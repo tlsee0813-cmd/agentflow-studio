@@ -16,8 +16,20 @@ Suggestion은 proposed이며 문제·효과·core/future를 가진다. 요구로
 
 입력 출처 중복 방지와 현재 도구 적용은 별개다. REQ-tools ID를 유지하고 출처를 재사용·누적한다.
 Codex→Claude→Codex에도 현재 값을 적용한다. 미정으로 되돌리면 deferred다.
-잠금 때문에 적용할 수 없으면 Project.conflicts에 requirementId/topic/expectedText/sourceId를
+잠금 때문에 적용할 수 없으면 Project.conflicts에 requirementId/topic/expectedText/sourceId와
+expectedAcceptance/expectedStatus를
 보관하고 현재 선택과 잠금 요구의 차이를 표시한다. 단순 확인으로 충돌을 숨기지 않는다.
+
+INIT-004의 좁은 선택 충돌 해결은 previewSelectionResolution으로 새 답변 반영/기존 요구 유지
+변경안을 순수하게 계산한다. 본문·완료 조건·적용 상태를 보여주고 고객 확인에서만 적용한다.
+확인 시 버전·출처·변경안을 재검증해 오래되거나 조작된 변경안은 거절한다.
+본문·완료 조건·상태·needsReview·해당 충돌·출처를 원자적으로 반영한다.
+Requirement/Answer ID, 이전 Source, 수동 잠금과 중요도, 다른 요구·충돌은 보존한다.
+기존 유지 결정에서도 새 답변 출처와 적용하지 않은 이유를 연결하며 답변 원문은 바꾸지 않는다.
+TBD 완료 조건은 proposed/deferred와 추가 확인 표시를 유지하며 일반 확인으로 confirmed가 되지 않는다.
+충돌 중 본문만 직접 수정하는 이전 경로는 거절한다. 취소는 Project를 변경하지 않는다.
+Project.selectionResolutions는 같은 입력으로 재요약할 때 결정이 다시 충돌로 돌아가지 않도록 하는
+로컬 상태다. 다른 선택 출처가 들어오면 해당 요구의 기록만 무효화한다. 요청/응답 계약은 변경하지 않는다.
 
 ## 요청과 응답
 

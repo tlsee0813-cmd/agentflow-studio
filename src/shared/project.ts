@@ -1,10 +1,10 @@
-import { SCHEMA_VERSION, ANSWER_MAX_LENGTH, REQUIREMENT_MAX_LENGTH, type Project, type Brief, type RequestPayload, type Question, type Answer, type Requirement, type Status } from './contracts.js';
+import { SCHEMA_VERSION, ANSWER_MAX_LENGTH, REQUIREMENT_MAX_LENGTH, type Project, type Brief, type RequestPayload, type Question, type Answer, type Requirement, type Status, type SelectionResolutionPreview } from './contracts.js';
 import { validateEnvelope, validateRequest, ContractError } from './validation.js';
 const uid = (prefix: string) => `${prefix}-${globalThis.crypto.randomUUID()}`;
 export function createProject(): Project {
   return { schemaVersion: SCHEMA_VERSION, id: uid('P'), version: 1,
     brief: { idea: '', tools: 'undecided', constraints: '' }, sources: [], answers: [], requirements: [],
-    question: null, answeredQuestion: null, conflicts: [], summary: '', ideas: [], openItems: [], phase: 'basic', pending: null, error: null, responseMode: null };
+    question: null, answeredQuestion: null, conflicts: [], selectionResolutions: [], summary: '', ideas: [], openItems: [], phase: 'basic', pending: null, error: null, responseMode: null };
 }
 export function storageQuestion(id = 'Q-storage'): Question {
   return { id, topic: 'storage', text: '만들 서비스의 데이터, 어디에서 이어서 사용하나요?',
@@ -38,12 +38,17 @@ function currentInputSource(state: Project) {
 }
 const sourcesTogether = (...lists: string[][]): string[] => [...new Set(lists.flat())];
 function applySelection(state: Project, desired: Requirement, sourceId: string): Project {
+  // Repeated summaries must respect an explicit decision about this exact input.
+  // A different input clears only this requirement's acknowledgement.
+  if (state.selectionResolutions.some(r => r.requirementId === desired.id && r.sourceId === sourceId)) return state;
+  state = { ...state, selectionResolutions: state.selectionResolutions.filter(r => r.requirementId !== desired.id) };
   const prior = state.requirements.find(r => r.id === desired.id);
   const conflicts = state.conflicts.filter(c => c.requirementId !== desired.id);
-  if (prior?.locked && (prior.text !== desired.text || prior.status !== desired.status)) {
+  if (prior?.locked && (prior.text !== desired.text || prior.status !== desired.status || prior.acceptance !== desired.acceptance)) {
     // A different direct choice is visible as a conflict, never a silent unlock.
     return { ...state, conflicts: [...conflicts, { requirementId: prior.id,
-      topic: desired.topic as 'tools' | 'storage', expectedText: desired.text, sourceId }],
+      topic: desired.topic as 'tools' | 'storage', expectedText: desired.text, sourceId,
+      expectedAcceptance: desired.acceptance, expectedStatus: desired.status }],
       requirements: state.requirements.map(r => r.id === prior.id ? { ...r, needsReview: true } : r) };
   }
   const next = { ...desired, locked: prior?.locked ?? false,
@@ -180,9 +185,48 @@ export function reviseAnswer(state: Project, input: Pick<Answer, 'optionId' | 't
 export function decideRequirement(state: Project, id: string, status: Status, editedText?: string): Project {
   const prior = state.requirements.find(r => r.id === id);
   if (!prior || (editedText !== undefined && (!editedText.trim() || editedText.length > REQUIREMENT_MAX_LENGTH))) throw new ContractError('INVALID_DECISION');
+  // A text-only edit cannot resolve a selection conflict or confirm an unknown
+  // completion condition. The paired preview is the explicit resolution path.
+  if (editedText !== undefined && state.conflicts.some(c => c.requirementId === id)) throw new ContractError('SELECTION_CONFLICT');
+  const unresolvedAcceptance = prior.acceptance.startsWith('TBD:')
+    && (prior.needsReview || state.selectionResolutions.some(r => r.requirementId === id));
+  if (status === 'confirmed' && unresolvedAcceptance) throw new ContractError('UNRESOLVED_ACCEPTANCE');
   let next: Project = { ...state, version: state.version + 1, pending: null, error: null };
   const added = withSource(next, 'customer-confirmation', `${id}: ${status}: ${editedText ?? prior.text}`); next = added.state;
   return { ...next, requirements: next.requirements.map(r => r.id !== id ? r : { ...r,
     text: editedText?.trim() ?? r.text, status, version: next.version, locked: editedText !== undefined || r.locked,
-    needsReview: next.conflicts.some(c => c.requirementId === id), sourceIds: [...r.sourceIds, added.source.id] }) };
+    needsReview: unresolvedAcceptance || next.conflicts.some(c => c.requirementId === id), sourceIds: [...r.sourceIds, added.source.id] }) };
+}
+
+/** Pure preview: choosing an option or cancelling it does not change the project. */
+export function previewSelectionResolution(state: Project, id: string, choice: 'apply' | 'keep'): SelectionResolutionPreview {
+  const prior = state.requirements.find(r => r.id === id);
+  const conflict = state.conflicts.find(c => c.requirementId === id);
+  if (!prior || !conflict || !['apply','keep'].includes(choice)) throw new ContractError('INVALID_RESOLUTION');
+  const candidate = choice === 'apply' ? { text: conflict.expectedText, acceptance: conflict.expectedAcceptance,
+    status: conflict.expectedStatus } : prior;
+  const uncertain = candidate.acceptance.startsWith('TBD:');
+  return { requirementId: id, sourceId: conflict.sourceId, baseVersion: state.version, choice,
+    text: candidate.text, acceptance: candidate.acceptance, priority: prior.priority,
+    status: uncertain && candidate.status === 'confirmed' ? 'proposed' : candidate.status,
+    needsReview: uncertain || state.conflicts.some(c => c.requirementId === id && c.sourceId !== conflict.sourceId) };
+}
+
+/** Atomically apply only a current, reviewed pair; never unlock or replace IDs. */
+export function confirmSelectionResolution(state: Project, preview: SelectionResolutionPreview): Project {
+  if (state.version !== preview.baseVersion) throw new ContractError('STALE_RESOLUTION');
+  const current = previewSelectionResolution(state, preview.requirementId, preview.choice);
+  if (JSON.stringify(current) !== JSON.stringify(preview)) throw new ContractError('STALE_RESOLUTION');
+  const prior = state.requirements.find(r => r.id === preview.requirementId)!;
+  let next: Project = { ...state, version: state.version + 1, pending: null, error: null };
+  const added = withSource(next, 'customer-confirmation', `${prior.id}: 선택 충돌 해결\n${preview.choice === 'apply' ? '새 답변 반영' : '기존 요구 유지 (새 선택을 이 요구에는 적용하지 않음)'}\n요구: ${preview.text}\n완료 조건: ${preview.acceptance}\n상태: ${preview.status}\n검토한 출처: ${preview.sourceId}`);
+  next = added.state;
+  return { ...next,
+    conflicts: next.conflicts.filter(c => !(c.requirementId === prior.id && c.sourceId === preview.sourceId)),
+    selectionResolutions: [...next.selectionResolutions.filter(r => r.requirementId !== prior.id),
+      { requirementId: prior.id, sourceId: preview.sourceId }],
+    requirements: next.requirements.map(r => r.id !== prior.id ? r : { ...r,
+      text: preview.text, acceptance: preview.acceptance, status: preview.status, priority: preview.priority,
+      version: next.version, needsReview: preview.needsReview,
+      sourceIds: sourcesTogether(r.sourceIds, [preview.sourceId, added.source.id]) }) };
 }

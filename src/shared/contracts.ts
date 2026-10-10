@@ -39,11 +39,17 @@ export interface AiResult {
 export interface Envelope { mode: 'mock' | 'deepseek'; result: AiResult }
 export interface SelectionConflict {
   requirementId: string; topic: 'tools' | 'storage'; expectedText: string; sourceId: string;
+  expectedAcceptance: string; expectedStatus: Status;
+}
+export interface SelectionResolutionPreview {
+  requirementId: string; sourceId: string; baseVersion: number; choice: 'apply' | 'keep';
+  text: string; acceptance: string; status: Status; priority: Requirement['priority']; needsReview: boolean;
 }
 export interface Project {
   schemaVersion: typeof SCHEMA_VERSION; id: string; version: number; brief: Brief;
   sources: Source[]; answers: Answer[]; requirements: Requirement[];
   question: Question | null; answeredQuestion: Question | null; conflicts: SelectionConflict[]; summary: string; ideas: Suggestion[]; openItems: string[];
+  selectionResolutions: { requirementId: string; sourceId: string }[];
   phase: 'basic' | 'question' | 'summary'; pending: RequestPayload | null;
   error: string | null; responseMode: 'mock' | 'deepseek' | null;
 }

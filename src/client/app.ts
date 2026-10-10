@@ -1,6 +1,6 @@
-import { createProject, editBrief, beginRequest, applyResponse, failRequest, cancelRequest, answerQuestion, reviseAnswer, decideRequirement } from '../shared/project.js';
+import { createProject, editBrief, beginRequest, applyResponse, failRequest, cancelRequest, answerQuestion, reviseAnswer, decideRequirement, previewSelectionResolution, confirmSelectionResolution } from '../shared/project.js';
 import { ANSWER_MAX_LENGTH, REQUIREMENT_MAX_LENGTH } from '../shared/contracts.js';
-import type { ToolEnvironment, Requirement, Status } from '../shared/contracts.js';
+import type { ToolEnvironment, Requirement, Status, SelectionResolutionPreview } from '../shared/contracts.js';
 const get = <T extends HTMLElement>(id: string): T => {
   const node = document.getElementById(id); if (!node) throw new Error('MISSING_UI_ELEMENT'); return node as T;
 };
@@ -18,6 +18,7 @@ let editingDraft = '';
 let customAnswerDraft = '';
 let editingAnswer = false;
 let answerDraft = '';
+let resolution: SelectionResolutionPreview | null = null;
 const errors: Record<string,string> = {
   AI_NOT_CONFIGURED: '서버의 AI 연결이 아직 설정되지 않았습니다. 입력은 그대로 보관했습니다. 모의 응답으로 바꾸지 않았습니다.',
   PAID_CALLS_DISABLED: '서버에서 유료 AI 호출이 비활성화되어 있습니다. 입력을 유지했습니다.',
@@ -37,19 +38,22 @@ const errors: Record<string,string> = {
   AI_CONFIG_REJECTED: 'AI 제공업체가 모델 또는 연결 설정을 거절했습니다. 서버 설정을 확인해야 합니다.',
   CANCELLED: '요청을 취소했습니다. 이후 도착하는 응답은 반영하지 않습니다. 이미 전송된 요청의 과금 취소를 보장하지는 않습니다.',
   NETWORK_ERROR: '개발 서버에 연결하지 못했습니다. 입력은 현재 화면에 유지됩니다.',
-  CONSENT_REQUIRED: 'DeepSeek로 입력·답변을 전송하기 전에 전송 동의를 확인해 주세요.'
+  CONSENT_REQUIRED: 'DeepSeek로 입력·답변을 전송하기 전에 전송 동의를 확인해 주세요.',
+  SELECTION_CONFLICT: '선택 충돌 해결에서 요구 내용과 완료 조건을 함께 확인해 주세요.',
+  UNRESOLVED_ACCEPTANCE: '완료 조건이 미정입니다. 추가 확인 전에는 이 요구를 확정할 수 없습니다.',
+  STALE_RESOLUTION: '검토 중 입력이 바뀌었습니다. 선택 충돌 해결을 다시 열어 현재 변경안을 확인해 주세요.'
 };
 const brief = () => ({ idea: get<HTMLTextAreaElement>('idea').value, tools: get<HTMLSelectElement>('tools').value as ToolEnvironment,
   constraints: get<HTMLTextAreaElement>('constraints').value });
 function updateFromForm() {
   const next = editBrief(state,brief());
-  if (next !== state) { controller?.abort(); controller = null; state = next; render(); }
+  if (next !== state) { controller?.abort(); controller = null; resolution = null; state = next; render(); }
 }
 for (const id of ['idea','tools','constraints']) get(id).addEventListener('input',updateFromForm);
 get('brief-form').addEventListener('submit', event => { event.preventDefault(); updateFromForm(); void send(); });
 get('cancel').addEventListener('click', () => { controller?.abort(); state = cancelRequest(state); render(); });
 async function send() {
-  if (state.pending || !mode || editingAnswer || editing !== null) return;
+  if (state.pending || !mode || editingAnswer || editing !== null || resolution) return;
   if (mode === 'deepseek' && !get<HTMLInputElement>('consent').checked) { state = { ...state,error:'CONSENT_REQUIRED' }; render(); return; }
   let request;
   try { const started = beginRequest(state); state = started.state; request = started.request; }
@@ -109,7 +113,20 @@ const statusLabel: Record<Status,string> = {confirmed:'확정',proposed:'제안'
 function decide(req: Requirement, status: Status, text?: string) {
   controller?.abort();
   try { state = decideRequirement(state,req.id,status,text); editing = null; render(); }
-  catch { state = { ...state,error:'INVALID_INPUT' }; render(); }
+  catch (error) {
+    const code = error instanceof Error ? error.message : 'INVALID_INPUT';
+    state = { ...state,error: Object.hasOwn(errors,code) ? code : 'INVALID_INPUT' }; render();
+  }
+}
+function chooseResolution(req: Requirement, choice: 'apply' | 'keep') {
+  if (state.pending) return;
+  editing = null; editingAnswer = false;
+  resolution = previewSelectionResolution(state, req.id, choice); render();
+}
+function confirmResolution() {
+  if (!resolution) return;
+  try { state = confirmSelectionResolution(state, resolution); resolution = null; render(); }
+  catch { resolution = null; state = { ...state, error: 'STALE_RESOLUTION' }; render(); }
 }
 function requirement(req: Requirement) {
   const row = el('article','','req'); row.dataset.requirementId = req.id; row.dataset.status = req.status;
@@ -117,8 +134,17 @@ function requirement(req: Requirement) {
     el('small',req.origin === 'customer' ? '고객 발언 / 확인' : req.origin === 'mock' ? (req.status === 'confirmed' ? '모의 해석 · 고객 확인' : '모의 제안 · 고객 미확정') : (req.status === 'confirmed' ? 'AI 해석 · 고객 확인' : 'AI 제안 · 고객 미확정')));
   row.append(head,el('p',req.text));
   const conflict = state.conflicts.find(c => c.requirementId === req.id);
-  if (conflict) row.append(el('p',`선택 충돌: 현재 고객 선택은 “${conflict.expectedText}”입니다. 수동 잠금 요구는 보존했습니다. 직접 수정하거나 도구 선택을 되돌려 일치시켜 주세요.`,'warning-text'));
-  if (req.needsReview) row.append(el('p','입력이 바뀌어 재검토가 필요합니다. 이전 내용은 보존했습니다.','warning-text'));
+  if (conflict) {
+    row.append(el('p',`선택 충돌: 현재 고객 선택은 “${conflict.expectedText}”입니다. 수동 잠금 요구는 보존했습니다. 새 답변을 반영하거나 기존 요구를 유지할지 선택한 뒤 본문과 완료 조건을 함께 확인해 주세요.`,'warning-text'));
+    const actions = el('div','','req-actions');
+    actions.append(button('새 답변 반영',() => chooseResolution(req,'apply')),
+      button('기존 요구 유지',() => chooseResolution(req,'keep')));
+    for (const action of actions.querySelectorAll('button')) action.disabled = Boolean(state.pending);
+    row.append(actions);
+  }
+  if (req.needsReview) row.append(el('p',req.acceptance.startsWith('TBD:') && !conflict
+    ? '완료 조건 확인이 필요합니다. 의미를 확인하기 전에는 확정하지 않습니다.'
+    : '입력이 바뀌어 재검토가 필요합니다. 이전 내용은 보존했습니다.','warning-text'));
   row.append(el('small',`관찰할 완료 조건: ${req.acceptance} · 중요도: ${req.priority === 'undecided' ? '미정' : req.priority}`));
   const trace = el('details'); trace.append(el('summary','출처와 버전 보기'),el('p',`${req.id} · 요구 v${req.version} · user-project${req.locked ? ' · 수동 수정 보존' : ''}`,'hint'));
   for (const id of req.sourceIds) {
@@ -126,7 +152,17 @@ function requirement(req: Requirement) {
     trace.append(el('p',s ? `${s.id} · ${s.kind} · v${s.atVersion}\n${s.text}` : `${id} (찾을 수 없음)`,'hint'));
   }
   row.append(trace);
-  if (editing === req.id) {
+  if (resolution?.requirementId === req.id) {
+    const box = el('section','','resolution-preview'); box.setAttribute('aria-label','선택 충돌 해결안');
+    box.append(el('h4',resolution.choice === 'apply' ? '새 답변 반영 변경안' : '기존 요구 유지 변경안'),
+      el('p',`현재 요구: ${req.text}`), el('p',`현재 완료 조건: ${req.acceptance}`),
+      el('p',`적용할 요구: ${resolution.text}`), el('p',`적용할 완료 조건: ${resolution.acceptance}`),
+      el('p',`적용 후 상태: ${statusLabel[resolution.status]}${resolution.needsReview ? ' · 추가 확인 필요' : ' · 이 선택 충돌 검토 완료'}`),
+      el('p',resolution.choice === 'keep' ? '새 답변 원문은 유지하되 이 요구에 적용하지 않은 결정과 출처를 기록합니다.' : '이전 출처와 수동 잠금을 보존하고 새 답변 출처를 연결합니다.','hint'));
+    const actions = el('div','','req-actions'); actions.append(button('해결안 확인',confirmResolution,'primary'),
+      button('해결 취소',() => { resolution = null; render(); }));
+    box.append(actions); row.append(box);
+  } else if (editing === req.id) {
     const label = el('label','요구 내용 수정'); const input = el('textarea'); input.value = editingDraft; input.addEventListener('input',() => {editingDraft = input.value;}); input.rows = 3; input.maxLength = REQUIREMENT_MAX_LENGTH;
     input.id = `edit-${req.id}`; label.htmlFor = input.id;
     const actions = el('div','','req-actions'); actions.append(button('수정 내용 확인',() => decide(req,'confirmed',input.value),'primary'),button('취소',() => {editing = null;render();}));
@@ -134,7 +170,7 @@ function requirement(req: Requirement) {
   } else {
     const actions = el('div','','req-actions');
     if (req.status !== 'confirmed' || req.needsReview) actions.append(button('이 요구 확인',() => decide(req,'confirmed'),'primary'));
-    actions.append(button('직접 수정',() => {controller?.abort(); state = cancelRequest(state); editingAnswer = false; editing = req.id; editingDraft = req.text; render();}));
+    if (!conflict) actions.append(button('직접 수정',() => {controller?.abort(); state = cancelRequest(state); resolution = null; editingAnswer = false; editing = req.id; editingDraft = req.text; render();}));
     if (req.status !== 'deferred') actions.append(button('보류',() => decide(req,'deferred')));
     if (req.status !== 'rejected') actions.append(button('제외',() => decide(req,'rejected')));
     row.append(actions);
@@ -167,7 +203,7 @@ function renderSummary() {
       actions.append(button('답변 수정 후 요약 다시 요청',saveAnswerEdit,'primary'),button('답변 수정 취소',() => { editingAnswer = false; render(); }));
       answers.append(label,input,el('p',`최대 ${ANSWER_MAX_LENGTH.toLocaleString()}자. 이전 원문도 출처 이력에 유지됩니다. 별도 질문을 추가하는 것은 아닙니다.`,'hint'),actions);
     } else if (state.answeredQuestion) answers.append(button('답변 수정',() => {
-      controller?.abort(); state = cancelRequest(state); editing = null; editingAnswer = true;
+      controller?.abort(); state = cancelRequest(state); resolution = null; editing = null; editingAnswer = true;
       answerDraft = state.answers.find(a => a.questionId === state.answeredQuestion?.id)?.text ?? ''; render();
     }));
     card.append(answers);
@@ -183,7 +219,7 @@ function renderSummary() {
   region.append(card);
 }
 function render() {
-  get<HTMLButtonElement>('start').disabled = Boolean(state.pending) || !mode || editing !== null || editingAnswer;
+  get<HTMLButtonElement>('start').disabled = Boolean(state.pending) || !mode || editing !== null || editingAnswer || resolution !== null;
   get('start').textContent = state.pending ? '응답 기다리는 중…' : state.answers.length ? '현재 내용으로 요약 다시 요청' : '구상 구체화하기 →';
   get('cancel').hidden = !state.pending; get('revision').textContent = `프로젝트 v${state.version}`;
   get('error').hidden = !state.error;

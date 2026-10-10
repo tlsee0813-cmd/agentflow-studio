@@ -1,4 +1,35 @@
-# INIT-003 — 결함 수정 / 독립 재검토 대기
+# INIT-004 — 기존 구현 인계 및 R5 수정 / 독립 재검토 대기
+
+인계 기준: init-003/fix-review-regressions의 9dbc01e2ad7b9a49703e45fd1b5bafeff23278b0.
+원격 브랜치와 PR #1 head가 같은 커밋임을 확인했다. 시작 체크아웃의 미커밋 변경은 없었다.
+첨부 재현 스크립트로 본문과 완료 조건의 불일치, 충돌·출처 누락을 실제 재현한 뒤 수정했다.
+새 앱/PR를 생성하지 않고 기존 브랜치와 PR #1을 이어 사용한다.
+
+## INIT-004 클라우드에서 직접 실행한 검사
+
+Linux x86_64 / Node22.16.0 / npm10.9.2 / Python3.13.5 / TypeScript5.8.3.
+브라우저 의존성은 저장소의 Python Playwright1.57.0/pyee13.0.1/greenlet3.5.1이다.
+환경의 독립 도구 Playwright1.64.0을 이 검증에 사용하지 않았다.
+- npm ci --ignore-scripts --no-audit --no-fund, npm run check, npm test: 성공.
+- 기존 Node83 + R5 신규9 = 92통과, 실패/건너뜀0.
+- 기존 브라우저15 + R5 신규3 = 18통과, 실패/건너뜀0.
+  시스템 Chromium154.0.8037.57, direct-http로 실제 브라우저→로컬 서버를 검증했다.
+  B15도 실행했고 브라우저 fetch를 교체하지 않았다. 모든 AI 응답은 mock/주입 대역이다.
+- Playwright1.57.0 번들 Chromium143.0.7499.4(build1200) 다운로드는 미완료:
+  cdn.playwright.dev에서 HTTP403 Domain forbidden,
+  playwright.download.prss.microsoft.com에서 최초403, 재시도400 GatewayExceptionResponse.
+  TLS·체크섬 검증을 끄지 않았다. 시스템 Chromium 검증을 번들 브라우저 검증이라고 부르지 않는다.
+
+R5 검사는 새 답변 반영/기존 유지, 취소, 미정 조건 확정 차단, 안정 ID·과거/새 출처·수동값 보존,
+다른 요구/충돌 보존, 오래된 변경안 거부, 재요약 이후 결정 유지까지 확인한다.
+충돌 자체의 해결과 TBD 완료 조건에 필요한 추가 확인은 별개다.
+
+새 커밋의 GitHub Actions 결과는 최종 보고의 해당 SHA 실행 링크에서 별도로 확인한다.
+이 문서의 클라우드 결과를 Windows 또는 CI 번들 Chromium 통과로 취급하지 않는다.
+실제 DeepSeek 인증·모델·비용·응답 품질은 미검증이다. AI_MODE=mock/ALLOW_PAID_AI=false 유지,
+실제 키 요청·유료 호출·main 병합·운영 배포 없음.
+
+## 과거 INIT-003 기록 (아래 결과는 INIT-004 새 실행 결과가 아님)
 
 2026-10-10 · 코드0.0.3 · 계약0.1.1. 통합·운영·실제 AI 검증 완료가 아니다.
 원본 INIT-002 SHA256: 5307d15e96d2f5dfcc1f1039f254f7968fffc03b6d168b28b57cc292a8452857.
