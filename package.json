@@ -1,0 +1,21 @@
+{
+  "name": "agentflow-studio",
+  "version": "0.0.3",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.16.0 <23"
+  },
+  "packageManager": "npm@10.9.2",
+  "scripts": {
+    "check": "tsc --noEmit && node scripts/check.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "start": "node --env-file-if-exists=.env server/index.mjs",
+    "demo": "node server/index.mjs --mock",
+    "test:browser": "python tests/browser.py"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}
