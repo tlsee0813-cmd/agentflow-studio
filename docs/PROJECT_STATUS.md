@@ -20,11 +20,17 @@
 
 실패·skip은 모두0이다. Node22.16.0 / npm10.9.2 / TypeScript5.8.3 / Python3.13.5 / Playwright1.57.0 / 시스템 Chromium154.0.8037.57을 사용했다. 브라우저는 native HTTP와 실제 localStorage 경로이며 지정된 응답 fixture·오류 주입은 구분했다. 30→14 기준 수정 뒤 낡은 AI 제외·수동값 보존, 장기 기록·v1 이력, 재시도 답변 중복 방지, 1,001개 저장→새로고침→백업→가져오기를 확인했다. 8MB/100,000개 경계는 Node 검사다. 검사 후169파일의 해시는 불변이었다.
 
-기존 persistent-profile 재방문 후 새 Blob 다운로드는 일반 Blob에서도 재현된 Chromium SIGSEGV 제한이 남아 있다. 위13개 검사는 그 제한의 해결을 주장하지 않는다. 새 프로필의 다운로드·복구 결과와 구분한다. 검증은 mock/paid=false였으며 새 실제 AI 품질, 실제 고객 효용, 운영 준비는 확인하지 않았다. 새 커밋의 GitHub Actions 결과는 이 Cloud 기록과 별도로 확인한다.
+기존 persistent-profile 재방문 후 새 Blob 다운로드는 일반 Blob에서도 재현된 Chromium SIGSEGV 제한이 남아 있다. 위13개 검사는 그 제한의 해결을 주장하지 않는다. 새 프로필의 다운로드·복구 결과와 구분한다. 검증은 mock/paid=false였으며 새 실제 AI 품질, 실제 고객 효용, 운영 준비는 확인하지 않았다. 별도로, 앱 통합 커밋 `608d4753ebf4efc96c2df5bd518e5437e0ee99b4`의 [GitHub CI 38140619804](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38140619804)는 completed/success다. 기존 앱과 continuity check·build·Node·브라우저 검사를 실행한 결과이며 IDEA016 실제 AI 품질 결과가 아니다. 이번 실험 도구 추가에서는 CI 검사 범위를 늘리지 않는다.
 
-## 다음 품질 초점
+## 다음 품질 초점 — IDEA016 rev1
 
-IDEA016 baseline 시험을 준비 중이다. 실제 continuity의 buildRequest/prompt/provider/state/handoff 경로에 6개 고객 흐름(각2~3단계)을 적용하고, 요청·답변·수동 기준·돌아온 결과가 다음 작업문에 어떻게 이어지는지 본다. 오래된 미수정 요청을 200자로 발췌할 때 뒤쪽 제약이 누락될 가능성도 입력 조립과 모델 실패로 나누어 확인한다. 제품 prompt의 선제 변경이나 기능 확대 없이 작은 사례·도구를 준비한 뒤 Cloud 실호출 결과로 개선을 판단한다. 아직 이 단계의 실행 결과나 품질 수용은 없다.
+[IDEA016 실험 도구](../experiments/idea016/README.md)는 실제 continuity의 buildRequest/prompt/provider/state/handoff 경로를 사용하는 고객 6흐름(각2~3단계)의 baseline 시험 준비 자료다. 상품 UI·저장 형식·prompt·provider와 기준169파일은 변경하지 않았다. 저장소에서의 실행 위치와 ZIP 전용 검증 자료는 [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 구분한다.
+
+rev1은 실험 기록과 receive 이전 경계에서 알려진 키의 반향을 차단·치환하도록 보완했다. 작성자의 가짜 키 focused 회귀1개와 독립 좁은 메모리 회귀5개가 통과해 검토를 수용했다. 이는 실HTTP 추가 검증이나 실제 제공업체 호출이 아니며, 제품 원본 provider의 보안 수정·모든 민감정보 보호를 뜻하지 않는다. 준비 검토의 실제 외부 호출은0이다.
+
+Cloud에 rev1 ZIP과 6사례·최대18회 실호출 지시를 전달해 실제 baseline 실행을 시작하도록 했다. 아직 완료 보고를 받지 않았으므로 새 실제 호출 수·현재 baseline 결과·품질 수용은 미확인이다. 실제 질문에 맞는 허용 합성 답변만 이어가고 실패·재시도0·중단을 그대로 회수할 예정이다.
+
+오래된 미수정 요청의200자 발췌에서 뒤쪽 제약이 누락되는지는 실제 전송 문맥·응답·작업문을 읽어 입력 조립과 모델 실패로 구분한다. 제품 prompt를 선제 변경하거나 기능을 확대하지 않으며, 첫 실결과를 받은 뒤 개선을 판단한다.
 
 과거 IDEA013·014 합성 비교는 [IDEA013 결과](research/idea013-results.md), [IDEA014 결과](research/idea014-results.md)에 보존한다. 그 계약 통과 수를 현재 앱의 품질이나 사용자 효용으로 옮겨 해석하지 않는다. 구현 과정의 검토는 [IDEA015 제품 검토](research/idea015-product-review.md)에 남아 있으며 원본·R2·R3의 과거 결과는 Git 이력과 구분한다.
 
