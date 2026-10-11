@@ -33,7 +33,7 @@ node continuity/server/index.mjs --mock
 
 UI001 rev1은 현재 작업 중심 화면·기준/기록 패널·상세 조정·내보내기 후 변경 표시를 반영했다. AI 문맥·domain·저장·provider는 IDEA017을 유지한다. Cloud UI Node9/9·native UI9/9 통과는 규칙 mock을 사용한 UI 검증이다.
 
-IDEA016~019의 실제 평가는 각 결과 문서에 보존하며 현재 공유 앱은 IDEA017 + UI001 rev1이다. IDEA018·019는 채택하지 않았다. 구현 검사와 실제 응답 관찰을 구분하고, 최신 판단·미검증 한계·병렬 작업은 [PROJECT_STATUS](PROJECT_STATUS.md)에서 이어받는다.
+IDEA016~019의 실제 평가는 각 결과 문서에 보존하며 현재 공유 앱은 IDEA017 + UI001 rev1이다. IDEA018·019는 채택하지 않았다. 구현 검사와 실제 응답 관찰을 구분하고, [IDEA022 결과](idea022-results.md)는 무상44검사·실제17회 수용과 품질 보류를 기록한다. IDEA022 + UI001 rev1 통합 검사는 진행 중이며 아직 새 소스를 게시하지 않았다. 최신 판단·미검증 한계·병렬 작업은 [PROJECT_STATUS](PROJECT_STATUS.md)에서 이어받는다.
 
 ## 주요 작업의 조사와 구현 판단
 
