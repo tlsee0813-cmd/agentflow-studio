@@ -30,7 +30,9 @@
 
 실제4사례 원문 발췌를 회수·대조했다. C03은 명시적 이어받기 요청과 전체 수동값이 전송됐으나, 현재 checks의 입력 원본 불변 생략과 ‘현재 지시 아님’ 이력 표제로 적용 우선순위가 불명확했다. 완전 유실은 아니다. C06의 ‘별명만’은 전송 전200자 발췌에서 빠졌고 연락처 제외는 이전 AI 재진술로 전송·반영됐다. C02의 첫 선택지는 모순됐으나 후속 확정 시점은 올바르며, C05는 checks 계약 실패로30→60 단계가 미실행이었다.
 
-IDEA017 최소 품질 개선을2026-10-11 23:41 KST Pro에 배정했고 응답 중이다. 실제4사례 원문을 바탕으로 prompt·context·handoff 관련 최소 변경과 사용자가 명시한 이어받기 범위를 검토한다. 다른 과거 수동 기준 전체의 강제 carry는 아니다. 후보0개·실제 재평가0회로 아직 수용된 변경이나 개선 결과는 없으며, baseline 결과도 실제 고객 효용·운영 준비를 입증하지 않는다. 실행 도구와 ZIP 전용 자료 위치는 [IDEA016 README](../experiments/idea016/README.md), [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 있다.
+IDEA017 후보1개가 독립 scratch 좁은 검사13/13을 통과해 Cloud 실제 평가 대상으로 수용됐다. production의 context·type·validation·prompt4파일을 보완한 별도179파일 묶음이며,172개 동일·6개 변경·1개 신규다. 이전 수동값 참조는 항상 제공하되 명시적 재사용 요청 때만 적용하도록 지시하고, 의미 탐지나 모든 과거 기준의 강제 carry를 보장하지 않는다. 원문 전체의 예산 내 우선 전송·엄격한 문자열 계약·선택지 명확화도 후보 범위다.
+
+Cloud에 같은6사례 실평가를 전달했으나 새 실제 호출 수·결과는 미확인이다. 좁은 검사는 품질 수용이 아니며 후보 소스는 실제 결과 수용 전까지 게시하지 않는다. 현재 수용 앱은 IDEA015 R3이고 위IDEA016 baseline14회 결과는 그대로다. 이번 반영은 문서2개뿐이며 소스·CI·main을 변경하지 않는다. 실행 도구와 ZIP 전용 자료 위치는 [IDEA016 README](../experiments/idea016/README.md), [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 있다.
 
 과거 IDEA013·014 합성 비교는 [IDEA013 결과](research/idea013-results.md), [IDEA014 결과](research/idea014-results.md)에 보존한다. 그 계약 통과 수를 현재 앱의 품질이나 사용자 효용으로 옮겨 해석하지 않는다. 구현 과정의 검토는 [IDEA015 제품 검토](research/idea015-product-review.md)에 남아 있으며 원본·R2·R3의 과거 결과는 Git 이력과 구분한다.
 
