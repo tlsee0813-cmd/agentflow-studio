@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IDEA014 output v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "route",
+    "focus",
+    "reason",
+    "evidence",
+    "scene",
+    "decision",
+    "notes",
+    "next"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "idea014.v2",
+      "type": "string"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "fork",
+        "proceed",
+        "need_info"
+      ]
+    },
+    "focus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceId",
+          "quote"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 1,
+      "maxItems": 4
+    },
+    "scene": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "axis",
+            "setup",
+            "action",
+            "alternatives"
+          ],
+          "properties": {
+            "axis": {
+              "type": "string",
+              "minLength": 1
+            },
+            "setup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "action": {
+              "type": "string",
+              "minLength": 1
+            },
+            "alternatives": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "interpretation",
+                  "rationale",
+                  "result",
+                  "tradeoff"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+                  },
+                  "interpretation": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "result": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "tradeoff": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "minItems": 1,
+              "maxItems": 3
+            }
+          }
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "question",
+        "sourceId"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "open",
+            "resolved",
+            "deferred",
+            "not_needed",
+            "test_only"
+          ]
+        },
+        "question": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "sourceId": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+            }
+          ]
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "text",
+          "sourceIds"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "requested",
+              "confirmed",
+              "context",
+              "assumption",
+              "proposed",
+              "unknown",
+              "test_only",
+              "conflict",
+              "change"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          }
+        }
+      },
+      "minItems": 0,
+      "maxItems": 6
+    },
+    "next": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
