@@ -48,12 +48,21 @@ class Browser(unittest.TestCase):
     def tearDown(self):
         self.assertEqual(self.external,[]);self.assertEqual(self.errors,[]);self.ctx.close()
     def state(self,page=None):return (page or self.page).evaluate('(key)=>JSON.parse(localStorage.getItem(key))',KEY)
+    # UI001: the composer and context are now disclosed on demand; assertions stay unchanged.
+    def compose(self,page=None):
+        page=page or self.page
+        if not page.locator('#work-view').is_visible():page.locator('#nav-work').click()
+        if not page.locator('#compose-panel').evaluate('(e)=>e.open'):page.locator('#compose-summary').click()
+    def context(self):
+        if not self.page.locator('#context-panel').is_visible():self.page.locator('#nav-context').click()
     def send(self,text,kind='request'):
+        self.compose()
         self.page.locator('#source-kind').evaluate('(e)=>e.closest("details").open=true')
         self.page.locator('#source-kind').select_option(kind)
-        self.page.locator('#draft').fill(text);self.page.locator('#send').click()
+        self.compose();self.page.locator('#draft').fill(text);self.page.locator('#send').click()
         expect(self.page.locator('#working')).to_have_text('');expect(self.page.locator('#current-work')).to_be_visible()
     def basis(self,text):
+        self.context()
         self.page.locator('#add-basis').evaluate('(e)=>e.open=true');self.page.locator('#basis-draft').fill(text);self.page.locator('#basis-form button').click()
     def test_01_end_to_end_second_change_and_reload(self):
         self.page.locator('#project-name').fill('수업 예약 · 문구 개선')
@@ -114,7 +123,7 @@ class Browser(unittest.TestCase):
         self.page.locator('#retry-work').click()
         if DOM:self.page.wait_for_function('!!window.__releaseTest')
         else:self.page.wait_for_timeout(100);self.assertEqual(len(parked),1)
-        self.page.locator('#draft').fill('응답 도착 전에 작성한 다음 요청')
+        self.compose();self.page.locator('#draft').fill('응답 도착 전에 작성한 다음 요청')
         self.page.locator('#edit-work').evaluate('(e)=>e.open=true');self.page.locator('#work-scope').fill('사용자가 직접 고친 현재 범위')
         if DOM:self.page.evaluate('window.__releaseTest()')
         else:
@@ -130,7 +139,7 @@ class Browser(unittest.TestCase):
         self.send('CSV 내려받기를 추가해줘.')
         before=self.state()
         self.page.evaluate('()=>{Storage.prototype.setItem=function(){throw new DOMException("Quota","QuotaExceededError")}}')
-        self.page.locator('#draft').fill('저장 실패 중에도 보존할 새 입력')
+        self.compose();self.page.locator('#draft').fill('저장 실패 중에도 보존할 새 입력')
         expect(self.page.locator('#storage-error')).to_be_visible();expect(self.page.locator('#draft')).to_have_value('저장 실패 중에도 보존할 새 입력')
         self.assertEqual(self.state(),before)
         with self.page.expect_download() as d:self.page.locator('#backup').click()
@@ -157,9 +166,9 @@ class Browser(unittest.TestCase):
         if DOM:dom_harness.mount(self,other,json.dumps(self.state(),ensure_ascii=False))
         else:other.goto(self.url)
         expect(other.locator('#current-work')).to_be_visible()
-        self.page.locator('#draft').fill('첫 탭의 새 입력')
+        self.compose();self.page.locator('#draft').fill('첫 탭의 새 입력')
         if DOM:other.evaluate('(raw)=>localStorage.setItem("agentflow.idea015.project.v1",raw)',json.dumps(self.state(),ensure_ascii=False))
-        other.locator('#draft').fill('둘째 탭에 보존할 입력')
+        self.compose(other);other.locator('#draft').fill('둘째 탭에 보존할 입력')
         expect(other.locator('#storage-error')).to_be_visible();expect(other.locator('#draft')).to_have_value('둘째 탭에 보존할 입력')
         self.assertEqual(self.state()['draft'],'첫 탭의 새 입력');other.close()
 
@@ -185,7 +194,7 @@ class Browser(unittest.TestCase):
         self.send('탈퇴 30일 뒤 계정 삭제 배치를 추가해줘.')
         self.assertIn('30일 지난 계정',self.instruction(self.page.locator('#handoff-text').input_value()))
         self.page.unroute('**/api/continuity',advice);calls=[];self.page.on('request',lambda r:calls.append(r.url) if '/api/continuity' in r.url else None)
-        self.page.locator('#edit-D1').evaluate('(e)=>e.open=true');self.page.locator('#text-D1').fill('탈퇴 14일 뒤 계정 삭제')
+        self.context();self.page.locator('#edit-D1').evaluate('(e)=>e.open=true');self.page.locator('#text-D1').fill('탈퇴 14일 뒤 계정 삭제')
         self.page.locator('#edit-D1 button',has_text='수정 기록').click()
         expect(self.page.locator('#stale-advice')).to_contain_text('D1')
         for label in ['before-reload','after-reload']:
@@ -211,7 +220,7 @@ class Browser(unittest.TestCase):
             if name=='legacy-68.json':
                 expect(self.page.locator('#notice')).to_contain_text('project.1')
                 self.assertEqual([h['legacyText'] for t in state['tasks'] for h in t['handoffs']],[h['text'] for t in source['tasks'] for h in t['handoffs']])
-            self.page.locator('#draft').fill(f'{name} 이후에도 계속 편집');expect(self.page.locator('#saved')).to_have_text('이 브라우저에 저장됨')
+            self.compose();self.page.locator('#draft').fill(f'{name} 이후에도 계속 편집');expect(self.page.locator('#saved')).to_have_text('이 브라우저에 저장됨')
             self.basis(f'{name} 새 제약');text=self.download_work(f'{name}-work.md');self.assertIn(f'{name} 새 제약',text)
             if name=='long-54.json':
                 self.assertTrue(all(b['text'] in text for b in state['bases']))
@@ -232,7 +241,7 @@ class Browser(unittest.TestCase):
     def test_12_unreadable_saved_data_keeps_its_specific_message_while_typing(self):
         self.page.evaluate('(key)=>localStorage.setItem(key,"broken")',KEY);self.page.reload()
         expect(self.page.locator('#storage-error')).to_contain_text('읽지 못')
-        self.page.locator('#draft').fill('새 입력');expect(self.page.locator('#storage-error')).to_contain_text('읽지 못해 덮어쓰지 않고')
+        self.compose();self.page.locator('#draft').fill('새 입력');expect(self.page.locator('#storage-error')).to_contain_text('읽지 못해 덮어쓰지 않고')
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),'broken')
 
     @unittest.skipIf(DOM,'needs native localStorage/reload')
@@ -240,7 +249,7 @@ class Browser(unittest.TestCase):
         subprocess.run(['node',str(ROOT/'tests/fixtures.mjs'),str(OUT)],check=True)
         path=OUT/'requests-1001.json';source=json.loads(path.read_text(encoding='utf-8'));self.assertEqual(len(source['tasks']),1001)
         self.import_file(path);expect(self.page.locator('#basis-count')).to_have_text('1001')
-        self.page.locator('#draft').fill('1001개 뒤에도 저장되는 입력');expect(self.page.locator('#saved')).to_have_text('이 브라우저에 저장됨')
+        self.compose();self.page.locator('#draft').fill('1001개 뒤에도 저장되는 입력');expect(self.page.locator('#saved')).to_have_text('이 브라우저에 저장됨')
         self.page.reload();expect(self.page.locator('#basis-count')).to_have_text('1001');expect(self.page.locator('#storage-error')).to_be_hidden()
         expect(self.page.locator('#draft')).to_have_value('1001개 뒤에도 저장되는 입력');state=self.state();self.assertEqual(state['sources'],source['sources'])
         backup=self.backup('requests-1001-backup.json');expect(self.page.locator('#notice')).to_be_hidden()

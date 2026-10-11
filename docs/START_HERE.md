@@ -1,6 +1,6 @@
 # 다른 세션을 위한 진입점
 
-최신 구현은 `init-003/fix-review-regressions`의 [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)을 기준으로 한다. main은 최신 구현이 아니다. 현재 수용된 실행 대상은 **IDEA015 R3 위에 IDEA017을 반영한 이어서 만들기**이며 기존 INIT009 앱과 별도 진입점을 사용한다.
+최신 구현은 `init-003/fix-review-regressions`의 [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)을 기준으로 한다. main은 최신 구현이 아니다. 현재 수용된 실행 대상은 **IDEA015 R3·IDEA017 위에 UI001 rev1을 반영한 이어서 만들기**이며 기존 INIT009 앱과 별도 진입점을 사용한다.
 
 | 자료 | 위치 | 용도 |
 |---|---|---|
@@ -31,7 +31,9 @@ node continuity/server/index.mjs --mock
 
 2026-10-11 21:31 KST 통합 Cloud에서 클린 설치·기존/continuity 타입검사·빌드, 기존 Node279·continuity Node45·직접 HTTP 브라우저13이 실패/skip0으로 통과했다. 이는 mock/native HTTP/localStorage 실행 검증이다. persistent-profile 재방문 후 새 다운로드의 Chromium SIGSEGV는 미해결 제한이며 실제 DeepSeek 내용 품질·고객 효용·운영 준비는 미검증이다.
 
-IDEA016~019의 실제 평가는 각 결과 문서에 보존하며 현재 공유 소스는 IDEA017이다. IDEA018·019는 채택하지 않았다. 구현 검사와 실제 응답 관찰을 구분하고, 최신 판단·미검증 한계·병렬 작업은 [PROJECT_STATUS](PROJECT_STATUS.md)에서 이어받는다.
+UI001 rev1은 현재 작업 중심 화면·기준/기록 패널·상세 조정·내보내기 후 변경 표시를 반영했다. AI 문맥·domain·저장·provider는 IDEA017을 유지한다. Cloud UI Node9/9·native UI9/9 통과는 규칙 mock을 사용한 UI 검증이다.
+
+IDEA016~019의 실제 평가는 각 결과 문서에 보존하며 현재 공유 앱은 IDEA017 + UI001 rev1이다. IDEA018·019는 채택하지 않았다. 구현 검사와 실제 응답 관찰을 구분하고, 최신 판단·미검증 한계·병렬 작업은 [PROJECT_STATUS](PROJECT_STATUS.md)에서 이어받는다.
 
 ## 주요 작업의 조사와 구현 판단
 

@@ -10,6 +10,9 @@ def mount(case,page,raw=None):
     async def api(path,init):
         if path not in ['/api/config','/api/continuity']:raise ValueError('Unexpected bridge path')
         case.bridge_calls.append(path)
+        # UI001: named config-display tests can inject a config response, never a provider/key.
+        override=getattr(case,'config_override',None)
+        if path=='/api/config' and override is not None:return {'status':200,'body':json.dumps(override)}
         def sync():
             body=init.get('body');req=urllib.request.Request(case.url+path,data=body.encode() if body else None,method=init.get('method','GET'),headers={**init.get('headers',{}),'Origin':case.url})
             try:
