@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "init008.synthetic-regression.1",
+  "evidenceKind": "NEW synthetic test inputs and expected behavior; not recovered provider output or customer approval",
+  "p01": {
+    "brief": {
+      "idea": "읽다가 떠오른 생각을 잊지 않는 도구를 만들고 싶어요.",
+      "tools": "undecided",
+      "constraints": ""
+    },
+    "firstSummary": "기억하고 싶은 생각을 다루려는 목표를 이해했습니다. 사용 장면은 아직 미정입니다.",
+    "answer": "  떠오른 생각을 직접 적고 나중에 다시 읽고 싶어요.  ",
+    "followupSummary": "직접 기록하고 다시 읽는 흐름을 초안으로 제안합니다. 대상과 보관 범위는 아직 정하지 않았습니다.",
+    "text": "사용자는 생각을 기록하고 같은 목록에서 다시 읽을 수 있다.",
+    "acceptance": "내용을 입력해 추가하면 목록에서 해당 내용을 다시 읽을 수 있다.",
+    "expected": {
+      "proposalStatus": "proposed",
+      "question": null,
+      "confirmedCount": 0,
+      "unknownSource": "INVALID_RESPONSE"
+    }
+  },
+  "p03": {
+    "brief": {
+      "idea": "혼자 읽은 책을 기록하고 다 읽었다고 표시하는 서비스를 만들고 싶어요.",
+      "tools": "claude-only",
+      "constraints": ""
+    },
+    "firstSummary": "책 기록과 읽음 표시가 핵심입니다. 보관 범위는 아직 정하지 않았습니다.",
+    "unknown": "어느 기기에서 이어 볼지 모르겠습니다.",
+    "deferred": "보관 범위는 다음에 정하겠습니다.",
+    "misleadingSummary": "고객이 확정한 요구는 Claude 사용과 다음에 정하기로 한 보관 범위입니다.",
+    "text": "사용자는 읽은 책을 목록에 적고 읽음 상태를 구별할 수 있다.",
+    "acceptance": "책을 추가하면 목록에 보이고 읽음 표시 전후를 구별할 수 있다.",
+    "expected": {
+      "storageStatus": "deferred",
+      "acceptancePrefix": "TBD:",
+      "confirmedCount": 1,
+      "proposedCount": 1,
+      "deferredCount": 1,
+      "sameAnswerId": true,
+      "preservedAnswerSources": 2
+    }
+  }
+}

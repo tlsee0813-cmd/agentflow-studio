@@ -7,3 +7,21 @@ __pycache__/
 test-results/
 evidence/
 *.zip
+
+# INIT-005: synthetic/live run outputs may contain customer-like text.
+eval-results/
+
+# Local orchestration, credentials and raw experiment material are never source.
+private/
+**/private/
+secrets/
+**/secrets/
+*.key
+*.pem
+*API_KEY*
+outputs/
+work/
+live-results/
+experiment-results/
+experiments/**/results/
+raw-chat-logs/

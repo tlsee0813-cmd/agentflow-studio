@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.*
+__pycache__/
+.venv/
+test-results/
+evidence/
+*.zip
+
+# INIT-005: synthetic/live run outputs may contain customer-like text.
+eval-results/

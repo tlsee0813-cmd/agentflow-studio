@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "init009.fixture.1",
+  "purpose": "INIT009-PROMPT-QUALITY-REEVALUATION",
+  "runId": "INIT009-KO-20261011-01",
+  "personas": [
+    {
+      "id": "p01",
+      "title": "초보의 막연한 아이디어",
+      "synthetic": true,
+      "fixtureVersion": "init007a.persona.1",
+      "brief": {
+        "idea": "생활을 조금 편하게 해 주는 서비스를 만들고 싶어요.",
+        "tools": "undecided",
+        "constraints": ""
+      },
+      "facts": [
+        {
+          "id": "F-goal",
+          "text": "생활을 편하게 하고 싶지만 구체적인 서비스 범위는 아직 좁히지 못했다.",
+          "knownAt": "initial"
+        },
+        {
+          "id": "F-core",
+          "text": "기억할 내용을 직접 기록한 뒤 다시 확인하고 싶다.",
+          "knownAt": "answer-if-relevant"
+        }
+      ],
+      "directChoices": {
+        "tools": "undecided",
+        "customerStorage": "undecided",
+        "coreScene": "record"
+      },
+      "undecided": [
+        "대상 사용자 범위",
+        "데이터 보관 범위",
+        "세부 예외와 측정 조건"
+      ],
+      "lockedRequirements": [],
+      "expectedChanges": [
+        "실제 핵심 장면 질문이 있으면 F-core로 답한다. 관련 없는 질문에는 사실을 추가하지 않는다.",
+        "둘째 응답의 core-flow 내용·완료 조건·출처 변화와 proposed 유지 여부를 검토한다."
+      ],
+      "notProvided": {
+        "schedule": "미정",
+        "budget": "미정",
+        "subscription": "미정",
+        "deploymentPermission": "미승인",
+        "storageScope": "user-project (고객이 설계하는 서비스)"
+      }
+    },
+    {
+      "id": "p03",
+      "title": "모르겠음과 보류",
+      "synthetic": true,
+      "fixtureVersion": "init007a.persona.1",
+      "brief": {
+        "idea": "개인 할 일을 적고 완료 표시하는 서비스를 만들고 싶어요.",
+        "tools": "claude-only",
+        "constraints": ""
+      },
+      "facts": [
+        {
+          "id": "F-core",
+          "text": "개인 할 일 등록과 완료 표시가 필요하다.",
+          "knownAt": "initial"
+        },
+        {
+          "id": "F-unknown",
+          "text": "어디서 데이터를 이어서 사용할지 잘 모르겠다.",
+          "knownAt": "answer-if-relevant"
+        },
+        {
+          "id": "F-defer",
+          "text": "데이터 보관 범위를 다음에 결정하겠다.",
+          "knownAt": "revision-if-relevant"
+        }
+      ],
+      "directChoices": {
+        "tools": "claude-only",
+        "customerStorage": "undecided"
+      },
+      "undecided": [
+        "데이터 보관 범위",
+        "기기 연결",
+        "계정 방식"
+      ],
+      "lockedRequirements": [],
+      "expectedChanges": [
+        "실제 저장 질문에서 unknown을 적용한 뒤 deferred로 수정하는 경로를 관찰한다.",
+        "어느 단계도 browser 동의나 confirmed로 바뀌면 안 된다."
+      ],
+      "notProvided": {
+        "schedule": "미정",
+        "budget": "미정",
+        "subscription": "미정",
+        "deploymentPermission": "미승인",
+        "storageScope": "user-project (고객이 설계하는 서비스)"
+      }
+    }
+  ],
+  "answerRules": {
+    "p01": {
+      "topic": "core-scene",
+      "factIds": [
+        "F-core"
+      ],
+      "dispositions": [
+        "answered"
+      ],
+      "optionId": null,
+      "semanticMatchRequiresCoordinatorReview": true
+    },
+    "p03": {
+      "topic": "storage",
+      "factIds": [
+        "F-unknown",
+        "F-defer"
+      ],
+      "dispositions": [
+        "unknown",
+        "deferred"
+      ],
+      "optionId": null,
+      "sameAnswerId": true,
+      "semanticMatchRequiresCoordinatorReview": true
+    }
+  },
+  "humanContentQuality": "pending",
+  "unmatched": "skip/unevaluated",
+  "previousErrorIdAndCause": "unknown"
+}

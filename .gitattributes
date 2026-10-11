@@ -1,0 +1,2 @@
+# Preserve the accepted source snapshot's byte-pinned experiment identity.
+app/** -text

@@ -1,4 +1,4 @@
-name: Verify INIT-003 (no paid AI)
+name: Verify INIT009 baseline (no paid AI)
 on:
   pull_request:
   workflow_dispatch:
@@ -15,6 +15,9 @@ jobs:
         os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
     env:
       AI_MODE: mock
       ALLOW_PAID_AI: 'false'
@@ -33,6 +36,7 @@ jobs:
         with:
           node-version: '22.16.0'
           cache: npm
+          cache-dependency-path: app/package-lock.json
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.13.5'
@@ -66,7 +70,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: init-003-${{ matrix.os }}-${{ github.run_id }}
-          path: test-results/
+          name: agentflow-${{ matrix.os }}-${{ github.run_id }}
+          path: app/test-results/
           if-no-files-found: warn
           retention-days: 7

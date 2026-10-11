@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IDEA-013 response v1 — structural shape",
+  "$comment": "경로별 개수·출처 유효성·인용 일치·답변 출처 규칙은 OUTPUT_CONTRACT.md 및 assemble.mjs의 validateResponse를 함께 따른다. 구조 통과는 의미 품질 통과가 아니다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "route",
+    "focus",
+    "reason",
+    "evidence",
+    "scene",
+    "decision",
+    "notes",
+    "next"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "idea013.v1",
+      "type": "string"
+    },
+    "route": {
+      "type": "string",
+      "enum": [
+        "fork",
+        "proceed",
+        "need_info"
+      ]
+    },
+    "focus": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceId",
+          "quote"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "scene": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "setup",
+            "alternatives"
+          ],
+          "properties": {
+            "setup": {
+              "type": "string",
+              "minLength": 1
+            },
+            "alternatives": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "interpretation",
+                  "rationale",
+                  "action",
+                  "result"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "enum": [
+                      "A",
+                      "B",
+                      "C"
+                    ]
+                  },
+                  "interpretation": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "action": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "result": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "question",
+        "sourceId"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "open",
+            "resolved",
+            "deferred",
+            "not_needed",
+            "test_only"
+          ]
+        },
+        "question": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "sourceId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "text",
+          "sourceIds"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "proposed",
+              "assumption",
+              "unknown",
+              "conflict",
+              "test_only"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+            }
+          }
+        }
+      }
+    },
+    "next": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
