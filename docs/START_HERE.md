@@ -33,7 +33,7 @@ node continuity/server/index.mjs --mock
 
 UI001 rev1은 현재 작업 중심 화면·기준/기록 패널·상세 조정·내보내기 후 변경 표시를 반영했다. UI와 AI 변경은 별도로 검토했고 저장·provider는 보존한다. Cloud UI Node9/9·native UI9/9 통과는 규칙 mock을 사용한 UI 검증이다.
 
-IDEA016~019의 실제 평가는 각 결과 문서에 보존하며 현재 공유 앱은 IDEA017 + UI001 rev1 + IDEA022다. IDEA018·019는 채택하지 않았다. 구현 검사와 실제 응답 관찰을 구분하고, [IDEA022 결과](idea022-results.md)는 무상44검사·실제17회 수용과 품질 보류를 기록한다. IDEA022 + UI001 rev1의 통합 Cloud Node87/87·native13/13·UI9/9 검사가 통과해 기록 근거 기능을 채택했다. 실제 AI 내용 품질은 보류다. [IDEA023 실측](idea023-results.md)은20회 수용과 남은 품질 문제를 기록하며 해당 소스는 미채택이다. QUALITY024의 추론 설정·최소 대조 실험 조사와 별도 독립 원인 진단이 진행 중이다. 최신 판단·미검증 한계·병렬 작업은 [PROJECT_STATUS](PROJECT_STATUS.md)에서 이어받는다.
+IDEA016~019의 실제 평가는 각 결과 문서에 보존하며 현재 공유 앱은 IDEA017 + UI001 rev1 + IDEA022다. IDEA018·019는 채택하지 않았다. 구현 검사와 실제 응답 관찰을 구분하고, [IDEA022 결과](idea022-results.md)는 무상44검사·실제17회 수용과 품질 보류를 기록한다. IDEA022 + UI001 rev1의 통합 Cloud Node87/87·native13/13·UI9/9 검사가 통과해 기록 근거 기능을 채택했다. 실제 AI 내용 품질은 보류다. [IDEA023 실측](idea023-results.md)은20회 수용과 남은 품질 문제를 기록하며 해당 소스는 미채택이다. [QUALITY024](research/quality024/README.md)는 공식 추론 근거·평가 기준·최소 대조 계획을 보존한다. C02·Q03은 질문 여부만으로 실패를 단정하지 않고 원문 재판정 대기다. QUALITY024-T1 실행 도구는 구현 중이며 실호출0이다. 최신 판단·미검증 한계·병렬 작업은 [PROJECT_STATUS](PROJECT_STATUS.md)에서 이어받는다.
 
 ## 주요 작업의 조사와 구현 판단
 

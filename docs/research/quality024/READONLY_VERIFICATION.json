@@ -1,0 +1,27 @@
+{
+  "sourceFiles": 182,
+  "allMatch": true,
+  "sourceManifestSha256": "e26a6aec7e7ee785b14dbc9298bc61636f5223bf3da06ed0ebefbed854058e95",
+  "promptFileSha256": "22f0ae77eee864fed0b4f50efb38847ae31526b6152797fca520c1c188d9f023",
+  "method": "Read-only file hashes; no domain, provider or tests executed",
+  "checkedDate": "2026-10-12",
+  "activity": "documentation and public-official research only",
+  "productChanges": 0,
+  "runnerChanges": 0,
+  "promptChanges": 0,
+  "applicationTestsExecuted": 0,
+  "applicationOrDomainInvocations": 0,
+  "paidAICalls": 0,
+  "realCredentialAccess": 0,
+  "remoteWrites": 0,
+  "deployment": 0,
+  "sourceZip": {
+    "file": "AgentFlow_Studio_IDEA023.zip",
+    "sha256": "0b42a8a5320b3612e5edd83129b1c66499bc1f50ac90296d30a03ad0a76b6b8a"
+  },
+  "researchZip": {
+    "file": "AgentFlow_Studio_RESEARCH021.zip",
+    "sha256": "96c58488447a9673bb53d3fad92332a249b291ec16b3628743d720ebeade5c06"
+  },
+  "containsExecutableExperiment": false
+}
