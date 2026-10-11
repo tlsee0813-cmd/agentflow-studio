@@ -20,17 +20,15 @@
 
 실패·skip은 모두0이다. Node22.16.0 / npm10.9.2 / TypeScript5.8.3 / Python3.13.5 / Playwright1.57.0 / 시스템 Chromium154.0.8037.57을 사용했다. 브라우저는 native HTTP와 실제 localStorage 경로이며 지정된 응답 fixture·오류 주입은 구분했다. 30→14 기준 수정 뒤 낡은 AI 제외·수동값 보존, 장기 기록·v1 이력, 재시도 답변 중복 방지, 1,001개 저장→새로고침→백업→가져오기를 확인했다. 8MB/100,000개 경계는 Node 검사다. 검사 후169파일의 해시는 불변이었다.
 
-기존 persistent-profile 재방문 후 새 Blob 다운로드는 일반 Blob에서도 재현된 Chromium SIGSEGV 제한이 남아 있다. 위13개 검사는 그 제한의 해결을 주장하지 않는다. 새 프로필의 다운로드·복구 결과와 구분한다. 검증은 mock/paid=false였으며 새 실제 AI 품질, 실제 고객 효용, 운영 준비는 확인하지 않았다. 별도로, 앱 통합 커밋 `608d4753ebf4efc96c2df5bd518e5437e0ee99b4`의 [GitHub CI 38140619804](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38140619804)는 completed/success다. 기존 앱과 continuity check·build·Node·브라우저 검사를 실행한 결과이며 IDEA016 실제 AI 품질 결과가 아니다. 이번 실험 도구 추가에서는 CI 검사 범위를 늘리지 않는다.
+기존 persistent-profile 재방문 후 새 Blob 다운로드는 일반 Blob에서도 재현된 Chromium SIGSEGV 제한이 남아 있다. 위13개 검사는 그 제한의 해결을 주장하지 않는다. 새 프로필의 다운로드·복구 결과와 구분한다. 이 통합 검증은 mock/paid=false였으며 당시 새 실제 AI 품질, 실제 고객 효용, 운영 준비는 확인하지 않았다. 별도로, 앱 통합 커밋 `608d4753ebf4efc96c2df5bd518e5437e0ee99b4`의 [GitHub CI 38140619804](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38140619804)는 completed/success다. 기존 앱과 continuity check·build·Node·브라우저 검사를 실행한 결과이며 IDEA016 실제 AI 품질 결과가 아니다. 이번 실험 도구 추가에서는 CI 검사 범위를 늘리지 않는다.
 
-## 다음 품질 초점 — IDEA016 rev1
+## 현재 품질 확인 — IDEA016 rev1 baseline 완료
 
-[IDEA016 실험 도구](../experiments/idea016/README.md)는 실제 continuity의 buildRequest/prompt/provider/state/handoff 경로를 사용하는 고객 6흐름(각2~3단계)의 baseline 시험 준비 자료다. 상품 UI·저장 형식·prompt·provider와 기준169파일은 변경하지 않았다. 저장소에서의 실행 위치와 ZIP 전용 검증 자료는 [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 구분한다.
+[IDEA016 결과](research/idea016-results.md)는 2026-10-11 23:17 KST Cloud 완료 보고를 요약한다. 고객6흐름에서 실제14회 호출했고 모두 HTTP200이었으나 앱 수용은13회, INVALID_RESPONSE는1회였다. C01~04는 도구상 complete, C05는 계약 실패로 후속 변경 미실행, C06은 질문이 남아3회 상한에서 incomplete다. complete나 HTTP 성공을 고객 효용 합격으로 해석하지 않는다.
 
-rev1은 실험 기록과 receive 이전 경계에서 알려진 키의 반향을 차단·치환하도록 보완했다. 작성자의 가짜 키 focused 회귀1개와 독립 좁은 메모리 회귀5개가 통과해 검토를 수용했다. 이는 실HTTP 추가 검증이나 실제 제공업체 호출이 아니며, 제품 원본 provider의 보안 수정·모든 민감정보 보호를 뜻하지 않는다. 준비 검토의 실제 외부 호출은0이다.
+실험 rev1의 키 반향 보호는 작성자 focused1개·독립 좁은 메모리 회귀5개로 수용했다. 이 보호는 실험의 기록·receive 이전 경계이며 제품 provider 수정이나 전수 보안 감사가 아니다. 실제 baseline은 기존2048토큰·15초 설정과 기존 curl proxy 전송을 사용했고 자동 재시도·키 반향은 없었다. 검증 ZIP의 기준169+실험9파일은 불변이며 종료 시 paid=false였다. 실제 제공업체 응답 관찰과 이전 mock 앱/CI 검증을 구분한다.
 
-Cloud에 rev1 ZIP과 6사례·최대18회 실호출 지시를 전달해 실제 baseline 실행을 시작하도록 했다. 아직 완료 보고를 받지 않았으므로 새 실제 호출 수·현재 baseline 결과·품질 수용은 미확인이다. 실제 질문에 맞는 허용 합성 답변만 이어가고 실패·재시도0·중단을 그대로 회수할 예정이다.
-
-오래된 미수정 요청의200자 발췌에서 뒤쪽 제약이 누락되는지는 실제 전송 문맥·응답·작업문을 읽어 입력 조립과 모델 실패로 구분한다. 제품 prompt를 선제 변경하거나 기능을 확대하지 않으며, 첫 실결과를 받은 뒤 개선을 판단한다.
+원문 추가 회수·대조가 진행 중이다. C03의 원본 불변 조건이 현재 기준에서 빠지고 history에 남은 원인·의미적 관련성은 아직 확정하지 않았다. C06은 원문의200자 발췌 누락과 이전 AI의 의미 재전달을 함께 읽어야 한다. C02의 상태 모순·C05 계약 실패도 다음 판단에 포함한다. Pro 수정 작업은 아직 배정하지 않았으며, 실험 결과가 실제 고객 효용이나 운영 준비를 입증하지 않는다. 실행 도구와 ZIP 전용 자료 위치는 [IDEA016 README](../experiments/idea016/README.md), [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 있다.
 
 과거 IDEA013·014 합성 비교는 [IDEA013 결과](research/idea013-results.md), [IDEA014 결과](research/idea014-results.md)에 보존한다. 그 계약 통과 수를 현재 앱의 품질이나 사용자 효용으로 옮겨 해석하지 않는다. 구현 과정의 검토는 [IDEA015 제품 검토](research/idea015-product-review.md)에 남아 있으며 원본·R2·R3의 과거 결과는 Git 이력과 구분한다.
 
