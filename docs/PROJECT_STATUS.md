@@ -28,7 +28,9 @@
 
 실험 rev1의 키 반향 보호는 작성자 focused1개·독립 좁은 메모리 회귀5개로 수용했다. 이 보호는 실험의 기록·receive 이전 경계이며 제품 provider 수정이나 전수 보안 감사가 아니다. 실제 baseline은 기존2048토큰·15초 설정과 기존 curl proxy 전송을 사용했고 자동 재시도·키 반향은 없었다. 검증 ZIP의 기준169+실험9파일은 불변이며 종료 시 paid=false였다. 실제 제공업체 응답 관찰과 이전 mock 앱/CI 검증을 구분한다.
 
-원문 추가 회수·대조가 진행 중이다. C03의 원본 불변 조건이 현재 기준에서 빠지고 history에 남은 원인·의미적 관련성은 아직 확정하지 않았다. C06은 원문의200자 발췌 누락과 이전 AI의 의미 재전달을 함께 읽어야 한다. C02의 상태 모순·C05 계약 실패도 다음 판단에 포함한다. Pro 수정 작업은 아직 배정하지 않았으며, 실험 결과가 실제 고객 효용이나 운영 준비를 입증하지 않는다. 실행 도구와 ZIP 전용 자료 위치는 [IDEA016 README](../experiments/idea016/README.md), [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 있다.
+실제4사례 원문 발췌를 회수·대조했다. C03은 명시적 이어받기 요청과 전체 수동값이 전송됐으나, 현재 checks의 입력 원본 불변 생략과 ‘현재 지시 아님’ 이력 표제로 적용 우선순위가 불명확했다. 완전 유실은 아니다. C06의 ‘별명만’은 전송 전200자 발췌에서 빠졌고 연락처 제외는 이전 AI 재진술로 전송·반영됐다. C02의 첫 선택지는 모순됐으나 후속 확정 시점은 올바르며, C05는 checks 계약 실패로30→60 단계가 미실행이었다.
+
+IDEA017 최소 품질 개선을2026-10-11 23:41 KST Pro에 배정했고 응답 중이다. 실제4사례 원문을 바탕으로 prompt·context·handoff 관련 최소 변경과 사용자가 명시한 이어받기 범위를 검토한다. 다른 과거 수동 기준 전체의 강제 carry는 아니다. 후보0개·실제 재평가0회로 아직 수용된 변경이나 개선 결과는 없으며, baseline 결과도 실제 고객 효용·운영 준비를 입증하지 않는다. 실행 도구와 ZIP 전용 자료 위치는 [IDEA016 README](../experiments/idea016/README.md), [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 있다.
 
 과거 IDEA013·014 합성 비교는 [IDEA013 결과](research/idea013-results.md), [IDEA014 결과](research/idea014-results.md)에 보존한다. 그 계약 통과 수를 현재 앱의 품질이나 사용자 효용으로 옮겨 해석하지 않는다. 구현 과정의 검토는 [IDEA015 제품 검토](research/idea015-product-review.md)에 남아 있으며 원본·R2·R3의 과거 결과는 Git 이력과 구분한다.
 
