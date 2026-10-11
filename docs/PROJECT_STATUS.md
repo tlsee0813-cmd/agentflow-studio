@@ -34,14 +34,14 @@ C02의 선택지 축·미정 기한·실제 답변 출처 표현, C05의 이미 
 
 ### 진행 중인 독립 작업과 인계
 
-Cloud의 IDEA019 평가는 완료했다. IDEA020 설계와 CONNECT001 설계·합성 PoC ZIP을 회수했고 UI001·RESEARCH021은 계속 진행 중이다. 현재 공유 상품 소스는 IDEA017이며 후보를 자동 승격하지 않는다.
+현재 공유 상품 소스는 IDEA017이다. RESEARCH021 조사와 IDEA020 보충 검토를 회수했으며 UI001·CONNECT001·IDEA022 후보를 아직 승격하지 않는다.
 
-- **Cloud / IDEA019:** 실제25회·계약 수용을 완료했지만 미반영 D1/D2에서도 ‘남은 작업 없음’이라고 한 B05와 금지 조건의 언급 제거로 읽히는 B03 checks를 관측했다. 이미 반영된 계획의 중복 작업을 줄인 B01/B03, 구현 요청을 남긴 B02/B04와 구분해 [IDEA019 결과](research/idea019-results.md)에 기록한다. 단일 비맹검 탐색이며019는 채택하지 않는다. Cloud B05/B03의 실제 구성 코드·원문을 읽기로 회수해 IDEA020 보충 검토에 전달했다. 새 AI 호출은 없다.
-- **Pro / IDEA020:** 설계 ZIP을 회수했다. 기존 history에서 항목별 앱 기록을 파생하고 요청 전체 완료 플래그를 쓰지 않는 안이며 현재는 설계뿐이다. B05/B03 코드·원문을 받은 보충 검토가 시작됐다. [설계 인계 요약](research/idea020-connect001-handoff.md)에 제안·합성 관측·미구현 범위를 구분한다.
-- **Pro / UI001:** 같은 AgentFlow 프로젝트의 새 세션에서 수용된017 ZIP을 기준으로 실제 고객 화면·사용 흐름을 구현한다. client·HTML·CSS·관련 UI 검사만 변경하며 prompt·domain·storage·API 등은 보존한다. 제공된 화면 구성 참고 자료를 사용하되 제품에 없는 실행·연결 상태를 만들지 않는다. 유료 AI 호출·원격 쓰기는 없다.
-- **Claude / CONNECT001:** 설계·합성 PoC ZIP을 회수했고 독립 좁은 검토 중이다. hook → 로컬 JSONL → 기존 report 가져오기를 제안하며 합성만 관측했다. 실제 CLI·Codex stable·Windows·동시 append·상품 통합은 미검증이다. [설계 인계 요약](research/idea020-connect001-handoff.md)을 기준으로 이어받으며 상품 소스·실제 연동 API는 변경/실행하지 않는다.
-- **Pro / RESEARCH021:** 같은 프로젝트의 새 조사 세션을 시작했고 응답 중이다. UI001·CONNECT001·IDEA020의 참고안을 위해 기존 조사·OSS 실제 코드·커뮤니티 실사용·UI/UX를 읽고 재사용·차별화 판단을 정리한다. 고객 근본 문제에서 출발해 다른 분야의 원리와 접근이 다른 대안도 비교하며 사실 근거와 새 가설을 구분한다. 제품 수정은 없고 조사 결과를 다음 구현 지시에 연결한다. 주요 작업마다 적용할 [조사·구현 판단 원칙](START_HERE.md#주요-작업의-조사와-구현-판단)을 따른다.
+- **Pro / RESEARCH021 — 조사 완료:** [조사 17문서](research/research021/README.md)를 원문대로 보존했다. [출처 지도](research/research021/01_SOURCE_MAP.md)·코드 재사용/실사용 원장·분야 밖 대안·[UI001](research/research021/handoffs/UI001.md) / [CONNECT001](research/research021/handoffs/CONNECT001.md) / [IDEA020](research/research021/handoffs/IDEA020.md) 인계·미실행 후속 연구를 제공한다. 현재 작업대와 작은 인계 출력, 요청/계획/외부 관측의 구분을 제안하며 고객 효용의 실증 결론은 아니다. 지정 커밋의 정적 열람·공식 문서·작성자 경험과 접근 한계를 기록했고 독립 연구 검증·앱 실행은 하지 않았다. 주요 작업의 [조사·구현 판단 원칙](START_HERE.md#주요-작업의-조사와-구현-판단)을 재사용한다.
+- **Pro / IDEA020 — 보충 검토 완료:** Cloud B05는 실제 domain API로 구성됐지만 초기 R01은 정확한 입력·revision·응답 재현이 아니다. 실제 응답의 next ‘무작업’과 reviewBasisIds D1이 공존한다. requested 항목이 남았다는 사실만으로 항상 미반영이라고 단정할 수 없다. [설계 인계](research/idea020-connect001-handoff.md)에 구분하며 설계 자체는 미통합이다.
+- **Pro / IDEA022 — 최소 구현 중:** IDEA017을 기준으로 기존 history에서 읽기 전용 planFacts를 파생하고 같은 사실을 handoff·AI 입력에 연결하는 후보를 만들기 시작했다. RESEARCH021을 전달했고 요청 보존/기준 기록/직접 수정/외부 실행 미확인을 구분한다. 요청 전체 완료 플래그는 만들지 않으며 UI 파일은 별도 작업으로 보존한다. 아직 수용·승격된 새 소스나 실제 재평가 결과는 없다.
+- **Pro / UI001 — rev1 수정 중:** Cloud 클린 설치·check/build, continuity Node65/65·기존 native HTTP 브라우저13/13 통과. 신규 UI8검사는7통과·1오류로 UI06이 접힌 입력 field를 채우려다 시간 초과했다. 독립 좁은 리뷰는 제안을 수정한 뒤 실제 인계문이 바뀌어도 ‘내보냄’ 표시가 갱신되지 않는 문제1건을 추가 확인했다. 두 건의 수정·재검증을 기다리며 원본 실패를 통과로 바꾸지 않는다. 실제 AI 호출은 없고 UI 소스는 미통합이다.
+- **Claude / CONNECT001 rev1 — 좁은 검토 수용:** 두 결함을 수정한 합성 PoC의 독립 좁은 검토가 통과했다. 자체 session/turn 연결 우선·충돌/미연결의 수동 배치·같은 시각 보고의 단일 최신 후보를 확인했다. Windows Node24.19.0의 합성 회귀·hook runner 검사는 실제 CLI 발화·Codex stable 호환·다중 프로세스 append·앱 통합 검증과 구별한다. [설계 인계](research/idea020-connect001-handoff.md)를 이어받으며 실제 연결은 미검증이다.
 
-UI 후보의 변경 지문·실행 검사·화면, 연결 조사 근거·최소 인터페이스·PoC 한계를 각각 회수한다. UI와 선정된 prompt는 별도 diff로 통합하며 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 업데이트는 결과·상태 문서뿐이고 소스·CI·PR 설정·main·배포는 변경하지 않는다.
+[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 조사·인계·상태 문서이며 상품 소스·CI·PR 설정·main·배포는 변경하지 않는다.
 
 과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.
