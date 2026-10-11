@@ -22,6 +22,7 @@ IDEA017은 이전 수동 scope·checks의 원문 참조를 현재 작업에 제�
 | IDEA017 실제 재평가 | 15회: provider/app 모두200,6흐름 완료, 오류·재시도·응답 수리·fallback0 |
 | IDEA017 GitHub CI | [1e585241 실행38152906064](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38152906064) completed/success |
 | IDEA018 실제 재평가 | 13회: provider모두200·앱12수용/1INVALID_RESPONSE,4complete·C02failed·C06incomplete. 소스 미게시 |
+| IDEA019 실제 평가 | 25회: 기존6흐름15회·동일 신규5입력017/019 각5회, 전부provider/app200·계약 수용. 소스 미채택 |
 
 IDEA017의 C03은 명시적으로 이어받은 수동 조건의 현재 적용 참조가 분명해졌고, C06은 ‘별명만’ 전문 전달과 반영을 확인했다. C05는 checks 문자열 수용 뒤30→60 단계를 처음 실제 관측했다. [IDEA016 결과](research/idea016-results.md)와 [IDEA017 결과](research/idea017-results.md)는 구별해 보존한다. complete·HTTP 성공·검사 통과는 고객 효용이나 내용 품질 합격이 아니다.
 
@@ -33,12 +34,13 @@ C02의 선택지 축·미정 기한·실제 답변 출처 표현, C05의 이미 
 
 ### 진행 중인 독립 작업과 인계
 
-세 작업을 병렬로 시작했고 진행 중임을 확인했다. 현재 공유 상품 소스는 IDEA017이며 아래 후보를 자동 승격하지 않는다.
+Cloud의 IDEA019 평가는 완료했고 UI001·CONNECT001은 독립 진행 중이다. 현재 공유 상품 소스는 IDEA017이며 후보를 자동 승격하지 않는다.
 
-- **Cloud / IDEA019:** 기존 Cloud 세션에서 IDEA019의 같은6사례와 새5사례의017/019 짝비교를 실행 중이다. 상한은28회이며 실제 호출 수·결과는 아직 미확인이다. C05의 현재 상태/next 최소 보완을 평가하고 전체 문제의 일괄 prompt 재작성으로 확대하지 않는다.
+- **Cloud / IDEA019:** 실제25회·계약 수용을 완료했지만 미반영 D1/D2에서도 ‘남은 작업 없음’이라고 한 B05와 금지 조건의 언급 제거로 읽히는 B03 checks를 관측했다. 이미 반영된 계획의 중복 작업을 줄인 B01/B03, 구현 요청을 남긴 B02/B04와 구분해 [IDEA019 결과](research/idea019-results.md)에 기록한다. 단일 비맹검 탐색이며019는 채택하지 않는다. Cloud는 B05 구성 원문을 추가 읽기로 회수 중이고 새 AI 호출은 없다.
+- **Pro / IDEA020:** 새 세션에서 확정 상태·requested 의도·반영 여부·다음 행동의 경계를 설계한다. 또 다른 전체 prompt 재작성이나 상품 코드 변경이 아니다. 후보·실평가 결과는 아직 없다.
 - **Pro / UI001:** 같은 AgentFlow 프로젝트의 새 세션에서 수용된017 ZIP을 기준으로 실제 고객 화면·사용 흐름을 구현한다. client·HTML·CSS·관련 UI 검사만 변경하며 prompt·domain·storage·API 등은 보존한다. 제공된 화면 구성 참고 자료를 사용하되 제품에 없는 실행·연결 상태를 만들지 않는다. 유료 AI 호출·원격 쓰기는 없다.
 - **Claude / CONNECT001:** 새 Opus5.5 High 세션에서 공식 문서·소스의 connector/event 경계를 먼저 확인하고 추천하는 첫 연결을 좁게 설계한다. 선택적 작은 PoC는 제품 밖에서 합성 이벤트 정규화·중복/오래된 이벤트 처리만 보여 준다. 상품 소스·원격 상태는 변경하지 않으며 실제 연동 API 호출은 없다.
 
-UI 후보의 변경 지문·실행 검사·화면, 연결 조사 근거·최소 인터페이스·PoC 한계를 각각 회수한다. UI와 선정된 prompt는 별도 diff로 통합하며 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 업데이트는 이 상태 문서뿐이고 소스·CI·PR 설정·main·배포는 변경하지 않는다.
+UI 후보의 변경 지문·실행 검사·화면, 연결 조사 근거·최소 인터페이스·PoC 한계를 각각 회수한다. UI와 선정된 prompt는 별도 diff로 통합하며 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 업데이트는 결과·상태 문서뿐이고 소스·CI·PR 설정·main·배포는 변경하지 않는다.
 
 과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.
