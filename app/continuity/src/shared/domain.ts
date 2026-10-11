@@ -1,5 +1,7 @@
 import { API_SCHEMA, SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
 import { ensure, text, validateEnvelope, digest } from './validation.js';
+import { planFacts, planFactsText } from './plan-facts.js';
+export { planFacts, planFactsText } from './plan-facts.js';
 const uid = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 const now = () => new Date().toISOString();
 const copy = <T>(value: T): T => structuredClone(value);
@@ -145,7 +147,7 @@ const jsonBytes=(v:unknown)=>new TextEncoder().encode(JSON.stringify(v)).length;
 export function buildRequest(p: Project, ticket: Ticket): ContextRequest {
   const t=taskOf(p,ticket.taskId),parts=contextParts(p,t);
   const req:ContextRequest={schemaVersion:API_SCHEMA,ticket:copy(ticket),projectName:p.name,sources:parts.sources,
-    bases:p.bases.map(contextBasis),previousWork:parts.previousWork};
+    bases:p.bases.map(contextBasis),appFacts:planFacts(p,t.id),previousWork:parts.previousWork};
   let bytes=jsonBytes(req);
   if(bytes>REQUEST_BYTES) {
     const sources=new Map(p.sources.map(s=>[s.id,s]));
@@ -237,6 +239,7 @@ export function handoffText(p:Project,id=p.currentTaskId):string {
     '전달 방식: 사용자가 복사·붙여넣기. CLI/MCP 연결, 자동 실행, 운영 권한 승인은 없음.',
     trial?'합성 시험 문맥입니다. 실제 고객 요청·기존 결정 변경에 사용하지 마세요.':'요청 원문은 의도이고, 구현 보고는 주장입니다. 실제 실행·검증을 완료했다고 간주하지 마세요.'];
   if(stale) lines.push(`${stale} 직접 작성한 값과 아래 현재 기준·입력 원문을 따르세요.`);
+  lines.push(`\n${planFactsText(planFacts(p,t.id))}`);
   lines.push('\n## 이번 작업',v.understanding||'아래 사용자 입력과 현재 기준을 바탕으로 좁은 작업을 준비하세요.',
     '\n### 범위',v.scope||'명시한 요청 범위만. 미정 조건은 가정으로 채우지 않습니다.',
     '\n### 다음 작업 (AI/모의 제안 또는 사용자 직접 수정)',v.next||'요청의 작은 변경을 준비하고, 모르는 기술적 사실은 실제 코드에서 확인하세요.',

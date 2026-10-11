@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, LEGACY_SCHEMA, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, type Advice, type Basis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
+import { API_SCHEMA, SCHEMA, LEGACY_SCHEMA, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -51,10 +51,67 @@ function contextBasis(v: unknown) {
   obj(v,['id','text','status','sourceId','revision','previousVersions','partial']); id(v.id); text(v.text); id(v.sourceId); integer(v.revision); integer(v.previousVersions);
   ensure(STATUSES.includes(v.status as string)); ensure(typeof v.partial === 'boolean');
 }
+/** Validate the projection's shape and all references available in this request. The server does not
+ * have prior snapshot texts; this is not re-execution, provenance authentication or semantic checking. */
+function appFacts(v: unknown, req: {ticket:Ticket;sources:Source[];bases:ContextBasis[]}) {
+  obj(v,['taskId','inputs','records']); id(v.taskId); ensure(v.taskId===req.ticket.taskId);
+  list(v.inputs); list(v.records);
+  const sources=new Map(req.sources.map(s=>[s.id,s])),bases=new Map(req.bases.map(b=>[b.id,b]));
+  const currentInputs=req.sources.filter(s=>s.taskId===req.ticket.taskId),inputIds=new Set<string>();
+  for(const input of v.inputs) {
+    obj(input,['sourceId','kind']); id(input.sourceId);
+    const s=sources.get(input.sourceId as string);
+    ensure(s && s.taskId===req.ticket.taskId && input.kind===s.kind && !inputIds.has(s.id));
+    inputIds.add(s.id);
+  }
+  ensure(inputIds.size===currentInputs.length && currentInputs.every(s=>inputIds.has(s.id)));
+  ensure(inputIds.size>0);
+  const seen=new Set<string>(),currentRecords=new Set<string>();
+  for(const f of v.records) {
+    obj(f,['basisId','sourceId','revision','status','versionIndex','isCurrent','kind','previousRevision','changedFields']);
+    id(f.basisId); id(f.sourceId); integer(f.revision); integer(f.versionIndex);
+    ensure(STATUSES.includes(f.status as string)); ensure(typeof f.isCurrent==='boolean');
+    ensure(['input-retained','basis-recorded','version-only'].includes(f.kind as string));
+    const b=bases.get(f.basisId as string),s=sources.get(f.sourceId as string);
+    ensure(b && s && inputIds.has(s.id));
+    const index=f.versionIndex as number,revision=f.revision as number,key=`${b.id}:${index}`;
+    ensure(!seen.has(key)); seen.add(key);
+    ensure(index<=b.previousVersions && f.isCurrent===(index===b.previousVersions));
+    ensure(revision<=req.ticket.revision);
+    if(f.isCurrent) {
+      ensure(revision===b.revision && f.sourceId===b.sourceId && f.status===b.status);
+      currentRecords.add(b.id);
+    } else if(f.kind!=='version-only') ensure(revision<b.revision);
+    if(f.previousRevision===null) ensure(f.changedFields===null);
+    else {
+      integer(f.previousRevision);
+      ensure(index>0 && (f.previousRevision as number)<revision && f.kind==='basis-recorded');
+      list(f.changedFields,2);
+      ensure(new Set(f.changedFields).size===f.changedFields.length);
+      for(const k of f.changedFields) ensure(k==='text'||k==='status');
+    }
+    if(f.kind==='version-only') ensure(f.previousRevision===null);
+    if(f.kind==='input-retained') {
+      ensure(index===0 && f.previousRevision===null);
+      ensure((s.kind==='request'&&f.status==='requested') || (s.kind==='answer'&&f.status==='answered'));
+      if(f.isCurrent && s.kind==='request') ensure(!b.partial && b.text===s.text);
+    }
+    if(f.kind==='basis-recorded') {
+      ensure((s.kind==='manual_decision' && ['confirmed','deferred'].includes(f.status as string)) ||
+        (s.kind==='request' && index>0 && f.status!=='answered'));
+      ensure(index===0 ? f.previousRevision===null : f.previousRevision!==null);
+      if(f.isCurrent && s.kind==='manual_decision') ensure(!b.partial && b.text===s.text);
+    }
+  }
+  // Current versions are present in full in this request, so their coverage can be checked exactly.
+  for(const b of req.bases) if(inputIds.has(b.sourceId)) ensure(currentRecords.has(b.id));
+}
 export function validateRequest(v: unknown): ContextRequest {
-  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
+  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
   list(v.sources); list(v.bases); for (const s of v.sources) source(s); for (const b of v.bases) contextBasis(b);
   ensure(v.sources.length > 0); unique(v.sources as Source[]); unique(v.bases as {id:string}[]);
+  appFacts(v.appFacts,{ticket:v.ticket,sources:v.sources as Source[],bases:v.bases as ContextBasis[]});
+  ensure(new TextEncoder().encode(JSON.stringify(v)).length<=REQUEST_BYTES,'CONTEXT_TOO_LARGE');
   // Bases carry current values; prior versions stay local. Old-request excerpts are budget-dependent.
   if (v.previousWork !== null) {
     obj(v.previousWork,['taskId','understanding','scope','next','checks','aiTextExcluded','manualConditionFields']); id(v.previousWork.taskId); ensure(typeof v.previousWork.aiTextExcluded === 'boolean');

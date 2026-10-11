@@ -1,6 +1,6 @@
-# AgentFlow Studio 현재 상태 — IDEA017 + UI001 rev1
+# AgentFlow Studio 현재 상태 — IDEA022 + UI001 rev1 통합
 
-최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017의 최소 개선과 UI001 rev1을 반영했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
+최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능을 통합했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
 
 ## 현재 구현
 
@@ -10,7 +10,9 @@ IDEA017은 이전 수동 scope·checks의 원문 참조를 현재 작업에 제�
 
 검증 후보179파일의 manifest SHA256은 `5c00511bf010b31f9bae7c443221cd3933fe01caff358ef7ac2fcc7c3df04850`다. baseline178개 중172개 동일·6개 변경·1개 신규이며, 공유 문서는 검증 ZIP과 구별되는 최신 상태 안내다. 실행 위치와 ZIP 전용 자료는 [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 구분한다.
 
-UI001 rev1은 현재 작업/다음 행동을 중심으로 화면을 재배치하고 기준·출처/기록 패널과 상세 편집을 제공한다. 전달될 전체 handoff의 문자수·digest로 내보내기 뒤 제안 text/why/포함 상태 변경을 감지하고 무관한 미제출 초안은 변경으로 표시하지 않는다. UI/client·presentation과 관련 UI 검사8경로만 반영했으며 AI prompt·domain·types·request validation·저장·provider는 보존했다. 후보 source182 manifest SHA256은 `cc55fee16f6d3753130b9914874a0c54fbfcb32f4d18c2723c9b52fd56552d41`이다.
+UI001 rev1은 현재 작업/다음 행동을 중심으로 화면을 재배치하고 기준·출처/기록 패널과 상세 편집을 제공한다. 전달될 전체 handoff의 문자수·digest로 내보내기 뒤 제안 text/why/포함 상태 변경을 감지하고 무관한 미제출 초안은 변경으로 표시하지 않는다. UI/client·presentation과 관련 UI 검사8경로만 반영했으며 UI 반영에서는 AI 경로를 보존했고 후속 IDEA022는 별도7경로로 통합했다. 저장·provider는 유지한다. 후보 source182 manifest SHA256은 `cc55fee16f6d3753130b9914874a0c54fbfcb32f4d18c2723c9b52fd56552d41`이다.
+
+IDEA022는 현재 요청과 기존 basis/history에서 읽기 전용 planFacts를 파생해 handoff·AI 입력 appFacts에 같은 기록 근거를 제공한다. 요청 보존(input-retained)·기준 기록(basis-recorded)·이력 누락(version-only)을 구분하며 요청 전체 완료나 외부 구현 완료를 판정하지 않는다. API 입력은 `idea022.context.4`로 엄격히 검증하고 기존 저장 schema는 유지한다. prompt/domain/types/validation·신규 plan-facts와 관련 검사7경로를 수용했다. 통합184소스 = 기존169불변 +10수정 +5추가이며 UI8경로와 IDEA0227경로는 겹치지 않는다. Cloud 통합 source manifest SHA256은 `11ac3176493bf02a15e681a31c6a12ca4e4bd7487c5d505019fceaf6941691d1`이다.
 
 ## 검증과 실제 관찰
 
@@ -26,6 +28,7 @@ UI001 rev1은 현재 작업/다음 행동을 중심으로 화면을 재배치하
 | IDEA018 실제 재평가 | 13회: provider모두200·앱12수용/1INVALID_RESPONSE,4complete·C02failed·C06incomplete. 소스 미게시 |
 | UI001 원본 Cloud | 클린 설치·check/build·continuity Node65/65·기존 native 브라우저13/13 통과. 신규 UI7통과/1오류(UI06 접힌 입력), 원본 실패 보존 |
 | UI001 rev1 독립·Cloud | 내보내기 신선도 좁은 독립 회귀 수용. Cloud 클린 설치·build·continuity check/build·UI Node9/9·native UI9/9, fail/error/skip0. 변화 없는 기존 전체 검사는 반복하지 않음 |
+| IDEA022 + UI001 rev1 통합 Cloud | 클린 설치·부모/continuity check/build·continuity Node87/87·native 브라우저13/13·UI9/9, fail/error/skip0. 새 실AI0·소스184검사 후 불변 |
 | IDEA019 실제 평가 | 25회: 기존6흐름15회·동일 신규5입력017/019 각5회, 전부provider/app200·계약 수용. 소스 미채택 |
 
 IDEA017의 C03은 명시적으로 이어받은 수동 조건의 현재 적용 참조가 분명해졌고, C06은 ‘별명만’ 전문 전달과 반영을 확인했다. C05는 checks 문자열 수용 뒤30→60 단계를 처음 실제 관측했다. [IDEA016 결과](research/idea016-results.md)와 [IDEA017 결과](research/idea017-results.md)는 구별해 보존한다. complete·HTTP 성공·검사 통과는 고객 효용이나 내용 품질 합격이 아니다.
@@ -34,19 +37,19 @@ C02의 선택지 축·미정 기한·실제 답변 출처 표현, C05의 이미 
 
 ## 다음 작업
 
-[IDEA018 결과](research/idea018-results.md)는 C05 마지막 상태/next 표현 개선과 C02 문자열 suggestions 계약 거절·혼합 선택지, C06 새 기술 질문·넓어진 금지 범위, C04 제외된 메일 제안 재노출을 함께 기록한다. 답변 적용·재시도·응답 수리는0이었다. 단일 실행의 정성 관찰로 인과적·통계적 효과나 고객 효용을 확정하지 않는다. IDEA018 소스는 게시하지 않고 현재 공유 앱은 IDEA017 + UI001 rev1을 유지한다.
+[IDEA018 결과](research/idea018-results.md)는 C05 마지막 상태/next 표현 개선과 C02 문자열 suggestions 계약 거절·혼합 선택지, C06 새 기술 질문·넓어진 금지 범위, C04 제외된 메일 제안 재노출을 함께 기록한다. 답변 적용·재시도·응답 수리는0이었다. 단일 실행의 정성 관찰로 인과적·통계적 효과나 고객 효용을 확정하지 않는다. IDEA018 소스는 게시하지 않고 현재 공유 앱은 IDEA017 + UI001 rev1 + IDEA022다.
 
 ### 진행 중인 독립 작업과 인계
 
-현재 공유 상품은 IDEA017 + UI001 rev1이다. RESEARCH021 조사와 IDEA020 보충 검토를 회수했다. CONNECT001·IDEA022는 아직 상품에 승격하지 않는다.
+현재 공유 상품은 IDEA017 + UI001 rev1 + IDEA022다. RESEARCH021 조사와 IDEA020 보충 검토를 회수했다. CONNECT001·IDEA023은 아직 상품에 승격하지 않는다.
 
 - **Pro / RESEARCH021 — 조사 완료:** [조사 17문서](research/research021/README.md)를 원문대로 보존했다. [출처 지도](research/research021/01_SOURCE_MAP.md)·코드 재사용/실사용 원장·분야 밖 대안·[UI001](research/research021/handoffs/UI001.md) / [CONNECT001](research/research021/handoffs/CONNECT001.md) / [IDEA020](research/research021/handoffs/IDEA020.md) 인계·미실행 후속 연구를 제공한다. 현재 작업대와 작은 인계 출력, 요청/계획/외부 관측의 구분을 제안하며 고객 효용의 실증 결론은 아니다. 지정 커밋의 정적 열람·공식 문서·작성자 경험과 접근 한계를 기록했고 독립 연구 검증·앱 실행은 하지 않았다. 주요 작업의 [조사·구현 판단 원칙](START_HERE.md#주요-작업의-조사와-구현-판단)을 재사용한다.
-- **Pro / IDEA020 — 보충 검토 완료:** Cloud B05는 실제 domain API로 구성됐지만 초기 R01은 정확한 입력·revision·응답 재현이 아니다. 실제 응답의 next ‘무작업’과 reviewBasisIds D1이 공존한다. requested 항목이 남았다는 사실만으로 항상 미반영이라고 단정할 수 없다. [설계 인계](research/idea020-connect001-handoff.md)에 구분하며 설계 자체는 미통합이다.
-- **IDEA022 — 검토 수용·품질 보류:** 독립 좁은 검토와 Cloud 클린 설치·check/build·무상44검사(새20/017관련13/HTTP11)가 통과했다. 실제17회 모두 provider/app200·계약 수용이지만 B03 중복 변경/추가 확정, C02 중요한 선택 미질문, C06 제약 범위 확대 등이 남아 품질을 보류한다. [실측 요약](idea022-results.md)에 B05 조기 종료 회피와 새 구현 요청 구별도 기록한다. Cloud에서022 + UI001 rev1 통합 무상 검사가 진행 중이며 결과는 미확인이다. 기존 C02/C05/C06 원문을 읽기로 회수 중이고 추가 AI 호출은 없다. IDEA022 소스는 아직 게시하지 않는다.
+- **Pro / IDEA020 — 보충 검토 완료:** Cloud B05는 실제 domain API로 구성됐지만 초기 R01은 정확한 입력·revision·응답 재현이 아니다. 실제 응답의 next ‘무작업’과 reviewBasisIds D1이 공존한다. requested 항목이 남았다는 사실만으로 항상 미반영이라고 단정할 수 없다. [설계 인계](research/idea020-connect001-handoff.md)에 구분하며 핵심 기록 파생은 IDEA022로 통합했다.
+- **IDEA022 — 기록 근거 기능 수용·AI 품질 보류:** 독립 좁은 검토·무상44검사 후 UI001 rev1 통합 Cloud Node87/87·native13/13·UI9/9가 fail/error/skip0으로 통과해7경로를 반영했다. 실제17회는 모두 provider/app200·계약 수용이지만 B03 중복 변경/추가 확정, C02 중요한 선택 미질문, C06 제약 범위 확대 등이 남았다. [실측 요약](idea022-results.md)에 B05 조기 종료 회피와 새 구현 요청 구별도 기록한다. 기존 C02/C05/C06 원문은 읽기로 회수했고 통합 검사에서 새 AI 호출은 없다.
 - **Pro / IDEA023 — 품질 보완 중:** IDEA022를 기준으로 요청 범위·현재값에 맞는 다음 행동, 중요한 초기 질문, 조건 적용 대상을 prompt 중심으로 보완하기 시작했다. UI는 별도 유지하고018/019를 재승격하지 않는다. 새 후보 수용·실제 재평가 결과는 아직 없다.
 - **Pro / UI001 rev1 — 수용·반영:** 초기 UI06 검사는 정상 compose 클릭 후 입력하도록 수정했고 제안 수정 뒤 ‘내보냄’ 표시가 갱신되지 않던 결함을 고쳤다. 독립 좁은 회귀 수용과 Cloud UI Node9/9·native UI9/9 통과를 확인했다. AI 응답은 규칙 mock이고 실제 AI 호출0이다. UI09는 Markdown 다운로드로 재내보내기를 검사했으며 별도 reload/클립보드 성공 검사는 아니다. UI08 클립보드 지연과 UI06 설정 표시는 명시적 대역이다.
 - **Claude / CONNECT001 rev1 — 좁은 검토 수용:** 두 결함을 수정한 합성 PoC의 독립 좁은 검토가 통과했다. 자체 session/turn 연결 우선·충돌/미연결의 수동 배치·같은 시각 보고의 단일 최신 후보를 확인했다. Windows Node24.19.0의 합성 회귀·hook runner 검사는 실제 CLI 발화·Codex stable 호환·다중 프로세스 append·앱 통합 검증과 구별한다. [설계 인계](research/idea020-connect001-handoff.md)를 이어받으며 실제 연결은 미검증이다.
 
-[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 IDEA022 결과·현재 인계 문서뿐이다. 원격 앱은 수용된 IDEA017 + UI001 rev1 기준을 유지한다. IDEA022·IDEA018·IDEA019 소스는 포함하지 않았고 CI·PR 설정·main·배포는 변경하지 않는다.
+[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 수용된 IDEA0227경로와 필수 상태 기록이다. UI001 rev1의8경로·기타 소스는 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. CI·PR 설정·main·배포는 변경하지 않는다.
 
 과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.

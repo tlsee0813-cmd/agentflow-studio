@@ -1,6 +1,6 @@
 export const SCHEMA = 'idea015.project.2' as const;
 export const LEGACY_SCHEMA = 'idea015.project.1' as const;
-export const API_SCHEMA = 'idea017.context.3' as const;
+export const API_SCHEMA = 'idea022.context.4' as const;
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
 export const FILE_LIMIT = 8_000_000;
@@ -54,9 +54,21 @@ export interface ContextBasis {
   id: string; text: string; status: Basis['status']; sourceId: string; revision: number;
   previousVersions: number; partial: boolean;
 }
+/** Read-only references to the supplied project's records; no intent/completion or durable-save claim. */
+export interface PlanFact {
+  basisId: string; sourceId: string; revision: number; status: Basis['status'];
+  versionIndex: number; isCurrent: boolean;
+  kind: 'input-retained' | 'basis-recorded' | 'version-only';
+  previousRevision: number | null;
+  /** Only actual text/status fields. null = comparison unavailable, [] = same values re-recorded. */
+  changedFields: ('text' | 'status')[] | null;
+}
+export interface AppFacts {
+  taskId: string; inputs: { sourceId: string; kind: SourceKind }[]; records: PlanFact[];
+}
 export interface ContextRequest {
   schemaVersion: typeof API_SCHEMA; ticket: Ticket; projectName: string;
-  sources: Source[]; bases: ContextBasis[];
+  sources: Source[]; bases: ContextBasis[]; appFacts: AppFacts;
   previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean; manualConditionFields: ('scope' | 'checks')[] }) | null;
 }
 export interface Envelope { mode: 'mock' | 'deepseek'; ticket: Ticket; advice: Advice }
