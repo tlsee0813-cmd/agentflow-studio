@@ -4,7 +4,7 @@ import { existsSync,readFileSync,writeFileSync,readdirSync,cpSync,mkdirSync } fr
 import { join } from 'node:path';
 import { readConfig } from '../server/config.mjs';
 import { mockInterview } from '../server/providers/mock.mjs';
-import { codeIdentity,fixture,fixtureHash,PURPOSE,RUN_ID,LIMITS,SLOTS,LIVE_DIR,MOCK_PRICES,MODEL,
+import { codeIdentity,fixture,fixtureHash,PURPOSE,RUN_ID,LIMITS,SLOTS,MOCK_PRICES,MODEL,
   sha,recentDate,rateDelay,reserveRequest,nanoCost,budgetAvailable,experimentConfig,failurePolicy,telemetryHalt,codeIdentity as realCode } from '../scripts/init009/policy.mjs';
 import { runCommand,parseCommand } from '../scripts/init009/run.mjs';
 import { newIdentity,openLedger,readLedger } from '../scripts/init009/ledger.mjs';
@@ -15,6 +15,7 @@ import { PURPOSE as OLD_PURPOSE,RUN_ID as OLD_RUN,reviewTemplate as oldReviewTem
   authorizeEnvironment as oldAuthorize,LIMITS as OLD_LIMITS } from '../scripts/init007b/policy.mjs';
 import { parseCommand as oldParse } from '../scripts/init007b/run.mjs';
 import { identity,code,temp,makeStore,clone,fixedAnswers,options,firsts,transportDouble,fakeClock,goodTelemetry } from './init009-helpers.mjs';
+import { isolatedInit009Cli } from './init009-cli-isolation.mjs';
 const never=async()=>assert.fail('transport must stay unopened');
 const safeDiagnostic={schemaVersion:'init006.diagnostic.1',stage:'result_contract',path:'result.proposals[].sourceIds[]',rule:'known_source'};
 function diskText(root){return readdirSync(root,{withFileTypes:true}).map(e=>e.isDirectory()?diskText(join(root,e.name)):readFileSync(join(root,e.name),'utf8')).join('\n');}
@@ -38,13 +39,41 @@ test('I9.01 fixed purpose/run/four slots; p01/p03 facts and choices are original
   assert.equal(readConfig({AI_MODE:'mock'}).maxTokens,2048);assert.equal(experimentConfig().maxTokens,4096);
   assert.equal(realCode().runtimeFingerprint,identity.runtimeFingerprint);
 });
-test('I9.02 plan and review-only are keyless, unknown live evidence does not open a ledger',async()=>{
-  const existed=existsSync(LIVE_DIR),env=new Proxy({}, {get(){assert.fail('plan environment read');}});
+test('I9.02 absent synthetic ledger: plan/review are keyless and missing evidence rejects before credential or transport',async()=>{
+  const isolated=await isolatedInit009Cli(),env=new Proxy({}, {get(){assert.fail('plan environment read');}});
+  assert.equal(existsSync(isolated.root),false);
   const plan=await runCommand('--plan',{env});assert.equal(plan.generationRequests,0);assert.equal(plan.currentPrices,null);
-  const r=await runCommand('--review-only',{env:{}});assert.equal(r.readiness,'blocked');assert.equal(r.credentialRead,false);
+  const r=await isolated.operate('--review-only',{});assert.equal(r.readiness,'blocked');assert.equal(r.blocker,'PLAN_REQUIRED');
+  assert.equal(r.credentialRead,false);assert.equal(r.generationRequests,0);
   const gated=new Proxy({ALLOW_PAID_AI:'true',AFS_INIT009_ASSIGNMENT:RUN_ID,AFS_INIT009_APPROVED_USD:'0.12',AFS_INIT009_CREDENTIAL:'network-secret'},
     {get:(target,key)=>{if(key==='DEEPSEEK_API_KEY')assert.fail('must not read key before readiness');return target[key];}});
-  await assert.rejects(runCommand('--firsts',{env:gated}));assert.equal(existsSync(LIVE_DIR),existed);
+  // Actual assignment authorization remains in use. Windows is never a live runner;
+  // assigned Linux Node22.16 reaches the missing-plan gate instead.
+  const expected=process.platform==='linux'&&process.version==='v22.16.0'?'PLAN_REQUIRED':'LIVE_NOT_AUTHORIZED';
+  await assert.rejects(isolated.operate('--firsts',gated),{message:expected});
+  assert.equal(existsSync(isolated.root),false);assert.deepEqual(readdirSync(isolated.control),[]);
+});
+
+test('I9.02 completed synthetic ledger: repeated firsts is unchanged generation-zero before any environment read',async()=>{
+  const isolated=await isolatedInit009Cli();
+  const liveIdentity=newIdentity(code,{mode:'live',reviewHash:sha('I9.02 SYNTHETIC REVIEW'),legacyHash:sha('I9.02 SYNTHETIC LEGACY')});
+  const store=openLedger(isolated.root,liveIdentity,{initialize:true});
+  const transport=transportDouble({respond:request=>({status:200,body:{mode:'deepseek',result:mockInterview(request)},telemetry:goodTelemetry()})});
+  try {
+    const plan=preparePhase('firsts',liveIdentity);
+    await executeStage(store,'firsts',options(plan,transport));
+    assert.equal(transport.calls.length,2);assert.equal(store.data.stages.firsts,'done');assert.equal(store.data.halt,null);
+  }finally{store.close();}
+  const before=diskText(isolated.root),snapshot=readLedger(isolated.root,liveIdentity);
+  const env=new Proxy({}, {get(_target,key){assert.fail(`completed stage must not read environment: ${String(key)}`);}});
+  for(let attempt=0;attempt<2;attempt++){
+    const result=await isolated.operate('--firsts',env);
+    assert.equal(result.dispatchesThisInvocation,0);assert.equal(result.totalDispatched,2);
+    assert.equal(result.ledgerHead,snapshot.head);assert.equal(result.stages.firsts,'done');assert.equal(result.halt,null);
+    assert.equal(diskText(isolated.root),before);
+  }
+  assert.equal(transport.calls.length,2);assert.equal(existsSync(join(isolated.root,'active.lock')),false);
+  assert.deepEqual(readdirSync(isolated.control),[]);
 });
 test('I9.03 CLI rejects arbitrary run/path/slots/key/transport/retry/reset; old gate rejects new identity without old CLI execution',()=>{
   for(const arg of ['--out=/tmp/other','--run=other','--slots=100','--retry','--reset','--key=x','--transport=native','--approve'])assert.throws(()=>parseCommand([arg]));

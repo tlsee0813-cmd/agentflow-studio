@@ -1,0 +1,70 @@
+export const SCHEMA = 'idea015.project.2' as const;
+export const LEGACY_SCHEMA = 'idea015.project.1' as const;
+export const API_SCHEMA = 'idea015.context.2' as const;
+export const TEXT_LIMIT = 12000;
+// One limit for the same compact JSON bytes: autosave, recovery file download and import.
+export const FILE_LIMIT = 8_000_000;
+// Element-count cap for every persisted/validated array, derived from FILE_LIMIT: an element written by
+// this app serialises to well over FILE_LIMIT / ITEM_LIMIT = 80 bytes, so the byte limit is what binds real
+// projects. The cap only bounds hand-crafted files; validation stays linear up to it.
+export const ITEM_LIMIT = 100_000;
+// AI request only. Local handoff, autosave and recovery files are not bound by it.
+export const REQUEST_BYTES = 131072;
+// Older, never-edited request records are sent to the AI as a marked excerpt plus source ID.
+export const EXCERPT_CHARS = 200;
+export type SourceKind = 'request' | 'report' | 'evidence' | 'test_answer' | 'answer' | 'manual_decision';
+export type Disposition = 'provided' | 'unknown' | 'deferred';
+export interface Source {
+  id: string; kind: SourceKind; text: string; at: string; taskId: string;
+  replyTo: string | null; disposition: Disposition;
+}
+export interface BasisVersion { text: string; status: Basis['status']; sourceId: string; revision: number }
+// No lock flag: nothing enforced one. AI output simply has no write path to bases.
+export interface Basis {
+  id: string; text: string; status: 'requested' | 'answered' | 'confirmed' | 'deferred';
+  sourceId: string; revision: number; history: BasisVersion[];
+}
+export interface Question { kind: 'fact' | 'choice'; text: string; why: string; options: { label: string; consequence: string }[] }
+// This type intentionally has NO source-kind, authority, status, completion or patch fields.
+export interface Advice {
+  understanding: string; scope: string; next: string; checks: string;
+  question: Question | null; relatedBasisIds: string[]; reviewBasisIds: string[];
+  suggestions: { text: string; why: string }[];
+}
+export interface WorkValues { understanding: string; scope: string; next: string; checks: string }
+/** Export metadata. The handoff text is derivable from stable IDs/revisions, so it is not copied again. */
+export interface ExportRecord {
+  at: string; method: 'clipboard' | 'download'; revision: number; chars: number; digest: string;
+  work: WorkValues | null; aiExcluded: boolean; legacyText: string | null;
+}
+export interface Task {
+  id: string; sourceIds: string[]; parentTaskId: string | null;
+  advice: Advice | null; adviceRevision: number | null; mode: 'mock' | 'deepseek' | null;
+  manual: { understanding: string | null; scope: string | null; next: string | null; checks: string | null };
+  suggestions: { text: string; why: string }[] | null; handoffs: ExportRecord[];
+}
+export interface Ticket { projectId: string; revision: number; requestId: string; taskId: string }
+export interface Project {
+  schemaVersion: typeof SCHEMA; id: string; revision: number; name: string;
+  sources: Source[]; bases: Basis[]; tasks: Task[]; currentTaskId: string | null;
+  draft: string; answerDraft: string; basisDraft: string; basisEdits: Record<string,string>; draftKind: 'request' | 'report' | 'evidence' | 'test_answer';
+  pending: Ticket | null; notice: string | null;
+}
+export interface ContextBasis {
+  id: string; text: string; status: Basis['status']; sourceId: string; revision: number;
+  previousVersions: number; partial: boolean;
+}
+export interface ContextRequest {
+  schemaVersion: typeof API_SCHEMA; ticket: Ticket; projectName: string;
+  sources: Source[]; bases: ContextBasis[];
+  previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean }) | null;
+}
+export interface Envelope { mode: 'mock' | 'deepseek'; ticket: Ticket; advice: Advice }
+export const SOURCE_LABEL: Record<SourceKind, string> = {
+  request: '사용자 요청 원문', report: '가져온 구현 보고 · 앱 미검증',
+  evidence: '사용자가 가져온 관찰·검사 자료 · 앱 미검증', test_answer: '합성 시험답변 · 실제 요구 아님',
+  answer: '사용자 답변', manual_decision: '사용자가 직접 기록·수정한 기준'
+};
+export const BASIS_LABEL: Record<Basis['status'], string> = {
+  requested: '요청 원문 · 해석 미확정', answered: '사용자 답변 원문', confirmed: '사용자 확정', deferred: '사용자 보류'
+};

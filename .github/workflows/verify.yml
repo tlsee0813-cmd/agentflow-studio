@@ -1,4 +1,4 @@
-name: Verify INIT009 baseline (no paid AI)
+name: Verify app and continuity (no paid AI)
 on:
   pull_request:
   workflow_dispatch:
@@ -59,6 +59,14 @@ jobs:
       - name: Build and domain / HTTP / simulated provider tests
         shell: bash
         run: npm test 2>&1 | tee test-results/node-tests.tap
+      - name: Continuity type, syntax and credential boundary checks
+        shell: bash
+        run: node continuity/scripts/check.mjs 2>&1 | tee test-results/continuity-check.log
+      - name: Build and test continuity with simulated providers
+        shell: bash
+        run: |
+          node continuity/scripts/build.mjs 2>&1 | tee test-results/continuity-build.log
+          node --test continuity/tests/*.test.mjs 2>&1 | tee test-results/continuity-node-tests.tap
       - name: Install pinned browser verification tools
         run: |
           python -m pip install -r tests/browser-requirements.txt
@@ -66,6 +74,11 @@ jobs:
       - name: Direct browser-to-server verification (AI is still mocked)
         shell: bash
         run: python tests/browser.py 2>&1 | tee test-results/browser-direct.log
+      - name: Direct continuity browser-to-server and storage verification (AI is mocked)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/continuity
+        shell: bash
+        run: python continuity/tests/browser.py 2>&1 | tee test-results/continuity-browser-direct.log
       - name: Upload only this run's results, not historic snapshot evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

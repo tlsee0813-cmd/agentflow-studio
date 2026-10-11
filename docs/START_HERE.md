@@ -1,50 +1,36 @@
 # 다른 세션을 위한 진입점
 
-2026-10-11 기준. 최신 작업은 `init-003/fix-review-regressions`와
-[Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)에서 읽는다.
-main은 최신 구현이 아니다. 먼저 해당 브랜치를 checkout하고 이 문서와 현재 상태를 읽는다.
+최신 구현은 `init-003/fix-review-regressions`의 [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)을 기준으로 한다. main은 최신 구현이 아니다. 현재 수용된 실행 대상은 **IDEA015 R3의 이어서 만들기**이며 기존 INIT009 앱과 별도 진입점을 사용한다.
 
-| 자료 | 위치 | 상태와 용도 |
+| 자료 | 위치 | 용도 |
 |---|---|---|
-| 실행 가능한 개발 앱 | `app/src/`, `app/server/`, `app/public/` | 수용된 INIT009 전체 소스. 로컬 개발용이며 운영 제품 완성 아님 |
-| 구현·검증 현재 상태 | [PROJECT_STATUS](PROJECT_STATUS.md) | 과거 검증과 실제 합성 호출의 관찰·한계 |
-| 평가 계약과 도구 | [INIT009 CONTRACT](../app/docs/init009/CONTRACT.md), `app/scripts/init009/`, `app/fixtures/init009/` | 고정 사례/원장/gate. 옛 live 실험을 재실행할 지시 아님 |
-| 탐색 클릭 시제품 | [IDEA012 README](../prototypes/idea012-rehearsal/README.md) | 모의 고객 체험. 제품 통합·실제 앱 판정·시장 검증 아님 |
-| 질적 연구의 판단 | [qualitative-findings](research/qualitative-findings.md) | 반복 불편과 반례에서 얻은 제품 가설 |
-| 재사용 후보 | [reuse-findings](research/reuse-findings.md) | 미설치·미통합 후보와 적용 전 확인 사항 |
-| IDEA013 준비물 | [실험 README](../experiments/idea013/README.md), [Cloud 인계](../experiments/idea013/CLOUD_HANDOFF.md) | 두 전략·합성 개발6사례·요청12개. 실제 API 비교 미실행 |
+| 현재 개발 흐름 | [continuity README](../app/continuity/README.md) | 요청·답변 → 작업문 → 돌아온 결과 → 다음 변경, 기준 편집과 저장·복구 |
+| 현재 상태·한계 | [PROJECT_STATUS](PROJECT_STATUS.md) | 수용된 소스, Cloud 검증, 미검증 품질과 다음 작업 |
+| 기존 INIT009 앱 | `app/src/`, `app/server/`, `app/public/` | `npm run demo`의 기존 화면과 계약·평가 도구 |
+| 과거 탐색·합성 비교 | [IDEA012](../prototypes/idea012-rehearsal/README.md), [IDEA013 결과](research/idea013-results.md), [IDEA014 결과](research/idea014-results.md) | 현재 UI의 실제 모델 품질과 구분하는 연구 기록 |
+| 제품·재사용 판단 | [IDEA015 제품 검토](research/idea015-product-review.md), [질적 조사](research/qualitative-findings.md), [재사용 후보](research/reuse-findings.md) | 판단 근거이며 고객 효용 입증 아님 |
 
-## 비용 없는 시작
+## 비용 없는 실행
 
-Node22.16.0/npm10.9.2를 사용한다. 다음 명령은 mock 앱을 실행한다.
+Node22.16.0 / npm10.9.2 / TypeScript5.8.3을 사용한다. 저장소 루트에서:
 
 ```sh
 cd app
 npm ci --ignore-scripts --no-audit --no-fund
-npm run check
-npm test
-npm run demo
+npm run build
+node continuity/scripts/build.mjs
+node continuity/server/index.mjs --mock
 ```
 
-`npm run demo` 후 `http://127.0.0.1:3000`을 연다. IDEA012는 별도로
-`prototypes/idea012-rehearsal/index.html`을 브라우저에서 연다.
-mock 성공은 실제 AI 내용 품질 성공이 아니다. 키나 기존 실험 원장을 새 세션에 복사하지 않는다.
-기존 live runner의 고정 ID, 잠금, 실패 기록을 재시도/reset/새 경로로 우회하지 않는다.
-기존 live gate는 당시 원본 소스와 Cloud 기록에 묶여 있다. `app/`의 원본 문서는 그 지문을
-유지하기 위한 당시 기록이고, 최신 상태는 루트 인계 문서에서 읽는다. gate 지문을 다시 써서 과거 실험을 열지 않는다.
+`http://127.0.0.1:3000`을 연다. 규칙 mock이며 API 키가 필요 없다. 기존 `npm run demo`는 INIT009 화면이다. 두 서버를 같은 포트에 동시에 시작하지 않는다. 작업문 복사·저장은 CLI 실행이 아니며, 사용자가 붙여넣은 결과 보고는 실제 구현 검증으로 바뀌지 않는다.
 
-## 다음 판단
+기준을 직접 수정하면 사용자 결정으로 반영한다. 수정 전 AI 문구는 현재 작업문에서 제외하고 수동 작성은 보존한다. 저장은 같은 주소·브라우저 프로필의 localStorage이며 JSON 복구 파일을 지원한다. 여러 탭의 자동 병합이나 공개 사용자 인증은 제공하지 않는다. 상세 지원 범위는 continuity README에서 읽는다.
 
-현재 개발 앱의 제안/확정/보류·출처·사용자 수동값 보호를 유지한다. p01의 중복/오래된 목표와
-AI 자유문장 품질은 남은 개선 입력이다. IDEA012의 핵심 가설은 사용자가 경험한 고객 결과를
-두 번째 실제 변경에서 다시 찾을 가치가 있는지다. 처음 한 번의 시연 호응이나 미리 심은
-불일치 발견만으로 제품 효용을 확정하지 않는다.
+## 검증과 다음 작업
 
-IDEA013은 이 커밋의 `experiments/idea013/`를 기존 Cloud에서 읽고 별도 독립4사례를 더해
-초기20요청을 비교하는 다음 단계다. 후속은 실제 첫 질문과 명시적 합성 답변에 한정한다.
-평가 메모를 모델 입력에 넣지 않는다. 실행 결과를 회수하면 합성 응답의 의미를 비교한다.
-불필요한 전체 재감사나 커뮤니티 출처 복구 작업을 반복하지 않는다. 새 세션은 현재 사용자
-지시와 자신의 권한 범위를 확인한다. main 병합과 운영 배포는 이번 작업 범위에 없다.
+2026-10-11 21:31 KST 통합 Cloud에서 클린 설치·기존/continuity 타입검사·빌드, 기존 Node279·continuity Node45·직접 HTTP 브라우저13이 실패/skip0으로 통과했다. 이는 mock/native HTTP/localStorage 실행 검증이다. persistent-profile 재방문 후 새 다운로드의 Chromium SIGSEGV는 미해결 제한이며 실제 DeepSeek 내용 품질·고객 효용·운영 준비는 미검증이다.
 
-공개 참조 자료에는 자체 소스·합성 fixture·짧은 판단 요약만 포함한다.
-원본 교재/사용자 첨부, 전체 채팅, 개인 실행 기록, 키, 설치 패키지, 빌드 및 live 출력은 저장소에 싣지 않는다.
+다음 IDEA016은 실제 continuity의 요청 조립·prompt·provider·상태·작업문 경로를 사용하는 6개 고객 흐름(2~3단계)의 baseline 품질시험 준비다. 제품 prompt를 먼저 바꾸지 않고 작은 사례·도구부터 준비한다. 오래된 미수정 요청의 200자 발췌가 후반 제약을 놓치는지, 입력 조립 문제와 모델 실패를 구분해 볼 예정이다. 아직 실행 결과가 아니다.
+
+기존 실험 원장·고정 ID·gate를 재시도/reset/새 경로로 우회하지 않는다. 키·private 자료·전체 채팅·원본 교재·live 출력·설치 패키지·dist는 공유하지 않는다. main 병합과 운영 배포는 이번 범위에 없다.
+
