@@ -191,13 +191,13 @@ test('I15-D27 68 report/export cycles and 54 long requests keep editing, export,
   for(const b of l.bases)assert.ok(handoff.includes(b.text));assert.deepEqual(parseProject(serializeProject(l)),l);
   for(let i=0;i<120;i++)l=request(LONG_REQUEST+'추가'+i,l);assert.ok(D.handoffText(l).length>0);assert.deepEqual(parseProject(serializeProject(l)),l);
 });
-test('I15-D28 important confirmed/answered/edited bases are never shortened in the AI context; only old untouched requests are',()=>{
+test('I15-D28 important confirmed/answered/edited bases are never shortened; within-budget old requests also stay full (IDEA017)',()=>{
   const long='중요 확정 제약: 개인정보는 외부로 보내지 않는다. '.repeat(30);
   let p=D.recordBasis(request(`유일문구. ${LONG_REQUEST}`),long);p=request('D1의 \'유일문구\'를 \'바뀐문구\'로 바꿔줘',p);for(let i=0;i<3;i++)p=request(`다음 작은 변경 ${i}`,p);
   const bases=start(p).request.bases,byId=Object.fromEntries(bases.map(b=>[b.id,b]));
   assert.equal(byId.D2.text,long);assert.equal(byId.D2.partial,false);assert.equal(byId.D1.partial,false);assert.equal(byId.D1.previousVersions,1);
-  p=request(LONG_REQUEST+'B',p);for(let i=0;i<2;i++)p=request(`또 다른 변경 ${i}`,p);const old=start(p).request.bases.find(b=>b.text.startsWith('회원 관리 화면 개선 요청')&&b.partial);
-  assert.ok(old);assert.ok(old.text.endsWith('…'));
+  p=request(LONG_REQUEST+'B',p);for(let i=0;i<2;i++)p=request(`또 다른 변경 ${i}`,p);const old=start(p).request.bases.find(b=>b.text.startsWith('회원 관리 화면 개선 요청'));
+  assert.ok(old);assert.equal(old.partial,false);assert.equal(old.text,LONG_REQUEST+'B');
 });
 test('I15-D29 a reply is recorded once even when re-organisation fails and is retried',()=>{
   let p=respond(request('결제가 실패하는데 원인을 모르겠어요.'));const id=p.currentTaskId;p=D.answer(p,id,'어제 오후부터 카드 결제만 실패');

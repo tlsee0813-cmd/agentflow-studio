@@ -1,6 +1,6 @@
 export const SCHEMA = 'idea015.project.2' as const;
 export const LEGACY_SCHEMA = 'idea015.project.1' as const;
-export const API_SCHEMA = 'idea015.context.2' as const;
+export const API_SCHEMA = 'idea017.context.3' as const;
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
 export const FILE_LIMIT = 8_000_000;
@@ -10,7 +10,7 @@ export const FILE_LIMIT = 8_000_000;
 export const ITEM_LIMIT = 100_000;
 // AI request only. Local handoff, autosave and recovery files are not bound by it.
 export const REQUEST_BYTES = 131072;
-// Older, never-edited request records are sent to the AI as a marked excerpt plus source ID.
+// Only when full context exceeds REQUEST_BYTES: older, never-edited requests may use marked excerpts.
 export const EXCERPT_CHARS = 200;
 export type SourceKind = 'request' | 'report' | 'evidence' | 'test_answer' | 'answer' | 'manual_decision';
 export type Disposition = 'provided' | 'unknown' | 'deferred';
@@ -57,7 +57,7 @@ export interface ContextBasis {
 export interface ContextRequest {
   schemaVersion: typeof API_SCHEMA; ticket: Ticket; projectName: string;
   sources: Source[]; bases: ContextBasis[];
-  previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean }) | null;
+  previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean; manualConditionFields: ('scope' | 'checks')[] }) | null;
 }
 export interface Envelope { mode: 'mock' | 'deepseek'; ticket: Ticket; advice: Advice }
 export const SOURCE_LABEL: Record<SourceKind, string> = {

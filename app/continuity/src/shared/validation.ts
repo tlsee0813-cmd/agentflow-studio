@@ -55,10 +55,13 @@ export function validateRequest(v: unknown): ContextRequest {
   obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
   list(v.sources); list(v.bases); for (const s of v.sources) source(s); for (const b of v.bases) contextBasis(b);
   ensure(v.sources.length > 0); unique(v.sources as Source[]); unique(v.bases as {id:string}[]);
-  // Bases carry current values only; earlier versions and full old request texts stay in the project.
+  // Bases carry current values; prior versions stay local. Old-request excerpts are budget-dependent.
   if (v.previousWork !== null) {
-    obj(v.previousWork,['taskId','understanding','scope','next','checks','aiTextExcluded']); id(v.previousWork.taskId); ensure(typeof v.previousWork.aiTextExcluded === 'boolean');
+    obj(v.previousWork,['taskId','understanding','scope','next','checks','aiTextExcluded','manualConditionFields']); id(v.previousWork.taskId); ensure(typeof v.previousWork.aiTextExcluded === 'boolean');
     for (const k of ['understanding','scope','next','checks']) text(v.previousWork[k],6000,true);
+    list(v.previousWork.manualConditionFields,2);
+    ensure(new Set(v.previousWork.manualConditionFields).size===v.previousWork.manualConditionFields.length);
+    for(const k of v.previousWork.manualConditionFields) ensure(k==='scope'||k==='checks');
   }
   return structuredClone(v) as unknown as ContextRequest;
 }

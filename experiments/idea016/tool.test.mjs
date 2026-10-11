@@ -125,13 +125,13 @@ test('explicit 30→60 change preserves ID/history, excludes old AI and retains 
   assert.equal(request.previousWork.checks, getCase('C05').stages[0].manualAfter.checks);
 });
 
-test('old requested tail is lost in R2 transport excerpt but preserved locally/handoff; no quality claim', () => {
+test('IDEA017 within-budget old requested tail reaches provider verbatim and stays local/handoff; no quality claim', () => {
   const p = state('C06').project, b = p.bases[0];
   assert.equal(b.status, 'requested'); assert.equal(b.history.length, 0);
   const request = readJSON(turn('C06', 3, 'request-app.json')), basis = request.bases.find(x => x.id === b.id);
-  assert.equal(basis.partial, true); assert.equal(basis.text, `${Array.from(b.text).slice(0, 200).join('')} …`);
+  assert.equal(basis.partial, false); assert.equal(basis.text, b.text);
   const trace = readJSON(turn('C06', 3, 'context-trace.json')), probe = trace.probes[0];
-  assert.deepEqual(probe.localBasisIds, ['D1']); assert.equal(probe.literalInProviderMessages, false);
+  assert.deepEqual(probe.localBasisIds, ['D1']); assert.equal(probe.literalInProviderMessages, true);
   assert.equal(probe.literalInHandoff, true); assert.equal(trace.meaningReview, 'NOT_PERFORMED');
   assert.ok(read(turn('C06', 1, 'request-provider.raw.json')).includes(probe.literal));
 });
