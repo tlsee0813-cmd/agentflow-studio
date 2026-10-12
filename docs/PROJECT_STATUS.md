@@ -2,6 +2,12 @@
 
 최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능을 통합했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
 
+## 최신 설계 방향
+
+목적은 고객이 작업을 이어갈 때 의도·기준·결정·변경을 잃고 다시 설명하는 손실을 줄이는 것이다. 이전 서비스/기능 구상은 필수요구가 아니다. 대시보드·노드그래프·실시간Codex/Claude연결·로그감지·모델/effort자동조절은 목적에 도움이 되는 가설로 평가하고 삭제·결합·제품형태 변경도 검토한다. 기존 문서와 충돌하면 이 최신 방향을 우선하며 기존 구현·자료를 자동 대체하지 않는다.
+
+규칙을 하나씩 더 붙이는 패치에 매몰되지 않고 실제GitHub OSS 핵심코드·테스트·실사용 이슈와 분야 밖 메커니즘을 조사해 재사용/차별화 판단을 구현 결정에 연결한다. 단일 호출·가격 최소화·기존 실험 계약 자체는 제품 목표가 아니다. 최소한의 완결된 고객 흐름과 관측할 성공조건으로 대안을 비교하고, 유지할 것/버릴 것/나중 검증할 것을 구분한다.
+
 ## 현재 구현
 
 [app/continuity](../app/continuity/README.md)는 입력 → 필요한 질문 → 편집 가능한 작업문 → 돌아온 결과 → 다음 변경을 연결한다. localStorage 지속 저장·JSON 백업/복구, 기준 변경 뒤 낡은 AI 제외·수동값 보존, v1 이력, AI128KiB와 로컬 복구8MB 한도는 유지한다.
@@ -52,9 +58,11 @@ C02의 선택지 축·미정 기한·실제 답변 출처 표현, C05의 이미 
 - **QUALITY026_IMPL — 실호출2회 후 관계검증 실패로 중단:** [설계·검증 이력](quality026-design.md)의 독립선택13·Cloud 신규25/기존31/연결7·mock20+8 통과와 실제 실패를 구분한다. F01 DIRECT025-A1수용·PLAN026-A1실패(provider200/stop, 앱502·PLAN_LINK_INVALID), 최초18미실행·후속8미배정·retry0이다. 정확 진단5CONTENT를 회수·바이트 확인했다. 실제wire에 이미named→work.constraintIds 연결 지시가 있었지만2개preserve가work에서 누락돼 구조 계약 위반을 관측했다. 계약 최적성·전체 방식 실패는 미확정이고 Sol최종raw검토는 대기다. 진단은기존raw 회수만/noAI, 입력/bodyhash·상태·승인소스와 기존5395파일 불변·종료paid=false다. 후보는 미승격이고 acceptedIDEA022 + UI001 rev1을 유지한다.
 - **Pro / UI001 rev1 — 수용·반영:** 초기 UI06 검사는 정상 compose 클릭 후 입력하도록 수정했고 제안 수정 뒤 ‘내보냄’ 표시가 갱신되지 않던 결함을 고쳤다. 독립 좁은 회귀 수용과 Cloud UI Node9/9·native UI9/9 통과를 확인했다. AI 응답은 규칙 mock이고 실제 AI 호출0이다. UI09는 Markdown 다운로드로 재내보내기를 검사했으며 별도 reload/클립보드 성공 검사는 아니다. UI08 클립보드 지연과 UI06 설정 표시는 명시적 대역이다.
 - **Claude / CONNECT001 rev1 — 좁은 검토 수용:** 두 결함을 수정한 합성 PoC의 독립 좁은 검토가 통과했다. 자체 session/turn 연결 우선·충돌/미연결의 수동 배치·같은 시각 보고의 단일 최신 후보를 확인했다. Windows Node24.19.0의 합성 회귀·hook runner 검사는 실제 CLI 발화·Codex stable 호환·다중 프로세스 append·앱 통합 검증과 구별한다. [설계 인계](research/idea020-connect001-handoff.md)를 이어받으며 실제 연결은 미검증이다.
-- **QUALITY027 — 실험 준비 수용·최초20회 지시 전달:** Sol좁은리뷰 선택9PASS·Cloud클린ci/checkbuild·신규25/HTTP11/연결7·mock20+8/resume0을 확인했다. retained는최종handoff에도보존되지만 의미오분류는미검증이다. source/runtime/identity/wrapper·기존7051파일 불변, 실제026failedrun/frozen 재사용은0송신거절했다. helper문법오류1건만수정·최초로그보존, deadline60040ms/abort313ms는026증거재사용이다. [구현·검증 인계](quality026-design.md)에무상검증과새027최초20실호출지시를구분하며 실제호출수/결과는미확인이다. F01은seen-regression,후속8은실제F02질문검토후별도다. 실패026은재개하지않고제품022+UI001rev1 유지·027미승격이다.
+- **QUALITY027 — 실호출2회에서 중단·미승격:** 준비 검증 뒤2송신/1수용/1실패, PLAN_SCOPE_CONFLICT·최초18미실행·retry0·paid=false다. Cloud는goal의context참조와validator의deliver요구를 보고했고 Sol예비검토는prompt≥1deliver/validator전부deliver의 차이를 확인했다. 실제실패raw가아직없어goal의전체참조/원인은미확정이다. 실패run은보존·재개없음, [설계·검증 이력](quality026-design.md)을 유지한다.
+- **Pro / ARCH028-A — 실제OSS 조사·구조 재검토 중:** 새세션에서핵심코드/함수/검사/이슈까지읽어구조대안을비교하며재사용·삭제·교체할단위를판단한다. 이름/스타/README나027한줄패치로끝내지않는다.
+- **Claude / ARCH028-B — 독립 목적 중심 설계 중:** 같은027후보와최신사용자방향을받아분야밖메커니즘·AI/코드/사용자의새경계·최소고객흐름을독립설계한다. 두갈래 모두제품편집/원격/키/실API없음, 최종추천·새구현은아직없다.
 
 
-[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 QUALITY027 무상 검증 완료·실험 준비 수용·최초20회 결과 대기 상태 문서뿐이다. 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. CI·PR 설정·main·배포는 변경하지 않는다.
+[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 QUALITY027 중단·최신 사용자 설계 방향·ARCH028 독립 조사 진행 상태 문서뿐이다. 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. CI·PR 설정·main·배포는 변경하지 않는다.
 
 과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.
