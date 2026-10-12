@@ -40,7 +40,11 @@ Cloud Node22.16.0은 클린 설치·부모/continuity check/build, 신규25/25·
 
 Luna 정적 패키지 확인은 manifest335/source210과026 대비199불변·2수정(plan-codec/generation)·9신규lab/검사·삭제0을 통과했다고 보고했다. 작성자는 runtime16동일, 신규25(10+8+7)·관련HTTP11·check/build 통과를 보고했으며 npm ci 없이 설치된 동일 컴파일러를 사용했다. 이 수치는 독립 런타임·Cloud 통과나 실제 계약 준수율·품질 개선 증거가 아니다. ZIP SHA256은 `f95dc82b67f7f8e2cc41b76a7d47fca9cb6fc3d6a345ddb2c933916e56eb9e67`, source manifest는 `1864b9b21e199a9a65bfd2f12d324bb62784a0f3a45cf3601300263b3189febb`다.
 
-Sol 좁은 코드리뷰가 진행 중이고 Cloud에 새027 클린 설치·신규 검사·기존 보호 mock 접착20+최대8만 검증하도록 전달했다. **결과는 아직 미확인이며 실제AI·live freeze·키 접근은 이번 단계에 없다.** 실패026 run·claim·원문은 그대로 보존하고 재개하지 않는다. 후보027은 미수용·미승격이며 공유 제품IDEA022 + UI001 rev1을 유지한다.
+Sol의 좁은 독립 리뷰는 선택9검사 통과·실호출 차단 결함 없음으로 완료됐다. retained가 scope/next/checks와최종 handoff에 남는 것을 확인했지만 관련 제약을 retained로 오분류하는 의미 오류까지 검증한 것은 아니다.
+
+Cloud Node22.16.0/npm10.9.2/TS5.8.3에서 클린ci·부모/continuity check/build, 신규25·기존HTTP11·연결7을 통과했다. mock20+8·완료resume 추가0,child 수신body/기록hash와 appliesTo 투영·보호/observer 오류 차단을 확인했다. 원래026 failed frozen/run은027에서 **0송신으로 거절**했고source210/runtime16/identity·wrapper·기존7051파일은 불변이다. 초기 외부 helper의 숫자 속성 표기 문법 오류1건은 helper만 수정하고 최초 실패 로그를 보존했다. 제품·기존 검사·wrapper는 수정하지 않았다. 간격은 모의 시계이며 불변wrapper의026 deadline60040ms·abort313ms 증거를 재사용하고 다시 실행하지 않았다. 이 무상 단계는 실제AI/키 접근0·paid=false·live frozen/run 미생성이었다.
+
+총괄은 **실험 준비만 수용**하고 Cloud에 새027의5개 개발상황 × DIRECT025/PLAN027 × OFF/ON-high 최초20회 실제 실행 지시를 전달했다. **실제 호출 수·수용/실패 결과는 아직 미확인**이다. F01은 이미 본 실패의 회귀이며 미공개 검증으로 부르지 않는다. 정상 완료 후F02 실제 질문을 회수·검토하기 전에는 후속최대8을 동결/호출하지 않는다. 실패026 run·claim·원문은 재개하지 않는다. 후보027은제품 미승격, 의미 품질 미평가이며 공유 제품IDEA022 + UI001 rev1은 유지한다.
 
 입력·body hash·상태 보존과 승인 source201/runtime16/보호 해시, 기존5395파일 불변을 확인했다. 실패 원장·claim·원문은 보존하고 종료paid=false를 복원했다. Cloud의 기존 raw 진단 회수를 완료했고 추가 AI 호출은 없다. 무상mock 검증 통과 이력은 유지하되 실호출 실패를 통과로 바꾸지 않는다. 모드/생성 방식의 우열·의미 품질·제품 승격은 판단하지 않는다.
 
