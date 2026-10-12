@@ -1,6 +1,6 @@
 # 다른 세션을 위한 진입점
 
-최신 구현은 `init-003/fix-review-regressions`의 [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)을 기준으로 한다. main은 최신 구현이 아니다. 현재 수용된 실행 대상은 **IDEA017·UI001 rev1·IDEA022에 RETURN032 결과 연결 안내와 FRESH033 rev1 질문 적용 보호를 반영한 이어서 만들기**이며 기존 INIT009 앱과 별도 진입점을 사용한다.
+최신 구현은 `init-003/fix-review-regressions`의 [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)을 기준으로 한다. main은 최신 구현이 아니다. 현재 수용된 실행 대상은 **IDEA017·UI001 rev1·IDEA022에 RETURN032/FRESH033 rev1·SELECT035·INTENT037 rev1을 반영한 이어서 만들기**이며 기존 INIT009 앱과 별도 진입점을 사용한다.
 
 | 자료 | 위치 | 용도 |
 |---|---|---|
@@ -30,6 +30,8 @@ node continuity/server/index.mjs --mock
 수용된 RETURN032/FRESH033 rev1은 결과 입력 전에 실제 연결 예정 대상과 기준 기록을 안내한다. 낡거나 시점 불명인 질문은 참고 기록으로 보존하며 현재 답변 적용을 막는다. imported 비단조 이력이 새 응답 시점 안으로 들어오면 이력을 지우지 않고 재정리 후 답변할 수 있다. 정상 질문·중복 보호·미제출 초안 예외, 독립 F1 해결 판정 및 Cloud Node39/native1 검증·CI 확인 범위는 [PROJECT_STATUS](PROJECT_STATUS.md)의 제품 반영 항목을 따른다. 실제 AI 품질·고객 효용은 미검증이며 PILOT2는 미채택이다.
 
 수용된 SELECT035는 결과 제출 전에 내보낸 작업을 선택한다. 여러 대상이 있으면 선택하기 전 결과를 보내지 않고, 미제출 입력 편집 중에는 선택을 유지한다. 본문 전체 교체를 초안 동일성으로 추측하지 않는다. 선택은 새로고침/가져오기/종류 전환/성공 제출 뒤 초기화하며 1개/없음과 무인자 domain의 기존 동작은 유지한다. Cloud Node58/native 선택3/UI001 11, 독립 domain 탐침·UI 정적 검토와 별도 합성 CI fixture native3 검증은 [PROJECT_STATUS](PROJECT_STATUS.md)의 반영 항목에서 구분한다. 기존 실제 자료는 공개 fixture에 포함하지 않으며 새 커밋 CI 결과는 Actions에서 확인한다.
+
+수용된 INTENT037 rev1은 현재 요청의 계획/조사/수정 수준을 보존한다. 수정 요청을 조사에서 끝내지 않고 최소수정·관련 검증까지 인계하며, 보류된 선택을 대신 정하지 않고 독립 범위를 유지한다. 파일 변경 금지를 필요한 읽기·관찰·재현 금지로 확대하지 않는다. 변경은 continuity/server/prompt.mjs 한 파일뿐이다. 직전 후보의 실제12건과 rev1 추가3건의 원문·검증 범위·ZIP 식별자는 [PROJECT_STATUS](PROJECT_STATUS.md)에 구분했으며 schema/buildBody/validator/provider/UI·기존 CI 게이트는 그대로다. 좁은 개선 수용이며 일반 AI 품질·고객 효용 보장은 아니다.
 
 ## 검증과 다음 작업
 

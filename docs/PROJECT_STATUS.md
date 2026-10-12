@@ -1,6 +1,6 @@
-# AgentFlow Studio 현재 상태 — IDEA022 + UI001 rev1 · RETURN032/FRESH033 rev1
+# AgentFlow Studio 현재 상태 — IDEA022 + UI001 rev1 · RETURN032/FRESH033 rev1 · SELECT035 · INTENT037 rev1
 
-최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능, RETURN032 결과 연결 안내·FRESH033 rev1 질문 적용 보호를 반영했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
+최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능, RETURN032 결과 연결 안내·FRESH033 rev1 질문 적용 보호·SELECT035 결과 대상 선택·INTENT037 rev1 행동 범위 prompt를 반영했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
 
 ## 최신 설계 방향
 
@@ -29,6 +29,16 @@ Claude 독립 검토는 필수 결함 없음으로 수용됐다. Node22.22 domai
 공개 CI에는 continuity/tests/fixtures/select035의 최소 합성 4파일만 추가했다. 공개 domain API로 두 독립 작업·내보내기·미제출 A 보고를 구성하고 고정 A/B 참조와 합성 시각을 보존했다. 보고문은 가상의 변경 가정이며 실제 실행 성적이나 총괄 원문을 포함하지 않는다. 이 fixture로 native 선택3/3을 별도로 실행해 fail/skip0을 확인했으며 원래 USE034 자료 재생 증거는 그대로 보존했다. 검사 출처를 구분하고 Python 읽기/쓰기에 UTF-8을 명시했다. 제품 3파일과 검사 기대값은 변경하지 않았다.
 
 CI Node wildcard는 신규 Node 검사를 포함한다. verify.yml에 합성 fixture의 native 선택 검사를 추가하고 app cwd 기준 materials/결과 경로, Bash pipefail 및 기존 app/test-results artifact 수집을 유지한다. 이 반영 커밋의 CI는 실행 후 해당 Actions 기록으로 확인하며 문서에서 성공을 선행 주장하지 않는다. 실AI 품질·고객 효용·병렬 결과 연결 일반 보장은 미검증이다. mock/paid=false, 실API·키 접근·mainmerge·배포0이며 RETURN032/FRESH033 수용 기록과 기존 실험은 보존한다.
+
+## INTENT037 rev1 — 좁은 prompt 개선 수용·반영
+
+총괄이 실제 입력·응답 원문을 읽고 수용했다. `app/continuity/server/prompt.mjs`만 변경해 계획/조사/수정의 행동 수준을 구분하고, 명시적 수정 요청은 필요한 조사→최소수정→관련 검증까지 인계하도록 한다. 보류는 해당 선택에 의존하는 행동에만 적용하고 독립 범위는 유지한다. 파일 변경 금지를 필요한 읽기·관찰·재현의 일괄 금지로 확대하지 않는다. schema·buildBody·validator·provider·domain·UI·설정·CI 게이트는 그대로다.
+
+직전 후보 비교는 고정 입력6개×기존/후보 각1회인 실제12건이며 rev1 증거로 합산하지 않는다. 01/05에서 기존은 조사 종료, 후보는 최소수정·검증까지 인계했다. 02 C3는 공통 사실 확인·후보 제안과 계획 문맥을 함께 읽으면 허용 가능하며 ‘화면 초안’만 떼어 착수 결함으로 단정하지 않는다. 04/06도 허용 가능했다. 남은 03의 ‘파일 비수정→코드 실행 금지’ 과잉 제한만 한 문장 교체로 보완했다.
+
+rev1 새 프로세스의 03→05→01 추가3건은 제품 HTTP200·앱수용·전체응답 회수, 실패/불명/재시도/추가답변0이다. 03은 “실제 파일 수정은 하지 않는다”를 유지하며 재현 입력·기대/실제 출력과 수정 위치 후보를 조사 산출물로 요구했다. 05는 “최소 수정한 뒤 ... 검증한다”, 01은 “미납 필터 상태만 초기화하도록 최소 수정 ... 이름 검색어는 유지”와 관련 확인까지 연결했다. 이는 실제 개발/검증을 실행한 결과가 아니며, 단일 표본들로 일반 품질·고객 효용·prompt의 인과 효과를 입증하지 않는다.
+
+Node22.16 문법·동결 입력 검증과 system 외 buildBody 동일성, 실제 송신 body의 system 외 동일성을 확인했다. 동일 설정 deepseek-flash/2048/15초/rate6/cap20, 실제순차1·기존 보호 fetch 명시주입을 사용했고 반환 provider model/usage/finish는 제품 API 미관측이다. 최종 prompt SHA256 `32819624fbb9c2a437f3b07386808077580277fdc1c07821ec503a82403a9939`. 직전12건 증거 ZIP SHA256 `2300e37a8e9845ac2bb4ddb1d3f4b189d508b0d00f542adf26f4a28973f1fa48`, rev1 추가3건 ZIP SHA256 `02646d46490fa3a43bf52e4cda00ea253e421814103da69a0136fc3b068048c3`는 Cloud에 보존하며 저장소에 원시 응답/전체 증거를 게시하지 않는다. 이번 반영에서 추가 실AI0, 종료 paid=false다. 새 커밋 CI 결과는 Actions에서 별도 확인하며 미리 성공으로 기록하지 않는다.
 
 ## 현재 구현
 
