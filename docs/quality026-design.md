@@ -62,9 +62,11 @@ Cloud의 **rev1 좁은 R1/R2 검증도 통과**했다. review-repro와 선택Nod
 
 실제 시작6회는 **DIRECT2수용 + CARD 생성4회 INVALID_DATA**였다. CARD는 사례마다G2/R0에서 종료돼 의미 검토를 한 번도 실행하지 않았다. 네 생성 모두 flat 계약 대신 `question` root 래퍼를 반환했고 최초 실패 raw는 보존한다. 소스prompt가PROPOSAL_SPEC 전체 wrapper를 ‘정확한 모양’으로 직렬화하는 계약 불일치를 확인해 유력 원인으로 판단했지만 실제wire bytes는 아직 회수하지 않아 유일 원인으로 확정하지 않는다. G2의 일반적인 재생성 피드백으로 같은 구조가 반복됐다.
 
-원문상 dev01은 계획 작성에 불필요한 선질문이 산출물을 막았고 dev02의 중복 정책 질문은 타당하나 독립적인 작은 작업까지 전부 막을 이유는 아니다. DIRECT2수용만으로 전체 품질·우월성이나 CARD 구조 전체의 실패를 결론내리지 않는다. Pro에rev3의flat 생성 지시·안전한 구조 오류 피드백·현재 작은 요청을 막는 미정인지 구분하는 질문 규칙만 좁게 수정하도록 배정 중이다. 자동unwrap·validator 완화·사례 답 하드코딩 없이baseline184와 기존 한도를 보존한다. Cloud는 수정 대기이며 실패run을 재시도하지 않는다.
+원문상 dev01은 계획 작성에 불필요한 선질문이 산출물을 막았고 dev02의 중복 정책 질문은 타당하나 독립적인 작은 작업까지 전부 막을 이유는 아니다. DIRECT2수용만으로 전체 품질·우월성이나 CARD 구조 전체의 실패를 결론내리지 않는다. rev3는 이 세 항목의 좁은 수정 후보로 회수했으며 아래에 제출·검증 대기를 구분한다. 자동unwrap·validator 완화·사례 답 하드코딩 없이baseline184와 기존 한도를 보존하고 실패run을 재시도하지 않는다.
 
 최초0호출 preflight 실패는 총괄이 이전8192토큰/10167ms 설정을 적용한 오류였다. 현재4096토큰·60초·rate6·cap20·동시성1로 정정했고 사례 간 시작 간격60.111초, finish stop6건·총14417토큰이다. 요청 모델은deepseek-flash지만 response-model·정확 HTTP상태는 provider가 저장하지 않아 복원해 주장하지 않는다. Cloud의 기존 보호 환경을 사용했고 실제 키 노출0·종료paid=false다. source223·entry·wrapper·기존19425파일 불변을 확인했으며 제품IDEA022 + UI001 rev1·026/027 실패 기록은 유지한다.
+
+**FLOW029rev3 제출·좁은 독립 리뷰 완료, Cloud 실행 중.** ZIP SHA256은 `b34320cd469bc03bc24d0c5cf50c1edbc90e72f3380d6f0a0448849cc729f55b`, source226 manifest는 `9b19a7feb0d794d382101ac08f6c0b636dcbb4337506c7423df546bcc3e6a24a`다. Luna의 정적 패키지 검사는rev2 대비4수정·3추가·삭제0, accepted184·lock 불변을 확인했다. 후보는flat prompt/schema 일치·안전하고 구체적인G2 형식 피드백·현재 요청한 작은 단위에 필요한 question/work 규칙을 보완한다. 작성자는좁은 mock57통과·strict 경계1070대조 차이0을 보고했지만 새실AI/native/독립검사 성공이 아니다. Sol 좁은 리뷰는 blocker 없이 선택6검사 통과로 완료했고 strict/raw/반향 보호·호출상한 보존을 확인했다. 의미 품질은 미측정이다. Cloud에19:50KST 변경분 검사 후 새dev01/dev02 실제 비교를 송신해 실행 중이며 결과는 아직 없다. 기존 보호 주입과4096토큰/60초·rate6·cap20·동시성1, 최대10시작·사례 간60초 이상을 유지한다. 새 정적entry는import 대상만 바꾸고 기존wrapper를 보존한다. 실제 비교 결과는 대기이며 기존rev2 실제6응답·CARD4실패는 불변 보존한다. 제품 승격·기본 설정 변경은 없다.
 
 별도 Claude의 **FLOW029-CASES**는4개 가상 고객 에피소드(public2/holdout2)를 완료·회수했다. INPUTS와ORACLE을 분리하고 구현자에게공개2개만 제공한다. 인간 사용성 실험이나미공개 모델 검증 완료라고 주장하지 않는다. Cloud 원본/rev1 무상 검증과 rev2 실제 개발 비교를 위에 구분했다. public/holdout4에피소드의 실제 평가 완료를 뜻하지 않으며 제품IDEA022 + UI001 rev1 및026/027 실패 기록은 유지한다.
 
