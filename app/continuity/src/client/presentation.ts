@@ -1,6 +1,6 @@
 /** UI-only projections. No stored fields, state transitions, provider guesses or execution status. */
 import type { Project, Task, Source, Basis } from '../shared/types.js';
-import { currentWork, questionAnswered, handoffText } from '../shared/domain.js';
+import { currentWork, questionApplicability, handoffText, returnTargetId } from '../shared/domain.js';
 import { digest } from '../shared/validation.js';
 
 export const sourceName: Record<Source['kind'], string> = {
@@ -26,6 +26,36 @@ export function dateLabel(at: string): string {
 export function basisDraftChanged(p: Project, b: Basis): boolean {
   return p.basisEdits[b.id] !== undefined && p.basisEdits[b.id] !== b.text;
 }
+export interface ReturnPreview {
+  kind: 'hidden' | 'no-target' | 'no-export' | 'comparable' | 'unknown';
+  targetTaskId: string | null; targetTitle: string | null;
+  exportedAt: string | null; exportRevision: number | null;
+  recordedBases: readonly Basis[] | null;
+}
+/** Recorded project bases since this task's export; no relevance, semantic or result verdict. */
+export function returnPreview(p: Project): ReturnPreview {
+  const empty:ReturnPreview={kind:'hidden',targetTaskId:null,targetTitle:null,exportedAt:null,exportRevision:null,recordedBases:null};
+  if(p.draftKind!=='report' && p.draftKind!=='evidence') return empty;
+  const targetId=returnTargetId(p),target=p.tasks.find(t=>t.id===targetId);
+  if(!target) return {...empty,kind:'no-target'};
+  const preview:ReturnPreview={...empty,kind:'no-export',targetTaskId:target.id,targetTitle:taskTitle(p,target)};
+  const last=target.handoffs.at(-1);
+  if(!last) return preview;
+  preview.exportedAt=last.at; preview.exportRevision=last.revision;
+  // Imported records may be valid storage data but lack a reliable comparison timeline.
+  if(last.legacyText!==null || !last.work || !Number.isSafeInteger(last.revision) || last.revision<0 || last.revision>p.revision)
+    return {...preview,kind:'unknown'};
+  for(const b of p.bases) {
+    let previous=-1;
+    for(let i=0;i<=b.history.length;i++) {
+      const version=i<b.history.length ? b.history[i]! : b;
+      if(!Number.isSafeInteger(version.revision) || version.revision<=previous || version.revision>p.revision)
+        return {...preview,kind:'unknown'};
+      previous=version.revision;
+    }
+  }
+  return {...preview,kind:'comparable',recordedBases:p.bases.filter(b=>b.revision>last.revision)};
+}
 /** An export record is evidence of copying/saving, never of a running/completed task. */
 export function exportNeedsRefresh(p: Project, t: Task): boolean {
   const last = t.handoffs.at(-1);
@@ -44,9 +74,9 @@ export interface Stage {
 export function stageOf(p: Project, t: Task | null): Stage {
   if (!t) return { kind: 'empty', title: '아이디어에서, 첫 작업으로.', label: '시작하기', next: '만들고 싶은 것 또는 바꾸고 싶은 것을 적어 주세요.', step: 1 };
   if (p.pending?.taskId === t.id) return { kind: 'pending', title: '작업 문맥을 정리하고 있어요.', label: '정리 응답 대기', next: '요청 원문은 보관했습니다. 개발 작업을 실행하는 단계는 아닙니다.', step: 1 };
-  if (t.advice?.question && !questionAnswered(p, t)) return { kind: 'question', title: '이 한 가지만 알려주세요.', label: '답변이 필요해요', next: '답에 따라 달라지는 부분만 확인하고, 작업문으로 이어갑니다.', step: 1 };
+  if (questionApplicability(p, t)==='active') return { kind: 'question', title: '이 한 가지만 알려주세요.', label: '답변이 필요해요', next: '답에 따라 달라지는 부분만 확인하고, 작업문으로 이어갑니다.', step: 1 };
   const w = currentWork(p, t);
-  if (w.aiStale) return { kind: 'stale', title: '바뀐 기준으로 이어가세요.', label: '기준 변경됨', next: '이전 AI 문구는 제외했습니다. 직접 다듬거나 이 입력만 다시 정리할 수 있어요.', step: 2 };
+  if (w.aiStale) return { kind: 'stale', title: '현재 기준으로 이어가세요.', label: w.changed==='unknown'?'기준 시점 확인 불가':'기준 변경됨', next: '이전 AI 문구는 제외했습니다. 직접 다듬거나 이 입력만 다시 정리할 수 있어요.', step: 2 };
   if (!t.advice && !Object.values(t.manual).some(v => v?.trim())) return { kind: 'saved', title: '요청 원문은 남아 있어요.', label: '원문 보관됨', next: '다시 정리하거나, 아래에서 작업문을 직접 작성하세요.', step: 1 };
   if (t.handoffs.length && !exportNeedsRefresh(p, t)) return { kind: 'exported', title: '돌아온 결과에서 이어가세요.', label: '작업문 내보냄', next: '사용 중인 도구에 작업문을 전달한 뒤, 받은 결과를 여기에 붙여넣으세요.', step: 3 };
   const returned = ['report', 'evidence'].includes(sourceOf(p, t)?.kind ?? '');

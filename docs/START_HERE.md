@@ -1,6 +1,6 @@
 # 다른 세션을 위한 진입점
 
-최신 구현은 `init-003/fix-review-regressions`의 [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)을 기준으로 한다. main은 최신 구현이 아니다. 현재 수용된 실행 대상은 **IDEA017·UI001 rev1에 IDEA022 기록 근거 기능을 통합한 이어서 만들기**이며 기존 INIT009 앱과 별도 진입점을 사용한다.
+최신 구현은 `init-003/fix-review-regressions`의 [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)을 기준으로 한다. main은 최신 구현이 아니다. 현재 수용된 실행 대상은 **IDEA017·UI001 rev1·IDEA022에 RETURN032 결과 연결 안내와 FRESH033 rev1 질문 적용 보호를 반영한 이어서 만들기**이며 기존 INIT009 앱과 별도 진입점을 사용한다.
 
 | 자료 | 위치 | 용도 |
 |---|---|---|
@@ -26,6 +26,8 @@ node continuity/server/index.mjs --mock
 `http://127.0.0.1:3000`을 연다. 규칙 mock이며 API 키가 필요 없다. 기존 `npm run demo`는 INIT009 화면이다. 두 서버를 같은 포트에 동시에 시작하지 않는다. 작업문 복사·저장은 CLI 실행이 아니며, 사용자가 붙여넣은 결과 보고는 실제 구현 검증으로 바뀌지 않는다.
 
 기준을 직접 수정하면 사용자 결정으로 반영한다. 수정 전 AI 문구는 현재 작업문에서 제외하고 수동 작성은 보존한다. 저장은 같은 주소·브라우저 프로필의 localStorage이며 JSON 복구 파일을 지원한다. 여러 탭의 자동 병합이나 공개 사용자 인증은 제공하지 않는다. 상세 지원 범위는 continuity README에서 읽는다.
+
+수용된 RETURN032/FRESH033 rev1은 결과 입력 전에 실제 연결 예정 대상과 기준 기록을 안내한다. 낡거나 시점 불명인 질문은 참고 기록으로 보존하며 현재 답변 적용을 막는다. imported 비단조 이력이 새 응답 시점 안으로 들어오면 이력을 지우지 않고 재정리 후 답변할 수 있다. 정상 질문·중복 보호·미제출 초안 예외, 독립 F1 해결 판정 및 Cloud Node39/native1 검증·CI 확인 범위는 [PROJECT_STATUS](PROJECT_STATUS.md)의 제품 반영 항목을 따른다. 실제 AI 품질·고객 효용은 미검증이며 PILOT2는 미채택이다.
 
 ## 검증과 다음 작업
 

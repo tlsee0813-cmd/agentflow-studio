@@ -45,10 +45,14 @@ export function explicitReplacement(input: string, b: Basis): string|null {
   }
   return null;
 }
+/** Preserve the existing array-order return link, not the latest wall-clock export. */
+export function returnTargetId(p: Project): string|null {
+  return [...p.tasks].reverse().find(t=>t.handoffs.length)?.id ?? p.currentTaskId;
+}
 export function submit(p: Project): Project {
   text(p.draft); const n=change(p);
   const returned=['report','evidence'].includes(n.draftKind);
-  const parent=returned ? ([...n.tasks].reverse().find(t=>t.handoffs.length)?.id ?? n.currentTaskId) : n.currentTaskId;
+  const parent=returned ? returnTargetId(n) : n.currentTaskId;
   const id=uid('T'),t:Task={id,sourceIds:[],parentTaskId:parent,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[]};
   const s=appendSource(n,n.draftKind,n.draft,id);
   t.sourceIds.push(s.id); n.tasks.push(t); n.currentTaskId=id;
@@ -82,9 +86,12 @@ export function questionAnswered(p: Project, t: Task): boolean {
   return t.sourceIds.some(sid=>{const s=p.sources.find(s=>s.id===sid); return !!s && ['answer','test_answer'].includes(s.kind) && s.replyTo===q.text;});
 }
 export function answer(p: Project, id: string, value: string, disposition: Source['disposition']='provided', testOnly=false): Project {
-  text(value); const n=change(p),t=taskOf(n,id),q=t.advice?.question; ensure(q,'QUESTION_MISSING');
+  text(value); const original=taskOf(p,id),q=original.advice?.question; ensure(q,'QUESTION_MISSING');
   // A failed or retried re-organisation must not record the same reply twice.
-  ensure(!questionAnswered(n,t),'ALREADY_ANSWERED');
+  const applicability=questionApplicability(p,original);
+  ensure(applicability!=='answered','ALREADY_ANSWERED');
+  ensure(applicability==='active','QUESTION_NOT_APPLICABLE');
+  const n=change(p),t=taskOf(n,id);
   const synthetic=testOnly||t.sourceIds.some(sid=>n.sources.find(s=>s.id===sid)?.kind==='test_answer');
   const s=appendSource(n,synthetic?'test_answer':'answer',value,id,q.text,disposition); t.sourceIds.push(s.id);
   if(!synthetic) newBasis(n,`${q.kind==='fact'?'사실 확인':'제품 선택'} 질문: ${q.text}\n사용자 ${disposition==='provided'?'답변':disposition==='unknown'?'모름':'보류'}: ${value}`,'answered',s);
@@ -104,12 +111,31 @@ export function taskValues(t: Task): WorkValues {
 }
 const createdAt=(b:Basis)=>b.history[0]?.revision ?? b.revision;
 /** Bases the AI text of this task did not see: changed after it was requested, or added to this task since.
- * 'unknown' = advice imported from project.1 without a recorded revision. */
+ * 'unknown' = absent revision evidence, or inconsistent history crossing the advice boundary. */
 export function changedSinceAdvice(p: Project, t: Task): Basis[]|'unknown' {
   if(!t.advice) return [];
-  if(t.adviceRevision === null) return 'unknown';
+  if(t.adviceRevision === null || !Number.isSafeInteger(t.adviceRevision) || t.adviceRevision<0 || t.adviceRevision>p.revision) return 'unknown';
   const r=t.adviceRevision;
+  for(const b of p.bases) {
+    let previous=-1,ordered=true,afterAdvice=false;
+    for(const version of [...b.history,b]) {
+      if(!Number.isSafeInteger(version.revision) || version.revision<0 || version.revision>p.revision) return 'unknown';
+      if(version.revision<=previous) ordered=false;
+      if(version.revision>r) afterAdvice=true;
+      previous=version.revision;
+    }
+    // A response covers the current basis snapshot at r. Older history need not be
+    // reordered to use it; any later evidence still needs a reliable chronology.
+    if(afterAdvice&&!ordered) return 'unknown';
+  }
   return p.bases.filter(b=>b.revision>r && (createdAt(b)<=r || t.sourceIds.includes(b.sourceId)));
+}
+/** A question belongs to its task; there is no separate questionId. No project writes. */
+export function questionApplicability(p: Project, t: Task): 'missing'|'answered'|'active'|'stale'|'unknown' {
+  if(!t.advice?.question) return 'missing';
+  if(questionAnswered(p,t)) return 'answered';
+  const changed=changedSinceAdvice(p,t);
+  return changed==='unknown' ? 'unknown' : changed.length ? 'stale' : 'active';
 }
 /** What may go out as the current instruction. Stale AI text is withheld; user-written values always stay. */
 export function currentWork(p: Project, t: Task) {
@@ -214,13 +240,15 @@ export function taskStatus(p: Project,t:Task): string {
   const returned=p.tasks.filter(x=>x.parentTaskId===t.id).flatMap(x=>x.sourceIds).map(id=>p.sources.find(s=>s.id===id));
   if(returned.some(s=>s?.kind==='evidence')) return '관찰·검사 자료 있음 · 앱 미검증';
   if(returned.some(s=>s?.kind==='report')) return '구현 보고 도착 · 앱 미검증';
+  const applicability=questionApplicability(p,t);
+  if(applicability==='stale'||applicability==='unknown') return '이전 질문 · 참고 기록';
   if(t.handoffs.length) return '작업문 내보냄 · 실행 여부 모름';
-  if(t.advice?.question && !questionAnswered(p,t)) return t.advice.question.kind === 'fact' ? '사실 확인 항목 있음' : '제품 선택 항목 있음';
+  if(applicability==='active') return t.advice!.question!.kind === 'fact' ? '사실 확인 항목 있음' : '제품 선택 항목 있음';
   return t.advice ? '작업문 준비됨 · 미실행' : '입력 보존됨';
 }
 export function staleText(p: Project, t: Task): string|null {
   const changed=changedSinceAdvice(p,t);
-  if(changed === 'unknown') return '이전 형식에서 가져온 AI 정리라 어느 기준 시점에 작성됐는지 알 수 없습니다. 그 문구는 현재 작업문에서 제외했습니다.';
+  if(changed === 'unknown') return 'AI 정리의 기준 시점을 확인할 수 없습니다. 그 문구는 현재 작업문에서 제외했습니다.';
   if(!changed.length) return null;
   return `AI 정리는 기준 r${t.adviceRevision}에서 작성돼 그 뒤 바뀐 기준(${changed.map(b=>`${b.id} r${b.revision}`).join(', ')})을 반영하지 않습니다. 그 문구는 현재 작업문에서 제외했습니다.`;
 }
@@ -246,7 +274,9 @@ export function handoffText(p:Project,id=p.currentTaskId):string {
     '\n### 확인할 동작 (아직 검사 결과가 아님)',v.checks||'요청한 결과와 현재 기준이 함께 유지되는지 확인합니다.');
   const manual=manualConditionText(p,t); if(manual) lines.push(`\n${manual}`);
   const q=t.advice?.question;
-  if(q && !questionAnswered(p,t)) lines.push(`\n### 남은 ${q.kind==='fact'?'사실 확인':'제품 선택'}${w.aiStale?' (기준 변경 전 제기됨)':''}`,q.text,q.why,'이 항목을 임의로 결정하지 말고, 관련 없는 명확한 범위는 계속 진행하세요.');
+  const applicability=questionApplicability(p,t);
+  if(q && applicability==='active') lines.push(`\n### 남은 ${q.kind==='fact'?'사실 확인':'제품 선택'}`,q.text,q.why,'이 항목을 임의로 결정하지 말고, 관련 없는 명확한 범위는 계속 진행하세요.');
+  else if(q && (applicability==='stale'||applicability==='unknown')) lines.push(`\n### 이전 질문 · 참고 기록 (${applicability==='unknown'?'시점 확인 불가':'기준 변경 전'})`,q.text,q.why,'현재 답변이 필요한 질문으로 적용하지 않습니다. 현재 기준과 입력 원문을 따르세요.');
   if(parts.previousWork) {
     const {taskId,aiTextExcluded,manualConditionFields:_manual,...prev}=parts.previousWork;
     lines.push(`\n## 직전에 넘긴 작업 ${taskId} (과거 기록 · 자동 적용 아님; 명시적 재사용은 위 원문 참조)`,...Object.entries(prev).filter(([,value])=>value).map(([k,value])=>`${k}: ${value}`));

@@ -28,7 +28,9 @@ test('I15-D03 actual answer attached to real question and no new forced confirma
 });
 test('I15-D04 unknown/defer applies only to answer; untouched old bases survive, no repeat question',()=>{
   for(const disp of ['unknown','deferred']) {
-    let p=respond(request('결제 오류의 원인을 모르겠어요.'));p=D.recordBasis(p,'결제 정보는 외부에 공개하지 않는다.');const before=clone(p.bases);
+    // Keep this normal unknown/defer test fresh; stale replies are rejected in FRESH033.
+    let p=respond(D.recordBasis(request('결제 오류의 원인을 모르겠어요.'),'결제 정보는 외부에 공개하지 않는다.'));const before=clone(p.bases);
+    assert.equal(D.questionApplicability(p,D.taskOf(p)),'active');
     p=D.answer(p,p.currentTaskId,'확인할 항목만 남겨 주세요.',disp);p=respond(p);
     assert.equal(D.taskOf(p).advice.question,null);assert.deepEqual(p.bases.slice(0,before.length),before);assert.equal(p.bases.at(-1).status,'answered');assert.match(D.handoffText(p),/결제 정보는 외부에 공개하지 않는다/);
   }

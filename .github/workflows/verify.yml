@@ -79,6 +79,20 @@ jobs:
           IDEA015_EVIDENCE_DIR: test-results/continuity
         shell: bash
         run: python continuity/tests/browser.py 2>&1 | tee test-results/continuity-browser-direct.log
+      # UI02/05/06 inject delay/storage/config faults; UI08 injects clipboard delay.
+      # These cases are regression checks, not pure native end-to-end evidence.
+      - name: Continuity UI and injected-fault regressions (AI is mocked)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/continuity-ui
+          UI001_SCREENSHOTS: test-results/continuity-ui/screenshots
+        shell: bash
+        run: python continuity/tests/ui001_browser.py 2>&1 | tee test-results/continuity-ui.log
+      - name: Question freshness and imported-history recovery (native HTTP, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/fresh033
+          FRESH033_EVIDENCE: test-results/fresh033
+        shell: bash
+        run: python continuity/tests/fresh033_browser.py 2>&1 | tee test-results/fresh033-browser.log
       - name: Upload only this run's results, not historic snapshot evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

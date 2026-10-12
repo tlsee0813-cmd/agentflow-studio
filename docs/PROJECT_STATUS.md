@@ -1,12 +1,22 @@
-# AgentFlow Studio 현재 상태 — IDEA022 + UI001 rev1 통합
+# AgentFlow Studio 현재 상태 — IDEA022 + UI001 rev1 · RETURN032/FRESH033 rev1
 
-최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능을 통합했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
+최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능, RETURN032 결과 연결 안내·FRESH033 rev1 질문 적용 보호를 반영했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
 
 ## 최신 설계 방향
 
 목적은 고객이 작업을 이어갈 때 의도·기준·결정·변경을 잃고 다시 설명하는 손실을 줄이는 것이다. 이전 서비스/기능 구상은 필수요구가 아니다. 대시보드·노드그래프·실시간Codex/Claude연결·로그감지·모델/effort자동조절은 목적에 도움이 되는 가설로 평가하고 삭제·결합·제품형태 변경도 검토한다. 기존 문서와 충돌하면 이 최신 방향을 우선하며 기존 구현·자료를 자동 대체하지 않는다.
 
 규칙을 하나씩 더 붙이는 패치에 매몰되지 않고 실제GitHub OSS 핵심코드·테스트·실사용 이슈와 분야 밖 메커니즘을 조사해 재사용/차별화 판단을 구현 결정에 연결한다. 단일 호출·가격 최소화·기존 실험 계약 자체는 제품 목표가 아니다. 공식 기능 문서만으로 실사용 문제가 해결됐거나 제품 기회가 없다고 추론한 총괄 판단을 정정한다. 기능 존재·지원 설명과 실제 개발자의 성공/실패·반복 노동은 별개다. 최근 원글·독립 반복 보고·성공 반례·OSS 핵심 코드/검사로 사용 맥락과 해결 범위를 확인하고, 원문 접근 한계와 설계 가설을 구분한다. 결정 변경 관리·FLOW029 카드뿐 아니라 기능 분할→의존성→맞춤 작업 구조→실행/재계획도 비교 후보이며 어느 쪽도 최종 정답으로 고정하지 않는다. 최소한의 완결된 고객 흐름과 관측할 성공조건으로 대안을 비교하고, 유지할 것/버릴 것/나중 검증할 것을 구분한다.
+
+## RETURN032 / FRESH033 rev1 제품 반영 (2026-10-13 KST)
+
+총괄이 RETURN032와 FRESH033 rev1을 수용해 기존 작업 브랜치의 기준 `875d983f49415d5e097d2be7bb70b5be93b43487` 위에 제품·검사 9경로를 반영했다. 최신 공유 문서와 다른 실험 소스는 보존했고 main 병합·배포는 없다. PILOT1의 모든 조건과 PILOT2는 제품 미채택이며 PILOT2 실호출은 보류다.
+
+RETURN032는 결과 입력 전에 실제 연결 예정 작업·내보낸 시점·이후 기준 기록을 읽기 전용으로 보여준다. FRESH033은 기준 변경 뒤 낡거나 시점 불명인 질문을 참고 기록으로 남기고, 새 답변을 source/basis에 적용하기 전에 `QUESTION_NOT_APPLICABLE`로 거절한다. 정상 답변·중복 거절과 미제출 초안/이름/내보내기 예외는 유지한다. rev1은 imported 비단조 이력이 응답 경계를 가로지르면 unknown을 유지하지만, 새 응답이 해당 이력을 포함한 시점에서 수신되면 원문·이력·수동값을 변경하지 않고 답변 가능 상태로 회복한다.
+
+Claude 최종 F1 검토는 해결로 수용됐다. 원래 A/B/C와 추가 탐침으로 숨은 미래 history의 unknown, 별개 실제 변경의 stale, 재정리 회복·원자성·기존값·중복 순서를 확인했다. 이는 Node22.22 타입 제거 사본 검토이며 Cloud Node22.16 빌드 실행과 구분한다.
+
+Cloud 변경 영향 검증: 부모·continuity check/build, domain+FRESH033 Node39/39 및 native 신규1/1, compiled 재현과 기존 C 도메인 재확인 통과(fail/skip0). 새 입력/질문 ID·저장 스키마·provider·prompt 변경은 없다. 앞선 원래033의 Node53/native2/UI001 정상 경계8 및 별도 fault-injection3 통과는 그대로 보존하며 rev1 재실행 수치로 합산하지 않는다. CI Node wildcard는 신규 검사를 포함하며 workflow에 UI001 및 FRESH033 브라우저 실행을 추가했다. UI02/05/06의 지연·저장 실패·설정 응답 모사와 UI08 clipboard 훅은 순수 native 증거와 구분한다. 문서 작성 시점 새 커밋의 CI 결과는 미확인이며 해당 Actions 기록으로 별도 확인한다. 실AI 품질·고객 효용·병렬 결과 연결 일반 보장은 미검증이다. 이번 실행은 mock/paid=false이며 실API·키 접근0이다.
 
 ## 현재 구현
 
@@ -70,6 +80,6 @@ C02의 선택지 축·미정 기한·실제 답변 출처 표현, C05의 이미 
 FLOW029 baseline은정확수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`의184파일 export다. ZIP SHA256 `382cedeaf38c884dbcdda594ec795636089cedb31d2a3966bc179487dd1abde3`, manifest `f605954bc71913b99994936e2c10a13a06254572f77d2a0d9f4b39be52dc0200`을 사용한다. Cloud snapshot11ac...와181blob은같고 workflow·START_HERE·PROJECT_STATUS의3공유메타만다르므로 전체동일이라고하지않는다. [설계 인계](quality026-design.md)에경로와구분을남긴다.
 
 
-[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 FLOW029-PILOT1 실제18회·독립 구조 재현·조건 가림 평가와 후속 지시 예정 상태 문서뿐이다. 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. CI·PR 설정·main·배포는 변경하지 않는다.
+[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 앞선 `875d983f` 공유 반영은 FLOW029-PILOT1 실제18회·독립 구조 재현·조건 가림 평가와 후속 지시 예정 상태 문서뿐이었다. 당시 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. 당시 CI·PR 설정·main·배포는 변경하지 않았다.
 
 과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.

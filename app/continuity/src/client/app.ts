@@ -1,9 +1,9 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, type Basis, type Project, type Task, type Source } from '../shared/types.js';
 import { createProject, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
-  answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionAnswered, staleText } from '../shared/domain.js';
+  answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText } from '../shared/domain.js';
 import { parseProject } from '../shared/validation.js';
 import { ProjectStore, serializeProject, storageErrorCode } from '../shared/storage.js';
-import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin } from './presentation.js';
+import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview } from './presentation.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HTMLElementTagNameMap[K] {
   const e=document.createElement(tag);e.textContent=content;if(cls)e.className=cls;return e;
@@ -70,8 +70,10 @@ function renderStatus() {
   $('working').textContent=pending?'정리 응답을 기다리는 중 · 입력은 계속 수정할 수 있어요.':'';
   $('work').setAttribute('aria-busy',String(pending));
   for(const b of document.querySelectorAll<HTMLButtonElement>('[data-ai-action]'))b.disabled=pending||!ready;
-  for(const b of document.querySelectorAll<HTMLButtonElement>('.option-button, #answer-unknown, #answer-defer'))b.disabled=pending;
-  if($('answer-send'))$<HTMLButtonElement>('answer-send').disabled=pending||!project.answerDraft.trim();
+  const answerable=project.currentTaskId!==null&&questionApplicability(project,taskOf(project))==='active';
+  for(const b of document.querySelectorAll<HTMLButtonElement>('.option-button, #answer-unknown, #answer-defer'))b.disabled=pending||!answerable;
+  if($('answer-send'))$<HTMLButtonElement>('answer-send').disabled=pending||!answerable||!project.answerDraft.trim();
+  if($('answer-draft'))$<HTMLTextAreaElement>('answer-draft').readOnly=!answerable;
   $('compose-draft-status').textContent=project.draft.trim()?'작성 중인 입력 있음':'';
   $('basis-draft-status').textContent=project.basisDraft.trim()?'작성 중 · 기록 버튼을 누르면 기준에 반영됩니다.':'';
   for(const basis of project.bases){const marker=$(`draft-status-${basis.id}`);if(marker){marker.textContent=basisDraftChanged(project,basis)?'작성 중 · 현재 기준에는 아직 반영되지 않았어요.':'';marker.hidden=!basisDraftChanged(project,basis);}}
@@ -197,14 +199,17 @@ function renderWork(t:Task|null) {
   const scope=node('p',v.scope||'이번 범위는 아래에서 직접 작성할 수 있습니다.','work-scope');scope.id='scope-preview';card.append(scope);
   if(local.some(s=>s.kind==='test_answer'))card.append(node('p','합성 시험 입력입니다. 실제 사용자 요구나 기존 확정 기준을 바꾸지 않습니다.','alert warning'));
   const q=t.advice?.question;
-  if(q&&questionAnswered(project,t)) {
+  const applicability=questionApplicability(project,t);
+  if(q&&applicability==='answered') {
     const box=node('div','','question-box');box.id='question-answered';box.append(tag('답변 기록됨','purple'),node('h3',q.text),node('p','답변은 저장됐습니다. 정리가 갱신되지 않았다면 ‘이 입력 다시 정리’로 이어가세요. 같은 답을 다시 기록하지 않습니다.','hint'));card.append(box);
   } else if(q) {
-    const box=node('div','','question-box');box.id='question-box';box.append(tag(q.kind==='fact'?'모르는 사실 확인':'중요한 제품 선택','amber'),node('h3',q.text),node('p',q.why,'hint'));
-    const answerAndSend=(value:string,disposition:Source['disposition']='provided')=>{if(project.pending||!value.trim())return;commit(answer(project,t.id,value,disposition));void generate(t.id);};
+    const active=applicability==='active';
+    const box=node('div','','question-box');box.id='question-box';box.append(tag(active?(q.kind==='fact'?'모르는 사실 확인':'중요한 제품 선택'):'이전 질문 · 참고 기록','amber'),node('h3',q.text),node('p',q.why,'hint'));
+    if(!active)box.append(node('p',`${applicability==='unknown'?'시점 확인 불가':'기준 변경 전'} · 이 질문에는 답변을 적용하지 않습니다.`,'hint'));
+    const answerAndSend=(value:string,disposition:Source['disposition']='provided')=>{if(project.pending||!value.trim()||questionApplicability(project,taskOf(project,t.id))!=='active')return;commit(answer(project,t.id,value,disposition));void generate(t.id);};
     for(const o of q.options){const b=btn(o.label,()=>answerAndSend(`${o.label} — ${o.consequence}`),'option-button');b.append(node('small',o.consequence));box.append(b);}
-    const lab=node('label','직접 답하거나 다른 방향을 적어 주세요.');lab.htmlFor='answer-draft';
-    const input=node('textarea');input.id='answer-draft';input.rows=2;input.maxLength=12000;input.value=project.answerDraft;input.placeholder=q.kind==='fact'?'알고 있는 관찰만 적어 주세요. 모르면 아래 버튼으로 확인 작업만 이어갑니다.':'선택지 밖의 답도 그대로 남깁니다.';
+    const lab=node('label',active?'직접 답하거나 다른 방향을 적어 주세요.':'작성 중이던 답변 · 읽기 전용');lab.htmlFor='answer-draft';
+    const input=node('textarea');input.id='answer-draft';input.rows=2;input.maxLength=12000;input.value=project.answerDraft;input.placeholder=active?(q.kind==='fact'?'알고 있는 관찰만 적어 주세요. 모르면 아래 버튼으로 확인 작업만 이어갑니다.':'선택지 밖의 답도 그대로 남깁니다.'):'';
     input.addEventListener('input',()=>guard(()=>commit(editAuxDraft(project,'answerDraft',input.value),false)));
     const row=node('div','','question-actions');row.append(btn('이 답으로 이어가기',()=>answerAndSend(input.value),'primary','answer-send'),btn('잘 모르겠음',()=>answerAndSend('지금은 모릅니다. 확인할 항목만 남겨 주세요.','unknown'),'quiet','answer-unknown'),btn('이 질문은 보류',()=>answerAndSend('이 질문은 지금 보류합니다. 관련 없는 명확한 범위만 진행해 주세요.','deferred'),'quiet','answer-defer'));
     box.append(lab,input,row);card.append(box);
@@ -245,6 +250,27 @@ function refreshPreview(){
   $('work-authorship').textContent=workOrigin(t);
   $('instruction-author').textContent=t.manual.next!==null?'사용자 직접 수정':t.mode==='mock'?'모의 제안':'AI 제안';
 }
+function renderReturnPreview() {
+  const area=$('return-preview'),preview=returnPreview(project);
+  area.replaceChildren();area.hidden=preview.kind==='hidden';
+  area.dataset.targetTaskId=preview.targetTaskId??'';
+  if(area.hidden)return;
+  const target=node('p',preview.targetTitle?`연결 예정 · ${preview.targetTitle}`:'연결할 이전 작업 없음','hint');target.id='return-target';area.append(target);
+  const when=node('p',preview.exportedAt?`내보낸 시점 · ${dateLabel(preview.exportedAt)}`:'내보낸 기록 없음','hint');when.id='return-export';area.append(when);
+  if(preview.kind==='comparable') {
+    const bases=preview.recordedBases!,list=details(`이후 기록된 기준 ${bases.length}개`,'return-records');
+    list.append(node('p','이 결과에 적용되는지는 직접 확인하세요.','hint'));
+    list.append(node('p',`${preview.targetTaskId} · 내보낸 기준 r${preview.exportRevision}`,'source-id'));
+    for(const basis of bases) {
+      const item=node('div','','basis');
+      item.append(node('p',`${basis.id} · ${BASIS_LABEL[basis.status]}`,'basis-status'),node('div',basis.text,'source-raw'));
+      list.append(item);
+    }
+    area.append(list);
+  } else {
+    const unavailable=node('p','기준 기록 비교 불가','hint');unavailable.id='return-unavailable';area.append(unavailable);
+  }
+}
 function render() {
   const open=new Map([...document.querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]));
   const active=document.activeElement as HTMLTextAreaElement|HTMLInputElement|null;
@@ -261,7 +287,7 @@ function render() {
   $('starter-examples').hidden=!!project.tasks.length||returned;
   $('compose-panel').classList.toggle('initial',!project.tasks.length);
   const t=project.currentTaskId?taskOf(project):null;
-  renderBases(t);renderHistory();renderWork(t);renderStatus();displayView();
+  renderBases(t);renderHistory();renderWork(t);renderReturnPreview();renderStatus();displayView();
   for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id))d.open=open.get(d.id)!;
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
