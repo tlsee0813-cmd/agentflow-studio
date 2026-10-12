@@ -18,6 +18,18 @@ Claude 최종 F1 검토는 해결로 수용됐다. 원래 A/B/C와 추가 탐침
 
 Cloud 변경 영향 검증: 부모·continuity check/build, domain+FRESH033 Node39/39 및 native 신규1/1, compiled 재현과 기존 C 도메인 재확인 통과(fail/skip0). 새 입력/질문 ID·저장 스키마·provider·prompt 변경은 없다. 앞선 원래033의 Node53/native2/UI001 정상 경계8 및 별도 fault-injection3 통과는 그대로 보존하며 rev1 재실행 수치로 합산하지 않는다. CI Node wildcard는 신규 검사를 포함하며 workflow에 UI001 및 FRESH033 브라우저 실행을 추가했다. UI02/05/06의 지연·저장 실패·설정 응답 모사와 UI08 clipboard 훅은 순수 native 증거와 구분한다. 문서 작성 시점 새 커밋의 CI 결과는 미확인이며 해당 Actions 기록으로 별도 확인한다. 실AI 품질·고객 효용·병렬 결과 연결 일반 보장은 미검증이다. 이번 실행은 mock/paid=false이며 실API·키 접근0이다.
 
+## SELECT035 — 수용·작업 브랜치 반영
+
+총괄은 report/evidence 제출 전에 내보낸 작업을 선택하는 제품 3파일을 수용했다. 다중 후보는 미선택 상태로 시작하며 UI와 실제 handler가 제출을 막는다. 1개/없음은 기존 fallback, 선택은 ephemeral, 저장 연결은 기존 parentTaskId다. 저장 schema/API/context 조립과 무인자 domain 호환은 유지한다. 미제출 입력 편집 중 선택 유지는 내용을 모두 지우거나 다른 보고로 바꾸는 편집에도 적용되는 수용된 동작이며, 초안 동일성을 추측하거나 필수 결함 해결로 해석하지 않는다. 종류 전환·성공 제출·가져오기·새로고침은 선택을 초기화한다.
+
+원격 기준 `67cd436976426ff4556b1b273628e8e03c126c65`의 별도 복사본에 app 증분 5경로만 적용했다. Cloud 잠금 설치·부모/continuity check/build, 관련 Node58/58·새 native 선택3/3·기존 UI001 11/11 통과(fail/skip0). USE034 백업을 실제 import한 재생에서 A/B parent와 원문을 보존하고 다음 B의 실제 POST·다운로드에 B 보고를 포함하며 A 보고 원문/출처 ID는 제외했다. 프로젝트 전체 기준 A 요청을 삭제한 것이 아니다. UI001의 오류·지연·설정/clipboard 모사 사례는 순수 native 증거와 구분한다.
+
+Claude 독립 검토는 필수 결함 없음으로 수용됐다. Node22.22 domain 탐침의 잘못된 ID 원자적 거절·preview/parent 일치·무인자 호환·B 문맥 분리와 UI 정적 검토는 Cloud 브라우저 실행과 구분한다.
+
+공개 CI에는 continuity/tests/fixtures/select035의 최소 합성 4파일만 추가했다. 공개 domain API로 두 독립 작업·내보내기·미제출 A 보고를 구성하고 고정 A/B 참조와 합성 시각을 보존했다. 보고문은 가상의 변경 가정이며 실제 실행 성적이나 총괄 원문을 포함하지 않는다. 이 fixture로 native 선택3/3을 별도로 실행해 fail/skip0을 확인했으며 원래 USE034 자료 재생 증거는 그대로 보존했다. 검사 출처를 구분하고 Python 읽기/쓰기에 UTF-8을 명시했다. 제품 3파일과 검사 기대값은 변경하지 않았다.
+
+CI Node wildcard는 신규 Node 검사를 포함한다. verify.yml에 합성 fixture의 native 선택 검사를 추가하고 app cwd 기준 materials/결과 경로, Bash pipefail 및 기존 app/test-results artifact 수집을 유지한다. 이 반영 커밋의 CI는 실행 후 해당 Actions 기록으로 확인하며 문서에서 성공을 선행 주장하지 않는다. 실AI 품질·고객 효용·병렬 결과 연결 일반 보장은 미검증이다. mock/paid=false, 실API·키 접근·mainmerge·배포0이며 RETURN032/FRESH033 수용 기록과 기존 실험은 보존한다.
+
 ## 현재 구현
 
 [app/continuity](../app/continuity/README.md)는 입력 → 필요한 질문 → 편집 가능한 작업문 → 돌아온 결과 → 다음 변경을 연결한다. localStorage 지속 저장·JSON 백업/복구, 기준 변경 뒤 낡은 AI 제외·수동값 보존, v1 이력, AI128KiB와 로컬 복구8MB 한도는 유지한다.

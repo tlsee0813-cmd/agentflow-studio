@@ -29,6 +29,8 @@ node continuity/server/index.mjs --mock
 
 수용된 RETURN032/FRESH033 rev1은 결과 입력 전에 실제 연결 예정 대상과 기준 기록을 안내한다. 낡거나 시점 불명인 질문은 참고 기록으로 보존하며 현재 답변 적용을 막는다. imported 비단조 이력이 새 응답 시점 안으로 들어오면 이력을 지우지 않고 재정리 후 답변할 수 있다. 정상 질문·중복 보호·미제출 초안 예외, 독립 F1 해결 판정 및 Cloud Node39/native1 검증·CI 확인 범위는 [PROJECT_STATUS](PROJECT_STATUS.md)의 제품 반영 항목을 따른다. 실제 AI 품질·고객 효용은 미검증이며 PILOT2는 미채택이다.
 
+수용된 SELECT035는 결과 제출 전에 내보낸 작업을 선택한다. 여러 대상이 있으면 선택하기 전 결과를 보내지 않고, 미제출 입력 편집 중에는 선택을 유지한다. 본문 전체 교체를 초안 동일성으로 추측하지 않는다. 선택은 새로고침/가져오기/종류 전환/성공 제출 뒤 초기화하며 1개/없음과 무인자 domain의 기존 동작은 유지한다. Cloud Node58/native 선택3/UI001 11, 독립 domain 탐침·UI 정적 검토와 별도 합성 CI fixture native3 검증은 [PROJECT_STATUS](PROJECT_STATUS.md)의 반영 항목에서 구분한다. 기존 실제 자료는 공개 fixture에 포함하지 않으며 새 커밋 CI 결과는 Actions에서 확인한다.
+
 ## 검증과 다음 작업
 
 2026-10-11 21:31 KST 통합 Cloud에서 클린 설치·기존/continuity 타입검사·빌드, 기존 Node279·continuity Node45·직접 HTTP 브라우저13이 실패/skip0으로 통과했다. 이는 mock/native HTTP/localStorage 실행 검증이다. persistent-profile 재방문 후 새 다운로드의 Chromium SIGSEGV는 미해결 제한이며 실제 DeepSeek 내용 품질·고객 효용·운영 준비는 미검증이다.

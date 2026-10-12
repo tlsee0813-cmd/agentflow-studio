@@ -93,6 +93,16 @@ jobs:
           FRESH033_EVIDENCE: test-results/fresh033
         shell: bash
         run: python continuity/tests/fresh033_browser.py 2>&1 | tee test-results/fresh033-browser.log
+      - name: Exported-task selection (native HTTP, synthetic fixture, mock AI)
+        env:
+          SELECT035_MATERIALS: continuity/tests/fixtures/select035
+          SELECT035_MATERIALS_SOURCE: synthetic CI fixture created with public domain APIs; no coordinator reports
+          IDEA015_EVIDENCE_DIR: test-results/select035
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-results
+          python continuity/tests/select035_browser.py 2>&1 | tee test-results/select035-browser.log
       - name: Upload only this run's results, not historic snapshot evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

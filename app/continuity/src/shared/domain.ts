@@ -45,14 +45,24 @@ export function explicitReplacement(input: string, b: Basis): string|null {
   }
   return null;
 }
-/** Preserve the existing array-order return link, not the latest wall-clock export. */
-export function returnTargetId(p: Project): string|null {
-  return [...p.tasks].reverse().find(t=>t.handoffs.length)?.id ?? p.currentTaskId;
+/** Exported tasks retain reverse array order, regardless of export timestamps. */
+export function returnTargets(p: Project): Task[] {
+  return [...p.tasks].reverse().filter(t=>t.handoffs.length);
 }
-export function submit(p: Project): Project {
-  text(p.draft); const n=change(p);
-  const returned=['report','evidence'].includes(n.draftKind);
-  const parent=returned ? returnTargetId(n) : n.currentTaskId;
+/** An omitted target preserves the original automatic/fallback contract. */
+export function returnTargetId(p: Project, selectedId?: string): string|null {
+  const targets=returnTargets(p);
+  if(selectedId!==undefined) {
+    ensure(targets.some(t=>t.id===selectedId),'INVALID_RETURN_TARGET');
+    return selectedId;
+  }
+  return targets[0]?.id ?? p.currentTaskId;
+}
+export function submit(p: Project, selectedId?: string): Project {
+  text(p.draft);
+  const returned=['report','evidence'].includes(p.draftKind);
+  const parent=returned ? returnTargetId(p,selectedId) : p.currentTaskId;
+  const n=change(p);
   const id=uid('T'),t:Task={id,sourceIds:[],parentTaskId:parent,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[]};
   const s=appendSource(n,n.draftKind,n.draft,id);
   t.sourceIds.push(s.id); n.tasks.push(t); n.currentTaskId=id;

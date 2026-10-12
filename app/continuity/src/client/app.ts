@@ -1,5 +1,5 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, type Basis, type Project, type Task, type Source } from '../shared/types.js';
-import { createProject, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
+import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText } from '../shared/domain.js';
 import { parseProject } from '../shared/validation.js';
 import { ProjectStore, serializeProject, storageErrorCode } from '../shared/storage.js';
@@ -16,6 +16,12 @@ let config:{mode:'mock'|'deepseek';configured:boolean;paidEnabled:boolean}|null=
 let controller:AbortController|null=null;
 // View preferences are ephemeral. They never enter the persisted project or request schema.
 let view:'work'|'history'='work',contextOpen=false,hasSaved=false,memoryDirty=false;
+let selectedReturnTaskId:string|undefined;
+function returnChoiceRequired():boolean {
+  return (project.draftKind==='report'||project.draftKind==='evidence')&&returnTargets(project).length>1&&
+    !returnTargets(project).some(t=>t.id===selectedReturnTaskId);
+}
+function changeKind(kind:Project['draftKind']) {selectedReturnTaskId=undefined;commit(setKind(project,kind));}
 let contextReturn:HTMLElement|null=null;
 try {store=new ProjectStore(window.localStorage);const restored=store.load();if(restored){project=restored;hasSaved=true;}}
 catch {storageError='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 않습니다. 이 화면의 입력은 메모리에 남으며 복구 파일로 저장할 수 있습니다.';}
@@ -48,7 +54,7 @@ function openComposer(kind:Project['draftKind']='request') {
   // A return CTA must not silently relabel an unsent request as an implementer's report.
   if(project.draftKind!==kind){
     if(project.draft.trim()){project={...project,notice:'작성 중인 입력이 있어 먼저 열었습니다. 내용과 출처 구분은 바꾸지 않았습니다. 이 입력을 마친 뒤 결과를 붙여넣으세요.'};renderStatus();}
-    else commit(setKind(project,kind));
+    else changeKind(kind);
   }
   $<HTMLDetailsElement>('compose-panel').open=true;$('draft').focus();
 }
@@ -64,8 +70,8 @@ function renderStatus() {
   if(storageError)$('saved').textContent='저장되지 않은 변경 있음';
   $('saved').classList.toggle('failed',!!storageError);
   const ready=readyForAI(),pending=!!project.pending;
-  $<HTMLButtonElement>('send').disabled=!ready||pending||!project.draft.trim();
-  $<HTMLButtonElement>('save-input').hidden=ready;$<HTMLButtonElement>('save-input').disabled=pending||!project.draft.trim();
+  $<HTMLButtonElement>('send').disabled=!ready||pending||!project.draft.trim()||returnChoiceRequired();
+  $<HTMLButtonElement>('save-input').hidden=ready;$<HTMLButtonElement>('save-input').disabled=pending||!project.draft.trim()||returnChoiceRequired();
   $('cancel').hidden=!pending;$('pending-bar').hidden=!pending;
   $('working').textContent=pending?'정리 응답을 기다리는 중 · 입력은 계속 수정할 수 있어요.':'';
   $('work').setAttribute('aria-busy',String(pending));
@@ -251,10 +257,26 @@ function refreshPreview(){
   $('instruction-author').textContent=t.manual.next!==null?'사용자 직접 수정':t.mode==='mock'?'모의 제안':'AI 제안';
 }
 function renderReturnPreview() {
-  const area=$('return-preview'),preview=returnPreview(project);
-  area.replaceChildren();area.hidden=preview.kind==='hidden';
-  area.dataset.targetTaskId=preview.targetTaskId??'';
+  const area=$('return-preview');
+  area.replaceChildren();area.hidden=project.draftKind!=='report'&&project.draftKind!=='evidence';
+  area.dataset.targetTaskId='';
   if(area.hidden)return;
+  const targets=returnTargets(project);
+  if(targets.length>1) {
+    const label=node('label','결과를 연결할 작업');label.htmlFor='return-task';
+    const select=node('select');select.id='return-task';
+    const placeholder=node('option','작업을 선택하세요');placeholder.value='';select.append(placeholder);
+    for(const task of targets) {
+      const option=node('option',`${project.tasks.indexOf(task)+1} · ${taskTitle(project,task)} · ${dateLabel(task.handoffs.at(-1)!.at)}`);
+      option.value=task.id;select.append(option);
+    }
+    select.value=selectedReturnTaskId??'';
+    select.addEventListener('change',()=>{selectedReturnTaskId=select.value||undefined;renderReturnPreview();renderStatus();$('return-task').focus();});
+    area.append(label,select);
+    if(returnChoiceRequired()) {area.append(node('p','내보낸 작업이 여러 개입니다. 이 결과의 작업을 선택하세요.','hint'));return;}
+  }
+  const preview=returnPreview(project,targets.length>1?selectedReturnTaskId:undefined);
+  area.dataset.targetTaskId=preview.targetTaskId??'';
   const target=node('p',preview.targetTitle?`연결 예정 · ${preview.targetTitle}`:'연결할 이전 작업 없음','hint');target.id='return-target';area.append(target);
   const when=node('p',preview.exportedAt?`내보낸 시점 · ${dateLabel(preview.exportedAt)}`:'내보낸 기록 없음','hint');when.id='return-export';area.append(when);
   if(preview.kind==='comparable') {
@@ -281,7 +303,7 @@ function render() {
   for(const [id,selected] of [['request-tab',project.draftKind==='request'],['report-tab',returned]] as const){$(id).classList.toggle('selected',selected);$(id).setAttribute('aria-pressed',String(selected));}
   $('compose-title').textContent=returned?'어떤 결과가 돌아왔나요?':project.tasks.length?'다음으로 바꾸고 싶은 것은?':'어떤 작업부터 시작할까요?';
   $('compose-eyebrow').textContent=returned?'CONTINUE WITH RESULTS':project.tasks.length?'NEXT REQUEST':"LET’S START";
-  $('input-hint').textContent=returned?'받은 보고를 그대로 붙여넣으세요. 마지막으로 내보낸 작업에 연결하며, 검증 완료로 바꾸지 않습니다.':project.draftKind==='test_answer'?'합성 시험자료로만 보관합니다. 실제 요청과 확정 기준은 바꾸지 않습니다.':'필요한 질문만 받고, 바로 전달할 작업문을 준비해요.';
+  $('input-hint').textContent=returned?'받은 보고를 그대로 붙여넣고 연결할 작업을 확인하세요. 검증 완료로 바꾸지 않습니다.':project.draftKind==='test_answer'?'합성 시험자료로만 보관합니다. 실제 요청과 확정 기준은 바꾸지 않습니다.':'필요한 질문만 받고, 바로 전달할 작업문을 준비해요.';
   $<HTMLTextAreaElement>('draft').placeholder=returned?'받은 결과 요약이나 변경 내용, 실행한 검사와 남은 일을 그대로 붙여넣으세요. 정해진 양식은 없어요.':project.tasks.length?'이번에 바꿀 부분만 적어 주세요. 앞에서 정한 기준은 함께 이어갑니다.':'무엇을 만들고 싶나요? 이미 작업 중이라면, 지금 바꾸고 싶은 부분만 알려주세요.';
   $('send').replaceChildren(document.createTextNode(returned?'결과에서 이어가기':'작업문 준비하기'),node('span',' ↗'));
   $('starter-examples').hidden=!!project.tasks.length||returned;
@@ -292,17 +314,17 @@ function render() {
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
 function submitInput(withAI:boolean) {
-  if(project.pending||!project.draft.trim()||(withAI&&!readyForAI()))return;
-  guard(()=>{commit(submit(project));$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('current-work').focus({preventScroll:true});$('current-work').scrollIntoView({block:'start'});if(withAI)void generate(project.currentTaskId!);else {$<HTMLDetailsElement>('edit-work').open=true;$('work-next').focus();}});
+  if(project.pending||!project.draft.trim()||returnChoiceRequired()||(withAI&&!readyForAI()))return;
+  guard(()=>{const next=submit(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);selectedReturnTaskId=undefined;commit(next);$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('current-work').focus({preventScroll:true});$('current-work').scrollIntoView({block:'start'});if(withAI)void generate(project.currentTaskId!);else {$<HTMLDetailsElement>('edit-work').open=true;$('work-next').focus();}});
 }
 $('compose').addEventListener('submit',e=>{e.preventDefault();submitInput(true);});
 $('save-input').addEventListener('click',()=>submitInput(false));
 $('draft').addEventListener('input',()=>guard(()=>commit(editDraft(project,$<HTMLTextAreaElement>('draft').value),false)));
 $('project-name').addEventListener('input',()=>{const value=$<HTMLInputElement>('project-name').value;if(value.trim())guard(()=>commit(rename(project,value),false));});
 $('project-name').addEventListener('blur',()=>{$<HTMLInputElement>('project-name').value=project.name;});
-$('request-tab').addEventListener('click',()=>{if(project.draftKind!=='request')commit(setKind(project,'request'));});
-$('report-tab').addEventListener('click',()=>{if(project.draftKind!=='report')commit(setKind(project,'report'));});
-$('source-kind').addEventListener('change',()=>{const kind=$<HTMLSelectElement>('source-kind').value as Project['draftKind'];if(project.draftKind!==kind)commit(setKind(project,kind));});
+$('request-tab').addEventListener('click',()=>{if(project.draftKind!=='request')changeKind('request');});
+$('report-tab').addEventListener('click',()=>{if(project.draftKind!=='report')changeKind('report');});
+$('source-kind').addEventListener('change',()=>{const kind=$<HTMLSelectElement>('source-kind').value as Project['draftKind'];if(project.draftKind!==kind)changeKind(kind);});
 $('cancel').addEventListener('click',()=>{controller?.abort();controller=null;commit(cancel(project));});
 $('consent').addEventListener('change',renderStatus);
 $('basis-draft').addEventListener('input',()=>guard(()=>commit(editAuxDraft(project,'basisDraft',$<HTMLTextAreaElement>('basis-draft').value),false)));
@@ -322,7 +344,7 @@ $('import-file').addEventListener('change',async()=>{
     if(!confirm(`“${imported.name}” · 기준 ${imported.bases.length}개 · 작업 ${imported.tasks.length}개를 복구할까요?\n현재 화면의 프로젝트를 바꿉니다. 필요한 현재 내용은 먼저 복구 파일로 저장하세요.\n파일의 출처 기록은 서명된 검증 증거가 아닙니다.`))return;
     controller?.abort();controller=null;imported.pending=null;
     try {if(!store)throw new Error();store.replace(imported);storageError='';hasSaved=true;memoryDirty=false;}catch{storageError='가져온 내용은 이 탭에 복구했지만 브라우저에 저장하지 못했습니다. 닫기 전에 복구 파일을 저장하세요.';memoryDirty=true;}
-    project=imported;view='work';contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();render();restoreDraftPanels();
+    project=imported;selectedReturnTaskId=undefined;view='work';contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();render();restoreDraftPanels();
   } catch {project={...project,notice:'복구 파일의 형식·버전·참조가 올바르지 않습니다. 현재 프로젝트를 바꾸지 않았습니다.'};renderStatus();}
 });
 $('nav-work').addEventListener('click',()=>{contextOpen=false;showWork();$('context-title').scrollIntoView({block:'nearest'});});

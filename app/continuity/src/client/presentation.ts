@@ -33,10 +33,10 @@ export interface ReturnPreview {
   recordedBases: readonly Basis[] | null;
 }
 /** Recorded project bases since this task's export; no relevance, semantic or result verdict. */
-export function returnPreview(p: Project): ReturnPreview {
+export function returnPreview(p: Project, selectedId?: string): ReturnPreview {
   const empty:ReturnPreview={kind:'hidden',targetTaskId:null,targetTitle:null,exportedAt:null,exportRevision:null,recordedBases:null};
   if(p.draftKind!=='report' && p.draftKind!=='evidence') return empty;
-  const targetId=returnTargetId(p),target=p.tasks.find(t=>t.id===targetId);
+  const targetId=returnTargetId(p,selectedId),target=p.tasks.find(t=>t.id===targetId);
   if(!target) return {...empty,kind:'no-target'};
   const preview:ReturnPreview={...empty,kind:'no-export',targetTaskId:target.id,targetTitle:taskTitle(p,target)};
   const last=target.handoffs.at(-1);
