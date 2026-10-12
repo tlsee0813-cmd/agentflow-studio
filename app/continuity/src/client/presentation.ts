@@ -1,7 +1,7 @@
 /** UI-only projections. No stored fields, state transitions, provider guesses or execution status. */
-import type { Project, Task, Source, Basis } from '../shared/types.js';
+import type { Project, Task, Source, Basis, ExportRecord } from '../shared/types.js';
 import { currentWork, questionApplicability, handoffText, returnTargetId } from '../shared/domain.js';
-import { digest } from '../shared/validation.js';
+import { digest, parseResultFile } from '../shared/validation.js';
 
 export const sourceName: Record<Source['kind'], string> = {
   request: '요청 원문', report: '구현자 보고 · 미검증', evidence: '관찰·검사 자료 · 미검증',
@@ -15,6 +15,7 @@ export function shortText(text: string, length = 68): string {
   return line.length > length ? `${line.slice(0, length)}…` : line;
 }
 export function taskTitle(p: Project, t: Task): string {
+  if(t.resultFile)return shortText(parseResultFile(t.resultFile.rawText).report);
   return shortText(sourceOf(p, t)?.text ?? '원문이 보존된 작업');
 }
 export function dateLabel(at: string): string {
@@ -38,8 +39,12 @@ export function returnPreview(p: Project, selectedId?: string): ReturnPreview {
   if(p.draftKind!=='report' && p.draftKind!=='evidence') return empty;
   const targetId=returnTargetId(p,selectedId),target=p.tasks.find(t=>t.id===targetId);
   if(!target) return {...empty,kind:'no-target'};
+  return exportPreview(p,target,target.handoffs.at(-1));
+}
+/** File returns use their exact export; manual paste keeps its existing last-export preview. */
+export function exportPreview(p:Project,target:Task,last:ExportRecord|undefined):ReturnPreview {
+  const empty:ReturnPreview={kind:'hidden',targetTaskId:null,targetTitle:null,exportedAt:null,exportRevision:null,recordedBases:null};
   const preview:ReturnPreview={...empty,kind:'no-export',targetTaskId:target.id,targetTitle:taskTitle(p,target)};
-  const last=target.handoffs.at(-1);
   if(!last) return preview;
   preview.exportedAt=last.at; preview.exportRevision=last.revision;
   // Imported records may be valid storage data but lack a reliable comparison timeline.
@@ -64,7 +69,7 @@ export function exportNeedsRefresh(p: Project, t: Task): boolean {
   // Compare the complete delivered text (including suggestions), not just the four work fields.
   // Pin only the header revision: export bookkeeping and unsubmitted drafts change p.revision
   // without changing the handoff content. This shallow view never rewrites the saved project.
-  const current = handoffText({ ...p, revision: last.revision }, t.id);
+  const current = handoffText({ ...p, revision: last.revision }, t.id,last.returnId);
   return current.length !== last.chars || digest(current) !== last.digest;
 }
 export interface Stage {

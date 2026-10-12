@@ -1,9 +1,9 @@
-import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, type Basis, type Project, type Task, type Source } from '../shared/types.js';
+import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source } from '../shared/types.js';
 import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
-  answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText } from '../shared/domain.js';
+  answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
 import { parseProject } from '../shared/validation.js';
 import { ProjectStore, serializeProject, storageErrorCode } from '../shared/storage.js';
-import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview } from './presentation.js';
+import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview } from './presentation.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HTMLElementTagNameMap[K] {
   const e=document.createElement(tag);e.textContent=content;if(cls)e.className=cls;return e;
@@ -17,6 +17,10 @@ let controller:AbortController|null=null;
 // View preferences are ephemeral. They never enter the persisted project or request schema.
 let view:'work'|'history'='work',contextOpen=false,hasSaved=false,memoryDirty=false;
 let selectedReturnTaskId:string|undefined;
+// Local file reads/clipboard are not tickets or durable project data. Replacement invalidates both.
+let projectEpoch=0,resultRead=0,recoveryRead=0,resultMessage='';
+let resultSelection:{rawText:string;projectId:string;revision:number}|null=null;
+let lastFileExport:{taskId:string;text:string}|null=null;
 function returnChoiceRequired():boolean {
   return (project.draftKind==='report'||project.draftKind==='evidence')&&returnTargets(project).length>1&&
     !returnTargets(project).some(t=>t.id===selectedReturnTaskId);
@@ -134,17 +138,67 @@ function download(filename:string,value:string,mime:string) {
   document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 function safeName(value:string){return value.replace(/[^a-zA-Z0-9가-힣_-]/g,'_').slice(0,50)||'project';}
-async function exportWork(id:string,method:'clipboard'|'download') {
-  let text:string;const exportRevision=project.revision,exportProjectId=project.id;
-  try {text=handoffText(project,id);}catch {project={...project,notice:'작업 문맥 데이터가 유효하지 않아 내보내지 않았습니다. 복구 파일로 내용을 보존하세요.'};renderStatus();return;}
-  if(method==='download'){download(`${safeName(project.name)}-작업문.md`,text,'text/markdown;charset=utf-8');commit(markHandoff(project,id,text,method,exportRevision));return;}
+async function exportWork(id:string,method:'clipboard'|'download',fileMode=false) {
+  let text:string;const exportRevision=project.revision,exportProjectId=project.id,epoch=projectEpoch;
+  const returnId=fileMode?`H_${crypto.randomUUID()}`:null;
+  try {text=handoffText(project,id,returnId);}catch {project={...project,notice:'작업 문맥 데이터가 유효하지 않아 내보내지 않았습니다. 복구 파일로 내용을 보존하세요.'};renderStatus();return;}
+  if(method==='download'){download(`${safeName(project.name)}-${fileMode?'파일반환-':''}작업문.md`,text,'text/markdown;charset=utf-8');if(fileMode)lastFileExport={taskId:id,text};commit(markHandoff(project,id,text,method,exportRevision,returnId));return;}
   try {await navigator.clipboard.writeText(text);
-    if(project.id!==exportProjectId||project.revision!==exportRevision){project={...project,notice:'작업문은 복사됐지만 그 사이 입력이 바뀌었습니다. 현재 내용의 내보내기 기록으로 표시하지 않았습니다. 최신 작업문이 필요하면 다시 복사하세요.'};renderStatus();return;}
-    commit(markHandoff(project,id,text,method,exportRevision));project={...project,notice:'작업문을 클립보드에 복사했습니다. 실행 도구에 직접 붙여넣으세요. 전송·실행된 것은 아닙니다.'};renderStatus();}
+    if(project.id!==exportProjectId||project.revision!==exportRevision||projectEpoch!==epoch){project={...project,notice:'작업문은 복사됐지만 그 사이 입력이 바뀌었습니다. 현재 내용의 내보내기 기록으로 표시하지 않았습니다. 최신 작업문이 필요하면 다시 복사하세요.'};renderStatus();return;}
+    if(fileMode)lastFileExport={taskId:id,text};
+    commit(markHandoff(project,id,text,method,exportRevision,returnId));project={...project,notice:memoryDirty?'작업문은 복사됐지만 내보내기 기록은 브라우저에 저장되지 않았습니다. 닫기 전에 JSON 백업을 저장하세요.':'작업문을 클립보드에 복사했습니다. 실행 도구에 직접 붙여넣으세요. 전송·실행된 것은 아닙니다.'};renderStatus();}
   catch {
     project={...project,notice:'클립보드를 사용할 수 없습니다. 아래 작업문을 직접 선택해 복사하거나 파일로 저장하세요.'};render();
     const d=$<HTMLDetailsElement>('handoff-preview');d.open=true;const field=$<HTMLTextAreaElement>('handoff-text');field.focus();field.select();
   }
+}
+function rawFileDetails(rawText:string,returnId:string,id:string):HTMLDetailsElement {
+  const d=details('수신 JSON 원문 · 파일 저장',id),field=node('textarea');field.readOnly=true;field.rows=5;field.className='export-preview';field.value=rawText;field.setAttribute('aria-label','수신 JSON 원문');
+  d.append(field,btn('원문 파일 저장',()=>download(`agentflow-return-${returnId}.json`,rawText,'application/json'),'quiet'));return d;
+}
+function resultError(e:unknown):string {
+  const code=e instanceof Error?e.message:'';
+  return code==='RESULT_TARGET_MISSING'?'이 프로젝트에서 정확히 일치하는 내보내기를 찾지 못했습니다. 최근 작업에 대신 연결하지 않았습니다.':
+    code==='FILE_TOO_LARGE'?'이 결과를 포함하면 프로젝트 저장 한도(8MB)를 넘습니다. 기존 기록은 변경하지 않았습니다.':
+    code==='RESULT_TOO_LARGE'?'결과 파일은 128 KiB 이하이어야 합니다. 원문을 잘라 저장하지 않았습니다.':
+    '결과 파일의 형식·버전·본문 길이를 확인할 수 없어 가져오지 않았습니다.';
+}
+function renderResultFile() {
+  $('result-file-message').textContent=resultMessage;
+  const area=$('result-file-preview');area.replaceChildren();if(!resultSelection)return;
+  try {
+    const {file,task,record,duplicate}=inspectResultFile(project,resultSelection.rawText),preview=exportPreview(project,task,record);
+    resultSelection.revision=project.revision;
+    area.dataset.targetTaskId=task.id;area.dataset.returnId=record.returnId!;
+    area.append(node('h3',`연결할 작업 · ${taskTitle(project,task)}`),node('p',`내보낸 시점 · ${dateLabel(record.at)} · 원래 버전 r${record.revision}`,'hint'));
+    if(task.handoffs.at(-1)!==record)area.append(node('p','이전 내보내기에 대한 보고입니다. 더 최근 내보내기로 옮기지 않습니다.','alert warning'));
+    const bases=details(preview.recordedBases===null?'기준 기록 비교 불가':`이후 기록된 기준 ${preview.recordedBases.length}개`,'file-return-bases');
+    bases.append(node('p','이 결과에 적용되는지는 직접 확인하세요. 기준·수동값을 자동으로 바꾸지 않습니다.','hint'));
+    for(const b of preview.recordedBases??[])bases.append(node('div',`${b.id} · ${BASIS_LABEL[b.status]}\n${b.text}`,'source-raw'));
+    const work=details('당시 작업문 내용','file-return-work');for(const [key,value] of Object.entries(record.work!))if(value)work.append(node('div',`${key}: ${value}`,'source-raw'));
+    area.append(bases,work,node('p','외부 보고 원문 · 앱 미검증','source-meta'),node('div',file.report,'source-raw'));
+    if(file.evidence!==null)area.append(node('p','외부 관찰·검사 원문 · 앱 미검증','source-meta'),node('div',file.evidence,'source-raw'));
+    area.append(node('p','파일은 실행 증명이 아닙니다. 가져와도 AI 정리·명령·링크를 실행하지 않습니다.','hint'));
+    if(duplicate)area.append(node('p','같은 인계의 같은 본문이 이미 있습니다. 다시 추가하지 않습니다.','hint'));
+    area.append(btn(duplicate?'기존 기록 확인':'이 결과 가져오기',acceptResultFile,'primary','accept-result-file'));
+    area.append(rawFileDetails(resultSelection.rawText,file.returnId,'result-file-raw'));
+  } catch(e) {
+    area.dataset.targetTaskId='';area.dataset.returnId='';area.append(node('p',resultError(e),'alert warning'));
+    const raw=details('선택 파일 원문 보기','result-file-raw'),field=node('textarea');field.readOnly=true;field.rows=5;field.value=resultSelection.rawText;field.setAttribute('aria-label','선택 파일 원문');raw.append(field);area.append(raw);
+  }
+  area.append(btn('닫고 기존 붙여넣기 이용',()=>{resultRead++;resultSelection=null;resultMessage='작성 중인 입력은 그대로입니다. 기존 입력란에 필요한 보고를 붙여넣으세요.';renderResultFile();$('draft').focus();},'quiet','cancel-result-file'));
+}
+function acceptResultFile() {
+  if(!resultSelection)return;
+  if(resultSelection.projectId!==project.id){resultSelection=null;renderResultFile();return;}
+  if(resultSelection.revision!==project.revision){resultMessage='입력이 바뀌어 현재 기준으로 미리보기를 갱신했습니다. 확인한 뒤 가져오세요.';renderResultFile();return;}
+  try {
+    const n=importResultFile(project,resultSelection.rawText);
+    if(n===project){resultMessage=memoryDirty?'같은 본문은 이미 이 탭에 있습니다. 브라우저에는 저장되지 않았습니다. JSON 백업으로 보존하세요.':'같은 본문의 기존 기록을 확인했습니다. 새 기록은 추가하지 않았습니다.';renderResultFile();return;}
+    controller?.abort();controller=null;resultRead++;resultSelection=null;resultMessage='';
+    commit(n);resultMessage=memoryDirty?'결과는 이 탭에만 있습니다. 브라우저에 저장하지 못했습니다. 닫기 전에 JSON 백업을 저장하세요.':'보고를 가져왔습니다 · 앱 미검증. 작성 중인 입력은 그대로입니다.';
+    renderResultFile();showWork();
+  }catch(e){resultMessage=resultError(e)+' 기존 붙여넣기도 계속 이용할 수 있습니다.';renderResultFile();}
 }
 function basisCard(b:Basis,focus=false):HTMLElement {
   const box=node('div','','basis');box.dataset.basisId=b.id;
@@ -178,6 +232,7 @@ function renderHistory() {
     const e=node('div','','history-item');e.append(node('strong',`작업 ${String(index+1).padStart(2,'0')}`),tag(taskStatus(project,t)));
     e.append(node('p',taskTitle(project,t),'history-task-title'));const first=sourceOf(project,t);if(first)e.append(node('small',`${sourceName[first.kind]} · ${dateLabel(first.at)}`));
     const d=details('입력 원문 · 내보낸 기록',`history-${t.id}`);
+    if(t.resultFile)d.append(rawFileDetails(t.resultFile.rawText,t.resultFile.returnId,`result-raw-${t.id}`));
     for(const id of t.sourceIds){const s=project.sources.find(s=>s.id===id)!;d.append(node('p',SOURCE_LABEL[s.kind]),node('div',s.text,'source-raw'));}
     for(const h of t.handoffs){d.append(node('p',`${h.at} · ${h.method==='clipboard'?'복사':'파일 생성'} · 당시 기준 r${h.revision} · ${h.chars}자 · 식별 ${h.digest}${h.aiExcluded?' · 낡은 AI 문구 제외':''} (실행 여부 모름)`,'hint'));
       if(h.work)for(const [k,value] of Object.entries(h.work))if(value)d.append(node('div',`${k}: ${value}`,'source-raw'));
@@ -196,6 +251,7 @@ function renderWork(t:Task|null) {
   raw.querySelector('summary')!.append(node('span',taskTitle(project,t),'task-source-title'));
   for(const source of local){raw.append(tag(sourceName[source.kind]),node('p',dateLabel(source.at),'source-meta'));if(source.replyTo)raw.append(node('p',`앞선 질문: ${source.replyTo}`,'hint'));raw.append(node('div',source.text,'source-raw'),node('p',source.id,'source-id'));}
   card.append(raw);
+  if(t.resultFile)raw.append(rawFileDetails(t.resultFile.rawText,t.resultFile.returnId,'current-result-raw'));
   const next= node('div','','handoff-ready');next.id='handoff-ready';
   const exported=t.handoffs.at(-1),nextText=node('div');nextText.append(node('strong','작업 결과를 받으셨나요?'),node('p',exported?`${dateLabel(exported.at)} · ${exported.method==='clipboard'?'복사':'파일 저장'} 기록이 있어요. 외부 실행 여부는 알 수 없습니다.`:'작업문을 전달한 도구에서 받은 내용을 그대로 가져오세요.'));
   next.append(nextText,btn('결과 붙여넣기',()=>openComposer('report'),'primary','bring-report'));card.append(next);
@@ -244,6 +300,12 @@ function renderWork(t:Task|null) {
   const retry=btn('이 입력 다시 정리',()=>{void generate(t.id);},'quiet','retry-work');retry.dataset.aiAction='true';
   row.append(btn('작업문 복사',()=>{void exportWork(t.id,'clipboard');},'primary','copy-work'),btn('Markdown 저장',()=>{void exportWork(t.id,'download');},'secondary','download-work'),retry);
   foot.append(row,node('p','복사·저장은 자동 실행이 아닙니다. 사용 중인 개발 도구에 직접 전달하세요.'));card.append(foot,edit);
+  const fileOptions=details('결과를 파일로 받기 · 선택','file-return-options');fileOptions.className='file-return-options';
+  fileOptions.append(node('p','외부 도구에 결과 JSON 한 개 생성을 요청합니다. 짧은 보고나 웹 전용 작업은 기존 붙여넣기가 더 간단할 수 있어요.','hint'));
+  const fileActions=node('div','','actions');fileActions.append(btn('파일 결과용 작업문 복사',()=>{void exportWork(t.id,'clipboard',true);},'secondary','copy-file-work'),btn('파일 결과용 Markdown 저장',()=>{void exportWork(t.id,'download',true);},'quiet','download-file-work'));fileOptions.append(fileActions);
+  fileOptions.append(node('p','실행 권한은 늘어나지 않습니다. 파일 생성 금지와 충돌하면 일반 보고로 반환합니다. 식별자는 내보낼 때 채워집니다.','hint'));
+  if(lastFileExport?.taskId===t.id){const sent=details('이 탭에서 마지막으로 내보낸 파일용 전문','file-handoff-preview'),field=node('textarea');field.readOnly=true;field.rows=8;field.className='export-preview';field.value=lastFileExport.text;sent.append(field);fileOptions.append(sent);}
+  foot.append(fileOptions);
   const preview=details('실제로 전달할 전체 문맥 보기','handoff-preview');const txt=node('textarea');txt.id='handoff-text';txt.readOnly=true;txt.rows=14;txt.className='export-preview';
   try{txt.value=handoffText(project,t.id);}catch{txt.value='문맥 크기 또는 데이터 오류로 자동 인계를 만들지 못했습니다. 복구 파일로 원문을 보존하세요.';}
   preview.append(node('p','관련 입력 + 직전 작업 + 모든 보존 기준. AI가 관련으로 고르지 않은 기준도 뒤에 남습니다.','hint'),txt);card.append(preview);area.append(card);
@@ -309,7 +371,7 @@ function render() {
   $('starter-examples').hidden=!!project.tasks.length||returned;
   $('compose-panel').classList.toggle('initial',!project.tasks.length);
   const t=project.currentTaskId?taskOf(project):null;
-  renderBases(t);renderHistory();renderWork(t);renderReturnPreview();renderStatus();displayView();
+  renderBases(t);renderHistory();renderWork(t);renderReturnPreview();renderResultFile();renderStatus();displayView();
   for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id))d.open=open.get(d.id)!;
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
@@ -337,15 +399,34 @@ $('backup').addEventListener('click',()=>guard(()=>{
   }
 }));
 $('import').addEventListener('click',()=>$<HTMLInputElement>('import-file').click());
+$('select-result-file').addEventListener('click',()=>$<HTMLInputElement>('result-file-input').click());
+$('result-file-input').addEventListener('change',async()=>{
+  const input=$<HTMLInputElement>('result-file-input'),file=input.files?.[0];input.value='';if(!file)return;
+  const read=++resultRead,epoch=projectEpoch,projectId=project.id;
+  resultSelection=null;resultMessage='선택한 파일을 읽는 중입니다. 아직 가져오지 않았습니다.';renderResultFile();
+  try {
+    if(file.size>RESULT_BYTES)throw new Error('RESULT_TOO_LARGE');
+    const bytes=await file.arrayBuffer();
+    if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId)return;
+    const rawText=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
+    resultSelection={rawText,projectId,revision:project.revision};resultMessage='원문과 연결 대상을 확인한 뒤 가져오세요.';renderResultFile();
+  }catch(e){if(read!==resultRead||epoch!==projectEpoch)return;resultMessage=resultError(e)+' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';renderResultFile();}
+});
 $('import-file').addEventListener('change',async()=>{
   const input=$<HTMLInputElement>('import-file'),file=input.files?.[0];input.value='';if(!file)return;
+  const read=++recoveryRead,epoch=++projectEpoch,revision=project.revision,projectId=project.id;
+  resultRead++;resultSelection=null;resultMessage='';lastFileExport=null;renderResultFile();
   try {
-    if(file.size>FILE_LIMIT)throw new Error();const imported=parseProject(await file.text());
+    if(file.size>FILE_LIMIT)throw new Error();const raw=await file.text();
+    if(read!==recoveryRead||epoch!==projectEpoch)return;
+    if(project.id!==projectId||project.revision!==revision){project={...project,notice:'복구 파일을 읽는 동안 입력이 바뀌어 교체하지 않았습니다. 현재 입력은 그대로입니다.'};renderStatus();return;}
+    const imported=parseProject(raw);
     if(!confirm(`“${imported.name}” · 기준 ${imported.bases.length}개 · 작업 ${imported.tasks.length}개를 복구할까요?\n현재 화면의 프로젝트를 바꿉니다. 필요한 현재 내용은 먼저 복구 파일로 저장하세요.\n파일의 출처 기록은 서명된 검증 증거가 아닙니다.`))return;
     controller?.abort();controller=null;imported.pending=null;
-    try {if(!store)throw new Error();store.replace(imported);storageError='';hasSaved=true;memoryDirty=false;}catch{storageError='가져온 내용은 이 탭에 복구했지만 브라우저에 저장하지 못했습니다. 닫기 전에 복구 파일을 저장하세요.';memoryDirty=true;}
+    projectEpoch++;resultRead++;resultSelection=null;resultMessage='';
+    try {if(!store)throw new Error();store.replace(imported);storageError='';hasSaved=true;memoryDirty=false;}catch{storageError='가져온 내용은 이 탭에 복구했지만 원본 보존 또는 브라우저 저장에 실패했습니다. 기존 저장값은 덮어쓰지 않았습니다. 닫기 전에 복구 파일을 저장하세요.';memoryDirty=true;}
     project=imported;selectedReturnTaskId=undefined;view='work';contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();render();restoreDraftPanels();
-  } catch {project={...project,notice:'복구 파일의 형식·버전·참조가 올바르지 않습니다. 현재 프로젝트를 바꾸지 않았습니다.'};renderStatus();}
+  } catch {if(read!==recoveryRead||epoch!==projectEpoch)return;project={...project,notice:'복구 파일의 형식·버전·참조가 올바르지 않습니다. 현재 프로젝트를 바꾸지 않았습니다.'};renderStatus();}
 });
 $('nav-work').addEventListener('click',()=>{contextOpen=false;showWork();$('context-title').scrollIntoView({block:'nearest'});});
 $('nav-context').addEventListener('click',()=>{if(contextOpen&&view==='work')closeContext();else showContext();});

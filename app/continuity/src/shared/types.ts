@@ -1,5 +1,13 @@
-export const SCHEMA = 'idea015.project.2' as const;
+export const SCHEMA = 'idea015.project.3' as const;
+export const PREVIOUS_SCHEMA = 'idea015.project.2' as const;
 export const LEGACY_SCHEMA = 'idea015.project.1' as const;
+export const RESULT_SCHEMA = 'agentflow.return.1' as const;
+export const RESULT_BYTES = 131072;
+export const RESULT_TEXT_LIMIT = 11000;
+export interface ResultFile {
+  schemaVersion: typeof RESULT_SCHEMA; projectId: string; taskId: string; returnId: string;
+  report: string; evidence: string | null;
+}
 export const API_SCHEMA = 'idea022.context.4' as const;
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
@@ -36,12 +44,14 @@ export interface WorkValues { understanding: string; scope: string; next: string
 export interface ExportRecord {
   at: string; method: 'clipboard' | 'download'; revision: number; chars: number; digest: string;
   work: WorkValues | null; aiExcluded: boolean; legacyText: string | null;
+  returnId: string | null;
 }
 export interface Task {
   id: string; sourceIds: string[]; parentTaskId: string | null;
   advice: Advice | null; adviceRevision: number | null; mode: 'mock' | 'deepseek' | null;
   manual: { understanding: string | null; scope: string | null; next: string | null; checks: string | null };
   suggestions: { text: string; why: string }[] | null; handoffs: ExportRecord[];
+  resultFile: { returnId: string; rawText: string } | null;
 }
 export interface Ticket { projectId: string; revision: number; requestId: string; taskId: string }
 export interface Project {

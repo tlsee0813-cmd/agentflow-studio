@@ -2044,3 +2044,9 @@ footer>span:first-child {
 .feedback-stack .alert {
   box-shadow: 0 5px 18px #3023420a;
 }
+/* Optional file exchange stays within the existing disclosure/card vocabulary. */
+.file-return-options { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line, #e5e7eb); }
+.file-return-options > summary { cursor: pointer; color: var(--muted, #64748b); font-size: 13px; }
+#result-file-preview { display: grid; gap: 10px; min-width: 0; }
+#result-file-preview .source-raw { max-height: 280px; overflow: auto; overflow-wrap: anywhere; }
+#result-file-preview textarea { width: 100%; box-sizing: border-box; }

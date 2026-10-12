@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, LEGACY_SCHEMA, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
+import { API_SCHEMA, SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -13,6 +13,23 @@ function integer(v: unknown) { ensure(Number.isSafeInteger(v) && (v as number) >
 function id(v: unknown) { text(v, 100); ensure(/^[A-Za-z0-9_-]+$/.test(v as string)); }
 function date(v: unknown) { text(v, 30); ensure(Number.isFinite(Date.parse(v as string)) && new Date(v as string).toISOString() === v); }
 function unique(items: {id: string}[]) { ensure(new Set(items.map(x => x.id)).size === items.length); }
+/** A file is untrusted data, not an authenticated execution receipt. Never repair/truncate it. */
+export function parseResultFile(raw: string): ResultFile {
+  ensure(typeof raw==='string' && new TextEncoder().encode(raw).length<=RESULT_BYTES,'RESULT_TOO_LARGE');
+  ensure(!raw.startsWith('\uFEFF'),'INVALID_RESULT_FILE');
+  const v:unknown=JSON.parse(raw);
+  obj(v,['schemaVersion','projectId','taskId','returnId','report','evidence']);
+  ensure(v.schemaVersion===RESULT_SCHEMA,'INVALID_RESULT_FILE');
+  id(v.projectId); id(v.taskId); id(v.returnId);
+  text(v.report,RESULT_TEXT_LIMIT); if(v.evidence!==null)text(v.evidence,RESULT_TEXT_LIMIT);
+  return v as unknown as ResultFile;
+}
+/** Prefix is Studio metadata; the following external field remains character-for-character intact. */
+export function resultSourceText(f:ResultFile, revision:number, kind:'report'|'evidence'):string {
+  const prefix=`[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 ${f.taskId}의 인계 ${f.returnId} / r${revision}에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 ${kind} 원문]\n`;
+  ensure(prefix.length<=TEXT_LIMIT-RESULT_TEXT_LIMIT);
+  const value=f[kind]; ensure(value!==null); const result=prefix+value; text(result);return result;
+}
 function source(v: unknown): asserts v is Source {
   obj(v, ['id','kind','text','at','taskId','replyTo','disposition']); id(v.id); id(v.taskId); text(v.text); date(v.at);
   ensure(['request','report','evidence','test_answer','answer','manual_decision'].includes(v.kind as string));
@@ -134,9 +151,9 @@ function assertProject(v: unknown): asserts v is Project {
   const basisIds=new Set((v.bases as Basis[]).map(b=>b.id));
   for(const [key,value] of Object.entries(v.basisEdits as Record<string,unknown>)) { ensure(basisIds.has(key)); text(value,TEXT_LIMIT,true); }
   const sources = new Map((v.sources as Source[]).map(s=>[s.id,s])); const bids = [...basisIds];
-  const tasks=new Set<string>();
+  const tasks=new Set<string>(),returns=new Map<string,{taskId:string;record:ExportRecord}>();
   for (const t of v.tasks) {
-    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs']); id(t.id); list(t.sourceIds); ensure(t.sourceIds.length > 0);
+    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile']); id(t.id); list(t.sourceIds); ensure(t.sourceIds.length > 0);
     for (const s of t.sourceIds) ensure(sources.has(s as string)); ensure(new Set(t.sourceIds).size === t.sourceIds.length);
     if(t.parentTaskId !== null) ensure(tasks.has(t.parentTaskId as string)); // Ordered, acyclic.
     if(t.advice !== null) validateAdvice(t.advice,bids); ensure([null,'mock','deepseek'].includes(t.mode as null|string));
@@ -145,10 +162,25 @@ function assertProject(v: unknown): asserts v is Project {
     obj(t.manual,['understanding','scope','next','checks']); for(const k of Object.keys(t.manual)) if(t.manual[k] !== null) text(t.manual[k],6000,true);
     if(t.suggestions !== null) { list(t.suggestions,8); for(const s of t.suggestions) {obj(s,['text','why']);text(s.text,2000,true);text(s.why,2000,true);} }
     list(t.handoffs); for(const h of t.handoffs) {
-      obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText']); date(h.at); ensure(['clipboard','download'].includes(h.method as string));
+      obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText','returnId']); date(h.at); ensure(['clipboard','download'].includes(h.method as string));
       integer(h.revision); ensure((h.revision as number) <= (v.revision as number)); integer(h.chars); ensure(typeof h.digest === 'string' && /^[0-9a-f]{8}$/.test(h.digest)); ensure(typeof h.aiExcluded === 'boolean');
       if(h.work !== null) { obj(h.work,['understanding','scope','next','checks']); for(const k of Object.keys(h.work)) text(h.work[k],6000,true); }
       if(h.legacyText !== null) text(h.legacyText,250000);
+      if(h.returnId!==null) {
+        id(h.returnId);ensure(h.work!==null && h.legacyText===null && !returns.has(h.returnId as string));
+        returns.set(h.returnId as string,{taskId:t.id as string,record:h as unknown as ExportRecord});
+      }
+    }
+    if(t.resultFile!==null) {
+      obj(t.resultFile,['returnId','rawText']);id(t.resultFile.returnId);ensure(typeof t.resultFile.rawText==='string');
+      const f=parseResultFile(t.resultFile.rawText),target=returns.get(f.returnId);
+      ensure(target && tasks.has(target.taskId) && f.projectId===v.id && f.taskId===t.parentTaskId && f.taskId===target.taskId && f.returnId===t.resultFile.returnId);
+      const kinds:('report'|'evidence')[]=f.evidence===null?['report']:['report','evidence'];
+      for(const [index,kind] of kinds.entries()) {
+        const s=sources.get(t.sourceIds[index] as string);
+        ensure(s && s.taskId===t.id && s.kind===kind && s.replyTo===null && s.disposition==='provided' && s.text===resultSourceText(f,target.record.revision,kind));
+      }
+      // Later real answers/manual decisions on this task remain legal; never require an exact source count.
     }
     ensure(!tasks.has(t.id as string)); tasks.add(t.id as string);
   }
@@ -172,7 +204,8 @@ export function validateProject(v: unknown): Project { assertProject(v); return 
 export function digest(value: string): string {
   let h=0x811c9dc5; for(let i=0;i<value.length;i++){h^=value.charCodeAt(i);h=Math.imul(h,0x01000193);} return (h>>>0).toString(16).padStart(8,'0');
 }
-export const MIGRATION_NOTICE='이전 형식(project.1)에서 변환했습니다. 원래 저장 내용은 보관했고 기록은 지우지 않았습니다. 이전 AI 정리는 어느 기준 시점에 작성됐는지 알 수 없어 현재 작업문에서 제외합니다.';
+export const MIGRATION_NOTICE='이전 형식(project.1)에서 변환했습니다. 기록은 지우지 않았습니다. 이전 AI 정리는 어느 기준 시점에 작성됐는지 알 수 없어 현재 작업문에서 제외합니다.';
+export const V2_MIGRATION_NOTICE='이전 형식(project.2)을 project.3으로 변환했습니다. 기록은 유지하며 과거 내보내기에 파일 식별자를 만들지 않습니다.';
 /** project.1 -> project.2. Nothing user-authored is dropped: old export texts move to legacyText. */
 export function migrateLegacy(v: unknown): unknown {
   obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice']);
@@ -184,12 +217,24 @@ export function migrateLegacy(v: unknown): unknown {
       return {at:h.at,method:h.method,revision:h.revision,chars:h.text.length,digest:digest(h.text),work:null,aiExcluded:false,legacyText:h.text}; });
     return {...t,adviceRevision:null,handoffs};
   });
-  return {...v,schemaVersion:SCHEMA,bases,tasks,notice:MIGRATION_NOTICE};
+  return migrateV2({...v,schemaVersion:PREVIOUS_SCHEMA,bases,tasks,notice:MIGRATION_NOTICE},MIGRATION_NOTICE);
 }
 export function isLegacy(raw: string): boolean { try { return (JSON.parse(raw) as {schemaVersion?:unknown})?.schemaVersion === LEGACY_SCHEMA; } catch { return false; } }
+export function isPrevious(raw:string):boolean {try{return JSON.parse(raw)?.schemaVersion===PREVIOUS_SCHEMA;}catch{return false;}}
+function migrateV2(v:unknown, notice=V2_MIGRATION_NOTICE):unknown {
+  obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice']);
+  ensure(v.schemaVersion===PREVIOUS_SCHEMA);list(v.tasks);
+  const tasks=v.tasks.map(t=>{
+    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs']);list(t.handoffs);
+    const handoffs=t.handoffs.map(h=>{obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText']);return {...h,returnId:null};});
+    return {...t,resultFile:null,handoffs};
+  });
+  return {...v,schemaVersion:SCHEMA,tasks,notice};
+}
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
-  const project=(v as {schemaVersion?:unknown})?.schemaVersion === LEGACY_SCHEMA ? migrateLegacy(v) : v;
+  const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : v;
   assertProject(project); return project; // Freshly parsed, not shared: no defensive copy needed.
 }

@@ -103,6 +103,13 @@ jobs:
           set -o pipefail
           mkdir -p test-results
           python continuity/tests/select035_browser.py 2>&1 | tee test-results/select035-browser.log
+      - name: Optional result files (native files/storage; labelled fault injections; mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/connect039
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/connect039_browser.py 2>&1 | tee test-results/connect039-browser.log
       - name: Upload only this run's results, not historic snapshot evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

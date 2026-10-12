@@ -29,7 +29,7 @@
       <main id="main" class="shell" tabindex="-1">
         <section class="project-head" aria-label="현재 프로젝트">
           <div class="project-heading"><p class="eyebrow">PROJECT WORKSPACE</p><label for="project-name" class="sr-only">프로젝트 이름</label><div class="project-title"><input id="project-name" value="나의 프로젝트" maxlength="120" class="project-name" aria-describedby="name-hint"><span aria-hidden="true" class="pencil">↙</span></div><span id="name-hint" class="sr-only">이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.</span><p class="subtitle">앞에서 정한 것은 남기고, 지금 필요한 작업부터.</p></div>
-          <div class="project-tools"><span id="saved" class="saved" role="status">이 브라우저에 자동 저장</span><div class="row"><button id="backup" class="quiet" title="현재 프로젝트를 JSON 파일로 저장">↓ JSON 백업</button><button id="import" class="quiet" title="JSON 파일로 프로젝트 복구">↑ 가져오기</button></div><input id="import-file" type="file" accept="application/json,.json" hidden></div>
+          <div class="project-tools"><span id="saved" class="saved" role="status">이 브라우저에 자동 저장</span><div class="row"><button id="backup" class="quiet" title="현재 프로젝트를 JSON 파일로 저장">↓ JSON 백업</button><button id="import" class="quiet" title="JSON 파일로 프로젝트 복구">↑ 프로젝트 복구</button></div><input id="import-file" type="file" accept="application/json,.json" hidden></div>
         </section>
         <div class="feedback-stack"><div id="storage-error" class="alert error" role="alert" hidden></div><div id="notice" class="alert" role="status" hidden></div></div>
         <div id="work-view">
@@ -46,6 +46,11 @@
                   <div class="composer-bottom"><p id="input-hint" class="hint">필요한 질문만 받고, 바로 전달할 작업문을 준비해요.</p><details id="source-options" class="source-options"><summary>출처 구분</summary><label for="source-kind">이 입력은 무엇인가요?</label><select id="source-kind"><option value="request">실제 사용자 요청</option><option value="report">가져온 구현·진행 보고</option><option value="evidence">가져온 관찰·검사 자료</option><option value="test_answer">합성 시험답변 (실제 요구 아님)</option></select></details></div>
                   <div class="composer-actions"><p class="privacy">비밀번호나 API 키는 넣지 마세요.</p><div class="actions"><button class="quiet" id="save-input" type="button" hidden>원문만 보관</button><button class="primary" id="send" type="submit" disabled>작업문 준비하기 <span aria-hidden="true">↗</span></button></div></div>
                 </form>
+                <details id="result-file-panel" class="file-return-options"><summary>결과 파일로 가져오기 · 선택</summary>
+                  <p class="hint">파일용 작업문으로 받은 JSON 한 개를 선택하세요. 프로젝트 전체를 바꾸는 JSON 복구와 다릅니다. 파일이 없으면 기존 붙여넣기를 이용하세요.</p>
+                  <button id="select-result-file" type="button" class="secondary">결과 파일 선택</button><input id="result-file-input" type="file" accept="application/json,.json" hidden>
+                  <p id="result-file-message" class="hint" role="status"></p><div id="result-file-preview" aria-live="polite"></div>
+                </details>
               </section></details>
               
               <section id="empty" class="empty"><span class="empty-icon" aria-hidden="true">↳</span><div><h2>다음에 돌아와도, 처음부터 설명하지 않도록.</h2><p>요청과 결정, 돌아온 결과를 같은 프로젝트에 남겨요.<br>상세 조건은 필요할 때 직접 다듬을 수 있습니다.</p></div></section>

@@ -1,9 +1,10 @@
 import { type Project } from './types.js';
-import { ensure, parseProject, isLegacy, MIGRATION_NOTICE } from './validation.js';
+import { ensure, parseProject, isLegacy, isPrevious } from './validation.js';
 import { restore } from './domain.js';
 export const STORAGE_KEY='agentflow.idea015.project.v1';
-/** Untouched copy of a project.1 value taken before the first project.2 write replaces it. */
+/** Untouched legacy values taken before a project.3 write replaces them. */
 export const LEGACY_BACKUP_KEY='agentflow.idea015.project.v1.legacy-original';
+export const V2_BACKUP_KEY='agentflow.idea015.project.v2.legacy-original';
 export interface StorageLike { getItem(key:string):string|null; setItem(key:string,value:string):void }
 /** Compact JSON: the same bytes are autosaved, downloaded as a recovery file and accepted by import. */
 export function serializeProject(project:Project):string { return JSON.stringify(project); }
@@ -17,15 +18,20 @@ export class ProjectStore {
   private expected:string|null=null;
   private blocked:string|null=null;
   constructor(private storage:StorageLike) {}
+  private preserve(raw:string|null):void {
+    if(raw===null)return;
+    const key=isLegacy(raw)?LEGACY_BACKUP_KEY:isPrevious(raw)?V2_BACKUP_KEY:null;
+    if(key!==null && this.storage.getItem(key)===null)this.storage.setItem(key,raw);
+  }
   load():Project|null {
     try {
       this.expected=this.storage.getItem(STORAGE_KEY); if(this.expected === null) return null;
       const project=parseProject(this.expected);
-      if(!isLegacy(this.expected)) return restore(project);
-      // Never let the first project.2 write replace the only copy of a project.1 value.
-      try { if(this.storage.getItem(LEGACY_BACKUP_KEY) === null) this.storage.setItem(LEGACY_BACKUP_KEY,this.expected); }
-      catch { this.blocked='LEGACY_UNPRESERVED'; return {...restore(project),notice:`${MIGRATION_NOTICE} 브라우저 안에 원본을 따로 보관하지 못해 자동 저장을 멈췄습니다. 복구 파일을 저장하세요.`}; }
-      return {...restore(project),notice:MIGRATION_NOTICE};
+      // Preserve exact v1/v2 bytes before the first v3 write. Failure never permits autosave.
+      try {this.preserve(this.expected);}
+      catch { this.blocked='LEGACY_UNPRESERVED'; return {...restore(project),notice:`${project.notice??''} 브라우저 안에 원본을 따로 보관하지 못해 자동 저장을 멈췄습니다. 복구 파일을 저장하세요.`}; }
+      const restored=restore(project);
+      return isLegacy(this.expected)||isPrevious(this.expected)?{...restored,notice:project.notice}:restored;
     }
     catch(e) { this.blocked='STORAGE_BLOCKED'; throw e; }
   }
@@ -37,9 +43,12 @@ export class ProjectStore {
     ensure(this.storage.getItem(STORAGE_KEY)===this.expected,'STORAGE_CONFLICT');
     this.storage.setItem(STORAGE_KEY,raw); this.expected=raw;
   }
-  /** Called only after a user reviewed an import and explicitly chose replacement. */
+  /** Explicit recovery: preserve only the browser value being overwritten.
+   * The selected recovery file already exists outside storage; do not duplicate it here. */
   replace(project:Project):void {
     const raw=serializeProject(project); parseProject(raw);
+    try {this.preserve(this.storage.getItem(STORAGE_KEY));}
+    catch {this.blocked='LEGACY_UNPRESERVED';ensure(false,'LEGACY_UNPRESERVED');}
     this.storage.setItem(STORAGE_KEY,raw); this.expected=raw; this.blocked=null;
   }
 }

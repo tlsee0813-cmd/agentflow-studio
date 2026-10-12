@@ -173,7 +173,7 @@ test('I15-D25 previous work AI text is withheld after its basis changed; user-ed
 });
 test('I15-D26 project.1 files migrate without losing records; old AI text is treated as unknown-revision',()=>{
   const c=cycles(3),legacy=toLegacy(c),raw=JSON.stringify(legacy,null,2),p=parseProject(raw);
-  assert.equal(p.schemaVersion,'idea015.project.2');assert.match(p.notice,/project\.1/);assert.ok(p.bases.every(b=>!('locked' in b)));
+  assert.equal(p.schemaVersion,'idea015.project.3');assert.match(p.notice,/project\.1/);assert.ok(p.bases.every(b=>!('locked' in b)));
   assert.deepEqual(p.bases.map(b=>[b.id,b.text,b.history]),c.project.bases.map(b=>[b.id,b.text,b.history]));assert.deepEqual(p.sources,c.project.sources);
   assert.deepEqual(p.tasks.flatMap(t=>t.handoffs.map(h=>h.legacyText)),c.texts);
   const t=p.tasks.find(t=>t.advice);assert.equal(D.changedSinceAdvice(p,t),'unknown');assert.equal(D.currentWork(p,t).aiStale,true);
@@ -207,13 +207,13 @@ test('I15-D29 a reply is recorded once even when re-organisation fails and is re
   assert.equal(D.questionAnswered(p,D.taskOf(p)),true);assert.throws(()=>D.answer(p,id,'어제 오후부터 카드 결제만 실패'),/ALREADY_ANSWERED/);assert.equal(p.bases.length,count);
   assert.doesNotMatch(D.taskStatus(p,D.taskOf(p)),/항목 있음/);p=respond(p);assert.equal(p.sources.filter(s=>s.kind==='answer').length,1);
 });
-test('I15-D30 storage reports why it did not save; legacy browser data is kept before the first project.2 write',()=>{
+test('I15-D30 storage reports why it did not save; legacy browser data is kept before the first project.3 write',()=>{
   const m=memory();m.setItem(STORAGE_KEY,'broken');const s=new ProjectStore(m);assert.throws(()=>s.load());
   try{s.save(request());assert.fail();}catch(e){assert.equal(storageErrorCode(e),'STORAGE_BLOCKED');}
   assert.equal(storageErrorCode({name:'QuotaExceededError'}),'QUOTA');assert.equal(storageErrorCode(new Error('x')),'WRITE_FAILED');
   const c=cycles(2),legacy=JSON.stringify(toLegacy(c)),l=memory();l.setItem(STORAGE_KEY,legacy);const store=new ProjectStore(l),loaded=store.load();
   assert.match(loaded.notice,/project\.1/);assert.equal(l.getItem(LEGACY_BACKUP_KEY),legacy);store.save(D.editDraft(loaded,'계속'));
-  assert.equal(JSON.parse(l.getItem(STORAGE_KEY)).schemaVersion,'idea015.project.2');assert.equal(l.getItem(LEGACY_BACKUP_KEY),legacy);
+  assert.equal(JSON.parse(l.getItem(STORAGE_KEY)).schemaVersion,'idea015.project.3');assert.equal(l.getItem(LEGACY_BACKUP_KEY),legacy);
   const full=memory();full.setItem(STORAGE_KEY,legacy);const tight={getItem:full.getItem,setItem(k,v){if(k===LEGACY_BACKUP_KEY)throw Object.assign(new Error('quota'),{name:'QuotaExceededError'});full.setItem(k,v);}};
   const t=new ProjectStore(tight),kept=t.load();assert.match(kept.notice,/자동 저장을 멈췄습니다/);
   try{t.save(D.editDraft(kept,'덮어쓰기 시도'));assert.fail();}catch(e){assert.equal(storageErrorCode(e),'LEGACY_UNPRESERVED');}assert.equal(full.getItem(STORAGE_KEY),legacy);

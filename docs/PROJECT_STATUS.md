@@ -1,6 +1,6 @@
-# AgentFlow Studio 현재 상태 — IDEA022 + UI001 rev1 · RETURN032/FRESH033 rev1 · SELECT035 · INTENT037 rev1
+# AgentFlow Studio 현재 상태 — IDEA022 + UI001 rev1 · RETURN032/FRESH033 rev1 · SELECT035 · INTENT037 rev1 · CONNECT039 rev1
 
-최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능, RETURN032 결과 연결 안내·FRESH033 rev1 질문 적용 보호·SELECT035 결과 대상 선택·INTENT037 rev1 행동 범위 prompt를 반영했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
+최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능, RETURN032 결과 연결 안내·FRESH033 rev1 질문 적용 보호·SELECT035 결과 대상 선택·INTENT037 rev1 행동 범위 prompt·CONNECT039 rev1 선택적 결과 파일을 반영했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
 
 ## 최신 설계 방향
 
@@ -39,6 +39,16 @@ CI Node wildcard는 신규 Node 검사를 포함한다. verify.yml에 합성 fix
 rev1 새 프로세스의 03→05→01 추가3건은 제품 HTTP200·앱수용·전체응답 회수, 실패/불명/재시도/추가답변0이다. 03은 “실제 파일 수정은 하지 않는다”를 유지하며 재현 입력·기대/실제 출력과 수정 위치 후보를 조사 산출물로 요구했다. 05는 “최소 수정한 뒤 ... 검증한다”, 01은 “미납 필터 상태만 초기화하도록 최소 수정 ... 이름 검색어는 유지”와 관련 확인까지 연결했다. 이는 실제 개발/검증을 실행한 결과가 아니며, 단일 표본들로 일반 품질·고객 효용·prompt의 인과 효과를 입증하지 않는다.
 
 Node22.16 문법·동결 입력 검증과 system 외 buildBody 동일성, 실제 송신 body의 system 외 동일성을 확인했다. 동일 설정 deepseek-flash/2048/15초/rate6/cap20, 실제순차1·기존 보호 fetch 명시주입을 사용했고 반환 provider model/usage/finish는 제품 API 미관측이다. 최종 prompt SHA256 `32819624fbb9c2a437f3b07386808077580277fdc1c07821ec503a82403a9939`. 직전12건 증거 ZIP SHA256 `2300e37a8e9845ac2bb4ddb1d3f4b189d508b0d00f542adf26f4a28973f1fa48`, rev1 추가3건 ZIP SHA256 `02646d46490fa3a43bf52e4cda00ea253e421814103da69a0136fc3b068048c3`는 Cloud에 보존하며 저장소에 원시 응답/전체 증거를 게시하지 않는다. 이번 반영에서 추가 실AI0, 종료 paid=false다. 새 커밋 CI 결과는 Actions에서 별도 확인하며 미리 성공으로 기록하지 않는다.
+
+## CONNECT039 rev1 — 선택적 결과 파일 수용·반영
+
+총괄이 Claude의 독립 코드/이관 검토와 원문·검사를 읽고 수용했다. 파일용 작업문 내보내기→결과 JSON 하나 선택→정확한 원래 작업/인계 시점 preview→명시 가져오기→다음 문맥/복구를 지원한다. 붙여넣기 기본 경로는 유지하며 자동 CLI·실시간 수집·외부 실행/검증 완료가 아니다. ExportRecord.returnId와 Task.resultFile.rawText, v3 저장 형식을 추가하며 prompt/API 계약은 그대로다.
+
+rev1은 외부 구형 복구 파일 원문을 localStorage에 중복 저장해 quota를 만들던 경계를 수정했다. 브라우저에 이미 저장돼 덮어쓸 v1/v2 원문만 첫 쓰기 전에 버전별 legacy-original로 정확히 백업하고, 백업 실패는 쓰기를 차단한다. 사용자가 선택한 복구 파일은 원파일 자체가 있으므로 별도 슬롯에 중복 보관하지 않는다. 기존 백업은 변경/삭제하지 않고 자동 quota 정리도 하지 않는다. 선택적 대기 취소 안내/clipboard 관찰은 기존 방어·붙여넣기 fallback 범위에서 수용했으며 추가 기능으로 바꾸지 않았다.
+
+원래 CONNECT039 Cloud 검증은 baseline148 Git blob/후보151파일/17경로 patch·prompt 불변, 관련 Node97/97과 브라우저5+SELECT0353+UI00104/05/08 3 통과이며 rev1 전체 재실행 수치가 아니다. rev1 새 실행은 부모/continuity check·build, CONNECT039 Node7/7·storage I15-D17/D18/D30 3/3·02 native 1/1 및 05 장애 주입 1/1, fail/error/skip0이다. 동일 compiled quota 탐침(cap5020, v2원문3585자/v3본문3740자)은 수정 전 replace/후속 save/v3 재복구의 quota 실패가 수정 후 성공으로 바뀌고 외부 파일 백업이 생성되지 않음을 확인했다. 이는 합성 문자 수 Storage 대역이며 실제 브라우저 용량 측정이 아니다. 원래 Cloud Node22.16/npm10.9.2/TS5.8.3·Python3.13.5/Playwright1.57/시스템 Chromium154를 재사용했고 제품·기대값을 임의 수정하지 않았다.
+
+수용된 17경로와 기존 문서2만 기준178b0ec 위에 통합했다. 기존 게이트와 새 CONNECT039 native 단계·CI 전역 PYTHONUTF8=1을 유지하며 일부 Python 기본 encoding의 선택적 이식성 보완은 이번에 추가하지 않았다. 이 반영 커밋의 Ubuntu/Windows CI는 Actions 완료 결과로 별도 확인하며 미리 성공으로 기록하지 않는다. 원본 ZIP SHA256 `d183ea966356dfa074d2ff14f6fda63bfec7c8cfdf68d97ffa70f9ad9a6800bb`, rev1 ZIP SHA256 `d4f9e7cb81ad9efe190feae23f61bf0718a571ea53a374ec0bbc798920c05d73`와 Cloud 증거는 별도 보존하고 저장소에는 합성 fixture·소스만 반영한다. mock/paid=false, 실AI·키 접근·mainmerge·배포0. 실제 외부 CLI 준수·AI 내용 품질·사람 효용·운영 준비는 미검증이다.
 
 ## 현재 구현
 
