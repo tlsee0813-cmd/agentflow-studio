@@ -56,9 +56,11 @@ Sol 좁은 독립 검토는 두 결함을 합성 입력으로 재현했다. **R1
 
 **FLOW029rev1을 회수했고 R1/R2의 좁은 독립 재검토를 수용했다.** ZIP SHA256은 `ec51315cdd3ab5bd5445b0be9de5c88cdbba3121187025049547de2aa51d125e`, source220 manifest는 `8c817b4cb6a6fae264c0e4ed87566dd07a18a6c8c311bd92874b798b8b41925a`다. baseline184는 불변이며 원본216 대비12수정·4추가다. 합성 반향은 실제 callText에서 거절됐고 confirmed 기준 변경 뒤 옛 질문/지적은 현재 답변·handoff에서 제외되며 이력은 보존됐다. export·미제출 draft·restore 반대 경계도 확인했다. 원격 요청·실키 사용0이며 전체 live 준비·제품 수용·의미 품질 검증은 아니다.
 
-Pro는 **FLOW029rev2의3건**—비교 CLI의 명시적 보호 transport 주입, 알려진 기존 ApiError만 제한적으로 정규화, native 답변 이력의 시험 전제 보완—을 시작했다. Cloud는rev1 변경분 재현·native R2·합성 HTTP 경계만 검증하기 시작했고 Node200 전수 검사는 반복하지 않는다. 두 결과는 아직 대기이며 실AI0·제품 미승격이다. 기존DIRECT·단순Markdown과 재설명/수정/미정확정 문제를 비교하는 방향 및 수용 제품IDEA022 + UI001 rev1·026/027 실패 기록은 유지한다.
+Cloud의 **rev1 좁은 R1/R2 검증도 통과**했다. review-repro와 선택Node4/4·native Browser.test_11 1/1을 확인했고 source220/manifest는 위rev1과 같다. fake AI만 사용했으며 실AI0·제품 수정0이다. 실제 로드된33모듈 해시를 포함한 기술 JSON을 회수했지만 전체 Cloud 증거 ZIP은 아직 받지 않았다. 원본의 native 실패·건너뜀 기록이나 전체 live 준비 판정으로 대체하지 않는다.
 
-별도 Claude의 **FLOW029-CASES**는4개 가상 고객 에피소드(public2/holdout2)를 완료·회수했다. INPUTS와ORACLE을 분리하고 구현자에게공개2개만 제공한다. 인간 사용성 실험이나미공개 모델 검증 완료라고 주장하지 않는다. Cloud 원본 무상 검증·rev1 좁은 수용과 rev2/Cloud 후속 대기를 위에 구분했다. 새 실AI0, 제품IDEA022 + UI001 rev1 및026/027 실패 기록은 유지한다.
+**FLOW029rev2를 회수했다.** ZIP SHA256은 `df9875edc67a2d202309f35daf5c70506666af2460f6e9659365dc4d8caea98b`, source223 manifest는 `6b43320353a4c24832cb3dc484c5427435c8344d71bbd0f6848040e867b83494`다. rev1 대비7수정·3추가이며 수용baseline184는 불변이다. 명시적 보호 transport 주입·known oldApiError의 제한된 정규화·native 답변 이력의 시험 전제를 보완했다고 보고했다. 작성자FLOW Node106·DOM2 통과는 native 실행이 아니다. Sol의4합성 연결 경계 검토는 예비적으로 blocker를 찾지 못했지만 최종 보고는 아직 대기다. Cloud는 새rev2의 무상 명시transport/native02 검증 중이고 실제 비교는 대기한다. 기존 실호출 승인이 있더라도 완료한 호출로 세지 않는다. 새실AI0·제품 미승격이며 기존DIRECT·단순Markdown 비교와 수용 제품IDEA022 + UI001 rev1·026/027 실패 기록은 유지한다.
+
+별도 Claude의 **FLOW029-CASES**는4개 가상 고객 에피소드(public2/holdout2)를 완료·회수했다. INPUTS와ORACLE을 분리하고 구현자에게공개2개만 제공한다. 인간 사용성 실험이나미공개 모델 검증 완료라고 주장하지 않는다. Cloud 원본 무상 검증·rev1 좁은 검증 통과와 rev2/Cloud 후속 대기를 위에 구분했다. 새 실AI0, 제품IDEA022 + UI001 rev1 및026/027 실패 기록은 유지한다.
 
 FLOW029 기준은 정확 수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`의184파일 export다. baseline ZIP SHA256은 `382cedeaf38c884dbcdda594ec795636089cedb31d2a3966bc179487dd1abde3`, SOURCE_MANIFEST SHA256은 `f605954bc71913b99994936e2c10a13a06254572f77d2a0d9f4b39be52dc0200`다. Cloud 통합snapshot의 `11ac3176493bf02a15e681a31c6a12ca4e4bd7487c5d505019fceaf6941691d1`와184중181blob은 같지만 `.github/workflows/verify.yml`, `docs/START_HERE.md`, `docs/PROJECT_STATUS.md`의3공유 메타파일은 게시 시 갱신돼 다르다. 따라서 전체manifest가 같다고 주장하지 않고 export의 실제manifest를 구현 기준으로 사용한다.
 
@@ -75,7 +77,7 @@ FLOW029 기준은 정확 수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`
 
 Pro RESEARCH030-A1 제출ZIP(SHA256 `50b7ae34639271b4e179d688c5d7faee1699eb5b53ec3d4d073b49ce0187f5be`)을 회수했다.13사례와 최근 게시6건을 확인했지만 GitHub 이슈에 편중됐으므로 전체 개발자 경험·시장 결론으로 일반화하지 않는다. 후속 C1(한국Orca·일본Rakko/Yomichi 원글3개)과B1·T2 자료를 회수했다. 각 ZIP SHA256은 C1 `b4e76f47922853e3de154ed3b05a120eec580940a19ab6849d63d4e77f40c8c2`, B1 `c8e5c4a8a55f918ae6fcad2979ac57f45afff7d596aef818ea97005cd241ad90`, T2 `2fd783697c7fe76d92fa8b163b989a07f7e88965b9cb5e331ff1cb66c5791454`다. 기록된 변경과 실제 소비/검수의 불일치는 제품 후보 문제이며 새 장부·플랫폼의 필요성은 아직 확정하지 않는다. 최신1~2주 원글을 우선하고 필요하면 한 달로 확장하며 게시일과 사건일을 구분한다. 전체B~D 완료로 일반화하지 않는다.
 
-Pro의D1은 A 기존 도구 / B 최소 개입 / C 다른 관점의3흐름을 단일 합성 변경과 사소한 변경 반례로 비교 설계 중이다. 구현·실AI 평가·제품 방향 확정은 아니다.
+D1·D2 설계 자료를 회수했다(D2 ZIP SHA256 `65b3790e3a2924f5c9f1293fa7362f0bcc6c57e560b31815135a672c1c4bb1e3`). D1의 공통 입력에는 답변에 가까운 기대가 포함돼 A 기존 도구 / B 최소 개입 / C 다른 관점의 표현·부담 비교로만 해석하고 숨은 누락 발견 효과를 주장하지 않는다. D2의 flip-probe·회귀 확인은 아이디어이며 채택 기능이 아니다. 제안된18회 실행은 다음 배정으로 승인하지 않았고3개 합성 사례로 제품 방향·원인을 일반화하지 않는다. 사용자 연구·구현·실AI 검증은 없으며 기존FLOW 후보의 실제 비교를 먼저 기다린다. 연구 세션은 추가 계획을 연속 배정하지 않고 대기한다.
 
 Claude RESEARCH030-T rev1 ZIP(SHA256 `f6f622bb134a1c2ad54c693d0881345a50b30b6aa9f63f447ba30983b3480740`)을 회수했다. 최초 보고서의 유일 경로·서버 없음·하네스 흡수·회사 종료의 인과 단정을 철회하고 적용 조건이 확인된 기술 후보 근거만 보존한다. T2 자료 회수와 별도로 Claude의 완료 보고를 기다린다. 제품 방향·시장 효용·미래 로드맵은 미확정이고 계정정보/키·설치실행·실호출·제품편집은 없다. 원문/ZIP은 공유 저장소에 게시하지 않는다.
 
