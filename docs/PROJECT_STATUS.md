@@ -115,3 +115,9 @@ FLOW029 baseline은정확수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`
 [IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 앞선 `875d983f` 공유 반영은 FLOW029-PILOT1 실제18회·독립 구조 재현·조건 가림 평가와 후속 지시 예정 상태 문서뿐이었다. 당시 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. 당시 CI·PR 설정·main·배포는 변경하지 않았다.
 
 과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.
+
+### CONNECT039 rev2 — 기존 브라우저 기대값 교정
+
+수용된 rev2는 `continuity/tests/browser.py:218`의 정확한 저장 형식 기대값만 `idea015.project.2`에서 `idea015.project.3`으로 교정한다. 제품·prompt·다른 assertion·fixture·skip·timeout·CI는 변경하지 않는다. [90ce4e7의 CI38321354904](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38321354904)는 Ubuntu/Windows 기존 continuity 브라우저 단계에서 실패했고 CONNECT039 단계는 미실행이었다. 이 실패 기록은 보존한다.
+
+Work는 수정 전 test_10 실패와 수정 후 Linux Node22.16/Python3.12/Chromium143 전체13개 통과(fail/error/skip0)를 보고했고 총괄이 원문 로그를 검토했다. 일부 검사는 장애·상태 주입이며 순수 native 통과로 합치지 않는다. Cloud는 패키지7개와 한 줄 diff·최종 파일 SHA를 대조했고 같은 전체 검사를 반복하지 않았다. 이번 새 커밋의 양 OS 필수 게이트·CONNECT039 단계 결과는 Actions에서 별도로 확인하며 미리 성공으로 기록하지 않는다. 실AI·고객 효용 검증은 아니다.

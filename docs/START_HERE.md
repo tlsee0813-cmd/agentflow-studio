@@ -53,3 +53,5 @@ IDEA016~019의 실제 평가는 각 결과 문서에 보존하며 현재 공유 
 
 기존 실험 원장·고정 ID·gate를 재시도/reset/새 경로로 우회하지 않는다. 키·private 자료·전체 채팅·원본 교재·live 출력·설치 패키지·dist는 공유하지 않는다. main 병합과 운영 배포는 이번 범위에 없다.
 
+
+CONNECT039 rev2는 제품 변경 없이 기존 브라우저 회귀의 저장 형식 기대값 한 줄을 v3로 교정했다. 이전 커밋 양 OS CI 실패/CONNECT039 미실행과 Work의 교정 후 Linux13개 통과는 별개이며, 새 커밋 CI 결과는 Actions에서 확인한다. 상세 범위는 [PROJECT_STATUS](PROJECT_STATUS.md#connect039-rev2--기존-브라우저-기대값-교정)를 따른다.
