@@ -59,10 +59,14 @@ C02의 선택지 축·미정 기한·실제 답변 출처 표현, C05의 이미 
 - **Pro / UI001 rev1 — 수용·반영:** 초기 UI06 검사는 정상 compose 클릭 후 입력하도록 수정했고 제안 수정 뒤 ‘내보냄’ 표시가 갱신되지 않던 결함을 고쳤다. 독립 좁은 회귀 수용과 Cloud UI Node9/9·native UI9/9 통과를 확인했다. AI 응답은 규칙 mock이고 실제 AI 호출0이다. UI09는 Markdown 다운로드로 재내보내기를 검사했으며 별도 reload/클립보드 성공 검사는 아니다. UI08 클립보드 지연과 UI06 설정 표시는 명시적 대역이다.
 - **Claude / CONNECT001 rev1 — 좁은 검토 수용:** 두 결함을 수정한 합성 PoC의 독립 좁은 검토가 통과했다. 자체 session/turn 연결 우선·충돌/미연결의 수동 배치·같은 시각 보고의 단일 최신 후보를 확인했다. Windows Node24.19.0의 합성 회귀·hook runner 검사는 실제 CLI 발화·Codex stable 호환·다중 프로세스 append·앱 통합 검증과 구별한다. [설계 인계](research/idea020-connect001-handoff.md)를 이어받으며 실제 연결은 미검증이다.
 - **QUALITY027 — 실호출2회에서 중단·미승격:** 준비 검증 뒤2송신/1수용/1실패, PLAN_SCOPE_CONFLICT·최초18미실행·retry0·paid=false다. Cloud는goal의context참조와validator의deliver요구를 보고했고 Sol예비검토는prompt≥1deliver/validator전부deliver의 차이를 확인했다. 실제실패raw가아직없어goal의전체참조/원인은미확정이다. 실패run은보존·재개없음, [설계·검증 이력](quality026-design.md)을 유지한다.
-- **Pro / ARCH028-A — 실제OSS 조사·구조 재검토 중:** 새세션에서핵심코드/함수/검사/이슈까지읽어구조대안을비교하며재사용·삭제·교체할단위를판단한다. 이름/스타/README나027한줄패치로끝내지않는다.
-- **Claude / ARCH028-B — 독립 목적 중심 설계 중:** 같은027후보와최신사용자방향을받아분야밖메커니즘·AI/코드/사용자의새경계·최소고객흐름을독립설계한다. 두갈래 모두제품편집/원격/키/실API없음, 최종추천·새구현은아직없다.
+- **ARCH028-A/B — 조사·mock 설계 시연 완료:** 실제OSS 메커니즘과 독립 대안을 회수했으며 실AI품질·고객효용 증거는 아니다. 총괄은A형 현재작업카드+작은근거검토를FLOW029 첫 후보로 선택했다. B의 원문보존 원칙만 재사용하고 문장분류/writer·A대안D를 동시에 쌓지 않는다.
+- **Pro / FLOW029 — 새세션 구현 중:** 필요한질문/답·모르겠음·보류→수동수정 작업/확인점→인계→결과보고→다음변경의 완결 후보를 작성한다. 기존DIRECT와단순Markdown 대비재설명·수정·미정확정 손실을 비교하며 후보/검토의시도·실패원문을 분리보존한다. 아직 제출·새실AI·제품승격 없음.
+- **Claude / FLOW029-CASES — 병렬 사례 준비 중:** 가상4에피소드(public2/holdout2)의INPUTS/ORACLE을 분리하며 구현자에는공개2개만 전달한다. Cloud는구현회수후검증 단계이고 기존026/027실패는재개하지 않는다.
 
 
-[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 QUALITY027 중단·최신 사용자 설계 방향·ARCH028 독립 조사 진행 상태 문서뿐이다. 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. CI·PR 설정·main·배포는 변경하지 않는다.
+FLOW029 baseline은정확수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`의184파일 export다. ZIP SHA256 `382cedeaf38c884dbcdda594ec795636089cedb31d2a3966bc179487dd1abde3`, manifest `f605954bc71913b99994936e2c10a13a06254572f77d2a0d9f4b39be52dc0200`을 사용한다. Cloud snapshot11ac...와181blob은같고 workflow·START_HERE·PROJECT_STATUS의3공유메타만다르므로 전체동일이라고하지않는다. [설계 인계](quality026-design.md)에경로와구분을남긴다.
+
+
+[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 ARCH028 완료·FLOW029 구현/사례 준비·정확baseline 인계 상태 문서뿐이다. 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. CI·PR 설정·main·배포는 변경하지 않는다.
 
 과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.
