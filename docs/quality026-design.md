@@ -72,9 +72,13 @@ Cloud의 **rev1 좁은 R1/R2 검증도 통과**했다. review-repro와 선택Nod
 
 Sol·총괄의 원문 기반 좁은 의미 판정은dev02 reviewer가 전체의 명시적CSV 구현 요청을 놓치고 카드 제안을 실제 실행 승인과 혼동했으며 비저장 중복 관찰을 데이터 변경 정책으로 과잉 해석했다고 본다. dev01도 명시적인제목 검색을저자/태그 미정으로 불필요하게 늘렸고issues=[]는 이를 놓쳤다. DIRECTdev02의저장 검수 경계도 모호해 정답 기준으로 삼지 않는다. 두 개발 입력은holdout이 아니며 전체 품질·고객 효용·방식의 우열은 수용하지 않는다.
 
-**Pro의rev4가 송신·응답 중이다.** REVIEW_SYSTEM이 전체 요청과 현재 작은 작업의 실제 blocker, 관찰/비저장 표시와 변경 정책을 구분하고 generator/reviewer가 명시 범위를 새 미정으로 만들지 않도록 좁게 보완한다. 검토 bypass·needsUser 끄기·CSV 하드코딩·새 구조 없이strict/raw/반향 보호·호출상한을 유지한다. 제출본·새 검증 결과는 아직 없고 Cloud는대기·paid=false다. 수용 제품IDEA022 + UI001 rev1과과거 실패 원장은 불변이며 후보 소스는 게시하지 않는다.
+**FLOW029rev4 실제4사례 완료·의미 수용 보류.** 새 구조 검사10개는 통과했고 dev01/dev02와 합성 대조A/B에서 실제12응답을 회수했다. dev01 계획과B의 한 축 필수 질문은 타당했다. dev02는ready였지만 outcome의 비저장 미리보기와action의 실제 목록 병합/반영 범위가 모순됐고 reviewer가 이를 놓쳤다. 이는 데이터 변경을 실제 실행했다는 주장이 아니라 앞으로 할 작업/검수 문면의 모순이다. A의 순수 조회 제안에는 제안과 실제 승인·관찰과 변경·미래 check와 완료 주장을 혼동한 과잉 지적이 있었고 모든 issue의 필수 needsUser가 누락돼 invalid/unreviewed로 남았다. 필드를 추론하거나 지적을 무시해 ready로 승격하지 않는다.
 
-별도 Claude의 **FLOW029-CASES**는4개 가상 고객 에피소드(public2/holdout2)를 완료·회수했다. INPUTS와ORACLE을 분리하고 구현자에게공개2개만 제공한다. 인간 사용성 실험이나미공개 모델 검증 완료라고 주장하지 않는다. Cloud 원본/rev1 무상 검증과rev2/3 실제 개발 비교를 위에 구분했다. public/holdout4에피소드의 실제 평가 완료를 뜻하지 않으며 제품IDEA022 + UI001 rev1 및026/027 실패 기록은 유지한다.
+실제 wire에는 전체 요청·action/check·현재 범위 규칙이 전달됐으며 입력 누락/옛 prompt로 설명할 근거는 없다. DIRECT도 무오류 정답 기준이 아니고 개발2입력과 합성 대조2개는 정식 holdout/사용자 연구가 아니다. 이 관측으로 제품 전체·모델 정확도·방식의 우열을 결론내리지 않는다. rev2 실제6응답/CARD4실패와 rev3 실제7응답 등 기존 원장은 보존한다.
+
+**DIAG1/DIAG2의 새 독립 진단을 시작했다.** 새 Claude 세션은 실제 wire/코드 원인과 상한 있는 실험을 검토하고 Pro는 OSS2개 메커니즘의 실제 코드를 조사한다. 같은 증거/후보 relay를 사용하지만 구현·추가 실호출은 아직 없다.12응답 이후 새 호출0, Cloud 대기·paid=false다. 단순 prompt 재강조·검토 bypass·needsUser 끄기·사례 하드코딩·새 구조를 미리 선택하지 않으며 strict/raw/반향·취소 보호와 호출상한을 유지한다. 수용 제품IDEA022 + UI001 rev1과 과거 실패 원장은 불변이며 후보 소스·원문은 게시하지 않는다.
+
+별도 Claude의 **FLOW029-CASES**는4개 가상 고객 에피소드(public2/holdout2)를 완료·회수했다. INPUTS와ORACLE을 분리하고 구현자에게공개2개만 제공한다. 인간 사용성 실험이나미공개 모델 검증 완료라고 주장하지 않는다. Cloud 원본/rev1 무상 검증과rev2/3/4 실제 개발 비교를 위에 구분했다. public/holdout4에피소드의 실제 평가 완료를 뜻하지 않으며 제품IDEA022 + UI001 rev1 및026/027 실패 기록은 유지한다.
 
 FLOW029 기준은 정확 수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`의184파일 export다. baseline ZIP SHA256은 `382cedeaf38c884dbcdda594ec795636089cedb31d2a3966bc179487dd1abde3`, SOURCE_MANIFEST SHA256은 `f605954bc71913b99994936e2c10a13a06254572f77d2a0d9f4b39be52dc0200`다. Cloud 통합snapshot의 `11ac3176493bf02a15e681a31c6a12ca4e4bd7487c5d505019fceaf6941691d1`와184중181blob은 같지만 `.github/workflows/verify.yml`, `docs/START_HERE.md`, `docs/PROJECT_STATUS.md`의3공유 메타파일은 게시 시 갱신돼 다르다. 따라서 전체manifest가 같다고 주장하지 않고 export의 실제manifest를 구현 기준으로 사용한다.
 
