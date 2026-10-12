@@ -66,9 +66,15 @@ Cloud의 **rev1 좁은 R1/R2 검증도 통과**했다. review-repro와 선택Nod
 
 최초0호출 preflight 실패는 총괄이 이전8192토큰/10167ms 설정을 적용한 오류였다. 현재4096토큰·60초·rate6·cap20·동시성1로 정정했고 사례 간 시작 간격60.111초, finish stop6건·총14417토큰이다. 요청 모델은deepseek-flash지만 response-model·정확 HTTP상태는 provider가 저장하지 않아 복원해 주장하지 않는다. Cloud의 기존 보호 환경을 사용했고 실제 키 노출0·종료paid=false다. source223·entry·wrapper·기존19425파일 불변을 확인했으며 제품IDEA022 + UI001 rev1·026/027 실패 기록은 유지한다.
 
-**FLOW029rev3 제출·좁은 독립 리뷰 완료, Cloud 실행 중.** ZIP SHA256은 `b34320cd469bc03bc24d0c5cf50c1edbc90e72f3380d6f0a0448849cc729f55b`, source226 manifest는 `9b19a7feb0d794d382101ac08f6c0b636dcbb4337506c7423df546bcc3e6a24a`다. Luna의 정적 패키지 검사는rev2 대비4수정·3추가·삭제0, accepted184·lock 불변을 확인했다. 후보는flat prompt/schema 일치·안전하고 구체적인G2 형식 피드백·현재 요청한 작은 단위에 필요한 question/work 규칙을 보완한다. 작성자는좁은 mock57통과·strict 경계1070대조 차이0을 보고했지만 새실AI/native/독립검사 성공이 아니다. Sol 좁은 리뷰는 blocker 없이 선택6검사 통과로 완료했고 strict/raw/반향 보호·호출상한 보존을 확인했다. 의미 품질은 미측정이다. Cloud에19:50KST 변경분 검사 후 새dev01/dev02 실제 비교를 송신해 실행 중이며 결과는 아직 없다. 기존 보호 주입과4096토큰/60초·rate6·cap20·동시성1, 최대10시작·사례 간60초 이상을 유지한다. 새 정적entry는import 대상만 바꾸고 기존wrapper를 보존한다. 실제 비교 결과는 대기이며 기존rev2 실제6응답·CARD4실패는 불변 보존한다. 제품 승격·기본 설정 변경은 없다.
+**FLOW029rev3 실제 개발 비교 완료·전체 수용 보류.** ZIP SHA256은 `b34320cd469bc03bc24d0c5cf50c1edbc90e72f3380d6f0a0448849cc729f55b`, source226 manifest는 `9b19a7feb0d794d382101ac08f6c0b636dcbb4337506c7423df546bcc3e6a24a`다. Luna는rev2 대비4수정·3추가·삭제0/accepted184·lock 불변을 확인했고 Sol 선택6검사와 Cloud 변경분57검사가 통과했다. 작성자의1070 strict 경계 대조 차이0은 유한 회귀 관측이며 의미 품질 보증이 아니다.
 
-별도 Claude의 **FLOW029-CASES**는4개 가상 고객 에피소드(public2/holdout2)를 완료·회수했다. INPUTS와ORACLE을 분리하고 구현자에게공개2개만 제공한다. 인간 사용성 실험이나미공개 모델 검증 완료라고 주장하지 않는다. Cloud 원본/rev1 무상 검증과 rev2 실제 개발 비교를 위에 구분했다. public/holdout4에피소드의 실제 평가 완료를 뜻하지 않으며 제품IDEA022 + UI001 rev1 및026/027 실패 기록은 유지한다.
+실제 **7응답·finish stop**은DIRECT2 + CARD 생성3/검토2다. dev01은G1/R1 ready·issues=[]로 선질문 없이 계획을 제공했다. dev02는G1의steps 누락 뒤 안전한 구체적G2 피드백으로valid work를 새로 생성했으나R1이decision_required로 막았다. 이번 관측에서wrapper 구조 실패는 사라졌고 피드백의 누락 수정이 작동했다. 최초invalid G1과rev2 실제6응답/CARD4실패는 그대로 보존한다.
+
+Sol·총괄의 원문 기반 좁은 의미 판정은dev02 reviewer가 전체의 명시적CSV 구현 요청을 놓치고 카드 제안을 실제 실행 승인과 혼동했으며 비저장 중복 관찰을 데이터 변경 정책으로 과잉 해석했다고 본다. dev01도 명시적인제목 검색을저자/태그 미정으로 불필요하게 늘렸고issues=[]는 이를 놓쳤다. DIRECTdev02의저장 검수 경계도 모호해 정답 기준으로 삼지 않는다. 두 개발 입력은holdout이 아니며 전체 품질·고객 효용·방식의 우열은 수용하지 않는다.
+
+**Pro의rev4가 송신·응답 중이다.** REVIEW_SYSTEM이 전체 요청과 현재 작은 작업의 실제 blocker, 관찰/비저장 표시와 변경 정책을 구분하고 generator/reviewer가 명시 범위를 새 미정으로 만들지 않도록 좁게 보완한다. 검토 bypass·needsUser 끄기·CSV 하드코딩·새 구조 없이strict/raw/반향 보호·호출상한을 유지한다. 제출본·새 검증 결과는 아직 없고 Cloud는대기·paid=false다. 수용 제품IDEA022 + UI001 rev1과과거 실패 원장은 불변이며 후보 소스는 게시하지 않는다.
+
+별도 Claude의 **FLOW029-CASES**는4개 가상 고객 에피소드(public2/holdout2)를 완료·회수했다. INPUTS와ORACLE을 분리하고 구현자에게공개2개만 제공한다. 인간 사용성 실험이나미공개 모델 검증 완료라고 주장하지 않는다. Cloud 원본/rev1 무상 검증과rev2/3 실제 개발 비교를 위에 구분했다. public/holdout4에피소드의 실제 평가 완료를 뜻하지 않으며 제품IDEA022 + UI001 rev1 및026/027 실패 기록은 유지한다.
 
 FLOW029 기준은 정확 수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`의184파일 export다. baseline ZIP SHA256은 `382cedeaf38c884dbcdda594ec795636089cedb31d2a3966bc179487dd1abde3`, SOURCE_MANIFEST SHA256은 `f605954bc71913b99994936e2c10a13a06254572f77d2a0d9f4b39be52dc0200`다. Cloud 통합snapshot의 `11ac3176493bf02a15e681a31c6a12ca4e4bd7487c5d505019fceaf6941691d1`와184중181blob은 같지만 `.github/workflows/verify.yml`, `docs/START_HERE.md`, `docs/PROJECT_STATUS.md`의3공유 메타파일은 게시 시 갱신돼 다르다. 따라서 전체manifest가 같다고 주장하지 않고 export의 실제manifest를 구현 기준으로 사용한다.
 
