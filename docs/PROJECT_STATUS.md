@@ -60,16 +60,16 @@ C02의 선택지 축·미정 기한·실제 답변 출처 표현, C05의 이미 
 - **Claude / CONNECT001 rev1 — 좁은 검토 수용:** 두 결함을 수정한 합성 PoC의 독립 좁은 검토가 통과했다. 자체 session/turn 연결 우선·충돌/미연결의 수동 배치·같은 시각 보고의 단일 최신 후보를 확인했다. Windows Node24.19.0의 합성 회귀·hook runner 검사는 실제 CLI 발화·Codex stable 호환·다중 프로세스 append·앱 통합 검증과 구별한다. [설계 인계](research/idea020-connect001-handoff.md)를 이어받으며 실제 연결은 미검증이다.
 - **QUALITY027 — 실호출2회에서 중단·미승격:** 준비 검증 뒤2송신/1수용/1실패, PLAN_SCOPE_CONFLICT·최초18미실행·retry0·paid=false다. Cloud는goal의context참조와validator의deliver요구를 보고했고 Sol예비검토는prompt≥1deliver/validator전부deliver의 차이를 확인했다. 실제실패raw가아직없어goal의전체참조/원인은미확정이다. 실패run은보존·재개없음, [설계·검증 이력](quality026-design.md)을 유지한다.
 - **ARCH028-A/B — 조사·mock 설계 시연 완료:** 실제OSS 메커니즘과 독립 대안을 회수했으며 실AI품질·고객효용 증거는 아니다. 총괄은A형 현재작업카드+작은근거검토를FLOW029 첫 후보로 선택했다. B의 원문보존 원칙만 재사용하고 문장분류/writer·A대안D를 동시에 쌓지 않는다.
-- **FLOW029 — 제출본 회수·rev1 두 결함 수정 중:** baseline184불변+app/flow02932추가(216)다. 작성자Node200·DOM10+legacy1보고와 독립 판정을 구분한다. Sol은JSON escape파싱후키반향차단누락(R1)·confirmed기준변경후옛review질문현재사용(R2)을 합성으로 재현했다(실키노출0). 원본 수용/실AI진행은 보류하고Pro에rev1두건만배정했다. Cloud는무상clean/native/mock 검증 중·결과 미확인, 새실AI0·제품 미승격이다.
-- **Claude / FLOW029-CASES — 완료:** public2/holdout2, 합4가상에피소드를 회수했다. INPUTS/ORACLE을 분리하고 보류 사례·판정자료는 공개하지 않는다. 아직 실AI품질·사람사용성 증거가 아니다. FLOW029 Pro 구현은 진행 중이고 Cloud 검증은 구현회수후다.
+- **FLOW029 — 무상 검증 회수·rev1 수정 중:** baseline184불변+app/flow02932추가(216), 원본 수용/실AI 진행은 보류한다. Cloud 클린 설치·check/build·Node200/200·기존UI 선택1통과, native8통과/1실패/1건너뜀이다. 질문 분기의 전체 답변1건 가정과 localStorage 이력 보존 차이를 별도 진단했고 각 답변+1은 정상이며 최초 실패는 유지한다. 명시적 protectedFetch CLI주입 부재·oldApiError 오분류·파싱 후 escape 반향 보호 누락으로 live는 차단됐다. 제품 수정0·실AI0, 기술 JSON/보고만 회수했고 전체 증거 ZIP은 미회수다. Pro의 R1/R2rev1은 진행 중이며 완료 뒤 주입/오류/시험 전제를 작은 후속 배치로 전달할 예정이다. Cloud 대기·제품 미승격이다.
+- **Claude / FLOW029-CASES — 완료:** public2/holdout2, 합4가상에피소드를 회수했다. INPUTS/ORACLE을 분리하고 보류 사례·판정자료는 공개하지 않는다. 아직 실AI품질·사람사용성 증거가 아니다. FLOW029 rev1 수정과 이후 독립/Cloud 확인을 기다린다.
 
-- **Pro / RESEARCH030-A1 — 사용자 조사 진행 중:** 소스지도·계획분할/병렬통합 첫배치의 최종 결과는 아직 없다. 후속은최근원글3~5개씩작은배치로조건·독립반복·성공반례를확인한다. 연속성/변경·성공OSS·분야밖제품UX도완료했다고기록하지않는다.
-- **RESEARCH030-T — 기술 조사 회수·두 원문 후속 검토:** ZIP을회수했다. 발견은후보근거이며유일/불가능/시장효용·미래로드맵확정이아니다. 별도Claude에regulus PR102/happy1759의원문·적용조건·과잉결론정리를배정했다. 계정정보/키·설치실행·실호출·제품편집 없음, 원시자료는공개하지않는다.
+- **Pro / RESEARCH030-A1 — 회수·C1 작은 배치 진행:**13사례·최근 게시6건을 확인했으나 GitHub 이슈 편중이 있어 일반화하지 않는다. C1은 한국Orca·일본Rakko/Yomichi 원글3개로 시작했으며 전체B~D 완료가 아니다. 최근 원글·독립 반복·성공 반례를 작은 배치로 계속 확인한다.
+- **RESEARCH030-T — rev1 회수·후속 완료 대기:** 최초 보고의 유일 경로·서버 없음·하네스 흡수·회사 종료 인과 단정을 철회하고 조건부 기술 근거만 보존한다. 두 원문 후속 정리를 맡은 Claude는 완료 대기다. 제품 방향·시장 효용·미래 로드맵은 미확정이고 계정정보/키·설치실행·실호출·제품편집은 없다. 원시자료는 공개하지 않는다.
 
 
 FLOW029 baseline은정확수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`의184파일 export다. ZIP SHA256 `382cedeaf38c884dbcdda594ec795636089cedb31d2a3966bc179487dd1abde3`, manifest `f605954bc71913b99994936e2c10a13a06254572f77d2a0d9f4b39be52dc0200`을 사용한다. Cloud snapshot11ac...와181blob은같고 workflow·START_HERE·PROJECT_STATUS의3공유메타만다르므로 전체동일이라고하지않는다. [설계 인계](quality026-design.md)에경로와구분을남긴다.
 
 
-[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 FLOW029 수정 배정·무상 검증과 RESEARCH030 회수/후속 상태 문서뿐이다. 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. CI·PR 설정·main·배포는 변경하지 않는다.
+[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 이번 공유 반영은 FLOW029 무상 검증의 통과/실패·live 차단과 RESEARCH030 회수/정정/후속 상태 문서뿐이다. 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. CI·PR 설정·main·배포는 변경하지 않는다.
 
 과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.
