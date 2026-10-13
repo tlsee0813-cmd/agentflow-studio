@@ -189,7 +189,10 @@ class Browser(unittest.TestCase):
             body=route.request.post_data_json;ids=[b['id'] for b in body['bases']]
             route.fulfill(status=200,content_type='application/json',body=json.dumps({'mode':'mock','ticket':body['ticket'],'advice':{
                 'understanding':'탈퇴 30일 뒤 계정 삭제 배치','scope':'삭제 배치만','next':'30일 지난 계정을 삭제하는 nightly job 구현',
-                'checks':'30일 경과 계정만 삭제되는지 확인','question':None,'relatedBasisIds':ids,'reviewBasisIds':[],'suggestions':[]}},ensure_ascii=False))
+                'checks':'30일 경과 계정만 삭제되는지 확인','question':None,'relatedBasisIds':ids,'reviewBasisIds':[],'suggestions':[],
+                # Synthetic success envelope for context.5; the stale-instruction assertions below are unchanged.
+                'intent':{'version':'intent.1','relation':'start','goal':'탈퇴 30일 뒤 계정 삭제 배치','conditions':[],'retired':[],
+                          'basisRefs':[{'basisId':b['id'],'sourceId':b['sourceId'],'revision':b['revision']} for b in body['bases']]}}},ensure_ascii=False))
         self.page.route('**/api/continuity',advice)
         self.send('탈퇴 30일 뒤 계정 삭제 배치를 추가해줘.')
         self.assertIn('30일 지난 계정',self.instruction(self.page.locator('#handoff-text').input_value()))
