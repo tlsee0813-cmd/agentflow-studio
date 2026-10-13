@@ -125,3 +125,24 @@ test('FIX051 off-path B remains visible after late A return and next request, wi
   assert.ok(!D.begin(p).request.sources.some(s=>s.taskId===B));
   assert.deepEqual(outcomeOf(parseProject(serializeProject(p))).otherRequests,view.otherRequests);
 });
+
+test('FIX053 return work keeps its effective request and exclusion in current bases, not past-only references',()=>{
+  const original='예약 취소 기능을 만들어줘. 환불은 이번 범위 아님';
+  const report='테스트 2개 실패, 남은 일: 실패 수정';
+  let source=put(D.createProject(),original);const taskId=source.currentTaskId,requestId=source.sources[0].id,basisId=source.bases[0].id;
+  source=D.markHandoff(source,taskId,D.handoffText(source,taskId,'H_fix053'),'download',source.revision,'H_fix053');
+  for(const kind of ['report','evidence','file']) {
+    const p=kind==='file'?D.importResultFile(source,JSON.stringify(fileFor(source,taskId,'H_fix053',report,null))):put(source,report,kind);
+    const snapshot=serializeProject(p),wire=D.begin(p).request,handoff=D.handoffText(p);
+    assert.equal(D.taskOf(p).parentTaskId,taskId);
+    assert.ok(handoff.includes(`이번 요청 [${requestId}]이 실행 범위를 정합니다`));
+    const start=handoff.indexOf('## 이어갈 기준'),past=handoff.indexOf('## 이전 요청 원문 참조');
+    const current=handoff.slice(start,past<0?handoff.indexOf('## 결과를 가져올 때'):past);
+    assert.ok(current.includes(`[${basisId}]`),`${kind}: effective request must remain a current basis`);
+    assert.ok(current.includes(original),`${kind}: preserve both requested work and refund exclusion`);
+    assert.ok(past<0||!handoff.slice(past).includes(original),`${kind}: do not also classify it as past-only`);
+    assert.ok(handoff.includes(report));
+    assert.deepEqual(D.buildRequest(p,wire.ticket),wire,'handoff classification must not alter transport');
+    assert.equal(serializeProject(p),snapshot);
+  }
+});

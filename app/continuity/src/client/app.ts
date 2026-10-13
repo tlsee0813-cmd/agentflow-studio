@@ -123,11 +123,11 @@ function renderOutcome(t:Task|null) {
   const origin=flow.origin;
   const request=flow.request;
   if(request) {
-    area.append(node('p',flow.requestBasis?.status==='confirmed'?'이번 요청 · 사용자 직접 정정':'이번 요청 · 사용자 원문','source-meta'));
+    area.append(node('p',flow.requestBasis?.status==='confirmed'?'이번 요청 · 사용자 직접 정정':flow.requestBasis&&flow.requestBasis.text!==request.text?'이번 요청 · 기준의 현재 값':'이번 요청 · 사용자 원문','source-meta'));
     const purpose=node('p',flow.requestBasis?.text??request.text,'outcome-purpose outcome-excerpt');purpose.id='outcome-purpose';area.append(purpose);
     const direction=node('section','','outcome-direction');direction.id='outcome-direction';
     if(flow.direction&&flow.direction.id!==request.id) {
-      direction.append(node('h3',`${flow.directionDeclared?'앞서 바꾼 방향':'직전 사용자 요청'} · ${flow.directionBasis?.status==='confirmed'?'직접 정정':'원문 참조'}`),node('p',flow.directionBasis?.text??flow.direction.text,'outcome-excerpt'));
+      direction.append(node('h3',`${flow.directionDeclared?'앞서 바꾼 방향':'직전 사용자 요청'} · ${flow.directionBasis?.status==='confirmed'?'직접 정정':flow.directionBasis&&flow.directionBasis.text!==flow.direction.text?'기준의 현재 값':'원문 참조'}`),node('p',flow.directionBasis?.text??flow.direction.text,'outcome-excerpt'));
     }
     area.append(direction);
     const basis=flow.directionBasis??flow.requestBasis;
@@ -141,7 +141,7 @@ function renderOutcome(t:Task|null) {
     }
   }
   if(origin) {
-    const source=details('요청 전체 · 이전 원문 보기','outcome-origin');
+    const source=details('출발 · 방향 · 이번 요청 원문 보기','outcome-origin');
     const visibleSources=new Map([origin,flow.direction,request].filter((s):s is Source=>s!==null).map(s=>[s.id,s]));
     for(const input of visibleSources.values())source.append(node('div',input.text,'source-raw'),node('p',`${input.id} · ${dateLabel(input.at)}`,'source-id'));
     source.append(btn('전체 작업 기록 보기',()=>$('nav-history').click(),'quiet'));
