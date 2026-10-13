@@ -326,7 +326,7 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
     intent.manualGoal??intent.value.goal,
     '유지할 조건: '+((intent.manualConditions??intent.value.conditions.join(' / '))||'명시된 추가 조건 없음'),
     ...(intent.manualGoal===null&&intent.manualConditions===null&&intent.value.retired.length?['대체된 지시 · 다시 실행하지 않음 (AI 해석): '+intent.value.retired.join(' / ')]:[]),
-    intent.value.relation==='uncertain'?'목적 관계 미정: 아래 질문에 의존하는 변경은 확정 범위가 아닙니다.':'이번 작업의 크기는 아래 현재 요청이 정합니다. 목적 전체를 다시 구현하라는 지시가 아닙니다.',
+    intent.manualGoal===null&&intent.manualConditions===null&&intent.value.relation==='uncertain'?'목적 관계 미정: 미정 선택에 의존하는 변경은 확정 범위가 아닙니다.':'이번 작업의 크기는 아래 현재 요청이 정합니다. 목적 전체를 다시 구현하라는 지시가 아닙니다.',
     '해석 근거: '+intent.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision} / ${ref.sourceId}`).join(', '));
   lines.push(`\n${planFactsText(planFacts(p,t.id))}`);
   lines.push('\n## 이번 작업',v.understanding||'아래 사용자 입력과 현재 기준을 바탕으로 좁은 작업을 준비하세요.',

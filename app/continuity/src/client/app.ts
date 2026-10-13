@@ -127,7 +127,7 @@ function renderOutcome(t:Task|null) {
     const goal=node('p',interpreted.manualGoal??value.goal,'outcome-purpose outcome-excerpt');goal.id='intent-goal';card.append(goal);
     const conditions=interpreted.manualConditions??value.conditions.join(' / ');
     if(conditions)card.append(node('p',conditions,'source-raw'));
-    if(value.relation==='uncertain')card.append(node('p','관계가 미정인 부분은 아래 질문에서 정할 수 있어요.','hint'));
+    if(interpreted.manualGoal===null&&interpreted.manualConditions===null&&value.relation==='uncertain')card.append(node('p','아직 정하지 않은 관계는 미정으로 남겨 두었어요.','hint'));
     const detail=details('정리 바로잡기 · 근거 보기','intent-details');
     const g=node('textarea');g.rows=2;g.maxLength=6000;g.value=interpreted.manualGoal??value.goal;g.id='intent-edit-goal';g.setAttribute('aria-label','이어갈 목적 직접 정정');
     const c=node('textarea');c.rows=2;c.maxLength=6000;c.value=conditions;c.id='intent-edit-conditions';c.setAttribute('aria-label','유지할 조건 직접 정정');

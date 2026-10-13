@@ -65,7 +65,6 @@ export function validateAdvice(v: unknown, basisIds: string[], request?:ContextR
       checkIntentRefs(value,request.bases);
       // All current user basis versions must be acknowledged, including unknown/deferred answers.
       for(const b of request.bases.filter(b=>request.appFacts.inputs.some(s=>s.sourceId===b.sourceId)))ensure(value.basisRefs.some(ref=>ref.basisId===b.id));
-      ensure(value.relation!=='uncertain'||v.question!==null);
     }
   }
   for (const k of ['understanding','scope','next','checks']) text(v[k], 6000);

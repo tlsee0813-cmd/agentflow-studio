@@ -22,7 +22,7 @@ test('AI055 hand-authored four-turn interpretation reaches next HTTP input, home
 });
 test('AI055 invalid version/source/revision/current-input omission is rejected atomically; stored legacy eight-key advice still readable',()=>{
  const p=put(D.createProject(),cases[0].turns[0]),s=D.begin(p),good=fixtureAdvice(s.request);
- for(const mutate of [a=>delete a.intent,a=>a.intent.version='intent.99',a=>a.intent.basisRefs[0].sourceId='S_wrong',a=>a.intent.basisRefs[0].revision++,a=>a.intent.basisRefs=[],a=>a.intent.relation='uncertain']) {
+ for(const mutate of [a=>delete a.intent,a=>a.intent.version='intent.99',a=>a.intent.basisRefs[0].sourceId='S_wrong',a=>a.intent.basisRefs[0].revision++,a=>a.intent.basisRefs=[]]) {
   const bad=structuredClone(good);mutate(bad);assert.throws(()=>validateAdvice(bad,['D1'],s.request));
   const n=D.receive(s.project,s.request,{mode:'mock',ticket:s.request.ticket,advice:bad});assert.equal(D.taskOf(n).advice,null);assert.deepEqual(n.bases,p.bases);assert.deepEqual(n.sources,p.sources);
  }
@@ -35,6 +35,8 @@ test('AI055 separate purpose and uncertain interpretation do not turn parent lin
  assert.deepEqual(D.currentIntent(p,D.taskOf(p)).value.conditions,[]);assert.equal(p.sources[0].text,cases[0].turns[0]);
  p=put(p,'제한은 좀 풀어줘');s=D.begin(p);a=fixtureAdvice(s.request);a.intent.relation='uncertain';a.question={kind:'choice',text:'어느 제한을 바꾸려 하나요?',why:'변경 범위가 달라집니다.',options:[]};
  p=D.receive(s.project,s.request,{mode:'mock',ticket:s.request.ticket,advice:a});assert.equal(D.questionApplicability(p,D.taskOf(p)),'active');assert.match(D.handoffText(p),/목적 관계 미정/);
+ p=D.answer(p,p.currentTaskId,'지금은 정하지 않을게요.','deferred');s=D.begin(p);a=fixtureAdvice(s.request);a.intent.relation='uncertain';a.question=null;
+ p=D.receive(s.project,s.request,{mode:'mock',ticket:s.request.ticket,advice:a});assert.equal(D.currentIntent(p,D.taskOf(p)).value.relation,'uncertain');assert.equal(D.questionApplicability(p,D.taskOf(p)),'missing');assert.equal(p.sources.at(-1).disposition,'deferred');
 });
 test('AI055 manual correction/undo values survive regeneration; stale response and changed source cannot replace them',()=>{
  let p=reply(put(D.createProject(),cases[0].turns[0]));p=reply(put(p,cases[0].turns[1]));
