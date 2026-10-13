@@ -208,7 +208,23 @@ export function previousIntent(p:Project,t:Task):CurrentIntent|null {
 function requestIntent(p:Project,t:Task):PreviousIntent|null {
   const correction=intentCorrection(t),base=(correction?currentIntent(p,t):null)??previousIntent(p,t);
   if(!correction)return base;
-  return {taskId:base?.taskId??t.id,value:base?.value??null,manualGoal:correction.goal,manualConditions:correction.conditions};
+  // taskId names the task whose purpose this is: the correction belongs to this task, even when the AI value is its predecessor's.
+  return {taskId:t.id,value:base?.value??null,manualGoal:correction.goal,manualConditions:correction.conditions};
+}
+/** A 'separate' interpretation does not end the earlier purpose of this path. Carry the nearest earlier
+ * still-valid non-separate interpretation next to it, so its maintained/replaced reading is not lost.
+ * Stops at a predecessor without a valid interpretation; never skips unknown ground. */
+function purposeIntent(p:Project,t:Task,prior:PreviousIntent|null):CurrentIntent|null {
+  if(prior?.value?.relation!=='separate')return null;
+  let task=p.tasks.find(x=>x.id===prior.taskId);const seen=new Set<string>();
+  while(task&&!seen.has(task.id)) {
+    seen.add(task.id);const {parent,anchor}=contextLinks(p,task),previous=anchor??parent;
+    const found=previous?currentIntent(p,previous):null;
+    if(!found)return null;
+    if(found.value.relation!=='separate')return found;
+    task=previous;
+  }
+  return null;
 }
 export function correctIntent(p:Project,id:string,goal:string,conditions:string):Project {
   text(goal,6000);text(conditions,6000,true);const n=change(p),t=taskOf(n,id);
@@ -236,7 +252,8 @@ const jsonBytes=(v:unknown)=>new TextEncoder().encode(JSON.stringify(v)).length;
 export function buildRequest(p: Project, ticket: Ticket): ContextRequest {
   const t=taskOf(p,ticket.taskId),parts=contextParts(p,t);
   const req:ContextRequest={schemaVersion:API_SCHEMA,ticket:copy(ticket),projectName:p.name,sources:parts.sources,
-    bases:p.bases.map(contextBasis),appFacts:planFacts(p,t.id),previousWork:parts.previousWork,previousIntent:requestIntent(p,t)};
+    bases:p.bases.map(contextBasis),appFacts:planFacts(p,t.id),previousWork:parts.previousWork,previousIntent:null,purposeIntent:null};
+  req.previousIntent=requestIntent(p,t);req.purposeIntent=purposeIntent(p,t,req.previousIntent);
   let bytes=jsonBytes(req);
   if(bytes>REQUEST_BYTES) {
     const sources=new Map(p.sources.map(s=>[s.id,s]));
@@ -253,6 +270,7 @@ export function buildRequest(p: Project, ticket: Ticket): ContextRequest {
   // An interpretation resting on an excerpt is withdrawn; a user correction is not an interpretation and stays.
   const prior=req.previousIntent;
   if(prior?.value?.basisRefs.some(ref=>req.bases.some(b=>b.id===ref.basisId&&b.partial)))req.previousIntent=prior.manualGoal!==null?{...prior,value:null}:null;
+  if(req.purposeIntent&&(req.previousIntent?.value?.relation!=='separate'||req.purposeIntent.value.basisRefs.some(ref=>req.bases.some(b=>b.id===ref.basisId&&b.partial))))req.purposeIntent=null;
   // Final check uses the exact serialised UTF-8 body, not characters or the 8MB local-storage budget.
   ensure(jsonBytes(req)<=REQUEST_BYTES,'CONTEXT_TOO_LARGE');
   return req;
@@ -371,9 +389,13 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
   // A return continues the effective request on its path; the report is not a replacement request.
   if(outcome.request)currentSources.add(outcome.request.id);
   const earlierRequests=p.bases.filter(b=>b.status==='requested'&&!currentSources.has(b.sourceId));
-  const earlierIds=new Set(earlierRequests.map(b=>b.id));
+  // After the user corrected this task's purpose, its own requested wording predates that correction: kept and
+  // shown, but not as a current value. User decisions (confirmed/answered/deferred) are unaffected.
+  const preCorrection=intentCorrection(t)?p.bases.filter(b=>b.status==='requested'&&currentSources.has(b.sourceId)):[];
+  const earlierIds=new Set([...earlierRequests,...preCorrection].map(b=>b.id));
   lines.push('\n## 이어갈 기준 — 직접 관련 (현재 값)',...p.bases.filter(b=>related.has(b.id)&&!earlierIds.has(b.id)).map(b=>basisLine(b)));
   lines.push('\n## 나머지 보존 기준 (현재 값) — 생략/무응답은 폐기가 아님',...p.bases.filter(b=>!related.has(b.id)&&!earlierIds.has(b.id)).map(b=>basisLine(b)));
+  if(preCorrection.length) lines.push('\n## 정정 전 이 작업의 요청 원문 — 사용자 정정과 양립하는 조건은 유지, 충돌하거나 유지 여부가 불명확하면 확정하지 말고 확인 (자동 폐기 아님)',...preCorrection.map(b=>basisLine(b)));
   if(earlierRequests.length) lines.push('\n## 이전 요청 원문 참조 — 후속 변경이 우선, 이번 범위에 자동 추가하지 않음',...earlierRequests.map(b=>basisLine(b)));
   lines.push('요청 원문에는 배경·인용도 포함될 수 있습니다. 전체를 확정 정책으로 읽지 마세요. 최신 명시 요청·답변은 그 범위에서만 적용하고, 관련 없는 기준은 유지하세요.');
   if(w.reviewBasisIds.length) lines.push(`재검토 제안 (자동 폐기 아님): ${w.reviewBasisIds.join(', ')}`);

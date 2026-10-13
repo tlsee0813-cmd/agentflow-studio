@@ -236,3 +236,12 @@ MOCK 기본 응답은 입력 인용만 하고 새 자연어 해석 능력을 흉
 - FIX059: 유효한 AI 해석이 없는 첫 작업에서 정정 뒤 새 확정 기준을 기록해도, 다음 요청에 `previousIntent.value=null`과 사용자 정정이 함께 실린다(가짜 AI 해석을 만들지 않음; `value=null`은 정정이 있을 때만 검증 통과). 발췌 기준에 기댄 AI 해석은 빠지되 정정은 남는다. `intent-edit.1` 복원 뒤 일반 작업 편집은 목적을 바꾸지 않는다. FIX061: 모든 `intent-edit.1`은 첫 복원 때 v2로 확정 변환하고 결과를 재검증한다. 비공백 목적이 없으면(빈값·공백·조건만) 목적을 지어내지 않고 `goal:null`로 옛 AI 문구·질문 제외 revision만 유지하며, `manual.*`는 그대로 둔다. 이후 편집·저장·재복원이 `manual.*`를 목적으로 읽지 않는다. `idea022.context.5`는 미공개 후보 계약이라 버전명을 유지했다.
 
 재현: `node --test continuity/tests/fix058.test.mjs continuity/tests/ai055.test.mjs`, `python continuity/tests/ai055_browser.py`(app/에서).
+
+## FIX066 — 실제 DeepSeek 의미 실패(AI060)의 구조 원인 수정 (`fix066/intent-action-consistency`)
+
+AI060(기준 `2750b58`, deepseek-flash 9회, 증거 `docs/evidence/AI060-semantic-failures.md` @ `c417c2a`)에서 HTTP·계약은 모두 통과했지만 의미 실패가 관측됐다. 원문 판정은 다음과 같다. P1·P2 입력에는 가입 제한을 철회한다는 명문이 없으므로, 이번 수정은 "가입 철회 위반"을 정답으로 고정하지 않는다.
+
+- P1 구조: 3턴째 버튼 색 작업이 `separate`로 해석되자, 4턴째 `previousIntent`에는 그 해석만 실리고 2턴째의 유지/대체 해석이 사라졌다. 이제 `previousIntent`가 separate이면 같은 경로에서 더 앞선 separate가 아닌 유효 해석을 `purposeIntent`로 함께 보낸다(AI 해석이며 기준을 바꾸지 않는다. 낡은 해석은 건너뛰지 않는다. 계약 `idea022.context.6`).
+- P2 구조: 정정된 작업의 정정 전 request 원문이 AI에는 "이번 입력"으로, 작업문에는 "현재 값"으로 정정과 나란히 나갔다. 이제 정정은 이 작업에 귀속(`previousIntent.taskId`=현재 작업)되고, 작업문은 그 원문을 "정정 전 이 작업의 요청 원문 — 양립하는 조건은 유지, 충돌·불명확은 확인" 구간에 보존한다. 사용자 결정(확정·답변·보류)은 그대로 현재 조건이다.
+- prompt: 같은 작업의 정정과 원문의 관계, 보존이 '그대로 유지' 단정이 아님, purposeIntent의 의미, next로 넘긴 사실의 재질문 금지, 원문에 없는 시점·조건 창작 금지(P3)를 추가했다. P3은 입력 결함이 아니라 모델 불이행 후보다.
+- 검증은 손으로 쓴 응답(관측 형태)과 MOCK이다. **수정 후 실DeepSeek 재검증은 아직 하지 않았다.**

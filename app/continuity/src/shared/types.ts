@@ -8,7 +8,7 @@ export interface ResultFile {
   schemaVersion: typeof RESULT_SCHEMA; projectId: string; taskId: string; returnId: string;
   report: string; evidence: string | null;
 }
-export const API_SCHEMA = 'idea022.context.5' as const;
+export const API_SCHEMA = 'idea022.context.6' as const;
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
 export const FILE_LIMIT = 8_000_000;
@@ -96,6 +96,8 @@ export interface AppFacts {
 export interface ContextRequest {
   schemaVersion: typeof API_SCHEMA; ticket: Ticket; projectName: string;
   sources: Source[]; bases: ContextBasis[]; appFacts: AppFacts; previousIntent: PreviousIntent|null;
+  /** Only when previousIntent is a 'separate' interpretation: the nearest earlier non-separate one on this path. */
+  purposeIntent: CurrentIntent|null;
   previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean; manualConditionFields: ('scope' | 'checks')[] }) | null;
 }
 export interface Envelope { mode: 'mock' | 'deepseek'; ticket: Ticket; advice: Advice }

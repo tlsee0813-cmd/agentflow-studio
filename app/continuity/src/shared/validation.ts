@@ -149,7 +149,7 @@ function appFacts(v: unknown, req: {ticket:Ticket;sources:Source[];bases:Context
   for(const b of req.bases) if(inputIds.has(b.sourceId)) ensure(currentRecords.has(b.id));
 }
 export function validateRequest(v: unknown): ContextRequest {
-  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts','previousIntent']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
+  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts','previousIntent','purposeIntent']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
   list(v.sources); list(v.bases); for (const s of v.sources) source(s); for (const b of v.bases) contextBasis(b);
   ensure(v.sources.length > 0); unique(v.sources as Source[]); unique(v.bases as {id:string}[]);
   if(v.previousIntent!==null) {
@@ -157,6 +157,12 @@ export function validateRequest(v: unknown): ContextRequest {
     if(v.previousIntent.value===null)text(v.previousIntent.manualGoal,6000); // A correction only; no AI interpretation is implied.
     else checkIntentRefs(validateIntent(v.previousIntent.value),v.bases as ContextBasis[]);
     for(const key of ['manualGoal','manualConditions'])if(v.previousIntent[key]!==null)text(v.previousIntent[key],6000,true);
+  }
+  if(v.purposeIntent!==null) {
+    ensure(v.previousIntent!==null&&(v.previousIntent as {value:{relation?:unknown}|null}).value?.relation==='separate');
+    obj(v.purposeIntent,['taskId','value','manualGoal','manualConditions']);id(v.purposeIntent.taskId);
+    const value=validateIntent(v.purposeIntent.value);ensure(value.relation!=='separate');checkIntentRefs(value,v.bases as ContextBasis[]);
+    for(const key of ['manualGoal','manualConditions'])if(v.purposeIntent[key]!==null)text(v.purposeIntent[key],6000,true);
   }
   appFacts(v.appFacts,{ticket:v.ticket,sources:v.sources as Source[],bases:v.bases as ContextBasis[]});
   ensure(new TextEncoder().encode(JSON.stringify(v)).length<=REQUEST_BYTES,'CONTEXT_TOO_LARGE');
