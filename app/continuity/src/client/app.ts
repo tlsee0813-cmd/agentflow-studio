@@ -127,7 +127,7 @@ function renderOutcome(t:Task|null) {
     const purpose=node('p',flow.requestBasis?.text??request.text,'outcome-purpose outcome-excerpt');purpose.id='outcome-purpose';area.append(purpose);
     const direction=node('section','','outcome-direction');direction.id='outcome-direction';
     if(flow.direction&&flow.direction.id!==request.id) {
-      direction.append(node('h3',`${flow.directionDeclared?'앞서 바꾼 방향':'직전 사용자 요청'} · ${flow.directionBasis?.status==='confirmed'?'직접 정정':'원문 참조'}`),node('p',flow.directionBasis?.text??flow.direction.text,'source-raw'));
+      direction.append(node('h3',`${flow.directionDeclared?'앞서 바꾼 방향':'직전 사용자 요청'} · ${flow.directionBasis?.status==='confirmed'?'직접 정정':'원문 참조'}`),node('p',flow.directionBasis?.text??flow.direction.text,'outcome-excerpt'));
     }
     area.append(direction);
     const basis=flow.directionBasis??flow.requestBasis;

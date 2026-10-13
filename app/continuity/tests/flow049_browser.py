@@ -141,6 +141,7 @@ class OutcomeHome(unittest.TestCase):
         for width in [1440,390]:
             self.page.set_viewport_size({'width':width,'height':900})
             self.page.locator('#outcome-home').scroll_into_view_if_needed()
+            self.assertLess(self.page.locator('#outcome-direction p').bounding_box()['height'],120)
             self.page.screenshot(path=str(base.OUT/f'fix051-return-{width}.png'),full_page=True)
             self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
         (base.OUT/'fix051-http-requests.json').write_bytes(json.dumps(calls,ensure_ascii=False,indent=2).encode('utf-8'))
