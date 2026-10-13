@@ -159,8 +159,8 @@ function boundaryProject() {
   const req=D.begin(p).request,extra=REQUEST_BYTES-bytes(req);
   assert.ok(extra>0);
   let left=extra;
-  // The starting request is now also on the wire; pad an old basis sent only once.
-  for(let i=1;left>0&&i<p.bases.length-2;i++) {
+  // Pad the oldest basis: old request sources are not redundantly forced onto the wire.
+  for(let i=0;left>0&&i<p.bases.length-2;i++) {
     const pad=Math.min(left,11900-p.bases[i].text.length);
     p.bases[i].text+='x'.repeat(pad);p.sources[i].text=p.bases[i].text;left-=pad;
   }
@@ -176,7 +176,7 @@ function local(port,request) {
 }
 test('I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8MB recovery/export independent',async()=>{
   const p=boundaryProject(),req=D.begin(p).request;assert.equal(bytes(req),REQUEST_BYTES);validateRequest(req);validateProject(p);
-  const over=clone(p);over.bases[1].text+='x';over.sources[1].text=over.bases[1].text;
+  const over=clone(p);over.bases[0].text+='x';over.sources[0].text=over.bases[0].text;
   const saved=serializeProject(over);assert.throws(()=>D.begin(over),/CONTEXT_TOO_LARGE/);assert.equal(serializeProject(over),saved);
   assert.deepEqual(parseProject(saved),over);assert.ok(Buffer.byteLength(saved)<FILE_LIMIT);assert.equal(FILE_LIMIT,8_000_000);
   assert.ok(D.handoffText(over).includes(over.bases[0].text));

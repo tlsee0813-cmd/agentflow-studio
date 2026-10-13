@@ -116,30 +116,45 @@ function renderOutcome(t:Task|null) {
   const area=$('outcome-home');area.replaceChildren();area.hidden=!t;if(!t)return;
   const flow=outcomeOf(project,t.id);area.dataset.outcomeId=flow.id??'';
   const top=node('div','','outcome-heading'),title=node('div');
-  title.append(node('p','PROJECT OUTCOME','eyebrow'),node('h2','원하는 결과를 중심으로'));
+  title.append(node('p','PROJECT OUTCOME','eyebrow'),node('h2','지금 이어갈 작업'));
   const primary=btn(questionApplicability(project,t)==='active'?'필요한 선택 보기':'현재 작업문 보기',()=>{$('current-work').focus({preventScroll:true});$('current-work').scrollIntoView({block:'start'});},'primary','home-work');
   const topActions=node('div','','outcome-actions');topActions.append(primary,btn('방향 수정 / 다음 요청',()=>openComposer('request'),'secondary','change-direction'));
   top.append(title,topActions);area.append(top);
   const origin=flow.origin;
-  if(origin) {
-    const current=flow.originBases.length===1?flow.originBases[0]:null;
-    area.append(node('p',current?'출발 요청에서 이어온 기준 · '+BASIS_LABEL[current.status]:'출발 요청 · 사용자 원문','source-meta'));
-    const purpose=node('p',current?.text??origin.text,'outcome-purpose');purpose.id='outcome-purpose';area.append(purpose);
-    const source=details('출발 원문과 연결 보기','outcome-origin');source.append(node('div',origin.text,'source-raw'),node('p',`${origin.id} · ${dateLabel(origin.at)}`,'source-id'));
-    if(current?.history.length)source.append(node('p','위에는 이 요청에서 이어온 기준의 현재 값이 보입니다. 최초 원문은 이 기록에 보존합니다.','hint'));
-    for(const b of flow.originBases.length>1?flow.originBases:[])source.append(node('div',`${b.id} · ${BASIS_LABEL[b.status]}\n${b.text}`,'source-raw'));
-    source.append(node('p','작업 연결을 따라 묶은 흐름입니다. AI의 해석·추천은 아래 작업문 초안이며 사용자 결정이나 저장소 확인 결과가 아닙니다.','hint'));area.append(source);
-  } else area.append(node('p','이 흐름에는 출발 요청이 없습니다. 원하는 결과를 다음 요청에 적으면 원문에서 이어갑니다.','hint'));
-  if(flow.request&&flow.request.id!==origin?.id) {
+  const request=flow.request;
+  if(request) {
+    area.append(node('p',flow.requestBasis?.status==='confirmed'?'이번 요청 · 사용자 직접 정정':'이번 요청 · 사용자 원문','source-meta'));
+    const purpose=node('p',flow.requestBasis?.text??request.text,'outcome-purpose outcome-excerpt');purpose.id='outcome-purpose';area.append(purpose);
     const direction=node('section','','outcome-direction');direction.id='outcome-direction';
-    direction.append(node('h3','이 작업에서 이어가는 요청'),node('p',flow.request.text,'source-raw'),node('p','이 발언이 바꾸는 범위와 아래 보존 기준을 함께 전달합니다. 코드 영향은 아직 확인하지 않았어요.','hint'));area.append(direction);
+    if(flow.direction&&flow.direction.id!==request.id) {
+      direction.append(node('h3',`${flow.directionDeclared?'앞서 바꾼 방향':'직전 사용자 요청'} · ${flow.directionBasis?.status==='confirmed'?'직접 정정':'원문 참조'}`),node('p',flow.directionBasis?.text??flow.direction.text,'source-raw'));
+    }
+    area.append(direction);
+    const basis=flow.directionBasis??flow.requestBasis;
+    if(basis) {
+      const correction=details(flow.directionBasis?(flow.directionDeclared?'이 방향 바로잡기':'직전 요청 바로잡기'):'이번 요청 바로잡기','outcome-correction');
+      const field=node('textarea');field.id='outcome-correction-text';field.rows=3;field.maxLength=12000;
+      field.setAttribute('aria-label','이어갈 내용 직접 정정');field.value=project.basisEdits[basis.id]??basis.text;
+      field.addEventListener('input',()=>guard(()=>commit(editBasisDraft(project,basis.id,field.value),false)));
+      correction.append(field,btn('정정한 내용 기록',()=>commit(recordBasis(project,field.value,'confirmed',basis.id)),'secondary','correct-outcome'));
+      area.append(correction);
+    }
   }
-  if(flow.otherLatestRequest) {
-    const newer=details('다른 작업에 더 나중 요청이 있어요','outcome-other-request');newer.append(node('div',flow.otherLatestRequest.text,'source-raw'),node('p','현재는 이 보고가 연결된 작업에서 이어갑니다. 다른 요청으로 보고를 자동 이동하지 않습니다.','hint'));area.append(newer);
+  if(origin) {
+    const source=details('요청 전체 · 이전 원문 보기','outcome-origin');
+    const visibleSources=new Map([origin,flow.direction,request].filter((s):s is Source=>s!==null).map(s=>[s.id,s]));
+    for(const input of visibleSources.values())source.append(node('div',input.text,'source-raw'),node('p',`${input.id} · ${dateLabel(input.at)}`,'source-id'));
+    source.append(btn('전체 작업 기록 보기',()=>$('nav-history').click(),'quiet'));
+    source.append(node('p','원문 이력입니다. 후속 발언이 바꾼 부분은 새 요청을 따르며, 연결만으로 같은 목적이나 코드 영향을 판단하지 않습니다.','hint'));area.append(source);
+  }
+  if(flow.otherRequests.length) {
+    const other=details(`현재 경로 밖 요청 ${flow.otherRequests.length}개`,'outcome-other-request');
+    for(const request of flow.otherRequests)other.append(node('div',request.text,'source-raw'),node('p',`작업 ${project.tasks.findIndex(t=>t.id===request.taskId)+1} · ${dateLabel(request.at)}`,'source-id'));
+    other.append(node('p','연결 기록만으로 진행·완료 여부를 알 수 없습니다. 이 요청이나 보고를 현재 작업에 자동 합치지 않습니다.','hint'));area.append(other);
   }
   const grid=node('div','','outcome-grid');
   const conditions=details(`선택 · 이유와 보존 기준 ${project.bases.length}개`,'outcome-conditions');
-  conditions.append(node('p','요청·답변·직접 기록의 현재 값입니다. 이유는 사용자가 쓴 범위만 남깁니다. 연결이나 인용이 없다고 영향이 없는 것은 아닙니다.','hint'));
+  conditions.append(node('p','이전 요청은 후속 변경과 함께 읽는 참고입니다. 답변·직접 기록은 해당 범위에서 유지합니다.','hint'));
   for(const b of project.bases) {
     const s=project.sources.find(s=>s.id===b.sourceId),entry=node('div','','outcome-record');
     entry.append(tag(BASIS_LABEL[b.status]),node('p',b.text,'source-raw'));
@@ -150,7 +165,7 @@ function renderOutcome(t:Task|null) {
   const lastReport=flow.reports.at(-1);
   if(lastReport) {
     const preview=node('section','','outcome-return');preview.id='outcome-last-report';
-    preview.append(node('h3','돌아온 내용 · 외부 원문'),node('p',reportBody(lastReport),'outcome-excerpt'),node('p','전체 원문과 연결 정보는 아래 보고·자료에서 볼 수 있어요. 수신은 수용·완료 판정이 아닙니다.','hint'));area.append(preview);
+    preview.append(node('h3','돌아온 내용 · 외부 원문'),node('p',reportBody(lastReport),'outcome-excerpt'),node('p','전체 원문과 연결 정보는 아래 보고·자료에서 볼 수 있어요.','hint'));area.append(preview);
   }
   const results=details(`이 흐름에서 받은 보고 · 자료 ${flow.reports.length}개`,'outcome-results');
   results.append(node('p','외부에서 가져온 원문입니다. 보고자·방법·환경·버전은 원문에 기재된 범위만 알 수 있고 나머지는 미상입니다. 파일이나 로그가 실행을 보증하지는 않습니다.','hint'));
@@ -163,7 +178,8 @@ function renderOutcome(t:Task|null) {
   grid.append(results);area.append(grid);
   const actions=node('div','','outcome-actions');
   actions.append(btn('결과 붙여넣기',()=>openComposer('report'),'quiet','home-paste-result'),btn('결과 JSON 가져오기',()=>{showWork();$<HTMLDetailsElement>('compose-panel').open=true;$<HTMLDetailsElement>('result-file-panel').open=true;$('select-result-file').click();},'quiet','home-file-result'));
-  area.append(actions,node('p','목적 변경, 필요한 선택, 의미 있는 결과가 있을 때 돌아오세요. 명확한 작업은 지금 쓰는 개발 도구에서 계속 진행하면 됩니다.','hint'));
+  area.append(actions);
+  const limits=details('이 흐름의 범위','outcome-limits');limits.append(node('p','목적 변경, 필요한 선택, 의미 있는 결과가 있을 때 돌아오세요. 명확한 작업은 개발 도구에서 이어갑니다. AI 초안은 사용자 결정이 아니며, 보고 수신은 실행·완료 판정이 아닙니다.','hint'));area.append(limits);
 }
 const errorMessages:Record<string,string>={
   INVALID_RESPONSE:'응답 형식이 올바르지 않아 적용하지 않았습니다.',AI_TIMEOUT:'정리 요청 시간이 초과됐습니다.',
@@ -347,11 +363,6 @@ function renderWork(t:Task|null) {
     if(old){const d=details('기준 변경 전 AI 문구 보기 (현재 작업문 아님)',`stale-${key}`);d.append(node('div',old,'source-raw'),btn('이 문구로 시작해 직접 고치기',()=>commit(editTask(project,t.id,key,old)),'quiet',`stale-use-${key}`));edit.append(d);}
   }
   const suggestions=taskSuggestions(t);
-  if(w.suggestions.length) {
-    const proposals=details(`${t.suggestions!==null?'직접 조정한':t.mode==='mock'?'모의':'AI'} 방향 제안 · 미확정`,'direction-proposals');
-    for(const s of w.suggestions)proposals.append(node('h3',s.text),node('p',s.why,'hint'));
-    proposals.append(node('p','고객 경험을 위한 제안입니다. 저장소에서 확인한 구현 사실이나 사용자 선택이 아니며, 아래에서 수정하거나 필요한 것만 기준으로 기록할 수 있어요.','hint'));card.append(proposals);
-  }
   for(const [index,s] of suggestions.entries()) {
     const box=node('div','','suggestion');box.append(tag(w.aiStale&&t.suggestions===null?'기준 변경 전 제안 · 작업문 제외 · 고치면 포함':'추가 제안 · 미확정'));
     for(const key of ['text','why'] as const){const l=node('label',key==='text'?'제안 문구':'이유와 대가');const f=node('textarea');f.rows=2;f.maxLength=2000;f.id=`suggestion-${index}-${key}`;l.htmlFor=f.id;f.value=s[key];f.addEventListener('input',()=>guard(()=>{commit(editSuggestion(project,t.id,index,key,f.value),false);refreshPreview();}));box.append(l,f);}

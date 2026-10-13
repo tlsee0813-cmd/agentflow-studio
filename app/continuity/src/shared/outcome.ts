@@ -11,6 +11,12 @@ export function contextLinks(p:Project,t:Task) {
   return {parent,anchor,returns};
 }
 
+/** An explicit direction declaration is a navigation cue, not permission to rewrite
+ * another basis or infer which clauses were revoked. Unrecognised prose stays visible
+ * as a request. The home always leads with this task's request, never the root. */
+export function declaresDirection(value:string):boolean {
+  return /^(?:방향|목적|목표)(?:을|를)?\s*(?:바꿀게|바꾸겠습니다|변경할게|변경하겠습니다|수정할게|바꿔줘|변경해줘|수정해줘)\s*[:：]/u.test(value.trim());
+}
 /** A navigation projection of existing provenance, not an inferred/confirmed goal.
  * The first request's Source ID stays stable across returns and later requests.
  * No second current-value store, migration, semantic merge or execution status. */
@@ -29,8 +35,18 @@ export function outcomeOf(p:Project, id=p.currentTaskId) {
   const current=id?tasks.get(id):undefined;
   const returnIds=new Set(current?contextLinks(p,current).returns.map(t=>t.id):[]);
   const reports=p.sources.filter(s=>(pathIds.has(s.taskId)||returnIds.has(s.taskId))&&(s.kind==='report'||s.kind==='evidence'));
-  const latestRequest=[...p.sources].reverse().find(s=>s.kind==='request')??null;
-  return {id:origin?.id??null,origin,originBases,request,path,reports,
+  const otherRequests=p.sources.filter(s=>s.kind==='request'&&!pathIds.has(s.taskId));
+  const declared=[...requests].reverse().find(s=>declaresDirection(s.text))??null;
+  // Other wording needs no magic command: keep the preceding request visible as
+  // attributed context, without claiming it is a semantic purpose/change classification.
+  const direction=declared??requests.at(-2)??null;
+  const basisFor=(s:Source|null)=>{
+    const matches=s?p.bases.filter(b=>b.sourceId===s.id||b.history.some(h=>h.sourceId===s.id)):[];
+    return matches.length===1?matches[0]!:null; // Imported ambiguity is not a choice made by the app.
+  };
+  const requestBasis=basisFor(request),directionBasis=basisFor(direction);
+  const latestRequest=otherRequests.at(-1)??null;
+  return {id:origin?.id??null,origin,originBases,request,requestBasis,direction,directionDeclared:declared!==null,directionBasis,path,reports,otherRequests,
     // A late return can select an older branch. Never call that branch the latest project direction.
     otherLatestRequest:latestRequest&&!pathIds.has(latestRequest.taskId)?latestRequest:null};
 }

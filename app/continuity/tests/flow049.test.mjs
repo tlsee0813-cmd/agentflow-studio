@@ -71,15 +71,57 @@ test('F049 sibling report and evidence match the existing adjacent return group,
   assert.ok(!D.handoffText(late).includes('B_REPORT'));
 });
 
-test('F049 long chain retains only starting request, not old answers/reports; stale question rejection remains atomic',()=>{
+test('F049 long chain retains old requests as bases, not duplicate sources; stale question rejection remains atomic',()=>{
   let p=respond(put(D.createProject(),'빈자리가 생기면 대기자를 자동으로 예약해줘.'));const root=p.currentTaskId,origin=outcomeOf(p).origin;
   p=D.answer(p,root,'참여 확인 뒤 확정. 미응답은 보류.');
   p=D.markHandoff(p,root,D.handoffText(p),'download');p=put(p,'OLD_RETURN_NOT_CURRENT','report');
   for(let i=0;i<4;i++)p=put(p,`명확한 문구 변경 ${i}`);
-  const r=D.begin(p).request;assert.ok(r.sources.some(s=>s.id===origin.id));assert.ok(!r.sources.some(s=>s.text==='OLD_RETURN_NOT_CURRENT'));
+  const r=D.begin(p).request;assert.ok(!r.sources.some(s=>s.id===origin.id));assert.equal(r.bases.find(b=>b.sourceId===origin.id).text,origin.text);assert.ok(!r.sources.some(s=>s.text==='OLD_RETURN_NOT_CURRENT'));
   assert.ok(r.bases.some(b=>b.text.includes('미응답은 보류')));
   let q=respond(put(D.createProject(),'빈자리가 생기면 대기자를 자동으로 예약해줘.'));
   q=D.recordBasis(q,'자동 확정은 하지 않는다.');const before=serializeProject(q);
   assert.equal(D.questionApplicability(q,D.taskOf(q)),'stale');assert.throws(()=>D.answer(q,q.currentTaskId,'바로 확정'),/QUESTION_NOT_APPLICABLE/);
   assert.equal(serializeProject(q),before);assert.equal(outcomeOf(q).originBases.length,1);
+});
+
+
+test('FIX051 direction remains visible through a small request; correction uses one basis and retains original history',()=>{
+  const first='회원가입한 고객만 예약을 취소할 수 있게 해줘';
+  const direction='방향을 바꿀게: 회원가입 없이도 예약 링크로 취소할 수 있게 해줘';
+  const small='취소 버튼 색만 빨간색으로 바꿔줘';
+  let p=put(put(put(D.createProject(),first),direction),small);
+  const before=structuredClone(p),view=outcomeOf(p);
+  assert.equal(view.requestBasis.text,small);assert.equal(view.directionBasis.text,direction);
+  const handoff=D.handoffText(p),reference=handoff.indexOf('## 이전 요청 원문 참조');
+  assert.ok(reference>0);assert.ok(handoff.indexOf(first)>reference,'old request is a reference, not a current instruction');
+  assert.ok(!handoff.includes('## 목적과 이어지는 요청'));
+  p=D.recordBasis(p,'예약 링크로 취소하되 만료 기간은 변경하지 않는다.','confirmed',view.directionBasis.id);
+  assert.equal(outcomeOf(p).directionBasis.text,p.bases[1].text);
+  assert.equal(p.bases[1].history[0].text,direction);assert.deepEqual(p.sources.slice(0,3),before.sources);
+  assert.deepEqual(p.bases[0],before.bases[0],'no invented semantic deletion of unmentioned clauses');
+  assert.equal(outcomeOf(parseProject(serializeProject(p))).directionBasis.text,p.bases[1].text);
+  assert.equal(D.begin(p).request.bases.find(b=>b.id===view.directionBasis.id).text,p.bases[1].text);
+});
+
+test('FIX051 two 11000-character requests fit; no root duplication or invented global purpose for unrelated scope',()=>{
+  let p=put(put(put(D.createProject(),'가'.repeat(11000)),'짧은 중간 요청'),'나'.repeat(11000));
+  const stored=serializeProject(p),r=D.begin(p).request;
+  assert.ok(Buffer.byteLength(JSON.stringify(r))<=131072);validateRequest(r);
+  assert.equal(r.sources.some(s=>s.id===p.sources[0].id),false);assert.equal(r.bases[0].text,p.sources[0].text);
+  assert.equal(serializeProject(p),stored);
+  p=put(put(put(D.createProject(),'예약 취소 정책을 조사해줘'),'확인할 항목만 정리해줘'),'별도 통계 차트의 색만 바꿔줘');
+  assert.equal(outcomeOf(p).request.text,p.sources[2].text);assert.equal(outcomeOf(p).directionDeclared,false);assert.equal(outcomeOf(p).direction.text,p.sources[1].text);
+  assert.equal(D.begin(p).request.sources.some(s=>s.id===p.sources[0].id),false);
+  const h=D.handoffText(p);assert.ok(h.indexOf(p.sources[0].text)>h.indexOf('## 이전 요청 원문 참조'));
+});
+
+test('FIX051 off-path B remains visible after late A return and next request, without report mixing',()=>{
+  let p=put(D.createProject(),'A 요청');const A=p.currentTaskId;p=D.markHandoff(p,A,D.handoffText(p),'download');
+  p=put(p,'B 요청');const B=p.currentTaskId;p=D.markHandoff(p,B,D.handoffText(p),'download');
+  p=D.submit(D.editDraft(D.setKind(p,'report'),'늦은 A 보고'),A);
+  p=put(p,'A 다음 요청');const view=outcomeOf(p);
+  assert.deepEqual(view.otherRequests.map(s=>s.taskId),[B]);assert.equal(D.taskOf(p).parentTaskId,p.tasks[2].id);
+  assert.ok(D.begin(p).request.sources.some(s=>s.text==='늦은 A 보고'));
+  assert.ok(!D.begin(p).request.sources.some(s=>s.taskId===B));
+  assert.deepEqual(outcomeOf(parseProject(serializeProject(p))).otherRequests,view.otherRequests);
 });

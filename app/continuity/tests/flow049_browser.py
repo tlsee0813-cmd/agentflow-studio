@@ -45,7 +45,7 @@ class OutcomeHome(unittest.TestCase):
         self.page.locator('#change-direction').click();expect(self.page.locator('#draft')).to_be_focused()
         direction='공개 게시만 먼저 구현해 주세요. 신청 접수는 보류합니다. 결제를 넣지 않는 조건은 유지해 주세요. 필요한 기술 선택은 로컬 도구에 맡깁니다.'
         self.page.locator('#draft').fill(direction);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
-        expect(self.page.locator('#outcome-direction')).to_contain_text(direction)
+        expect(self.page.locator('#outcome-purpose')).to_have_text(direction)
         expect(self.page.locator('#outcome-home')).to_have_attribute('data-outcome-id',origin)
         text=self.download('#download-work','flow049-next-handoff.md').read_text(encoding='utf-8')
         for value in [text,json.dumps(calls[-1],ensure_ascii=False)]:
@@ -82,5 +82,67 @@ class OutcomeHome(unittest.TestCase):
         self.send(request);expect(self.page.locator('#outcome-purpose')).to_have_text(request)
         text=self.download('#download-work','flow049-performance-handoff.md').read_text(encoding='utf-8')
         self.assertIn(request,text);self.assertEqual(len(self.state()['tasks']),1)
+
+    def test_04_direction_three_turns_correction_and_recovery(self):
+        calls=[];self.page.on('request',lambda r:calls.append(r.post_data_json) if r.method=='POST' and r.url.endswith('/api/continuity') else None)
+        first='회원가입한 고객만 예약을 취소할 수 있게 해줘'
+        direction='방향을 바꿀게: 회원가입 없이도 예약 링크로 취소할 수 있게 해줘'
+        small='취소 버튼 색만 빨간색으로 바꿔줘'
+        for request in [first,direction,small]:self.send(request)
+        expect(self.page.locator('#outcome-purpose')).to_have_text(small)
+        expect(self.page.locator('#outcome-direction')).to_contain_text(direction)
+        self.assertEqual(self.state()['sources'][0]['text'],first)
+        self.assertNotIn(first,json.dumps(calls[-1]['sources'],ensure_ascii=False))
+        self.assertEqual(self.page.locator('#direction-proposals').count(),0)
+        for width in [1440,390]:
+            self.page.set_viewport_size({'width':width,'height':900})
+            self.page.locator('#outcome-home').scroll_into_view_if_needed()
+            self.page.screenshot(path=str(base.OUT/f'fix051-direction-{width}.png'),full_page=True)
+            self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
+        self.page.locator('#outcome-correction > summary').click()
+        correction='예약 링크로 취소하되 만료 기간은 유지한다.'
+        self.page.locator('#outcome-correction-text').fill(correction)
+        self.page.locator('#correct-outcome').click()
+        expect(self.page.locator('#outcome-direction')).to_contain_text(correction)
+        backup=self.download('#backup','fix051-direction-backup.json')
+        self.page.reload();expect(self.page.locator('#outcome-direction')).to_contain_text(correction)
+        self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(str(backup))
+        expect(self.page.locator('#outcome-direction')).to_contain_text(correction)
+        self.assertEqual(self.state()['bases'][1]['history'][0]['text'],direction)
+        self.assertEqual(len(calls),3,'correction and recovery do not auto-call AI')
+
+    def test_05_long_requests_and_return_continuation(self):
+        calls=[];self.page.on('request',lambda r:calls.append(r.post_data_json) if r.method=='POST' and r.url.endswith('/api/continuity') else None)
+        for request in ['가'*11000,'짧은 중간 요청','나'*11000]:self.send(request)
+        self.assertEqual(len(calls),3)
+        self.assertLessEqual(len(json.dumps(calls[-1],ensure_ascii=False,separators=(',',':')).encode('utf-8')),131072)
+        self.assertEqual(len(self.state()['sources'][0]['text']),11000)
+        for width in [1440,390]:
+            self.page.set_viewport_size({'width':width,'height':900})
+            expect(self.page.locator('#outcome-purpose')).to_have_text('나'*11000)
+            self.assertLess(self.page.locator('#outcome-purpose').bounding_box()['height'],120)
+            self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
+            self.page.locator('#outcome-home').scroll_into_view_if_needed()
+            self.page.screenshot(path=str(base.OUT/f'fix051-long-{width}.png'))
+        self.download('#download-work','fix051-long-handoff.md')
+        A=self.state()['currentTaskId']
+        self.send('B 별도 통계 차트 색 변경');self.download('#download-work','fix051-B-handoff.md')
+        self.page.locator('#home-paste-result').click()
+        self.page.locator('#return-task').select_option(A)
+        self.page.locator('#draft').fill('합성 A 늦은 보고. 실제 실행 검사는 하지 않음.')
+        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        self.send('A 결과에서 이어갈 다음 문구 수정')
+        expect(self.page.locator('#outcome-other-request > summary')).to_have_text('현재 경로 밖 요청 1개')
+        expect(self.page.locator('#outcome-other-request')).to_contain_text('B 별도 통계 차트 색 변경')
+        self.assertEqual(self.state()['tasks'][-2]['parentTaskId'],A)
+        self.assertNotIn('B 별도 통계 차트 색 변경',json.dumps(calls[-1]['sources'],ensure_ascii=False))
+        self.assertIn('합성 A 늦은 보고',json.dumps(calls[-1]['sources'],ensure_ascii=False))
+        self.download('#download-work','fix051-after-return.md')
+        for width in [1440,390]:
+            self.page.set_viewport_size({'width':width,'height':900})
+            self.page.locator('#outcome-home').scroll_into_view_if_needed()
+            self.page.screenshot(path=str(base.OUT/f'fix051-return-{width}.png'),full_page=True)
+            self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
+        (base.OUT/'fix051-http-requests.json').write_bytes(json.dumps(calls,ensure_ascii=False,indent=2).encode('utf-8'))
 
 if __name__=='__main__':unittest.main(verbosity=2)
