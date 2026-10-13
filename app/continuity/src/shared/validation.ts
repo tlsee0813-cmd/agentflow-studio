@@ -154,7 +154,8 @@ export function validateRequest(v: unknown): ContextRequest {
   ensure(v.sources.length > 0); unique(v.sources as Source[]); unique(v.bases as {id:string}[]);
   if(v.previousIntent!==null) {
     obj(v.previousIntent,['taskId','value','manualGoal','manualConditions']);id(v.previousIntent.taskId);
-    const value=validateIntent(v.previousIntent.value);checkIntentRefs(value,v.bases as ContextBasis[]);
+    if(v.previousIntent.value===null)text(v.previousIntent.manualGoal,6000); // A correction only; no AI interpretation is implied.
+    else checkIntentRefs(validateIntent(v.previousIntent.value),v.bases as ContextBasis[]);
     for(const key of ['manualGoal','manualConditions'])if(v.previousIntent[key]!==null)text(v.previousIntent[key],6000,true);
   }
   appFacts(v.appFacts,{ticket:v.ticket,sources:v.sources as Source[],bases:v.bases as ContextBasis[]});
@@ -275,9 +276,21 @@ function migrateV2(v:unknown, notice=V2_MIGRATION_NOTICE):unknown {
   return {...v,schemaVersion:SCHEMA,tasks,notice};
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
+/** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
+ * would rewrite it. Copy it out once so ordinary edits never change the purpose; manual.* stays as written.
+ * An empty legacy correction had nothing to keep and is dropped. */
+function convertIntentEdits(p:Project):Project {
+  for(const t of p.tasks) {
+    if(t.intentEdit?.version!=='intent-edit.1')continue;
+    const goal=t.manual.understanding;
+    if(goal===null||goal==='')delete t.intentEdit;
+    else t.intentEdit={version:'intent-edit.2',revision:t.intentEdit.revision,goal,conditions:t.manual.scope??''};
+  }
+  return p;
+}
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
   const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : v;
-  assertProject(project); return project; // Freshly parsed, not shared: no defensive copy needed.
+  assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }

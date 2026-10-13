@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
 import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { outcomeOf, contextLinks } from './outcome.js';
@@ -186,7 +186,7 @@ export function currentWork(p: Project, t: Task) {
 }
 /** Interpretation is reusable only while its referenced user versions and freshness remain valid.
  * New tasks are reconciled by the provider; this is not a semantic proof of same purpose. */
-export function currentIntent(p:Project,t:Task):PreviousIntent|null {
+export function currentIntent(p:Project,t:Task):CurrentIntent|null {
   const value=t.advice?.intent,changed=changedSinceAdvice(p,t);
   if(!value||changed==='unknown'||changed.length||value.basisRefs.some(ref=>!p.bases.some(b=>b.id===ref.basisId&&b.sourceId===ref.sourceId&&b.revision===ref.revision)))return null;
   const correction=intentCorrection(t);
@@ -195,20 +195,20 @@ export function currentIntent(p:Project,t:Task):PreviousIntent|null {
 /** The user's purpose correction for this task, if any. Ordinary edits of the task's own
  * understanding/scope are work instructions for this task only and are never read here. */
 export function intentCorrection(t:Task):{goal:string;conditions:string}|null {
-  const e=t.intentEdit;if(!e)return null;
-  if(e.version==='intent-edit.1')return t.manual.understanding===null?null:{goal:t.manual.understanding,conditions:t.manual.scope??''};
-  return {goal:e.goal,conditions:e.conditions};
+  const e=t.intentEdit; // intent-edit.1 is converted at parse time and never read from manual.* here.
+  return e?.version==='intent-edit.2'?{goal:e.goal,conditions:e.conditions}:null;
 }
-export function previousIntent(p:Project,t:Task):PreviousIntent|null {
+export function previousIntent(p:Project,t:Task):CurrentIntent|null {
   // Stop at the immediate semantic predecessor; never jump across an unprocessed request.
   const {parent,anchor}=contextLinks(p,t);const previous=anchor??parent;
   return previous?currentIntent(p,previous):null;
 }
-/** Regenerating a corrected task must still carry the user's correction, even when the AI value
- * behind it went stale; it then rides on the predecessor's still-valid interpretation. */
+/** A user's correction always reaches the next request. AI staleness only withdraws the AI value:
+ * with no still-valid interpretation the correction travels alone (value=null), never as a made-up intent. */
 function requestIntent(p:Project,t:Task):PreviousIntent|null {
   const correction=intentCorrection(t),base=(correction?currentIntent(p,t):null)??previousIntent(p,t);
-  return base&&correction?{...base,manualGoal:correction.goal,manualConditions:correction.conditions}:base;
+  if(!correction)return base;
+  return {taskId:base?.taskId??t.id,value:base?.value??null,manualGoal:correction.goal,manualConditions:correction.conditions};
 }
 export function correctIntent(p:Project,id:string,goal:string,conditions:string):Project {
   text(goal,6000);text(conditions,6000,true);const n=change(p),t=taskOf(n,id);
@@ -250,7 +250,9 @@ export function buildRequest(p: Project, ticket: Ticket): ContextRequest {
       bytes+=jsonBytes(b)-before;
     }
   }
-  if(req.previousIntent?.value.basisRefs.some(ref=>req.bases.some(b=>b.id===ref.basisId&&b.partial)))req.previousIntent=null;
+  // An interpretation resting on an excerpt is withdrawn; a user correction is not an interpretation and stays.
+  const prior=req.previousIntent;
+  if(prior?.value?.basisRefs.some(ref=>req.bases.some(b=>b.id===ref.basisId&&b.partial)))req.previousIntent=prior.manualGoal!==null?{...prior,value:null}:null;
   // Final check uses the exact serialised UTF-8 body, not characters or the 8MB local-storage budget.
   ensure(jsonBytes(req)<=REQUEST_BYTES,'CONTEXT_TOO_LARGE');
   return req;

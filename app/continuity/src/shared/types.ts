@@ -40,9 +40,11 @@ export interface Intent {
   goal: string; conditions: string[]; retired: string[];
   basisRefs: {basisId:string;sourceId:string;revision:number}[];
 }
+/** value=null only when a user correction exists without a still-valid AI interpretation. */
 export interface PreviousIntent {
-  taskId:string; value:Intent; manualGoal:string|null; manualConditions:string|null;
+  taskId:string; value:Intent|null; manualGoal:string|null; manualConditions:string|null;
 }
+export interface CurrentIntent extends PreviousIntent { value:Intent }
 export interface Advice {
   // Absent in saved pre-AI055 advice. A new provider response must include it.
   intent?: Intent;

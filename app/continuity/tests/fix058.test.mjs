@@ -98,3 +98,31 @@ test('F058 intent-edit.1 from the earlier candidate stays readable with its orig
   const bad=structuredClone(legacy);bad.tasks.find(x=>x.id===t).intentEdit={version:'intent-edit.2',revision:legacy.revision};
   assert.throws(()=>parseProject(JSON.stringify(bad)));
 });
+
+test('F059 first task: correction plus a new confirmed basis both reach the next request without a made-up AI intent',()=>{
+  let p=reply(put(D.createProject(),first));const t=p.currentTaskId;
+  p=D.correctIntent(p,t,'문자 링크로 예약 취소','환불 제외');p=D.recordBasis(p,'링크는 SMS로만 보낸다','confirmed',null);
+  assert.equal(D.currentIntent(p,D.taskOf(p,t)),null,'the AI interpretation is stale and withdrawn');
+  const r=D.begin(p).request;validateRequest(r);
+  assert.deepEqual(r.previousIntent,{taskId:t,value:null,manualGoal:'문자 링크로 예약 취소',manualConditions:'환불 제외'});
+  assert.ok(r.bases.some(b=>b.text==='링크는 SMS로만 보낸다'&&b.status==='confirmed'));
+  const noCorrection=structuredClone(r);noCorrection.previousIntent.manualGoal=null;assert.throws(()=>validateRequest(noCorrection),'value=null needs a user correction');
+  p=reply(p);assert.equal(D.currentIntent(p,D.taskOf(p,t)).manualGoal,'문자 링크로 예약 취소');assert.equal(D.taskOf(p,t).manual.understanding,null);
+});
+
+test('F059 intent-edit.1 restore -> ordinary work edit leaves the converted correction, handoff and next request unchanged',()=>{
+  let p=threeTurns();const t=p.currentTaskId;
+  const raw=JSON.parse(serializeProject(p)),task=raw.tasks.find(x=>x.id===t);
+  task.manual.understanding='옛 정정: 문자 링크로 취소';task.manual.scope='환불 제외';task.intentEdit={version:'intent-edit.1',revision:raw.revision};
+  let loaded=parseProject(JSON.stringify(raw));
+  assert.deepEqual(D.taskOf(loaded,t).intentEdit,{version:'intent-edit.2',revision:raw.revision,goal:'옛 정정: 문자 링크로 취소',conditions:'환불 제외'});
+  assert.equal(D.taskOf(loaded,t).manual.understanding,'옛 정정: 문자 링크로 취소','legacy work text is kept as written');
+  loaded=D.editTask(loaded,t,'understanding','이번 작업은 CSS 한 줄만');loaded=D.editTask(loaded,t,'scope','버튼 스타일 파일만');
+  assert.deepEqual(D.intentCorrection(D.taskOf(loaded,t)),{goal:'옛 정정: 문자 링크로 취소',conditions:'환불 제외'});
+  const h=D.handoffText(loaded,t);assert.ok(section(h,'## 이어가는 목적').includes('옛 정정: 문자 링크로 취소'));assert.ok(!section(h,'## 이어가는 목적').includes('CSS 한 줄'));
+  assert.ok(section(h,'## 이번 작업').includes('이번 작업은 CSS 한 줄만'));
+  const next=D.begin(put(parseProject(serializeProject(loaded)),typo)).request;validateRequest(next);
+  assert.equal(next.previousIntent.manualGoal,'옛 정정: 문자 링크로 취소');assert.equal(next.previousIntent.manualConditions,'환불 제외');
+  const empty=structuredClone(raw);empty.tasks.find(x=>x.id===t).manual.understanding=null;
+  assert.equal(D.taskOf(parseProject(JSON.stringify(empty)),t).intentEdit,undefined,'an empty legacy correction is dropped, not invented');
+});
