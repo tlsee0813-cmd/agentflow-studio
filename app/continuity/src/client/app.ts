@@ -299,11 +299,11 @@ function renderWork(t:Task|null) {
   const foot=node('div','','work-footer'),row=node('div','','actions');
   const retry=btn('이 입력 다시 정리',()=>{void generate(t.id);},'quiet','retry-work');retry.dataset.aiAction='true';
   row.append(btn('작업문 복사',()=>{void exportWork(t.id,'clipboard');},'primary','copy-work'),btn('Markdown 저장',()=>{void exportWork(t.id,'download');},'secondary','download-work'),retry);
-  foot.append(row,node('p','복사·저장은 자동 실행이 아닙니다. 사용 중인 개발 도구에 직접 전달하세요.'));card.append(foot,edit);
+  foot.append(row,node('p','작업문에 코드 파일은 포함되지 않습니다. 작업에 필요하다면 실행자가 대상 저장소나 관련 파일을 볼 수 있게 준비하세요. 복사·저장은 자동 실행이 아닙니다.'));card.append(foot,edit);
   const fileOptions=details('결과를 파일로 받기 · 선택','file-return-options');fileOptions.className='file-return-options';
   fileOptions.append(node('p','외부 도구에 결과 JSON 한 개 생성을 요청합니다. 짧은 보고나 웹 전용 작업은 기존 붙여넣기가 더 간단할 수 있어요.','hint'));
   const fileActions=node('div','','actions');fileActions.append(btn('파일 결과용 작업문 복사',()=>{void exportWork(t.id,'clipboard',true);},'secondary','copy-file-work'),btn('파일 결과용 Markdown 저장',()=>{void exportWork(t.id,'download',true);},'quiet','download-file-work'));fileOptions.append(fileActions);
-  fileOptions.append(node('p','실행 권한은 늘어나지 않습니다. 파일 생성 금지와 충돌하면 일반 보고로 반환합니다. 식별자는 내보낼 때 채워집니다.','hint'));
+  fileOptions.append(node('p','같은 작업에서 받은 결과 JSON은 ‘결과 파일로 가져오기’에서 선택하세요. 실행 권한은 늘어나지 않으며, 파일 생성 금지와 충돌하면 일반 보고로 반환합니다.','hint'));
   if(lastFileExport?.taskId===t.id){const sent=details('이 탭에서 마지막으로 내보낸 파일용 전문','file-handoff-preview'),field=node('textarea');field.readOnly=true;field.rows=8;field.className='export-preview';field.value=lastFileExport.text;sent.append(field);fileOptions.append(sent);}
   foot.append(fileOptions);
   const preview=details('실제로 전달할 전체 문맥 보기','handoff-preview');const txt=node('textarea');txt.id='handoff-text';txt.readOnly=true;txt.rows=14;txt.className='export-preview';
