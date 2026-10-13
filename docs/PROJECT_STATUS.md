@@ -151,3 +151,5 @@ A는 같은 자료에 K체크리스트/C조건연결 지시를 비교하는 입�
 수동 report/evidence의 선택 대상에 내보내기가2개 이상이면 비교 기준을 마지막 내보내기 시점·이후 기준N개·기준r로 표시하고, 붙여넣은 보고가 어느 내보내기에 대한 것인지는 미확인임을 안내한다. 결과 JSON은 기존 파일 경로로 가져오도록 안내하며 단일/없음/미선택 경로는 유지한다. 데이터 오연결 수정이 아니라 표시 모호함의 한정 수정이다. 파일 판본 연결은 이미 충족됐고 계산/submit/parent/domain/presentation/저장/schema/prompt/작업문/CSS는 불변이다.
 
 Work의 native 관찰은 report/evidence H2기준1개·파일 H1기준2개/legacy 비교 불가·선택·자료 불변을 확인했으며 이번 수신POST0로 이전 mock 왕복과 구분한다. 독립 좁은 검토를 수용했고 Cloud continuity 타입/경계·build가 통과했다. 실제 사용자 효용은 미측정이다. 이 반영 커밋의 양 OS 필수 CI는 Actions 완료 결과로 별도 확인한다. 원본 조언/보고서·ZIP은 게시하지 않는다.
+
+ADVICE044_FIX rev1은 UI10의 두 번째 내보내기 직후 기대값 한 줄만 `마지막 내보내기 이후 기록된 기준 0개`로 교정했다. 정확 비교/locator·첫 내보내기/기준 변경/reload/유형 변경·부모/원문/호출 수 검사는 유지하고 제품은 불변이다. [257ecc5의 CI38357118980](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38357118980)는 양 OS UI 단계 실패와 후속 FRESH033/SELECT035/CONNECT039 미실행으로 보존한다. Work는 실제 UI10 실패 재현 후 Linux UI00111/FRESH0333/SELECT0353/CONNECT0395 합계22개를 각1회 통과했고 기존 명시 장애주입을 구분했다. Cloud는 manifest11·기준/최종 hash·한 줄 diff·문법을 확인하고22개는 반복하지 않았다. 이번 새 커밋의 필수 CI는 양 OS 완료 결과로 별도 확인한다.

@@ -280,7 +280,7 @@ class UI001(unittest.TestCase):
         self.page.locator('#source-kind').select_option('evidence')
         expect(self.page.locator('#return-records > summary')).to_have_text('이후 기록된 기준 1개')
         self.download_work('return032-h1.md')
-        expect(self.page.locator('#return-records > summary')).to_have_text('이후 기록된 기준 0개')
+        expect(self.page.locator('#return-records > summary')).to_have_text('마지막 내보내기 이후 기록된 기준 0개')
         self.assertEqual(self.calls(),before,'preview, editing, recovery and export add no AI calls')
         observed=self.state();self.assertEqual(observed['tasks'][0]['manual'],original['tasks'][0]['manual'])
         self.assertEqual(observed['sources'][:len(original['sources'])],original['sources'])
