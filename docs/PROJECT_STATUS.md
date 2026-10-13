@@ -127,3 +127,13 @@ Work는 수정 전 test_10 실패와 수정 후 Linux Node22.16/Python3.12/Chrom
 수용된 rev3는 UI001 UI11과 FRESH033 F02의 v1 합성 fixture에서 현재 v3 전용 `resultFile`을 제거하는 두 줄만 반영한다. 진짜 v1 필드 집합으로 이관을 검사하며 제품·validator·prompt·assertion·skip·timeout·CI는 불변이다. [c5580bd의 CI38324157715](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38324157715)는 기존 browser13 단계를 양 OS에서 통과했지만 다음 UI 단계에서 실패해 CONNECT039는 미실행이었다. 이전 실패는 보존한다.
 
 Work의 별도 Linux 실행은 UI00111/FRESH0333/SELECT0353/CONNECT0395 합계22개 통과(fail/error/skip0)이며 mock/direct HTTP·명시 장애주입을 구분한다. Cloud는 manifest21·두 줄 patch·최종 두 파일 SHA와 제품 불변을 확인했고 같은22개를 반복하지 않았다. 새 커밋의 양 OS 필수 단계 완료 결과는 Actions에서 별도로 확인한다. 선택적 파일 교환 기능 상태와 기존 이관 보호는 유지하며 실AI·사람 효용 검증은 아니다.
+
+## USE040 / LIVE041 — 단일 파일 왕복과 기본 AI 두 응답 수용
+
+제품 기준은 `5cfe11ba3c13f9dede3a72409b7ac95ed6f13fe4`다. [CI38327519595](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38327519595)는 Ubuntu/Windows 전체 필수 게이트와 UI001→FRESH033→SELECT035→CONNECT039 단계가 완료·성공했다. 이전 실패 기록은 유지하며 이번 문서 반영의 CI와 구분한다. 제품·prompt(`32819624fbb9c2a437f3b07386808077580277fdc1c07821ec503a82403a9939`)는 불변이다.
+
+**USE040:** 제품에서 내보낸 작업문으로 새 ClaudeCode가 독립 합성 Node 검색/미납필터 예제를 구현했고 제공된 검사 로그는11 pass였다. Work는 native UI 복구→원본 결과 JSON 수신→정확한 부모 연결과 raw/report/evidence 보존→다음 검토 작업문 내보내기를 수행했다. 총괄은 manifest10·다운로드 raw 동일성·부모 연결을 직접 확인했다. `USE040_ROUNDTRIP.zip` SHA256은 `1bff8ccf94071355727865ad3da3fb34e28c8ac54ef572d80a6d5f0ff9c002a5`다. 당시 AI 초안은 mock+수동편집이며 합성 단일 파일 왕복이지 자동 CLI 연결·사람 효용 입증은 아니다.
+
+**LIVE041:** 동일 제품의 고정 A/B를 각1회 실제 전송했다. 제품 HTTP200 2건·mode deepseek·원ticket 일치·재시도0이며 총괄이 두 advice 전문을 읽고 수용했다. A는 코드 수정 없는 검토와 미확인 구분, B는 AND 조건만 변경하면서 paid===false·순서·비변경·필터 off 검색 보존과 D3 검토 표시를 유지했다. 추가 prompt 수정은 없다. 준비 수집 오류로 mock추가1(총3/보존2), compiled 누락에 따른 서버 사전중단 POST0을 따로 기록하며 영구 런타임 재현성 완료로 해석하지 않는다. 별도 제공자 raw/reasoning/usage는 수집하지 않았고 종료 paid=false다. 두 응답 수용은 실사용자 효용·일반 품질 완료가 아니다. 원문·ZIP은 별도 보존하고 공개 저장소에 추가하지 않는다.
+
+**다음 예정:** 작업문과 함께 코드·관련 자료도 외부 실행자에게 전달해야 한다는 안내를 개선할 예정이다. 아직 구현 착수·완료나 후보는 없다.
