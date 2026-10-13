@@ -63,3 +63,20 @@ python continuity/tests/static_browser.py
 코드 영향 자동 판정, 자동 로컬 실행, 학습/역할/그래프는 구현하지 않았다. 일반 변경 발언을 자동 확정 정책으로
 만들지 않으며, 코드 현실은 로컬 도구의 자료와 구분한다. 실제 AI 초안 품질과 사람의 시간 절감·고객 효용은
 이번에 측정하지 않았다. 이 후보는 총괄 및 독립 검토를 기다린다.
+
+## Windows CI 후속 — 합성 반환 파일의 개행 보존
+
+`dbbb22bd96c4fe1987a655dc2ee7159840d0650a`의 CI `38384891052`는 Ubuntu 성공,
+Windows step19 실패·step20 정적 검사 skipped다. 위 로컬 성공과 구분한다.
+Windows job `115254117895`의 test_01은 `flow049_browser.py:39`에서 보존된 rawText의 CRLF와
+기대 raw의 LF를 비교해 실패했고 test_02/03은 통과했다. 실제 artifact의
+`flow049/flow049-synthetic-return.json`은 496 bytes, CRLF 7개/bare LF 0개였으며,
+기대 JSON 문자열을 Windows 개행으로 쓴 바이트와 정확히 일치했다. artifact ZIP SHA256:
+`d44cd12196dd71ad8fad03539f68380a1549d09f26f4597289181ef8484fb908`.
+
+원인은 fixture의 `Path.write_text` 기본 개행 변환이다. 제품은 업로드된 원문을 그대로 보존했다.
+파일 생성만 `write_bytes(raw.encode('utf-8'))`로 고쳐 양 OS에서 같은 기대 바이트를 업로드한다.
+원문 완전일치 assertion·나머지 수용조건·skip·timeout·CI·제품 코드는 그대로다.
+로컬에서 Windows식 text-write 변환을 명시 주입해 같은 line39 실패를 재현했다(Windows 실행은 아님).
+수정 후 같은 재현 조건 1/1, Python 문법, 기존 FLOW049 native 3/3이 통과했다.
+새 커밋의 양 OS CI 최종 결과는 해당 Actions run에서 별도로 확인한다.

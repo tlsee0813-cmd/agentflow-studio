@@ -31,7 +31,8 @@ class OutcomeHome(unittest.TestCase):
         # A public synthetic executor report, not an actual implementation or inspected repository.
         report='합성 로컬 도구 보고: 접근안 두 가지를 정리했습니다. 저장소·코드는 없으며 파일 수정이나 실행 검사는 하지 않았습니다. 공개 게시와 신청 접수 중 무엇을 먼저 할지는 미정입니다.'
         raw=json.dumps({'schemaVersion':'agentflow.return.1','projectId':exported['id'],'taskId':task,'returnId':record['returnId'],'report':report,'evidence':None},ensure_ascii=False,indent=2)
-        returned=base.OUT/'flow049-synthetic-return.json';returned.write_text(raw,encoding='utf-8')
+        # Preserve the exact expected UTF-8 bytes; Windows text writes would translate LF to CRLF.
+        returned=base.OUT/'flow049-synthetic-return.json';returned.write_bytes(raw.encode('utf-8'))
         with self.page.expect_file_chooser() as chooser:self.page.locator('#home-file-result').click()
         chooser.value.set_files(str(returned));expect(self.page.locator('#result-file-preview')).to_have_attribute('data-return-id',record['returnId'])
         self.page.locator('#accept-result-file').click()
