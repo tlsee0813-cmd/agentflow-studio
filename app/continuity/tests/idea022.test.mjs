@@ -275,13 +275,14 @@ function boundaryProject() {
   const p=synthetic(12,'가'.repeat(2700));
   for(const b of p.bases)b.history=[{text:b.text,status:b.status,sourceId:b.sourceId,revision:b.revision}];
   let left=REQUEST_BYTES-bytes(D.begin(p).request);assert.ok(left>0);
-  for(let i=0;left>0&&i<p.bases.length-2;i++) {const n=Math.min(left,11900-p.bases[i].text.length);p.bases[i].text+='x'.repeat(n);p.sources[i].text=p.bases[i].text;left-=n;}
+  // The starting request is now also on the wire; pad an old basis sent only once.
+  for(let i=1;left>0&&i<p.bases.length-2;i++) {const n=Math.min(left,11900-p.bases[i].text.length);p.bases[i].text+='x'.repeat(n);p.sources[i].text=p.bases[i].text;left-=n;}
   assert.equal(left,0);return p;
 }
 test('I22-all facts count toward exact 128KiB; +1 fails, while marked excerpts and local 8MB boundary remain separate',()=>{
   const p=boundaryProject(),req=D.begin(p).request;assert.equal(bytes(req),REQUEST_BYTES);validateRequest(req);
   const without=clone(req);delete without.appFacts;assert.ok(bytes(without)<REQUEST_BYTES);
-  const over=clone(p);over.bases[0].text+='x';over.sources[0].text=over.bases[0].text;
+  const over=clone(p);over.bases[1].text+='x';over.sources[1].text=over.bases[1].text;
   const raw=serializeProject(over);assert.throws(()=>D.begin(over),/CONTEXT_TOO_LARGE/);assert.deepEqual(parseProject(raw),over);
   assert.ok(Buffer.byteLength(raw)<FILE_LIMIT);assert.equal(FILE_LIMIT,8_000_000);assert.ok(D.handoffText(over).includes(over.bases[0].text));
   const oversized=clone(req);oversized.projectName+='x';assert.equal(bytes(oversized),REQUEST_BYTES+1);assert.throws(()=>validateRequest(oversized),/CONTEXT_TOO_LARGE/);

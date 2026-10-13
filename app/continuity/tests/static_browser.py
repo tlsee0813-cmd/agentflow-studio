@@ -72,7 +72,7 @@ class StaticWeb(unittest.TestCase):
         expected_files = {'.nojekyll', 'index.html', 'styles.css', 'client/app.js',
                           'client/presentation.js', 'client/runtime.js',
                           *('shared/' + n + '.js' for n in
-                            ['types', 'domain', 'validation', 'storage', 'plan-facts', 'mock'])}
+                            ['types', 'domain', 'validation', 'storage', 'plan-facts', 'mock', 'outcome'])}
         files = {str(p.relative_to(self.site)).replace('\\', '/') for p in self.site.rglob('*') if p.is_file()}
         self.assertEqual(files, expected_files, 'publish only UI/shared/browser-MOCK modules')
         for p in self.site.rglob('*.js'):
@@ -104,6 +104,8 @@ class StaticWeb(unittest.TestCase):
             expect(self.page.locator('#mode')).to_have_text('브라우저 MOCK · AI 아님')
             self.assertEqual(self.page.locator('#consent-area').count(), 0)
             self.send('빈자리가 생기면 대기자를 자동으로 예약해줘.')
+            origin = self.state()['sources'][0]['id']
+            expect(self.page.locator('#outcome-home')).to_have_attribute('data-outcome-id', origin)
             expect(self.page.locator('#question-box')).to_be_visible()
             expect(self.page.locator('.option-button')).to_have_count(2)
             self.page.locator('.option-button', has_text='참여 확인 뒤 확정').click()
@@ -149,6 +151,7 @@ class StaticWeb(unittest.TestCase):
             self.import_file(backup)
             self.assertEqual(self.state(), after)
             for width, name in [(1440, 'static-desktop.png'), (390, 'static-narrow.png')]:
+                expect(self.page.locator('#outcome-home')).to_have_attribute('data-outcome-id', origin)
                 self.page.set_viewport_size({'width': width, 'height': 1050 if width == 1440 else 844})
                 self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'), width)
                 self.page.screenshot(path=str(OUT / name), full_page=True)

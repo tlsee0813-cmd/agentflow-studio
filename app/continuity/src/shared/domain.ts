@@ -1,6 +1,7 @@
 import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
 import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
+import { outcomeOf, contextLinks } from './outcome.js';
 export { planFacts, planFactsText } from './plan-facts.js';
 const uid = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
 const now = () => new Date().toISOString();
@@ -183,15 +184,16 @@ export function currentWork(p: Project, t: Task) {
   return {values,changed,aiStale,aiExcluded,suggestions,reviewBasisIds:aiStale ? [] : t.advice?.reviewBasisIds ?? []};
 }
 function contextParts(p: Project, t: Task) {
-  const parent=p.tasks.find(x=>x.id===t.parentTaskId);
   // Reuse current input/replies and its immediate predecessor, not the complete chat transcript.
-  const firstKind=parent ? p.sources.find(s=>s.id===parent.sourceIds[0])?.kind : null;
-  const anchor=parent && ['report','evidence'].includes(firstKind ?? '') ? p.tasks.find(x=>x.id===parent.parentTaskId) : parent;
-  const returns=anchor ? p.tasks.filter(x=>x.parentTaskId===anchor.id && ['report','evidence'].includes(p.sources.find(s=>s.id===x.sourceIds[0])?.kind ?? '')) : [];
+  const {parent,anchor,returns}=contextLinks(p,t);
   // After a pasted report/evidence, the previous work is the handed-off task (with user edits), not the report wrapper.
   const work=anchor ?? parent;
   const tasks=new Set([t.id,...(parent ? [parent.id] : []),...(anchor ? [anchor.id] : []),...returns.map(x=>x.id)]);
   const relevant=new Set([...t.sourceIds,...(parent?.sourceIds ?? []),...(anchor?.sourceIds ?? []),...returns.flatMap(x=>x.sourceIds)]);
+  // Keep the purpose's starting request through a long chain, without pulling in
+  // that task's old answers or unrelated returned reports. Current bases remain authoritative.
+  const origin=outcomeOf(p,t.id).origin;
+  if(origin){relevant.add(origin.id);tasks.add(origin.taskId);}
   const previous=work ? currentWork(p,work) : null;
   return {sources:p.sources.filter(s=>relevant.has(s.id)),tasks,
     previousWork:work && previous ? {taskId:work.id,...previous.values,aiTextExcluded:previous.aiExcluded,
@@ -300,6 +302,10 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
     '전달 방식: 사용자가 복사·붙여넣기. CLI/MCP 연결, 자동 실행, 운영 권한 승인은 없음.',
     trial?'합성 시험 문맥입니다. 실제 고객 요청·기존 결정 변경에 사용하지 마세요.':'요청 원문은 의도이고, 구현 보고는 주장입니다. 실제 실행·검증을 완료했다고 간주하지 마세요.'];
   if(stale) lines.push(`${stale} 직접 작성한 값과 아래 현재 기준·입력 원문을 따르세요.`);
+  const outcome=outcomeOf(p,t.id);
+  if(outcome.origin) lines.push(`\n## 목적과 이어지는 요청`,
+    `출발 요청 [${outcome.id}] / 이번 작업에서 이어가는 요청 [${outcome.request!.id}]. 아래 원문과 현재 기준을 함께 읽으세요. 연결 자체는 같은 목적·영향 없음의 의미 판정이 아닙니다.`,
+    '최신 사용자 발언이 바꾼 범위와 유지할 조건을 구분하세요. 제품 방향 제안은 가능하지만 사용자 결정으로 바꾸지 마세요. 저장소의 구현 상태·코드 영향은 실행 도구가 실제 자료로 판단합니다.');
   lines.push(`\n${planFactsText(planFacts(p,t.id))}`);
   lines.push('\n## 이번 작업',v.understanding||'아래 사용자 입력과 현재 기준을 바탕으로 좁은 작업을 준비하세요.',
     '\n### 범위',v.scope||'명시한 요청 범위만. 미정 조건은 가정으로 채우지 않습니다.',
@@ -321,7 +327,9 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
   lines.push('요청 원문에는 배경·인용도 포함될 수 있습니다. 전체를 확정 정책으로 읽지 마세요. 최신 명시 요청·답변은 그 범위에서만 적용하고, 관련 없는 기준은 유지하세요.');
   if(w.reviewBasisIds.length) lines.push(`재검토 제안 (자동 폐기 아님): ${w.reviewBasisIds.join(', ')}`);
   if(w.suggestions.length) lines.push('\n## 추가 제안 — 미확정',...w.suggestions.map(s=>`${s.text}\n이유: ${s.why}`));
-  lines.push('\n## 결과를 가져올 때','가능한 형태 그대로 결과 요약·변경 파일·실제로 실행한 검사와 결과·못 한 일을 붙여넣으세요. 필수 양식은 없습니다.','보고와 관찰 자료를 구분해 주세요. 결과를 가져오지 않으면 이 기록은 낡을 수 있으며 Studio는 외부 진행을 감시하지 않습니다.');
+  lines.push('\n## 결과를 가져올 때','목적이 바뀌거나, 사용자 판단이 필요하거나, 의미 있는 결과가 생겼을 때 돌아오세요. 이미 요청한 명확한 범위는 기술적 단계마다 재승인을 받지 않고 이어갑니다.',
+    '가능한 형태 그대로 결과 요약·변경 파일·실제로 실행한 검사와 결과·못 한 일을 붙여넣으세요. 누가 무엇을 어떤 방법·환경·버전에서 확인했다고 보고하는지 아는 범위만 남기세요. 자료 없는 항목은 미상이며 필수 양식은 없습니다.',
+    '보고와 관찰 자료를 구분해 주세요. 결과를 가져오지 않으면 이 기록은 낡을 수 있으며 Studio는 외부 진행을 감시하지 않습니다.');
   if(returnId!==null) {
     ensure(/^[A-Za-z0-9_-]{1,100}$/.test(returnId));
     lines.push('\n## 선택한 교환 산출물 — 결과 파일 한 개',

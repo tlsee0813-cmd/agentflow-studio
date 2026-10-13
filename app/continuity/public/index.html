@@ -33,10 +33,11 @@
         </section>
         <div class="feedback-stack"><div id="storage-error" class="alert error" role="alert" hidden></div><div id="notice" class="alert" role="status" hidden></div></div>
         <div id="work-view">
+              <div id="pending-bar" class="pending-bar" hidden><span class="spinner" aria-hidden="true"></span><span id="working" role="status"></span><button type="button" id="cancel" class="quiet" hidden>정리 중단</button></div>
+          <section id="outcome-home" class="card outcome-home" aria-label="목적 중심 프로젝트 홈" tabindex="-1" hidden></section>
           <section class="context-bar" aria-label="현재 위치와 다음 행동"><div class="context-top"><div><span id="task-number" class="eyebrow">첫 작업</span><h1 id="context-title">아이디어에서, 첫 작업으로.</h1><p id="context-sub">만들고 싶은 것 또는 바꾸고 싶은 것을 적어 주세요.</p></div><span id="stage-label" class="tag purple">시작하기</span></div><ol class="journey" aria-label="작업 흐름"><li id="journey-request"><span>1</span>요청 정리</li><li id="journey-handoff"><span>2</span>작업문 전달</li><li id="journey-report"><span>3</span>결과로 이어가기</li></ol><details id="last-result" class="last-result" hidden><summary id="last-result-summary">최근 가져온 결과</summary><div id="last-result-text" class="source-raw"></div></details></section>
           <div id="workspace" class="workspace">
             <div class="main-column">
-              <div id="pending-bar" class="pending-bar" hidden><span class="spinner" aria-hidden="true"></span><span id="working" role="status"></span><button type="button" id="cancel" class="quiet" hidden>정리 중단</button></div>
               <section id="work" aria-label="현재 작업" aria-live="polite"></section>
               <details id="compose-panel" class="card compose-panel" open><summary id="compose-summary"><span>＋ 새 요청 또는 결과 남기기</span><small id="compose-draft-status"></small></summary><section class="compose-card"><div class="section-heading"><div><p id="compose-eyebrow" class="eyebrow">LET'S START</p><h2 id="compose-title">어떤 작업부터 시작할까요?</h2></div><span class="compose-icon" aria-hidden="true">✦</span></div>
                 <form id="compose"><div class="tabs" role="group" aria-label="입력 종류"><button type="button" id="request-tab" class="tab selected" aria-pressed="true">요청 / 다음 변경</button><button type="button" id="report-tab" class="tab" aria-pressed="false">돌아온 결과</button></div>

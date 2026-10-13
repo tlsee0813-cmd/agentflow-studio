@@ -1,10 +1,11 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source } from '../shared/types.js';
 import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
-import { parseProject } from '../shared/validation.js';
+import { parseProject, parseResultFile } from '../shared/validation.js';
 import { ProjectStore, serializeProject, storageErrorCode } from '../shared/storage.js';
 import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview } from './presentation.js';
 import { loadConfig, requestAdvice, runtimeStorage, runtimeFailure, type RuntimeConfig } from './runtime.js';
+import { outcomeOf } from '../shared/outcome.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HTMLElementTagNameMap[K] {
   const e=document.createElement(tag);e.textContent=content;if(cls)e.className=cls;return e;
@@ -68,6 +69,11 @@ function showContext() {
   $('panel-title').focus({preventScroll:true});$('context-panel').scrollIntoView({block:'nearest'});
 }
 function closeContext() {contextOpen=false;displayView();(contextReturn??$('nav-context')).focus({preventScroll:true});}
+function reportBody(source:Source):string {
+  const file=project.tasks.find(t=>t.id===source.taskId)?.resultFile;
+  if(file&&(source.kind==='report'||source.kind==='evidence'))return parseResultFile(file.rawText)[source.kind]??source.text;
+  return source.text;
+}
 function renderStatus() {
   $('notice').textContent=project.notice??'';$('notice').hidden=!project.notice;
   $('storage-error').textContent=storageError;$('storage-error').hidden=!storageError;
@@ -95,16 +101,69 @@ function renderStatus() {
   $('task-number').textContent=t?`현재 작업 ${String(project.tasks.indexOf(t)+1).padStart(2,'0')}`:'첫 작업';
   $('context-title').textContent=stage.title;$('context-sub').textContent=stage.next;$('stage-label').textContent=stage.label;
   $('stage-label').dataset.stage=stage.kind;
-  const report=[...project.sources].reverse().find(s=>s.kind==='report'||s.kind==='evidence');
+  const report=outcomeOf(project).reports.at(-1);
   $('last-result').hidden=!report;
   if(report){const reportTask=project.tasks.find(x=>x.id===report.taskId),parent=project.tasks.findIndex(x=>x.id===reportTask?.parentTaskId);
     $('last-result-summary').textContent=`최근 가져온 결과 · ${dateLabel(report.at)}${parent>=0?` · 작업 ${parent+1}에 연결`:''} · 앱 미검증`;
-    $('last-result-text').textContent=report.text;}
+    $('last-result-text').textContent=reportBody(report);}
   $('sidebar-task').textContent=t?`작업 ${project.tasks.indexOf(t)+1} · ${taskTitle(project,t)}`:'첫 작업을 기다리고 있어요.';
   for(const [i,id] of ['journey-request','journey-handoff','journey-report'].entries()){$(id).classList.toggle('current',i+1===stage.step);$(id).classList.toggle('past',i+1<stage.step);if(i+1===stage.step)$(id).setAttribute('aria-current','step');else $(id).removeAttribute('aria-current');}
   if($('handoff-ready'))$('handoff-ready').hidden=stage.kind!=='exported';
   if($('bring-report'))$('bring-report').textContent=project.draft.trim()?'작성 중인 입력 이어쓰기':'결과 붙여넣기';
   if($('copy-work')){const copy=$<HTMLButtonElement>('copy-work');copy.className=stage.kind==='exported'||stage.kind==='question'?'secondary':'primary';copy.textContent=t&&exportNeedsRefresh(project,t)?'수정한 작업문 복사':'작업문 복사';}
+}
+function renderOutcome(t:Task|null) {
+  const area=$('outcome-home');area.replaceChildren();area.hidden=!t;if(!t)return;
+  const flow=outcomeOf(project,t.id);area.dataset.outcomeId=flow.id??'';
+  const top=node('div','','outcome-heading'),title=node('div');
+  title.append(node('p','PROJECT OUTCOME','eyebrow'),node('h2','원하는 결과를 중심으로'));
+  const primary=btn(questionApplicability(project,t)==='active'?'필요한 선택 보기':'현재 작업문 보기',()=>{$('current-work').focus({preventScroll:true});$('current-work').scrollIntoView({block:'start'});},'primary','home-work');
+  const topActions=node('div','','outcome-actions');topActions.append(primary,btn('방향 수정 / 다음 요청',()=>openComposer('request'),'secondary','change-direction'));
+  top.append(title,topActions);area.append(top);
+  const origin=flow.origin;
+  if(origin) {
+    const current=flow.originBases.length===1?flow.originBases[0]:null;
+    area.append(node('p',current?'출발 요청에서 이어온 기준 · '+BASIS_LABEL[current.status]:'출발 요청 · 사용자 원문','source-meta'));
+    const purpose=node('p',current?.text??origin.text,'outcome-purpose');purpose.id='outcome-purpose';area.append(purpose);
+    const source=details('출발 원문과 연결 보기','outcome-origin');source.append(node('div',origin.text,'source-raw'),node('p',`${origin.id} · ${dateLabel(origin.at)}`,'source-id'));
+    if(current?.history.length)source.append(node('p','위에는 이 요청에서 이어온 기준의 현재 값이 보입니다. 최초 원문은 이 기록에 보존합니다.','hint'));
+    for(const b of flow.originBases.length>1?flow.originBases:[])source.append(node('div',`${b.id} · ${BASIS_LABEL[b.status]}\n${b.text}`,'source-raw'));
+    source.append(node('p','작업 연결을 따라 묶은 흐름입니다. AI의 해석·추천은 아래 작업문 초안이며 사용자 결정이나 저장소 확인 결과가 아닙니다.','hint'));area.append(source);
+  } else area.append(node('p','이 흐름에는 출발 요청이 없습니다. 원하는 결과를 다음 요청에 적으면 원문에서 이어갑니다.','hint'));
+  if(flow.request&&flow.request.id!==origin?.id) {
+    const direction=node('section','','outcome-direction');direction.id='outcome-direction';
+    direction.append(node('h3','이 작업에서 이어가는 요청'),node('p',flow.request.text,'source-raw'),node('p','이 발언이 바꾸는 범위와 아래 보존 기준을 함께 전달합니다. 코드 영향은 아직 확인하지 않았어요.','hint'));area.append(direction);
+  }
+  if(flow.otherLatestRequest) {
+    const newer=details('다른 작업에 더 나중 요청이 있어요','outcome-other-request');newer.append(node('div',flow.otherLatestRequest.text,'source-raw'),node('p','현재는 이 보고가 연결된 작업에서 이어갑니다. 다른 요청으로 보고를 자동 이동하지 않습니다.','hint'));area.append(newer);
+  }
+  const grid=node('div','','outcome-grid');
+  const conditions=details(`선택 · 이유와 보존 기준 ${project.bases.length}개`,'outcome-conditions');
+  conditions.append(node('p','요청·답변·직접 기록의 현재 값입니다. 이유는 사용자가 쓴 범위만 남깁니다. 연결이나 인용이 없다고 영향이 없는 것은 아닙니다.','hint'));
+  for(const b of project.bases) {
+    const s=project.sources.find(s=>s.id===b.sourceId),entry=node('div','','outcome-record');
+    entry.append(tag(BASIS_LABEL[b.status]),node('p',b.text,'source-raw'));
+    if(s?.replyTo)entry.append(node('p',`답한 질문: ${s.replyTo}`,'hint'));
+    entry.append(node('p',`${b.id} · ${b.sourceId} · r${b.revision}`,'source-id'));conditions.append(entry);
+  }
+  conditions.append(btn('기준 · 출처 자세히 조정',showContext,'quiet'));grid.append(conditions);
+  const lastReport=flow.reports.at(-1);
+  if(lastReport) {
+    const preview=node('section','','outcome-return');preview.id='outcome-last-report';
+    preview.append(node('h3','돌아온 내용 · 외부 원문'),node('p',reportBody(lastReport),'outcome-excerpt'),node('p','전체 원문과 연결 정보는 아래 보고·자료에서 볼 수 있어요. 수신은 수용·완료 판정이 아닙니다.','hint'));area.append(preview);
+  }
+  const results=details(`이 흐름에서 받은 보고 · 자료 ${flow.reports.length}개`,'outcome-results');
+  results.append(node('p','외부에서 가져온 원문입니다. 보고자·방법·환경·버전은 원문에 기재된 범위만 알 수 있고 나머지는 미상입니다. 파일이나 로그가 실행을 보증하지는 않습니다.','hint'));
+  for(const s of [...flow.reports].reverse()) {
+    const rt=project.tasks.find(x=>x.id===s.taskId)!,entry=node('div','','outcome-record');
+    const parentIndex=project.tasks.findIndex(x=>x.id===rt.parentTaskId);
+    entry.append(tag(sourceName[s.kind]),node('p',`${dateLabel(s.at)} · ${parentIndex<0?'연결된 이전 작업 없음':`연결 작업 ${parentIndex+1}`}${rt.resultFile?` · 내보내기 ${rt.resultFile.returnId}`:' · 붙여넣기 / 내보내기 판본 미확인'}`,'hint'),node('div',reportBody(s),'source-raw'));results.append(entry);
+  }
+  if(!flow.reports.length)results.append(node('p','아직 이 작업 연결에서 받은 결과가 없습니다. 다른 작업의 보고는 작업 기록에서 볼 수 있어요.','hint'));
+  grid.append(results);area.append(grid);
+  const actions=node('div','','outcome-actions');
+  actions.append(btn('결과 붙여넣기',()=>openComposer('report'),'quiet','home-paste-result'),btn('결과 JSON 가져오기',()=>{showWork();$<HTMLDetailsElement>('compose-panel').open=true;$<HTMLDetailsElement>('result-file-panel').open=true;$('select-result-file').click();},'quiet','home-file-result'));
+  area.append(actions,node('p','목적 변경, 필요한 선택, 의미 있는 결과가 있을 때 돌아오세요. 명확한 작업은 지금 쓰는 개발 도구에서 계속 진행하면 됩니다.','hint'));
 }
 const errorMessages:Record<string,string>={
   INVALID_RESPONSE:'응답 형식이 올바르지 않아 적용하지 않았습니다.',AI_TIMEOUT:'정리 요청 시간이 초과됐습니다.',
@@ -288,6 +347,11 @@ function renderWork(t:Task|null) {
     if(old){const d=details('기준 변경 전 AI 문구 보기 (현재 작업문 아님)',`stale-${key}`);d.append(node('div',old,'source-raw'),btn('이 문구로 시작해 직접 고치기',()=>commit(editTask(project,t.id,key,old)),'quiet',`stale-use-${key}`));edit.append(d);}
   }
   const suggestions=taskSuggestions(t);
+  if(w.suggestions.length) {
+    const proposals=details(`${t.suggestions!==null?'직접 조정한':t.mode==='mock'?'모의':'AI'} 방향 제안 · 미확정`,'direction-proposals');
+    for(const s of w.suggestions)proposals.append(node('h3',s.text),node('p',s.why,'hint'));
+    proposals.append(node('p','고객 경험을 위한 제안입니다. 저장소에서 확인한 구현 사실이나 사용자 선택이 아니며, 아래에서 수정하거나 필요한 것만 기준으로 기록할 수 있어요.','hint'));card.append(proposals);
+  }
   for(const [index,s] of suggestions.entries()) {
     const box=node('div','','suggestion');box.append(tag(w.aiStale&&t.suggestions===null?'기준 변경 전 제안 · 작업문 제외 · 고치면 포함':'추가 제안 · 미확정'));
     for(const key of ['text','why'] as const){const l=node('label',key==='text'?'제안 문구':'이유와 대가');const f=node('textarea');f.rows=2;f.maxLength=2000;f.id=`suggestion-${index}-${key}`;l.htmlFor=f.id;f.value=s[key];f.addEventListener('input',()=>guard(()=>{commit(editSuggestion(project,t.id,index,key,f.value),false);refreshPreview();}));box.append(l,f);}
@@ -371,13 +435,13 @@ function render() {
   $('starter-examples').hidden=!!project.tasks.length||returned;
   $('compose-panel').classList.toggle('initial',!project.tasks.length);
   const t=project.currentTaskId?taskOf(project):null;
-  renderBases(t);renderHistory();renderWork(t);renderReturnPreview();renderResultFile();renderStatus();displayView();
+  renderOutcome(t);renderBases(t);renderHistory();renderWork(t);renderReturnPreview();renderResultFile();renderStatus();displayView();
   for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id))d.open=open.get(d.id)!;
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
 function submitInput(withAI:boolean) {
   if(project.pending||!project.draft.trim()||returnChoiceRequired()||(withAI&&!readyForAI()))return;
-  guard(()=>{const next=submit(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);selectedReturnTaskId=undefined;commit(next);$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('current-work').focus({preventScroll:true});$('current-work').scrollIntoView({block:'start'});if(withAI)void generate(project.currentTaskId!);else {$<HTMLDetailsElement>('edit-work').open=true;$('work-next').focus();}});
+  guard(()=>{const next=submit(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);selectedReturnTaskId=undefined;commit(next);$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});if(withAI)void generate(project.currentTaskId!);else {$<HTMLDetailsElement>('edit-work').open=true;$('work-next').focus();}});
 }
 $('compose').addEventListener('submit',e=>{e.preventDefault();submitInput(true);});
 $('save-input').addEventListener('click',()=>submitInput(false));
