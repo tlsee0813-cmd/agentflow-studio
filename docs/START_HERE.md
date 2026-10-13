@@ -62,6 +62,6 @@ PATTERN043 A 준비 후 B1의 합성 M/S×K/C 최초4응답을 총괄·독립검
 
 ADVICE044_FIX는 여러 내보내기가 있는 수동 report/evidence에서 마지막 내보내기 비교 기준과 보고 판본 미확인을 안내한다. 기존 결과 JSON 경로·대상 연결·데이터 처리는 유지하며 표시만 바꿨다. rev1은 두 번째 내보내기 뒤 UI10의 정확 기대값 한 줄만 수용된 표시로 교정했고 제품은 불변이다. 이전 CI 실패와 Work의Linux22개 통과·새 커밋 CI는 구분한다. 좁은 관찰/검증과 사용자 효용 미측정은 [PROJECT_STATUS](PROJECT_STATUS.md#advice044_fix--수동-보고-판본-미확인-표시)에 구분한다.
 
-## 설치 없는 정적 체험 — WEB046, 미게시
+## 설치 없는 정적 체험 — WEB046 / WEB047
 
-같은 화면/도메인/파일교환의 브라우저 MOCK을 준비했다. 고객은 게시 후URL로 사용하며 Node 설치/키 입력은 없다. 일반 자연어 이해나 실AI 서비스가 아니고 현재 공개URL은 없다. 기존 서버 실행은 그대로 유지한다. 개발자가 잠금 의존성을 설치한 `app/`에서 `node continuity/scripts/build-static.mjs`로 `continuity/static-dist/`를 재생성한다. 게시 대상은 이 폴더 내용만이고 `/agentflow-studio/` 상대경로를 검증했다. Pages 설정/계정 적격성·실제HTTPS/헤더는 후속 게시 범위이며 이번에는 변경하지 않았다. 별도 저장접두사·JSON백업을 사용하므로 주소/기기 자동동기화는 없다. CI의 정적검사는 `python continuity/tests/static_browser.py`이며 native UI/File/localStorage와 명시된 sentinel/CSP탐침을 구분한다. 범위와 실제확인은 [PROJECT_STATUS](PROJECT_STATUS.md#web046--정적-브라우저-mock-통합미게시)를 따른다.
+같은 화면/도메인/파일교환의 브라우저 MOCK을 준비했다. 고객은 게시 후URL로 사용하며 Node 설치/키 입력은 없다. 일반 자연어 이해나 실AI 서비스가 아니다. 공개 주소는 https://tlsee0813-cmd.github.io/agentflow-studio/ 이며 `gh-pages` 정적12파일 게시와 GitHub Pages 배포 성공을 확인했다. Cloud의 공개호스트 접속은 프록시403으로 막혀 실제 공개화면 검증은 미완료다. 기존 서버 실행은 그대로 유지한다. 개발자가 잠금 의존성을 설치한 `app/`에서 `node continuity/scripts/build-static.mjs`로 `continuity/static-dist/`를 재생성한다. 게시 대상은 이 폴더 내용만이고 `/agentflow-studio/` 상대경로를 검증했다. Pages 소스는 `gh-pages /`이며 HTTPS 강제다. 공개URL 응답/헤더·native 흐름은 Cloud에서 해당 호스트를 허용한 뒤 별도로 확인해야 한다. 별도 저장접두사·JSON백업을 사용하므로 주소/기기 자동동기화는 없다. CI의 정적검사는 `python continuity/tests/static_browser.py`이며 native UI/File/localStorage와 명시된 sentinel/CSP탐침을 구분한다. 범위와 실제확인은 [PROJECT_STATUS](PROJECT_STATUS.md#web046--web047--정적-브라우저-mock-통합pages-게시)를 따른다.

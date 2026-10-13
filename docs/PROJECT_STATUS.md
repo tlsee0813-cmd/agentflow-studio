@@ -154,10 +154,10 @@ Work의 native 관찰은 report/evidence H2기준1개·파일 H1기준2개/legac
 
 ADVICE044_FIX rev1은 UI10의 두 번째 내보내기 직후 기대값 한 줄만 `마지막 내보내기 이후 기록된 기준 0개`로 교정했다. 정확 비교/locator·첫 내보내기/기준 변경/reload/유형 변경·부모/원문/호출 수 검사는 유지하고 제품은 불변이다. [257ecc5의 CI38357118980](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38357118980)는 양 OS UI 단계 실패와 후속 FRESH033/SELECT035/CONNECT039 미실행으로 보존한다. Work는 실제 UI10 실패 재현 후 Linux UI00111/FRESH0333/SELECT0353/CONNECT0395 합계22개를 각1회 통과했고 기존 명시 장애주입을 구분했다. Cloud는 manifest11·기준/최종 hash·한 줄 diff·문법을 확인하고22개는 반복하지 않았다. 이번 새 커밋의 필수 CI는 양 OS 완료 결과로 별도 확인한다.
 
-## WEB046 — 정적 브라우저 MOCK 통합·미게시
+## WEB046 / WEB047 — 정적 브라우저 MOCK 통합·Pages 게시
 
 같은 UI/도메인/검증을 사용하는 설치 없는 정적 체험을 통합했다. 기본 runtime은 기존 서버 개발/실AI 경로를 유지하고 정적 build만 브라우저 MOCK adapter를 선택한다. 기존 mock 규칙은 타입 표기만 추가해 shared/mock.ts로 이동했다. 정적 저장은 별도 접두사이며 기존 서버 기록·구형 백업을 자동 접근하지 않는다. 화면에 `브라우저 MOCK · AI 아님`을 명시하고 일반 자연어 이해·실AI 품질을 제공한다고 주장하지 않는다.
 
 Cloud Node22.16/npm10.9.2/잠금TS5.8.3 클린설치 후 부모/continuity 검사·빌드 및 정적 build가 통과했다. 재생성12파일177353B은 첨부publish와 바이트 동일했다. 기존 서버HTTP11·새 정적native1이 통과했고 `/agentflow-studio/`에서 요청/질문/직접편집/내보내기/결과JSON 정확연결/백업복구·reload를 확인했다. 일반API0·서버저장키 불변·정적import closure를 확인했으며 합성sentinel/CSP차단탐침은 일반 사용 흐름과 구분한다. 기존 게이트를 유지한 CI에 정적build/검사 단계만 추가했고 새 커밋 양OS 결과는 Actions에서 별도로 확인한다.
 
-공개URL·Pages 설정·배포는 아직 없다. 게시 후보는 `app/continuity/static-dist/` 내용12파일뿐이며 서버/provider/prompt/키·API호출 경로는 포함하지 않는다. 상대자산·하위경로·connect-src none을 확인했지만 실제 호스팅의 HTTPS/헤더·계정 적격성은 미확인이다. 게시workflow/권한확장·ServiceWorker·숨은fallback은 추가하지 않았고 기존 서버의 키/실AI 경로는 유지한다. 규칙체험의 실제 고객 효용·운영 준비는 미검증이다.
+WEB047 사용자 공개 승인으로 검증 소스 `dfc1bb92`의 정적12파일177353B만 `gh-pages`에 게시했다. 게시 커밋 `3a1df758f3a30cce78d2f57d385b726e70f74de2`의 원격 파일은 검증본과 바이트 동일하다. 공개 주소는 https://tlsee0813-cmd.github.io/agentflow-studio/ 이며 Pages 소스 `gh-pages /`·HTTPS 강제·[배포38377279130 성공](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38377279130)을 확인했다. 소스 양OS CI38373503761도 성공했다. Cloud에서는 공개호스트가 프록시403/Chromium ERR_TUNNEL_CONNECTION_FAILED로 차단되어 공개HTTPS 응답·자산·native 화면/API0는 미검증이다. 기존 로컬 native 검증과 구분하며 호스트 추가 허용 초안의 환경 설정 저장·게시 후 해당 확인만 남는다. 게시물은 서버/provider/prompt/키·API호출 경로를 포함하지 않으며 기존 서버 제품·main·PR Draft를 유지했다. 규칙체험의 고객 효용·운영 준비는 미검증이다.
