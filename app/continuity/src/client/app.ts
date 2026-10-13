@@ -338,13 +338,15 @@ function renderReturnPreview() {
     if(returnChoiceRequired()) {area.append(node('p','내보낸 작업이 여러 개입니다. 이 결과의 작업을 선택하세요.','hint'));return;}
   }
   const preview=returnPreview(project,targets.length>1?selectedReturnTaskId:undefined);
+  const multipleExports=(targets.find(t=>t.id===preview.targetTaskId)?.handoffs.length??0)>1;
   area.dataset.targetTaskId=preview.targetTaskId??'';
   const target=node('p',preview.targetTitle?`연결 예정 · ${preview.targetTitle}`:'연결할 이전 작업 없음','hint');target.id='return-target';area.append(target);
-  const when=node('p',preview.exportedAt?`내보낸 시점 · ${dateLabel(preview.exportedAt)}`:'내보낸 기록 없음','hint');when.id='return-export';area.append(when);
+  const when=node('p',preview.exportedAt?`${multipleExports?'이 작업의 마지막 내보내기':'내보낸 시점'} · ${dateLabel(preview.exportedAt)}`:'내보낸 기록 없음','hint');when.id='return-export';area.append(when);
+  if(multipleExports)area.append(node('p','붙여넣은 보고가 어느 내보내기에 대한 것인지는 미확인입니다. 결과 JSON이 있으면 아래에서 가져오세요.','hint'));
   if(preview.kind==='comparable') {
-    const bases=preview.recordedBases!,list=details(`이후 기록된 기준 ${bases.length}개`,'return-records');
+    const bases=preview.recordedBases!,list=details(`${multipleExports?'마지막 내보내기 이후':'이후'} 기록된 기준 ${bases.length}개`,'return-records');
     list.append(node('p','이 결과에 적용되는지는 직접 확인하세요.','hint'));
-    list.append(node('p',`${preview.targetTaskId} · 내보낸 기준 r${preview.exportRevision}`,'source-id'));
+    list.append(node('p',`${preview.targetTaskId} · ${multipleExports?'마지막 내보낸 기준':'내보낸 기준'} r${preview.exportRevision}`,'source-id'));
     for(const basis of bases) {
       const item=node('div','','basis');
       item.append(node('p',`${basis.id} · ${BASIS_LABEL[basis.status]}`,'basis-status'),node('div',basis.text,'source-raw'));
