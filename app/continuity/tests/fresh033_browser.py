@@ -99,7 +99,7 @@ class FRESH033(unittest.TestCase):
         self.observe();self.send('결제가 실패하는 오류가 있어요.')
         current=self.state();legacy=json.loads(json.dumps(current));legacy['schemaVersion']='idea015.project.1'
         for b in legacy['bases']:b['locked']=True
-        for t in legacy['tasks']:del t['adviceRevision']
+        for t in legacy['tasks']:del t['adviceRevision'];del t['resultFile']
         path=OUT/'legacy-fixture.json';self.save(path.name,legacy);count=len(self.wires)
         self.import_file(path);self.assert_readonly(unknown=True)
         self.assertEqual(self.state()['sources'],current['sources']);self.assertEqual(self.state()['bases'],current['bases'])

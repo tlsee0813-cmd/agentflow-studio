@@ -121,3 +121,9 @@ FLOW029 baseline은정확수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`
 수용된 rev2는 `continuity/tests/browser.py:218`의 정확한 저장 형식 기대값만 `idea015.project.2`에서 `idea015.project.3`으로 교정한다. 제품·prompt·다른 assertion·fixture·skip·timeout·CI는 변경하지 않는다. [90ce4e7의 CI38321354904](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38321354904)는 Ubuntu/Windows 기존 continuity 브라우저 단계에서 실패했고 CONNECT039 단계는 미실행이었다. 이 실패 기록은 보존한다.
 
 Work는 수정 전 test_10 실패와 수정 후 Linux Node22.16/Python3.12/Chromium143 전체13개 통과(fail/error/skip0)를 보고했고 총괄이 원문 로그를 검토했다. 일부 검사는 장애·상태 주입이며 순수 native 통과로 합치지 않는다. Cloud는 패키지7개와 한 줄 diff·최종 파일 SHA를 대조했고 같은 전체 검사를 반복하지 않았다. 이번 새 커밋의 양 OS 필수 게이트·CONNECT039 단계 결과는 Actions에서 별도로 확인하며 미리 성공으로 기록하지 않는다. 실AI·고객 효용 검증은 아니다.
+
+### CONNECT039 rev3 — 구형 fixture 필드 교정
+
+수용된 rev3는 UI001 UI11과 FRESH033 F02의 v1 합성 fixture에서 현재 v3 전용 `resultFile`을 제거하는 두 줄만 반영한다. 진짜 v1 필드 집합으로 이관을 검사하며 제품·validator·prompt·assertion·skip·timeout·CI는 불변이다. [c5580bd의 CI38324157715](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38324157715)는 기존 browser13 단계를 양 OS에서 통과했지만 다음 UI 단계에서 실패해 CONNECT039는 미실행이었다. 이전 실패는 보존한다.
+
+Work의 별도 Linux 실행은 UI00111/FRESH0333/SELECT0353/CONNECT0395 합계22개 통과(fail/error/skip0)이며 mock/direct HTTP·명시 장애주입을 구분한다. Cloud는 manifest21·두 줄 patch·최종 두 파일 SHA와 제품 불변을 확인했고 같은22개를 반복하지 않았다. 새 커밋의 양 OS 필수 단계 완료 결과는 Actions에서 별도로 확인한다. 선택적 파일 교환 기능 상태와 기존 이관 보호는 유지하며 실AI·사람 효용 검증은 아니다.
