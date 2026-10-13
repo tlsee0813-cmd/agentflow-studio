@@ -1,9 +1,10 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES } from '../shared/types.js';
 import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
-import { parseProject } from '../shared/validation.js';
+import { parseProject, parseResultFile } from '../shared/validation.js';
 import { ProjectStore, serializeProject, storageErrorCode } from '../shared/storage.js';
 import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview } from './presentation.js';
 import { loadConfig, requestAdvice, runtimeStorage, runtimeFailure } from './runtime.js';
+import { outcomeOf } from '../shared/outcome.js';
 const $ = (id) => document.getElementById(id);
 function node(tag, content = '', cls = '') {
     const e = document.createElement(tag);
@@ -116,6 +117,12 @@ function showContext() {
     $('context-panel').scrollIntoView({ block: 'nearest' });
 }
 function closeContext() { contextOpen = false; displayView(); (contextReturn ?? $('nav-context')).focus({ preventScroll: true }); }
+function reportBody(source) {
+    const file = project.tasks.find(t => t.id === source.taskId)?.resultFile;
+    if (file && (source.kind === 'report' || source.kind === 'evidence'))
+        return parseResultFile(file.rawText)[source.kind] ?? source.text;
+    return source.text;
+}
 function renderStatus() {
     $('notice').textContent = project.notice ?? '';
     $('notice').hidden = !project.notice;
@@ -162,12 +169,12 @@ function renderStatus() {
     $('context-sub').textContent = stage.next;
     $('stage-label').textContent = stage.label;
     $('stage-label').dataset.stage = stage.kind;
-    const report = [...project.sources].reverse().find(s => s.kind === 'report' || s.kind === 'evidence');
+    const report = outcomeOf(project).reports.at(-1);
     $('last-result').hidden = !report;
     if (report) {
         const reportTask = project.tasks.find(x => x.id === report.taskId), parent = project.tasks.findIndex(x => x.id === reportTask?.parentTaskId);
         $('last-result-summary').textContent = `최근 가져온 결과 · ${dateLabel(report.at)}${parent >= 0 ? ` · 작업 ${parent + 1}에 연결` : ''} · 앱 미검증`;
-        $('last-result-text').textContent = report.text;
+        $('last-result-text').textContent = reportBody(report);
     }
     $('sidebar-task').textContent = t ? `작업 ${project.tasks.indexOf(t) + 1} · ${taskTitle(project, t)}` : '첫 작업을 기다리고 있어요.';
     for (const [i, id] of ['journey-request', 'journey-handoff', 'journey-report'].entries()) {
@@ -187,6 +194,103 @@ function renderStatus() {
         copy.className = stage.kind === 'exported' || stage.kind === 'question' ? 'secondary' : 'primary';
         copy.textContent = t && exportNeedsRefresh(project, t) ? '수정한 작업문 복사' : '작업문 복사';
     }
+}
+function renderOutcome(t) {
+    const area = $('outcome-home');
+    area.replaceChildren();
+    area.hidden = !t;
+    if (!t)
+        return;
+    const flow = outcomeOf(project, t.id);
+    area.dataset.outcomeId = flow.id ?? '';
+    const top = node('div', '', 'outcome-heading'), title = node('div');
+    title.append(node('p', 'PROJECT OUTCOME', 'eyebrow'), node('h2', '지금 이어갈 작업'));
+    const primary = btn(questionApplicability(project, t) === 'active' ? '필요한 선택 보기' : '현재 작업문 보기', () => { $('current-work').focus({ preventScroll: true }); $('current-work').scrollIntoView({ block: 'start' }); }, 'primary', 'home-work');
+    const topActions = node('div', '', 'outcome-actions');
+    topActions.append(primary, btn('방향 수정 / 다음 요청', () => openComposer('request'), 'secondary', 'change-direction'));
+    top.append(title, topActions);
+    area.append(top);
+    const origin = flow.origin;
+    const request = flow.request;
+    if (request) {
+        area.append(node('p', flow.requestBasis?.status === 'confirmed' ? '이번 요청 · 사용자 직접 정정' : flow.requestBasis && flow.requestBasis.text !== request.text ? '이번 요청 · 기준의 현재 값' : '이번 요청 · 사용자 원문', 'source-meta'));
+        const purpose = node('p', flow.requestBasis?.text ?? request.text, 'outcome-purpose outcome-excerpt');
+        purpose.id = 'outcome-purpose';
+        area.append(purpose);
+        const direction = node('section', '', 'outcome-direction');
+        direction.id = 'outcome-direction';
+        if (flow.direction && flow.direction.id !== request.id) {
+            direction.append(node('h3', `${flow.directionDeclared ? '앞서 바꾼 방향' : '직전 사용자 요청'} · ${flow.directionBasis?.status === 'confirmed' ? '직접 정정' : flow.directionBasis && flow.directionBasis.text !== flow.direction.text ? '기준의 현재 값' : '원문 참조'}`), node('p', flow.directionBasis?.text ?? flow.direction.text, 'outcome-excerpt'));
+        }
+        area.append(direction);
+        const basis = flow.directionBasis ?? flow.requestBasis;
+        if (basis) {
+            const correction = details(flow.directionBasis ? (flow.directionDeclared ? '이 방향 바로잡기' : '직전 요청 바로잡기') : '이번 요청 바로잡기', 'outcome-correction');
+            const field = node('textarea');
+            field.id = 'outcome-correction-text';
+            field.rows = 3;
+            field.maxLength = 12000;
+            field.setAttribute('aria-label', '이어갈 내용 직접 정정');
+            field.value = project.basisEdits[basis.id] ?? basis.text;
+            field.addEventListener('input', () => guard(() => commit(editBasisDraft(project, basis.id, field.value), false)));
+            correction.append(field, btn('정정한 내용 기록', () => commit(recordBasis(project, field.value, 'confirmed', basis.id)), 'secondary', 'correct-outcome'));
+            area.append(correction);
+        }
+    }
+    if (origin) {
+        const source = details('출발 · 방향 · 이번 요청 원문 보기', 'outcome-origin');
+        const visibleSources = new Map([origin, flow.direction, request].filter((s) => s !== null).map(s => [s.id, s]));
+        for (const input of visibleSources.values())
+            source.append(node('div', input.text, 'source-raw'), node('p', `${input.id} · ${dateLabel(input.at)}`, 'source-id'));
+        source.append(btn('전체 작업 기록 보기', () => $('nav-history').click(), 'quiet'));
+        source.append(node('p', '원문 이력입니다. 후속 발언이 바꾼 부분은 새 요청을 따르며, 연결만으로 같은 목적이나 코드 영향을 판단하지 않습니다.', 'hint'));
+        area.append(source);
+    }
+    if (flow.otherRequests.length) {
+        const other = details(`현재 경로 밖 요청 ${flow.otherRequests.length}개`, 'outcome-other-request');
+        for (const request of flow.otherRequests)
+            other.append(node('div', request.text, 'source-raw'), node('p', `작업 ${project.tasks.findIndex(t => t.id === request.taskId) + 1} · ${dateLabel(request.at)}`, 'source-id'));
+        other.append(node('p', '연결 기록만으로 진행·완료 여부를 알 수 없습니다. 이 요청이나 보고를 현재 작업에 자동 합치지 않습니다.', 'hint'));
+        area.append(other);
+    }
+    const grid = node('div', '', 'outcome-grid');
+    const conditions = details(`선택 · 이유와 보존 기준 ${project.bases.length}개`, 'outcome-conditions');
+    conditions.append(node('p', '이전 요청은 후속 변경과 함께 읽는 참고입니다. 답변·직접 기록은 해당 범위에서 유지합니다.', 'hint'));
+    for (const b of project.bases) {
+        const s = project.sources.find(s => s.id === b.sourceId), entry = node('div', '', 'outcome-record');
+        entry.append(tag(BASIS_LABEL[b.status]), node('p', b.text, 'source-raw'));
+        if (s?.replyTo)
+            entry.append(node('p', `답한 질문: ${s.replyTo}`, 'hint'));
+        entry.append(node('p', `${b.id} · ${b.sourceId} · r${b.revision}`, 'source-id'));
+        conditions.append(entry);
+    }
+    conditions.append(btn('기준 · 출처 자세히 조정', showContext, 'quiet'));
+    grid.append(conditions);
+    const lastReport = flow.reports.at(-1);
+    if (lastReport) {
+        const preview = node('section', '', 'outcome-return');
+        preview.id = 'outcome-last-report';
+        preview.append(node('h3', '돌아온 내용 · 외부 원문'), node('p', reportBody(lastReport), 'outcome-excerpt'), node('p', '전체 원문과 연결 정보는 아래 보고·자료에서 볼 수 있어요.', 'hint'));
+        area.append(preview);
+    }
+    const results = details(`이 흐름에서 받은 보고 · 자료 ${flow.reports.length}개`, 'outcome-results');
+    results.append(node('p', '외부에서 가져온 원문입니다. 보고자·방법·환경·버전은 원문에 기재된 범위만 알 수 있고 나머지는 미상입니다. 파일이나 로그가 실행을 보증하지는 않습니다.', 'hint'));
+    for (const s of [...flow.reports].reverse()) {
+        const rt = project.tasks.find(x => x.id === s.taskId), entry = node('div', '', 'outcome-record');
+        const parentIndex = project.tasks.findIndex(x => x.id === rt.parentTaskId);
+        entry.append(tag(sourceName[s.kind]), node('p', `${dateLabel(s.at)} · ${parentIndex < 0 ? '연결된 이전 작업 없음' : `연결 작업 ${parentIndex + 1}`}${rt.resultFile ? ` · 내보내기 ${rt.resultFile.returnId}` : ' · 붙여넣기 / 내보내기 판본 미확인'}`, 'hint'), node('div', reportBody(s), 'source-raw'));
+        results.append(entry);
+    }
+    if (!flow.reports.length)
+        results.append(node('p', '아직 이 작업 연결에서 받은 결과가 없습니다. 다른 작업의 보고는 작업 기록에서 볼 수 있어요.', 'hint'));
+    grid.append(results);
+    area.append(grid);
+    const actions = node('div', '', 'outcome-actions');
+    actions.append(btn('결과 붙여넣기', () => openComposer('report'), 'quiet', 'home-paste-result'), btn('결과 JSON 가져오기', () => { showWork(); $('compose-panel').open = true; $('result-file-panel').open = true; $('select-result-file').click(); }, 'quiet', 'home-file-result'));
+    area.append(actions);
+    const limits = details('이 흐름의 범위', 'outcome-limits');
+    limits.append(node('p', '목적 변경, 필요한 선택, 의미 있는 결과가 있을 때 돌아오세요. 명확한 작업은 개발 도구에서 이어갑니다. AI 초안은 사용자 결정이 아니며, 보고 수신은 실행·완료 판정이 아닙니다.', 'hint'));
+    area.append(limits);
 }
 const errorMessages = {
     INVALID_RESPONSE: '응답 형식이 올바르지 않아 적용하지 않았습니다.', AI_TIMEOUT: '정리 요청 시간이 초과됐습니다.',
@@ -737,6 +841,7 @@ function render() {
     $('starter-examples').hidden = !!project.tasks.length || returned;
     $('compose-panel').classList.toggle('initial', !project.tasks.length);
     const t = project.currentTaskId ? taskOf(project) : null;
+    renderOutcome(t);
     renderBases(t);
     renderHistory();
     renderWork(t);
@@ -762,7 +867,7 @@ function render() {
 function submitInput(withAI) {
     if (project.pending || !project.draft.trim() || returnChoiceRequired() || (withAI && !readyForAI()))
         return;
-    guard(() => { const next = submit(project, returnTargets(project).length > 1 ? selectedReturnTaskId : undefined); selectedReturnTaskId = undefined; commit(next); $('compose-panel').open = false; showWork(); $('current-work').focus({ preventScroll: true }); $('current-work').scrollIntoView({ block: 'start' }); if (withAI)
+    guard(() => { const next = submit(project, returnTargets(project).length > 1 ? selectedReturnTaskId : undefined); selectedReturnTaskId = undefined; commit(next); $('compose-panel').open = false; showWork(); $('outcome-home').focus({ preventScroll: true }); $('outcome-home').scrollIntoView({ block: 'start' }); if (withAI)
         void generate(project.currentTaskId);
     else {
         $('edit-work').open = true;
