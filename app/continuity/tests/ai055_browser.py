@@ -38,6 +38,12 @@ class IntentFlow(unittest.TestCase):
             self.page.locator('#outcome-home').scroll_into_view_if_needed()
             self.page.screenshot(path=str(base.OUT/f'ai055-home-{width}.png'),full_page=True)
             self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
+        # FIX058-B1: an ordinary edit of this task's work field is not a purpose correction.
+        self.page.locator('#edit-work').evaluate('(e)=>e.open=true')
+        self.page.locator('#work-understanding').fill('이번 작업은 오타 한 곳만 고친다')
+        self.page.reload()
+        expect(self.page.locator('#intent-goal')).to_have_text('문자로 받은 링크로 가입 없이 예약을 취소한다.')
+        expect(self.page.locator('#intent-home h3')).to_have_text('이어갈 목적 · MOCK 정리')
         self.page.locator('#intent-details > summary').click()
         self.page.locator('#intent-edit-goal').fill('문자 링크로 취소, 12시간 만료')
         self.page.locator('#intent-edit-conditions').fill('환불은 제외한다.')
@@ -46,6 +52,14 @@ class IntentFlow(unittest.TestCase):
         saved=self.state();self.assertEqual(len(calls),4,'manual correction does not call AI')
         self.page.reload();expect(self.page.locator('#intent-goal')).to_have_text('문자 링크로 취소, 12시간 만료')
         self.assertEqual(self.state(),saved)
+        # FIX058-B2: the correction lives apart from this task's work; its narrow instruction survives.
+        self.assertEqual(saved['tasks'][-1]['manual']['understanding'],'이번 작업은 오타 한 곳만 고친다')
+        self.assertEqual(saved['tasks'][-1]['intentEdit']['goal'],'문자 링크로 취소, 12시간 만료')
+        with self.page.expect_download() as event:self.page.locator('#download-work').click()
+        path=base.OUT/'fix058-corrected-handoff.md';event.value.save_as(path);corrected=path.read_text(encoding='utf-8')
+        work=corrected.split('## 이번 작업')[1].split('\n## ')[0]
+        self.assertIn('이번 작업은 오타 한 곳만 고친다',work);self.assertNotIn('12시간 만료',work)
+        self.assertIn('12시간 만료',corrected.split('## 이어가는 목적')[1].split('\n## ')[0])
         self.page.locator('#retry-work').click();expect(self.page.locator('#working')).to_have_text('')
         self.assertEqual(calls[-1]['previousIntent']['manualGoal'],'문자 링크로 취소, 12시간 만료')
         expect(self.page.locator('#intent-goal')).to_have_text('문자 링크로 취소, 12시간 만료')

@@ -43,7 +43,7 @@ test('AI055 manual correction/undo values survive regeneration; stale response a
  const previous=D.previousIntent(p,D.taskOf(p));D.taskOf(p).advice.question={kind:'fact',text:'합성 과거 질문',why:'보호 경계 fixture',options:[]};const before=serializeProject(p),pending=D.begin(p);
  p=D.correctIntent(p,p.currentTaskId,'가입 없이 링크로 취소; 12시간 만료','환불 제외');
  assert.throws(()=>D.answer(p,p.currentTaskId,'옛 질문 답'),/QUESTION_NOT_APPLICABLE/);assert.equal(D.currentWork(p,D.taskOf(p)).values.next,'');assert.equal(D.begin(p).request.previousIntent.manualGoal,'가입 없이 링크로 취소; 12시간 만료');
- const n=D.receive(p,pending.request,{mode:'mock',ticket:pending.request.ticket,advice:fixtureAdvice(pending.request)});assert.equal(D.taskOf(n).manual.understanding,'가입 없이 링크로 취소; 12시간 만료');
+ const n=D.receive(p,pending.request,{mode:'mock',ticket:pending.request.ticket,advice:fixtureAdvice(pending.request)});assert.equal(n,p);assert.equal(D.intentCorrection(D.taskOf(n)).goal,'가입 없이 링크로 취소; 12시간 만료');assert.deepEqual(D.taskOf(n).manual,JSON.parse(before).tasks.at(-1).manual);
  p=reply(p);assert.notEqual(D.currentWork(p,D.taskOf(p)).values.next,'');assert.equal(D.currentIntent(p,D.taskOf(p)).manualGoal,'가입 없이 링크로 취소; 12시간 만료');assert.deepEqual(p.sources,JSON.parse(before).sources);
  const req=D.begin(put(p,'오타도 고쳐줘')).request;assert.equal(req.previousIntent.manualConditions,'환불 제외');
  const undone=D.correctIntent(p,p.currentTaskId,previous.value.goal,previous.value.conditions.join(' / '));assert.equal(D.currentIntent(undone,D.taskOf(undone)).manualGoal,previous.value.goal);assert.ok(!D.handoffText(undone).includes('대체된 지시 · 다시 실행하지 않음'));

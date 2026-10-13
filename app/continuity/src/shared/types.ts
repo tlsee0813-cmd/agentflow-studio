@@ -58,7 +58,9 @@ export interface ExportRecord {
   returnId: string | null;
 }
 export interface Task {
-  intentEdit?: {version:'intent-edit.1';revision:number};
+  /** Purpose correction, stored apart from this task's own work fields (manual.*).
+   * intent-edit.1 came from the unreleased AI055 candidate, which wrote the correction into manual.*. */
+  intentEdit?: {version:'intent-edit.1';revision:number}|{version:'intent-edit.2';revision:number;goal:string;conditions:string};
   id: string; sourceIds: string[]; parentTaskId: string | null;
   advice: Advice | null; adviceRevision: number | null; mode: 'mock' | 'deepseek' | null;
   manual: { understanding: string | null; scope: string | null; next: string | null; checks: string | null };

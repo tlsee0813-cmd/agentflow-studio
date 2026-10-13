@@ -222,3 +222,16 @@ MOCK 기본 응답은 입력 인용만 하고 새 자연어 해석 능력을 흉
 수동 수정 손실이 나오면 실제 원문으로 좁게 판단한다. 좋은 답이 나올 때까지 자동 반복하지 않는다.
 로컬 기능 재현은 `node --test continuity/tests/ai055.test.mjs`,
 `python continuity/tests/ai055_browser.py`(후자는 명시 합성 MOCK)이다. 둘 다 app/에서 실행한다.
+
+## FIX058 — 목적 정정과 작업 필드 분리 (별도 브랜치 `fix058/intent-edit-separation`)
+
+기준 `d5ef9a4458144901148a60eda342d78e5f3890f4`(제품은 REVIEW056 대상 `8b23cdf`와 동일). Work 연결 장애로 독립 검토자가 구현했고 최종 확인은 별도 검토자가 한다.
+
+- B1: 작업 카드의 이해/범위 직접 수정은 그 작업의 작업 지시일 뿐이다. 다음 턴 `previousIntent.manualGoal`·홈 ‘직접 정정’으로 승격하지 않는다.
+- B2: 목적 정정은 `Task.intentEdit`(`intent-edit.2`: revision·goal·conditions)에만 저장하고 `manual.*`를 덮지 않는다. 정정 뒤 낡은 AI next/checks·질문 제외는 유지되며, 사용자가 쓴 좁은 범위와 현재 요청 원문이 작업문에 남는다. AI 해석이 낡아도 정정은 홈·작업문에 보이고 재정리 요청에 실린다(직전 작업의 유효 해석이 없으면 실리지 않음).
+- `intent-edit.1`(이전 후보 저장값)은 원래 의미(정정이 `manual.*`에 있음)로 계속 읽는다.
+- N1: AI의 retired는 이전 요청 원문의 표현에만 적용하고 확정·답변·보류 기준을 대체하지 않는다고 작업문·홈에 표시한다. 사용자 결정이 있으면 그 ID를 해석보다 우선하는 현재 조건으로 명시한다. 사용자 결정의 변경은 요청 원문이나 직접 수정으로만 일어난다. prompt에 같은 규칙을 추가했고 실제 모델 준수는 미검증이다.
+- N2: 새 응답에서 `separate`+retired, 같은 문장의 conditions/retired 동시 기재를 거절한다(저장된 기존 advice는 그대로 읽음). N5: MOCK 작업문 라벨은 ‘MOCK 정리 / 의미 이해 아님’.
+- 남은 한계: partial 기준 인용 시 응답 전체 거절(N3), 큰 previousIntent를 줄이지 않고 128 KiB에서 거절(N4), retired는 여전히 ID 없는 자유문이라 어떤 요청 표현을 대체했는지 앱이 결정적으로 알 수 없다. 검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.
+
+재현: `node --test continuity/tests/fix058.test.mjs continuity/tests/ai055.test.mjs`, `python continuity/tests/ai055_browser.py`(app/에서).

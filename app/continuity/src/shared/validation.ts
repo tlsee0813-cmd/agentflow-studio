@@ -63,6 +63,9 @@ export function validateAdvice(v: unknown, basisIds: string[], request?:ContextR
     const value=validateIntent(v.intent);for(const ref of value.basisRefs)ensure(basisIds.includes(ref.basisId));
     if(request) {
       checkIntentRefs(value,request.bases);
+      // Structural contradictions: an independent purpose replaces nothing; one sentence cannot be both kept and retired.
+      ensure(value.relation!=='separate'||value.retired.length===0);
+      const kept=new Set(value.conditions.map(c=>c.trim()));ensure(value.retired.every(r=>!kept.has(r.trim())));
       // All current user basis versions must be acknowledged, including unknown/deferred answers.
       for(const b of request.bases.filter(b=>request.appFacts.inputs.some(s=>s.sourceId===b.sourceId)))ensure(value.basisRefs.some(ref=>ref.basisId===b.id));
     }
@@ -183,7 +186,12 @@ function assertProject(v: unknown): asserts v is Project {
     obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile',...(t&&typeof t==='object'&&Object.hasOwn(t,'intentEdit')?['intentEdit']:[])]); id(t.id); list(t.sourceIds); ensure(t.sourceIds.length > 0);
     for (const s of t.sourceIds) ensure(sources.has(s as string)); ensure(new Set(t.sourceIds).size === t.sourceIds.length);
     if(t.parentTaskId !== null) ensure(tasks.has(t.parentTaskId as string)); // Ordered, acyclic.
-    if(t.intentEdit!==undefined) {obj(t.intentEdit,['version','revision']);ensure(t.intentEdit.version==='intent-edit.1');integer(t.intentEdit.revision);ensure((t.intentEdit.revision as number)<=(v.revision as number));}
+    if(t.intentEdit!==undefined) {
+      const legacy=!!t.intentEdit&&typeof t.intentEdit==='object'&&(t.intentEdit as {version?:unknown}).version==='intent-edit.1';
+      obj(t.intentEdit,legacy?['version','revision']:['version','revision','goal','conditions']);ensure(legacy||t.intentEdit.version==='intent-edit.2');
+      integer(t.intentEdit.revision);ensure((t.intentEdit.revision as number)<=(v.revision as number));
+      if(!legacy){text(t.intentEdit.goal,6000);text(t.intentEdit.conditions,6000,true);}
+    }
     if(t.advice !== null) {
       const advice=validateAdvice(t.advice,bids);
       for(const ref of advice.intent?.basisRefs??[]) {
