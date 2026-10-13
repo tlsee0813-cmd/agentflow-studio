@@ -74,3 +74,35 @@ test('F066 prompt states the correction, preserve, continuing-purpose and no-inv
   assert.match(SYSTEM_PROMPT,/이미 next에서 실행 도구가 확인하도록 넘긴 사실은 question으로 다시 묻지 않는다/);
   assert.match(SYSTEM_PROMPT,/원문·기준에 없는 동작 시점·발생 조건·대상을 next\/checks에 새로 만들지 않는다/);
 });
+
+// FIX069 (AI068): the small current edit and the still-valid earlier purpose are different axes.
+test('F069 a separate small edit is printed next to the earlier purpose it does not change; nothing is retired or invented',()=>{
+  let {p}=p1('separate');p=reply(p,{relation:'separate',goal:'SMS 문구를 더 짧게 만든다.'}).project;const t=p.currentTaskId;
+  const purpose=section(D.handoffText(p,t),'## 이어가는 목적');
+  assert.ok(purpose.includes('SMS 문구를 더 짧게 만든다.'),'this task stays this task');
+  assert.match(purpose,/계속 유효한 앞선 목적 · 이번 작업이 바꾸지 않음 \(AI 해석\): 가입 없이 SMS 링크로 예약을 취소할 수 있게 한다\./);
+  assert.match(purpose,/그 목적의 유지 조건: 환불은 이번 범위에서 제외한다\./);
+  assert.ok(purpose.includes(`그 목적에서 대체된 이전 요청 표현 (AI 해석 · 사용자 결정은 대체하지 않음): ${P1[0]}`));
+  assert.equal(D.continuingIntent(p,D.taskOf(p,t)).value.relation,'revise');
+  assert.ok(p.bases.every(b=>b.status==='requested'),'display only; no basis state changes');
+});
+
+test('F069 no earlier-purpose line for continue, for a user correction, or across a stale interpretation',()=>{
+  let cont=reply(p1('separate').p,{relation:'continue',goal:'SMS 링크 취소의 문구를 짧게 한다.'}).project;
+  assert.ok(!section(D.handoffText(cont),'## 이어가는 목적').includes('계속 유효한 앞선 목적'));
+  let corr=reply(p1('separate').p,{relation:'separate',goal:'SMS 문구를 더 짧게 만든다.'}).project;
+  corr=D.correctIntent(corr,corr.currentTaskId,'문구만 짧게','환불 제외');assert.equal(D.continuingIntent(corr,D.taskOf(corr)),null);
+  assert.ok(!section(D.handoffText(corr),'## 이어가는 목적').includes('계속 유효한 앞선 목적'));
+  // The earlier (revise) interpretation goes stale before this task's own fresh interpretation is received.
+  let stale=D.recordBasis(p1('separate').p,'가입이 번거로우니 SMS 링크로 예약을 취소하게 해줘.','confirmed','D2');
+  stale=reply(stale,{relation:'separate',goal:'SMS 문구를 더 짧게 만든다.'}).project;
+  assert.ok(D.currentIntent(stale,D.taskOf(stale)),'this task\'s own interpretation is valid');
+  assert.equal(D.continuingIntent(stale,D.taskOf(stale)),null,'a stale earlier interpretation is not shown as continuing');
+});
+
+test('F069 prompt separates the purpose relation from the size of this edit',()=>{
+  assert.match(SYSTEM_PROMPT,/relation은 고객 결과\(목적\)의 관계이지 이번 수정 범위의 크기가 아니다/);
+  assert.match(SYSTEM_PROMPT,/separate는 사용자가 다른 고객 결과를 새로 시작했을 때만 쓴다/);
+  assert.match(SYSTEM_PROMPT,/'적용하지 않는다'거나 '무관하다'고 쓰지 않는다/);
+  assert.match(SYSTEM_PROMPT,/그 목적과 조건이 끝났거나 폐기됐다고 쓰지 않는다/);
+});

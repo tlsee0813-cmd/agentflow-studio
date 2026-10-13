@@ -1,6 +1,6 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source } from '../shared/types.js';
 import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
-  currentIntent, previousIntent, correctIntent, intentCorrection, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
+  currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
 import { parseProject, parseResultFile } from '../shared/validation.js';
 import { ProjectStore, serializeProject, storageErrorCode } from '../shared/storage.js';
 import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview } from './presentation.js';
@@ -129,6 +129,8 @@ function renderOutcome(t:Task|null) {
     const conditions=correction?correction.conditions:value!.conditions.join(' / ');
     if(conditions)card.append(node('p',conditions,'source-raw'));
     if(value?.relation==='uncertain')card.append(node('p','아직 정하지 않은 관계는 미정으로 남겨 두었어요.','hint'));
+    const earlier=value?.relation==='separate'?continuingIntent(project,t):null;
+    if(earlier){const line=node('p',`계속 유효한 앞선 목적 · 이번 작업이 바꾸지 않음: ${earlier.manualGoal??earlier.value.goal}`,'hint');line.id='intent-continuing';card.append(line);}
     if(value&&project.bases.some(b=>['confirmed','deferred','answered'].includes(b.status)))card.append(node('p','직접 확정·답변·보류한 기준은 이 정리보다 우선해요.','hint'));
     const detail=details('정리 바로잡기 · 근거 보기','intent-details');
     const g=node('textarea');g.rows=2;g.maxLength=6000;g.value=correction?.goal??value!.goal;g.id='intent-edit-goal';g.setAttribute('aria-label','이어갈 목적 직접 정정');

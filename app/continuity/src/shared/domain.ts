@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
 import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { outcomeOf, contextLinks } from './outcome.js';
@@ -226,6 +226,19 @@ function purposeIntent(p:Project,t:Task,prior:PreviousIntent|null):CurrentIntent
   }
   return null;
 }
+/** The still-valid earlier purpose next to this task's own 'separate' interpretation (AI readings only). */
+export function continuingIntent(p:Project,t:Task):CurrentIntent|null {
+  const own=currentIntent(p,t);
+  return own&&!intentCorrection(t)?purposeIntent(p,t,own):null;
+}
+function continuingLines(p:Project,t:Task,intent:CurrentIntent|null,ai:Intent|null):string[] {
+  const earlier=ai?.relation==='separate'&&intent?continuingIntent(p,t):null;if(!earlier)return [];
+  const label=t.mode==='mock'?'MOCK 정리':'AI 해석',e=earlier.manualGoal!==null?null:earlier.value;
+  return [`계속 유효한 앞선 목적 · 이번 작업이 바꾸지 않음 (${earlier.manualGoal!==null?'사용자 직접 정정':label}): ${earlier.manualGoal??e!.goal}`,
+    `그 목적의 유지 조건: ${(earlier.manualGoal!==null?earlier.manualConditions:e!.conditions.join(' / '))||'명시된 추가 조건 없음'}`,
+    ...(e?.retired.length?[`그 목적에서 대체된 이전 요청 표현 (${label} · 사용자 결정은 대체하지 않음): ${e.retired.join(' / ')}`]:[]),
+    `앞선 목적 근거: ${earlier.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision}`).join(', ')}`];
+}
 export function correctIntent(p:Project,id:string,goal:string,conditions:string):Project {
   text(goal,6000);text(conditions,6000,true);const n=change(p),t=taskOf(n,id);
   // Kept apart from manual.*: correcting the purpose must not rewrite this task's narrow work. Regeneration cannot overwrite it.
@@ -366,6 +379,7 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
       '유지할 조건: '+((correction?correction.conditions:ai!.conditions.join(' / '))||'명시된 추가 조건 없음'),
       ...(ai?.retired.length?[`대체된 지시 · 다시 실행하지 않음 (${interp} · 이전 요청 원문의 표현에만 적용, 사용자 결정 기준은 대체하지 않음): `+ai.retired.join(' / ')]:[]),
       ...(decisions.length?[`사용자 결정 기준 ${decisions.map(b=>`${b.id}(${BASIS_LABEL[b.status]})`).join(', ')}은 이 ${interp}보다 우선하며 아래 현재 값 그대로 유효합니다. 이번 요청 원문이 그 결정을 명시적으로 바꾼 부분만 요청 원문을 따르고, ${interp}만으로 결정을 폐기하지 마세요.`]:[]),
+      ...continuingLines(p,t,intent,ai),
       ai?.relation==='uncertain'?'목적 관계 미정: 미정 선택에 의존하는 변경은 확정 범위가 아닙니다.':'이번 작업의 크기는 아래 현재 요청이 정합니다. 목적 전체를 다시 구현하라는 지시가 아닙니다.',
       ...(intent?[(correction?`정정 전 ${interp} 근거: `:'해석 근거: ')+intent.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision} / ${ref.sourceId}`).join(', ')]:[]));
   }
