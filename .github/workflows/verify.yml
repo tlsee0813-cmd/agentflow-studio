@@ -120,6 +120,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/flow049_browser.py 2>&1 | tee test-results/flow049-browser.log
+      - name: Natural-language intent wiring (native HTTP, hand-authored MOCK, not AI quality)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/ai055
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/ai055_browser.py 2>&1 | tee test-results/ai055-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:

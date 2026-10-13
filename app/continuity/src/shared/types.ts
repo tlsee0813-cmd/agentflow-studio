@@ -8,7 +8,7 @@ export interface ResultFile {
   schemaVersion: typeof RESULT_SCHEMA; projectId: string; taskId: string; returnId: string;
   report: string; evidence: string | null;
 }
-export const API_SCHEMA = 'idea022.context.4' as const;
+export const API_SCHEMA = 'idea022.context.5' as const;
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
 export const FILE_LIMIT = 8_000_000;
@@ -34,7 +34,18 @@ export interface Basis {
 }
 export interface Question { kind: 'fact' | 'choice'; text: string; why: string; options: { label: string; consequence: string }[] }
 // This type intentionally has NO source-kind, authority, status, completion or patch fields.
+/** Versioned interpretation, never a write to user bases or an execution receipt. */
+export interface Intent {
+  version: 'intent.1'; relation: 'start'|'continue'|'revise'|'separate'|'uncertain';
+  goal: string; conditions: string[]; retired: string[];
+  basisRefs: {basisId:string;sourceId:string;revision:number}[];
+}
+export interface PreviousIntent {
+  taskId:string; value:Intent; manualGoal:string|null; manualConditions:string|null;
+}
 export interface Advice {
+  // Absent in saved pre-AI055 advice. A new provider response must include it.
+  intent?: Intent;
   understanding: string; scope: string; next: string; checks: string;
   question: Question | null; relatedBasisIds: string[]; reviewBasisIds: string[];
   suggestions: { text: string; why: string }[];
@@ -47,6 +58,7 @@ export interface ExportRecord {
   returnId: string | null;
 }
 export interface Task {
+  intentEdit?: {version:'intent-edit.1';revision:number};
   id: string; sourceIds: string[]; parentTaskId: string | null;
   advice: Advice | null; adviceRevision: number | null; mode: 'mock' | 'deepseek' | null;
   manual: { understanding: string | null; scope: string | null; next: string | null; checks: string | null };
@@ -78,7 +90,7 @@ export interface AppFacts {
 }
 export interface ContextRequest {
   schemaVersion: typeof API_SCHEMA; ticket: Ticket; projectName: string;
-  sources: Source[]; bases: ContextBasis[]; appFacts: AppFacts;
+  sources: Source[]; bases: ContextBasis[]; appFacts: AppFacts; previousIntent: PreviousIntent|null;
   previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean; manualConditionFields: ('scope' | 'checks')[] }) | null;
 }
 export interface Envelope { mode: 'mock' | 'deepseek'; ticket: Ticket; advice: Advice }

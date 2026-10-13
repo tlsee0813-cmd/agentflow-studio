@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
+import { API_SCHEMA, SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -43,8 +43,31 @@ function basis(v: unknown): asserts v is Basis {
   for (const h of v.history) { obj(h,['text','status','sourceId','revision']); text(h.text); id(h.sourceId); integer(h.revision); ensure(['requested','answered','confirmed','deferred'].includes(h.status as string)); }
 }
 function ticket(v: unknown): asserts v is Ticket { obj(v,['projectId','revision','requestId','taskId']); id(v.projectId); integer(v.revision); id(v.requestId); id(v.taskId); }
-export function validateAdvice(v: unknown, basisIds: string[]): Advice {
-  obj(v,['understanding','scope','next','checks','question','relatedBasisIds','reviewBasisIds','suggestions']);
+export function validateIntent(v:unknown):Intent {
+  obj(v,['version','relation','goal','conditions','retired','basisRefs']);
+  ensure(v.version==='intent.1');ensure(['start','continue','revise','separate','uncertain'].includes(v.relation as string));text(v.goal,2000);
+  for(const key of ['conditions','retired']) {list(v[key],12);for(const value of v[key] as unknown[])text(value,1000);}
+  list(v.basisRefs);const seen=new Set<string>();
+  for(const ref of v.basisRefs) {obj(ref,['basisId','sourceId','revision']);id(ref.basisId);id(ref.sourceId);integer(ref.revision);ensure(!seen.has(ref.basisId as string));seen.add(ref.basisId as string);}
+  return structuredClone(v) as unknown as Intent;
+}
+function checkIntentRefs(value:Intent,bases:ContextBasis[]) {
+  for(const ref of value.basisRefs)ensure(bases.some(b=>b.id===ref.basisId&&b.sourceId===ref.sourceId&&b.revision===ref.revision&&!b.partial));
+}
+/** Old eight-key advice remains readable; new wire responses use intent.1. */
+export function validateAdvice(v: unknown, basisIds: string[], request?:ContextRequest): Advice {
+  const hasIntent=!!v&&typeof v==='object'&&Object.hasOwn(v,'intent');
+  obj(v,['understanding','scope','next','checks','question','relatedBasisIds','reviewBasisIds','suggestions',...(hasIntent?['intent']:[])]);
+  if(request)ensure(hasIntent);
+  if(hasIntent) {
+    const value=validateIntent(v.intent);for(const ref of value.basisRefs)ensure(basisIds.includes(ref.basisId));
+    if(request) {
+      checkIntentRefs(value,request.bases);
+      // All current user basis versions must be acknowledged, including unknown/deferred answers.
+      for(const b of request.bases.filter(b=>request.appFacts.inputs.some(s=>s.sourceId===b.sourceId)))ensure(value.basisRefs.some(ref=>ref.basisId===b.id));
+      ensure(value.relation!=='uncertain'||v.question!==null);
+    }
+  }
   for (const k of ['understanding','scope','next','checks']) text(v[k], 6000);
   for (const k of ['relatedBasisIds','reviewBasisIds']) {
     list(v[k]); const refs = v[k] as unknown[];
@@ -62,7 +85,7 @@ export function validateAdvice(v: unknown, basisIds: string[]): Advice {
 export function validateEnvelope(v: unknown, req: ContextRequest): Envelope {
   obj(v,['mode','ticket','advice']); ensure(['mock','deepseek'].includes(v.mode as string)); ticket(v.ticket);
   ensure(Object.keys(req.ticket).every(k => req.ticket[k as keyof Ticket] === (v.ticket as Ticket)[k as keyof Ticket]));
-  return {mode: v.mode as Envelope['mode'], ticket: {...v.ticket}, advice: validateAdvice(v.advice,req.bases.map(b=>b.id))};
+  return {mode: v.mode as Envelope['mode'], ticket: {...v.ticket}, advice: validateAdvice(v.advice,req.bases.map(b=>b.id),req)};
 }
 function contextBasis(v: unknown) {
   obj(v,['id','text','status','sourceId','revision','previousVersions','partial']); id(v.id); text(v.text); id(v.sourceId); integer(v.revision); integer(v.previousVersions);
@@ -124,9 +147,14 @@ function appFacts(v: unknown, req: {ticket:Ticket;sources:Source[];bases:Context
   for(const b of req.bases) if(inputIds.has(b.sourceId)) ensure(currentRecords.has(b.id));
 }
 export function validateRequest(v: unknown): ContextRequest {
-  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
+  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts','previousIntent']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
   list(v.sources); list(v.bases); for (const s of v.sources) source(s); for (const b of v.bases) contextBasis(b);
   ensure(v.sources.length > 0); unique(v.sources as Source[]); unique(v.bases as {id:string}[]);
+  if(v.previousIntent!==null) {
+    obj(v.previousIntent,['taskId','value','manualGoal','manualConditions']);id(v.previousIntent.taskId);
+    const value=validateIntent(v.previousIntent.value);checkIntentRefs(value,v.bases as ContextBasis[]);
+    for(const key of ['manualGoal','manualConditions'])if(v.previousIntent[key]!==null)text(v.previousIntent[key],6000,true);
+  }
   appFacts(v.appFacts,{ticket:v.ticket,sources:v.sources as Source[],bases:v.bases as ContextBasis[]});
   ensure(new TextEncoder().encode(JSON.stringify(v)).length<=REQUEST_BYTES,'CONTEXT_TOO_LARGE');
   // Bases carry current values; prior versions stay local. Old-request excerpts are budget-dependent.
@@ -150,13 +178,21 @@ function assertProject(v: unknown): asserts v is Project {
   // Lookups use Map/Set so validation stays linear up to ITEM_LIMIT (no nested scans).
   const basisIds=new Set((v.bases as Basis[]).map(b=>b.id));
   for(const [key,value] of Object.entries(v.basisEdits as Record<string,unknown>)) { ensure(basisIds.has(key)); text(value,TEXT_LIMIT,true); }
-  const sources = new Map((v.sources as Source[]).map(s=>[s.id,s])); const bids = [...basisIds];
+  const sources = new Map((v.sources as Source[]).map(s=>[s.id,s])); const bids = [...basisIds],basisMap=new Map((v.bases as Basis[]).map(b=>[b.id,b]));
   const tasks=new Set<string>(),returns=new Map<string,{taskId:string;record:ExportRecord}>();
   for (const t of v.tasks) {
-    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile']); id(t.id); list(t.sourceIds); ensure(t.sourceIds.length > 0);
+    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile',...(t&&typeof t==='object'&&Object.hasOwn(t,'intentEdit')?['intentEdit']:[])]); id(t.id); list(t.sourceIds); ensure(t.sourceIds.length > 0);
     for (const s of t.sourceIds) ensure(sources.has(s as string)); ensure(new Set(t.sourceIds).size === t.sourceIds.length);
     if(t.parentTaskId !== null) ensure(tasks.has(t.parentTaskId as string)); // Ordered, acyclic.
-    if(t.advice !== null) validateAdvice(t.advice,bids); ensure([null,'mock','deepseek'].includes(t.mode as null|string));
+    if(t.intentEdit!==undefined) {obj(t.intentEdit,['version','revision']);ensure(t.intentEdit.version==='intent-edit.1');integer(t.intentEdit.revision);ensure((t.intentEdit.revision as number)<=(v.revision as number));}
+    if(t.advice !== null) {
+      const advice=validateAdvice(t.advice,bids);
+      for(const ref of advice.intent?.basisRefs??[]) {
+        const b=basisMap.get(ref.basisId)!;
+        ensure([b,...b.history].some(b=>b.sourceId===ref.sourceId&&b.revision===ref.revision));
+        if(t.adviceRevision!==null)ensure(ref.revision<=(t.adviceRevision as number));
+      }
+    } ensure([null,'mock','deepseek'].includes(t.mode as null|string));
     // null with advice = imported from project.1, when the basis revision behind the advice was not recorded.
     if(t.adviceRevision !== null) { ensure(t.advice !== null); integer(t.adviceRevision); ensure((t.adviceRevision as number) <= (v.revision as number)); }
     obj(t.manual,['understanding','scope','next','checks']); for(const k of Object.keys(t.manual)) if(t.manual[k] !== null) text(t.manual[k],6000,true);

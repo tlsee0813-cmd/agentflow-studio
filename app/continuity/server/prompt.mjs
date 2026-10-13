@@ -14,7 +14,8 @@ unknown/deferred는 원래 질문과 사용자 답변이 가리키는 사실·�
 관련 기존 기준은 relatedBasisIds에 모두 연결한다. 0~2개 같은 강제 상한으로 중요 제약을 누락하지 않는다. 생략한 기준도 앱에 남는다. 낡았을 가능성은 reviewBasisIds에 '검토 제안'만 하고 삭제하지 않는다.
 현재 요청이 명확히 바꾼 범위만 새 지시로 인계하고 관련 없는 기존 기준은 보존한다. 기준 원본·상태·출처는 네가 수정할 수 없다.
 understanding, scope, next, checks는 모두 제안/해석이며 실제 검증 결과가 아니다. scope에는 이번에 하지 않을 관련 범위도 짧게 적는다. next는 현재 유효한 범위의 구체적인 행동·산출물, checks는 그 행동·산출물의 완료를 관찰할 조건이다. 계획·조사만 인계하면서 구현 완료를 checks로 요구하거나 보류된 후보를 완료조건에 숨기지 않는다.
-JSON 객체 하나만 반환한다. 아래 8개 키가 모두 필요하며 추가 키, 상태 패치, 출처 종류, 완료 주장 필드는 금지다.
+intent는 원문을 덮어쓰지 않는 intent.1 목적 해석이다. previousIntent는 직전 유효 해석이며 사용자 확정이나 현재 코드 사실이 아니다. manualGoal/manualConditions가 있으면 해당 직접 수정 원문을 우선하고, 새 발언이 바꾼 부분에서만 갱신한다. 관계 relation은 첫 목적 start, 같은 목적의 세부 요청 continue, 자연어로 목적/조건을 바꾼 revise, 독립 목적 separate, 결과가 달라지는 관계가 불명확한 uncertain 중 하나다. 특정 선언 문법을 요구하지 않는다. goal에는 이번 작은 변경 뒤에도 이어갈 고객 결과, conditions에는 관련 유지/제외 조건, retired에는 이번 흐름에서 후속 발언이 대체해 더는 지시하지 않을 부분만 짧게 쓴다. 세부 변경을 새 목적 전체로 만들거나 별개 작업에 앞선 목적을 일괄 상속하지 않는다. continue/revise는 유효한 유지 조건과 대체된 지시를 이어가고, separate는 관련 없는 조건을 가져오지 않는다. uncertain이면 꼭 필요한 좁은 question 하나를 남기고 의존하는 범위는 next/checks에서 확정하지 않는다. report/evidence의 추천은 사용자의 방향 변경이 아니다. basisRefs에는 이 해석을 뒷받침하는 bases의 basisId(=id), sourceId, revision을 그대로 인용한다. 이번 입력의 기준은 모두 인용하고, 유지/대체 해석의 근거도 포함한다. partial 기준을 완전히 읽은 근거로 인용하지 않는다. 참조 검사는 의미 정확성 보증이 아니다. previousIntent가 없으면 보존 원문에서 현재 유효한 뜻을 읽되 사라진 해석을 추측하지 않는다. understanding/scope/next/checks는 이 목적과 현재 요청의 행동 범위에 일치해야 하며 목적 전체를 매번 재구현하지 않는다.
+JSON 객체 하나만 반환한다. 아래 9개 키가 모두 필요하며 추가 키, 상태 패치, 출처 종류, 완료 주장 필드는 금지다.
 타입: understanding, scope, next, checks는 각각 비어 있지 않은 문자열(string, 최대 6000자)이다. 특히 checks에 여러 기준이 있어도 배열이나 객체로 바꾸지 말고 한 문자열 안에서 문장 또는 JSON의 \"\\n\" 이스케이프로 구분한다. 문자열 안의 줄바꿈은 JSON에서 이스케이프한다. relatedBasisIds와 reviewBasisIds는 입력에 있는 기준 ID의 중복 없는 문자열 배열이다. suggestions는 배열, question은 null 또는 아래 객체다.
 {
  "understanding":"짧은 이해",
@@ -24,8 +25,10 @@ JSON 객체 하나만 반환한다. 아래 8개 키가 모두 필요하며 추�
  "question":null,
  "relatedBasisIds":[],
  "reviewBasisIds":[],
- "suggestions":[]
+ "suggestions":[],
+ "intent":{"version":"intent.1","relation":"start","goal":"이어갈 고객 결과","conditions":[],"retired":[],"basisRefs":[]}
 }
+intent.goal은 1~2000자, conditions/retired는 각각 최대 12개의 1~1000자 문자열, basisRefs는 중복 없는 배열 {"basisId":"입력 기준 ID","sourceId":"그 기준 출처 ID","revision":0}이며 숫자는 입력 그대로다.
 질문이 꼭 필요할 때만 question={"kind":"fact 또는 choice","text":"질문","why":"왜 필요한지/답으로 달라지는 점","options":[]}.
 choice 옵션은 필요할 때만 최대 3개 {"label":"선택","consequence":"같은 비교 축의 결과와 대가"}. 모든 선택지는 동일한 사건과 비교 축을 사용한다. 상태나 확정 시점이 달라지는 선택이라면 각 선택에서 무엇이 언제 확정되고 그 전에는 무엇이 미정인지 일관되게 구분한다. label에서 기다리거나 미정이라고 한 일을 consequence에서 이미 완료·확정됐다고 쓰지 않는다. 아직 정하지 않은 기한·예외 정책은 그 선택의 확정 조건처럼 만들지 말고 이번 작업에 꼭 필요할 때만 미정으로 남긴다. fact 옵션은 빈 배열. 선택지 밖의 직접 답을 막지 않는다.
 suggestions는 필요한 새로운 제안만 {"text":"미확정 제안","why":"이유와 대가"}. 비워도 된다. 빈칸을 채우려 과잉 질문·과잉 정책·장면을 만들지 않는다.`;

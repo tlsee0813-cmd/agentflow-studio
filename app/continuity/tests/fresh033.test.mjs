@@ -18,7 +18,7 @@ const stale=()=>D.recordBasis(fresh(),CHANGED,'confirmed','D2');
 const dump=(name,value)=>{if(process.env.FRESH033_EVIDENCE){mkdirSync(process.env.FRESH033_EVIDENCE,{recursive:true});writeFileSync(join(process.env.FRESH033_EVIDENCE,name),JSON.stringify(value,null,2));}};
 
 test('F033-1 relay exact stale choice cannot create a source/basis or enter the next request',()=>{
-  const p=stale(),before=JSON.stringify(p),t=D.taskOf(p);
+  const original=fresh(),p=D.recordBasis(original,CHANGED,'confirmed','D2'),before=JSON.stringify(p),t=D.taskOf(p);
   assert.equal(t.adviceRevision,4);assert.equal(p.revision,6);assert.equal(p.bases[1].revision,6);
   assert.equal('questionId' in t.advice.question,false);assert.equal(D.currentWork(p,t).aiStale,true);
   let result=p,code=null;try{result=D.answer(p,t.id,OLD_REPLY);}catch(e){code=e.message;}
@@ -30,7 +30,7 @@ test('F033-1 relay exact stale choice cannot create a source/basis or enter the 
   assert.equal(D.questionApplicability(p,t),'stale');
   assert.equal(stageOf(p,t).kind,'stale');assert.match(D.taskStatus(p,t),/이전 질문/);
   assert.match(D.handoffText(p),/이전 질문 · 참고 기록/);assert.doesNotMatch(D.handoffText(p),/### 남은 제품 선택/);
-  assert.deepEqual(t.advice,fresh().tasks[0].advice);assert.equal(p.bases[1].history[0].text,ORIGINAL);
+  assert.deepEqual(t.advice,original.tasks[0].advice);assert.equal(p.bases[1].history[0].text,ORIGINAL);
 });
 
 test('F033-2 fresh replies and existing duplicate precedence survive bookkeeping',()=>{

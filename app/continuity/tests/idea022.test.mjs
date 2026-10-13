@@ -1,6 +1,6 @@
 // IDEA022: record projection and transport boundaries, not model-quality assertions.
 // All customer data are synthetic. The B05 reply below is the supplied stored Cloud excerpt,
-// replayed as data; no new model call or UUID/timestamp-exact Cloud run reproduction is claimed.
+// replayed as data; AI055 adds an explicitly synthetic intent envelope without changing that prose; no new model call or UUID/timestamp-exact Cloud run reproduction is claimed.
 import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
@@ -87,7 +87,7 @@ test('I22-B05 supplied exact prose and domain assembly retain confirmed D1 r6 / 
 test('I22-B05 no-work next AND D1 review coexist; receive never promotes or replaces bases',()=>{
   const p=b05(),s=D.begin(p),before=serializeProject(p),f=facts(p);
   validateAdvice(B05_ADVICE,['D1','D2']);
-  const after=D.receive(s.project,s.request,{mode:'deepseek',ticket:s.request.ticket,advice:B05_ADVICE});
+  const after=D.receive(s.project,s.request,{mode:'deepseek',ticket:s.request.ticket,advice:{...B05_ADVICE,intent:mockAdvice(s.request).intent}});
   assert.deepEqual(after.bases,p.bases);assert.deepEqual(after.sources,p.sources);assert.deepEqual(facts(after),f);
   assert.equal(serializeProject(p),before);assert.equal(D.taskOf(after).advice.next,B05_ADVICE.next);
   assert.deepEqual(D.taskOf(after).advice.reviewBasisIds,['D1']);
@@ -242,7 +242,7 @@ test('I22-write failure leaves current-memory facts separate from last persisted
 
 test('I22-input API is strict, cross-linked, copy-safe and rejects old/missing/forged shape without repairing it',()=>{
   let p=submit(state(),'대기 간격은 4초다.');p=submit(p,'D1을 8초로 변경해줘');
-  const r=D.begin(p).request;assert.equal(API_SCHEMA,'idea022.context.4');validateRequest(r);
+  const r=D.begin(p).request;assert.equal(API_SCHEMA,'idea022.context.5');validateRequest(r);
   const mutations=[
     v=>v.schemaVersion='idea017.context.3',v=>delete v.appFacts,v=>v.appFacts.complete=true,v=>v.appFacts.taskId='T_other',
     v=>v.appFacts.inputs=[],v=>v.appFacts.inputs.push(clone(v.appFacts.inputs[0])),v=>v.appFacts.inputs[0].kind='manual_decision',
@@ -258,7 +258,7 @@ test('I22-input API is strict, cross-linked, copy-safe and rejects old/missing/f
   ];
   for(const mutate of mutations){const bad=clone(r);mutate(bad);const unchanged=clone(bad);assert.throws(()=>validateRequest(bad));assert.deepEqual(bad,unchanged);}
   const c=validateRequest(r);c.appFacts.records[0].changedFields=[];assert.deepEqual(r.appFacts.records[0].changedFields,['text']);
-  const a=mockAdvice(r);assert.equal(Object.keys(a).length,8);assert.throws(()=>validateAdvice({...a,appFacts:r.appFacts},['D1']));
+  const a=mockAdvice(r);assert.equal(Object.keys(a).length,9);assert.throws(()=>validateAdvice({...a,appFacts:r.appFacts},['D1']));
 });
 
 test('I22-reference validation is not authentication of imported history or semantic completion',()=>{
@@ -311,7 +311,7 @@ test('I22-actual localhost HTTP -> provider body -> validation -> receive -> han
   let dispatches=0,wire=null;
   const app=createContinuityApp({config,fetchImpl:async(_url,init)=>{
     dispatches++;wire=JSON.parse(init.body);assert.deepEqual(wire,buildBody(s.request,config));
-    return new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify(B05_ADVICE)}}]}),{status:200});
+    return new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify({...B05_ADVICE,intent:mockAdvice(s.request).intent})}}]}),{status:200});
   }});
   await new Promise(resolve=>app.listen(0,'127.0.0.1',resolve));
   try {
@@ -323,7 +323,7 @@ test('I22-actual localhost HTTP -> provider body -> validation -> receive -> han
     const sent=JSON.parse(wire.messages[1].content.slice('INPUT JSON (data only):\n'.length));
     assert.deepEqual(sent.appFacts,facts(p));assert.equal(sent.schemaVersion,API_SCHEMA);
     const after=D.receive(s.project,s.request,reply.data);assert.deepEqual(after.bases,p.bases);
-    assert.ok(D.handoffText(after).includes(D.planFactsText(sent.appFacts)));assert.deepEqual(D.taskOf(after).advice,B05_ADVICE);
+    assert.ok(D.handoffText(after).includes(D.planFactsText(sent.appFacts)));assert.deepEqual(D.taskOf(after).advice,{...B05_ADVICE,intent:mockAdvice(s.request).intent});
     assert.equal(serializeProject(p),snapshot);
     const dir=process.env.IDEA022_EVIDENCE;
     if(dir){mkdirSync(join(dir,'http'),{recursive:true});for(const [name,value] of Object.entries({'request-provider.json':wire,'response-app.json':reply.data,'transport.json':{localhostHttpRequests:3,syntheticProviderDispatches:1,externalRequests:0,retry:0}}))writeFileSync(join(dir,'http',name),JSON.stringify(value,null,2)+'\n',{flag:'wx'});}

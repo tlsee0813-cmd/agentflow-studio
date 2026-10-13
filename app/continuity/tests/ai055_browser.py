@@ -1,0 +1,61 @@
+"""Native UI -> actual product HTTP -> hand-authored semantic MOCK fixture.
+Verifies wiring, not natural-language/model quality. No storage or response injection.
+"""
+import json, os, re, subprocess, unittest
+from playwright.sync_api import expect
+import browser as base
+
+class IntentFlow(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        base.Browser.setUpClass.__func__(cls)
+        cls.proc.terminate();cls.proc.wait(timeout=10);cls.proc.stdout.close();cls.proc.stderr.close()
+        env={k:os.environ[k] for k in ['PATH','HOME','TEMP','TMP','TMPDIR','SYSTEMROOT','WINDIR'] if k in os.environ}
+        cls.proc=subprocess.Popen(['node',str(base.ROOT/'tests/ai055-fixtures.mjs')],env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+        line=cls.proc.stdout.readline();match=re.search(r'http://127\.0\.0\.1:\d+',line)
+        if not match:raise RuntimeError('Synthetic mock server did not start')
+        cls.url=match.group(0)
+    tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
+    setUp=base.Browser.setUp;tearDown=base.Browser.tearDown
+    state=base.Browser.state;compose=base.Browser.compose;send=base.Browser.send
+
+    def test_01_four_turns_correction_http_handoff_restore(self):
+        calls=[]
+        self.page.on('request',lambda r:calls.append(r.post_data_json) if r.method=='POST' and r.url.endswith('/api/continuity') else None)
+        turns=['가입한 고객만 예약 취소','가입시키는 건 번거롭네. 문자로 보낸 링크만 있으면 취소하게 하자. 환불은 이번에 빼고','취소 버튼만 빨갛게','오타도 고쳐줘']
+        for text in turns:self.send(text)
+        expect(self.page.locator('#intent-goal')).to_have_text('문자로 받은 링크로 가입 없이 예약을 취소한다.')
+        expect(self.page.locator('#intent-home')).to_contain_text('환불은 이번 범위에서 제외한다.')
+        self.assertEqual(len(calls),4)
+        self.assertEqual(calls[-1]['previousIntent']['value']['goal'],'문자로 받은 링크로 가입 없이 예약을 취소한다.')
+        self.assertEqual([s['text'] for s in self.state()['sources']],turns)
+        with self.page.expect_download() as event:self.page.locator('#download-work').click()
+        path=base.OUT/'ai055-handoff.md';event.value.save_as(path);text=path.read_text(encoding='utf-8')
+        section=text.split('## 이어가는 목적')[1].split('##')[0]
+        self.assertIn('가입 없이',section);self.assertIn('환불',section);self.assertIn('다시 실행하지 않음',section)
+        for width in [1440,390]:
+            self.page.set_viewport_size({'width':width,'height':1000})
+            self.page.locator('#outcome-home').scroll_into_view_if_needed()
+            self.page.screenshot(path=str(base.OUT/f'ai055-home-{width}.png'),full_page=True)
+            self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
+        self.page.locator('#intent-details > summary').click()
+        self.page.locator('#intent-edit-goal').fill('문자 링크로 취소, 12시간 만료')
+        self.page.locator('#intent-edit-conditions').fill('환불은 제외한다.')
+        self.page.locator('#intent-correct').click()
+        expect(self.page.locator('#intent-goal')).to_have_text('문자 링크로 취소, 12시간 만료')
+        saved=self.state();self.assertEqual(len(calls),4,'manual correction does not call AI')
+        self.page.reload();expect(self.page.locator('#intent-goal')).to_have_text('문자 링크로 취소, 12시간 만료')
+        self.assertEqual(self.state(),saved)
+        self.page.locator('#retry-work').click();expect(self.page.locator('#working')).to_have_text('')
+        self.assertEqual(calls[-1]['previousIntent']['manualGoal'],'문자 링크로 취소, 12시간 만료')
+        expect(self.page.locator('#intent-goal')).to_have_text('문자 링크로 취소, 12시간 만료')
+        with self.page.expect_download() as event:self.page.locator('#backup').click()
+        event.value.save_as(base.OUT/'ai055-backup.json')
+        self.page.locator('#intent-details').evaluate('(e)=>e.open=true')
+        self.page.locator('#intent-undo').click()
+        expect(self.page.locator('#intent-goal')).to_have_text('문자로 받은 링크로 가입 없이 예약을 취소한다.')
+        self.assertEqual(len(calls),5,'undo does not call AI')
+        self.assertEqual([s['text'] for s in self.state()['sources']],turns)
+        (base.OUT/'ai055-requests.json').write_bytes(json.dumps(calls,ensure_ascii=False,indent=2).encode('utf-8'))
+
+if __name__=='__main__':unittest.main(verbosity=2)

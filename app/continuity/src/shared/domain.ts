@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
 import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { outcomeOf, contextLinks } from './outcome.js';
@@ -112,7 +112,7 @@ export function importResultFile(p:Project,rawText:string):Project {
 }
 export function editTask(p: Project, id: string, key: keyof Task['manual'], value: string): Project {
   ensure(WORK_KEYS.includes(key)); text(value,6000,true);
-  const n=change(p); taskOf(n,id).manual[key]=value; return n;
+  const n=change(p),t=taskOf(n,id); t.manual[key]=value; if(t.intentEdit&&['understanding','scope'].includes(key))t.intentEdit.revision=n.revision; return n;
 }
 /** The current question already has a recorded reply in this task (real or synthetic). */
 export function questionAnswered(p: Project, t: Task): boolean {
@@ -168,12 +168,13 @@ export function changedSinceAdvice(p: Project, t: Task): Basis[]|'unknown' {
 export function questionApplicability(p: Project, t: Task): 'missing'|'answered'|'active'|'stale'|'unknown' {
   if(!t.advice?.question) return 'missing';
   if(questionAnswered(p,t)) return 'answered';
+  if(t.intentEdit&&t.intentEdit.revision>(t.adviceRevision??-1))return 'stale';
   const changed=changedSinceAdvice(p,t);
   return changed==='unknown' ? 'unknown' : changed.length ? 'stale' : 'active';
 }
 /** What may go out as the current instruction. Stale AI text is withheld; user-written values always stay. */
 export function currentWork(p: Project, t: Task) {
-  const changed=changedSinceAdvice(p,t),aiStale=changed==='unknown'||changed.length>0;
+  const changed=changedSinceAdvice(p,t),aiStale=changed==='unknown'||changed.length>0||!!(t.intentEdit&&t.intentEdit.revision>(t.adviceRevision??-1));
   const values={} as WorkValues; let aiExcluded=false;
   for(const k of WORK_KEYS) {
     const manual=t.manual[k],ai=t.advice?.[k] ?? '';
@@ -182,6 +183,23 @@ export function currentWork(p: Project, t: Task) {
   }
   const suggestions=t.suggestions ?? (aiStale ? [] : t.advice?.suggestions ?? []);
   return {values,changed,aiStale,aiExcluded,suggestions,reviewBasisIds:aiStale ? [] : t.advice?.reviewBasisIds ?? []};
+}
+/** Interpretation is reusable only while its referenced user versions and freshness remain valid.
+ * New tasks are reconciled by the provider; this is not a semantic proof of same purpose. */
+export function currentIntent(p:Project,t:Task):PreviousIntent|null {
+  const value=t.advice?.intent,changed=changedSinceAdvice(p,t);
+  if(!value||changed==='unknown'||changed.length||value.basisRefs.some(ref=>!p.bases.some(b=>b.id===ref.basisId&&b.sourceId===ref.sourceId&&b.revision===ref.revision)))return null;
+  return {taskId:t.id,value:copy(value),manualGoal:t.manual.understanding,manualConditions:t.manual.scope};
+}
+export function previousIntent(p:Project,t:Task):PreviousIntent|null {
+  // Stop at the immediate semantic predecessor; never jump across an unprocessed request.
+  const {parent,anchor}=contextLinks(p,t);const previous=anchor??parent;
+  return previous?currentIntent(p,previous):null;
+}
+export function correctIntent(p:Project,id:string,goal:string,conditions:string):Project {
+  text(goal,6000);text(conditions,6000,true);const n=change(p),t=taskOf(n,id);
+  // Existing manual work fields remain the sole editable authority. Regeneration cannot overwrite them.
+  t.manual.understanding=goal;t.manual.scope=conditions;t.intentEdit={version:'intent-edit.1',revision:n.revision};return n;
 }
 function contextParts(p: Project, t: Task) {
   // Reuse current input/replies and its immediate predecessor, not the complete chat transcript.
@@ -204,7 +222,7 @@ const jsonBytes=(v:unknown)=>new TextEncoder().encode(JSON.stringify(v)).length;
 export function buildRequest(p: Project, ticket: Ticket): ContextRequest {
   const t=taskOf(p,ticket.taskId),parts=contextParts(p,t);
   const req:ContextRequest={schemaVersion:API_SCHEMA,ticket:copy(ticket),projectName:p.name,sources:parts.sources,
-    bases:p.bases.map(contextBasis),appFacts:planFacts(p,t.id),previousWork:parts.previousWork};
+    bases:p.bases.map(contextBasis),appFacts:planFacts(p,t.id),previousWork:parts.previousWork,previousIntent:(t.intentEdit?currentIntent(p,t):null)??previousIntent(p,t)};
   let bytes=jsonBytes(req);
   if(bytes>REQUEST_BYTES) {
     const sources=new Map(p.sources.map(s=>[s.id,s]));
@@ -218,6 +236,7 @@ export function buildRequest(p: Project, ticket: Ticket): ContextRequest {
       bytes+=jsonBytes(b)-before;
     }
   }
+  if(req.previousIntent?.value.basisRefs.some(ref=>req.bases.some(b=>b.id===ref.basisId&&b.partial)))req.previousIntent=null;
   // Final check uses the exact serialised UTF-8 body, not characters or the 8MB local-storage budget.
   ensure(jsonBytes(req)<=REQUEST_BYTES,'CONTEXT_TOO_LARGE');
   return req;
@@ -302,6 +321,13 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
   if(outcome.request) lines.push('\n## 이번 요청과 이전 맥락',
     `이번 요청 [${outcome.request.id}]이 실행 범위를 정합니다. 부모 연결은 같은 목적이라는 판정이 아닙니다.`,
     '후속 사용자 발언이 바꾼 부분은 앞선 요청보다 우선합니다. 바꾸지 않은 유지 조건은 보존하되, 관련 없는 이전 요청을 이번 작업에 추가하지 마세요. 코드 영향은 실행 도구가 실제 자료로 판단합니다.');
+  const intent=currentIntent(p,t);
+  if(intent)lines.push('\n## 이어가는 목적 · '+(intent.manualGoal!==null?'사용자 직접 정정':'AI 해석 / 원문과 구분'),
+    intent.manualGoal??intent.value.goal,
+    '유지할 조건: '+((intent.manualConditions??intent.value.conditions.join(' / '))||'명시된 추가 조건 없음'),
+    ...(intent.manualGoal===null&&intent.manualConditions===null&&intent.value.retired.length?['대체된 지시 · 다시 실행하지 않음 (AI 해석): '+intent.value.retired.join(' / ')]:[]),
+    intent.value.relation==='uncertain'?'목적 관계 미정: 아래 질문에 의존하는 변경은 확정 범위가 아닙니다.':'이번 작업의 크기는 아래 현재 요청이 정합니다. 목적 전체를 다시 구현하라는 지시가 아닙니다.',
+    '해석 근거: '+intent.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision} / ${ref.sourceId}`).join(', '));
   lines.push(`\n${planFactsText(planFacts(p,t.id))}`);
   lines.push('\n## 이번 작업',v.understanding||'아래 사용자 입력과 현재 기준을 바탕으로 좁은 작업을 준비하세요.',
     '\n### 범위',v.scope||'명시한 요청 범위만. 미정 조건은 가정으로 채우지 않습니다.',

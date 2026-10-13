@@ -180,7 +180,7 @@ test('I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8M
   const saved=serializeProject(over);assert.throws(()=>D.begin(over),/CONTEXT_TOO_LARGE/);assert.equal(serializeProject(over),saved);
   assert.deepEqual(parseProject(saved),over);assert.ok(Buffer.byteLength(saved)<FILE_LIMIT);assert.equal(FILE_LIMIT,8_000_000);
   assert.ok(D.handoffText(over).includes(over.bases[0].text));
-  let calls=0;const app=createContinuityApp({config:fakeConfig(),fetchImpl:async()=>{calls++;return response(JSON.stringify({understanding:'합성 검사',scope:'경계 검사',next:'작은 검사',checks:'실행 전 조건',question:null,relatedBasisIds:[],reviewBasisIds:[],suggestions:[]}));}});
+  let calls=0;const app=createContinuityApp({config:fakeConfig(),fetchImpl:async()=>{calls++;return response(JSON.stringify({intent:mockAdvice(req).intent,understanding:'합성 검사',scope:'경계 검사',next:'작은 검사',checks:'실행 전 조건',question:null,relatedBasisIds:[],reviewBasisIds:[],suggestions:[]}));}});
   await new Promise(resolve=>app.listen(0,'127.0.0.1',resolve));
   try {
     assert.equal((await local(app.address().port,req)).status,200);
@@ -191,7 +191,7 @@ test('I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8M
 
 test('I17-contract manual provenance is input-only, narrow, versioned; advice parser is not relaxed',()=>{
   const {c,p}=expert(),req=D.begin(input(c.stages[1].input.text,p)).request;
-  assert.equal(req.schemaVersion,API_SCHEMA);assert.equal(API_SCHEMA,'idea022.context.4');validateRequest(req);
+  assert.equal(req.schemaVersion,API_SCHEMA);assert.equal(API_SCHEMA,'idea022.context.5');validateRequest(req);
   for(const fields of [['scope','scope'],['status'],['scope','checks','next'],true]) {
     const bad=clone(req);bad.previousWork.manualConditionFields=fields;assert.throws(()=>validateRequest(bad));
   }
@@ -213,10 +213,10 @@ test('I17-C05 supplied invalid array still fails once through real provider; raw
 
 test('I17-C05 prompt example matches strict string schema; valid multi-line strings pass unchanged',async()=>{
   const match=SYSTEM_PROMPT.match(/\n\{\n[\s\S]*?\n\}/);assert.ok(match);
-  const example=JSON.parse(match[0]);assert.equal(Object.keys(example).length,8);validateAdvice(example,[]);
+  const example=JSON.parse(match[0]);assert.equal(Object.keys(example).length,9);validateAdvice(example,[]);
   assert.match(SYSTEM_PROMPT,/checks.*문자열/);assert.match(SYSTEM_PROMPT,/배열이나 객체로 바꾸지/);assert.ok(SYSTEM_PROMPT.includes('"\\n"'));
   const req=D.begin(input('독립적인 작은 검사 준비')).request;
-  const advice={...example,checks:'첫 기준을 확인한다.\n둘째 기준도 확인한다.'};let calls=0;
+  const advice={...example,intent:mockAdvice(req).intent,checks:'첫 기준을 확인한다.\n둘째 기준도 확인한다.'};let calls=0;
   const result=await callContinuity(req,fakeConfig(),{fetchImpl:async()=>{calls++;return response(JSON.stringify(advice));}});
   assert.deepEqual(result,advice);assert.equal(calls,1);
 });

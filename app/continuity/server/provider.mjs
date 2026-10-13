@@ -34,7 +34,7 @@ export async function callContinuity(request,config,{fetchImpl=globalThis.fetch,
         if(c?.finish_reason!=='stop' || c?.message?.tool_calls || typeof c?.message?.content!=='string')throw new Error();
         // The API credential must never be echoed into a model-generated display field.
         if(config.apiKey && c.message.content.includes(config.apiKey))throw new Error();
-        return validateAdvice(JSON.parse(c.message.content),request.bases.map(b=>b.id));
+        return validateAdvice(JSON.parse(c.message.content),request.bases.map(b=>b.id),request);
       } catch { throw new ApiError('INVALID_RESPONSE',502); }
     })();
     return await Promise.race([work,cancelled]);

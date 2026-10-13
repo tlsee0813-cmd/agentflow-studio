@@ -9,7 +9,8 @@ export function mockAdvice(request:ContextRequest):Advice {
     const words=latest.text.match(/[가-힣A-Za-z0-9]{2,}/g) ?? [];
     return words.some(w=>b.text.includes(w));
   }).map(b=>b.id);
-  const out:Advice={understanding:'입력한 요청을 작은 작업으로 이어갑니다.',scope:'명시한 범위만 다루고, 나머지 저장 기준은 유지합니다.',
+  const refs=request.bases.filter(b=>request.appFacts.inputs.some(s=>s.sourceId===b.sourceId)).map(b=>({basisId:b.id,sourceId:b.sourceId,revision:b.revision}));
+  const out:Advice={intent:{version:'intent.1',relation:request.previousIntent?'separate':'start',goal:initial.text.slice(0,2000),conditions:[],retired:[],basisRefs:refs},understanding:'입력한 요청을 작은 작업으로 이어갑니다.',scope:'명시한 범위만 다루고, 나머지 저장 기준은 유지합니다.',
     next:'관련 구현 위치를 찾고 요청한 부분만 수정하세요. 새 정책이나 기술 선택은 임의로 추가하지 마세요.',
     checks:'요청한 변화가 보이는지 확인하고, 기존 동작을 바꾸지 않았는지 관련 검사를 실행해 결과를 따로 보고하세요.',
     question:null,relatedBasisIds:related,reviewBasisIds:[],suggestions:[]};

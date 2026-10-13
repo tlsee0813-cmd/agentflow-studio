@@ -42,7 +42,7 @@ export function createContinuityApp({config=readConfig(),fetchImpl=globalThis.fe
         const release=limiter.acquire(request.ticket.requestId),controller=new AbortController();
         const disconnected=()=>{if(!res.writableEnded)controller.abort();};res.on('close',disconnected);
         try {
-          const advice=config.mode==='mock'?validateAdvice(await mockImpl(request),request.bases.map(b=>b.id)):
+          const advice=config.mode==='mock'?validateAdvice(await mockImpl(request),request.bases.map(b=>b.id),request):
             await callContinuity(request,config,{fetchImpl,signal:controller.signal});
           if(!res.destroyed)json(res,200,{mode:config.mode,ticket:request.ticket,advice});
         } finally {release();res.off('close',disconnected);}return;
