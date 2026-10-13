@@ -153,3 +153,11 @@ A는 같은 자료에 K체크리스트/C조건연결 지시를 비교하는 입�
 Work의 native 관찰은 report/evidence H2기준1개·파일 H1기준2개/legacy 비교 불가·선택·자료 불변을 확인했으며 이번 수신POST0로 이전 mock 왕복과 구분한다. 독립 좁은 검토를 수용했고 Cloud continuity 타입/경계·build가 통과했다. 실제 사용자 효용은 미측정이다. 이 반영 커밋의 양 OS 필수 CI는 Actions 완료 결과로 별도 확인한다. 원본 조언/보고서·ZIP은 게시하지 않는다.
 
 ADVICE044_FIX rev1은 UI10의 두 번째 내보내기 직후 기대값 한 줄만 `마지막 내보내기 이후 기록된 기준 0개`로 교정했다. 정확 비교/locator·첫 내보내기/기준 변경/reload/유형 변경·부모/원문/호출 수 검사는 유지하고 제품은 불변이다. [257ecc5의 CI38357118980](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38357118980)는 양 OS UI 단계 실패와 후속 FRESH033/SELECT035/CONNECT039 미실행으로 보존한다. Work는 실제 UI10 실패 재현 후 Linux UI00111/FRESH0333/SELECT0353/CONNECT0395 합계22개를 각1회 통과했고 기존 명시 장애주입을 구분했다. Cloud는 manifest11·기준/최종 hash·한 줄 diff·문법을 확인하고22개는 반복하지 않았다. 이번 새 커밋의 필수 CI는 양 OS 완료 결과로 별도 확인한다.
+
+## WEB046 — 정적 브라우저 MOCK 통합·미게시
+
+같은 UI/도메인/검증을 사용하는 설치 없는 정적 체험을 통합했다. 기본 runtime은 기존 서버 개발/실AI 경로를 유지하고 정적 build만 브라우저 MOCK adapter를 선택한다. 기존 mock 규칙은 타입 표기만 추가해 shared/mock.ts로 이동했다. 정적 저장은 별도 접두사이며 기존 서버 기록·구형 백업을 자동 접근하지 않는다. 화면에 `브라우저 MOCK · AI 아님`을 명시하고 일반 자연어 이해·실AI 품질을 제공한다고 주장하지 않는다.
+
+Cloud Node22.16/npm10.9.2/잠금TS5.8.3 클린설치 후 부모/continuity 검사·빌드 및 정적 build가 통과했다. 재생성12파일177353B은 첨부publish와 바이트 동일했다. 기존 서버HTTP11·새 정적native1이 통과했고 `/agentflow-studio/`에서 요청/질문/직접편집/내보내기/결과JSON 정확연결/백업복구·reload를 확인했다. 일반API0·서버저장키 불변·정적import closure를 확인했으며 합성sentinel/CSP차단탐침은 일반 사용 흐름과 구분한다. 기존 게이트를 유지한 CI에 정적build/검사 단계만 추가했고 새 커밋 양OS 결과는 Actions에서 별도로 확인한다.
+
+공개URL·Pages 설정·배포는 아직 없다. 게시 후보는 `app/continuity/static-dist/` 내용12파일뿐이며 서버/provider/prompt/키·API호출 경로는 포함하지 않는다. 상대자산·하위경로·connect-src none을 확인했지만 실제 호스팅의 HTTPS/헤더·계정 적격성은 미확인이다. 게시workflow/권한확장·ServiceWorker·숨은fallback은 추가하지 않았고 기존 서버의 키/실AI 경로는 유지한다. 규칙체험의 실제 고객 효용·운영 준비는 미검증이다.

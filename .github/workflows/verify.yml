@@ -67,6 +67,9 @@ jobs:
         run: |
           node continuity/scripts/build.mjs 2>&1 | tee test-results/continuity-build.log
           node --test continuity/tests/*.test.mjs 2>&1 | tee test-results/continuity-node-tests.tap
+      - name: Build isolated static browser MOCK (no provider or prompt)
+        shell: bash
+        run: node continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log
       - name: Install pinned browser verification tools
         run: |
           python -m pip install -r tests/browser-requirements.txt
@@ -110,6 +113,14 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/connect039_browser.py 2>&1 | tee test-results/connect039-browser.log
+      # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
+      - name: Static subpath exchange and storage isolation (browser MOCK, no API)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/static-web
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/static_browser.py 2>&1 | tee test-results/static-browser.log
       - name: Upload only this run's results, not historic snapshot evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

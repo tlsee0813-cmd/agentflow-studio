@@ -4,6 +4,7 @@ import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, 
 import { parseProject } from '../shared/validation.js';
 import { ProjectStore, serializeProject, storageErrorCode } from '../shared/storage.js';
 import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview } from './presentation.js';
+import { loadConfig, requestAdvice, runtimeStorage, runtimeFailure, type RuntimeConfig } from './runtime.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HTMLElementTagNameMap[K] {
   const e=document.createElement(tag);e.textContent=content;if(cls)e.className=cls;return e;
@@ -12,7 +13,7 @@ function btn(label:string,act:()=>void,cls='quiet',id='') {const b=node('button'
 function tag(content:string,cls=''){return node('span',content,`tag ${cls}`);}
 function details(title:string,id:string):HTMLDetailsElement {const d=node('details');d.id=id;d.append(node('summary',title));return d;}
 let project:Project=createProject(),store:ProjectStore|null=null,storageError='';
-let config:{mode:'mock'|'deepseek';configured:boolean;paidEnabled:boolean}|null=null;
+let config:RuntimeConfig|null=null;
 let controller:AbortController|null=null;
 // View preferences are ephemeral. They never enter the persisted project or request schema.
 let view:'work'|'history'='work',contextOpen=false,hasSaved=false,memoryDirty=false;
@@ -27,7 +28,7 @@ function returnChoiceRequired():boolean {
 }
 function changeKind(kind:Project['draftKind']) {selectedReturnTaskId=undefined;commit(setKind(project,kind));}
 let contextReturn:HTMLElement|null=null;
-try {store=new ProjectStore(window.localStorage);const restored=store.load();if(restored){project=restored;hasSaved=true;}}
+try {store=new ProjectStore(runtimeStorage(window.localStorage));const restored=store.load();if(restored){project=restored;hasSaved=true;}}
 catch {storageError='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 않습니다. 이 화면의 입력은 메모리에 남으며 복구 파일로 저장할 수 있습니다.';}
 const storageMessages:Record<string,string>={
   STORAGE_BLOCKED:'기존 저장 내용을 읽지 못해 덮어쓰지 않고 있습니다. 이 탭의 입력은 메모리에 있습니다. 복구 파일을 저장하고, 필요하면 ‘가져오기’로 교체하면 자동 저장이 다시 켜집니다.',
@@ -120,10 +121,7 @@ async function generate(id:string) {
   controller?.abort();const active=new AbortController();controller=active;commit(started.project);
   $('pending-bar').scrollIntoView({block:'nearest'});
   try {
-    const response=await fetch('/api/continuity',{method:'POST',headers:{'Content-Type':'application/json','X-AgentFlow-Request':'1'},body:JSON.stringify(started.request),signal:active.signal});
-    const raw=await response.text();let data;
-    try {data=JSON.parse(raw);}catch {throw new Error('INVALID_RESPONSE');}
-    if(!response.ok)throw new Error(typeof data?.error?.code==='string'?data.error.code:'REQUEST_FAILED');
+    const data=await requestAdvice(started.request,active.signal);
     if(data?.mode!==config.mode)throw new Error('INVALID_RESPONSE');
     commit(receive(project,started.request,data));
   } catch(e) {
@@ -390,7 +388,7 @@ $('request-tab').addEventListener('click',()=>{if(project.draftKind!=='request')
 $('report-tab').addEventListener('click',()=>{if(project.draftKind!=='report')changeKind('report');});
 $('source-kind').addEventListener('change',()=>{const kind=$<HTMLSelectElement>('source-kind').value as Project['draftKind'];if(project.draftKind!==kind)changeKind(kind);});
 $('cancel').addEventListener('click',()=>{controller?.abort();controller=null;commit(cancel(project));});
-$('consent').addEventListener('change',renderStatus);
+$('consent')?.addEventListener('change',renderStatus);
 $('basis-draft').addEventListener('input',()=>guard(()=>commit(editAuxDraft(project,'basisDraft',$<HTMLTextAreaElement>('basis-draft').value),false)));
 $('basis-form').addEventListener('submit',e=>{e.preventDefault();guard(()=>commit(recordBasis(project,project.basisDraft)));});
 $('backup').addEventListener('click',()=>guard(()=>{
@@ -447,13 +445,11 @@ function restoreDraftPanels() {
 contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();
 render();restoreDraftPanels();
 try {
-  const response=await fetch('/api/config');if(!response.ok)throw new Error();const value=await response.json();
-  if(!['mock','deepseek'].includes(value.mode)||typeof value.configured!=='boolean'||typeof value.paidEnabled!=='boolean')throw new Error();
-  config=value;
-  $('mode').textContent=config!.mode==='mock'?'MOCK · 체험 모드':config!.configured&&config!.paidEnabled?'DeepSeek · 요청 가능':'DeepSeek · 호출 꺼짐';
-  $('mode-description').textContent=config!.mode==='mock'?'규칙 기반 모의 정리입니다. 실제 AI 해석이나 외부 전송 없이 화면 흐름을 시험합니다.':config!.configured&&config!.paidEnabled?'서버에 요청 설정이 있습니다. 실제 연결 성공은 아직 확인하지 않았으며, 아래 전송 동의 후 요청할 수 있습니다.':'서버에서 실제 AI 호출이 비활성화되어 있습니다. 원문 보관·직접 편집·파일 저장은 사용할 수 있습니다.';
-  $('consent-area').hidden=config!.mode!=='deepseek';
-  if(config!.mode==='deepseek'&&config!.configured&&config!.paidEnabled)$<HTMLDetailsElement>('connection-details').open=true;
-  if(config!.mode==='deepseek'&&(!config!.configured||!config!.paidEnabled))project={...project,notice:'실제 AI 호출은 서버에서 잠겨 있습니다. 원문 보관·문맥 편집·저장·복구는 사용할 수 있습니다.'};
-} catch {project={...project,notice:'서버 모드를 확인하지 못했습니다. 자동 AI 호출 없이 입력을 보존합니다.'};$('mode').textContent='서버 연결 미확인';$('mode-description').textContent='서버 모드를 확인하지 못했습니다. 원문만 보관하거나 연결 설정을 확인한 뒤 새로고침하세요.';}
+  config=await loadConfig();
+  $('mode').textContent=config.label;
+  $('mode-description').textContent=config.description;
+  const consentArea=$('consent-area');if(consentArea)consentArea.hidden=!config.consentVisible;
+  if(config.consentVisible&&config.configured&&config.paidEnabled)$<HTMLDetailsElement>('connection-details').open=true;
+  if(config.notice)project={...project,notice:config.notice};
+} catch {project={...project,notice:runtimeFailure.notice};$('mode').textContent=runtimeFailure.label;$('mode-description').textContent=runtimeFailure.description;}
 renderStatus();
