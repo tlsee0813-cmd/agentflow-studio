@@ -86,7 +86,7 @@ Windows job `115254117895`의 test_01은 `flow049_browser.py:39`에서 보존된
 ## FIX051 — 독립 검토 재현과 수정
 
 기준 HEAD `ce21fe8e09bd9b8c02dd33ea0eb90886df151484` 및 원격 blob 일치 확인. 변경은 제품 3파일,
-기존 검사 4파일, 이 문서에 한정한다. prompt/provider/API/project/return 형식·CI·CSS는 변경하지 않는다.
+기존 검사 5파일, 이 문서에 한정한다. prompt/provider/API/project/return 형식·CI·CSS는 변경하지 않는다.
 앞선 Windows fixture 수정과 독립 변경을 보존한다. 원래 115/39는 dbbb22b의 로컬 검사이며 이번 결과와 구분한다.
 
 - **R1 수용:** 회원가입 필수 → 링크 취소로 방향 변경 → 버튼 색 수정의 3턴에서 종전 홈 큰 제목이
@@ -122,3 +122,14 @@ continuity Node **118/118**. 실제 localhost/mock FLOW049 **5/5**(새 방향 3�
 재현은 위 명령과 기존 `ui001_browser.py`, `fresh033_browser.py`, `select035_browser.py`,
 `connect039_browser.py`를 사용한다. SELECT035는 기존 CI의 공개 합성 fixture 환경변수를 따른다.
 새 화면/POST/다운로드 자료는 기존 FLOW049 CI artifact에 `fix051-*`로 남는다. 새 평가 하네스는 없다.
+
+
+FIX051 CI 후속: `f5672f98e396dc5b1a99847d2a3dfa320229d0e3`의 run `38390626743`은
+Ubuntu 성공, Windows CONNECT039 test_03 실패(뒤 홈/정적 skipped)였다. 실제 line101 traceback은
+클립보드 무효화 안내 기대에 빈 notice였다. `recovery()`가 이미 화면에 있던 동일 프로젝트 이름만
+기다려 파일 읽기/교체 전에 반환했고, 늦은 복구 렌더가 안내를 지우는 순서를 허용했다.
+로컬에서 세 번째 File.text 읽기 250ms 지연과 관찰 시점 조절로 같은 assertion 실패를 재현했다
+(Windows 실행으로 주장하지 않는다). helper만 해당 복구의 확인창 수락과 이전 작업 카드의 교체까지
+기다리게 고쳤다. 기대문구·상태 불변·클립보드 무효화 assertion, timeout/skip, 제품은 변경하지 않았다.
+같은 지연 재현은 수정 전 0/1 → 수정 후 1/1, 기존 CONNECT039 전체 5/5 통과다.
+최종 브랜치 HEAD의 새 CI 결과는 이 실패 run과 구별한다.

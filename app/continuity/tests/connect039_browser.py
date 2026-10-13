@@ -17,8 +17,13 @@ class ResultFiles(unittest.TestCase):
     tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
     setUp=base.Browser.setUp;tearDown=base.Browser.tearDown;state=base.Browser.state;compose=base.Browser.compose;send=base.Browser.send;basis=base.Browser.basis;context=base.Browser.context
     def recovery(self,name='before.json'):
-        self.page.once('dialog',lambda d:d.accept())
-        self.page.locator('#import-file').set_input_files(str(self.materials/name))
+        # The same name/project/revision may already be on screen. Wait for this
+        # recovery's read/confirmation and render, not a label left by the last one.
+        previous=self.page.query_selector('#current-work')
+        with self.page.expect_event('dialog') as confirmation:
+            self.page.locator('#import-file').set_input_files(str(self.materials/name))
+        confirmation.value.accept()
+        if previous:self.page.wait_for_function('(node)=>!node.isConnected',arg=previous)
         expect(self.page.locator('#sidebar-project')).to_contain_text('CONNECT039')
     def select(self,name='A-H1.result.json'):
         self.compose();self.page.locator('#result-file-panel').evaluate('(e)=>e.open=true')
