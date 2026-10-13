@@ -153,3 +153,10 @@ UI에서는 실제 보고 작업문 다운로드의 유효 요청·제외 조건
 “기준의 현재 값”으로 교정했다. 구조 확장·기존 R1~R6 재설계·실AI 평가는 하지 않았다.
 방향 선언 탐색 보조, 자유문장 전체 의미 병합 아님, 다목적 미구현이라는 기존 한계는 유지한다.
 최종 양 OS CI는 이 수정 커밋의 PR 검사로 확인하며 위 로컬 실행과 구분한다.
+
+
+## WEB054 — 검토 완료본의 공개 MOCK 갱신
+
+검토·FIX053 수용 소스 `1454c6ff369b49243b5fc07ba91af8365f9e6cc8`의 [CI38398192356](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38398192356)은 양 OS 성공·skipped 0이다. 같은 잠금 의존성과 Node22.16/TS5.8.3으로 정적 빌드 후 13파일192239B·상대자산/import closure·connect-src none·MOCK adapter·서버/비밀 제외를 확인했고 원격 게시물과 바이트 동일했다. 전체 검사는 반복하지 않았다.
+
+게시 커밋 `1033f0654762baeea870e5350045acea61b92c9c`를 `gh-pages`에 비강제 반영했고 [Pages 배포38400559735](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38400559735)는 성공했다. 공개 주소는 https://tlsee0813-cmd.github.io/agentflow-studio/ 이다. Cloud의 기존 프록시 제한으로 새 공개 UI는 재접속하지 않았으며 총괄 IAB 확인에 인계한다. 게시 성공과 공개 UI 실제 검증은 구분한다. main·기존 개발브랜치·PR1과 서버/실AI 경로는 보존했고 PR2는 Draft다. 앞선 미게시/검토대기 문구는 당시 기록이며 이번 갱신으로 일반 품질·고객 효용을 입증한 것은 아니다.
