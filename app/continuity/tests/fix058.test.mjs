@@ -124,5 +124,30 @@ test('F059 intent-edit.1 restore -> ordinary work edit leaves the converted corr
   const next=D.begin(put(parseProject(serializeProject(loaded)),typo)).request;validateRequest(next);
   assert.equal(next.previousIntent.manualGoal,'옛 정정: 문자 링크로 취소');assert.equal(next.previousIntent.manualConditions,'환불 제외');
   const empty=structuredClone(raw);empty.tasks.find(x=>x.id===t).manual.understanding=null;
-  assert.equal(D.taskOf(parseProject(JSON.stringify(empty)),t).intentEdit,undefined,'an empty legacy correction is dropped, not invented');
+  const kept=D.taskOf(parseProject(JSON.stringify(empty)),t);
+  assert.deepEqual(kept.intentEdit,{version:'intent-edit.2',revision:raw.revision,goal:null,conditions:null},'no goal is invented; the stale revision is kept');assert.equal(D.intentCorrection(kept),null);
+});
+
+test('F061 legacy intent-edit.1 without a non-blank goal keeps withholding old AI text, is never a purpose, and round-trips',()=>{
+  let p=D.createProject();p=put(p,first);
+  {const st=D.begin(p),a=fixtureAdvice(st.request);a.next='OLD_AI_NEXT';a.checks='OLD_AI_CHECKS';a.question={kind:'fact',text:'OLD_Q',why:'w',options:[]};
+   p=D.receive(st.project,st.request,{mode:'deepseek',ticket:st.request.ticket,advice:a});}
+  const t=p.currentTaskId,base=JSON.parse(serializeProject(p));
+  for(const [understanding,scope] of [['',null],[' ',null],[null,'환불 제외'],['\t','환불 제외']]) {
+    const raw=structuredClone(base),task=raw.tasks.find(x=>x.id===t);raw.revision+=1;
+    task.manual.understanding=understanding;task.manual.scope=scope;task.intentEdit={version:'intent-edit.1',revision:raw.revision};
+    let loaded=parseProject(JSON.stringify(raw));const once=serializeProject(loaded);
+    assert.equal(serializeProject(parseProject(once)),once,'restore -> save -> restore is stable');
+    const lt=D.taskOf(loaded,t);assert.deepEqual(lt.intentEdit,{version:'intent-edit.2',revision:raw.revision,goal:null,conditions:null});assert.deepEqual(lt.manual,task.manual,'manual input kept as written');
+    const w=D.currentWork(loaded,lt);assert.equal(w.aiStale,true);assert.equal(w.values.next,'');assert.equal(w.values.checks,'');
+    assert.equal(D.questionApplicability(loaded,lt),'stale');assert.throws(()=>D.answer(loaded,t,'옛 질문 답'),/QUESTION_NOT_APPLICABLE/);
+    let h=D.handoffText(loaded,t);assert.ok(!h.includes('OLD_AI_NEXT')&&!h.includes('OLD_AI_CHECKS'));assert.ok(!h.includes('사용자 직접 정정'));
+    if(scope)assert.ok(section(h,'## 이번 작업').includes(scope),'a legacy work-field value stays in this task');
+    loaded=D.editTask(loaded,t,'understanding','이번 작업은 CSS 한 줄만');
+    assert.equal(D.intentCorrection(D.taskOf(loaded,t)),null,'an ordinary work edit is not promoted to a purpose');
+    h=D.handoffText(loaded,t);assert.ok(!h.includes('사용자 직접 정정'));assert.ok(!h.includes('OLD_AI_NEXT'));
+    const next=D.begin(put(parseProject(serializeProject(loaded)),typo)).request;validateRequest(next);
+    assert.ok(next.previousIntent===null||next.previousIntent.manualGoal===null,'re-parse after a work edit must not read manual.* as a purpose');
+    const bad=structuredClone(raw);bad.tasks.find(x=>x.id===t).intentEdit={version:'intent-edit.2',revision:raw.revision,goal:null,conditions:'x'};assert.throws(()=>parseProject(JSON.stringify(bad)));
+  }
 });

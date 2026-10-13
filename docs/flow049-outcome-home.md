@@ -233,6 +233,6 @@ MOCK 기본 응답은 입력 인용만 하고 새 자연어 해석 능력을 흉
 - N1: AI의 retired는 이전 요청 원문의 표현에만 적용하고 확정·답변·보류 기준을 대체하지 않는다고 작업문·홈에 표시한다. 사용자 결정이 있으면 그 ID를 해석보다 우선하는 현재 조건으로 명시한다. 사용자 결정의 변경은 요청 원문이나 직접 수정으로만 일어난다. prompt에 같은 규칙을 추가했고 실제 모델 준수는 미검증이다.
 - N2: 새 응답에서 `separate`+retired, 같은 문장의 conditions/retired 동시 기재를 거절한다(저장된 기존 advice는 그대로 읽음). N5: MOCK 작업문 라벨은 ‘MOCK 정리 / 의미 이해 아님’.
 - 남은 한계: partial 기준 인용 시 응답 전체 거절(N3), 큰 previousIntent를 줄이지 않고 128 KiB에서 거절(N4), retired는 여전히 ID 없는 자유문이라 어떤 요청 표현을 대체했는지 앱이 결정적으로 알 수 없다. 검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.
-- FIX059: 유효한 AI 해석이 없는 첫 작업에서 정정 뒤 새 확정 기준을 기록해도, 다음 요청에 `previousIntent.value=null`과 사용자 정정이 함께 실린다(가짜 AI 해석을 만들지 않음; `value=null`은 정정이 있을 때만 검증 통과). 발췌 기준에 기댄 AI 해석은 빠지되 정정은 남는다. `intent-edit.1` 복원 뒤 일반 작업 편집은 목적을 바꾸지 않는다. `idea022.context.5`는 미공개 후보 계약이라 버전명을 유지했다.
+- FIX059: 유효한 AI 해석이 없는 첫 작업에서 정정 뒤 새 확정 기준을 기록해도, 다음 요청에 `previousIntent.value=null`과 사용자 정정이 함께 실린다(가짜 AI 해석을 만들지 않음; `value=null`은 정정이 있을 때만 검증 통과). 발췌 기준에 기댄 AI 해석은 빠지되 정정은 남는다. `intent-edit.1` 복원 뒤 일반 작업 편집은 목적을 바꾸지 않는다. FIX061: 모든 `intent-edit.1`은 첫 복원 때 v2로 확정 변환하고 결과를 재검증한다. 비공백 목적이 없으면(빈값·공백·조건만) 목적을 지어내지 않고 `goal:null`로 옛 AI 문구·질문 제외 revision만 유지하며, `manual.*`는 그대로 둔다. 이후 편집·저장·재복원이 `manual.*`를 목적으로 읽지 않는다. `idea022.context.5`는 미공개 후보 계약이라 버전명을 유지했다.
 
 재현: `node --test continuity/tests/fix058.test.mjs continuity/tests/ai055.test.mjs`, `python continuity/tests/ai055_browser.py`(app/에서).

@@ -195,8 +195,8 @@ export function currentIntent(p:Project,t:Task):CurrentIntent|null {
 /** The user's purpose correction for this task, if any. Ordinary edits of the task's own
  * understanding/scope are work instructions for this task only and are never read here. */
 export function intentCorrection(t:Task):{goal:string;conditions:string}|null {
-  const e=t.intentEdit; // intent-edit.1 is converted at parse time and never read from manual.* here.
-  return e?.version==='intent-edit.2'?{goal:e.goal,conditions:e.conditions}:null;
+  const e=t.intentEdit; // Never read from manual.*; intent-edit.1 is converted at parse time.
+  return e?.version==='intent-edit.2'&&e.goal!==null?{goal:e.goal,conditions:e.conditions}:null;
 }
 export function previousIntent(p:Project,t:Task):CurrentIntent|null {
   // Stop at the immediate semantic predecessor; never jump across an unprocessed request.

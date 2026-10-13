@@ -60,9 +60,10 @@ export interface ExportRecord {
   returnId: string | null;
 }
 export interface Task {
-  /** Purpose correction, stored apart from this task's own work fields (manual.*).
-   * intent-edit.1 came from the unreleased AI055 candidate, which wrote the correction into manual.*. */
-  intentEdit?: {version:'intent-edit.1';revision:number}|{version:'intent-edit.2';revision:number;goal:string;conditions:string};
+  /** Purpose correction, stored apart from this task's own work fields (manual.*). goal=null (with conditions=null)
+   * keeps only the revision that withholds older AI text, with no correction. intent-edit.1 came from the
+   * unreleased AI055 candidate and is accepted on input only; parsing always converts it to intent-edit.2. */
+  intentEdit?: {version:'intent-edit.1';revision:number}|{version:'intent-edit.2';revision:number;goal:string;conditions:string}|{version:'intent-edit.2';revision:number;goal:null;conditions:null};
   id: string; sourceIds: string[]; parentTaskId: string | null;
   advice: Advice | null; adviceRevision: number | null; mode: 'mock' | 'deepseek' | null;
   manual: { understanding: string | null; scope: string | null; next: string | null; checks: string | null };

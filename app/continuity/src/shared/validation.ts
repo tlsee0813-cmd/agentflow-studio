@@ -191,7 +191,8 @@ function assertProject(v: unknown): asserts v is Project {
       const legacy=!!t.intentEdit&&typeof t.intentEdit==='object'&&(t.intentEdit as {version?:unknown}).version==='intent-edit.1';
       obj(t.intentEdit,legacy?['version','revision']:['version','revision','goal','conditions']);ensure(legacy||t.intentEdit.version==='intent-edit.2');
       integer(t.intentEdit.revision);ensure((t.intentEdit.revision as number)<=(v.revision as number));
-      if(!legacy){text(t.intentEdit.goal,6000);text(t.intentEdit.conditions,6000,true);}
+      if(!legacy&&t.intentEdit.goal===null)ensure(t.intentEdit.conditions===null);
+      else if(!legacy){text(t.intentEdit.goal,6000);text(t.intentEdit.conditions,6000,true);}
     }
     if(t.advice !== null) {
       const advice=validateAdvice(t.advice,bids);
@@ -277,15 +278,19 @@ function migrateV2(v:unknown, notice=V2_MIGRATION_NOTICE):unknown {
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
- * would rewrite it. Copy it out once so ordinary edits never change the purpose; manual.* stays as written.
- * An empty legacy correction had nothing to keep and is dropped. */
+ * would rewrite it. Every one is converted on the first parse, so no later parse reads manual.* again:
+ * a non-blank goal is copied out; otherwise no goal is invented (goal=null) and only the revision that
+ * withholds the older AI text and question is kept. manual.* stays as written. The result is revalidated. */
 function convertIntentEdits(p:Project):Project {
+  let converted=false;
   for(const t of p.tasks) {
-    if(t.intentEdit?.version!=='intent-edit.1')continue;
-    const goal=t.manual.understanding;
-    if(goal===null||goal==='')delete t.intentEdit;
-    else t.intentEdit={version:'intent-edit.2',revision:t.intentEdit.revision,goal,conditions:t.manual.scope??''};
+    const e=t.intentEdit,goal=t.manual.understanding;
+    if(e?.version!=='intent-edit.1')continue;
+    t.intentEdit=goal!==null&&goal.trim()?{version:'intent-edit.2',revision:e.revision,goal,conditions:t.manual.scope??''}
+      :{version:'intent-edit.2',revision:e.revision,goal:null,conditions:null};
+    converted=true;
   }
+  if(converted)assertProject(p);
   return p;
 }
 export function parseProject(raw: string): Project {
