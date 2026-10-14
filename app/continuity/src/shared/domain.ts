@@ -440,7 +440,7 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
       ...(ai?.retired.length?[`대체된 지시 · 다시 실행하지 않음 (${interp} · 이전 요청 원문의 표현에만 적용, 사용자 결정 기준은 대체하지 않음): `+ai.retired.join(' / ')]:[]),
       ...(decisions.length?[`사용자 결정 기준 ${decisions.map(b=>`${b.id}(${BASIS_LABEL[b.status]})`).join(', ')}은 이 ${interp}보다 우선하며 아래 현재 값 그대로 유효합니다. 이번 요청 원문이 그 결정을 명시적으로 바꾼 부분만 요청 원문을 따르고, ${interp}만으로 결정을 폐기하지 마세요.`]:[]),
       ...continuingLines(p,t,intent,ai,shown),
-      ai?.relation==='uncertain'?'목적 관계 미정: 미정 선택에 의존하는 변경은 확정 범위가 아닙니다.':'이번 작업의 크기는 아래 현재 요청이 정합니다. 목적 전체를 다시 구현하라는 지시가 아닙니다.',
+      ai?.relation==='uncertain'?'목적 관계 미정: 미정 선택에 의존하는 변경은 확정 범위가 아닙니다.':(req?`이번 작업의 크기는 ‘이번 요청과 이전 맥락’ 절의 이번 요청 원문 [${req.id}]이 정합니다.`:'이번 작업의 크기는 아래 현재 요청이 정합니다.')+' 목적 전체를 다시 구현하라는 지시가 아닙니다.',
       ...(intent?[(correction?`정정 전 ${interp} 근거: `:'해석 근거: ')+intent.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision} / ${ref.sourceId}`).join(', ')]:[]));
   }
   lines.push(`\n${planFactsText(planFacts(p,t.id))}`);
