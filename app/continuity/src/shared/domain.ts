@@ -226,7 +226,8 @@ function purposeIntent(p:Project,t:Task,prior:PreviousIntent|null):CurrentIntent
   }
   return null;
 }
-/** The still-valid earlier purpose next to this task's own 'separate' interpretation (AI readings only). */
+/** The nearest earlier non-separate interpretation next to this task's own 'separate' one. A fresh version only
+ * means its cited bases are unchanged, not that the purpose is still wanted: shown as a sourced reference. */
 export function continuingIntent(p:Project,t:Task):CurrentIntent|null {
   const own=currentIntent(p,t);
   return own&&!intentCorrection(t)?purposeIntent(p,t,own):null;
@@ -234,10 +235,12 @@ export function continuingIntent(p:Project,t:Task):CurrentIntent|null {
 function continuingLines(p:Project,t:Task,intent:CurrentIntent|null,ai:Intent|null):string[] {
   const earlier=ai?.relation==='separate'&&intent?continuingIntent(p,t):null;if(!earlier)return [];
   const label=t.mode==='mock'?'MOCK 정리':'AI 해석',e=earlier.manualGoal!==null?null:earlier.value;
-  return [`계속 유효한 앞선 목적 · 이번 작업이 바꾸지 않음 (${earlier.manualGoal!==null?'사용자 직접 정정':label}): ${earlier.manualGoal??e!.goal}`,
-    `그 목적의 유지 조건: ${(earlier.manualGoal!==null?earlier.manualConditions:e!.conditions.join(' / '))||'명시된 추가 조건 없음'}`,
-    ...(e?.retired.length?[`그 목적에서 대체된 이전 요청 표현 (${label} · 사용자 결정은 대체하지 않음): ${e.retired.join(' / ')}`]:[]),
-    `앞선 목적 근거: ${earlier.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision}`).join(', ')}`];
+  const kind=earlier.manualGoal!==null?'앞선 작업의 사용자 직접 정정':`앞선 작업의 ${label}`;
+  return [`참고 · 앞선 목적 (${kind}, 현재 유효 여부는 확정하지 않음): ${earlier.manualGoal??e!.goal}`,
+    `그 당시 조건: ${(earlier.manualGoal!==null?earlier.manualConditions:e!.conditions.join(' / '))||'명시된 추가 조건 없음'}`,
+    ...(e?.retired.length?[`그 해석이 대체로 본 이전 요청 표현 (${label} · 사용자 결정은 대체하지 않음): ${e.retired.join(' / ')}`]:[]),
+    '이번 요청 원문이나 사용자 정정이 이 목적의 폐기·교체·변경을 말하면 그쪽이 우선합니다. 이 참고는 앞선 목적을 지금 유지하라는 지시가 아닙니다.',
+    `참고 출처: 작업 ${earlier.taskId} / ${earlier.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision}`).join(', ')}`];
 }
 export function correctIntent(p:Project,id:string,goal:string,conditions:string):Project {
   text(goal,6000);text(conditions,6000,true);const n=change(p),t=taskOf(n,id);

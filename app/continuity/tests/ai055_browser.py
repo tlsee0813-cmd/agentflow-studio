@@ -72,4 +72,19 @@ class IntentFlow(unittest.TestCase):
         self.assertEqual([s['text'] for s in self.state()['sources']],turns)
         (base.OUT/'ai055-requests.json').write_bytes(json.dumps(calls,ensure_ascii=False,indent=2).encode('utf-8'))
 
+    def test_02_explicit_discard_old_purpose_is_reference_not_valid(self):
+        # FIX071: explicit MOCK reads a follow-up as 'separate'; the older reading stays version-fresh.
+        self.send('예약 취소 기능을 만들어줘.')
+        self.send('예약 취소 기능은 폐기하고 고객 문의 접수 페이지를 만들자.')
+        line=self.page.locator('#intent-continuing')
+        expect(line).to_contain_text('참고 · 앞선 목적 (이전 해석, 현재 유효 여부는 이번 요청이 우선): 예약 취소 기능을 만들어줘.')
+        self.assertNotIn('계속 유효',line.inner_text());self.assertNotIn('바꾸지 않음',line.inner_text())
+        with self.page.expect_download() as event:self.page.locator('#download-work').click()
+        path=base.OUT/'fix071-discard-handoff.md';event.value.save_as(path);text=path.read_text(encoding='utf-8')
+        purpose=text.split('## 이어가는 목적')[1].split('\n## ')[0]
+        self.assertIn('참고 · 앞선 목적 (앞선 작업의 MOCK 정리, 현재 유효 여부는 확정하지 않음)',purpose)
+        self.assertIn('폐기·교체·변경을 말하면 그쪽이 우선합니다',purpose)
+        self.assertNotIn('계속 유효',purpose);self.assertNotIn('이번 작업이 바꾸지 않음',purpose)
+        self.assertTrue(all(b['status']=='requested' for b in self.state()['bases']))
+
 if __name__=='__main__':unittest.main(verbosity=2)
