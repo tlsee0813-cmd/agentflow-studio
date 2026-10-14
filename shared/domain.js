@@ -221,14 +221,17 @@ export function questionApplicability(p, t) {
         return 'missing';
     if (questionAnswered(p, t))
         return 'answered';
-    if (t.intentEdit && t.intentEdit.revision > (t.adviceRevision ?? -1))
+    if (correctedSinceAdvice(t))
         return 'stale';
     const changed = changedSinceAdvice(p, t);
     return changed === 'unknown' ? 'unknown' : changed.length ? 'stale' : 'active';
 }
-/** What may go out as the current instruction. Stale AI text is withheld; user-written values always stay. */
+/** The user corrected this task's purpose after its AI text was written (or with no AI text yet). */
+function correctedSinceAdvice(t) { return !!(t.intentEdit && t.intentEdit.revision > (t.adviceRevision ?? -1)); }
+/** What may go out as the current instruction. Stale AI text is withheld; user-written values always stay.
+ * intentCorrected/manualFields say why AI text is withheld and which fields are the user's own, for display only. */
 export function currentWork(p, t) {
-    const changed = changedSinceAdvice(p, t), aiStale = changed === 'unknown' || changed.length > 0 || !!(t.intentEdit && t.intentEdit.revision > (t.adviceRevision ?? -1));
+    const changed = changedSinceAdvice(p, t), intentCorrected = correctedSinceAdvice(t), aiStale = changed === 'unknown' || changed.length > 0 || intentCorrected;
     const values = {};
     let aiExcluded = false;
     for (const k of WORK_KEYS) {
@@ -238,7 +241,7 @@ export function currentWork(p, t) {
         values[k] = manual ?? (aiStale ? '' : ai);
     }
     const suggestions = t.suggestions ?? (aiStale ? [] : t.advice?.suggestions ?? []);
-    return { values, changed, aiStale, aiExcluded, suggestions, reviewBasisIds: aiStale ? [] : t.advice?.reviewBasisIds ?? [] };
+    return { values, changed, aiStale, aiExcluded, intentCorrected, manualFields: WORK_KEYS.filter(k => t.manual[k] !== null), suggestions, reviewBasisIds: aiStale ? [] : t.advice?.reviewBasisIds ?? [] };
 }
 /** Interpretation is reusable only while its referenced user versions and freshness remain valid.
  * New tasks are reconciled by the provider; this is not a semantic proof of same purpose. */
