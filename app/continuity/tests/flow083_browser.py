@@ -227,6 +227,26 @@ class Flow083(unittest.TestCase):
         self.assertIsNone(self.state()['pending']);self.assertEqual(len(self.envelope()['entries']),1)
         holder.close()
 
+    def test_12_consent_covers_only_the_input_shown_when_it_was_given(self):
+        # FIX084-R2: already unsaved (conflict) -> another save waits on the lock -> agree to leave that input ->
+        # type new text while the flush waits -> release (still conflicting). The new text was never agreed to.
+        self.send('동의 범위 확인 요청');key=self.current_entry()
+        with self.page.expect_download() as d:self.page.locator('#backup').click()
+        path=base.OUT/'fix084-r2-import.json';d.value.save_as(path)
+        other=self.new_tab();base.open_listed(other,key);base.Browser.compose(self,other);other.locator('#draft').fill('다른 탭의 최신 입력');base.saved(other)
+        self.compose();self.page.locator('#draft').fill('충돌로 저장 못 한 입력');expect(self.page.locator('#storage-error')).to_be_visible();base.saved(self.page)
+        holder=self.hold_lock();self.page.locator('#draft').fill('잠금 뒤에서 기다리는 입력')
+        dialogs=[]
+        def answer(dialog):dialogs.append(dialog.message);dialog.accept() if len(dialogs)==1 else dialog.dismiss()
+        self.page.on('dialog',answer);self.page.locator('#import-file').set_input_files(str(path))
+        self.page.wait_for_timeout(200);self.assertEqual(len(dialogs),1);self.assertIn('저장되지 않은 변경',dialogs[0],'the first consent named the unsaved input')
+        self.page.locator('#draft').fill('동의한 뒤에 새로 쓴 입력');holder.evaluate('window.__release()')
+        self.page.wait_for_timeout(500);base.saved(self.page)
+        self.assertEqual(len(dialogs),2,'input typed after the consent is asked about again');self.assertIn('저장되지 않은',dialogs[1])
+        self.assertEqual(self.current_entry(),key);expect(self.page.locator('#draft')).to_have_value('동의한 뒤에 새로 쓴 입력')
+        self.assertEqual(len(self.envelope()['entries']),1,'declined: no copy')
+        self.page.remove_listener('dialog',answer);other.close();holder.close()
+
     def denied_tab(self,script):
         tab=self.ctx.new_page();errors=[];tab.on('pageerror',lambda e:errors.append(str(e)));tab.set_default_timeout(6000)
         tab.add_init_script(script);tab.goto(self.url);return tab,errors

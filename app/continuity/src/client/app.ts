@@ -744,11 +744,13 @@ $('import-file').addEventListener('change',async()=>{
     // FLOW083: a recovery file becomes a separate entry with a NEW entryId only; Project.id, tasks, sources,
     // returnIds and result files stay as in the file, so an exact result file still matches inside that entry.
     // The open project is never replaced, and nothing changes screen until the copy is written.
-    imported.pending=null;const warned=memoryDirty;
+    // The consent covers only what was on screen then: unsaved input at this revision.
+    imported.pending=null;const warned=memoryDirty,agreed=project.revision;
     await flushSaves();
     if(read!==recoveryRead||epoch!==projectEpoch)return;
-    // The flush itself may fail (another tab saved this project, quota): ask again instead of leaving that input.
-    if(memoryDirty&&!warned&&!confirm('이 탭에 저장되지 않은 변경이 있어요. 사본을 열면 이 화면을 떠나 그 변경이 사라질 수 있어요. 먼저 백업 파일을 저장하세요.\n그래도 사본을 열까요?'))return;
+    // The flush may fail (another tab saved this project, quota), and input typed meanwhile was never agreed to:
+    // unsaved changes beyond that consent are asked about again instead of being left behind.
+    if(memoryDirty&&(!warned||project.revision!==agreed)&&!confirm('이 탭에 저장되지 않은 변경이 있어요. 사본을 열면 이 화면을 떠나 그 변경이 사라질 수 있어요. 먼저 백업 파일을 저장하세요.\n그래도 사본을 열까요?'))return;
     const shown=target.kind==='entry'?target.ref.entryId:target.kind,shownRevision=project.revision;
     let ref:EntryRef;
     try {ref=await workspace.create(imported,'import');}
