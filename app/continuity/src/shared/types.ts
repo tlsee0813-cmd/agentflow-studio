@@ -79,7 +79,10 @@ export interface Area { id: string; name: string; note: string; archived: boolea
 export type RelationKind = 'flow' | 'needs' | 'shares' | 'related';
 export interface Relation { id: string; from: string; to: string; kind: RelationKind; note: string }
 export interface Brief { text: string; at: string; previous: { text: string; at: string }[] }
-export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[] }
+/** Where the unsent request goes: null = continue the current work's area; {area:null} = no area; {area:id} = that area.
+ * Part of the draft's meaning, so it is saved with the draft text (unlike the per-tab view). */
+export interface DraftTarget { area: string | null }
+export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null }
 export interface Ticket { projectId: string; revision: number; requestId: string; taskId: string }
 export interface Project {
   schemaVersion: typeof SCHEMA; id: string; revision: number; name: string;

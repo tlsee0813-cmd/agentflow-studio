@@ -258,7 +258,7 @@ function assertProject(v: unknown): asserts v is Project {
 }
 /** FLOW090 plan data: the user's purpose text, areas and typed relations. Returns the area IDs. */
 function space(v: unknown): Set<string> {
-  obj(v,['brief','areas','relations']);
+  obj(v,['brief','areas','relations','draftTarget']);
   if(v.brief!==null) {
     obj(v.brief,['text','at','previous']);text(v.brief.text,TEXT_LIMIT);date(v.brief.at);list(v.brief.previous,200);
     for(const old of v.brief.previous){obj(old,['text','at']);text(old.text,TEXT_LIMIT);date(old.at);}
@@ -271,9 +271,10 @@ function space(v: unknown): Set<string> {
     ensure(['flow','needs','shares','related'].includes(r.kind as string));text(r.note,200,true);
   }
   unique(v.relations as {id:string}[]);
+  if(v.draftTarget!==null){obj(v.draftTarget,['area']);ensure(v.draftTarget.area===null||ids.has(v.draftTarget.area as string));}
   return ids;
 }
-export const EMPTY_SPACE=()=>({brief:null,areas:[],relations:[]});
+export const EMPTY_SPACE=()=>({brief:null,areas:[],relations:[],draftTarget:null});
 export function validateProject(v: unknown): Project { assertProject(v); return structuredClone(v); }
 /** Identity check for an exported text (FNV-1a, 32 bit). Not a signature or security control. */
 export function digest(value: string): string {
@@ -332,5 +333,7 @@ export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
   const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : v;
+  // The unreleased first project.4 candidate had no draft target: it meant 'follow the current work' (null).
+  const space=(project as {space?:Record<string,unknown>})?.space;if(schema===SCHEMA&&space&&typeof space==='object'&&!Object.hasOwn(space,'draftTarget'))space.draftTarget=null;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }

@@ -90,4 +90,63 @@ class SpatialWorkspace(unittest.TestCase):
         expect(self.page.locator('#notice')).to_contain_text('사본');copy=self.state()
         self.assertEqual(copy['space'],s['space']);self.assertEqual(copy['tasks'][0]['areaId'],s['tasks'][0]['areaId'])
 
+    def start(self,areas):
+        self.page.locator('#brief-input').fill('예약 서비스');self.page.locator('#brief-start').click()
+        for name in areas:self.add_area(name)
+        return [self.area_id(n) for n in areas]
+    def request_in(self,area,text,export=True):
+        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text=area).click();self.page.locator('#area-new-request').click()
+        self.page.locator('#draft').fill(text);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        if export:self.download('#download-work',f'flow090-{len(self.state()["tasks"])}.md')
+        return self.state()['currentTaskId']
+
+    def test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report(self):
+        booking,notify=self.start(['예약','알림'])
+        A=self.request_in('예약','A: 예약 화면 전체 변경');B=self.request_in('예약','B: 예약 버튼 문구만');C=self.request_in('알림','C: 알림 문자')
+        self.page.locator('#home-paste-result').click();self.page.locator('#return-task').select_option(A)
+        self.page.locator('#draft').fill('늦은 A 보고: 전체 화면을 고쳤다고 주장');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        self.assertEqual(self.state()['currentTaskId'],C)
+        self.request_in('예약','예약 새 요청',export=False)
+        s=self.state();self.assertEqual(s['tasks'][-1]['parentTaskId'],B);self.assertEqual(s['tasks'][-1]['areaId'],booking)
+
+    def test_04_an_unsent_report_or_request_keeps_its_kind_and_target(self):
+        booking,notify=self.start(['예약','알림'])
+        self.request_in('예약','A: 예약 화면');self.page.locator('#home-paste-result').click()
+        self.page.locator('#draft').fill('작성 중인 보고 원문');self.page.wait_for_timeout(100)
+        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='알림').click();self.page.locator('#area-new-request').click()
+        s=self.state();self.assertEqual(s['draftKind'],'report');self.assertEqual(s['draft'],'작성 중인 보고 원문')
+        expect(self.page.locator('#notice')).to_contain_text('작성 중인')
+        # An unsent request keeps the area it was written for.
+        self.page.locator('#draft').fill('');self.page.locator('#request-tab').click()
+        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='알림').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#draft').fill('알림 쪽 요청 작성 중');self.page.wait_for_timeout(100)
+        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='예약').click();self.page.locator('#area-new-request').click()
+        expect(self.page.locator('#compose-area')).to_have_value(notify);expect(self.page.locator('#notice')).to_contain_text('작성 중인')
+        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        self.assertEqual(self.state()['tasks'][-1]['areaId'],notify)
+
+    def test_05_area_edit_drafts_stay_with_their_area(self):
+        booking,notify=self.start(['예약','알림'])
+        def edit(area):
+            self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text=area).click()
+            self.page.locator('#area-edit').evaluate('(e)=>e.open=true')
+        edit('예약');self.page.locator('#area-edit-name').fill('예약 바꾸는 중');self.page.locator('#area-edit-note').fill('예약 설명 초안')
+        edit('알림');expect(self.page.locator('#area-edit-name')).to_have_value('알림');expect(self.page.locator('#area-edit-note')).to_have_value('')
+        edit('예약');expect(self.page.locator('#area-edit-name')).to_have_value('예약 바꾸는 중')
+        self.page.locator('#area-edit-cancel').click();self.page.locator('#area-edit').evaluate('(e)=>e.open=true')
+        expect(self.page.locator('#area-edit-name')).to_have_value('예약');self.assertEqual(self.state()['space']['areas'][1]['name'],'알림')
+
+    def test_06_a_backup_copy_keeps_the_unsent_requests_area(self):
+        booking,notify=self.start(['예약','알림'])
+        self.request_in('예약','A: 예약 화면')
+        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='알림').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#draft').fill('알림 쪽 미제출 요청');self.page.wait_for_timeout(100)
+        backup=self.download('#backup','flow090-draft-target.json')
+        self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(str(backup))
+        expect(self.page.locator('#notice')).to_contain_text('사본');self.page.locator('#nav-work').click()
+        if not self.page.locator('#compose-panel').evaluate('(e)=>e.open'):self.page.locator('#compose-summary').click()
+        expect(self.page.locator('#draft')).to_have_value('알림 쪽 미제출 요청');expect(self.page.locator('#compose-area')).to_have_value(notify)
+        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        self.assertEqual(self.state()['tasks'][-1]['areaId'],notify)
+
 if __name__=='__main__':unittest.main(verbosity=2)

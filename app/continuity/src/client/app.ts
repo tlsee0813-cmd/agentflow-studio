@@ -1,7 +1,7 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source, type Area, type RelationKind } from '../shared/types.js';
 import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask,
-  areaOf, isReturnTask, setBrief, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
+  areaOf, isReturnTask, setBrief, setDraftTarget, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
 import { parseProject, parseResultFile, validateRequest, validateAdvice } from '../shared/validation.js';
 import { WorkspaceStore, serializeProject, storageErrorCode, type EntryRef, type WorkspaceEntry } from '../shared/storage.js';
 import { mockAdvice } from '../shared/mock.js';
@@ -37,19 +37,18 @@ let controller:AbortController|null=null;
 let view:'work'|'history'|'space'|'area'='work',contextOpen=false,hasSaved=false,memoryDirty=false;
 // FLOW090: where this tab looks in the plan space, and which area the next request is written for. Per tab, never
 // project data; looking around never changes currentTaskId (the work the user continues).
-let viewArea:string|null=null,composeArea:string|null|undefined=undefined;
+let viewArea:string|null=null;
 const spaceInputs:Record<string,string>={};
 const PLACE_KEY='agentflow.workspace.place';
 const hasSpace=(p:Project)=>!!p.space.brief||p.space.areas.length>0;
-function rememberPlace(){try{session?.setItem(PLACE_KEY,JSON.stringify({entry:target.kind==='entry'?target.ref.entryId:'',view,area:viewArea,compose:composeArea===undefined?'@follow':composeArea}));}catch{/* Per-tab convenience only. */}}
+function rememberPlace(){try{session?.setItem(PLACE_KEY,JSON.stringify({entry:target.kind==='entry'?target.ref.entryId:'',view,area:viewArea}));}catch{/* Per-tab convenience only. */}}
 function recallPlace(entryId:string) {
   try {
-    const v=JSON.parse(session?.getItem(PLACE_KEY)||'null') as {entry?:unknown;view?:unknown;area?:unknown;compose?:unknown}|null;
+    const v=JSON.parse(session?.getItem(PLACE_KEY)||'null') as {entry?:unknown;view?:unknown;area?:unknown}|null;
     if(!v||v.entry!==entryId)return null;
     const areaOk=(id:unknown)=>typeof id==='string'&&(id==='unassigned'||project.space.areas.some(a=>a.id===id));
     const placed=['work','history','space','area'].includes(v.view as string)?v.view as typeof view:'work';
-    return {view:placed==='area'&&!areaOk(v.area)?'space' as const:placed,area:areaOk(v.area)?v.area as string:null,
-      compose:v.compose==='@follow'||v.compose===undefined?undefined:v.compose===null?null:project.space.areas.some(a=>a.id===v.compose&&!a.archived)?v.compose as string:undefined};
+    return {view:placed==='area'&&!areaOk(v.area)?'space' as const:placed,area:areaOk(v.area)?v.area as string:null};
   } catch {return null;}
 }
 let selectedReturnTaskId:string|undefined;
@@ -66,7 +65,7 @@ let contextReturn:HTMLElement|null=null;
 const unreadable='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 않습니다. 이 화면의 입력은 메모리에 남으며 복구 파일로 저장할 수 있습니다.';
 function resetEphemeral() {
   controller?.abort();controller=null;selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
-  resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;composeArea=undefined;
+  resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
 function openEntry(entry:WorkspaceEntry) {
@@ -77,7 +76,7 @@ function openEntry(entry:WorkspaceEntry) {
   rememberOpen(entry.entryId);contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();
   // A reload keeps this tab's place; opening from the list starts at the space once the project has one.
   const place=recallPlace(entry.entryId);
-  if(place){view=place.view;viewArea=place.area;composeArea=place.compose;} else view=hasSpace(project)?'space':'work';
+  if(place){view=place.view;viewArea=place.area;} else view=hasSpace(project)?'space':'work';
 }
 /** The pre-workspace value while it is not migrated: shown read-only, never written. */
 function openLegacy() {
@@ -184,8 +183,16 @@ function continueTask(id:string) {
   if(!same)commit(focusTask(project,id));view='work';render();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});
 }
 function writeInArea(id:string) {
-  composeArea=id;if(project.draftKind!=='request')commit(setKind(project,'request'));
-  view='work';render();$<HTMLDetailsElement>('compose-panel').open=true;$('draft').focus();
+  // An unsent report or request keeps its kind and target: open it instead of relabelling or moving it.
+  if(project.draft.trim()) {
+    const where=project.space.draftTarget?.area?areaById(project.space.draftTarget.area)?.name:null;
+    const message=project.draftKind==='request'?`작성 중인 요청이 있어 먼저 열었어요. 이 요청의 영역(${where??'지금 작업을 따라감'})은 그대로예요. 다른 영역에 쓰려면 이 요청을 보내거나 비운 뒤 다시 누르세요.`
+      :'작성 중인 결과가 있어 먼저 열었어요. 종류와 연결할 작업은 바꾸지 않았어요. 이 입력을 마친 뒤 새 요청을 쓰세요.';
+    view='work';render();project={...project,notice:message};renderStatus();
+  } else {
+    let n=project;if(n.draftKind!=='request')n=setKind(n,'request');selectedReturnTaskId=undefined;commit(setDraftTarget(n,id));view='work';render();
+  }
+  $<HTMLDetailsElement>('compose-panel').open=true;$('draft').focus();
 }
 /** Explicit navigation to another task (a received result, or back to the latest request). */
 function openTask(id:string) {
@@ -741,10 +748,11 @@ function returnsOf(t:Task):Task[] {return project.tasks.filter(x=>x.parentTaskId
 function currentGroup(t:Task):boolean {
   const c=project.currentTaskId?taskOf(project):null;return !!c&&(c.id===t.id||isReturnTask(project,c)&&c.parentTaskId===t.id);
 }
-function spaceInput<T extends HTMLInputElement|HTMLTextAreaElement>(el:T,id:string,initial=''):T {
-  el.id=id;el.value=spaceInputs[id]??initial;el.addEventListener('input',()=>{spaceInputs[id]=el.value;});return el;
+/** Unsaved plan inputs survive a redraw, keyed by project and (for area edits) area, never by DOM id alone. */
+function spaceInput<T extends HTMLInputElement|HTMLTextAreaElement>(el:T,id:string,initial='',key=id):T {
+  const k=`${project.id}:${key}`;el.id=id;el.value=spaceInputs[k]??initial;el.addEventListener('input',()=>{spaceInputs[k]=el.value;});return el;
 }
-function clearInputs(...ids:string[]){for(const id of ids)delete spaceInputs[id];}
+function clearInputs(...keys:string[]){for(const key of keys)delete spaceInputs[`${project.id}:${key}`];}
 function areaCard(a:Area):HTMLElement {
   const tasks=areaRequests(a.id),results=tasks.flatMap(returnsOf).length,card=node('button','','area-card');card.type='button';card.dataset.areaId=a.id;
   card.append(node('strong',a.name,'area-card-name'),a.note?node('p',a.note,'area-card-note'):tag('미정','area-undecided'));
@@ -831,9 +839,11 @@ function renderArea(root:HTMLElement,a:Area) {
   if(!a.archived)actions.append(btn('＋ 이 영역에 새 요청',()=>writeInArea(a.id),'primary','area-new-request'));
   actions.append(btn(a.archived?'영역 되살리기':'영역 보관',()=>{commit(setAreaArchived(project,a.id,!a.archived));if(!a.archived){project={...project,notice:`‘${a.name}’ 영역을 보관했어요. 연결된 요청과 결과는 그대로이며 ‘보관한 영역’에서 되살릴 수 있어요.`};openSpace();}},'quiet','area-archive'));
   head.append(actions);
-  const edit=details('이름·설명 고치기','area-edit'),name=spaceInput(node('input'),'area-edit-name',a.name);name.maxLength=60;name.setAttribute('aria-label','영역 이름');
-  const note=spaceInput(node('textarea'),'area-edit-note',a.note);note.rows=2;note.maxLength=2000;note.setAttribute('aria-label','영역 설명');
-  edit.append(name,note,btn('저장',()=>{if(!name.value.trim())return;commit(editArea(project,a.id,name.value,note.value));clearInputs('area-edit-name','area-edit-note');},'secondary','area-edit-save'));
+  const nameKey=`area-edit-name:${a.id}`,noteKey=`area-edit-note:${a.id}`;
+  const edit=details('이름·설명 고치기','area-edit'),name=spaceInput(node('input'),'area-edit-name',a.name,nameKey);name.maxLength=60;name.setAttribute('aria-label','영역 이름');
+  const note=spaceInput(node('textarea'),'area-edit-note',a.note,noteKey);note.rows=2;note.maxLength=2000;note.setAttribute('aria-label','영역 설명');
+  edit.append(name,note,btn('저장',()=>{if(!name.value.trim())return;commit(editArea(project,a.id,name.value,note.value));clearInputs(nameKey,noteKey);},'secondary','area-edit-save'),
+    btn('취소',()=>{clearInputs(nameKey,noteKey);edit.open=false;render();},'quiet','area-edit-cancel'));
   head.append(edit);root.append(head);
   const tasks=areaRequests(a.id),list=node('section','','area-tasks');list.id='area-tasks';
   list.append(node('h2','이 영역의 요청과 작업'));
@@ -870,7 +880,10 @@ function renderComposeArea(t:Task|null,returned:boolean) {
   const follow=t?areaById(areaOf(project,t)):null;
   const options:[string,string][]=[['@follow',`지금 작업을 따라감 (${follow?follow.name:'영역 없음'})`],...active.map(a=>[a.id,a.name] as [string,string]),['@none','영역 없이']];
   sel.replaceChildren(...options.map(([v,label])=>{const o=node('option',label);o.value=v;return o;}));
-  sel.value=composeArea===undefined?'@follow':composeArea===null?'@none':active.some(a=>a.id===composeArea)?composeArea:'@follow';
+  // A saved target in an archived area is shown as it is; it is never swapped for another area automatically.
+  const dt=project.space.draftTarget,parked=dt?.area?project.space.areas.find(a=>a.id===dt.area&&a.archived):undefined;
+  if(parked){const o=node('option',`보관된 영역: ${parked.name} · 되살리거나 다른 영역을 고르세요`);o.value=parked.id;sel.append(o);}
+  sel.value=dt===null?'@follow':dt.area===null?'@none':dt.area;
 }
 function render() {
   if(route==='projects'){renderProjects();renderStatus();displayView();return;}
@@ -881,7 +894,7 @@ function render() {
   $<HTMLTextAreaElement>('draft').value=project.draft;$<HTMLSelectElement>('source-kind').value=project.draftKind;
   const returned=project.draftKind==='report'||project.draftKind==='evidence';
   for(const [id,selected] of [['request-tab',project.draftKind==='request'],['report-tab',returned]] as const){$(id).classList.toggle('selected',selected);$(id).setAttribute('aria-pressed',String(selected));}
-  $('compose-title').textContent=returned?'어떤 결과가 돌아왔나요?':project.tasks.length?'다음으로 바꾸고 싶은 것은?':project.space.brief||composeArea?'첫 요청 · 무엇부터 만들까요?':'또는 바로 첫 요청 쓰기';
+  $('compose-title').textContent=returned?'어떤 결과가 돌아왔나요?':project.tasks.length?'다음으로 바꾸고 싶은 것은?':project.space.brief||project.space.draftTarget?'첫 요청 · 무엇부터 만들까요?':'또는 바로 첫 요청 쓰기';
   const others=activeEntries().some(e=>target.kind!=='entry'||e.entryId!==target.ref.entryId);
   $('welcome-title').textContent=others?'새 프로젝트 · 무엇을 만들고 싶나요?':'AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.';
   $('compose-eyebrow').textContent=returned?'CONTINUE WITH RESULTS':project.tasks.length?'NEXT REQUEST':"LET’S START";
@@ -901,7 +914,9 @@ function submitInput(withAI:boolean) {
   guard(()=>{
     // No naming step: a still-default name becomes the first request's opening words; it can be renamed any time.
     if(!project.tasks.length&&project.name===createProject().name&&project.draftKind==='request')project=rename(project,shortText(project.draft,30));
-    const next=submit(project,returnTargets(project).length>1?selectedReturnTaskId:undefined,project.draftKind==='request'?composeArea:undefined);selectedReturnTaskId=undefined;composeArea=undefined;commit(next);$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});// FIX088: a result filed to another task leaves the current work as it was: no AI run on it, no edit panel.
+    const parked=project.draftKind==='request'&&project.space.draftTarget?.area?project.space.areas.find(a=>a.id===project.space.draftTarget!.area&&a.archived):undefined;
+    if(parked){project={...project,notice:`이 요청의 영역 ‘${parked.name}’은 보관돼 있어요. 영역을 되살리거나 다른 영역을 고른 뒤 보내세요.`};renderStatus();return;}
+    const next=submit(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);selectedReturnTaskId=undefined;commit(next);$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});// FIX088: a result filed to another task leaves the current work as it was: no AI run on it, no edit panel.
     if(next.currentTaskId!==next.tasks.at(-1)!.id)return;
     if(withAI)void generate(project.currentTaskId!);else {$<HTMLDetailsElement>('edit-work').open=true;$('work-next').focus();}});
 }
@@ -983,7 +998,7 @@ for(const id of ['list-example','open-example'])$(id).addEventListener('click',(
 $('example-start').addEventListener('click',()=>closeExample(true));
 $('example-close').addEventListener('click',()=>closeExample(false));
 $('nav-space').addEventListener('click',openSpace);
-$('compose-area').addEventListener('change',()=>{const v=$<HTMLSelectElement>('compose-area').value;composeArea=v==='@follow'?undefined:v==='@none'?null:v;rememberPlace();});
+$('compose-area').addEventListener('change',()=>{const v=$<HTMLSelectElement>('compose-area').value;guard(()=>commit(setDraftTarget(project,v==='@follow'?undefined:v==='@none'?null:v)));});
 $('brief-input').addEventListener('input',()=>{$<HTMLButtonElement>('brief-start').disabled=!$<HTMLTextAreaElement>('brief-input').value.trim();});
 $('brief-form').addEventListener('submit',e=>{e.preventDefault();const value=$<HTMLTextAreaElement>('brief-input').value.trim();if(!value)return;
   guard(()=>{let n=setBrief(project,value);if(!n.tasks.length&&n.name===createProject().name)n=rename(n,shortText(value,30));

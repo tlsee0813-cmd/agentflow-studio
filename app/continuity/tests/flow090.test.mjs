@@ -16,7 +16,7 @@ const planned=()=>{let p=D.setBrief(D.createProject(),'동네 미용실 예약 �
 test('F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import',()=>{
   let p=exported(respond(put(D.createProject(),'예약 화면 만들기')));p=put(p,'보고: 화면을 만들었다고 주장','report');
   const old=v3(p),opened=parseProject(old);
-  assert.equal(opened.schemaVersion,'idea015.project.4');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[]});
+  assert.equal(opened.schemaVersion,'idea015.project.4');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null});
   for(const k of ['sources','bases','tasks','currentTaskId','draft'])assert.deepEqual(opened[k],JSON.parse(old)[k],k);
   let q=D.addArea(opened,'예약','');q=D.placeTask(q,q.tasks[0].id,q.space.areas[0].id);
   const again=parseProject(serializeProject(q));assert.deepEqual(again.space,q.space);assert.equal(again.tasks[0].areaId,q.space.areas[0].id);
@@ -69,7 +69,37 @@ test('F090-6 a stored project.3 entry opens through the workspace and the next s
   const old=JSON.parse(v3(respond(put(D.createProject(),'기존 요청')))),storage=new Memory();
   storage.setItem(WORKSPACE_KEY,JSON.stringify({version:'agentflow.workspace.1',migratedFromLegacy:true,entries:[{entryId:`E_${crypto.randomUUID()}`,state:'active',lifecycle:1,seq:1,createdAt:new Date().toISOString(),trashedAt:null,origin:'new',project:old}]}));
   const w=new WorkspaceStore(storage,new Locks());await w.init();assert.equal(w.readError,null);
-  const e=w.entries()[0];assert.deepEqual(e.project.space,{brief:null,areas:[],relations:[]});assert.deepEqual(e.project.sources,old.sources);
+  const e=w.entries()[0];assert.deepEqual(e.project.space,{brief:null,areas:[],relations:[],draftTarget:null});assert.deepEqual(e.project.sources,old.sources);
   await w.save({entryId:e.entryId,lifecycle:e.lifecycle,seq:e.seq},D.addArea(e.project,'예약'));
   const saved=JSON.parse(storage.getItem(WORKSPACE_KEY)).entries[0].project;assert.equal(saved.schemaVersion,'idea015.project.4');assert.equal(saved.space.areas[0].name,'예약');
+});
+
+test('F090-7 returning to an area continues its latest request (and that request\'s returns), not a late old report',()=>{
+  let {p,booking,notify}=planned();
+  p=exported(respond(put(p,'A: 예약 화면 전체 변경','request',undefined,booking)));const A=p.currentTaskId;
+  p=exported(respond(put(p,'B: 예약 버튼 문구만','request',undefined,booking)));const B=p.currentTaskId;
+  p=exported(respond(put(p,'C: 알림 문자','request',undefined,notify)));const C=p.currentTaskId;
+  p=put(p,'늦은 A 보고: 전체 화면을 고쳤다고 주장','report',A);assert.equal(p.currentTaskId,C,'receiving the report keeps C');
+  const lateA=p.tasks.at(-1).id;
+  let next=put(p,'예약 새 요청','request',undefined,booking);
+  assert.equal(D.taskOf(next).parentTaskId,B,'the latest booking request, not the late A report');
+  assert.ok(!D.handoffText(next).includes('늦은 A 보고'));
+  // B's own returns stay with it.
+  let q=put(p,'B 보고: 버튼 문구 바꿨다고 주장','report',B);const bReport=q.tasks.at(-1).id;
+  q=put(q,'예약 새 요청','request',undefined,booking);assert.equal(D.taskOf(q).parentTaskId,bReport);
+  // Explicitly continuing the old work is still the user's choice.
+  let r=D.focusTask(p,lateA);r=put(r,'A 결과에서 이어가기','request',undefined,booking);assert.equal(D.taskOf(r).parentTaskId,lateA);
+});
+
+test('F090-8 the unsent request\'s area is saved with the draft; old formats default to following the current work',()=>{
+  let {p,booking,notify}=planned();p=respond(put(p,'A: 예약 화면','request',undefined,booking));
+  assert.equal(parseProject(v3(p)).space.draftTarget,null,'project.3 = follow the current work');
+  const candidate=JSON.parse(serializeProject(p));delete candidate.space.draftTarget;assert.equal(parseProject(JSON.stringify(candidate)).space.draftTarget,null,'the first v4 candidate had none');
+  p=D.setDraftTarget(D.editDraft(p,'알림 쪽 미제출 요청'),notify);
+  const copy=parseProject(serializeProject(p));assert.deepEqual(copy.space.draftTarget,{area:notify});assert.equal(copy.draft,'알림 쪽 미제출 요청');
+  const sent=D.submit(copy);assert.equal(D.taskOf(sent).areaId,notify);assert.equal(sent.space.draftTarget,null,'the target goes with the sent draft');
+  assert.equal(D.taskOf(D.submit(D.setDraftTarget(D.editDraft(p,'영역 없이'),null))).areaId,undefined);
+  const bad=JSON.parse(serializeProject(p));bad.space.draftTarget={area:'A_nope'};assert.throws(()=>parseProject(JSON.stringify(bad)));
+  const parked=D.setAreaArchived(p,notify,true);assert.deepEqual(parked.space.draftTarget,{area:notify},'archiving never moves the draft');
+  assert.throws(()=>D.submit(parked),/AREA_MISSING/);assert.throws(()=>D.setDraftTarget(parked,notify),/AREA_MISSING/);
 });

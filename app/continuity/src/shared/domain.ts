@@ -9,7 +9,7 @@ const copy = <T>(value: T): T => structuredClone(value);
 const WORK_KEYS = ['understanding','scope','next','checks'] as const;
 const CONDITION_KEYS = ['scope','checks'] as const;
 export function createProject(): Project {
-  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[]}};
+  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null}};
 }
 export function taskOf(p: Project, id = p.currentTaskId): Task { const t=p.tasks.find(t=>t.id === id); ensure(t,'TASK_MISSING'); return t; }
 function change(p: Project): Project { return {...copy(p),revision:p.revision+1,notice:null}; }
@@ -81,10 +81,15 @@ export function submit(p: Project, selectedId?: string, areaId?: string|null): P
   text(p.draft);
   const returned=['report','evidence'].includes(p.draftKind);
   const current=p.tasks.find(x=>x.id===p.currentTaskId);
-  // FLOW090: an explicit area target continues that area's latest work, never another area's current task.
-  const target=areaId===undefined?(current?areaOf(p,current):null):areaId;
+  // FLOW090: the saved draft target (or an explicit one) decides the area; none = continue the current work's area.
+  const chosen=areaId!==undefined?areaId:!returned&&p.space.draftTarget?p.space.draftTarget.area:undefined;
+  const target=chosen===undefined?(current?areaOf(p,current):null):chosen;
   const inArea=(x:Task)=>areaOf(p,x)===target;
-  const parent=returned ? returnTargetId(p,selectedId) : areaId===undefined||(current&&inArea(current)) ? p.currentTaskId : [...p.tasks].reverse().find(inArea)?.id??null;
+  // Coming back to an area continues its latest user request (with that request's own latest return), never a late
+  // report of an older request. Continuing older work stays an explicit choice (it is then the current task).
+  const latestRequest=[...p.tasks].reverse().find(x=>!isReturnTask(p,x)&&inArea(x));
+  const latestReturn=latestRequest?[...p.tasks].reverse().find(x=>x.parentTaskId===latestRequest.id&&isReturnTask(p,x)):undefined;
+  const parent=returned ? returnTargetId(p,selectedId) : chosen===undefined||(current&&inArea(current)) ? p.currentTaskId : latestReturn?.id??latestRequest?.id??null;
   const n=change(p);
   const id=uid('T'),t:Task={id,sourceIds:[],parentTaskId:parent,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:null};
   const s=appendSource(n,n.draftKind,n.draft,id);
@@ -103,7 +108,7 @@ export function submit(p: Project, selectedId?: string, areaId?: string|null): P
     if(!replaced) newBasis(n,s.text,'requested',s);
     else n.notice='명시한 부분만 기준에 반영했습니다. 기존 ID·출처와 이전 값은 보존했습니다. 실제 구현은 바뀌지 않았습니다.';
   }
-  n.draft=''; n.pending=null; return n;
+  n.draft=''; n.pending=null; n.space.draftTarget=null; return n;
 }
 export function recordBasis(p: Project, value: string, status: 'confirmed'|'deferred'='confirmed', id: string|null=null): Project {
   text(value); ensure(p.currentTaskId,'TASK_MISSING'); ensure(['confirmed','deferred'].includes(status));
@@ -509,6 +514,11 @@ export function addRelation(p: Project, from: string, to: string, kind: Relation
 }
 export function removeRelation(p: Project, id: string): Project {
   ensure(p.space.relations.some(r=>r.id===id));const n=change(p);n.space.relations=n.space.relations.filter(r=>r.id!==id);return n;
+}
+/** The area the unsent request is written for (undefined = follow the current work). Changed only by the user. */
+export function setDraftTarget(p: Project, area: string|null|undefined): Project {
+  if(typeof area==='string')ensure(p.space.areas.some(a=>a.id===area&&!a.archived),'AREA_MISSING');
+  const n=change(p);n.space.draftTarget=area===undefined?null:{area};return n;
 }
 /** Explicit tidy-up: put an existing request (with its returns) into an area, or take it out. */
 export function placeTask(p: Project, taskId: string, areaId: string|null): Project {
