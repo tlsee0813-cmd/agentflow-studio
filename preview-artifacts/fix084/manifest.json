@@ -1,7 +1,7 @@
 {
   "schema": "agentflow.static-preview-artifact.1",
-  "candidateSHA": "e1879e8d19e82b994ede67580be9f5d38f539295",
-  "parentSHA": "ffed6f12355a66a29602b2900b40319d613fa2d7",
+  "candidateSHA": "5f3dd88f44aff49266cb951b6f51e8a518d8ea82",
+  "parentSHA": "e1879e8d19e82b994ede67580be9f5d38f539295",
   "snapshot": "partial exact static runtime/build snapshot; 24 Git blobs verified",
   "node": "22.16.0",
   "typescript": "5.8.3",
@@ -18,8 +18,8 @@
     },
     {
       "path": "client/app.js",
-      "bytes": 94282,
-      "sha256": "3848e2c2f4bb1ec6ca28286ed2c882ac35e10954719af7d3dd3249c6b7765ff1"
+      "bytes": 94532,
+      "sha256": "dd2e3afb5c3eeb047cb3996a3349f6830e54874f126c04807be6e22fa97f51b1"
     },
     {
       "path": "client/presentation.js",
@@ -78,11 +78,11 @@
     }
   ],
   "aggregateAlgorithm": "SHA256 over UTF-8 sorted paths: sha256 + two spaces + decimal bytes + two spaces + path + LF, excluding manifest/zip",
-  "aggregateSHA256": "ac092d700fc7a8d3a6a788be26897f69a7244d316695cc4fba7062eadade7fab",
+  "aggregateSHA256": "a5481950f9ff4200d30fc0f6c12d9f37fff39d06758c11397ad40c0cff5e6c82",
   "artifact": {
     "path": "static-preview.zip",
-    "bytes": 75368,
-    "sha256": "0da649079cb73b835009795144e3589f8a2d2ec0facd7d369804fbc5b01f682e",
+    "bytes": 75462,
+    "sha256": "96127154f53d465d7034fcea426dcf31704bb12dd9da19816dd3feaae250cf9a",
     "contents": "13 static assets only; extract into a dedicated empty directory"
   },
   "sourceBlobs": [
@@ -128,7 +128,7 @@
     },
     {
       "path": "app/continuity/src/client/app.ts",
-      "gitBlobSHA": "c6dacca5434d9b690e7eeea67c8961b1ce2639c6"
+      "gitBlobSHA": "bcb8ef59fa13fb259399cc912180ca6c6aa7c405"
     },
     {
       "path": "app/continuity/src/client/presentation.ts",
