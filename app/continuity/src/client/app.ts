@@ -1,7 +1,7 @@
-import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source, type Area, type RelationKind } from '../shared/types.js';
+import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source, type Area, type RelationKind, type Point } from '../shared/types.js';
 import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask,
-  areaOf, isReturnTask, setBrief, setDraftTarget, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
+  areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
 import { parseProject, parseResultFile, validateRequest, validateAdvice } from '../shared/validation.js';
 import { WorkspaceStore, serializeProject, storageErrorCode, type EntryRef, type WorkspaceEntry } from '../shared/storage.js';
 import { mockAdvice } from '../shared/mock.js';
@@ -38,6 +38,20 @@ let view:'work'|'history'|'space'|'area'='work',contextOpen=false,hasSaved=false
 // FLOW090: where this tab looks in the plan space, and which area the next request is written for. Per tab, never
 // project data; looking around never changes currentTaskId (the work the user continues).
 let viewArea:string|null=null;
+// FLOW090-B1: map viewport and selection are this tab's view of one project; positions are project data.
+type MapView={x:number;y:number;s:number};
+let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false;
+// One move = one command. Undo re-applies only that position, only while it is still where the move put it.
+let posUndo:{id:string;from:Point|null;to:Point;at:number;key:boolean}[]=[];
+const MAP_KEY='agentflow.workspace.map';
+function rememberMap(){try{session?.setItem(MAP_KEY,JSON.stringify({project:project.id,view:mapView,selected:mapSelected}));}catch{/* Per-tab convenience only. */}}
+function recallMap() {
+  try {const v=JSON.parse(session?.getItem(MAP_KEY)||'null') as {project?:unknown;view?:MapView|null;selected?:unknown}|null;
+    if(!v||v.project!==project.id)return;const w=v.view;
+    mapView=w&&[w.x,w.y,w.s].every(n=>typeof n==='number'&&Number.isFinite(n))&&w.s>=0.3&&w.s<=2?w:null;
+    mapSelected=typeof v.selected==='string'&&project.space.areas.some(a=>a.id===v.selected&&!a.archived)?v.selected:null;
+  } catch {/* none */}
+}
 const spaceInputs:Record<string,string>={};
 const PLACE_KEY='agentflow.workspace.place';
 const hasSpace=(p:Project)=>!!p.space.brief||p.space.areas.length>0;
@@ -66,6 +80,7 @@ const unreadable='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 �
 function resetEphemeral() {
   controller?.abort();controller=null;selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;
+  mapView=null;mapSelected=null;sheetOpen=false;posUndo=[];
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
 function openEntry(entry:WorkspaceEntry) {
@@ -76,6 +91,7 @@ function openEntry(entry:WorkspaceEntry) {
   rememberOpen(entry.entryId);contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();
   // A reload keeps this tab's place; opening from the list starts at the space once the project has one.
   const place=recallPlace(entry.entryId);
+  recallMap();
   if(place){view=place.view;viewArea=place.area;} else view=hasSpace(project)?'space':'work';
 }
 /** The pre-workspace value while it is not migrated: shown read-only, never written. */
@@ -753,12 +769,148 @@ function spaceInput<T extends HTMLInputElement|HTMLTextAreaElement>(el:T,id:stri
   const k=`${project.id}:${key}`;el.id=id;el.value=spaceInputs[k]??initial;el.addEventListener('input',()=>{spaceInputs[k]=el.value;});return el;
 }
 function clearInputs(...keys:string[]){for(const key of keys)delete spaceInputs[`${project.id}:${key}`];}
-function areaCard(a:Area):HTMLElement {
-  const tasks=areaRequests(a.id),results=tasks.flatMap(returnsOf).length,card=node('button','','area-card');card.type='button';card.dataset.areaId=a.id;
-  card.append(node('strong',a.name,'area-card-name'),a.note?node('p',a.note,'area-card-note'):tag('미정','area-undecided'));
-  card.append(node('p',tasks.length?`요청 ${tasks.length}개${results?` · 돌아온 결과 ${results}개 · 앱 미검증`:''}`:'아직 요청 없음','hint'));
-  if(tasks.some(currentGroup))card.append(tag('지금 이어가는 작업','purple'));
-  card.addEventListener('click',()=>openArea(a.id));return card;
+function areaSummary(a:Area):string {
+  const tasks=areaRequests(a.id),results=tasks.flatMap(returnsOf).length;
+  return tasks.length?`요청 ${tasks.length}개${results?` · 돌아온 결과 ${results}개 · 앱 미검증`:''}`:'아직 요청 없음';
+}
+const MAP_MIN=0.4,MAP_MAX=1.6;
+function applyView(plane:HTMLElement){if(mapView)plane.style.transform=`translate(${mapView.x}px,${mapView.y}px) scale(${mapView.s})`;}
+/** Fit changes only the viewport; stored positions stay as they are. */
+function fitView(map:HTMLElement,active:Area[]):MapView {
+  const w=map.clientWidth||800,h=map.clientHeight||480;
+  if(!active.length)return {x:24,y:24,s:1};
+  const pts=active.map(a=>areaPosition(project,a)),minX=Math.min(...pts.map(p=>p.x)),minY=Math.min(...pts.map(p=>p.y));
+  const bw=Math.max(...pts.map(p=>p.x))+NODE_W-minX,bh=Math.max(...pts.map(p=>p.y))+NODE_H-minY;
+  const s=Math.max(MAP_MIN,Math.min(1.2,(w-48)/bw,(h-48)/bh));
+  return {x:(w-bw*s)/2-minX*s,y:(h-bh*s)/2-minY*s,s};
+}
+function zoom(map:HTMLElement,plane:HTMLElement,factor:number) {
+  const v=mapView??{x:0,y:0,s:1},s=Math.max(MAP_MIN,Math.min(MAP_MAX,v.s*factor)),cx=map.clientWidth/2,cy=map.clientHeight/2;
+  mapView={x:cx-(cx-v.x)*(s/v.s),y:cy-(cy-v.y)*(s/v.s),s};applyView(plane);rememberMap();
+  $('map-scale').textContent=`${Math.round(s*100)}%`;
+}
+function commitMove(id:string,to:Point,key:boolean) {
+  const a=areaById(id)!,stored=project.space.layout.positions[id]??null,from=stored?{...stored}:null;
+  if(from&&from.x===Math.round(to.x)&&from.y===Math.round(to.y))return;
+  const next=moveArea(project,id,to),placed=next.space.layout.positions[id]!,top=posUndo.at(-1);
+  // Consecutive arrow-key nudges of one area within a moment count as one move.
+  if(key&&top&&top.key&&top.id===id&&Date.now()-top.at<1500){top.to={...placed};top.at=Date.now();}
+  else posUndo.push({id,from:from??(stored===null?null:areaPosition(project,a)),to:{...placed},at:Date.now(),key});
+  if(posUndo.length>50)posUndo.shift();
+  commit(next);
+}
+function undoPosition() {
+  const step=posUndo.pop();if(!step)return;const a=areaById(step.id);
+  try {commit(undoMove(project,step.id,step.from,step.to));project={...project,notice:`‘${a?.name??'영역'}’의 위치를 되돌렸어요. 다른 내용은 바뀌지 않았어요.`};renderStatus();}
+  catch {posUndo=[];project={...project,notice:'그 뒤 위치가 다시 바뀌어(다른 이동이나 다른 탭) 되돌리지 않았어요. 지금 위치를 그대로 두었어요.'};render();}
+}
+function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
+  const pt=areaPosition(project,a),el=node('div','','area-node');el.dataset.areaId=a.id;
+  el.style.left=`${pt.x}px`;el.style.top=`${pt.y}px`;el.classList.toggle('selected',mapSelected===a.id);
+  const handle=node('button','⠿','node-handle');handle.type='button';handle.id=`node-move-${a.id}`;
+  handle.setAttribute('aria-label',`${a.name} 위치 이동 (끌기 또는 방향키)`);handle.title='끌어서 위치 이동 · 방향키로도 옮길 수 있어요';
+  const pick=node('button','','node-select');pick.type='button';pick.id=`node-select-${a.id}`;pick.setAttribute('aria-pressed',String(mapSelected===a.id));
+  pick.append(node('strong',a.name,'area-card-name'),a.note?node('span',a.note,'area-card-note'):tag('미정','area-undecided'),node('span',areaSummary(a),'hint'));
+  if(areaRequests(a.id).some(currentGroup))pick.append(tag('지금 이어가는 작업','purple'));
+  // Selecting shows the short properties; it never opens the area or changes the open work.
+  pick.addEventListener('click',()=>{mapSelected=a.id;sheetOpen=true;rememberMap();render();$(`node-select-${a.id}`)?.focus({preventScroll:true});});
+  const open=btn('영역 열기 ↗',()=>openArea(a.id),'secondary area-open');open.id=`node-open-${a.id}`;
+  el.append(handle,pick,open);
+  // Dragging uses only the handle; a drag never ends as a click on open/select.
+  handle.addEventListener('pointerdown',e=>{
+    if(e.button!==0)return;e.preventDefault();e.stopPropagation();handle.setPointerCapture(e.pointerId);
+    const s=mapView?.s??1,sx=e.clientX,sy=e.clientY,ox=pt.x,oy=pt.y;let moved=false,cur={x:ox,y:oy};
+    const move=(ev:PointerEvent)=>{const dx=(ev.clientX-sx)/s,dy=(ev.clientY-sy)/s;if(Math.abs(dx)+Math.abs(dy)>3)moved=true;
+      cur={x:Math.round(ox+dx),y:Math.round(oy+dy)};el.style.left=`${cur.x}px`;el.style.top=`${cur.y}px`;el.classList.add('dragging');redraw();};
+    const up=()=>{handle.removeEventListener('pointermove',move);handle.removeEventListener('pointerup',up);handle.removeEventListener('pointercancel',up);
+      el.classList.remove('dragging');if(moved)guard(()=>commitMove(a.id,cur,false));};
+    handle.addEventListener('pointermove',move);handle.addEventListener('pointerup',up);handle.addEventListener('pointercancel',up);
+  });
+  handle.addEventListener('keydown',e=>{
+    const step=e.shiftKey?60:20,d={ArrowLeft:[-step,0],ArrowRight:[step,0],ArrowUp:[0,-step],ArrowDown:[0,step]}[e.key];if(!d)return;
+    e.preventDefault();const p0=areaPosition(project,a);guard(()=>commitMove(a.id,{x:p0.x+d[0]!,y:p0.y+d[1]!},true));$(`node-move-${a.id}`)?.focus({preventScroll:true});
+  });
+  return el;
+}
+const RELATION_HINT:Record<RelationKind,string>={flow:'이어서 사용(기능 흐름)',needs:'먼저 필요(기능 의존)',shares:'같은 요구 공유',related:'관련(참고)'};
+/** Read-only lines: what the user wrote about how areas relate. Not run order, messages or progress. */
+function drawRelations(svg:SVGSVGElement,labels:HTMLElement,plane:HTMLElement) {
+  const center=(id:string)=>{const el=plane.querySelector<HTMLElement>(`.area-node[data-area-id="${id}"]`);if(!el)return null;
+    return {x:el.offsetLeft+el.offsetWidth/2,y:el.offsetTop+el.offsetHeight/2};};
+  svg.replaceChildren();labels.replaceChildren();
+  for(const r of project.space.relations) {
+    const a=center(r.from),b=center(r.to);if(!a||!b)continue;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    for(const [k,v] of [['x1',a.x],['y1',a.y],['x2',b.x],['y2',b.y]] as const)line.setAttribute(k,String(v));
+    line.setAttribute('class',`relation-line ${r.kind}`);line.setAttribute('marker-end','url(#relation-end)');svg.append(line);
+    const chip=node('span',RELATION_LABEL[r.kind],'relation-chip');chip.title=`${areaById(r.from)?.name} → ${areaById(r.to)?.name} · ${RELATION_HINT[r.kind]}${r.note?` · ${r.note}`:''}`;
+    chip.style.left=`${(a.x+b.x)/2}px`;chip.style.top=`${(a.y+b.y)/2}px`;labels.append(chip);
+  }
+}
+function renderMap(root:HTMLElement,active:Area[]) {
+  const section=node('section','','area-map');section.setAttribute('aria-label','영역 지도');
+  const bar=node('div','','map-toolbar');bar.append(node('h2','영역'));
+  const add=node('form','','area-add');add.id='area-add-form';add.setAttribute('aria-label','영역 추가');
+  const name=spaceInput(node('input'),'area-name');name.maxLength=60;name.placeholder='영역 이름 (예: 예약)';name.setAttribute('aria-label','영역 이름');
+  const note=spaceInput(node('input'),'area-note');note.maxLength=2000;note.placeholder='한 줄 구상 · 비워 두면 ‘미정’';note.setAttribute('aria-label','영역 설명');
+  const submitArea=node('button','＋ 영역 추가','secondary');submitArea.type='submit';submitArea.id='area-add';add.append(name,note,submitArea);
+  bar.append(add);
+  const unplaced=areaRequests(null);
+  if(unplaced.length){const b=btn(`영역 미지정 작업 · 요청 ${unplaced.length}개`,()=>openArea('unassigned'),'quiet','open-unplaced');bar.append(b);}
+  section.append(bar);
+  const layout=node('div','','map-layout'),map=node('div','','space-map');map.id='space-map';
+  map.setAttribute('aria-label','영역 지도 · 빈 곳을 끌어 이동, 카드의 ⠿를 끌어 위치 이동');
+  const plane=node('div','','space-plane');plane.id='space-plane';
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','relation-layer');svg.setAttribute('aria-hidden','true');
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');defs.innerHTML='<marker id="relation-end" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z"/></marker>';
+  const lines=document.createElementNS('http://www.w3.org/2000/svg','g');svg.append(defs,lines);
+  const labels=node('div','','relation-labels');
+  plane.append(svg,labels);const redraw=()=>drawRelations(lines as unknown as SVGSVGElement,labels,plane);
+  for(const a of active)plane.append(areaNode(a,plane,redraw));
+  map.append(plane);
+  if(!active.length)map.append(node('p','아직 영역이 없어요. 위에서 큰 덩어리부터 추가해 보세요. 정하지 못한 것은 설명을 비워 두면 ‘미정’으로 남아요.','map-empty hint'));
+  const controls=node('div','','map-controls');
+  const scale=node('span','','map-scale');scale.id='map-scale';
+  controls.append(btn('－',()=>zoom(map,plane,1/1.25),'quiet map-zoom-out','map-zoom-out'),scale,btn('＋',()=>zoom(map,plane,1.25),'quiet map-zoom-in','map-zoom-in'),
+    btn('전체 맞춤',()=>{mapView=fitView(map,active);applyView(plane);rememberMap();scale.textContent=`${Math.round(mapView.s*100)}%`;},'quiet','map-fit'));
+  const last=posUndo.at(-1);
+  if(last)controls.append(btn(`위치 되돌리기 · ${areaById(last.id)?.name??''}`,undoPosition,'quiet','map-undo'));
+  map.append(controls);layout.append(map);
+  // Panning: only from the empty background, so cards, buttons and inputs keep their own behaviour.
+  map.addEventListener('pointerdown',e=>{
+    const t=e.target as HTMLElement;if(e.button!==0||t.closest('.area-node,.map-controls,button,input,textarea,select,a'))return;
+    map.setPointerCapture(e.pointerId);const v=mapView??{x:0,y:0,s:1},sx=e.clientX,sy=e.clientY;map.classList.add('panning');
+    const move=(ev:PointerEvent)=>{mapView={x:v.x+ev.clientX-sx,y:v.y+ev.clientY-sy,s:v.s};applyView(plane);};
+    const up=()=>{map.removeEventListener('pointermove',move);map.removeEventListener('pointerup',up);map.removeEventListener('pointercancel',up);map.classList.remove('panning');rememberMap();};
+    map.addEventListener('pointermove',move);map.addEventListener('pointerup',up);map.addEventListener('pointercancel',up);
+  });
+  const sel=mapSelected?areaById(mapSelected):null;
+  if(sel&&!sel.archived)layout.append(areaPanel(sel));
+  section.append(layout);root.append(section);
+  if(!mapView)mapView=fitView(map,active);
+  applyView(plane);scale.textContent=`${Math.round(mapView.s*100)}%`;redraw();
+  add.addEventListener('submit',e=>{e.preventDefault();if(!name.value.trim())return;
+    // Place the new area where the user is looking (free slot nearest to the map centre).
+    const v=mapView??{x:0,y:0,s:1},near={x:(map.clientWidth/2-v.x)/v.s-NODE_W/2,y:(map.clientHeight/2-v.y)/v.s-NODE_H/2};
+    guard(()=>{commit(addArea(project,name.value,note.value,near));const created=project.space.areas.at(-1)!;clearInputs('area-name','area-note');
+      // Keep the new area in sight: move only the viewport when its slot is outside the visible map.
+      const pt=areaPosition(project,created),w=$('space-map').clientWidth,h=$('space-map').clientHeight,s=v.s,sx=pt.x*s+v.x,sy=pt.y*s+v.y;
+      if(sx<0||sy<0||sx+NODE_W*s>w||sy+NODE_H*s>h)mapView={x:w/2-(pt.x+NODE_W/2)*s,y:h/2-(pt.y+NODE_H/2)*s,s};
+      mapSelected=created.id;rememberMap();render();$('area-name').focus();});});
+}
+/** Short properties of the selected area: name and one-line idea. Long work and reports live in the area screen. */
+function areaPanel(a:Area):HTMLElement {
+  const panel=node('aside','','area-panel');panel.id='area-panel';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
+  const head=node('div','','panel-top');head.append(node('strong',a.name),btn('닫기',()=>{mapSelected=null;sheetOpen=false;rememberMap();render();},'quiet','area-panel-close'));
+  const nameKey=`area-edit-name:${a.id}`,noteKey=`area-edit-note:${a.id}`;
+  const name=spaceInput(node('input'),'panel-name',a.name,nameKey);name.maxLength=60;name.setAttribute('aria-label','영역 이름');
+  const note=spaceInput(node('textarea'),'panel-note',a.note,noteKey);note.rows=3;note.maxLength=2000;note.setAttribute('aria-label','한 줄 구상');note.placeholder='비워 두면 ‘미정’';
+  const row=node('div','','row');
+  row.append(btn('반영',()=>{if(!name.value.trim())return;commit(editArea(project,a.id,name.value,note.value));clearInputs(nameKey,noteKey);},'secondary','panel-save'),
+    btn('취소',()=>{clearInputs(nameKey,noteKey);render();},'quiet','panel-cancel'));
+  const go=node('div','','row');go.append(btn('영역 열기 ↗',()=>openArea(a.id),'primary','panel-open'),btn('이 영역에 새 요청',()=>writeInArea(a.id),'quiet','panel-new-request'));
+  panel.append(head,node('label','이름'),name,node('label','한 줄 구상'),note,row,node('p',areaSummary(a),'hint'),go);
+  return panel;
 }
 function renderSpace() {
   const root=$('space-view');root.replaceChildren();if(view!=='space'&&view!=='area')return;
@@ -777,21 +929,7 @@ function renderOverview(root:HTMLElement) {
   edit.append(field,btn('목적 저장',()=>{if(!field.value.trim())return;commit(setBrief(project,field.value.trim()));clearInputs('brief-edit-text');},'secondary','brief-save'));
   if(brief?.previous.length)edit.append(node('p',`이전에 적은 목적 ${brief.previous.length}개는 그대로 보관돼요.`,'hint'));
   head.append(edit);root.append(head);
-  const map=node('section','','area-map');map.setAttribute('aria-label','영역');
-  map.append(node('h2','영역'));
-  const grid=node('div','','area-grid');for(const a of active)grid.append(areaCard(a));
-  const unplaced=areaRequests(null);
-  if(unplaced.length){const card=node('button','','area-card unplaced');card.type='button';card.id='open-unplaced';
-    card.append(node('strong','영역 미지정 작업','area-card-name'),node('p',`요청 ${unplaced.length}개 · 영역으로 옮길 수 있어요`,'hint'));card.addEventListener('click',()=>openArea('unassigned'));grid.append(card);}
-  const add=node('form','','area-card area-add');add.id='area-add-form';add.setAttribute('aria-label','영역 추가');
-  const name=spaceInput(node('input'),'area-name');name.maxLength=60;name.placeholder='영역 이름 (예: 예약)';name.setAttribute('aria-label','영역 이름');
-  const note=spaceInput(node('textarea'),'area-note');note.rows=2;note.maxLength=2000;note.placeholder='설명 · 비워 두면 ‘미정’';note.setAttribute('aria-label','영역 설명');
-  const submitArea=node('button','＋ 영역 추가','secondary');submitArea.type='submit';submitArea.id='area-add';
-  add.append(name,note,submitArea);add.addEventListener('submit',e=>{e.preventDefault();if(!name.value.trim())return;
-    guard(()=>{commit(addArea(project,name.value,note.value));clearInputs('area-name','area-note');$('area-name').focus();});});
-  grid.append(add);map.append(grid);
-  if(!active.length)map.append(node('p','아직 영역이 없어요. 큰 덩어리부터 나눠 보세요. 정하지 못한 것은 설명을 비워 두면 ‘미정’으로 남아요.','hint'));
-  root.append(map);
+  renderMap(root,active);
   if(active.length>1||project.space.relations.length) {
     const rel=node('section','','area-relations');rel.id='area-relations';rel.append(node('h2','영역 사이 관계'),node('p','실행 순서나 자동 연결이 아니라, 영역끼리 어떤 사이인지 적어 두는 메모예요.','hint'));
     const list=node('ul','','relation-list');
@@ -998,6 +1136,11 @@ for(const id of ['list-example','open-example'])$(id).addEventListener('click',(
 $('example-start').addEventListener('click',()=>closeExample(true));
 $('example-close').addEventListener('click',()=>closeExample(false));
 $('nav-space').addEventListener('click',openSpace);
+document.addEventListener('keydown',e=>{
+  if(!(e.ctrlKey||e.metaKey)||e.shiftKey||e.key.toLowerCase()!=='z')return;
+  const t=e.target as HTMLElement|null;if(t&&(t.closest('input,textarea,select')||t.isContentEditable))return; // text undo first
+  if(view==='space'&&posUndo.length){e.preventDefault();undoPosition();}
+});
 $('compose-area').addEventListener('change',()=>{const v=$<HTMLSelectElement>('compose-area').value;guard(()=>commit(setDraftTarget(project,v==='@follow'?undefined:v==='@none'?null:v)));});
 $('brief-input').addEventListener('input',()=>{$<HTMLButtonElement>('brief-start').disabled=!$<HTMLTextAreaElement>('brief-input').value.trim();});
 $('brief-form').addEventListener('submit',e=>{e.preventDefault();const value=$<HTMLTextAreaElement>('brief-input').value.trim();if(!value)return;

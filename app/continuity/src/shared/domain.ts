@@ -1,5 +1,5 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind } from './types.js';
-import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject } from './validation.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area } from './types.js';
+import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { outcomeOf, contextLinks } from './outcome.js';
 export { planFacts, planFactsText } from './plan-facts.js';
@@ -9,7 +9,7 @@ const copy = <T>(value: T): T => structuredClone(value);
 const WORK_KEYS = ['understanding','scope','next','checks'] as const;
 const CONDITION_KEYS = ['scope','checks'] as const;
 export function createProject(): Project {
-  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null}};
+  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}}}};
 }
 export function taskOf(p: Project, id = p.currentTaskId): Task { const t=p.tasks.find(t=>t.id === id); ensure(t,'TASK_MISSING'); return t; }
 function change(p: Project): Project { return {...copy(p),revision:p.revision+1,notice:null}; }
@@ -496,8 +496,43 @@ export function setBrief(p: Project, value: string): Project {
   n.space.brief={text:value,at:now(),previous:old?[...old.previous,{text:old.text,at:old.at}]:[]};return n;
 }
 function areaName(name: string): string { const v=name.trim(); text(v,60); return v; }
-export function addArea(p: Project, name: string, note=''): Project {
-  const n=change(p);text(note,2000,true);n.space.areas.push({id:uid('A'),name:areaName(name),note:note.trim(),archived:false,createdAt:now()});return n;
+/** A new area gets its own stored position: the free slot nearest to where the user is looking. */
+export function addArea(p: Project, name: string, note='', near?: Point): Project {
+  const n=change(p);text(note,2000,true);const id=uid('A');
+  n.space.layout.positions[id]=freeSlot(p,near);
+  n.space.areas.push({id,name:areaName(name),note:note.trim(),archived:false,createdAt:now()});return n;
+}
+/* ---------- FLOW090-B1: map positions (presentation data; never touches work records) ---------- */
+export const NODE_W=240, NODE_H=132, GRID_X=300, GRID_Y=200;
+/** Stored position, else a fixed default from the area's place in the list (never recomputed from others). */
+export function areaPosition(p: Project, a: Area): Point {
+  const stored=p.space.layout.positions[a.id];if(stored)return {...stored};
+  const i=p.space.areas.findIndex(x=>x.id===a.id);return {x:40+(i%3)*GRID_X,y:40+Math.floor(i/3)*GRID_Y};
+}
+function freeSlot(p: Project, near?: Point): Point {
+  const taken=p.space.areas.filter(a=>!a.archived).map(a=>areaPosition(p,a));
+  const clash=(x:number,y:number)=>taken.some(t=>Math.abs(t.x-x)<NODE_W+20&&Math.abs(t.y-y)<NODE_H+20);
+  const ox=near?Math.round(near.x/20)*20:40,oy=near?Math.round(near.y/20)*20:40;
+  // Nearest free grid slot, trying right, then left, then below, then above (reading order) within each ring.
+  for(let r=0;r<40;r++) {
+    const ring:[number,number][]=[];
+    for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)if(Math.max(Math.abs(dx),Math.abs(dy))===r)ring.push([dx,dy]);
+    ring.sort((a,b)=>Math.abs(a[1])-Math.abs(b[1])||Number(a[1]<0)-Number(b[1]<0)||Math.abs(a[0])-Math.abs(b[0])||Number(a[0]<0)-Number(b[0]<0));
+    for(const [dx,dy] of ring){const x=ox+dx*GRID_X,y=oy+dy*GRID_Y;if(!clash(x,y))return clampPoint({x,y});}
+  }
+  return clampPoint({x:ox,y:oy});
+}
+const clampPoint=(pt:Point):Point=>({x:Math.max(-POSITION_LIMIT,Math.min(POSITION_LIMIT,Math.round(pt.x))),y:Math.max(-POSITION_LIMIT,Math.min(POSITION_LIMIT,Math.round(pt.y)))});
+/** One move = one command: only this area's position field changes. */
+export function moveArea(p: Project, id: string, to: Point): Project {
+  ensure(p.space.areas.some(a=>a.id===id&&!a.archived),'AREA_MISSING');const n=change(p);n.space.layout.positions[id]=clampPoint(to);return n;
+}
+/** Limited undo of one move: applied only while the area still sits where that move put it. Restores only that
+ * field (from=null: back to the default slot); later reports, requests and other areas' edits are untouched. */
+export function undoMove(p: Project, id: string, from: Point|null, expected: Point): Project {
+  const now=p.space.layout.positions[id];ensure(p.space.areas.some(a=>a.id===id),'AREA_MISSING');
+  ensure(!!now&&now.x===expected.x&&now.y===expected.y,'POSITION_CHANGED');
+  const n=change(p);if(from)n.space.layout.positions[id]=clampPoint(from);else delete n.space.layout.positions[id];return n;
 }
 export function editArea(p: Project, id: string, name: string, note: string): Project {
   text(note,2000,true);const n=change(p),a=n.space.areas.find(a=>a.id===id);ensure(a,'AREA_MISSING');a.name=areaName(name);a.note=note.trim();return n;

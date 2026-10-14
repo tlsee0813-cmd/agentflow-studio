@@ -13,7 +13,11 @@ class SpatialWorkspace(unittest.TestCase):
 
     def add_area(self,name,note=''):
         self.page.locator('#area-name').fill(name);self.page.locator('#area-note').fill(note);self.page.locator('#area-add').click()
-        expect(self.page.locator('.area-card',has_text=name)).to_be_visible()
+        expect(self.page.locator('.area-node',has_text=name)).to_be_visible()
+    def open_area(self,name):
+        # FLOW090-B1: a card click selects; the always-visible 'open' button goes straight to the area.
+        self.page.locator('.area-node',has_text=name).first.locator('.area-open').click()
+        expect(self.page.locator('#space-title')).to_contain_text(name.split()[0])
     def area_id(self,name):return next(a['id'] for a in self.state()['space']['areas'] if a['name']==name)
     def download(self,button,name):
         with self.page.expect_download() as event:self.page.locator(button).click()
@@ -28,9 +32,9 @@ class SpatialWorkspace(unittest.TestCase):
         expect(self.page.locator('#space-title')).to_have_text('전체 공간');expect(self.page.locator('#space-brief')).to_have_text(brief)
         self.assertEqual(self.state()['space']['brief']['text'],brief);self.assertEqual(self.state()['sources'],[],'the purpose is not a request')
         self.add_area('예약','날짜와 시간을 골라 예약');self.add_area('알림')
-        expect(self.page.locator('.area-card',has_text='알림')).to_contain_text('미정')
+        expect(self.page.locator('.area-node',has_text='알림')).to_contain_text('미정')
         # Rename an area; looking at it changes nothing else.
-        self.page.locator('.area-card',has_text='알림').click();expect(self.page.locator('#space-title')).to_have_text('알림')
+        self.open_area('알림');expect(self.page.locator('#space-title')).to_have_text('알림')
         self.page.locator('#area-edit').evaluate('(e)=>e.open=true');self.page.locator('#area-edit-name').fill('알림 문자');self.page.locator('#area-edit-save').click()
         expect(self.page.locator('#space-title')).to_have_text('알림 문자');self.page.locator('#space-crumb-root').click()
         booking,notify=self.area_id('예약'),self.area_id('알림 문자')
@@ -38,7 +42,7 @@ class SpatialWorkspace(unittest.TestCase):
         self.page.locator('#relation-kind').select_option('flow');self.page.locator('#relation-note').fill('예약하면 알림');self.page.locator('#relation-save').click()
         expect(self.page.locator('#area-relations')).to_contain_text('예약 → 알림 문자 · 이어서 사용 · 예약하면 알림')
         # Write the first request for the booking area.
-        self.page.locator('.area-card',has_text='예약').click();self.page.locator('#area-new-request').click()
+        self.open_area('예약');self.page.locator('#area-new-request').click()
         expect(self.page.locator('#compose-area')).to_have_value(booking)
         self.page.locator('#draft').fill('예약 화면에서 날짜와 시간을 고르게 해줘');self.page.locator('#send').click()
         expect(self.page.locator('#working')).to_have_text('');expect(self.page.locator('#current-work')).to_be_visible()
@@ -56,7 +60,7 @@ class SpatialWorkspace(unittest.TestCase):
         self.page.screenshot(path=str(base.OUT/'flow090-area.png'),full_page=True)
         self.page.set_viewport_size({'width':390,'height':844});self.page.screenshot(path=str(base.OUT/'flow090-area-390.png'),full_page=True)
         self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390);self.page.set_viewport_size({'width':1440,'height':1050})
-        current=self.state()['currentTaskId'];self.page.locator('#space-crumb-root').click();self.page.locator('.area-card',has_text='알림 문자').click()
+        current=self.state()['currentTaskId'];self.page.locator('#space-crumb-root').click();self.open_area('알림 문자')
         expect(self.page.locator('#area-tasks')).to_contain_text('아직 이 영역의 요청이 없어요');self.assertEqual(self.state()['currentTaskId'],current)
         saved=self.state();self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK')
         expect(self.page.locator('#space-title')).to_have_text('알림 문자');self.assertEqual(self.state(),saved)
@@ -64,10 +68,10 @@ class SpatialWorkspace(unittest.TestCase):
         self.page.locator('#nav-projects').click();card=self.page.locator('.project-card').first;expect(card).to_contain_text('영역 2개')
         card.locator('.project-open').click();expect(self.page.locator('#space-view')).to_be_visible()
         # Archive keeps everything and can be undone.
-        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='예약').click();self.page.locator('#area-archive').click()
+        self.page.locator('#nav-space').click();self.open_area('예약');self.page.locator('#area-archive').click()
         expect(self.page.locator('#archived-areas > summary')).to_have_text('보관한 영역 1개');self.assertEqual(self.state()['tasks'][0]['areaId'],booking)
         self.page.locator('#archived-areas').evaluate('(e)=>e.open=true');self.page.locator('#archived-areas button',has_text='되살리기').click()
-        expect(self.page.locator('.area-card',has_text='예약')).to_be_visible();self.assertEqual(len(calls),2,'only the request and the report analysis called the MOCK; areas never do')
+        expect(self.page.locator('.area-node',has_text='예약')).to_be_visible();self.assertEqual(len(calls),2,'only the request and the report analysis called the MOCK; areas never do')
         self.page.screenshot(path=str(base.OUT/'flow090-space.png'),full_page=True)
 
     def test_02_an_older_project_without_areas_opens_whole_and_can_be_placed(self):
@@ -95,7 +99,7 @@ class SpatialWorkspace(unittest.TestCase):
         for name in areas:self.add_area(name)
         return [self.area_id(n) for n in areas]
     def request_in(self,area,text,export=True):
-        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text=area).click();self.page.locator('#area-new-request').click()
+        self.page.locator('#nav-space').click();self.open_area(area);self.page.locator('#area-new-request').click()
         self.page.locator('#draft').fill(text);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         if export:self.download('#download-work',f'flow090-{len(self.state()["tasks"])}.md')
         return self.state()['currentTaskId']
@@ -113,14 +117,14 @@ class SpatialWorkspace(unittest.TestCase):
         booking,notify=self.start(['예약','알림'])
         self.request_in('예약','A: 예약 화면');self.page.locator('#home-paste-result').click()
         self.page.locator('#draft').fill('작성 중인 보고 원문');self.page.wait_for_timeout(100)
-        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='알림').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#nav-space').click();self.open_area('알림');self.page.locator('#area-new-request').click()
         s=self.state();self.assertEqual(s['draftKind'],'report');self.assertEqual(s['draft'],'작성 중인 보고 원문')
         expect(self.page.locator('#notice')).to_contain_text('작성 중인')
         # An unsent request keeps the area it was written for.
         self.page.locator('#draft').fill('');self.page.locator('#request-tab').click()
-        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='알림').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#nav-space').click();self.open_area('알림');self.page.locator('#area-new-request').click()
         self.page.locator('#draft').fill('알림 쪽 요청 작성 중');self.page.wait_for_timeout(100)
-        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='예약').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#nav-space').click();self.open_area('예약');self.page.locator('#area-new-request').click()
         expect(self.page.locator('#compose-area')).to_have_value(notify);expect(self.page.locator('#notice')).to_contain_text('작성 중인')
         self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         self.assertEqual(self.state()['tasks'][-1]['areaId'],notify)
@@ -128,7 +132,7 @@ class SpatialWorkspace(unittest.TestCase):
     def test_05_area_edit_drafts_stay_with_their_area(self):
         booking,notify=self.start(['예약','알림'])
         def edit(area):
-            self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text=area).click()
+            self.page.locator('#nav-space').click();self.open_area(area)
             self.page.locator('#area-edit').evaluate('(e)=>e.open=true')
         edit('예약');self.page.locator('#area-edit-name').fill('예약 바꾸는 중');self.page.locator('#area-edit-note').fill('예약 설명 초안')
         edit('알림');expect(self.page.locator('#area-edit-name')).to_have_value('알림');expect(self.page.locator('#area-edit-note')).to_have_value('')
@@ -139,7 +143,7 @@ class SpatialWorkspace(unittest.TestCase):
     def test_06_a_backup_copy_keeps_the_unsent_requests_area(self):
         booking,notify=self.start(['예약','알림'])
         self.request_in('예약','A: 예약 화면')
-        self.page.locator('#nav-space').click();self.page.locator('.area-card',has_text='알림').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#nav-space').click();self.open_area('알림');self.page.locator('#area-new-request').click()
         self.page.locator('#draft').fill('알림 쪽 미제출 요청');self.page.wait_for_timeout(100)
         backup=self.download('#backup','flow090-draft-target.json')
         self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(str(backup))
@@ -148,5 +152,65 @@ class SpatialWorkspace(unittest.TestCase):
         expect(self.page.locator('#draft')).to_have_value('알림 쪽 미제출 요청');expect(self.page.locator('#compose-area')).to_have_value(notify)
         self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         self.assertEqual(self.state()['tasks'][-1]['areaId'],notify)
+
+    def pos(self,area):
+        s=self.state();a=next(x for x in s['space']['areas'] if x['id']==area);return s['space']['layout']['positions'].get(area)
+    def drag(self,area,dx,dy):
+        box=self.page.locator(f'#node-move-{area}').bounding_box();x,y=box['x']+box['width']/2,box['y']+box['height']/2
+        self.page.mouse.move(x,y);self.page.mouse.down();self.page.mouse.move(x+dx/2,y+dy/2,steps=4);self.page.mouse.move(x+dx,y+dy,steps=4);self.page.mouse.up()
+    def scale(self):return float(self.page.locator('#space-plane').evaluate('(e)=>new DOMMatrix(getComputedStyle(e).transform).a'))
+
+    def test_07_map_select_move_open_zoom_fit_undo_and_restore(self):
+        booking,notify=self.start(['예약','알림'])
+        before=self.pos(booking);s0=self.scale()
+        self.drag(booking,120,60);expect(self.page.locator('#space-title')).to_have_text('전체 공간')
+        after=self.pos(booking);self.assertAlmostEqual(after['x']-before['x'],120/s0,delta=2);self.assertAlmostEqual(after['y']-before['y'],60/s0,delta=2)
+        # Selecting shows the short panel; it never opens the area.
+        self.page.locator(f'#node-select-{notify}').click();expect(self.page.locator('#area-panel')).to_contain_text('알림')
+        expect(self.page.locator('#space-title')).to_have_text('전체 공간')
+        # Zoomed in, a drag moves by screen distance / scale.
+        self.page.locator('#map-zoom-in').click();self.page.locator('#map-zoom-in').click();s1=self.scale();self.assertGreater(s1,s0)
+        n0=self.pos(notify);self.drag(notify,100,0);n1=self.pos(notify)
+        self.assertAlmostEqual(n1['x']-n0['x'],100/s1,delta=2);self.assertAlmostEqual(n1['y'],n0['y'],delta=1)
+        # Fit changes the view only.
+        stored=self.state()['space']['layout'];self.page.locator('#map-fit').click();self.assertEqual(self.state()['space']['layout'],stored)
+        # Position undo: the last move first (button), then the one before (Ctrl+Z outside text fields).
+        expect(self.page.locator('#map-undo')).to_contain_text('알림');self.page.locator('#map-undo').click()
+        self.assertEqual(self.pos(notify),n0);self.page.locator('#space-title').click();self.page.keyboard.press('Control+z')
+        self.assertEqual(self.pos(booking),before)
+        # Ctrl+Z in a text field edits text, not positions.
+        self.drag(notify,40,40);moved=self.pos(notify);self.page.locator(f'#node-select-{notify}').click()
+        self.page.locator('#panel-name').fill('알림 바꾸는 중');self.page.locator('#panel-name').press('Control+z');self.assertEqual(self.pos(notify),moved)
+        self.page.locator('#panel-cancel').click();expect(self.page.locator('#panel-name')).to_have_value('알림')
+        # A report that arrives between a move and its undo stays.
+        self.request_in('예약','예약 화면 만들기');self.page.locator('#nav-space').click();p0=self.pos(booking);self.drag(booking,80,0);p1=self.pos(booking)
+        self.page.locator('#nav-work').click();self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('보고: 화면을 만들었다고 주장')
+        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('');tasks=len(self.state()['tasks'])
+        self.page.locator('#nav-space').click();self.page.locator('#map-undo').click();self.assertEqual(self.pos(booking),p0)
+        self.assertEqual(len(self.state()['tasks']),tasks);self.assertEqual(self.state()['sources'][-1]['kind'],'report')
+        # Keyboard: move with arrows (one nudge = 20), open with Enter.
+        k0=self.pos(notify);self.page.locator(f'#node-move-{notify}').focus();self.page.keyboard.press('ArrowRight')
+        self.assertEqual(self.pos(notify)['x'],k0['x']+20)
+        # View, scale and selection come back after an area round trip and after reload.
+        self.page.locator(f'#node-select-{notify}').click();self.page.locator('#map-zoom-out').click();t0=self.page.locator('#space-plane').evaluate('(e)=>e.style.transform')
+        self.page.locator(f'#node-open-{booking}').click();expect(self.page.locator('#space-title')).to_have_text('예약');self.page.locator('#space-crumb-root').click()
+        self.assertEqual(self.page.locator('#space-plane').evaluate('(e)=>e.style.transform'),t0)
+        saved=self.state();self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK')
+        self.assertEqual(self.page.locator('#space-plane').evaluate('(e)=>e.style.transform'),t0);expect(self.page.locator('#area-panel')).to_contain_text('알림')
+        self.assertEqual(self.state(),saved)
+        self.page.locator(f'#node-open-{notify}').focus();self.page.keyboard.press('Enter');expect(self.page.locator('#space-title')).to_have_text('알림')
+        self.page.locator('#space-crumb-root').click();self.page.screenshot(path=str(base.OUT/'flow090-map.png'),full_page=True)
+
+    def test_08_narrow_screen_sheet_and_direct_open(self):
+        self.page.set_viewport_size({'width':390,'height':844})
+        booking,notify=self.start(['예약','알림'])
+        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390)
+        # Narrow: the map shows a part at a time; 'fit' brings every area into view without moving any.
+        stored=self.state()['space']['layout'];self.page.locator('#map-fit').click();self.assertEqual(self.state()['space']['layout'],stored)
+        self.page.locator(f'#node-select-{booking}').click();expect(self.page.locator('#area-panel')).to_be_visible()
+        self.page.screenshot(path=str(base.OUT/'flow090-map-390-sheet.png'))
+        self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0)
+        self.page.locator(f'#node-open-{notify}').click();expect(self.page.locator('#space-title')).to_have_text('알림')
+        self.page.locator('#space-crumb-root').click();self.page.screenshot(path=str(base.OUT/'flow090-map-390.png'))
 
 if __name__=='__main__':unittest.main(verbosity=2)

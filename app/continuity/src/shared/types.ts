@@ -82,7 +82,11 @@ export interface Brief { text: string; at: string; previous: { text: string; at:
 /** Where the unsent request goes: null = continue the current work's area; {area:null} = no area; {area:id} = that area.
  * Part of the draft's meaning, so it is saved with the draft text (unlike the per-tab view). */
 export interface DraftTarget { area: string | null }
-export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null }
+/** FLOW090-B1: where the user put each area on the map (presentation data, versioned). Areas without a stored
+ * position use a fixed default from their place in the list, so adding or archiving never moves anyone else. */
+export interface Point { x: number; y: number }
+export interface Layout { version: 'layout.1'; positions: Record<string, Point> }
+export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null; layout: Layout }
 export interface Ticket { projectId: string; revision: number; requestId: string; taskId: string }
 export interface Project {
   schemaVersion: typeof SCHEMA; id: string; revision: number; name: string;

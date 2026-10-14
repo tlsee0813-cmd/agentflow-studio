@@ -16,7 +16,7 @@ const planned=()=>{let p=D.setBrief(D.createProject(),'동네 미용실 예약 �
 test('F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import',()=>{
   let p=exported(respond(put(D.createProject(),'예약 화면 만들기')));p=put(p,'보고: 화면을 만들었다고 주장','report');
   const old=v3(p),opened=parseProject(old);
-  assert.equal(opened.schemaVersion,'idea015.project.4');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null});
+  assert.equal(opened.schemaVersion,'idea015.project.4');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}}});
   for(const k of ['sources','bases','tasks','currentTaskId','draft'])assert.deepEqual(opened[k],JSON.parse(old)[k],k);
   let q=D.addArea(opened,'예약','');q=D.placeTask(q,q.tasks[0].id,q.space.areas[0].id);
   const again=parseProject(serializeProject(q));assert.deepEqual(again.space,q.space);assert.equal(again.tasks[0].areaId,q.space.areas[0].id);
@@ -69,7 +69,7 @@ test('F090-6 a stored project.3 entry opens through the workspace and the next s
   const old=JSON.parse(v3(respond(put(D.createProject(),'기존 요청')))),storage=new Memory();
   storage.setItem(WORKSPACE_KEY,JSON.stringify({version:'agentflow.workspace.1',migratedFromLegacy:true,entries:[{entryId:`E_${crypto.randomUUID()}`,state:'active',lifecycle:1,seq:1,createdAt:new Date().toISOString(),trashedAt:null,origin:'new',project:old}]}));
   const w=new WorkspaceStore(storage,new Locks());await w.init();assert.equal(w.readError,null);
-  const e=w.entries()[0];assert.deepEqual(e.project.space,{brief:null,areas:[],relations:[],draftTarget:null});assert.deepEqual(e.project.sources,old.sources);
+  const e=w.entries()[0];assert.deepEqual(e.project.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}}});assert.deepEqual(e.project.sources,old.sources);
   await w.save({entryId:e.entryId,lifecycle:e.lifecycle,seq:e.seq},D.addArea(e.project,'예약'));
   const saved=JSON.parse(storage.getItem(WORKSPACE_KEY)).entries[0].project;assert.equal(saved.schemaVersion,'idea015.project.4');assert.equal(saved.space.areas[0].name,'예약');
 });
@@ -102,4 +102,31 @@ test('F090-8 the unsent request\'s area is saved with the draft; old formats def
   const bad=JSON.parse(serializeProject(p));bad.space.draftTarget={area:'A_nope'};assert.throws(()=>parseProject(JSON.stringify(bad)));
   const parked=D.setAreaArchived(p,notify,true);assert.deepEqual(parked.space.draftTarget,{area:notify},'archiving never moves the draft');
   assert.throws(()=>D.submit(parked),/AREA_MISSING/);assert.throws(()=>D.setDraftTarget(parked,notify),/AREA_MISSING/);
+});
+
+test('F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo',()=>{
+  let {p,booking,notify}=planned();
+  assert.deepEqual(parseProject(v3(D.createProject())).space.layout,{version:'layout.1',positions:{}});
+  const candidate=JSON.parse(serializeProject(p));delete candidate.space.layout;delete candidate.space.draftTarget;
+  const old=parseProject(JSON.stringify(candidate));assert.deepEqual(old.space.layout.positions,{},'unreleased candidate: defaults');
+  const d0=D.areaPosition(old,old.space.areas[0]),d1=D.areaPosition(old,old.space.areas[1]);
+  let q=D.setAreaArchived(D.addArea(old,'결제'),old.space.areas[0].id,true);q=D.setAreaArchived(q,old.space.areas[0].id,false);
+  assert.deepEqual(D.areaPosition(q,q.space.areas[0]),d0);assert.deepEqual(D.areaPosition(q,q.space.areas[1]),d1,'adding/archiving moves nobody else');
+  const placed=q.space.areas.map(a=>D.areaPosition(q,a));
+  for(let i=0;i<placed.length;i++)for(let j=i+1;j<placed.length;j++)assert.ok(Math.abs(placed[i].x-placed[j].x)>=D.NODE_W||Math.abs(placed[i].y-placed[j].y)>=D.NODE_H,'new area does not overlap');
+  const near=D.addArea(D.createProject(),'첫 영역','',{x:600,y:300});assert.deepEqual(Object.values(near.space.layout.positions)[0],{x:600,y:300});
+  // One move changes one field; undo restores only it, keeping a report that arrived in between.
+  p=exported(respond(put(p,'예약 화면','request',undefined,booking)));const from=D.areaPosition(p,p.space.areas[0]);
+  const moved=D.moveArea(p,booking,{x:777.4,y:-12.6});assert.deepEqual(moved.space.layout.positions[booking],{x:777,y:-13});
+  assert.deepEqual(moved.space.areas,p.space.areas);assert.deepEqual(moved.tasks,p.tasks);
+  const withReport=put(moved,'보고: 화면 만들었다고 주장','report');
+  const undone=D.undoMove(withReport,booking,from,{x:777,y:-13});
+  assert.deepEqual(undone.space.layout.positions[booking],from);assert.equal(undone.tasks.length,withReport.tasks.length);assert.deepEqual(undone.sources,withReport.sources);
+  assert.throws(()=>D.undoMove(D.moveArea(withReport,booking,{x:10,y:10}),booking,from,{x:777,y:-13}),/POSITION_CHANGED/,'moved again: not silently overwritten');
+  assert.deepEqual(D.undoMove(D.moveArea(old,old.space.areas[0].id,{x:5,y:5}),old.space.areas[0].id,null,{x:5,y:5}).space.layout.positions,{},'back to the default slot');
+  // Stored positions are checked and survive backup/import.
+  assert.deepEqual(parseProject(serializeProject(moved)).space.layout,moved.space.layout);
+  for(const bad of [{x:1.5,y:0},{x:0,y:999999},{x:'1',y:0}]){const b=JSON.parse(serializeProject(moved));b.space.layout.positions[booking]=bad;assert.throws(()=>parseProject(JSON.stringify(b)));}
+  const stray=JSON.parse(serializeProject(moved));stray.space.layout.positions.A_nope={x:0,y:0};assert.throws(()=>parseProject(JSON.stringify(stray)));
+  assert.throws(()=>D.moveArea(D.setAreaArchived(p,notify,true),notify,{x:0,y:0}),/AREA_MISSING/);
 });

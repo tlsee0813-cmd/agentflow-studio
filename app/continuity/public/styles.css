@@ -2260,3 +2260,41 @@ button.area-card:hover,button.area-card:focus-visible{border-color:var(--accent)
 @media (max-width:640px){.area-grid{grid-template-columns:1fr}.space-head{padding:16px}.space-head h1{font-size:22px}}
 /* Five project views: keep labels on one line and let the row scroll inside itself on narrow screens. */
 @media(max-width:800px){.navigation{overflow-x:auto;scrollbar-width:none}.navigation::-webkit-scrollbar{display:none}.nav-item{flex:0 0 auto;white-space:nowrap}}
+
+/* FLOW090-B1 map: a quiet dotted plane. Cards select; the ⠿ handle moves; 'open' goes straight to the area. */
+.map-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:4px 0 10px}
+.map-toolbar h2{margin:0 8px 0 0}
+.map-toolbar .area-add{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1;min-width:260px}
+.map-toolbar .area-add input{flex:1;min-width:140px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--paper);margin:0}
+.map-layout{display:flex;gap:14px;align-items:flex-start}
+.space-map{position:relative;flex:1;min-width:0;height:min(62vh,560px);min-height:380px;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--paper) radial-gradient(circle,#d9dae4 1px,transparent 1.2px) 0 0/22px 22px;overflow:hidden;touch-action:none;cursor:grab}
+.space-map.panning{cursor:grabbing}
+.space-plane{position:absolute;left:0;top:0;width:1px;height:1px;transform-origin:0 0}
+.area-node{position:absolute;width:240px;min-height:132px;background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 1px 3px rgba(30,30,60,.06);padding:10px 12px 10px 34px;display:flex;flex-direction:column;gap:6px;cursor:default}
+.area-node.selected{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
+.area-node.dragging{opacity:.85;box-shadow:0 8px 24px rgba(30,30,60,.16)}
+.node-handle{position:absolute;left:6px;top:8px;width:22px;height:30px;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:grab;touch-action:none;font-size:15px;line-height:1}
+.node-handle:hover,.node-handle:focus-visible{background:var(--tint);color:var(--accent)}
+.node-select{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:none;border:0;padding:0;cursor:pointer}
+.node-select .area-card-note{overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.area-node .area-open{align-self:flex-start;padding:4px 10px}
+.relation-layer{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
+.relation-line{stroke:#a9aabd;stroke-width:1.5;stroke-dasharray:6 5;fill:none}
+#relation-end path{fill:#a9aabd}
+.relation-labels{position:absolute;left:0;top:0}
+.relation-chip{position:absolute;transform:translate(-50%,-50%);font-size:11px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted);white-space:nowrap;pointer-events:auto}
+.map-controls{position:absolute;right:10px;bottom:10px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px 6px;max-width:calc(100% - 20px)}
+.map-scale{min-width:42px;text-align:center;color:var(--muted);font-size:12px}
+.map-empty{position:absolute;left:24px;top:24px;right:24px}
+.area-panel{width:300px;flex:none;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.area-panel .panel-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.area-panel label{font-size:12px;color:var(--muted);margin-top:4px}
+.area-panel input,.area-panel textarea{border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--paper)}
+.area-panel .row{gap:6px;flex-wrap:wrap}
+@media(max-width:760px){
+  .map-layout{display:block}.space-map{height:62vh;min-height:340px}
+  .area-panel{position:fixed;left:0;right:0;bottom:0;width:auto;max-height:50vh;overflow:auto;z-index:40;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(30,30,60,.14)}
+  .area-panel:not(.sheet-open){display:none}
+}
