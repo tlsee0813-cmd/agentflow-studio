@@ -202,15 +202,24 @@ class Browser(unittest.TestCase):
     def import_file(self,path):
         def accept(dialog):dialog.accept()
         self.page.on('dialog',accept)
+        probe='()=>[document.documentElement.dataset.entryId||"",document.getElementById("notice").textContent||""]'
         try:
+            before=self.page.evaluate(probe)
             # A backup reimport can already match every state/count assertion: await this import's dialog.
             with self.page.expect_event('dialog') as event:
                 self.page.locator('#import-file').set_input_files(path)
             self.assertEqual(event.value.type,'confirm')
             # FLOW083: a backup is now added as a separate copy; the open project is not replaced.
             self.assertIn('새 프로젝트 사본으로 불러올까요?',event.value.message)
-            # The app replaces/renders synchronously after confirm; evaluate runs after that continuation.
-            self.page.evaluate('() => undefined')
+            # The copy is written asynchronously (flush, then a locked create): wait for this import's outcome,
+            # i.e. the copy opened, or a new notice says it was listed only or could not be written.
+            import time;end=time.monotonic()+6
+            while True:
+                entry,notice=self.page.evaluate(probe)
+                if entry!=before[0] or notice!=before[1] and ('사본' in notice or '저장하지 못했' in notice):break
+                if time.monotonic()>end:raise AssertionError('import did not finish')
+                self.page.wait_for_timeout(20)
+            saved(self.page)
         finally:
             self.page.remove_listener('dialog',accept)
     def backup(self,name):

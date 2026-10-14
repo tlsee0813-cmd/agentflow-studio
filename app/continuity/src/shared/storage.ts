@@ -9,7 +9,7 @@ export interface StorageLike { getItem(key:string):string|null; setItem(key:stri
 /** Compact JSON: the same bytes are autosaved, downloaded as a recovery file and accepted by import. */
 export function serializeProject(project:Project):string { return JSON.stringify(project); }
 export function storageErrorCode(e:unknown):string {
-  if(e instanceof Error && ['STORAGE_BLOCKED','LEGACY_UNPRESERVED','STORAGE_CONFLICT','FILE_TOO_LARGE','LOCKS_UNAVAILABLE','TRASHED','ENTRY_MISSING'].includes(e.message)) return e.message;
+  if(e instanceof Error && ['STORAGE_BLOCKED','STORAGE_DENIED','LEGACY_UNPRESERVED','STORAGE_CONFLICT','FILE_TOO_LARGE','LOCKS_UNAVAILABLE','TRASHED','ENTRY_MISSING'].includes(e.message)) return e.message;
   if(e instanceof Error && e.name==='ContextError') return 'INVALID_DATA';
   if(e && typeof e==='object' && 'name' in e && ['QuotaExceededError','NS_ERROR_DOM_QUOTA_REACHED'].includes(String(e.name))) return 'QUOTA';
   return 'WRITE_FAILED';
@@ -97,9 +97,15 @@ export class WorkspaceStore {
   }
   /** Fresh read, no writes. The old key is only shown separately while no envelope recorded its migration. */
   read():Envelope|null {
-    const raw=this.storage.getItem(WORKSPACE_KEY);this.readError=null;this.envelope=null;
-    if(raw!==null){try{this.envelope=parseEnvelope(raw);}catch(e){this.readError=(e as Error).message;}}
-    if(raw===null||this.readError!==null||!this.envelope?.migratedFromLegacy)this.readLegacy();else this.legacy=null;
+    this.readError=null;this.envelope=null;
+    try {
+      const raw=this.storage.getItem(WORKSPACE_KEY);
+      if(raw!==null){try{this.envelope=parseEnvelope(raw);}catch(e){this.readError=(e as Error).message;}}
+      if(raw===null||this.readError!==null||!this.envelope?.migratedFromLegacy)this.readLegacy();else this.legacy=null;
+    } catch {
+      // Access refused (privacy setting, SecurityError): unknown is not empty, and readError keeps every write off.
+      this.readError='STORAGE_DENIED';this.envelope=null;this.legacy=null;
+    }
     return this.envelope;
   }
   private async locked<T>(change:(env:Envelope|null)=>{next:Envelope|null;result:T}):Promise<T> {

@@ -171,4 +171,76 @@ class Flow083(unittest.TestCase):
         with tab.expect_download() as d:tab.locator('#backup').click()
         self.assertEqual(json.loads(Path(d.value.path()).read_text(encoding='utf-8'))['draft'],'잠금 없이 쓴 입력');tab.close()
 
+    # --- FIX084: boundaries found by independent review ---
+    LOCK="()=>new Promise(held=>navigator.locks.request('agentflow.idea015.workspace',()=>new Promise(r=>{window.__release=r;held();})))"
+    def hold_lock(self):
+        holder=self.new_tab();holder.evaluate(self.LOCK);return holder
+    def wait_entry_change(self,before,page=None,timeout=6.0):
+        import time;page=page or self.page;end=time.monotonic()+timeout
+        while self.current_entry(page)==before:
+            if time.monotonic()>end:raise AssertionError('the imported copy did not open')
+            page.wait_for_timeout(20)
+
+    def test_09_import_never_switches_over_input_that_failed_or_changed_while_saving(self):
+        self.send('공유 프로젝트 요청');key=self.current_entry()
+        with self.page.expect_download() as d:self.page.locator('#backup').click()
+        path=base.OUT/'fix084-import.json';d.value.save_as(path)
+        other=self.new_tab();base.open_listed(other,key);base.Browser.compose(self,other);other.locator('#draft').fill('다른 탭의 최신 입력');base.saved(other)
+        holder=self.hold_lock()
+        self.compose();self.page.locator('#draft').fill('A 탭에서 아직 저장 못 한 입력') # its save waits for the lock, then conflicts
+        dialogs=[]
+        def answer(dialog):dialogs.append(dialog.message);dialog.accept() if len(dialogs)==1 else dialog.dismiss()
+        self.page.on('dialog',answer);self.page.locator('#import-file').set_input_files(str(path))
+        self.page.wait_for_timeout(200);holder.evaluate('window.__release()')
+        expect(self.page.locator('#storage-error')).to_be_visible()
+        self.page.wait_for_timeout(300)
+        self.assertEqual(len(dialogs),2,'a save that failed during the flush asks again before switching');self.assertIn('저장되지 않은',dialogs[1])
+        self.assertEqual(self.current_entry(),key);expect(self.page.locator('#draft')).to_have_value('A 탭에서 아직 저장 못 한 입력')
+        self.assertEqual(len(self.envelope()['entries']),1,'no copy was created after the user declined')
+        self.page.remove_listener('dialog',answer)
+        # Edits made while the copy is being written are not replaced by it: the copy is listed, the screen stays.
+        other.close();self.page.reload();base.open_listed(self.page,key)
+        holder=self.hold_lock();self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(str(path))
+        self.page.wait_for_timeout(200);self.compose();self.page.locator('#draft').fill('사본 저장 중에 쓴 입력');holder.evaluate('window.__release()')
+        self.page.wait_for_timeout(500);base.saved(self.page)
+        self.assertEqual(self.current_entry(),key);expect(self.page.locator('#draft')).to_have_value('사본 저장 중에 쓴 입력')
+        expect(self.page.locator('#notice')).to_contain_text('내 프로젝트');self.assertEqual(len(self.envelope()['entries']),2)
+        holder.close()
+
+    def test_10_a_normal_answer_survives_the_first_save_and_a_cancelled_import(self):
+        holder=self.hold_lock();parked=[]
+        self.page.route('**/api/continuity',lambda route:parked.append((route,route.fetch())))
+        self.page.locator('#draft').fill('첫 저장보다 늦게 오는 응답');self.page.locator('#send').click()
+        self.page.wait_for_timeout(200);self.assertEqual(len(parked),1)
+        holder.evaluate('window.__release()');base.saved(self.page);self.assertTrue(self.current_entry(),'first save made it an entry')
+        route,response=parked.pop();route.fulfill(response=response)
+        expect(self.page.locator('#working')).to_have_text('');self.assertIsNotNone(self.state()['tasks'][0]['advice'],'the same project\'s answer is applied')
+        self.assertIsNone(self.state()['pending'])
+        # Choosing a backup and then cancelling must not drop a normal pending answer.
+        with self.page.expect_download() as d:self.page.locator('#backup').click()
+        path=base.OUT/'fix084-cancel.json';d.value.save_as(path)
+        self.page.locator('#retry-work').click();self.page.wait_for_timeout(200);self.assertEqual(len(parked),1)
+        with self.page.expect_event('dialog') as event:self.page.locator('#import-file').set_input_files(str(path))
+        event.value.dismiss();self.page.wait_for_timeout(100)
+        route,response=parked.pop();route.fulfill(response=response);self.page.unroute('**/api/continuity')
+        expect(self.page.locator('#working')).to_have_text('');base.saved(self.page)
+        self.assertIsNone(self.state()['pending']);self.assertEqual(len(self.envelope()['entries']),1)
+        holder.close()
+
+    def denied_tab(self,script):
+        tab=self.ctx.new_page();errors=[];tab.on('pageerror',lambda e:errors.append(str(e)));tab.set_default_timeout(6000)
+        tab.add_init_script(script);tab.goto(self.url);return tab,errors
+    def test_11_a_browser_that_refuses_storage_keeps_the_app_usable_and_says_so(self):
+        for name,script in [('getter','Object.defineProperty(window,"localStorage",{get(){throw new DOMException("denied","SecurityError")},configurable:true})'),
+                            ('getItem','Storage.prototype.getItem=function(){throw new DOMException("denied","SecurityError")}')]:
+            with self.subTest(name):
+                tab,errors=self.denied_tab(script)
+                expect(tab.locator('#mode')).to_contain_text('MOCK');self.assertEqual(errors,[])
+                expect(tab.locator('#storage-error')).to_contain_text('저장소');expect(tab.locator('#projects-view')).to_be_hidden()
+                tab.locator('#draft').fill('저장소가 막힌 탭의 입력');expect(tab.locator('#saved')).to_have_text('저장되지 않은 변경 있음')
+                with tab.expect_download() as d:tab.locator('#backup').click()
+                self.assertEqual(json.loads(Path(d.value.path()).read_text(encoding='utf-8'))['draft'],'저장소가 막힌 탭의 입력')
+                tab.close()
+        self.assertEqual(self.keys(),[],'nothing was written as if storage were empty')
+
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -26,7 +26,10 @@ const session=(()=>{try{return runtimeStorage(window.sessionStorage);}catch{retu
 function rememberOpen(id:string|null){try{session?.setItem(OPEN_KEY,id??'');}catch{/* Per-tab convenience only. */}
   document.documentElement.dataset.entryId=id??'';}
 const locks=(()=>{try{return navigator.locks??null;}catch{return null;}})();
-const workspace=new WorkspaceStore(runtimeStorage(window.localStorage),locks?{request:(name,callback)=>locks.request(name,callback as ()=>Promise<unknown>)}:null);
+// Even reading window.localStorage can throw (SecurityError); every access then fails as STORAGE_DENIED.
+const denied=():never=>{throw new Error('STORAGE_DENIED');};
+const local=(()=>{try{return runtimeStorage(window.localStorage);}catch{return {getItem:denied,setItem:denied};}})();
+const workspace=new WorkspaceStore(local,locks?{request:(name,callback)=>locks.request(name,callback as ()=>Promise<unknown>)}:null);
 let config:RuntimeConfig|null=null;
 let controller:AbortController|null=null;
 // View preferences are ephemeral. They never enter the persisted project or request schema.
@@ -75,6 +78,7 @@ const storageMessages:Record<string,string>={
   WRITE_FAILED:'자동 저장하지 못했습니다. 저장 권한을 확인하세요. 입력은 이 탭에 남아 있습니다. 닫기 전에 복구 파일을 저장하세요.',
   TRASHED:'다른 탭에서 이 프로젝트를 휴지통으로 옮겼거나 휴지통에서 되살려, 이 탭이 연 뒤의 상태와 달라졌습니다. 이 탭의 변경은 저장하지 않았고 입력은 이 탭에 남아 있습니다. 백업 파일로 저장하거나 목록에서 다시 여세요.',
   ENTRY_MISSING:'저장할 프로젝트를 목록에서 찾지 못해 저장하지 않았습니다. 입력은 이 탭에 남아 있습니다. 백업 파일로 저장하세요.',
+  STORAGE_DENIED:'브라우저가 이 페이지의 저장소 접근을 막아 기존 저장 내용을 읽지도 저장하지도 못했습니다. 비어 있는 것으로 보고 덮어쓰지 않았습니다. 입력은 이 탭에만 있으니 닫기 전에 백업 파일을 저장하세요.',
   LOCKS_UNAVAILABLE:'이 브라우저에서는 여러 탭이 동시에 저장하지 않도록 막는 기능(Web Locks)을 쓸 수 없어 저장하지 않았습니다. 기존 저장 내용은 읽을 수 있고, 입력은 이 탭에 남아 있습니다. 백업 파일로 저장하세요.',
   LEGACY_READONLY:'이전 형식으로 저장된 이 내용은 새 저장 형식으로 옮기지 않은 읽기 전용 자료라 저장하지 않았습니다. 백업 파일로 저장한 뒤 ‘백업 파일 불러오기’로 사본을 만들면 이어갈 수 있어요.'};
 await workspace.init();
@@ -85,6 +89,7 @@ await workspace.init();
   // Trashed or unreadable saves count: the list is the only way back to them.
   if(entry)openEntry(entry);
   else if(remembered==='legacy'&&workspace.legacy)openLegacy();
+  else if(workspace.readError==='STORAGE_DENIED')startNew(); // nothing to list: keep working in memory, with the reason shown
   else if(workspace.entries().length||workspace.legacy||workspace.readError)route='projects';
   else startNew();
 }
@@ -308,7 +313,9 @@ async function generate(id:string) {
   try {started=begin(project,id);} catch {commit({...project,notice:'AI 전송 문맥이 한도를 넘거나 유효하지 않아 보내지 않았습니다. 확정 기준을 잘라 보내지 않았습니다. 작업문 복사·Markdown 저장과 복구 파일은 계속 쓸 수 있습니다.'});return;}
   controller?.abort();const active=new AbortController();controller=active;commit(started.project);
   // Copies can share a project ID: a late answer is applied only to the same entry in the same activation.
-  const owner=target,activation=projectEpoch,current=()=>target===owner&&projectEpoch===activation;
+  // projectEpoch changes on every real switch; a new project's first save (new -> entry) is not a switch.
+  const ownerEntry=target.kind==='entry'?target.ref.entryId:null,activation=projectEpoch;
+  const current=()=>projectEpoch===activation&&(ownerEntry===null||target.kind==='entry'&&target.ref.entryId===ownerEntry);
   $('pending-bar').scrollIntoView({block:'nearest'});
   try {
     const data=await requestAdvice(started.request,active.signal);
@@ -725,8 +732,9 @@ $('result-file-input').addEventListener('change',async()=>{
 });
 $('import-file').addEventListener('change',async()=>{
   const input=$<HTMLInputElement>('import-file'),file=input.files?.[0];input.value='';if(!file)return;
-  const read=++recoveryRead,epoch=++projectEpoch,revision=project.revision,projectId=project.id;
-  resultRead++;resultSelection=null;resultMessage='';lastFileExport=null;renderResultFile();
+  // Choosing or cancelling a file is not a switch: a pending answer or result preview stays valid until a copy opens
+  // (openEntry then resets them). Only a newer file choice supersedes this read.
+  const read=++recoveryRead,epoch=projectEpoch,revision=project.revision,projectId=project.id;
   try {
     if(file.size>FILE_LIMIT)throw new Error();const raw=await file.text();
     if(read!==recoveryRead||epoch!==projectEpoch)return;
@@ -736,11 +744,19 @@ $('import-file').addEventListener('change',async()=>{
     // FLOW083: a recovery file becomes a separate entry with a NEW entryId only; Project.id, tasks, sources,
     // returnIds and result files stay as in the file, so an exact result file still matches inside that entry.
     // The open project is never replaced, and nothing changes screen until the copy is written.
-    imported.pending=null;
+    imported.pending=null;const warned=memoryDirty;
     await flushSaves();
+    if(read!==recoveryRead||epoch!==projectEpoch)return;
+    // The flush itself may fail (another tab saved this project, quota): ask again instead of leaving that input.
+    if(memoryDirty&&!warned&&!confirm('이 탭에 저장되지 않은 변경이 있어요. 사본을 열면 이 화면을 떠나 그 변경이 사라질 수 있어요. 먼저 백업 파일을 저장하세요.\n그래도 사본을 열까요?'))return;
+    const shown=target.kind==='entry'?target.ref.entryId:target.kind,shownRevision=project.revision;
     let ref:EntryRef;
     try {ref=await workspace.create(imported,'import');}
-    catch(e) {const message=`백업 파일을 새 프로젝트로 저장하지 못했습니다. ${saveMessage(e)} 지금 프로젝트와 입력은 그대로입니다.`;project={...project,notice:message};listNotice=message;render();return;}
+    catch(e) {const message=`백업 파일을 새 프로젝트로 저장하지 못했습니다. ${saveMessage(e)} 지금 프로젝트와 입력은 그대로입니다.`;listNotice=message;if(read===recoveryRead&&epoch===projectEpoch)project={...project,notice:message};render();return;}
+    // Edits or another selection while the copy was written win: the copy is listed, the current screen stays.
+    if(read!==recoveryRead||epoch!==projectEpoch||project.revision!==shownRevision||(target.kind==='entry'?target.ref.entryId:target.kind)!==shown||pendingSave||draining) {
+      project={...project,notice:`“${imported.name}” 사본은 ‘내 프로젝트’에 추가했어요. 그 사이 이 화면이 바뀌어 지금 화면은 그대로 두었어요.`};renderStatus();return;
+    }
     const entry=workspace.entries().find(e=>e.entryId===ref.entryId)!;
     openEntry(entry);project={...project,notice:`${imported.notice?`${imported.notice} `:''}“${imported.name}”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요.`};
     render();restoreDraftPanels();

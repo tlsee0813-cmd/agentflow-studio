@@ -88,3 +88,13 @@ test('F083-S8 a quota failure keeps the stored workspace and reports it; nothing
   await assert.rejects(w.trash(ref.entryId),e=>e.name==='QuotaExceededError');
   assert.equal(storage.getItem(WORKSPACE_KEY),before);
 });
+
+test('F083-S9 a refused storage read is not an empty workspace: no migration, no create, nothing written', async () => {
+  const raw=serializeProject(project('기존 프로젝트')),storage=new Memory({[STORAGE_KEY]:raw});
+  const getItem=storage.getItem.bind(storage);let denied=true;
+  storage.getItem=k=>{if(denied)throw Object.assign(new Error('denied'),{name:'SecurityError'});return getItem(k);};
+  const w=new WorkspaceStore(storage,new Locks(),ids);await w.init();
+  assert.equal(w.readError,'STORAGE_DENIED');assert.equal(w.writable,false);assert.deepEqual(w.entries(),[]);assert.equal(w.legacy,null);
+  await assert.rejects(w.create(project('새것'),'new'),/STORAGE_DENIED/);
+  denied=false;assert.equal(storage.getItem(WORKSPACE_KEY),null);assert.equal(storage.getItem(STORAGE_KEY),raw);
+});
