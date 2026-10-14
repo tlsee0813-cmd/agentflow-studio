@@ -37,9 +37,13 @@ test('G097-1 the same idea: one question, two answers give different scope and c
 });
 
 test('G097-2 enough existing information: note, a user decision or an earlier area request already answers it, so no question',()=>{
-  assert.match(ask(...Object.values(plan('예약받기 — 공방이 확인 후 확정'))).reply.proposal.scope,/확인 대기/);
+  // GUIDE097-R1 (R2): these used to assert a confirm/instant draft read out of the free sentence itself. That reading also turned
+  // bans and deferrals into a positive choice, so MOCK now quotes the original with what it is (idea / decision) and defers to it.
+  const byNote=ask(...Object.values(plan('예약받기 — 공방이 확인 후 확정'))).reply;assert.equal(byNote.question,null);
+  assert.ok(byNote.proposal.scope.includes('[영역 구상] ‘예약받기 — 공방이 확인 후 확정’')&&!/확인 대기/.test(byNote.proposal.scope));
   let {p,area}=plan();p=D.recordBasis(D.submit(D.editDraft(p,'사이트 첫 화면 문구를 정해 주세요.'),undefined,null),'예약은 즉시 확정','confirmed');
-  const r=ask(p,area);assert.equal(r.reply.question,null);assert.match(r.reply.proposal.scope,/그 자리에서 예약이 확정/);assert.ok(G.readOf(r.req).some(x=>x.startsWith('사용자 결정')));
+  const r=ask(p,area);assert.equal(r.reply.question,null);assert.ok(r.reply.proposal.scope.includes('사용자 확정] ‘예약은 즉시 확정’'));assert.ok(!/그 자리에서 예약이 확정/.test(r.reply.proposal.scope));
+  assert.ok(G.readOf(r.req).some(x=>x.startsWith('사용자 결정')));
   ({p,area}=plan());p=D.submit(D.editDraft(p,'예약은 공방 승인 후 확정되게 접수 화면을 만들어 주세요.'),undefined,area);
   const w=ask(p,area);assert.equal(w.reply.question,null);assert.equal(w.req.areaWork.length,1);assert.match(w.reply.proposal.open.join(' '),/이전 요청과 겹치는지/);
   assert.match(G.proposalText('예약',w.reply.proposal,!w.req.areaWork.length),/다음 작업/);
@@ -129,4 +133,36 @@ test('G097-7 fake upstream failures map to fixed codes; a second question, extra
   // A slow upstream past the timeout is a fixed timeout code; the request is not retried.
   let n=0;await withServer(cfg({mode:'deepseek',apiKey:KEY,allowPaid:true,timeoutMs:100}),async port=>{const r=await post(port,G.buildGuideRequest(p,area,null));assert.equal(r.data.error.code,'AI_TIMEOUT');assert.equal(n,1);},
     {fetchImpl:(_u,init)=>{n++;return new Promise((_r,reject)=>init.signal.addEventListener('abort',()=>reject(new DOMException('aborted','AbortError'))));}});
+});
+
+// ---------- GUIDE097-R1 (independent review) ----------
+const instantText=/그 자리에서 예약이 확정/;
+test('G097-8 (R2) MOCK never turns a ban, a deferral, a quote or a free answer into a positive choice; status and wording are kept',()=>{
+  const cases=[['예약은 자동 확정하지 않는다. 접수만 받는다.','confirmed','사용자 확정'],['예약 즉시 확정은 보류한다.','deferred','사용자 보류']];
+  for(const [text,status,label] of cases) {
+    let {p,area}=plan();p=D.recordBasis(D.submit(D.editDraft(p,'사이트 첫 화면 문구를 정해 주세요.'),undefined,null),text,status);
+    const r=ask(p,area);assert.equal(r.reply.question,null,'existing material is respected, not asked again');
+    const pr=r.reply.proposal,all=`${pr.scope}\n${pr.checks}\n${pr.open.join('\n')}`;
+    assert.ok(!instantText.test(all)&&!/승인하면 확정/.test(all),`${text}\n${all}`);assert.ok(pr.scope.includes(`‘${text}’`),'the original wording is quoted as it is');assert.ok(pr.scope.includes(label),'with its status');
+    if(status==='deferred')assert.match(pr.open.join(' '),/사용자 보류/);
+  }
+  // The area idea and an earlier request are quoted as what they are (idea / request), never read as a decision.
+  const note=plan('예약받기 — 즉시 확정은 하지 않음'),n=ask(note.p,note.area).reply.proposal;
+  assert.ok(!instantText.test(n.scope)&&n.scope.includes('영역 구상')&&n.scope.includes('‘예약받기 — 즉시 확정은 하지 않음’'));
+  // A free or quoted answer is followed as written; only the MOCK's own option is mapped to its branch.
+  const {p,area}=plan(),q=ask(p,area).reply.question;
+  for(const said of ['바로 확정은 안 돼요','“바로 확정”이라고 하지 마세요','공방이 승인하지 않아도 확정']) {
+    const pr=ask(p,area,answered(q,said)).reply.proposal;assert.ok(!instantText.test(pr.scope)&&!/확인 대기/.test(pr.scope),said);assert.ok(pr.scope.includes(`‘${said}’`));
+  }
+  assert.match(ask(p,area,answered(q,q.options[0].label)).reply.proposal.scope,instantText);assert.match(ask(p,area,answered(q,q.options[1].label)).reply.proposal.scope,/확인 대기/);
+});
+
+test('G097-9 (R3) blank manual scope/checks are valid as in task edits; length and character checks stay',async()=>{
+  let {p,area}=plan();p=D.submit(D.editDraft(p,'예약 접수 화면을 만들어 주세요.'),undefined,area);
+  p=D.editTask(D.editTask(p,p.currentTaskId,'scope',''),p.currentTaskId,'checks','   ');
+  const req=G.buildGuideRequest(p,area,null);assert.deepEqual([req.areaWork[0].scope,req.areaWork[0].checks],['','   ']);
+  await withServer(cfg(),async port=>{const r=await post(port,req);assert.equal(r.status,200);assert.ok(r.data.reply);});
+  const w=req.areaWork[0];
+  for(const bad of ['x'.repeat(6001),'a\u0001b'])assert.throws(()=>validateGuideRequest({...req,areaWork:[{...w,scope:bad}]}));
+  assert.throws(()=>validateGuideRequest({...req,areaWork:[{...w,request:''}]}),'the request text itself is never blank');
 });

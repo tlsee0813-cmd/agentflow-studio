@@ -379,7 +379,7 @@ export function validateGuideRequest(v: unknown): GuideRequest {
   list(v.decisions); const ids=new Set<string>();
   for(const d of v.decisions) { obj(d,['id','text','status']); id(d.id); text(d.text); ensure(['confirmed','deferred','answered'].includes(d.status as string)); ensure(!ids.has(d.id as string)); ids.add(d.id as string); }
   list(v.areaWork,GUIDE_WORK);
-  for(const w of v.areaWork) { obj(w,['taskId','request','scope','checks']); id(w.taskId); text(w.request); if(w.scope!==null)text(w.scope,6000); if(w.checks!==null)text(w.checks,6000); }
+  for(const w of v.areaWork) { obj(w,['taskId','request','scope','checks']); id(w.taskId); text(w.request); if(w.scope!==null)text(w.scope,6000,true); if(w.checks!==null)text(w.checks,6000,true); } // Blank manual values are valid, as in editTask.
   if(v.answer!==null) { obj(v.answer,['question','text','disposition']); question(v.answer.question); text(v.answer.text); ensure(['provided','unknown','deferred'].includes(v.answer.disposition as string)); }
   ensure(new TextEncoder().encode(JSON.stringify(v)).length<=REQUEST_BYTES,'CONTEXT_TOO_LARGE');
   return structuredClone(v) as unknown as GuideRequest;

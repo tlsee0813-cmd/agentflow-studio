@@ -92,4 +92,48 @@ class AreaGuidance(unittest.TestCase):
         expect(self.page.locator('#guide-notice')).to_contain_text('작성 중인 요청이 있어 초안을 넣지 않았어요');self.assertEqual(self.state()['draft'],'작성 중인 내 요청')
         expect(self.page.locator('#guide-text')).to_have_value(mine);self.assertEqual(self.state()['tasks'],[])
 
+    # ---------- GUIDE097-R1 (R1): a reply that arrives after the user edited the draft never replaces the edit ----------
+    def test_04_edit_while_waiting_is_never_overwritten(self):
+        import json,re
+        booking,works=self.start([('예약','예약받기'),('작품','사진으로 작품 소개')]);self.open_area('예약')
+        self.page.locator('#guide-start').click();self.page.locator('#guide-option-0').click()
+        first=self.page.locator('#guide-text');expect(first).to_have_value(re.compile('그 자리에서'));original=first.input_value()
+        # Real delayed HTTP: the request is held in the browser, then sent to the real local MOCK server.
+        held=self.hold();self.page.locator('#guide-again').click();self.page.wait_for_function('()=>document.querySelector("#guide-stop")')
+        mine=original+'\n(기다리는 동안 직접 고침)';first.fill(mine);held[0].continue_()
+        self.page.wait_for_function('()=>!document.querySelector("#guide-stop")')
+        self.assertEqual(first.input_value(),mine,'the reply must not replace the edit made while waiting')
+        expect(self.page.locator('#guide-notice')).to_contain_text('직접 고친 내용이 있어 새 초안으로 바꾸지 않았어요');expect(self.page.locator('#guide-take-incoming')).to_be_visible()
+        self.page.screenshot(path=str(base.OUT/'guide097-r1-held.png'),full_page=True)
+        # Keeping the edit is the default; replacing it is an explicit choice.
+        self.page.locator('#guide-keep-mine').click();expect(first).to_have_value(mine);expect(self.page.locator('#guide-take-incoming')).to_have_count(0)
+        # An edit that returns to the same value is still the user's: the reply is held, not applied.
+        self.page.locator('#guide-revert').click();expect(first).to_have_value(original)
+        self.page.locator('#guide-again').click();self.page.wait_for_function('()=>document.querySelector("#guide-stop")')
+        first.fill(original+'x');first.fill(original);held[1].continue_()
+        expect(self.page.locator('#guide-take-incoming')).to_be_visible();expect(first).to_have_value(original)
+        self.page.locator('#guide-take-incoming').click();expect(first).to_have_value(re.compile('그 자리에서'));expect(self.page.locator('#guide-edited')).to_have_text('')
+        # Area switch while waiting: the edit stays with its area; the reply is held there.
+        self.page.locator('#guide-again').click();self.page.wait_for_function('()=>document.querySelector("#guide-stop")')
+        first.fill('다른 영역으로 가기 전에 고친 초안');self.open_area('작품');held[2].continue_();self.page.wait_for_timeout(300)
+        self.open_area('예약');expect(self.page.locator('#guide-text')).to_have_value('다른 영역으로 가기 전에 고친 초안');expect(self.page.locator('#guide-take-incoming')).to_be_visible()
+        self.page.locator('#guide-keep-mine').click()
+        # A question reply while edited (a draft with no answer yet: 작품 gets a draft directly). The reply is a labelled
+        # browser-side fake carrying the request's own ticket, since MOCK never asks there; it is held, the draft stays.
+        held2=self.hold();self.open_area('작품');self.page.locator('#guide-start').click();self.page.wait_for_function('()=>document.querySelector("#guide-stop")')
+        held2[0].continue_();expect(self.page.locator('#guide-text')).to_have_value(re.compile('사진으로 작품 소개'))
+        self.page.locator('#guide-again').click();self.page.wait_for_function('()=>document.querySelector("#guide-stop")')
+        self.page.locator('#guide-text').fill('질문이 와도 남아야 하는 초안')
+        req=json.loads(held2[1].request.post_data);self.assertIsNone(req['answer'])
+        held2[1].fulfill(status=200,content_type='application/json',body=json.dumps({'mode':'mock','ticket':req['ticket'],'reply':{'question':{'kind':'fact','text':'확인할 점?','why':'시험','options':[]},'proposal':None}}))
+        expect(self.page.locator('#guide-notice')).to_contain_text('직접 고친 내용이 있어');expect(self.page.locator('#guide-text')).to_have_value('질문이 와도 남아야 하는 초안')
+        expect(self.page.locator('#guide-question')).to_have_count(0)
+        # Cancel while waiting after an edit: the edit stays.
+        held3=self.hold();self.page.locator('#guide-keep-mine').click();self.page.locator('#guide-revert').click();self.page.locator('#guide-again').click()
+        self.page.wait_for_function('()=>document.querySelector("#guide-stop")');self.page.locator('#guide-text').fill('중단해도 남는 초안');self.page.locator('#guide-stop').click()
+        try:held3[0].continue_()
+        except Exception:pass
+        self.page.wait_for_timeout(200);expect(self.page.locator('#guide-text')).to_have_value('중단해도 남는 초안')
+        self.assertEqual(self.state()['tasks'],[],'nothing written before adoption')
+
 if __name__=='__main__':unittest.main(verbosity=2)

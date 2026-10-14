@@ -1,4 +1,4 @@
-import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source, type Area, type RelationKind, type Point, type Question, type GuideAnswer, type Proposal } from '../shared/types.js';
+import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source, type Area, type RelationKind, type Point, type Question, type GuideAnswer, type GuideReply, type Proposal } from '../shared/types.js';
 import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask,
   areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
@@ -43,8 +43,10 @@ let viewArea:string|null=null;
 type MapView={x:number;y:number;s:number};
 let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
 /** GUIDE097: area guidance per project and area, in this tab's memory only (declared early: resets use it). */
+/** gen counts the user's edits of the draft; a reply that arrives after one is held in incoming, never applied over it. */
+type GuideApply={reply:GuideReply;mode:'mock'|'deepseek';read:string[];areaName:string;first:boolean};
 type Guide={question:Question|null;answer:GuideAnswer|null;proposal:Proposal|null;mode:'mock'|'deepseek'|null;read:string[];text:string;base:string;
-  answerDraft:string;pending:{requestId:string;controller:AbortController}|null;notice:string|null};
+  answerDraft:string;pending:{requestId:string;controller:AbortController}|null;notice:string|null;gen:number;incoming:GuideApply|null};
 const guides=new Map<string,Guide>();
 /** FLOW091-C: the task whose background preview the user opened (survives redraws such as an autosave). */
 let backgroundOpen:string|null=null;
@@ -1063,10 +1065,15 @@ function taskEntry(t:Task,placing:boolean):HTMLElement {
 const guideKey=(areaId:string)=>`${project.id}:${areaId}`;
 function guideOf(areaId:string):Guide {
   let g=guides.get(guideKey(areaId));
-  if(!g){g={question:null,answer:null,proposal:null,mode:null,read:[],text:'',base:'',answerDraft:'',pending:null,notice:null};guides.set(guideKey(areaId),g);}
+  if(!g){g={question:null,answer:null,proposal:null,mode:null,read:[],text:'',base:'',answerDraft:'',pending:null,notice:null,gen:0,incoming:null};guides.set(guideKey(areaId),g);}
   return g;
 }
 const guideEdited=(g:Guide)=>g.proposal!==null&&g.text!==g.base;
+function applyGuide(g:Guide,x:GuideApply) {
+  g.mode=x.mode;g.read=x.read;g.incoming=null;
+  if(x.reply.question){g.question=x.reply.question;g.proposal=null;}
+  else {const prop=x.reply.proposal!;g.proposal=prop;g.text=g.base=proposalText(x.areaName,prop,x.first);}
+}
 /** One request for this area. A reply is applied only to the same project activation, the same pending request, and only
  * while the material it was built from (purpose, this area, decisions, this area's requests, the answer) is unchanged. */
 async function askGuide(areaId:string) {
@@ -1074,7 +1081,7 @@ async function askGuide(areaId:string) {
   if(!readyForAI()){g.notice=config?.mode==='deepseek'?'실제 AI 안내는 서버 설정과 위 연결 메뉴의 전송 동의가 필요해요. 직접 쓰는 요청은 그대로 쓸 수 있어요.':'정리 방식을 확인하지 못했어요.';render();return;}
   let req;
   try {req=buildGuideRequest(project,areaId,g.answer);} catch {g.notice='보낼 자료가 한도(128 KiB)를 넘거나 유효하지 않아 보내지 않았어요. 사용자 결정은 잘라 보내지 않아요. 직접 요청을 쓸 수 있어요.';render();return;}
-  const active=new AbortController(),key=guideKey(areaId),digest=guideDigest(req),epoch=projectEpoch;
+  const active=new AbortController(),key=guideKey(areaId),digest=guideDigest(req),epoch=projectEpoch,gen=g.gen;
   g.pending={requestId:req.ticket.requestId,controller:active};g.notice=null;render();
   const mine=()=>epoch===projectEpoch&&guides.get(key)===g&&g.pending?.requestId===req.ticket.requestId;
   try {
@@ -1083,9 +1090,10 @@ async function askGuide(areaId:string) {
     if(data.mode!==config!.mode)throw new Error('INVALID_RESPONSE');
     let now:string|null=null;try{now=guideDigest(buildGuideRequest(project,areaId,g.answer));}catch{/* area archived or removed */}
     if(now!==digest){g.notice='기다리는 동안 목적·영역 구상·결정이 바뀌어 이 응답은 적용하지 않았어요. 입력과 초안은 그대로예요. 다시 받을 수 있어요.';return;}
-    g.mode=data.mode;g.read=readOf(req);
-    if(data.reply.question){g.question=data.reply.question;g.proposal=null;}
-    else {const prop=data.reply.proposal!;g.proposal=prop;g.text=g.base=proposalText(areaById(areaId)?.name??req.area.name,prop,!req.areaWork.length);}
+    const x:GuideApply={reply:data.reply,mode:data.mode,read:readOf(req),areaName:areaById(areaId)?.name??req.area.name,first:!req.areaWork.length};
+    // GUIDE097-R1: any edit after the request was sent (even one back to the same text) keeps the screen as it is.
+    if(g.proposal!==null&&g.gen!==gen){g.incoming=x;g.notice='기다리는 동안 직접 고친 내용이 있어 새 초안으로 바꾸지 않았어요. 화면의 초안은 그대로예요. 새 응답을 쓰려면 ‘새 응답으로 바꾸기’를 누르세요(지금 초안은 버려져요).';return;}
+    applyGuide(g,x);
   } catch(e) {
     if(!active.signal.aborted&&mine()){const code=e instanceof Error?e.message:'';g.notice=`${errorMessages[code]??(e instanceof Error&&e.name==='ContextError'?errorMessages.INVALID_RESPONSE:'요청이 실패했어요.')} 입력·답·초안은 그대로예요. 다시 받을 수 있어요.`;}
   } finally {if(guides.get(key)===g&&g.pending?.requestId===req.ticket.requestId)g.pending=null;if(epoch===projectEpoch)render();}
@@ -1140,9 +1148,13 @@ function guidePanel(a:Area,hasRequests:boolean):HTMLElement {
   if(g.answer)sec.append(node('p',`질문: ${g.answer.question.text} → ${g.answer.disposition==='provided'?g.answer.text:g.answer.disposition==='unknown'?'모름':'보류'}`,'hint'));
   const area=node('textarea');area.id='guide-text';area.rows=8;area.maxLength=12000;area.value=g.text;area.setAttribute('aria-label','요청 초안');
   const edited=node('p',guideEdited(g)?'직접 고친 초안이에요.':'','hint');edited.id='guide-edited';
-  area.addEventListener('input',()=>{g.text=area.value;edited.textContent=guideEdited(g)?'직접 고친 초안이에요.':'';});
+  area.addEventListener('input',()=>{g.text=area.value;g.gen++;edited.textContent=guideEdited(g)?'직접 고친 초안이에요.':'';});
+  if(g.incoming){const hold=node('div','','row');hold.id='guide-incoming';
+    hold.append(btn('내 초안 유지',()=>{g.incoming=null;g.notice=null;render();},'secondary','guide-keep-mine'),
+      btn('새 응답으로 바꾸기 · 지금 초안 버림',()=>{applyGuide(g,g.incoming!);g.notice=null;render();},'quiet','guide-take-incoming'));
+    sec.append(hold);}
   const row=node('div','','row'),use=btn('이 초안으로 요청 쓰기',()=>adoptGuide(a),'primary','guide-adopt');use.disabled=busy;row.append(use);
-  if(guideEdited(g))row.append(btn('고친 내용 되돌리기',()=>{g.text=g.base;render();},'quiet','guide-revert'));
+  if(guideEdited(g))row.append(btn('고친 내용 되돌리기',()=>{g.text=g.base;g.gen++;render();},'quiet','guide-revert'));
   else {
     const again=btn('다시 받기',()=>void askGuide(a.id),'quiet','guide-again');again.disabled=busy;row.append(again);
     if(g.answer){const change=btn('질문 답 바꾸기',()=>{g.question=g.answer!.question;g.answer=null;g.proposal=null;g.text=g.base='';render();},'quiet','guide-change-answer');change.disabled=busy;row.append(change);}

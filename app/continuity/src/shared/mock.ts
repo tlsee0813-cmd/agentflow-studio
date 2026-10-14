@@ -1,4 +1,4 @@
-import { type ContextRequest, type Advice, type GuideRequest, type GuideReply, type Proposal } from './types.js';
+import { BASIS_LABEL, type ContextRequest, type Advice, type GuideRequest, type GuideReply, type Proposal } from './types.js';
 /** A corrected condition text as response items (<=12 x 1000 chars, none blank), cut only between words/lines.
  * Joined they give the text back; blank text gives none. Only a whitespace run longer than one item can shrink. */
 function conditionItems(value:string):string[] {
@@ -86,31 +86,41 @@ export function mockAdvice(request:ContextRequest):Advice {
   }
   return out;
 }
-/* GUIDE097: deterministic guidance preview. It knows one rule (how a reservation is confirmed) and otherwise drafts a
- * neutral smallest-first-step from the user's own words. No language-model call; not general comprehension. */
-const INSTANT=/즉시\s*확정|바로\s*(?:예약\s*)?확정|자동\s*확정/,CONFIRM=/확인\s*(?:뒤|후)|승인|수락|참여\s*확인/;
+/* GUIDE097: deterministic guidance preview. It knows one question (how a reservation is confirmed) and maps only its own
+ * option labels to a branch. It never reads a choice out of free sentences (an idea, a decision, a request, a free or quoted
+ * answer): those are quoted as they are, with what they are, and the draft defers to them. No language-model call. */
+const TOPIC=/확정|승인|수락|참여\s*확인/;
 export const GUIDE_QUESTION={kind:'choice' as const,text:'예약이 들어오면 바로 확정할까요, 공방이 확인한 뒤 확정할까요?',why:'고객에게 예약 확정이 보이는 시점과 이번에 만들 화면 범위가 달라집니다. 모르면 접수까지만 만들 수 있어요.',options:[
   {label:'바로 확정',consequence:'고객이 시간을 고르면 그 자리에서 예약이 확정됩니다. 공방의 승인 단계는 없습니다.'},
   {label:'공방 확인 뒤 확정',consequence:'예약은 ‘확인 대기’로 접수되고, 공방이 승인해야 확정됩니다.'}]};
+const quote=(text:string)=>`‘${text.length>300?`${text.slice(0,300)} …(원문은 기록에 그대로)`:text}’`;
 export function mockGuidance(req:GuideRequest):GuideReply {
-  const a=req.area,idea=a.note??a.name,known=[a.note??'',...req.decisions.map(d=>d.text),...req.areaWork.flatMap(w=>[w.request,w.scope??'',w.checks??''])].join('\n');
+  const a=req.area,idea=a.note??a.name;
   const reservation=/예약|대기/.test(`${a.name}\n${a.note??''}`);
   const open:string[]=[...(a.note===null?['영역 구상이 비어 있어 무엇을 만들지 — 초안을 직접 고쳐 적어 주세요']:[]),...(req.areaWork.length?['이 영역의 이전 요청과 겹치는지 — 직접 확인']:[])];
   const proposal=(scope:string,checks:string,more:string[]=[]):GuideReply=>({question:null,proposal:{goal:idea,scope,checks,open:[...more,...open]} satisfies Proposal});
   if(reservation) {
     const ans=req.answer,said=ans?.disposition==='provided'?ans.text:null;
-    const instant=said!==null?said===GUIDE_QUESTION.options[0]!.label||INSTANT.test(said)&&!CONFIRM.test(said):INSTANT.test(known)&&!CONFIRM.test(known);
-    const confirm=said!==null?said===GUIDE_QUESTION.options[1]!.label||CONFIRM.test(said)&&!INSTANT.test(said):CONFIRM.test(known)&&!INSTANT.test(known);
-    if(instant)return proposal('고객이 빈 시간을 고르면 그 자리에서 예약이 확정됩니다. 공방의 승인 단계는 만들지 않습니다. 결제·알림·취소 정책은 이번에 더하지 않습니다.',
+    // Only this MOCK's own option, by its exact label. Anything else the user wrote is followed as written.
+    const option=said===null?-1:GUIDE_QUESTION.options.findIndex(o=>o.label===said);
+    if(option===0)return proposal('고객이 빈 시간을 고르면 그 자리에서 예약이 확정됩니다. 공방의 승인 단계는 만들지 않습니다. 결제·알림·취소 정책은 이번에 더하지 않습니다.',
       '예약 직후 고객 화면에 ‘예약 확정’이 보이는지, 이미 확정된 같은 시간에 두 번째 예약이 확정되지 않는지 확인합니다.');
-    if(confirm)return proposal('고객 예약은 ‘확인 대기’로 접수되고, 공방이 승인하면 확정됩니다. 승인 기한·거절 안내는 정하지 않았으므로 임의로 정하지 않습니다. 결제·알림은 이번에 더하지 않습니다.',
+    if(option===1)return proposal('고객 예약은 ‘확인 대기’로 접수되고, 공방이 승인하면 확정됩니다. 승인 기한·거절 안내는 정하지 않았으므로 임의로 정하지 않습니다. 결제·알림은 이번에 더하지 않습니다.',
       '접수 직후에는 ‘확인 대기’로 보이고 확정으로 보이지 않는지, 공방이 승인한 뒤에만 ‘예약 확정’으로 바뀌는지 확인합니다.',['승인 기한과 거절 안내']);
-    if(said!==null)return proposal(`예약 확정 방식은 사용자 답변 원문을 따릅니다: ‘${said.slice(0,300)}’. 답변에 없는 정책은 더하지 않습니다.`,
-      '답변에 적힌 방식대로 예약이 접수·확정되는지 확인하고, 답변이 정하지 않은 동작은 만들지 않았는지 확인합니다.');
+    if(said!==null)return proposal(`예약 확정 방식은 사용자 답변 원문을 따릅니다: ${quote(said)}. MOCK은 이 답의 뜻을 해석하지 않으며, 답변에 없는 정책은 더하지 않습니다.`,
+      '답변 원문에 적힌 대로 예약이 접수·확정되는지 확인하고, 답변이 정하지 않은 동작은 만들지 않았는지 확인합니다.');
     if(ans)return proposal('고객이 원하는 시간을 골라 예약 요청을 남기는 접수까지만 만듭니다. 확정 방식(바로/확인 뒤)은 사용자가 아직 정하지 않았으므로 확정 처리는 만들지 않습니다.',
       '예약 요청이 접수 기록으로 남는지 확인하고, 확정·승인 동작이 새로 생기지 않았는지 확인합니다.',[`예약 확정 방식 — 사용자 ${ans.disposition==='unknown'?'모름':'보류'}`]);
-    if(!INSTANT.test(known)&&!CONFIRM.test(known))return {question:structuredClone(GUIDE_QUESTION),proposal:null};
-    return proposal('기존 기록에 확정 방식이 두 가지로 적혀 있어 이번 범위에서 정하지 않고, 예약 접수까지만 만듭니다.','예약 요청이 접수 기록으로 남는지 확인하고, 확정 방식을 임의로 고르지 않았는지 확인합니다.',['예약 확정 방식 — 기존 기록이 서로 다름']);
+    // Existing material that already speaks about confirmation is respected as written, never re-asked or read as a choice.
+    const cited=[...(a.note!==null?[{label:'영역 구상',text:a.note,deferred:false}]:[]),
+      ...req.decisions.map(d=>({label:`${d.id} ${BASIS_LABEL[d.status]}`,text:d.text,deferred:d.status==='deferred'})),
+      ...req.areaWork.flatMap(w=>[{label:'이 영역의 요청 원문',text:w.request,deferred:false},...(w.scope?[{label:'직접 고친 범위',text:w.scope,deferred:false}]:[]),...(w.checks?[{label:'직접 고친 완료 조건',text:w.checks,deferred:false}]:[])])]
+      .filter(c=>TOPIC.test(c.text));
+    if(!cited.length)return {question:structuredClone(GUIDE_QUESTION),proposal:null};
+    const shown=cited.slice(0,4);
+    return proposal(`예약 확정 방식은 아래 기존 기록 원문을 그대로 따릅니다. MOCK은 그 뜻을 해석하거나 새로 정하지 않습니다: ${shown.map(c=>`[${c.label}] ${quote(c.text)}`).join(' / ')}${cited.length>shown.length?` / 외 ${cited.length-shown.length}건은 기록에서 확인`:''}`,
+      '기존 기록 원문의 조건을 어기지 않았는지, 원문이 정하지 않은 확정 방식을 새로 만들지 않았는지 확인합니다.',
+      cited.filter(c=>c.deferred).map(c=>`${c.label.split(' ')[0]} 사용자 보류 — 정하지 않음`));
   }
   return proposal(`‘${idea.slice(0,300)}’에 필요한 가장 작은 화면·동작 하나만 만듭니다. 구상에 없는 정책·외부 연동·결제는 더하지 않습니다.`,
     '그 동작을 실제로 한 번 해 볼 수 있는지 확인하고, 확인한 것과 못 한 것을 나눠 보고합니다.');
