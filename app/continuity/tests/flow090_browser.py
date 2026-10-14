@@ -388,4 +388,25 @@ class SpatialWorkspace(unittest.TestCase):
         backup=json.loads(self.download('#backup','flow091c-backup.json').read_text(encoding='utf-8'))
         self.assertEqual(backup['schemaVersion'],'idea015.project.5');self.assertEqual([t['background'] for t in backup['tasks']],[t['background'] for t in saved['tasks']])
 
+    # ---------- FLOW093-U: the narrow settings sheet scrolls; its fields keep their height (real HTTP) ----------
+    def test_17_narrow_sheet_fields_keep_their_height(self):
+        self.page.set_viewport_size({'width':390,'height':844})
+        booking,notify=self.start(['예약','알림'])
+        self.page.locator(f'#list-open-{booking}').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#draft').fill('예약 화면');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('보고: 만들었다고 주장 '*10);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        self.page.locator('#nav-space').click()
+        size=lambda sel:self.page.locator(sel).bounding_box()['height']
+        self.page.locator(f'#list-select-{booking}').click();panel=self.page.locator('#area-panel');expect(panel).to_be_visible()
+        self.assertGreater(panel.evaluate('(e)=>e.scrollHeight-e.clientHeight'),0,'the panel content is taller than the sheet')
+        note0,name0=size('#panel-note'),size('#panel-name');self.assertGreaterEqual(note0,80);self.assertGreaterEqual(name0,36)
+        long='날짜와 시간을 골라 예약 · 아직 못 정함: 결제 방식과 취소 규칙 '*12
+        self.page.locator('#panel-note').fill(long);self.page.locator('#panel-note').focus();self.assertEqual(size('#panel-note'),note0,'focus and long text do not squeeze it')
+        self.page.locator('#panel-open').click();self.page.locator('#nav-space').click();expect(panel).to_be_hidden()
+        self.page.locator(f'#list-select-{booking}').click();expect(panel).to_be_visible()
+        expect(self.page.locator('#panel-note')).to_have_value(long);self.assertEqual(size('#panel-note'),note0);self.assertEqual(size('#panel-name'),name0)
+        self.page.locator('#panel-open').scroll_into_view_if_needed();expect(self.page.locator('#panel-open')).to_be_in_viewport()
+        self.page.screenshot(path=str(base.OUT/'flow093-sheet-390.png'))
+        self.page.set_viewport_size({'width':1265,'height':712});self.assertGreaterEqual(size('#panel-note'),80)
+
 if __name__=='__main__':unittest.main(verbosity=2)

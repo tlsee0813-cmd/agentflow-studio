@@ -2289,6 +2289,8 @@ button.area-card:hover,button.area-card:focus-visible{border-color:var(--accent)
 .map-scale{min-width:42px;text-align:center;color:var(--muted);font-size:12px}
 .map-empty{position:absolute;left:24px;top:24px;right:24px}
 .area-panel{width:300px;flex:none;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+/* FLOW093: the panel scrolls; its fields keep their own height (a capped flex column would squeeze the textarea). */
+.area-panel>*{flex-shrink:0}
 .area-panel .panel-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .area-panel label{font-size:12px;color:var(--muted);margin-top:4px}
 .area-panel input,.area-panel textarea{border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--paper)}
