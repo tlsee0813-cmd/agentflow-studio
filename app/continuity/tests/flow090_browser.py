@@ -377,7 +377,8 @@ class SpatialWorkspace(unittest.TestCase):
         self.assertEqual(len(self.state()['bases']),1,'the background is not recorded as a basis')
         # Edit the plan: A keeps its copy (and says the plan changed since), B gets the latest.
         self.page.locator('#nav-space').click();self.page.locator('#brief-edit > summary').click();self.page.locator('#brief-edit-text').fill('미용실과 네일숍 예약');self.page.locator('#brief-save').click()
-        self.page.locator('#nav-work').click();expect(self.page.locator('#background-changed')).to_be_attached()
+        self.page.locator('#nav-work').click();expect(self.page.locator('#background-preview > summary')).to_contain_text('그 뒤 구상이 바뀜')
+        expect(box).to_have_attribute('open','');self.page.wait_for_timeout(300);expect(self.page.locator('#background-changed')).to_be_visible()  # the opened preview stays open across views and redraws
         self.assertEqual(next(t for t in self.state()['tasks'] if t['id']==A)['background'],bg)
         self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('A 보고: 만들었다고 주장');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         report=self.state()['tasks'][-1];self.assertEqual(report['parentTaskId'],A);self.assertEqual(report['background'],bg)

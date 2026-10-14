@@ -41,6 +41,8 @@ let viewArea:string|null=null;
 // FLOW090-B1: map viewport and selection are this tab's view of one project; positions are project data.
 type MapView={x:number;y:number;s:number};
 let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
+/** FLOW091-C: the task whose background preview the user opened (survives redraws such as an autosave). */
+let backgroundOpen:string|null=null;
 // One move = one command. Undo re-applies only that position, only while it is still where the move put it.
 let posUndo:{id:string;from:Point|null;to:Point;at:number;key:boolean}[]=[];
 const MAP_KEY='agentflow.workspace.map';
@@ -80,7 +82,7 @@ const unreadable='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 �
 function resetEphemeral() {
   controller?.abort();controller=null;selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;
-  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;posUndo=[];
+  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
 function openEntry(entry:WorkspaceEntry) {
@@ -624,7 +626,7 @@ function renderWork(t:Task|null) {
 /** FLOW091-C: which plan copy goes out with this task. Fixed at the request; later plan edits are not applied to it. */
 function backgroundPreview(t:Task):HTMLElement {
   const b=t.background,own=!isReturnTask(project,t),box=details('','background-preview');box.className='background-preview';
-  const summary=box.querySelector('summary')!;
+  const summary=box.querySelector('summary')!;box.open=backgroundOpen===t.id;box.addEventListener('toggle',()=>{backgroundOpen=box.open?t.id:null;});
   if(!b){summary.textContent='작업문에 넣을 프로젝트 배경 · 이 작업에는 없음';
     box.append(node('p','이 작업에는 저장된 배경 사본이 없어요(배경을 저장하기 전에 쓴 작업이거나, 사본 없이 내보낸 작업에 돌아온 결과). 지금 전체 공간의 구상을 소급해 넣지 않아요.','hint'));return box;}
   if(b.brief===null&&b.area===null){summary.textContent='작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음';
@@ -635,6 +637,7 @@ function backgroundPreview(t:Task):HTMLElement {
   if(b.area){box.append(node('p',`요청 대상 영역 · ${b.area.name}`,'source-meta'));if(b.area.note!==null)box.append(node('div',b.area.note,'source-raw'));}
   const area=b.area?project.space.areas.find(a=>a.id===b.area!.id):undefined;
   const changed=(project.space.brief?.text??null)!==b.brief||(!!b.area&&(!area||area.name!==b.area.name||(area.note||null)!==b.area.note));
+  if(changed)summary.append(node('span',' · 그 뒤 구상이 바뀜 (이 사본은 그대로)','background-changed-tag'));
   if(changed){const line=node('p','전체 공간의 목적이나 이 영역의 이름·구상이 그 뒤 바뀌었어요. 이미 준비된 이 작업의 사본은 그대로이고, 다음에 쓰는 새 요청부터 최신 구상이 들어가요.','hint');line.id='background-changed';box.append(line);}
   return box;
 }
