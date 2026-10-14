@@ -33,9 +33,13 @@ export function readOf(req: GuideRequest): string[] {
     ...(req.answer ? [`질문 답변(${req.answer.disposition === 'provided' ? '답' : req.answer.disposition === 'unknown' ? '모름' : '보류'})`] : [])];
 }
 /** The draft request the user reviews and edits. Plain words; the user's edited text is what is sent. */
-export function proposalText(areaName: string, p: Proposal, first = true): string {
+/** GUIDE097-R2: the user's answer is added whole, as its own section, so it reaches the request record (and every later handoff)
+ * on adoption. The guidance memory is dropped then; the request source is the record. Nothing here shortens it. */
+export function proposalText(areaName: string, p: Proposal, first = true, answer: GuideAnswer | null = null): string {
   return [`‘${areaName}’ 영역의 ${first ? '첫' : '다음'} 작업을 해 주세요.`, `목표: ${p.goal}`, `이번 범위: ${p.scope}`, `완료 조건: ${p.checks}`,
-    ...(p.open.length ? [`아직 정하지 않은 것 (임의로 정하지 마세요): ${p.open.join(' / ')}`] : [])].join('\n');
+    ...(p.open.length ? [`아직 정하지 않은 것 (임의로 정하지 마세요): ${p.open.join(' / ')}`] : []),
+    ...(answer ? ['', '안내 질문과 사용자 답변 원문:', `질문: ${answer.question.text}`,
+      `답(${answer.disposition === 'provided' ? '사용자 답변' : answer.disposition === 'unknown' ? '사용자 모름' : '사용자 보류'}): ${answer.text}`] : [])].join('\n');
 }
 /** Adoption: the user's (possibly edited) text becomes the unsent request for this area. An unsent draft is never replaced. */
 export function adoptProposal(p: Project, areaId: string, value: string): Project {

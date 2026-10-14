@@ -136,4 +136,20 @@ class AreaGuidance(unittest.TestCase):
         self.page.wait_for_timeout(200);expect(self.page.locator('#guide-text')).to_have_value('중단해도 남는 초안')
         self.assertEqual(self.state()['tasks'],[],'nothing written before adoption')
 
+    # ---------- GUIDE097-R2: a long free answer survives draft -> adoption -> request -> handoff, closing ban included ----------
+    def test_05_long_free_answer_kept_whole_after_adoption(self):
+        end='예약 확정 처리는 금지하고 접수만 받으세요.'
+        long='주말 클래스는 인원이 적어서 공방 사정에 따라 시작 시간이 바뀔 수 있으니 고객에게 그 점을 예약 화면에서 충분히 알려 주세요. '*6+end
+        (booking,)=self.start([('예약','예약받기')]);self.open_area('예약');self.page.locator('#guide-start').click()
+        self.page.locator('#guide-answer').fill(long);self.page.locator('#guide-answer-send').click()
+        text=self.page.locator('#guide-text');text.wait_for();self.assertIn(long,text.input_value(),'the draft holds the whole answer')
+        self.page.locator('#guide-adopt').click();expect(self.page.locator('#draft')).to_have_value(text_re(long))
+        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        s=self.state();self.assertIn(long,s['sources'][0]['text'],'the request record keeps it');self.assertEqual(s['tasks'][0]['areaId'],booking)
+        with self.page.expect_download() as d:self.page.locator('#download-work').click()
+        path=base.OUT/'guide097-r2-long-answer.md';d.value.save_as(path);self.assertIn(end,path.read_text(encoding='utf-8'))
+
+def text_re(fragment):
+    import re;return re.compile(re.escape(fragment))
+
 if __name__=='__main__':unittest.main(verbosity=2)

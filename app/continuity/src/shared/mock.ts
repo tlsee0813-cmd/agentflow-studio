@@ -93,7 +93,17 @@ const TOPIC=/확정|승인|수락|참여\s*확인/;
 export const GUIDE_QUESTION={kind:'choice' as const,text:'예약이 들어오면 바로 확정할까요, 공방이 확인한 뒤 확정할까요?',why:'고객에게 예약 확정이 보이는 시점과 이번에 만들 화면 범위가 달라집니다. 모르면 접수까지만 만들 수 있어요.',options:[
   {label:'바로 확정',consequence:'고객이 시간을 고르면 그 자리에서 예약이 확정됩니다. 공방의 승인 단계는 없습니다.'},
   {label:'공방 확인 뒤 확정',consequence:'예약은 ‘확인 대기’로 접수되고, 공방이 승인해야 확정됩니다.'}]};
-const quote=(text:string)=>`‘${text.length>300?`${text.slice(0,300)} …(원문은 기록에 그대로)`:text}’`;
+/** GUIDE097-R2: nothing is cut. A short original is quoted whole; a longer one, or one that no longer fits a field, is named by
+ * where its whole text actually is (a basis ID, the area idea in the background copy, the answer section of the draft). */
+const QUOTE=300,FIELD=2000,OPEN_ITEM=500;
+/** Join entries in order while they fit max; the rest are counted and named by their short refs (or only counted, if even that cannot fit). */
+function fitted(head:string,entries:{full:string;ref:string}[],max:number,where:string):string {
+  let out=head,i=0;
+  for(;i<entries.length;i++){const next=`${i?' / ':''}${entries[i]!.full}`;if(out.length+next.length>max-120)break;out+=next;}
+  if(i===entries.length)return out;
+  const rest=entries.slice(i),refs=` / 외 ${rest.length}건: ${rest.map(e=>e.ref).join(', ')} (각 원문은 ${where})`;
+  return out.length+refs.length<=max?out+refs:`${out} / 외 ${rest.length}건 (모두 ${where})`;
+}
 export function mockGuidance(req:GuideRequest):GuideReply {
   const a=req.area,idea=a.note??a.name;
   const reservation=/예약|대기/.test(`${a.name}\n${a.note??''}`);
@@ -107,20 +117,25 @@ export function mockGuidance(req:GuideRequest):GuideReply {
       '예약 직후 고객 화면에 ‘예약 확정’이 보이는지, 이미 확정된 같은 시간에 두 번째 예약이 확정되지 않는지 확인합니다.');
     if(option===1)return proposal('고객 예약은 ‘확인 대기’로 접수되고, 공방이 승인하면 확정됩니다. 승인 기한·거절 안내는 정하지 않았으므로 임의로 정하지 않습니다. 결제·알림은 이번에 더하지 않습니다.',
       '접수 직후에는 ‘확인 대기’로 보이고 확정으로 보이지 않는지, 공방이 승인한 뒤에만 ‘예약 확정’으로 바뀌는지 확인합니다.',['승인 기한과 거절 안내']);
-    if(said!==null)return proposal(`예약 확정 방식은 사용자 답변 원문을 따릅니다: ${quote(said)}. MOCK은 이 답의 뜻을 해석하지 않으며, 답변에 없는 정책은 더하지 않습니다.`,
+    // A long answer is not copied into this field: the draft carries the whole answer in its own section (proposalText).
+    if(said!==null)return proposal(`${said.length<=QUOTE?`예약 확정 방식은 사용자 답변 원문을 따릅니다: ‘${said}’.`:'예약 확정 방식은 이 요청 끝의 ‘안내 질문과 사용자 답변 원문’ 전문을 그대로 따릅니다(답이 길어 이 줄에는 옮기지 않음).'} MOCK은 이 답의 뜻을 해석하지 않으며, 답변에 없는 정책은 더하지 않습니다.`,
       '답변 원문에 적힌 대로 예약이 접수·확정되는지 확인하고, 답변이 정하지 않은 동작은 만들지 않았는지 확인합니다.');
     if(ans)return proposal('고객이 원하는 시간을 골라 예약 요청을 남기는 접수까지만 만듭니다. 확정 방식(바로/확인 뒤)은 사용자가 아직 정하지 않았으므로 확정 처리는 만들지 않습니다.',
       '예약 요청이 접수 기록으로 남는지 확인하고, 확정·승인 동작이 새로 생기지 않았는지 확인합니다.',[`예약 확정 방식 — 사용자 ${ans.disposition==='unknown'?'모름':'보류'}`]);
     // Existing material that already speaks about confirmation is respected as written, never re-asked or read as a choice.
-    const cited=[...(a.note!==null?[{label:'영역 구상',text:a.note,deferred:false}]:[]),
-      ...req.decisions.map(d=>({label:`${d.id} ${BASIS_LABEL[d.status]}`,text:d.text,deferred:d.status==='deferred'})),
-      ...req.areaWork.flatMap(w=>[{label:'이 영역의 요청 원문',text:w.request,deferred:false},...(w.scope?[{label:'직접 고친 범위',text:w.scope,deferred:false}]:[]),...(w.checks?[{label:'직접 고친 완료 조건',text:w.checks,deferred:false}]:[])])]
+    // ref = where the whole original is in every handoff: a basis by ID, the area idea in the background copy, a task's own fields.
+    const cited=[...(a.note!==null?[{label:'영역 구상',text:a.note,ref:'영역 구상(배경 사본)',deferred:null}]:[]),
+      ...req.decisions.map(d=>({label:`${d.id} ${BASIS_LABEL[d.status]}`,text:d.text,ref:`기준 ${d.id}`,deferred:d.status==='deferred'?d.id:null})),
+      ...req.areaWork.flatMap(w=>[{label:'이 영역의 요청 원문',text:w.request,ref:`작업 ${w.taskId}의 요청`,deferred:null},
+        ...(w.scope?[{label:'직접 고친 범위',text:w.scope,ref:`작업 ${w.taskId}의 범위`,deferred:null}]:[]),...(w.checks?[{label:'직접 고친 완료 조건',text:w.checks,ref:`작업 ${w.taskId}의 완료 조건`,deferred:null}]:[])])]
       .filter(c=>TOPIC.test(c.text));
     if(!cited.length)return {question:structuredClone(GUIDE_QUESTION),proposal:null};
-    const shown=cited.slice(0,4);
-    return proposal(`예약 확정 방식은 아래 기존 기록 원문을 그대로 따릅니다. MOCK은 그 뜻을 해석하거나 새로 정하지 않습니다: ${shown.map(c=>`[${c.label}] ${quote(c.text)}`).join(' / ')}${cited.length>shown.length?` / 외 ${cited.length-shown.length}건은 기록에서 확인`:''}`,
-      '기존 기록 원문의 조건을 어기지 않았는지, 원문이 정하지 않은 확정 방식을 새로 만들지 않았는지 확인합니다.',
-      cited.filter(c=>c.deferred).map(c=>`${c.label.split(' ')[0]} 사용자 보류 — 정하지 않음`));
+    const scope=fitted('예약 확정 방식은 아래 기존 기록 원문을 그대로 따릅니다. MOCK은 그 뜻을 해석하거나 새로 정하지 않습니다: ',
+      cited.map(c=>({full:c.text.length<=QUOTE?`[${c.label}] ‘${c.text}’`:`[${c.label}] 원문이 길어 ${c.ref}의 전문을 따름`,ref:c.ref})),FIELD,'앱 기록(기준 목록·배경 사본·영역 화면의 원문 보기)에 그대로 있음');
+    // R2-1: every deferral is named in ONE open item (the contract allows 6), never one item each.
+    const deferred=cited.flatMap(c=>c.deferred?[c.deferred]:[]);
+    const held=deferred.length?[fitted('확정 방식 관련 사용자 보류 — 정하지 않음: ',deferred.map(id=>({full:id,ref:id})),OPEN_ITEM,'작업문의 기준 목록에서 ‘사용자 보류’로 확인')]:[];
+    return proposal(scope,'기존 기록 원문의 조건을 어기지 않았는지, 원문이 정하지 않은 확정 방식을 새로 만들지 않았는지 확인합니다.',held);
   }
   return proposal(`‘${idea.slice(0,300)}’에 필요한 가장 작은 화면·동작 하나만 만듭니다. 구상에 없는 정책·외부 연동·결제는 더하지 않습니다.`,
     '그 동작을 실제로 한 번 해 볼 수 있는지 확인하고, 확인한 것과 못 한 것을 나눠 보고합니다.');

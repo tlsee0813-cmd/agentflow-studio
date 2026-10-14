@@ -166,3 +166,34 @@ test('G097-9 (R3) blank manual scope/checks are valid as in task edits; length a
   for(const bad of ['x'.repeat(6001),'a\u0001b'])assert.throws(()=>validateGuideRequest({...req,areaWork:[{...w,scope:bad}]}));
   assert.throws(()=>validateGuideRequest({...req,areaWork:[{...w,request:''}]}),'the request text itself is never blank');
 });
+
+// ---------- GUIDE097-R2 (narrow re-review) ----------
+test('G097-10 (R2-1) many deferred confirmation decisions stay inside the reply contract (max 6 open) and all are named',()=>{
+  for(const n of [6,7,40]) {
+    let {p,area}=plan();p=D.submit(D.editDraft(p,'사이트 첫 화면 문구를 정해 주세요.'),undefined,null);
+    for(let i=1;i<=n;i++)p=D.recordBasis(p,`예약 확정 방식 후보 ${i}는 보류한다.`,'deferred');
+    const req=G.buildGuideRequest(p,area,null),reply=validateGuideReply(mockGuidance(req),req),pr=reply.proposal;
+    assert.ok(pr.open.length<=6,`${n}: ${pr.open.length}`);
+    const named=`${pr.scope}\n${pr.open.join('\n')}`;
+    for(const d of req.decisions)assert.ok(new RegExp(`\\b${d.id}\\b`).test(named),`${n}: ${d.id} is named`);
+    assert.ok(!instantText.test(named));
+  }
+});
+
+const LONG=`${'주말 클래스는 인원이 적어서 공방 사정에 따라 시작 시간이 바뀔 수 있으니 고객에게 그 점을 예약 화면에서 충분히 알려 주세요. '.repeat(6)}예약 확정 처리는 금지하고 접수만 받으세요.`;
+test('G097-11 (R2-2) a long free answer is kept whole through draft, adoption, request and handoff; its closing ban is never cut',()=>{
+  assert.ok(LONG.length>400&&LONG.endsWith('예약 확정 처리는 금지하고 접수만 받으세요.'));
+  let {p,area}=plan();const q=ask(p,area).reply.question,ans=answered(q,LONG);
+  const req=G.buildGuideRequest(p,area,ans),pr=validateGuideReply(mockGuidance(req),req).proposal;
+  assert.ok(!/원문은 기록에 그대로/.test(pr.scope),'no cut quote that claims a record');assert.ok(!instantText.test(pr.scope)&&!/확인 대기/.test(pr.scope));
+  const draft=G.proposalText('예약',pr,true,ans);assert.ok(draft.includes(LONG),'the draft carries the whole answer');assert.ok(draft.includes(q.text),'with its question');
+  const sent=respond(D.submit(G.adoptProposal(p,area,draft)));
+  assert.ok(sent.sources.at(-1).text.includes(LONG),'the user request record holds it');assert.ok(D.handoffText(sent).includes('예약 확정 처리는 금지하고 접수만 받으세요.'));
+  // A long existing decision is not cut either: it is named by the basis ID whose whole text every handoff carries.
+  let d=D.recordBasis(D.submit(D.editDraft(plan().p,'첫 화면 문구'),undefined,null),LONG,'confirmed');const da=d.space.areas[0].id,did=d.bases.at(-1).id;
+  const dp=validateGuideReply(mockGuidance(G.buildGuideRequest(d,da,null)),G.buildGuideRequest(d,da,null)).proposal;
+  assert.ok(dp.scope.includes(`원문이 길어 기준 ${did}의 전문을 따름`)&&!/원문은 기록에 그대로/.test(dp.scope)&&!instantText.test(dp.scope));
+  assert.ok(D.handoffText(respond(D.submit(G.adoptProposal(d,da,G.proposalText('예약',dp)))) ).includes('예약 확정 처리는 금지하고 접수만 받으세요.'),'the basis itself goes out whole');
+  // Short option answers still map to their branch, and the draft names the answer too.
+  const opt=answered(q,q.options[1].label),pr2=ask(p,area,opt).reply.proposal;assert.match(pr2.scope,/확인 대기/);assert.match(G.proposalText('예약',pr2,true,opt),/공방 확인 뒤 확정/);
+});

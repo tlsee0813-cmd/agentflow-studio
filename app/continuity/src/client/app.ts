@@ -1,4 +1,4 @@
-import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source, type Area, type RelationKind, type Point, type Question, type GuideAnswer, type GuideReply, type Proposal } from '../shared/types.js';
+import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, TEXT_LIMIT, type Basis, type Project, type Task, type Source, type Area, type RelationKind, type Point, type Question, type GuideAnswer, type GuideReply, type Proposal } from '../shared/types.js';
 import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask,
   areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
@@ -44,7 +44,7 @@ type MapView={x:number;y:number;s:number};
 let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
 /** GUIDE097: area guidance per project and area, in this tab's memory only (declared early: resets use it). */
 /** gen counts the user's edits of the draft; a reply that arrives after one is held in incoming, never applied over it. */
-type GuideApply={reply:GuideReply;mode:'mock'|'deepseek';read:string[];areaName:string;first:boolean};
+type GuideApply={reply:GuideReply;mode:'mock'|'deepseek';read:string[];areaName:string;first:boolean;answer:GuideAnswer|null};
 type Guide={question:Question|null;answer:GuideAnswer|null;proposal:Proposal|null;mode:'mock'|'deepseek'|null;read:string[];text:string;base:string;
   answerDraft:string;pending:{requestId:string;controller:AbortController}|null;notice:string|null;gen:number;incoming:GuideApply|null};
 const guides=new Map<string,Guide>();
@@ -1072,7 +1072,7 @@ const guideEdited=(g:Guide)=>g.proposal!==null&&g.text!==g.base;
 function applyGuide(g:Guide,x:GuideApply) {
   g.mode=x.mode;g.read=x.read;g.incoming=null;
   if(x.reply.question){g.question=x.reply.question;g.proposal=null;}
-  else {const prop=x.reply.proposal!;g.proposal=prop;g.text=g.base=proposalText(x.areaName,prop,x.first);}
+  else {const prop=x.reply.proposal!;g.proposal=prop;g.text=g.base=proposalText(x.areaName,prop,x.first,x.answer);}
 }
 /** One request for this area. A reply is applied only to the same project activation, the same pending request, and only
  * while the material it was built from (purpose, this area, decisions, this area's requests, the answer) is unchanged. */
@@ -1090,7 +1090,7 @@ async function askGuide(areaId:string) {
     if(data.mode!==config!.mode)throw new Error('INVALID_RESPONSE');
     let now:string|null=null;try{now=guideDigest(buildGuideRequest(project,areaId,g.answer));}catch{/* area archived or removed */}
     if(now!==digest){g.notice='기다리는 동안 목적·영역 구상·결정이 바뀌어 이 응답은 적용하지 않았어요. 입력과 초안은 그대로예요. 다시 받을 수 있어요.';return;}
-    const x:GuideApply={reply:data.reply,mode:data.mode,read:readOf(req),areaName:areaById(areaId)?.name??req.area.name,first:!req.areaWork.length};
+    const x:GuideApply={reply:data.reply,mode:data.mode,read:readOf(req),areaName:areaById(areaId)?.name??req.area.name,first:!req.areaWork.length,answer:req.answer};
     // GUIDE097-R1: any edit after the request was sent (even one back to the same text) keeps the screen as it is.
     if(g.proposal!==null&&g.gen!==gen){g.incoming=x;g.notice='기다리는 동안 직접 고친 내용이 있어 새 초안으로 바꾸지 않았어요. 화면의 초안은 그대로예요. 새 응답을 쓰려면 ‘새 응답으로 바꾸기’를 누르세요(지금 초안은 버려져요).';return;}
     applyGuide(g,x);
@@ -1106,7 +1106,8 @@ function answerGuide(areaId:string,value:string,disposition:GuideAnswer['disposi
 function adoptGuide(a:Area) {
   const g=guideOf(a.id);if(!g.text.trim())return;
   try {commit(adoptProposal(project,a.id,g.text));}
-  catch(e){g.notice=e instanceof Error&&e.message==='DRAFT_IN_USE'?'작성 중인 요청이 있어 초안을 넣지 않았어요. 작업 화면에서 그 요청을 보내거나 비운 뒤 다시 누르세요. 이 초안은 여기 그대로예요.':'초안을 넣지 못했어요. 이 초안은 여기 그대로예요.';render();return;}
+  catch(e){g.notice=e instanceof Error&&e.message==='DRAFT_IN_USE'?'작성 중인 요청이 있어 초안을 넣지 않았어요. 작업 화면에서 그 요청을 보내거나 비운 뒤 다시 누르세요. 이 초안은 여기 그대로예요.'
+    :g.text.length>TEXT_LIMIT?`초안이 요청 한 건의 한도(${TEXT_LIMIT.toLocaleString()}자)를 넘어 넣지 않았어요. 자르지 않았으니 직접 줄인 뒤 다시 누르세요. 이 초안은 여기 그대로예요.`:'초안을 넣지 못했어요. 이 초안은 여기 그대로예요.';render();return;}
   guides.delete(guideKey(a.id));view='work';render();
   project={...project,notice:`초안을 ‘${a.name}’ 영역의 요청 입력칸에 넣었어요. 아직 보내지 않았어요. 확인·수정한 뒤 ‘작업문 준비하기’를 누르세요.`};renderStatus();
   $<HTMLDetailsElement>('compose-panel').open=true;$('draft').focus();
