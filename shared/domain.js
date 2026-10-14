@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL } from './types.js';
-import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject } from './validation.js';
+import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { outcomeOf, contextLinks } from './outcome.js';
 export { planFacts, planFactsText } from './plan-facts.js';
@@ -9,7 +9,7 @@ const copy = (value) => structuredClone(value);
 const WORK_KEYS = ['understanding', 'scope', 'next', 'checks'];
 const CONDITION_KEYS = ['scope', 'checks'];
 export function createProject() {
-    return { schemaVersion: SCHEMA, id: uid('P'), revision: 1, name: '나의 프로젝트', sources: [], bases: [], tasks: [], currentTaskId: null, draft: '', answerDraft: '', basisDraft: '', basisEdits: {}, draftKind: 'request', pending: null, notice: null };
+    return { schemaVersion: SCHEMA, id: uid('P'), revision: 1, name: '나의 프로젝트', sources: [], bases: [], tasks: [], currentTaskId: null, draft: '', answerDraft: '', basisDraft: '', basisEdits: {}, draftKind: 'request', pending: null, notice: null, space: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} } } };
 }
 export function taskOf(p, id = p.currentTaskId) { const t = p.tasks.find(t => t.id === id); ensure(t, 'TASK_MISSING'); return t; }
 function change(p) { return { ...copy(p), revision: p.revision + 1, notice: null }; }
@@ -65,16 +65,72 @@ export function returnTargetId(p, selectedId) {
     }
     return targets[0]?.id ?? p.currentTaskId;
 }
-export function submit(p, selectedId) {
+/** FIX088: a report belongs to the task it returns to; receiving it is not the user choosing that task.
+ * It continues the current work only when it returns to that work (or to the handoff whose return is open). */
+function continuesFocus(p, target) {
+    const current = p.tasks.find(t => t.id === p.currentTaskId);
+    if (!current || target === null || target === current.id)
+        return true;
+    const kind = p.sources.find(s => s.id === current.sourceIds[0])?.kind;
+    return current.parentTaskId === target && (kind === 'report' || kind === 'evidence');
+}
+function placeReturn(p, n, id, target) {
+    if (continuesFocus(p, target)) {
+        n.currentTaskId = id;
+        return;
+    }
+    const index = (tid) => p.tasks.findIndex(t => t.id === tid) + 1;
+    n.notice = `결과를 작업 ${index(target)}에 연결했어요 · 앱 미검증. 지금 이어가던 작업 ${index(p.currentTaskId)}의 요청과 범위는 그대로예요. 받은 결과는 ‘다른 작업에 도착한 결과’에서 열 수 있어요.`;
+}
+/** Explicit navigation: the user opens a task to continue it. Nothing else changes. */
+export function focusTask(p, id) {
+    ensure(p.tasks.some(t => t.id === id), 'TASK_MISSING');
+    const n = change(p);
+    n.currentTaskId = id;
+    return n;
+}
+/** FLOW091-C: the plan as it is now, for the area this request was decided to go to (not the map selection).
+ * Only this project's purpose and that one area: no other areas, relations, positions or earlier texts. */
+function captureBackground(p, areaId) {
+    const a = areaId === null ? null : p.space.areas.find(x => x.id === areaId);
+    return { version: 'background.1', revision: p.revision, brief: p.space.brief?.text ?? null, area: a ? { id: a.id, name: a.name, note: a.note || null } : null };
+}
+/** areaId: undefined = continue the current task's area, null = none, string = that (active) area. */
+export function submit(p, selectedId, areaId) {
     text(p.draft);
     const returned = ['report', 'evidence'].includes(p.draftKind);
-    const parent = returned ? returnTargetId(p, selectedId) : p.currentTaskId;
+    const current = p.tasks.find(x => x.id === p.currentTaskId);
+    // FLOW090: the saved draft target (or an explicit one) decides the area; none = continue the current work's area.
+    const chosen = areaId !== undefined ? areaId : !returned && p.space.draftTarget ? p.space.draftTarget.area : undefined;
+    const target = chosen === undefined ? (current ? areaOf(p, current) : null) : chosen;
+    const inArea = (x) => areaOf(p, x) === target;
+    // Coming back to an area continues its latest user request (with that request's own latest return), never a late
+    // report of an older request. Continuing older work stays an explicit choice (it is then the current task).
+    const latestRequest = [...p.tasks].reverse().find(x => !isReturnTask(p, x) && inArea(x));
+    const latestReturn = latestRequest ? [...p.tasks].reverse().find(x => x.parentTaskId === latestRequest.id && isReturnTask(p, x)) : undefined;
+    const parent = returned ? returnTargetId(p, selectedId) : chosen === undefined || (current && inArea(current)) ? p.currentTaskId : latestReturn?.id ?? latestRequest?.id ?? null;
     const n = change(p);
-    const id = uid('T'), t = { id, sourceIds: [], parentTaskId: parent, advice: null, adviceRevision: null, mode: null, manual: { understanding: null, scope: null, next: null, checks: null }, suggestions: null, handoffs: [], resultFile: null };
+    const id = uid('T'), t = { id, sourceIds: [], parentTaskId: parent, advice: null, adviceRevision: null, mode: null, manual: { understanding: null, scope: null, next: null, checks: null }, suggestions: null, handoffs: [], resultFile: null, background: null };
     const s = appendSource(n, n.draftKind, n.draft, id);
     t.sourceIds.push(s.id);
     n.tasks.push(t);
-    n.currentTaskId = id;
+    if (returned) {
+        // FLOW091-C: a pasted report carries the copy of the exact task it returns to, never the current plan.
+        const back = parent === null ? null : p.tasks.find(x => x.id === parent)?.background ?? null;
+        t.background = copy(back);
+        placeReturn(p, n, id, parent);
+    }
+    else {
+        n.currentTaskId = id;
+        // FLOW090: a request is placed in the area it was written for; a follow-up keeps the area of the work it continues.
+        if (target !== null) {
+            ensure(p.space.areas.some(a => a.id === target && !a.archived), 'AREA_MISSING');
+            t.areaId = target;
+        }
+        // FLOW091-C: only an explicit new request captures the latest plan (a synthetic test answer is not a user request).
+        if (s.kind === 'request')
+            t.background = captureBackground(p, target);
+    }
     if (s.kind === 'request') {
         let replaced = false;
         for (const b of n.bases) {
@@ -91,6 +147,7 @@ export function submit(p, selectedId) {
     }
     n.draft = '';
     n.pending = null;
+    n.space.draftTarget = null;
     return n;
 }
 export function recordBasis(p, value, status = 'confirmed', id = null) {
@@ -131,12 +188,14 @@ export function importResultFile(p, rawText) {
     if (duplicate)
         return p;
     const n = change(p), id = uid('T'), t = { id, sourceIds: [], parentTaskId: task.id, advice: null, adviceRevision: null, mode: null,
-        manual: { understanding: null, scope: null, next: null, checks: null }, suggestions: null, handoffs: [], resultFile: { returnId: file.returnId, rawText } };
+        manual: { understanding: null, scope: null, next: null, checks: null }, suggestions: null, handoffs: [], resultFile: { returnId: file.returnId, rawText },
+        // FLOW091-C: the background that went out with that exact export; an older export without one stays null.
+        background: copy(record.background) };
     const kinds = file.evidence === null ? ['report'] : ['report', 'evidence'];
     for (const kind of kinds)
         t.sourceIds.push(appendSource(n, kind, resultSourceText(file, record.revision, kind), id).id);
     n.tasks.push(t);
-    n.currentTaskId = id;
+    placeReturn(p, n, id, task.id);
     n.pending = null;
     // Includes the unchanged drafts and raw JSON in the real project byte/validation budget.
     return parseProject(JSON.stringify(n));
@@ -340,7 +399,9 @@ const jsonBytes = (v) => new TextEncoder().encode(JSON.stringify(v)).length;
 export function buildRequest(p, ticket) {
     const t = taskOf(p, ticket.taskId), parts = contextParts(p, t);
     const req = { schemaVersion: API_SCHEMA, ticket: copy(ticket), projectName: p.name, sources: parts.sources,
-        bases: p.bases.map(contextBasis), appFacts: planFacts(p, t.id), previousWork: parts.previousWork, previousIntent: null, purposeIntent: null };
+        bases: p.bases.map(contextBasis), appFacts: planFacts(p, t.id), previousWork: parts.previousWork, previousIntent: null, purposeIntent: null,
+        // Never excerpted or dropped for size: over the limit the request is refused (CONTEXT_TOO_LARGE) and nothing is cut.
+        background: copy(t.background) };
     req.previousIntent = requestIntent(p, t);
     req.purposeIntent = purposeIntent(p, t, req.previousIntent);
     let bytes = jsonBytes(req);
@@ -481,6 +542,9 @@ export function handoffText(p, id = p.currentTaskId, returnId = null) {
     const outcome = outcomeOf(p, t.id);
     if (outcome.request)
         lines.push('\n## 이번 요청과 이전 맥락', `이번 요청 [${outcome.request.id}]이 실행 범위를 정합니다. 부모 연결은 같은 목적이라는 판정이 아닙니다.`, '후속 사용자 발언이 바꾼 부분은 앞선 요청보다 우선합니다. 바꾸지 않은 유지 조건은 보존하되, 관련 없는 이전 요청을 이번 작업에 추가하지 마세요. 코드 영향은 실행 도구가 실제 자료로 판단합니다.');
+    const background = backgroundLines(p, t);
+    if (background.length)
+        lines.push(...background);
     const intent = currentIntent(p, t), correction = intentCorrection(t);
     if (intent || correction) {
         // A user's purpose correction stays visible even after the AI interpretation behind it went stale.
@@ -534,6 +598,19 @@ export function handoffText(p, id = p.currentTaskId, returnId = null) {
     }
     return lines.join('\n\n');
 }
+/** FLOW091-C: this task's fixed plan copy as background material, apart from the request that sets the scope.
+ * Nothing is shown for a task without a copy (older work), and empty values add no placeholder text. */
+export function backgroundLines(p, t) {
+    const b = t.background;
+    if (!b || (b.brief === null && b.area === null))
+        return [];
+    const own = !isReturnTask(p, t);
+    return ['\n## 프로젝트 배경·영역 구상 — 이번 요청 범위와 구분',
+        `${own ? '이 작업의 요청을 쓸 때' : '이 보고가 돌아간 작업의 요청을 쓸 때'}(기준 r${b.revision}) 사용자가 저장해 둔 구상의 사본입니다. 배경 자료이며 작업 지시·사용자 결정 기준이 아닙니다. 그 뒤 바뀐 구상은 여기에 들어가지 않습니다.`,
+        '이번 요청이 실행 범위를 정합니다. 배경 전체를 구현하지 말고, 배경에 적힌 아이디어나 아직 정하지 않은 점을 임의로 확정하지 마세요. 필요하면 확인할 항목으로만 남기세요.',
+        ...(b.brief !== null ? [`프로젝트 목적 원문:\n${b.brief}`] : []),
+        ...(b.area ? [`요청 대상 영역: ${b.area.name} [${b.area.id}]`, ...(b.area.note !== null ? [`영역 구상 원문:\n${b.area.note}`] : [])] : [])];
+}
 function basisLine(b) {
     // Earlier values stay in the project (and recovery file); they are not repeated as instructions.
     return `[${b.id}] ${BASIS_LABEL[b.status]} / r${b.revision} / ${b.sourceId}\n${b.text}${b.history.length ? `\n(이전 값 ${b.history.length}건은 앱 기록에 보존 · 현재 지시 아님)` : ''}`;
@@ -541,9 +618,153 @@ function basisLine(b) {
 export function markHandoff(p, id, text, method, exportRevision = p.revision, returnId = null) {
     ensure(returnId === null || /^[A-Za-z0-9_-]{1,100}$/.test(returnId) && !p.tasks.some(t => t.handoffs.some(h => h.returnId === returnId)));
     const w = currentWork(p, taskOf(p, id)), n = change(p);
-    taskOf(n, id).handoffs.push({ at: now(), method, revision: exportRevision, chars: text.length, digest: digest(text), work: w.values, aiExcluded: w.aiExcluded, legacyText: null, returnId });
+    const t = taskOf(n, id);
+    // FLOW091-C: the background actually sent with this export (the task's fixed copy), kept with the record.
+    t.handoffs.push({ at: now(), method, revision: exportRevision, chars: text.length, digest: digest(text), work: w.values, aiExcluded: w.aiExcluded, legacyText: null, returnId, background: copy(t.background) });
     return n;
 }
 export function restore(p) {
     return { ...copy(p), pending: null, notice: p.pending ? '중단된 요청의 입력을 복구했습니다. 자동으로 다시 전송하지 않습니다.' : null };
+}
+/* ---------- FLOW090: the user's plan space. Plan data, not work records: nothing here edits sources, tasks or reports. ---------- */
+const returnKinds = new Set(['report', 'evidence']);
+export function isReturnTask(p, t) { return returnKinds.has(p.sources.find(s => s.id === t.sourceIds[0])?.kind ?? ''); }
+/** A request's own area; a returned report follows the task it returns to. */
+export function areaOf(p, t) {
+    const tasks = new Map(p.tasks.map(x => [x.id, x])), seen = new Set();
+    let cur = t;
+    while (cur && !seen.has(cur.id)) {
+        seen.add(cur.id);
+        if (cur.areaId)
+            return cur.areaId;
+        if (!isReturnTask(p, cur))
+            return null;
+        cur = cur.parentTaskId ? tasks.get(cur.parentTaskId) : undefined;
+    }
+    return null;
+}
+/** The user's own words for what they are making. Rewriting keeps the earlier text. */
+export function setBrief(p, value) {
+    text(value);
+    if (p.space.brief?.text === value)
+        return p;
+    const n = change(p), old = n.space.brief;
+    n.space.brief = { text: value, at: now(), previous: old ? [...old.previous, { text: old.text, at: old.at }] : [] };
+    return n;
+}
+function areaName(name) { const v = name.trim(); text(v, 60); return v; }
+/** A new area gets its own stored position: the free slot nearest to where the user is looking. */
+export function addArea(p, name, note = '', near) {
+    const n = change(p);
+    text(note, 2000, true);
+    const id = uid('A');
+    n.space.layout.positions[id] = freeSlot(p, near);
+    n.space.areas.push({ id, name: areaName(name), note: note.trim(), archived: false, createdAt: now() });
+    return n;
+}
+/* ---------- FLOW090-B1: map positions (presentation data; never touches work records) ---------- */
+export const NODE_W = 240, NODE_H = 132, GRID_X = 300, GRID_Y = 200;
+/** Stored position, else a fixed default from the area's place in the list (never recomputed from others). */
+export function areaPosition(p, a) {
+    const stored = p.space.layout.positions[a.id];
+    if (stored)
+        return { ...stored };
+    const i = p.space.areas.findIndex(x => x.id === a.id);
+    return { x: 40 + (i % 3) * GRID_X, y: 40 + Math.floor(i / 3) * GRID_Y };
+}
+function freeSlot(p, near) {
+    // Archived areas keep their place too: restoring one must not land it on an area added meanwhile.
+    const taken = p.space.areas.map(a => areaPosition(p, a));
+    const clash = (x, y) => taken.some(t => Math.abs(t.x - x) < NODE_W + 20 && Math.abs(t.y - y) < NODE_H + 20);
+    const start = clampPoint({ x: near ? Math.round(near.x / 20) * 20 : 40, y: near ? Math.round(near.y / 20) * 20 : 40 }), ox = start.x, oy = start.y;
+    const inside = (x, y) => Math.abs(x) <= POSITION_LIMIT && Math.abs(y) <= POSITION_LIMIT;
+    // Nearest free grid slot, trying right, then left, then below, then above (reading order) within each ring.
+    for (let r = 0; r < 40; r++) {
+        const ring = [];
+        for (let dy = -r; dy <= r; dy++)
+            for (let dx = -r; dx <= r; dx++)
+                if (Math.max(Math.abs(dx), Math.abs(dy)) === r)
+                    ring.push([dx, dy]);
+        ring.sort((a, b) => Math.abs(a[1]) - Math.abs(b[1]) || Number(a[1] < 0) - Number(b[1] < 0) || Math.abs(a[0]) - Math.abs(b[0]) || Number(a[0] < 0) - Number(b[0] < 0));
+        // Check the final, in-range coordinate: a slot past the limit is skipped, never clamped onto a neighbour.
+        for (const [dx, dy] of ring) {
+            const x = ox + dx * GRID_X, y = oy + dy * GRID_Y;
+            if (inside(x, y) && !clash(x, y))
+                return { x, y };
+        }
+    }
+    return clampPoint({ x: ox, y: oy });
+}
+const clampPoint = (pt) => ({ x: Math.max(-POSITION_LIMIT, Math.min(POSITION_LIMIT, Math.round(pt.x))), y: Math.max(-POSITION_LIMIT, Math.min(POSITION_LIMIT, Math.round(pt.y))) });
+/** One move = one command: only this area's position field changes. */
+export function moveArea(p, id, to) {
+    ensure(p.space.areas.some(a => a.id === id && !a.archived), 'AREA_MISSING');
+    const n = change(p);
+    n.space.layout.positions[id] = clampPoint(to);
+    return n;
+}
+/** Limited undo of one move: applied only while the area still sits where that move put it. Restores only that
+ * field (from=null: back to the default slot); later reports, requests and other areas' edits are untouched. */
+export function undoMove(p, id, from, expected) {
+    const now = p.space.layout.positions[id];
+    ensure(p.space.areas.some(a => a.id === id), 'AREA_MISSING');
+    ensure(!!now && now.x === expected.x && now.y === expected.y, 'POSITION_CHANGED');
+    const n = change(p);
+    if (from)
+        n.space.layout.positions[id] = clampPoint(from);
+    else
+        delete n.space.layout.positions[id];
+    return n;
+}
+export function editArea(p, id, name, note) {
+    text(note, 2000, true);
+    const n = change(p), a = n.space.areas.find(a => a.id === id);
+    ensure(a, 'AREA_MISSING');
+    a.name = areaName(name);
+    a.note = note.trim();
+    return n;
+}
+/** Areas are archived, never deleted: placed tasks and their reports stay where they are. */
+export function setAreaArchived(p, id, archived) {
+    const n = change(p), a = n.space.areas.find(a => a.id === id);
+    ensure(a, 'AREA_MISSING');
+    a.archived = archived;
+    return n;
+}
+export function addRelation(p, from, to, kind, note = '') {
+    ensure(from !== to && p.space.areas.some(a => a.id === from) && p.space.areas.some(a => a.id === to), 'AREA_MISSING');
+    ensure(['flow', 'needs', 'shares', 'related'].includes(kind));
+    text(note.trim(), 200, true);
+    ensure(!p.space.relations.some(r => r.from === from && r.to === to && r.kind === kind), 'RELATION_EXISTS');
+    const n = change(p);
+    n.space.relations.push({ id: uid('L'), from, to, kind, note: note.trim() });
+    return n;
+}
+export function removeRelation(p, id) {
+    ensure(p.space.relations.some(r => r.id === id));
+    const n = change(p);
+    n.space.relations = n.space.relations.filter(r => r.id !== id);
+    return n;
+}
+/** The area the unsent request is written for (undefined = follow the current work). Changed only by the user. */
+export function setDraftTarget(p, area) {
+    if (typeof area === 'string')
+        ensure(p.space.areas.some(a => a.id === area && !a.archived), 'AREA_MISSING');
+    const n = change(p);
+    n.space.draftTarget = area === undefined ? null : { area };
+    return n;
+}
+/** Explicit tidy-up: put an existing request (with its returns) into an area, or take it out. */
+export function placeTask(p, taskId, areaId) {
+    const t = p.tasks.find(x => x.id === taskId);
+    ensure(t, 'TASK_MISSING');
+    ensure(!isReturnTask(p, t), 'RETURN_FOLLOWS_PARENT');
+    if (areaId !== null)
+        ensure(p.space.areas.some(a => a.id === areaId && !a.archived), 'AREA_MISSING');
+    const n = change(p), u = taskOf(n, taskId);
+    if (areaId === null)
+        delete u.areaId;
+    else
+        u.areaId = areaId;
+    return n;
 }

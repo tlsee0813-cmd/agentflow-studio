@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES } from './types.js';
+import { API_SCHEMA, SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES } from './types.js';
 export class ContextError extends Error {
     constructor(code) { super(code); this.name = 'ContextError'; }
 }
@@ -67,6 +67,26 @@ function basis(v) {
         id(h.sourceId);
         integer(h.revision);
         ensure(['requested', 'answered', 'confirmed', 'deferred'].includes(h.status));
+    }
+}
+/** FLOW091-C: a fixed plan copy. Same length limits as the plan itself; empty values are null, never placeholder words.
+ * The area may since have been renamed, archived or moved: the copy does not refer to the current area list. */
+export function background(v, maxRevision) {
+    if (v === null)
+        return;
+    obj(v, ['version', 'revision', 'brief', 'area']);
+    ensure(v.version === 'background.1');
+    integer(v.revision);
+    if (maxRevision !== undefined)
+        ensure(v.revision <= maxRevision);
+    if (v.brief !== null)
+        text(v.brief, TEXT_LIMIT);
+    if (v.area !== null) {
+        obj(v.area, ['id', 'name', 'note']);
+        id(v.area.id);
+        text(v.area.name, 60);
+        if (v.area.note !== null)
+            text(v.area.note, 2000);
     }
 }
 function ticket(v) { obj(v, ['projectId', 'revision', 'requestId', 'taskId']); id(v.projectId); integer(v.revision); id(v.requestId); id(v.taskId); }
@@ -239,10 +259,11 @@ function appFacts(v, req) {
             ensure(currentRecords.has(b.id));
 }
 export function validateRequest(v) {
-    obj(v, ['schemaVersion', 'ticket', 'projectName', 'sources', 'bases', 'previousWork', 'appFacts', 'previousIntent', 'purposeIntent']);
+    obj(v, ['schemaVersion', 'ticket', 'projectName', 'sources', 'bases', 'previousWork', 'appFacts', 'previousIntent', 'purposeIntent', 'background']);
     ensure(v.schemaVersion === API_SCHEMA);
     ticket(v.ticket);
     text(v.projectName, 120);
+    background(v.background, v.ticket.revision);
     list(v.sources);
     list(v.bases);
     for (const s of v.sources)
@@ -292,7 +313,7 @@ export function validateRequest(v) {
 }
 /** Same checks as validateProject without the defensive copy; used on freshly parsed JSON. */
 function assertProject(v) {
-    obj(v, ['schemaVersion', 'id', 'revision', 'name', 'sources', 'bases', 'tasks', 'currentTaskId', 'draft', 'answerDraft', 'basisDraft', 'basisEdits', 'draftKind', 'pending', 'notice']);
+    obj(v, ['schemaVersion', 'id', 'revision', 'name', 'sources', 'bases', 'tasks', 'currentTaskId', 'draft', 'answerDraft', 'basisDraft', 'basisEdits', 'draftKind', 'pending', 'notice', 'space']);
     ensure(v.schemaVersion === SCHEMA, 'UNSUPPORTED_SCHEMA');
     id(v.id);
     integer(v.revision);
@@ -322,9 +343,12 @@ function assertProject(v) {
     const sources = new Map(v.sources.map(s => [s.id, s]));
     const bids = [...basisIds], basisMap = new Map(v.bases.map(b => [b.id, b]));
     const tasks = new Set(), returns = new Map();
+    const areaIds = space(v.space);
     for (const t of v.tasks) {
-        obj(t, ['id', 'sourceIds', 'parentTaskId', 'advice', 'adviceRevision', 'mode', 'manual', 'suggestions', 'handoffs', 'resultFile', ...(t && typeof t === 'object' && Object.hasOwn(t, 'intentEdit') ? ['intentEdit'] : [])]);
+        const optional = ['intentEdit', 'areaId'].filter(k => t && typeof t === 'object' && Object.hasOwn(t, k));
+        obj(t, ['id', 'sourceIds', 'parentTaskId', 'advice', 'adviceRevision', 'mode', 'manual', 'suggestions', 'handoffs', 'resultFile', 'background', ...optional]);
         id(t.id);
+        background(t.background, v.revision);
         list(t.sourceIds);
         ensure(t.sourceIds.length > 0);
         for (const s of t.sourceIds)
@@ -332,6 +356,10 @@ function assertProject(v) {
         ensure(new Set(t.sourceIds).size === t.sourceIds.length);
         if (t.parentTaskId !== null)
             ensure(tasks.has(t.parentTaskId)); // Ordered, acyclic.
+        if (t.areaId !== undefined) { // Only a request task is placed; a returned report follows its parent's area.
+            ensure(typeof t.areaId === 'string' && areaIds.has(t.areaId));
+            ensure(!['report', 'evidence'].includes(sources.get(t.sourceIds[0]).kind));
+        }
         if (t.intentEdit !== undefined) {
             const legacy = !!t.intentEdit && typeof t.intentEdit === 'object' && t.intentEdit.version === 'intent-edit.1';
             obj(t.intentEdit, legacy ? ['version', 'revision'] : ['version', 'revision', 'goal', 'conditions']);
@@ -375,8 +403,9 @@ function assertProject(v) {
         }
         list(t.handoffs);
         for (const h of t.handoffs) {
-            obj(h, ['at', 'method', 'revision', 'chars', 'digest', 'work', 'aiExcluded', 'legacyText', 'returnId']);
+            obj(h, ['at', 'method', 'revision', 'chars', 'digest', 'work', 'aiExcluded', 'legacyText', 'returnId', 'background']);
             date(h.at);
+            background(h.background, v.revision);
             ensure(['clipboard', 'download'].includes(h.method));
             integer(h.revision);
             ensure(h.revision <= v.revision);
@@ -436,6 +465,58 @@ function assertProject(v) {
         ensure(v.pending.projectId === v.id && tasks.has(v.pending.taskId) && v.pending.revision <= v.revision);
     }
 }
+/** FLOW090 plan data: the user's purpose text, areas and typed relations. Returns the area IDs. */
+function space(v) {
+    obj(v, ['brief', 'areas', 'relations', 'draftTarget', 'layout']);
+    if (v.brief !== null) {
+        obj(v.brief, ['text', 'at', 'previous']);
+        text(v.brief.text, TEXT_LIMIT);
+        date(v.brief.at);
+        list(v.brief.previous, 200);
+        for (const old of v.brief.previous) {
+            obj(old, ['text', 'at']);
+            text(old.text, TEXT_LIMIT);
+            date(old.at);
+        }
+    }
+    list(v.areas, 500);
+    list(v.relations, 2000);
+    for (const a of v.areas) {
+        obj(a, ['id', 'name', 'note', 'archived', 'createdAt']);
+        id(a.id);
+        text(a.name, 60);
+        text(a.note, 2000, true);
+        ensure(typeof a.archived === 'boolean');
+        date(a.createdAt);
+    }
+    unique(v.areas);
+    const ids = new Set(v.areas.map(a => a.id));
+    for (const r of v.relations) {
+        obj(r, ['id', 'from', 'to', 'kind', 'note']);
+        id(r.id);
+        ensure(ids.has(r.from) && ids.has(r.to) && r.from !== r.to);
+        ensure(['flow', 'needs', 'shares', 'related'].includes(r.kind));
+        text(r.note, 200, true);
+    }
+    unique(v.relations);
+    if (v.draftTarget !== null) {
+        obj(v.draftTarget, ['area']);
+        ensure(v.draftTarget.area === null || ids.has(v.draftTarget.area));
+    }
+    obj(v.layout, ['version', 'positions']);
+    ensure(v.layout.version === 'layout.1');
+    const positions = v.layout.positions;
+    ensure(!!positions && typeof positions === 'object' && !Array.isArray(positions));
+    for (const [key, point] of Object.entries(positions)) {
+        ensure(ids.has(key));
+        obj(point, ['x', 'y']);
+        for (const n of [point.x, point.y])
+            ensure(Number.isSafeInteger(n) && Math.abs(n) <= POSITION_LIMIT);
+    }
+    return ids;
+}
+export const POSITION_LIMIT = 200000;
+export const EMPTY_SPACE = () => ({ brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} } });
 export function validateProject(v) { assertProject(v); return structuredClone(v); }
 /** Identity check for an exported text (FNV-1a, 32 bit). Not a signature or security control. */
 export function digest(value) {
@@ -447,7 +528,7 @@ export function digest(value) {
     return (h >>> 0).toString(16).padStart(8, '0');
 }
 export const MIGRATION_NOTICE = '이전 형식(project.1)에서 변환했습니다. 기록은 지우지 않았습니다. 이전 AI 정리는 어느 기준 시점에 작성됐는지 알 수 없어 현재 작업문에서 제외합니다.';
-export const V2_MIGRATION_NOTICE = '이전 형식(project.2)을 project.3으로 변환했습니다. 기록은 유지하며 과거 내보내기에 파일 식별자를 만들지 않습니다.';
+export const V2_MIGRATION_NOTICE = '이전 형식(project.2)을 최신 형식으로 변환했습니다. 기록은 유지하며 과거 내보내기에 파일 식별자를 만들지 않습니다.';
 /** project.1 -> project.2. Nothing user-authored is dropped: old export texts move to legacyText. */
 export function migrateLegacy(v) {
     obj(v, ['schemaVersion', 'id', 'revision', 'name', 'sources', 'bases', 'tasks', 'currentTaskId', 'draft', 'answerDraft', 'basisDraft', 'basisEdits', 'draftKind', 'pending', 'notice']);
@@ -489,7 +570,34 @@ function migrateV2(v, notice = V2_MIGRATION_NOTICE) {
         const handoffs = t.handoffs.map(h => { obj(h, ['at', 'method', 'revision', 'chars', 'digest', 'work', 'aiExcluded', 'legacyText']); return { ...h, returnId: null }; });
         return { ...t, resultFile: null, handoffs };
     });
-    return { ...v, schemaVersion: SCHEMA, tasks, notice };
+    return migrateV4({ ...v, schemaVersion: V4_SCHEMA, tasks, notice, space: EMPTY_SPACE() });
+}
+/** project.3 -> project.4: nothing changes but an empty plan space (no areas are invented). */
+function migrateV3(v) {
+    obj(v, ['schemaVersion', 'id', 'revision', 'name', 'sources', 'bases', 'tasks', 'currentTaskId', 'draft', 'answerDraft', 'basisDraft', 'basisEdits', 'draftKind', 'pending', 'notice']);
+    ensure(v.schemaVersion === V3_SCHEMA);
+    return migrateV4({ ...v, schemaVersion: V4_SCHEMA, space: EMPTY_SPACE() });
+}
+/** project.4 -> project.5: no task or export had a background copy. They read null; the current plan is never backfilled. */
+function migrateV4(v) {
+    const p = v;
+    ensure(p && p.schemaVersion === V4_SCHEMA);
+    list(p.tasks);
+    // The unreleased first project.4 candidate had no draft target ('follow the current work') and no stored positions.
+    const space = p.space;
+    if (space && typeof space === 'object') {
+        if (!Object.hasOwn(space, 'draftTarget'))
+            space.draftTarget = null;
+        if (!Object.hasOwn(space, 'layout'))
+            space.layout = { version: 'layout.1', positions: {} };
+    }
+    const tasks = p.tasks.map(t => {
+        ensure(t !== null && typeof t === 'object' && !Array.isArray(t) && !Object.hasOwn(t, 'background'));
+        const task = t;
+        list(task.handoffs);
+        return { ...task, background: null, handoffs: task.handoffs.map(h => { ensure(h !== null && typeof h === 'object' && !Array.isArray(h) && !Object.hasOwn(h, 'background')); return { ...h, background: null }; }) };
+    });
+    return { ...p, schemaVersion: SCHEMA, tasks };
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -514,7 +622,7 @@ export function parseProject(raw) {
     ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT, 'FILE_TOO_LARGE');
     const v = JSON.parse(raw);
     const schema = v?.schemaVersion;
-    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : v;
+    const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : v;
     assertProject(project);
     return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }

@@ -1,3 +1,44 @@
+/** A corrected condition text as response items (<=12 x 1000 chars, none blank), cut only between words/lines.
+ * Joined they give the text back; blank text gives none. Only a whitespace run longer than one item can shrink. */
+function conditionItems(value) {
+    if (!value.trim())
+        return [];
+    const tokens = value.match(/\s*\S+\s*$|\s*\S+/g) ?? [], items = [];
+    let item = '';
+    for (let token of tokens) {
+        while (token.length > 1000) { // one unbroken word longer than an item: split it, never inside a surrogate pair
+            let cut = 1000;
+            if (/[\uD800-\uDBFF]/.test(token[cut - 1]))
+                cut--;
+            if (item) {
+                items.push(item);
+                item = '';
+            }
+            if (token.slice(0, cut).trim())
+                items.push(token.slice(0, cut));
+            token = token.slice(cut);
+        }
+        if (item.length + token.length > 1000) {
+            items.push(item);
+            item = '';
+        }
+        item += token;
+    }
+    if (item.trim())
+        items.push(item);
+    else if (item && items.length && items.at(-1).length + item.length <= 1000)
+        items[items.length - 1] += item;
+    return items;
+}
+/** The response goal holds 2000 chars; a longer continued goal is shortened visibly, never silently. */
+function goalText(value) {
+    if (value.length <= 2000)
+        return value;
+    let cut = 1960;
+    if (/[\uD800-\uDBFF]/.test(value[cut - 1]))
+        cut--;
+    return `${value.slice(0, cut)} … (길어서 앞부분만 · 원문은 해당 작업에 그대로 보존)`;
+}
 // Explicit deterministic preview. No language-model calls and no claim of general comprehension.
 export function mockAdvice(request) {
     const local = request.sources.filter(s => s.taskId === request.ticket.taskId && s.kind !== 'manual_decision');
@@ -10,7 +51,17 @@ export function mockAdvice(request) {
         return words.some(w => b.text.includes(w));
     }).map(b => b.id);
     const refs = request.bases.filter(b => request.appFacts.inputs.some(s => s.sourceId === b.sourceId)).map(b => ({ basisId: b.id, sourceId: b.sourceId, revision: b.revision }));
-    const out = { intent: { version: 'intent.1', relation: request.previousIntent ? 'separate' : 'start', goal: initial.text.slice(0, 2000), conditions: [], retired: [], basisRefs: refs }, understanding: '입력한 요청을 작은 작업으로 이어갑니다.', scope: '명시한 범위만 다루고, 나머지 저장 기준은 유지합니다.',
+    // FIX088: a returned report is a claim about earlier work, never the user's goal. It continues the purpose of the
+    // request it returns to (the previous interpretation, else that request's own words); with no request, none is set.
+    const returned = initial.kind === 'report' || initial.kind === 'evidence', prior = request.previousIntent;
+    const asked = request.sources.filter(s => s.kind === 'request' && s.taskId !== request.ticket.taskId).at(-1);
+    // Earlier refs by basis ID, then this task's own (a basis recorded here, current version wins): every input stays cited.
+    const cite = (earlier) => [...new Map([...earlier, ...refs].map(r => [r.basisId, r])).values()];
+    const intent = !returned ? { version: 'intent.1', relation: prior ? 'separate' : 'start', goal: initial.text.slice(0, 2000), conditions: [], retired: [], basisRefs: refs }
+        : prior ? { version: 'intent.1', relation: 'continue', goal: goalText(prior.manualGoal ?? prior.value.goal),
+            conditions: prior.manualGoal !== null ? conditionItems(prior.manualConditions ?? '') : prior.value.conditions, retired: [], basisRefs: cite(prior.value?.basisRefs ?? []) }
+            : { version: 'intent.1', relation: asked ? 'continue' : 'uncertain', goal: asked ? goalText(asked.text) : '요청 원문이 없어 목적을 정하지 않았어요. 돌아온 보고는 목적이 아니에요.', conditions: [], retired: [], basisRefs: cite([]) };
+    const out = { intent, understanding: '입력한 요청을 작은 작업으로 이어갑니다.', scope: '명시한 범위만 다루고, 나머지 저장 기준은 유지합니다.',
         next: '관련 구현 위치를 찾고 요청한 부분만 수정하세요. 새 정책이나 기술 선택은 임의로 추가하지 마세요.',
         checks: '요청한 변화가 보이는지 확인하고, 기존 동작을 바꾸지 않았는지 관련 검사를 실행해 결과를 따로 보고하세요.',
         question: null, relatedBasisIds: related, reviewBasisIds: [], suggestions: [] };

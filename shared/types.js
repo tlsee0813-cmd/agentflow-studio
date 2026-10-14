@@ -1,10 +1,14 @@
-export const SCHEMA = 'idea015.project.3';
+export const SCHEMA = 'idea015.project.5';
+/** project.4 had no background snapshots: every task and export reads background=null (nothing is backfilled). */
+export const V4_SCHEMA = 'idea015.project.4';
+/** project.3 had no space; it is read as an empty one. */
+export const V3_SCHEMA = 'idea015.project.3';
 export const PREVIOUS_SCHEMA = 'idea015.project.2';
 export const LEGACY_SCHEMA = 'idea015.project.1';
 export const RESULT_SCHEMA = 'agentflow.return.1';
 export const RESULT_BYTES = 131072;
 export const RESULT_TEXT_LIMIT = 11000;
-export const API_SCHEMA = 'idea022.context.6';
+export const API_SCHEMA = 'idea022.context.7';
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
 export const FILE_LIMIT = 8_000_000;

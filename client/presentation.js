@@ -85,7 +85,9 @@ export function stageOf(p, t) {
     if (t.handoffs.length && !exportNeedsRefresh(p, t))
         return { kind: 'exported', title: '돌아온 결과에서 이어가세요.', label: '작업문 내보냄', next: '사용 중인 도구에 작업문을 전달한 뒤, 받은 결과를 여기에 붙여넣으세요.', step: 3 };
     const returned = ['report', 'evidence'].includes(sourceOf(p, t)?.kind ?? '');
-    return { kind: 'ready', title: returned ? '보고를 다음 작업으로 이었어요.' : '이제, 작업문을 전달하세요.', label: t.handoffs.length ? '내보낸 뒤 수정됨' : '작업문 준비됨', next: returned ? '아래는 가져온 자료를 바탕으로 한 후속 제안입니다. 구현 완료 판정은 아닙니다.' : '필요하면 직접 다듬고, 사용 중인 개발 도구에 복사해 전달하세요.', step: 2 };
+    // FLOW091: the report itself is kept under its original task; what is shown next is a draft to check it.
+    const origin = p.tasks.findIndex(x => x.id === t.parentTaskId), at = origin >= 0 ? `작업 ${String(origin + 1).padStart(2, '0')}에` : '';
+    return { kind: 'ready', title: returned ? `받은 보고를 ${at ? `${at} ` : ''}보관했어요. 이어서 후속 확인 작업문 초안이에요.` : '이제, 작업문을 전달하세요.', label: t.handoffs.length ? '내보낸 뒤 수정됨' : '작업문 준비됨', next: returned ? `보고 원문은 ${at || '받은 그대로'} 보관했고 앱에서 검증하지 않았어요. 아래는 그 보고를 확인하기 위한 후속 초안입니다. 구현 완료 판정은 아닙니다.` : '필요하면 직접 다듬고, 사용 중인 개발 도구에 복사해 전달하세요.', step: 2 };
 }
 export function workOrigin(t) {
     const manual = Object.values(t.manual).some(v => v !== null) || t.suggestions !== null;
@@ -93,4 +95,15 @@ export function workOrigin(t) {
         return manual ? '사용자 직접 작성' : '입력 원문 보존';
     return t.mode === 'mock' ? (manual ? '모의 제안 · 직접 수정 포함' : '모의 제안 · 규칙 기반')
         : (manual ? 'AI 제안 · 직접 수정 포함' : 'AI 제안 · 사용자 미확정');
+}
+/** FLOW090-B1-R1: the view that shows every card (measured boxes in plane units) inside a w x h map with a margin.
+ * The scale goes as low as fitting needs; only the zoom buttons have a comfort floor. Never moves a card. */
+export const FIT_MIN = 0.0005, ZOOM_MIN = 0.4, ZOOM_MAX = 1.6;
+export function fitViewport(w, h, boxes, margin = 24) {
+    if (!boxes.length)
+        return { x: margin, y: margin, s: 1 };
+    const minX = Math.min(...boxes.map(b => b.x)), minY = Math.min(...boxes.map(b => b.y));
+    const bw = Math.max(...boxes.map(b => b.x + b.w)) - minX, bh = Math.max(...boxes.map(b => b.y + b.h)) - minY;
+    const s = Math.max(FIT_MIN, Math.min(1.2, (w - 2 * margin) / bw, (h - 2 * margin) / bh));
+    return { x: (w - bw * s) / 2 - minX * s, y: (h - bh * s) / 2 - minY * s, s };
 }
