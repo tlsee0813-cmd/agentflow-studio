@@ -9,6 +9,10 @@ import {SYSTEM_PROMPT} from '../server/prompt.mjs';
 import {mockAdvice} from '../dist/public/shared/mock.js';
 const put=(p,text)=>D.submit(D.editDraft(D.setKind(p,'request'),text));
 const section=(h,name)=>{const i=h.indexOf(name);if(i<0)return '';const j=h.indexOf('\n## ',i+3);return h.slice(i,j<0?undefined:j);};
+// FLOW095: the current request's full text is shown once, in '이번 요청과 이전 맥락'; an exact copy elsewhere keeps its entry
+// (ID/label/section) with a pointer to it. A section 'shows' a text when it holds it in full or holds such a pointer to it.
+const shows=(h,name,text)=>{const s=section(h,name),req=section(h,'## 이번 요청과 이전 맥락');
+  return s.includes(text)||req.includes(`\n${text}\n`)&&/글자 그대로 같은 본문 생략|본문은 위 ‘이번 요청과 이전 맥락’/.test(s);};
 function reply(p,intent,extraRefs=[]) {
   const s=D.begin(p);validateRequest(s.request);
   const ids=new Set([...s.request.bases.filter(b=>s.request.appFacts.inputs.some(i=>i.sourceId===b.sourceId)).map(b=>b.id),...extraRefs]);
@@ -48,13 +52,13 @@ test('F066-P1 the purpose chain never jumps over a stale interpretation; the con
 
 test('F066-P2 a purpose correction is attributed to this task; its pre-correction request is not printed as a current value',()=>{
   let p=reply(put(D.createProject(),P1[0]),{relation:'start',goal:'가입한 고객만 예약을 취소할 수 있게 한다.'}).project;const t=p.currentTaskId;
-  const before=D.handoffText(p,t);assert.ok(section(before,'## 이어갈 기준').includes(P1[0])||section(before,'## 나머지 보존 기준').includes(P1[0]),'without a correction nothing changes');
+  const before=D.handoffText(p,t);assert.ok(shows(before,'## 이어갈 기준',P1[0])||shows(before,'## 나머지 보존 기준',P1[0]),'without a correction nothing changes');
   p=D.correctIntent(p,t,'문자 링크로 예약 취소','환불 제외');p=D.recordBasis(p,'링크는 SMS로만 보낸다','confirmed',null);
   const r=D.begin(p).request;validateRequest(r);
   assert.equal(r.previousIntent.taskId,r.ticket.taskId);assert.equal(r.previousIntent.value,null);assert.equal(r.previousIntent.manualGoal,'문자 링크로 예약 취소');
   const h=D.handoffText(p,t),pre=section(h,'## 정정 전 이 작업의 요청 원문');
-  assert.ok(pre.includes(P1[0]),'kept and visible');assert.match(pre,/양립하는 조건은 유지/);assert.match(pre,/불명확하면 확정하지 말고 확인/);
-  for(const name of ['## 이어갈 기준','## 나머지 보존 기준'])assert.ok(!section(h,name).includes(P1[0]),`${name} must not present it as current`);
+  assert.ok(shows(h,'## 정정 전 이 작업의 요청 원문',P1[0]),'kept and visible');assert.match(pre,/양립하는 조건은 유지/);assert.match(pre,/불명확하면 확정하지 말고 확인/);
+  for(const name of ['## 이어갈 기준','## 나머지 보존 기준'])assert.ok(!shows(h,name,P1[0]),`${name} must not present it as current`);
   assert.ok(section(h,'## 이어갈 기준').includes('링크는 SMS로만 보낸다')||section(h,'## 나머지 보존 기준').includes('링크는 SMS로만 보낸다'),'the user decision stays current');
   assert.equal(p.bases.find(b=>b.id==='D1').status,'requested','nothing is deleted or retired');
 });
@@ -119,6 +123,6 @@ test('F071 an explicit discard with a separate reading and a fresh old interpret
   assert.match(purpose,/참고 · 앞선 목적 \(앞선 작업의 AI 해석, 현재 유효 여부는 확정하지 않음\): 고객이 예약을 취소할 수 있다\./);
   assert.match(purpose,/이번 요청 원문이나 사용자 정정이 이 목적의 폐기·교체·변경을 말하면 그쪽이 우선합니다/);
   assert.ok(purpose.includes(`참고 출처: 작업 ${old} / D1 r`),'the source of the old reading is kept');
-  assert.ok(section(h,'## 관련 입력').includes(turn),'the discard wording itself is in the handoff');
+  assert.ok(shows(h,'## 관련 입력',turn),'the discard wording itself is in the handoff');
   assert.ok(p.bases.every(b=>b.status==='requested'),'no basis state changes');
 });

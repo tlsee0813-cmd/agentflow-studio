@@ -409,4 +409,23 @@ class SpatialWorkspace(unittest.TestCase):
         self.page.screenshot(path=str(base.OUT/'flow093-sheet-390.png'))
         self.page.set_viewport_size({'width':1265,'height':712});self.assertGreaterEqual(size('#panel-note'),80)
 
+    # ---------- FLOW095: the full handoff shows the current request once; copy, Markdown and preview are the same text ----------
+    def test_18_repeated_request_shown_once_and_copy_markdown_preview_match(self):
+        req='지도 다중선택·그룹 처리 방식을 검토해 주세요. 코드·실행·배포 변경 없이 선택조건과 보류이유만 제안해 주세요.'
+        (booking,)=self.start(['예약']);self.request_in('예약',req);self.request_in('예약',req,export=False)
+        s=self.state();self.assertEqual([x['text'] for x in s['sources']],[req,req],'both inputs are stored in full')
+        self.page.evaluate('()=>Object.defineProperty(navigator,"clipboard",{value:{writeText:t=>(window.__copied=t,Promise.resolve())},configurable:true})')
+        self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('복사')
+        copied=self.page.evaluate('()=>window.__copied')
+        md=self.download('#download-work','flow095-handoff.md').read_text(encoding='utf-8')
+        self.page.locator('#next-preview').click();preview=self.page.locator('#handoff-text').input_value()
+        # Each recorded export advances the project revision, so only the '기준 rN' header line can differ between them.
+        import re as _re;body=lambda t:_re.sub(r' / 기준 r\d+\n',' / 기준 r#\n',t,count=1)
+        self.assertEqual(body(copied),body(md));self.assertEqual(body(md),body(preview))
+        self.assertEqual(md.count(req),1,'one full copy of the request')
+        for src in s['sources']:self.assertIn(f"[{src['id']}] 사용자 요청 원문",md)
+        for b in s['bases']:self.assertIn(f"[{b['id']}] 요청 원문 · 해석 미확정",md)
+        rec=self.state()['tasks'][-1]['handoffs'];self.assertEqual(rec[-1]['chars'],len(md),'the export record describes the text that went out')
+        self.assertEqual([x['text'] for x in self.state()['sources']],[req,req])
+
 if __name__=='__main__':unittest.main(verbosity=2)

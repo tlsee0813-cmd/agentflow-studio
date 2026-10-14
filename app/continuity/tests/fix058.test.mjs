@@ -10,6 +10,10 @@ import {cases} from './ai055-cases.mjs';
 const put=(p,text)=>D.submit(D.editDraft(D.setKind(p,'request'),text));
 const reply=(p,edit=a=>a,mode='deepseek')=>{const s=D.begin(p);return D.receive(s.project,s.request,{mode,ticket:s.request.ticket,advice:edit(fixtureAdvice(s.request),s.request)});};
 const section=(h,name)=>{const i=h.indexOf(name);if(i<0)return '';const j=h.indexOf('\n## ',i+3);return h.slice(i,j<0?undefined:j);};
+// FLOW095: the current request's full text is shown once, in '이번 요청과 이전 맥락'; an exact copy elsewhere keeps its entry
+// (ID/label/section) with a pointer to it. A section 'shows' a text when it holds it in full or holds such a pointer to it.
+const shows=(h,name,text)=>{const s=section(h,name),req=section(h,'## 이번 요청과 이전 맥락');
+  return s.includes(text)||req.includes(`\n${text}\n`)&&/글자 그대로 같은 본문 생략|본문은 위 ‘이번 요청과 이전 맥락’/.test(s);};
 const [first,change,button,typo]=cases[0].turns;
 const AI_GOAL='문자로 받은 링크로 가입 없이 예약을 취소한다.';
 function threeTurns() {let p=D.createProject();for(const text of [first,change,button])p=reply(put(p,text));return p;}
@@ -39,7 +43,7 @@ test('F058-B2 purpose correction on a small task keeps that task narrow; stale A
   const h=D.handoffText(p,t),work=section(h,'## 이번 작업'),purpose=section(h,'## 이어가는 목적');
   assert.ok(!work.includes('24시간 유효'),'purpose must not replace this task\'s work');assert.ok(!work.includes('환불 제외(이번)'));
   assert.ok(work.includes('버튼 스타일 파일만'),'user-written narrow scope survives');assert.ok(!work.includes('취소 버튼 색만 빨간색으로 수정'),'stale AI next is withheld');
-  assert.ok(section(h,'## 관련 입력').includes(button));
+  assert.ok(shows(h,'## 관련 입력',button));
   assert.match(purpose,/사용자 직접 정정/);assert.ok(purpose.includes('24시간 유효'));assert.ok(!purpose.includes('대체된 지시'));
   assert.match(purpose,/정정 전 AI 해석 근거/);
   const restored=parseProject(serializeProject(p));assert.deepEqual(restored,p);

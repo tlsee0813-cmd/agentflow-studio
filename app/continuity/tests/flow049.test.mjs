@@ -148,7 +148,9 @@ test('FIX053 return work keeps its effective request and exclusion in current ba
     const start=handoff.indexOf('## 이어갈 기준'),past=handoff.indexOf('## 이전 요청 원문 참조');
     const current=handoff.slice(start,past<0?handoff.indexOf('## 결과를 가져올 때'):past);
     assert.ok(current.includes(`[${basisId}]`),`${kind}: effective request must remain a current basis`);
-    assert.ok(current.includes(original),`${kind}: preserve both requested work and refund exclusion`);
+    // FLOW095: the effective request's full text is shown once under '이번 요청과 이전 맥락'; its current basis entry points to it.
+    const shown=current.includes(original)||handoff.slice(handoff.indexOf('## 이번 요청과 이전 맥락'),start).includes(`\n${original}\n`)&&current.includes('글자 그대로 같은 본문 생략');
+    assert.ok(shown,`${kind}: preserve both requested work and refund exclusion`);
     assert.ok(past<0||!handoff.slice(past).includes(original),`${kind}: do not also classify it as past-only`);
     assert.ok(handoff.includes(report));
     assert.deepEqual(D.buildRequest(p,wire.ticket),wire,'handoff classification must not alter transport');
