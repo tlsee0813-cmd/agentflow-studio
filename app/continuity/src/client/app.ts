@@ -350,9 +350,8 @@ function renderWork(t:Task|null) {
   const next= node('div','','handoff-ready');next.id='handoff-ready';
   const exported=t.handoffs.at(-1),nextText=node('div');nextText.append(node('strong','작업 결과를 받으셨나요?'),node('p',exported?`${dateLabel(exported.at)} · ${exported.method==='clipboard'?'복사':'파일 저장'} 기록이 있어요. 외부 실행 여부는 알 수 없습니다.`:'작업문을 전달한 도구에서 받은 내용을 그대로 가져오세요.'));
   next.append(nextText,btn('결과 붙여넣기',()=>openComposer('report'),'primary','bring-report'));card.append(next);
-  const summary=node('p',v.understanding||(w.aiStale?'이전 AI 정리는 제외하고 원문과 현재 기준을 보존했어요.':'원문은 보관했습니다. 정리 결과가 없어도 직접 작업문을 작성할 수 있어요.'),'work-summary');summary.id='work-summary';card.append(summary);
-  const stale=staleText(project,t);
-  if(stale){const banner=node('p',`${stale} 직접 고쳐 내보내거나 ‘이 입력 다시 정리’로 이어가세요.`,'alert warning');banner.id='stale-advice';card.append(banner);}
+  const summary=node('p',v.understanding||(w.aiExcluded?'이전 AI 정리는 제외하고 원문과 현재 기준을 보존했어요.':'원문은 보관했습니다. 정리 결과가 없어도 직접 작업문을 작성할 수 있어요.'),'work-summary');summary.id='work-summary';card.append(summary);
+  const banner=node('p','','alert warning');banner.id='stale-advice';card.append(banner);showStaleNotice(banner,t,w);
   const scope=node('p',v.scope||'이번 범위는 아래에서 직접 작성할 수 있습니다.','work-scope');scope.id='scope-preview';card.append(scope);
   if(local.some(s=>s.kind==='test_answer'))card.append(node('p','합성 시험 입력입니다. 실제 사용자 요구나 기존 확정 기준을 바꾸지 않습니다.','alert warning'));
   const q=t.advice?.question;
@@ -362,7 +361,7 @@ function renderWork(t:Task|null) {
   } else if(q) {
     const active=applicability==='active';
     const box=node('div','','question-box');box.id='question-box';box.append(tag(active?(q.kind==='fact'?'모르는 사실 확인':'중요한 제품 선택'):'이전 질문 · 참고 기록','amber'),node('h3',q.text),node('p',q.why,'hint'));
-    if(!active)box.append(node('p',`${applicability==='unknown'?'시점 확인 불가':'기준 변경 전'} · 이 질문에는 답변을 적용하지 않습니다.`,'hint'));
+    if(!active)box.append(node('p',`${applicability==='unknown'?'시점 확인 불가':staleCause(w)} · 이 질문에는 답변을 적용하지 않습니다.`,'hint'));
     const answerAndSend=(value:string,disposition:Source['disposition']='provided')=>{if(project.pending||!value.trim()||questionApplicability(project,taskOf(project,t.id))!=='active')return;commit(answer(project,t.id,value,disposition));void generate(t.id);};
     for(const o of q.options){const b=btn(o.label,()=>answerAndSend(`${o.label} — ${o.consequence}`),'option-button');b.append(node('small',o.consequence));box.append(b);}
     const lab=node('label',active?'직접 답하거나 다른 방향을 적어 주세요.':'작성 중이던 답변 · 읽기 전용');lab.htmlFor='answer-draft';
@@ -372,7 +371,7 @@ function renderWork(t:Task|null) {
     box.append(lab,input,row);card.append(box);
   }
   const letter=node('section','','work-letter'),letterHead=node('div','','work-letter-heading');
-  letterHead.append(node('span','전달할 작업문'));const author=tag(t.manual.next!==null?'사용자 직접 수정':t.mode==='mock'?'모의 제안':t.mode==='deepseek'?'AI 제안':'직접 작성 가능');author.id='instruction-author';letterHead.append(author);
+  letterHead.append(node('span','전달할 작업문'));const author=tag(workAuthor(t,v.next));author.id='instruction-author';letterHead.append(author);
   const instruction=node('p',v.next||'원문과 현재 기준이 전체 인계 문맥에 포함됩니다. 구체적인 작업은 아래에서 직접 작성할 수 있어요.','work-instruction');instruction.id='instruction-preview';
   const checks=details('완료 조건 · 확인할 동작','checks-preview');checks.className='checks-preview';const checksText=node('p',v.checks||'아직 작성된 완료 조건이 없습니다.');checksText.id='checks-text';checks.append(checksText);
   letter.append(letterHead,instruction,checks);card.append(letter);
@@ -381,12 +380,12 @@ function renderWork(t:Task|null) {
     const l=node('label',label);l.htmlFor=`work-${key}`;const field=node('textarea');field.id=`work-${key}`;field.rows=key==='next'?4:2;field.maxLength=6000;field.value=v[key];
     field.addEventListener('input',()=>guard(()=>{commit(editTask(project,t.id,key,field.value),false);const marker=$(`manual-${key}`);marker.textContent='직접 수정 · AI가 덮어쓰지 않음';refreshPreview();}));
     const old=t.manual[key]===null&&w.aiStale?t.advice?.[key]??'':'';
-    const marker=node('p',t.manual[key]!==null?'직접 수정 · AI가 덮어쓰지 않음':old?'기준 변경 전 AI 문구는 작업문에서 제외됨 · 직접 쓰면 그대로 들어갑니다':'제안 · 실제 실행 결과 아님','manual-note');marker.id=`manual-${key}`;edit.append(l,field,marker);
-    if(old){const d=details('기준 변경 전 AI 문구 보기 (현재 작업문 아님)',`stale-${key}`);d.append(node('div',old,'source-raw'),btn('이 문구로 시작해 직접 고치기',()=>commit(editTask(project,t.id,key,old)),'quiet',`stale-use-${key}`));edit.append(d);}
+    const marker=node('p',t.manual[key]!==null?'직접 수정 · AI가 덮어쓰지 않음':old?'이전 AI 문구는 작업문에서 제외됨 · 직접 쓰면 그대로 들어갑니다':'제안 · 실제 실행 결과 아님','manual-note');marker.id=`manual-${key}`;edit.append(l,field,marker);
+    if(old){const d=details('제외된 이전 AI 문구 보기 (현재 작업문 아님)',`stale-${key}`);d.append(node('div',old,'source-raw'),btn('이 문구로 시작해 직접 고치기',()=>commit(editTask(project,t.id,key,old)),'quiet',`stale-use-${key}`));edit.append(d);}
   }
   const suggestions=taskSuggestions(t);
   for(const [index,s] of suggestions.entries()) {
-    const box=node('div','','suggestion');box.append(tag(w.aiStale&&t.suggestions===null?'기준 변경 전 제안 · 작업문 제외 · 고치면 포함':'추가 제안 · 미확정'));
+    const box=node('div','','suggestion');box.append(tag(w.aiStale&&t.suggestions===null?'이전 제안 · 작업문 제외 · 고치면 포함':'추가 제안 · 미확정'));
     for(const key of ['text','why'] as const){const l=node('label',key==='text'?'제안 문구':'이유와 대가');const f=node('textarea');f.rows=2;f.maxLength=2000;f.id=`suggestion-${index}-${key}`;l.htmlFor=f.id;f.value=s[key];f.addEventListener('input',()=>guard(()=>{commit(editSuggestion(project,t.id,index,key,f.value),false);refreshPreview();}));box.append(l,f);}
     box.append(btn('이 제안을 내 기준으로 기록',()=>{const value=taskSuggestions(taskOf(project,t.id))[index];if(value)commit(recordBasis(project,value.text));},'secondary'));edit.append(box);
   }
@@ -405,13 +404,29 @@ function renderWork(t:Task|null) {
   try{txt.value=handoffText(project,t.id);}catch{txt.value='문맥 크기 또는 데이터 오류로 자동 인계를 만들지 못했습니다. 복구 파일로 원문을 보존하세요.';}
   preview.append(node('p','관련 입력 + 직전 작업 + 모든 보존 기준. AI가 관련으로 고르지 않은 기준도 뒤에 남습니다.','hint'),txt);card.append(preview);area.append(card);
 }
+type Work=ReturnType<typeof currentWork>;
+function workAuthor(t:Task,next:string){return t.manual.next!==null?'사용자 직접 수정':!next?'직접 작성 가능':t.mode==='mock'?'모의 제안':t.mode==='deepseek'?'AI 제안':'직접 작성 가능';}
+/** Why older AI text is withheld: a basis change, a purpose correction, or both — never only one when both hold. */
+function staleCause(w:Work){const basis=w.changed==='unknown'||w.changed.length>0;return basis&&w.intentCorrected?'기준 변경·목적 정정 전':w.intentCorrected?'목적 정정 전':'기준 변경 전';}
+/** Uses currentWork's derived state. AI text is said to be removed only when some was; user-written fields are said to stay,
+ * because regeneration never overwrites them. No claim is made that a user field conflicts with the corrected purpose. */
+function showStaleNotice(banner:HTMLElement,t:Task,w:Work){
+  const basis=staleText(project,t),manual=w.manualFields.length>0;
+  const cause=basis?(w.intentCorrected?`${basis} 목적 직접 정정도 그 AI 정리 뒤에 있었어요.`:basis):w.intentCorrected&&w.aiExcluded?'목적을 직접 정정하기 전에 만든 AI 문구는 작업문에서 뺐어요.':'';
+  const target=basis&&w.intentCorrected?'바뀐 기준과 정정한 목적':basis?'현재 기준':'정정한 목적';
+  const next=!basis&&!w.intentCorrected?'':manual?`직접 쓴 내용은 그대로예요. ${target}에 맞는지 직접 확인해 주세요. ‘이 입력 다시 정리’를 해도 직접 쓴 내용은 바뀌지 않아요.`
+    :cause?'‘이 입력 다시 정리’로 새로 정리하거나 아래에서 직접 쓰세요.':'';
+  banner.textContent=[cause,next].filter(Boolean).join(' ');banner.hidden=!banner.textContent;
+  Object.assign(banner.dataset,{causes:[basis&&'basis',w.intentCorrected&&'intent'].filter(Boolean).join(' '),aiExcluded:String(w.aiExcluded),manual:manual?'kept':'none'});
+}
 function refreshPreview(){
   if(!project.currentTaskId||!$('handoff-text'))return;
-  const t=taskOf(project),v=currentWork(project,t).values;
+  const t=taskOf(project),w=currentWork(project,t),v=w.values;
   try{$<HTMLTextAreaElement>('handoff-text').value=handoffText(project);}catch{/* Never truncate or erase a manual draft. */}
   for(const [id,value] of [['work-summary',v.understanding],['scope-preview',v.scope],['instruction-preview',v.next],['checks-text',v.checks]])if($(id!))$(id!).textContent=value||'직접 작성한 내용이 없습니다. 원문은 그대로 보존됩니다.';
   $('work-authorship').textContent=workOrigin(t);
-  $('instruction-author').textContent=t.manual.next!==null?'사용자 직접 수정':t.mode==='mock'?'모의 제안':'AI 제안';
+  $('instruction-author').textContent=workAuthor(t,v.next);
+  if($('stale-advice'))showStaleNotice($('stale-advice'),t,w);
 }
 function renderReturnPreview() {
   const area=$('return-preview');

@@ -87,4 +87,66 @@ class IntentFlow(unittest.TestCase):
         self.assertNotIn('계속 유효',purpose);self.assertNotIn('이번 작업이 바꾸지 않음',purpose)
         self.assertTrue(all(b['status']=='requested' for b in self.state()['bases']))
 
+    def notice(self):
+        banner=self.page.locator('#stale-advice')
+        return {'visible':banner.is_visible(),'causes':banner.get_attribute('data-causes'),'aiExcluded':banner.get_attribute('data-ai-excluded'),'manual':banner.get_attribute('data-manual'),'text':banner.inner_text()}
+    def correct_purpose(self,goal,conditions='환불은 제외한다.'):
+        self.page.locator('#intent-details').evaluate('(e)=>e.open=true')
+        self.page.locator('#intent-edit-goal').fill(goal);self.page.locator('#intent-edit-conditions').fill(conditions)
+        self.page.locator('#intent-correct').click();expect(self.page.locator('#intent-goal')).to_have_text(goal)
+    def handoff(self,name):
+        with self.page.expect_download() as event:self.page.locator('#download-work').click()
+        path=base.OUT/name;event.value.save_as(path);return path.read_text(encoding='utf-8')
+
+    def test_03_purpose_correction_without_own_work_explains_withheld_ai_text_until_regenerated(self):
+        # FIX079: the work card says why AI text left the instruction and clears once a fresh reading arrives.
+        self.send('가입한 고객만 예약 취소')
+        ai=self.state()['tasks'][-1]['advice'];self.assertTrue(ai['next'])
+        self.assertFalse(self.notice()['visible'])
+        author=self.page.locator('#instruction-author').inner_text()
+        self.correct_purpose('문자 링크로 가입 없이 예약을 취소한다')
+        n=self.notice();self.assertTrue(n['visible'])
+        self.assertEqual((n['causes'],n['aiExcluded'],n['manual']),('intent','true','none'))
+        self.assertIn('목적',n['text']);self.assertNotIn('직접 쓴 내용은 그대로',n['text'])
+        expect(self.page.locator('#instruction-preview')).not_to_contain_text(ai['next'])
+        self.assertNotEqual(self.page.locator('#instruction-author').inner_text(),author,'withheld AI text is not labelled as the AI suggestion')
+        self.page.locator('#edit-work').evaluate('(e)=>e.open=true')
+        self.assertNotIn('기준 변경',self.page.locator('#manual-next').inner_text(),'no basis changed; the field note does not blame one')
+        text=self.handoff('fix079-no-own-work.md')
+        self.assertNotIn(ai['next'],text.split('### 다음 작업')[1].split('\n### ')[0])
+        self.assertIn('문자 링크로 가입 없이',text.split('## 이어가는 목적')[1].split('\n## ')[0])
+        self.page.locator('#retry-work').click();expect(self.page.locator('#working')).to_have_text('')
+        self.assertFalse(self.notice()['visible'],'a fresh reading is not shown as stale')
+        expect(self.page.locator('#instruction-author')).to_have_text(author)
+        expect(self.page.locator('#intent-goal')).to_have_text('문자 링크로 가입 없이 예약을 취소한다')
+        # Every work field is the user's own: nothing AI-written is said to be removed.
+        for key in ['understanding','scope','next','checks']:self.page.locator(f'#work-{key}').fill(f'직접 쓴 {key}')
+        self.correct_purpose('문자 링크로 가입 없이 예약을 취소하고 12시간 뒤 만료')
+        n=self.notice();self.assertTrue(n['visible']);self.assertEqual((n['causes'],n['aiExcluded'],n['manual']),('intent','false','kept'))
+        self.assertNotIn('뺐어요',n['text'])
+
+    def test_04_purpose_correction_keeps_own_work_and_names_both_causes(self):
+        # FIX079: a user-written instruction stays and goes out as written; regeneration never replaces it.
+        self.send('가입한 고객만 예약 취소')
+        self.page.locator('#edit-work').evaluate('(e)=>e.open=true')
+        own='회원 로그인 후 예약 취소 버튼을 추가한다.'
+        self.page.locator('#work-next').fill(own)
+        self.correct_purpose('문자 링크로 가입 없이 예약을 취소한다')
+        n=self.notice();self.assertTrue(n['visible']);self.assertEqual((n['causes'],n['aiExcluded'],n['manual']),('intent','true','kept'))
+        self.assertIn('직접 쓴 내용은 그대로',n['text'])
+        expect(self.page.locator('#instruction-preview')).to_have_text(own)
+        expect(self.page.locator('#instruction-author')).to_have_text('사용자 직접 수정')
+        text=self.handoff('fix079-own-work.md')
+        self.assertIn(own,text.split('### 다음 작업')[1].split('\n### ')[0])
+        self.assertIn('문자 링크로 가입 없이',text.split('## 이어가는 목적')[1].split('\n## ')[0])
+        # A recorded basis change as well: both causes are named, not just one.
+        self.page.locator('#outcome-correction').evaluate('(e)=>e.open=true')
+        self.page.locator('#outcome-correction-text').fill('비회원도 문자 링크로 예약 취소');self.page.locator('#correct-outcome').click()
+        n=self.notice();self.assertEqual(n['causes'],'basis intent');self.assertIn('D1',n['text'])
+        self.page.locator('#retry-work').click();expect(self.page.locator('#working')).to_have_text('')
+        self.assertFalse(self.notice()['visible'])
+        saved=self.state()['tasks'][-1];self.assertEqual(saved['manual']['next'],own)
+        expect(self.page.locator('#instruction-preview')).to_have_text(own)
+        self.page.reload();expect(self.page.locator('#instruction-preview')).to_have_text(own);self.assertFalse(self.notice()['visible'])
+
 if __name__=='__main__':unittest.main(verbosity=2)
