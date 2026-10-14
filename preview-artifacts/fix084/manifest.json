@@ -1,0 +1,189 @@
+{
+  "schema": "agentflow.static-preview-artifact.1",
+  "candidateSHA": "e1879e8d19e82b994ede67580be9f5d38f539295",
+  "parentSHA": "ffed6f12355a66a29602b2900b40319d613fa2d7",
+  "snapshot": "partial exact static runtime/build snapshot; 24 Git blobs verified",
+  "node": "22.16.0",
+  "typescript": "5.8.3",
+  "buildCommand": "node continuity/scripts/build-static.mjs",
+  "buildCount": 1,
+  "buildExit": 0,
+  "mode": "browser MOCK; no server/provider files",
+  "csp": "candidate static build CSP preserved, including connect-src none",
+  "files": [
+    {
+      "path": ".nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "client/app.js",
+      "bytes": 94282,
+      "sha256": "3848e2c2f4bb1ec6ca28286ed2c882ac35e10954719af7d3dd3249c6b7765ff1"
+    },
+    {
+      "path": "client/presentation.js",
+      "bytes": 6626,
+      "sha256": "22518bad59b234be37441877c4c7ed3e6f66b0c2c7f3346ee65879396fdd0bb6"
+    },
+    {
+      "path": "client/runtime.js",
+      "bytes": 1505,
+      "sha256": "215ccc5ab637c33f3435b7f5144ed08e9c72b332ac04c68890bb6ee67b6a9571"
+    },
+    {
+      "path": "index.html",
+      "bytes": 15600,
+      "sha256": "8f532b6cadac6472e14901e0df8dc1444cf8369a99deba7b2301afd57009de4e"
+    },
+    {
+      "path": "shared/domain.js",
+      "bytes": 39356,
+      "sha256": "d445aa22bb715ca4d47c55b3e9e83f159f3bb71f3c9d771fd41ea399018f9bcf"
+    },
+    {
+      "path": "shared/mock.js",
+      "bytes": 6383,
+      "sha256": "fa08b44f5ed7418d79a16d99b5a34d591cd38eb1a01fce8b9453a5b222495338"
+    },
+    {
+      "path": "shared/outcome.js",
+      "bytes": 4014,
+      "sha256": "ed7f60ef0330dc477654dccf66964ab3bab965a5790c341be2d21b8eb115b45f"
+    },
+    {
+      "path": "shared/plan-facts.js",
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+    },
+    {
+      "path": "shared/storage.js",
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+    },
+    {
+      "path": "shared/types.js",
+      "bytes": 1615,
+      "sha256": "eef8d365a2334841440f8d59cfbe576a55f13f66e400c51ddd4dfe13d7158e79"
+    },
+    {
+      "path": "shared/validation.js",
+      "bytes": 26092,
+      "sha256": "d21808eee21efdb4af654df79e50acf699714f53a89809050183fd227aadaa29"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 38512,
+      "sha256": "6018c9a3cf635b3b72f59220a4de6a50cad47ffa049bad20148b22f1cd9106f1"
+    }
+  ],
+  "aggregateAlgorithm": "SHA256 over UTF-8 sorted paths: sha256 + two spaces + decimal bytes + two spaces + path + LF, excluding manifest/zip",
+  "aggregateSHA256": "ac092d700fc7a8d3a6a788be26897f69a7244d316695cc4fba7062eadade7fab",
+  "artifact": {
+    "path": "static-preview.zip",
+    "bytes": 75368,
+    "sha256": "0da649079cb73b835009795144e3589f8a2d2ec0facd7d369804fbc5b01f682e",
+    "contents": "13 static assets only; extract into a dedicated empty directory"
+  },
+  "sourceBlobs": [
+    {
+      "path": "README.md",
+      "gitBlobSHA": "b3abb7aa03b86a1277153af5348a434c96a65d21"
+    },
+    {
+      "path": "app/.nvmrc",
+      "gitBlobSHA": "5b540673a82888c11694866137e18f3865890bde"
+    },
+    {
+      "path": "app/README.md",
+      "gitBlobSHA": "b5cba0c40dc7a6e16d97e9c4c5f010bcff16ff5d"
+    },
+    {
+      "path": "app/continuity/README.md",
+      "gitBlobSHA": "dd5de8b3a0a301c08b1047a88db640906c8a008f"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "gitBlobSHA": "19a3bfc43c6291ff21cce94517201f0ab0f7f977"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "gitBlobSHA": "540e42b0e8a1a3243747abcba5cc7d7e04881129"
+    },
+    {
+      "path": "app/continuity/scripts/build-static.mjs",
+      "gitBlobSHA": "c67c3a7097eb8fa91a69ba7a4e43fcb7d6fc49ae"
+    },
+    {
+      "path": "app/continuity/scripts/build.mjs",
+      "gitBlobSHA": "a3ebcc94b7ec2655e56b9a75ac5077d560d02733"
+    },
+    {
+      "path": "app/continuity/scripts/check.mjs",
+      "gitBlobSHA": "810992c086c458c1f56e369559fb0ca83e49569c"
+    },
+    {
+      "path": "app/continuity/scripts/compiler.mjs",
+      "gitBlobSHA": "e36c052b78b914f3d6764710baced3262edbe8f6"
+    },
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "gitBlobSHA": "c6dacca5434d9b690e7eeea67c8961b1ce2639c6"
+    },
+    {
+      "path": "app/continuity/src/client/presentation.ts",
+      "gitBlobSHA": "076bbdb38f09cb20f0b7404f63f420f5a1a942f7"
+    },
+    {
+      "path": "app/continuity/src/client/runtime-static.ts",
+      "gitBlobSHA": "c99d17ddb44510a966ecd9fcc1658acdffa4764d"
+    },
+    {
+      "path": "app/continuity/src/client/runtime.ts",
+      "gitBlobSHA": "6b21e28382e4883ca7951dc92a40edcf29ee7cf1"
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "gitBlobSHA": "c69a6b1b0ec9e4847c6e5b58bd541fd290975b04"
+    },
+    {
+      "path": "app/continuity/src/shared/mock.ts",
+      "gitBlobSHA": "b4ad06e94a2f5eafbd06c997ab25667df256e457"
+    },
+    {
+      "path": "app/continuity/src/shared/outcome.ts",
+      "gitBlobSHA": "3384b5f08932aa2febf0712f83d1e859f9d3666f"
+    },
+    {
+      "path": "app/continuity/src/shared/plan-facts.ts",
+      "gitBlobSHA": "6766c24cae83a8b68417c06e61c3df95fb373f18"
+    },
+    {
+      "path": "app/continuity/src/shared/storage.ts",
+      "gitBlobSHA": "f4b2607e70ad762e924539a34dd36f684003bca8"
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "gitBlobSHA": "d2d7a3fb17289a4834ea0e2b9443ffeff7727418"
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "gitBlobSHA": "6edfb3c78c3ce13fe625c0689292199222b7e3c5"
+    },
+    {
+      "path": "app/continuity/tsconfig.json",
+      "gitBlobSHA": "493acc461202daea6aa6de9aa75a58367b7ecee9"
+    },
+    {
+      "path": "app/package.json",
+      "gitBlobSHA": "f42ee82e7a541bf94a88bf02aec8e8c54834b294"
+    },
+    {
+      "path": "app/tsconfig.json",
+      "gitBlobSHA": "c1ffc989d4ef7c43a6da7ac9d61a581a03043c2f"
+    }
+  ],
+  "realAICalls": 0,
+  "generations": 0,
+  "personaEvaluations": 0
+}
