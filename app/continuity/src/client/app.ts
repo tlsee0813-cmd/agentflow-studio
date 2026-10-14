@@ -5,7 +5,7 @@ import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBas
 import { parseProject, parseResultFile, validateRequest, validateAdvice } from '../shared/validation.js';
 import { WorkspaceStore, serializeProject, storageErrorCode, type EntryRef, type WorkspaceEntry } from '../shared/storage.js';
 import { mockAdvice } from '../shared/mock.js';
-import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview } from './presentation.js';
+import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview, fitViewport, FIT_MIN, ZOOM_MIN, ZOOM_MAX } from './presentation.js';
 import { loadConfig, requestAdvice, runtimeStorage, runtimeFailure, type RuntimeConfig } from './runtime.js';
 import { outcomeOf } from '../shared/outcome.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
@@ -48,7 +48,7 @@ function rememberMap(){try{session?.setItem(MAP_KEY,JSON.stringify({project:proj
 function recallMap() {
   try {const v=JSON.parse(session?.getItem(MAP_KEY)||'null') as {project?:unknown;view?:MapView|null;selected?:unknown}|null;
     if(!v||v.project!==project.id)return;const w=v.view;
-    mapView=w&&[w.x,w.y,w.s].every(n=>typeof n==='number'&&Number.isFinite(n))&&w.s>=0.3&&w.s<=2?w:null;
+    mapView=w&&[w.x,w.y,w.s].every(n=>typeof n==='number'&&Number.isFinite(n))&&w.s>=FIT_MIN&&w.s<=ZOOM_MAX?w:null;
     mapSelected=typeof v.selected==='string'&&project.space.areas.some(a=>a.id===v.selected&&!a.archived)?v.selected:null;
   } catch {/* none */}
 }
@@ -170,6 +170,8 @@ function displayView() {
   document.body.dataset.route=route;document.body.dataset.starting=String(starting);
   $('projects-view').hidden=inProject;$('breadcrumb-project').hidden=!inProject;$('breadcrumb-sep').hidden=!inProject;$('example-banner').hidden=route!=='example';
   for(const id of ['nav-work','nav-context','nav-history'])$(id).hidden=!inProject||starting;
+  // With a plan space, the work view (and an unsent draft) stays reachable before the first task.
+  if(inProject&&starting&&hasSpace(project)&&route!=='example')$('nav-work').hidden=false;
   for(const id of ['backup','import','trash-current','new-project-top'])$(id).hidden=route==='example';
   // An empty new project has nothing to back up yet; restoring a backup stays reachable from the first screen.
   $('new-project-top').hidden=route==='example'||starting;
@@ -773,21 +775,20 @@ function areaSummary(a:Area):string {
   const tasks=areaRequests(a.id),results=tasks.flatMap(returnsOf).length;
   return tasks.length?`요청 ${tasks.length}개${results?` · 돌아온 결과 ${results}개 · 앱 미검증`:''}`:'아직 요청 없음';
 }
-const MAP_MIN=0.4,MAP_MAX=1.6;
+const scaleLabel=(s:number)=>s>=0.01?`${Math.round(s*100)}%`:'<1%';
 function applyView(plane:HTMLElement){if(mapView)plane.style.transform=`translate(${mapView.x}px,${mapView.y}px) scale(${mapView.s})`;}
 /** Fit changes only the viewport; stored positions stay as they are. */
 function fitView(map:HTMLElement,active:Area[]):MapView {
-  const w=map.clientWidth||800,h=map.clientHeight||480;
-  if(!active.length)return {x:24,y:24,s:1};
-  const pts=active.map(a=>areaPosition(project,a)),minX=Math.min(...pts.map(p=>p.x)),minY=Math.min(...pts.map(p=>p.y));
-  const bw=Math.max(...pts.map(p=>p.x))+NODE_W-minX,bh=Math.max(...pts.map(p=>p.y))+NODE_H-minY;
-  const s=Math.max(MAP_MIN,Math.min(1.2,(w-48)/bw,(h-48)/bh));
-  return {x:(w-bw*s)/2-minX*s,y:(h-bh*s)/2-minY*s,s};
+  // Measured card sizes (long names/notes make cards taller), in plane units.
+  const boxes=active.map(a=>{const pt=areaPosition(project,a),el=map.querySelector<HTMLElement>(`.area-node[data-area-id="${a.id}"]`);
+    return {x:pt.x,y:pt.y,w:el?.offsetWidth||NODE_W,h:el?.offsetHeight||NODE_H};});
+  return fitViewport(map.clientWidth||800,map.clientHeight||480,boxes);
 }
 function zoom(map:HTMLElement,plane:HTMLElement,factor:number) {
-  const v=mapView??{x:0,y:0,s:1},s=Math.max(MAP_MIN,Math.min(MAP_MAX,v.s*factor)),cx=map.clientWidth/2,cy=map.clientHeight/2;
+  // Buttons stay within a comfortable range, but never force a smaller fitted scale back up to it.
+  const v=mapView??{x:0,y:0,s:1},s=Math.max(Math.min(ZOOM_MIN,v.s),Math.min(ZOOM_MAX,v.s*factor)),cx=map.clientWidth/2,cy=map.clientHeight/2;
   mapView={x:cx-(cx-v.x)*(s/v.s),y:cy-(cy-v.y)*(s/v.s),s};applyView(plane);rememberMap();
-  $('map-scale').textContent=`${Math.round(s*100)}%`;
+  $('map-scale').textContent=scaleLabel(s);
 }
 function commitMove(id:string,to:Point,key:boolean) {
   const a=areaById(id)!,stored=project.space.layout.positions[id]??null,from=stored?{...stored}:null;
@@ -872,7 +873,7 @@ function renderMap(root:HTMLElement,active:Area[]) {
   const controls=node('div','','map-controls');
   const scale=node('span','','map-scale');scale.id='map-scale';
   controls.append(btn('－',()=>zoom(map,plane,1/1.25),'quiet map-zoom-out','map-zoom-out'),scale,btn('＋',()=>zoom(map,plane,1.25),'quiet map-zoom-in','map-zoom-in'),
-    btn('전체 맞춤',()=>{mapView=fitView(map,active);applyView(plane);rememberMap();scale.textContent=`${Math.round(mapView.s*100)}%`;},'quiet','map-fit'));
+    btn('전체 맞춤',()=>{mapView=fitView(map,active);applyView(plane);rememberMap();scale.textContent=scaleLabel(mapView.s);},'quiet','map-fit'));
   const last=posUndo.at(-1);
   if(last)controls.append(btn(`위치 되돌리기 · ${areaById(last.id)?.name??''}`,undoPosition,'quiet','map-undo'));
   map.append(controls);layout.append(map);
@@ -888,7 +889,7 @@ function renderMap(root:HTMLElement,active:Area[]) {
   if(sel&&!sel.archived)layout.append(areaPanel(sel));
   section.append(layout);root.append(section);
   if(!mapView)mapView=fitView(map,active);
-  applyView(plane);scale.textContent=`${Math.round(mapView.s*100)}%`;redraw();
+  applyView(plane);scale.textContent=scaleLabel(mapView.s);redraw();
   add.addEventListener('submit',e=>{e.preventDefault();if(!name.value.trim())return;
     // Place the new area where the user is looking (free slot nearest to the map centre).
     const v=mapView??{x:0,y:0,s:1},near={x:(map.clientWidth/2-v.x)/v.s-NODE_W/2,y:(map.clientHeight/2-v.y)/v.s-NODE_H/2};
@@ -914,6 +915,7 @@ function areaPanel(a:Area):HTMLElement {
 }
 function renderSpace() {
   const root=$('space-view');root.replaceChildren();if(view!=='space'&&view!=='area')return;
+  root.hidden=route==='projects'; // shown before building, so the map is measured at its real size (fit)
   const area=view==='area'?areaById(viewArea):null,crumb=node('nav','','space-crumb');crumb.setAttribute('aria-label','공간 경로');
   if(view==='area')crumb.append(btn('전체 공간',openSpace,'crumb-link','space-crumb-root'),node('span','›','crumb-sep'),node('strong',area?area.name:'영역 미지정 작업'));
   if(view==='area')root.append(crumb);
@@ -1014,7 +1016,8 @@ function renderPlace(t:Task|null) {
 /** The area the next request goes to: explicit, visible and changeable. Shown once areas exist. */
 function renderComposeArea(t:Task|null,returned:boolean) {
   const row=$('compose-area-row'),sel=$<HTMLSelectElement>('compose-area'),active=project.space.areas.filter(a=>!a.archived);
-  row.hidden=returned||!active.length||route==='example';if(row.hidden)return;
+  const saved=project.space.draftTarget?.area?project.space.areas.find(a=>a.id===project.space.draftTarget!.area&&a.archived):undefined;
+  row.hidden=returned||(!active.length&&!saved)||route==='example';if(row.hidden)return;
   const follow=t?areaById(areaOf(project,t)):null;
   const options:[string,string][]=[['@follow',`지금 작업을 따라감 (${follow?follow.name:'영역 없음'})`],...active.map(a=>[a.id,a.name] as [string,string]),['@none','영역 없이']];
   sel.replaceChildren(...options.map(([v,label])=>{const o=node('option',label);o.value=v;return o;}));

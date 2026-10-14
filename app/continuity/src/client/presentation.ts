@@ -94,3 +94,14 @@ export function workOrigin(t: Task): string {
   return t.mode === 'mock' ? (manual ? '모의 제안 · 직접 수정 포함' : '모의 제안 · 규칙 기반')
     : (manual ? 'AI 제안 · 직접 수정 포함' : 'AI 제안 · 사용자 미확정');
 }
+
+/** FLOW090-B1-R1: the view that shows every card (measured boxes in plane units) inside a w x h map with a margin.
+ * The scale goes as low as fitting needs; only the zoom buttons have a comfort floor. Never moves a card. */
+export const FIT_MIN=0.0005, ZOOM_MIN=0.4, ZOOM_MAX=1.6;
+export function fitViewport(w:number,h:number,boxes:{x:number;y:number;w:number;h:number}[],margin=24):{x:number;y:number;s:number} {
+  if(!boxes.length)return {x:margin,y:margin,s:1};
+  const minX=Math.min(...boxes.map(b=>b.x)),minY=Math.min(...boxes.map(b=>b.y));
+  const bw=Math.max(...boxes.map(b=>b.x+b.w))-minX,bh=Math.max(...boxes.map(b=>b.y+b.h))-minY;
+  const s=Math.max(FIT_MIN,Math.min(1.2,(w-2*margin)/bw,(h-2*margin)/bh));
+  return {x:(w-bw*s)/2-minX*s,y:(h-bh*s)/2-minY*s,s};
+}

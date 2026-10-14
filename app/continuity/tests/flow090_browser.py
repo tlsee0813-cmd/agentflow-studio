@@ -213,4 +213,41 @@ class SpatialWorkspace(unittest.TestCase):
         self.page.locator(f'#node-open-{notify}').click();expect(self.page.locator('#space-title')).to_have_text('알림')
         self.page.locator('#space-crumb-root').click();self.page.screenshot(path=str(base.OUT/'flow090-map-390.png'))
 
+    def place(self,positions,notes={}):
+        """Stores positions/notes as saved project data (the same envelope a reload reads), then reloads."""
+        entry=self.page.evaluate('document.documentElement.dataset.entryId')
+        self.page.evaluate("""([key,entry,positions,notes])=>{const env=JSON.parse(localStorage.getItem(key));const p=env.entries.find(e=>e.entryId===entry).project;
+          Object.assign(p.space.layout.positions,positions);for(const a of p.space.areas)if(notes[a.id])a.note=notes[a.id];localStorage.setItem(key,JSON.stringify(env));}""",[base.WORKSPACE,entry,positions,notes])
+        self.page.evaluate("sessionStorage.removeItem('agentflow.workspace.map')");self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK')
+    def all_cards_inside(self):
+        m=self.page.locator('#space-map').bounding_box()
+        for box in [self.page.locator('.area-node').nth(i).bounding_box() for i in range(self.page.locator('.area-node').count())]:
+            self.assertGreaterEqual(box['x'],m['x']-0.5);self.assertGreaterEqual(box['y'],m['y']-0.5)
+            self.assertLessEqual(box['x']+box['width'],m['x']+m['width']+0.5);self.assertLessEqual(box['y']+box['height'],m['y']+m['height']+0.5)
+
+    def test_09_fit_brings_every_card_into_view_at_any_spread(self):
+        self.page.set_viewport_size({'width':390,'height':844})
+        booking,notify=self.start(['예약','알림'])
+        long='아주 긴 한 줄 구상이 들어가서 카드 높이가 달라지는 경우도 화면 안에 다 들어와야 합니다 '*3
+        for spread in [{'x':2000,'y':0},{'x':200000,'y':-200000}]:
+            self.place({booking:{'x':0,'y':0},notify:spread},{notify:long})
+            self.all_cards_inside()  # the first visit to the map without a saved view fits
+            self.page.locator('#map-zoom-in').click();self.page.locator('#map-fit').click();self.all_cards_inside()
+            stored=self.state()['space']['layout'];t0=self.page.locator('#space-plane').evaluate('(e)=>e.style.transform')
+            self.page.locator('#map-zoom-out').click();self.page.locator('#map-fit').click()
+            self.assertEqual(self.state()['space']['layout'],stored)
+            # A small fitted scale is kept across reload; zoom-out never jumps it back up to the button floor.
+            self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK')
+            self.assertEqual(self.page.locator('#space-plane').evaluate('(e)=>e.style.transform'),t0);self.all_cards_inside()
+
+    def test_10_a_saved_target_in_the_last_archived_area_stays_visible(self):
+        (booking,)=self.start(['예약'])
+        self.open_area('예약');self.page.locator('#area-new-request').click();self.page.locator('#draft').fill('예약 쪽 미제출 요청');self.page.wait_for_timeout(100)
+        self.page.locator('#nav-space').click();self.open_area('예약');self.page.locator('#area-archive').click()
+        self.page.locator('#nav-work').click()
+        if not self.page.locator('#compose-panel').evaluate('(e)=>e.open'):self.page.locator('#compose-summary').click()
+        expect(self.page.locator('#compose-area-row')).to_be_visible();expect(self.page.locator('#compose-area')).to_have_value(booking)
+        expect(self.page.locator('#compose-area')).to_contain_text('보관된 영역');self.page.locator('#send').click()
+        expect(self.page.locator('#notice')).to_contain_text('보관돼 있어요');self.assertEqual(self.state()['space']['draftTarget'],{'area':booking})
+
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -510,15 +510,18 @@ export function areaPosition(p: Project, a: Area): Point {
   const i=p.space.areas.findIndex(x=>x.id===a.id);return {x:40+(i%3)*GRID_X,y:40+Math.floor(i/3)*GRID_Y};
 }
 function freeSlot(p: Project, near?: Point): Point {
-  const taken=p.space.areas.filter(a=>!a.archived).map(a=>areaPosition(p,a));
+  // Archived areas keep their place too: restoring one must not land it on an area added meanwhile.
+  const taken=p.space.areas.map(a=>areaPosition(p,a));
   const clash=(x:number,y:number)=>taken.some(t=>Math.abs(t.x-x)<NODE_W+20&&Math.abs(t.y-y)<NODE_H+20);
-  const ox=near?Math.round(near.x/20)*20:40,oy=near?Math.round(near.y/20)*20:40;
+  const start=clampPoint({x:near?Math.round(near.x/20)*20:40,y:near?Math.round(near.y/20)*20:40}),ox=start.x,oy=start.y;
+  const inside=(x:number,y:number)=>Math.abs(x)<=POSITION_LIMIT&&Math.abs(y)<=POSITION_LIMIT;
   // Nearest free grid slot, trying right, then left, then below, then above (reading order) within each ring.
   for(let r=0;r<40;r++) {
     const ring:[number,number][]=[];
     for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)if(Math.max(Math.abs(dx),Math.abs(dy))===r)ring.push([dx,dy]);
     ring.sort((a,b)=>Math.abs(a[1])-Math.abs(b[1])||Number(a[1]<0)-Number(b[1]<0)||Math.abs(a[0])-Math.abs(b[0])||Number(a[0]<0)-Number(b[0]<0));
-    for(const [dx,dy] of ring){const x=ox+dx*GRID_X,y=oy+dy*GRID_Y;if(!clash(x,y))return clampPoint({x,y});}
+    // Check the final, in-range coordinate: a slot past the limit is skipped, never clamped onto a neighbour.
+    for(const [dx,dy] of ring){const x=ox+dx*GRID_X,y=oy+dy*GRID_Y;if(inside(x,y)&&!clash(x,y))return {x,y};}
   }
   return clampPoint({x:ox,y:oy});
 }

@@ -130,3 +130,25 @@ test('F090-9 map positions: fixed defaults, free slots for new areas, one-field 
   const stray=JSON.parse(serializeProject(moved));stray.space.layout.positions.A_nope={x:0,y:0};assert.throws(()=>parseProject(JSON.stringify(stray)));
   assert.throws(()=>D.moveArea(D.setAreaArchived(p,notify,true),notify,{x:0,y:0}),/AREA_MISSING/);
 });
+
+test('F090-10 automatic slots never land on an archived area or on another area at the coordinate limit',()=>{
+  const overlap=(p,q)=>Math.abs(p.x-q.x)<D.NODE_W&&Math.abs(p.y-q.y)<D.NODE_H;
+  let p=D.addArea(D.createProject(),'A');const A=p.space.areas[0].id,a0=D.areaPosition(p,p.space.areas[0]);
+  p=D.setAreaArchived(p,A,true);p=D.addArea(p,'B');p=D.setAreaArchived(p,A,false);
+  const [a,b]=p.space.areas.map(x=>D.areaPosition(p,x));assert.deepEqual(a,a0,'restored where it was');assert.ok(!overlap(a,b),'B did not take archived A\'s place');
+  // Near the limit: each new area gets a distinct, in-range slot within a bounded search.
+  let q=D.addArea(D.createProject(),'끝');q=D.moveArea(q,q.space.areas[0].id,{x:200000,y:0});
+  for(let i=0;i<6;i++)q=D.addArea(q,`끝 ${i}`,'',{x:200000,y:0});
+  const pts=q.space.areas.map(x=>D.areaPosition(q,x));
+  for(const pt of pts)assert.ok(Math.abs(pt.x)<=200000&&Math.abs(pt.y)<=200000);
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++)assert.ok(!overlap(pts[i],pts[j]),`slot ${i} and ${j} overlap`);
+});
+
+test('F090-11 fit shows every measured card inside the map, however far apart (no 0.4 floor)',async()=>{
+  const {fitViewport}=await import('../dist/public/client/presentation.js');
+  const inside=(w,h,boxes,v)=>boxes.every(b=>b.x*v.s+v.x>=0&&b.y*v.s+v.y>=0&&(b.x+b.w)*v.s+v.x<=w+1e-6&&(b.y+b.h)*v.s+v.y<=h+1e-6);
+  for(const boxes of [[{x:0,y:0,w:240,h:132},{x:2000,y:0,w:240,h:132}],[{x:-200000,y:-200000,w:240,h:132},{x:200000,y:200000,w:240,h:310}],[{x:0,y:0,w:240,h:420}]]) {
+    const v=fitViewport(320,400,boxes);assert.ok(v.s>0&&Number.isFinite(v.x)&&Number.isFinite(v.y));assert.ok(inside(320,400,boxes,v),JSON.stringify(v));
+  }
+  assert.equal(fitViewport(800,500,[{x:0,y:0,w:240,h:132}]).s,1.2,'a single card is not blown up past 120%');
+});
