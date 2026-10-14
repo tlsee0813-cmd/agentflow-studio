@@ -311,7 +311,7 @@ class UI001(unittest.TestCase):
         fixture=self.state();fixture['schemaVersion']='idea015.project.1';fixture.pop('space',None)  # project.1 predates the plan space
         for b in fixture['bases']:b['locked']=False
         for t in fixture['tasks']:
-            t.pop('adviceRevision');t.pop('resultFile')
+            t.pop('adviceRevision');t.pop('resultFile');t.pop('background',None)
             t['handoffs']=[{'at':h['at'],'method':h['method'],'revision':h['revision'],'text':'이전 형식 작업문 원문'} for h in t['handoffs']]
         path=base.OUT/'return032-legacy-fixture.json';path.write_text(json.dumps(fixture,ensure_ascii=False),encoding='utf-8')
         calls=self.calls();self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(path)

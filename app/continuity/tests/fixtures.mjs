@@ -27,7 +27,7 @@ export function synthetic(n, text='짧은 요청') {
   const p=D.createProject(),at='2026-10-11T00:00:00.000Z',pad=i=>String(i).padStart(36,'0');
   for(let i=1;i<=n;i++){
     const t=`T_${pad(i)}`,s=`S_${pad(i)}`;
-    p.tasks.push({id:t,sourceIds:[s],parentTaskId:i>1?`T_${pad(i-1)}`:null,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:null});
+    p.tasks.push({id:t,sourceIds:[s],parentTaskId:i>1?`T_${pad(i-1)}`:null,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:null,background:null});
     p.sources.push({id:s,kind:'request',text:`${text} ${i}`,at,taskId:t,replyTo:null,disposition:'provided'});
     p.bases.push({id:`D${i}`,text:`${text} ${i}`,status:'requested',sourceId:s,revision:i,history:[]});
   }
@@ -36,7 +36,7 @@ export function synthetic(n, text='짧은 요청') {
 export function longRequests(n) { let p=D.createProject();for(let i=1;i<=n;i++)p=submit(p,`${LONG_REQUEST}${i}`);return p; }
 /** Down-convert to the shipped project.1 shape: lock flag, no advice revision, full handoff text per export. */
 export function toLegacy({project,texts}) {
-  let k=0;const v=structuredClone(project);v.schemaVersion='idea015.project.1';delete v.space;for(const t of v.tasks)delete t.areaId; // project.1 predates the plan space
+  let k=0;const v=structuredClone(project);v.schemaVersion='idea015.project.1';delete v.space;for(const t of v.tasks){delete t.areaId;delete t.background;for(const h of t.handoffs)delete h.background;} // project.1 predates the plan space and background copies
   v.bases=v.bases.map(({id,text,status,sourceId,revision,history})=>({id,text,status,sourceId,locked:true,revision,history}));
   v.tasks=v.tasks.map(({adviceRevision,resultFile,handoffs,...t})=>({...t,handoffs:handoffs.map(h=>({at:h.at,text:texts[k++],revision:h.revision,method:h.method}))}));
   if(k!==texts.length||project.schemaVersion!==SCHEMA)throw new Error('fixture mismatch');

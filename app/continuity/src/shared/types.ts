@@ -1,4 +1,6 @@
-export const SCHEMA = 'idea015.project.4' as const;
+export const SCHEMA = 'idea015.project.5' as const;
+/** project.4 had no background snapshots: every task and export reads background=null (nothing is backfilled). */
+export const V4_SCHEMA = 'idea015.project.4' as const;
 /** project.3 had no space; it is read as an empty one. */
 export const V3_SCHEMA = 'idea015.project.3' as const;
 export const PREVIOUS_SCHEMA = 'idea015.project.2' as const;
@@ -10,7 +12,7 @@ export interface ResultFile {
   schemaVersion: typeof RESULT_SCHEMA; projectId: string; taskId: string; returnId: string;
   report: string; evidence: string | null;
 }
-export const API_SCHEMA = 'idea022.context.6' as const;
+export const API_SCHEMA = 'idea022.context.7' as const;
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
 export const FILE_LIMIT = 8_000_000;
@@ -55,11 +57,19 @@ export interface Advice {
   suggestions: { text: string; why: string }[];
 }
 export interface WorkValues { understanding: string; scope: string; next: string; checks: string }
-/** Export metadata. The handoff text is derivable from stable IDs/revisions, so it is not copied again. */
+/** FLOW091-C: copy of the user's plan fixed when an explicit new request was submitted: the project purpose and the
+ * area that request was written for (not the map selection). Background material, never an instruction, basis or
+ * user decision. Later purpose/area edits, moves, re-organisation and exports never change it. Empty = null. */
+export interface Background {
+  version: 'background.1'; revision: number; brief: string | null;
+  area: { id: string; name: string; note: string | null } | null;
+}
+/** Export metadata. The handoff text is derivable from stable IDs/revisions, so it is not copied again.
+ * Exception: background, the copy actually sent (older records: null; not recovered from the current plan). */
 export interface ExportRecord {
   at: string; method: 'clipboard' | 'download'; revision: number; chars: number; digest: string;
   work: WorkValues | null; aiExcluded: boolean; legacyText: string | null;
-  returnId: string | null;
+  returnId: string | null; background: Background | null;
 }
 export interface Task {
   /** Purpose correction, stored apart from this task's own work fields (manual.*). goal=null (with conditions=null)
@@ -71,6 +81,8 @@ export interface Task {
   manual: { understanding: string | null; scope: string | null; next: string | null; checks: string | null };
   suggestions: { text: string; why: string }[] | null; handoffs: ExportRecord[];
   resultFile: { returnId: string; rawText: string } | null;
+  /** FLOW091-C: a request's own capture; a return carries the copy of the task (or exact export) it returns to. */
+  background: Background | null;
   /** FLOW090: the area of a request task. Absent = not placed. Returns follow their parent and never carry it. */
   areaId?: string;
 }
@@ -116,6 +128,8 @@ export interface ContextRequest {
   /** Only when previousIntent is a 'separate' interpretation: the nearest earlier non-separate one on this path. */
   purposeIntent: CurrentIntent|null;
   previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean; manualConditionFields: ('scope' | 'checks')[] }) | null;
+  /** FLOW091-C: this task's fixed plan copy, as separate material (not a source, basis or decision). */
+  background: Background | null;
 }
 export interface Envelope { mode: 'mock' | 'deepseek'; ticket: Ticket; advice: Advice }
 export const SOURCE_LABEL: Record<SourceKind, string> = {

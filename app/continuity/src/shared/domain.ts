@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background } from './types.js';
 import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { outcomeOf, contextLinks } from './outcome.js';
@@ -76,6 +76,12 @@ function placeReturn(p: Project, n: Project, id: string, target: string|null) {
 export function focusTask(p: Project, id: string): Project {
   ensure(p.tasks.some(t=>t.id===id),'TASK_MISSING'); const n=change(p); n.currentTaskId=id; return n;
 }
+/** FLOW091-C: the plan as it is now, for the area this request was decided to go to (not the map selection).
+ * Only this project's purpose and that one area: no other areas, relations, positions or earlier texts. */
+function captureBackground(p: Project, areaId: string|null): Background {
+  const a=areaId===null?null:p.space.areas.find(x=>x.id===areaId);
+  return {version:'background.1',revision:p.revision,brief:p.space.brief?.text??null,area:a?{id:a.id,name:a.name,note:a.note||null}:null};
+}
 /** areaId: undefined = continue the current task's area, null = none, string = that (active) area. */
 export function submit(p: Project, selectedId?: string, areaId?: string|null): Project {
   text(p.draft);
@@ -91,13 +97,19 @@ export function submit(p: Project, selectedId?: string, areaId?: string|null): P
   const latestReturn=latestRequest?[...p.tasks].reverse().find(x=>x.parentTaskId===latestRequest.id&&isReturnTask(p,x)):undefined;
   const parent=returned ? returnTargetId(p,selectedId) : chosen===undefined||(current&&inArea(current)) ? p.currentTaskId : latestReturn?.id??latestRequest?.id??null;
   const n=change(p);
-  const id=uid('T'),t:Task={id,sourceIds:[],parentTaskId:parent,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:null};
+  const id=uid('T'),t:Task={id,sourceIds:[],parentTaskId:parent,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:null,background:null};
   const s=appendSource(n,n.draftKind,n.draft,id);
   t.sourceIds.push(s.id); n.tasks.push(t);
-  if(returned) placeReturn(p,n,id,parent); else {
+  if(returned) {
+    // FLOW091-C: a pasted report carries the copy of the exact task it returns to, never the current plan.
+    const back=parent===null?null:p.tasks.find(x=>x.id===parent)?.background??null;t.background=copy(back);
+    placeReturn(p,n,id,parent);
+  } else {
     n.currentTaskId=id;
     // FLOW090: a request is placed in the area it was written for; a follow-up keeps the area of the work it continues.
     if(target!==null){ensure(p.space.areas.some(a=>a.id===target&&!a.archived),'AREA_MISSING');t.areaId=target;}
+    // FLOW091-C: only an explicit new request captures the latest plan (a synthetic test answer is not a user request).
+    if(s.kind==='request')t.background=captureBackground(p,target);
   }
   if(s.kind === 'request') {
     let replaced=false;
@@ -135,7 +147,9 @@ export function inspectResultFile(p:Project,rawText:string) {
 export function importResultFile(p:Project,rawText:string):Project {
   const {file,task,record,duplicate}=inspectResultFile(p,rawText);if(duplicate)return p;
   const n=change(p),id=uid('T'),t:Task={id,sourceIds:[],parentTaskId:task.id,advice:null,adviceRevision:null,mode:null,
-    manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:{returnId:file.returnId,rawText}};
+    manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:{returnId:file.returnId,rawText},
+    // FLOW091-C: the background that went out with that exact export; an older export without one stays null.
+    background:copy(record.background)};
   const kinds:('report'|'evidence')[]=file.evidence===null?['report']:['report','evidence'];
   for(const kind of kinds)t.sourceIds.push(appendSource(n,kind,resultSourceText(file,record.revision,kind),id).id);
   n.tasks.push(t);placeReturn(p,n,id,task.id);n.pending=null;
@@ -303,7 +317,9 @@ const jsonBytes=(v:unknown)=>new TextEncoder().encode(JSON.stringify(v)).length;
 export function buildRequest(p: Project, ticket: Ticket): ContextRequest {
   const t=taskOf(p,ticket.taskId),parts=contextParts(p,t);
   const req:ContextRequest={schemaVersion:API_SCHEMA,ticket:copy(ticket),projectName:p.name,sources:parts.sources,
-    bases:p.bases.map(contextBasis),appFacts:planFacts(p,t.id),previousWork:parts.previousWork,previousIntent:null,purposeIntent:null};
+    bases:p.bases.map(contextBasis),appFacts:planFacts(p,t.id),previousWork:parts.previousWork,previousIntent:null,purposeIntent:null,
+    // Never excerpted or dropped for size: over the limit the request is refused (CONTEXT_TOO_LARGE) and nothing is cut.
+    background:copy(t.background)};
   req.previousIntent=requestIntent(p,t);req.purposeIntent=purposeIntent(p,t,req.previousIntent);
   let bytes=jsonBytes(req);
   if(bytes>REQUEST_BYTES) {
@@ -406,6 +422,7 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
   if(outcome.request) lines.push('\n## 이번 요청과 이전 맥락',
     `이번 요청 [${outcome.request.id}]이 실행 범위를 정합니다. 부모 연결은 같은 목적이라는 판정이 아닙니다.`,
     '후속 사용자 발언이 바꾼 부분은 앞선 요청보다 우선합니다. 바꾸지 않은 유지 조건은 보존하되, 관련 없는 이전 요청을 이번 작업에 추가하지 마세요. 코드 영향은 실행 도구가 실제 자료로 판단합니다.');
+  const background=backgroundLines(p,t);if(background.length)lines.push(...background);
   const intent=currentIntent(p,t),correction=intentCorrection(t);
   if(intent||correction) {
     // A user's purpose correction stays visible even after the AI interpretation behind it went stale.
@@ -466,6 +483,17 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
   }
   return lines.join('\n\n');
 }
+/** FLOW091-C: this task's fixed plan copy as background material, apart from the request that sets the scope.
+ * Nothing is shown for a task without a copy (older work), and empty values add no placeholder text. */
+export function backgroundLines(p:Project,t:Task):string[] {
+  const b=t.background;if(!b||(b.brief===null&&b.area===null))return [];
+  const own=!isReturnTask(p,t);
+  return ['\n## 프로젝트 배경·영역 구상 — 이번 요청 범위와 구분',
+    `${own?'이 작업의 요청을 쓸 때':'이 보고가 돌아간 작업의 요청을 쓸 때'}(기준 r${b.revision}) 사용자가 저장해 둔 구상의 사본입니다. 배경 자료이며 작업 지시·사용자 결정 기준이 아닙니다. 그 뒤 바뀐 구상은 여기에 들어가지 않습니다.`,
+    '이번 요청이 실행 범위를 정합니다. 배경 전체를 구현하지 말고, 배경에 적힌 아이디어나 아직 정하지 않은 점을 임의로 확정하지 마세요. 필요하면 확인할 항목으로만 남기세요.',
+    ...(b.brief!==null?[`프로젝트 목적 원문:\n${b.brief}`]:[]),
+    ...(b.area?[`요청 대상 영역: ${b.area.name} [${b.area.id}]`,...(b.area.note!==null?[`영역 구상 원문:\n${b.area.note}`]:[])]:[])];
+}
 function basisLine(b:Basis):string {
   // Earlier values stay in the project (and recovery file); they are not repeated as instructions.
   return `[${b.id}] ${BASIS_LABEL[b.status]} / r${b.revision} / ${b.sourceId}\n${b.text}${b.history.length ? `\n(이전 값 ${b.history.length}건은 앱 기록에 보존 · 현재 지시 아님)`:''}`;
@@ -473,7 +501,9 @@ function basisLine(b:Basis):string {
 export function markHandoff(p:Project,id:string,text:string,method:'clipboard'|'download',exportRevision=p.revision,returnId:string|null=null):Project {
   ensure(returnId===null || /^[A-Za-z0-9_-]{1,100}$/.test(returnId) && !p.tasks.some(t=>t.handoffs.some(h=>h.returnId===returnId)));
   const w=currentWork(p,taskOf(p,id)),n=change(p);
-  taskOf(n,id).handoffs.push({at:now(),method,revision:exportRevision,chars:text.length,digest:digest(text),work:w.values,aiExcluded:w.aiExcluded,legacyText:null,returnId});
+  const t=taskOf(n,id);
+  // FLOW091-C: the background actually sent with this export (the task's fixed copy), kept with the record.
+  t.handoffs.push({at:now(),method,revision:exportRevision,chars:text.length,digest:digest(text),work:w.values,aiExcluded:w.aiExcluded,legacyText:null,returnId,background:copy(t.background)});
   return n;
 }
 export function restore(p: Project): Project {

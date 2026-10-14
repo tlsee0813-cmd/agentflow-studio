@@ -49,7 +49,9 @@ class SpatialWorkspace(unittest.TestCase):
         s=self.state();task=s['tasks'][0];self.assertEqual(task['areaId'],booking);self.assertEqual(s['currentTaskId'],task['id']);self.assertEqual(len(calls),1)
         expect(self.page.locator('#work-place')).to_contain_text('예약')
         handoff=self.download('#download-work','flow090-booking.md').read_text(encoding='utf-8')
-        self.assertNotIn(brief,handoff,'the purpose text is not sent as a work instruction')
+        # FLOW091-C replaced 'never sent': the purpose goes out only inside the separated background block, not as an instruction.
+        bg=handoff.split('## 프로젝트 배경·영역 구상 — 이번 요청 범위와 구분')
+        self.assertEqual(len(bg),2);self.assertIn(brief,bg[1].split('\n## ')[0]);self.assertNotIn(brief,bg[0]);self.assertNotIn(brief,bg[1].split('\n## ',1)[1])
         self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('보고: 날짜 선택 화면을 만들었다고 주장. 실제 확인 없음.')
         self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         s=self.state();report=s['tasks'][-1];self.assertEqual(report['parentTaskId'],task['id']);self.assertNotIn('areaId',report)
@@ -77,7 +79,9 @@ class SpatialWorkspace(unittest.TestCase):
     def test_02_an_older_project_without_areas_opens_whole_and_can_be_placed(self):
         self.page.locator('#draft').fill('예약 확정 문구를 바꿔줘');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         old=self.state();old['schemaVersion']='idea015.project.3';del old['space']
-        for t in old['tasks']:t.pop('areaId',None)
+        for t in old['tasks']:
+            t.pop('areaId',None);t.pop('background',None)  # project.3 had neither areas nor background copies
+            for h in t['handoffs']:h.pop('background',None)
         entry=self.page.evaluate('document.documentElement.dataset.entryId')
         self.page.evaluate('''([key,entry,project])=>{const env=JSON.parse(localStorage.getItem(key));env.entries.find(e=>e.entryId===entry).project=project;localStorage.setItem(key,JSON.stringify(env));}''',[base.WORKSPACE,entry,old])
         self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');expect(self.page.locator('#current-work')).to_be_visible()
@@ -86,10 +90,10 @@ class SpatialWorkspace(unittest.TestCase):
         self.add_area('확정 화면');self.page.locator('#open-unplaced').click()
         self.page.locator('.area-task').locator('.area-place').click()
         expect(self.page.locator('#area-tasks')).to_contain_text('영역 미지정 요청이 없어요')
-        s=self.state();self.assertEqual(s['schemaVersion'],'idea015.project.4');self.assertEqual(s['tasks'][0]['areaId'],self.area_id('확정 화면'))
+        s=self.state();self.assertEqual(s['schemaVersion'],'idea015.project.5');self.assertEqual(s['tasks'][0]['areaId'],self.area_id('확정 화면'))
         for k in ['sources','bases','currentTaskId']:self.assertEqual(s[k],old[k],k)
         backup=self.download('#backup','flow090-backup.json');data=json.loads(backup.read_text(encoding='utf-8'))
-        self.assertEqual(data['schemaVersion'],'idea015.project.4');self.assertEqual(data['space'],s['space']);self.assertEqual(data['tasks'][0]['areaId'],s['tasks'][0]['areaId'])
+        self.assertEqual(data['schemaVersion'],'idea015.project.5');self.assertEqual(data['space'],s['space']);self.assertEqual(data['tasks'][0]['areaId'],s['tasks'][0]['areaId'])
         self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(str(backup))
         expect(self.page.locator('#notice')).to_contain_text('사본');copy=self.state()
         self.assertEqual(copy['space'],s['space']);self.assertEqual(copy['tasks'][0]['areaId'],s['tasks'][0]['areaId'])
@@ -352,5 +356,35 @@ class SpatialWorkspace(unittest.TestCase):
         expect(self.page.locator('#area-panel')).to_be_hidden();reopen=self.page.locator('#map-sheet-reopen');expect(reopen).to_be_visible()
         reopen.click();expect(self.page.locator('#area-panel')).to_be_visible();expect(self.page.locator('#panel-note')).to_have_value('아직 못 정한 점: 취소 규칙')
         s=self.state();self.assertEqual(next(a for a in s['space']['areas'] if a['id']==booking)['note'],'','not saved until 반영');self.assertIsNone(s['currentTaskId'])
+
+    # ---------- FLOW091-C: the saved plan reaches the work text as a fixed background copy (real HTTP, MOCK) ----------
+    def test_16_background_copy_walkthrough(self):
+        calls=[];self.page.on('request',lambda r:calls.append(r.post_data_json) if r.method=='POST' and r.url.endswith('/api/continuity') else None)
+        booking,notify=self.start(['예약','알림'])
+        self.open_area('예약');self.page.locator('#area-edit').evaluate('(e)=>e.open=true')
+        self.page.locator('#area-edit-note').fill('날짜와 시간 고르기 · 아직 못 정함: 결제');self.page.locator('#area-edit-save').click()
+        self.request_in('예약','A: 예약 화면에서 날짜를 고르게 해줘',export=False);A=self.state()['currentTaskId']
+        s=self.state();bg=next(t for t in s['tasks'] if t['id']==A)['background']
+        self.assertEqual(bg['brief'],'예약 서비스');self.assertEqual(bg['area'],{'id':booking,'name':'예약','note':'날짜와 시간 고르기 · 아직 못 정함: 결제'})
+        self.assertEqual(calls[-1]['background'],bg,'the AI request carries the same copy as its own field')
+        self.assertTrue(all('예약 서비스' not in x['text'] for x in calls[-1]['sources']))
+        box=self.page.locator('#background-preview');box.locator('summary').click()
+        expect(box).to_contain_text('예약 서비스');expect(box).to_contain_text('아직 못 정함: 결제');expect(box).not_to_contain_text('알림')
+        md=self.download('#download-work','flow091c-A.md').read_text(encoding='utf-8')
+        self.assertIn('## 프로젝트 배경·영역 구상 — 이번 요청 범위와 구분',md);self.assertIn('아직 못 정함: 결제',md);self.assertNotIn('알림',md)
+        self.page.locator('#next-preview').click();self.assertIn('아직 못 정함: 결제',self.page.locator('#handoff-text').input_value())
+        rec=next(t for t in self.state()['tasks'] if t['id']==A)['handoffs'][-1];self.assertEqual(rec['background'],bg)
+        self.assertEqual(len(self.state()['bases']),1,'the background is not recorded as a basis')
+        # Edit the plan: A keeps its copy (and says the plan changed since), B gets the latest.
+        self.page.locator('#nav-space').click();self.page.locator('#brief-edit > summary').click();self.page.locator('#brief-edit-text').fill('미용실과 네일숍 예약');self.page.locator('#brief-save').click()
+        self.page.locator('#nav-work').click();expect(self.page.locator('#background-changed')).to_be_attached()
+        self.assertEqual(next(t for t in self.state()['tasks'] if t['id']==A)['background'],bg)
+        self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('A 보고: 만들었다고 주장');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        report=self.state()['tasks'][-1];self.assertEqual(report['parentTaskId'],A);self.assertEqual(report['background'],bg)
+        self.request_in('알림','B: 알림 문자 보내기',export=False);B=self.state()['tasks'][-1]
+        self.assertEqual(B['background']['brief'],'미용실과 네일숍 예약');self.assertEqual(B['background']['area']['name'],'알림');self.assertIsNone(B['background']['area']['note'])
+        saved=self.state();self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');self.assertEqual(self.state(),saved)
+        backup=json.loads(self.download('#backup','flow091c-backup.json').read_text(encoding='utf-8'))
+        self.assertEqual(backup['schemaVersion'],'idea015.project.5');self.assertEqual([t['background'] for t in backup['tasks']],[t['background'] for t in saved['tasks']])
 
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -408,7 +408,7 @@ async function generate(id:string) {
   if(project.pending||(route==='example'&&config?.mode!=='mock'))return;
   if(!config||!(config.mode==='mock'||config.configured&&config.paidEnabled&&$<HTMLInputElement>('consent').checked)) {commit({...project,notice:'실제 AI 모드는 서버 설정과 프로젝트 문맥 전송 동의가 필요합니다.'});return;}
   let started;
-  try {started=begin(project,id);} catch {commit({...project,notice:'AI 전송 문맥이 한도를 넘거나 유효하지 않아 보내지 않았습니다. 확정 기준을 잘라 보내지 않았습니다. 작업문 복사·Markdown 저장과 복구 파일은 계속 쓸 수 있습니다.'});return;}
+  try {started=begin(project,id);} catch {commit({...project,notice:'AI 전송 문맥이 한도(128 KiB)를 넘거나 유효하지 않아 보내지 않았습니다. 확정 기준과 프로젝트 배경·영역 구상을 잘라 보내지 않았고, 입력과 저장 내용은 그대로입니다. 작업문 복사·Markdown 저장과 복구 파일은 계속 쓸 수 있습니다.'});return;}
   controller?.abort();const active=new AbortController();controller=active;commit(started.project);
   // Copies can share a project ID: a late answer is applied only to the same entry in the same activation.
   // projectEpoch changes on every real switch; a new project's first save (new -> entry) is not a switch.
@@ -588,7 +588,7 @@ function renderWork(t:Task|null) {
   letterHead.append(node('span','전달할 작업문'));const author=tag(workAuthor(t,v.next));author.id='instruction-author';letterHead.append(author);
   const instruction=node('p',v.next||'원문과 현재 기준이 전체 인계 문맥에 포함됩니다. 구체적인 작업은 아래에서 직접 작성할 수 있어요.','work-instruction');instruction.id='instruction-preview';
   const checks=details('완료 조건 · 확인할 동작','checks-preview');checks.className='checks-preview';const checksText=node('p',v.checks||'아직 작성된 완료 조건이 없습니다.');checksText.id='checks-text';checks.append(checksText);
-  letter.append(letterHead,instruction,checks);card.append(letter);
+  letter.append(letterHead,instruction,checks);card.append(letter,backgroundPreview(t));
   const edit=details('범위 · 제안 · 작업문 직접 다듬기','edit-work');edit.className='edit-area';
   for(const [key,label] of [['understanding','짧은 이해'],['scope','이번 범위와 유지할 것'],['next','실행 도구에 전달할 작업문'],['checks','확인할 동작 / 완료 조건']] as const) {
     const l=node('label',label);l.htmlFor=`work-${key}`;const field=node('textarea');field.id=`work-${key}`;field.rows=key==='next'?4:2;field.maxLength=6000;field.value=v[key];
@@ -620,6 +620,23 @@ function renderWork(t:Task|null) {
   const preview=details('실제로 전달할 전체 문맥 보기','handoff-preview');const txt=node('textarea');txt.id='handoff-text';txt.readOnly=true;txt.rows=14;txt.className='export-preview';
   try{txt.value=handoffText(project,t.id);}catch{txt.value='문맥 크기 또는 데이터 오류로 자동 인계를 만들지 못했습니다. 복구 파일로 원문을 보존하세요.';}
   preview.append(node('p','관련 입력 + 직전 작업 + 모든 보존 기준. AI가 관련으로 고르지 않은 기준도 뒤에 남습니다.','hint'),txt);card.append(preview);area.append(card);
+}
+/** FLOW091-C: which plan copy goes out with this task. Fixed at the request; later plan edits are not applied to it. */
+function backgroundPreview(t:Task):HTMLElement {
+  const b=t.background,own=!isReturnTask(project,t),box=details('','background-preview');box.className='background-preview';
+  const summary=box.querySelector('summary')!;
+  if(!b){summary.textContent='작업문에 넣을 프로젝트 배경 · 이 작업에는 없음';
+    box.append(node('p','이 작업에는 저장된 배경 사본이 없어요(배경을 저장하기 전에 쓴 작업이거나, 사본 없이 내보낸 작업에 돌아온 결과). 지금 전체 공간의 구상을 소급해 넣지 않아요.','hint'));return box;}
+  if(b.brief===null&&b.area===null){summary.textContent='작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음';
+    box.append(node('p','요청을 쓸 때 프로젝트 목적도, 대상 영역도 없었어요. 작업문에 배경 부분을 넣지 않아요.','hint'));return box;}
+  summary.textContent=`작업문에 넣을 프로젝트 배경·영역 구상 보기 · r${b.revision} 사본`;
+  box.append(node('p',`${own?'이 작업의 요청을 쓸 때':'이 보고가 돌아간 작업의 요청을 쓸 때'} 고정한 사본이에요. 작업문에 ‘이번 요청 범위와 구분’된 배경으로 들어가며, 지시나 확정 기준이 아니에요.`,'hint'));
+  if(b.brief!==null)box.append(node('p','프로젝트 목적 원문','source-meta'),node('div',b.brief,'source-raw'));
+  if(b.area){box.append(node('p',`요청 대상 영역 · ${b.area.name}`,'source-meta'));if(b.area.note!==null)box.append(node('div',b.area.note,'source-raw'));}
+  const area=b.area?project.space.areas.find(a=>a.id===b.area!.id):undefined;
+  const changed=(project.space.brief?.text??null)!==b.brief||(!!b.area&&(!area||area.name!==b.area.name||(area.note||null)!==b.area.note));
+  if(changed){const line=node('p','전체 공간의 목적이나 이 영역의 이름·구상이 그 뒤 바뀌었어요. 이미 준비된 이 작업의 사본은 그대로이고, 다음에 쓰는 새 요청부터 최신 구상이 들어가요.','hint');line.id='background-changed';box.append(line);}
+  return box;
 }
 type Work=ReturnType<typeof currentWork>;
 function workAuthor(t:Task,next:string){return t.manual.next!==null?'사용자 직접 수정':!next?'직접 작성 가능':t.mode==='mock'?'모의 제안':t.mode==='deepseek'?'AI 제안':'직접 작성 가능';}

@@ -9,15 +9,20 @@ import {mockAdvice} from '../server/mock.mjs';
 const put=(p,text,kind='request',target,area)=>D.submit(D.editDraft(D.setKind(p,kind),text),target,area);
 const respond=p=>{const s=D.begin(p);return D.receive(s.project,s.request,{mode:'mock',ticket:s.request.ticket,advice:mockAdvice(s.request)});};
 const exported=p=>D.markHandoff(p,p.currentTaskId,D.handoffText(p),'download');
-const v3=p=>{const o=structuredClone(p);o.schemaVersion='idea015.project.3';delete o.space;for(const t of o.tasks)delete t.areaId;return JSON.stringify(o);};
+const v3=p=>{const o=structuredClone(p);o.schemaVersion='idea015.project.3';delete o.space;for(const t of o.tasks){delete t.areaId;delete t.background;for(const h of t.handoffs)delete h.background;}return JSON.stringify(o);};
+// FLOW091-C: the unreleased first project.4 candidate is a project.4 file (no background copies).
+const v4=p=>{const o=JSON.parse(serializeProject(p));o.schemaVersion='idea015.project.4';for(const t of o.tasks){delete t.background;for(const h of t.handoffs)delete h.background;}return o;};
 const planned=()=>{let p=D.setBrief(D.createProject(),'동네 미용실 예약 서비스');p=D.addArea(p,'예약','날짜와 시간을 골라 예약');p=D.addArea(p,'알림');
   const [booking,notify]=p.space.areas.map(a=>a.id);return {p,booking,notify};};
 
 test('F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import',()=>{
   let p=exported(respond(put(D.createProject(),'예약 화면 만들기')));p=put(p,'보고: 화면을 만들었다고 주장','report');
   const old=v3(p),opened=parseProject(old);
-  assert.equal(opened.schemaVersion,'idea015.project.4');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}}});
-  for(const k of ['sources','bases','tasks','currentTaskId','draft'])assert.deepEqual(opened[k],JSON.parse(old)[k],k);
+  assert.equal(opened.schemaVersion,'idea015.project.5');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}}});
+  for(const k of ['sources','bases','currentTaskId','draft'])assert.deepEqual(opened[k],JSON.parse(old)[k],k);
+  // FLOW091-C: older work gets background=null (task and export), never the current plan; nothing else changes.
+  const strip=t=>{const {background,...rest}=t;assert.equal(background,null);return {...rest,handoffs:rest.handoffs.map(({background:b,...h})=>{assert.equal(b,null);return h;})};};
+  assert.deepEqual(opened.tasks.map(strip),JSON.parse(old).tasks,'tasks');
   let q=D.addArea(opened,'예약','');q=D.placeTask(q,q.tasks[0].id,q.space.areas[0].id);
   const again=parseProject(serializeProject(q));assert.deepEqual(again.space,q.space);assert.equal(again.tasks[0].areaId,q.space.areas[0].id);
   assert.equal(D.areaOf(again,again.tasks[1]),q.space.areas[0].id,'the report follows its task into the area');
@@ -55,12 +60,17 @@ test('F090-4 reports follow their task; validation refuses areas on returns, unk
   const rel=JSON.parse(serializeProject(p));rel.space.relations.push({id:'L_x',from:booking,to:'A_nope',kind:'flow',note:''});assert.throws(()=>parseProject(JSON.stringify(rel)));
 });
 
+// FLOW091-C changed the old policy: the purpose now goes out as a separated background copy (never as a request,
+// source, basis or work instruction). The test keeps 'kept with earlier wording' and 'not a request/instruction'.
 test('F090-5 the purpose text is kept (with earlier wording) and is not sent as a request or work instruction',()=>{
   let p=D.setBrief(D.createProject(),'예약 서비스');p=D.setBrief(p,'동네 미용실 예약 서비스');
   assert.deepEqual(p.space.brief.previous.map(x=>x.text),['예약 서비스']);assert.equal(D.setBrief(p,'동네 미용실 예약 서비스'),p);
   p=respond(put(p,'예약 화면 만들기'));
-  assert.ok(!D.handoffText(p).includes('동네 미용실 예약 서비스'));assert.ok(!JSON.stringify(D.begin(p).request).includes('동네 미용실'));
-  assert.equal(p.sources.length,1);
+  const text=D.handoffText(p),block=text.indexOf('## 프로젝트 배경·영역 구상 — 이번 요청 범위와 구분'),work=text.indexOf('\n## 이번 작업');
+  assert.ok(block>0&&text.indexOf('동네 미용실 예약 서비스')>block&&text.indexOf('동네 미용실 예약 서비스')<work,'only inside the background block');
+  const req=D.begin(p).request;assert.equal(req.background.brief,'동네 미용실 예약 서비스');
+  assert.ok(!JSON.stringify({...req,background:null}).includes('동네 미용실'),'not in sources, bases, facts or intent');
+  assert.equal(p.sources.length,1);assert.ok(p.bases.every(b=>!b.text.includes('동네 미용실')));
 });
 
 test('F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space',async()=>{
@@ -71,7 +81,7 @@ test('F090-6 a stored project.3 entry opens through the workspace and the next s
   const w=new WorkspaceStore(storage,new Locks());await w.init();assert.equal(w.readError,null);
   const e=w.entries()[0];assert.deepEqual(e.project.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}}});assert.deepEqual(e.project.sources,old.sources);
   await w.save({entryId:e.entryId,lifecycle:e.lifecycle,seq:e.seq},D.addArea(e.project,'예약'));
-  const saved=JSON.parse(storage.getItem(WORKSPACE_KEY)).entries[0].project;assert.equal(saved.schemaVersion,'idea015.project.4');assert.equal(saved.space.areas[0].name,'예약');
+  const saved=JSON.parse(storage.getItem(WORKSPACE_KEY)).entries[0].project;assert.equal(saved.schemaVersion,'idea015.project.5');assert.equal(saved.space.areas[0].name,'예약');
 });
 
 test('F090-7 returning to an area continues its latest request (and that request\'s returns), not a late old report',()=>{
@@ -94,7 +104,7 @@ test('F090-7 returning to an area continues its latest request (and that request
 test('F090-8 the unsent request\'s area is saved with the draft; old formats default to following the current work',()=>{
   let {p,booking,notify}=planned();p=respond(put(p,'A: 예약 화면','request',undefined,booking));
   assert.equal(parseProject(v3(p)).space.draftTarget,null,'project.3 = follow the current work');
-  const candidate=JSON.parse(serializeProject(p));delete candidate.space.draftTarget;assert.equal(parseProject(JSON.stringify(candidate)).space.draftTarget,null,'the first v4 candidate had none');
+  const candidate=v4(p);delete candidate.space.draftTarget;assert.equal(parseProject(JSON.stringify(candidate)).space.draftTarget,null,'the first v4 candidate had none');
   p=D.setDraftTarget(D.editDraft(p,'알림 쪽 미제출 요청'),notify);
   const copy=parseProject(serializeProject(p));assert.deepEqual(copy.space.draftTarget,{area:notify});assert.equal(copy.draft,'알림 쪽 미제출 요청');
   const sent=D.submit(copy);assert.equal(D.taskOf(sent).areaId,notify);assert.equal(sent.space.draftTarget,null,'the target goes with the sent draft');
@@ -107,7 +117,7 @@ test('F090-8 the unsent request\'s area is saved with the draft; old formats def
 test('F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo',()=>{
   let {p,booking,notify}=planned();
   assert.deepEqual(parseProject(v3(D.createProject())).space.layout,{version:'layout.1',positions:{}});
-  const candidate=JSON.parse(serializeProject(p));delete candidate.space.layout;delete candidate.space.draftTarget;
+  const candidate=v4(p);delete candidate.space.layout;delete candidate.space.draftTarget;
   const old=parseProject(JSON.stringify(candidate));assert.deepEqual(old.space.layout.positions,{},'unreleased candidate: defaults');
   const d0=D.areaPosition(old,old.space.areas[0]),d1=D.areaPosition(old,old.space.areas[1]);
   let q=D.setAreaArchived(D.addArea(old,'결제'),old.space.areas[0].id,true);q=D.setAreaArchived(q,old.space.areas[0].id,false);

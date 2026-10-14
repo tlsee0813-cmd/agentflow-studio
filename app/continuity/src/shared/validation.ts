@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
+import { API_SCHEMA, SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -41,6 +41,15 @@ function basis(v: unknown): asserts v is Basis {
   obj(v,['id','text','status','sourceId','revision','history']); id(v.id); text(v.text); id(v.sourceId); integer(v.revision);
   ensure(STATUSES.includes(v.status as string)); list(v.history);
   for (const h of v.history) { obj(h,['text','status','sourceId','revision']); text(h.text); id(h.sourceId); integer(h.revision); ensure(['requested','answered','confirmed','deferred'].includes(h.status as string)); }
+}
+/** FLOW091-C: a fixed plan copy. Same length limits as the plan itself; empty values are null, never placeholder words.
+ * The area may since have been renamed, archived or moved: the copy does not refer to the current area list. */
+export function background(v: unknown, maxRevision?: number): asserts v is Background {
+  if(v===null)return;
+  obj(v,['version','revision','brief','area']);ensure(v.version==='background.1');integer(v.revision);
+  if(maxRevision!==undefined)ensure((v.revision as number)<=maxRevision);
+  if(v.brief!==null)text(v.brief,TEXT_LIMIT);
+  if(v.area!==null){obj(v.area,['id','name','note']);id(v.area.id);text(v.area.name,60);if(v.area.note!==null)text(v.area.note,2000);}
 }
 function ticket(v: unknown): asserts v is Ticket { obj(v,['projectId','revision','requestId','taskId']); id(v.projectId); integer(v.revision); id(v.requestId); id(v.taskId); }
 export function validateIntent(v:unknown):Intent {
@@ -149,7 +158,8 @@ function appFacts(v: unknown, req: {ticket:Ticket;sources:Source[];bases:Context
   for(const b of req.bases) if(inputIds.has(b.sourceId)) ensure(currentRecords.has(b.id));
 }
 export function validateRequest(v: unknown): ContextRequest {
-  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts','previousIntent','purposeIntent']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
+  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts','previousIntent','purposeIntent','background']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
+  background(v.background,(v.ticket as Ticket).revision);
   list(v.sources); list(v.bases); for (const s of v.sources) source(s); for (const b of v.bases) contextBasis(b);
   ensure(v.sources.length > 0); unique(v.sources as Source[]); unique(v.bases as {id:string}[]);
   if(v.previousIntent!==null) {
@@ -192,7 +202,8 @@ function assertProject(v: unknown): asserts v is Project {
   const areaIds=space(v.space);
   for (const t of v.tasks) {
     const optional=['intentEdit','areaId'].filter(k=>t&&typeof t==='object'&&Object.hasOwn(t,k));
-    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile',...optional]); id(t.id); list(t.sourceIds); ensure(t.sourceIds.length > 0);
+    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile','background',...optional]); id(t.id);
+    background(t.background,v.revision as number); list(t.sourceIds); ensure(t.sourceIds.length > 0);
     for (const s of t.sourceIds) ensure(sources.has(s as string)); ensure(new Set(t.sourceIds).size === t.sourceIds.length);
     if(t.parentTaskId !== null) ensure(tasks.has(t.parentTaskId as string)); // Ordered, acyclic.
     if(t.areaId!==undefined) { // Only a request task is placed; a returned report follows its parent's area.
@@ -219,7 +230,7 @@ function assertProject(v: unknown): asserts v is Project {
     obj(t.manual,['understanding','scope','next','checks']); for(const k of Object.keys(t.manual)) if(t.manual[k] !== null) text(t.manual[k],6000,true);
     if(t.suggestions !== null) { list(t.suggestions,8); for(const s of t.suggestions) {obj(s,['text','why']);text(s.text,2000,true);text(s.why,2000,true);} }
     list(t.handoffs); for(const h of t.handoffs) {
-      obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText','returnId']); date(h.at); ensure(['clipboard','download'].includes(h.method as string));
+      obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText','returnId','background']); date(h.at);background(h.background,v.revision as number); ensure(['clipboard','download'].includes(h.method as string));
       integer(h.revision); ensure((h.revision as number) <= (v.revision as number)); integer(h.chars); ensure(typeof h.digest === 'string' && /^[0-9a-f]{8}$/.test(h.digest)); ensure(typeof h.aiExcluded === 'boolean');
       if(h.work !== null) { obj(h.work,['understanding','scope','next','checks']); for(const k of Object.keys(h.work)) text(h.work[k],6000,true); }
       if(h.legacyText !== null) text(h.legacyText,250000);
@@ -312,12 +323,24 @@ function migrateV2(v:unknown, notice=V2_MIGRATION_NOTICE):unknown {
     const handoffs=t.handoffs.map(h=>{obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText']);return {...h,returnId:null};});
     return {...t,resultFile:null,handoffs};
   });
-  return {...v,schemaVersion:SCHEMA,tasks,notice,space:EMPTY_SPACE()};
+  return migrateV4({...v,schemaVersion:V4_SCHEMA,tasks,notice,space:EMPTY_SPACE()});
 }
 /** project.3 -> project.4: nothing changes but an empty plan space (no areas are invented). */
 function migrateV3(v:unknown):unknown {
   obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice']);ensure(v.schemaVersion===V3_SCHEMA);
-  return {...v,schemaVersion:SCHEMA,space:EMPTY_SPACE()};
+  return migrateV4({...v,schemaVersion:V4_SCHEMA,space:EMPTY_SPACE()});
+}
+/** project.4 -> project.5: no task or export had a background copy. They read null; the current plan is never backfilled. */
+function migrateV4(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown;tasks?:unknown;space?:unknown};ensure(p&&p.schemaVersion===V4_SCHEMA);list(p.tasks);
+  // The unreleased first project.4 candidate had no draft target ('follow the current work') and no stored positions.
+  const space=p.space as Record<string,unknown>|undefined;
+  if(space&&typeof space==='object'){if(!Object.hasOwn(space,'draftTarget'))space.draftTarget=null;if(!Object.hasOwn(space,'layout'))space.layout={version:'layout.1',positions:{}};}
+  const tasks=p.tasks.map(t=>{
+    ensure(t!==null&&typeof t==='object'&&!Array.isArray(t)&&!Object.hasOwn(t,'background'));const task=t as Record<string,unknown>;list(task.handoffs);
+    return {...task,background:null,handoffs:task.handoffs.map(h=>{ensure(h!==null&&typeof h==='object'&&!Array.isArray(h)&&!Object.hasOwn(h,'background'));return {...h as object,background:null};})};
+  });
+  return {...p,schemaVersion:SCHEMA,tasks};
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -339,12 +362,6 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : v;
-  // The unreleased first project.4 candidate had no draft target: it meant 'follow the current work' (null).
-  const space=(project as {space?:Record<string,unknown>})?.space;
-  if(schema===SCHEMA&&space&&typeof space==='object') {
-    if(!Object.hasOwn(space,'draftTarget'))space.draftTarget=null;
-    if(!Object.hasOwn(space,'layout'))space.layout={version:'layout.1',positions:{}}; // no stored positions: defaults
-  }
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }

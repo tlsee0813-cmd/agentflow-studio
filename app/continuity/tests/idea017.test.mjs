@@ -191,7 +191,7 @@ test('I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8M
 
 test('I17-contract manual provenance is input-only, narrow, versioned; advice parser is not relaxed',()=>{
   const {c,p}=expert(),req=D.begin(input(c.stages[1].input.text,p)).request;
-  assert.equal(req.schemaVersion,API_SCHEMA);assert.equal(API_SCHEMA,'idea022.context.6');validateRequest(req);
+  assert.equal(req.schemaVersion,API_SCHEMA);assert.equal(API_SCHEMA,'idea022.context.7');validateRequest(req);
   for(const fields of [['scope','scope'],['status'],['scope','checks','next'],true]) {
     const bad=clone(req);bad.previousWork.manualConditionFields=fields;assert.throws(()=>validateRequest(bad));
   }

@@ -242,7 +242,7 @@ test('I22-write failure leaves current-memory facts separate from last persisted
 
 test('I22-input API is strict, cross-linked, copy-safe and rejects old/missing/forged shape without repairing it',()=>{
   let p=submit(state(),'대기 간격은 4초다.');p=submit(p,'D1을 8초로 변경해줘');
-  const r=D.begin(p).request;assert.equal(API_SCHEMA,'idea022.context.6');validateRequest(r);
+  const r=D.begin(p).request;assert.equal(API_SCHEMA,'idea022.context.7');validateRequest(r);
   const mutations=[
     v=>v.schemaVersion='idea017.context.3',v=>delete v.appFacts,v=>v.appFacts.complete=true,v=>v.appFacts.taskId='T_other',
     v=>v.appFacts.inputs=[],v=>v.appFacts.inputs.push(clone(v.appFacts.inputs[0])),v=>v.appFacts.inputs[0].kind='manual_decision',
@@ -295,7 +295,7 @@ test('I22-projection works after legacy migration and never adds fields to store
   const c=cycles(2),legacy=JSON.stringify(toLegacy(c)),p=parseProject(legacy),snapshot=serializeProject(p);
   const f=facts(p);assert.deepEqual(facts(parseProject(snapshot)),f);validateRequest(D.begin(p).request);
   assert.deepEqual(p.tasks.flatMap(t=>t.handoffs.map(h=>h.legacyText)),c.texts);
-  assert.equal(serializeProject(p),snapshot);assert.equal(p.schemaVersion,'idea015.project.4');assert.ok(!snapshot.includes('appFacts'));
+  assert.equal(serializeProject(p),snapshot);assert.equal(p.schemaVersion,'idea015.project.5');assert.ok(!snapshot.includes('appFacts'));
 });
 
 function local(port,request) {
