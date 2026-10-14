@@ -2298,3 +2298,36 @@ button.area-card:hover,button.area-card:focus-visible{border-color:var(--accent)
   .area-panel{position:fixed;left:0;right:0;bottom:0;width:auto;max-height:50vh;overflow:auto;z-index:40;border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(30,30,60,.14)}
   .area-panel:not(.sheet-open){display:none}
 }
+
+/* FLOW091: the project head and purpose stay one compact line inside a project so the map / next action come first.
+   Name editing, the full purpose and its editing stay where they were (one click away). */
+body[data-compact="true"] .shell{padding-top:18px}
+body[data-compact="true"] .project-head{margin-bottom:12px;gap:12px}
+body[data-compact="true"] .project-head .eyebrow,body[data-compact="true"] .project-head .subtitle{display:none}
+body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
+.space-head.compact{padding:12px 18px;margin-bottom:12px}
+.space-head-line{display:flex;align-items:baseline;gap:10px;min-width:0}
+.space-head.compact h1{font-size:20px;margin:0;flex:none}
+.space-brief-label{font-size:11px;color:var(--muted);flex:none}
+.space-head.compact .space-brief,.space-head.compact #space-brief{margin:0;min-width:0;flex:1;font-size:14px;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
+.space-head.compact details{margin-top:4px}
+.space-head.compact details[open] summary{margin-bottom:4px}
+/* Areas outside the visible map, and the reopen path for an unsaved sheet. */
+.map-offscreen{position:absolute;left:10px;top:10px;z-index:3;font-size:13px;padding:6px 10px;box-shadow:0 2px 8px rgba(30,30,60,.12)}
+.map-offscreen[hidden]{display:none}
+.sheet-reopen{position:absolute;left:10px;bottom:10px;z-index:3;font-size:13px;padding:6px 10px;display:none}
+.panel-report{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:flex;flex-direction:column;gap:4px}
+.panel-excerpt{margin:0;max-height:5.2em;overflow:hidden}
+.area-list{display:none}
+@media(max-width:760px){
+  body[data-compact="true"] .project-name{font-size:17px}
+  .space-head-line{flex-wrap:wrap;gap:4px 8px}
+  .space-head.compact #space-brief{flex-basis:100%}
+  .sheet-reopen{display:inline-flex;bottom:58px}
+  .area-list{display:block;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:8px 12px;margin:0 0 10px}
+  .area-list>summary{font-size:14px;padding:4px 0}
+  .area-list-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+  .area-list-row.selected .area-list-select{border-color:var(--accent)}
+  .area-list-select{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;min-height:44px}
+  .area-list-row>button:last-child{min-height:44px;flex:none}
+}

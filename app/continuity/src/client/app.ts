@@ -40,7 +40,7 @@ let view:'work'|'history'|'space'|'area'='work',contextOpen=false,hasSaved=false
 let viewArea:string|null=null;
 // FLOW090-B1: map viewport and selection are this tab's view of one project; positions are project data.
 type MapView={x:number;y:number;s:number};
-let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false;
+let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
 // One move = one command. Undo re-applies only that position, only while it is still where the move put it.
 let posUndo:{id:string;from:Point|null;to:Point;at:number;key:boolean}[]=[];
 const MAP_KEY='agentflow.workspace.map';
@@ -80,7 +80,7 @@ const unreadable='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 �
 function resetEphemeral() {
   controller?.abort();controller=null;selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;
-  mapView=null;mapSelected=null;sheetOpen=false;posUndo=[];
+  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;posUndo=[];
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
 function openEntry(entry:WorkspaceEntry) {
@@ -168,6 +168,8 @@ function readyForAI():boolean {return !!config&&(route==='example'?config.mode==
 function displayView() {
   const inProject=route!=='projects',starting=inProject&&!project.tasks.length;
   document.body.dataset.route=route;document.body.dataset.starting=String(starting);
+  // FLOW091: inside a project (past the welcome) the head is one compact line so the map / next action come first.
+  document.body.dataset.compact=String(inProject&&(view==='space'||view==='area'||!starting));
   $('projects-view').hidden=inProject;$('breadcrumb-project').hidden=!inProject;$('breadcrumb-sep').hidden=!inProject;$('example-banner').hidden=route!=='example';
   for(const id of ['nav-work','nav-context','nav-history'])$(id).hidden=!inProject||starting;
   // With a plan space, the work view (and an unsent draft) stays reachable before the first task.
@@ -192,7 +194,7 @@ function displayView() {
   }
 }
 function showWork() {view='work';displayView();}
-function openSpace() {view='space';viewArea=null;render();$('space-title')?.focus({preventScroll:true});window.scrollTo({top:0});}
+function openSpace() {view='space';viewArea=null;sheetOpen=false;render();$('space-title')?.focus({preventScroll:true});window.scrollTo({top:0});}
 function openArea(id:string) {view='area';viewArea=id;render();$('space-title')?.focus({preventScroll:true});window.scrollTo({top:0});}
 /** Explicit: continue this task (or go back to it when its return is what is open). Viewing never does this. */
 function continueTask(id:string) {
@@ -261,7 +263,9 @@ function renderStatus() {
   document.title=route==='projects'?'내 프로젝트 · AgentFlow Studio':`${route==='example'?'예제 · ':''}${project.name} · AgentFlow Studio`;
   $('sidebar-project').textContent=project.name;$('breadcrumb-project').textContent=project.name;
   const t=project.currentTaskId?taskOf(project):null,stage=stageOf(project,t);
-  $('task-number').textContent=t?`현재 작업 ${String(project.tasks.indexOf(t)+1).padStart(2,'0')}`:'첫 작업';
+  const receipt=t?receiptOf(t):null;
+  $('task-number').textContent=!t?'첫 작업':receipt!==null?`작업 ${pad(project.tasks.indexOf(t)+1)} · ${receipt>=0?`작업 ${pad(receipt+1)}에 받은 보고 보관`:'받은 보고 보관'} · 후속 확인 작업문 초안`
+    :`현재 작업 ${pad(project.tasks.indexOf(t)+1)}`;
   $('context-title').textContent=stage.title;$('context-sub').textContent=stage.next;$('stage-label').textContent=stage.label;
   $('stage-label').dataset.stage=stage.kind;
   const report=outcomeOf(project).reports.at(-1);
@@ -269,7 +273,7 @@ function renderStatus() {
   if(report){const reportTask=project.tasks.find(x=>x.id===report.taskId),parent=project.tasks.findIndex(x=>x.id===reportTask?.parentTaskId);
     $('last-result-summary').textContent=`최근 가져온 결과 · ${dateLabel(report.at)}${parent>=0?` · 작업 ${parent+1}에 연결`:''} · 앱 미검증`;
     $('last-result-text').textContent=reportBody(report);}
-  $('sidebar-task').textContent=t?`작업 ${project.tasks.indexOf(t)+1} · ${taskTitle(project,t)}`:'첫 작업을 기다리고 있어요.';
+  $('sidebar-task').textContent=!t?'첫 작업을 기다리고 있어요.':`작업 ${project.tasks.indexOf(t)+1} · ${receipt!==null?`${receipt>=0?`작업 ${receipt+1}에 받은 보고 · `:''}후속 확인 작업문 초안`:taskTitle(project,t)}`;
   $('entry-limits').textContent=entryLimits();
   // Backup is offered as soon as there is anything to keep, including input that could not be saved.
   $('backup').hidden=route==='example'||(!project.tasks.length&&!project.draft.trim()&&!memoryDirty);
@@ -282,8 +286,8 @@ function renderOutcome(t:Task|null) {
   const flow=outcomeOf(project,t.id);area.dataset.outcomeId=flow.id??'';
   const top=node('div','','outcome-heading'),title=node('div');
   title.append(node('p','PROJECT OUTCOME','eyebrow'),node('h2','지금 이어갈 작업'));
-  const primary=btn(questionApplicability(project,t)==='active'?'필요한 선택 보기':'현재 작업문 보기',()=>{$('current-work').focus({preventScroll:true});$('current-work').scrollIntoView({block:'start'});},'secondary','home-work');
-  const topActions=node('div','','outcome-actions');topActions.append(primary,btn('방향 수정 / 다음 요청',()=>openComposer('request'),'secondary','change-direction'));
+  // FLOW091: the work text is reached from the '지금 할 일' row above; this head keeps only the next-request entry.
+  const topActions=node('div','','outcome-actions');topActions.append(btn('방향 수정 / 다음 요청',()=>openComposer('request'),'secondary','change-direction'));
   top.append(title,topActions);area.append(top);
   // FIX088: received results and the user's latest request are shown, never merged into or swapped with this flow.
   const latest=flow.otherLatestRequest;
@@ -310,18 +314,18 @@ function renderOutcome(t:Task|null) {
   if(interpreted||correction) {
     // A user correction stays visible after the AI interpretation behind it went stale; AI-only parts need a fresh interpretation.
     const value=correction?null:interpreted!.value,card=node('section','','outcome-direction');card.id='intent-home';
-    card.append(node('h3',correction?'이어갈 목적 · 직접 정정':t.mode==='mock'?'이어갈 목적 · MOCK 정리':'이어갈 목적 · AI 정리'));
+    card.append(node('h3',`이 작업의 목표 · ${correction?'직접 정정':t.mode==='mock'?'MOCK 정리':'AI 정리'}`));
     const goal=node('p',correction?.goal??value!.goal,'outcome-purpose outcome-excerpt');goal.id='intent-goal';card.append(goal);
     const conditions=correction?correction.conditions:value!.conditions.join(' / ');
     if(conditions)card.append(node('p',conditions,'source-raw'));
     if(value?.relation==='uncertain')card.append(node('p','아직 정하지 않은 관계는 미정으로 남겨 두었어요.','hint'));
     const earlier=value?.relation==='separate'?continuingIntent(project,t):null;
-    if(earlier){const line=node('p',`참고 · 앞선 목적 (이전 해석, 현재 유효 여부는 이번 요청이 우선): ${earlier.manualGoal??earlier.value.goal}`,'hint');line.id='intent-continuing';card.append(line);}
+    if(earlier){const line=node('p',`참고 · 앞선 작업의 목표 (이전 해석, 현재 유효 여부는 이번 요청이 우선): ${earlier.manualGoal??earlier.value.goal}`,'hint');line.id='intent-continuing';card.append(line);}
     if(value&&project.bases.some(b=>['confirmed','deferred','answered'].includes(b.status)))card.append(node('p','직접 확정·답변·보류한 기준은 이 정리보다 우선해요.','hint'));
     const detail=details('정리 바로잡기 · 근거 보기','intent-details');
-    const g=node('textarea');g.rows=2;g.maxLength=6000;g.value=correction?.goal??value!.goal;g.id='intent-edit-goal';g.setAttribute('aria-label','이어갈 목적 직접 정정');
+    const g=node('textarea');g.rows=2;g.maxLength=6000;g.value=correction?.goal??value!.goal;g.id='intent-edit-goal';g.setAttribute('aria-label','이 작업의 목표 직접 정정');
     const c=node('textarea');c.rows=2;c.maxLength=6000;c.value=conditions;c.id='intent-edit-conditions';c.setAttribute('aria-label','유지할 조건 직접 정정');
-    detail.append(node('label','이어갈 목적'),g,node('label','유지할 조건'),c,btn('정정 적용',()=>commit(correctIntent(project,t.id,g.value,c.value)),'secondary','intent-correct'));
+    detail.append(node('label','이 작업의 목표'),g,node('label','유지할 조건'),c,btn('정정 적용',()=>commit(correctIntent(project,t.id,g.value,c.value)),'secondary','intent-correct'));
     const prior=previousIntent(project,t);
     if(prior)detail.append(btn('직전 정리로 되돌리기',()=>commit(correctIntent(project,t.id,prior.manualGoal??prior.value.goal,prior.manualConditions??prior.value.conditions.join(' / '))),'quiet','intent-undo'));
     if(value?.retired.length)detail.append(node('p',`대체된 이전 요청 표현 · ${t.mode==='mock'?'MOCK 정리':'AI 해석'} (사용자 결정은 대체하지 않음): `+value.retired.join(' / '),'source-raw'));
@@ -331,8 +335,12 @@ function renderOutcome(t:Task|null) {
   const origin=flow.origin;
   const request=flow.request;
   if(request) {
-    area.append(node('p',flow.requestBasis?.status==='confirmed'?'이번 요청 · 사용자 직접 정정':flow.requestBasis&&flow.requestBasis.text!==request.text?'이번 요청 · 기준의 현재 값':'이번 요청 · 사용자 원문','source-meta'));
-    const purpose=node('p',flow.requestBasis?.text??request.text,'outcome-purpose outcome-excerpt');purpose.id='outcome-purpose';area.append(purpose);
+    const label=flow.requestBasis?.status==='confirmed'?'이번 요청 · 사용자 직접 정정':flow.requestBasis&&flow.requestBasis.text!==request.text?'이번 요청 · 기준의 현재 값':'이번 요청 · 사용자 원문';
+    const purpose=node('p',flow.requestBasis?.text??request.text,'outcome-purpose outcome-excerpt');purpose.id='outcome-purpose';
+    // FLOW091: when the goal above is the same sentence, the original is folded (one click away), never dropped.
+    const goal=interpreted||correction?(correction?.goal??interpreted!.value.goal):null;
+    if(goal!==null&&goal.trim()===purpose.textContent!.trim()){const same=details(`${label} 보기 · 위 목표와 같은 문장`,'outcome-request-raw');same.append(purpose);area.append(same);}
+    else area.append(node('p',label,'source-meta'),purpose);
     const direction=node('section','','outcome-direction');direction.id='outcome-direction';
     if(flow.direction&&flow.direction.id!==request.id) {
       direction.append(node('h3',`${flow.directionDeclared?'앞서 바꾼 방향':'직전 사용자 요청'} · ${flow.directionBasis?.status==='confirmed'?'직접 정정':flow.directionBasis&&flow.directionBasis.text!==flow.direction.text?'기준의 현재 값':'원문 참조'}`),node('p',flow.directionBasis?.text??flow.direction.text,'outcome-excerpt'));
@@ -545,7 +553,8 @@ function renderWork(t:Task|null) {
   const area=$('work'),actions=$('next-actions');area.replaceChildren();actions.replaceChildren();$('empty').hidden=!!t;if(!t)return;
   const w=currentWork(project,t),v=w.values,card=node('div','','card work-card');card.id='current-work';card.tabIndex=-1;
   const local=project.sources.filter(s=>t.sourceIds.includes(s.id));
-  const heading=node('div','','work-heading'),h=node('div');h.append(node('p',`TASK ${String(project.tasks.indexOf(t)+1).padStart(2,'0')}`,'eyebrow'),node('h2','이어갈 작업'));
+  const heading=node('div','','work-heading'),h=node('div');const receipt=receiptOf(t);
+  h.append(node('p',`TASK ${pad(project.tasks.indexOf(t)+1)}${receipt!==null&&receipt>=0?` · 작업 ${pad(receipt+1)}에 받은 보고`:''}`,'eyebrow'),node('h2',receipt!==null?'후속 확인 작업문 초안':'이어갈 작업'));
   const origin=tag(workOrigin(t),'purple');origin.id='work-authorship';heading.append(h,origin);card.append(heading);
   const first=sourceOf(project,t),raw=details(first?sourceName[first.kind]:'입력 원문','current-source');raw.className='task-source';
   raw.querySelector('summary')!.append(node('span',taskTitle(project,t),'task-source-title'));
@@ -598,8 +607,7 @@ function renderWork(t:Task|null) {
   const foot=node('div','','work-footer'),row=node('div','','actions');
   const retry=btn('이 입력 다시 정리',()=>{void generate(t.id);},'quiet','retry-work');retry.dataset.aiAction='true';
   row.append(btn('작업문 복사',()=>{void exportWork(t.id,'clipboard');},'primary','copy-work'),btn('Markdown 저장',()=>{void exportWork(t.id,'download');},'secondary','download-work'),retry,
-    btn('전체 작업문 보기',()=>{const d=$<HTMLDetailsElement>('handoff-preview');d.open=true;d.scrollIntoView({block:'nearest'});$('handoff-text').focus({preventScroll:true});},'quiet','next-preview'),
-    btn('＋ 새 요청',()=>openComposer('request'),'quiet','next-new-request'));
+    btn('전달할 작업문 전체 보기',()=>{const d=$<HTMLDetailsElement>('handoff-preview');d.open=true;d.scrollIntoView({block:'nearest'});$('handoff-text').focus({preventScroll:true});},'quiet','next-preview'));
   if(questionApplicability(project,t)==='active')row.prepend(btn('질문에 답하기',()=>{$('question-box').scrollIntoView({block:'center'});$('answer-draft')?.focus({preventScroll:true});},'primary','next-answer'));
   actions.append(row);
   foot.append(node('p','작업문에 코드 파일은 포함되지 않습니다. 작업에 필요하다면 실행자가 대상 저장소나 관련 파일을 볼 수 있게 준비하세요. 복사·저장은 자동 실행이 아닙니다.'));card.append(foot,edit);
@@ -771,12 +779,27 @@ function spaceInput<T extends HTMLInputElement|HTMLTextAreaElement>(el:T,id:stri
   const k=`${project.id}:${key}`;el.id=id;el.value=spaceInputs[k]??initial;el.addEventListener('input',()=>{spaceInputs[k]=el.value;});return el;
 }
 function clearInputs(...keys:string[]){for(const key of keys)delete spaceInputs[`${project.id}:${key}`];}
+const pad=(n:number)=>String(n).padStart(2,'0');
+/** FLOW091: a returned report task is stored under its original task. Index of that task (-1 if none), or null when t is not a return. */
+function receiptOf(t:Task):number|null {return isReturnTask(project,t)?project.tasks.findIndex(x=>x.id===t.parentTaskId):null;}
+function appTag():HTMLElement {const el=tag('앱에서 이어갈 작업','purple');el.title='이 앱에서 열어 둔 작업이에요. 외부 도구의 실시간 실행 상태가 아니에요.';return el;}
+function noNote():HTMLElement {const el=tag('구상 미기재','area-undecided');el.title='설명이 비어 있어요. 아이디어도, 아직 못 정한 점도 적을 수 있어요.';return el;}
 function areaSummary(a:Area):string {
   const tasks=areaRequests(a.id),results=tasks.flatMap(returnsOf).length;
   return tasks.length?`요청 ${tasks.length}개${results?` · 돌아온 결과 ${results}개 · 앱 미검증`:''}`:'아직 요청 없음';
 }
 const scaleLabel=(s:number)=>s>=0.01?`${Math.round(s*100)}%`:'<1%';
-function applyView(plane:HTMLElement){if(mapView)plane.style.transform=`translate(${mapView.x}px,${mapView.y}px) scale(${mapView.s})`;}
+function applyView(plane:HTMLElement){if(mapView)plane.style.transform=`translate(${mapView.x}px,${mapView.y}px) scale(${mapView.s})`;markOffscreen(plane);}
+/** FLOW091: counts cards not fully inside the visible map. Only tells; moving the view is the user's 'fit'. */
+function markOffscreen(plane:HTMLElement) {
+  const map=plane.parentElement,chip=map?.querySelector<HTMLButtonElement>('#map-offscreen');if(!map||!chip||!mapView)return;
+  const v=mapView,W=map.clientWidth,H=map.clientHeight;let out=0;
+  for(const el of plane.querySelectorAll<HTMLElement>('.area-node')) {
+    const x=el.offsetLeft*v.s+v.x,y=el.offsetTop*v.s+v.y,off=x<0||y<0||x+el.offsetWidth*v.s>W||y+el.offsetHeight*v.s>H;
+    el.classList.toggle('offscreen',off);if(off)out++;
+  }
+  chip.hidden=!out;chip.textContent=`화면 밖 영역 ${out}개 · 모두 보기`;
+}
 /** Fit changes only the viewport; stored positions stay as they are. */
 function fitView(map:HTMLElement,active:Area[]):MapView {
   // Measured card sizes (long names/notes make cards taller), in plane units.
@@ -811,8 +834,8 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   const handle=node('button','⠿','node-handle');handle.type='button';handle.id=`node-move-${a.id}`;
   handle.setAttribute('aria-label',`${a.name} 위치 이동 (끌기 또는 방향키)`);handle.title='끌어서 위치 이동 · 방향키로도 옮길 수 있어요';
   const pick=node('button','','node-select');pick.type='button';pick.id=`node-select-${a.id}`;pick.setAttribute('aria-pressed',String(mapSelected===a.id));
-  pick.append(node('strong',a.name,'area-card-name'),a.note?node('span',a.note,'area-card-note'):tag('미정','area-undecided'),node('span',areaSummary(a),'hint'));
-  if(areaRequests(a.id).some(currentGroup))pick.append(tag('지금 이어가는 작업','purple'));
+  pick.append(node('strong',a.name,'area-card-name'),a.note?node('span',a.note,'area-card-note'):noNote(),node('span',areaSummary(a),'hint'));
+  if(areaRequests(a.id).some(currentGroup))pick.append(appTag());
   // Selecting shows the short properties; it never opens the area or changes the open work.
   pick.addEventListener('click',()=>{mapSelected=a.id;sheetOpen=true;rememberMap();render();$(`node-select-${a.id}`)?.focus({preventScroll:true});});
   const open=btn('영역 열기 ↗',()=>openArea(a.id),'secondary area-open');open.id=`node-open-${a.id}`;
@@ -853,12 +876,13 @@ function renderMap(root:HTMLElement,active:Area[]) {
   const bar=node('div','','map-toolbar');bar.append(node('h2','영역'));
   const add=node('form','','area-add');add.id='area-add-form';add.setAttribute('aria-label','영역 추가');
   const name=spaceInput(node('input'),'area-name');name.maxLength=60;name.placeholder='영역 이름 (예: 예약)';name.setAttribute('aria-label','영역 이름');
-  const note=spaceInput(node('input'),'area-note');note.maxLength=2000;note.placeholder='한 줄 구상 · 비워 두면 ‘미정’';note.setAttribute('aria-label','영역 설명');
+  const note=spaceInput(node('input'),'area-note');note.maxLength=2000;note.placeholder='한 줄 구상 · 아이디어나 아직 못 정한 점 (선택)';note.setAttribute('aria-label','영역 설명');
   const submitArea=node('button','＋ 영역 추가','secondary');submitArea.type='submit';submitArea.id='area-add';add.append(name,note,submitArea);
   bar.append(add);
   const unplaced=areaRequests(null);
   if(unplaced.length){const b=btn(`영역 미지정 작업 · 요청 ${unplaced.length}개`,()=>openArea('unassigned'),'quiet','open-unplaced');bar.append(b);}
   section.append(bar);
+  if(active.length)section.append(areaList(active));
   const layout=node('div','','map-layout'),map=node('div','','space-map');map.id='space-map';
   map.setAttribute('aria-label','영역 지도 · 빈 곳을 끌어 이동, 카드의 ⠿를 끌어 위치 이동');
   const plane=node('div','','space-plane');plane.id='space-plane';
@@ -869,13 +893,17 @@ function renderMap(root:HTMLElement,active:Area[]) {
   plane.append(svg,labels);const redraw=()=>drawRelations(lines as unknown as SVGSVGElement,labels,plane);
   for(const a of active)plane.append(areaNode(a,plane,redraw));
   map.append(plane);
-  if(!active.length)map.append(node('p','아직 영역이 없어요. 위에서 큰 덩어리부터 추가해 보세요. 정하지 못한 것은 설명을 비워 두면 ‘미정’으로 남아요.','map-empty hint'));
+  if(!active.length)map.append(node('p','아직 영역이 없어요. 위에서 큰 덩어리부터 추가해 보세요. 설명에는 아이디어도, 아직 못 정한 점도 적을 수 있고 비워 둬도 돼요.','map-empty hint'));
   const controls=node('div','','map-controls');
   const scale=node('span','','map-scale');scale.id='map-scale';
   controls.append(btn('－',()=>zoom(map,plane,1/1.25),'quiet map-zoom-out','map-zoom-out'),scale,btn('＋',()=>zoom(map,plane,1.25),'quiet map-zoom-in','map-zoom-in'),
     btn('전체 맞춤',()=>{mapView=fitView(map,active);applyView(plane);rememberMap();scale.textContent=scaleLabel(mapView.s);},'quiet','map-fit'));
   const last=posUndo.at(-1);
   if(last)controls.append(btn(`위치 되돌리기 · ${areaById(last.id)?.name??''}`,undoPosition,'quiet','map-undo'));
+  const offscreen=btn('',()=>$('map-fit').click(),'secondary map-offscreen','map-offscreen');offscreen.hidden=true;map.append(offscreen);
+  // FLOW091: after returning from an area the mobile sheet is closed; unsaved settings stay and can be reopened.
+  const sel0=mapSelected?areaById(mapSelected):null;
+  if(sel0&&!sel0.archived&&!sheetOpen&&panelDirty(sel0))map.append(btn(`작성 중인 ‘${sel0.name}’ 설정 다시 열기`,()=>{sheetOpen=true;render();$('panel-name')?.focus({preventScroll:true});},'secondary sheet-reopen','map-sheet-reopen'));
   map.append(controls);layout.append(map);
   // Panning: only from the empty background, so cards, buttons and inputs keep their own behaviour.
   map.addEventListener('pointerdown',e=>{
@@ -899,18 +927,50 @@ function renderMap(root:HTMLElement,active:Area[]) {
       if(sx<0||sy<0||sx+NODE_W*s>w||sy+NODE_H*s>h)mapView={x:w/2-(pt.x+NODE_W/2)*s,y:h/2-(pt.y+NODE_H/2)*s,s};
       mapSelected=created.id;rememberMap();render();$('area-name').focus();});});
 }
+/** FLOW091: unsaved name/idea edits of an area (shared by the panel and the area screen's edit form). */
+function panelDirty(a:Area):boolean {
+  const n=spaceInputs[`${project.id}:area-edit-name:${a.id}`],d=spaceInputs[`${project.id}:area-edit-note:${a.id}`];
+  return (n!==undefined&&n!==a.name)||(d!==undefined&&d!==a.note);
+}
+/** FLOW091: the same areas as the map, by the same IDs, as a plain list zoom never shrinks (shown on narrow screens). */
+function areaList(active:Area[]):HTMLElement {
+  const box=details(`영역 목록 ${active.length}개 · 지도 확대와 상관없이 고르기`,'area-list');box.className='area-list';
+  box.open=areaListOpen??active.length<=5;box.addEventListener('toggle',()=>{areaListOpen=box.open;});
+  for(const a of active) {
+    const row=node('div','','area-list-row');row.dataset.areaId=a.id;row.classList.toggle('selected',mapSelected===a.id);
+    const pick=btn('',()=>{mapSelected=a.id;sheetOpen=true;rememberMap();render();},'quiet area-list-select',`list-select-${a.id}`);
+    pick.setAttribute('aria-pressed',String(mapSelected===a.id));pick.append(node('strong',a.name),node('span',a.note?shortText(a.note,40):'구상 미기재','hint'));
+    if(areaRequests(a.id).some(currentGroup))pick.append(appTag());
+    row.append(pick,btn('열기 ↗',()=>openArea(a.id),'secondary',`list-open-${a.id}`));box.append(row);
+  }
+  return box;
+}
 /** Short properties of the selected area: name and one-line idea. Long work and reports live in the area screen. */
 function areaPanel(a:Area):HTMLElement {
   const panel=node('aside','','area-panel');panel.id='area-panel';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
   const head=node('div','','panel-top');head.append(node('strong',a.name),btn('닫기',()=>{mapSelected=null;sheetOpen=false;rememberMap();render();},'quiet','area-panel-close'));
   const nameKey=`area-edit-name:${a.id}`,noteKey=`area-edit-note:${a.id}`;
   const name=spaceInput(node('input'),'panel-name',a.name,nameKey);name.maxLength=60;name.setAttribute('aria-label','영역 이름');
-  const note=spaceInput(node('textarea'),'panel-note',a.note,noteKey);note.rows=3;note.maxLength=2000;note.setAttribute('aria-label','한 줄 구상');note.placeholder='비워 두면 ‘미정’';
+  const note=spaceInput(node('textarea'),'panel-note',a.note,noteKey);note.rows=3;note.maxLength=2000;note.setAttribute('aria-label','한 줄 구상');
   const row=node('div','','row');
   row.append(btn('반영',()=>{if(!name.value.trim())return;commit(editArea(project,a.id,name.value,note.value));clearInputs(nameKey,noteKey);},'secondary','panel-save'),
     btn('취소',()=>{clearInputs(nameKey,noteKey);render();},'quiet','panel-cancel'));
   const go=node('div','','row');go.append(btn('영역 열기 ↗',()=>openArea(a.id),'primary','panel-open'),btn('이 영역에 새 요청',()=>writeInArea(a.id),'quiet','panel-new-request'));
-  panel.append(head,node('label','이름'),name,node('label','한 줄 구상'),note,row,node('p',areaSummary(a),'hint'),go);
+  panel.append(head,node('label','이름'),name,node('label','한 줄 구상'),note,node('p','아이디어도, 아직 못 정한 점도 적을 수 있어요.','hint'),row,node('p',areaSummary(a),'hint'));
+  const requests=areaRequests(a.id);
+  if(requests.some(currentGroup))panel.append(node('p','‘앱에서 이어갈 작업’은 이 앱에서 열어 둔 작업이에요. 외부 도구에서 지금 실행 중이라는 뜻이 아니에요.','hint'));
+  const rt=requests.flatMap(returnsOf).sort((x,y)=>project.tasks.indexOf(y)-project.tasks.indexOf(x))[0],src=rt?project.sources.find(s=>s.id===rt.sourceIds[0]):undefined;
+  if(rt&&src) {
+    // Raw text only: no summary, no classification of what the report says; the full report stays in the area screen.
+    const box=node('section','','panel-report'),parent=rt.parentTaskId!;box.id='panel-report';
+    box.append(node('p',`최근 돌아온 ${sourceName[src.kind]} · 원문 앞부분 · ${dateLabel(src.at)} · 작업 ${project.tasks.findIndex(x=>x.id===parent)+1}에 연결${sourceName[src.kind].includes('미검증')?'':' · 앱 미검증'}`,'hint'),
+      node('p',shortText(reportBody(src),140),'source-raw panel-excerpt'));
+    const links=node('div','','row');
+    links.append(btn('자세히 보기',()=>{openArea(a.id);const d=document.getElementById(`raw-${parent}`) as HTMLDetailsElement|null;if(d){d.open=true;d.scrollIntoView({block:'start'});}},'quiet','panel-report-more'),
+      btn(project.currentTaskId===rt.id?'작업 화면으로':'이 보고에서 이어가기',()=>continueTask(rt.id),'quiet','panel-report-continue'));
+    box.append(links);panel.append(box);
+  }
+  panel.append(go);
   return panel;
 }
 function renderSpace() {
@@ -923,10 +983,11 @@ function renderSpace() {
 }
 function renderOverview(root:HTMLElement) {
   const active=project.space.areas.filter(a=>!a.archived),archived=project.space.areas.filter(a=>a.archived),brief=project.space.brief;
-  const head=node('div','','space-head'),title=node('h1','전체 공간');title.id='space-title';title.tabIndex=-1;
-  head.append(node('p','PROJECT SPACE','eyebrow'),title);
-  const purpose=node('p',brief?brief.text:'무엇을 만드는지 한두 문장으로 적어 두면 영역을 나누기 쉬워요.',brief?'space-brief':'hint');purpose.id='space-brief';head.append(purpose);
-  const edit=details(brief?'목적 고치기':'목적 적기','brief-edit'),field=spaceInput(node('textarea'),'brief-edit-text',brief?.text??'');field.rows=2;field.maxLength=12000;
+  const head=node('div','','space-head compact'),title=node('h1','전체 공간');title.id='space-title';title.tabIndex=-1;
+  const line=node('div','','space-head-line');line.append(title);
+  const purpose=node('p',brief?brief.text:'무엇을 만드는지 한두 문장으로 적어 두면 영역을 나누기 쉬워요.',brief?'space-brief':'hint');purpose.id='space-brief';
+  if(brief)line.append(node('span','프로젝트 목적','space-brief-label'));line.append(purpose);head.append(line);
+  const edit=details(brief?'목적 전체 보기 · 고치기':'목적 적기','brief-edit'),field=spaceInput(node('textarea'),'brief-edit-text',brief?.text??'');field.rows=4;field.maxLength=12000;
   field.setAttribute('aria-label','프로젝트 목적');
   edit.append(field,btn('목적 저장',()=>{if(!field.value.trim())return;commit(setBrief(project,field.value.trim()));clearInputs('brief-edit-text');},'secondary','brief-save'));
   if(brief?.previous.length)edit.append(node('p',`이전에 적은 목적 ${brief.previous.length}개는 그대로 보관돼요.`,'hint'));
@@ -959,7 +1020,7 @@ function taskEntry(t:Task,placing:boolean):HTMLElement {
   if(results.length){const last=results.at(-1)!,src=project.sources.find(s=>s.id===last.sourceIds[0]);
     item.append(node('p',`돌아온 결과 ${results.length}개 · 앱 미검증${src?` · 최근: ${shortText(reportBody(src),60)}`:''}`,'area-task-result'));}
   const row=node('div','','row');
-  if(currentGroup(t)){row.append(tag('지금 이어가는 작업','purple'),btn('작업 화면으로',()=>continueTask(t.id),'secondary'));}
+  if(currentGroup(t)){row.append(appTag(),btn('작업 화면으로',()=>continueTask(t.id),'secondary'));}
   else row.append(btn('이어서 작업',()=>continueTask(t.id),'secondary area-continue'));
   if(placing) {
     const choices=project.space.areas.filter(a=>!a.archived);
@@ -974,7 +1035,7 @@ function taskEntry(t:Task,placing:boolean):HTMLElement {
 }
 function renderArea(root:HTMLElement,a:Area) {
   const head=node('div','','space-head'),title=node('h1',a.name);title.id='space-title';title.tabIndex=-1;
-  head.append(node('p',a.archived?'AREA · 보관됨':'AREA','eyebrow'),title,a.note?node('p',a.note,'space-brief'):tag('미정','area-undecided'));
+  head.append(node('p',a.archived?'AREA · 보관됨':'AREA','eyebrow'),title,a.note?node('p',a.note,'space-brief'):noNote());
   const actions=node('div','','row');
   if(!a.archived)actions.append(btn('＋ 이 영역에 새 요청',()=>writeInArea(a.id),'primary','area-new-request'));
   actions.append(btn(a.archived?'영역 되살리기':'영역 보관',()=>{commit(setAreaArchived(project,a.id,!a.archived));if(!a.archived){project={...project,notice:`‘${a.name}’ 영역을 보관했어요. 연결된 요청과 결과는 그대로이며 ‘보관한 영역’에서 되살릴 수 있어요.`};openSpace();}},'quiet','area-archive'));
@@ -991,9 +1052,9 @@ function renderArea(root:HTMLElement,a:Area) {
   if(!tasks.length)list.append(node('p',a.archived?'이 영역에 연결된 요청이 없어요.':'아직 이 영역의 요청이 없어요. ‘이 영역에 새 요청’으로 시작하세요.','hint'));
   root.append(list);
   const own=new Set(tasks.flatMap(t=>[t.id,...returnsOf(t).map(r=>r.id)])),bases=project.bases.filter(b=>own.has(project.sources.find(s=>s.id===b.sourceId)?.taskId??''));
-  const shared=project.bases.length-bases.length,box=details(`기준 · 이 영역 ${bases.length}개 · 프로젝트 공통 ${shared}개`,'area-bases');
+  const shared=project.bases.length-bases.length,box=details(`기준 · 이 영역 ${bases.length}개 · 다른 영역·미분류 기준 ${shared}개`,'area-bases');
   for(const b of bases)box.append(node('p',`${BASIS_LABEL[b.status]} · ${shortText(b.text,90)}`,'source-raw'));
-  box.append(node('p','공통 기준은 영역에 복사하지 않아요. 모든 영역의 작업문에 함께 들어가요.','hint'),btn('기준 · 출처 전체 보기',showContext,'quiet'));
+  box.append(node('p','다른 영역·미분류 기준은 다른 영역의 요청에서 나왔거나 어느 영역에서 나왔는지 기록이 없는 기준이에요. 모두가 합의한 공통 기준이라는 뜻은 아니에요. 이 영역에 복사하지 않고, 기준 전체가 지금처럼 모든 작업문에 함께 들어가요.','hint'),btn('기준 · 출처 전체 보기',showContext,'quiet'));
   root.append(box);
 }
 function renderUnplaced(root:HTMLElement) {
@@ -1011,7 +1072,8 @@ function renderPlace(t:Task|null) {
   const area=t?areaById(areaOf(project,t)):null;
   bar.append(btn('전체 공간',openSpace,'crumb-link','place-space'));
   if(area)bar.append(node('span','›','crumb-sep'),btn(area.name,()=>openArea(area.id),'crumb-link','place-area'));
-  bar.append(node('span','›','crumb-sep'),node('strong',t?'지금 이어가는 작업':'새 요청'));
+  const receipt=t?receiptOf(t):null;
+  bar.append(node('span','›','crumb-sep'),node('strong',!t?'새 요청':receipt!==null?`${receipt>=0?`작업 ${pad(receipt+1)}의 보고 · `:''}후속 확인 작업문 초안`:'앱에서 이어갈 작업'));
 }
 /** The area the next request goes to: explicit, visible and changeable. Shown once areas exist. */
 function renderComposeArea(t:Task|null,returned:boolean) {

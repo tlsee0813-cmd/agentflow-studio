@@ -2,7 +2,7 @@
 an area's request and report, reload, the project list, and an older project without areas. Wiring, not usability.
 Run from app/: python continuity/tests/flow090_browser.py
 """
-import json, unittest
+import json, re, unittest
 from playwright.sync_api import expect
 import browser as base
 
@@ -32,7 +32,7 @@ class SpatialWorkspace(unittest.TestCase):
         expect(self.page.locator('#space-title')).to_have_text('전체 공간');expect(self.page.locator('#space-brief')).to_have_text(brief)
         self.assertEqual(self.state()['space']['brief']['text'],brief);self.assertEqual(self.state()['sources'],[],'the purpose is not a request')
         self.add_area('예약','날짜와 시간을 골라 예약');self.add_area('알림')
-        expect(self.page.locator('.area-node',has_text='알림')).to_contain_text('미정')
+        expect(self.page.locator('.area-node',has_text='알림')).to_contain_text('구상 미기재')
         # Rename an area; looking at it changes nothing else.
         self.open_area('알림');expect(self.page.locator('#space-title')).to_have_text('알림')
         self.page.locator('#area-edit').evaluate('(e)=>e.open=true');self.page.locator('#area-edit-name').fill('알림 문자');self.page.locator('#area-edit-save').click()
@@ -56,7 +56,7 @@ class SpatialWorkspace(unittest.TestCase):
         # The area shows the request with its result (unverified); looking around never changes the open work.
         self.page.locator('#place-area').click();expect(self.page.locator('#space-title')).to_have_text('예약')
         item=self.page.locator('.area-task',has_text='예약 화면에서')
-        expect(item).to_contain_text('돌아온 결과 1개 · 앱 미검증');expect(item).to_contain_text('지금 이어가는 작업')
+        expect(item).to_contain_text('돌아온 결과 1개 · 앱 미검증');expect(item).to_contain_text('앱에서 이어갈 작업')
         self.page.screenshot(path=str(base.OUT/'flow090-area.png'),full_page=True)
         self.page.set_viewport_size({'width':390,'height':844});self.page.screenshot(path=str(base.OUT/'flow090-area-390.png'),full_page=True)
         self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390);self.page.set_viewport_size({'width':1440,'height':1050})
@@ -249,5 +249,108 @@ class SpatialWorkspace(unittest.TestCase):
         expect(self.page.locator('#compose-area-row')).to_be_visible();expect(self.page.locator('#compose-area')).to_have_value(booking)
         expect(self.page.locator('#compose-area')).to_contain_text('보관된 영역');self.page.locator('#send').click()
         expect(self.page.locator('#notice')).to_contain_text('보관돼 있어요');self.assertEqual(self.state()['space']['draftTarget'],{'area':booking})
+
+    # ---------- FLOW091-U: usability cleanup of existing screens (wording, duplicate entries, map-first, narrow screens) ----------
+    def test_11_task_goal_is_not_repeated_and_one_entry_each(self):
+        self.page.set_viewport_size({'width':1265,'height':712})
+        self.start(['예약']);request='예약 화면에서 날짜와 시간을 고르게 해줘'
+        # Map first: the compact head keeps the full purpose and its editing one click away.
+        expect(self.page.locator('#space-brief')).to_have_text('예약 서비스')
+        self.assertLess(self.page.locator('#space-map').bounding_box()['y'],380,'the map starts in the first screen')
+        self.page.locator('#brief-edit > summary').click();expect(self.page.locator('#brief-edit-text')).to_have_value('예약 서비스')
+        self.request_in('예약',request,export=False)
+        self.assertLess(self.page.locator('#next-actions').bounding_box()['y'],330,'the next action starts in the first screen')
+        expect(self.page.locator('#intent-home h3')).to_have_text('이 작업의 목표 · MOCK 정리');expect(self.page.locator('#intent-goal')).to_have_text(request)
+        # The same sentence is not shown twice; the original stays one click away.
+        raw=self.page.locator('#outcome-request-raw');expect(raw).to_have_count(1);expect(self.page.locator('#outcome-purpose')).to_be_hidden()
+        expect(self.page.locator('#outcome-purpose')).to_have_text(request);raw.locator('summary').click();expect(self.page.locator('#outcome-purpose')).to_be_visible()
+        # One entry to the work text and one new-request button (plus the composer itself); both still work.
+        work=self.page.locator('#work-view')
+        expect(work.locator('button',has_text=re.compile('작업문.*보기'))).to_have_count(1);expect(work.locator('button',has_text='새 요청')).to_have_count(0)
+        expect(work.locator('button',has_text='다음 요청')).to_have_count(1)
+        self.page.locator('#next-preview').click();expect(self.page.locator('#handoff-text')).to_be_visible()
+        self.page.locator('#change-direction').click();expect(self.page.locator('#draft')).to_be_focused()
+        # A corrected goal differs from the original, which is then shown open again.
+        self.page.locator('#intent-details > summary').click();self.page.locator('#intent-edit-goal').fill('날짜 고르기 화면만 먼저');self.page.locator('#intent-correct').click()
+        expect(self.page.locator('#intent-home h3')).to_have_text('이 작업의 목표 · 직접 정정')
+        expect(self.page.locator('#outcome-request-raw')).to_have_count(0);expect(self.page.locator('#outcome-purpose')).to_be_visible()
+
+    def test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft(self):
+        (booking,)=self.start(['예약']);task=self.request_in('예약','예약 화면에서 날짜와 시간을 고르게 해줘')
+        report='보고: 날짜 선택 화면을 만들었다고 함. 테스트는 미검사. '+'세부 내용이 길게 이어집니다. '*40+'끝 문장 ZZ-END'
+        self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill(report);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        s=self.state();rt=s['tasks'][-1]
+        self.assertEqual([t['id'] for t in s['tasks']][0],task);self.assertEqual(rt['parentTaskId'],task);self.assertEqual(len(s['tasks']),2)
+        self.assertEqual(next(x for x in s['sources'] if x['id']==rt['sourceIds'][0])['kind'],'report')
+        expect(self.page.locator('#task-number')).to_contain_text('작업 01에 받은 보고');expect(self.page.locator('#task-number')).to_contain_text('후속 확인 작업문 초안')
+        expect(self.page.locator('#context-title')).to_contain_text('작업 01에 보관');expect(self.page.locator('#context-sub')).to_contain_text('검증하지 않았어요')
+        expect(self.page.locator('#work-place')).to_contain_text('작업 01의 보고 · 후속 확인 작업문 초안')
+        expect(self.page.locator('#current-work h2')).to_have_text('후속 확인 작업문 초안');expect(self.page.locator('#last-result-summary')).to_contain_text('앱 미검증')
+        self.assertEqual(self.state()['tasks'],s['tasks'],'labels only: ids, parents and history unchanged')
+        # Map and panel: what the app has open (not live execution), and a short raw excerpt of the latest report.
+        self.page.locator('#nav-space').click();node=self.page.locator(f'.area-node[data-area-id="{booking}"]')
+        expect(node).to_contain_text('앱에서 이어갈 작업');expect(self.page.locator('#space-view')).not_to_contain_text('지금 이어가는')
+        self.page.locator(f'#node-select-{booking}').click();panel=self.page.locator('#panel-report')
+        expect(self.page.locator('#area-panel')).to_contain_text('외부 도구에서 지금 실행 중이라는 뜻이 아니에요')
+        expect(panel).to_contain_text('원문 앞부분');expect(panel).to_contain_text('미검증')
+        excerpt=self.page.locator('.panel-excerpt').inner_text().rstrip('…')
+        self.assertTrue(' '.join(report.split()).startswith(excerpt.strip()),'raw text, not a summary');self.assertNotIn('ZZ-END',panel.inner_text(),'the full report stays out of the panel')
+        self.page.locator('#panel-report-more').click();expect(self.page.locator('#space-title')).to_have_text('예약')
+        expect(self.page.locator(f'#raw-{task}')).to_have_attribute('open','');expect(self.page.locator(f'#raw-{task}')).to_contain_text('ZZ-END')
+        self.page.locator('#space-crumb-root').click();self.page.locator(f'#node-select-{booking}').click()
+        expect(self.page.locator('#panel-report-continue')).to_have_text('작업 화면으로');self.page.locator('#panel-report-continue').click()
+        expect(self.page.locator('#current-work')).to_be_visible();self.assertEqual(self.state()['currentTaskId'],rt['id'])
+
+    def test_13_bases_from_other_areas_are_not_called_common(self):
+        booking,notify=self.start(['예약','알림'])
+        def basis(text):
+            if not self.page.locator('#context-panel').is_visible():self.page.locator('#nav-context').click()
+            n=len(self.state()['bases']);self.page.locator('#add-basis').evaluate('(e)=>e.open=true')
+            self.page.locator('#basis-draft').fill(text);self.page.locator('#basis-form button').click();self.page.wait_for_timeout(50);self.assertEqual(len(self.state()['bases']),n+1)
+        self.request_in('예약','예약 화면 만들기',export=False);basis('예약은 하루 전까지만 바꿀 수 있다')
+        self.request_in('알림','알림 문자 보내기',export=False);basis('문자는 밤 10시 이후 보내지 않는다')
+        self.page.locator('#nav-space').click();self.open_area('알림');box=self.page.locator('#area-bases')
+        expect(box.locator('summary')).to_have_text('기준 · 이 영역 2개 · 다른 영역·미분류 기준 2개')  # each area: its request and its recorded basis;box.locator('summary').click()
+        expect(box).to_contain_text('문자는 밤 10시');expect(box).not_to_contain_text('하루 전까지만');expect(box).not_to_contain_text('프로젝트 공통')
+        expect(box).to_contain_text('합의한 공통 기준이라는 뜻은 아니에요')
+        expect(self.page.locator(f'.area-node[data-area-id="{booking}"]')).to_have_count(0)  # area screen, not the map
+
+    def test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming(self):
+        self.page.set_viewport_size({'width':390,'height':844})
+        booking,notify=self.start(['예약','알림']);stored=self.state()['space']['layout']
+        chip=self.page.locator('#map-offscreen');expect(chip).to_be_visible();expect(chip).to_contain_text('화면 밖 영역')
+        s0=self.scale();self.assertEqual(s0,1.0,'nothing re-scaled on its own')
+        chip.click();expect(chip).to_be_hidden();self.all_cards_inside();self.assertEqual(self.state()['space']['layout'],stored,'fit moves the view only')
+        for _ in range(3):self.page.locator('#map-zoom-in').click()
+        expect(chip).to_be_visible()
+        # The list names the same areas (same IDs) and is not affected by zoom.
+        lst=self.page.locator('#area-list');expect(lst).to_be_visible();expect(lst).to_have_attribute('open','')
+        ids=self.page.locator('.area-list-row').evaluate_all('(r)=>r.map(e=>e.dataset.areaId)')
+        self.assertEqual(sorted(ids),sorted(self.page.locator('.area-node').evaluate_all('(r)=>r.map(e=>e.dataset.areaId)')))
+        for _ in range(4):self.page.locator('#map-zoom-out').click()
+        box=self.page.locator(f'#list-open-{notify}').bounding_box();self.assertGreaterEqual(box['height'],40);self.assertGreaterEqual(box['width'],44)
+        self.page.locator(f'#list-open-{notify}').click();expect(self.page.locator('#space-title')).to_have_text('알림')
+        self.page.locator('#space-crumb-root').click();self.page.locator(f'#list-select-{booking}').click()
+        expect(self.page.locator('#area-panel')).to_be_visible();expect(self.page.locator(f'.area-node[data-area-id="{booking}"]')).to_have_class(re.compile('selected'))
+        self.page.locator(f'#area-panel #panel-open').click();expect(self.page.locator('#space-title')).to_have_text('예약')
+        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390)
+        self.page.screenshot(path=str(base.OUT/'flow091-map-390.png'))
+        self.page.set_viewport_size({'width':1265,'height':712});self.page.locator('#space-crumb-root').click();expect(self.page.locator('#area-list')).to_be_hidden()
+
+    def test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft(self):
+        self.page.set_viewport_size({'width':390,'height':844})
+        booking,notify=self.start(['예약','알림']);self.page.locator('#map-fit').click()
+        self.page.locator(f'#node-select-{booking}').click();expect(self.page.locator('#area-panel')).to_be_visible()
+        view=self.page.locator('#space-plane').evaluate('(e)=>e.style.transform')
+        self.page.locator('#panel-open').click();self.page.locator('#space-crumb-root').click()
+        expect(self.page.locator('#area-panel')).to_be_hidden();expect(self.page.locator('#map-sheet-reopen')).to_have_count(0)
+        expect(self.page.locator(f'.area-node[data-area-id="{booking}"]')).to_have_class(re.compile('selected'))
+        self.assertEqual(self.page.locator('#space-plane').evaluate('(e)=>e.style.transform'),view,'viewport kept')
+        # An unsaved edit: the sheet still closes, the value stays and the sheet can be reopened.
+        self.page.locator(f'#node-select-{booking}').click();self.page.locator('#panel-note').fill('아직 못 정한 점: 취소 규칙')
+        self.page.locator('#panel-open').click();self.page.locator('#nav-space').click()
+        expect(self.page.locator('#area-panel')).to_be_hidden();reopen=self.page.locator('#map-sheet-reopen');expect(reopen).to_be_visible()
+        reopen.click();expect(self.page.locator('#area-panel')).to_be_visible();expect(self.page.locator('#panel-note')).to_have_value('아직 못 정한 점: 취소 규칙')
+        s=self.state();self.assertEqual(next(a for a in s['space']['areas'] if a['id']==booking)['note'],'','not saved until 반영');self.assertIsNone(s['currentTaskId'])
 
 if __name__=='__main__':unittest.main(verbosity=2)

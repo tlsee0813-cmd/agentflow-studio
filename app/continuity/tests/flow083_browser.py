@@ -123,7 +123,7 @@ class Flow083(unittest.TestCase):
         expect(self.page.locator('#stage-label')).to_have_attribute('data-stage','ready')
         self.assertTrue(self.page.locator('#next-actions #copy-work').evaluate('(e)=>e.classList.contains("primary")'))
         self.assertEqual(self.page.locator('#work #draft').count(),0,'the request input is not inside the output card')
-        self.page.locator('#next-new-request').click();expect(self.page.locator('#draft')).to_be_focused()
+        self.page.locator('#change-direction').click();expect(self.page.locator('#draft')).to_be_focused()
         expect(self.page.locator('#request-tab')).to_have_attribute('aria-pressed','true')
         self.page.locator('#next-preview').click();expect(self.page.locator('#handoff-text')).to_be_visible()
         self.assertEqual(len(self.state()['tasks'][0]['handoffs']),0,'viewing is not a handoff')
