@@ -16,7 +16,8 @@ test('UI001-P1 stage labels distinguish source preservation, API response waitin
   assert.doesNotMatch(JSON.stringify(stage(ready)),/구현 완료|실행 중|연결됨/);
 });
 test('UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy',()=>{
-  let p=organised(request('결제가 실패하는 오류가 있어요.'));assert.equal(stage(p).kind,'question');
+  // FLOW094-R1: the MOCK asks the fact question only when the user says the cause is unknown (no incident assumed from a word).
+  let p=organised(request('결제가 실패하는 오류가 있어요. 원인은 아직 모르겠어요.'));assert.equal(stage(p).kind,'question');
   p=answer(p,p.currentTaskId,'지금은 모릅니다.','unknown');assert.notEqual(stage(p).kind,'question');
   p=organised(p);assert.equal(stage(p).kind,'ready');assert.equal(p.sources.at(-1).disposition,'unknown');
   assert.doesNotMatch(stage(p).label,/완료/);
@@ -191,7 +192,7 @@ test('RETURN032-R3 drafts and bookkeeping are not basis records; same-value reco
   assert.deepEqual(returnPreview(p).recordedBases.map(b=>[b.id,b.status,b.text]),[[basisId,'deferred','순서 변경은 보류한다.']]);
 });
 test('RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap',()=>{
-  let p=exported(organised(request('결제가 실패하는 오류가 있어요.')));
+  let p=exported(organised(request('결제가 실패하는 오류가 있어요. 원인은 아직 모르겠어요.'))); // FLOW094-R1: same question fixture
   p=answer(p,p.currentTaskId,'관찰한 오류는 없습니다.','unknown'); // Fresh question, not the separate C investigation.
   p=recordBasis(p,'예약 순서 유지');p=recordBasis(p,'추가 정책은 보류','deferred');
   p=submit(editDraft(setKind(p,'request'),'다른 화면에 관한 새 요청'));

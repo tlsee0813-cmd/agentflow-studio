@@ -55,7 +55,8 @@ test('I15-D07 synthetic test answers stay test-only on initial and followup, inc
   let p=D.recordBasis(request(),'탈퇴 유예는 30일. 유예 동안 로그인은 제한한다.');const before=clone(p.bases),id=p.bases.at(-1).id;
   p=respond(request(`${id}을 60일로 변경해줘`,p,'test_answer'));
   assert.deepEqual(p.bases,before);assert.match(D.taskStatus(p,D.taskOf(p)),/시험/);assert.match(D.handoffText(p),/합성 시험 문맥/);
-  p=respond(request('결제 오류가 있다.'));p=D.answer(p,p.currentTaskId,'실제로는 성공으로 가정한다.','provided',true);p=respond(p);
+  // FLOW094-R1: the fact-question fixture states the unknown cause (a word like '오류' alone no longer implies an incident).
+  p=respond(request('결제 오류가 있다. 원인은 모른다.'));p=D.answer(p,p.currentTaskId,'실제로는 성공으로 가정한다.','provided',true);p=respond(p);
   assert.equal(p.sources.at(-1).kind,'test_answer');assert.equal(p.bases.length,1);
 });
 test('I15-D08 explicit unique scalar change updates only intended span, stable ID/history and no extra approval',()=>{

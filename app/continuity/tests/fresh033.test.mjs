@@ -46,7 +46,7 @@ test('F033-2 fresh replies and existing duplicate precedence survive bookkeeping
 });
 
 test('F033-3 all dispositions and synthetic paths reject stale without input mutation; refreshed questions work',()=>{
-  for(const request of [REQUEST,'결제가 실패하는 오류가 있어요.']) {
+  for(const request of [REQUEST,'결제가 실패하는 오류가 있어요. 원인은 아직 모르겠어요.']) { // FLOW094-R1: fact-question fixture states the unknown cause
     let p=organised(D.recordBasis(D.submit(D.editDraft(D.createProject(),request)),ORIGINAL));
     p=D.recordBasis(p,CHANGED,'confirmed','D2');
     for(const disposition of ['provided','unknown','deferred'])for(const synthetic of [false,true]) {
