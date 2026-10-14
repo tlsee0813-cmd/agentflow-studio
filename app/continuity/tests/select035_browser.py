@@ -37,7 +37,8 @@ class Selection(unittest.TestCase):
         self.page.locator('#return-task').select_option(A)
         expect(self.page.locator('#return-preview')).to_have_attribute('data-target-task-id',A)
         self.shot('02-A-selected.png');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
-        afterA=self.state();RA=afterA['currentTaskId'];self.assertEqual(afterA['tasks'][-1]['parentTaskId'],A)
+        # FIX088: the A report is filed under A without an AI run on the current work, which stays current.
+        afterA=self.state();RA=afterA['tasks'][-1]['id'];self.assertEqual(afterA['tasks'][-1]['parentTaskId'],A);self.assertEqual(afterA['currentTaskId'],before['currentTaskId'])
         self.compose();self.page.locator('#draft').fill(self.material('B_report.txt'))
         expect(self.page.locator('#return-task')).to_have_value('');expect(self.page.locator('#send')).to_be_disabled()
         self.page.locator('#return-task').select_option(B);self.shot('03-B-selected.png')
@@ -56,7 +57,7 @@ class Selection(unittest.TestCase):
             self.assertNotIn(self.material('A_report.txt').strip(),raw.replace('\\n','\n'))
         self.assertNotIn(both['sources'][-2]['id'],[s['id'] for s in requests[-1]['sources']])
         self.assertEqual(final['bases'][:len(before['bases'])],before['bases'])
-        self.assertEqual(len(requests),3);self.assertEqual(responses,[200,200,200])
+        self.assertEqual(len(requests),2);self.assertEqual(responses,[200,200])  # FIX088: no AI run for the report filed under A
         (OUT/'replay.json').write_text(json.dumps({'requests':requests,'httpStatuses':responses,'A':A,'B':B,'A_report':RA,'B_report':RB,'pageErrors':self.errors,'claims':f'Actual UI replay using {MATERIALS_SOURCE}; native HTTP; mock AI; no human benefit measurement'},ensure_ascii=False,indent=2),encoding='utf-8')
         # Native JSON recovery preserves explicit parent links and resets selection.
         self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(str(restored))

@@ -38,13 +38,17 @@ test('F049 revised origin basis is current, immutable origin stays attributed; h
 });
 
 test('F049 late A return is scoped; latest B request is flagged and A report never leaks into B handoff',()=>{
-  const {p,A,B,H1,HB,raw}=fixture();const returned=D.importResultFile(p,raw),view=outcomeOf(returned);
+  // FIX088: the late A return no longer moves the view to A. B stays current; the A return is listed as received
+  // elsewhere. Opening it explicitly shows A's flow, with B still flagged as the latest request.
+  const {p,A,B,H1,HB,raw}=fixture();const returned=D.importResultFile(p,raw),current=outcomeOf(returned);
+  assert.equal(current.request.taskId,B);assert.equal(current.otherLatestRequest,null);assert.equal(current.reports.length,0);assert.equal(current.elsewhere.length,2);
+  const view=outcomeOf(D.focusTask(returned,returned.tasks.at(-1).id));
   assert.equal(view.request.taskId,A);assert.equal(view.otherLatestRequest.taskId,B);assert.equal(view.reports.length,2);
   const n=put(D.importResultFile(returned,JSON.stringify(fileFor(returned,B,HB,'B_ONLY_RESULT',null))),'B 다음 작업');
   for(const body of [D.handoffText(n),JSON.stringify(D.begin(n).request)]){assert.ok(body.includes('B_ONLY_RESULT'));assert.ok(!body.includes('합성 A 보고'));}
   assert.equal(outcomeOf(n).reports.some(s=>s.text.includes('합성 A 보고')),false);
   assert.equal(outcomeOf(n).id,outcomeOf(p,A).id);
-  assert.equal(D.taskOf(returned).resultFile.returnId,H1);
+  assert.equal(returned.tasks.at(-1).resultFile.returnId,H1);
 });
 
 test('F049 empty/report-only/legacy projects do not acquire an invented goal; existing IDs survive migration',()=>{
@@ -66,9 +70,12 @@ test('F049 sibling report and evidence match the existing adjacent return group,
   }
   p=put(p,'B 범위');const B=p.currentTaskId;p=D.markHandoff(p,B,D.handoffText(p),'download');
   p=D.submit(D.editDraft(D.setKind(p,'report'),'B_REPORT'),B);
+  // FIX088: late A evidence stays with A's return group and does not pull the open B work over to A.
   const late=D.submit(D.editDraft(D.setKind(p,'evidence'),'A_MORE'),A);
-  assert.deepEqual(outcomeOf(late).reports.map(s=>s.text),['A_REPORT','A_EVIDENCE','A_MORE']);
-  assert.ok(!D.handoffText(late).includes('B_REPORT'));
+  assert.deepEqual(outcomeOf(late).reports.map(s=>s.text),['A_EVIDENCE','B_REPORT'],'B was written after A_EVIDENCE, so that one is on its path');assert.deepEqual(outcomeOf(late).elsewhere.map(s=>s.text),['A_MORE']);
+  const opened=D.focusTask(late,late.tasks.at(-1).id);
+  assert.deepEqual(outcomeOf(opened).reports.map(s=>s.text),['A_REPORT','A_EVIDENCE','A_MORE']);
+  assert.ok(!D.handoffText(opened).includes('B_REPORT'));
 });
 
 test('F049 long chain retains old requests as bases, not duplicate sources; stale question rejection remains atomic',()=>{
@@ -119,6 +126,8 @@ test('FIX051 off-path B remains visible after late A return and next request, wi
   let p=put(D.createProject(),'A 요청');const A=p.currentTaskId;p=D.markHandoff(p,A,D.handoffText(p),'download');
   p=put(p,'B 요청');const B=p.currentTaskId;p=D.markHandoff(p,B,D.handoffText(p),'download');
   p=D.submit(D.editDraft(D.setKind(p,'report'),'늦은 A 보고'),A);
+  // FIX088: continuing A after its late report is an explicit choice; receiving the report keeps B current.
+  assert.equal(p.currentTaskId,B);p=D.focusTask(p,p.tasks.at(-1).id);
   p=put(p,'A 다음 요청');const view=outcomeOf(p);
   assert.deepEqual(view.otherRequests.map(s=>s.taskId),[B]);assert.equal(D.taskOf(p).parentTaskId,p.tasks[2].id);
   assert.ok(D.begin(p).request.sources.some(s=>s.text==='늦은 A 보고'));

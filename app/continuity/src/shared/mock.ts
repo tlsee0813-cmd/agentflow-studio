@@ -10,7 +10,15 @@ export function mockAdvice(request:ContextRequest):Advice {
     return words.some(w=>b.text.includes(w));
   }).map(b=>b.id);
   const refs=request.bases.filter(b=>request.appFacts.inputs.some(s=>s.sourceId===b.sourceId)).map(b=>({basisId:b.id,sourceId:b.sourceId,revision:b.revision}));
-  const out:Advice={intent:{version:'intent.1',relation:request.previousIntent?'separate':'start',goal:initial.text.slice(0,2000),conditions:[],retired:[],basisRefs:refs},understanding:'입력한 요청을 작은 작업으로 이어갑니다.',scope:'명시한 범위만 다루고, 나머지 저장 기준은 유지합니다.',
+  // FIX088: a returned report is a claim about earlier work, never the user's goal. It continues the purpose of the
+  // request it returns to (the previous interpretation, else that request's own words); with no request, none is set.
+  const returned=initial.kind==='report'||initial.kind==='evidence',prior=request.previousIntent;
+  const asked=request.sources.filter(s=>s.kind==='request'&&s.taskId!==request.ticket.taskId).at(-1);
+  const intent:Advice['intent']=!returned?{version:'intent.1',relation:prior?'separate':'start',goal:initial.text.slice(0,2000),conditions:[],retired:[],basisRefs:refs}
+    :prior?{version:'intent.1',relation:'continue',goal:(prior.manualGoal??prior.value!.goal).slice(0,2000),
+      conditions:prior.manualGoal!==null?(prior.manualConditions?[prior.manualConditions.slice(0,2000)]:[]):prior.value!.conditions,retired:[],basisRefs:prior.value?.basisRefs??[]}
+    :{version:'intent.1',relation:asked?'continue':'uncertain',goal:asked?asked.text.slice(0,2000):'요청 원문이 없어 목적을 정하지 않았어요. 돌아온 보고는 목적이 아니에요.',conditions:[],retired:[],basisRefs:[]};
+  const out:Advice={intent,understanding:'입력한 요청을 작은 작업으로 이어갑니다.',scope:'명시한 범위만 다루고, 나머지 저장 기준은 유지합니다.',
     next:'관련 구현 위치를 찾고 요청한 부분만 수정하세요. 새 정책이나 기술 선택은 임의로 추가하지 마세요.',
     checks:'요청한 변화가 보이는지 확인하고, 기존 동작을 바꾸지 않았는지 관련 검사를 실행해 결과를 따로 보고하세요.',
     question:null,relatedBasisIds:related,reviewBasisIds:[],suggestions:[]};

@@ -63,6 +63,9 @@ class ResultFiles(unittest.TestCase):
         for k in ['draft','answerDraft','basisDraft','basisEdits','bases']:self.assertEqual(after[k],before[k])
         self.assertEqual(after['tasks'][:-1],before['tasks']);self.assertEqual(after['sources'][:-2],before['sources']);self.assertEqual(calls,[])
         original=(self.materials/'A-H1.result.json').read_text();self.assertEqual(after['tasks'][-1]['resultFile']['rawText'],original)
+        # FIX088: the A result is filed under A and B stays current; the raw result is shown once the user opens it.
+        self.assertEqual(after['currentTaskId'],self.refs['B']);expect(self.page.locator('#outcome-elsewhere')).to_contain_text('합성 A 보고')
+        self.page.locator('#outcome-elsewhere button').first.click();after=self.state();self.assertEqual(after['currentTaskId'],after['tasks'][-1]['id'])
         self.page.locator('#current-result-raw').evaluate('(e)=>{for(let x=e;x;x=x.parentElement)if(x.tagName==="DETAILS")x.open=true}')
         self.assertEqual(self.download('#current-result-raw button','native-raw-return.json').read_text(),original)
         backup=self.download('#backup','native-recovery.json');self.assertEqual(json.loads(backup.read_text()),after)
@@ -73,6 +76,8 @@ class ResultFiles(unittest.TestCase):
         self.make('partial.json',report='합성 A 부분 추가: 실기기 미확인',evidence=None);self.select('partial.json');self.page.locator('#accept-result-file').click();self.assertEqual(len(self.state()['tasks']),len(after['tasks'])+1)
         self.make('B.result.json',taskId=self.refs['B'],returnId=self.refs['HB'],report='합성 B 전용 보고',evidence=None)
         self.select('B.result.json');self.page.locator('#accept-result-file').click();self.assertEqual(len(calls),0)
+        # FIX088: the B result arrives while an A result is open; continuing B is the user's explicit choice.
+        self.page.locator('#outcome-elsewhere .outcome-record',has_text='합성 B 전용 보고').locator('button').click()
         self.send('B 검색 입력의 다음 문구 변경');self.assertEqual(len(calls),1)
         text=self.download('#download-work','native-B-next-handoff.md').read_text()
         for value in [json.dumps(calls[-1],ensure_ascii=False),text]:

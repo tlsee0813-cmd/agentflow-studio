@@ -1,6 +1,6 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source } from '../shared/types.js';
 import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
-  currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
+  currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask } from '../shared/domain.js';
 import { parseProject, parseResultFile, validateRequest, validateAdvice } from '../shared/validation.js';
 import { WorkspaceStore, serializeProject, storageErrorCode, type EntryRef, type WorkspaceEntry } from '../shared/storage.js';
 import { mockAdvice } from '../shared/mock.js';
@@ -148,6 +148,11 @@ function displayView() {
   }
 }
 function showWork() {view='work';displayView();}
+/** Explicit navigation to another task (a received result, or back to the latest request). */
+function openTask(id:string) {
+  if(project.pending)return;
+  commit(focusTask(project,id));showWork();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});
+}
 function openComposer(kind:Project['draftKind']='request') {
   showWork();
   // A return CTA must not silently relabel an unsent request as an implementer's report.
@@ -216,6 +221,27 @@ function renderOutcome(t:Task|null) {
   const primary=btn(questionApplicability(project,t)==='active'?'필요한 선택 보기':'현재 작업문 보기',()=>{$('current-work').focus({preventScroll:true});$('current-work').scrollIntoView({block:'start'});},'secondary','home-work');
   const topActions=node('div','','outcome-actions');topActions.append(primary,btn('방향 수정 / 다음 요청',()=>openComposer('request'),'secondary','change-direction'));
   top.append(title,topActions);area.append(top);
+  // FIX088: received results and the user's latest request are shown, never merged into or swapped with this flow.
+  const latest=flow.otherLatestRequest;
+  if(latest) {
+    const box=node('section','','outcome-direction');box.id='outcome-latest-request';
+    box.append(node('h3','가장 최근에 쓴 요청 · 지금 화면 밖'),node('p',latest.text,'outcome-purpose outcome-excerpt'),
+      node('p',`작업 ${project.tasks.findIndex(x=>x.id===latest.taskId)+1} · ${dateLabel(latest.at)} · 다른 결과를 열었다고 이 요청이 바뀌거나 끝나지 않았어요.`,'hint'),
+      btn('그 요청으로 돌아가기',()=>openTask(latest.taskId),'secondary','resume-latest'));
+    area.append(box);
+  }
+  if(flow.elsewhere.length) {
+    const box=node('section','','outcome-return');box.id='outcome-elsewhere';
+    box.append(node('h3',`다른 작업에 도착한 결과 ${flow.elsewhere.length}개`));
+    for(const s of flow.elsewhere) {
+      const rt=project.tasks.find(x=>x.id===s.taskId)!,entry=node('div','','outcome-record');
+      entry.append(tag(sourceName[s.kind]),node('p',`${dateLabel(s.at)} · 작업 ${project.tasks.findIndex(x=>x.id===rt.parentTaskId)+1}에 연결 · 앱 미검증`,'hint'),
+        node('div',reportBody(s),'source-raw outcome-excerpt'),btn('이 결과 열어 이어가기',()=>openTask(rt.id),'quiet'));
+      box.append(entry);
+    }
+    box.append(node('p','지금 이어가던 요청과 범위에는 합치지 않았어요. 열면 그 작업을 이어가고, 지금 요청으로는 언제든 돌아올 수 있어요.','hint'));
+    area.append(box);
+  }
   const interpreted=currentIntent(project,t),correction=intentCorrection(t);
   if(interpreted||correction) {
     // A user correction stays visible after the AI interpretation behind it went stale; AI-only parts need a fresh interpretation.
@@ -695,7 +721,9 @@ function submitInput(withAI:boolean) {
   guard(()=>{
     // No naming step: a still-default name becomes the first request's opening words; it can be renamed any time.
     if(!project.tasks.length&&project.name===createProject().name&&project.draftKind==='request')project=rename(project,shortText(project.draft,30));
-    const next=submit(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);selectedReturnTaskId=undefined;commit(next);$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});if(withAI)void generate(project.currentTaskId!);else {$<HTMLDetailsElement>('edit-work').open=true;$('work-next').focus();}});
+    const next=submit(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);selectedReturnTaskId=undefined;commit(next);$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});// FIX088: a result filed to another task leaves the current work as it was: no AI run on it, no edit panel.
+    if(next.currentTaskId!==next.tasks.at(-1)!.id)return;
+    if(withAI)void generate(project.currentTaskId!);else {$<HTMLDetailsElement>('edit-work').open=true;$('work-next').focus();}});
 }
 $('compose').addEventListener('submit',e=>{e.preventDefault();submitInput(true);});
 $('save-input').addEventListener('click',()=>submitInput(false));

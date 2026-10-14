@@ -54,6 +54,8 @@ test('AI055 exact late return preserves manual purpose, raw file and independent
  p=D.markHandoff(p,A,D.handoffText(p,A,'H_ai055'),'download',p.revision,'H_ai055');
  p=D.correctIntent(p,A,'링크로 취소, 12시간 만료','환불 제외');p=reply(put(p,'별개 통계 차트'));
  const raw=JSON.stringify(fileFor(p,A,'H_ai055','합성 늦은 보고: 가입 제한을 구현했다고 주장. 실제 실행 증거 없음.',null));p=D.importResultFile(p,raw);
+ // FIX088: receiving the late A return no longer switches away from the separate request; analysing it is an explicit choice.
+ assert.equal(D.taskOf(p).sourceIds.length,1);assert.equal(p.tasks.at(-1).parentTaskId,A);p=D.focusTask(p,p.tasks.at(-1).id);
  const r=D.begin(p).request;assert.equal(r.previousIntent.taskId,A);assert.equal(r.previousIntent.manualGoal,'링크로 취소, 12시간 만료');
  assert.equal(D.taskOf(p).resultFile.rawText,raw);assert.deepEqual(parseProject(serializeProject(p)),p);assert.equal(p.bases[0].text,cases[0].turns[0]);
 });

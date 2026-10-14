@@ -59,6 +59,23 @@ export function returnTargetId(p: Project, selectedId?: string): string|null {
   }
   return targets[0]?.id ?? p.currentTaskId;
 }
+/** FIX088: a report belongs to the task it returns to; receiving it is not the user choosing that task.
+ * It continues the current work only when it returns to that work (or to the handoff whose return is open). */
+function continuesFocus(p: Project, target: string|null): boolean {
+  const current=p.tasks.find(t=>t.id===p.currentTaskId);
+  if(!current||target===null||target===current.id) return true;
+  const kind=p.sources.find(s=>s.id===current.sourceIds[0])?.kind;
+  return current.parentTaskId===target && (kind==='report'||kind==='evidence');
+}
+function placeReturn(p: Project, n: Project, id: string, target: string|null) {
+  if(continuesFocus(p,target)) { n.currentTaskId=id; return; }
+  const index=(tid:string|null)=>p.tasks.findIndex(t=>t.id===tid)+1;
+  n.notice=`결과를 작업 ${index(target)}에 연결했어요 · 앱 미검증. 지금 이어가던 작업 ${index(p.currentTaskId)}의 요청과 범위는 그대로예요. 받은 결과는 ‘다른 작업에 도착한 결과’에서 열 수 있어요.`;
+}
+/** Explicit navigation: the user opens a task to continue it. Nothing else changes. */
+export function focusTask(p: Project, id: string): Project {
+  ensure(p.tasks.some(t=>t.id===id),'TASK_MISSING'); const n=change(p); n.currentTaskId=id; return n;
+}
 export function submit(p: Project, selectedId?: string): Project {
   text(p.draft);
   const returned=['report','evidence'].includes(p.draftKind);
@@ -66,7 +83,8 @@ export function submit(p: Project, selectedId?: string): Project {
   const n=change(p);
   const id=uid('T'),t:Task={id,sourceIds:[],parentTaskId:parent,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:null};
   const s=appendSource(n,n.draftKind,n.draft,id);
-  t.sourceIds.push(s.id); n.tasks.push(t); n.currentTaskId=id;
+  t.sourceIds.push(s.id); n.tasks.push(t);
+  if(returned) placeReturn(p,n,id,parent); else n.currentTaskId=id;
   if(s.kind === 'request') {
     let replaced=false;
     for(const b of n.bases) {
@@ -106,7 +124,7 @@ export function importResultFile(p:Project,rawText:string):Project {
     manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:{returnId:file.returnId,rawText}};
   const kinds:('report'|'evidence')[]=file.evidence===null?['report']:['report','evidence'];
   for(const kind of kinds)t.sourceIds.push(appendSource(n,kind,resultSourceText(file,record.revision,kind),id).id);
-  n.tasks.push(t);n.currentTaskId=id;n.pending=null;
+  n.tasks.push(t);placeReturn(p,n,id,task.id);n.pending=null;
   // Includes the unchanged drafts and raw JSON in the real project byte/validation budget.
   return parseProject(JSON.stringify(n));
 }

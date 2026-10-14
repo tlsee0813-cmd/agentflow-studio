@@ -131,6 +131,9 @@ class OutcomeHome(unittest.TestCase):
         self.page.locator('#return-task').select_option(A)
         self.page.locator('#draft').fill('합성 A 늦은 보고. 실제 실행 검사는 하지 않음.')
         self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        # FIX088: the late A report is filed under A without an AI run on B; continuing A is an explicit choice.
+        self.assertEqual(len(calls),4);expect(self.page.locator('#outcome-elsewhere')).to_contain_text('합성 A 늦은 보고')
+        self.page.locator('#outcome-elsewhere button').click()
         self.send('A 결과에서 이어갈 다음 문구 수정')
         expect(self.page.locator('#outcome-other-request > summary')).to_have_text('현재 경로 밖 요청 1개')
         expect(self.page.locator('#outcome-other-request')).to_contain_text('B 별도 통계 차트 색 변경')
@@ -145,5 +148,31 @@ class OutcomeHome(unittest.TestCase):
             self.page.screenshot(path=str(base.OUT/f'fix051-return-{width}.png'),full_page=True)
             self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),width)
         (base.OUT/'fix051-http-requests.json').write_bytes(json.dumps(calls,ensure_ascii=False,indent=2).encode('utf-8'))
+
+    def test_06_late_report_keeps_the_current_request_and_never_becomes_the_goal(self):
+        """FIX088: receiving a report for A is not choosing A. B (scope, goal, export) stays; the A result is findable."""
+        calls=[];self.page.on('request',lambda r:calls.append(r.post_data_json) if r.method=='POST' and r.url.endswith('/api/continuity') else None)
+        a_text,b_text,report='A: 예약 화면 전체 문구와 배치 정리','B: 취소 버튼 문구만 바꿔 줘','늦게 온 A 보고: 전체 문구와 배치를 고쳤다고 주장. 실제 검사 없음.'
+        self.send(a_text);A=self.state()['currentTaskId'];self.download('#download-work','fix088-A.md')
+        self.send(b_text);B=self.state()['currentTaskId'];before=self.download('#download-work','fix088-B.md').read_text(encoding='utf-8')
+        expect(self.page.locator('#intent-goal')).to_have_text(b_text)
+        self.page.locator('#home-paste-result').click();self.page.locator('#return-task').select_option(A)
+        self.page.locator('#draft').fill(report);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        saved=self.state();self.assertEqual(saved['currentTaskId'],B);self.assertEqual(saved['tasks'][-1]['parentTaskId'],A)
+        self.assertEqual(len(calls),2,'no AI run on B for the A report')
+        expect(self.page.locator('#notice')).to_contain_text('그대로');expect(self.page.locator('#outcome-purpose')).to_have_text(b_text)
+        expect(self.page.locator('#intent-goal')).to_have_text(b_text);expect(self.page.locator('#outcome-elsewhere')).to_contain_text(report)
+        after=self.download('#download-work','fix088-B-after.md').read_text(encoding='utf-8')
+        self.assertNotIn(report,after);import re;self.assertEqual(re.sub(r'기준 r\d+','',after),re.sub(r'기준 r\d+','',before),'B export: only the header revision may differ')
+        self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');self.assertEqual(self.state()['currentTaskId'],B)
+        expect(self.page.locator('#outcome-elsewhere')).to_contain_text(report)
+        # Opening the A result explicitly continues A; B stays visible as the latest request, not an old one.
+        self.page.locator('#outcome-elsewhere button').click();R=self.state()['currentTaskId'];self.assertEqual(self.state()['tasks'][-1]['id'],R)
+        expect(self.page.locator('#outcome-purpose')).to_have_text(a_text);expect(self.page.locator('#outcome-latest-request')).to_contain_text(b_text)
+        self.page.locator('#retry-work').click();expect(self.page.locator('#working')).to_have_text('')
+        self.assertEqual(calls[-1]['ticket']['taskId'],R);expect(self.page.locator('#intent-goal')).to_have_text(a_text)
+        self.assertNotIn(report,self.page.locator('#intent-goal').inner_text())
+        self.page.locator('#resume-latest').click();self.assertEqual(self.state()['currentTaskId'],B)
+        expect(self.page.locator('#outcome-purpose')).to_have_text(b_text);expect(self.page.locator('#outcome-latest-request')).to_have_count(0)
 
 if __name__=='__main__':unittest.main(verbosity=2)

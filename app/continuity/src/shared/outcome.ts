@@ -7,7 +7,11 @@ export function contextLinks(p:Project,t:Task) {
   const firstKind=parent?p.sources.find(s=>s.id===parent.sourceIds[0])?.kind:null;
   const anchor=parent&&['report','evidence'].includes(firstKind??'')?p.tasks.find(x=>x.id===parent.parentTaskId):parent;
   const sourceKinds=new Map(p.sources.map(s=>[s.id,s.kind]));
-  const returns=anchor?p.tasks.filter(x=>x.parentTaskId===anchor.id&&['report','evidence'].includes(sourceKinds.get(x.sourceIds[0]!)??'')):[];
+  const isReturn=(x:Task)=>['report','evidence'].includes(sourceKinds.get(x.sourceIds[0]!)??'');
+  // FIX088: a request only carries the returns that existed when it was written. A report that arrives later for
+  // the earlier task belongs to that task, not to this request's context or export.
+  const created=p.tasks.indexOf(t),own=isReturn(t);
+  const returns=anchor?p.tasks.filter(x=>x.parentTaskId===anchor.id&&isReturn(x)&&(own||p.tasks.indexOf(x)<created)):[];
   return {parent,anchor,returns};
 }
 
@@ -45,8 +49,12 @@ export function outcomeOf(p:Project, id=p.currentTaskId) {
     return matches.length===1?matches[0]!:null; // Imported ambiguity is not a choice made by the app.
   };
   const requestBasis=basisFor(request),directionBasis=basisFor(direction);
-  const latestRequest=otherRequests.at(-1)??null;
-  return {id:origin?.id??null,origin,originBases,request,requestBasis,direction,directionDeclared:declared!==null,directionBasis,path,reports,otherRequests,
+  // The latest request the user wrote, when it is not on this path (e.g. after explicitly opening an older result).
+  const latestRequest=p.sources.filter(s=>s.kind==='request').at(-1)??null;
+  // Results received for other tasks after this path's request: discoverable, never merged into this flow.
+  const shown=new Set(reports.map(s=>s.id)),since=request?p.sources.indexOf(request):-1;
+  const elsewhere=p.sources.filter((s,i)=>i>since&&(s.kind==='report'||s.kind==='evidence')&&!shown.has(s.id)&&!pathIds.has(s.taskId));
+  return {elsewhere,id:origin?.id??null,origin,originBases,request,requestBasis,direction,directionDeclared:declared!==null,directionBasis,path,reports,otherRequests,
     // A late return can select an older branch. Never call that branch the latest project direction.
     otherLatestRequest:latestRequest&&!pathIds.has(latestRequest.taskId)?latestRequest:null};
 }
