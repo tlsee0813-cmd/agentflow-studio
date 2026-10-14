@@ -153,8 +153,7 @@ class Browser(unittest.TestCase):
         original=self.state()
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=OUT/'valid-recovery.json';d.value.save_as(path)
-        self.page.once('dialog',lambda dialog:dialog.accept())
-        self.page.locator('#import-file').set_input_files(path);expect(self.page.locator('#basis-count')).to_have_text('2')
+        self.import_file(path);expect(self.page.locator('#basis-count')).to_have_text('2')
         self.assertEqual(self.state()['bases'],original['bases'])
         self.page.evaluate('Object.defineProperty(navigator,"clipboard",{value:{writeText:()=>Promise.reject(new Error("denied"))},configurable:true})')
         self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드를 사용할 수 없습니다')
@@ -179,7 +178,18 @@ class Browser(unittest.TestCase):
         with self.page.expect_download() as d:self.page.locator('#download-work').click()
         path=OUT/name;d.value.save_as(path);return path.read_text(encoding='utf-8')
     def import_file(self,path):
-        self.page.once('dialog',lambda dialog:dialog.accept());self.page.locator('#import-file').set_input_files(path)
+        def accept(dialog):dialog.accept()
+        self.page.on('dialog',accept)
+        try:
+            # A backup reimport can already match every state/count assertion: await this import's dialog.
+            with self.page.expect_event('dialog') as event:
+                self.page.locator('#import-file').set_input_files(path)
+            self.assertEqual(event.value.type,'confirm')
+            self.assertIn('복구할까요?',event.value.message)
+            # The app replaces/renders synchronously after confirm; evaluate runs after that continuation.
+            self.page.evaluate('() => undefined')
+        finally:
+            self.page.remove_listener('dialog',accept)
     def backup(self,name):
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=OUT/name;d.value.save_as(path);return path
