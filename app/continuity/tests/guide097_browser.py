@@ -1,0 +1,95 @@
+"""GUIDE097 native UI -> localhost -> explicit MOCK. Area guidance: one question, a reviewable draft, adoption into the area's
+existing request draft; edits survive area switches, cancel, failure and late replies. Wiring, not AI quality (MOCK rules).
+Run from app/: python continuity/tests/guide097_browser.py
+"""
+import unittest
+from playwright.sync_api import expect
+import browser as base
+
+class AreaGuidance(unittest.TestCase):
+    setUpClass=classmethod(base.Browser.setUpClass.__func__)
+    tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
+    setUp=base.Browser.setUp;tearDown=base.Browser.tearDown;state=base.Browser.state
+
+    def start(self,areas):
+        self.page.locator('#brief-input').fill('도자기 공방 원데이 클래스 온라인 예약 사이트');self.page.locator('#brief-start').click()
+        for name,note in areas:
+            self.page.locator('#area-name').fill(name);self.page.locator('#area-note').fill(note);self.page.locator('#area-add').click()
+            expect(self.page.locator('.area-node',has_text=name)).to_be_visible()
+        return [next(a['id'] for a in self.state()['space']['areas'] if a['name']==n) for n,_ in areas]
+    def open_area(self,name):
+        self.page.locator('#nav-space').click();self.page.locator('.area-node',has_text=name).first.locator('.area-open').click()
+        expect(self.page.locator('#space-title')).to_have_text(name)
+    def calls(self,path):
+        out=[];self.page.on('request',lambda r:out.append(r.post_data_json) if r.method=='POST' and r.url.endswith(path) else None);return out
+    def hold(self):
+        held=[];self.page.route('**/api/guidance',lambda route:held.append(route));return held
+
+    def test_01_question_answer_edit_switch_adopt_and_send(self):
+        guide,organise=self.calls('/api/guidance'),self.calls('/api/continuity')
+        booking,works=self.start([('예약','예약받기'),('작품','사진으로 작품 소개')]);self.open_area('예약')
+        expect(self.page.locator(f'#guide-{booking}')).to_have_attribute('open','')  # an empty area shows the option
+        before=self.state();self.page.locator('#guide-start').click()
+        q=self.page.locator('#guide-question');expect(q).to_contain_text('바로 확정할까요, 공방이 확인한 뒤 확정할까요?');expect(q).to_contain_text('MOCK 규칙 · AI 아님')
+        self.assertEqual(guide[0]['area'],{'id':booking,'name':'예약','note':'예약받기'});self.assertEqual(guide[0]['brief'],'도자기 공방 원데이 클래스 온라인 예약 사이트')
+        self.page.locator('#guide-option-1').click();text=self.page.locator('#guide-text');expect(text).to_have_value(__import__('re').compile('확인 대기'))
+        self.assertEqual(guide[1]['answer']['text'],'공방 확인 뒤 확정');self.assertIsNone(guide[0]['answer'])
+        self.assertEqual(self.state(),before,'asking and answering write nothing to the project')
+        edited=text.input_value()+'\n(사용자 메모: 주말 클래스만 먼저)';text.fill(edited);expect(self.page.locator('#guide-edited')).to_contain_text('직접 고친')
+        # Another area and back: the edit stays with its area and never shows in the other one.
+        self.open_area('작품');expect(self.page.locator('#guide-text')).to_have_count(0);self.open_area('예약');expect(self.page.locator('#guide-text')).to_have_value(edited)
+        self.page.screenshot(path=str(base.OUT/'guide097-proposal.png'),full_page=True)
+        self.page.set_viewport_size({'width':390,'height':844});self.page.screenshot(path=str(base.OUT/'guide097-proposal-390.png'),full_page=True)
+        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390);expect(self.page.locator('#guide-adopt')).to_be_visible()
+        self.page.set_viewport_size({'width':1440,'height':1050})
+        self.page.locator('#guide-adopt').click();expect(self.page.locator('#draft')).to_have_value(edited)
+        expect(self.page.locator('#compose-area')).to_have_value(booking);expect(self.page.locator('#notice')).to_contain_text('아직 보내지 않았어요')
+        s=self.state();self.assertEqual(s['space']['areas'],before['space']['areas'],'area ideas untouched');self.assertEqual(s['tasks'],[]);self.assertEqual(s['bases'],[])
+        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        s=self.state();self.assertEqual(s['tasks'][0]['areaId'],booking);self.assertEqual(s['sources'][0]['text'],edited);self.assertEqual(s['tasks'][0]['background']['area']['note'],'예약받기')
+        self.assertEqual((len(guide),len(organise)),(2,1))
+        with self.page.expect_download() as d:self.page.locator('#download-work').click()
+        path=base.OUT/'guide097-handoff.md';d.value.save_as(path);self.assertEqual(path.read_text(encoding='utf-8').count(edited),1)
+        # Back in the area: it now has a request, so the option is folded and the request is listed as before.
+        self.open_area('예약');expect(self.page.locator(f'#guide-{booking}')).not_to_have_attribute('open','');expect(self.page.locator('#area-tasks')).to_contain_text('예약')
+
+    def test_02_unknown_then_change_answer(self):
+        (booking,)=self.start([('예약','예약받기')]);self.open_area('예약');self.page.locator('#guide-start').click()
+        self.page.locator('#guide-unknown').click();expect(self.page.locator('#guide-text')).to_have_value(__import__('re').compile('예약 확정 방식 — 사용자 모름'))
+        self.page.locator('#guide-change-answer').click();self.page.locator('#guide-option-0').click()
+        expect(self.page.locator('#guide-text')).to_have_value(__import__('re').compile('그 자리에서 예약이 확정'))
+        expect(self.page.locator('#guide-proposal')).to_contain_text('바로 확정')
+
+    def test_03_failure_cancel_late_reply_and_unsent_draft(self):
+        booking,works=self.start([('예약','예약받기'),('작품','사진으로 작품 소개')]);self.open_area('예약')
+        self.page.locator('#guide-start').click();self.page.locator('#guide-option-0').wait_for()
+        # Failure after answering: the answer stays and is sent again; the question is not asked again.
+        self.page.route('**/api/guidance',lambda route:route.abort());self.page.locator('#guide-option-1').click()
+        expect(self.page.locator('#guide-notice')).to_contain_text('입력·답·초안은 그대로');expect(self.page.locator('#guide-question')).to_contain_text('보낸 답: 공방 확인 뒤 확정')
+        self.page.unroute('**/api/guidance');sent=self.calls('/api/guidance');self.page.locator('#guide-retry').click()
+        expect(self.page.locator('#guide-text')).to_have_value(__import__('re').compile('확인 대기'));self.assertEqual(sent[0]['answer']['text'],'공방 확인 뒤 확정')
+        mine=self.page.locator('#guide-text').input_value()+' 직접 수정';self.page.locator('#guide-text').fill(mine)
+        held=self.hold()
+        # Late reply for another area: B's guide is filled only in B, never in A.
+        self.open_area('작품');self.page.locator('#guide-start').click();self.page.wait_for_function('()=>document.querySelector("#guide-stop")')
+        self.open_area('예약');expect(self.page.locator('#guide-text')).to_have_value(mine)
+        held[0].continue_();self.page.wait_for_timeout(300);expect(self.page.locator('#guide-text')).to_have_value(mine)
+        self.open_area('작품');expect(self.page.locator('#guide-text')).to_have_value(__import__('re').compile('사진으로 작품 소개'))
+        # A late reply after the area idea changed is not applied; the new idea is kept.
+        self.page.locator('#guide-discard').click();self.page.locator('#guide-start').click();self.page.wait_for_function('()=>document.querySelector("#guide-stop")')
+        self.page.locator('#area-edit').evaluate('(e)=>e.open=true');self.page.locator('#area-edit-note').fill('작품 사진과 가격 소개');self.page.locator('#area-edit-save').click()
+        held[1].continue_();expect(self.page.locator('#guide-notice')).to_contain_text('바뀌어 이 응답은 적용하지 않았어요');expect(self.page.locator('#guide-text')).to_have_count(0)
+        self.assertEqual(self.state()['space']['areas'][1]['note'],'작품 사진과 가격 소개')
+        # Stop while waiting: input kept, later delivery ignored.
+        self.page.locator('#guide-start').click();self.page.locator('#guide-stop').click();expect(self.page.locator('#guide-notice')).to_contain_text('중단했어요')
+        try:held[2].continue_()
+        except Exception:pass
+        self.page.wait_for_timeout(200);expect(self.page.locator('#guide-text')).to_have_count(0);expect(self.page.locator('#guide-start')).to_be_enabled()
+        self.page.unroute('**/api/guidance')
+        # An unsent request is never replaced by adoption.
+        self.open_area('예약');self.page.locator('#area-new-request').click();self.page.locator('#draft').fill('작성 중인 내 요청')
+        self.open_area('예약');self.page.locator('#guide-adopt').click()
+        expect(self.page.locator('#guide-notice')).to_contain_text('작성 중인 요청이 있어 초안을 넣지 않았어요');self.assertEqual(self.state()['draft'],'작성 중인 내 요청')
+        expect(self.page.locator('#guide-text')).to_have_value(mine);self.assertEqual(self.state()['tasks'],[])
+
+if __name__=='__main__':unittest.main(verbosity=2)

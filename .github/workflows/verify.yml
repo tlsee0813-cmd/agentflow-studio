@@ -141,6 +141,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/flow090_browser.py 2>&1 | tee test-results/flow090-browser.log
+      - name: Area guidance question, draft and adoption into the area's request (native HTTP, MOCK rules; not AI quality)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/guide097
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/guide097_browser.py 2>&1 | tee test-results/guide097-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:

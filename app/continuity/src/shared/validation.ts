@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
+import { API_SCHEMA, SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket } from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -86,12 +86,13 @@ export function validateAdvice(v: unknown, basisIds: string[], request?:ContextR
   }
   list(v.suggestions, 8);
   for (const s of v.suggestions) { obj(s,['text','why']); text(s.text, 2000); text(s.why, 2000); }
-  if (v.question !== null) {
-    const q = v.question; obj(q,['kind','text','why','options']); ensure(['fact','choice'].includes(q.kind as string)); text(q.text, 2000); text(q.why, 2000); list(q.options, 3);
-    ensure(q.kind !== 'fact' || q.options.length === 0);
-    for (const o of q.options) { obj(o,['label','consequence']); text(o.label, 500); text(o.consequence, 1000); }
-  }
+  if (v.question !== null) question(v.question);
   return structuredClone(v) as unknown as Advice;
+}
+function question(q: unknown): asserts q is Question {
+  obj(q,['kind','text','why','options']); ensure(['fact','choice'].includes(q.kind as string)); text(q.text, 2000); text(q.why, 2000); list(q.options, 3);
+  ensure(q.kind !== 'fact' || q.options.length === 0);
+  for (const o of q.options) { obj(o,['label','consequence']); text(o.label, 500); text(o.consequence, 1000); }
 }
 export function validateEnvelope(v: unknown, req: ContextRequest): Envelope {
   obj(v,['mode','ticket','advice']); ensure(['mock','deepseek'].includes(v.mode as string)); ticket(v.ticket);
@@ -364,4 +365,37 @@ export function parseProject(raw: string): Project {
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
   const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
+}
+
+/* ---------- GUIDE097 ---------- */
+function guideTicket(v: unknown): asserts v is GuideTicket { obj(v,['projectId','revision','requestId','areaId']); id(v.projectId); integer(v.revision); id(v.requestId); id(v.areaId); }
+const GUIDE_WORK = 5;
+/** Shape and size of the guidance material. It carries no sources, tasks or bases to write back. */
+export function validateGuideRequest(v: unknown): GuideRequest {
+  obj(v,['schemaVersion','ticket','projectName','brief','area','decisions','areaWork','answer']); ensure(v.schemaVersion===GUIDE_SCHEMA);
+  guideTicket(v.ticket); text(v.projectName,120); if(v.brief!==null)text(v.brief);
+  obj(v.area,['id','name','note']); id(v.area.id); text(v.area.name,60); if(v.area.note!==null)text(v.area.note,2000);
+  ensure(v.area.id===(v.ticket as GuideTicket).areaId);
+  list(v.decisions); const ids=new Set<string>();
+  for(const d of v.decisions) { obj(d,['id','text','status']); id(d.id); text(d.text); ensure(['confirmed','deferred','answered'].includes(d.status as string)); ensure(!ids.has(d.id as string)); ids.add(d.id as string); }
+  list(v.areaWork,GUIDE_WORK);
+  for(const w of v.areaWork) { obj(w,['taskId','request','scope','checks']); id(w.taskId); text(w.request); if(w.scope!==null)text(w.scope,6000); if(w.checks!==null)text(w.checks,6000); }
+  if(v.answer!==null) { obj(v.answer,['question','text','disposition']); question(v.answer.question); text(v.answer.text); ensure(['provided','unknown','deferred'].includes(v.answer.disposition as string)); }
+  ensure(new TextEncoder().encode(JSON.stringify(v)).length<=REQUEST_BYTES,'CONTEXT_TOO_LARGE');
+  return structuredClone(v) as unknown as GuideRequest;
+}
+/** Exactly one of question/proposal. Once the question is answered only a proposal is accepted: at most one question. */
+export function validateGuideReply(v: unknown, req: GuideRequest): GuideReply {
+  obj(v,['question','proposal']); ensure((v.question===null)!==(v.proposal===null));
+  if(v.question!==null) { ensure(req.answer===null); question(v.question); }
+  if(v.proposal!==null) {
+    const p=v.proposal; obj(p,['goal','scope','checks','open']); text(p.goal,2000); text(p.scope,2000); text(p.checks,2000);
+    list(p.open,6); for(const o of p.open) text(o,500);
+  }
+  return structuredClone(v) as unknown as GuideReply;
+}
+export function validateGuideEnvelope(v: unknown, req: GuideRequest): GuideEnvelope {
+  obj(v,['mode','ticket','reply']); ensure(['mock','deepseek'].includes(v.mode as string)); guideTicket(v.ticket);
+  ensure(Object.keys(req.ticket).every(k=>req.ticket[k as keyof GuideTicket]===(v.ticket as GuideTicket)[k as keyof GuideTicket]));
+  return {mode:v.mode as GuideEnvelope['mode'],ticket:{...v.ticket},reply:validateGuideReply(v.reply,req)};
 }

@@ -73,7 +73,8 @@ class StaticWeb(unittest.TestCase):
         expected_files = {'.nojekyll', 'index.html', 'styles.css', 'client/app.js',
                           'client/presentation.js', 'client/runtime.js',
                           *('shared/' + n + '.js' for n in
-                            ['types', 'domain', 'validation', 'storage', 'plan-facts', 'mock', 'outcome'])}
+                            # GUIDE097 adds shared/guidance.js (area guidance, browser MOCK only); the network/key checks below cover it.
+                            ['types', 'domain', 'validation', 'storage', 'plan-facts', 'mock', 'outcome', 'guidance'])}
         files = {str(p.relative_to(self.site)).replace('\\', '/') for p in self.site.rglob('*') if p.is_file()}
         self.assertEqual(files, expected_files, 'publish only UI/shared/browser-MOCK modules')
         for p in self.site.rglob('*.js'):

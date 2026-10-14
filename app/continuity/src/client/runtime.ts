@@ -1,4 +1,4 @@
-import { type ContextRequest, type Envelope } from '../shared/types.js';
+import { type ContextRequest, type Envelope, type GuideRequest, type GuideEnvelope } from '../shared/types.js';
 import { type StorageLike } from '../shared/storage.js';
 
 export interface RuntimeConfig {
@@ -17,8 +17,11 @@ export async function loadConfig():Promise<RuntimeConfig> {
     consentVisible:value.mode==='deepseek',
     notice:value.mode==='deepseek'&&(!value.configured||!value.paidEnabled)?'실제 AI 호출은 서버에서 잠겨 있습니다. 원문 보관·문맥 편집·저장·복구는 사용할 수 있습니다.':null};
 }
-export async function requestAdvice(request:ContextRequest,signal:AbortSignal):Promise<Envelope> {
-  const response=await fetch('/api/continuity',{method:'POST',headers:{'Content-Type':'application/json','X-AgentFlow-Request':'1'},body:JSON.stringify(request),signal});
+export function requestAdvice(request:ContextRequest,signal:AbortSignal):Promise<Envelope> {return post('/api/continuity',request,signal) as Promise<Envelope>;}
+/** GUIDE097: same server boundary and headers as the organise request. */
+export function requestGuidance(request:GuideRequest,signal:AbortSignal):Promise<GuideEnvelope> {return post('/api/guidance',request,signal) as Promise<GuideEnvelope>;}
+async function post(path:string,request:unknown,signal:AbortSignal):Promise<unknown> {
+  const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-AgentFlow-Request':'1'},body:JSON.stringify(request),signal});
   const raw=await response.text();let data;
   try {data=JSON.parse(raw);}catch {throw new Error('INVALID_RESPONSE');}
   if(!response.ok)throw new Error(typeof data?.error?.code==='string'?data.error.code:'REQUEST_FAILED');

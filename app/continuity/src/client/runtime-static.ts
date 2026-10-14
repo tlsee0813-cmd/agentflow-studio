@@ -1,7 +1,7 @@
-import { type ContextRequest, type Envelope } from '../shared/types.js';
+import { type ContextRequest, type Envelope, type GuideRequest, type GuideEnvelope } from '../shared/types.js';
 import { type StorageLike } from '../shared/storage.js';
-import { validateRequest, validateAdvice } from '../shared/validation.js';
-import { mockAdvice } from '../shared/mock.js';
+import { validateRequest, validateAdvice, validateGuideRequest, validateGuideReply } from '../shared/validation.js';
+import { mockAdvice, mockGuidance } from '../shared/mock.js';
 import { type RuntimeConfig } from './runtime.js';
 
 // Build-selected adapter. Prefix ALL store keys, including legacy backups/conflict checks.
@@ -22,4 +22,11 @@ export async function requestAdvice(request:ContextRequest,signal:AbortSignal):P
   const advice=validateAdvice(mockAdvice(checked),checked.bases.map(b=>b.id));
   signal.throwIfAborted();
   return {mode:'mock',ticket:checked.ticket,advice};
+}
+/** GUIDE097: the same rules as server MOCK, in the browser. Never presented as AI. */
+export async function requestGuidance(request:GuideRequest,signal:AbortSignal):Promise<GuideEnvelope> {
+  signal.throwIfAborted();
+  const checked=validateGuideRequest(request),reply=validateGuideReply(mockGuidance(checked),checked);
+  signal.throwIfAborted();
+  return {mode:'mock',ticket:checked.ticket,reply};
 }

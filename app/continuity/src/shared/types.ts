@@ -140,3 +140,23 @@ export const SOURCE_LABEL: Record<SourceKind, string> = {
 export const BASIS_LABEL: Record<Basis['status'], string> = {
   requested: '요청 원문 · 해석 미확정', answered: '사용자 답변 원문', confirmed: '사용자 확정', deferred: '사용자 보류'
 };
+/* ---------- GUIDE097: area guidance. A separate, unsaved preview before the user's own request; never project data. ---------- */
+export const GUIDE_SCHEMA = 'guidance.1' as const;
+export interface GuideTicket { projectId: string; revision: number; requestId: string; areaId: string }
+/** The user's reply to the one guidance question, sent back with that question. Not a basis until the user sends a request. */
+export interface GuideAnswer { question: Question; text: string; disposition: Disposition }
+/** Read-only material the preview may use. All user-written: purpose, this area, user decisions and this area's requests. */
+export interface GuideRequest {
+  schemaVersion: typeof GUIDE_SCHEMA; ticket: GuideTicket; projectName: string;
+  brief: string | null; area: { id: string; name: string; note: string | null };
+  /** Current values of confirmed/deferred/answered bases (user decisions), never shortened. */
+  decisions: { id: string; text: string; status: Basis['status'] }[];
+  /** Newest first: this area's own requests and the user's manual scope/checks for them. */
+  areaWork: { taskId: string; request: string; scope: string | null; checks: string | null }[];
+  answer: GuideAnswer | null;
+}
+/** A reviewable draft of the user's next request, not an instruction. open = points the draft leaves undecided. */
+export interface Proposal { goal: string; scope: string; checks: string; open: string[] }
+/** Exactly one is non-null. After an answer the question is always null (one question at most). */
+export interface GuideReply { question: Question | null; proposal: Proposal | null }
+export interface GuideEnvelope { mode: 'mock' | 'deepseek'; ticket: GuideTicket; reply: GuideReply }
