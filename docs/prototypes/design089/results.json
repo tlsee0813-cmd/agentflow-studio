@@ -1,0 +1,74 @@
+{
+  "artifactSha256": "3540ea1e238fa966dbf433317d9bdaba54a89a8be209dba2da10d8579e9fed13",
+  "executedAtUtc": "2026-10-14T10:55:45.386521+00:00",
+  "environment": {
+    "python": "3.13.5",
+    "os": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "chromium": "144.0.7559.96",
+    "loadMode": "exact HTML via Playwright set_content in about:blank"
+  },
+  "limitations": [
+    "file:// and loopback HTTP navigation were blocked by environment administrator policy in preliminary attempts. No policy was changed.",
+    "Direct file opening, actual browser restart, Firefox/Safari, touch device hardware and screen-reader behavior were not tested.",
+    "New-page reset is tested, not a full OS/browser restart. No external AI, product integration, independent review or user usability study."
+  ],
+  "cases": [
+    {
+      "name": "01 navigation / map scroll and selection / browser back-forward",
+      "result": "PASS",
+      "seconds": 1.38,
+      "evidence": {
+        "mapBefore": {"x": 332, "y": 40},
+        "mapAfter": {"x": 332, "y": 40},
+        "windowYRestored": 120,
+        "browserBackForward": true,
+        "areaScrollYRestored": 1393,
+        "navigationDidNotMutateDomain": true
+      }
+    },
+    {
+      "name": "02 sparse area / optional question / unknown and defer",
+      "result": "PASS",
+      "seconds": 1.51,
+      "evidence": "One optional question; unknown/deferred/proposed stay non-confirmed; no tasks/sessions created."
+    },
+    {
+      "name": "03 draft / viewed area / report target separation",
+      "result": "PASS",
+      "seconds": 1.49,
+      "evidence": "Draft TASK-API-01 and report TASK-CANCEL-01 remain independent of route; note does not replace draft."
+    },
+    {
+      "name": "04 affected task only / old report vs latest request",
+      "result": "PASS",
+      "seconds": 0.94,
+      "evidence": "Stale report displayed against latest text-only request; no execution or completion state created."
+    },
+    {
+      "name": "05 single shared requirement / immutable old work / no over-splitting",
+      "result": "PASS",
+      "seconds": 1.06,
+      "evidence": "One REQ-01 updated once; both views share it; old work/report and manually written draft remain at their bases."
+    },
+    {
+      "name": "06 keyboard interaction at 375px",
+      "result": "PASS",
+      "seconds": 0.84,
+      "evidence": "Enter navigation, native details, dialog focus containment and Escape restoration, arrow-key map scroll."
+    },
+    {
+      "name": "07 offline/static boundary and new-page reset",
+      "result": "PASS",
+      "seconds": 0.75,
+      "evidence": {
+        "newPageStateReset": true,
+        "networkRequests": 0,
+        "uncaughtErrors": 0,
+        "runtimeDependencies": 0,
+        "storageAPIs": 0
+      }
+    }
+  ],
+  "uncaughtErrors": [],
+  "networkRequests": []
+}
