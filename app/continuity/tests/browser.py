@@ -13,10 +13,25 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(os.environ.get('IDEA015_EVIDENCE_DIR',str(ROOT/'test-results')))
 OUT.mkdir(parents=True,exist_ok=True)
 KEY='agentflow.idea015.project.v1'
-# FLOW083: a new tab/visit lands on the project list; opening the only listed project is the old direct load.
-def open_listed(page,key=None):
+# FLOW083: a new tab/visit lands on the project list; opening the listed project is the old direct load.
+WORKSPACE='agentflow.idea015.workspace'
+def open_listed(page,entry=None):
     if page.locator('#projects-view').is_visible():
-        (page.locator(f'.project-card[data-project-key="{key}"] .project-open') if key else page.locator('.project-open').first).click()
+        (page.locator(f'.project-card[data-entry-id="{entry}"] .project-open') if entry else page.locator('.project-open').first).click()
+# FLOW083: projects live in one workspace envelope written asynchronously under a Web Lock. Read the project this
+# tab has open once its queued save finished (the read-only older value is still read from its own key).
+STATE_JS="""([prefix,wk,key])=>{const id=document.documentElement.dataset.entryId;
+  if(id==='legacy')return JSON.parse(localStorage.getItem(prefix+key));
+  const env=JSON.parse(localStorage.getItem(prefix+wk));const e=env&&env.entries.find(x=>x.entryId===id);return e?e.project:null}"""
+def saved(page,timeout=6.0):
+    # Polled from Python: the app's CSP forbids the string evaluation wait_for_function would need.
+    import time;end=time.monotonic()+timeout
+    while page.evaluate('()=>!!document.documentElement.dataset.saving'):
+        if time.monotonic()>end:raise AssertionError('workspace save did not finish')
+        page.wait_for_timeout(20)
+def read_state(page,prefix=''):
+    saved(page)
+    return page.evaluate(STATE_JS,[prefix,WORKSPACE,KEY])
 
 class Browser(unittest.TestCase):
     @classmethod
@@ -51,8 +66,7 @@ class Browser(unittest.TestCase):
         expect(self.page.locator('#mode')).to_contain_text('MOCK')
     def tearDown(self):
         self.assertEqual(self.external,[]);self.assertEqual(self.errors,[]);self.ctx.close()
-    # FLOW083: several projects may be saved; read the one this tab has open (the first one keeps KEY).
-    def state(self,page=None):return (page or self.page).evaluate('(key)=>JSON.parse(localStorage.getItem(document.documentElement.dataset.projectKey||key))',KEY)
+    def state(self,page=None):return read_state(page or self.page)
     def open_listed(self,page=None):open_listed(page or self.page)
     # UI001: the composer and context are now disclosed on demand; assertions stay unchanged.
     def compose(self,page=None):

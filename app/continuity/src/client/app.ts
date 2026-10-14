@@ -1,8 +1,8 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, type Basis, type Project, type Task, type Source } from '../shared/types.js';
-import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
+import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
 import { parseProject, parseResultFile, validateRequest, validateAdvice } from '../shared/validation.js';
-import { ProjectStore, WorkspaceStore, slotKey, serializeProject, storageErrorCode } from '../shared/storage.js';
+import { WorkspaceStore, serializeProject, storageErrorCode, type EntryRef, type WorkspaceEntry } from '../shared/storage.js';
 import { mockAdvice } from '../shared/mock.js';
 import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview } from './presentation.js';
 import { loadConfig, requestAdvice, runtimeStorage, runtimeFailure, type RuntimeConfig } from './runtime.js';
@@ -14,15 +14,19 @@ function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HT
 function btn(label:string,act:()=>void,cls='quiet',id='') {const b=node('button',label,cls);b.type='button';if(id)b.id=id;b.addEventListener('click',()=>guard(act));return b;}
 function tag(content:string,cls=''){return node('span',content,`tag ${cls}`);}
 function details(title:string,id:string):HTMLDetailsElement {const d=node('details');d.id=id;d.append(node('summary',title));return d;}
-let project:Project=createProject(),store:ProjectStore|null=null,storageError='';
-// FLOW083: which saved project this tab shows. 'project' with slot=null is a new, not yet saved project;
-// 'example' is an in-memory sample that is never persisted. The route itself is per tab, never project data.
-let route:'project'|'projects'|'example'='project',slot:string|null=null,workspace:WorkspaceStore|null=null;
-let listNotice='',undoSlot:string|null=null;
+let project:Project=createProject(),storageError='';
+// FLOW083: what this tab edits. 'entry' = a saved project (with the lifecycle/seq this tab read), 'new' = not saved
+// yet (created on its first change), 'legacy' = the pre-workspace value shown read-only, 'example' = never saved.
+// The selection is per tab (sessionStorage); another tab choosing a different project never changes this one.
+type Target={kind:'entry';ref:EntryRef}|{kind:'new'}|{kind:'legacy';error:string}|{kind:'example'};
+let route:'project'|'projects'|'example'='project',target:Target={kind:'new'};
+let listNotice='',undoEntry:string|null=null;
 const OPEN_KEY='agentflow.workspace.open';
 const session=(()=>{try{return runtimeStorage(window.sessionStorage);}catch{return null;}})();
 function rememberOpen(id:string|null){try{session?.setItem(OPEN_KEY,id??'');}catch{/* Per-tab convenience only. */}
-  document.documentElement.dataset.projectKey=id===null?'':slotKey(id);}
+  document.documentElement.dataset.entryId=id??'';}
+const locks=(()=>{try{return navigator.locks??null;}catch{return null;}})();
+const workspace=new WorkspaceStore(runtimeStorage(window.localStorage),locks?{request:(name,callback)=>locks.request(name,callback as ()=>Promise<unknown>)}:null);
 let config:RuntimeConfig|null=null;
 let controller:AbortController|null=null;
 // View preferences are ephemeral. They never enter the persisted project or request schema.
@@ -30,7 +34,7 @@ let view:'work'|'history'='work',contextOpen=false,hasSaved=false,memoryDirty=fa
 let selectedReturnTaskId:string|undefined;
 // Local file reads/clipboard are not tickets or durable project data. Replacement invalidates both.
 let projectEpoch=0,resultRead=0,recoveryRead=0,resultMessage='';
-let resultSelection:{rawText:string;projectId:string;revision:number}|null=null;
+let resultSelection:{rawText:string;projectId:string;revision:number;epoch:number}|null=null;
 let lastFileExport:{taskId:string;text:string}|null=null;
 function returnChoiceRequired():boolean {
   return (project.draftKind==='report'||project.draftKind==='evidence')&&returnTargets(project).length>1&&
@@ -43,27 +47,24 @@ function resetEphemeral() {
   controller?.abort();controller=null;selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';
 }
-function activeSlots(){return workspace?.slots().filter(s=>s.state==='active')??[];}
-/** Opens one saved project. Unreadable bytes stay untouched (autosave blocked), exactly as before workspaces. */
-function openSlot(id:string) {
-  resetEphemeral();route='project';slot=id;storageError='';memoryDirty=false;hasSaved=false;
-  store=new ProjectStore(runtimeStorage(window.localStorage),slotKey(id));
-  try {const restored=store.load();project=restored??createProject();hasSaved=!!restored;}
-  catch {project=createProject();storageError=unreadable;}
-  rememberOpen(id);contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();
+function openEntry(entry:WorkspaceEntry) {
+  resetEphemeral();route='project';target={kind:'entry',ref:{entryId:entry.entryId,lifecycle:entry.lifecycle,seq:entry.seq}};
+  // A just-migrated older value keeps its one-time conversion notice; otherwise the usual restore applies.
+  project=entry.origin==='legacy'&&entry.seq===1?{...restore(entry.project),notice:entry.project.notice}:restore(entry.project);
+  storageError=workspace.writable?'':storageMessages[workspace.readError??'LOCKS_UNAVAILABLE']!;memoryDirty=false;hasSaved=true;
+  rememberOpen(entry.entryId);contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();
 }
-/** A new project is created in memory and saved (listed) on its first change. */
-function startNew() {resetEphemeral();route='project';slot=null;store=null;project=createProject();storageError='';memoryDirty=false;hasSaved=false;contextOpen=false;rememberOpen(null);}
-try {workspace=new WorkspaceStore(runtimeStorage(window.localStorage));workspace.load();}
-catch {workspace=null;storageError=unreadable;}
-{
-  let remembered:string|null=null;try{remembered=session?.getItem(OPEN_KEY)||null;}catch{/* No per-tab memory. */}
-  // A reload keeps its place; a new visit (tab/session) starts from the project list, never straight in the editor.
-  if(remembered&&activeSlots().some(s=>s.slot===remembered))openSlot(remembered);
-  // Trashed projects count too: the list is the only way back to them.
-  else if(workspace?.slots().length)route='projects';
-  else rememberOpen(null);
+/** The pre-workspace value while it is not migrated: shown read-only, never written. */
+function openLegacy() {
+  const legacy=workspace.legacy;resetEphemeral();route='project';memoryDirty=false;hasSaved=!!legacy?.project;
+  const error=legacy?.error??(workspace.writable?'LEGACY_READONLY':'LOCKS_UNAVAILABLE');target={kind:'legacy',error};
+  project=legacy?.project?restore(legacy.project):createProject();
+  storageError=legacy?.project?storageMessages[error]!:unreadable;rememberOpen('legacy');
+  contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();
 }
+/** A new project lives in memory and is added to the workspace on its first change. */
+function startNew() {resetEphemeral();route='project';target={kind:'new'};project=createProject();storageError=workspace.writable?'':storageMessages[workspace.readError??'LOCKS_UNAVAILABLE']!;memoryDirty=false;hasSaved=false;contextOpen=false;rememberOpen(null);}
+function activeEntries(){return workspace.entries().filter(e=>e.state==='active');}
 const storageMessages:Record<string,string>={
   STORAGE_BLOCKED:'기존 저장 내용을 읽지 못해 덮어쓰지 않고 있습니다. 이 탭의 입력은 메모리에 있습니다. 백업 파일을 저장한 뒤 ‘백업 파일 불러오기’로 새 사본을 만들면 그 사본은 자동 저장됩니다.',
   LEGACY_UNPRESERVED:'이전 형식 저장 내용의 원본을 브라우저에 따로 보관하지 못해 덮어쓰지 않도록 자동 저장을 멈췄습니다. 백업 파일을 저장한 뒤 ‘백업 파일 불러오기’로 새 사본을 만들면 그 사본은 자동 저장됩니다.',
@@ -72,25 +73,46 @@ const storageMessages:Record<string,string>={
   INVALID_DATA:'저장 형식 검사를 통과하지 못해 저장하지 않았습니다. 다시 열 수 없는 상태를 덮어쓰지 않았고, 입력은 이 탭에 남아 있습니다. 복구 파일을 저장하세요.',
   QUOTA:'브라우저 저장 공간이 부족해 자동 저장하지 못했습니다. 입력은 이 탭에 남아 있습니다. 복구 파일을 저장하세요.',
   WRITE_FAILED:'자동 저장하지 못했습니다. 저장 권한을 확인하세요. 입력은 이 탭에 남아 있습니다. 닫기 전에 복구 파일을 저장하세요.',
-  TRASHED:'다른 탭에서 이 프로젝트를 휴지통으로 옮겨 이 탭의 변경은 저장하지 않았습니다. 입력은 이 탭에 남아 있습니다. 필요하면 백업 파일로 저장하거나, 휴지통에서 되살린 뒤 이어가세요.'};
+  TRASHED:'다른 탭에서 이 프로젝트를 휴지통으로 옮겼거나 휴지통에서 되살려, 이 탭이 연 뒤의 상태와 달라졌습니다. 이 탭의 변경은 저장하지 않았고 입력은 이 탭에 남아 있습니다. 백업 파일로 저장하거나 목록에서 다시 여세요.',
+  ENTRY_MISSING:'저장할 프로젝트를 목록에서 찾지 못해 저장하지 않았습니다. 입력은 이 탭에 남아 있습니다. 백업 파일로 저장하세요.',
+  LOCKS_UNAVAILABLE:'이 브라우저에서는 여러 탭이 동시에 저장하지 않도록 막는 기능(Web Locks)을 쓸 수 없어 저장하지 않았습니다. 기존 저장 내용은 읽을 수 있고, 입력은 이 탭에 남아 있습니다. 백업 파일로 저장하세요.',
+  LEGACY_READONLY:'이전 형식으로 저장된 이 내용은 새 저장 형식으로 옮기지 않은 읽기 전용 자료라 저장하지 않았습니다. 백업 파일로 저장한 뒤 ‘백업 파일 불러오기’로 사본을 만들면 이어갈 수 있어요.'};
+await workspace.init();
+{
+  let remembered:string|null=null;try{remembered=session?.getItem(OPEN_KEY)||null;}catch{/* No per-tab memory. */}
+  const entry=activeEntries().find(e=>e.entryId===remembered);
+  // A reload keeps its place; a new visit (tab/session) starts from the list, never straight in the editor.
+  // Trashed or unreadable saves count: the list is the only way back to them.
+  if(entry)openEntry(entry);
+  else if(remembered==='legacy'&&workspace.legacy)openLegacy();
+  else if(workspace.entries().length||workspace.legacy||workspace.readError)route='projects';
+  else startNew();
+}
+const saveMessage=(e:unknown)=>(e instanceof Error&&storageMessages[e.message])||storageMessages[storageErrorCode(e)]||storageMessages.WRITE_FAILED!;
+let pendingSave=false,draining:Promise<void>|null=null;
+function markSaving(){if(pendingSave||draining)document.documentElement.dataset.saving='1';else delete document.documentElement.dataset.saving;}
+/** Queued, locked saves of the latest state. Only the target captured with a snapshot is written. */
 function persist() {
-  if(route==='example')return; // The sample is never saved and never enters the project list.
-  try {
-    if(!workspace)throw new Error('WRITE_FAILED');
-    if(slot===null) {
-      // First change of a new project: its own empty key first, then the listing.
-      const next=workspace.newSlot(),created=new ProjectStore(runtimeStorage(window.localStorage),slotKey(next));
-      created.save(project);store=created;slot=next;rememberOpen(next);workspace.register(next);
-    } else {
-      let state:'active'|'trashed'|'unlisted'|'blocked';
-      try {state=workspace.stateOf(slot);} catch {state=slot==='legacy'?'active':'blocked';}
-      if(state==='trashed')throw new Error('TRASHED');
-      if(state==='blocked'||!store)throw new Error('WRITE_FAILED');
-      store.save(project);
-      if(state==='unlisted')workspace.register(slot);
-    }
-    storageError='';hasSaved=true;memoryDirty=false;
-  } catch(e) {storageError=storageMessages[e instanceof Error&&e.message==='TRASHED'?'TRASHED':storageErrorCode(e)]!;memoryDirty=true;}
+  if(target.kind==='example')return; // The sample is never saved and never enters the project list.
+  pendingSave=true;markSaving();
+  draining??=drainSaves().finally(()=>{draining=null;markSaving();if(pendingSave)persist();else renderStatus();});
+}
+async function drainSaves() {
+  while(pendingSave) {
+    pendingSave=false;const snapshot=project,captured=target,epoch=projectEpoch;let error='';
+    try {
+      if(captured.kind==='new'){const ref=await workspace.create(snapshot,'new');if(target===captured){target={kind:'entry',ref};rememberOpen(ref.entryId);}}
+      else if(captured.kind==='entry')captured.ref=await workspace.save(captured.ref,snapshot);
+      else throw new Error(captured.kind==='legacy'?captured.error:'WRITE_FAILED');
+    } catch(e) {error=saveMessage(e);}
+    if(epoch===projectEpoch){storageError=error;if(error)memoryDirty=true;else if(!pendingSave){hasSaved=true;memoryDirty=false;}}
+  }
+}
+async function flushSaves(){while(draining)await draining;}
+/** Before leaving a project view: finish queued saves; never drop unsaved input silently. */
+async function leaveProject(message:string):Promise<boolean> {
+  await flushSaves();
+  return !(route!=='projects'&&target.kind!=='example'&&memoryDirty)||confirm(`이 탭에 저장되지 않은 변경이 있어요. ${message} 이 변경은 사라질 수 있어요. 먼저 백업 파일을 저장하세요.\n그래도 이동할까요?`);
 }
 function commit(p:Project,redraw=true) {project=p;persist();if(redraw)render();else renderStatus();}
 function guard(action:()=>void) {try{action();}catch{project={...project,notice:'입력 또는 자료를 처리하지 못했습니다. 기존 내용은 그대로 보존했습니다. 길이·형식을 확인하세요.'};renderStatus();}}
@@ -108,8 +130,8 @@ function displayView() {
   for(const id of ['nav-work','nav-context','nav-history'])$(id).hidden=!inProject||starting;
   for(const id of ['backup','import','trash-current','new-project-top'])$(id).hidden=route==='example';
   // An empty new project has nothing to back up yet; restoring a backup stays reachable from the first screen.
-  $('backup').hidden=route==='example'||starting;$('new-project-top').hidden=route==='example'||starting;
-  $('trash-current').hidden=route!=='project'||slot===null;
+  $('new-project-top').hidden=route==='example'||starting;
+  $('trash-current').hidden=target.kind!=='entry';
   $('nav-projects').classList.toggle('active',!inProject);
   if(!inProject)$('nav-projects').setAttribute('aria-current','page');else $('nav-projects').removeAttribute('aria-current');
   document.querySelector<HTMLElement>('.project-head')!.hidden=!inProject;document.querySelector<HTMLElement>('.feedback-stack')!.hidden=!inProject;
@@ -143,7 +165,8 @@ function reportBody(source:Source):string {
 function renderStatus() {
   $('notice').textContent=project.notice??'';$('notice').hidden=!project.notice;
   $('storage-error').textContent=storageError;$('storage-error').hidden=!storageError;
-  $('saved').textContent=route==='example'?'예제 · 저장하지 않음':hasSaved?'이 브라우저에 저장됨':'이 브라우저에 자동 저장';
+  $('saved').textContent=route==='example'?'예제 · 저장하지 않음':pendingSave||draining?'저장 중…':hasSaved?'이 브라우저에 저장됨':'이 브라우저에 자동 저장';
+  $('saved').title='이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.';
   if(storageError)$('saved').textContent='저장되지 않은 변경 있음';
   $('saved').classList.toggle('failed',!!storageError);
   const ready=readyForAI(),pending=!!project.pending;
@@ -174,6 +197,8 @@ function renderStatus() {
     $('last-result-text').textContent=reportBody(report);}
   $('sidebar-task').textContent=t?`작업 ${project.tasks.indexOf(t)+1} · ${taskTitle(project,t)}`:'첫 작업을 기다리고 있어요.';
   $('entry-limits').textContent=entryLimits();
+  // Backup is offered as soon as there is anything to keep, including input that could not be saved.
+  $('backup').hidden=route==='example'||(!project.tasks.length&&!project.draft.trim()&&!memoryDirty);
   if($('handoff-ready'))$('handoff-ready').hidden=stage.kind!=='exported';
   if($('bring-report'))$('bring-report').textContent=project.draft.trim()?'작성 중인 입력 이어쓰기':'결과 붙여넣기';
   if($('copy-work')){const copy=$<HTMLButtonElement>('copy-work');copy.className=stage.kind==='exported'||stage.kind==='question'?'secondary':'primary';copy.textContent=t&&exportNeedsRefresh(project,t)?'수정한 작업문 복사':'작업문 복사';}
@@ -282,13 +307,16 @@ async function generate(id:string) {
   let started;
   try {started=begin(project,id);} catch {commit({...project,notice:'AI 전송 문맥이 한도를 넘거나 유효하지 않아 보내지 않았습니다. 확정 기준을 잘라 보내지 않았습니다. 작업문 복사·Markdown 저장과 복구 파일은 계속 쓸 수 있습니다.'});return;}
   controller?.abort();const active=new AbortController();controller=active;commit(started.project);
+  // Copies can share a project ID: a late answer is applied only to the same entry in the same activation.
+  const owner=target,activation=projectEpoch,current=()=>target===owner&&projectEpoch===activation;
   $('pending-bar').scrollIntoView({block:'nearest'});
   try {
     const data=await requestAdvice(started.request,active.signal);
     if(data?.mode!==config.mode)throw new Error('INVALID_RESPONSE');
+    if(!current())return;
     commit(receive(project,started.request,data));
   } catch(e) {
-    if(!active.signal.aborted) {
+    if(!active.signal.aborted&&current()) {
       const code=e instanceof Error?e.message:'';
       commit(failed(project,started.request.ticket,`${errorMessages[code]??'요청이 실패했습니다.'} 입력은 보존했습니다. 필요한 경우 이 작업만 다시 정리하세요.`));
     }
@@ -304,11 +332,12 @@ async function exportWork(id:string,method:'clipboard'|'download',fileMode=false
   const returnId=fileMode?`H_${crypto.randomUUID()}`:null;
   try {text=handoffText(project,id,returnId);}catch {project={...project,notice:'작업 문맥 데이터가 유효하지 않아 내보내지 않았습니다. 복구 파일로 내용을 보존하세요.'};renderStatus();return;}
   if(method==='download'){download(`${safeName(project.name)}-${fileMode?'파일반환-':''}작업문.md`,text,'text/markdown;charset=utf-8');if(fileMode)lastFileExport={taskId:id,text};commit({...markHandoff(project,id,text,method,exportRevision,returnId),notice:'작업문을 Markdown 파일로 저장했어요. 그 파일을 개발 도구에 전달하는 건 직접 해 주세요. 전달·실행된 것은 아니에요.'});
-    if(memoryDirty){project={...project,notice:'Markdown 파일은 저장했지만 저장 기록은 브라우저에 남기지 못했습니다. 닫기 전에 백업 파일을 저장하세요.'};renderStatus();}return;}
+    // Saves are asynchronous (locked): judge the save record only after it finished, for the same project view.
+    await flushSaves();if(memoryDirty&&projectEpoch===epoch){project={...project,notice:'Markdown 파일은 저장했지만 저장 기록은 브라우저에 남기지 못했습니다. 닫기 전에 백업 파일을 저장하세요.'};renderStatus();}return;}
   try {await navigator.clipboard.writeText(text);
     if(project.id!==exportProjectId||project.revision!==exportRevision||projectEpoch!==epoch){project={...project,notice:'작업문은 복사됐지만 그 사이 입력이 바뀌었습니다. 현재 내용의 내보내기 기록으로 표시하지 않았습니다. 최신 작업문이 필요하면 다시 복사하세요.'};renderStatus();return;}
     if(fileMode)lastFileExport={taskId:id,text};
-    commit(markHandoff(project,id,text,method,exportRevision,returnId));project={...project,notice:memoryDirty?'작업문은 복사됐지만 내보내기 기록은 브라우저에 저장되지 않았습니다. 닫기 전에 JSON 백업을 저장하세요.':'작업문을 클립보드에 복사했습니다. 실행 도구에 직접 붙여넣으세요. 전송·실행된 것은 아닙니다.'};renderStatus();}
+    commit(markHandoff(project,id,text,method,exportRevision,returnId));await flushSaves();if(projectEpoch!==epoch)return;project={...project,notice:memoryDirty?'작업문은 복사됐지만 내보내기 기록은 브라우저에 저장되지 않았습니다. 닫기 전에 JSON 백업을 저장하세요.':'작업문을 클립보드에 복사했습니다. 실행 도구에 직접 붙여넣으세요. 전송·실행된 것은 아닙니다.'};renderStatus();}
   catch {
     project={...project,notice:'클립보드를 사용할 수 없습니다. 아래 작업문을 직접 선택해 복사하거나 파일로 저장하세요.'};render();
     const d=$<HTMLDetailsElement>('handoff-preview');d.open=true;const field=$<HTMLTextAreaElement>('handoff-text');field.focus();field.select();
@@ -342,7 +371,7 @@ function renderResultFile() {
     if(file.evidence!==null)area.append(node('p','외부 관찰·검사 원문 · 앱 미검증','source-meta'),node('div',file.evidence,'source-raw'));
     area.append(node('p','파일은 실행 증명이 아닙니다. 가져와도 AI 정리·명령·링크를 실행하지 않습니다.','hint'));
     if(duplicate)area.append(node('p','같은 인계의 같은 본문이 이미 있습니다. 다시 추가하지 않습니다.','hint'));
-    area.append(btn(duplicate?'기존 기록 확인':'이 결과 가져오기',acceptResultFile,'primary','accept-result-file'));
+    area.append(btn(duplicate?'기존 기록 확인':'이 결과 가져오기',()=>void acceptResultFile(),'primary','accept-result-file'));
     area.append(rawFileDetails(resultSelection.rawText,file.returnId,'result-file-raw'));
   } catch(e) {
     area.dataset.targetTaskId='';area.dataset.returnId='';area.append(node('p',resultError(e),'alert warning'));
@@ -350,15 +379,15 @@ function renderResultFile() {
   }
   area.append(btn('닫고 기존 붙여넣기 이용',()=>{resultRead++;resultSelection=null;resultMessage='작성 중인 입력은 그대로입니다. 기존 입력란에 필요한 보고를 붙여넣으세요.';renderResultFile();$('draft').focus();},'quiet','cancel-result-file'));
 }
-function acceptResultFile() {
+async function acceptResultFile() {
   if(!resultSelection)return;
-  if(resultSelection.projectId!==project.id){resultSelection=null;renderResultFile();return;}
+  if(resultSelection.projectId!==project.id||resultSelection.epoch!==projectEpoch){resultSelection=null;renderResultFile();return;}
   if(resultSelection.revision!==project.revision){resultMessage='입력이 바뀌어 현재 기준으로 미리보기를 갱신했습니다. 확인한 뒤 가져오세요.';renderResultFile();return;}
   try {
     const n=importResultFile(project,resultSelection.rawText);
     if(n===project){resultMessage=memoryDirty?'같은 본문은 이미 이 탭에 있습니다. 브라우저에는 저장되지 않았습니다. JSON 백업으로 보존하세요.':'같은 본문의 기존 기록을 확인했습니다. 새 기록은 추가하지 않았습니다.';renderResultFile();return;}
     controller?.abort();controller=null;resultRead++;resultSelection=null;resultMessage='';
-    commit(n);resultMessage=memoryDirty?'결과는 이 탭에만 있습니다. 브라우저에 저장하지 못했습니다. 닫기 전에 JSON 백업을 저장하세요.':'보고를 가져왔습니다 · 앱 미검증. 작성 중인 입력은 그대로입니다.';
+    commit(n);const epoch=projectEpoch;await flushSaves();if(epoch!==projectEpoch)return;resultMessage=memoryDirty?'결과는 이 탭에만 있습니다. 브라우저에 저장하지 못했습니다. 닫기 전에 JSON 백업을 저장하세요.':'보고를 가져왔습니다 · 앱 미검증. 작성 중인 입력은 그대로입니다.';
     renderResultFile();showWork();
   }catch(e){resultMessage=resultError(e)+' 기존 붙여넣기도 계속 이용할 수 있습니다.';renderResultFile();}
 }
@@ -555,64 +584,81 @@ function lastActivity(p:Project):string|null {
   const times=[...p.sources.map(s=>s.at),...p.tasks.flatMap(t=>t.handoffs.map(h=>h.at))].filter(at=>!Number.isNaN(new Date(at).getTime()));
   return times.sort().at(-1)??null;
 }
-function projectCard(id:string,info:Project|'unreadable'|null,trashed:boolean):HTMLElement {
-  const li=node('li','','project-card');li.dataset.slot=id;li.dataset.projectKey=slotKey(id);
-  if(info==='unreadable'||info===null) {
-    li.append(node('strong',info===null?'저장 내용 없음':'읽지 못한 저장 내용','project-card-name'),node('p','덮어쓰지 않고 그대로 보관하고 있어요. 열면 백업 파일로 저장할 수 있어요.','hint'));
-  } else {
-    const requests=info.sources.filter(s=>s.kind==='request'),results=info.sources.filter(s=>s.kind==='report'||s.kind==='evidence');
-    const last=requests.at(-1),at=lastActivity(info);
-    li.append(node('strong',info.name,'project-card-name'),
-      node('p',last?`마지막 요청 · ${shortText(last.text,80)}`:info.draft.trim()?'아직 보낸 요청 없음 · 작성 중인 입력 있음':'아직 보낸 요청 없음','project-card-summary'),
-      node('p',`${at?`최근 활동 · ${dateLabel(at)}`:'활동 기록 없음'} · 요청 ${requests.length}개 · 가져온 결과 ${results.length}개`,'hint'));
-  }
-  const row=node('div','','row'),name=info==='unreadable'||info===null?'이 프로젝트':info.name;
-  if(trashed) {li.querySelector('strong')!.append(' ',tag('휴지통'));row.append(btn('되살리기',()=>restoreProject(id),'secondary project-restore'));}
-  else row.append(btn('이어서 하기',()=>{openSlot(id);render();restoreDraftPanels();$('main').focus({preventScroll:true});},'primary project-open'),
-    btn('휴지통으로',()=>trashProject(id,name),'quiet project-trash'));
+function projectSummary(li:HTMLElement,info:Project) {
+  const requests=info.sources.filter(s=>s.kind==='request'),results=info.sources.filter(s=>s.kind==='report'||s.kind==='evidence');
+  const last=requests.at(-1),at=lastActivity(info);
+  li.append(node('strong',info.name,'project-card-name'),
+    node('p',last?`마지막 요청 · ${shortText(last.text,80)}`:info.draft.trim()?'아직 보낸 요청 없음 · 작성 중인 입력 있음':'아직 보낸 요청 없음','project-card-summary'),
+    node('p',`${at?`최근 활동 · ${dateLabel(at)}`:'활동 기록 없음'} · 요청 ${requests.length}개 · 가져온 결과 ${results.length}개`,'hint'));
+}
+function projectCard(entry:WorkspaceEntry):HTMLElement {
+  const li=node('li','','project-card');li.dataset.entryId=entry.entryId;projectSummary(li,entry.project);
+  const row=node('div','','row');
+  if(entry.state==='trashed') {li.querySelector('strong')!.append(' ',tag('휴지통'));row.append(btn('되살리기',()=>void restoreProject(entry.entryId),'secondary project-restore'));}
+  else row.append(btn('이어서 하기',()=>{const fresh=workspace.read()?.entries.find(e=>e.entryId===entry.entryId&&e.state==='active');
+      if(!fresh){listNotice='다른 탭에서 바뀌어 이 프로젝트를 열지 않았어요. 목록을 새로 읽었어요.';render();return;}
+      openEntry(fresh);render();restoreDraftPanels();$('main').focus({preventScroll:true});},'primary project-open'),
+    btn('휴지통으로',()=>void trashProject(entry.entryId,entry.project.name),'quiet project-trash'));
   li.append(row);return li;
 }
+function legacyCard():HTMLElement {
+  const legacy=workspace.legacy!,li=node('li','','project-card');li.dataset.entryId='legacy';
+  if(legacy.project){projectSummary(li,legacy.project);li.querySelector('strong')!.append(' ',tag('이전 저장 · 읽기 전용'));}
+  else li.append(node('strong','읽지 못한 이전 저장 내용','project-card-name'));
+  li.append(node('p','이전 형식으로 이 브라우저에 남아 있는 내용이에요. 지우거나 덮어쓰지 않았고, 새 저장 형식으로 옮기지 않아 여기서는 저장되지 않아요.','hint'));
+  const row=node('div','','row');row.append(btn('열어 보기',()=>{openLegacy();render();restoreDraftPanels();},'secondary project-open'));li.append(row);return li;
+}
 function renderProjects() {
-  const slots=workspace?.load()??[],list=$('project-list'),trash=$('trash-list');list.replaceChildren();trash.replaceChildren();
-  const active=slots.filter(s=>s.state==='active'),trashed=slots.filter(s=>s.state==='trashed');
-  const sortKey=(id:string)=>{const info=workspace?.peek(id);return info&&info!=='unreadable'?lastActivity(info)??'':'';};
-  for(const s of [...active].sort((a,b)=>sortKey(b.slot).localeCompare(sortKey(a.slot))))list.append(projectCard(s.slot,workspace!.peek(s.slot),false));
-  if(!active.length)list.append(node('li','아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 예제를 둘러보세요.','hint'));
-  for(const s of trashed)trash.append(projectCard(s.slot,workspace!.peek(s.slot),true));
+  workspace.read();const list=$('project-list'),trash=$('trash-list');list.replaceChildren();trash.replaceChildren();
+  const entries=workspace.entries(),active=entries.filter(e=>e.state==='active'),trashed=entries.filter(e=>e.state==='trashed');
+  for(const e of [...active].sort((a,b)=>(lastActivity(b.project)??'').localeCompare(lastActivity(a.project)??'')))list.append(projectCard(e));
+  if(workspace.legacy)list.append(legacyCard());
+  // An empty list and a list that could not be read are different situations.
+  if(!active.length&&!workspace.legacy&&!workspace.readError)list.append(node('li','아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 예제를 둘러보세요.','hint'));
+  for(const e of trashed)trash.append(projectCard(e));
   $('trash-section').hidden=!trashed.length;$('trash-count').textContent=String(trashed.length);
-  $('list-notice').hidden=!listNotice;$('list-notice-text').textContent=listNotice;$('undo-trash').hidden=undoSlot===null;
-  if(workspace?.blocked){$('list-notice').hidden=false;$('list-notice-text').textContent='프로젝트 목록을 읽지 못해 덮어쓰지 않고 있어요. 기존 프로젝트는 그대로이며, 새로 만들거나 휴지통으로 옮기는 동작은 잠시 멈췄어요.';}
+  const problem=workspace.readError?'저장된 프로젝트 목록을 읽지 못해 덮어쓰지 않고 있어요. 기존 내용은 그대로이며, 새로 만들기·휴지통 이동은 멈췄어요. 백업 파일이 있다면 보관하세요.'
+    :!workspace.writable?storageMessages.LOCKS_UNAVAILABLE!:'';
+  const message=[problem,listNotice].filter(Boolean).join(' ');
+  $('list-notice').hidden=!message;$('list-notice-text').textContent=message;$('undo-trash').hidden=undoEntry===null;
+  $('new-project').toggleAttribute('disabled',!workspace.writable);$('list-import').toggleAttribute('disabled',!workspace.writable);
 }
-function showProjects(message='') {
-  if(memoryDirty&&!confirm('이 탭에 저장되지 않은 변경이 있어요. 목록으로 가면 이 변경은 사라질 수 있어요. 먼저 백업 파일을 저장하세요.\n그래도 목록으로 갈까요?'))return;
-  resetEphemeral();route='projects';listNotice=message;if(!message)undoSlot=null;rememberOpen(null);render();$('projects-title').focus();
+async function showProjects(message='') {
+  if(!await leaveProject('목록으로 가면'))return;
+  resetEphemeral();route='projects';listNotice=message;if(!message)undoEntry=null;rememberOpen(null);render();$('projects-title').focus();
 }
-function trashProject(id:string,name:string) {
+/** Completes only after the envelope is written; the open project's queued saves are flushed first. */
+async function trashProject(entryId:string,name:string) {
   if(!confirm(`‘${name}’을(를) 휴지통으로 옮길까요?\n원문·기준·요청·돌아온 결과가 모두 함께 옮겨지고, 휴지통에서 그대로 되살릴 수 있어요.\n개발 도구에서 이미 한 작업이 취소되지는 않아요.`))return;
-  try {workspace!.trash(id);undoSlot=id;if(slot===id){memoryDirty=false;}showProjects(`‘${name}’을(를) 휴지통으로 옮겼어요.`);}
-  catch {listNotice='휴지통으로 옮기지 못했어요. 프로젝트는 바뀌지 않았어요.';undoSlot=null;render();}
+  const current=target.kind==='entry'&&target.ref.entryId===entryId;
+  if(current&&!await leaveProject('휴지통으로 옮기면'))return;
+  try {await workspace.trash(entryId);}
+  catch(e) {listNotice=`휴지통으로 옮기지 못했어요. 프로젝트는 그대로예요. ${saveMessage(e)}`;undoEntry=null;if(current){project={...project,notice:listNotice};renderStatus();}else render();return;}
+  undoEntry=entryId;if(current)memoryDirty=false;
+  resetEphemeral();route='projects';listNotice=`‘${name}’을(를) 휴지통으로 옮겼어요.`;rememberOpen(null);render();$('projects-title').focus();
 }
-function restoreProject(id:string,undo=false) {
-  try {workspace!.restoreSlot(id);listNotice=undo?'되돌렸어요. 프로젝트가 목록에 다시 있어요.':'되살렸어요. 내용은 휴지통에 넣기 전 그대로예요.';}
-  catch {listNotice='되살리지 못했어요. 휴지통의 프로젝트는 그대로예요.';}
-  undoSlot=null;render();
+async function restoreProject(entryId:string,undo=false) {
+  try {await workspace.restoreEntry(entryId);listNotice=undo?'되돌렸어요. 프로젝트가 목록에 다시 있어요.':'되살렸어요. 내용은 휴지통에 넣기 전 그대로예요.';}
+  catch(e) {listNotice=`되살리지 못했어요. 휴지통의 프로젝트는 그대로예요. ${saveMessage(e)}`;}
+  undoEntry=null;render();
 }
-/** In-memory sample made with the normal domain path and the explicit MOCK rules; never persisted. */
+/** In-memory sample made with the normal domain path and the explicit MOCK rules; never persisted.
+ * Starting my own project from it starts empty: nothing from the sample becomes my record or result. */
 function exampleProject():Project {
   let p=rename(createProject(),'예제 · 동네 미용실 예약 사이트');
   p=submit(editDraft(p,'동네 미용실 예약 사이트를 만들고 싶어요. 손님이 휴대폰으로 날짜와 시간을 고르고, 예약하면 문자로 확인을 받게 해 주세요.'));
   const started=begin(p,p.currentTaskId!),request=validateRequest(started.request);
   return {...receive(started.project,started.request,{mode:'mock',ticket:request.ticket,advice:validateAdvice(mockAdvice(request),request.bases.map(b=>b.id))}),notice:null};
 }
-function openExample() {
-  if(memoryDirty&&!confirm('이 탭에 저장되지 않은 변경이 있어요. 예제로 가면 이 변경은 사라질 수 있어요. 그래도 예제를 열까요?'))return;
-  resetEphemeral();route='example';slot=null;store=null;storageError='';memoryDirty=false;hasSaved=false;contextOpen=false;
+async function openExample() {
+  if(!await leaveProject('예제로 가면'))return;
+  resetEphemeral();route='example';target={kind:'example'};storageError='';memoryDirty=false;hasSaved=false;contextOpen=false;
   try {project=exampleProject();} catch {project=createProject();}
-  rememberOpen(null);render();$('example-banner').focus?.();
+  rememberOpen(null);render();
 }
 function closeExample(start:boolean) {
-  if(start||!workspace?.slots().length){startNew();render();restoreDraftPanels();$('draft').focus();}
-  else showProjects();
+  if(start||!(workspace.entries().length||workspace.legacy||workspace.readError)){startNew();render();restoreDraftPanels();$('draft').focus();}
+  else void showProjects();
 }
 function render() {
   if(route==='projects'){renderProjects();renderStatus();displayView();return;}
@@ -624,7 +670,7 @@ function render() {
   const returned=project.draftKind==='report'||project.draftKind==='evidence';
   for(const [id,selected] of [['request-tab',project.draftKind==='request'],['report-tab',returned]] as const){$(id).classList.toggle('selected',selected);$(id).setAttribute('aria-pressed',String(selected));}
   $('compose-title').textContent=returned?'어떤 결과가 돌아왔나요?':project.tasks.length?'다음으로 바꾸고 싶은 것은?':'무엇을 만들고 싶나요?';
-  const others=activeSlots().some(s=>s.slot!==slot);
+  const others=activeEntries().some(e=>target.kind!=='entry'||e.entryId!==target.ref.entryId);
   $('welcome-title').textContent=others?'새 프로젝트 · 무엇을 만들고 싶나요?':'AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.';
   $('compose-eyebrow').textContent=returned?'CONTINUE WITH RESULTS':project.tasks.length?'NEXT REQUEST':"LET’S START";
   $('input-hint').textContent=returned?'받은 보고를 그대로 붙여넣고 연결할 작업을 확인하세요. 검증 완료로 바꾸지 않습니다.':project.draftKind==='test_answer'?'합성 시험자료로만 보관합니다. 실제 요청과 확정 기준은 바꾸지 않습니다.':'필요한 질문만 받고, 바로 전달할 작업문을 준비해요.';
@@ -674,7 +720,7 @@ $('result-file-input').addEventListener('change',async()=>{
     const bytes=await file.arrayBuffer();
     if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId)return;
     const rawText=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
-    resultSelection={rawText,projectId,revision:project.revision};resultMessage='원문과 연결 대상을 확인한 뒤 가져오세요.';renderResultFile();
+    resultSelection={rawText,projectId,revision:project.revision,epoch};resultMessage='원문과 연결 대상을 확인한 뒤 가져오세요.';renderResultFile();
   }catch(e){if(read!==resultRead||epoch!==projectEpoch)return;resultMessage=resultError(e)+' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';renderResultFile();}
 });
 $('import-file').addEventListener('change',async()=>{
@@ -687,32 +733,27 @@ $('import-file').addEventListener('change',async()=>{
     if(project.id!==projectId||project.revision!==revision){project={...project,notice:'복구 파일을 읽는 동안 입력이 바뀌어 사본을 만들거나 교체하지 않았습니다. 현재 입력은 그대로입니다.'};renderStatus();return;}
     const imported=parseProject(raw);
     if(!confirm(`“${imported.name}” · 기준 ${imported.bases.length}개 · 작업 ${imported.tasks.length}개를 새 프로젝트 사본으로 불러올까요?\n지금 열려 있는 프로젝트는 바뀌지 않아요. 원문·반환 연결은 파일 그대로 유지됩니다.${memoryDirty?'\n이 탭에서 저장되지 않은 변경은 사본으로 옮기면 사라질 수 있어요.':''}\n파일의 출처 기록은 서명된 검증 증거가 아닙니다.`))return;
-    // FLOW083: a recovery file becomes a separate copy with its payload unchanged (same project ID and export
-    // records, so a matching result file still finds its exact return); the open project is never replaced.
+    // FLOW083: a recovery file becomes a separate entry with a NEW entryId only; Project.id, tasks, sources,
+    // returnIds and result files stay as in the file, so an exact result file still matches inside that entry.
+    // The open project is never replaced, and nothing changes screen until the copy is written.
     imported.pending=null;
-    if(!workspace)throw new Error();
-    const next=workspace.newSlot(),copyStore=new ProjectStore(runtimeStorage(window.localStorage),slotKey(next));
-    try {copyStore.save(imported);}
-    catch {
-      // As before: the confirmed recovery opens in this tab even when the browser cannot save it. It stays an
-      // unsaved new project (no slot) and is saved as its own project on the first change that can be written.
-      startNew();project=imported;storageError='가져온 내용은 이 탭에 복구했지만 원본 보존 또는 브라우저 저장에 실패했습니다. 기존 저장값은 덮어쓰지 않았습니다. 닫기 전에 복구 파일을 저장하세요.';memoryDirty=true;
-      contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();render();restoreDraftPanels();return;
-    }
-    try {workspace.register(next);} catch {/* Listed again on the copy's next save ('unlisted'). */}
-    openSlot(next);project={...project,notice:`${imported.notice?`${imported.notice} `:''}“${imported.name}”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요.`};
-    contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();render();restoreDraftPanels();
+    await flushSaves();
+    let ref:EntryRef;
+    try {ref=await workspace.create(imported,'import');}
+    catch(e) {const message=`백업 파일을 새 프로젝트로 저장하지 못했습니다. ${saveMessage(e)} 지금 프로젝트와 입력은 그대로입니다.`;project={...project,notice:message};listNotice=message;render();return;}
+    const entry=workspace.entries().find(e=>e.entryId===ref.entryId)!;
+    openEntry(entry);project={...project,notice:`${imported.notice?`${imported.notice} `:''}“${imported.name}”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요.`};
+    render();restoreDraftPanels();
   } catch {if(read!==recoveryRead||epoch!==projectEpoch)return;project={...project,notice:'복구 파일의 형식·버전·참조가 올바르지 않습니다. 현재 프로젝트를 바꾸지 않았습니다.'};renderStatus();}
 });
-$('nav-projects').addEventListener('click',()=>showProjects());
-$('to-projects').addEventListener('click',()=>showProjects());
-for(const id of ['new-project','new-project-top'])$(id).addEventListener('click',()=>{
-  if(id==='new-project-top'&&memoryDirty&&!confirm('이 탭에 저장되지 않은 변경이 있어요. 새 프로젝트로 가면 이 변경은 사라질 수 있어요. 그래도 새로 시작할까요?'))return;
-  startNew();render();restoreDraftPanels();$('draft').focus();});
-$('trash-current').addEventListener('click',()=>{if(slot!==null)trashProject(slot,project.name);});
-$('undo-trash').addEventListener('click',()=>{if(undoSlot!==null)restoreProject(undoSlot,true);});
+$('nav-projects').addEventListener('click',()=>void showProjects());
+$('to-projects').addEventListener('click',()=>void showProjects());
+for(const id of ['new-project','new-project-top'])$(id).addEventListener('click',()=>void (async()=>{
+  if(!await leaveProject('새 프로젝트로 가면'))return;startNew();render();restoreDraftPanels();$('draft').focus();})());
+$('trash-current').addEventListener('click',()=>{if(target.kind==='entry')void trashProject(target.ref.entryId,project.name);});
+$('undo-trash').addEventListener('click',()=>{if(undoEntry!==null)void restoreProject(undoEntry,true);});
 $('list-import').addEventListener('click',()=>$<HTMLInputElement>('import-file').click());
-for(const id of ['list-example','open-example'])$(id).addEventListener('click',openExample);
+for(const id of ['list-example','open-example'])$(id).addEventListener('click',()=>void openExample());
 $('example-start').addEventListener('click',()=>closeExample(true));
 $('example-close').addEventListener('click',()=>closeExample(false));
 $('nav-work').addEventListener('click',()=>{contextOpen=false;showWork();$('context-title').scrollIntoView({block:'nearest'});});
@@ -722,7 +763,7 @@ $('nav-history').addEventListener('click',()=>{view='history';displayView();$<HT
 $('back-to-work').addEventListener('click',()=>{showWork();$('nav-work').focus();});
 for(const example of document.querySelectorAll<HTMLButtonElement>('[data-example]'))example.addEventListener('click',()=>guard(()=>{commit(editDraft(project,example.dataset.example!));$('draft').focus();}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($<HTMLDetailsElement>('connection-details').open){$<HTMLDetailsElement>('connection-details').open=false;$('connection-details').querySelector('summary')!.focus();}else if(contextOpen)closeContext();}});
-window.addEventListener('beforeunload',e=>{if(memoryDirty){e.preventDefault();e.returnValue='';}});
+window.addEventListener('beforeunload',e=>{if(memoryDirty||pendingSave||draining){e.preventDefault();e.returnValue='';}});
 function restoreDraftPanels() {
   $<HTMLDetailsElement>('compose-panel').open=!project.tasks.length||!!project.draft.trim();
   if(project.basisDraft.trim())$<HTMLDetailsElement>('add-basis').open=true;

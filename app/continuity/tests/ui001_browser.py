@@ -140,8 +140,10 @@ class UI001(unittest.TestCase):
         self.compose();self.page.locator('#draft').fill('저장 실패 중에 입력한 내용을 지키기')
         expect(self.page.locator('#saved')).to_have_text('저장되지 않은 변경 있음');expect(self.page.locator('#storage-error')).to_be_visible()
         recovery=self.backup('ui001-memory-recovery.json');self.assertEqual(json.loads(recovery.read_text())['draft'],'저장 실패 중에 입력한 내용을 지키기')
+        # FLOW083 (Sol storage boundary): a copy that cannot be written is not opened; the unsaved input stays here.
         self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(path)
-        expect(self.page.locator('#storage-error')).to_contain_text('가져온 내용은 이 탭에 복구했지만')
+        expect(self.page.locator('#notice')).to_contain_text('새 프로젝트로 저장하지 못했습니다')
+        expect(self.page.locator('#draft')).to_have_value('저장 실패 중에 입력한 내용을 지키기')
         expect(self.page.locator('#saved')).to_have_text('저장되지 않은 변경 있음')
         self.page.evaluate('()=>{Storage.prototype.setItem=window.__originalSet}')
         self.compose();self.page.locator('#draft').fill('저장 가능해진 뒤의 입력')

@@ -116,7 +116,7 @@ class ResultFiles(unittest.TestCase):
         self.shot('05-storage-failure.png');self.page.evaluate('()=>{Storage.prototype.setItem=window.realSet}')
         self.recovery();other=self.ctx.new_page();other.goto(self.url);expect(other.locator('#mode')).to_contain_text('MOCK')
         # FLOW083: each recovery is its own copy; the second tab opens the same project this tab has open.
-        base.open_listed(other,self.page.evaluate('document.documentElement.dataset.projectKey'))
+        base.open_listed(other,self.page.evaluate('document.documentElement.dataset.entryId'))
         self.compose(other);other.locator('#draft').fill('다른 탭에서 보존할 입력');persisted=self.state(other)
         self.select();self.page.locator('#accept-result-file').click();expect(self.page.locator('#result-file-message')).to_contain_text('이 탭에만');self.assertEqual(self.state(),persisted);other.close()
     def test_05_injected_backup_failure_and_late_AI(self):
@@ -124,13 +124,13 @@ class ResultFiles(unittest.TestCase):
         # Protect the old value actually in the browser, not a duplicate of the selected file.
         raw=(self.materials/'v2.json').read_text();self.page.evaluate('(raw)=>localStorage.setItem("agentflow.idea015.project.v1",raw)',raw);before=json.loads(raw)
         self.page.evaluate('''()=>{window.realSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.endsWith('legacy-original'))throw new Error('backup denied');return window.realSet.call(this,k,v)}}''')
-        # FLOW083: a recovery is now a separate copy, so it never overwrites (or needs to back up) the browser's value.
+        # FLOW083: a recovery is a separate workspace copy: it never overwrites (or needs to back up) the browser's
+        # older value, and a value written to the old key after the workspace exists is shown read-only, never saved.
         self.recovery('v2.json');self.assertEqual(self.page.evaluate('(k)=>localStorage.getItem(k)',base.KEY),raw)
-        # Opening that older value still must not convert it without first keeping its original bytes.
-        self.page.locator('#nav-projects').click();base.open_listed(self.page,base.KEY)
-        expect(self.page.locator('#notice')).to_contain_text('원본을 따로 보관하지 못해');self.assertEqual(self.state(),before)
+        self.page.locator('#nav-projects').click();base.open_listed(self.page,'legacy')
+        self.assertEqual(self.state(),before)
         self.compose();self.page.locator('#draft').fill('이관 실패 중 초안');self.assertEqual(self.state(),before)
-        expect(self.page.locator('#storage-error')).to_contain_text('원본을 브라우저에 따로 보관하지 못해')
+        expect(self.page.locator('#storage-error')).to_contain_text('읽기 전용');self.assertEqual(self.page.evaluate('(k)=>localStorage.getItem(k)',base.KEY),raw)
         self.page.evaluate('()=>{Storage.prototype.setItem=window.realSet}');self.recovery()
         parked=[]
         def delayed(route):parked.append((route,route.fetch()))
