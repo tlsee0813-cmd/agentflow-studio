@@ -1,5 +1,5 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES } from '../shared/types.js';
-import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
+import { createProject, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion, currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile } from '../shared/domain.js';
 import { parseProject, parseResultFile } from '../shared/validation.js';
 import { ProjectStore, serializeProject, storageErrorCode } from '../shared/storage.js';
 import { sourceName, sourceOf, taskTitle, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview } from './presentation.js';
@@ -210,6 +210,52 @@ function renderOutcome(t) {
     topActions.append(primary, btn('방향 수정 / 다음 요청', () => openComposer('request'), 'secondary', 'change-direction'));
     top.append(title, topActions);
     area.append(top);
+    const interpreted = currentIntent(project, t), correction = intentCorrection(t);
+    if (interpreted || correction) {
+        // A user correction stays visible after the AI interpretation behind it went stale; AI-only parts need a fresh interpretation.
+        const value = correction ? null : interpreted.value, card = node('section', '', 'outcome-direction');
+        card.id = 'intent-home';
+        card.append(node('h3', correction ? '이어갈 목적 · 직접 정정' : t.mode === 'mock' ? '이어갈 목적 · MOCK 정리' : '이어갈 목적 · AI 정리'));
+        const goal = node('p', correction?.goal ?? value.goal, 'outcome-purpose outcome-excerpt');
+        goal.id = 'intent-goal';
+        card.append(goal);
+        const conditions = correction ? correction.conditions : value.conditions.join(' / ');
+        if (conditions)
+            card.append(node('p', conditions, 'source-raw'));
+        if (value?.relation === 'uncertain')
+            card.append(node('p', '아직 정하지 않은 관계는 미정으로 남겨 두었어요.', 'hint'));
+        const earlier = value?.relation === 'separate' ? continuingIntent(project, t) : null;
+        if (earlier) {
+            const line = node('p', `참고 · 앞선 목적 (이전 해석, 현재 유효 여부는 이번 요청이 우선): ${earlier.manualGoal ?? earlier.value.goal}`, 'hint');
+            line.id = 'intent-continuing';
+            card.append(line);
+        }
+        if (value && project.bases.some(b => ['confirmed', 'deferred', 'answered'].includes(b.status)))
+            card.append(node('p', '직접 확정·답변·보류한 기준은 이 정리보다 우선해요.', 'hint'));
+        const detail = details('정리 바로잡기 · 근거 보기', 'intent-details');
+        const g = node('textarea');
+        g.rows = 2;
+        g.maxLength = 6000;
+        g.value = correction?.goal ?? value.goal;
+        g.id = 'intent-edit-goal';
+        g.setAttribute('aria-label', '이어갈 목적 직접 정정');
+        const c = node('textarea');
+        c.rows = 2;
+        c.maxLength = 6000;
+        c.value = conditions;
+        c.id = 'intent-edit-conditions';
+        c.setAttribute('aria-label', '유지할 조건 직접 정정');
+        detail.append(node('label', '이어갈 목적'), g, node('label', '유지할 조건'), c, btn('정정 적용', () => commit(correctIntent(project, t.id, g.value, c.value)), 'secondary', 'intent-correct'));
+        const prior = previousIntent(project, t);
+        if (prior)
+            detail.append(btn('직전 정리로 되돌리기', () => commit(correctIntent(project, t.id, prior.manualGoal ?? prior.value.goal, prior.manualConditions ?? prior.value.conditions.join(' / '))), 'quiet', 'intent-undo'));
+        if (value?.retired.length)
+            detail.append(node('p', `대체된 이전 요청 표현 · ${t.mode === 'mock' ? 'MOCK 정리' : 'AI 해석'} (사용자 결정은 대체하지 않음): ` + value.retired.join(' / '), 'source-raw'));
+        if (interpreted)
+            detail.append(node('p', interpreted.value.basisRefs.map(ref => `${ref.basisId} · r${ref.revision} · ${ref.sourceId}`).join(' / '), 'source-id'));
+        card.append(detail);
+        area.append(card);
+    }
     const origin = flow.origin;
     const request = flow.request;
     if (request) {

@@ -4,7 +4,7 @@ export const LEGACY_SCHEMA = 'idea015.project.1';
 export const RESULT_SCHEMA = 'agentflow.return.1';
 export const RESULT_BYTES = 131072;
 export const RESULT_TEXT_LIMIT = 11000;
-export const API_SCHEMA = 'idea022.context.4';
+export const API_SCHEMA = 'idea022.context.6';
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
 export const FILE_LIMIT = 8_000_000;

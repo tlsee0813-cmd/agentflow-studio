@@ -146,7 +146,7 @@ export function editTask(p, id, key, value) {
     text(value, 6000, true);
     const n = change(p);
     taskOf(n, id).manual[key] = value;
-    return n;
+    return n; // Work fields only; never a purpose correction.
 }
 /** The current question already has a recorded reply in this task (real or synthetic). */
 export function questionAnswered(p, t) {
@@ -221,12 +221,14 @@ export function questionApplicability(p, t) {
         return 'missing';
     if (questionAnswered(p, t))
         return 'answered';
+    if (t.intentEdit && t.intentEdit.revision > (t.adviceRevision ?? -1))
+        return 'stale';
     const changed = changedSinceAdvice(p, t);
     return changed === 'unknown' ? 'unknown' : changed.length ? 'stale' : 'active';
 }
 /** What may go out as the current instruction. Stale AI text is withheld; user-written values always stay. */
 export function currentWork(p, t) {
-    const changed = changedSinceAdvice(p, t), aiStale = changed === 'unknown' || changed.length > 0;
+    const changed = changedSinceAdvice(p, t), aiStale = changed === 'unknown' || changed.length > 0 || !!(t.intentEdit && t.intentEdit.revision > (t.adviceRevision ?? -1));
     const values = {};
     let aiExcluded = false;
     for (const k of WORK_KEYS) {
@@ -237,6 +239,82 @@ export function currentWork(p, t) {
     }
     const suggestions = t.suggestions ?? (aiStale ? [] : t.advice?.suggestions ?? []);
     return { values, changed, aiStale, aiExcluded, suggestions, reviewBasisIds: aiStale ? [] : t.advice?.reviewBasisIds ?? [] };
+}
+/** Interpretation is reusable only while its referenced user versions and freshness remain valid.
+ * New tasks are reconciled by the provider; this is not a semantic proof of same purpose. */
+export function currentIntent(p, t) {
+    const value = t.advice?.intent, changed = changedSinceAdvice(p, t);
+    if (!value || changed === 'unknown' || changed.length || value.basisRefs.some(ref => !p.bases.some(b => b.id === ref.basisId && b.sourceId === ref.sourceId && b.revision === ref.revision)))
+        return null;
+    const correction = intentCorrection(t);
+    return { taskId: t.id, value: copy(value), manualGoal: correction?.goal ?? null, manualConditions: correction ? correction.conditions : null };
+}
+/** The user's purpose correction for this task, if any. Ordinary edits of the task's own
+ * understanding/scope are work instructions for this task only and are never read here. */
+export function intentCorrection(t) {
+    const e = t.intentEdit; // Never read from manual.*; intent-edit.1 is converted at parse time.
+    return e?.version === 'intent-edit.2' && e.goal !== null ? { goal: e.goal, conditions: e.conditions } : null;
+}
+export function previousIntent(p, t) {
+    // Stop at the immediate semantic predecessor; never jump across an unprocessed request.
+    const { parent, anchor } = contextLinks(p, t);
+    const previous = anchor ?? parent;
+    return previous ? currentIntent(p, previous) : null;
+}
+/** A user's correction always reaches the next request. AI staleness only withdraws the AI value:
+ * with no still-valid interpretation the correction travels alone (value=null), never as a made-up intent. */
+function requestIntent(p, t) {
+    const correction = intentCorrection(t), base = (correction ? currentIntent(p, t) : null) ?? previousIntent(p, t);
+    if (!correction)
+        return base;
+    // taskId names the task whose purpose this is: the correction belongs to this task, even when the AI value is its predecessor's.
+    return { taskId: t.id, value: base?.value ?? null, manualGoal: correction.goal, manualConditions: correction.conditions };
+}
+/** A 'separate' interpretation does not end the earlier purpose of this path. Carry the nearest earlier
+ * still-valid non-separate interpretation next to it, so its maintained/replaced reading is not lost.
+ * Stops at a predecessor without a valid interpretation; never skips unknown ground. */
+function purposeIntent(p, t, prior) {
+    if (prior?.value?.relation !== 'separate')
+        return null;
+    let task = p.tasks.find(x => x.id === prior.taskId);
+    const seen = new Set();
+    while (task && !seen.has(task.id)) {
+        seen.add(task.id);
+        const { parent, anchor } = contextLinks(p, task), previous = anchor ?? parent;
+        const found = previous ? currentIntent(p, previous) : null;
+        if (!found)
+            return null;
+        if (found.value.relation !== 'separate')
+            return found;
+        task = previous;
+    }
+    return null;
+}
+/** The nearest earlier non-separate interpretation next to this task's own 'separate' one. A fresh version only
+ * means its cited bases are unchanged, not that the purpose is still wanted: shown as a sourced reference. */
+export function continuingIntent(p, t) {
+    const own = currentIntent(p, t);
+    return own && !intentCorrection(t) ? purposeIntent(p, t, own) : null;
+}
+function continuingLines(p, t, intent, ai) {
+    const earlier = ai?.relation === 'separate' && intent ? continuingIntent(p, t) : null;
+    if (!earlier)
+        return [];
+    const label = t.mode === 'mock' ? 'MOCK 정리' : 'AI 해석', e = earlier.manualGoal !== null ? null : earlier.value;
+    const kind = earlier.manualGoal !== null ? '앞선 작업의 사용자 직접 정정' : `앞선 작업의 ${label}`;
+    return [`참고 · 앞선 목적 (${kind}, 현재 유효 여부는 확정하지 않음): ${earlier.manualGoal ?? e.goal}`,
+        `그 당시 조건: ${(earlier.manualGoal !== null ? earlier.manualConditions : e.conditions.join(' / ')) || '명시된 추가 조건 없음'}`,
+        ...(e?.retired.length ? [`그 해석이 대체로 본 이전 요청 표현 (${label} · 사용자 결정은 대체하지 않음): ${e.retired.join(' / ')}`] : []),
+        '이번 요청 원문이나 사용자 정정이 이 목적의 폐기·교체·변경을 말하면 그쪽이 우선합니다. 이 참고는 앞선 목적을 지금 유지하라는 지시가 아닙니다.',
+        `참고 출처: 작업 ${earlier.taskId} / ${earlier.value.basisRefs.map(ref => `${ref.basisId} r${ref.revision}`).join(', ')}`];
+}
+export function correctIntent(p, id, goal, conditions) {
+    text(goal, 6000);
+    text(conditions, 6000, true);
+    const n = change(p), t = taskOf(n, id);
+    // Kept apart from manual.*: correcting the purpose must not rewrite this task's narrow work. Regeneration cannot overwrite it.
+    t.intentEdit = { version: 'intent-edit.2', revision: n.revision, goal, conditions };
+    return n;
 }
 function contextParts(p, t) {
     // Reuse current input/replies and its immediate predecessor, not the complete chat transcript.
@@ -259,7 +337,9 @@ const jsonBytes = (v) => new TextEncoder().encode(JSON.stringify(v)).length;
 export function buildRequest(p, ticket) {
     const t = taskOf(p, ticket.taskId), parts = contextParts(p, t);
     const req = { schemaVersion: API_SCHEMA, ticket: copy(ticket), projectName: p.name, sources: parts.sources,
-        bases: p.bases.map(contextBasis), appFacts: planFacts(p, t.id), previousWork: parts.previousWork };
+        bases: p.bases.map(contextBasis), appFacts: planFacts(p, t.id), previousWork: parts.previousWork, previousIntent: null, purposeIntent: null };
+    req.previousIntent = requestIntent(p, t);
+    req.purposeIntent = purposeIntent(p, t, req.previousIntent);
     let bytes = jsonBytes(req);
     if (bytes > REQUEST_BYTES) {
         const sources = new Map(p.sources.map(s => [s.id, s]));
@@ -279,6 +359,12 @@ export function buildRequest(p, ticket) {
             bytes += jsonBytes(b) - before;
         }
     }
+    // An interpretation resting on an excerpt is withdrawn; a user correction is not an interpretation and stays.
+    const prior = req.previousIntent;
+    if (prior?.value?.basisRefs.some(ref => req.bases.some(b => b.id === ref.basisId && b.partial)))
+        req.previousIntent = prior.manualGoal !== null ? { ...prior, value: null } : null;
+    if (req.purposeIntent && (req.previousIntent?.value?.relation !== 'separate' || req.purposeIntent.value.basisRefs.some(ref => req.bases.some(b => b.id === ref.basisId && b.partial))))
+        req.purposeIntent = null;
     // Final check uses the exact serialised UTF-8 body, not characters or the 8MB local-storage budget.
     ensure(jsonBytes(req) <= REQUEST_BYTES, 'CONTEXT_TOO_LARGE');
     return req;
@@ -392,6 +478,14 @@ export function handoffText(p, id = p.currentTaskId, returnId = null) {
     const outcome = outcomeOf(p, t.id);
     if (outcome.request)
         lines.push('\n## 이번 요청과 이전 맥락', `이번 요청 [${outcome.request.id}]이 실행 범위를 정합니다. 부모 연결은 같은 목적이라는 판정이 아닙니다.`, '후속 사용자 발언이 바꾼 부분은 앞선 요청보다 우선합니다. 바꾸지 않은 유지 조건은 보존하되, 관련 없는 이전 요청을 이번 작업에 추가하지 마세요. 코드 영향은 실행 도구가 실제 자료로 판단합니다.');
+    const intent = currentIntent(p, t), correction = intentCorrection(t);
+    if (intent || correction) {
+        // A user's purpose correction stays visible even after the AI interpretation behind it went stale.
+        const ai = correction ? null : intent.value, interp = t.mode === 'mock' ? 'MOCK 정리' : 'AI 해석';
+        // Explicit user decisions outrank an interpretation; only the user's own words may change them.
+        const decisions = ai ? p.bases.filter(b => ['confirmed', 'deferred', 'answered'].includes(b.status)) : [];
+        lines.push('\n## 이어가는 목적 · ' + (correction ? '사용자 직접 정정' : t.mode === 'mock' ? 'MOCK 정리 / 의미 이해 아님' : 'AI 해석 / 원문과 구분'), correction?.goal ?? ai.goal, '유지할 조건: ' + ((correction ? correction.conditions : ai.conditions.join(' / ')) || '명시된 추가 조건 없음'), ...(ai?.retired.length ? [`대체된 지시 · 다시 실행하지 않음 (${interp} · 이전 요청 원문의 표현에만 적용, 사용자 결정 기준은 대체하지 않음): ` + ai.retired.join(' / ')] : []), ...(decisions.length ? [`사용자 결정 기준 ${decisions.map(b => `${b.id}(${BASIS_LABEL[b.status]})`).join(', ')}은 이 ${interp}보다 우선하며 아래 현재 값 그대로 유효합니다. 이번 요청 원문이 그 결정을 명시적으로 바꾼 부분만 요청 원문을 따르고, ${interp}만으로 결정을 폐기하지 마세요.`] : []), ...continuingLines(p, t, intent, ai), ai?.relation === 'uncertain' ? '목적 관계 미정: 미정 선택에 의존하는 변경은 확정 범위가 아닙니다.' : '이번 작업의 크기는 아래 현재 요청이 정합니다. 목적 전체를 다시 구현하라는 지시가 아닙니다.', ...(intent ? [(correction ? `정정 전 ${interp} 근거: ` : '해석 근거: ') + intent.value.basisRefs.map(ref => `${ref.basisId} r${ref.revision} / ${ref.sourceId}`).join(', ')] : []));
+    }
     lines.push(`\n${planFactsText(planFacts(p, t.id))}`);
     lines.push('\n## 이번 작업', v.understanding || '아래 사용자 입력과 현재 기준을 바탕으로 좁은 작업을 준비하세요.', '\n### 범위', v.scope || '명시한 요청 범위만. 미정 조건은 가정으로 채우지 않습니다.', '\n### 다음 작업 (AI/모의 제안 또는 사용자 직접 수정)', v.next || '요청의 작은 변경을 준비하고, 모르는 기술적 사실은 실제 코드에서 확인하세요.', '\n### 확인할 동작 (아직 검사 결과가 아님)', v.checks || '요청한 결과와 현재 기준이 함께 유지되는지 확인합니다.');
     const manual = manualConditionText(p, t);
@@ -415,9 +509,14 @@ export function handoffText(p, id = p.currentTaskId, returnId = null) {
     if (outcome.request)
         currentSources.add(outcome.request.id);
     const earlierRequests = p.bases.filter(b => b.status === 'requested' && !currentSources.has(b.sourceId));
-    const earlierIds = new Set(earlierRequests.map(b => b.id));
+    // After the user corrected this task's purpose, its own requested wording predates that correction: kept and
+    // shown, but not as a current value. User decisions (confirmed/answered/deferred) are unaffected.
+    const preCorrection = intentCorrection(t) ? p.bases.filter(b => b.status === 'requested' && currentSources.has(b.sourceId)) : [];
+    const earlierIds = new Set([...earlierRequests, ...preCorrection].map(b => b.id));
     lines.push('\n## 이어갈 기준 — 직접 관련 (현재 값)', ...p.bases.filter(b => related.has(b.id) && !earlierIds.has(b.id)).map(b => basisLine(b)));
     lines.push('\n## 나머지 보존 기준 (현재 값) — 생략/무응답은 폐기가 아님', ...p.bases.filter(b => !related.has(b.id) && !earlierIds.has(b.id)).map(b => basisLine(b)));
+    if (preCorrection.length)
+        lines.push('\n## 정정 전 이 작업의 요청 원문 — 사용자 정정과 양립하는 조건은 유지, 충돌하거나 유지 여부가 불명확하면 확정하지 말고 확인 (자동 폐기 아님)', ...preCorrection.map(b => basisLine(b)));
     if (earlierRequests.length)
         lines.push('\n## 이전 요청 원문 참조 — 후속 변경이 우선, 이번 범위에 자동 추가하지 않음', ...earlierRequests.map(b => basisLine(b)));
     lines.push('요청 원문에는 배경·인용도 포함될 수 있습니다. 전체를 확정 정책으로 읽지 마세요. 최신 명시 요청·답변은 그 범위에서만 적용하고, 관련 없는 기준은 유지하세요.');

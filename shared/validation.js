@@ -70,8 +70,53 @@ function basis(v) {
     }
 }
 function ticket(v) { obj(v, ['projectId', 'revision', 'requestId', 'taskId']); id(v.projectId); integer(v.revision); id(v.requestId); id(v.taskId); }
-export function validateAdvice(v, basisIds) {
-    obj(v, ['understanding', 'scope', 'next', 'checks', 'question', 'relatedBasisIds', 'reviewBasisIds', 'suggestions']);
+export function validateIntent(v) {
+    obj(v, ['version', 'relation', 'goal', 'conditions', 'retired', 'basisRefs']);
+    ensure(v.version === 'intent.1');
+    ensure(['start', 'continue', 'revise', 'separate', 'uncertain'].includes(v.relation));
+    text(v.goal, 2000);
+    for (const key of ['conditions', 'retired']) {
+        list(v[key], 12);
+        for (const value of v[key])
+            text(value, 1000);
+    }
+    list(v.basisRefs);
+    const seen = new Set();
+    for (const ref of v.basisRefs) {
+        obj(ref, ['basisId', 'sourceId', 'revision']);
+        id(ref.basisId);
+        id(ref.sourceId);
+        integer(ref.revision);
+        ensure(!seen.has(ref.basisId));
+        seen.add(ref.basisId);
+    }
+    return structuredClone(v);
+}
+function checkIntentRefs(value, bases) {
+    for (const ref of value.basisRefs)
+        ensure(bases.some(b => b.id === ref.basisId && b.sourceId === ref.sourceId && b.revision === ref.revision && !b.partial));
+}
+/** Old eight-key advice remains readable; new wire responses use intent.1. */
+export function validateAdvice(v, basisIds, request) {
+    const hasIntent = !!v && typeof v === 'object' && Object.hasOwn(v, 'intent');
+    obj(v, ['understanding', 'scope', 'next', 'checks', 'question', 'relatedBasisIds', 'reviewBasisIds', 'suggestions', ...(hasIntent ? ['intent'] : [])]);
+    if (request)
+        ensure(hasIntent);
+    if (hasIntent) {
+        const value = validateIntent(v.intent);
+        for (const ref of value.basisRefs)
+            ensure(basisIds.includes(ref.basisId));
+        if (request) {
+            checkIntentRefs(value, request.bases);
+            // Structural contradictions: an independent purpose replaces nothing; one sentence cannot be both kept and retired.
+            ensure(value.relation !== 'separate' || value.retired.length === 0);
+            const kept = new Set(value.conditions.map(c => c.trim()));
+            ensure(value.retired.every(r => !kept.has(r.trim())));
+            // All current user basis versions must be acknowledged, including unknown/deferred answers.
+            for (const b of request.bases.filter(b => request.appFacts.inputs.some(s => s.sourceId === b.sourceId)))
+                ensure(value.basisRefs.some(ref => ref.basisId === b.id));
+        }
+    }
     for (const k of ['understanding', 'scope', 'next', 'checks'])
         text(v[k], 6000);
     for (const k of ['relatedBasisIds', 'reviewBasisIds']) {
@@ -108,7 +153,7 @@ export function validateEnvelope(v, req) {
     ensure(['mock', 'deepseek'].includes(v.mode));
     ticket(v.ticket);
     ensure(Object.keys(req.ticket).every(k => req.ticket[k] === v.ticket[k]));
-    return { mode: v.mode, ticket: { ...v.ticket }, advice: validateAdvice(v.advice, req.bases.map(b => b.id)) };
+    return { mode: v.mode, ticket: { ...v.ticket }, advice: validateAdvice(v.advice, req.bases.map(b => b.id), req) };
 }
 function contextBasis(v) {
     obj(v, ['id', 'text', 'status', 'sourceId', 'revision', 'previousVersions', 'partial']);
@@ -194,7 +239,7 @@ function appFacts(v, req) {
             ensure(currentRecords.has(b.id));
 }
 export function validateRequest(v) {
-    obj(v, ['schemaVersion', 'ticket', 'projectName', 'sources', 'bases', 'previousWork', 'appFacts']);
+    obj(v, ['schemaVersion', 'ticket', 'projectName', 'sources', 'bases', 'previousWork', 'appFacts', 'previousIntent', 'purposeIntent']);
     ensure(v.schemaVersion === API_SCHEMA);
     ticket(v.ticket);
     text(v.projectName, 120);
@@ -207,6 +252,28 @@ export function validateRequest(v) {
     ensure(v.sources.length > 0);
     unique(v.sources);
     unique(v.bases);
+    if (v.previousIntent !== null) {
+        obj(v.previousIntent, ['taskId', 'value', 'manualGoal', 'manualConditions']);
+        id(v.previousIntent.taskId);
+        if (v.previousIntent.value === null)
+            text(v.previousIntent.manualGoal, 6000); // A correction only; no AI interpretation is implied.
+        else
+            checkIntentRefs(validateIntent(v.previousIntent.value), v.bases);
+        for (const key of ['manualGoal', 'manualConditions'])
+            if (v.previousIntent[key] !== null)
+                text(v.previousIntent[key], 6000, true);
+    }
+    if (v.purposeIntent !== null) {
+        ensure(v.previousIntent !== null && v.previousIntent.value?.relation === 'separate');
+        obj(v.purposeIntent, ['taskId', 'value', 'manualGoal', 'manualConditions']);
+        id(v.purposeIntent.taskId);
+        const value = validateIntent(v.purposeIntent.value);
+        ensure(value.relation !== 'separate');
+        checkIntentRefs(value, v.bases);
+        for (const key of ['manualGoal', 'manualConditions'])
+            if (v.purposeIntent[key] !== null)
+                text(v.purposeIntent[key], 6000, true);
+    }
     appFacts(v.appFacts, { ticket: v.ticket, sources: v.sources, bases: v.bases });
     ensure(new TextEncoder().encode(JSON.stringify(v)).length <= REQUEST_BYTES, 'CONTEXT_TOO_LARGE');
     // Bases carry current values; prior versions stay local. Old-request excerpts are budget-dependent.
@@ -253,10 +320,10 @@ function assertProject(v) {
         text(value, TEXT_LIMIT, true);
     }
     const sources = new Map(v.sources.map(s => [s.id, s]));
-    const bids = [...basisIds];
+    const bids = [...basisIds], basisMap = new Map(v.bases.map(b => [b.id, b]));
     const tasks = new Set(), returns = new Map();
     for (const t of v.tasks) {
-        obj(t, ['id', 'sourceIds', 'parentTaskId', 'advice', 'adviceRevision', 'mode', 'manual', 'suggestions', 'handoffs', 'resultFile']);
+        obj(t, ['id', 'sourceIds', 'parentTaskId', 'advice', 'adviceRevision', 'mode', 'manual', 'suggestions', 'handoffs', 'resultFile', ...(t && typeof t === 'object' && Object.hasOwn(t, 'intentEdit') ? ['intentEdit'] : [])]);
         id(t.id);
         list(t.sourceIds);
         ensure(t.sourceIds.length > 0);
@@ -265,8 +332,28 @@ function assertProject(v) {
         ensure(new Set(t.sourceIds).size === t.sourceIds.length);
         if (t.parentTaskId !== null)
             ensure(tasks.has(t.parentTaskId)); // Ordered, acyclic.
-        if (t.advice !== null)
-            validateAdvice(t.advice, bids);
+        if (t.intentEdit !== undefined) {
+            const legacy = !!t.intentEdit && typeof t.intentEdit === 'object' && t.intentEdit.version === 'intent-edit.1';
+            obj(t.intentEdit, legacy ? ['version', 'revision'] : ['version', 'revision', 'goal', 'conditions']);
+            ensure(legacy || t.intentEdit.version === 'intent-edit.2');
+            integer(t.intentEdit.revision);
+            ensure(t.intentEdit.revision <= v.revision);
+            if (!legacy && t.intentEdit.goal === null)
+                ensure(t.intentEdit.conditions === null);
+            else if (!legacy) {
+                text(t.intentEdit.goal, 6000);
+                text(t.intentEdit.conditions, 6000, true);
+            }
+        }
+        if (t.advice !== null) {
+            const advice = validateAdvice(t.advice, bids);
+            for (const ref of advice.intent?.basisRefs ?? []) {
+                const b = basisMap.get(ref.basisId);
+                ensure([b, ...b.history].some(b => b.sourceId === ref.sourceId && b.revision === ref.revision));
+                if (t.adviceRevision !== null)
+                    ensure(ref.revision <= t.adviceRevision);
+            }
+        }
         ensure([null, 'mock', 'deepseek'].includes(t.mode));
         // null with advice = imported from project.1, when the basis revision behind the advice was not recorded.
         if (t.adviceRevision !== null) {
@@ -405,11 +492,29 @@ function migrateV2(v, notice = V2_MIGRATION_NOTICE) {
     return { ...v, schemaVersion: SCHEMA, tasks, notice };
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
+/** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
+ * would rewrite it. Every one is converted on the first parse, so no later parse reads manual.* again:
+ * a non-blank goal is copied out; otherwise no goal is invented (goal=null) and only the revision that
+ * withholds the older AI text and question is kept. manual.* stays as written. The result is revalidated. */
+function convertIntentEdits(p) {
+    let converted = false;
+    for (const t of p.tasks) {
+        const e = t.intentEdit, goal = t.manual.understanding;
+        if (e?.version !== 'intent-edit.1')
+            continue;
+        t.intentEdit = goal !== null && goal.trim() ? { version: 'intent-edit.2', revision: e.revision, goal, conditions: t.manual.scope ?? '' }
+            : { version: 'intent-edit.2', revision: e.revision, goal: null, conditions: null };
+        converted = true;
+    }
+    if (converted)
+        assertProject(p);
+    return p;
+}
 export function parseProject(raw) {
     ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT, 'FILE_TOO_LARGE');
     const v = JSON.parse(raw);
     const schema = v?.schemaVersion;
     const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : v;
     assertProject(project);
-    return project; // Freshly parsed, not shared: no defensive copy needed.
+    return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
