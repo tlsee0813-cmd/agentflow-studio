@@ -97,7 +97,7 @@ class FRESH033(unittest.TestCase):
 
     def test_f02_legacy_unknown_and_fact_question_keep_records_readonly(self):
         self.observe();self.send('결제가 실패하는 오류가 있어요.')
-        current=self.state();legacy=json.loads(json.dumps(current));legacy['schemaVersion']='idea015.project.1'
+        current=self.state();legacy=json.loads(json.dumps(current));legacy['schemaVersion']='idea015.project.1';legacy.pop('space',None)  # project.1 predates the plan space
         for b in legacy['bases']:b['locked']=True
         for t in legacy['tasks']:del t['adviceRevision'];del t['resultFile']
         path=OUT/'legacy-fixture.json';self.save(path.name,legacy);count=len(self.wires)

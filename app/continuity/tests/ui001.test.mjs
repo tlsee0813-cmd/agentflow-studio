@@ -221,7 +221,7 @@ test('RETURN032-R5 legacy, missing work, invalid export revisions and unordered 
     assert.equal(preview.targetTaskId,base.currentTaskId);assert.equal(serializeProject(p),before);
   }
   // The real old-schema parser owns migration. This feature only reads its migrated result.
-  const old=JSON.parse(serializeProject(base));old.schemaVersion='idea015.project.1';
+  const old=JSON.parse(serializeProject(base));old.schemaVersion='idea015.project.1';delete old.space; // project.1 predates the plan space
   for(const b of old.bases)b.locked=false;
   for(const t of old.tasks) {delete t.adviceRevision;delete t.resultFile;t.handoffs=t.handoffs.map(h=>({at:h.at,method:h.method,revision:h.revision,text:'보존된 이전 작업문'}));}
   const migrated=parseProject(JSON.stringify(old));

@@ -2215,3 +2215,48 @@ body[data-starting="true"] .project-name {
   font-size:15px;
   color:var(--muted);
 }
+
+/* FLOW090 plan space: whole space -> one area. Wide, quiet cards; state words only where they matter. */
+.brief-form{display:grid;gap:8px;margin:18px 0 6px;max-width:640px}
+.brief-form label{font-weight:700}
+.brief-form label small{font-weight:400;color:var(--muted);margin-left:6px}
+.brief-form textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--paper);resize:vertical}
+.space-view{padding:4px 0 24px}
+.space-crumb,.work-place{display:flex;flex-wrap:wrap;align-items:center;gap:6px;color:var(--muted);margin:0 0 14px}
+.work-place{margin:0 0 10px}
+.space-crumb strong,.work-place strong{color:var(--ink)}
+.crumb-sep{color:var(--muted)}
+.space-head{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px}
+.space-head h1{font-size:26px;margin:2px 0 6px;outline:none}
+.space-brief{font-size:15px;margin:0 0 10px;white-space:pre-wrap}
+.space-head textarea,.space-head input,.area-add input,.area-add textarea,#relation-add input,#relation-add select{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);margin:6px 0}
+.space-head details{margin-top:8px}
+.area-map h2,.area-relations h2,.area-tasks h2{font-size:16px;margin:4px 0 10px}
+.area-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));margin-bottom:12px}
+.area-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;min-height:132px}
+button.area-card:hover,button.area-card:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
+.area-card-name{font-size:17px}
+.area-card-note{margin:0;color:var(--ink);overflow-wrap:anywhere}
+.area-card.unplaced{border-style:dashed;background:transparent}
+.area-card.area-add{border-style:dashed;justify-content:flex-start}
+.area-card.area-add button{align-self:flex-start}
+.tag.area-undecided{background:var(--amber-bg);color:var(--amber)}
+.area-relations{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin:12px 0}
+.relation-list{list-style:none;margin:0 0 8px;padding:0}
+.relation-list li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+#archived-areas{margin-top:12px}
+#archived-areas .row{align-items:center;gap:8px}
+.area-tasks{display:grid;gap:12px;margin-bottom:12px}
+.area-task{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px}
+.area-task h3{font-size:15px;margin:0 0 2px;overflow-wrap:anywhere}
+.area-task .hint{margin:0 0 6px}
+.area-task-result{margin:0 0 8px;color:var(--amber)}
+.area-task .row{gap:8px;align-items:center;flex-wrap:wrap}
+.area-task select{border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:var(--paper)}
+#area-bases{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px 18px}
+.compose-area{display:flex;align-items:center;gap:8px;margin:0 0 8px;flex-wrap:wrap}
+.compose-area label{font-weight:600}
+.compose-area select{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--paper);max-width:100%}
+@media (max-width:640px){.area-grid{grid-template-columns:1fr}.space-head{padding:16px}.space-head h1{font-size:22px}}
+/* Five project views: keep labels on one line and let the row scroll inside itself on narrow screens. */
+@media(max-width:800px){.navigation{overflow-x:auto;scrollbar-width:none}.navigation::-webkit-scrollbar{display:none}.nav-item{flex:0 0 auto;white-space:nowrap}}

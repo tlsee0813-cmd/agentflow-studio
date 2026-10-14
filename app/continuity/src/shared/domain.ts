@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind } from './types.js';
 import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { outcomeOf, contextLinks } from './outcome.js';
@@ -9,7 +9,7 @@ const copy = <T>(value: T): T => structuredClone(value);
 const WORK_KEYS = ['understanding','scope','next','checks'] as const;
 const CONDITION_KEYS = ['scope','checks'] as const;
 export function createProject(): Project {
-  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null};
+  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[]}};
 }
 export function taskOf(p: Project, id = p.currentTaskId): Task { const t=p.tasks.find(t=>t.id === id); ensure(t,'TASK_MISSING'); return t; }
 function change(p: Project): Project { return {...copy(p),revision:p.revision+1,notice:null}; }
@@ -76,15 +76,24 @@ function placeReturn(p: Project, n: Project, id: string, target: string|null) {
 export function focusTask(p: Project, id: string): Project {
   ensure(p.tasks.some(t=>t.id===id),'TASK_MISSING'); const n=change(p); n.currentTaskId=id; return n;
 }
-export function submit(p: Project, selectedId?: string): Project {
+/** areaId: undefined = continue the current task's area, null = none, string = that (active) area. */
+export function submit(p: Project, selectedId?: string, areaId?: string|null): Project {
   text(p.draft);
   const returned=['report','evidence'].includes(p.draftKind);
-  const parent=returned ? returnTargetId(p,selectedId) : p.currentTaskId;
+  const current=p.tasks.find(x=>x.id===p.currentTaskId);
+  // FLOW090: an explicit area target continues that area's latest work, never another area's current task.
+  const target=areaId===undefined?(current?areaOf(p,current):null):areaId;
+  const inArea=(x:Task)=>areaOf(p,x)===target;
+  const parent=returned ? returnTargetId(p,selectedId) : areaId===undefined||(current&&inArea(current)) ? p.currentTaskId : [...p.tasks].reverse().find(inArea)?.id??null;
   const n=change(p);
   const id=uid('T'),t:Task={id,sourceIds:[],parentTaskId:parent,advice:null,adviceRevision:null,mode:null,manual:{understanding:null,scope:null,next:null,checks:null},suggestions:null,handoffs:[],resultFile:null};
   const s=appendSource(n,n.draftKind,n.draft,id);
   t.sourceIds.push(s.id); n.tasks.push(t);
-  if(returned) placeReturn(p,n,id,parent); else n.currentTaskId=id;
+  if(returned) placeReturn(p,n,id,parent); else {
+    n.currentTaskId=id;
+    // FLOW090: a request is placed in the area it was written for; a follow-up keeps the area of the work it continues.
+    if(target!==null){ensure(p.space.areas.some(a=>a.id===target&&!a.archived),'AREA_MISSING');t.areaId=target;}
+  }
   if(s.kind === 'request') {
     let replaced=false;
     for(const b of n.bases) {
@@ -464,4 +473,46 @@ export function markHandoff(p:Project,id:string,text:string,method:'clipboard'|'
 }
 export function restore(p: Project): Project {
   return {...copy(p),pending:null,notice:p.pending ? '중단된 요청의 입력을 복구했습니다. 자동으로 다시 전송하지 않습니다.' : null};
+}
+
+/* ---------- FLOW090: the user's plan space. Plan data, not work records: nothing here edits sources, tasks or reports. ---------- */
+const returnKinds=new Set(['report','evidence']);
+export function isReturnTask(p: Project, t: Task): boolean { return returnKinds.has(p.sources.find(s=>s.id===t.sourceIds[0])?.kind ?? ''); }
+/** A request's own area; a returned report follows the task it returns to. */
+export function areaOf(p: Project, t: Task): string|null {
+  const tasks=new Map(p.tasks.map(x=>[x.id,x])),seen=new Set<string>();let cur:Task|undefined=t;
+  while(cur&&!seen.has(cur.id)){seen.add(cur.id);if(cur.areaId)return cur.areaId;if(!isReturnTask(p,cur))return null;cur=cur.parentTaskId?tasks.get(cur.parentTaskId):undefined;}
+  return null;
+}
+/** The user's own words for what they are making. Rewriting keeps the earlier text. */
+export function setBrief(p: Project, value: string): Project {
+  text(value); if(p.space.brief?.text===value) return p;
+  const n=change(p),old=n.space.brief;
+  n.space.brief={text:value,at:now(),previous:old?[...old.previous,{text:old.text,at:old.at}]:[]};return n;
+}
+function areaName(name: string): string { const v=name.trim(); text(v,60); return v; }
+export function addArea(p: Project, name: string, note=''): Project {
+  const n=change(p);text(note,2000,true);n.space.areas.push({id:uid('A'),name:areaName(name),note:note.trim(),archived:false,createdAt:now()});return n;
+}
+export function editArea(p: Project, id: string, name: string, note: string): Project {
+  text(note,2000,true);const n=change(p),a=n.space.areas.find(a=>a.id===id);ensure(a,'AREA_MISSING');a.name=areaName(name);a.note=note.trim();return n;
+}
+/** Areas are archived, never deleted: placed tasks and their reports stay where they are. */
+export function setAreaArchived(p: Project, id: string, archived: boolean): Project {
+  const n=change(p),a=n.space.areas.find(a=>a.id===id);ensure(a,'AREA_MISSING');a.archived=archived;return n;
+}
+export function addRelation(p: Project, from: string, to: string, kind: RelationKind, note=''): Project {
+  ensure(from!==to&&p.space.areas.some(a=>a.id===from)&&p.space.areas.some(a=>a.id===to),'AREA_MISSING');
+  ensure(['flow','needs','shares','related'].includes(kind));text(note.trim(),200,true);
+  ensure(!p.space.relations.some(r=>r.from===from&&r.to===to&&r.kind===kind),'RELATION_EXISTS');
+  const n=change(p);n.space.relations.push({id:uid('L'),from,to,kind,note:note.trim()});return n;
+}
+export function removeRelation(p: Project, id: string): Project {
+  ensure(p.space.relations.some(r=>r.id===id));const n=change(p);n.space.relations=n.space.relations.filter(r=>r.id!==id);return n;
+}
+/** Explicit tidy-up: put an existing request (with its returns) into an area, or take it out. */
+export function placeTask(p: Project, taskId: string, areaId: string|null): Project {
+  const t=p.tasks.find(x=>x.id===taskId);ensure(t,'TASK_MISSING');ensure(!isReturnTask(p,t),'RETURN_FOLLOWS_PARENT');
+  if(areaId!==null)ensure(p.space.areas.some(a=>a.id===areaId&&!a.archived),'AREA_MISSING');
+  const n=change(p),u=taskOf(n,taskId);if(areaId===null)delete u.areaId;else u.areaId=areaId;return n;
 }

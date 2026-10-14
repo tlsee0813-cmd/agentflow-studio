@@ -93,7 +93,7 @@ class ResultFiles(unittest.TestCase):
         for name,key in [('v1.json','agentflow.idea015.project.v1.legacy-original'),('v2.json','agentflow.idea015.project.v2.legacy-original')]:
             # Selected files retain their own originals; do not allocate a browser backup slot.
             self.recovery(name);raw=(self.materials/name).read_text();self.assertIsNone(self.page.evaluate('(k)=>localStorage.getItem(k)',key))
-            p=self.state();self.assertEqual(p['schemaVersion'],'idea015.project.3');self.assertTrue(all(h['returnId'] is None for t in p['tasks'] for h in t['handoffs']))
+            p=self.state();self.assertEqual(p['schemaVersion'],'idea015.project.4');self.assertTrue(all(h['returnId'] is None for t in p['tasks'] for h in t['handoffs']))
             self.compose();self.page.locator('#draft').fill('복구 후 계속 작성');expect(self.page.locator('#storage-error')).to_be_hidden()
             self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');self.assertIsNone(self.page.evaluate('(k)=>localStorage.getItem(k)',key))
             self.assertEqual(self.state()['draft'],'복구 후 계속 작성');self.assertEqual(self.state()['sources'],p['sources']);self.assertEqual(self.state()['tasks'],p['tasks'])

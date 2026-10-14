@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
+import { API_SCHEMA, SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket } from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -178,7 +178,7 @@ export function validateRequest(v: unknown): ContextRequest {
 }
 /** Same checks as validateProject without the defensive copy; used on freshly parsed JSON. */
 function assertProject(v: unknown): asserts v is Project {
-  obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice']);
+  obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice','space']);
   ensure(v.schemaVersion === SCHEMA, 'UNSUPPORTED_SCHEMA'); id(v.id); integer(v.revision); text(v.name,120); text(v.draft,TEXT_LIMIT,true); text(v.answerDraft,TEXT_LIMIT,true); text(v.basisDraft,TEXT_LIMIT,true);
   ensure(['request','report','evidence','test_answer'].includes(v.draftKind as string)); if (v.notice !== null) text(v.notice,2000);
   list(v.sources); list(v.bases); list(v.tasks); for (const s of v.sources) source(s); for (const b of v.bases) basis(b);
@@ -189,10 +189,16 @@ function assertProject(v: unknown): asserts v is Project {
   for(const [key,value] of Object.entries(v.basisEdits as Record<string,unknown>)) { ensure(basisIds.has(key)); text(value,TEXT_LIMIT,true); }
   const sources = new Map((v.sources as Source[]).map(s=>[s.id,s])); const bids = [...basisIds],basisMap=new Map((v.bases as Basis[]).map(b=>[b.id,b]));
   const tasks=new Set<string>(),returns=new Map<string,{taskId:string;record:ExportRecord}>();
+  const areaIds=space(v.space);
   for (const t of v.tasks) {
-    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile',...(t&&typeof t==='object'&&Object.hasOwn(t,'intentEdit')?['intentEdit']:[])]); id(t.id); list(t.sourceIds); ensure(t.sourceIds.length > 0);
+    const optional=['intentEdit','areaId'].filter(k=>t&&typeof t==='object'&&Object.hasOwn(t,k));
+    obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile',...optional]); id(t.id); list(t.sourceIds); ensure(t.sourceIds.length > 0);
     for (const s of t.sourceIds) ensure(sources.has(s as string)); ensure(new Set(t.sourceIds).size === t.sourceIds.length);
     if(t.parentTaskId !== null) ensure(tasks.has(t.parentTaskId as string)); // Ordered, acyclic.
+    if(t.areaId!==undefined) { // Only a request task is placed; a returned report follows its parent's area.
+      ensure(typeof t.areaId==='string'&&areaIds.has(t.areaId));
+      ensure(!['report','evidence'].includes(sources.get(t.sourceIds[0] as string)!.kind));
+    }
     if(t.intentEdit!==undefined) {
       const legacy=!!t.intentEdit&&typeof t.intentEdit==='object'&&(t.intentEdit as {version?:unknown}).version==='intent-edit.1';
       obj(t.intentEdit,legacy?['version','revision']:['version','revision','goal','conditions']);ensure(legacy||t.intentEdit.version==='intent-edit.2');
@@ -250,13 +256,31 @@ function assertProject(v: unknown): asserts v is Project {
   if(v.currentTaskId !== null) ensure(tasks.has(v.currentTaskId as string));
   if(v.pending !== null) { ticket(v.pending); ensure(v.pending.projectId === v.id && tasks.has((v.pending as Ticket).taskId) && v.pending.revision <= (v.revision as number)); }
 }
+/** FLOW090 plan data: the user's purpose text, areas and typed relations. Returns the area IDs. */
+function space(v: unknown): Set<string> {
+  obj(v,['brief','areas','relations']);
+  if(v.brief!==null) {
+    obj(v.brief,['text','at','previous']);text(v.brief.text,TEXT_LIMIT);date(v.brief.at);list(v.brief.previous,200);
+    for(const old of v.brief.previous){obj(old,['text','at']);text(old.text,TEXT_LIMIT);date(old.at);}
+  }
+  list(v.areas,500);list(v.relations,2000);
+  for(const a of v.areas){obj(a,['id','name','note','archived','createdAt']);id(a.id);text(a.name,60);text(a.note,2000,true);ensure(typeof a.archived==='boolean');date(a.createdAt);}
+  unique(v.areas as {id:string}[]);const ids=new Set((v.areas as {id:string}[]).map(a=>a.id));
+  for(const r of v.relations) {
+    obj(r,['id','from','to','kind','note']);id(r.id);ensure(ids.has(r.from as string)&&ids.has(r.to as string)&&r.from!==r.to);
+    ensure(['flow','needs','shares','related'].includes(r.kind as string));text(r.note,200,true);
+  }
+  unique(v.relations as {id:string}[]);
+  return ids;
+}
+export const EMPTY_SPACE=()=>({brief:null,areas:[],relations:[]});
 export function validateProject(v: unknown): Project { assertProject(v); return structuredClone(v); }
 /** Identity check for an exported text (FNV-1a, 32 bit). Not a signature or security control. */
 export function digest(value: string): string {
   let h=0x811c9dc5; for(let i=0;i<value.length;i++){h^=value.charCodeAt(i);h=Math.imul(h,0x01000193);} return (h>>>0).toString(16).padStart(8,'0');
 }
 export const MIGRATION_NOTICE='이전 형식(project.1)에서 변환했습니다. 기록은 지우지 않았습니다. 이전 AI 정리는 어느 기준 시점에 작성됐는지 알 수 없어 현재 작업문에서 제외합니다.';
-export const V2_MIGRATION_NOTICE='이전 형식(project.2)을 project.3으로 변환했습니다. 기록은 유지하며 과거 내보내기에 파일 식별자를 만들지 않습니다.';
+export const V2_MIGRATION_NOTICE='이전 형식(project.2)을 최신 형식으로 변환했습니다. 기록은 유지하며 과거 내보내기에 파일 식별자를 만들지 않습니다.';
 /** project.1 -> project.2. Nothing user-authored is dropped: old export texts move to legacyText. */
 export function migrateLegacy(v: unknown): unknown {
   obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice']);
@@ -280,7 +304,12 @@ function migrateV2(v:unknown, notice=V2_MIGRATION_NOTICE):unknown {
     const handoffs=t.handoffs.map(h=>{obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText']);return {...h,returnId:null};});
     return {...t,resultFile:null,handoffs};
   });
-  return {...v,schemaVersion:SCHEMA,tasks,notice};
+  return {...v,schemaVersion:SCHEMA,tasks,notice,space:EMPTY_SPACE()};
+}
+/** project.3 -> project.4: nothing changes but an empty plan space (no areas are invented). */
+function migrateV3(v:unknown):unknown {
+  obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice']);ensure(v.schemaVersion===V3_SCHEMA);
+  return {...v,schemaVersion:SCHEMA,space:EMPTY_SPACE()};
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -302,6 +331,6 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : v;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }

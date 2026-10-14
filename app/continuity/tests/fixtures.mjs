@@ -36,7 +36,7 @@ export function synthetic(n, text='짧은 요청') {
 export function longRequests(n) { let p=D.createProject();for(let i=1;i<=n;i++)p=submit(p,`${LONG_REQUEST}${i}`);return p; }
 /** Down-convert to the shipped project.1 shape: lock flag, no advice revision, full handoff text per export. */
 export function toLegacy({project,texts}) {
-  let k=0;const v=structuredClone(project);v.schemaVersion='idea015.project.1';
+  let k=0;const v=structuredClone(project);v.schemaVersion='idea015.project.1';delete v.space;for(const t of v.tasks)delete t.areaId; // project.1 predates the plan space
   v.bases=v.bases.map(({id,text,status,sourceId,revision,history})=>({id,text,status,sourceId,locked:true,revision,history}));
   v.tasks=v.tasks.map(({adviceRevision,resultFile,handoffs,...t})=>({...t,handoffs:handoffs.map(h=>({at:h.at,text:texts[k++],revision:h.revision,method:h.method}))}));
   if(k!==texts.length||project.schemaVersion!==SCHEMA)throw new Error('fixture mismatch');

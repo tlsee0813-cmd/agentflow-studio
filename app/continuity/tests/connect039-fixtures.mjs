@@ -19,7 +19,8 @@ export function fixture() {
   return {p,A,B,H1,H2,HB,firstText,raw:JSON.stringify(fileFor(p,A,H1),null,2)};
 }
 export function v2(p) {
-  const old=structuredClone(p);old.schemaVersion='idea015.project.2';
+  // project.2 predates the FLOW090 plan space and task areas.
+  const old=structuredClone(p);old.schemaVersion='idea015.project.2';delete old.space;for(const t of old.tasks)delete t.areaId;
   for(const t of old.tasks){delete t.resultFile;for(const h of t.handoffs)delete h.returnId;}
   return old;
 }

@@ -308,7 +308,7 @@ class UI001(unittest.TestCase):
         expect(self.page.locator('#return-export')).to_have_text('내보낸 기록 없음')
         self.send('이어 온 관찰 자료','evidence');self.assertEqual(self.state()['tasks'][-1]['parentTaskId'],target)
         self.download_work('return032-before-legacy.md')
-        fixture=self.state();fixture['schemaVersion']='idea015.project.1'
+        fixture=self.state();fixture['schemaVersion']='idea015.project.1';fixture.pop('space',None)  # project.1 predates the plan space
         for b in fixture['bases']:b['locked']=False
         for t in fixture['tasks']:
             t.pop('adviceRevision');t.pop('resultFile')

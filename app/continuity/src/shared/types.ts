@@ -1,4 +1,6 @@
-export const SCHEMA = 'idea015.project.3' as const;
+export const SCHEMA = 'idea015.project.4' as const;
+/** project.3 had no space; it is read as an empty one. */
+export const V3_SCHEMA = 'idea015.project.3' as const;
 export const PREVIOUS_SCHEMA = 'idea015.project.2' as const;
 export const LEGACY_SCHEMA = 'idea015.project.1' as const;
 export const RESULT_SCHEMA = 'agentflow.return.1' as const;
@@ -69,13 +71,21 @@ export interface Task {
   manual: { understanding: string | null; scope: string | null; next: string | null; checks: string | null };
   suggestions: { text: string; why: string }[] | null; handoffs: ExportRecord[];
   resultFile: { returnId: string; rawText: string } | null;
+  /** FLOW090: the area of a request task. Absent = not placed. Returns follow their parent and never carry it. */
+  areaId?: string;
 }
+/** FLOW090: the user's own plan of the product. Areas and relations are layout/plan data, not work records. */
+export interface Area { id: string; name: string; note: string; archived: boolean; createdAt: string }
+export type RelationKind = 'flow' | 'needs' | 'shares' | 'related';
+export interface Relation { id: string; from: string; to: string; kind: RelationKind; note: string }
+export interface Brief { text: string; at: string; previous: { text: string; at: string }[] }
+export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[] }
 export interface Ticket { projectId: string; revision: number; requestId: string; taskId: string }
 export interface Project {
   schemaVersion: typeof SCHEMA; id: string; revision: number; name: string;
   sources: Source[]; bases: Basis[]; tasks: Task[]; currentTaskId: string | null;
   draft: string; answerDraft: string; basisDraft: string; basisEdits: Record<string,string>; draftKind: 'request' | 'report' | 'evidence' | 'test_answer';
-  pending: Ticket | null; notice: string | null;
+  pending: Ticket | null; notice: string | null; space: Space;
 }
 export interface ContextBasis {
   id: string; text: string; status: Basis['status']; sourceId: string; revision: number;
