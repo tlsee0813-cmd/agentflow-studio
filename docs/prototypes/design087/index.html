@@ -74,7 +74,13 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
 /* A: spatial map */
 .a-grid{display:grid;gap:12px;align-items:start}
 @media (min-width:1100px){.a-grid.sel{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}}
-.map{position:relative;width:100%}
+.map{position:relative;width:100%;margin:0 auto}
+.map.tight .node .rl,.map.compact .node .sm{display:none}
+.map.compact .node .nm{font-size:15px}
+@media (min-width:1100px){.a-grid.sel>.panel:first-child{position:sticky;top:8px}}
+.cn{font-size:12px;color:var(--muted);margin-top:4px}
+.ov .flows{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);width:100%}
+.ov .flows .opt{border-bottom:1px dashed var(--muted)}
 .map svg.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .map .grp{position:absolute;border-radius:16px;background:var(--group);border:1px dashed var(--line)}
 .map .grp span{position:absolute;left:12px;top:8px;font-size:13px;color:var(--muted);font-weight:600}
@@ -151,7 +157,8 @@ const AREAS=[
   {id:'booking',name:'예약',group:'flow',summary:'날짜·시간을 골라 예약',idea:['날짜·시간 선택 후 예약 확정','회원·비회원 모두 예약 (10/05 결정)']},
   {id:'cancel',name:'취소',group:'flow',summary:'예약 취소 화면',idea:['예약을 찾아 취소','취소 버튼 문구 다듬기']},
   {id:'notify',name:'알림',group:'support',summary:'예약·취소 알림',idea:['예약 확정 알림','취소 알림']}];
-const FLOWS=[['member','booking','로그인 (이제 선택)'],['booking','cancel','예약 후 취소'],['booking','notify','예약 알림'],['cancel','notify','취소 알림']];
+// Area-to-area relations: one source for every variant. The 4th field marks a path that is now optional.
+const FLOWS=[['member','booking','로그인 (이제 선택)',true],['booking','cancel','예약 후 취소'],['booking','notify','예약 알림'],['cancel','notify','취소 알림']];
 const DECISIONS={
   d1:{text:'예약은 로그인한 회원만 할 수 있다',date:'10/01',areas:['booking','member'],replacedBy:'d2'},
   d2:{text:'비회원도 이름·연락처로 예약할 수 있다',date:'10/05',areas:['booking','member','notify'],replaces:'d1',
@@ -198,6 +205,7 @@ function rolesOf(id){
   const roles=[...new Set(tasksOf(id).map(([,t])=>t.role))];
   return roles.length?roles.map(r=>`${ROLES[r].name}·${ROLES[r].tool}`).join(' / '):'담당 없음';
 }
+const flowsOf=id=>FLOWS.filter(([f,t])=>f===id||t===id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const badges=id=>flags(id).map(([k,t])=>`<span class="badge ${k}">${esc(t)}</span>`).join(' ');
 const areaColor=id=>`var(--a-${id})`;
@@ -254,7 +262,10 @@ function needPanel(a){
   const decs=Object.entries(DECISIONS).filter(([,d])=>d.areas.includes(a.id));
   const reqs=Object.entries(REQUESTS).filter(([,r])=>r.area===a.id).reverse();
   const qs=QUESTIONS.filter(q=>q.area===a.id);
+  const links=flowsOf(a.id).map(([f,t,label,opt])=>{const other=f===a.id?t:f;
+    return `<li>${f===a.id?'→':'←'} <button class="link flow-link" data-area="${other}">${esc(area(other).name)}</button> · ${esc(label)}${opt?' <span class="badge">선택 경로</span>':''}</li>`;}).join('');
   return `<div class="sec">구상</div><ul style="margin:0;padding-left:18px">${a.idea.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
+  <div class="sec">다른 영역과의 연결</div><ul style="margin:0;padding-left:18px">${links}</ul>
   ${decs.length?`<div class="sec">결정</div>${decs.map(([k,d])=>`<div class="item${d.replacedBy?' old':''}${hi(k)}"><h4>${d.replacedBy?`<s>${esc(d.text)}</s>`:esc(d.text)}</h4>
     <div class="muted" style="font-size:13px">${d.date} · ${d.replacedBy?`${DECISIONS[d.replacedBy].date} 결정으로 바뀜`:'지금 결정'}</div></div>`).join('')}`:''}
   <div class="sec">요청</div>${reqs.length?reqs.map(([k,r],i)=>`<div class="item${i?' old':''}${hi(k)}"><h4>${esc(r.text)}</h4>
@@ -376,29 +387,43 @@ const box=(x,y,w,h)=>({x,y,w,h,cx:x+w/2,cy:y+h/2});
 
 /* ---------- Variant A: spatial structure map + detail tabs ---------- */
 const LAYOUT={
-  wide:{w:900,h:640,node:[190,150],groups:{flow:[20,20,670,600],support:[700,20,190,600]},
-        pos:{member:[40,60],booking:[260,245],cancel:[480,440],notify:[705,245]}},
+  // Rows are 40 units apart so each link label sits in a gap, not under a node.
+  wide:{w:1000,h:600,node:[200,140],groups:{flow:[20,20,720,560],support:[760,20,220,560]},
+        pos:{member:[40,62],booking:[280,220],cancel:[520,400],notify:[770,220]}},
   narrow:{w:400,h:820,node:[170,150],groups:{flow:[10,10,380,560],support:[10,590,380,220]},
           pos:{member:[20,50],booking:[210,210],cancel:[20,390],notify:[115,630]}}};
 function variantA(){
   const L=matchMedia('(max-width:640px)').matches?LAYOUT.narrow:LAYOUT.wide,[nw,nh]=L.node,pct=(v,t)=>`${v/t*100}%`;
   const boxes=Object.fromEntries(AREAS.map(a=>[a.id,box(...L.pos[a.id],nw,nh)]));
-  const edges=FLOWS.map(([f,t,label])=>{const c=curve(boxes[f],boxes[t]),on=state.area&&(state.area===f||state.area===t);
-    return `<path d="${c.d}" fill="none" stroke="${on?'var(--edge-hi)':'var(--edge)'}" stroke-width="${on?3:2}" marker-end="url(#arr${on?'h':''})"/>
-      <text class="edge-label" x="${c.mx}" y="${c.my-6}" text-anchor="middle">${esc(label)}</text>`;}).join('');
+  const edges=FLOWS.map(([f,t,label,opt])=>{const c=curve(boxes[f],boxes[t]),on=state.area&&(state.area===f||state.area===t);
+    return `<path d="${c.d}" fill="none" stroke="${on?'var(--edge-hi)':'var(--edge)'}" stroke-width="${on?3:2}" ${opt?'stroke-dasharray="7 5"':''} marker-end="url(#arr${on?'h':''})"/>
+      <text class="edge-label" x="${c.mx}" y="${c.my}" text-anchor="middle" dominant-baseline="middle">${esc(label)}</text>`;}).join('');
   const groups=Object.entries(L.groups).map(([g,[x,y,w,h]])=>`<div class="grp" style="left:${pct(x,L.w)};top:${pct(y,L.h)};width:${pct(w,L.w)};height:${pct(h,L.h)}"><span>${GROUPS[g]}</span></div>`).join('');
   const nodes=AREAS.map(a=>{const b=boxes[a.id];return `<button class="node" data-area="${a.id}" aria-current="${state.area===a.id}"
       style="left:${pct(b.x,L.w)};top:${pct(b.y,L.h)};width:${pct(nw,L.w)};min-height:${pct(nh,L.h)};border-top:6px solid ${areaColor(a.id)}"
       aria-label="${esc(a.name)} 영역. ${flags(a.id).map(f=>f[1]).join(', ')}">
       <div class="nm">${esc(a.name)}</div><div class="sm">${esc(a.summary)}</div><div class="fl">${badges(a.id)}</div><div class="rl">${esc(rolesOf(a.id))}</div></button>`;}).join('');
   return `<div class="a-grid${state.area?' sel':''}">
-    <div class="panel" style="padding:10px"><div class="map" style="aspect-ratio:${L.w}/${L.h}">${groups}
+    <div class="panel" style="padding:10px"><p class="sub" style="margin:0 0 6px">영역을 누르면 구상·작업·결과·변경을 볼 수 있어요. 점선은 이제 선택인 경로입니다.</p>
+      <div class="map" id="map" data-w="${L.w}" data-h="${L.h}" data-fit="${L===LAYOUT.wide}" style="aspect-ratio:${L.w}/${L.h}">${groups}
       <svg class="edges" viewBox="0 0 ${L.w} ${L.h}" aria-hidden="true"><defs>
         <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--edge)"/></marker>
         <marker id="arrh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--edge-hi)"/></marker></defs>${edges}</svg>
       ${nodes}</div></div>
-    ${state.area?`<div class="panel">${detail()}</div>`:`<div class="panel detail"><h2>영역을 고르면 구상·작업·결과·변경을 볼 수 있어요</h2><p class="muted">화살표는 고객 흐름과 알림 연결입니다.</p></div>`}
+    ${state.area?`<div class="panel">${detail()}</div>`:''}
   </div>`;
+}
+
+// Fit the whole map to the visible height on wide screens (first screen shows all four areas and their links).
+// Below a readable scale it stops shrinking; phones keep the tall layout and the list view instead.
+function fitMap(){
+  const map=document.getElementById('map');if(!map)return;
+  map.style.width='';map.classList.remove('compact','tight');if(map.dataset.fit!=='true')return;
+  const w=+map.dataset.w,h=+map.dataset.h,availW=map.parentElement.clientWidth-20;
+  const availH=innerHeight-(state.area?24:map.getBoundingClientRect().top+scrollY)-56;
+  const scale=Math.min(availW/w,Math.max(availH/h,.62));
+  map.style.width=`${Math.floor(w*scale)}px`;// Scaled-down nodes drop the roles line (header and detail still show roles), then the summary.
+  map.classList.toggle('tight',scale<.95);map.classList.toggle('compact',scale<.75);
 }
 
 /* ---------- Variant B: feature cards + relation diagram of the selected area ---------- */
@@ -421,7 +446,8 @@ const TAB_FOR={0:'change',1:'need',2:'work',3:'result',4:'work'};
 function variantB(){
   const cards=AREAS.map(a=>`<button class="card" data-area="${a.id}" aria-current="${state.area===a.id}" style="border-top:6px solid ${areaColor(a.id)}">
     <div class="nm">${esc(a.name)}</div><div class="muted" style="font-size:13px">${esc(a.summary)} · ${GROUPS[a.group]}</div>
-    <div style="margin:6px 0">${badges(a.id)}</div><div class="muted" style="font-size:12px">${esc(rolesOf(a.id))}</div></button>`).join('');
+    <div style="margin:6px 0">${badges(a.id)}</div><div class="muted" style="font-size:12px">${esc(rolesOf(a.id))}</div>
+    <div class="cn">연결: ${flowsOf(a.id).map(([f,t,,opt])=>`${f===a.id?'→ '+esc(area(t).name):'← '+esc(area(f).name)}${opt?' (선택)':''}`).join(' · ')}</div></button>`).join('');
   let rel='';
   if(state.area){
     const g=relGraph(state.area),near=state.focus?closedNeighborhood(state.focus,g.edges):null,lab=Object.fromEntries(g.nodes.map(n=>[n.k,n.label]));
@@ -459,10 +485,10 @@ function events(){
   return ev;
 }
 function variantC(){
-  const order=['member','booking','cancel'];
-  const ov=`<div class="panel ov" role="group" aria-label="구상 개요">${order.map((id,i)=>`${i?'<span class="arrow" aria-hidden="true">→</span>':''}<button class="pill" data-area="${id}" aria-pressed="${state.area===id}" style="border-left:6px solid ${areaColor(id)}">${esc(area(id).name)} ${badges(id)}</button>`).join('')}
-    <span class="gl">${GROUPS.flow}</span><span class="arrow" aria-hidden="true">|</span>
-    <button class="pill" data-area="notify" aria-pressed="${state.area==='notify'}" style="border-left:6px solid ${areaColor('notify')}">${esc(area('notify').name)} ${badges('notify')}</button><span class="gl">${GROUPS.support}</span></div>`;
+  const pill=id=>`<button class="pill" data-area="${id}" aria-pressed="${state.area===id}" style="border-left:6px solid ${areaColor(id)}">${esc(area(id).name)} ${badges(id)}</button>`;
+  const ov=`<div class="panel ov" role="group" aria-label="구상 개요">
+    ${Object.keys(GROUPS).map(g=>`<span class="gl" style="margin-left:0">${GROUPS[g]}:</span>${AREAS.filter(a=>a.group===g).map(a=>pill(a.id)).join('')}`).join('<span class="arrow" aria-hidden="true">|</span>')}
+    <ul class="flows" aria-label="영역 연결">${FLOWS.map(([f,t,label,opt])=>`<li class="${opt?'opt':''}">${esc(area(f).name)} → ${esc(area(t).name)} · ${esc(label)}</li>`).join('')}</ul></div>`;
   const ev=events(),lanes=[['user','사용자 결정·요청'],['screen','화면 담당 · Claude'],['api','API 담당 · Codex']];
   const cell=(lane,date)=>{
     const swap=lane==='screen'&&date==='10/06'?'<span class="swap">세션 1 → 세션 2 교체</span>':'';
@@ -490,13 +516,14 @@ function render(){
   main.innerHTML=state.list?listView():state.v==='A'?variantA():state.v==='B'?variantB():variantC();
   document.getElementById('back')?.addEventListener('click',back);
   document.querySelectorAll('#variants [data-v]').forEach(b=>b.addEventListener('click',()=>{pendingFocus=`#variants [data-v="${b.dataset.v}"]`;go({v:b.dataset.v,list:false});}));
-  main.querySelectorAll('.node[data-area],.card[data-area],.pill[data-area],.list [data-area]').forEach(b=>b.addEventListener('click',()=>{
+  main.querySelectorAll('.node[data-area],.card[data-area],.pill[data-area],.list [data-area],.flow-link[data-area]').forEach(b=>b.addEventListener('click',()=>{
     if(state.area===b.dataset.area){pendingFocus='#detail-title';render();return;}openArea(b.dataset.area);}));
   main.querySelectorAll('.chip[data-ev]').forEach(b=>b.addEventListener('click',()=>openArea(b.dataset.area,b.dataset.tab,b.dataset.ev)));
   main.querySelectorAll('.rn[data-node]').forEach(b=>b.addEventListener('click',()=>{
     const k=b.dataset.node,off=state.focus===k;state.focus=off?null:k;pendingFocus=`[data-node="${k}"]`;
     go(off?{}:{tab:TAB_FOR[b.dataset.col]},'replace');}));
   if(main.querySelector('[role=tablist]'))bindDetail(main);
+  if(state.v==='A'&&!state.list)fitMap();
   if(state.v==='B'&&!state.list)requestAnimationFrame(drawRel);
   if(pendingFocus){const el=document.querySelector(pendingFocus);pendingFocus=null;if(el){el.focus({preventScroll:false});if(el.id==='detail-title'||el.id==='draft')el.scrollIntoView({block:'nearest'});}}
 }

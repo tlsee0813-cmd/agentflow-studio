@@ -56,5 +56,31 @@ with sync_playwright() as p:
             import re;assert not re.search(r'\b(t\d|r\d|d\d|res\d|s\d)\b',txt),'internal ids shown'
         ok(f'{width} no internal ids in visible text')
         ctx.close()
+    # P1: first screen of A fits common desktop viewports; relation info comes from the same FLOWS in A/B/C
+    for vw,vh in ((1280,720),(1265,712)):
+        ctx=b.new_context(viewport={'width':vw,'height':vh});page=ctx.new_page();page.set_default_timeout(4000)
+        page.on('pageerror',lambda e:errors.append(f'{vw} pageerror: {e}'))
+        page.goto(URL+'#v=A');rects=[page.locator(f'.node[data-area="{a}"]').bounding_box() for a in ('member','booking','cancel','notify')]
+        assert all(r['y']+r['height']<=vh and r['x']+r['width']<=vw for r in rects),f'a node is cut off at {vw}x{vh}: {rects}'
+        for i in range(4):
+            for j in range(i+1,4):
+                p,q=rects[i],rects[j];assert p['x']+p['width']<=q['x'] or q['x']+q['width']<=p['x'] or p['y']+p['height']<=q['y'] or q['y']+q['height']<=p['y'],'nodes overlap'
+        ok(f'{vw}x{vh} A first screen shows all four areas, not overlapping')
+        if OUT:page.screenshot(path=str(OUT/f'A-overview-{vw}x{vh}.png'))
+        page.locator('.node[data-area="booking"]').click();page.mouse.wheel(0,1500);page.wait_for_timeout(100)
+        r=page.locator('.node[data-area="booking"]').bounding_box();assert 0<=r['y'] and r['y']+r['height']<=vh,'map scrolled away while reading detail'
+        ok(f'{vw}x{vh} A map stays in view while the detail scrolls')
+        if OUT:page.screenshot(path=str(OUT/f'A-selected-scrolled-{vw}x{vh}.png'))
+        page.goto('about:blank');page.goto(URL+'#v=C');flows=page.locator('.ov .flows')
+        for label in ('회원 → 예약 · 로그인 (이제 선택)','예약 → 취소 · 예약 후 취소','예약 → 알림 · 예약 알림','취소 → 알림 · 취소 알림'):expect(flows).to_contain_text(label)
+        assert '→' not in page.locator('.ov').inner_text().split('회원 → 예약')[0],'no unlabeled arrows before the flow list'
+        ok(f'{vw}x{vh} C overview lists the four links with labels; login path marked optional')
+        page.goto(URL+'#v=B');expect(page.locator('.card[data-area="booking"] .cn')).to_have_text('연결: ← 회원 (선택) · → 취소 · → 알림')
+        ok(f'{vw}x{vh} B cards show each area\'s links')
+        for v in 'ABC':
+            page.goto('about:blank');page.goto(URL+f'#v={v}&a=booking&t=need');expect(page.locator('#panel')).to_contain_text('다른 영역과의 연결')
+            expect(page.locator('#panel')).to_contain_text('회원 · 로그인 (이제 선택)');page.locator('.flow-link[data-area="cancel"]').click();expect(page.locator('#detail-title')).to_contain_text('취소')
+        ok(f'{vw}x{vh} detail lists the same links in A/B/C and opens the linked area')
+        ctx.close()
     b.close()
 print('ERRORS',errors);sys.exit(1 if errors else 0)
