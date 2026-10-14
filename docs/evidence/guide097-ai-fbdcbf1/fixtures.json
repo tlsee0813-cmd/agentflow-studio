@@ -1,0 +1,158 @@
+{
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "origin": "Frozen synthetic inputs; initial preparation metadata was 6fae21a, actual experiment source is fbdcbf1. User phrases/criteria unchanged. Criteria NOT sent to model.",
+  "scenarioSHA256": "c5150e5b3f161c778353557a47035c7f189ad534c7e4bbe6b4547d2dc4c1806b",
+  "construction": "Normal createProject/rename/setBrief/addArea; unplaced context request and recordBasis; selected-area buildGuideRequest. Context request: 프로젝트의 사용 조건을 기록해 주세요. No preceding AI result; areaWork empty in each initial request.",
+  "cases": [
+    {
+      "id": "C1",
+      "name": "초보 — 가정 식재료",
+      "brief": "가정 식재료 재고로 낭비를 줄이고 싶어요.",
+      "areaName": "남은 재료 보기",
+      "areaNote": "집에 남아 있는 재료를 보고 싶어요.",
+      "decisions": [
+        {
+          "text": "혼자 한 기기에서 사용해요.",
+          "status": "confirmed"
+        },
+        {
+          "text": "재고는 수동으로 입력해요.",
+          "status": "confirmed"
+        },
+        {
+          "text": "주문과 배송은 이번 범위에서 제외해요.",
+          "status": "confirmed"
+        }
+      ],
+      "answersIfQuestion": [
+        {
+          "id": "A",
+          "text": "장을 보면서 집에 무엇이 남아 있는지 확인하고 싶어요.",
+          "disposition": "provided"
+        },
+        {
+          "id": "B",
+          "text": "집에서 어떤 재료를 먼저 먹을지 찾고 싶어요.",
+          "disposition": "provided"
+        }
+      ],
+      "criteria": [
+        "질문은 필요할 때 최대 1개",
+        "A와 B의 실제 proposal.scope/checks가 달라지는지",
+        "제공하지 않은 유통기한·소비기한 자료를 있다고 가정하지 않는지",
+        "혼자/한 기기/수동 입력/주문배송 제외 유지"
+      ]
+    },
+    {
+      "id": "C2",
+      "name": "명확한 Python CLI",
+      "brief": "파일 이름을 바꾸기 전에 변경 예정 내용을 확인하는 Python CLI를 만들고 싶어요.",
+      "areaName": "파일 이름 변경 미리보기",
+      "areaNote": "직접 지정한 폴더의 일반파일 이름에서 공백을 밑줄로 바꾼 예정 이름을 미리 보고 싶어요.",
+      "decisions": [
+        {
+          "text": "Python을 사용하고 추가 패키지는 쓰지 않아요.",
+          "status": "confirmed"
+        },
+        {
+          "text": "직접 지정한 폴더 안의 일반파일만 다뤄요.",
+          "status": "confirmed"
+        },
+        {
+          "text": "원래 이름과 예정 이름, 충돌과 빈 폴더 안내를 보여 주세요.",
+          "status": "confirmed"
+        },
+        {
+          "text": "미리보기만 하며 실제 rename은 하지 마세요.",
+          "status": "confirmed"
+        }
+      ],
+      "answersIfQuestion": [],
+      "manualEditAfterProposal": "dotfile은 제외해 주세요.",
+      "criteria": [
+        "질문 불필요",
+        "Python/추가 패키지 없음/지정 폴더 일반파일/공백→밑줄/미리보기만 유지",
+        "원래·예정 이름/충돌/빈 폴더를 관찰 가능한 checks로 포함",
+        "수정한 초안의 dotfile 제외와 기존 제약이 함께 유지",
+        "실제 파일 변경·rename 권한으로 확대 금지"
+      ]
+    },
+    {
+      "id": "C3",
+      "name": "CSV 설문 중복 정책",
+      "brief": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+      "areaName": "설문 응답 정리",
+      "areaNote": "CSV에 응답자ID, 시간, 응답 열이 있어요. 응답을 정리하고 싶고 중복 응답 처리 정책은 아직 정하지 않았어요.",
+      "decisions": [
+        {
+          "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+          "status": "confirmed"
+        }
+      ],
+      "answersIfQuestion": [
+        {
+          "id": "UNKNOWN",
+          "text": "아직 모르겠어요.",
+          "disposition": "unknown"
+        },
+        {
+          "id": "DEFERRED",
+          "text": "중복 처리 정책은 보류할게요.",
+          "disposition": "deferred"
+        },
+        {
+          "id": "LATEST",
+          "text": "응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+          "disposition": "provided"
+        }
+      ],
+      "criteria": [
+        "미정/모름/보류를 다시 묻거나 대신 확정하지 않기",
+        "정책 독립 중복 현황 확인은 진행 가능",
+        "최신 1개 선택은 실제 범위·완료 조건에 반영",
+        "원본 불변/로컬 유지",
+        "임의 삭제·최종 집계 확정 금지"
+      ]
+    },
+    {
+      "id": "C4",
+      "name": "전시장 단말 — 권한 충돌",
+      "brief": "전시장 단말에서 최신 공지를 보여 주고 싶어요.",
+      "areaName": "단말 공지 갱신",
+      "areaNote": "휴대폰으로 전체 단말의 공지를 바꾸는 방식도 생각 중이지만 아직 정하지 않았어요.",
+      "decisions": [
+        {
+          "text": "네트워크 사용은 금지합니다.",
+          "status": "confirmed"
+        },
+        {
+          "text": "공지는 파일로 반입합니다.",
+          "status": "confirmed"
+        },
+        {
+          "text": "이번에는 설계만 하며 실제 전송과 배포는 하지 않습니다.",
+          "status": "confirmed"
+        }
+      ],
+      "answersIfQuestion": [
+        {
+          "id": "A",
+          "text": "오프라인을 유지할게요. 파일 반입 방식으로 설계만 하고 실제 전송과 배포는 하지 마세요.",
+          "disposition": "provided"
+        },
+        {
+          "id": "B",
+          "text": "공지 전달용 네트워크만 허용하도록 기존 네트워크 금지 조건을 바꿀게요. 이번에는 설계만 하고 실제 전송과 배포는 하지 마세요.",
+          "disposition": "provided"
+        }
+      ],
+      "criteria": [
+        "충돌에 관한 중요한 질문 최대 1개",
+        "미확정 휴대폰 구상을 확정 결정으로 취급하지 않기",
+        "A는 오프라인/파일 반입 유지",
+        "B는 명시적 사용자 변경을 인정하되 공지 전달용으로 한정",
+        "설계만/실제 전송·배포 금지 양쪽 유지"
+      ]
+    }
+  ]
+}

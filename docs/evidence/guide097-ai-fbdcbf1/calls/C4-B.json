@@ -1,0 +1,173 @@
+{
+  "slot": "C4-B",
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "request": {
+    "schemaVersion": "guidance.1",
+    "ticket": {
+      "projectId": "P_0fc9bbaf-3d21-4c73-903e-2fb3aef49c3d",
+      "revision": 9,
+      "requestId": "G_9e530d83-0267-46b1-9c1c-302d5bf198bb",
+      "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d"
+    },
+    "projectName": "전시장 단말 — 권한 충돌",
+    "brief": "전시장 단말에서 최신 공지를 보여 주고 싶어요.",
+    "area": {
+      "id": "A_47e85546-b580-420e-8fba-b09fe584056d",
+      "name": "단말 공지 갱신",
+      "note": "휴대폰으로 전체 단말의 공지를 바꾸는 방식도 생각 중이지만 아직 정하지 않았어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "네트워크 사용은 금지합니다.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D3",
+        "text": "공지는 파일로 반입합니다.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D4",
+        "text": "이번에는 설계만 하며 실제 전송과 배포는 하지 않습니다.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": {
+      "question": {
+        "kind": "choice",
+        "text": "이번에 만들 결과물은 어느 쪽에 더 가까운가요?",
+        "why": "설계 산출물의 형태가 정해지면 초안의 범위와 완료 조건이 그 형태에 맞게 달라집니다.",
+        "options": [
+          {
+            "label": "화면/동작 흐름 정리",
+            "consequence": "단말이 공지 파일을 어떻게 읽어 화면에 반영하는지 흐름과 상태를 문서로 정리하는 범위가 됩니다."
+          },
+          {
+            "label": "파일 형식·갱신 규칙 정의",
+            "consequence": "공지 파일의 형식과 갱신 시점·조건을 정의하는 문서 중심 범위가 됩니다."
+          },
+          {
+            "label": "휴대폰 조작 방식 설계",
+            "consequence": "휴대폰에서 전체 단말 공지를 바꾸는 조작 흐름을 설계하는 범위가 되며, 미정인 방식 선택을 전제로 두게 됩니다."
+          }
+        ]
+      },
+      "text": "공지 전달용 네트워크만 허용하도록 기존 네트워크 금지 조건을 바꿀게요. 이번에는 설계만 하고 실제 전송과 배포는 하지 마세요.",
+      "disposition": "provided"
+    }
+  },
+  "actualModelResponse": {
+    "providerHTTP": 200,
+    "model": "deepseek-flash",
+    "finishReason": "stop",
+    "usage": {
+      "prompt_tokens": 1392,
+      "completion_tokens": 350,
+      "total_tokens": 1742,
+      "prompt_tokens_details": {
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 752
+    },
+    "message": {
+      "role": "assistant",
+      "content": "{\"question\":null,\"proposal\":{\"goal\":\"단말이 공지 파일을 읽어 화면에 반영하는 흐름과 상태를 문서로 정리한다. 네트워크 없이 파일 반입만으로 최신 공지가 표시되는 경로를 설계 수준에서 명확히 한다.\",\"scope\":\"이번에 할 것: 단말이 공지 파일을 인식·읽기·화면 반영하는 동작 흐름과 상태(예: 정상 표시, 파일 없음, 읽기 실패 시 화면 유지 여부)를 문서로 정리한다. 하지 않을 것: 실제 전송·배포 구현, 휴대폰 조작 방식 확정, 파일 형식·갱신 주기 확정, 네트워크 사용.\",\"checks\":\"문서에 공지 파일이 단말 화면에 반영되기까지의 단계가 순서대로 나열되어 있고, 각 단계에서 발생할 수 있는 상태와 그때 화면이 어떻게 되는지가 함께 적혀 있다. 파일이 없거나 읽히지 않을 때의 화면 동작이 상태 목록에 포함되어 있다.\",\"open\":[\"공지 파일의 구체적 형식과 갱신 시점·조건은 아직 정하지 않음\",\"휴대폰으로 전체 단말 공지를 바꾸는 방식은 보류 상태\",\"파일 없음·읽기 실패 시 화면을 유지할지 이전 공지를 계속 보여줄지는 흐름 정리 후 결정 필요\"]}}"
+    }
+  },
+  "productResponse": {
+    "httpStatus": 200,
+    "body": {
+      "mode": "deepseek",
+      "ticket": {
+        "projectId": "P_0fc9bbaf-3d21-4c73-903e-2fb3aef49c3d",
+        "revision": 9,
+        "requestId": "G_9e530d83-0267-46b1-9c1c-302d5bf198bb",
+        "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d"
+      },
+      "reply": {
+        "question": null,
+        "proposal": {
+          "goal": "단말이 공지 파일을 읽어 화면에 반영하는 흐름과 상태를 문서로 정리한다. 네트워크 없이 파일 반입만으로 최신 공지가 표시되는 경로를 설계 수준에서 명확히 한다.",
+          "scope": "이번에 할 것: 단말이 공지 파일을 인식·읽기·화면 반영하는 동작 흐름과 상태(예: 정상 표시, 파일 없음, 읽기 실패 시 화면 유지 여부)를 문서로 정리한다. 하지 않을 것: 실제 전송·배포 구현, 휴대폰 조작 방식 확정, 파일 형식·갱신 주기 확정, 네트워크 사용.",
+          "checks": "문서에 공지 파일이 단말 화면에 반영되기까지의 단계가 순서대로 나열되어 있고, 각 단계에서 발생할 수 있는 상태와 그때 화면이 어떻게 되는지가 함께 적혀 있다. 파일이 없거나 읽히지 않을 때의 화면 동작이 상태 목록에 포함되어 있다.",
+          "open": [
+            "공지 파일의 구체적 형식과 갱신 시점·조건은 아직 정하지 않음",
+            "휴대폰으로 전체 단말 공지를 바꾸는 방식은 보류 상태",
+            "파일 없음·읽기 실패 시 화면을 유지할지 이전 공지를 계속 보여줄지는 흐름 정리 후 결정 필요"
+          ]
+        }
+      }
+    }
+  },
+  "draft": {
+    "formatter": "candidate exported proposalText(areaName, proposal, first, request.answer), same function actual UI calls",
+    "formatterText": "‘단말 공지 갱신’ 영역의 첫 작업을 해 주세요.\n목표: 단말이 공지 파일을 읽어 화면에 반영하는 흐름과 상태를 문서로 정리한다. 네트워크 없이 파일 반입만으로 최신 공지가 표시되는 경로를 설계 수준에서 명확히 한다.\n이번 범위: 이번에 할 것: 단말이 공지 파일을 인식·읽기·화면 반영하는 동작 흐름과 상태(예: 정상 표시, 파일 없음, 읽기 실패 시 화면 유지 여부)를 문서로 정리한다. 하지 않을 것: 실제 전송·배포 구현, 휴대폰 조작 방식 확정, 파일 형식·갱신 주기 확정, 네트워크 사용.\n완료 조건: 문서에 공지 파일이 단말 화면에 반영되기까지의 단계가 순서대로 나열되어 있고, 각 단계에서 발생할 수 있는 상태와 그때 화면이 어떻게 되는지가 함께 적혀 있다. 파일이 없거나 읽히지 않을 때의 화면 동작이 상태 목록에 포함되어 있다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 공지 파일의 구체적 형식과 갱신 시점·조건은 아직 정하지 않음 / 휴대폰으로 전체 단말 공지를 바꾸는 방식은 보류 상태 / 파일 없음·읽기 실패 시 화면을 유지할지 이전 공지를 계속 보여줄지는 흐름 정리 후 결정 필요\n\n안내 질문과 사용자 답변 원문:\n질문: 이번에 만들 결과물은 어느 쪽에 더 가까운가요?\n답(사용자 답변): 공지 전달용 네트워크만 허용하도록 기존 네트워크 금지 조건을 바꿀게요. 이번에는 설계만 하고 실제 전송과 배포는 하지 마세요.",
+    "editedText": "‘단말 공지 갱신’ 영역의 첫 작업을 해 주세요.\n목표: 단말이 공지 파일을 읽어 화면에 반영하는 흐름과 상태를 문서로 정리한다. 네트워크 없이 파일 반입만으로 최신 공지가 표시되는 경로를 설계 수준에서 명확히 한다.\n이번 범위: 이번에 할 것: 단말이 공지 파일을 인식·읽기·화면 반영하는 동작 흐름과 상태(예: 정상 표시, 파일 없음, 읽기 실패 시 화면 유지 여부)를 문서로 정리한다. 하지 않을 것: 실제 전송·배포 구현, 휴대폰 조작 방식 확정, 파일 형식·갱신 주기 확정, 네트워크 사용.\n완료 조건: 문서에 공지 파일이 단말 화면에 반영되기까지의 단계가 순서대로 나열되어 있고, 각 단계에서 발생할 수 있는 상태와 그때 화면이 어떻게 되는지가 함께 적혀 있다. 파일이 없거나 읽히지 않을 때의 화면 동작이 상태 목록에 포함되어 있다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 공지 파일의 구체적 형식과 갱신 시점·조건은 아직 정하지 않음 / 휴대폰으로 전체 단말 공지를 바꾸는 방식은 보류 상태 / 파일 없음·읽기 실패 시 화면을 유지할지 이전 공지를 계속 보여줄지는 흐름 정리 후 결정 필요\n\n안내 질문과 사용자 답변 원문:\n질문: 이번에 만들 결과물은 어느 쪽에 더 가까운가요?\n답(사용자 답변): 공지 전달용 네트워크만 허용하도록 기존 네트워크 금지 조건을 바꿀게요. 이번에는 설계만 하고 실제 전송과 배포는 하지 마세요.",
+    "submission": "adopted unsent request only; no submit/begin/handoff generation"
+  },
+  "outcome": {
+    "slot": "C4-B",
+    "productHTTP": 200,
+    "error": null,
+    "question": false,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "draftExact": true,
+      "unsent": true,
+      "areaTarget": {
+        "area": "A_47e85546-b580-420e-8fba-b09fe584056d"
+      },
+      "questionPreserved": true,
+      "answerPreserved": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "basesUnchanged": true,
+      "originalProjectUnchanged": true
+    }
+  },
+  "metadata": {
+    "providerSendOrdinal": 11,
+    "latencyMs": 3110,
+    "productRequestBytes": 1880,
+    "productResponseBytes": 1459,
+    "localHTTPAttempts": 1
+  },
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+      "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d",
+      "answer": {
+        "question": {
+          "kind": "choice",
+          "text": "이번에 만들 결과물은 어느 쪽에 더 가까운가요?",
+          "why": "설계 산출물의 형태가 정해지면 초안의 범위와 완료 조건이 그 형태에 맞게 달라집니다.",
+          "options": [
+            {
+              "label": "화면/동작 흐름 정리",
+              "consequence": "단말이 공지 파일을 어떻게 읽어 화면에 반영하는지 흐름과 상태를 문서로 정리하는 범위가 됩니다."
+            },
+            {
+              "label": "파일 형식·갱신 규칙 정의",
+              "consequence": "공지 파일의 형식과 갱신 시점·조건을 정의하는 문서 중심 범위가 됩니다."
+            },
+            {
+              "label": "휴대폰 조작 방식 설계",
+              "consequence": "휴대폰에서 전체 단말 공지를 바꾸는 조작 흐름을 설계하는 범위가 되며, 미정인 방식 선택을 전제로 두게 됩니다."
+            }
+          ]
+        },
+        "text": "공지 전달용 네트워크만 허용하도록 기존 네트워크 금지 조건을 바꿀게요. 이번에는 설계만 하고 실제 전송과 배포는 하지 마세요.",
+        "disposition": "provided"
+      }
+    },
+    {
+      "origin": "actual initial model question copied unchanged",
+      "disposition": "provided"
+    }
+  ]
+}

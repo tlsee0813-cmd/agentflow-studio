@@ -1,0 +1,163 @@
+{
+  "slot": "C3-LATEST",
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "request": {
+    "schemaVersion": "guidance.1",
+    "ticket": {
+      "projectId": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+      "revision": 7,
+      "requestId": "G_87c6661d-3f22-4acd-a4d8-c7e144e025c1",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+    },
+    "projectName": "CSV 설문 중복 정책",
+    "brief": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+    "area": {
+      "id": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "name": "설문 응답 정리",
+      "note": "CSV에 응답자ID, 시간, 응답 열이 있어요. 응답을 정리하고 싶고 중복 응답 처리 정책은 아직 정하지 않았어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": {
+      "question": {
+        "kind": "choice",
+        "text": "CSV에서 중복 응답을 어떻게 처리할까요?",
+        "why": "이 답을 정하기 전에는 정리 범위와 완료 조건을 확정할 수 없습니다. 중복 정의와 출력 형태가 달라집니다.",
+        "options": [
+          {
+            "label": "중복을 찾기만 한다",
+            "consequence": "원본은 그대로 두고, 응답자ID가 겹치는 행 목록만 결과로 확인합니다. 정리 결과 파일은 만들지 않습니다."
+          },
+          {
+            "label": "중복을 제거한다",
+            "consequence": "응답자ID 기준으로 한 건만 남긴 정리 결과 CSV를 새 파일로 만들고, 제외된 행 수를 함께 확인합니다. 어떤 건을 남길지는 미정으로 남깁니다."
+          },
+          {
+            "label": "일단 전부 그대로 둔다",
+            "consequence": "중복 처리 없이 행 수와 열 구성을 확인하는 것까지만 하고, 중복 판단은 다음 작업으로 미룹니다."
+          }
+        ]
+      },
+      "text": "응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+      "disposition": "provided"
+    }
+  },
+  "actualModelResponse": {
+    "providerHTTP": 200,
+    "model": "deepseek-flash",
+    "finishReason": "stop",
+    "usage": {
+      "prompt_tokens": 1327,
+      "completion_tokens": 318,
+      "total_tokens": 1645,
+      "prompt_tokens_details": {
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 687
+    },
+    "message": {
+      "role": "assistant",
+      "content": "{\"question\":null,\"proposal\":{\"goal\":\"CSV 설문 응답에서 응답자ID가 같은 행들을 찾아, 응답자ID별로 시간이 가장 최신인 응답 1개만 남긴 정리 결과를 새 CSV 파일로 만든다. 원본 파일은 그대로 둔다.\",\"scope\":\"이번에 할 것: 로컬 CSV를 읽어 응답자ID별 중복 그룹을 찾고, 시간 열을 기준으로 가장 최신 응답 1개를 선택해 정리 결과 CSV를 새 파일로 작성한다. 제외된 행 수도 함께 확인한다. 하지 않을 것: 원본 파일 수정, 외부 전송·연동, 결제·알림, 시간 값 해석 규칙(형식·시간대)을 새로 정하는 일.\",\"checks\":\"정리 결과 CSV가 원본과 다른 새 파일로 생겼는지 확인한다. 응답자ID별로 남은 행이 1개인지, 제외된 행 수 합계가 원본 행 수와 맞는지 확인한다. 원본 파일이 변경되지 않았는지 확인한다.\",\"open\":[\"시간 열의 형식과 시간대를 어떻게 해석할지(문자열 정렬로 충분한지)\",\"시간 값이 같거나 비어 있는 중복의 경우 어떤 행을 남길지\",\"출력 CSV의 열 순서와 파일명 규칙\"]}}"
+    }
+  },
+  "productResponse": {
+    "httpStatus": 200,
+    "body": {
+      "mode": "deepseek",
+      "ticket": {
+        "projectId": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+        "revision": 7,
+        "requestId": "G_87c6661d-3f22-4acd-a4d8-c7e144e025c1",
+        "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+      },
+      "reply": {
+        "question": null,
+        "proposal": {
+          "goal": "CSV 설문 응답에서 응답자ID가 같은 행들을 찾아, 응답자ID별로 시간이 가장 최신인 응답 1개만 남긴 정리 결과를 새 CSV 파일로 만든다. 원본 파일은 그대로 둔다.",
+          "scope": "이번에 할 것: 로컬 CSV를 읽어 응답자ID별 중복 그룹을 찾고, 시간 열을 기준으로 가장 최신 응답 1개를 선택해 정리 결과 CSV를 새 파일로 작성한다. 제외된 행 수도 함께 확인한다. 하지 않을 것: 원본 파일 수정, 외부 전송·연동, 결제·알림, 시간 값 해석 규칙(형식·시간대)을 새로 정하는 일.",
+          "checks": "정리 결과 CSV가 원본과 다른 새 파일로 생겼는지 확인한다. 응답자ID별로 남은 행이 1개인지, 제외된 행 수 합계가 원본 행 수와 맞는지 확인한다. 원본 파일이 변경되지 않았는지 확인한다.",
+          "open": [
+            "시간 열의 형식과 시간대를 어떻게 해석할지(문자열 정렬로 충분한지)",
+            "시간 값이 같거나 비어 있는 중복의 경우 어떤 행을 남길지",
+            "출력 CSV의 열 순서와 파일명 규칙"
+          ]
+        }
+      }
+    }
+  },
+  "draft": {
+    "formatter": "candidate exported proposalText(areaName, proposal, first, request.answer), same function actual UI calls",
+    "formatterText": "‘설문 응답 정리’ 영역의 첫 작업을 해 주세요.\n목표: CSV 설문 응답에서 응답자ID가 같은 행들을 찾아, 응답자ID별로 시간이 가장 최신인 응답 1개만 남긴 정리 결과를 새 CSV 파일로 만든다. 원본 파일은 그대로 둔다.\n이번 범위: 이번에 할 것: 로컬 CSV를 읽어 응답자ID별 중복 그룹을 찾고, 시간 열을 기준으로 가장 최신 응답 1개를 선택해 정리 결과 CSV를 새 파일로 작성한다. 제외된 행 수도 함께 확인한다. 하지 않을 것: 원본 파일 수정, 외부 전송·연동, 결제·알림, 시간 값 해석 규칙(형식·시간대)을 새로 정하는 일.\n완료 조건: 정리 결과 CSV가 원본과 다른 새 파일로 생겼는지 확인한다. 응답자ID별로 남은 행이 1개인지, 제외된 행 수 합계가 원본 행 수와 맞는지 확인한다. 원본 파일이 변경되지 않았는지 확인한다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 시간 열의 형식과 시간대를 어떻게 해석할지(문자열 정렬로 충분한지) / 시간 값이 같거나 비어 있는 중복의 경우 어떤 행을 남길지 / 출력 CSV의 열 순서와 파일명 규칙\n\n안내 질문과 사용자 답변 원문:\n질문: CSV에서 중복 응답을 어떻게 처리할까요?\n답(사용자 답변): 응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+    "editedText": "‘설문 응답 정리’ 영역의 첫 작업을 해 주세요.\n목표: CSV 설문 응답에서 응답자ID가 같은 행들을 찾아, 응답자ID별로 시간이 가장 최신인 응답 1개만 남긴 정리 결과를 새 CSV 파일로 만든다. 원본 파일은 그대로 둔다.\n이번 범위: 이번에 할 것: 로컬 CSV를 읽어 응답자ID별 중복 그룹을 찾고, 시간 열을 기준으로 가장 최신 응답 1개를 선택해 정리 결과 CSV를 새 파일로 작성한다. 제외된 행 수도 함께 확인한다. 하지 않을 것: 원본 파일 수정, 외부 전송·연동, 결제·알림, 시간 값 해석 규칙(형식·시간대)을 새로 정하는 일.\n완료 조건: 정리 결과 CSV가 원본과 다른 새 파일로 생겼는지 확인한다. 응답자ID별로 남은 행이 1개인지, 제외된 행 수 합계가 원본 행 수와 맞는지 확인한다. 원본 파일이 변경되지 않았는지 확인한다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 시간 열의 형식과 시간대를 어떻게 해석할지(문자열 정렬로 충분한지) / 시간 값이 같거나 비어 있는 중복의 경우 어떤 행을 남길지 / 출력 CSV의 열 순서와 파일명 규칙\n\n안내 질문과 사용자 답변 원문:\n질문: CSV에서 중복 응답을 어떻게 처리할까요?\n답(사용자 답변): 응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+    "submission": "adopted unsent request only; no submit/begin/handoff generation"
+  },
+  "outcome": {
+    "slot": "C3-LATEST",
+    "productHTTP": 200,
+    "error": null,
+    "question": false,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "draftExact": true,
+      "unsent": true,
+      "areaTarget": {
+        "area": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+      },
+      "questionPreserved": true,
+      "answerPreserved": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "basesUnchanged": true,
+      "originalProjectUnchanged": true
+    }
+  },
+  "metadata": {
+    "providerSendOrdinal": 8,
+    "latencyMs": 3193,
+    "productRequestBytes": 1701,
+    "productResponseBytes": 1349,
+    "localHTTPAttempts": 1
+  },
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "answer": {
+        "question": {
+          "kind": "choice",
+          "text": "CSV에서 중복 응답을 어떻게 처리할까요?",
+          "why": "이 답을 정하기 전에는 정리 범위와 완료 조건을 확정할 수 없습니다. 중복 정의와 출력 형태가 달라집니다.",
+          "options": [
+            {
+              "label": "중복을 찾기만 한다",
+              "consequence": "원본은 그대로 두고, 응답자ID가 겹치는 행 목록만 결과로 확인합니다. 정리 결과 파일은 만들지 않습니다."
+            },
+            {
+              "label": "중복을 제거한다",
+              "consequence": "응답자ID 기준으로 한 건만 남긴 정리 결과 CSV를 새 파일로 만들고, 제외된 행 수를 함께 확인합니다. 어떤 건을 남길지는 미정으로 남깁니다."
+            },
+            {
+              "label": "일단 전부 그대로 둔다",
+              "consequence": "중복 처리 없이 행 수와 열 구성을 확인하는 것까지만 하고, 중복 판단은 다음 작업으로 미룹니다."
+            }
+          ]
+        },
+        "text": "응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+        "disposition": "provided"
+      }
+    },
+    {
+      "origin": "actual initial model question copied unchanged",
+      "disposition": "provided"
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "slot": "C3-UNKNOWN",
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "request": {
+    "schemaVersion": "guidance.1",
+    "ticket": {
+      "projectId": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+      "revision": 7,
+      "requestId": "G_2a1446ad-419e-45ae-b4ff-5601973f8698",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+    },
+    "projectName": "CSV 설문 중복 정책",
+    "brief": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+    "area": {
+      "id": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "name": "설문 응답 정리",
+      "note": "CSV에 응답자ID, 시간, 응답 열이 있어요. 응답을 정리하고 싶고 중복 응답 처리 정책은 아직 정하지 않았어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": {
+      "question": {
+        "kind": "choice",
+        "text": "CSV에서 중복 응답을 어떻게 처리할까요?",
+        "why": "이 답을 정하기 전에는 정리 범위와 완료 조건을 확정할 수 없습니다. 중복 정의와 출력 형태가 달라집니다.",
+        "options": [
+          {
+            "label": "중복을 찾기만 한다",
+            "consequence": "원본은 그대로 두고, 응답자ID가 겹치는 행 목록만 결과로 확인합니다. 정리 결과 파일은 만들지 않습니다."
+          },
+          {
+            "label": "중복을 제거한다",
+            "consequence": "응답자ID 기준으로 한 건만 남긴 정리 결과 CSV를 새 파일로 만들고, 제외된 행 수를 함께 확인합니다. 어떤 건을 남길지는 미정으로 남깁니다."
+          },
+          {
+            "label": "일단 전부 그대로 둔다",
+            "consequence": "중복 처리 없이 행 수와 열 구성을 확인하는 것까지만 하고, 중복 판단은 다음 작업으로 미룹니다."
+          }
+        ]
+      },
+      "text": "아직 모르겠어요.",
+      "disposition": "unknown"
+    }
+  },
+  "actualModelResponse": {
+    "providerHTTP": 200,
+    "model": "deepseek-flash",
+    "finishReason": "stop",
+    "usage": {
+      "prompt_tokens": 1306,
+      "completion_tokens": 301,
+      "total_tokens": 1607,
+      "prompt_tokens_details": {
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 666
+    },
+    "message": {
+      "role": "assistant",
+      "content": "{\"question\":null,\"proposal\":{\"goal\":\"로컬 CSV 설문 응답 파일을 원본 변경 없이 읽어, 응답자ID가 겹치는 행이 있는지와 전체 행 수·열 구성을 확인한다. 중복 처리 방식을 정하지 않은 상태에서도 정리 전 현황을 파악할 수 있게 한다.\",\"scope\":\"할 일: CSV 파일을 읽어 열 이름과 행 수를 확인하고, 응답자ID가 두 번 이상 나오는 값을 나열한다. 하지 않을 일: 중복 제거·선별·정리 결과 파일 생성, 원본 파일 수정, 어떤 행을 남길지 결정, 결제·알림·외부 연동 추가.\",\"checks\":\"실행 도구가 CSV를 읽어 열 구성과 전체 행 수를 출력한다. 응답자ID 기준으로 겹치는 값과 각 값의 등장 횟수가 목록으로 나온다. 원본 파일이 변경되지 않았음을 확인할 수 있다. 중복 제거 여부는 결과에 반영되지 않는다.\",\"open\":[\"중복 응답 처리 방식을 아직 정하지 않음(찾기만/제거/그대로 두기)\",\"중복으로 볼 기준과 남길 행 선택 규칙 미정\",\"결과를 화면 출력으로 볼지 파일로 저장할지 미정\"]}}"
+    }
+  },
+  "productResponse": {
+    "httpStatus": 200,
+    "body": {
+      "mode": "deepseek",
+      "ticket": {
+        "projectId": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+        "revision": 7,
+        "requestId": "G_2a1446ad-419e-45ae-b4ff-5601973f8698",
+        "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+      },
+      "reply": {
+        "question": null,
+        "proposal": {
+          "goal": "로컬 CSV 설문 응답 파일을 원본 변경 없이 읽어, 응답자ID가 겹치는 행이 있는지와 전체 행 수·열 구성을 확인한다. 중복 처리 방식을 정하지 않은 상태에서도 정리 전 현황을 파악할 수 있게 한다.",
+          "scope": "할 일: CSV 파일을 읽어 열 이름과 행 수를 확인하고, 응답자ID가 두 번 이상 나오는 값을 나열한다. 하지 않을 일: 중복 제거·선별·정리 결과 파일 생성, 원본 파일 수정, 어떤 행을 남길지 결정, 결제·알림·외부 연동 추가.",
+          "checks": "실행 도구가 CSV를 읽어 열 구성과 전체 행 수를 출력한다. 응답자ID 기준으로 겹치는 값과 각 값의 등장 횟수가 목록으로 나온다. 원본 파일이 변경되지 않았음을 확인할 수 있다. 중복 제거 여부는 결과에 반영되지 않는다.",
+          "open": [
+            "중복 응답 처리 방식을 아직 정하지 않음(찾기만/제거/그대로 두기)",
+            "중복으로 볼 기준과 남길 행 선택 규칙 미정",
+            "결과를 화면 출력으로 볼지 파일로 저장할지 미정"
+          ]
+        }
+      }
+    }
+  },
+  "draft": {
+    "formatter": "candidate exported proposalText(areaName, proposal, first, request.answer), same function actual UI calls",
+    "formatterText": "‘설문 응답 정리’ 영역의 첫 작업을 해 주세요.\n목표: 로컬 CSV 설문 응답 파일을 원본 변경 없이 읽어, 응답자ID가 겹치는 행이 있는지와 전체 행 수·열 구성을 확인한다. 중복 처리 방식을 정하지 않은 상태에서도 정리 전 현황을 파악할 수 있게 한다.\n이번 범위: 할 일: CSV 파일을 읽어 열 이름과 행 수를 확인하고, 응답자ID가 두 번 이상 나오는 값을 나열한다. 하지 않을 일: 중복 제거·선별·정리 결과 파일 생성, 원본 파일 수정, 어떤 행을 남길지 결정, 결제·알림·외부 연동 추가.\n완료 조건: 실행 도구가 CSV를 읽어 열 구성과 전체 행 수를 출력한다. 응답자ID 기준으로 겹치는 값과 각 값의 등장 횟수가 목록으로 나온다. 원본 파일이 변경되지 않았음을 확인할 수 있다. 중복 제거 여부는 결과에 반영되지 않는다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 중복 응답 처리 방식을 아직 정하지 않음(찾기만/제거/그대로 두기) / 중복으로 볼 기준과 남길 행 선택 규칙 미정 / 결과를 화면 출력으로 볼지 파일로 저장할지 미정\n\n안내 질문과 사용자 답변 원문:\n질문: CSV에서 중복 응답을 어떻게 처리할까요?\n답(사용자 모름): 아직 모르겠어요.",
+    "editedText": "‘설문 응답 정리’ 영역의 첫 작업을 해 주세요.\n목표: 로컬 CSV 설문 응답 파일을 원본 변경 없이 읽어, 응답자ID가 겹치는 행이 있는지와 전체 행 수·열 구성을 확인한다. 중복 처리 방식을 정하지 않은 상태에서도 정리 전 현황을 파악할 수 있게 한다.\n이번 범위: 할 일: CSV 파일을 읽어 열 이름과 행 수를 확인하고, 응답자ID가 두 번 이상 나오는 값을 나열한다. 하지 않을 일: 중복 제거·선별·정리 결과 파일 생성, 원본 파일 수정, 어떤 행을 남길지 결정, 결제·알림·외부 연동 추가.\n완료 조건: 실행 도구가 CSV를 읽어 열 구성과 전체 행 수를 출력한다. 응답자ID 기준으로 겹치는 값과 각 값의 등장 횟수가 목록으로 나온다. 원본 파일이 변경되지 않았음을 확인할 수 있다. 중복 제거 여부는 결과에 반영되지 않는다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 중복 응답 처리 방식을 아직 정하지 않음(찾기만/제거/그대로 두기) / 중복으로 볼 기준과 남길 행 선택 규칙 미정 / 결과를 화면 출력으로 볼지 파일로 저장할지 미정\n\n안내 질문과 사용자 답변 원문:\n질문: CSV에서 중복 응답을 어떻게 처리할까요?\n답(사용자 모름): 아직 모르겠어요.",
+    "submission": "adopted unsent request only; no submit/begin/handoff generation"
+  },
+  "outcome": {
+    "slot": "C3-UNKNOWN",
+    "productHTTP": 200,
+    "error": null,
+    "question": false,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "draftExact": true,
+      "unsent": true,
+      "areaTarget": {
+        "area": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+      },
+      "questionPreserved": true,
+      "answerPreserved": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "basesUnchanged": true,
+      "originalProjectUnchanged": true
+    }
+  },
+  "metadata": {
+    "providerSendOrdinal": 6,
+    "latencyMs": 2916,
+    "productRequestBytes": 1636,
+    "productResponseBytes": 1346,
+    "localHTTPAttempts": 1
+  },
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "answer": {
+        "question": {
+          "kind": "choice",
+          "text": "CSV에서 중복 응답을 어떻게 처리할까요?",
+          "why": "이 답을 정하기 전에는 정리 범위와 완료 조건을 확정할 수 없습니다. 중복 정의와 출력 형태가 달라집니다.",
+          "options": [
+            {
+              "label": "중복을 찾기만 한다",
+              "consequence": "원본은 그대로 두고, 응답자ID가 겹치는 행 목록만 결과로 확인합니다. 정리 결과 파일은 만들지 않습니다."
+            },
+            {
+              "label": "중복을 제거한다",
+              "consequence": "응답자ID 기준으로 한 건만 남긴 정리 결과 CSV를 새 파일로 만들고, 제외된 행 수를 함께 확인합니다. 어떤 건을 남길지는 미정으로 남깁니다."
+            },
+            {
+              "label": "일단 전부 그대로 둔다",
+              "consequence": "중복 처리 없이 행 수와 열 구성을 확인하는 것까지만 하고, 중복 판단은 다음 작업으로 미룹니다."
+            }
+          ]
+        },
+        "text": "아직 모르겠어요.",
+        "disposition": "unknown"
+      }
+    },
+    {
+      "origin": "actual initial model question copied unchanged",
+      "disposition": "unknown"
+    }
+  ]
+}

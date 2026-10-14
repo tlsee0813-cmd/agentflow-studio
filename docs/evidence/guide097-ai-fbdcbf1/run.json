@@ -1,0 +1,51 @@
+{
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "execution": "Current product buildGuideRequest -> actual loopback POST /api/guidance -> product provider -> existing protected transport -> approved DeepSeek HTTPS",
+  "actualModel": "deepseek-flash",
+  "options": {
+    "timeoutMs": {
+      "productDefault": 15000,
+      "experimentOverride": 60000
+    },
+    "maxTokens": {
+      "productDefault": 2048,
+      "experimentOverride": 4096
+    },
+    "thinking": {
+      "value": "disabled",
+      "origin": "hardcoded product buildGuideBody"
+    },
+    "temperature": {
+      "sent": false,
+      "origin": "omitted by product buildGuideBody"
+    },
+    "stream": false,
+    "responseFormat": "json_object",
+    "ratePerMinute": 6,
+    "productProcessCap": 20,
+    "experimentSendCap": 11,
+    "sequential": true
+  },
+  "metrics": {
+    "actualProviderSends": 11,
+    "providerResponses": 11,
+    "product200": 10,
+    "product502": 1,
+    "latencyMsMin": 2417,
+    "latencyMsMedian": 3052,
+    "latencyMsMax": 3296,
+    "usage": {
+      "prompt_tokens": 13853,
+      "completion_tokens": 3060,
+      "total_tokens": 16913
+    },
+    "proposalsAdopted": 7
+  },
+  "localUnsent429": 0,
+  "rateWindowWaits": 1,
+  "retriesAfterSend": 0,
+  "extraGenerationsForPublication": 0,
+  "actualMockGenerations": 0,
+  "sourceUnchangedAfterExecution": true,
+  "limits": "Synthetic four-case single-sample-per-slot experiment; no human efficacy/general failure rate/full quality claim."
+}

@@ -1,0 +1,116 @@
+{
+  "slot": "C4-INITIAL",
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "request": {
+    "schemaVersion": "guidance.1",
+    "ticket": {
+      "projectId": "P_0fc9bbaf-3d21-4c73-903e-2fb3aef49c3d",
+      "revision": 9,
+      "requestId": "G_bd53765f-2048-486f-93ac-e54eeb695f1b",
+      "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d"
+    },
+    "projectName": "전시장 단말 — 권한 충돌",
+    "brief": "전시장 단말에서 최신 공지를 보여 주고 싶어요.",
+    "area": {
+      "id": "A_47e85546-b580-420e-8fba-b09fe584056d",
+      "name": "단말 공지 갱신",
+      "note": "휴대폰으로 전체 단말의 공지를 바꾸는 방식도 생각 중이지만 아직 정하지 않았어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "네트워크 사용은 금지합니다.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D3",
+        "text": "공지는 파일로 반입합니다.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D4",
+        "text": "이번에는 설계만 하며 실제 전송과 배포는 하지 않습니다.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": null
+  },
+  "actualModelResponse": {
+    "providerHTTP": 200,
+    "model": "deepseek-flash",
+    "finishReason": "stop",
+    "usage": {
+      "prompt_tokens": 1108,
+      "completion_tokens": 230,
+      "total_tokens": 1338,
+      "prompt_tokens_details": {
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 468
+    },
+    "message": {
+      "role": "assistant",
+      "content": "{\"question\":{\"kind\":\"choice\",\"text\":\"이번에 만들 결과물은 어느 쪽에 더 가까운가요?\",\"why\":\"설계 산출물의 형태가 정해지면 초안의 범위와 완료 조건이 그 형태에 맞게 달라집니다.\",\"options\":[{\"label\":\"화면/동작 흐름 정리\",\"consequence\":\"단말이 공지 파일을 어떻게 읽어 화면에 반영하는지 흐름과 상태를 문서로 정리하는 범위가 됩니다.\"},{\"label\":\"파일 형식·갱신 규칙 정의\",\"consequence\":\"공지 파일의 형식과 갱신 시점·조건을 정의하는 문서 중심 범위가 됩니다.\"},{\"label\":\"휴대폰 조작 방식 설계\",\"consequence\":\"휴대폰에서 전체 단말 공지를 바꾸는 조작 흐름을 설계하는 범위가 되며, 미정인 방식 선택을 전제로 두게 됩니다.\"}]},\"proposal\":null}"
+    }
+  },
+  "productResponse": {
+    "httpStatus": 200,
+    "body": {
+      "mode": "deepseek",
+      "ticket": {
+        "projectId": "P_0fc9bbaf-3d21-4c73-903e-2fb3aef49c3d",
+        "revision": 9,
+        "requestId": "G_bd53765f-2048-486f-93ac-e54eeb695f1b",
+        "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d"
+      },
+      "reply": {
+        "question": {
+          "kind": "choice",
+          "text": "이번에 만들 결과물은 어느 쪽에 더 가까운가요?",
+          "why": "설계 산출물의 형태가 정해지면 초안의 범위와 완료 조건이 그 형태에 맞게 달라집니다.",
+          "options": [
+            {
+              "label": "화면/동작 흐름 정리",
+              "consequence": "단말이 공지 파일을 어떻게 읽어 화면에 반영하는지 흐름과 상태를 문서로 정리하는 범위가 됩니다."
+            },
+            {
+              "label": "파일 형식·갱신 규칙 정의",
+              "consequence": "공지 파일의 형식과 갱신 시점·조건을 정의하는 문서 중심 범위가 됩니다."
+            },
+            {
+              "label": "휴대폰 조작 방식 설계",
+              "consequence": "휴대폰에서 전체 단말 공지를 바꾸는 조작 흐름을 설계하는 범위가 되며, 미정인 방식 선택을 전제로 두게 됩니다."
+            }
+          ]
+        },
+        "proposal": null
+      }
+    }
+  },
+  "draft": null,
+  "outcome": {
+    "slot": "C4-INITIAL",
+    "productHTTP": 200,
+    "error": null,
+    "question": true,
+    "proposal": false,
+    "adoption": null
+  },
+  "metadata": {
+    "providerSendOrdinal": 9,
+    "latencyMs": 2747,
+    "productRequestBytes": 867,
+    "productResponseBytes": 1032,
+    "localHTTPAttempts": 1
+  },
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+      "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d",
+      "answer": null
+    }
+  ]
+}

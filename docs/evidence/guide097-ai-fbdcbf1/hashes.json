@@ -1,0 +1,81 @@
+{
+  "algorithm": "SHA256 UTF-8 file bytes; excludes hashes.json",
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "files": [
+    {
+      "path": "INDEX.md",
+      "bytes": 7358,
+      "sha256": "1202e83f763ccfe11f1e180542e69e9a4a08d1ad4e31817d2e78883b58df51ee"
+    },
+    {
+      "path": "assessment.json",
+      "bytes": 5537,
+      "sha256": "eb1596410f12437c76ff080d7573536478ae00547db5e41d42d907e299db1588"
+    },
+    {
+      "path": "calls/C1-A.json",
+      "bytes": 9407,
+      "sha256": "71afeb54b9bb38d76b5cb9da147e2780c959757d612db8a637484868c9a7691a"
+    },
+    {
+      "path": "calls/C1-B.json",
+      "bytes": 10963,
+      "sha256": "e788568b3f9db1df8356e9ba02448e5ab6988ea1e6978f08eb33a84f7f3312cf"
+    },
+    {
+      "path": "calls/C1-INITIAL.json",
+      "bytes": 4461,
+      "sha256": "b084f4b165fab1eddb780c42569cdcec20c45b71c31d535589374fb9fbe4cd34"
+    },
+    {
+      "path": "calls/C2-INITIAL.json",
+      "bytes": 4016,
+      "sha256": "9c857d2663a7245c5793f380a00b9a35c8896ace5fbd03a5a8153e6e7c537de4"
+    },
+    {
+      "path": "calls/C3-DEFERRED.json",
+      "bytes": 10621,
+      "sha256": "394c021a477bd2070f4dd6fcb5de1c11d436c7ebd32795bb80ca215aea0d77c0"
+    },
+    {
+      "path": "calls/C3-INITIAL.json",
+      "bytes": 4424,
+      "sha256": "0e5c49f2cceba7d5d124765e35fddc6e4c55f66bed58ba9ee512062e05d562d6"
+    },
+    {
+      "path": "calls/C3-LATEST.json",
+      "bytes": 10913,
+      "sha256": "50d50738bd719df397f5d746330954f4567765ca44d4a7e08c1fdda2dbd0b0cc"
+    },
+    {
+      "path": "calls/C3-UNKNOWN.json",
+      "bytes": 10644,
+      "sha256": "4e7c3ad615c73824e9b02920d707f722f05432fde34bec92e18a204786327599"
+    },
+    {
+      "path": "calls/C4-A.json",
+      "bytes": 11199,
+      "sha256": "fe3e0999a9d8738a35ca79b895b357d0ae52af9229b15d8974d5a4aa520b4a4c"
+    },
+    {
+      "path": "calls/C4-B.json",
+      "bytes": 11819,
+      "sha256": "43f6f765292f90f085a6908b16190c353d4efb05ff6ee317233fef56ed4d5b9a"
+    },
+    {
+      "path": "calls/C4-INITIAL.json",
+      "bytes": 4529,
+      "sha256": "7586790ad49a54ddd86ccbea279321d065f090fa7673e37d94cff53dea387a56"
+    },
+    {
+      "path": "fixtures.json",
+      "bytes": 6430,
+      "sha256": "b9324714b8699d138cb986ed159a6d8248899a1442108c1ec1b463676039b5be"
+    },
+    {
+      "path": "run.json",
+      "bytes": 1487,
+      "sha256": "c1b4555150f4d88657a65c957eaddb66a0823124e90faa7a3dfe13511f763625"
+    }
+  ]
+}

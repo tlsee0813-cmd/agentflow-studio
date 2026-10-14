@@ -1,0 +1,62 @@
+{
+  "candidateSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "basis": "Actual received responses, product envelopes, and adoption evidence; semantic judgments are distinct from protocol checks. No regeneration.",
+  "C1": {
+    "judgment": "PARTIAL / practical adequacy unresolved",
+    "observations": [
+      "Initial actual question asks list/search/category presentation rather than shopping versus first-to-eat purpose.",
+      "Free-text A/B answers were sent against that actual question; options were not fabricated or relabelled.",
+      "A/B scope and checks actually differ. Neither branch assumes available expiry dates; expiry is excluded or left open.",
+      "A chooses a line-list and a phone without an explicit selection of those details. B offers visually choosing from a plain name screen and leaves the first-to-eat criterion unresolved.",
+      "Original one-user/one-device/manual-input/order-delivery exclusions remain in Project decisions through adoption."
+    ],
+    "interpretation": "The explicit difference and no-expiry-assumption criteria are met; usefulness for finding the first ingredient to eat remains weak/uncertain. Presentation-first questioning and unselected phone/list choices prevent an unconditional semantic PASS."
+  },
+  "C2": {
+    "judgment": "FAIL: unnecessary question + response contract violation; manual-edit branch NOT_EXECUTED",
+    "observations": [
+      "Provider HTTP200 and finish stop; product HTTP502 INVALID_RESPONSE.",
+      "Raw JSON is parseable, but question.kind is fact with two options. Exact validator requires fact.options.length === 0.",
+      "Question asks output format despite the sufficient preview-only CLI requirements.",
+      "No accepted proposal exists, so dotfile manual edit/adoption and preservation in an accepted draft were not exercised. No synthetic replacement or repeat call."
+    ],
+    "interpretation": "Provider transport/auth succeeded. The failure belongs to model response structure and question choice; it is not a connection failure."
+  },
+  "C3": {
+    "judgment": "PARTIAL: unknown branch useful; deferral overly conservative; latest checks flawed",
+    "observations": [
+      "Unknown: ID-group frequencies and row/column overview, no source changes or deduplication.",
+      "Deferred: only row/column overview; scope explicitly excludes duplicate judgment. No destructive policy is invented, but policy-independent duplicate overview is not proposed.",
+      "Latest: selects one latest response per ID into a separate output and preserves source; time ties/format remain open.",
+      "Latest checks literally say the sum of excluded rows should match original rows, rather than retained plus excluded. They do not explicitly check that the retained timestamp is maximal."
+    ],
+    "interpretation": "Policy-dependent branch changes occur and no original deletion/final aggregate policy is silently imposed. Deferral loses a safe useful step, and latest completion conditions are not sufficiently correct."
+  },
+  "C4": {
+    "judgment": "FAIL overall; A core constraints PASS, B explicit-change handling FAIL",
+    "observations": [
+      "Initial question asks deliverable form, not the important offline-versus-limited-network conflict.",
+      "A remains offline/file-based/design-only and prohibits actual transmission/deployment.",
+      "B actually sends the explicit user amendment allowing only a notice-delivery network, together with unchanged earlier confirmed network ban.",
+      "B proposal.goal still says no network/file import only; scope prohibits network use.",
+      "Candidate proposalText appends the exact actual question and B answer, but the adopted draft contains both the contradictory proposal and the allowance. Text preservation is successful; semantic consistency is not."
+    ],
+    "interpretation": "An undeclared idea must not override confirmed decisions, but B is an explicit latest user amendment. The response does not distinguish them. No actual network/deployment operation was carried out."
+  },
+  "productAdoption": {
+    "acceptedProposals": 7,
+    "allExactDrafts": true,
+    "allActualQuestionAndAnswerPreserved": true,
+    "allUnsent": true,
+    "sourcesTasksBasesUnchanged": true,
+    "limit": "These cases are short. The 12000-character rejection and native UI preservation boundaries were not re-exercised here. No whole handoff/submit/continuity AI follow-up was generated."
+  },
+  "nextMinimumChangesProposedOnly": [
+    "Clarify the existing fact-versus-choice output contract; retain validator rejection and original failure evidence. Do not normalize invalid replies into successes.",
+    "Prioritize consequential policy/permission conflicts over presentation preferences, and let sufficient small tasks proceed without a cosmetic question.",
+    "Distinguish an explicit current answer amending a past decision from a speculative area idea, for the proposed draft only; do not auto-edit stored bases.",
+    "Keep policy-independent observation useful under unknown/deferred choices; make completion checks logically valid (retained + excluded = input, selected timestamp maximal).",
+    "After a separately reviewed minimal fix, rerun only the relevant original fixtures. Dotfile editing remains unverified until a valid CLI proposal is obtained."
+  ],
+  "limits": "Synthetic actual-model experiment, four cases and one sample per request slot. No human efficacy claim, general failure-rate estimate, full-quality guarantee, prompt tuning, or product changes."
+}

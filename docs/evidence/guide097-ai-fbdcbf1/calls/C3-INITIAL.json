@@ -1,0 +1,106 @@
+{
+  "slot": "C3-INITIAL",
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "request": {
+    "schemaVersion": "guidance.1",
+    "ticket": {
+      "projectId": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+      "revision": 7,
+      "requestId": "G_71656cb9-1084-40b7-a67b-c2a60ececca0",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+    },
+    "projectName": "CSV 설문 중복 정책",
+    "brief": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+    "area": {
+      "id": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "name": "설문 응답 정리",
+      "note": "CSV에 응답자ID, 시간, 응답 열이 있어요. 응답을 정리하고 싶고 중복 응답 처리 정책은 아직 정하지 않았어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": null
+  },
+  "actualModelResponse": {
+    "providerHTTP": 200,
+    "model": "deepseek-flash",
+    "finishReason": "stop",
+    "usage": {
+      "prompt_tokens": 1069,
+      "completion_tokens": 228,
+      "total_tokens": 1297,
+      "prompt_tokens_details": {
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 429
+    },
+    "message": {
+      "role": "assistant",
+      "content": "{\"question\":{\"kind\":\"choice\",\"text\":\"CSV에서 중복 응답을 어떻게 처리할까요?\",\"why\":\"이 답을 정하기 전에는 정리 범위와 완료 조건을 확정할 수 없습니다. 중복 정의와 출력 형태가 달라집니다.\",\"options\":[{\"label\":\"중복을 찾기만 한다\",\"consequence\":\"원본은 그대로 두고, 응답자ID가 겹치는 행 목록만 결과로 확인합니다. 정리 결과 파일은 만들지 않습니다.\"},{\"label\":\"중복을 제거한다\",\"consequence\":\"응답자ID 기준으로 한 건만 남긴 정리 결과 CSV를 새 파일로 만들고, 제외된 행 수를 함께 확인합니다. 어떤 건을 남길지는 미정으로 남깁니다.\"},{\"label\":\"일단 전부 그대로 둔다\",\"consequence\":\"중복 처리 없이 행 수와 열 구성을 확인하는 것까지만 하고, 중복 판단은 다음 작업으로 미룹니다.\"}]},\"proposal\":null}"
+    }
+  },
+  "productResponse": {
+    "httpStatus": 200,
+    "body": {
+      "mode": "deepseek",
+      "ticket": {
+        "projectId": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+        "revision": 7,
+        "requestId": "G_71656cb9-1084-40b7-a67b-c2a60ececca0",
+        "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+      },
+      "reply": {
+        "question": {
+          "kind": "choice",
+          "text": "CSV에서 중복 응답을 어떻게 처리할까요?",
+          "why": "이 답을 정하기 전에는 정리 범위와 완료 조건을 확정할 수 없습니다. 중복 정의와 출력 형태가 달라집니다.",
+          "options": [
+            {
+              "label": "중복을 찾기만 한다",
+              "consequence": "원본은 그대로 두고, 응답자ID가 겹치는 행 목록만 결과로 확인합니다. 정리 결과 파일은 만들지 않습니다."
+            },
+            {
+              "label": "중복을 제거한다",
+              "consequence": "응답자ID 기준으로 한 건만 남긴 정리 결과 CSV를 새 파일로 만들고, 제외된 행 수를 함께 확인합니다. 어떤 건을 남길지는 미정으로 남깁니다."
+            },
+            {
+              "label": "일단 전부 그대로 둔다",
+              "consequence": "중복 처리 없이 행 수와 열 구성을 확인하는 것까지만 하고, 중복 판단은 다음 작업으로 미룹니다."
+            }
+          ]
+        },
+        "proposal": null
+      }
+    }
+  },
+  "draft": null,
+  "outcome": {
+    "slot": "C3-INITIAL",
+    "productHTTP": 200,
+    "error": null,
+    "question": true,
+    "proposal": false,
+    "adoption": null
+  },
+  "metadata": {
+    "providerSendOrdinal": 5,
+    "latencyMs": 2417,
+    "productRequestBytes": 700,
+    "productResponseBytes": 1107,
+    "localHTTPAttempts": 1
+  },
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "answer": null
+    }
+  ]
+}

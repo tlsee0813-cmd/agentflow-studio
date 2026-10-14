@@ -1,0 +1,116 @@
+{
+  "slot": "C1-INITIAL",
+  "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+  "request": {
+    "schemaVersion": "guidance.1",
+    "ticket": {
+      "projectId": "P_d022fed1-e34b-4d40-a242-6fb1bc363e9f",
+      "revision": 9,
+      "requestId": "G_e70941ba-1ea6-401e-b5c6-128247e0d8f9",
+      "areaId": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+    },
+    "projectName": "초보 — 가정 식재료",
+    "brief": "가정 식재료 재고로 낭비를 줄이고 싶어요.",
+    "area": {
+      "id": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b",
+      "name": "남은 재료 보기",
+      "note": "집에 남아 있는 재료를 보고 싶어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "혼자 한 기기에서 사용해요.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D3",
+        "text": "재고는 수동으로 입력해요.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D4",
+        "text": "주문과 배송은 이번 범위에서 제외해요.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": null
+  },
+  "actualModelResponse": {
+    "providerHTTP": 200,
+    "model": "deepseek-flash",
+    "finishReason": "stop",
+    "usage": {
+      "prompt_tokens": 1098,
+      "completion_tokens": 233,
+      "total_tokens": 1331,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 1098
+    },
+    "message": {
+      "role": "assistant",
+      "content": "{\"question\":{\"kind\":\"choice\",\"text\":\"남은 재료를 어떤 화면으로 보고 싶으세요?\",\"why\":\"보기 방식을 정하면 초안의 범위와 완료 조건이 그 화면 기준으로 좁아집니다. 지금까지 정한 결정에는 화면 형태가 없습니다.\",\"options\":[{\"label\":\"목록 한 줄씩\",\"consequence\":\"재료 이름이 한 줄씩 나열되는 목록 화면을 만들고, 각 줄에 이름이 보이면 완료로 봅니다.\"},{\"label\":\"이름으로 찾기\",\"consequence\":\"이름을 입력해 해당 재료만 걸러 보는 검색 화면을 만들고, 입력한 이름의 재료만 남으면 완료로 봅니다.\"},{\"label\":\"분류별로 묶어 보기\",\"consequence\":\"채소·고기 같은 분류로 묶은 화면을 만들고, 분류 제목 아래에 재료가 모여 보이면 완료로 봅니다.\"}]},\"proposal\":null}"
+    }
+  },
+  "productResponse": {
+    "httpStatus": 200,
+    "body": {
+      "mode": "deepseek",
+      "ticket": {
+        "projectId": "P_d022fed1-e34b-4d40-a242-6fb1bc363e9f",
+        "revision": 9,
+        "requestId": "G_e70941ba-1ea6-401e-b5c6-128247e0d8f9",
+        "areaId": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+      },
+      "reply": {
+        "question": {
+          "kind": "choice",
+          "text": "남은 재료를 어떤 화면으로 보고 싶으세요?",
+          "why": "보기 방식을 정하면 초안의 범위와 완료 조건이 그 화면 기준으로 좁아집니다. 지금까지 정한 결정에는 화면 형태가 없습니다.",
+          "options": [
+            {
+              "label": "목록 한 줄씩",
+              "consequence": "재료 이름이 한 줄씩 나열되는 목록 화면을 만들고, 각 줄에 이름이 보이면 완료로 봅니다."
+            },
+            {
+              "label": "이름으로 찾기",
+              "consequence": "이름을 입력해 해당 재료만 걸러 보는 검색 화면을 만들고, 입력한 이름의 재료만 남으면 완료로 봅니다."
+            },
+            {
+              "label": "분류별로 묶어 보기",
+              "consequence": "채소·고기 같은 분류로 묶은 화면을 만들고, 분류 제목 아래에 재료가 모여 보이면 완료로 봅니다."
+            }
+          ]
+        },
+        "proposal": null
+      }
+    }
+  },
+  "draft": null,
+  "outcome": {
+    "slot": "C1-INITIAL",
+    "productHTTP": 200,
+    "error": null,
+    "question": true,
+    "proposal": false,
+    "adoption": null
+  },
+  "metadata": {
+    "providerSendOrdinal": 1,
+    "latencyMs": 2846,
+    "productRequestBytes": 762,
+    "productResponseBytes": 1052,
+    "localHTTPAttempts": 1
+  },
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+      "areaId": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b",
+      "answer": null
+    }
+  ]
+}
