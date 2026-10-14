@@ -66,7 +66,8 @@ class StaticWeb(unittest.TestCase):
         cls.server.shutdown(); cls.server.server_close(); cls.thread.join(); cls.temp.cleanup()
 
     def state(self, page=None):
-        return (page or self.page).evaluate('(key)=>JSON.parse(localStorage.getItem(key))', STATIC_KEY)
+        # FLOW083: read the project this tab has open (prefixed like every static key).
+        return (page or self.page).evaluate('([prefix,key])=>JSON.parse(localStorage.getItem(prefix+(document.documentElement.dataset.projectKey||key)))', ['agentflow.studio.browser-demo:', base.KEY])
 
     def test_static_subpath_exchange_reload_and_isolation(self):
         expected_files = {'.nojekyll', 'index.html', 'styles.css', 'client/app.js',

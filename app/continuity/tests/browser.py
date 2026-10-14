@@ -13,6 +13,10 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(os.environ.get('IDEA015_EVIDENCE_DIR',str(ROOT/'test-results')))
 OUT.mkdir(parents=True,exist_ok=True)
 KEY='agentflow.idea015.project.v1'
+# FLOW083: a new tab/visit lands on the project list; opening the only listed project is the old direct load.
+def open_listed(page,key=None):
+    if page.locator('#projects-view').is_visible():
+        (page.locator(f'.project-card[data-project-key="{key}"] .project-open') if key else page.locator('.project-open').first).click()
 
 class Browser(unittest.TestCase):
     @classmethod
@@ -47,10 +51,13 @@ class Browser(unittest.TestCase):
         expect(self.page.locator('#mode')).to_contain_text('MOCK')
     def tearDown(self):
         self.assertEqual(self.external,[]);self.assertEqual(self.errors,[]);self.ctx.close()
-    def state(self,page=None):return (page or self.page).evaluate('(key)=>JSON.parse(localStorage.getItem(key))',KEY)
+    # FLOW083: several projects may be saved; read the one this tab has open (the first one keeps KEY).
+    def state(self,page=None):return (page or self.page).evaluate('(key)=>JSON.parse(localStorage.getItem(document.documentElement.dataset.projectKey||key))',KEY)
+    def open_listed(self,page=None):open_listed(page or self.page)
     # UI001: the composer and context are now disclosed on demand; assertions stay unchanged.
     def compose(self,page=None):
         page=page or self.page
+        open_listed(page)
         if not page.locator('#work-view').is_visible():page.locator('#nav-work').click()
         if not page.locator('#compose-panel').evaluate('(e)=>e.open'):page.locator('#compose-summary').click()
     def context(self):
@@ -164,6 +171,7 @@ class Browser(unittest.TestCase):
         other=self.ctx.new_page()
         if DOM:dom_harness.mount(self,other,json.dumps(self.state(),ensure_ascii=False))
         else:other.goto(self.url)
+        self.open_listed(other) # FLOW083: a second tab starts at the list; open the same project as before.
         expect(other.locator('#current-work')).to_be_visible()
         self.compose();self.page.locator('#draft').fill('첫 탭의 새 입력')
         if DOM:other.evaluate('(raw)=>localStorage.setItem("agentflow.idea015.project.v1",raw)',json.dumps(self.state(),ensure_ascii=False))
@@ -185,7 +193,8 @@ class Browser(unittest.TestCase):
             with self.page.expect_event('dialog') as event:
                 self.page.locator('#import-file').set_input_files(path)
             self.assertEqual(event.value.type,'confirm')
-            self.assertIn('복구할까요?',event.value.message)
+            # FLOW083: a backup is now added as a separate copy; the open project is not replaced.
+            self.assertIn('새 프로젝트 사본으로 불러올까요?',event.value.message)
             # The app replaces/renders synchronously after confirm; evaluate runs after that continuation.
             self.page.evaluate('() => undefined')
         finally:
@@ -253,6 +262,7 @@ class Browser(unittest.TestCase):
     @unittest.skipIf(DOM,'needs native localStorage')
     def test_12_unreadable_saved_data_keeps_its_specific_message_while_typing(self):
         self.page.evaluate('(key)=>localStorage.setItem(key,"broken")',KEY);self.page.reload()
+        self.open_listed() # FLOW083: listed as unreadable (never repaired); opening it shows the same specific message.
         expect(self.page.locator('#storage-error')).to_contain_text('읽지 못')
         self.compose();self.page.locator('#draft').fill('새 입력');expect(self.page.locator('#storage-error')).to_contain_text('읽지 못해 덮어쓰지 않고')
         self.assertEqual(self.page.evaluate('(key)=>localStorage.getItem(key)',KEY),'broken')

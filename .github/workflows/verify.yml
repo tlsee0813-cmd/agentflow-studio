@@ -127,6 +127,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/ai055_browser.py 2>&1 | tee test-results/ai055-browser.log
+      - name: Project entry, list, trash and backup copies (native HTTP, MOCK; wiring, not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/flow083
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/flow083_browser.py 2>&1 | tee test-results/flow083-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:

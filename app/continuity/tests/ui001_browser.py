@@ -44,6 +44,7 @@ class UI001(unittest.TestCase):
             if config is not None:self.page.route('**/api/config',lambda route:route.fulfill(status=200,content_type='application/json',body=json.dumps(config)))
             if raw is not None:self.page.add_init_script('localStorage.setItem('+json.dumps(base.KEY)+','+json.dumps(raw)+');')
             self.page.goto(self.url)
+            base.open_listed(self.page) # FLOW083: a new tab lists projects first; open the seeded one as before.
         self.track()
         expect(self.page.locator('#mode')).not_to_have_text('모드 확인 중')
 

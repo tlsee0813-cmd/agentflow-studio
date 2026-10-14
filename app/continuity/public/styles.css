@@ -2070,3 +2070,148 @@ footer>span:first-child {
   .outcome-heading { align-items:flex-start; flex-direction:column; gap:4px; }
   .outcome-grid { grid-template-columns:1fr; }
 }
+/* FLOW083 · entry, project list and "지금 할 일" */
+.crumb-link {
+  border:0;
+  background:none;
+  padding:0;
+  font:inherit;
+  color:var(--accent-dark);
+  cursor:pointer;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.welcome {
+  display:block;
+  padding:6px 0 18px;
+  color:var(--ink);
+}
+.welcome h2 {
+  font-size:24px;
+  line-height:1.35;
+  color:var(--ink);
+  font-weight:700;
+  letter-spacing:-.03em;
+  margin:4px 0 10px;
+}
+.welcome p {
+  font-size:14px;
+  line-height:1.7;
+  color:var(--muted);
+  max-width:640px;
+  margin:0 0 12px;
+}
+.entry-limits {
+  font-size:12px;
+  line-height:1.6;
+  color:var(--amber);
+  background:var(--amber-bg);
+  border-radius:10px;
+  padding:8px 12px;
+  margin:0 0 10px;
+}
+body[data-starting="true"] .context-bar,
+body[data-starting="true"] #outcome-home {
+  display:none;
+}
+body[data-starting="true"] #compose-panel>summary {
+  display:none;
+}
+.next-actions {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:14px;
+}
+.next-actions>.actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+.next-actions .handoff-ready {
+  margin:0;
+}
+.example-banner {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px 14px;
+  margin:0 0 18px;
+  border:1px solid var(--accent);
+  background:var(--tint);
+}
+.example-banner span {
+  flex:1 1 260px;
+  font-size:13px;
+}
+.projects-view {
+  max-width:960px;
+  margin:0 auto;
+}
+.project-list {
+  list-style:none;
+  padding:0;
+  margin:0 0 18px;
+  display:grid;
+  gap:12px;
+}
+.project-card {
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:16px 18px;
+  display:grid;
+  gap:6px;
+}
+.project-card-name {
+  font-size:16px;
+  overflow-wrap:anywhere;
+}
+.project-card-summary {
+  margin:0;
+  font-size:13px;
+  color:var(--ink);
+  overflow-wrap:anywhere;
+}
+.project-card .hint {
+  margin:0;
+}
+.list-tools {
+  margin:0 0 18px;
+}
+.trash-section>summary {
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:10px;
+  cursor:pointer;
+}
+.history-links {
+  margin:4px 0 0;
+}
+.history-number {
+  color:var(--muted);
+  margin-right:6px;
+}
+@media(max-width:720px) {
+  .welcome h2 {
+    font-size:20px;
+  }
+  .view-heading {
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .project-card .row,
+  .next-actions>.actions {
+    flex-direction:column;
+    align-items:stretch;
+  }
+}
+body[data-starting="true"] .project-head .eyebrow,
+body[data-starting="true"] .project-head .subtitle {
+  display:none;
+}
+body[data-starting="true"] .project-name {
+  font-size:15px;
+  color:var(--muted);
+}
