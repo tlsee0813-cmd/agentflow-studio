@@ -1,6 +1,6 @@
 AgentFlow Studio static preview (browser MOCK, no AI, no server)
-source: tlsee0813-cmd/agentflow-studio @ flow090/spatial-workspace fd82e964c3e4a972a93392aa2aa31fdf3a08bd06
-includes: FLOW091-U (81fd2249) and FLOW091-C (8f3aa99c + fd82e964); storage format idea015.project.5
+source: tlsee0813-cmd/agentflow-studio @ flow090/spatial-workspace 446358c1763910ed5fbdcf107baceca043edb2d7
+includes: FLOW094-R1 (446358c1, neutral MOCK default) on top of FLOW094-M c5229e24, REUSE092 doc fix e2881939 and FLOW093-U 2e21fea2; storage format idea015.project.5
 build (from app/, with the repo's locked TypeScript 5.8.3 in app/node_modules): node continuity/scripts/build-static.mjs
 output copied unchanged from app/continuity/static-dist; contents: index.html, styles.css, client/, shared/, .nojekyll
 excluded: API keys, server/provider code, user data, node_modules, test logs
@@ -13,10 +13,10 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./.nojekyll
 215ccc5ab637c33f3435b7f5144ed08e9c72b332ac04c68890bb6ee67b6a9571  ./client/runtime.js
 3c6903aaed9c35fb6f56c93617829b04671dd304ce7abe53180cc854341ff7ae  ./index.html
 d4ee1751ca0711a0ca5c24acbea1efb29bf894b4194f7b242cca5c8c74fe1aa4  ./shared/domain.js
-a58675e827ba592f1c4789ce8dcb21675d20f7c3d68fc33ebe1e2e16ba1931a5  ./shared/mock.js
+38daf4e65b0871493fc0fa73c342186181bb97ffdb2e394f435f2802d11bb9ce  ./shared/mock.js
 c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8  ./shared/outcome.js
 33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45  ./shared/plan-facts.js
 0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38  ./shared/storage.js
 60a24814698a6d61f3445e460c3302f40fe635ed2040371a3a4a0905a1505f87  ./shared/types.js
 29ef1e70f7cb51deb5acc8735984eecf125166247020765d61b413540bf1f5fe  ./shared/validation.js
-2b35eda3be9db3ce9938830f4b28ee0e0e02194c5c2ed6804a0fcd8e17cd51d2  ./styles.css
+5d887ddbe0ceb841126574bb8a128aca52704ac42e75275a3f640e86fdf34ae7  ./styles.css
