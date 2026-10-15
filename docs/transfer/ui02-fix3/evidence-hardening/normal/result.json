@@ -1,0 +1,1555 @@
+{
+  "commit": "3847a9b267d43dcc16bd1b999af446ad5cc38c91",
+  "sha256": "0aeedd515e7f80f4b091ba1b395f90e0d19355a9eb3ca6c7e1174ad48fa2898c",
+  "actualHTTPURL": "http://127.0.0.1:40583/canvas-study.html",
+  "playwright": "1.57.0",
+  "chromium": "154.0.8037.57",
+  "executable": "/usr/bin/chromium",
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      390,
+      664
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "checks": [
+    {
+      "name": "1440x900/S1/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "1440x900/S1/no-future-unresolved",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 1097,
+          "y": 109.453125,
+          "width": 327,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 1080,
+          "t": 79.515625,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2 대여 신청",
+        "scrollWidth": 327,
+        "clientWidth": 327
+      }
+    },
+    {
+      "name": "1440x900/S2/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "1440x900/S2/three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "1440x900/S2/C-collapsed-A-open-direct-A2-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 341.46875,
+          "width": 284,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 79.515625,
+          "r": 1080,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\nA2 소유 미결 1건 · 실패 알림 정책\n→ A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "1440x900/S2/L1-collapsed-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 306.46875,
+          "width": 284,
+          "height": 42.78125
+        },
+        "clip": {
+          "l": 0,
+          "t": 79.515625,
+          "r": 1080,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2\n대여 신청 — B\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "1440x900/S2/select-B",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "1440x900/S2/L2-B-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": [
+        {
+          "rect": {
+            "x": 1097,
+            "y": 261.921875,
+            "width": 327,
+            "height": 31
+          },
+          "clip": {
+            "l": 1080,
+            "t": 79.515625,
+            "r": 1440,
+            "b": 900
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 325,
+          "clientWidth": 325
+        },
+        {
+          "rect": {
+            "x": 1097,
+            "y": 261.921875,
+            "width": 327,
+            "height": 31
+          },
+          "clip": {
+            "l": 1080,
+            "t": 79.515625,
+            "r": 1440,
+            "b": 900
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 325,
+          "clientWidth": 325
+        }
+      ]
+    },
+    {
+      "name": "1440x900/S2/B-unresolved-direct-A2-B-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 1097,
+          "y": 517.09375,
+          "width": 327,
+          "height": 46.78125
+        },
+        "clip": {
+          "l": 1080,
+          "t": 79.515625,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\n실패 알림 정책 (아직 결정하지 않음) · 소유 A2\n→ A2",
+        "scrollWidth": 325,
+        "clientWidth": 325
+      }
+    },
+    {
+      "name": "1440x900/S2/A4-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 1097,
+          "y": 109.453125,
+          "width": 327,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 1080,
+          "t": 79.515625,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "A4 반납",
+        "scrollWidth": 327,
+        "clientWidth": 327
+      }
+    },
+    {
+      "name": "1440x900/S2/A6-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 1097,
+          "y": 109.453125,
+          "width": 327,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 1080,
+          "t": 79.515625,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "A6 연체 처리",
+        "scrollWidth": 327,
+        "clientWidth": 327
+      }
+    },
+    {
+      "name": "1440x900/S2/A4-A2-B-back-A2-back-A4",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "1440x900/S2/final-three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "1440x900/S2/final-document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "1440x900/S3/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "1440x900/S3/three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "1440x900/S3/C-collapsed-A-open-direct-A2-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 345.46875,
+          "width": 284,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 83.515625,
+          "r": 1080,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\nA2 소유 미결 1건 · 실패 알림 정책\n→ A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "1440x900/S3/L1-collapsed-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 310.46875,
+          "width": 284,
+          "height": 42.78125
+        },
+        "clip": {
+          "l": 0,
+          "t": 83.515625,
+          "r": 1080,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2\n대여 신청 — B\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "1440x900/S3/select-B",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "1440x900/S3/L2-B-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": [
+        {
+          "rect": {
+            "x": 1097,
+            "y": 265.921875,
+            "width": 327,
+            "height": 31
+          },
+          "clip": {
+            "l": 1080,
+            "t": 83.515625,
+            "r": 1440,
+            "b": 900
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 325,
+          "clientWidth": 325
+        },
+        {
+          "rect": {
+            "x": 1097,
+            "y": 265.921875,
+            "width": 327,
+            "height": 31
+          },
+          "clip": {
+            "l": 1080,
+            "t": 83.515625,
+            "r": 1440,
+            "b": 900
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 325,
+          "clientWidth": 325
+        }
+      ]
+    },
+    {
+      "name": "1440x900/S3/B-unresolved-direct-A2-B-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 1097,
+          "y": 521.09375,
+          "width": 327,
+          "height": 46.78125
+        },
+        "clip": {
+          "l": 1080,
+          "t": 83.515625,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\n실패 알림 정책 (아직 결정하지 않음) · 소유 A2\n→ A2",
+        "scrollWidth": 325,
+        "clientWidth": 325
+      }
+    },
+    {
+      "name": "1440x900/S3/A4-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 1097,
+          "y": 113.453125,
+          "width": 327,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 1080,
+          "t": 83.515625,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "A4 반납",
+        "scrollWidth": 327,
+        "clientWidth": 327
+      }
+    },
+    {
+      "name": "1440x900/S3/A6-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 1097,
+          "y": 113.453125,
+          "width": 327,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 1080,
+          "t": 83.515625,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "hit": true,
+        "text": "A6 연체 처리",
+        "scrollWidth": 327,
+        "clientWidth": 327
+      }
+    },
+    {
+      "name": "1440x900/S3/A4-A2-B-back-A2-back-A4",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "1440x900/S3/final-three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "1440x900/S3/final-document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 1440,
+        "scrollWidth": 1440
+      }
+    },
+    {
+      "name": "390x664/S1/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x664/S1/no-future-unresolved",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 266.859375,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2 대여 신청",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x664/S2/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x664/S2/three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x664/S2/C-collapsed-A-open-direct-A2-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 498.875,
+          "width": 284,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\nA2 소유 미결 1건 · 실패 알림 정책\n→ A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "390x664/S2/L1-collapsed-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 463.875,
+          "width": 284,
+          "height": 42.78125
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2\n대여 신청 — B\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "390x664/S2/select-B",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x664/S2/L2-B-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": [
+        {
+          "rect": {
+            "x": 16,
+            "y": 452.71875,
+            "width": 358,
+            "height": 31
+          },
+          "clip": {
+            "l": 0,
+            "t": 236.921875,
+            "r": 390,
+            "b": 664
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 356,
+          "clientWidth": 356
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 452.71875,
+            "width": 358,
+            "height": 31
+          },
+          "clip": {
+            "l": 0,
+            "t": 236.921875,
+            "r": 390,
+            "b": 664
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 356,
+          "clientWidth": 356
+        }
+      ]
+    },
+    {
+      "name": "390x664/S2/B-unresolved-direct-A2-B-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 621.890625,
+          "width": 358,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\n실패 알림 정책 (아직 결정하지 않음) · 소유 A2\n→ A2",
+        "scrollWidth": 356,
+        "clientWidth": 356
+      }
+    },
+    {
+      "name": "390x664/S2/A4-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 266.859375,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "A4 반납",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x664/S2/A6-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 266.859375,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "A6 연체 처리",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x664/S2/A4-A2-B-back-A2-back-A4",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x664/S2/L3-relation-A2-and-A6-visible-click-return-scroll",
+      "status": "passed",
+      "detail": {
+        "A2": {
+          "rect": {
+            "x": 14,
+            "y": 465.734375,
+            "width": 362,
+            "height": 62
+          },
+          "clip": {
+            "l": 0,
+            "t": 236.921875,
+            "r": 390,
+            "b": 664
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n— B\nE03 확인\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+          "scrollWidth": 360,
+          "clientWidth": 360
+        },
+        "A6": {
+          "rect": {
+            "x": 14,
+            "y": 572.734375,
+            "width": 362,
+            "height": 37
+          },
+          "clip": {
+            "l": 0,
+            "t": 236.921875,
+            "r": 390,
+            "b": 664
+          },
+          "full": true,
+          "hit": true,
+          "text": "A6\n— B\nE03 확인",
+          "scrollWidth": 360,
+          "clientWidth": 360
+        },
+        "scrollBefore": 254,
+        "scrollAfter": 254
+      }
+    },
+    {
+      "name": "390x664/S2/outline-scroll120-or-actual-max-preserved",
+      "status": "passed",
+      "detail": {
+        "requested": 120,
+        "actual": 120,
+        "max": 254,
+        "restored": 120
+      }
+    },
+    {
+      "name": "390x664/S2/final-three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x664/S2/final-document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x664/S3/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x664/S3/three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x664/S3/C-collapsed-A-open-direct-A2-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 546.734375,
+          "width": 284,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\nA2 소유 미결 1건 · 실패 알림 정책\n→ A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "390x664/S3/L1-collapsed-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 511.734375,
+          "width": 284,
+          "height": 42.78125
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2\n대여 신청 — B\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "390x664/S3/select-B",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x664/S3/L2-B-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": [
+        {
+          "rect": {
+            "x": 16,
+            "y": 500.578125,
+            "width": 358,
+            "height": 31
+          },
+          "clip": {
+            "l": 0,
+            "t": 284.78125,
+            "r": 390,
+            "b": 664
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 356,
+          "clientWidth": 356
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 500.578125,
+            "width": 358,
+            "height": 31
+          },
+          "clip": {
+            "l": 0,
+            "t": 284.78125,
+            "r": 390,
+            "b": 664
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 356,
+          "clientWidth": 356
+        }
+      ]
+    },
+    {
+      "name": "390x664/S3/B-unresolved-direct-A2-B-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 621.75,
+          "width": 358,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\n실패 알림 정책 (아직 결정하지 않음) · 소유 A2\n→ A2",
+        "scrollWidth": 356,
+        "clientWidth": 356
+      }
+    },
+    {
+      "name": "390x664/S3/A4-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 314.71875,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "A4 반납",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x664/S3/A6-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 314.71875,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 664
+        },
+        "full": true,
+        "hit": true,
+        "text": "A6 연체 처리",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x664/S3/A4-A2-B-back-A2-back-A4",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x664/S3/L3-relation-A2-and-A6-visible-click-return-scroll",
+      "status": "passed",
+      "detail": {
+        "A2": {
+          "rect": {
+            "x": 14,
+            "y": 535.59375,
+            "width": 362,
+            "height": 62
+          },
+          "clip": {
+            "l": 0,
+            "t": 284.78125,
+            "r": 390,
+            "b": 664
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n— B\nE03 확인\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+          "scrollWidth": 360,
+          "clientWidth": 360
+        },
+        "A6": {
+          "rect": {
+            "x": 14,
+            "y": 626.59375,
+            "width": 362,
+            "height": 37
+          },
+          "clip": {
+            "l": 0,
+            "t": 284.78125,
+            "r": 390,
+            "b": 664
+          },
+          "full": true,
+          "hit": true,
+          "text": "A6\n— B\nE03 확인",
+          "scrollWidth": 360,
+          "clientWidth": 360
+        },
+        "scrollBefore": 232,
+        "scrollAfter": 232
+      }
+    },
+    {
+      "name": "390x664/S3/outline-scroll120-or-actual-max-preserved",
+      "status": "passed",
+      "detail": {
+        "requested": 120,
+        "actual": 120,
+        "max": 302,
+        "restored": 120
+      }
+    },
+    {
+      "name": "390x664/S3/final-three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x664/S3/final-document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x844/S1/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x844/S1/no-future-unresolved",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 266.859375,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2 대여 신청",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x844/S2/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x844/S2/three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x844/S2/C-collapsed-A-open-direct-A2-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 498.875,
+          "width": 284,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\nA2 소유 미결 1건 · 실패 알림 정책\n→ A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "390x844/S2/L1-collapsed-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 463.875,
+          "width": 284,
+          "height": 42.78125
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2\n대여 신청 — B\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "390x844/S2/select-B",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x844/S2/L2-B-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": [
+        {
+          "rect": {
+            "x": 16,
+            "y": 452.71875,
+            "width": 358,
+            "height": 31
+          },
+          "clip": {
+            "l": 0,
+            "t": 236.921875,
+            "r": 390,
+            "b": 844
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 356,
+          "clientWidth": 356
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 452.71875,
+            "width": 358,
+            "height": 31
+          },
+          "clip": {
+            "l": 0,
+            "t": 236.921875,
+            "r": 390,
+            "b": 844
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 356,
+          "clientWidth": 356
+        }
+      ]
+    },
+    {
+      "name": "390x844/S2/B-unresolved-direct-A2-B-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 707.890625,
+          "width": 358,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\n실패 알림 정책 (아직 결정하지 않음) · 소유 A2\n→ A2",
+        "scrollWidth": 356,
+        "clientWidth": 356
+      }
+    },
+    {
+      "name": "390x844/S2/A4-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 266.859375,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "A4 반납",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x844/S2/A6-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 266.859375,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 236.921875,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "A6 연체 처리",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x844/S2/A4-A2-B-back-A2-back-A4",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x844/S2/L3-relation-A2-and-A6-visible-click-return-scroll",
+      "status": "passed",
+      "detail": {
+        "A2": {
+          "rect": {
+            "x": 14,
+            "y": 719.734375,
+            "width": 362,
+            "height": 62
+          },
+          "clip": {
+            "l": 0,
+            "t": 236.921875,
+            "r": 390,
+            "b": 844
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n— B\nE03 확인\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+          "scrollWidth": 360,
+          "clientWidth": 360
+        },
+        "A6": {
+          "rect": {
+            "x": 14,
+            "y": 806.734375,
+            "width": 362,
+            "height": 37
+          },
+          "clip": {
+            "l": 0,
+            "t": 236.921875,
+            "r": 390,
+            "b": 844
+          },
+          "full": true,
+          "hit": true,
+          "text": "A6\n— B\nE03 확인",
+          "scrollWidth": 360,
+          "clientWidth": 360
+        },
+        "scrollBefore": 0,
+        "scrollAfter": 0
+      }
+    },
+    {
+      "name": "390x844/S2/outline-scroll120-or-actual-max-preserved",
+      "status": "passed",
+      "detail": {
+        "requested": 120,
+        "actual": 74,
+        "max": 74,
+        "restored": 74
+      }
+    },
+    {
+      "name": "390x844/S2/final-three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x844/S2/final-document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x844/S3/document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "name": "390x844/S3/three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x844/S3/C-collapsed-A-open-direct-A2-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 546.734375,
+          "width": 284,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\nA2 소유 미결 1건 · 실패 알림 정책\n→ A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "390x844/S3/L1-collapsed-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 69,
+          "y": 511.734375,
+          "width": 284,
+          "height": 42.78125
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "A2\n대여 신청 — B\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+        "scrollWidth": 282,
+        "clientWidth": 282
+      }
+    },
+    {
+      "name": "390x844/S3/select-B",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x844/S3/L2-B-endpoint-A2-badges-jump-return",
+      "status": "passed",
+      "detail": [
+        {
+          "rect": {
+            "x": 16,
+            "y": 500.578125,
+            "width": 358,
+            "height": 31
+          },
+          "clip": {
+            "l": 0,
+            "t": 284.78125,
+            "r": 390,
+            "b": 844
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 356,
+          "clientWidth": 356
+        },
+        {
+          "rect": {
+            "x": 16,
+            "y": 500.578125,
+            "width": 358,
+            "height": 31
+          },
+          "clip": {
+            "l": 0,
+            "t": 284.78125,
+            "r": 390,
+            "b": 844
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n대여 신청\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2\n→",
+          "scrollWidth": 356,
+          "clientWidth": 356
+        }
+      ]
+    },
+    {
+      "name": "390x844/S3/B-unresolved-direct-A2-B-return",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 755.75,
+          "width": 358,
+          "height": 31
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "◇ 미결\n실패 알림 정책 (아직 결정하지 않음) · 소유 A2\n→ A2",
+        "scrollWidth": 356,
+        "clientWidth": 356
+      }
+    },
+    {
+      "name": "390x844/S3/A4-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 314.71875,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "A4 반납",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x844/S3/A6-no-unresolved-propagation",
+      "status": "passed",
+      "detail": {
+        "rect": {
+          "x": 16,
+          "y": 314.71875,
+          "width": 358,
+          "height": 21.75
+        },
+        "clip": {
+          "l": 0,
+          "t": 284.78125,
+          "r": 390,
+          "b": 844
+        },
+        "full": true,
+        "hit": true,
+        "text": "A6 연체 처리",
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    },
+    {
+      "name": "390x844/S3/A4-A2-B-back-A2-back-A4",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x844/S3/L3-relation-A2-and-A6-visible-click-return-scroll",
+      "status": "passed",
+      "detail": {
+        "A2": {
+          "rect": {
+            "x": 14,
+            "y": 767.59375,
+            "width": 362,
+            "height": 62
+          },
+          "clip": {
+            "l": 0,
+            "t": 284.78125,
+            "r": 390,
+            "b": 844
+          },
+          "full": true,
+          "hit": true,
+          "text": "A2\n— B\nE03 확인\nΔ 결정 변경 1\n◇ 미결 1 · 소유 A2",
+          "scrollWidth": 360,
+          "clientWidth": 360
+        },
+        "A6": {
+          "rect": {
+            "x": 14,
+            "y": 752.59375,
+            "width": 362,
+            "height": 37
+          },
+          "clip": {
+            "l": 0,
+            "t": 284.78125,
+            "r": 390,
+            "b": 844
+          },
+          "full": true,
+          "hit": true,
+          "text": "A6\n— B\nE03 확인",
+          "scrollWidth": 360,
+          "clientWidth": 360
+        },
+        "scrollBefore": 0,
+        "scrollAfter": 0
+      }
+    },
+    {
+      "name": "390x844/S3/outline-scroll120-or-actual-max-preserved",
+      "status": "passed",
+      "detail": {
+        "requested": 120,
+        "actual": 120,
+        "max": 122,
+        "restored": 120
+      }
+    },
+    {
+      "name": "390x844/S3/final-three-current-relations",
+      "status": "passed",
+      "detail": null
+    },
+    {
+      "name": "390x844/S3/final-document-no-horizontal-overflow",
+      "status": "passed",
+      "detail": {
+        "width": 390,
+        "scrollWidth": 390
+      }
+    }
+  ],
+  "counts": {
+    "passed": 86,
+    "failed": 0
+  },
+  "pageerrors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+    }
+  ],
+  "http_requests": [
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -",
+    "code 404, message File not found",
+    "\"GET /favicon.ico HTTP/1.1\" 404 -",
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -",
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -",
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -",
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -",
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -",
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -",
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -",
+    "\"GET /canvas-study.html HTTP/1.1\" 200 -"
+  ],
+  "unrun": [
+    "new Cloud task environment restoration",
+    "bundled Chromium",
+    "whole product build",
+    "real AI"
+  ],
+  "environmentPublication": "UI directly observed by auxiliary operator; not reverified here",
+  "transport": "real Chromium navigation over HTTP; no fetch/DOM substitutes",
+  "fatal": null,
+  "cleanup_errors": [],
+  "expected_checks": 86,
+  "executed_checks": 86,
+  "complete": true,
+  "exit_code": 0,
+  "probe_fatal": false,
+  "limitations": [
+    "C decision display has no separate assertion",
+    "A4/A6 non-propagation assertions cover inspector detail only",
+    "DOM scrollIntoView and scrollTop used; wheel/touch not tested"
+  ]
+}

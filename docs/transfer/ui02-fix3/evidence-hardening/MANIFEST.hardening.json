@@ -1,0 +1,75 @@
+{
+  "algorithm": "SHA256",
+  "files": [
+    {
+      "path": "check.hardened.py",
+      "bytes": 9938,
+      "sha256": "70fc8cb54f380c4a7b58f5255e10f4c8ef28c10457359570ed6dcc83926c6dce"
+    },
+    {
+      "path": "evidence-hardening/README.md",
+      "bytes": 2500,
+      "sha256": "1bf538f4745fc6b0ed844da01b77f2d340c5a96ae539f8229f79fa448ee9d6c4"
+    },
+    {
+      "path": "evidence-hardening/normal/1440-B-open.png",
+      "bytes": 122307,
+      "sha256": "f167ad0bea42409867a8eace120c212f26d08a89c13faf9b00758394730fe4f2"
+    },
+    {
+      "path": "evidence-hardening/normal/1440-L1.png",
+      "bytes": 139477,
+      "sha256": "bf9a7ef4e7d91b5d63bda2f14337c857ddd360b4a56637f3de370e31d01dce3b"
+    },
+    {
+      "path": "evidence-hardening/normal/390x664-B-open.png",
+      "bytes": 54002,
+      "sha256": "5427709cce2b17097af2c08f9569aad350654bfb40a5bca2707d54ef8e026d89"
+    },
+    {
+      "path": "evidence-hardening/normal/390x664-L3-A2.png",
+      "bytes": 50344,
+      "sha256": "bbee610fb2de2c0ef348fe31114de820122640f98919a7092da28f34b0a73f22"
+    },
+    {
+      "path": "evidence-hardening/normal/390x844-B-open.png",
+      "bytes": 58221,
+      "sha256": "a3a0a2e1a15467470f508c73552201857c90b39474b2448498c8fa183ed88159"
+    },
+    {
+      "path": "evidence-hardening/normal/390x844-L3-A6.png",
+      "bytes": 60378,
+      "sha256": "c746156f2bfb37c4359f46d3c9c838d121105af57009c73035679307578a415f"
+    },
+    {
+      "path": "evidence-hardening/normal/result.json",
+      "bytes": 36448,
+      "sha256": "70cc8d403ddcb710e5ceb1c0a9b7a6d8b841e0c42be46145c1e6b5f672eafe2a"
+    },
+    {
+      "path": "evidence-hardening/normal.log",
+      "bytes": 103,
+      "sha256": "27b459deea42ee40fa4cc5d1ac11069249f613032efa8fe505300bd927fce9cc"
+    },
+    {
+      "path": "evidence-hardening/probe/result.json",
+      "bytes": 1549,
+      "sha256": "f2a8548f8aeec78dbcb0d16c1dd3bce7e77e3da7ac124b08b5e9b860620ae3ac"
+    },
+    {
+      "path": "evidence-hardening/probe.log",
+      "bytes": 964,
+      "sha256": "3ff272f22d75f59cdd80942f5cd8563ba801c0797404f3a7d9514e77a7e1df09"
+    },
+    {
+      "path": "evidence-hardening/process-results.json",
+      "bytes": 764,
+      "sha256": "be06c47b264086e7b3ef692d716f77b8892501cb9cf00fdd5ff84e16cd10e606"
+    },
+    {
+      "path": "evidence-hardening/run-validation.py",
+      "bytes": 1032,
+      "sha256": "9ce821ddb0db2cf030d80a475d807719af2b41d09d32ea66ee8b3f0f5e25571a"
+    }
+  ]
+}

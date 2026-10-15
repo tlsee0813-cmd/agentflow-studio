@@ -1,0 +1,23 @@
+[
+  {
+    "run": "normal",
+    "process_exit_code": 0,
+    "expected_exit": 0,
+    "executed_checks": 86,
+    "complete": true,
+    "fatal": null
+  },
+  {
+    "run": "probe",
+    "process_exit_code": 1,
+    "expected_exit": "nonzero",
+    "executed_checks": 0,
+    "complete": false,
+    "fatal": {
+      "type": "RuntimeError",
+      "message": "Intentional pre-check configuration exception (--probe-fatal)",
+      "phase": "configuration",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/hardening/check.hardened.py\", line 62, in <module>\n    raise RuntimeError('Intentional pre-check configuration exception (--probe-fatal)')\nRuntimeError: Intentional pre-check configuration exception (--probe-fatal)\n"
+    }
+  }
+]

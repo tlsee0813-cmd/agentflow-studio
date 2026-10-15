@@ -1,0 +1,55 @@
+{
+  "commit": "3847a9b267d43dcc16bd1b999af446ad5cc38c91",
+  "sha256": null,
+  "actualHTTPURL": null,
+  "playwright": "1.57.0",
+  "chromium": null,
+  "executable": "/usr/bin/chromium",
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      390,
+      664
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "checks": [],
+  "counts": {
+    "passed": 0,
+    "failed": 0
+  },
+  "pageerrors": [],
+  "console": [],
+  "http_requests": [],
+  "unrun": [
+    "new Cloud task environment restoration",
+    "bundled Chromium",
+    "whole product build",
+    "real AI"
+  ],
+  "environmentPublication": "UI directly observed by auxiliary operator; not reverified here",
+  "transport": "real Chromium navigation over HTTP; no fetch/DOM substitutes",
+  "fatal": {
+    "type": "RuntimeError",
+    "message": "Intentional pre-check configuration exception (--probe-fatal)",
+    "phase": "configuration",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/hardening/check.hardened.py\", line 62, in <module>\n    raise RuntimeError('Intentional pre-check configuration exception (--probe-fatal)')\nRuntimeError: Intentional pre-check configuration exception (--probe-fatal)\n"
+  },
+  "cleanup_errors": [],
+  "expected_checks": 86,
+  "executed_checks": 0,
+  "complete": false,
+  "exit_code": 1,
+  "probe_fatal": true,
+  "limitations": [
+    "C decision display has no separate assertion",
+    "A4/A6 non-propagation assertions cover inspector detail only",
+    "DOM scrollIntoView and scrollTop used; wheel/touch not tested"
+  ]
+}
