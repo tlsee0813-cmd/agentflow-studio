@@ -1,0 +1,105 @@
+{
+  "slot": "C2-INITIAL",
+  "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+  "request": {
+    "schemaVersion": "guidance.2",
+    "ticket": {
+      "projectId": "P_627d66db-adc4-46be-b920-d5574c64eee3",
+      "revision": 10,
+      "requestId": "G_766a797b-be53-415d-a6d6-386de44742a9",
+      "areaId": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9"
+    },
+    "projectName": "명확한 Python CLI",
+    "brief": "파일 이름을 바꾸기 전에 변경 예정 내용을 확인하는 Python CLI를 만들고 싶어요.",
+    "area": {
+      "id": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9",
+      "name": "파일 이름 변경 미리보기",
+      "note": "직접 지정한 폴더의 일반파일 이름에서 공백을 밑줄로 바꾼 예정 이름을 미리 보고 싶어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "Python을 사용하고 추가 패키지는 쓰지 않아요.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D3",
+        "text": "직접 지정한 폴더 안의 일반파일만 다뤄요.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D4",
+        "text": "원래 이름과 예정 이름, 충돌과 빈 폴더 안내를 보여 주세요.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D5",
+        "text": "미리보기만 하며 실제 rename은 하지 마세요.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": null
+  },
+  "requestedModel": "deepseek-flash",
+  "actualModelResponse": null,
+  "providerHTTPStatus": null,
+  "missingResponseReason": "No upstream HTTP response reached the adapter before product timeout",
+  "productResponse": {
+    "httpStatus": 504,
+    "body": {
+      "error": {
+        "code": "AI_TIMEOUT"
+      }
+    }
+  },
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false,
+    "diagnostic": false
+  },
+  "metadata": {
+    "providerSendOrdinal": 3,
+    "latencyMs": 15004,
+    "productRequestBytes": 1061,
+    "productResponseBytes": 31,
+    "localAttempts": 1,
+    "transportEvents": [
+      {
+        "slot": "C2-INITIAL",
+        "timeUTC": "2026-10-15T00:46:19.476Z",
+        "sendCount": 3,
+        "event": "transport_attempt",
+        "requestBytes": 7746
+      },
+      {
+        "slot": "C2-INITIAL",
+        "timeUTC": "2026-10-15T00:46:34.475Z",
+        "sendCount": 3,
+        "event": "transport_failure",
+        "code": "CANCELLED"
+      }
+    ]
+  },
+  "draft": null,
+  "adoption": null,
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+      "areaId": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9",
+      "answer": null
+    }
+  ],
+  "outcome": {
+    "slot": "C2-INITIAL",
+    "productHTTP": 504,
+    "error": "AI_TIMEOUT",
+    "question": false,
+    "proposal": false,
+    "adoption": null
+  }
+}

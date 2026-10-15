@@ -1,0 +1,95 @@
+{
+  "slot": "HB-INITIAL",
+  "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+  "request": {
+    "schemaVersion": "guidance.2",
+    "ticket": {
+      "projectId": "P_4eae635b-5642-49fe-b1d1-c784022a12c5",
+      "revision": 8,
+      "requestId": "G_86f10f1c-e977-4f0b-87c6-566fc5747070",
+      "areaId": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835"
+    },
+    "projectName": "오프라인 리듬 연습",
+    "brief": "박자 맞춰 누른 연습 결과 이해",
+    "area": {
+      "id": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835",
+      "name": "연습 결과",
+      "note": "박자 시각과 그 박자에 대응하는 키 입력 시각을 제공해요. 연습 결과를 이해하고 싶고, 성공 허용오차는 아직 정하지 않았어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "네트워크를 사용하지 않아요.",
+        "status": "confirmed"
+      },
+      {
+        "id": "D3",
+        "text": "개인 연습 기록을 저장하지 않아요.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": null
+  },
+  "requestedModel": "deepseek-flash",
+  "actualModelResponse": null,
+  "providerHTTPStatus": null,
+  "missingResponseReason": "No upstream HTTP response reached the adapter before product timeout",
+  "productResponse": {
+    "httpStatus": 504,
+    "body": {
+      "error": {
+        "code": "AI_TIMEOUT"
+      }
+    }
+  },
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false,
+    "diagnostic": false
+  },
+  "metadata": {
+    "providerSendOrdinal": 6,
+    "latencyMs": 15004,
+    "productRequestBytes": 777,
+    "productResponseBytes": 31,
+    "localAttempts": 1,
+    "transportEvents": [
+      {
+        "slot": "HB-INITIAL",
+        "timeUTC": "2026-10-15T00:47:04.502Z",
+        "sendCount": 6,
+        "event": "transport_attempt",
+        "requestBytes": 7438
+      },
+      {
+        "slot": "HB-INITIAL",
+        "timeUTC": "2026-10-15T00:47:19.503Z",
+        "sendCount": 6,
+        "event": "transport_failure",
+        "code": "CANCELLED"
+      }
+    ]
+  },
+  "draft": null,
+  "adoption": null,
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+      "areaId": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835",
+      "answer": null
+    }
+  ],
+  "outcome": {
+    "slot": "HB-INITIAL",
+    "productHTTP": 504,
+    "error": "AI_TIMEOUT",
+    "question": false,
+    "proposal": false,
+    "adoption": null
+  }
+}

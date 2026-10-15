@@ -1,0 +1,38 @@
+{
+  "originalSlot": "C1-INITIAL",
+  "reason": "shipped-timeout failure",
+  "finish": null,
+  "originalSettings": {
+    "timeoutMs": 15000,
+    "maxTokens": 2048
+  },
+  "overrides": {
+    "timeoutMs": 60000
+  },
+  "limit": "one diagnostic total; not a replacement success; new ticket only, same product material",
+  "originalMaterialDigest": "{\"schemaVersion\":\"guidance.2\",\"projectName\":\"초보 — 가정 식재료\",\"brief\":\"가정 식재료 재고로 낭비를 줄이고 싶어요.\",\"area\":{\"id\":\"A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b\",\"name\":\"남은 재료 보기\",\"note\":\"집에 남아 있는 재료를 보고 싶어요.\"},\"decisions\":[{\"id\":\"D2\",\"text\":\"혼자 한 기기에서 사용해요.\",\"status\":\"confirmed\"},{\"id\":\"D3\",\"text\":\"재고는 수동으로 입력해요.\",\"status\":\"confirmed\"},{\"id\":\"D4\",\"text\":\"주문과 배송은 이번 범위에서 제외해요.\",\"status\":\"confirmed\"}],\"areaWork\":[],\"answer\":null}",
+  "materialMatch": {
+    "sameMaterial": true,
+    "originalTicket": {
+      "projectId": "P_d022fed1-e34b-4d40-a242-6fb1bc363e9f",
+      "revision": 9,
+      "requestId": "G_556c49ac-9edc-4dea-9961-28495e83719e",
+      "areaId": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+    },
+    "diagnosticTicket": {
+      "projectId": "P_d022fed1-e34b-4d40-a242-6fb1bc363e9f",
+      "revision": 9,
+      "requestId": "G_cdbee4a0-c226-4489-8171-90ae83737e62",
+      "areaId": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+    }
+  },
+  "tcpOnlyFollowup": {
+    "kind": "one free TCP-only reachability check to existing configured protected proxy",
+    "tcp": "CONNECTED",
+    "errno": null,
+    "httpRequests": 0,
+    "credentialBytes": 0,
+    "actualAIRequests": 0,
+    "limits": "TCP outcome only; does not establish proxy HTTP/TLS/provider/auth readiness."
+  }
+}

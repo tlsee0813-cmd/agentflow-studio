@@ -1,0 +1,35 @@
+{
+  "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+  "verdict": "EXECUTION_HOLD; semantic quality UNASSESSED",
+  "runnerExit": 0,
+  "runnerExitMeaning": "orchestration completed, not successful AI evaluation",
+  "requestContract": "guidance.2",
+  "requestedModel": "deepseek-flash",
+  "actualResponseModel": null,
+  "productDefaults": {
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled in source body builder",
+    "temperatureSent": false,
+    "rate": 6,
+    "processCap": 20
+  },
+  "firstRunUsesProductDefaults": true,
+  "previousExperiment": "fbdcbf1 used 60000ms/4096 evaluation overrides; not carried over",
+  "transportSendAttempts": 6,
+  "providerHTTPResponses": 0,
+  "productHTTP504": 6,
+  "diagnosticCount": 1,
+  "diagnosticOverrides": {
+    "timeoutMs": 60000
+  },
+  "diagnosticUnchangedOutputTokens": 2048,
+  "localUnsent429": 0,
+  "mockGenerations": 0,
+  "additionalCallsForPublication": 0,
+  "semanticBranchesExecuted": 0,
+  "adoptionsExecuted": 0,
+  "sourceUnchanged": true,
+  "remoteReceiptAndBilling": "unknown; a transport attempt is not proof provider processed it",
+  "limits": "No provider status/model/finish/usage/raw reply received. Cannot distinguish protected HTTP/TLS path issue from upstream delay, auth or model issue. No source/semantic regression claim from timeouts."
+}

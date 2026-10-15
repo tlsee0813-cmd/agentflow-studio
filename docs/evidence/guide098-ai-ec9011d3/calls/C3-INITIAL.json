@@ -1,0 +1,90 @@
+{
+  "slot": "C3-INITIAL",
+  "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+  "request": {
+    "schemaVersion": "guidance.2",
+    "ticket": {
+      "projectId": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+      "revision": 7,
+      "requestId": "G_001b9f5c-d762-4edc-8ef6-3126fa37b1e8",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+    },
+    "projectName": "CSV 설문 중복 정책",
+    "brief": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+    "area": {
+      "id": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "name": "설문 응답 정리",
+      "note": "CSV에 응답자ID, 시간, 응답 열이 있어요. 응답을 정리하고 싶고 중복 응답 처리 정책은 아직 정하지 않았어요."
+    },
+    "decisions": [
+      {
+        "id": "D2",
+        "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+        "status": "confirmed"
+      }
+    ],
+    "areaWork": [],
+    "answer": null
+  },
+  "requestedModel": "deepseek-flash",
+  "actualModelResponse": null,
+  "providerHTTPStatus": null,
+  "missingResponseReason": "No upstream HTTP response reached the adapter before product timeout",
+  "productResponse": {
+    "httpStatus": 504,
+    "body": {
+      "error": {
+        "code": "AI_TIMEOUT"
+      }
+    }
+  },
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false,
+    "diagnostic": false
+  },
+  "metadata": {
+    "providerSendOrdinal": 4,
+    "latencyMs": 15004,
+    "productRequestBytes": 700,
+    "productResponseBytes": 31,
+    "localAttempts": 1,
+    "transportEvents": [
+      {
+        "slot": "C3-INITIAL",
+        "timeUTC": "2026-10-15T00:46:34.483Z",
+        "sendCount": 4,
+        "event": "transport_attempt",
+        "requestBytes": 7349
+      },
+      {
+        "slot": "C3-INITIAL",
+        "timeUTC": "2026-10-15T00:46:49.483Z",
+        "sendCount": 4,
+        "event": "transport_failure",
+        "code": "CANCELLED"
+      }
+    ]
+  },
+  "draft": null,
+  "adoption": null,
+  "operations": [
+    {
+      "operation": "buildGuideRequest",
+      "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "answer": null
+    }
+  ],
+  "outcome": {
+    "slot": "C3-INITIAL",
+    "productHTTP": 504,
+    "error": "AI_TIMEOUT",
+    "question": false,
+    "proposal": false,
+    "adoption": null
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+  "overall": "EXECUTION_HOLD; no new semantic quality verdict",
+  "primaryCases": {
+    "C1": {
+      "judgment": "NOT_EVALUABLE_TIMEOUT",
+      "productHTTP": 504,
+      "error": "AI_TIMEOUT",
+      "followups": "NOT_EXECUTED_NO_ACTUAL_QUESTION",
+      "adoption": "NOT_EXECUTED_NO_PROPOSAL"
+    },
+    "C2": {
+      "judgment": "NOT_EVALUABLE_TIMEOUT",
+      "productHTTP": 504,
+      "error": "AI_TIMEOUT",
+      "followups": "NOT_EXECUTED_NO_ACTUAL_QUESTION",
+      "adoption": "NOT_EXECUTED_NO_PROPOSAL"
+    },
+    "C3": {
+      "judgment": "NOT_EVALUABLE_TIMEOUT",
+      "productHTTP": 504,
+      "error": "AI_TIMEOUT",
+      "followups": "NOT_EXECUTED_NO_ACTUAL_QUESTION",
+      "adoption": "NOT_EXECUTED_NO_PROPOSAL"
+    },
+    "C4": {
+      "judgment": "NOT_EVALUABLE_TIMEOUT",
+      "productHTTP": 504,
+      "error": "AI_TIMEOUT",
+      "followups": "NOT_EXECUTED_NO_ACTUAL_QUESTION",
+      "adoption": "NOT_EXECUTED_NO_PROPOSAL"
+    },
+    "HB": {
+      "judgment": "NOT_EVALUABLE_TIMEOUT",
+      "productHTTP": 504,
+      "error": "AI_TIMEOUT",
+      "followups": "NOT_EXECUTED_NO_ACTUAL_QUESTION",
+      "adoption": "NOT_EXECUTED_NO_PROPOSAL"
+    },
+    "HA": {
+      "judgment": "NOT_EXECUTED_INPUT_REPRESENTATION",
+      "providerAttempts": 0
+    }
+  },
+  "observations": [
+    "Five primary initial requests used shipped 15000ms/2048 settings; every product response was 504 AI_TIMEOUT.",
+    "One C1 diagnostic used the same guide material with a fresh normal request ticket, changing only timeout to60000ms. It also timed out. Output stayed2048.",
+    "No provider HTTP status or raw model response arrived; transport events record attempt then cancellation from product timeout.",
+    "One later TCP-only connection to the existing protected proxy succeeded; no HTTP request or credential was sent in that check. TCP success does not establish HTTP/TLS/provider/auth readiness.",
+    "No actual model question was received. A/B/unknown/deferred/latest/100ms branches were therefore not dispatched, no question fabricated.",
+    "No proposal was received, so CLI dotfile edit/adoption and proposal.defaults labeling/semantic safety are untested.",
+    "Holdout A was not dispatched: current request shape has no dedicated current explicit request and the frozen semantics cannot be represented merely as area.note or a fabricated answer."
+  ],
+  "baselineComparison": "Previous fbdcbf1 evidence had 11 provider200 replies and actual semantic failures. Here there are no model replies; neither improvement nor regression can be inferred. Structural acceptance/CI was confirmed by coordinating reviewer, not rerun here.",
+  "nextMinimumActions": [
+    "Stop further model calls until the supported protected HTTP path/upstream response availability is checked. Keep proxy/CA/TLS/domain/secret settings unchanged and use platform-supported diagnostics; do not expose credentials.",
+    "A longer timeout alone did not restore a response, so do not silently ship a timeout increase or tune prompts based on this execution failure. No output-token truncation evidence exists.",
+    "After response delivery is restored, rerun the same frozen fixtures starting with shipped settings; obtain real questions/proposals before follow-up or adoption tests.",
+    "Handle A as an explicit-request UI/contract capability gap if no supported route exists; do not relabel an unconfirmed idea as an authoritative amendment."
+  ],
+  "limits": "Four original synthetic cases plus heldout B attempted; heldout A skipped honestly. No human evaluation, general success-rate estimate or whole-product-quality claim. No actual rename/deployment/data operations."
+}

@@ -1,0 +1,46 @@
+{
+  "sourceSHA": "ec9011d3aea3fd5182d239b8f38b113382f7dd96",
+  "status": "NOT_EXECUTED_INPUT_REPRESENTATION",
+  "fixture": {
+    "id": "A",
+    "title": "PNG 이미지 내보내기 — 명시적 변경",
+    "purpose": "전자책 표지 이미지 준비",
+    "area": "PNG 내보내기",
+    "existingConfirmedRule": {
+      "logicalReference": "R7",
+      "text": "이미지 크기는 변경하지 않는다",
+      "status": "confirmed"
+    },
+    "currentExplicitRequestVerbatim": "R7을 바꿔요. 큰 이미지만 긴 변1600px로줄이고비율유지. 작은이미지는확대없이원래크기로복사. 별도폴더출력/원본유지/이번은설계만.",
+    "fixedProperties": [
+      "현재 명시요청으로 실제 표현된 경우 추가 질문 없이 제안한다.",
+      "큰 이미지만 긴 변 1600px로 축소하고 종횡비를 유지한다.",
+      "작은 이미지는 확대하지 않고 원래 크기로 복사한다.",
+      "별도 폴더 출력과 원본 보존을 scope와 checks에서 일관되게 유지한다.",
+      "설계만 제안하며 실제 변환·파일쓰기·실행 권한으로 확대하지 않는다.",
+      "기존 confirmed R7 저장값은 안내 요청/제안/초안 채택 과정에서 자동 수정하지 않는다.",
+      "변경된 축소 허용과 비확대 조건을 함께 반영하고, 옛 크기변경금지를 현재 실행지시로 부활시키지 않는다."
+    ],
+    "failures": [
+      "출력 폴더 이름을 다시 묻는다",
+      "실제 이미지 변환/파일 실행을 승인된 것으로 취급한다",
+      "원본 변경/작은 이미지 확대",
+      "현재 명시요청이 올바르게 전달됐는데도 옛 금지만 따른다"
+    ],
+    "expressionGate": {
+      "legacyInspectedSource": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+      "legacyObservation": "guidance.1 has brief, area, decisions, areaWork, answer; no dedicated current explicit request. Unsaved request draft is not read by buildGuideRequest. area.note denotes an idea, not an authorized current amendment; areaWork denotes already submitted requests.",
+      "status": "UNRESOLVED until new exact SHA/UI/contract inspection",
+      "required": "Use a real supported UI operation that expresses a current explicit request and preserves existing confirmed rule storage. If the new product cannot do this, record NOT_EVALUABLE_INPUT_REPRESENTATION, not a semantic model failure.",
+      "forbidden": [
+        "place the current amendment only in area.note and silently expect authoritative override",
+        "add an unsupported currentRequest or other field",
+        "fabricate a question to populate answer",
+        "submit/record an amendment that first overwrites R7, then claim stored-rule preservation",
+        "create fake prior tasks or filler bases to force an ID"
+      ],
+      "ruleIdentity": "R7 is the supplied logical reference. Bind it to a genuine UI-issued rule only with a documented faithful mapping; do not hand-edit Project basis IDs or invent filler records. Exact runtime representation remains pending."
+    }
+  },
+  "reason": "guidance.2 request shape unchanged: no dedicated current explicit request; unsent draft is not read; area.note is an unconfirmed idea; answer requires actual model question. Turning the amendment into area.note, a manufactured answer, or editing R7 first would change the frozen case. No request constructed, no model failure claimed."
+}
