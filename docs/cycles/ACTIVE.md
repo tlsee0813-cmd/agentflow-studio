@@ -1,7 +1,7 @@
 # AgentFlow 활성 연구·검증 배정
 2026-10-16 갱신 · 단일 총괄: 현재 Codex 대화. 현재 상태는 여기만 갱신한다.
 
-## 현재: cycle07 작성자 v0 수령·준비문 의미 fix1 진행
+## 현재: cycle07 fix1 원격 보존·Cloud 독립 조작 검사 진행
 [범위](2026-10-16-change-record-07/BRIEF.md) · [입력](2026-10-16-change-record-07/INPUT.md) · [고정 patch 감사](2026-10-16-change-record-07/STRUCTURE_AUDIT.md).
 
 질문은 사용자 목적을 유지하며 두 화면과 공통 계산의 변화·확인되지 않은 상태를 긴 검토문 없이 읽는 방법이다. 실제 공개 사람–Copilot 후속 수정 기록을 쓴다. 두 화면은 이미 공통 계산을 호출했으므로 이번 변경을 새 관계 생성으로 표시하지 않는다. 실제 되돌림·최종 수용·AI 세션 인계는 확인되지 않았다.
@@ -13,13 +13,15 @@
 | Astra High | PNG4·HTML 의미 감사 완료. 준비문의 과거 요청/수정 방향 선결정을 발견 |
 | 6.1 Sol High | 27파일 수령/manifest 검증·세 run 코드/종료 감사 완료. 지도 raw 전후값·대상 편집 재방문을 독립 검사에서 보완 |
 | 총괄 | [선택](2026-10-16-change-record-07/DECISION.md)·[구현 계약](2026-10-16-change-record-07/IMPLEMENTATION.md) 통합. 공식 원문 감사·Astra 반례 반영 |
-| [Opus 구현](https://claude.ai/chat/c4b2aa44-1b79-4f2a-9a5a-1d412872b647) | v0 수령. 준비 기본문의 방향 선결정만 fix1 정정 중. 지도/동작 재설계 없음 |
-| Cloud | cycle07 독립 조작 검사 미배정. 의미 fix1 원본을 고정한 뒤 배정 |
+| [Opus 구현](https://claude.ai/chat/c4b2aa44-1b79-4f2a-9a5a-1d412872b647) | fix1 수령. 준비 기본문 3줄 정정, 단일 작성자75 PASS·child/collector0. textarea 끝문장 실제 접근은 독립 검증 대기 |
+| Cloud | 고정 fix1 0dfadba…로 독립 2폭×3경로 배정·실행 시작 확인. 결과 수령 전 |
 
 ## 이번 수령과 발견
 [작성자 원본](https://github.com/tlsee0813-cmd/agentflow-studio/tree/9ec6a58398c95a4ad5617f50eb16d2aa98052a4a/docs/transfer/change-record-07/author-v0) 27파일/977,107B(25 payload＋manifest2), HTML42,113B/SHA3fd8a0ad… 보존·원격 HTML/manifest 바이트 대조 완료. run01 69 PASS/6 FAIL, run02·03 각75 PASS/0 FAIL; 실제 child/collector 1→0→0. 첫 실패는 clip 계산2·선 문자열3·장면 준비1이며 접근 조건 변경도 있어 모두 측정식 오류로 뭉뚱그리지 않는다. 최신 작성자 단일 실행만75로 세며 독립/사람 검사와 구별한다.
 
 [의미 감사](2026-10-16-change-record-07/AUTHOR_SEMANTIC_AUDIT.md): 메뉴 준비의 ‘1/16만 되돌림’과 공통 계산의 ‘함수 쪽에서 맞춤’이 현재 사실 확인 전에 수정 방향을 정했다. 후속 요청의 범위/반영상태와 현재 코드의 근거부터 확인하고 선택 부분의 필요한 수정 제안을 하도록 좁게 고친다. [코드·증거 감사](2026-10-16-change-record-07/AUTHOR_CODE_AUDIT.md)는 별도이다.
+
+[fix1 고정 원본](https://github.com/tlsee0813-cmd/agentflow-studio/tree/0dfadba788e0f2f035bbe51b899b9c02e4260e45/docs/transfer/change-record-07/author-fix1) 14파일/696,425B(12 payload＋manifest2), HTML42,420B/SHA d10e7dca… 보존·원격 원본 바이트 일치. [준비문 정정 확인](2026-10-16-change-record-07/FIX1_SEMANTIC_AUDIT.md). [실제 화면 비평](2026-10-16-change-record-07/VISUAL_REVIEW.md)은 다음 과제를 첫 전체 조망으로 좁혔다. 현재 검사 완료를 뜻하지 않는다.
 
 ## 직전 결과
 [cycle06 통합 판단](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d17667c1c519492f6edf8ea064a9f87b5d51fc12/docs/cycles/2026-10-16-purpose-06/RESULT.md): 목적→부분 역할→지킬 조건과 명시 왕복을 잠정 유지. 정보 없음/미결정 단정은 fix1에서 교정했다. 독립 단일 6장면/39단언과 별도 비초기 X2 왕복 2경로/16단언은 각각 완료했다. 새 하위 기능을 만들어 채우지 않았으며 입력 N01은 개발자 합성 초기 구상이다.
