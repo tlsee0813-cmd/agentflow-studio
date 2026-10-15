@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "guidance.3",
+  "ticket": {
+    "projectId": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+    "revision": 7,
+    "requestId": "G_bb6d8522-30b8-4fe9-853f-e18f72bf433d",
+    "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+  },
+  "projectName": "CSV 설문 중복 정책",
+  "brief": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+  "area": {
+    "id": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+    "name": "설문 응답 정리",
+    "note": "CSV에 응답자ID, 시간, 응답 열이 있어요. 응답을 정리하고 싶고 중복 응답 처리 정책은 아직 정하지 않았어요."
+  },
+  "decisions": [
+    {
+      "id": "D2",
+      "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+      "status": "confirmed"
+    }
+  ],
+  "areaWork": [],
+  "answer": null,
+  "currentInstruction": null
+}

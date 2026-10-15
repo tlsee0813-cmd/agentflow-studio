@@ -1,0 +1,79 @@
+GUIDE099 evidence handoff — original evidence, not a new experiment
+
+Product source exact SHA: 2a40ac3d7079b3984856b87abd4e085b43d35aa7
+Product source parent: f1a00a9a5f9f419a8b32179a7c4eb5a47aa9dc51
+Publication root: docs/evidence/guide099-ai-2a40ac3d/
+This evidence-only branch is based on that exact product commit. No product/prompt/config change or extra AI call accompanies publication.
+
+START HERE
+1. FINAL-REPORT.txt and semantic-assessment.json are byte-identical to the local original judgement. The original INDEX.txt is also preserved without editing.
+2. call-table.json links all six actual product calls to status/model/finish/usage/latency and unsent adoption. neutral-availability.json accounts for the seventh call without disclosing transport/auth material.
+3. In each CASE-INITIAL/ directory: request.json is the actual product-built request; project-pre.json and operations.json give its synthetic provenance; provider-request.json is the actual product-generated provider body (no headers); provider-response.raw.txt is the unchanged received provider JSON string; provider-response.json is its parsed representation. response.json/product-response.raw.txt are the actual product acceptance response. proposal-text.txt and edited-draft.txt precede the actual project-adopted.json/outcome.json. No expected answer was added to these requests.
+4. fixed-original-cases.json and fixed-holdouts.json contain the fixed criteria separately from model input. HA-rule-mapping.json documents the fixture's logical R7 -> genuine product-issued D2; it was not added to the provider input. No Project IDs or stored rule were edited to force this mapping.
+
+ALL-PROPOSAL DOES NOT MEAN ALL REQUIREMENTS PASS
+All six responses had question:null and a proposal; HTTP acceptance validates protocol, not semantic completeness. A 0-or-1 question contract permits zero when enough is known. Do not fail a response solely because it has no question, or pass it solely because it returns a proposal.
+C1 has a concrete omission, separate from question count: scope excludes "재료 추가·수정·삭제 기능(이번에는 보기만)" while relying on user-entered inventory. request.json and project-pre.json contain no prior area work or established data-entry facility. The assessment infers that the first useful manual-entry-to-view workflow is incomplete; this is an evaluator judgement, not a validator error or an observed implementation failure.
+C2 was sufficiently explicit: a no-question proposal preserved Python/no extra packages/regular files/preview only, names/collisions/empty folder checks. edited-draft.txt adds exact "dotfile은 제외해 주세요." and actual adoption is unsent, with old sources/tasks/bases unchanged.
+C3 starts useful, non-destructive duplicate observation with policy open. C4 preserves current offline/file-import/design-only conditions and recognizes the unresolved phone idea. HB provides paired timestamp differences without scoring, network or record storage. These initial results do not establish the missing comparison branches.
+HA currentInstruction contains the frozen amendment verbatim with answer:null, area.note:null and old confirmed D2 unchanged. Core 1600px reduction/aspect ratio/no enlargement/original preservation/design-only conditions are present. Read its whole scope: keeping the stored D2 record is not by itself reinstating the old ban. Remaining open boundary/classification ambiguity and the phrase "사용자 답" despite answer:null are separately identified in semantic-assessment.json. No automatic wholesale FAIL or PASS is claimed.
+
+CALL -> RAW -> JUDGEMENT -> UNEXECUTED BRANCH MAP
+
+C1-INITIAL — HOLD — incomplete first useful workflow
+  Input: C1-INITIAL/request.json; C1-INITIAL/project-pre.json
+  Actual raw model response: C1-INITIAL/provider-response.raw.txt (choices[0].message.content is the original returned string)
+  Product acceptance/draft: C1-INITIAL/response.json; C1-INITIAL/edited-draft.txt; C1-INITIAL/outcome.json
+  Judgement: semantic-assessment.json -> caseAssessments entry with case=C1 (observations versus judgement versus limits)
+  Non-execution: C1-branches-not-executed.json
+  A/B shopping-versus-first-to-eat comparison not sent: no actual question.
+
+C2-INITIAL — PASS — this single sample
+  Input: C2-INITIAL/request.json; C2-INITIAL/project-pre.json
+  Actual raw model response: C2-INITIAL/provider-response.raw.txt (choices[0].message.content is the original returned string)
+  Product acceptance/draft: C2-INITIAL/response.json; C2-INITIAL/edited-draft.txt; C2-INITIAL/outcome.json
+  Judgement: semantic-assessment.json -> caseAssessments entry with case=C2 (observations versus judgement versus limits)
+  Non-execution: No fixed conditional answer branches for this case.
+
+C3-INITIAL — PARTIAL — useful policy-independent initial proposal; branches untested
+  Input: C3-INITIAL/request.json; C3-INITIAL/project-pre.json
+  Actual raw model response: C3-INITIAL/provider-response.raw.txt (choices[0].message.content is the original returned string)
+  Product acceptance/draft: C3-INITIAL/response.json; C3-INITIAL/edited-draft.txt; C3-INITIAL/outcome.json
+  Judgement: semantic-assessment.json -> caseAssessments entry with case=C3 (observations versus judgement versus limits)
+  Non-execution: C3-branches-not-executed.json
+  UNKNOWN/DEFERRED/LATEST answers not sent: no actual question. The prior latest-row checks defect is not claimed fixed.
+
+C4-INITIAL — PARTIAL — confirmed offline scope preserved; change/conflict-question behavior untested
+  Input: C4-INITIAL/request.json; C4-INITIAL/project-pre.json
+  Actual raw model response: C4-INITIAL/provider-response.raw.txt (choices[0].message.content is the original returned string)
+  Product acceptance/draft: C4-INITIAL/response.json; C4-INITIAL/edited-draft.txt; C4-INITIAL/outcome.json
+  Judgement: semantic-assessment.json -> caseAssessments entry with case=C4 (observations versus judgement versus limits)
+  Non-execution: C4-branches-not-executed.json
+  Offline-vs-notice-only-network amendment answers not sent: no actual question. Old ignored-amendment defect is not claimed fixed by the initial offline proposal.
+
+HB-INITIAL — PARTIAL — useful initial independent result; tolerance branches untested
+  Input: HB-INITIAL/request.json; HB-INITIAL/project-pre.json
+  Actual raw model response: HB-INITIAL/provider-response.raw.txt (choices[0].message.content is the original returned string)
+  Product acceptance/draft: HB-INITIAL/response.json; HB-INITIAL/edited-draft.txt; HB-INITIAL/outcome.json
+  Judgement: semantic-assessment.json -> caseAssessments entry with case=HB (observations versus judgement versus limits)
+  Non-execution: HB-branches-not-executed.json
+  DEFER/±100ms answers not sent: no actual question. Explicit deferral/100ms-boundary behaviour remains untested.
+
+HA-INITIAL — PARTIAL — core explicit amendment passes; boundary/open clarity remains
+  Input: HA-INITIAL/request.json; HA-INITIAL/project-pre.json
+  Actual raw model response: HA-INITIAL/provider-response.raw.txt (choices[0].message.content is the original returned string)
+  Product acceptance/draft: HA-INITIAL/response.json; HA-INITIAL/edited-draft.txt; HA-INITIAL/outcome.json
+  Judgement: semantic-assessment.json -> caseAssessments entry with case=HA (observations versus judgement versus limits)
+  Non-execution: No fixed conditional answer branches for this case.
+
+FACTS AND LIMITS
+Previous successful GUIDE097 source was fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1: 11 provider calls with experimental timeout60000/output4096 (not product defaults). This GUIDE099 run used shipped timeout15000/output2048, deepseek-flash, thinking disabled, temperature omitted. Six product calls + one neutral call = seven; provider200/finishstop7, product2006, product rejection0, local-unsent4290, mock0, retry0. Current contract guidance.3/currentInstruction differs from the prior contract, so this is not a controlled causal estimate or a paired eleven-response replay.
+No conditional answer was manufactured. In particular, outcome booleans actualQuestionPreserved/actualAnswerPreserved are conditionally true when answer=null; they are not evidence that an actual question-answer path was exercised.
+All six proposals were adopted using exact candidate proposalText/adoptProposal into unsent drafts; this did not submit tasks, implement code, rename files, transform images, transmit customer data or deploy anything. Native browser/stale-adopt/incoming-guard behaviours were not exercised by this experiment.
+Dedicated quoted/hypothetical/third-party instruction controls are absent from these fixed inputs, so that rejection behaviour remains unverified. One actual response per initial case and synthetic projects do not establish human usefulness, overall quality, or a general failure rate.
+
+FIDELITY AND DISCLOSURE
+The 102 original text/JSON files (including original hashes/scope check) are copied byte-for-byte. Original reports that say remoteWrites0 describe the experiment before this separately authorized evidence publication. Original INDEX's parent-local net-check path is a historical local reference; use neutral-availability.json here for the safe published account of that request.
+PUBLICATION-HASHES.json identifies every original file's SHA256/bytes and its original evidence path; new handoff files are clearly marked. FILE-HASHES.json is the preserved local original hash manifest, not a self-hash of this new publication.
+No protected adapter/runner/source tree, headers, keys or placeholders, environment files, package/binary files, private data, session tokens or unrelated projects are published. Provider completion IDs and synthetic app project/task/basis/ticket IDs are execution/synthetic identifiers, not authentication credentials.
+All original actual-model responses and all six cases are included; there is no success-only selection or rewritten response to fit the judgement. Future implementers should inspect the raw case files, not rely solely on the summary. No new calls were made for handoff.

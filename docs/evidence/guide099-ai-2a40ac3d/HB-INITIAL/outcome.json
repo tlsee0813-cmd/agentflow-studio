@@ -1,0 +1,24 @@
+{
+  "slot": "HB-INITIAL",
+  "productHTTP": 200,
+  "errorCode": null,
+  "question": false,
+  "proposal": true,
+  "adoption": {
+    "accepted": true,
+    "unsent": true,
+    "draftExact": true,
+    "draftTarget": {
+      "area": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835"
+    },
+    "rawCurrentInstructionPreserved": true,
+    "actualQuestionPreserved": true,
+    "actualAnswerPreserved": true,
+    "manualEditPreserved": true,
+    "basesUnchanged": true,
+    "sourcesUnchanged": true,
+    "tasksUnchanged": true,
+    "originalUnchanged": true,
+    "defaultsLabeled": true
+  }
+}

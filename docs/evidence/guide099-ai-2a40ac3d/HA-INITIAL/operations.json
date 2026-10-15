@@ -1,0 +1,14 @@
+[
+  {
+    "operation": "reuse frozen pre-project",
+    "path": "guide099-ai/prepared/HA/project-pre.json"
+  },
+  {
+    "operation": "buildGuideRequest",
+    "sourceSHA": "2a40ac3d7079b3984856b87abd4e085b43d35aa7",
+    "areaId": "A_d3c1a75a-c072-419c-af02-56cf99f65b76",
+    "currentInstruction": "R7을 바꿔요. 큰 이미지만 긴 변1600px로줄이고비율유지. 작은이미지는확대없이원래크기로복사. 별도폴더출력/원본유지/이번은설계만.",
+    "answer": null,
+    "actualInitialQuestionOnly": false
+  }
+]

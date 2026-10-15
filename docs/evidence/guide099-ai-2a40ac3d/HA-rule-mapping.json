@@ -1,0 +1,21 @@
+{
+  "status": "REPRESENTABLE_THROUGH_PRODUCT_GUIDANCE3",
+  "uiControl": "이번에 맡기거나 바꿀 일 (선택)",
+  "uiElement": "textarea#guide-instruction",
+  "path": "g.instruction -> instructionOf -> buildGuideRequest(project,areaId,null,instruction)",
+  "currentInstructionUnchanged": true,
+  "answer": null,
+  "areaNote": null,
+  "ruleMapping": {
+    "fixtureLogicalReference": "R7",
+    "actualProductIssuedId": "D2",
+    "storedText": "이미지 크기는 변경하지 않는다",
+    "status": "confirmed"
+  },
+  "limits": [
+    "R7 is the frozen logical reference, not a manufactured product ID. The product issued D2; the exact currentInstruction still says R7.",
+    "Mapping is documented only in evidence, not injected into provider data. Only one confirmed rule exists; whether the model correctly resolves this reference remains untested.",
+    "No Project IDs edited, no filler records, no rule overwritten or retired.",
+    "No browser/UI interaction run; source wiring and pure product builder establish input representation only."
+  ]
+}

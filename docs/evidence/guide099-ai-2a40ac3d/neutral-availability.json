@@ -1,0 +1,34 @@
+{
+  "sourceSHA": "2a40ac3d7079b3984856b87abd4e085b43d35aa7",
+  "kind": "previous neutral availability request, safe execution metadata only; not a synthetic product case",
+  "attempts": 1,
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false
+  },
+  "result": {
+    "success": true,
+    "providerHTTPStatus": 200,
+    "model": "deepseek-flash",
+    "finish": "stop",
+    "responseBytes": 512,
+    "usage": {
+      "prompt_tokens": 46,
+      "completion_tokens": 16,
+      "total_tokens": 62,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 46
+    }
+  },
+  "providerBodyContentNotIncluded": true,
+  "observedUTC": "2026-10-15T06:25:20.840Z",
+  "adapterReturnElapsedMs": 1266,
+  "originalEvidenceSHA256": "b1b338d90d4da54ecfada77564c9e78b571061731c23a3bdfaadf02b6336f2cd",
+  "disclosure": "No headers, credential/placeholder, env, adapter, proxy settings or diagnostic code included. No new request was made for this publication."
+}

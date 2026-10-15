@@ -1,0 +1,24 @@
+{
+  "integrity": {
+    "candidate": true,
+    "previousF1": true,
+    "previousEc9011": true,
+    "fixedOriginal": true,
+    "fixedHoldouts": true
+  },
+  "actualCalls": {
+    "neutral": 1,
+    "product": 6,
+    "total": 7,
+    "extraDiagnostic": 0
+  },
+  "semanticVerdict": "HOLD",
+  "availability": "Response recovered; six real product requests accepted at shipped settings",
+  "allQuestionDependentBranches": "not executed; no actual questions",
+  "automaticAdditionalCalls": false,
+  "sourcePromptChanges": 0,
+  "remoteWrites": 0,
+  "deployment": 0,
+  "scopeScan": "scope-check.json",
+  "report": "FINAL-REPORT.txt"
+}

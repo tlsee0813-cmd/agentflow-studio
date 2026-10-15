@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_87e5622c-96d3-4a52-8f78-2f492b43c227",
+  "revision": 7,
+  "name": "PNG 이미지 내보내기 — 명시적 변경",
+  "sources": [
+    {
+      "id": "S_cc3487e8-1bcb-484c-a58c-6e1cfceecb68",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-15T02:45:01.606Z",
+      "taskId": "T_8b8fe3bb-cba6-4773-ab90-76cc8a1f35dc",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_8066fb64-2aab-4741-9a07-8c4dd0b0666d",
+      "kind": "manual_decision",
+      "text": "이미지 크기는 변경하지 않는다",
+      "at": "2026-10-15T02:45:01.607Z",
+      "taskId": "T_8b8fe3bb-cba6-4773-ab90-76cc8a1f35dc",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_cc3487e8-1bcb-484c-a58c-6e1cfceecb68",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "이미지 크기는 변경하지 않는다",
+      "status": "confirmed",
+      "sourceId": "S_8066fb64-2aab-4741-9a07-8c4dd0b0666d",
+      "revision": 7,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_8b8fe3bb-cba6-4773-ab90-76cc8a1f35dc",
+      "sourceIds": [
+        "S_cc3487e8-1bcb-484c-a58c-6e1cfceecb68",
+        "S_8066fb64-2aab-4741-9a07-8c4dd0b0666d"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "전자책 표지 이미지 준비",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_8b8fe3bb-cba6-4773-ab90-76cc8a1f35dc",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "전자책 표지 이미지 준비",
+      "at": "2026-10-15T02:45:01.606Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_d3c1a75a-c072-419c-af02-56cf99f65b76",
+        "name": "PNG 내보내기",
+        "note": "",
+        "archived": false,
+        "createdAt": "2026-10-15T02:45:01.606Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_d3c1a75a-c072-419c-af02-56cf99f65b76": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

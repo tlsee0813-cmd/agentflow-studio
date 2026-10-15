@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_627d66db-adc4-46be-b920-d5574c64eee3",
+  "revision": 12,
+  "name": "명확한 Python CLI",
+  "sources": [
+    {
+      "id": "S_52b7f140-b59e-4476-9130-d932c5d8c2c2",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-14T22:45:02.185Z",
+      "taskId": "T_91108df1-3718-427a-9e5e-d034342ef80b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_af90a84d-2803-4994-9a3a-5cf5aef287ae",
+      "kind": "manual_decision",
+      "text": "Python을 사용하고 추가 패키지는 쓰지 않아요.",
+      "at": "2026-10-14T22:45:02.186Z",
+      "taskId": "T_91108df1-3718-427a-9e5e-d034342ef80b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_b29c1999-32ba-4f83-b297-4b20202b8750",
+      "kind": "manual_decision",
+      "text": "직접 지정한 폴더 안의 일반파일만 다뤄요.",
+      "at": "2026-10-14T22:45:02.186Z",
+      "taskId": "T_91108df1-3718-427a-9e5e-d034342ef80b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_78f688ee-af75-4c23-8c30-b0ad68e973b0",
+      "kind": "manual_decision",
+      "text": "원래 이름과 예정 이름, 충돌과 빈 폴더 안내를 보여 주세요.",
+      "at": "2026-10-14T22:45:02.186Z",
+      "taskId": "T_91108df1-3718-427a-9e5e-d034342ef80b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_f815c6c1-531e-4d16-8c47-16c3ae5789c3",
+      "kind": "manual_decision",
+      "text": "미리보기만 하며 실제 rename은 하지 마세요.",
+      "at": "2026-10-14T22:45:02.186Z",
+      "taskId": "T_91108df1-3718-427a-9e5e-d034342ef80b",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_52b7f140-b59e-4476-9130-d932c5d8c2c2",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "Python을 사용하고 추가 패키지는 쓰지 않아요.",
+      "status": "confirmed",
+      "sourceId": "S_af90a84d-2803-4994-9a3a-5cf5aef287ae",
+      "revision": 7,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "직접 지정한 폴더 안의 일반파일만 다뤄요.",
+      "status": "confirmed",
+      "sourceId": "S_b29c1999-32ba-4f83-b297-4b20202b8750",
+      "revision": 8,
+      "history": []
+    },
+    {
+      "id": "D4",
+      "text": "원래 이름과 예정 이름, 충돌과 빈 폴더 안내를 보여 주세요.",
+      "status": "confirmed",
+      "sourceId": "S_78f688ee-af75-4c23-8c30-b0ad68e973b0",
+      "revision": 9,
+      "history": []
+    },
+    {
+      "id": "D5",
+      "text": "미리보기만 하며 실제 rename은 하지 마세요.",
+      "status": "confirmed",
+      "sourceId": "S_f815c6c1-531e-4d16-8c47-16c3ae5789c3",
+      "revision": 10,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_91108df1-3718-427a-9e5e-d034342ef80b",
+      "sourceIds": [
+        "S_52b7f140-b59e-4476-9130-d932c5d8c2c2",
+        "S_af90a84d-2803-4994-9a3a-5cf5aef287ae",
+        "S_b29c1999-32ba-4f83-b297-4b20202b8750",
+        "S_78f688ee-af75-4c23-8c30-b0ad68e973b0",
+        "S_f815c6c1-531e-4d16-8c47-16c3ae5789c3"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "파일 이름을 바꾸기 전에 변경 예정 내용을 확인하는 Python CLI를 만들고 싶어요.",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_91108df1-3718-427a-9e5e-d034342ef80b",
+  "draft": "‘파일 이름 변경 미리보기’ 영역의 첫 작업을 해 주세요.\n목표: 사용자가 지정한 폴더 안의 일반파일 이름에서 공백을 밑줄로 바꾼 예정 이름을 미리 볼 수 있게 한다. 원래 이름과 예정 이름, 충돌 여부, 빈 폴더 안내를 보여 주되 실제 이름 변경은 하지 않는다.\n이번 범위: 직접 지정한 폴더 하나를 입력받아, 그 안의 일반파일만 대상으로 이름을 만든다. 공백을 밑줄로 바꾼 예정 이름을 계산하고, 원래 이름과 예정 이름을 함께 목록으로 보여 준다. 예정 이름이 서로 겹치거나 기존 파일과 충돌하는 경우를 표시한다. 폴더에 대상 일반파일이 없으면 빈 폴더 안내를 보여 준다. 실제 rename은 수행하지 않는다. Python만 사용하고 추가 패키지는 쓰지 않는다. 하위 폴더와 일반파일이 아닌 항목은 다루지 않는다.\n완료 조건: 지정한 폴더의 일반파일 각각에 대해 원래 이름과 공백이 밑줄로 바뀐 예정 이름이 짝지어 출력되는지 확인한다. 출력된 파일 쌍의 개수가 폴더 안 일반파일 개수와 같은지 확인한다. 공백이 없는 이름은 예정 이름이 원래 이름과 같게 나오는지 확인한다. 예정 이름이 겹치는 경우 충돌로 표시되는지 확인한다. 대상 일반파일이 없는 폴더에서는 빈 폴더 안내가 나오는지 확인한다. 실행 후 실제 파일 이름이 바뀌지 않았는지 확인한다.\nAI가 정한 기본값 (사용자 결정 아님 · 바꿀 수 있음): 출력은 터미널 텍스트 목록으로, 원래 이름과 예정 이름을 나란히 표시 / 충돌 항목은 목록에서 별도 표시 문구로 구분 / 폴더 경로는 명령줄 인자로 받는다 / 목록 정렬은 원래 이름 기준 오름차순\ndotfile은 제외해 주세요.",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "파일 이름을 바꾸기 전에 변경 예정 내용을 확인하는 Python CLI를 만들고 싶어요.",
+      "at": "2026-10-14T22:45:02.185Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9",
+        "name": "파일 이름 변경 미리보기",
+        "note": "직접 지정한 폴더의 일반파일 이름에서 공백을 밑줄로 바꾼 예정 이름을 미리 보고 싶어요.",
+        "archived": false,
+        "createdAt": "2026-10-14T22:45:02.185Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": {
+      "area": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9"
+    },
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

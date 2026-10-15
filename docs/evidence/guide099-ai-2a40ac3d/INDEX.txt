@@ -1,0 +1,13 @@
+GUIDE099 actual results — exact 2a40ac3d7079b3984856b87abd4e085b43d35aa7
+
+FINAL-REPORT.txt: 요약과 잔여문제
+semantic-assessment.json: 사실/의미판정/추론/미검증 구분, 원응답 인용
+experiment.json: source/runner/fixture fingerprints and actual settings
+call-table.json: 모든 실제제품호출 status/model/finish/usage/latency/adoption
+run-summary.json: 6회 전송/결과와 source 불변
+fixed-original-cases.json, fixed-holdouts.json: 원고정 입력/기준(기준은 모델요청에 미전송)
+각 CASE-INITIAL/: project-pre.json, request.json(실제품생성), operations.json, provider-request.json(제품 body, headers0), provider-response.raw.txt/JSON(실수신), product-response.raw.txt/response.json(제품수용), metadata/outcome, proposal-text/edited-draft, project-adopted.json.
+HA-rule-mapping.json: fixture logical R7 -> actual product-issued D2, no injected mapping
+*-branches-not-executed.json: 실제 질문이 없어 답변 분기를 미실행한 근거
+원응답은 판정에 맞춰 수정하지 않았음. 합성자료만. 보호키/placeholder/환경/헤더/adapter/설치파일 제외. 공유 대상은 이 actual-results-1525 폴더만이며 상위 runtime/connection 폴더는 제외.
+중립회복 결과는 상위 net-check-1525/result.json; observer/adapter 코드는 공유대상 아님.

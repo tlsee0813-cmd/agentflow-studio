@@ -1,0 +1,292 @@
+{
+  "sourceSHA": "2a40ac3d7079b3984856b87abd4e085b43d35aa7",
+  "overallVerdict": "HOLD — C1 incomplete workflow; remaining conditional branches not exercised; protocol success is not whole semantic success",
+  "facts": {
+    "neutralGenerationAttempts": 1,
+    "productGenerationAttempts": 6,
+    "allGenerationAttemptsThisTurn": 7,
+    "providerHTTP200": 7,
+    "productHTTP200": 6,
+    "productRejected": 0,
+    "productQuestions": 0,
+    "productProposals": 6,
+    "finishStop": 7,
+    "localUnsent429": 0,
+    "retriesOrExtraDiagnosis": 0,
+    "model": "deepseek-flash",
+    "settings": {
+      "timeoutMs": 15000,
+      "maxTokens": 2048,
+      "thinking": "disabled",
+      "temperatureSent": false
+    },
+    "productLatencyMs": {
+      "min": 3370,
+      "max": 7170,
+      "median": 3898.0
+    },
+    "allSixUnsentAdoptionsAccepted": true,
+    "rawCurrentInstructionPreservedHA": true,
+    "CLIDotfileEditPreserved": true,
+    "allOriginalSourcesTasksBasesPreserved": true
+  },
+  "caseAssessments": [
+    {
+      "case": "C1",
+      "verdict": "HOLD — incomplete first useful workflow",
+      "sourceRequest": "C1-INITIAL/request.json",
+      "sourceResponse": "C1-INITIAL/response.json",
+      "sourceDraft": "C1-INITIAL/edited-draft.txt",
+      "observations": [
+        "Actual initial question=null; a list-view proposal was returned. No prior area work or pre-existing data source was supplied.",
+        "Scope explicitly says 재료 추가·수정·삭제 기능(이번에는 보기만), while relying on 사용자가 직접 입력한 재료.",
+        "Manual entry, one device and no ordering/delivery are retained as constraints. Expiry is an open data-field choice, not assumed existing data."
+      ],
+      "judgement": "The proposed first task has no way to enter inventory despite manual-entry-only context. A screen reading unspecified existing manually entered data is not a complete first useful workflow. No question alone is not judged a failure; the missing input path is the concrete reason.",
+      "limits": [
+        "Shopping-vs-first-to-eat fixed answer comparison NOT_EXECUTED: no actual question.",
+        "Open list includes which fields to show, though defaults already choose presentation details; no invented expiry values were observed."
+      ],
+      "nextMinimum": "Propose the minimal manual-entry-to-view path, or only rely on an existing input source when actual context establishes one; no source/prompt change made here.",
+      "actualCurrentInstruction": null,
+      "actualAnswer": null,
+      "representativeOriginalResponse": {
+        "question": null,
+        "proposal": {
+          "goal": "집에 남아 있는 재료를 한 화면에서 확인할 수 있게 한다. 사용자가 직접 입력한 재료 목록을 보고, 무엇이 있는지 파악할 수 있다.",
+          "scope": "이번에는 재료 목록을 보여주는 화면 한 개를 만든다. 사용자가 직접 입력한 재료가 목록으로 표시되고, 목록이 비어 있을 때의 안내도 보여준다. 하지 않을 것: 주문·배송 관련 기능, 재고 자동 입력·연동, 여러 기기 동기화, 재료 추가·수정·삭제 기능(이번에는 보기만).",
+          "checks": "목록 화면에 사용자가 입력한 재료들이 빠짐없이 표시되는지 확인한다. 입력한 재료 개수와 화면에 보이는 항목 수가 같은지 확인한다. 재료가 하나도 없을 때 빈 상태 안내가 보이고 오류가 나지 않는지 확인한다. 기존 확정 결정(수동 입력, 한 기기, 주문·배송 제외)을 어기는 기능이 화면에 없는지 확인한다.",
+          "open": [
+            "재료를 어떤 항목(이름만인지, 수량·유통기한까지인지)으로 보여줄지"
+          ],
+          "defaults": [
+            "목록은 입력한 순서대로 표시",
+            "빈 상태에는 \"아직 입력한 재료가 없어요\" 안내 문구 표시",
+            "화면 제목은 \"남은 재료\"로 표시"
+          ]
+        }
+      }
+    },
+    {
+      "case": "C2",
+      "verdict": "PASS — this single sample",
+      "sourceRequest": "C2-INITIAL/request.json",
+      "sourceResponse": "C2-INITIAL/response.json",
+      "sourceDraft": "C2-INITIAL/edited-draft.txt",
+      "observations": [
+        "No unnecessary question. Python/no extra packages/direct-folder regular files/space-to-underscore/preview only are in scope.",
+        "Original/planned names, collisions, empty folder and unchanged real filenames are checked.",
+        "User exact sentence dotfile은 제외해 주세요. appended to editable actual draft. Product adoptProposal accepted it as exact unsent draft; bases/sources/tasks unchanged."
+      ],
+      "judgement": "Product protocol and observed semantic constraints pass; manual edit narrows the set while retaining the original preview-only conditions.",
+      "limits": [
+        "No actual filesystem rename or generated Python execution.",
+        "This is pure product builder/formatter/adoption evidence, not browser UI/stale-race coverage."
+      ],
+      "nextMinimum": "No fix established by this case; keep evidence and existing constraints.",
+      "actualCurrentInstruction": null,
+      "actualAnswer": null,
+      "representativeOriginalResponse": {
+        "question": null,
+        "proposal": {
+          "goal": "사용자가 지정한 폴더 안의 일반파일 이름에서 공백을 밑줄로 바꾼 예정 이름을 미리 볼 수 있게 한다. 원래 이름과 예정 이름, 충돌 여부, 빈 폴더 안내를 보여 주되 실제 이름 변경은 하지 않는다.",
+          "scope": "직접 지정한 폴더 하나를 입력받아, 그 안의 일반파일만 대상으로 이름을 만든다. 공백을 밑줄로 바꾼 예정 이름을 계산하고, 원래 이름과 예정 이름을 함께 목록으로 보여 준다. 예정 이름이 서로 겹치거나 기존 파일과 충돌하는 경우를 표시한다. 폴더에 대상 일반파일이 없으면 빈 폴더 안내를 보여 준다. 실제 rename은 수행하지 않는다. Python만 사용하고 추가 패키지는 쓰지 않는다. 하위 폴더와 일반파일이 아닌 항목은 다루지 않는다.",
+          "checks": "지정한 폴더의 일반파일 각각에 대해 원래 이름과 공백이 밑줄로 바뀐 예정 이름이 짝지어 출력되는지 확인한다. 출력된 파일 쌍의 개수가 폴더 안 일반파일 개수와 같은지 확인한다. 공백이 없는 이름은 예정 이름이 원래 이름과 같게 나오는지 확인한다. 예정 이름이 겹치는 경우 충돌로 표시되는지 확인한다. 대상 일반파일이 없는 폴더에서는 빈 폴더 안내가 나오는지 확인한다. 실행 후 실제 파일 이름이 바뀌지 않았는지 확인한다.",
+          "open": [],
+          "defaults": [
+            "출력은 터미널 텍스트 목록으로, 원래 이름과 예정 이름을 나란히 표시",
+            "충돌 항목은 목록에서 별도 표시 문구로 구분",
+            "폴더 경로는 명령줄 인자로 받는다",
+            "목록 정렬은 원래 이름 기준 오름차순"
+          ]
+        }
+      }
+    },
+    {
+      "case": "C3",
+      "verdict": "PARTIAL — useful policy-independent initial proposal; branches untested",
+      "sourceRequest": "C3-INITIAL/request.json",
+      "sourceResponse": "C3-INITIAL/response.json",
+      "sourceDraft": "C3-INITIAL/edited-draft.txt",
+      "observations": [
+        "No question; scope detects duplicate respondent IDs, reports counts/IDs, and excludes removal/selection/merge, original mutation and external transfer.",
+        "Policy remains open; defaults are output format/report arrangement/time-display choices, visibly labeled AI suggestions."
+      ],
+      "judgement": "Initial independent duplicate observation is useful and non-destructive. Unknown/deferred/latest-one outcomes and the old latest-row arithmetic defect cannot be judged from this response.",
+      "limits": [
+        "UNKNOWN/DEFERRED/LATEST branches NOT_EXECUTED because no actual question was received.",
+        "Scope uses repeated respondent ID while open still lists the duplicate key definition as undecided; this is a residual clarity issue, not observed destructive deduplication."
+      ],
+      "nextMinimum": "Independent review of the initial proposal; any future explicit-instruction controls must be planned as such, not relabeled as responses to an unasked question.",
+      "actualCurrentInstruction": null,
+      "actualAnswer": null,
+      "representativeOriginalResponse": {
+        "question": null,
+        "proposal": {
+          "goal": "로컬 CSV의 응답자ID·시간·응답 열을 읽어 설문 응답을 정리한 결과를 만들고, 같은 응답자ID가 여러 번 나오는 중복 응답이 몇 건인지 확인할 수 있게 한다.",
+          "scope": "할 것: 로컬 CSV 파일을 읽어 원본은 그대로 두고, 응답자ID·시간·응답 열을 기준으로 응답을 정리하며, 응답자ID가 여러 번 등장하는 중복 항목이 있는지 탐지하여 건수와 해당 응답자ID를 보고한다. 하지 않을 것: 원본 파일 수정·이동·삭제, 중복 응답을 제거·선택·병합하는 처리(정책 미정), 외부 전송, 중복 정책의 임의 확정.",
+          "checks": "읽은 총 행 수가 CSV의 데이터 행 수와 일치한다. 정리 결과의 응답자ID 집합과 중복 응답자ID 목록을 구분해 셀 수 있다. 중복 항목 건수와 중복 응답자ID 수가 서로 모순되지 않는다. 원본 CSV 파일이 읽기 전후로 동일함(내용·수정 시각)이 확인된다.",
+          "open": [
+            "중복 응답을 어떤 기준(응답자ID만, 응답자ID+시간 등)으로 볼지",
+            "중복이 발견됐을 때 최종 결과에서 어떻게 처리할지(제거·유지·별도 표시 등)"
+          ],
+          "defaults": [
+            "정리 결과는 로컬 CSV 또는 화면 표 형태로 출력",
+            "중복 보고는 응답자ID, 등장 횟수, 해당 행 번호 목록 순으로 정렬",
+            "시간 열은 원본 표기를 유지하고 임의 변환하지 않음"
+          ]
+        }
+      }
+    },
+    {
+      "case": "C4",
+      "verdict": "PARTIAL — confirmed offline scope preserved; change/conflict-question behavior untested",
+      "sourceRequest": "C4-INITIAL/request.json",
+      "sourceResponse": "C4-INITIAL/response.json",
+      "sourceDraft": "C4-INITIAL/edited-draft.txt",
+      "observations": [
+        "No question; proposal explicitly identifies phone remote-change idea as unconfirmed and conflicting with current decisions.",
+        "It designs file-import-to-display only, with no network implementation, actual transfer, deployment or terminal operation.",
+        "Latest-notice mechanisms are compared as candidates; no new delivery permission was inferred."
+      ],
+      "judgement": "The current offline design is consistent. The intended important conflict question and A/B comparison, especially notice-only network amendment, were not exercised. A safe initial proposal is not evidence of amendment handling.",
+      "limits": [
+        "Fixed A/B answers NOT_EXECUTED: no actual question.",
+        "Whether an important permission conflict should have been asked now remains a quality consideration; no current permission violation observed."
+      ],
+      "nextMinimum": "Keep current constraints; a later explicitly authorized direct-instruction control could test the fixed amendment without creating a fake answer.",
+      "actualCurrentInstruction": null,
+      "actualAnswer": null,
+      "representativeOriginalResponse": {
+        "question": null,
+        "proposal": {
+          "goal": "전시장 단말이 최신 공지를 보여 주는 흐름을, 네트워크·전송 없이 파일 반입만으로 성립하도록 설계한다. 휴대폰 원격 변경 방식은 채택 여부를 정하지 않고, 채택 시 무엇이 필요한지 비교 가능한 형태로 드러낸다.",
+          "scope": "이번에는 설계만 한다. 실제 전송·배포·단말 조작은 하지 않는다. 포함: (1) 공지 파일이 단말에 반입되어 화면에 최신으로 표시되기까지의 흐름과 각 단계의 입력·출력 정의, (2) '최신'을 판별하는 규칙 후보와 그 규칙이 파일 형식·이름·단말 저장 위치에 요구하는 조건, (3) 현재 단말이 어떤 방식으로 공지를 읽는지 확인할 항목 목록(코드·설정에서 확인, 실행 도구가 조사). (4) 휴대폰으로 전체 단말 공지를 바꾸는 방식은 확정 결정과 충돌하므로 선택하지 않고, 채택 시 요구사항(네트워크 부재 하 대안, 반입 절차, 단말별 적용 범위)만 비교 메모로 남긴다. 제외: 네트워크 통신 구현, 실제 파일 전송·배포, 결제·알림, 단말 UI 문구·정렬 확정.",
+          "checks": "설계 문서를 읽고 (a) 공지 파일 반입→단말 표시까지의 각 단계에 입력·출력·책임 주체가 빠짐없이 적혀 있는지, (b) '최신' 판별 규칙 후보들이 서로 어떤 파일 조건을 요구하는지 대조표로 확인 가능한지, (c) 제안된 어떤 단계도 네트워크 사용이나 실제 전송·배포를 전제하지 않는지, (d) 휴대폰 원격 변경 방식이 선택·배제로 확정되지 않고 비교 메모로만 남아 있는지, (e) 확인 항목 목록의 각 항목이 '무엇을 어디서 확인하는지' 형태로 적혀 있는지 확인한다.",
+          "open": [
+            "휴대폰으로 전체 단말 공지를 바꾸는 방식을 채택할지, 채택한다면 네트워크 금지 결정과 어떻게 양립시킬지(예: 오프라인 매체 경유)",
+            "현재 단말이 공지를 어떤 방식으로 읽고 표시하는지(파일 경로·형식·갱신 시점)"
+          ],
+          "defaults": [
+            "설계 산출물 형식은 마크다운 문서 1개로 한다",
+            "'최신' 판별 규칙 후보는 파일 수정 시각, 파일명 규칙, 내용 내 버전 표기 세 가지를 나란히 비교한다",
+            "확인 항목 목록은 표로 정리하고 각 항목에 확인 대상(코드/설정/파일)을 표기한다",
+            "용어는 '단말', '공지 파일', '반입'으로 통일한다"
+          ]
+        }
+      }
+    },
+    {
+      "case": "HB",
+      "verdict": "PARTIAL — useful initial independent result; tolerance branches untested",
+      "sourceRequest": "HB-INITIAL/request.json",
+      "sourceResponse": "HB-INITIAL/response.json",
+      "sourceDraft": "HB-INITIAL/edited-draft.txt",
+      "observations": [
+        "Proposal pairs beat and key-input timestamps, calculates signed timing differences, and shows unmatched entries.",
+        "No pass/fail scoring or invented success tolerance. No network or personal record storage.",
+        "Open asks how to handle undetermined tolerance even though scope already selects differences without judgement."
+      ],
+      "judgement": "The policy-independent result is useful and preserves constraints. The open item partly reopens a treatment already chosen in scope; keep this as a clarity issue. Neither explicit deferral handling nor inclusive ±100ms scoring was tested.",
+      "limits": [
+        "DEFER/WITHIN_100MS branches NOT_EXECUTED: no actual question.",
+        "Milliseconds is an AI default, not supplied timestamp-unit data or a user-confirmed tolerance. No concrete timestamps were fabricated."
+      ],
+      "nextMinimum": "Clarify that tolerance itself stays open while timing differences can proceed; do not claim the 100ms boundary test passed.",
+      "actualCurrentInstruction": null,
+      "actualAnswer": null,
+      "representativeOriginalResponse": {
+        "question": null,
+        "proposal": {
+          "goal": "연습이 끝난 뒤, 각 박자 시각과 그 박자에 대응하는 키 입력 시각을 나란히 볼 수 있어 사용자가 자기 박자 감각을 스스로 이해할 수 있게 한다.",
+          "scope": "이번에는 연습 1회분의 박자 시각 목록과 각 박자에 대응하는 키 입력 시각을 함께 보여주는 결과 화면을 만든다. 입력과 박자를 짝지어 시각 차이를 계산해 표시하는 부분까지 포함한다. 성공 허용오차는 정하지 않으므로 합격/불합격 판정이나 점수화는 하지 않는다. 개인 기록 저장, 네트워크 사용, 연습 진행·판정 로직 변경은 하지 않는다.",
+          "checks": "연습을 마치면 박자 시각과 키 입력 시각이 짝지어 나란히 표시된다. 짝이 없는 박자나 입력이 있으면 그 사실을 구분해 볼 수 있다. 표시된 시각 차이가 원래 시각 값들과 일치하는지 화면에서 확인된다. 저장·네트워크 관련 동작이 새로 생기지 않았는지 확인된다.",
+          "open": [
+            "성공 허용오차를 정하지 않은 상태를 이번 화면에서 어떻게 다룰지(판정 없이 차이만 보여줄지 등)"
+          ],
+          "defaults": [
+            "시각은 밀리초 단위 숫자로 표시",
+            "결과는 표 형태 한 화면",
+            "박자 순서대로 정렬",
+            "차이는 부호 있는 값(빠름/느림)으로 표시"
+          ]
+        }
+      }
+    },
+    {
+      "case": "HA",
+      "verdict": "PARTIAL — core explicit amendment passes; boundary/open clarity remains",
+      "sourceRequest": "HA-INITIAL/request.json",
+      "sourceResponse": "HA-INITIAL/response.json",
+      "sourceDraft": "HA-INITIAL/edited-draft.txt",
+      "observations": [
+        "currentInstruction is the exact frozen current request, answer=null and area.note=null.",
+        "Actual old rule D2 remains confirmed and unchanged in request and adopted Project; R7 is the fixture logical reference, mapped in evidence only.",
+        "Goal/scope/checks include large-image long-side1600 reduction + aspect ratio, no enlargement for small images, separate folder/original retained, design only.",
+        "No question about folder name; export is labeled an AI default. No actual code/image conversion authority was inferred."
+      ],
+      "judgement": "Core current-instruction amendment and stored-rule preservation pass. The whole scope says stored D2 is not changed and only this request overrides the specified large-image case, so do not treat its stored-rule preservation sentence alone as reinstating the old ban. However, open leaves the 1600px classification/boundary and copy-vs-reencoding unresolved despite the explicit reduction/non-enlargement instruction. The scope also says 사용자 답 although this is currentInstruction with answer=null: a provenance wording error, not an observed invented answer request.",
+      "limits": [
+        "Logical R7 versus genuine product-issued D2 is a documented representation limit; no IDs or old rule were hand-edited.",
+        "Boundary/open ambiguity is retained for independent judgement; the observed core amendment is not labeled a total failure.",
+        "The design response proposes excluding damaged/read-failure cases as an AI default; this is not a confirmed user exclusion."
+      ],
+      "nextMinimum": "Make scale-only-when-long-side>1600 / otherwise preserve the effective size explicit in the design checks, keep reasonable technical defaults separate from user decisions, and name current instruction accurately; no implementation/prompt changes made.",
+      "actualCurrentInstruction": "R7을 바꿔요. 큰 이미지만 긴 변1600px로줄이고비율유지. 작은이미지는확대없이원래크기로복사. 별도폴더출력/원본유지/이번은설계만.",
+      "actualAnswer": null,
+      "representativeOriginalResponse": {
+        "question": null,
+        "proposal": {
+          "goal": "전자책 표지용 PNG 내보내기 설계에서, 원본 폴더의 이미지를 큰 이미지와 작은 이미지로 나눠 처리하는 규칙을 설계로 정리한다. 큰 이미지는 긴 변 1600px로 줄이고 비율을 유지하며, 작은 이미지는 확대 없이 원래 크기로 복사한다. 결과는 별도 폴더에 출력하고 원본은 유지한다. 이번 요청은 설계만 한다.",
+          "scope": "이번에 할 것: (1) '큰 이미지'와 '작은 이미지'를 가르는 기준을 설계로 명시한다(긴 변 1600px 기준과의 관계 포함). (2) 큰 이미지 처리 규칙 설계: 긴 변을 1600px로 줄이고 가로·세로 비율을 유지하는 리샘플링 방식 명시. (3) 작은 이미지 처리 규칙 설계: 확대 없이 원래 크기 그대로 복사하는 조건 명시. (4) 출력 규칙 설계: 별도 폴더에 출력하고 원본은 유지하는 구조 명시. (5) 위 규칙을 실행 순서와 예외 처리(예: 이미 1600px 이하인 경우, 긴 변이 정확히 1600px인 경우)까지 문서로 정리. 이번에 하지 않을 것: 실제 코드 구현·실행, 이미지 생성·변환 실행, 기존 확정 결정(D2: 이미지 크기는 변경하지 않는다)을 바꾸는 일. D2의 '이미지 크기는 변경하지 않는다'는 이번 지시가 큰 이미지에 한해 긴 변 1600px 축소를 명시적으로 지시한 대상에 한해서만 사용자 답에 따라 이번 요청 범위에서 바꿔 적용하며, 그 외 다른 대상과 조건은 그대로 유지한다.",
+          "checks": "(1) 설계 문서에 큰 이미지와 작은 이미지를 가르는 기준이 명시되어 있고, 그 기준이 '긴 변 1600px'과 일관되게 서술되어 있는지 확인한다. (2) 큰 이미지 처리 규칙에서 긴 변 1600px 축소와 비율 유지가 모두 서술되어 있는지, 비율 유지 계산 방식(가로·세로 중 긴 변 기준)이 적혀 있는지 확인한다. (3) 작은 이미지 처리 규칙에서 확대 없이 원래 크기로 복사한다는 조건이 명시되어 있는지 확인한다. (4) 출력이 별도 폴더로 지정되고 원본 유지가 명시되어 있는지 확인한다. (5) D2가 이번 지시에서 명시적으로 바꾼 대상(큰 이미지의 긴 변 1600px 축소)에만 적용되고, 다른 이미지 크기 조건은 그대로 유지된다고 설계에 적혀 있는지 확인한다. (6) 이번 요청이 설계만이며 실제 구현·실행은 하지 않았다고 범위에 적혀 있는지 확인한다.",
+          "open": [
+            "'큰 이미지'와 '작은 이미지'를 가르는 정확한 기준(긴 변이 1600px 초과인지, 미만인지, 정확히 1600px인 경우 어느 쪽으로 분류하는지)은 사용자가 정하지 않았다.",
+            "긴 변 1600px 축소 시 정확히 1600px인 이미지를 축소 대상에 포함하는지 여부.",
+            "작은 이미지를 '원래 크기로 복사'할 때 PNG 재인코딩 없이 바이트 그대로 복사하는지, 재인코딩하는지."
+          ],
+          "defaults": [
+            "설계 문서의 출력 형식은 마크다운 섹션(목적, 분류 기준, 처리 규칙, 출력 규칙, 예외, 확인 조건)으로 한다.",
+            "큰 이미지 축소 시 리샘플링 방식은 기본값으로 고품질 다운스케일(예: Lanczos)을 제안한다.",
+            "설계 문서의 파일명은 'png-export-design.md'로 제안한다.",
+            "별도 출력 폴더의 이름은 'export'로 제안한다.",
+            "예외 목록에서 손상 파일·읽기 실패 파일은 이번 설계에서 다루지 않고 후속 작업 후보로만 언급한다."
+          ]
+        }
+      }
+    }
+  ],
+  "comparisonToPrior": {
+    "priorSourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+    "priorActualProviderCalls": 11,
+    "priorSettings": "60000ms/4096 were experiment overrides, not product defaults",
+    "currentSettings": "15000ms/2048 shipped defaults; guidance.3/currentInstruction and mandatory defaults",
+    "observedDifference": [
+      "C2 prior provider200/product502 fact-options response and unnecessary question -> now provider200/product200 immediate complete proposal and dotfile adoption.",
+      "Current C3/HB immediately provide independent observation without deciding policy; old explicit deferral weakness is not a directly repeated branch.",
+      "Current C4 initial offline design replaces old deliverable-format question; the old ignored network amendment has no matched current answer branch.",
+      "HA was previously unrepresentable/unexecuted; now faithful explicit currentInstruction is transmitted, stored rule retained and amendment largely reflected.",
+      "C1 now gives no question; old shopping/first-to-eat answer comparisons cannot be treated as retested."
+    ],
+    "limits": [
+      "Single actual response per initial case, not failure-rate estimation.",
+      "Changed contract/prompt and different shipped versus old experiment settings prevent attributing every difference to one code change.",
+      "Previous ec9011 timeout runs yielded no semantic responses and are infrastructure evidence, not semantic baselines."
+    ]
+  },
+  "unverified": [
+    "Question quality/one-question followup protocol: no actual question produced in any of six cases.",
+    "A/B, unknown/deferred/latest and ±100ms response differences.",
+    "Quoted/hypothetical/third-party instruction rejection has no dedicated fixed control in these six inputs.",
+    "Browser/UI currentInstruction edit/stale-adopt/incoming race guards; only exact source identity and pure formatter/adoption path observed.",
+    "Human usefulness and overall product quality."
+  ],
+  "actions": {
+    "sourcePromptEdits": 0,
+    "remoteWrites": 0,
+    "deployments": 0,
+    "mockGenerations": 0,
+    "furtherCallsPlannedAutomatically": false
+  },
+  "nextMinimum": "Independent review of these raw results, then a narrow C1 prompt/contract refinement outside this experiment if accepted. Separately plan direct currentInstruction controls for skipped comparisons if needed; no extra calls here."
+}

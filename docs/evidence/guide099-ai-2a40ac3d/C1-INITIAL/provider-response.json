@@ -1,0 +1,32 @@
+{
+  "httpStatus": 200,
+  "body": {
+    "id": "52066fce-db00-483c-b9fb-0a779b0fc201",
+    "object": "chat.completion",
+    "created": 1792045645,
+    "model": "deepseek-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\"question\":null,\"proposal\":{\"goal\":\"집에 남아 있는 재료를 한 화면에서 확인할 수 있게 한다. 사용자가 직접 입력한 재료 목록을 보고, 무엇이 있는지 파악할 수 있다.\",\"scope\":\"이번에는 재료 목록을 보여주는 화면 한 개를 만든다. 사용자가 직접 입력한 재료가 목록으로 표시되고, 목록이 비어 있을 때의 안내도 보여준다. 하지 않을 것: 주문·배송 관련 기능, 재고 자동 입력·연동, 여러 기기 동기화, 재료 추가·수정·삭제 기능(이번에는 보기만).\",\"checks\":\"목록 화면에 사용자가 입력한 재료들이 빠짐없이 표시되는지 확인한다. 입력한 재료 개수와 화면에 보이는 항목 수가 같은지 확인한다. 재료가 하나도 없을 때 빈 상태 안내가 보이고 오류가 나지 않는지 확인한다. 기존 확정 결정(수동 입력, 한 기기, 주문·배송 제외)을 어기는 기능이 화면에 없는지 확인한다.\",\"open\":[\"재료를 어떤 항목(이름만인지, 수량·유통기한까지인지)으로 보여줄지\"],\"defaults\":[\"목록은 입력한 순서대로 표시\",\"빈 상태에는 \\\"아직 입력한 재료가 없어요\\\" 안내 문구 표시\",\"화면 제목은 \\\"남은 재료\\\"로 표시\"]}}"
+        },
+        "logprobs": null,
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 2250,
+      "completion_tokens": 354,
+      "total_tokens": 2604,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 2250
+    },
+    "system_fingerprint": "aeb56401ca74e127821c4f9126dcb669"
+  },
+  "nonJson": false
+}

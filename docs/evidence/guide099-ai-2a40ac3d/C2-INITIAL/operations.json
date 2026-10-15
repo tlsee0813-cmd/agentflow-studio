@@ -1,0 +1,14 @@
+[
+  {
+    "operation": "reuse frozen pre-project",
+    "path": "guide099-ai/prepared/C2/project-pre.json"
+  },
+  {
+    "operation": "buildGuideRequest",
+    "sourceSHA": "2a40ac3d7079b3984856b87abd4e085b43d35aa7",
+    "areaId": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9",
+    "currentInstruction": null,
+    "answer": null,
+    "actualInitialQuestionOnly": false
+  }
+]

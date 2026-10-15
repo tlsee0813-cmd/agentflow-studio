@@ -1,0 +1,35 @@
+GUIDE099 exact 2a40ac3d7079b3984856b87abd4e085b43d35aa7 — 실제 응답 회복 / 의미품질 HOLD
+
+호출: 중립1 + 제품6 = 총7. provider200/finishstop7, product2006, reject0, mock0, retry0, local4290.
+설정: deepseek-flash / 15000ms / output2048 / thinking disabled / temperature 미전송. 제품 지연3370~7170ms.
+제품 경로: buildGuideRequest -> native HTTP /api/guidance -> createContinuityApp({fetchImpl}) -> 기존 보호 어댑터 -> DeepSeek.
+모두 question:null/proposal. 실제 질문이 없어 고정 A/B·모름·보류·최신·100ms 답변은 미전송; 답/질문을 날조하지 않음.
+
+C1: HOLD — incomplete first useful workflow
+The proposed first task has no way to enter inventory despite manual-entry-only context. A screen reading unspecified existing manually entered data is not a complete first useful workflow. No question alone is not judged a failure; the missing input path is the concrete reason.
+근거: C1-INITIAL/request.json / C1-INITIAL/response.json / C1-INITIAL/edited-draft.txt
+
+C2: PASS — this single sample
+Product protocol and observed semantic constraints pass; manual edit narrows the set while retaining the original preview-only conditions.
+근거: C2-INITIAL/request.json / C2-INITIAL/response.json / C2-INITIAL/edited-draft.txt
+
+C3: PARTIAL — useful policy-independent initial proposal; branches untested
+Initial independent duplicate observation is useful and non-destructive. Unknown/deferred/latest-one outcomes and the old latest-row arithmetic defect cannot be judged from this response.
+근거: C3-INITIAL/request.json / C3-INITIAL/response.json / C3-INITIAL/edited-draft.txt
+
+C4: PARTIAL — confirmed offline scope preserved; change/conflict-question behavior untested
+The current offline design is consistent. The intended important conflict question and A/B comparison, especially notice-only network amendment, were not exercised. A safe initial proposal is not evidence of amendment handling.
+근거: C4-INITIAL/request.json / C4-INITIAL/response.json / C4-INITIAL/edited-draft.txt
+
+HB: PARTIAL — useful initial independent result; tolerance branches untested
+The policy-independent result is useful and preserves constraints. The open item partly reopens a treatment already chosen in scope; keep this as a clarity issue. Neither explicit deferral handling nor inclusive ±100ms scoring was tested.
+근거: HB-INITIAL/request.json / HB-INITIAL/response.json / HB-INITIAL/edited-draft.txt
+
+HA: PARTIAL — core explicit amendment passes; boundary/open clarity remains
+Core current-instruction amendment and stored-rule preservation pass. The whole scope says stored D2 is not changed and only this request overrides the specified large-image case, so do not treat its stored-rule preservation sentence alone as reinstating the old ban. However, open leaves the 1600px classification/boundary and copy-vs-reencoding unresolved despite the explicit reduction/non-enlargement instruction. The scope also says 사용자 답 although this is currentInstruction with answer=null: a provenance wording error, not an observed invented answer request.
+근거: HA-INITIAL/request.json / HA-INITIAL/response.json / HA-INITIAL/edited-draft.txt
+
+6개 초안 모두 제품 함수로 미전송 채택, Source/Task/Basis 불변. CLI dotfile제외 추가 보존, HA 지시 전문 보존. true인 actualQuestionPreserved는 질문이 없는 경우 조건부로 참일 뿐, 질문 전문보존 실증이 아니다.
+이전 fbd는60s/4096 실험설정·11회. 이번은제품15s/2048·6초기응답이므로 전체 paired 재시험/전체 품질 보증이 아니다.
+최소 후속: 원문 독립검토, C1의 수동입력→목록까지 완결된 최소범위 보완 검토. 미실행 분기는 별도 계획이 필요하며 이번 추가호출0.
+제품/프롬프트 수정0, 원격쓰기0, 배포0. 기존 baseline/fixture/results 보존.

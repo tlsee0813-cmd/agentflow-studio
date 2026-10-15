@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "guidance.3",
+  "ticket": {
+    "projectId": "P_627d66db-adc4-46be-b920-d5574c64eee3",
+    "revision": 10,
+    "requestId": "G_1823846e-9b20-4b75-a3ca-28e5350e0e73",
+    "areaId": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9"
+  },
+  "projectName": "명확한 Python CLI",
+  "brief": "파일 이름을 바꾸기 전에 변경 예정 내용을 확인하는 Python CLI를 만들고 싶어요.",
+  "area": {
+    "id": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9",
+    "name": "파일 이름 변경 미리보기",
+    "note": "직접 지정한 폴더의 일반파일 이름에서 공백을 밑줄로 바꾼 예정 이름을 미리 보고 싶어요."
+  },
+  "decisions": [
+    {
+      "id": "D2",
+      "text": "Python을 사용하고 추가 패키지는 쓰지 않아요.",
+      "status": "confirmed"
+    },
+    {
+      "id": "D3",
+      "text": "직접 지정한 폴더 안의 일반파일만 다뤄요.",
+      "status": "confirmed"
+    },
+    {
+      "id": "D4",
+      "text": "원래 이름과 예정 이름, 충돌과 빈 폴더 안내를 보여 주세요.",
+      "status": "confirmed"
+    },
+    {
+      "id": "D5",
+      "text": "미리보기만 하며 실제 rename은 하지 마세요.",
+      "status": "confirmed"
+    }
+  ],
+  "areaWork": [],
+  "answer": null,
+  "currentInstruction": null
+}

@@ -1,0 +1,26 @@
+{
+  "sourceSHA": "2a40ac3d7079b3984856b87abd4e085b43d35aa7",
+  "parentSHA": "f1a00a9a5f9f419a8b32179a7c4eb5a47aa9dc51",
+  "snapshot": "partial exact runtime/build plus guidance contract reference snapshot; 52 tracked files, not full checkout",
+  "verifiedGitBlobs": 52,
+  "runnerSHA256": "26175e4c0967520f49100879e66d56785740c808b13dcaa062ffabbc13efcf83",
+  "originalFixtureSHA256": "c5150e5b3f161c778353557a47035c7f189ad534c7e4bbe6b4547d2dc4c1806b",
+  "holdoutFixtureSHA256": "5b8bf6abc458ea588b5c9e34a5d8198fb3ee1cb66fd087a37ded63f2e56b1e08",
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false,
+    "rate": 6,
+    "processCap": 20
+  },
+  "productBudget": 15,
+  "neutralCheckAttempts": 1,
+  "neutralCheckHTTP": 200,
+  "previousGUIDE097": "fbd used experiment overrides 60000/4096; this run uses shipped15000/2048 and guidance.3",
+  "path": "candidate buildGuideRequest -> native HTTP POST /api/guidance -> createContinuityApp({fetchImpl}) -> original protected adapter -> exact candidate curl transport -> approved provider",
+  "noMock": true,
+  "noSourcePromptChanges": true,
+  "singleSamplePerSlot": true
+}

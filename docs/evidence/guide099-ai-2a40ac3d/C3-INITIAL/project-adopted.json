@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+  "revision": 9,
+  "name": "CSV 설문 중복 정책",
+  "sources": [
+    {
+      "id": "S_d4b20342-6318-4dd6-8eee-a1e00d15970a",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-14T22:45:02.189Z",
+      "taskId": "T_1f3893e7-81ec-4461-8346-41e123e4b911",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_0accd6e7-bd1a-461f-8238-bef27eadaf1e",
+      "kind": "manual_decision",
+      "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+      "at": "2026-10-14T22:45:02.189Z",
+      "taskId": "T_1f3893e7-81ec-4461-8346-41e123e4b911",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_d4b20342-6318-4dd6-8eee-a1e00d15970a",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+      "status": "confirmed",
+      "sourceId": "S_0accd6e7-bd1a-461f-8238-bef27eadaf1e",
+      "revision": 7,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_1f3893e7-81ec-4461-8346-41e123e4b911",
+      "sourceIds": [
+        "S_d4b20342-6318-4dd6-8eee-a1e00d15970a",
+        "S_0accd6e7-bd1a-461f-8238-bef27eadaf1e"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_1f3893e7-81ec-4461-8346-41e123e4b911",
+  "draft": "‘설문 응답 정리’ 영역의 첫 작업을 해 주세요.\n목표: 로컬 CSV의 응답자ID·시간·응답 열을 읽어 설문 응답을 정리한 결과를 만들고, 같은 응답자ID가 여러 번 나오는 중복 응답이 몇 건인지 확인할 수 있게 한다.\n이번 범위: 할 것: 로컬 CSV 파일을 읽어 원본은 그대로 두고, 응답자ID·시간·응답 열을 기준으로 응답을 정리하며, 응답자ID가 여러 번 등장하는 중복 항목이 있는지 탐지하여 건수와 해당 응답자ID를 보고한다. 하지 않을 것: 원본 파일 수정·이동·삭제, 중복 응답을 제거·선택·병합하는 처리(정책 미정), 외부 전송, 중복 정책의 임의 확정.\n완료 조건: 읽은 총 행 수가 CSV의 데이터 행 수와 일치한다. 정리 결과의 응답자ID 집합과 중복 응답자ID 목록을 구분해 셀 수 있다. 중복 항목 건수와 중복 응답자ID 수가 서로 모순되지 않는다. 원본 CSV 파일이 읽기 전후로 동일함(내용·수정 시각)이 확인된다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 중복 응답을 어떤 기준(응답자ID만, 응답자ID+시간 등)으로 볼지 / 중복이 발견됐을 때 최종 결과에서 어떻게 처리할지(제거·유지·별도 표시 등)\nAI가 정한 기본값 (사용자 결정 아님 · 바꿀 수 있음): 정리 결과는 로컬 CSV 또는 화면 표 형태로 출력 / 중복 보고는 응답자ID, 등장 횟수, 해당 행 번호 목록 순으로 정렬 / 시간 열은 원본 표기를 유지하고 임의 변환하지 않음",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+      "at": "2026-10-14T22:45:02.189Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+        "name": "설문 응답 정리",
+        "note": "CSV에 응답자ID, 시간, 응답 열이 있어요. 응답을 정리하고 싶고 중복 응답 처리 정책은 아직 정하지 않았어요.",
+        "archived": false,
+        "createdAt": "2026-10-14T22:45:02.189Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": {
+      "area": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+    },
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_d79994a9-f632-4681-9aa5-5a226de4d376": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,224 @@
+[
+  {
+    "slot": "C1-INITIAL",
+    "providerHTTP": 200,
+    "productHTTP": 200,
+    "latencyMs": 3734,
+    "actualModel": "deepseek-flash",
+    "finish": "stop",
+    "usage": {
+      "prompt_tokens": 2250,
+      "completion_tokens": 354,
+      "total_tokens": 2604,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 2250
+    },
+    "question": null,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "unsent": true,
+      "draftExact": true,
+      "draftTarget": {
+        "area": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+      },
+      "rawCurrentInstructionPreserved": true,
+      "actualQuestionPreserved": true,
+      "actualAnswerPreserved": true,
+      "manualEditPreserved": true,
+      "basesUnchanged": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "originalUnchanged": true,
+      "defaultsLabeled": true
+    }
+  },
+  {
+    "slot": "C2-INITIAL",
+    "providerHTTP": 200,
+    "productHTTP": 200,
+    "latencyMs": 3370,
+    "actualModel": "deepseek-flash",
+    "finish": "stop",
+    "usage": {
+      "prompt_tokens": 2321,
+      "completion_tokens": 485,
+      "total_tokens": 2806,
+      "prompt_tokens_details": {
+        "cached_tokens": 1792
+      },
+      "prompt_cache_hit_tokens": 1792,
+      "prompt_cache_miss_tokens": 529
+    },
+    "question": null,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "unsent": true,
+      "draftExact": true,
+      "draftTarget": {
+        "area": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9"
+      },
+      "rawCurrentInstructionPreserved": true,
+      "actualQuestionPreserved": true,
+      "actualAnswerPreserved": true,
+      "manualEditPreserved": true,
+      "basesUnchanged": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "originalUnchanged": true,
+      "defaultsLabeled": true
+    }
+  },
+  {
+    "slot": "C3-INITIAL",
+    "providerHTTP": 200,
+    "productHTTP": 200,
+    "latencyMs": 3946,
+    "actualModel": "deepseek-flash",
+    "finish": "stop",
+    "usage": {
+      "prompt_tokens": 2224,
+      "completion_tokens": 420,
+      "total_tokens": 2644,
+      "prompt_tokens_details": {
+        "cached_tokens": 1792
+      },
+      "prompt_cache_hit_tokens": 1792,
+      "prompt_cache_miss_tokens": 432
+    },
+    "question": null,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "unsent": true,
+      "draftExact": true,
+      "draftTarget": {
+        "area": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+      },
+      "rawCurrentInstructionPreserved": true,
+      "actualQuestionPreserved": true,
+      "actualAnswerPreserved": true,
+      "manualEditPreserved": true,
+      "basesUnchanged": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "originalUnchanged": true,
+      "defaultsLabeled": true
+    }
+  },
+  {
+    "slot": "C4-INITIAL",
+    "providerHTTP": 200,
+    "productHTTP": 200,
+    "latencyMs": 6082,
+    "actualModel": "deepseek-flash",
+    "finish": "stop",
+    "usage": {
+      "prompt_tokens": 2262,
+      "completion_tokens": 726,
+      "total_tokens": 2988,
+      "prompt_tokens_details": {
+        "cached_tokens": 1792
+      },
+      "prompt_cache_hit_tokens": 1792,
+      "prompt_cache_miss_tokens": 470
+    },
+    "question": null,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "unsent": true,
+      "draftExact": true,
+      "draftTarget": {
+        "area": "A_47e85546-b580-420e-8fba-b09fe584056d"
+      },
+      "rawCurrentInstructionPreserved": true,
+      "actualQuestionPreserved": true,
+      "actualAnswerPreserved": true,
+      "manualEditPreserved": true,
+      "basesUnchanged": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "originalUnchanged": true,
+      "defaultsLabeled": true
+    }
+  },
+  {
+    "slot": "HB-INITIAL",
+    "providerHTTP": 200,
+    "productHTTP": 200,
+    "latencyMs": 3850,
+    "actualModel": "deepseek-flash",
+    "finish": "stop",
+    "usage": {
+      "prompt_tokens": 2238,
+      "completion_tokens": 376,
+      "total_tokens": 2614,
+      "prompt_tokens_details": {
+        "cached_tokens": 1792
+      },
+      "prompt_cache_hit_tokens": 1792,
+      "prompt_cache_miss_tokens": 446
+    },
+    "question": null,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "unsent": true,
+      "draftExact": true,
+      "draftTarget": {
+        "area": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835"
+      },
+      "rawCurrentInstructionPreserved": true,
+      "actualQuestionPreserved": true,
+      "actualAnswerPreserved": true,
+      "manualEditPreserved": true,
+      "basesUnchanged": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "originalUnchanged": true,
+      "defaultsLabeled": true
+    }
+  },
+  {
+    "slot": "HA-INITIAL",
+    "providerHTTP": 200,
+    "productHTTP": 200,
+    "latencyMs": 7170,
+    "actualModel": "deepseek-flash",
+    "finish": "stop",
+    "usage": {
+      "prompt_tokens": 2236,
+      "completion_tokens": 1019,
+      "total_tokens": 3255,
+      "prompt_tokens_details": {
+        "cached_tokens": 1792
+      },
+      "prompt_cache_hit_tokens": 1792,
+      "prompt_cache_miss_tokens": 444
+    },
+    "question": null,
+    "proposal": true,
+    "adoption": {
+      "accepted": true,
+      "unsent": true,
+      "draftExact": true,
+      "draftTarget": {
+        "area": "A_d3c1a75a-c072-419c-af02-56cf99f65b76"
+      },
+      "rawCurrentInstructionPreserved": true,
+      "actualQuestionPreserved": true,
+      "actualAnswerPreserved": true,
+      "manualEditPreserved": true,
+      "basesUnchanged": true,
+      "sourcesUnchanged": true,
+      "tasksUnchanged": true,
+      "originalUnchanged": true,
+      "defaultsLabeled": true
+    }
+  }
+]

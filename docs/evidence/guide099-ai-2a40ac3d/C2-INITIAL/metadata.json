@@ -1,0 +1,45 @@
+{
+  "slot": "C2-INITIAL",
+  "sourceSHA": "2a40ac3d7079b3984856b87abd4e085b43d35aa7",
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false
+  },
+  "productHTTPStatus": 200,
+  "latencyMs": 3370,
+  "requestBytes": 1087,
+  "productResponseBytes": 1972,
+  "providerSendOrdinal": 2,
+  "providerEvents": [
+    {
+      "slot": "C2-INITIAL",
+      "timeUTC": "2026-10-15T06:27:28.159Z",
+      "sends": 2,
+      "event": "transport_attempt",
+      "requestBytes": 8679
+    },
+    {
+      "slot": "C2-INITIAL",
+      "timeUTC": "2026-10-15T06:27:31.523Z",
+      "sends": 2,
+      "event": "provider_response",
+      "status": 200,
+      "responseBytes": 2256,
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 2321,
+        "completion_tokens": 485,
+        "total_tokens": 2806,
+        "prompt_tokens_details": {
+          "cached_tokens": 1792
+        },
+        "prompt_cache_hit_tokens": 1792,
+        "prompt_cache_miss_tokens": 529
+      },
+      "finishReason": "stop"
+    }
+  ]
+}

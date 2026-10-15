@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "guidance.3",
+  "ticket": {
+    "projectId": "P_d022fed1-e34b-4d40-a242-6fb1bc363e9f",
+    "revision": 9,
+    "requestId": "G_717ac891-b9ce-4975-b884-6b3a3b8538f2",
+    "areaId": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+  },
+  "projectName": "초보 — 가정 식재료",
+  "brief": "가정 식재료 재고로 낭비를 줄이고 싶어요.",
+  "area": {
+    "id": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b",
+    "name": "남은 재료 보기",
+    "note": "집에 남아 있는 재료를 보고 싶어요."
+  },
+  "decisions": [
+    {
+      "id": "D2",
+      "text": "혼자 한 기기에서 사용해요.",
+      "status": "confirmed"
+    },
+    {
+      "id": "D3",
+      "text": "재고는 수동으로 입력해요.",
+      "status": "confirmed"
+    },
+    {
+      "id": "D4",
+      "text": "주문과 배송은 이번 범위에서 제외해요.",
+      "status": "confirmed"
+    }
+  ],
+  "areaWork": [],
+  "answer": null,
+  "currentInstruction": null
+}

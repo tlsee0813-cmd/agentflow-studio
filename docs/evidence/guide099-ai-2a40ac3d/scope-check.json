@@ -1,0 +1,12 @@
+{
+  "allowedScope": "synthetic app requests/responses/projects/drafts/judgement plus safe metadata only",
+  "credentialPatternFindings": [],
+  "utf8Only": true,
+  "forbiddenExtensions": [],
+  "noAdapterEnvHeadersSecrets": true,
+  "sourcePromptEdits": 0,
+  "remoteWrites": 0,
+  "allGenerationAttemptsThisTurn": 7,
+  "fileCountBeforeManifest": 99,
+  "bytesBeforeManifest": 304148
+}
