@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/change07/check.py",
+    "--out",
+    "/workspace/browser-env/change07/run02"
+  ],
+  "actualChildExit": 1,
+  "jsonExit": 1,
+  "agreement": true,
+  "collectorIntendedExit": 1
+}

@@ -1,0 +1,177 @@
+{
+  "UTC": "2026-10-15T21:22:27.404033+00:00",
+  "scope": "All delivered files except this manifest itself",
+  "files": [
+    {
+      "path": "390-P3-follow.png",
+      "bytes": 87509,
+      "sha256": "9d20360eec78222815e6e00ed18da805517a490271816409dad435bf0962f324"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 6122,
+      "sha256": "4cf56874fbf6333a724ddaececa3c9464f0ea5e3d2de83aa6c1aff9f0553aaa6"
+    },
+    {
+      "path": "SOURCE.json",
+      "bytes": 672,
+      "sha256": "45f8b915298897e5b639791026f90bd2b7121bf094239444f60a362acb45444c"
+    },
+    {
+      "path": "check.py",
+      "bytes": 18370,
+      "sha256": "0a12d82bbfb6d191a631b95938c00e2812971fe8cadb7eebd9c1ccbd8b188fa7"
+    },
+    {
+      "path": "collect.py",
+      "bytes": 852,
+      "sha256": "323cfd191a47a66fa0cfeb8d60bba14a911d9de53b20c7f800b0f3f3881bb775"
+    },
+    {
+      "path": "comparison-before-1440.png",
+      "bytes": 140812,
+      "sha256": "dc9c8cf846af253c8c27379a4a9260bca9a866373080f45a5ae25e883165038b"
+    },
+    {
+      "path": "geometry.py",
+      "bytes": 1956,
+      "sha256": "81208b448ae68b48fc5d4ee7213812c5b6d2e812f5bcce9229dc9985f77236ef"
+    },
+    {
+      "path": "initial-1440.png",
+      "bytes": 142984,
+      "sha256": "117a3f5e76fcb2fe6e14290329a66a91e48ce7703b380448bef7931d2b93a1ad"
+    },
+    {
+      "path": "launch.py",
+      "bytes": 733,
+      "sha256": "cb8566582e80f9d39d36cb94f93be7abe9a9a8dbc8d6dd12cffddcd774d94d55"
+    },
+    {
+      "path": "prep-default-P1-390.png",
+      "bytes": 72328,
+      "sha256": "3421efa3dfd5d9e60d1b7c7719878158b80c0fdf6aeb5f014b352c9a808feeec"
+    },
+    {
+      "path": "run01/actual-exit.json",
+      "bytes": 141,
+      "sha256": "e25d85d774f21ff932ed0c2e3afa3738b5edb77818f5bcf11088dd1b6b13be5b"
+    },
+    {
+      "path": "run01/check.py",
+      "bytes": 17461,
+      "sha256": "9983c22bf9d0380cf7255cb3bc89e46ea5567f2ed6305dd10faac3c575dd174f"
+    },
+    {
+      "path": "run01/child-exit.json",
+      "bytes": 265,
+      "sha256": "f9c2a56172144705b03069486c1fa5353f7e8a290210f31ae36089d92417b3f6"
+    },
+    {
+      "path": "run01/collect.py",
+      "bytes": 852,
+      "sha256": "323cfd191a47a66fa0cfeb8d60bba14a911d9de53b20c7f800b0f3f3881bb775"
+    },
+    {
+      "path": "run01/collector.log",
+      "bytes": 7246,
+      "sha256": "a98594ae153e7b9744742f1e3559fbde60f5b8478339b96d28a3f845c0f8a0d5"
+    },
+    {
+      "path": "run01/geometry.py",
+      "bytes": 1956,
+      "sha256": "81208b448ae68b48fc5d4ee7213812c5b6d2e812f5bcce9229dc9985f77236ef"
+    },
+    {
+      "path": "run01/process.log",
+      "bytes": 6819,
+      "sha256": "38170cd1cac6d20adec359f7c2abc071cd38a3733ed59bc699a6ffb7d687f1e1"
+    },
+    {
+      "path": "run01/result.json",
+      "bytes": 509492,
+      "sha256": "df48b3e5a7c9b5a15e344630bd333023c6deebbc37d19835e499fd59a76b39cf"
+    },
+    {
+      "path": "run02/actual-exit.json",
+      "bytes": 141,
+      "sha256": "241a3c44f15fa830aadb5a76aa05ca886006cb3babde9b3401bc445ee693ef86"
+    },
+    {
+      "path": "run02/check.py",
+      "bytes": 17872,
+      "sha256": "221dee36aaf5e2a8035f6267b1ee52423c4b404ff905ab6237d9576d565f4146"
+    },
+    {
+      "path": "run02/child-exit.json",
+      "bytes": 265,
+      "sha256": "b7bf5f58d71ff20dc09271f4426c0a3b2980ab918460cbe8d0b7c962298ac0ee"
+    },
+    {
+      "path": "run02/collect.py",
+      "bytes": 852,
+      "sha256": "323cfd191a47a66fa0cfeb8d60bba14a911d9de53b20c7f800b0f3f3881bb775"
+    },
+    {
+      "path": "run02/collector.log",
+      "bytes": 155,
+      "sha256": "855f41411f970db0a8dabd7004c85024d689f61bc335d2238f3cd813c2fccc59"
+    },
+    {
+      "path": "run02/geometry.py",
+      "bytes": 1956,
+      "sha256": "81208b448ae68b48fc5d4ee7213812c5b6d2e812f5bcce9229dc9985f77236ef"
+    },
+    {
+      "path": "run02/process.log",
+      "bytes": 6266,
+      "sha256": "6edc56a0574632d8c510499290a482bf320806b82fa93b6d2218f17e267cc2d2"
+    },
+    {
+      "path": "run02/result.json",
+      "bytes": 907304,
+      "sha256": "0df486f8f77faf8e57c3af3895c20da9b8ebfbae75de19662688fd236886984f"
+    },
+    {
+      "path": "run03/actual-exit.json",
+      "bytes": 141,
+      "sha256": "fca590a8b67840d39ea5aa279a044daa3170a09978370e9fd5a34631f10badd1"
+    },
+    {
+      "path": "run03/check.py",
+      "bytes": 18370,
+      "sha256": "0a12d82bbfb6d191a631b95938c00e2812971fe8cadb7eebd9c1ccbd8b188fa7"
+    },
+    {
+      "path": "run03/child-exit.json",
+      "bytes": 265,
+      "sha256": "60250a9dfe9453b4684e8cb0d272791e32f130a813a686830eae9b60caa50679"
+    },
+    {
+      "path": "run03/collect.py",
+      "bytes": 852,
+      "sha256": "323cfd191a47a66fa0cfeb8d60bba14a911d9de53b20c7f800b0f3f3881bb775"
+    },
+    {
+      "path": "run03/collector.log",
+      "bytes": 70,
+      "sha256": "1c37b1a35a430d1783c8e608b131f9dfd2e6600bedf133a6630fbeead06487bd"
+    },
+    {
+      "path": "run03/geometry.py",
+      "bytes": 1956,
+      "sha256": "81208b448ae68b48fc5d4ee7213812c5b6d2e812f5bcce9229dc9985f77236ef"
+    },
+    {
+      "path": "run03/process.log",
+      "bytes": 6266,
+      "sha256": "73a55ace652c27c76f45d33f48e37fcf731481189a50d7e3814036f15c5c5fac"
+    },
+    {
+      "path": "run03/result.json",
+      "bytes": 910431,
+      "sha256": "23d89f682709ed5ba2ca51541750a73b203e3e80077d198176e19a0e5c8cb386"
+    }
+  ],
+  "totalBytesExcludingManifest": 2889732
+}

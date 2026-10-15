@@ -1,0 +1,14 @@
+{
+  "commit": "0dfadba788e0f2f035bbe51b899b9c02e4260e45",
+  "url": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/0dfadba788e0f2f035bbe51b899b9c02e4260e45/docs/transfer/change-record-07/author-fix1/change-record-study.html",
+  "bytes": 42420,
+  "sha256": "d10e7dcac86bf4d569164ad9276a7686a92aec43ad4ec8bd68924e88ecf897cb",
+  "retrieval": "Existing authenticated GitHub git fetch, then git show exact commit:path into temporary site; unchanged source not duplicated in payload",
+  "contractCommit": "e22d30169b982807a5ba15136f6db2adf780e320",
+  "contractFiles": [
+    "IMPLEMENTATION.md",
+    "INPUT.md",
+    "STRUCTURE_AUDIT.md",
+    "DECISION.md"
+  ]
+}

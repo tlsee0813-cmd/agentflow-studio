@@ -1,0 +1,152 @@
+HTTP "GET /change-record-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1440/HTTP
+PASS 1440/raw-dom-ID-unique
+1440/initial-header
+PASS 1440/header-access
+1440/comparison-after
+1440/click/#vBefore
+1440/comparison-before
+PASS 1440/same-three-targets-two-relations
+PASS 1440/comparison-geometry-stable
+PASS 1440/responsibility-content
+1440/before/actual-card-P1
+1440/before/actual-card-P2
+1440/before/actual-card-P3
+1440/click/#followOpen
+1440/before/follow-dialog
+PASS 1440/before-follow-boundary
+1440/click/#fClose
+1440/click/#vAfter
+1440/after/actual-card-P1
+1440/after/actual-card-P2
+1440/after/actual-card-P3
+1440/click/#followOpen
+1440/after/follow-dialog
+PASS 1440/after-follow-boundary
+1440/click/#fClose
+1440/click/#n-P3
+1440/click/#panel .act.wide [data-act="read"]
+1440/wheel/#reader
+1440/related-before
+1440/click/[data-loc="P2"]
+1440/related-map-target
+PASS 1440/related-target-clip-hit
+1440/related-after-immediate
+PASS 1440/related-reader-row-focus
+1440/code-before
+1440/click/[data-peek="code"]
+1440/code-open
+1440/click/#pk-code [data-act="peek-close"]
+1440/code-closed
+PASS 1440/code-close-return
+1440/click/[data-peek="code"]
+1440/code-Escape
+PASS 1440/code-Escape-return
+1440/follow-before
+1440/click/[data-peek="follow"]
+1440/follow-open
+1440/wheel/#reader
+1440/wheel/#reader
+1440/wheel/#reader
+1440/click/#pk-follow [data-act="peek-close"]
+1440/follow-closed
+PASS 1440/follow-close-return
+1440/click/[data-peek="follow"]
+1440/follow-Escape
+PASS 1440/follow-Escape-return
+1440/click/#rPrep
+1440/default-prep-P3
+PASS 1440/P3-default-purpose-target
+PASS 1440/P3-not-predetermined
+1440/click/#pf-ask
+1440/P3-request-tail
+PASS 1440/P3-request-end-access
+1440/click/#prepClose
+1440/click/#rBack
+1440/click/#vBefore
+1440/click/#zIn
+1440/wheel/#mapScroll
+1440/wheel/#mapScroll
+1440/click/#n-P1
+1440/P1-entry-map-A
+PASS 1440/actual-115%
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+1440/default-prep-P1
+PASS 1440/P1-default-purpose-target
+PASS 1440/P1-not-predetermined
+1440/click/#pf-ask
+1440/P1-request-tail
+PASS 1440/P1-request-end-access
+1440/click/#pf-ask
+1440/click/#prepClose
+1440/click/#vAfter
+1440/click/#rPrep
+PASS 1440/P1-edit-after-compare
+1440/click/#prepClose
+1440/click/#rBack
+1440/P1-return-map-B-immediate
+FAIL 1440/P1-map-restoration
+PASS 1440/P1-return-before-responsibility
+1440/click/#n-P2
+1440/P2-entry-map-A2
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+1440/default-prep-P2
+PASS 1440/P2-default-purpose-target
+PASS 1440/P2-not-predetermined
+PASS 1440/P2-specific-default-no-E
+1440/click/#pf-ask
+1440/P2-request-tail
+PASS 1440/P2-request-end-access
+1440/click/#prepClose
+1440/click/#rBack
+1440/P2-return-map-B2-immediate
+PASS 1440/P2-map-restoration
+1440/click/#n-P1
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+PASS 1440/P1-E-survives-P2
+1440/P1-final-edited-values
+1440/click/#prepClose
+HTTP "GET /change-record-study.html HTTP/1.1" 200 -
+PASS 390/HTTP
+PASS 390/raw-dom-ID-unique
+390/initial-header
+PASS 390/header-access
+390/comparison-after
+390/click/#vBefore
+390/comparison-before
+PASS 390/same-three-targets-two-relations
+PASS 390/comparison-geometry-stable
+PASS 390/responsibility-content
+390/before/actual-card-P1
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+Traceback (most recent call last):
+  File "/workspace/browser-env/change07/check.py", line 70, in main
+    expose('#n-'+id,'#mapScroll');record(f'{w}/{view}/actual-card-{id}',{'card':geom('#n-'+id),'rows':geom('#n-'+id+' .rows')})
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/change07/check.py", line 41, in expose
+    raise RuntimeError('cannot normally expose '+s+' '+json.dumps(g,ensure_ascii=False))
+RuntimeError: cannot normally expose #n-P2 {"exists": true, "text": "화면 쪽 표시 · 읽기용 역할 이름\n설정 메뉴의 업데이트 표시\n설정 메뉴에 다운로드 중과 남은 시간 표시\n여기서\n표시 문구·분기 고르기\n여기서\n진행 정보 누락 확인\n여기서\n경과 시간 계산\n넘김\n세 숫자로 계산 요청", "value": "", "rect": {"x": 18, "y": 418.25, "width": 324, "height": 250, "top": 418.25, "bottom": 668.25, "left": 18, "right": 342}, "selfContentClip": null, "clip": {"left": 0, "top": 200.25, "right": 390, "bottom": 668}, "visibleIntersection": {"left": 18, "right": 342, "top": 418.25, "bottom": 668}, "clips": [{"id": "mapScroll", "tag": "DIV", "self": false, "x": true, "y": true, "box": {"left": 0, "top": 200.25, "right": 390, "bottom": 668}}], "samples": [{"x": 99, "y": 543.125, "hit": true, "cover": {"id": "", "tag": "SPAN", "cls": "r here"}}, {"x": 180, "y": 543.125, "hit": true, "cover": {"id": "", "tag": "SPAN", "cls": "r here"}}, {"x": 261, "y": 543.125, "hit": true, "cover": {"id": "", "tag": "SPAN", "cls": "r here"}}], "rangeRects": [{"x": 18, "y": 418.25, "width": 324, "height": 250, "top": 418.25, "bottom": 668.25, "left": 18, "right": 342}, {"x": 33, "y": 432.25, "width": 148.1875, "height": 15, "top": 432.25, "bottom": 447.25, "left": 33, "right": 181.1875}, {"x": 33, "y": 451.0625, "width": 177.546875, "height": 23, "top": 451.0625, "bottom": 474.0625, "left": 33, "right": 210.546875}, {"x": 33, "y": 478.625, "width": 215.015625, "height": 17, "top": 478.625, "bottom": 495.625, "left": 33, "right": 248.015625}, {"x": 58.8125, "y": 514, "width": 30.375, "height": 15, "top": 514, "bottom": 529, "left": 58.8125, "right": 89.1875}, {"x": 114, "y": 512.421875, "width": 117.890625, "height": 18, "top": 512.421875, "bottom": 530.421875, "left": 114, "right": 231.890625}, {"x": 58.8125, "y": 549, "width": 30.375, "height": 15, "top": 549, "bottom": 564, "left": 58.8125, "right": 89.1875}, {"x": 114, "y": 547.421875, "width": 105.828125, "height": 18, "top": 547.421875, "bottom": 565.421875, "left": 114, "right": 219.828125}, {"x": 58.8125, "y": 584, "width": 30.375, "height": 15, "top": 584, "bottom": 599, "left": 58.8125, "right": 89.1875}, {"x": 114, "y": 582.421875, "width": 78.53125, "height": 18, "top": 582.421875, "bottom": 600.421875, "left": 114, "right": 192.53125}, {"x": 63.875, "y": 619, "width": 20.25, "height": 15, "top": 619, "bottom": 634, "left": 63.875, "right": 84.125}, {"x": 114, "y": 617.421875, "width": 105.828125, "height": 18, "top": 617.421875, "bottom": 635.421875, "left": 114, "right": 219.828125}], "display": "block", "visibility": "visible", "hidden": false, "full": false, "hit": true}
+
+CHILD_EXIT 1

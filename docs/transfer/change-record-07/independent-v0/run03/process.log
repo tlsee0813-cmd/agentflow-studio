@@ -1,0 +1,252 @@
+HTTP "GET /change-record-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1440/HTTP
+PASS 1440/raw-dom-ID-unique
+1440/initial-header
+PASS 1440/header-access
+1440/comparison-after
+1440/click/#vBefore
+1440/comparison-before
+PASS 1440/same-three-targets-two-relations
+PASS 1440/comparison-geometry-stable
+PASS 1440/responsibility-content
+1440/before/actual-card-P1
+1440/before/actual-card-P2
+1440/before/actual-card-P3
+1440/click/#followOpen
+1440/before/follow-dialog
+PASS 1440/before-follow-boundary
+1440/click/#fClose
+1440/click/#vAfter
+1440/after/actual-card-P1
+1440/after/actual-card-P2
+1440/after/actual-card-P3
+1440/click/#followOpen
+1440/after/follow-dialog
+PASS 1440/after-follow-boundary
+1440/click/#fClose
+1440/click/#n-P3
+1440/click/#panel .act.wide [data-act="read"]
+1440/wheel/#reader
+1440/related-before
+1440/click/[data-loc="P2"]
+1440/related-map-target
+PASS 1440/related-target-clip-hit
+1440/related-after-immediate
+PASS 1440/related-reader-row-focus
+1440/code-before
+1440/click/[data-peek="code"]
+1440/code-open
+1440/click/#pk-code [data-act="peek-close"]
+1440/code-closed
+PASS 1440/code-close-return
+1440/click/[data-peek="code"]
+1440/code-Escape
+PASS 1440/code-Escape-return
+1440/follow-before
+1440/click/[data-peek="follow"]
+1440/follow-open
+1440/wheel/#reader
+1440/wheel/#reader
+1440/wheel/#reader
+1440/click/#pk-follow [data-act="peek-close"]
+1440/follow-closed
+PASS 1440/follow-close-return
+1440/click/[data-peek="follow"]
+1440/follow-Escape
+PASS 1440/follow-Escape-return
+1440/click/#rPrep
+1440/default-prep-P3
+PASS 1440/P3-default-purpose-target
+PASS 1440/P3-not-predetermined
+1440/click/#pf-ask
+1440/P3-request-tail
+PASS 1440/P3-request-end-access
+1440/click/#prepClose
+1440/click/#rBack
+1440/click/#vBefore
+1440/click/#zIn
+1440/wheel/#mapScroll
+1440/wheel/#mapScroll
+1440/click/#n-P1
+1440/P1-entry-map-A
+PASS 1440/actual-115%
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+1440/default-prep-P1
+PASS 1440/P1-default-purpose-target
+PASS 1440/P1-not-predetermined
+1440/click/#pf-ask
+1440/P1-request-tail
+PASS 1440/P1-request-end-access
+1440/click/#pf-ask
+1440/click/#prepClose
+1440/click/#vAfter
+1440/click/#rPrep
+PASS 1440/P1-edit-after-compare
+1440/click/#prepClose
+1440/click/#rBack
+1440/P1-return-map-B-immediate
+PASS 1440/P1-map-restoration
+PASS 1440/P1-return-before-responsibility
+1440/click/#n-P2
+1440/P2-entry-map-A2
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+1440/default-prep-P2
+PASS 1440/P2-default-purpose-target
+PASS 1440/P2-not-predetermined
+PASS 1440/P2-specific-default-no-E
+1440/click/#pf-ask
+1440/P2-request-tail
+PASS 1440/P2-request-end-access
+1440/click/#prepClose
+1440/click/#rBack
+1440/P2-return-map-B2-immediate
+PASS 1440/P2-map-restoration
+1440/click/#n-P1
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+PASS 1440/P1-E-survives-P2
+1440/P1-final-edited-values
+1440/click/#prepClose
+HTTP "GET /change-record-study.html HTTP/1.1" 200 -
+PASS 390/HTTP
+PASS 390/raw-dom-ID-unique
+390/initial-header
+PASS 390/header-access
+390/comparison-after
+390/click/#vBefore
+390/comparison-before
+PASS 390/same-three-targets-two-relations
+PASS 390/comparison-geometry-stable
+PASS 390/responsibility-content
+390/before/actual-card-P1
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/before/actual-card-P2
+390/wheel/#mapScroll
+390/before/actual-card-P3
+390/click/#followOpen
+390/before/follow-dialog
+PASS 390/before-follow-boundary
+390/click/#fClose
+390/click/#vAfter
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/after/actual-card-P1
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/after/actual-card-P2
+390/wheel/#mapScroll
+390/after/actual-card-P3
+390/click/#followOpen
+390/after/follow-dialog
+PASS 390/after-follow-boundary
+390/click/#fClose
+390/click/#n-P3
+390/click/#panel [data-act="read"].narrow
+390/wheel/#reader
+390/related-before
+390/click/[data-loc="P2"]
+390/related-map-target
+PASS 390/related-target-clip-hit
+390/click/#backRead
+390/related-after-immediate
+PASS 390/related-reader-row-focus
+390/code-before
+390/click/[data-peek="code"]
+390/code-open
+390/click/#pk-code [data-act="peek-close"]
+390/code-closed
+PASS 390/code-close-return
+390/click/[data-peek="code"]
+390/code-Escape
+PASS 390/code-Escape-return
+390/wheel/#reader
+390/follow-before
+390/click/[data-peek="follow"]
+390/follow-open
+390/wheel/#reader
+390/wheel/#reader
+390/click/#pk-follow [data-act="peek-close"]
+390/follow-closed
+PASS 390/follow-close-return
+390/click/[data-peek="follow"]
+390/follow-Escape
+PASS 390/follow-Escape-return
+390/click/#rPrep
+390/default-prep-P3
+PASS 390/P3-default-purpose-target
+PASS 390/P3-not-predetermined
+390/click/#pf-ask
+390/P3-request-tail
+PASS 390/P3-request-end-access
+390/click/#prepClose
+390/click/#rBack
+390/click/#vBefore
+390/click/#zIn
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/click/#n-P1
+390/P1-entry-map-A
+PASS 390/actual-115%
+390/click/#panel [data-act="read"].narrow
+390/click/#rPrep
+390/default-prep-P1
+PASS 390/P1-default-purpose-target
+PASS 390/P1-not-predetermined
+390/click/#pf-ask
+390/P1-request-tail
+PASS 390/P1-request-end-access
+390/click/#pf-ask
+390/click/#prepClose
+390/click/[data-loc="P3"]
+390/click/#vAfter
+390/click/#backRead
+390/click/#rPrep
+PASS 390/P1-edit-after-compare
+390/click/#prepClose
+390/click/#rBack
+390/P1-return-map-B-immediate
+PASS 390/P1-map-restoration
+PASS 390/P1-return-before-responsibility
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/click/#n-P2
+390/P2-entry-map-A2
+390/click/#panel [data-act="read"].narrow
+390/click/#rPrep
+390/default-prep-P2
+PASS 390/P2-default-purpose-target
+PASS 390/P2-not-predetermined
+PASS 390/P2-specific-default-no-E
+390/click/#pf-ask
+390/P2-request-tail
+PASS 390/P2-request-end-access
+390/click/#prepClose
+390/click/#rBack
+390/P2-return-map-B2-immediate
+PASS 390/P2-map-restoration
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/click/#n-P1
+390/click/#panel [data-act="read"].narrow
+390/click/#rPrep
+PASS 390/P1-E-survives-P2
+390/P1-final-edited-values
+390/click/#prepClose
+CHILD_EXIT 0
