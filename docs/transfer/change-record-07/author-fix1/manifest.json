@@ -1,0 +1,65 @@
+{
+ "note": "cycle07 change-record author-fix1. MANIFEST.sha256과 manifest.json 자신은 목록에서 제외.",
+ "files": [
+  {
+   "path": "README.md",
+   "bytes": 5745,
+   "sha256": "4b217ddf66bbecda38eda7c23455937a2e4b284ddd7f139ae13df1ef962a10e1"
+  },
+  {
+   "path": "change-record-study.html",
+   "bytes": 42420,
+   "sha256": "d10e7dcac86bf4d569164ad9276a7686a92aec43ad4ec8bd68924e88ecf897cb"
+  },
+  {
+   "path": "checks/author_check.diff-from-v0.patch",
+   "bytes": 3562,
+   "sha256": "3f6385f5557553c432f87d0181dff686f98c83984c5437d31f429961aa3d035d"
+  },
+  {
+   "path": "checks/author_check.py",
+   "bytes": 28109,
+   "sha256": "56a92c9bec57d522997390d2ec834d94a1c241a18e610111d427f79d6737ee54"
+  },
+  {
+   "path": "checks/run_all.sh",
+   "bytes": 338,
+   "sha256": "776ac053001f4922cec4917bf981d16affa433fc6889515e850af289c10c7268"
+  },
+  {
+   "path": "checks/run_checks.py",
+   "bytes": 1246,
+   "sha256": "27823346f76cacebcc5ad495e6082bedaf61c44f21812de6da900955cbff2afb"
+  },
+  {
+   "path": "run/D-1440-prep-before-edit-menu.png",
+   "bytes": 287770,
+   "sha256": "0ff94007e137453f647ca328c1f6fc2e6aa6296b10e9a0ea48a31178f62c1b15"
+  },
+  {
+   "path": "run/E-1440-prep-before-edit-common.png",
+   "bytes": 276309,
+   "sha256": "346fcbad70edf6db57558cbb4b1070776d6a72fd1fc1b73353b2f32adc176ba3"
+  },
+  {
+   "path": "run/collector_exit.txt",
+   "bytes": 2,
+   "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+   "path": "run/exit.json",
+   "bytes": 307,
+   "sha256": "adcc733fa0b56fecbd07e009bd351d420ef28d758a0262e41f726dd306fba2ed"
+  },
+  {
+   "path": "run/results.json",
+   "bytes": 29246,
+   "sha256": "92ef7a574b164ccd65d5bfdac714a960edb2e14cbeb52b946533b62a09ff7f6d"
+  },
+  {
+   "path": "run/run.log",
+   "bytes": 18440,
+   "sha256": "294bc12e7bde22345e3a0fc51f137b860b94ca1bc18b65d558434d0d0cfcbec3"
+  }
+ ]
+}

@@ -1,0 +1,34 @@
+--- /tmp/claude-0/-home-claude/4df88141-ae7c-5954-a073-948ee9c5e879/scratchpad/author_check.v0.py	2026-10-16 06:12:42.555130189 +0900
++++ checks/author_check.py	2026-10-16 06:12:42.580004139 +0900
+@@ -244,6 +244,11 @@
+         r_ = rd(page); h_ = rect(page, '#p-follow h3')
+         rec(size, '2', f'후속 기록 닫기({how}): 본문·링크·닫기 실제 제거, 출발 위치·초점', c['peek'] == 0 and c['links'] == 0 and c['exp'] == 'false' and abs(r_['top'] - top0) <= 1 and close(h_, host0) and r_['active'] == 'peek-follow',
+             {**c, 'top': [top0, t_before_click, r_['top']], 'host': [host0, h_], 'active': r_['active']})
++    if not narrow:  # 공통 계산의 편집 전 준비문 PNG와 기본문 기록(단언 아님)
++        page.click('#rPrep'); page.wait_for_timeout(200)
++        note(size, '2', '공통 계산 편집 전 준비문(관측)', page.evaluate("()=>Object.fromEntries([...document.querySelectorAll('#prep textarea')].map(t=>[t.dataset.f,t.value]))"))
++        shot('E-1440-prep-before-edit-common.png')
++        page.keyboard.press('Escape'); page.wait_for_timeout(120)
+     page.click('#rBack'); page.wait_for_timeout(200)
+     gr = geo(page)
+     d = geo_diff(g_enter, gr); rec(size, '2', '진입 전 지도로: 원래 상태 동일, 초점 P3 카드', not d and gr['active'] == 'n-P3', {'diff': d, 'active': gr['active']})
+@@ -268,15 +273,16 @@
+     page.click('#rPrep'); page.wait_for_timeout(200)
+     d0 = prep_vals()
+     want = (d0['purpose'].startswith('추정할 수 있을 때 업데이트 다운로드의 남은 시간') and '설정 메뉴의 업데이트 표시' in d0['target'] and '1월 16일 고정 변경' in d0['target']
+-            and '먼저 확인' in d0['ask'] and '수정안을 제안' in d0['ask'] and '1월 21일' in d0['ask']
++            and d0['ask'].startswith('먼저') and '확인해 주세요' in d0['ask'] and '선택지를 근거와 함께 제안' in d0['ask'] and '1월 21일' in d0['ask']
++            and '범위를 미리 정하지 않습니다' in d0['ask'] and '1월 16일 변경만' not in d0['ask']
+             and '자동 수정 범위가 아님' in d0['keep'] and '영향이 없다는 보장은 아님' in d0['keep']
+-            and '되돌림 요청이 실제로 반영됐는지' in d0['unknown'] and 'PR이 병합되지 않고 닫힌 이유' in d0['unknown']
++            and '되돌림 요청의 정확한 범위와 지금 반영 상태' in d0['unknown'] and 'PR이 병합되지 않고 닫힌 이유' in d0['unknown']
+             and not any(x in ''.join(d0.values()) for x in ('완료했', '완료하', '공통화 완료', '되돌림 완료')))
+     rec(size, '3', '편집 전 준비문: 목적·대상·1/16 변경·후속 기록·확인 요청+수정 제안·미확인', want, d0)
+     v = vis(page, '#prepClose'); rec(size, '3', '준비 닫기 버튼 표시', v['ok'], v['ok'])
+     sc = page.evaluate("()=>{const s=document.getElementById('prepScroll');return {scrollable:s.scrollHeight>s.clientHeight+1,max:s.scrollHeight-s.clientHeight}}")
+     note(size, '3', '준비 영역 자연 스크롤', sc)
+-    if not narrow: shot('D-1440-prep-before-edit.png')
++    if not narrow: shot('D-1440-prep-before-edit-menu.png')
+     o = page.evaluate(OVF_JS); rec(size, '3', '준비 가로 넘침 없음', o['doc'] <= o['vw'], o)
+     ADD = ' 확인 결과와 함께, 이 화면에서 남은 시간이 언제 보이고 언제 숨겨지는지도 한두 문장으로 적어 주세요.'
+     page.click('#pf-ask'); page.keyboard.press('Control+End'); page.keyboard.type(ADD)

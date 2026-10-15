@@ -1,0 +1,1252 @@
+{
+ "meta": {
+  "started": "2026-10-15T21:12:42.982934+00:00",
+  "html": "change-record-study.html",
+  "file_sha256_before": "d10e7dcac86bf4d569164ad9276a7686a92aec43ad4ec8bd68924e88ecf897cb",
+  "file_bytes": 42420,
+  "url": "http://127.0.0.1:52163/change-record-study.html",
+  "http": {
+   "1440x900": {
+    "status": 200,
+    "bytes": 42420,
+    "sha": "d10e7dcac86bf4d569164ad9276a7686a92aec43ad4ec8bd68924e88ecf897cb"
+   },
+   "390x844": {
+    "status": 200,
+    "bytes": 42420,
+    "sha": "d10e7dcac86bf4d569164ad9276a7686a92aec43ad4ec8bd68924e88ecf897cb"
+   }
+  },
+  "errors": {
+   "1440x900": [],
+   "390x844": []
+  },
+  "playwright_python": "1.56.0",
+  "python": "3.13.16",
+  "browser": "chromium 141.0.7390.37 headless",
+  "http_server_exit": -15,
+  "file_sha256_after": "d10e7dcac86bf4d569164ad9276a7686a92aec43ad4ec8bd68924e88ecf897cb",
+  "file_unchanged": true,
+  "sizes_completed": [
+   "1440x900",
+   "390x844"
+  ],
+  "finished": "2026-10-15T21:13:04.617337+00:00",
+  "fatal": null,
+  "failed": 0
+ },
+ "checks": [
+  {
+   "size": "1440x900",
+   "path": "0",
+   "check": "최초 HTTP 응답 status/body SHA = 원본 파일",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 42420,
+    "sha": "d10e7dcac86bf4d569164ad9276a7686a92aec43ad4ec8bd68924e88ecf897cb"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "초기: 목적·기록 범위·후속 기록 줄·비교 버튼 표시(clip·hit)",
+   "status": "PASS",
+   "detail": {
+    "#purposeTxt": true,
+    "#scope": true,
+    "#followTxt": true,
+    "#followOpen": true,
+    "#vBefore": true,
+    "#vAfter": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "초기: 대상 3·관계 2, 관계는 P1→P3·P2→P3, 기본 보기=1월 16일 변경",
+   "status": "PASS",
+   "detail": {
+    "nodes": [
+     "n-P1",
+     "n-P2",
+     "n-P3"
+    ],
+    "edges": [
+     [
+      "e-R1",
+      "P1",
+      "P3"
+     ],
+     [
+      "e-R2",
+      "P2",
+      "P3"
+     ]
+    ],
+    "view": [
+     "after"
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 0)"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "초기 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "P1 선택: 배치·transform·scroll 불변",
+   "status": "PASS",
+   "detail": {
+    "wheelAssist": 0,
+    "diff": {}
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "1월 16일 변경 보기: 이동한 책임(옮겨 감/옮겨 옴)·남은 표시·추정 본체 글자와 렌더, 카드 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "rows": {
+     "n-P1": [
+      "그대로 표시 문구·분기 고르기",
+      "옮겨 감 진행 정보 누락 확인",
+      "옮겨 감 경과 시간 계산",
+      "넘김 다운로드 상태로 계산 요청"
+     ],
+     "n-P2": [
+      "그대로 표시 문구·분기 고르기",
+      "옮겨 감 진행 정보 누락 확인",
+      "옮겨 감 경과 시간 계산",
+      "넘김 다운로드 상태로 계산 요청"
+     ],
+     "n-P3": [
+      "그대로 남은 시간 추정",
+      "받음 다운로드 상태 받기",
+      "옮겨 옴 진행 정보 누락 확인",
+      "옮겨 옴 경과 시간 계산"
+     ]
+    },
+    "labels": [
+     "다운로드 상태로 계산 요청",
+     "다운로드 상태로 같은 계산 사용"
+    ],
+    "faceClip": [
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "변경 전으로 전환: 대상·관계 ID/개수·rect·선 경로·transform·scroll·선택 동일",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "변경 전 보기: 두 메뉴가 확인·경과 계산, 세 숫자 전달, 공통 계산은 이미 있음",
+   "status": "PASS",
+   "detail": {
+    "rows": {
+     "n-P1": [
+      "여기서 표시 문구·분기 고르기",
+      "여기서 진행 정보 누락 확인",
+      "여기서 경과 시간 계산",
+      "넘김 세 숫자로 계산 요청"
+     ],
+     "n-P2": [
+      "여기서 표시 문구·분기 고르기",
+      "여기서 진행 정보 누락 확인",
+      "여기서 경과 시간 계산",
+      "넘김 세 숫자로 계산 요청"
+     ],
+     "n-P3": [
+      "이미 있음 남은 시간 추정",
+      "받음 세 숫자 받기",
+      "메뉴에서 진행 정보 누락 확인",
+      "메뉴에서 경과 시간 계산"
+     ]
+    },
+    "labels": [
+     "세 숫자로 계산 요청",
+     "세 숫자로 계산 요청"
+    ],
+    "faceClip": [
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "변경 전 보기에서도 후속 기록 줄·범위 표시 유지",
+   "status": "PASS",
+   "detail": {
+    "#followTxt": true,
+    "#followOpen": true,
+    "#scope": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "후속 기록 열기(button 전): 되돌림 요청 2·미병합 종료 1, 미확인 문장",
+   "status": "PASS",
+   "detail": {
+    "items": 3,
+    "links": 3
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "후속 기록 닫기(button): 실제 제거·출발 초점",
+   "status": "PASS",
+   "detail": {
+    "hidden": true,
+    "children": 0,
+    "links": 0,
+    "active": "followOpen"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "후속 기록 열기(escape 전): 되돌림 요청 2·미병합 종료 1, 미확인 문장",
+   "status": "PASS",
+   "detail": {
+    "items": 3,
+    "links": 3
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "후속 기록 닫기(escape): 실제 제거·출발 초점",
+   "status": "PASS",
+   "detail": {
+    "hidden": true,
+    "children": 0,
+    "links": 0,
+    "active": "followOpen"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "1",
+   "check": "1월 16일 변경으로 복귀: 처음 측정과 동일",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "선택 설명에서 ‘이 부분 보기’ 접근",
+   "status": "PASS",
+   "detail": {
+    "wheelAssist": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "읽기 시작: 복귀·준비·목적·이름·전후 변화 표시",
+   "status": "PASS",
+   "detail": {
+    "#rBack": true,
+    "#rPrep": true,
+    "#reader .crumb": true,
+    "#reader h2": true,
+    "#p-code .ba": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "P1 지도에서 위치 보기: 대상 시야 안, 선택 P3 유지, 이동 여부 정직",
+   "status": "PASS",
+   "detail": {
+    "moved": "0",
+    "inPaneAtEntry": true,
+    "scrollEntry": [
+     0,
+     0
+    ],
+    "scrollNow": [
+     0,
+     0
+    ],
+    "active": "BUTTON"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "읽던 곳: scrollTop 180→180, 출발 행 원시 rect, 출발 버튼 초점",
+   "status": "PASS",
+   "detail": {
+    "before": {
+     "top": 180,
+     "row": {
+      "x": 1079,
+      "y": 425.015625,
+      "w": 339,
+      "h": 98.4375
+     }
+    },
+    "after": {
+     "top": 180,
+     "row": {
+      "x": 1079,
+      "y": 425.015625,
+      "w": 339,
+      "h": 98.4375
+     },
+     "active": "loc-P1"
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "후속 기록 인라인 열림(1/21 요청 2, 2/1 미병합 1)",
+   "status": "PASS",
+   "detail": {
+    "links": 3,
+    "btn": 1,
+    "items": 3
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "후속 기록 닫기(button): 본문·링크·닫기 실제 제거, 출발 위치·초점",
+   "status": "PASS",
+   "detail": {
+    "peek": 0,
+    "links": 0,
+    "exp": "false",
+    "top": [
+     180,
+     480,
+     180
+    ],
+    "host": [
+     {
+      "x": 1079,
+      "y": 791.21875,
+      "w": 339,
+      "h": 20.8125
+     },
+     {
+      "x": 1079,
+      "y": 791.21875,
+      "w": 339,
+      "h": 20.8125
+     }
+    ],
+    "active": "peek-follow"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "같은 후속 기록 재열기",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "후속 기록 닫기(reopen-escape): 본문·링크·닫기 실제 제거, 출발 위치·초점",
+   "status": "PASS",
+   "detail": {
+    "peek": 0,
+    "links": 0,
+    "exp": "false",
+    "top": [
+     180,
+     180,
+     180
+    ],
+    "host": [
+     {
+      "x": 1079,
+      "y": 791.21875,
+      "w": 339,
+      "h": 20.8125
+     },
+     {
+      "x": 1079,
+      "y": 791.21875,
+      "w": 339,
+      "h": 20.8125
+     }
+    ],
+    "active": "peek-follow"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "check": "진입 전 지도로: 원래 상태 동일, 초점 P3 카드",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "active": "n-P3"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "확대·이동한 지도에서 P2 선택(비기본 배율, 비초기 scroll)",
+   "status": "PASS",
+   "detail": {
+    "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+    "sl": 39,
+    "st": 64,
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "편집 전 준비문: 목적·대상·1/16 변경·후속 기록·확인 요청+수정 제안·미확인",
+   "status": "PASS",
+   "detail": {
+    "purpose": "추정할 수 있을 때 업데이트 다운로드의 남은 시간을 알려 기다림을 이해하도록 돕는다.",
+    "target": "설정 메뉴의 업데이트 표시 — 1월 16일 고정 변경(8a83069)에서 이 화면이 다운로드 상태를 넘기도록 바뀐 부분만.",
+    "ask": "먼저 다음을 확인해 주세요. ① 지금 코드에서 이 화면이 공통 계산에 무엇을 넘기는지 ② 1월 21일 이 워크벤치 업데이트 파일 변경에 대한 되돌림 요청이 정확히 무엇을 가리켰는지(대상·범위)와 지금 반영 상태 ③ 그 요청과 현재 목적의 관계. 확인한 근거를 바탕으로, 이 화면에 실제로 필요한 확인·수정 선택지를 근거와 함께 제안해 주세요. 지난 요청을 그대로 실행하거나 되돌릴 범위를 미리 정하지 않습니다.",
+    "keep": "- 표시 문구와 남은 시간이 양수일 때만 보이는 분기는 이 화면에 그대로 둘 것\n- 다른 화면과 공통 계산은 맥락이며 자동 수정 범위가 아님(영향이 없다는 보장은 아님)",
+    "unknown": "- 되돌림 요청의 정확한 범위와 지금 반영 상태\n- 2월 1일 PR이 병합되지 않고 닫힌 이유\n- 실제 화면 동작·추정 정확도·CI 결과"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "준비 닫기 버튼 표시",
+   "status": "PASS",
+   "detail": true
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "준비 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "요청 문장 실제 입력과 ‘직접 고침’ 표시",
+   "status": "PASS",
+   "detail": [
+    "ask"
+   ]
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "준비 닫기: 출발 버튼 초점·읽기 위치",
+   "status": "PASS",
+   "detail": {
+    "hidden": true,
+    "active": "rPrep",
+    "top": [
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "닫기·비교 전환·재열기 뒤 편집 보존, 기준 문장 그대로",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "[복귀1] 세 대상 rect·computed transform·native scroll·비교 보기·선택·선 동일, 초점 P2",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "post": {
+     "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+     "sl": 39,
+     "st": 64,
+     "view": [
+      "after"
+     ],
+     "sel": [
+      "n-P2"
+     ],
+     "active": "n-P2"
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "지도에서 ‘변경 전’으로 바꾼 뒤 재진입: 준비문 편집·기준 그대로",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "[복귀2] 변경 전 보기 상태 그대로 복원(rect·transform·scroll·보기·선택)",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "post": {
+     "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+     "sl": 39,
+     "st": 64,
+     "view": [
+      "before"
+     ],
+     "sel": [
+      "n-P2"
+     ],
+     "active": "n-P2"
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "두 번째 대상(P1) 준비: 자기 기본문, P2 편집 미상속",
+   "status": "PASS",
+   "detail": {
+    "target": "네이티브 메뉴의 업데이트 표시 — 1월 16일 고정 변경(8a83069)",
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "[복귀3] P1 진입 전 상태 동일",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "active": "n-P1"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "check": "복귀 후 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "0",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  },
+  {
+   "size": "390x844",
+   "path": "0",
+   "check": "최초 HTTP 응답 status/body SHA = 원본 파일",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 42420,
+    "sha": "d10e7dcac86bf4d569164ad9276a7686a92aec43ad4ec8bd68924e88ecf897cb"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "초기: 목적·기록 범위·후속 기록 줄·비교 버튼 표시(clip·hit)",
+   "status": "PASS",
+   "detail": {
+    "#purposeTxt": true,
+    "#scope": true,
+    "#followTxt": true,
+    "#followOpen": true,
+    "#vBefore": true,
+    "#vAfter": true
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "초기: 대상 3·관계 2, 관계는 P1→P3·P2→P3, 기본 보기=1월 16일 변경",
+   "status": "PASS",
+   "detail": {
+    "nodes": [
+     "n-P1",
+     "n-P2",
+     "n-P3"
+    ],
+    "edges": [
+     [
+      "e-R1",
+      "P1",
+      "P3"
+     ],
+     [
+      "e-R2",
+      "P2",
+      "P3"
+     ]
+    ],
+    "view": [
+     "after"
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 0)"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "초기 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "P1 선택: 배치·transform·scroll 불변",
+   "status": "PASS",
+   "detail": {
+    "wheelAssist": 0,
+    "diff": {}
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "1월 16일 변경 보기: 이동한 책임(옮겨 감/옮겨 옴)·남은 표시·추정 본체 글자와 렌더, 카드 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "rows": {
+     "n-P1": [
+      "그대로 표시 문구·분기 고르기",
+      "옮겨 감 진행 정보 누락 확인",
+      "옮겨 감 경과 시간 계산",
+      "넘김 다운로드 상태로 계산 요청"
+     ],
+     "n-P2": [
+      "그대로 표시 문구·분기 고르기",
+      "옮겨 감 진행 정보 누락 확인",
+      "옮겨 감 경과 시간 계산",
+      "넘김 다운로드 상태로 계산 요청"
+     ],
+     "n-P3": [
+      "그대로 남은 시간 추정",
+      "받음 다운로드 상태 받기",
+      "옮겨 옴 진행 정보 누락 확인",
+      "옮겨 옴 경과 시간 계산"
+     ]
+    },
+    "labels": [
+     "다운로드 상태로 계산 요청",
+     "다운로드 상태로 같은 계산 사용"
+    ],
+    "faceClip": [
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "변경 전으로 전환: 대상·관계 ID/개수·rect·선 경로·transform·scroll·선택 동일",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "변경 전 보기: 두 메뉴가 확인·경과 계산, 세 숫자 전달, 공통 계산은 이미 있음",
+   "status": "PASS",
+   "detail": {
+    "rows": {
+     "n-P1": [
+      "여기서 표시 문구·분기 고르기",
+      "여기서 진행 정보 누락 확인",
+      "여기서 경과 시간 계산",
+      "넘김 세 숫자로 계산 요청"
+     ],
+     "n-P2": [
+      "여기서 표시 문구·분기 고르기",
+      "여기서 진행 정보 누락 확인",
+      "여기서 경과 시간 계산",
+      "넘김 세 숫자로 계산 요청"
+     ],
+     "n-P3": [
+      "이미 있음 남은 시간 추정",
+      "받음 세 숫자 받기",
+      "메뉴에서 진행 정보 누락 확인",
+      "메뉴에서 경과 시간 계산"
+     ]
+    },
+    "labels": [
+     "세 숫자로 계산 요청",
+     "세 숫자로 계산 요청"
+    ],
+    "faceClip": [
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "변경 전 보기에서도 후속 기록 줄·범위 표시 유지",
+   "status": "PASS",
+   "detail": {
+    "#followTxt": true,
+    "#followOpen": true,
+    "#scope": true
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "후속 기록 열기(button 전): 되돌림 요청 2·미병합 종료 1, 미확인 문장",
+   "status": "PASS",
+   "detail": {
+    "items": 3,
+    "links": 3
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "후속 기록 닫기(button): 실제 제거·출발 초점",
+   "status": "PASS",
+   "detail": {
+    "hidden": true,
+    "children": 0,
+    "links": 0,
+    "active": "followOpen"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "후속 기록 열기(escape 전): 되돌림 요청 2·미병합 종료 1, 미확인 문장",
+   "status": "PASS",
+   "detail": {
+    "items": 3,
+    "links": 3
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "후속 기록 닫기(escape): 실제 제거·출발 초점",
+   "status": "PASS",
+   "detail": {
+    "hidden": true,
+    "children": 0,
+    "links": 0,
+    "active": "followOpen"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "check": "1월 16일 변경으로 복귀: 처음 측정과 동일",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "선택 설명에서 ‘이 부분 보기’ 접근",
+   "status": "PASS",
+   "detail": {
+    "wheelAssist": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "읽기 시작: 복귀·준비·목적·이름·전후 변화 표시",
+   "status": "PASS",
+   "detail": {
+    "#rBack": true,
+    "#rPrep": true,
+    "#reader .crumb": true,
+    "#reader h2": true,
+    "#p-code .ba": true
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "P1 지도에서 위치 보기: 대상 시야 안, 선택 P3 유지, 이동 여부 정직",
+   "status": "PASS",
+   "detail": {
+    "moved": "1",
+    "inPaneAtEntry": false,
+    "scrollEntry": [
+     0,
+     100
+    ],
+    "scrollNow": [
+     0,
+     0
+    ],
+    "active": "backRead"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "‘읽던 곳으로’ 표시",
+   "status": "PASS",
+   "detail": {
+    "exists": true,
+    "rect": {
+     "x": 14,
+     "y": 752.984375,
+     "w": 118.421875,
+     "h": 37.6875
+    },
+    "clipBox": [
+     0,
+     669,
+     390,
+     844
+    ],
+    "clips": [
+     "panel"
+    ],
+    "inside": true,
+    "hits": [
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "innerClipped": false,
+    "ok": true
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "읽던 곳: scrollTop 180→180, 출발 행 원시 rect, 출발 버튼 초점",
+   "status": "PASS",
+   "detail": {
+    "before": {
+     "top": 180,
+     "row": {
+      "x": 16,
+      "y": 456.546875,
+      "w": 358,
+      "h": 98.4375
+     }
+    },
+    "after": {
+     "top": 180,
+     "row": {
+      "x": 16,
+      "y": 456.546875,
+      "w": 358,
+      "h": 98.4375
+     },
+     "active": "loc-P1"
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "후속 기록 인라인 열림(1/21 요청 2, 2/1 미병합 1)",
+   "status": "PASS",
+   "detail": {
+    "links": 3,
+    "btn": 1,
+    "items": 3
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "후속 기록 닫기(button): 본문·링크·닫기 실제 제거, 출발 위치·초점",
+   "status": "PASS",
+   "detail": {
+    "peek": 0,
+    "links": 0,
+    "exp": "false",
+    "top": [
+     180,
+     480,
+     180
+    ],
+    "host": [
+     {
+      "x": 16,
+      "y": 801.828125,
+      "w": 358,
+      "h": 20.8125
+     },
+     {
+      "x": 16,
+      "y": 801.828125,
+      "w": 358,
+      "h": 20.8125
+     }
+    ],
+    "active": "peek-follow"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "같은 후속 기록 재열기",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "후속 기록 닫기(reopen-escape): 본문·링크·닫기 실제 제거, 출발 위치·초점",
+   "status": "PASS",
+   "detail": {
+    "peek": 0,
+    "links": 0,
+    "exp": "false",
+    "top": [
+     180,
+     180,
+     180
+    ],
+    "host": [
+     {
+      "x": 16,
+      "y": 801.828125,
+      "w": 358,
+      "h": 20.8125
+     },
+     {
+      "x": 16,
+      "y": 801.828125,
+      "w": 358,
+      "h": 20.8125
+     }
+    ],
+    "active": "peek-follow"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "check": "진입 전 지도로: 원래 상태 동일, 초점 P3 카드",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "active": "n-P3"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "확대·이동한 지도에서 P2 선택(비기본 배율, 비초기 scroll)",
+   "status": "PASS",
+   "detail": {
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "sl": 21,
+    "st": 535,
+    "assistWheels": 1
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "편집 전 준비문: 목적·대상·1/16 변경·후속 기록·확인 요청+수정 제안·미확인",
+   "status": "PASS",
+   "detail": {
+    "purpose": "추정할 수 있을 때 업데이트 다운로드의 남은 시간을 알려 기다림을 이해하도록 돕는다.",
+    "target": "설정 메뉴의 업데이트 표시 — 1월 16일 고정 변경(8a83069)에서 이 화면이 다운로드 상태를 넘기도록 바뀐 부분만.",
+    "ask": "먼저 다음을 확인해 주세요. ① 지금 코드에서 이 화면이 공통 계산에 무엇을 넘기는지 ② 1월 21일 이 워크벤치 업데이트 파일 변경에 대한 되돌림 요청이 정확히 무엇을 가리켰는지(대상·범위)와 지금 반영 상태 ③ 그 요청과 현재 목적의 관계. 확인한 근거를 바탕으로, 이 화면에 실제로 필요한 확인·수정 선택지를 근거와 함께 제안해 주세요. 지난 요청을 그대로 실행하거나 되돌릴 범위를 미리 정하지 않습니다.",
+    "keep": "- 표시 문구와 남은 시간이 양수일 때만 보이는 분기는 이 화면에 그대로 둘 것\n- 다른 화면과 공통 계산은 맥락이며 자동 수정 범위가 아님(영향이 없다는 보장은 아님)",
+    "unknown": "- 되돌림 요청의 정확한 범위와 지금 반영 상태\n- 2월 1일 PR이 병합되지 않고 닫힌 이유\n- 실제 화면 동작·추정 정확도·CI 결과"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "준비 닫기 버튼 표시",
+   "status": "PASS",
+   "detail": true
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "준비 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "요청 문장 실제 입력과 ‘직접 고침’ 표시",
+   "status": "PASS",
+   "detail": [
+    "ask"
+   ]
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "준비 닫기: 출발 버튼 초점·읽기 위치",
+   "status": "PASS",
+   "detail": {
+    "hidden": true,
+    "active": "rPrep",
+    "top": [
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "닫기·재열기 뒤 편집 보존, 기준 문장 그대로",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "[복귀1] 세 대상 rect·computed transform·native scroll·비교 보기·선택·선 동일, 초점 P2",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "post": {
+     "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+     "sl": 21,
+     "st": 535,
+     "view": [
+      "after"
+     ],
+     "sel": [
+      "n-P2"
+     ],
+     "active": "n-P2"
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "지도에서 ‘변경 전’으로 바꾼 뒤 재진입: 준비문 편집·기준 그대로",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "[복귀2] 변경 전 보기 상태 그대로 복원(rect·transform·scroll·보기·선택)",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "post": {
+     "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+     "sl": 21,
+     "st": 535,
+     "view": [
+      "before"
+     ],
+     "sel": [
+      "n-P2"
+     ],
+     "active": "n-P2"
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "두 번째 대상(P1) 준비: 자기 기본문, P2 편집 미상속",
+   "status": "PASS",
+   "detail": {
+    "target": "네이티브 메뉴의 업데이트 표시 — 1월 16일 고정 변경(8a83069)",
+    "assistWheels": 2
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "[복귀3] P1 진입 전 상태 동일",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "active": "n-P1"
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "check": "복귀 후 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "0",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  }
+ ],
+ "observations": [
+  {
+   "size": "1440x900",
+   "path": "1",
+   "observation": "초기 지도 시야 안 대상",
+   "detail": {
+    "n-P1": true,
+    "n-P2": true,
+    "n-P3": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "observation": "P3 선택 전 지도 휠 보조 횟수",
+   "detail": 0
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "observation": "읽기 자연 스크롤 여유(px)",
+   "detail": 378
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "observation": "P1 위치 보기 직전 읽기 scrollTop(실제 휠)",
+   "detail": {
+    "top": 180,
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "observation": "후속 기록 열기 전 읽기 scrollTop",
+   "detail": {
+    "top": 180,
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "2",
+   "observation": "공통 계산 편집 전 준비문(관측)",
+   "detail": {
+    "purpose": "추정할 수 있을 때 업데이트 다운로드의 남은 시간을 알려 기다림을 이해하도록 돕는다.",
+    "target": "다운로드 남은 시간 계산 — 1월 16일 고정 변경(8a83069)에서 이 함수가 다운로드 상태를 받아 누락 확인·경과 계산을 맡게 된 부분만.",
+    "ask": "먼저 지금 코드에서 이 함수가 받는 입력과 두 화면의 호출을 비교해 확인해 주세요. 그 결과로 이 함수에 조정이 필요한지 판단하고, 근거와 함께 선택지를 제안해 주세요. 두 화면 파일의 변경이 필요해 보이면 이번 범위 밖의 제안으로 따로 적어 주세요.",
+    "keep": "- 추정할 수 있을 때만 남은 시간을 돌려주는 조건 유지\n- 두 화면 파일은 맥락이며 자동 수정 범위가 아님. 다만 두 화면의 표시에 영향이 없다고 보장하지 않으므로 영향 여부도 함께 적을 것",
+    "unknown": "- 1월 21일 두 화면 파일의 되돌림 요청이 실제로 반영됐는지\n- 2월 1일 PR이 병합되지 않고 닫힌 이유\n- 실제 화면 동작·추정 정확도·CI 결과"
+   }
+  },
+  {
+   "size": "1440x900",
+   "path": "3",
+   "observation": "준비 영역 자연 스크롤",
+   "detail": {
+    "scrollable": false,
+    "max": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "1",
+   "observation": "초기 지도 시야 안 대상",
+   "detail": {
+    "n-P1": true,
+    "n-P2": false,
+    "n-P3": false
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "observation": "P3 선택 전 지도 휠 보조 횟수",
+   "detail": 0
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "observation": "읽기 자연 스크롤 여유(px)",
+   "detail": 420
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "observation": "P1 위치 보기 직전 읽기 scrollTop(실제 휠)",
+   "detail": {
+    "top": 180,
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "2",
+   "observation": "후속 기록 열기 전 읽기 scrollTop",
+   "detail": {
+    "top": 180,
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "path": "3",
+   "observation": "준비 영역 자연 스크롤",
+   "detail": {
+    "scrollable": false,
+    "max": 0
+   }
+  }
+ ]
+}
