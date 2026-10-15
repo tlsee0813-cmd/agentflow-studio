@@ -2,6 +2,7 @@
 
 이 브랜치는 세션 간 원본 파일을 전달하는 공간이다. 제품 배포나 현재 연구 상태의 별도 사본이 아니다.
 
+- [혼합 깊이 읽기·준비 cycle09 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/6565fb94850a17d7eed228638f3a768fbaff71fb/docs/cycles/2026-10-16-mixed-reading-09/RESULT.md)
 - [첫 전체 조망 cycle08 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/ce0f9eeec6b7ea55cb630e4b1b5df68e345c2e5f/docs/cycles/2026-10-16-overview-08/RESULT.md)
 - [책임 변화·후속 요청 cycle07 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a738280b994b4872ada81574850747e291bc1418/docs/cycles/2026-10-16-change-record-07/RESULT.md)
 - [목적·역할 cycle06 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d17667c1c519492f6edf8ea064a9f87b5d51fc12/docs/cycles/2026-10-16-purpose-06/RESULT.md)
@@ -13,6 +14,9 @@
 
 | 묶음 | 고정 원본 | 읽는 순서와 범위 |
 |---|---|---|
+| cycle09 작성자 v0 | [원본168파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/017dec57df289cc9c4cbff7344ec7fdb71ab734d/docs/transfer/mixed-reading-09/author-v0) | 마지막 r05: 1280/390 ABC+1440 초기,299단언(클릭 전제58 포함). 첫 실제 짧은 묶음선 결함·검사 오류·재실행 보존. 원격168/168 일치 |
+| cycle09 작성자 fix1 | [안내1줄 정정37파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/08a04afb7515efc5f4007b5d9bf5bb787c908c20/docs/transfer/mixed-reading-09/author-fix1) | 묶음을 준비 대상으로 부르던 일반화 정정. HTML54,524B/SHA90141c4c…53173. f02 두 폭 각50단언의 별도 검사, 새 관계참고 이후 실질 편집 보존. 원격37/37 일치 |
+| cycle09 fix1 독립 관측 | [24파일·PNG4](https://github.com/tlsee0813-cmd/agentflow-studio/tree/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0) | 최신 run02: 1280/390 ABC6흐름+1440초기,91 PASS·실제 child/외부 collector0. launcher0은 외부 도구 관측 전사. 전후/HTTP 원본·payload23/23 bytesSHA·원격집합 일치. 선 복귀 최대0.162 world/허용0.5, 종류 자동단언 범위 정정은 AUDIT 참조 |
 | cycle08 작성자 v0 | [원본27파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/bbdf2234c6523de86b64510843282ac1003124bd/docs/transfer/overview-08/author-v0) | 첫 조망/명시 상세. run01 장면부족·run02 실제폭결함·run03 단일78 PASS를 구별. 모두 보존 |
 | cycle08 작성자 fix1 | [문구10줄 정정14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/167f86b8ac783a15bc1b2991b73017ee2f1e0d6a/docs/transfer/overview-08/author-fix1) | 누락 확인 책임범위 복구. HTML42,025B/SHA85f07ee4… 단일 좁은24 PASS. v0와 합산 안 함 |
 | cycle08 fix1 독립 관측 | [원시기록·PNG4·23파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0) | 최신run02 단일6/6·73 PASS·실제child/외부collector0. raw전후·개별문구노출 보완. payload22/22 bytesSHA·원격tree일치. launcher 별도외부로그 미제공 |
@@ -53,3 +57,6 @@ cycle06 대표 화면: [첫 화면1440](https://github.com/tlsee0813-cmd/agentfl
 
 
 cycle08 대표 화면: [1280 첫 전체](https://github.com/tlsee0813-cmd/agentflow-studio/blob/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0/initial-1280.png) · [390 첫 전체](https://github.com/tlsee0813-cmd/agentflow-studio/blob/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0/initial-390.png) · [선택 상세](https://github.com/tlsee0813-cmd/agentflow-studio/blob/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0/selected-detail-1440.png) · [편집 전 준비](https://github.com/tlsee0813-cmd/agentflow-studio/blob/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0/default-preparation-390.png). 준비문 전체 동시노출·사람이해·큰지도·모든배율 성공으로 확대하지 않는다.
+
+
+cycle09 대표 화면: [1280 첫 공간 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/initial-1280.png) · [390 첫 공간 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/initial-390.png) · [390 R3 참고](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/R3-reference-390.png) · [편집된 준비문1280](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/edited-preparation-1280.png). 기본 공간 지도와 열린 참고의 읽기 부담을 구분한다. 참고/준비의 전체 동시노출·사람 이해·터치·큰 지도·현재 AI 송신수락을 입증하지 않는다. FLOW091 과거 계약/MOCK 입력이며 실제 사람–Copilot 표본07과 섞지 않는다.
