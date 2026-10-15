@@ -1,0 +1,129 @@
+{
+  "sourcePath": "../../prototype.html",
+  "sha256": "5B9B42CC48DDF5488814495BDB20E96CAB1DD3D749EEC59599BF96AD83E4B09C",
+  "timestampUTC": "2026-10-15T13:17:44.521Z",
+  "environment": "Node.js v24.19.0; minimal document/event stubs; no browser; no layout engine; no jsdom",
+  "limitation": "Scroll values are synthetic; only scrollTo invocation/state is checked. No visual, viewport, DOM accessibility or network observation.",
+  "results": [
+    {
+      "id": "F3-01-handoff-purpose-retained",
+      "status": "PASS",
+      "checks": {
+        "projectPurpose": true,
+        "separateWorkPurpose": true,
+        "priorDecision": true,
+        "unresolvedPolicy": true,
+        "candidateNotAssigned": true,
+        "notTransmitted": true
+      },
+      "observed": {
+        "handoffMarkupFound": true
+      }
+    },
+    {
+      "id": "F3-02-B-breadcrumb-roundtrip",
+      "status": "PASS",
+      "checks": {
+        "rootState": true,
+        "focusedStateOnReentry": true
+      },
+      "observed": {
+        "root": {
+          "selected": "B",
+          "relOpen": true,
+          "bLoc": "root",
+          "scrollY": 250
+        },
+        "focused": {
+          "selected": "A2",
+          "relOpen": false,
+          "bLoc": "A",
+          "scrollY": 900
+        },
+        "scrollCalls": [
+          {
+            "x": 0,
+            "y": 250
+          },
+          {
+            "x": 0,
+            "y": 900
+          }
+        ]
+      }
+    },
+    {
+      "id": "F3-03-B-direct-child-return",
+      "status": "PASS",
+      "checks": {
+        "rootState": true
+      },
+      "observed": {
+        "actual": {
+          "selected": "B",
+          "relOpen": true,
+          "bLoc": "root",
+          "scrollY": 275
+        },
+        "scrollCalls": [
+          {
+            "x": 0,
+            "y": 275
+          }
+        ]
+      }
+    },
+    {
+      "id": "F3-04-A-snapshot-isolation",
+      "status": "PASS",
+      "checks": {
+        "correctOriginalSnapshot": true,
+        "stableThroughBReentry": true,
+        "stableThroughBSecondReturn": true,
+        "AStateRestored": true
+      },
+      "observed": {
+        "before": {
+          "selected": "A4",
+          "expanded": true,
+          "relOpen": true,
+          "scrollY": 640
+        },
+        "afterReentry": {
+          "selected": "A4",
+          "expanded": true,
+          "relOpen": true,
+          "scrollY": 640
+        },
+        "afterSecondReturn": {
+          "selected": "A4",
+          "expanded": true,
+          "relOpen": true,
+          "scrollY": 640
+        },
+        "returned": {
+          "plan": "A",
+          "selected": "A4",
+          "expanded": true,
+          "relOpen": true,
+          "scrollY": 640,
+          "aSnap": null
+        },
+        "scrollCalls": [
+          {
+            "x": 0,
+            "y": 880
+          },
+          {
+            "x": 0,
+            "y": 220
+          },
+          {
+            "x": 0,
+            "y": 640
+          }
+        ]
+      }
+    }
+  ]
+}
