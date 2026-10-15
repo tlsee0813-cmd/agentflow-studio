@@ -1,163 +1,62 @@
-# AgentFlow Studio 현재 상태 — IDEA022 + UI001 rev1 · RETURN032/FRESH033 rev1 · SELECT035 · INTENT037 rev1 · CONNECT039 rev1
+# AgentFlow Studio 현재 상태 — 2026-10-15 checkpoint
 
-최신 공유 기준은 `init-003/fix-review-regressions` / [Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1)이다. IDEA015 R3 앱 위에 IDEA017·UI001 rev1과 IDEA022 기록 근거 기능, RETURN032 결과 연결 안내·FRESH033 rev1 질문 적용 보호·SELECT035 결과 대상 선택·INTENT037 rev1 행동 범위 prompt·CONNECT039 rev1 선택적 결과 파일을 반영했으며 main 병합·운영 배포는 없다. 실행 명령은 [START_HERE](START_HERE.md)에 있다.
+**현재 사이클을 마무리하고 정지한다. 예약은 PAUSED이며 사용자 결정 없이 다음 조사·기능·실험·배포 사이클을 시작하지 않는다.** 이 문서가 현황의 단일 진입점이다. [첫 사용](START_HERE.md) · [공개 MOCK](https://tlsee0813-cmd.github.io/agentflow-studio/).
 
-## 최신 설계 방향
+## 제품 목적과 현재 범위
 
-목적은 고객이 작업을 이어갈 때 의도·기준·결정·변경을 잃고 다시 설명하는 손실을 줄이는 것이다. 이전 서비스/기능 구상은 필수요구가 아니다. 대시보드·노드그래프·실시간Codex/Claude연결·로그감지·모델/effort자동조절은 목적에 도움이 되는 가설로 평가하고 삭제·결합·제품형태 변경도 검토한다. 기존 문서와 충돌하면 이 최신 방향을 우선하며 기존 구현·자료를 자동 대체하지 않는다.
+외부 AI 개발 과정에서 목적·요청·작업문·결과·변경을 잃지 않고 이어 가도록 돕는다. 공간형 진행 화면에서 영역과 작업을 살펴보고, 외부 도구에 전달할 작업문과 돌아온 보고를 연결한다. 자동 실행 서비스가 아니며 실행 자동화·계정 동기화·실작업 자동 진행은 구현하지 않았다.
 
-규칙을 하나씩 더 붙이는 패치에 매몰되지 않고 실제GitHub OSS 핵심코드·테스트·실사용 이슈와 분야 밖 메커니즘을 조사해 재사용/차별화 판단을 구현 결정에 연결한다. 단일 호출·가격 최소화·기존 실험 계약 자체는 제품 목표가 아니다. 공식 기능 문서만으로 실사용 문제가 해결됐거나 제품 기회가 없다고 추론한 총괄 판단을 정정한다. 기능 존재·지원 설명과 실제 개발자의 성공/실패·반복 노동은 별개다. 최근 원글·독립 반복 보고·성공 반례·OSS 핵심 코드/검사로 사용 맥락과 해결 범위를 확인하고, 원문 접근 한계와 설계 가설을 구분한다. 결정 변경 관리·FLOW029 카드뿐 아니라 기능 분할→의존성→맞춤 작업 구조→실행/재계획도 비교 후보이며 어느 쪽도 최종 정답으로 고정하지 않는다. 최소한의 완결된 고객 흐름과 관측할 성공조건으로 대안을 비교하고, 유지할 것/버릴 것/나중 검증할 것을 구분한다.
+현재 제품은 continuity의 목적·요청·기준·작업·결과 연결과 공간형 화면이다. USE106은 첫 목적과 요청을 함께 제출할 때 목적을 배경으로 보존하고, 검토 화면에서 원문·별도 조건·열린 질문·다음 행동을 구분한다. 빈 조건란은 원문 조건의 부재를 뜻하지 않는다. 원문 보존·수동 편집·확정사항 보호는 AI의 의미 정확성과 별개다.
 
-## RETURN032 / FRESH033 rev1 제품 반영 (2026-10-13 KST)
+## 어떤 버전인가
 
-총괄이 RETURN032와 FRESH033 rev1을 수용해 기존 작업 브랜치의 기준 `875d983f49415d5e097d2be7bb70b5be93b43487` 위에 제품·검사 9경로를 반영했다. 최신 공유 문서와 다른 실험 소스는 보존했고 main 병합·배포는 없다. PILOT1의 모든 조건과 PILOT2는 제품 미채택이며 PILOT2 실호출은 보류다.
+| 구분 | 정확한 기준 | 상태 |
+|---|---|---|
+| 이 checkpoint | [`checkpoint/2026-10-15`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/checkpoint/2026-10-15), 시작 소스 [`618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/618d9bd2b99ad433df35107d8902b15f45e30000) | USE106 코드에서 README·START_HERE·PROJECT_STATUS만 정리. 새 제품 변경 없음 |
+| 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
+| 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
+| GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
+| main / dev | [main `896dcf38`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/896dcf3848fec70357d0f9bd4fd6c09cab70db37) / dev 없음 | main은 초기 커밋이며 최신 제품 아님 |
+| [Draft PR #2](https://github.com/tlsee0813-cmd/agentflow-studio/pull/2) | `flow049/outcome-home@f0fa5326` → `init-003/fix-review-regressions@61c3b2f0` | 과거 목적 홈 단계, open·Draft·미병합. 최신 제품 통합 PR 아님 |
 
-RETURN032는 결과 입력 전에 실제 연결 예정 작업·내보낸 시점·이후 기준 기록을 읽기 전용으로 보여준다. FRESH033은 기준 변경 뒤 낡거나 시점 불명인 질문을 참고 기록으로 남기고, 새 답변을 source/basis에 적용하기 전에 `QUESTION_NOT_APPLICABLE`로 거절한다. 정상 답변·중복 거절과 미제출 초안/이름/내보내기 예외는 유지한다. rev1은 imported 비단조 이력이 응답 경계를 가로지르면 unknown을 유지하지만, 새 응답이 해당 이력을 포함한 시점에서 수신되면 원문·이력·수동값을 변경하지 않고 답변 가능 상태로 회복한다.
+USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·기존 브랜치·PR 설정은 변경하지 않는다.
 
-Claude 최종 F1 검토는 해결로 수용됐다. 원래 A/B/C와 추가 탐침으로 숨은 미래 history의 unknown, 별개 실제 변경의 stale, 재정리 회복·원자성·기존값·중복 순서를 확인했다. 이는 Node22.22 타입 제거 사본 검토이며 Cloud Node22.16 빌드 실행과 구분한다.
+## USE106 UI와 공개 MOCK 검증
 
-Cloud 변경 영향 검증: 부모·continuity check/build, domain+FRESH033 Node39/39 및 native 신규1/1, compiled 재현과 기존 C 도메인 재확인 통과(fail/skip0). 새 입력/질문 ID·저장 스키마·provider·prompt 변경은 없다. 앞선 원래033의 Node53/native2/UI001 정상 경계8 및 별도 fault-injection3 통과는 그대로 보존하며 rev1 재실행 수치로 합산하지 않는다. CI Node wildcard는 신규 검사를 포함하며 workflow에 UI001 및 FRESH033 브라우저 실행을 추가했다. UI02/05/06의 지연·저장 실패·설정 응답 모사와 UI08 clipboard 훅은 순수 native 증거와 구분한다. 문서 작성 시점 새 커밋의 CI 결과는 미확인이며 해당 Actions 기록으로 별도 확인한다. 실AI 품질·고객 효용·병렬 결과 연결 일반 보장은 미검증이다. 이번 실행은 mock/paid=false이며 실API·키 접근0이다.
+- 제품 구현은 [`a84f83a7`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/a84f83a77a9115d45a2a38a77c5d10f018d05901)에서 수용했다. 첫 [CI38702330366](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38702330366)은 Ubuntu 성공·Windows 새 test07 실패였고, 이 상태로 게시하지 않았다. 실패는 native clipboard의 CRLF와 textarea의 LF 전문 비교였다.
+- [최종 소스 `618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/618d9bd2b99ad433df35107d8902b15f45e30000)는 검사·증거만 보완했다. CRLF 쌍만 LF로 정규화하고 전문 동등 비교·Markdown·ID·권한 검사를 유지했으며 제품 코드 변경은 없다. [수리 기록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/reviews/use106/windows-ci-repair.md). 좁은 독립 검토 수용, [exact CI38703882455](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38703882455)는 Ubuntu·Windows 모두 success다.
+- [구현·로컬 검사 기록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/reviews/use106/README.md): continuity Node210/210, 기존 browser66/66, USE106 browser11/11 및 check/build. 합성 자료·MOCK 기반 구현 회귀이며 사람 사용성·AI 의미 품질 평가가 아니다.
+- 공개 실행 자산15개는 수용된 `a84f83a7` 산출물과 동일하다. BUILD를 포함한16개 원격 파일의 해시 대조와 독립 공개 HTTPS 확인이 통과했다. [exact Pages38705109869](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38705109869)는 배포 `63f5540d`로 completed/success다. BUILD SHA256: `a49029bad1a3cc2ab12eca70663218063194b58cc55115824508e206d7f32f4b`.
+- 공개 화면의 좁은 native smoke에서 새로고침 뒤 기존 합성 프로젝트의 목적·영역·요청2·기준2가 유지됐고 현재 작업의 검토 영역·다음 행동 안내를 확인했다. console error0. 전체 검사의 재실행이나 사람 대상 사용성 평가로 세지 않는다.
+- 공개 화면은 정적 MOCK이며 CSP도 이에 맞춰 제한된다. 공개 AI backend·외부 개발 도구 자동 실행·계정 동기화의 검증이나 구현을 뜻하지 않는다.
 
-## SELECT035 — 수용·작업 브랜치 반영
+## GUIDE107 실제 AI — HOLD·미통합
 
-총괄은 report/evidence 제출 전에 내보낸 작업을 선택하는 제품 3파일을 수용했다. 다중 후보는 미선택 상태로 시작하며 UI와 실제 handler가 제출을 막는다. 1개/없음은 기존 fallback, 선택은 ephemeral, 저장 연결은 기존 parentTaskId다. 저장 schema/API/context 조립과 무인자 domain 호환은 유지한다. 미제출 입력 편집 중 선택 유지는 내용을 모두 지우거나 다른 보고로 바꾸는 편집에도 적용되는 수용된 동작이며, 초안 동일성을 추측하거나 필수 결함 해결로 해석하지 않는다. 종류 전환·성공 제출·가져오기·새로고침은 선택을 초기화한다.
+[후보 소스](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee)의 좁은 독립 검토는 ACCEPT, [exact CI38700663131](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38700663131)는 양OS success다. 하지만 제품/provider HTTP200·finish stop17·retry0과 의미 품질 수용은 별개다.
 
-원격 기준 `67cd436976426ff4556b1b273628e8e03c126c65`의 별도 복사본에 app 증분 5경로만 적용했다. Cloud 잠금 설치·부모/continuity check/build, 관련 Node58/58·새 native 선택3/3·기존 UI001 11/11 통과(fail/skip0). USE034 백업을 실제 import한 재생에서 A/B parent와 원문을 보존하고 다음 B의 실제 POST·다운로드에 B 보고를 포함하며 A 보고 원문/출처 ID는 제외했다. 프로젝트 전체 기준 A 요청을 삭제한 것이 아니다. UI001의 오류·지연·설정/clipboard 모사 사례는 순수 native 증거와 구분한다.
+실제17회는 초기8 + 실제 질문에 대한 답변2 + direct currentInstruction7이다. 출력은 question1/proposal16, 제품 내 미전송 채택16이었다. 실제 질문 경로는 HB 한 곳이며 direct7을 질문·답변 검증으로 세지 않는다. 제품 내 채택은 외부 개발 도구 전달·실행·완료가 아니다.
 
-Claude 독립 검토는 필수 결함 없음으로 수용됐다. Node22.22 domain 탐침의 잘못된 ID 원자적 거절·preview/parent 일치·무인자 호환·B 문맥 분리와 UI 정적 검토는 Cloud 브라우저 실행과 구분한다.
+총괄과 별도 독립 의미 검토는 **HOLD를 수용**했다. 차단점은 다음 두 가지다.
 
-공개 CI에는 continuity/tests/fixtures/select035의 최소 합성 4파일만 추가했다. 공개 domain API로 두 독립 작업·내보내기·미제출 A 보고를 구성하고 고정 A/B 참조와 합성 시각을 보존했다. 보고문은 가상의 변경 가정이며 실제 실행 성적이나 총괄 원문을 포함하지 않는다. 이 fixture로 native 선택3/3을 별도로 실행해 fail/skip0을 확인했으며 원래 USE034 자료 재생 증거는 그대로 보존했다. 검사 출처를 구분하고 Python 읽기/쓰기에 UTF-8을 명시했다. 제품 3파일과 검사 기대값은 변경하지 않았다.
+- CSV 보류 direct 응답: 입력 행 수와 결과 행 수의 합이 다시 입력과 같아야 한다는 불가능한 완료 조건을 만들었다.
+- 리듬 보류 응답: 기존 대응 관계를 다시 짝짓는 AI 기본값이 이른 입력을 놓칠 수 있고 음수 차이 표시 약속과도 충돌했다.
 
-CI Node wildcard는 신규 Node 검사를 포함한다. verify.yml에 합성 fixture의 native 선택 검사를 추가하고 app cwd 기준 materials/결과 경로, Bash pipefail 및 기존 app/test-results artifact 수집을 유지한다. 이 반영 커밋의 CI는 실행 후 해당 Actions 기록으로 확인하며 문서에서 성공을 선행 주장하지 않는다. 실AI 품질·고객 효용·병렬 결과 연결 일반 보장은 미검증이다. mock/paid=false, 실API·키 접근·mainmerge·배포0이며 RETURN032/FRESH033 수용 기록과 기존 실험은 보존한다.
+C2는 해당 표본 통과, C1은 부분 개선이나 전체 흐름 미입증, C3/HB는 HOLD다. C4/HA와 비공개2사례는 핵심 조건 보존을 관측했지만 전체 수용으로 확대하지 않는다. 비공개 사례 원문은 옮기지 않는다. 원문 보존·기존 수동 편집·확정사항 보호 및 실제 통신 완료는 의미 정확성·실사용자 효용·서비스 완성의 증거가 아니다.
 
-## INTENT037 rev1 — 좁은 prompt 개선 수용·반영
+고정 증거: [FINAL-REPORT](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b8940d415c5d3afe20aaf4302286ea59f24496e5/docs/evidence/guide107-ai-3fd4b305/FINAL-REPORT.txt) · [INDEX](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b8940d415c5d3afe20aaf4302286ea59f24496e5/docs/evidence/guide107-ai-3fd4b305/INDEX.txt) · [semantic-assessment](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b8940d415c5d3afe20aaf4302286ea59f24496e5/docs/evidence/guide107-ai-3fd4b305/semantic-assessment.json). 추가 수정·재평가 사이클은 시작하지 않는다.
 
-총괄이 실제 입력·응답 원문을 읽고 수용했다. `app/continuity/server/prompt.mjs`만 변경해 계획/조사/수정의 행동 수준을 구분하고, 명시적 수정 요청은 필요한 조사→최소수정→관련 검증까지 인계하도록 한다. 보류는 해당 선택에 의존하는 행동에만 적용하고 독립 범위는 유지한다. 파일 변경 금지를 필요한 읽기·관찰·재현의 일괄 금지로 확대하지 않는다. schema·buildBody·validator·provider·domain·UI·설정·CI 게이트는 그대로다.
+## 남은 제약과 종료 시점
 
-직전 후보 비교는 고정 입력6개×기존/후보 각1회인 실제12건이며 rev1 증거로 합산하지 않는다. 01/05에서 기존은 조사 종료, 후보는 최소수정·검증까지 인계했다. 02 C3는 공통 사실 확인·후보 제안과 계획 문맥을 함께 읽으면 허용 가능하며 ‘화면 초안’만 떼어 착수 결함으로 단정하지 않는다. 04/06도 허용 가능했다. 남은 03의 ‘파일 비수정→코드 실행 금지’ 과잉 제한만 한 문장 교체로 보완했다.
+- 개별 결과 원문 수정·삭제·제외·연결 해제는 미구현이다. 정정 요청을 남겨도 기존 결과와 연결은 남고 전달문에 포함될 수 있다.
+- 브라우저 로컬 저장·백업/복구는 있으나 계정 간 동기화는 없다. quota 오류 뒤 메모리에만 남은 변경을 영구 저장으로 약속하지 않는다.
+- MOCK의 의미 오해와 원문 조건·미정의 완전한 자동 추출은 해결됐다고 주장하지 않는다. 실제 AI 후보도 위 의미 품질 한계가 남았다.
+- 실제 고객의 시간 절감·효용, 일반 모델 정확도·운영 준비는 미검증이다. AI의 역할 수행 검사와 사람의 실제 개발 사용성 검사는 다르다.
+- 현재 작업을 정리한 뒤 전체 새 사이클을 중지한다. 예약은 PAUSED이며 다음 우선순위·기능·실험·재개는 사용자가 결정한다.
 
-rev1 새 프로세스의 03→05→01 추가3건은 제품 HTTP200·앱수용·전체응답 회수, 실패/불명/재시도/추가답변0이다. 03은 “실제 파일 수정은 하지 않는다”를 유지하며 재현 입력·기대/실제 출력과 수정 위치 후보를 조사 산출물로 요구했다. 05는 “최소 수정한 뒤 ... 검증한다”, 01은 “미납 필터 상태만 초기화하도록 최소 수정 ... 이름 검색어는 유지”와 관련 확인까지 연결했다. 이는 실제 개발/검증을 실행한 결과가 아니며, 단일 표본들로 일반 품질·고객 효용·prompt의 인과 효과를 입증하지 않는다.
+## 근거와 과거 기록
 
-Node22.16 문법·동결 입력 검증과 system 외 buildBody 동일성, 실제 송신 body의 system 외 동일성을 확인했다. 동일 설정 deepseek-flash/2048/15초/rate6/cap20, 실제순차1·기존 보호 fetch 명시주입을 사용했고 반환 provider model/usage/finish는 제품 API 미관측이다. 최종 prompt SHA256 `32819624fbb9c2a437f3b07386808077580277fdc1c07821ec503a82403a9939`. 직전12건 증거 ZIP SHA256 `2300e37a8e9845ac2bb4ddb1d3f4b189d508b0d00f542adf26f4a28973f1fa48`, rev1 추가3건 ZIP SHA256 `02646d46490fa3a43bf52e4cda00ea253e421814103da69a0136fc3b068048c3`는 Cloud에 보존하며 저장소에 원시 응답/전체 증거를 게시하지 않는다. 이번 반영에서 추가 실AI0, 종료 paid=false다. 새 커밋 CI 결과는 Actions에서 별도 확인하며 미리 성공으로 기록하지 않는다.
+현재 상태를 과거 문서의 머리말과 혼동하지 않는다. 다른 역사·연구·실패 기록은 삭제하지 않았다.
 
-## CONNECT039 rev1 — 선택적 결과 파일 수용·반영
-
-총괄이 Claude의 독립 코드/이관 검토와 원문·검사를 읽고 수용했다. 파일용 작업문 내보내기→결과 JSON 하나 선택→정확한 원래 작업/인계 시점 preview→명시 가져오기→다음 문맥/복구를 지원한다. 붙여넣기 기본 경로는 유지하며 자동 CLI·실시간 수집·외부 실행/검증 완료가 아니다. ExportRecord.returnId와 Task.resultFile.rawText, v3 저장 형식을 추가하며 prompt/API 계약은 그대로다.
-
-rev1은 외부 구형 복구 파일 원문을 localStorage에 중복 저장해 quota를 만들던 경계를 수정했다. 브라우저에 이미 저장돼 덮어쓸 v1/v2 원문만 첫 쓰기 전에 버전별 legacy-original로 정확히 백업하고, 백업 실패는 쓰기를 차단한다. 사용자가 선택한 복구 파일은 원파일 자체가 있으므로 별도 슬롯에 중복 보관하지 않는다. 기존 백업은 변경/삭제하지 않고 자동 quota 정리도 하지 않는다. 선택적 대기 취소 안내/clipboard 관찰은 기존 방어·붙여넣기 fallback 범위에서 수용했으며 추가 기능으로 바꾸지 않았다.
-
-원래 CONNECT039 Cloud 검증은 baseline148 Git blob/후보151파일/17경로 patch·prompt 불변, 관련 Node97/97과 브라우저5+SELECT0353+UI00104/05/08 3 통과이며 rev1 전체 재실행 수치가 아니다. rev1 새 실행은 부모/continuity check·build, CONNECT039 Node7/7·storage I15-D17/D18/D30 3/3·02 native 1/1 및 05 장애 주입 1/1, fail/error/skip0이다. 동일 compiled quota 탐침(cap5020, v2원문3585자/v3본문3740자)은 수정 전 replace/후속 save/v3 재복구의 quota 실패가 수정 후 성공으로 바뀌고 외부 파일 백업이 생성되지 않음을 확인했다. 이는 합성 문자 수 Storage 대역이며 실제 브라우저 용량 측정이 아니다. 원래 Cloud Node22.16/npm10.9.2/TS5.8.3·Python3.13.5/Playwright1.57/시스템 Chromium154를 재사용했고 제품·기대값을 임의 수정하지 않았다.
-
-수용된 17경로와 기존 문서2만 기준178b0ec 위에 통합했다. 기존 게이트와 새 CONNECT039 native 단계·CI 전역 PYTHONUTF8=1을 유지하며 일부 Python 기본 encoding의 선택적 이식성 보완은 이번에 추가하지 않았다. 이 반영 커밋의 Ubuntu/Windows CI는 Actions 완료 결과로 별도 확인하며 미리 성공으로 기록하지 않는다. 원본 ZIP SHA256 `d183ea966356dfa074d2ff14f6fda63bfec7c8cfdf68d97ffa70f9ad9a6800bb`, rev1 ZIP SHA256 `d4f9e7cb81ad9efe190feae23f61bf0718a571ea53a374ec0bbc798920c05d73`와 Cloud 증거는 별도 보존하고 저장소에는 합성 fixture·소스만 반영한다. mock/paid=false, 실AI·키 접근·mainmerge·배포0. 실제 외부 CLI 준수·AI 내용 품질·사람 효용·운영 준비는 미검증이다.
-
-## 현재 구현
-
-[app/continuity](../app/continuity/README.md)는 입력 → 필요한 질문 → 편집 가능한 작업문 → 돌아온 결과 → 다음 변경을 연결한다. localStorage 지속 저장·JSON 백업/복구, 기준 변경 뒤 낡은 AI 제외·수동값 보존, v1 이력, AI128KiB와 로컬 복구8MB 한도는 유지한다.
-
-IDEA017은 이전 수동 scope·checks의 원문 참조를 현재 작업에 제공하고, 명시적 재사용 요청이 있을 때만 적용하도록 지시한다. 다른 과거 기준을 강제 적용하거나 의미 탐지를 보장하지 않는다. requested 원문은 문맥 예산 안에서 전문을 우선하고 문자열 출력 계약·선택지 지시를 보완한다. production 변경은 domain·types·request validation·prompt4파일이며 관련 검사3파일을 함께 반영했다. IDEA017의 AI 변경과 UI001 rev1의 화면 변경은 별개다. 저장 스키마·provider·실험 기록 보호·사례·gate·원장은 그대로다.
-
-검증 후보179파일의 manifest SHA256은 `5c00511bf010b31f9bae7c443221cd3933fe01caff358ef7ac2fcc7c3df04850`다. baseline178개 중172개 동일·6개 변경·1개 신규이며, 공유 문서는 검증 ZIP과 구별되는 최신 상태 안내다. 실행 위치와 ZIP 전용 자료는 [REPOSITORY_SCOPE](../experiments/idea016/REPOSITORY_SCOPE.md)에 구분한다.
-
-UI001 rev1은 현재 작업/다음 행동을 중심으로 화면을 재배치하고 기준·출처/기록 패널과 상세 편집을 제공한다. 전달될 전체 handoff의 문자수·digest로 내보내기 뒤 제안 text/why/포함 상태 변경을 감지하고 무관한 미제출 초안은 변경으로 표시하지 않는다. UI/client·presentation과 관련 UI 검사8경로만 반영했으며 UI 반영에서는 AI 경로를 보존했고 후속 IDEA022는 별도7경로로 통합했다. 저장·provider는 유지한다. 후보 source182 manifest SHA256은 `cc55fee16f6d3753130b9914874a0c54fbfcb32f4d18c2723c9b52fd56552d41`이다.
-
-IDEA022는 현재 요청과 기존 basis/history에서 읽기 전용 planFacts를 파생해 handoff·AI 입력 appFacts에 같은 기록 근거를 제공한다. 요청 보존(input-retained)·기준 기록(basis-recorded)·이력 누락(version-only)을 구분하며 요청 전체 완료나 외부 구현 완료를 판정하지 않는다. API 입력은 `idea022.context.4`로 엄격히 검증하고 기존 저장 schema는 유지한다. prompt/domain/types/validation·신규 plan-facts와 관련 검사7경로를 수용했다. 통합184소스 = 기존169불변 +10수정 +5추가이며 UI8경로와 IDEA0227경로는 겹치지 않는다. Cloud 통합 source manifest SHA256은 `11ac3176493bf02a15e681a31c6a12ca4e4bd7487c5d505019fceaf6941691d1`이다.
-
-## 검증과 실제 관찰
-
-| 범위 | 확인 결과 |
-|---|---|
-| IDEA015 R3 Cloud 통합 (2026-10-11 21:31 KST) | 클린 설치·check/build, 기존 Node279/279·continuity45/45·직접 HTTP/localStorage 브라우저13/13 통과 |
-| IDEA015 R3 GitHub CI | [608d4753 실행38140619804](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38140619804) completed/success |
-| IDEA017 독립 좁은 검사 | scratch13/13 통과 |
-| IDEA017 Cloud 구현 검사 | 클린 설치·기존/continuity 타입·빌드·신규13/13 통과. 기존 전체 Node·브라우저는 반복하지 않음 |
-| IDEA016 실제 baseline | 14회: provider200, 앱13수용·1INVALID_RESPONSE. C05 변경 미실행·C06 미완료 |
-| IDEA017 실제 재평가 | 15회: provider/app 모두200,6흐름 완료, 오류·재시도·응답 수리·fallback0 |
-| IDEA017 GitHub CI | [1e585241 실행38152906064](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38152906064) completed/success |
-| IDEA018 실제 재평가 | 13회: provider모두200·앱12수용/1INVALID_RESPONSE,4complete·C02failed·C06incomplete. 소스 미게시 |
-| UI001 원본 Cloud | 클린 설치·check/build·continuity Node65/65·기존 native 브라우저13/13 통과. 신규 UI7통과/1오류(UI06 접힌 입력), 원본 실패 보존 |
-| UI001 rev1 독립·Cloud | 내보내기 신선도 좁은 독립 회귀 수용. Cloud 클린 설치·build·continuity check/build·UI Node9/9·native UI9/9, fail/error/skip0. 변화 없는 기존 전체 검사는 반복하지 않음 |
-| IDEA022 + UI001 rev1 통합 Cloud | 클린 설치·부모/continuity check/build·continuity Node87/87·native 브라우저13/13·UI9/9, fail/error/skip0. 새 실AI0·소스184검사 후 불변 |
-| IDEA019 실제 평가 | 25회: 기존6흐름15회·동일 신규5입력017/019 각5회, 전부provider/app200·계약 수용. 소스 미채택 |
-
-IDEA017의 C03은 명시적으로 이어받은 수동 조건의 현재 적용 참조가 분명해졌고, C06은 ‘별명만’ 전문 전달과 반영을 확인했다. C05는 checks 문자열 수용 뒤30→60 단계를 처음 실제 관측했다. [IDEA016 결과](research/idea016-results.md)와 [IDEA017 결과](research/idea017-results.md)는 구별해 보존한다. complete·HTTP 성공·검사 통과는 고객 효용이나 내용 품질 합격이 아니다.
-
-C02의 선택지 축·미정 기한·실제 답변 출처 표현, C05의 이미 갱신된 기준을 next에서 다시 갱신하라는 표현, C06의 공개 명단보다 넓은 첫 금지 범위가 남았다. persistent-profile 재방문/Blob 다운로드의 Chromium SIGSEGV 제한도 해결됐다고 주장하지 않는다. 실제 고객 관찰·운영 준비는 미검증이다.
-
-## 다음 작업
-
-[IDEA018 결과](research/idea018-results.md)는 C05 마지막 상태/next 표현 개선과 C02 문자열 suggestions 계약 거절·혼합 선택지, C06 새 기술 질문·넓어진 금지 범위, C04 제외된 메일 제안 재노출을 함께 기록한다. 답변 적용·재시도·응답 수리는0이었다. 단일 실행의 정성 관찰로 인과적·통계적 효과나 고객 효용을 확정하지 않는다. IDEA018 소스는 게시하지 않고 현재 공유 앱은 IDEA017 + UI001 rev1 + IDEA022다.
-
-### 진행 중인 독립 작업과 인계
-
-현재 공유 상품은 IDEA017 + UI001 rev1 + IDEA022다. RESEARCH021 조사와 IDEA020 보충 검토를 회수했다. CONNECT001·IDEA023은 아직 상품에 승격하지 않는다.
-
-- **Pro / RESEARCH021 — 조사 완료:** [조사 17문서](research/research021/README.md)를 원문대로 보존했다. [출처 지도](research/research021/01_SOURCE_MAP.md)·코드 재사용/실사용 원장·분야 밖 대안·[UI001](research/research021/handoffs/UI001.md) / [CONNECT001](research/research021/handoffs/CONNECT001.md) / [IDEA020](research/research021/handoffs/IDEA020.md) 인계·미실행 후속 연구를 제공한다. 현재 작업대와 작은 인계 출력, 요청/계획/외부 관측의 구분을 제안하며 고객 효용의 실증 결론은 아니다. 지정 커밋의 정적 열람·공식 문서·작성자 경험과 접근 한계를 기록했고 독립 연구 검증·앱 실행은 하지 않았다. 주요 작업의 [조사·구현 판단 원칙](START_HERE.md#주요-작업의-조사와-구현-판단)을 재사용한다.
-- **Pro / IDEA020 — 보충 검토 완료:** Cloud B05는 실제 domain API로 구성됐지만 초기 R01은 정확한 입력·revision·응답 재현이 아니다. 실제 응답의 next ‘무작업’과 reviewBasisIds D1이 공존한다. requested 항목이 남았다는 사실만으로 항상 미반영이라고 단정할 수 없다. [설계 인계](research/idea020-connect001-handoff.md)에 구분하며 핵심 기록 파생은 IDEA022로 통합했다.
-- **IDEA022 — 기록 근거 기능 수용·AI 품질 보류:** 독립 좁은 검토·무상44검사 후 UI001 rev1 통합 Cloud Node87/87·native13/13·UI9/9가 fail/error/skip0으로 통과해7경로를 반영했다. 실제17회는 모두 provider/app200·계약 수용이지만 B03 중복 변경/추가 확정, C02 중요한 선택 미질문, C06 제약 범위 확대 등이 남았다. [실측 요약](idea022-results.md)에 B05 조기 종료 회피와 새 구현 요청 구별도 기록한다. 기존 C02/C05/C06 원문은 읽기로 회수했고 통합 검사에서 새 AI 호출은 없다.
-- **IDEA023 — 전체 채택 보류:** 독립 코드 검토·Cloud 구현41검사는 통과했다. 실제20회(A13/B3/새Q4)는 모두 provider/app200·계약 수용이며 C05·B03·계획/구현 요청 구별은 개선 관측됐다. C02는 채널 질문의 허용 답이 없어 대기했고 Q03은 질문이 없었다. 원문 보충 후 C02는 scope/question/next 모순·선택지 축 혼합으로 실패, Q03은 현행 담당자 전환 유지로 통과/표현 약함으로 재분류했다. 다음 단계 미실행은 하네스 한계다. C06은 next만 제약 범위를 넓혔고 Q02는 requested 기록을 코드 미반영으로 단정했다. [실측 요약](idea023-results.md)에 한계를 기록하며 소스는 미반영한다.
-- **QUALITY024-T1 — blind 평가·좁은 재판정 회수:** [결과](quality024-t1-results.md)의 실제28회·기술 수용과 품질 판정을 구분한다. A OFF 수용은Claude7/14·Pro8/14, B ON/high는Claude10/14·Pro9/14다. 두 평가자 각각 전체17수용/11조건부/0부적합, 원판정 일치22·불일치6이며 원평가 집계는 그대로다. 모드 정보를 보지 않은6.1 검토로 불일치6+추가1을 좁게 재판정했고 실게시 검수 해석·최소 보관 단계 효용2건은 유보했다. 강제 단일 점수·최종 모드 승자는 없고 기본값을 변경하지 않는다.7입력×2모드×2반복의 탐색 관찰이며28독립 프로젝트·통계적 우월성·운영 안전 보증이 아니다. 관측 지연 중앙값은OFF3930ms·ON17377ms다.
-- **QUALITY025 — 두 blind 평가·모드 결합 회수:** [후보 상태](quality025-status.md)에 실제28회 기술 완료와 Pro19수용/9조건부·Claude18수용/10조건부(부적합/P1둘다0)를 구분한다. T1각17/11 대비 원판정 수의 소폭 변화는7입력 반복·시간차·평가자 차이로 개선 입증이 아니다. 지정5표본 좁은 최종 검토는8ed/d796의 필드 모순·68의 계획 기록/구현 검수 혼합·505의 준비 메모 열람 누락을 확인했지만614의 전역 금지 확대는 모호하며 수동 유지 검수 삭제는 과하다. 최종 결합은A OFF 수용Claude7→8/14·Pro8→9/14, B ON/high Claude10→10/14·Pro9→10/14이며 원평가는 보존한다. 개별 판정 변동은Claude11/28·Pro14/28로 효과·기본 모드 우열을 확정하지 않는다. overall불일치7 중614는 적용범위 모호함으로 보존하고 나머지6은 미해결이다. QUALITY025는 미승격, 수용 제품은IDEA022 + UI001 rev1이다.
-- **QUALITY026_IMPL — 실호출2회 후 관계검증 실패로 중단:** [설계·검증 이력](quality026-design.md)의 독립선택13·Cloud 신규25/기존31/연결7·mock20+8 통과와 실제 실패를 구분한다. F01 DIRECT025-A1수용·PLAN026-A1실패(provider200/stop, 앱502·PLAN_LINK_INVALID), 최초18미실행·후속8미배정·retry0이다. 정확 진단5CONTENT를 회수·바이트 확인했다. 실제wire에 이미named→work.constraintIds 연결 지시가 있었지만2개preserve가work에서 누락돼 구조 계약 위반을 관측했다. 계약 최적성·전체 방식 실패는 미확정이고 Sol최종raw검토는 대기다. 진단은기존raw 회수만/noAI, 입력/bodyhash·상태·승인소스와 기존5395파일 불변·종료paid=false다. 후보는 미승격이고 acceptedIDEA022 + UI001 rev1을 유지한다.
-- **Pro / UI001 rev1 — 수용·반영:** 초기 UI06 검사는 정상 compose 클릭 후 입력하도록 수정했고 제안 수정 뒤 ‘내보냄’ 표시가 갱신되지 않던 결함을 고쳤다. 독립 좁은 회귀 수용과 Cloud UI Node9/9·native UI9/9 통과를 확인했다. AI 응답은 규칙 mock이고 실제 AI 호출0이다. UI09는 Markdown 다운로드로 재내보내기를 검사했으며 별도 reload/클립보드 성공 검사는 아니다. UI08 클립보드 지연과 UI06 설정 표시는 명시적 대역이다.
-- **Claude / CONNECT001 rev1 — 좁은 검토 수용:** 두 결함을 수정한 합성 PoC의 독립 좁은 검토가 통과했다. 자체 session/turn 연결 우선·충돌/미연결의 수동 배치·같은 시각 보고의 단일 최신 후보를 확인했다. Windows Node24.19.0의 합성 회귀·hook runner 검사는 실제 CLI 발화·Codex stable 호환·다중 프로세스 append·앱 통합 검증과 구별한다. [설계 인계](research/idea020-connect001-handoff.md)를 이어받으며 실제 연결은 미검증이다.
-- **QUALITY027 — 실호출2회에서 중단·미승격:** 준비 검증 뒤2송신/1수용/1실패, PLAN_SCOPE_CONFLICT·최초18미실행·retry0·paid=false다. Cloud는goal의context참조와validator의deliver요구를 보고했고 Sol예비검토는prompt≥1deliver/validator전부deliver의 차이를 확인했다. 실제실패raw가아직없어goal의전체참조/원인은미확정이다. 실패run은보존·재개없음, [설계·검증 이력](quality026-design.md)을 유지한다.
-- **ARCH028-A/B — 조사·mock 설계 시연 완료:** 실제OSS 메커니즘과 독립 대안을 회수했으며 실AI품질·고객효용 증거는 아니다. 총괄은A형 현재작업카드+작은근거검토를FLOW029 첫 후보로 선택했다. B의 원문보존 원칙만 재사용하고 문장분류/writer·A대안D를 동시에 쌓지 않는다.
-- **FLOW029 — PILOT1 실제18·조건 가림 평가 완료, 세 조건 미채택:**6고정자료×C0/C1/C2 각1회 reviewer-only 탐색을 완료했다. 계획/수신18·finish stop18, strict15/invalid3·retry0·terminal0·entry최소12007ms·종료paid=false, bodyhash18은동결일치다. 독립strict는C0 4/6·C1 6/6·C2 5/6이다. Claude18평가에서K2내부단계모순은세조건모두미검출·오지적도있었다. K5명시금지/K6정책미정핵심은각3/3내용관측이나K5C0 invalid는유효TP가아니다. K4C1필요질문오지적·K3C2경미오지적/invalid도남았다. C1형식전달개선은의미정확성보장이아니며일반품질/인과/제품수용은입증하지않는다. 다음제한설계/최소구현은지시예정·아직미시작이다. generation/pipeline0·rev4source229/accepted184·기존실패원장보존, 제품/프롬프트미승격이다.
-- **Claude / FLOW029-CASES — 완료:** public2/holdout2, 합4가상에피소드를 회수했다. INPUTS/ORACLE을 분리하고 보류 사례·판정자료는 공개하지 않는다. 아직 실AI품질·사람사용성 증거가 아니다. FLOW029-PILOT1 후속 판단을 기다리며 이4에피소드의 실제 평가 완료를 뜻하지 않는다.
-
-- **Pro / RESEARCH030 — A1/C1/B1/D1/D2 회수·연구 대기:** A1의GitHub이슈 편중과 최근1~2주 원글 우선/필요 시 한 달 확장·게시일/사건일 구분을 유지한다. 기록 변경과 실제 소비/검수 불일치는 후보 문제이며 새 장부/플랫폼 필요성은 미확정이다. D1은공통입력의 답변형 기대 때문에 표현/부담 비교로만 해석하고 숨은 누락 발견 효과로 세지 않는다. D2 flip-probe/회귀확인은 미채택 아이디어이며18회 제안은 다음배정으로 승인하지 않았다.3합성사례로 제품방향/원인을 일반화하지 않는다. 사용자연구·실AI 증거는 없고 FLOW실제실패를 반영한 좁은수정/후속비교를 먼저 기다리며 추가계획을 연속배정하지 않는다.
-- **RESEARCH030-T — rev1/T2 회수·완료 보고 대기:** 최초 보고의 유일 경로·서버 없음·하네스 흡수·회사 종료 인과 단정을 철회하고 조건부 기술 근거만 보존한다. T2 자료를 회수했고 Claude의 완료 보고를 기다린다. 제품 방향·시장 효용·미래 로드맵은 미확정이고 계정정보/키·설치실행·실호출·제품편집은 없다. 원시자료는 공개하지 않는다.
-
-
-FLOW029 baseline은정확수용commit `c2d03e816a8a6cb4731f8142b19e091b70a96408`의184파일 export다. ZIP SHA256 `382cedeaf38c884dbcdda594ec795636089cedb31d2a3966bc179487dd1abde3`, manifest `f605954bc71913b99994936e2c10a13a06254572f77d2a0d9f4b39be52dc0200`을 사용한다. Cloud snapshot11ac...와181blob은같고 workflow·START_HERE·PROJECT_STATUS의3공유메타만다르므로 전체동일이라고하지않는다. [설계 인계](quality026-design.md)에경로와구분을남긴다.
-
-
-[IDEA019 결과](research/idea019-results.md)의 실제25회·계약 수용 기록은 유지하지만019는 채택하지 않는다. B05/B03 구성 코드·원문을 읽기로 회수해 설계 판단에 사용했고 추가 AI 호출은 없다. UI와 파생 사실 후보는 별도 변경으로 검토하고 연결 PoC를 실제 상품 연동 성공으로 해석하지 않는다. 앞선 `875d983f` 공유 반영은 FLOW029-PILOT1 실제18회·독립 구조 재현·조건 가림 평가와 후속 지시 예정 상태 문서뿐이었다. 당시 제품 소스는 수용된 IDEA022 + UI001 rev1 기준을 보존했고 IDEA018·IDEA019·IDEA023 소스는 포함하지 않았다. 당시 CI·PR 설정·main·배포는 변경하지 않았다.
-
-과거 [IDEA013](research/idea013-results.md)·[IDEA014](research/idea014-results.md) 합성 비교와 [IDEA015 제품 검토](research/idea015-product-review.md)는 각 기록으로 남긴다.
-
-### CONNECT039 rev2 — 기존 브라우저 기대값 교정
-
-수용된 rev2는 `continuity/tests/browser.py:218`의 정확한 저장 형식 기대값만 `idea015.project.2`에서 `idea015.project.3`으로 교정한다. 제품·prompt·다른 assertion·fixture·skip·timeout·CI는 변경하지 않는다. [90ce4e7의 CI38321354904](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38321354904)는 Ubuntu/Windows 기존 continuity 브라우저 단계에서 실패했고 CONNECT039 단계는 미실행이었다. 이 실패 기록은 보존한다.
-
-Work는 수정 전 test_10 실패와 수정 후 Linux Node22.16/Python3.12/Chromium143 전체13개 통과(fail/error/skip0)를 보고했고 총괄이 원문 로그를 검토했다. 일부 검사는 장애·상태 주입이며 순수 native 통과로 합치지 않는다. Cloud는 패키지7개와 한 줄 diff·최종 파일 SHA를 대조했고 같은 전체 검사를 반복하지 않았다. 이번 새 커밋의 양 OS 필수 게이트·CONNECT039 단계 결과는 Actions에서 별도로 확인하며 미리 성공으로 기록하지 않는다. 실AI·고객 효용 검증은 아니다.
-
-### CONNECT039 rev3 — 구형 fixture 필드 교정
-
-수용된 rev3는 UI001 UI11과 FRESH033 F02의 v1 합성 fixture에서 현재 v3 전용 `resultFile`을 제거하는 두 줄만 반영한다. 진짜 v1 필드 집합으로 이관을 검사하며 제품·validator·prompt·assertion·skip·timeout·CI는 불변이다. [c5580bd의 CI38324157715](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38324157715)는 기존 browser13 단계를 양 OS에서 통과했지만 다음 UI 단계에서 실패해 CONNECT039는 미실행이었다. 이전 실패는 보존한다.
-
-Work의 별도 Linux 실행은 UI00111/FRESH0333/SELECT0353/CONNECT0395 합계22개 통과(fail/error/skip0)이며 mock/direct HTTP·명시 장애주입을 구분한다. Cloud는 manifest21·두 줄 patch·최종 두 파일 SHA와 제품 불변을 확인했고 같은22개를 반복하지 않았다. 새 커밋의 양 OS 필수 단계 완료 결과는 Actions에서 별도로 확인한다. 선택적 파일 교환 기능 상태와 기존 이관 보호는 유지하며 실AI·사람 효용 검증은 아니다.
-
-## USE040 / LIVE041 — 단일 파일 왕복과 기본 AI 두 응답 수용
-
-제품 기준은 `5cfe11ba3c13f9dede3a72409b7ac95ed6f13fe4`다. [CI38327519595](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38327519595)는 Ubuntu/Windows 전체 필수 게이트와 UI001→FRESH033→SELECT035→CONNECT039 단계가 완료·성공했다. 이전 실패 기록은 유지하며 이번 문서 반영의 CI와 구분한다. 제품·prompt(`32819624fbb9c2a437f3b07386808077580277fdc1c07821ec503a82403a9939`)는 불변이다.
-
-**USE040:** 제품에서 내보낸 작업문으로 새 ClaudeCode가 독립 합성 Node 검색/미납필터 예제를 구현했고 제공된 검사 로그는11 pass였다. Work는 native UI 복구→원본 결과 JSON 수신→정확한 부모 연결과 raw/report/evidence 보존→다음 검토 작업문 내보내기를 수행했다. 총괄은 manifest10·다운로드 raw 동일성·부모 연결을 직접 확인했다. `USE040_ROUNDTRIP.zip` SHA256은 `1bff8ccf94071355727865ad3da3fb34e28c8ac54ef572d80a6d5f0ff9c002a5`다. 당시 AI 초안은 mock+수동편집이며 합성 단일 파일 왕복이지 자동 CLI 연결·사람 효용 입증은 아니다.
-
-**LIVE041:** 동일 제품의 고정 A/B를 각1회 실제 전송했다. 제품 HTTP200 2건·mode deepseek·원ticket 일치·재시도0이며 총괄이 두 advice 전문을 읽고 수용했다. A는 코드 수정 없는 검토와 미확인 구분, B는 AND 조건만 변경하면서 paid===false·순서·비변경·필터 off 검색 보존과 D3 검토 표시를 유지했다. 추가 prompt 수정은 없다. 준비 수집 오류로 mock추가1(총3/보존2), compiled 누락에 따른 서버 사전중단 POST0을 따로 기록하며 영구 런타임 재현성 완료로 해석하지 않는다. 별도 제공자 raw/reasoning/usage는 수집하지 않았고 종료 paid=false다. 두 응답 수용은 실사용자 효용·일반 품질 완료가 아니다. 원문·ZIP은 별도 보존하고 공개 저장소에 추가하지 않는다.
-
-**DELIVER042 반영:** 작업문에는 코드 파일이 포함되지 않으며 필요한 저장소·관련 자료 접근을 준비하고 같은 작업에서 받은 결과 JSON을 가져오도록 화면 도움말3곳(HTML/client2파일)을 수용·반영했다. 작업문/footer/prompt·상태/domain/schema·CSS는 불변이다. Work의1440/390 native 전달·수신 확인과 독립 좁은 검토를 회수했고 Cloud continuity 타입/경계·build가 통과했다. 실제 전달 실수 감소·사용자 효용은 미측정이며 자동 자료 첨부·접근 확인 기능은 아니다. 이번 새 커밋의 필수 CI는 Actions 결과로 별도 확인한다.
-
-## PATTERN043 A / B1 — 한정 비교 종료·채택 보류
-
-A는 같은 자료에 K체크리스트/C조건연결 지시를 비교하는 입력을 준비했다. A의 T는 임의의 미검증 비교틀이었다. B1은 혼합 M/사소한 S 두 합성 상황×K/C 각1회만 실행했다. 실제 제품 POST4 모두 HTTP200·mode deepseek·원ticket 일치, question=null·재시도/후속답변0, 종료 paid=false다. 제공자 raw/reasoning/usage는 신규 수집하지 않았다. 총괄은 공유된 입력/8키 응답 전문을 직접 대조했고 독립 Sol6.1High도 같은 내용을 검토했다. 원문 회수와 전체 결과 ZIP 다운로드는 별개이며 원문·ZIP은 공개 저장소에 추가하지 않는다.
-
-이 네 관측에서 C의 중요한 추가 이득을 확인하지 못해 조건부 패턴 보조의 제품 채택을 보류한다. M 양쪽은 AI 연결 보류·엔진 입력/정답·퍼즐 진행 상태 보존과 정적 힌트 계획을 유지했다. C의 자료 미확인 조건·향후 전환 비용은 유용하지만 중대 누락 개선 차이는 아니었다. 공통으로 참가자의 힌트 이해·다음 행동에 관한 구체적 관찰이 약하고 계획서/상태 보존 검사에 치우쳤다. S 양쪽은 대상 문구와 변경 금지 범위를 유지하고 불필요한 질문/재설계가 없었으며 C의 diff/화면 설명은 중요한 차이를 입증하지 않았다. 계획만 요청했으므로 미구현을 실패로 세지 않는다.
-
-이번에는 L0→L1·추가 CSV 실행 비교·F/T 확대를 하지 않으며 현행 제품/prompt를 유지한다. 공통 약점을 자동으로 새 prompt 수정 과제로 열지 않는다. K의 일반 우월·C 무효·유형별 검증 라이브러리 전체 기각이라는 결론은 아니다. 사람 수정 수/시간·고객 효용은 미측정이고 AI 검토는 이를 대체하지 않는다. 별도로 요청한 이전 저장소 조언은 도착해 검토했다. 주요 교훈은 기존 FRESH033/SELECT035/CONNECT039에 이미 반영됐고 신규 원장/DAG/고정 역할/추가 PATTERN043 실험은 채택하지 않았다. 개인 원본은 공개하지 않는다.
-
-## ADVICE044_FIX — 수동 보고 판본 미확인 표시
-
-수동 report/evidence의 선택 대상에 내보내기가2개 이상이면 비교 기준을 마지막 내보내기 시점·이후 기준N개·기준r로 표시하고, 붙여넣은 보고가 어느 내보내기에 대한 것인지는 미확인임을 안내한다. 결과 JSON은 기존 파일 경로로 가져오도록 안내하며 단일/없음/미선택 경로는 유지한다. 데이터 오연결 수정이 아니라 표시 모호함의 한정 수정이다. 파일 판본 연결은 이미 충족됐고 계산/submit/parent/domain/presentation/저장/schema/prompt/작업문/CSS는 불변이다.
-
-Work의 native 관찰은 report/evidence H2기준1개·파일 H1기준2개/legacy 비교 불가·선택·자료 불변을 확인했으며 이번 수신POST0로 이전 mock 왕복과 구분한다. 독립 좁은 검토를 수용했고 Cloud continuity 타입/경계·build가 통과했다. 실제 사용자 효용은 미측정이다. 이 반영 커밋의 양 OS 필수 CI는 Actions 완료 결과로 별도 확인한다. 원본 조언/보고서·ZIP은 게시하지 않는다.
-
-ADVICE044_FIX rev1은 UI10의 두 번째 내보내기 직후 기대값 한 줄만 `마지막 내보내기 이후 기록된 기준 0개`로 교정했다. 정확 비교/locator·첫 내보내기/기준 변경/reload/유형 변경·부모/원문/호출 수 검사는 유지하고 제품은 불변이다. [257ecc5의 CI38357118980](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38357118980)는 양 OS UI 단계 실패와 후속 FRESH033/SELECT035/CONNECT039 미실행으로 보존한다. Work는 실제 UI10 실패 재현 후 Linux UI00111/FRESH0333/SELECT0353/CONNECT0395 합계22개를 각1회 통과했고 기존 명시 장애주입을 구분했다. Cloud는 manifest11·기준/최종 hash·한 줄 diff·문법을 확인하고22개는 반복하지 않았다. 이번 새 커밋의 필수 CI는 양 OS 완료 결과로 별도 확인한다.
-
-## WEB046 / WEB047 — 정적 브라우저 MOCK 통합·Pages 게시
-
-같은 UI/도메인/검증을 사용하는 설치 없는 정적 체험을 통합했다. 기본 runtime은 기존 서버 개발/실AI 경로를 유지하고 정적 build만 브라우저 MOCK adapter를 선택한다. 기존 mock 규칙은 타입 표기만 추가해 shared/mock.ts로 이동했다. 정적 저장은 별도 접두사이며 기존 서버 기록·구형 백업을 자동 접근하지 않는다. 화면에 `브라우저 MOCK · AI 아님`을 명시하고 일반 자연어 이해·실AI 품질을 제공한다고 주장하지 않는다.
-
-Cloud Node22.16/npm10.9.2/잠금TS5.8.3 클린설치 후 부모/continuity 검사·빌드 및 정적 build가 통과했다. 재생성12파일177353B은 첨부publish와 바이트 동일했다. 기존 서버HTTP11·새 정적native1이 통과했고 `/agentflow-studio/`에서 요청/질문/직접편집/내보내기/결과JSON 정확연결/백업복구·reload를 확인했다. 일반API0·서버저장키 불변·정적import closure를 확인했으며 합성sentinel/CSP차단탐침은 일반 사용 흐름과 구분한다. 기존 게이트를 유지한 CI에 정적build/검사 단계만 추가했고 새 커밋 양OS 결과는 Actions에서 별도로 확인한다.
-
-WEB047 사용자 공개 승인으로 검증 소스 `dfc1bb92`의 정적12파일177353B만 `gh-pages`에 게시했다. 게시 커밋 `3a1df758f3a30cce78d2f57d385b726e70f74de2`의 원격 파일은 검증본과 바이트 동일하다. 공개 주소는 https://tlsee0813-cmd.github.io/agentflow-studio/ 이며 Pages 소스 `gh-pages /`·HTTPS 강제·[배포38377279130 성공](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38377279130)을 확인했다. 소스 양OS CI38373503761도 성공했다. 총괄은 별도 IAB 브라우저에서 공개HTTPS 직접접속·초기화면/CSS/JS·`MOCK · AI 아님` 표시와 “문구 하나 바꾸기” 예시→작업문 준비→모의 작업문 생성의 native UI 초기 흐름을 확인했다. 사용자는 추가 환경 설정 없이 공개 주소로 체험할 수 있다. 이는 Cloud 프록시 제한 해소나 공개본 API0 네트워크 추적·전체 왕복 검증이 아니며, 기존 로컬 native 검증과 구분한다. Cloud 호스트 추가 허용 초안은 불필요하므로 미적용 상태로 유지하며 반복 접속 검사는 하지 않는다. 게시물은 서버/provider/prompt/키·API호출 경로를 포함하지 않으며 기존 서버 제품·main·PR Draft를 유지했다. 규칙체험의 고객 효용·운영 준비는 미검증이다.
+- [이전 집계 문서](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/PROJECT_STATUS.md), [이전 진입 안내](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/START_HERE.md)
+- [USE106 검토](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/reviews/use106/README.md), [GUIDE097](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/guide097-area-guidance.md), [SPATIAL102](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/spatial102-enter-first.md)
+- [목적 홈 이력](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/flow049-outcome-home.md), [초기 앱 단계별 기록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/app/docs/PROJECT_STATUS.md), [초기 탐색·진단 이력](https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/quality026-design.md)
