@@ -12,14 +12,15 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 이 checkpoint | [`checkpoint/2026-10-15`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/checkpoint/2026-10-15), 시작 소스 [`618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/618d9bd2b99ad433df35107d8902b15f45e30000) | USE106 코드에서 README·START_HERE·PROJECT_STATUS만 정리. 새 제품 변경 없음 |
+| 이 checkpoint | [`checkpoint/2026-10-15`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/checkpoint/2026-10-15), 시작 소스 [`618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/618d9bd2b99ad433df35107d8902b15f45e30000) | USE106 코드에서 안내3개·[보관 기록](REPOSITORY_ARCHIVE.md)만 정리. 새 제품 변경 없음 |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
 | main / dev | [main `896dcf38`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/896dcf3848fec70357d0f9bd4fd6c09cab70db37) / dev 없음 | main은 초기 커밋이며 최신 제품 아님 |
-| [Draft PR #2](https://github.com/tlsee0813-cmd/agentflow-studio/pull/2) | `flow049/outcome-home@f0fa5326` → `init-003/fix-review-regressions@61c3b2f0` | 과거 목적 홈 단계, open·Draft·미병합. 최신 제품 통합 PR 아님 |
+| [과거 Draft PR #1](https://github.com/tlsee0813-cmd/agentflow-studio/pull/1) | `init-003/fix-review-regressions@61c3b2f0` → `main@896dcf38` | closed·미병합. 본문·댓글 보존 |
+| [과거 Draft PR #2](https://github.com/tlsee0813-cmd/agentflow-studio/pull/2) | `flow049/outcome-home@f0fa5326` → `init-003/fix-review-regressions@61c3b2f0` | 과거 목적 홈 단계, closed·미병합. 본문·댓글 보존. 최신 제품 통합 PR 아님 |
 
-USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·기존 브랜치·PR 설정은 변경하지 않는다.
+USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·gh-pages는 그대로 유지하고, 기존22개 브랜치는 [태그 보관·SHA 검증 후 정리](REPOSITORY_ARCHIVE.md)했다. PR #1·#2는 미병합으로 닫았다. 사용자 개편안 대기 상태다.
 
 ## USE106 UI와 공개 MOCK 검증
 

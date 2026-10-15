@@ -1,6 +1,6 @@
 # 첫 사용과 인계
 
-최신 소스·공개 배포·병렬 후보·검증·미해결은 **[PROJECT_STATUS](PROJECT_STATUS.md)**를 기준으로 읽으세요. `main`과 과거 Draft PR #2는 최신 제품 기준이 아닙니다.
+최신 소스·공개 배포·병렬 후보·검증·미해결은 **[PROJECT_STATUS](PROJECT_STATUS.md)**를 기준으로 읽으세요. `main`과 과거 Draft PR #2는 최신 제품 기준이 아닙니다. PR #1·#2는 미병합 상태로 닫았으며, [22개 브랜치의 보관 태그·복원 방법](REPOSITORY_ARCHIVE.md)을 남겼습니다.
 
 ## 설치 없이 첫 흐름
 
@@ -14,7 +14,7 @@
 
 ## 다음 세션이 이어받을 때
 
-- 이 checkpoint의 코드는 [USE106 `618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/618d9bd2b99ad433df35107d8902b15f45e30000) 기준입니다. 공개 화면도 이 소스의 정적 MOCK이며 이 checkpoint는 문서3개만 정리합니다.
+- 이 checkpoint의 코드는 [USE106 `618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/618d9bd2b99ad433df35107d8902b15f45e30000) 기준입니다. 공개 화면도 이 소스의 정적 MOCK이며 이 checkpoint는 안내·보관 문서만 정리합니다.
 - GUIDE107 실제 AI 평가는 별도 병렬 후보의 결과입니다. **HOLD·미통합**이며 공개 UI의 AI 품질 결과로 합치지 않습니다.
 - 소스 CI·정적 배포·공개 smoke·실제 AI 응답·사람 대상 사용성은 서로 다른 검증입니다. 정확한 SHA와 근거 링크는 PROJECT_STATUS에 있습니다.
 - 현재 개발 사이클은 종료·정지하고 예약은 PAUSED입니다. 사용자 결정 없이 새로운 조사·기능·실험·배포를 시작하지 않습니다.
