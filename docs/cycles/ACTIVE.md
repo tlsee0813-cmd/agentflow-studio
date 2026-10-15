@@ -13,11 +13,13 @@
 | 내부 Astra High | 입력 사실11개·제안 경계·반례3개 완료 | INPUT에 통합. 확정 포함트리를 요구하지 않음 |
 | 내부6.1 Sol High — 코드 | 이전 혼합 깊이/미결/외부관계/읽기/준비/복귀 재사용 계약·Dify/yFiles 원문 감사 완료 | 코드 대조이며 새 브라우저 검사 아님 |
 | 내부6.1 Sol High — 전달 | 기존 Cloud 직접git 전송 확인, Opus 직접쓰기 미확인으로 분리 완료 | 기존 연결이 없으면 작은 원본ZIP1회 임시 수령. 새 인증/환경으로 본 연구를 막지 않음 |
-| 총괄 | 기능별 구성+보존 조건, 제자리 선택+필요시 집중 읽기 선택. 시안 계약 확정·Opus 전달 | Pro 답 전달만으로 완료하지 않음 |
+| 총괄 | 기능별 구성+보존 조건, 제자리 선택+필요시 집중 읽기 선택. 시안 계약 확정·Opus 전달, 공식 접힘 데모 직접 관측 | Pro 답 전달만으로 완료하지 않음 |
 | [새 Opus 5.5 High](https://claude.ai/chat/c4b2aa44-1b79-4f2a-9a5a-1d412872b647) | 고정 계약 전달, 연구용 클릭 시안 작성 중 | 입력/계약 ddad7014…; composition-study.html·작성자 실행·최소 PNG·manifest. 기존 쓰기 연결이 있을 때만 delivery의 docs/transfer/composition-05/author-v0/ 추가 허용. 없으면 원본 ZIP1개 |
-| 기존 Cloud | **cycle05 아직 미배정** | 정확 작성본 회수·의미검토 뒤 독립 실행을 분리 배정 |
+| [기존 Cloud](https://chatgpt.com/local/01a13fcb-e7e5-73b9-b4a3-cf9a2b95b0bb?hostId=local) | 공식 yFiles Folding 데모의 한 경로 독립 관측 진행 중 | 공개 데모1280 한 크기, 접기→내부→전체. delivery의 docs/transfer/composition-05/reference-folding/만 허용. **우리 시안 독립 검증은 아직 미배정** |
 
 [선택 기록](2026-10-16-composition-05/DECISION.md) · [시안 계약](2026-10-16-composition-05/IMPLEMENTATION.md) · [원문 대조](2026-10-16-composition-05/SOURCE_AUDIT.md) · [재사용/검증 경계](2026-10-16-composition-05/REUSE_AUDIT.md)
+
+총괄의 공식 데모 관측은 선택→접기→내부→전체 한 경로다. 내부에서 외부 노드/연결이 사라지고 나올 때 접힌 상태가 보이는 것을 확인했다. 정밀 좌표/임의 배율·사람 사용성을 검증한 것은 아니다. Cloud는 이 결과를 정답으로 가정하지 않고 별도 화면·실행 기록을 남긴다.
 
 ## 직전 판단과 공유
 - [cycle04 통합 결과](https://github.com/tlsee0813-cmd/agentflow-studio/blob/571e7a7030039b4d4354757949cdabc8533c70aa/docs/cycles/2026-10-16-orientation-04/RESULT.md): A 관계 개요 조건부 유지, B 긴 설명 배치 보류·동일대상 참조 보존. 독립17장면과 한계를 분리. 같은 FIX058의 장식 수정은 정리.
