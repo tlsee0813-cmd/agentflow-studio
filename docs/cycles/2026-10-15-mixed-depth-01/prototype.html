@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>탐색 비교 시안 Q03·Q04</title>
+<style>
+:root{
+  --bg:#f6f6f3;--card:#ffffff;--ink:#1c1c1f;--muted:#5d5d66;--line:#d8d8dd;
+  --accent:#2355c2;--accent-bg:#e7edfb;
+  --warn:#8a5200;--warn-bg:#fff1d6;
+  --ok:#1b6637;--ok-bg:#e2f3e8;
+  --unk:#64459c;--unk-bg:#eee7fa;
+  --sel:#2355c2;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#131315;--card:#1d1d21;--ink:#ececf0;--muted:#a5a5af;--line:#35353c;
+    --accent:#90b0ff;--accent-bg:#1e2944;
+    --warn:#f2b860;--warn-bg:#3a2b10;
+    --ok:#82d49f;--ok-bg:#15301e;
+    --unk:#c6aef0;--unk-bg:#2a2140;
+    --sel:#90b0ff;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+h1{font-size:1.15rem;margin:0 0 4px}
+h2{font-size:1rem;margin:0 0 8px}
+h3{font-size:.95rem;margin:0}
+p{margin:4px 0}
+.notice{background:var(--warn-bg);color:var(--warn);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.85rem;margin:8px 0}
+.bar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:10px 0}
+.group{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.group-l{font-size:.8rem;color:var(--muted);margin-right:2px}
+button{font:inherit;color:inherit;cursor:pointer}
+.seg,.btn{border:1px solid var(--line);background:var(--card);border-radius:7px;padding:5px 10px;font-size:.88rem}
+.seg[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme: dark){.seg[aria-pressed="true"]{color:#101318}}
+.btn:hover,.seg:hover{border-color:var(--accent)}
+.link{border:none;background:none;color:var(--accent);padding:2px 0;text-decoration:underline;font-size:.88rem;text-align:left}
+.chg{display:block;width:100%;text-align:left;border:1px solid var(--warn);background:var(--warn-bg);color:var(--warn);border-radius:7px;padding:4px 8px;font-size:.85rem;margin:6px 0}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.status{font-size:.82rem;color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:8px;padding:6px 10px}
+.banner{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;margin:10px 0}
+.baseline{margin-top:6px;padding:6px 8px;background:var(--accent-bg);border-radius:6px;font-size:.88rem}
+.layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px;align-items:start}
+.map{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:100%}
+.mapgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start}
+.mapgrid.focus{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.box{border:1px solid var(--line);border-radius:9px;padding:10px;background:var(--bg)}
+.box.ext{border-style:dashed}
+.box-h{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.tag{display:inline-block;font-size:.75em;padding:1px 7px;border-radius:999px;background:var(--accent-bg);color:var(--accent);white-space:nowrap}
+.tag.ok{background:var(--ok-bg);color:var(--ok)}
+.tag.unk{background:var(--unk-bg);color:var(--unk)}
+.tag.warn{background:var(--warn-bg);color:var(--warn)}
+.tag.mut{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.small{font-size:.85em}
+.muted{color:var(--muted)}
+.kids{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-top:6px}
+.node{display:flex;flex-direction:column;gap:4px;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 8px;font-size:.9em}
+.node[aria-pressed="true"]{border:2px solid var(--sel);padding:6px 7px}
+.node-t{font-weight:600}
+.badges{display:flex;flex-wrap:wrap;gap:3px}
+.frame-note{border:1px dashed var(--unk);border-radius:7px;padding:4px 8px;font-size:.85em;background:var(--unk-bg);color:var(--unk)}
+.rel{border:1px solid var(--line);border-radius:9px;padding:10px;background:var(--card)}
+.rel.unk{border-color:var(--unk)}
+.rel.ok{border-color:var(--ok)}
+.rel-h{margin:0 0 4px}
+.rl{list-style:none;padding:0;margin:6px 0;display:grid;gap:5px}
+.rl button{width:100%;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 8px;font-size:.88em;display:flex;flex-direction:column;gap:3px}
+.crumb ol{list-style:none;display:flex;gap:6px;padding:0;margin:0 0 8px;align-items:center;font-size:.9rem}
+.crumb [aria-current]{font-weight:700}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.panel section{border-top:1px solid var(--line);padding-top:7px;margin-top:8px}
+.panel h3{font-size:.85rem;color:var(--muted);margin-bottom:2px}
+table{border-collapse:collapse;width:100%;font-size:.86rem;margin-top:6px}
+th,td{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.work{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg)}
+.handoff{margin-top:8px;border:1px solid var(--warn);border-radius:8px;padding:8px;background:var(--card);font-size:.86rem}
+.handoff dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 10px;margin:6px 0 0}
+.handoff dt{font-weight:600;color:var(--muted)}
+.handoff dd{margin:0}
+.handoff ul{margin:0;padding-left:18px}
+.log{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.log ol{margin:0;padding-left:20px;font-size:.86rem}
+.log li.cur{font-weight:600}
+.log li.later{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  .mapgrid,.mapgrid.focus{grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  .wrap{padding:10px}
+  .handoff dl{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>AgentFlow Studio · 혼합 깊이 탐색 비교 시안 (Q03·Q04)</h1>
+    <p class="small muted">공통 합성 사례: 도서 대여 서비스 — A 대여 경험 / B 알림 구상. 안 A(전체에서 부분 펼침)와 안 B(부분 집중 + 경로 복귀)를 같은 입력으로 비교합니다.</p>
+    <p class="notice" id="synthetic-note">연구 시안 · 모든 데이터는 합성 · 자동 추출 없음 · 실제 전달·수신 없음 · 저장하지 않음</p>
+  </header>
+  <main id="app" aria-live="polite"></main>
+</div>
+<script>
+(function(){
+"use strict";
+
+/* ---------- 합성 입력 (고정) ---------- */
+var CHILDREN = [
+  ["A1","도서 찾기"],["A2","대여 신청"],["A3","내 목록"],
+  ["A4","반납"],["A5","운영 검토"],["A6","연체 처리"]
+];
+var LINKED = ["A2","A4","A6"];
+var A2 = {
+  before:{desc:"신청 즉시 확정",dec:"신청 시 알림"},
+  after:{desc:"재고 확인 뒤 확정",dec:"확정 후 알림"},
+  reason:"재고 불일치 방지",
+  open:"실패 알림"
+};
+var EVENTS = [
+  {id:"E01",n:1,scene:1,text:"A–B 관련 관측. 자식 대상은 미확인."},
+  {id:"E02",n:2,scene:1,text:"A만 A1~A6으로 상세화. 관계는 하위로 자동 복제하지 않음."},
+  {id:"E03",n:3,scene:2,text:"기존 A–B 상위 관련성의 구체 대상을 A2·A4·A6–B로 확인."},
+  {id:"E04",n:4,scene:2,text:"A2 설명 “신청 즉시 확정”→“재고 확인 뒤 확정”, 결정 “신청 시 알림”→“확정 후 알림”. 이유: 재고 불일치 방지. 실패 알림은 미결."},
+  {id:"E05",n:5,scene:3,text:"사용자 재방문(합성 열람 E03). E04 변경 확인 후 작업 W2 인계문을 후보 세션 SESSION-02용으로 준비. 실제 전달·수신 아님."}
+];
+var SCENES = {
+  1:{title:"장면 1 · 부분 상세화",range:"E01~E02",last:2,
+     desc:"A만 6개로 상세화, B는 미세분화. A–B 관계는 A 영역 수준만 알려져 있고 세부 대상은 미확인입니다."},
+  2:{title:"장면 2 · 관계와 결정 변경",range:"E03~E04",last:4,
+     desc:"상위 A–B 관련의 구체 대상이 A2·A4·A6로 확인되고, A2의 설명·결정이 바뀌었습니다."},
+  3:{title:"장면 3 · 재방문·인계",range:"E05",last:5,
+     desc:"E03까지 본 사용자가 돌아와 E04 변경을 확인하고, A2 작업 W2의 인계문을 후보 세션 SESSION-02용으로 준비했습니다(미전달)."}
+};
+var ZOOMS = [80,90,100,115,130];
+
+/* ---------- 보기 상태 (장면별 독립) ---------- */
+var S = {scene:1, plan:"A", zoom:100, v:{}};
+function V(){
+  if(!S.v[S.scene]) S.v[S.scene] = {expanded:false,selected:null,relOpen:false,bLoc:"root",compare:false,handoff:false,fromA:false};
+  return S.v[S.scene];
+}
+function conf(){ return S.scene >= 2; }
+function nm(id){
+  if(id==="A") return "대여 경험";
+  if(id==="B") return "알림 구상";
+  for(var i=0;i<CHILDREN.length;i++) if(CHILDREN[i][0]===id) return CHILDREN[i][1];
+  return "";
+}
+function isChild(id){ return /^A[1-6]$/.test(id); }
+
+/* ---------- 조각 ---------- */
+function seg(label, action, val, pressed){
+  return '<button type="button" class="seg" data-action="'+action+'" data-val="'+val+'" data-key="'+action+'-'+val+'" aria-pressed="'+pressed+'">'+label+'</button>';
+}
+function changeRef(k){
+  return '<button type="button" class="chg" data-action="goto" data-val="A2" data-key="chg-'+k+'" data-testid="change-ref">A2 관련 결정 변경 1건 (E04) → A2로 이동</button>';
+}
+function relUnk(){
+  return '<div class="rel unk" data-rel-state="unconfirmed" data-child-links="0">'+
+    '<p class="rel-h"><strong>A ↔ B 관련</strong> <span class="tag unk">세부 대상 미확인</span></p>'+
+    '<p class="small">A 영역 수준 관측(E01) · 자식 연결 0개.</p>'+
+    '<p class="small muted">펼쳐도 하위로 복제하지 않음(E02).</p></div>';
+}
+function relList(k){
+  var v = V();
+  var h = '<div class="rel ok" data-rel-state="confirmed" data-child-links="3">'+
+    '<p class="rel-h"><strong>A 하위 3곳이 B와 관련</strong> <span class="tag ok">E03 확인</span></p>'+
+    changeRef("rel-"+k)+
+    '<button type="button" class="link" data-action="rel" data-key="rel-'+k+'" aria-expanded="'+v.relOpen+'"'+(v.relOpen?' aria-controls="rl-'+k+'"':'')+'>'+
+      (v.relOpen?'실제 관계 3곳 접기':'실제 관계 3곳 보기')+'</button>';
+  if(v.relOpen){
+    h += '<ul class="rl" id="rl-'+k+'" data-testid="relation-list">';
+    LINKED.forEach(function(id){
+      h += '<li><button type="button" data-action="goto" data-val="'+id+'" data-key="rl-'+k+'-'+id+'" data-relation="'+id+'-B">'+
+        '<span>'+id+' '+nm(id)+' ↔ B 알림 구상</span>'+
+        (id==="A2"?'<span class="tag warn">A2 관련 결정 변경 1건 (E04)</span>':'')+
+        '</button></li>';
+    });
+    h += '</ul>';
+  }
+  h += '<p class="small">구체화 이력: E01의 A–B 상위 관련이 E03에서 위 3곳으로 구체화됨 — 네 번째 관계 아님.</p>'+
+       '<p class="small muted">A1·A3·A5: 이번 관측에 연결 없음 (무관 확정 아님)</p></div>';
+  return h;
+}
+function relBlock(k){ return conf() ? relList(k) : relUnk(); }
+
+function childCard(id, name){
+  var v = V(), sel = v.selected===id, b = "";
+  if(conf()){
+    b += LINKED.indexOf(id)>=0 ? '<span class="tag ok">↔ B</span>' : '<span class="tag mut">이번 관측 연결 없음</span>';
+    if(id==="A2") b += '<span class="tag warn">결정 변경 1 · E04</span>';
+  }
+  if(S.scene===3 && id==="A2") b += '<span class="tag">W2 인계 준비·미전달</span>';
+  return '<button type="button" class="node" data-action="goto" data-val="'+id+'" data-key="node-'+id+'" data-node="'+id+'" aria-pressed="'+sel+'">'+
+    '<span class="node-t">'+id+' '+name+'</span>'+(b?'<span class="badges">'+b+'</span>':'')+'</button>';
+}
+function kids(){
+  return '<div class="kids" data-testid="children">'+CHILDREN.map(function(c){return childCard(c[0],c[1]);}).join("")+'</div>';
+}
+function collapsedSummary(k){
+  var h = '<p class="small muted">하위 6곳: '+CHILDREN.map(function(c){return c[0]+" "+c[1];}).join(" · ")+'</p>';
+  if(conf()){
+    h += '<p><strong>A 하위 3곳이 B와 관련</strong> <span class="tag ok">E03</span></p>'+changeRef("sum-"+k);
+    if(S.scene===3) h += '<p class="small"><span class="tag">W2 인계 준비·미전달 (A2)</span></p>';
+  } else {
+    h += '<p>B 관련: <span class="tag unk">세부 대상 미확인</span> <span class="small muted">자식 연결 0개</span></p>';
+  }
+  return h;
+}
+function bBox(k, external){
+  var v = V();
+  var h = '<div class="box b'+(external?' ext':'')+'" data-box="B">'+
+    '<div class="box-h"><h3>'+(external?'외부 관련 부분 · ':'')+'B 알림 구상</h3><span class="tag">미세분화</span></div>'+
+    '<p class="small muted">'+(external?'원본과 같은 식별자 B · 하위 없음':'하위 없음 (세분화되지 않음)')+'</p>'+
+    '<div class="acts"><button type="button" class="btn" data-action="goto" data-val="B" data-key="selB-'+k+'" aria-pressed="'+(v.selected==="B")+'">B 선택</button></div>';
+  if(external){
+    h += relBlock("ext");
+  } else if(conf()){
+    h += '<p class="small">A 쪽 관련 부분 3곳 · 미결 참조 1 (실패 알림, 소유 A2)</p>'+changeRef("b-"+k);
+  } else {
+    h += '<p class="small">A 쪽 대상: <span class="tag unk">세부 대상 미확인</span></p>';
+  }
+  return h + '</div>';
+}
+
+/* ---------- 안 A ---------- */
+function planA(){
+  var v = V();
+  var h = '<div class="mapgrid" data-plan-view="A">';
+  h += '<div class="box" data-box="A" data-expanded="'+v.expanded+'">'+
+    '<div class="box-h"><h3>A 대여 경험</h3><span class="tag">하위 6 · E02</span></div>'+
+    '<div class="acts">'+
+      '<button type="button" class="btn" data-action="toggleA" data-key="toggleA" aria-expanded="'+v.expanded+'">'+(v.expanded?'A 접기':'A 펼치기')+'</button>'+
+      '<button type="button" class="btn" data-action="goto" data-val="A" data-key="selA" aria-pressed="'+(v.selected==="A")+'">A 선택</button>'+
+      '<button type="button" class="btn" data-action="focusA" data-key="focusA">A에 집중 (안 B) →</button>'+
+    '</div>';
+  if(v.expanded){
+    if(!conf()) h += '<p class="frame-note" data-testid="frame-unconfirmed">A 영역 ↔ B: 세부 대상 미확인 · 자식 연결 0개</p>';
+    h += kids();
+  } else {
+    h += collapsedSummary("a");
+  }
+  h += '</div>';
+  h += '<div>'+relBlock("a")+'</div>';
+  h += bBox("a", false);
+  return h + '</div>';
+}
+
+/* ---------- 안 B ---------- */
+function planB(){
+  var v = V();
+  var crumb = '<nav class="crumb" aria-label="경로"><ol>'+
+    (v.bLoc==="root" ? '<li><span aria-current="page">전체</span></li>'
+      : '<li><button type="button" class="link" data-action="bgo" data-val="root" data-key="crumb-root">전체</button></li><li aria-hidden="true">›</li><li><span aria-current="page">A 대여 경험</span></li>')+
+    '</ol></nav>';
+  var back = v.fromA ? '<div class="acts"><button type="button" class="btn" data-action="backA" data-key="backA">← 안 A 직전 보기로 복귀</button></div>' : '';
+  var h = crumb + back;
+  if(v.bLoc==="root"){
+    h += '<div class="mapgrid" data-plan-view="B-root">'+
+      '<div class="box" data-box="A">'+
+        '<div class="box-h"><h3>A 대여 경험</h3><span class="tag">하위 6 · E02</span></div>'+
+        '<div class="acts">'+
+          '<button type="button" class="btn" data-action="bgo" data-val="A" data-key="enterA">A로 진입 →</button>'+
+          '<button type="button" class="btn" data-action="goto" data-val="A" data-key="selA" aria-pressed="'+(v.selected==="A")+'">A 선택</button>'+
+        '</div>'+collapsedSummary("b")+'</div>'+
+      '<div>'+relBlock("b")+'</div>'+
+      bBox("b", false)+'</div>';
+  } else {
+    h += '<div class="mapgrid focus" data-plan-view="B-A">'+
+      '<div class="box" data-box="A">'+
+        '<div class="box-h"><h3>A 대여 경험</h3><span class="tag">부분 집중</span></div>'+
+        '<div class="acts"><button type="button" class="btn" data-action="goto" data-val="A" data-key="selA" aria-pressed="'+(v.selected==="A")+'">A 선택</button></div>'+
+        (conf()?'':'<p class="frame-note" data-testid="frame-unconfirmed">A 영역 ↔ B: 세부 대상 미확인 · 자식 연결 0개</p>')+
+        kids()+'</div>'+
+      bBox("bA", true)+'</div>';
+  }
+  return h;
+}
+
+/* ---------- 선택 패널 ---------- */
+function sec(t, body){ return '<section><h3>'+t+'</h3>'+body+'</section>'; }
+function handoffDoc(){
+  return '<article class="handoff" aria-label="W2 인계문 준비본" data-testid="handoff-doc">'+
+    '<p><span class="tag warn">준비·미전달</span> <span class="small">SESSION-02에 전달·수신된 적 없음</span></p>'+
+    '<dl>'+
+    '<dt>목적</dt><dd>A2 대여 신청의 실패 알림 정책 검토 (작업 W2)</dd>'+
+    '<dt>범위·기준</dt><dd>A2 대여 신청만 · 기준 E04 · A4·A6는 인계 범위 아님</dd>'+
+    '<dt>현재 설명</dt><dd>재고 확인 뒤 확정 (E04 · 이전: 신청 즉시 확정)</dd>'+
+    '<dt>현재 결정</dt><dd>확정 후 알림 (E04)</dd>'+
+    '<dt>대체된 결정</dt><dd>신청 시 알림</dd>'+
+    '<dt>이유</dt><dd>재고 불일치 방지</dd>'+
+    '<dt>관련 부분</dt><dd>B 알림 구상은 미세분화(하위 없음). A2–B 관계는 E03에서 확인.</dd>'+
+    '<dt>미결</dt><dd>실패 알림 — 정책 미정 (이번 검토 대상)</dd>'+
+    '<dt>합성 근거</dt><dd><ul>'+
+      '<li>E01 A–B 관련 관측(자식 미확인)</li>'+
+      '<li>E02 A를 A1~A6으로 상세화</li>'+
+      '<li>E03 A–B 구체 대상 A2·A4·A6 확인</li>'+
+      '<li>E04 A2 설명·결정 변경, 실패 알림 미결</li>'+
+    '</ul></dd>'+
+    '<dt>작업·세션</dt><dd>작업 W2 · 후보 세션 SESSION-02 (후보이며 배정·전달 아님)</dd>'+
+    '<dt>상태</dt><dd data-testid="handoff-state">준비·미전달</dd>'+
+    '</dl></article>';
+}
+function compareTable(){
+  return '<table data-testid="compare"><thead><tr><th>항목</th><th>변경 전</th><th>변경 후 (E04)</th></tr></thead><tbody>'+
+    '<tr><td>설명</td><td>'+A2.before.desc+'</td><td>'+A2.after.desc+'</td></tr>'+
+    '<tr><td>결정</td><td>'+A2.before.dec+'</td><td>'+A2.after.dec+'</td></tr>'+
+    '<tr><td>이유</td><td>—</td><td>'+A2.reason+'</td></tr>'+
+    '<tr><td>미결</td><td>—</td><td>'+A2.open+'</td></tr>'+
+    '</tbody></table>';
+}
+function panelA2(){
+  var v = V(), h = '';
+  if(!conf()){
+    h += sec("설명", '<p>'+A2.before.desc+'</p><p class="small muted">합성 입력에 기록 시점 미지정 (E04 이전 값)</p>');
+    h += sec("결정", '<p>'+A2.before.dec+'</p>');
+    h += sec("변경", '<p class="muted">이 장면에서 변경 없음</p>');
+    h += sec("B와의 관계", '<p><span class="tag unk">세부 대상 미확인</span> A 영역 수준 관련만 관측(E01). A2 연결로 표시하지 않음.</p>');
+    h += sec("인계", '<p class="muted">없음</p>');
+    return h;
+  }
+  h += sec("설명", '<p>'+A2.after.desc+' <span class="tag warn">E04 변경</span></p>');
+  h += sec("결정", '<p>'+A2.after.dec+' <span class="tag warn">E04</span></p><p class="small muted">대체된 결정: '+A2.before.dec+'</p>');
+  h += sec("변경", '<p>E04 · 1건 · 이유: '+A2.reason+'</p><p>미결: <strong>'+A2.open+'</strong></p>'+
+    '<button type="button" class="link" data-action="compare" data-key="compare" aria-expanded="'+v.compare+'">'+(v.compare?'변경 전후 숨기기':'변경 전후 보기')+'</button>'+
+    (v.compare?compareTable():''));
+  h += sec("B와의 관계", '<p>A2 ↔ B (E03 확인) · B는 미세분화</p><p class="small muted">관계 자체 변경으로 표시하지 않음 — A2 결정 변경을 B 쪽에 참조로 노출</p>'+
+    '<button type="button" class="link" data-action="goto" data-val="B" data-key="p-toB">B 보기</button>');
+  if(S.scene===3){
+    h += sec("인계", '<div class="work" data-testid="work">'+
+      '<p><strong>작업 W2</strong> · A2 실패 알림 정책 검토 <span class="tag mut">구조와 별도 항목</span></p>'+
+      '<p>후보 세션: <strong>SESSION-02</strong> <span class="small muted">(후보 · 배정 아님)</span></p>'+
+      '<p>상태: <strong data-testid="work-state">준비·미전달</strong></p>'+
+      '<button type="button" class="btn" data-action="handoff" data-key="handoff" aria-expanded="'+v.handoff+'">'+(v.handoff?'인계문 접기':'인계문 준비 내용 보기')+'</button>'+
+      (v.handoff?handoffDoc():'')+'</div>');
+  } else {
+    h += sec("인계", '<p class="muted">이 장면에는 인계 없음</p>');
+  }
+  return h;
+}
+function panelChild(id){
+  var h = '';
+  h += sec("설명", '<p class="muted">합성 입력에 기록 없음</p>');
+  h += sec("결정", '<p class="muted">합성 입력에 기록 없음</p>');
+  h += sec("변경", '<p class="muted">없음</p>');
+  var rel;
+  if(!conf()) rel = '<p><span class="tag unk">세부 대상 미확인</span> A 영역 수준 관련만 관측(E01).</p>';
+  else if(LINKED.indexOf(id)>=0) rel = '<p>'+id+' ↔ B (E03 확인)</p><p class="small muted">이 관계에는 변경 기록 없음</p>';
+  else rel = '<p>이번 관측에 연결 없음 <span class="small muted">(무관 확정 아님)</span></p>';
+  h += sec("B와의 관계", rel);
+  h += sec("인계", S.scene===3 && (id==="A4"||id==="A6") ? '<p class="muted">W2 인계 범위 아님</p>' : '<p class="muted">없음</p>');
+  return h;
+}
+function panelA(){
+  var h = sec("설명", '<p>대여 경험 상위 구상 · E02에서 하위 6곳으로 상세화</p><div class="chips">'+
+    CHILDREN.map(function(c){return '<button type="button" class="btn" data-action="goto" data-val="'+c[0]+'" data-key="pA-'+c[0]+'">'+c[0]+' '+c[1]+'</button>';}).join("")+'</div>');
+  h += sec("B와의 관계", conf()
+    ? '<p>하위 3곳(A2·A4·A6)이 B와 관련 (E03)</p><p class="small muted">E01 상위 관련은 구체화 이력 — 네 번째 관계 아님</p>'+changeRef("pA")
+    : '<p><span class="tag unk">세부 대상 미확인</span> A 영역 수준(E01) · 자식 연결 0개</p>');
+  return h;
+}
+function panelB(){
+  var h = sec("설명", '<p>알림 구상 · 미세분화(하위 없음)</p><p class="small muted">상세 설명은 합성 입력에 없음</p>');
+  if(!conf()){
+    h += sec("A와의 관계", '<p>A–B 관련(E01) · A 쪽 <span class="tag unk">세부 대상 미확인</span></p>');
+    return h;
+  }
+  h += sec("A 쪽 관련 부분 3곳", '<div class="chips">'+LINKED.map(function(id){
+    return '<button type="button" class="btn" data-action="goto" data-val="'+id+'" data-key="pB-'+id+'">'+id+' '+nm(id)+'</button>';}).join("")+'</div>');
+  h += sec("관련 결정 변경 참조", '<p data-testid="b-change-ref">A2 관련 결정 변경 1건 (E04): '+A2.before.dec+' → '+A2.after.dec+'</p>'+
+    '<p class="small muted">B 자체 또는 관계 자체의 변경이 아님 · A4·A6에는 전파하지 않음</p>'+changeRef("pB"));
+  h += sec("미결 참조", '<p data-testid="b-open-ref">미결 1: '+A2.open+' (소유: A2)</p>'+
+    '<button type="button" class="link" data-action="goto" data-val="A2" data-key="pB-open">A2에서 보기</button>');
+  return h;
+}
+function panel(){
+  var v = V(), id = v.selected, body, title;
+  if(!id){ return '<aside class="panel" aria-label="선택 패널" data-selected="none"><h2>선택 패널</h2><p class="muted">지도나 목록에서 항목을 선택하세요.</p></aside>'; }
+  if(id==="A"){ title = "A 대여 경험"; body = panelA(); }
+  else if(id==="B"){ title = "B 알림 구상"; body = panelB(); }
+  else if(id==="A2"){ title = "A2 대여 신청"; body = panelA2(); }
+  else { title = id+" "+nm(id); body = panelChild(id); }
+  return '<aside class="panel" aria-label="선택 패널" data-selected="'+id+'"><h2>'+title+'</h2>'+
+    (isChild(id)?'<p class="small muted">소속: A 대여 경험</p>':'')+body+'</aside>';
+}
+
+/* ---------- 전체 ---------- */
+function statusText(){
+  var v = V();
+  var loc = S.plan==="A" ? (v.expanded?"A 펼침":"A 접힘") : ("위치: "+(v.bLoc==="A"?"전체 › A":"전체"));
+  return "상태 · 장면 "+S.scene+" · 안 "+S.plan+" · "+loc+" · 선택: "+(v.selected||"없음")+
+    " · 관계 목록: "+(v.relOpen?"펼침":"접힘")+" · 확대 "+S.zoom+"%";
+}
+function render(focusKey){
+  var v = V(), sc = SCENES[S.scene];
+  var active = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute("data-key") : null;
+  var zi = ZOOMS.indexOf(S.zoom);
+  var h = '';
+  h += '<div class="bar" role="toolbar" aria-label="보기 조절">'+
+    '<div class="group"><span class="group-l">장면</span>'+[1,2,3].map(function(n){return seg("장면 "+n+" ("+SCENES[n].range+")","scene",n,S.scene===n);}).join("")+'</div>'+
+    '<div class="group"><span class="group-l">탐색</span>'+seg("안 A · 전체에서 펼침","plan","A",S.plan==="A")+seg("안 B · 부분 집중","plan","B",S.plan==="B")+'</div>'+
+    '<div class="group"><span class="group-l">확대</span>'+
+      '<button type="button" class="seg" data-action="zoom" data-val="-1" data-key="zoom-out" aria-label="축소"'+(zi<=0?' disabled':'')+'>−</button>'+
+      '<span class="small" data-testid="zoom">'+S.zoom+'%</span>'+
+      '<button type="button" class="seg" data-action="zoom" data-val="1" data-key="zoom-in" aria-label="확대"'+(zi>=ZOOMS.length-1?' disabled':'')+'>+</button>'+
+    '</div></div>';
+  h += '<p class="status" data-testid="status">'+statusText()+'</p>';
+  h += '<div class="banner" data-testid="scene-banner"><strong>'+sc.title+' ('+sc.range+')</strong><p class="small">'+sc.desc+'</p>';
+  if(S.scene===3){
+    h += '<div class="baseline" data-testid="baseline"><p><strong>읽음 기준: 합성 열람 E03 / 반영 E04</strong></p>'+
+      '<p class="small">실제 열람 시점은 알 수 없어 합성 표시 · 장면 전환으로 갱신하지 않음</p>'+
+      '<p class="small">E03 이후 변경 1건</p>'+changeRef("base")+'</div>';
+  }
+  h += '</div>';
+  h += '<div class="layout"><section class="map" aria-label="구조 지도" style="font-size:'+S.zoom+'%">'+
+    (S.plan==="A"?planA():planB())+'</section>'+panel()+'</div>';
+  h += '<section class="log" aria-label="합성 기록"><h2>기록 (합성)</h2><ol>'+
+    EVENTS.map(function(e){
+      var cls = e.n>sc.last?"later":(e.scene===S.scene?"cur":"");
+      return '<li class="'+cls+'" data-event="'+e.id+'"><strong>'+e.id+'</strong> '+e.text+(e.scene===S.scene?' <span class="tag">이 장면</span>':'')+'</li>';
+    }).join("")+'</ol></section>';
+
+  var app = document.getElementById("app");
+  app.innerHTML = h;
+  app.setAttribute("data-scene", S.scene);
+  app.setAttribute("data-plan", S.plan);
+  app.setAttribute("data-expanded", v.expanded);
+  app.setAttribute("data-selected", v.selected||"none");
+  app.setAttribute("data-bloc", v.bLoc);
+  app.setAttribute("data-zoom", S.zoom);
+
+  var key = focusKey || active;
+  if(key){
+    var el = app.querySelector('[data-key="'+key+'"]');
+    if(el) el.focus();
+  }
+}
+
+/* ---------- 동작 ---------- */
+function goto(id){
+  var v = V();
+  v.selected = id;
+  if(isChild(id)){
+    if(S.plan==="A") v.expanded = true; else v.bLoc = "A";
+    render("node-"+id);
+  } else {
+    render();
+  }
+}
+document.getElementById("app").addEventListener("click", function(ev){
+  var b = ev.target.closest("button[data-action]");
+  if(!b || b.disabled) return;
+  var a = b.getAttribute("data-action"), val = b.getAttribute("data-val"), v = V();
+  switch(a){
+    case "scene": S.scene = Number(val); render("scene-"+val); return;
+    case "plan": S.plan = val; V().fromA = false; render("plan-"+val); return;
+    case "zoom":
+      var i = ZOOMS.indexOf(S.zoom) + Number(val);
+      if(i>=0 && i<ZOOMS.length) S.zoom = ZOOMS[i];
+      render(); return;
+    case "toggleA": v.expanded = !v.expanded; render("toggleA"); return;
+    case "focusA": S.plan = "B"; v.bLoc = "A"; v.fromA = true; render("backA"); return;
+    case "backA": S.plan = "A"; v.fromA = false; render("focusA"); return;
+    case "bgo": v.bLoc = val; render(val==="A" ? "crumb-root" : "enterA"); return;
+    case "rel": v.relOpen = !v.relOpen; render(); return;
+    case "compare": v.compare = !v.compare; render(); return;
+    case "handoff": v.handoff = !v.handoff; render(); return;
+    case "goto": goto(val); return;
+  }
+});
+
+render();
+window.__proto_state = S; /* 검사용 읽기 전용 노출 */
+})();
+</script>
+</body>
+</html>
+
