@@ -1,0 +1,6815 @@
+{
+  "target_commit": "34b4124098fe6242b34e16e23532ceb3e0fe91ad",
+  "source": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/34b4124098fe6242b34e16e23532ceb3e0fe91ad/docs/cycles/2026-10-16-return-flow-03/author-fix1/return-flow-study.html",
+  "input_contract_commit": "34b4124098fe6242b34e16e23532ceb3e0fe91ad",
+  "started_utc": "2026-10-15T17:18:04.859160+00:00",
+  "expected_steps": 16,
+  "cases": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "steps": [
+        {
+          "stage": 1,
+          "status": "PASS",
+          "mapAfterSetup": {
+            "selected": [
+              "instruction"
+            ],
+            "depths": {
+              "home": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "task": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "next": {
+                "depth": "0",
+                "expanded": "false",
+                "bodyHidden": true
+              },
+              "restore": {
+                "depth": "1",
+                "expanded": "true",
+                "bodyHidden": false
+              }
+            },
+            "mapScroll": {
+              "left": 32,
+              "top": 100,
+              "maxX": 32,
+              "maxY": 374
+            },
+            "windowY": 0,
+            "zoomLabel": "120%",
+            "appliedTransform": "matrix(1.2, 0, 0, 1.2, 0, 0)",
+            "canvasScale": {
+              "x": 1.2,
+              "y": 1.2001656707022628
+            },
+            "nodes": {
+              "purpose": {
+                "rect": {
+                  "x": 396,
+                  "y": 149.7531280517578,
+                  "width": 360,
+                  "height": 96.71250915527344
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 81
+              },
+              "instruction": {
+                "rect": {
+                  "x": 396,
+                  "y": 265.6656494140625,
+                  "width": 360,
+                  "height": 121.9124755859375
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 102
+              },
+              "decision": {
+                "rect": {
+                  "x": 396,
+                  "y": 406.77813720703125,
+                  "width": 360,
+                  "height": 121.91253662109375
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 102
+              },
+              "home": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 283.2531433105469,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "task": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 604.2906494140625,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "next": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 844.721923828125,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "restore": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 911.9219360351562,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              }
+            },
+            "helpOpen": true,
+            "related": [
+              "home",
+              "task",
+              "next"
+            ],
+            "active": "",
+            "mapHidden": false,
+            "focusHidden": true,
+            "peekCount": 0,
+            "prepOpen": false,
+            "devicePixelRatio": 1,
+            "overflow": {
+              "sw": 1440,
+              "cw": 1440
+            }
+          }
+        },
+        {
+          "stage": 2,
+          "status": "PASS",
+          "preEntry": {
+            "selected": [
+              "purpose"
+            ],
+            "depths": {
+              "home": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "task": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "next": {
+                "depth": "0",
+                "expanded": "false",
+                "bodyHidden": true
+              },
+              "restore": {
+                "depth": "1",
+                "expanded": "true",
+                "bodyHidden": false
+              }
+            },
+            "mapScroll": {
+              "left": 32,
+              "top": 100,
+              "maxX": 32,
+              "maxY": 374
+            },
+            "windowY": 0,
+            "zoomLabel": "120%",
+            "appliedTransform": "matrix(1.2, 0, 0, 1.2, 0, 0)",
+            "canvasScale": {
+              "x": 1.2,
+              "y": 1.2001656707022628
+            },
+            "nodes": {
+              "purpose": {
+                "rect": {
+                  "x": 396,
+                  "y": 149.7531280517578,
+                  "width": 360,
+                  "height": 96.71250915527344
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 81
+              },
+              "instruction": {
+                "rect": {
+                  "x": 396,
+                  "y": 265.6656494140625,
+                  "width": 360,
+                  "height": 121.9124755859375
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 102
+              },
+              "decision": {
+                "rect": {
+                  "x": 396,
+                  "y": 406.77813720703125,
+                  "width": 360,
+                  "height": 121.91253662109375
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 102
+              },
+              "home": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 283.2531433105469,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "task": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 604.2906494140625,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "next": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 844.721923828125,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "restore": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 911.9219360351562,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              }
+            },
+            "helpOpen": true,
+            "related": [
+              "home",
+              "task",
+              "next",
+              "restore"
+            ],
+            "active": "purpose",
+            "mapHidden": false,
+            "focusHidden": true,
+            "peekCount": 0,
+            "prepOpen": false,
+            "devicePixelRatio": 1,
+            "overflow": {
+              "sw": 1440,
+              "cw": 1440
+            }
+          },
+          "edges": {
+            "display": "block",
+            "paths": [
+              {
+                "start": {
+                  "x": 756.0000162124634,
+                  "y": 198.10938220471144
+                },
+                "end": {
+                  "x": 955.2000241279602,
+                  "y": 309.65315494760944
+                },
+                "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 244.04688517252606 506.00001017252606 244.04688517252606"
+              },
+              {
+                "start": {
+                  "x": 756.0000162124634,
+                  "y": 198.10938220471144
+                },
+                "end": {
+                  "x": 955.2000241279602,
+                  "y": 630.6906493939459
+                },
+                "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 511.57814025878906 506.00001017252606 511.57814025878906"
+              },
+              {
+                "start": {
+                  "x": 756.0000162124634,
+                  "y": 198.10938220471144
+                },
+                "end": {
+                  "x": 955.2000241279602,
+                  "y": 871.1219821900158
+                },
+                "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 711.9375356038412 506.00001017252606 711.9375356038412"
+              },
+              {
+                "start": {
+                  "x": 756.0000162124634,
+                  "y": 198.10938220471144
+                },
+                "end": {
+                  "x": 955.2000241279602,
+                  "y": 938.3219848603039
+                },
+                "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 767.9375457763672 506.00001017252606 767.9375457763672"
+              }
+            ],
+            "origin": {
+              "x": 756,
+              "y": 198.10938262939453
+            },
+            "targets": [
+              {
+                "id": "home",
+                "x": 955.2000122070312,
+                "y": 309.65313720703125
+              },
+              {
+                "id": "task",
+                "x": 955.2000122070312,
+                "y": 630.6906433105469
+              },
+              {
+                "id": "next",
+                "x": 955.2000122070312,
+                "y": 871.1219177246094
+              },
+              {
+                "id": "restore",
+                "x": 955.2000122070312,
+                "y": 938.3219299316406
+              }
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "status": "PASS",
+          "opened": {
+            "before": {
+              "scroll": {
+                "windowY": 0,
+                "reading": 0,
+                "prep": 0,
+                "focus": "focusTitle"
+              },
+              "button": {
+                "box": {
+                  "x": 428.59375,
+                  "y": 324.546875,
+                  "width": 27.921875,
+                  "height": 20.796875,
+                  "bottom": 345.34375,
+                  "right": 456.515625
+                },
+                "full": true,
+                "hit": true,
+                "cover": "evbtn",
+                "ancestors": [
+                  {
+                    "id": "reading",
+                    "overflow": "auto"
+                  }
+                ],
+                "clip": {
+                  "l": 300,
+                  "t": 49,
+                  "r": 1440,
+                  "b": 900
+                }
+              }
+            },
+            "text": "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”\n닫기\n문서 보고 FIX058 변경 보고, 226–237행에서 옮긴 발췌. 원문 전체가 아닙니다.\nAI 해석이 낡아도 정정은 홈·작업문에 보이고 재정리 요청에 실린다.\n검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.\n이 설명이 읽은 방식\n\n요청에 ‘실린다’는 것까지가 보고 내용입니다.\n\n이 기록으로 알 수 없는 것\n\n실제 AI가 정정을 읽고 따랐는지, 해석 품질이 어떤지는 확인되지 않았습니다. 검증은 합성 응답과 MOCK입니다.\n\nGitHub에서 원문 위치 열기 (외부 페이지, 새 탭)",
+            "panel": {
+              "scrollTop": 0,
+              "clientHeight": 340,
+              "scrollHeight": 340,
+              "overflow": "visible"
+            },
+            "body": {
+              "clientHeight": 292,
+              "scrollHeight": 292,
+              "overflow": "visible"
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 897.078125,
+                "y": 367.546875,
+                "width": 45.921875,
+                "height": 28.796875,
+                "bottom": 396.34375,
+                "right": 943
+              },
+              "full": true,
+              "hit": true,
+              "cover": "peek-close",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "noInternalScrollablePane": true
+          }
+        },
+        {
+          "stage": 4,
+          "status": "PASS",
+          "buttonClosed": {
+            "afterImmediate": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 428.59375,
+                "y": 324.546875,
+                "width": 27.921875,
+                "height": 20.796875,
+                "bottom": 345.34375,
+                "right": 456.515625
+              },
+              "full": true,
+              "hit": true,
+              "cover": "evbtn",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "tabAfterClosed": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p4"
+            },
+            "removedPanelAndLinks": true
+          },
+          "reopened": {
+            "before": {
+              "scroll": {
+                "windowY": 0,
+                "reading": 0,
+                "prep": 0,
+                "focus": "p3"
+              },
+              "button": {
+                "box": {
+                  "x": 428.59375,
+                  "y": 324.546875,
+                  "width": 27.921875,
+                  "height": 20.796875,
+                  "bottom": 345.34375,
+                  "right": 456.515625
+                },
+                "full": true,
+                "hit": true,
+                "cover": "evbtn",
+                "ancestors": [
+                  {
+                    "id": "reading",
+                    "overflow": "auto"
+                  }
+                ],
+                "clip": {
+                  "l": 300,
+                  "t": 49,
+                  "r": 1440,
+                  "b": 900
+                }
+              }
+            },
+            "text": "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”\n닫기\n문서 보고 FIX058 변경 보고, 226–237행에서 옮긴 발췌. 원문 전체가 아닙니다.\nAI 해석이 낡아도 정정은 홈·작업문에 보이고 재정리 요청에 실린다.\n검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.\n이 설명이 읽은 방식\n\n요청에 ‘실린다’는 것까지가 보고 내용입니다.\n\n이 기록으로 알 수 없는 것\n\n실제 AI가 정정을 읽고 따랐는지, 해석 품질이 어떤지는 확인되지 않았습니다. 검증은 합성 응답과 MOCK입니다.\n\nGitHub에서 원문 위치 열기 (외부 페이지, 새 탭)",
+            "panel": {
+              "scrollTop": 0,
+              "clientHeight": 340,
+              "scrollHeight": 340,
+              "overflow": "visible"
+            },
+            "body": {
+              "clientHeight": 292,
+              "scrollHeight": 292,
+              "overflow": "visible"
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 897.078125,
+                "y": 367.546875,
+                "width": 45.921875,
+                "height": 28.796875,
+                "bottom": 396.34375,
+                "right": 943
+              },
+              "full": true,
+              "hit": true,
+              "cover": "peek-close",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "noInternalScrollablePane": true
+          },
+          "escapeClosed": {
+            "afterImmediate": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 428.59375,
+                "y": 324.546875,
+                "width": 27.921875,
+                "height": 20.796875,
+                "bottom": 345.34375,
+                "right": 456.515625
+              },
+              "full": true,
+              "hit": true,
+              "cover": "evbtn",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "tabAfterClosed": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p4"
+            },
+            "removedPanelAndLinks": true
+          }
+        },
+        {
+          "stage": 5,
+          "status": "PASS",
+          "prep": {
+            "before": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 344,
+                "y": 760.328125,
+                "width": 295.546875,
+                "height": 44,
+                "bottom": 804.328125,
+                "right": 639.546875
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepBtn",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "text": "이어 맡길 내용\n\n목적 정정 · 준비 제안이며 보내지 않습니다\n\n닫기\n대상\n목적 정정 (이 개발 기록에서 보고한 변경)\n이 부분이 하는 일\n목적 정정은 별도 기록에 저장하고, 작업 지시(직접 쓴 이해·범위, 현재 요청 원문)는 덮지 않는 동작.\n범위\n홈, 작업문, 다음 AI 요청, 저장 복구에서 문서가 보고한 내용. 같은 문서의 후속 보완 FIX059·FIX061은 제외.\n기준 기록\nflow049-outcome-home.md, 고정 커밋 f0fa532, FIX058 226–237행\n비교용 앞선 설명 AI055 175–187행\n문서에 적힌 제품 기준 d5ef9a4 (코드 대조 안 함)\n지켜야 할 조건\n작업 카드 직접 수정을 목적 정정으로 올리지 않기\n정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지\n사용자 결정은 AI 해석보다 앞선 조건으로 다루기\n이 기록으로 알 수 없는 것\n실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)\n별도 검토자의 최종 확인 결과\n사용자 원요청\n받을 담당자: 기록에 없음\n\n이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.",
+            "lowerReadings": [
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(1)",
+                "text": "작업 카드 직접 수정을 목적 정정으로 올리지 않기",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 495.875,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 518.265625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(2)",
+                "text": "정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 521.265625,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 543.65625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(3)",
+                "text": "사용자 결정은 AI 해석보다 앞선 조건으로 다루기",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 546.65625,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 569.046875,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(1)",
+                "text": "실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 609.84375,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 632.234375,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(2)",
+                "text": "별도 검토자의 최종 확인 결과",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 635.234375,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 657.625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(3)",
+                "text": "사용자 원요청",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 660.625,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 683.015625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(4)",
+                "text": "받을 담당자: 기록에 없음",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 686.015625,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 708.40625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody .nosend",
+                "text": "이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.",
+                "geometry": {
+                  "box": {
+                    "x": 990,
+                    "y": 728.40625,
+                    "width": 430,
+                    "height": 84.78125,
+                    "bottom": 813.1875,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "nosend",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              }
+            ],
+            "bodyMetrics": {
+              "top": 0,
+              "max": 0,
+              "clientHeight": 822,
+              "scrollHeight": 822
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 1358.390625,
+                "y": 18,
+                "width": 61.609375,
+                "height": 44,
+                "bottom": 62,
+                "right": 1420
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepClose",
+              "ancestors": [
+                {
+                  "id": "prep",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 970,
+                "t": 0,
+                "r": 1440,
+                "b": 900
+              }
+            }
+          }
+        },
+        {
+          "stage": 6,
+          "status": "PASS",
+          "closed": {
+            "afterImmediate": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "prepBtn"
+            },
+            "dialogGeometry": {
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "full": false,
+              "hit": false,
+              "cover": "top",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "originGeometry": {
+              "box": {
+                "x": 344,
+                "y": 760.328125,
+                "width": 295.546875,
+                "height": 44,
+                "bottom": 804.328125,
+                "right": 639.546875
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepBtn",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            }
+          }
+        },
+        {
+          "stage": 7,
+          "status": "PASS",
+          "returned": {
+            "afterImmediate": {
+              "selected": [
+                "purpose"
+              ],
+              "depths": {
+                "home": {
+                  "depth": "2",
+                  "expanded": "true",
+                  "bodyHidden": false
+                },
+                "task": {
+                  "depth": "2",
+                  "expanded": "true",
+                  "bodyHidden": false
+                },
+                "next": {
+                  "depth": "0",
+                  "expanded": "false",
+                  "bodyHidden": true
+                },
+                "restore": {
+                  "depth": "1",
+                  "expanded": "true",
+                  "bodyHidden": false
+                }
+              },
+              "mapScroll": {
+                "left": 32,
+                "top": 100,
+                "maxX": 32,
+                "maxY": 374
+              },
+              "windowY": 0,
+              "zoomLabel": "120%",
+              "appliedTransform": "matrix(1.2, 0, 0, 1.2, 0, 0)",
+              "canvasScale": {
+                "x": 1.2,
+                "y": 1.2001656707022628
+              },
+              "nodes": {
+                "purpose": {
+                  "rect": {
+                    "x": 396,
+                    "y": 149.7531280517578,
+                    "width": 360,
+                    "height": 96.71250915527344
+                  },
+                  "layoutWidth": 300,
+                  "layoutHeight": 81
+                },
+                "instruction": {
+                  "rect": {
+                    "x": 396,
+                    "y": 265.6656494140625,
+                    "width": 360,
+                    "height": 121.9124755859375
+                  },
+                  "layoutWidth": 300,
+                  "layoutHeight": 102
+                },
+                "decision": {
+                  "rect": {
+                    "x": 396,
+                    "y": 406.77813720703125,
+                    "width": 360,
+                    "height": 121.91253662109375
+                  },
+                  "layoutWidth": 300,
+                  "layoutHeight": 102
+                },
+                "home": {
+                  "rect": {
+                    "x": 955.2000122070312,
+                    "y": 283.2531433105469,
+                    "width": 417.60003662109375,
+                    "height": 52.79998779296875
+                  },
+                  "layoutWidth": 348,
+                  "layoutHeight": 44
+                },
+                "task": {
+                  "rect": {
+                    "x": 955.2000122070312,
+                    "y": 604.2906494140625,
+                    "width": 417.60003662109375,
+                    "height": 52.79998779296875
+                  },
+                  "layoutWidth": 348,
+                  "layoutHeight": 44
+                },
+                "next": {
+                  "rect": {
+                    "x": 955.2000122070312,
+                    "y": 844.721923828125,
+                    "width": 417.60003662109375,
+                    "height": 52.79998779296875
+                  },
+                  "layoutWidth": 348,
+                  "layoutHeight": 44
+                },
+                "restore": {
+                  "rect": {
+                    "x": 955.2000122070312,
+                    "y": 911.9219360351562,
+                    "width": 417.60003662109375,
+                    "height": 52.79998779296875
+                  },
+                  "layoutWidth": 348,
+                  "layoutHeight": 44
+                }
+              },
+              "helpOpen": true,
+              "related": [
+                "home",
+                "task",
+                "next",
+                "restore"
+              ],
+              "active": "purpose",
+              "mapHidden": false,
+              "focusHidden": true,
+              "peekCount": 0,
+              "prepOpen": false,
+              "devicePixelRatio": 1,
+              "overflow": {
+                "sw": 1440,
+                "cw": 1440
+              }
+            },
+            "nodeCoordinateDeltas": {
+              "purpose": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "instruction": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "decision": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "home": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.0,
+                "height": 0.0
+              },
+              "task": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.0,
+                "height": 0.0
+              },
+              "next": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.0,
+                "height": 0.0
+              },
+              "restore": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.0,
+                "height": 0.0
+              }
+            },
+            "edgeGeometry": {
+              "display": "block",
+              "paths": [
+                {
+                  "start": {
+                    "x": 756.0000162124634,
+                    "y": 198.10938220471144
+                  },
+                  "end": {
+                    "x": 955.2000241279602,
+                    "y": 309.65315494760944
+                  },
+                  "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 244.04688517252606 506.00001017252606 244.04688517252606"
+                },
+                {
+                  "start": {
+                    "x": 756.0000162124634,
+                    "y": 198.10938220471144
+                  },
+                  "end": {
+                    "x": 955.2000241279602,
+                    "y": 630.6906493939459
+                  },
+                  "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 511.57814025878906 506.00001017252606 511.57814025878906"
+                },
+                {
+                  "start": {
+                    "x": 756.0000162124634,
+                    "y": 198.10938220471144
+                  },
+                  "end": {
+                    "x": 955.2000241279602,
+                    "y": 871.1219821900158
+                  },
+                  "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 711.9375356038412 506.00001017252606 711.9375356038412"
+                },
+                {
+                  "start": {
+                    "x": 756.0000162124634,
+                    "y": 198.10938220471144
+                  },
+                  "end": {
+                    "x": 955.2000241279602,
+                    "y": 938.3219848603039
+                  },
+                  "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 767.9375457763672 506.00001017252606 767.9375457763672"
+                }
+              ],
+              "origin": {
+                "x": 756,
+                "y": 198.10938262939453
+              },
+              "targets": [
+                {
+                  "id": "home",
+                  "x": 955.2000122070312,
+                  "y": 309.65313720703125
+                },
+                {
+                  "id": "task",
+                  "x": 955.2000122070312,
+                  "y": 630.6906433105469
+                },
+                {
+                  "id": "next",
+                  "x": 955.2000122070312,
+                  "y": 871.1219177246094
+                },
+                {
+                  "id": "restore",
+                  "x": 955.2000122070312,
+                  "y": 938.3219299316406
+                }
+              ]
+            },
+            "measurementBeforeAnyPostReturnScroll": true
+          }
+        },
+        {
+          "stage": 8,
+          "status": "PASS",
+          "preEntry": {
+            "selected": [
+              "purpose"
+            ],
+            "depths": {
+              "home": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "task": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "next": {
+                "depth": "0",
+                "expanded": "false",
+                "bodyHidden": true
+              },
+              "restore": {
+                "depth": "1",
+                "expanded": "true",
+                "bodyHidden": false
+              }
+            },
+            "mapScroll": {
+              "left": 32,
+              "top": 100,
+              "maxX": 32,
+              "maxY": 374
+            },
+            "windowY": 0,
+            "zoomLabel": "120%",
+            "appliedTransform": "matrix(1.2, 0, 0, 1.2, 0, 0)",
+            "canvasScale": {
+              "x": 1.2,
+              "y": 1.2001656707022628
+            },
+            "nodes": {
+              "purpose": {
+                "rect": {
+                  "x": 396,
+                  "y": 149.7531280517578,
+                  "width": 360,
+                  "height": 96.71250915527344
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 81
+              },
+              "instruction": {
+                "rect": {
+                  "x": 396,
+                  "y": 265.6656494140625,
+                  "width": 360,
+                  "height": 121.9124755859375
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 102
+              },
+              "decision": {
+                "rect": {
+                  "x": 396,
+                  "y": 406.77813720703125,
+                  "width": 360,
+                  "height": 121.91253662109375
+                },
+                "layoutWidth": 300,
+                "layoutHeight": 102
+              },
+              "home": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 283.2531433105469,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "task": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 604.2906494140625,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "next": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 844.721923828125,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              },
+              "restore": {
+                "rect": {
+                  "x": 955.2000122070312,
+                  "y": 911.9219360351562,
+                  "width": 417.60003662109375,
+                  "height": 52.79998779296875
+                },
+                "layoutWidth": 348,
+                "layoutHeight": 44
+              }
+            },
+            "helpOpen": true,
+            "related": [
+              "home",
+              "task",
+              "next",
+              "restore"
+            ],
+            "active": "purpose",
+            "mapHidden": false,
+            "focusHidden": true,
+            "peekCount": 0,
+            "prepOpen": false,
+            "devicePixelRatio": 1,
+            "overflow": {
+              "sw": 1440,
+              "cw": 1440
+            }
+          },
+          "peek": {
+            "before": {
+              "scroll": {
+                "windowY": 0,
+                "reading": 0,
+                "prep": 0,
+                "focus": "focusTitle"
+              },
+              "button": {
+                "box": {
+                  "x": 428.59375,
+                  "y": 324.546875,
+                  "width": 27.921875,
+                  "height": 20.796875,
+                  "bottom": 345.34375,
+                  "right": 456.515625
+                },
+                "full": true,
+                "hit": true,
+                "cover": "evbtn",
+                "ancestors": [
+                  {
+                    "id": "reading",
+                    "overflow": "auto"
+                  }
+                ],
+                "clip": {
+                  "l": 300,
+                  "t": 49,
+                  "r": 1440,
+                  "b": 900
+                }
+              }
+            },
+            "text": "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”\n닫기\n문서 보고 FIX058 변경 보고, 226–237행에서 옮긴 발췌. 원문 전체가 아닙니다.\nAI 해석이 낡아도 정정은 홈·작업문에 보이고 재정리 요청에 실린다.\n검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.\n이 설명이 읽은 방식\n\n요청에 ‘실린다’는 것까지가 보고 내용입니다.\n\n이 기록으로 알 수 없는 것\n\n실제 AI가 정정을 읽고 따랐는지, 해석 품질이 어떤지는 확인되지 않았습니다. 검증은 합성 응답과 MOCK입니다.\n\nGitHub에서 원문 위치 열기 (외부 페이지, 새 탭)",
+            "panel": {
+              "scrollTop": 0,
+              "clientHeight": 340,
+              "scrollHeight": 340,
+              "overflow": "visible"
+            },
+            "body": {
+              "clientHeight": 292,
+              "scrollHeight": 292,
+              "overflow": "visible"
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 897.078125,
+                "y": 367.546875,
+                "width": 45.921875,
+                "height": 28.796875,
+                "bottom": 396.34375,
+                "right": 943
+              },
+              "full": true,
+              "hit": true,
+              "cover": "peek-close",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "noInternalScrollablePane": true
+          },
+          "peekClosed": {
+            "afterImmediate": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 428.59375,
+                "y": 324.546875,
+                "width": 27.921875,
+                "height": 20.796875,
+                "bottom": 345.34375,
+                "right": 456.515625
+              },
+              "full": true,
+              "hit": true,
+              "cover": "evbtn",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "tabAfterClosed": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p4"
+            },
+            "removedPanelAndLinks": true
+          },
+          "prep": {
+            "before": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 344,
+                "y": 760.328125,
+                "width": 295.546875,
+                "height": 44,
+                "bottom": 804.328125,
+                "right": 639.546875
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepBtn",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "text": "이어 맡길 내용\n\n목적 정정 · 준비 제안이며 보내지 않습니다\n\n닫기\n대상\n목적 정정 (이 개발 기록에서 보고한 변경)\n이 부분이 하는 일\n목적 정정은 별도 기록에 저장하고, 작업 지시(직접 쓴 이해·범위, 현재 요청 원문)는 덮지 않는 동작.\n범위\n홈, 작업문, 다음 AI 요청, 저장 복구에서 문서가 보고한 내용. 같은 문서의 후속 보완 FIX059·FIX061은 제외.\n기준 기록\nflow049-outcome-home.md, 고정 커밋 f0fa532, FIX058 226–237행\n비교용 앞선 설명 AI055 175–187행\n문서에 적힌 제품 기준 d5ef9a4 (코드 대조 안 함)\n지켜야 할 조건\n작업 카드 직접 수정을 목적 정정으로 올리지 않기\n정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지\n사용자 결정은 AI 해석보다 앞선 조건으로 다루기\n이 기록으로 알 수 없는 것\n실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)\n별도 검토자의 최종 확인 결과\n사용자 원요청\n받을 담당자: 기록에 없음\n\n이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.",
+            "lowerReadings": [
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(1)",
+                "text": "작업 카드 직접 수정을 목적 정정으로 올리지 않기",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 495.875,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 518.265625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(2)",
+                "text": "정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 521.265625,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 543.65625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(3)",
+                "text": "사용자 결정은 AI 해석보다 앞선 조건으로 다루기",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 546.65625,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 569.046875,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(1)",
+                "text": "실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 609.84375,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 632.234375,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(2)",
+                "text": "별도 검토자의 최종 확인 결과",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 635.234375,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 657.625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(3)",
+                "text": "사용자 원요청",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 660.625,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 683.015625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(4)",
+                "text": "받을 담당자: 기록에 없음",
+                "geometry": {
+                  "box": {
+                    "x": 1008,
+                    "y": 686.015625,
+                    "width": 412,
+                    "height": 22.390625,
+                    "bottom": 708.40625,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody .nosend",
+                "text": "이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.",
+                "geometry": {
+                  "box": {
+                    "x": 990,
+                    "y": 728.40625,
+                    "width": 430,
+                    "height": 84.78125,
+                    "bottom": 813.1875,
+                    "right": 1420
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "nosend",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 970,
+                    "t": 78.375,
+                    "r": 1440,
+                    "b": 900
+                  }
+                },
+                "scroll": {
+                  "windowY": 0,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              }
+            ],
+            "bodyMetrics": {
+              "top": 0,
+              "max": 0,
+              "clientHeight": 822,
+              "scrollHeight": 822
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 1358.390625,
+                "y": 18,
+                "width": 61.609375,
+                "height": 44,
+                "bottom": 62,
+                "right": 1420
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepClose",
+              "ancestors": [
+                {
+                  "id": "prep",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 970,
+                "t": 0,
+                "r": 1440,
+                "b": 900
+              }
+            }
+          },
+          "prepClosed": {
+            "afterImmediate": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "prepBtn"
+            },
+            "dialogGeometry": {
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "full": false,
+              "hit": false,
+              "cover": "top",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 1440,
+                "b": 900
+              }
+            },
+            "originGeometry": {
+              "box": {
+                "x": 344,
+                "y": 760.328125,
+                "width": 295.546875,
+                "height": 44,
+                "bottom": 804.328125,
+                "right": 639.546875
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepBtn",
+              "ancestors": [
+                {
+                  "id": "reading",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 300,
+                "t": 49,
+                "r": 1440,
+                "b": 900
+              }
+            }
+          },
+          "returned": {
+            "afterImmediate": {
+              "selected": [
+                "purpose"
+              ],
+              "depths": {
+                "home": {
+                  "depth": "2",
+                  "expanded": "true",
+                  "bodyHidden": false
+                },
+                "task": {
+                  "depth": "2",
+                  "expanded": "true",
+                  "bodyHidden": false
+                },
+                "next": {
+                  "depth": "0",
+                  "expanded": "false",
+                  "bodyHidden": true
+                },
+                "restore": {
+                  "depth": "1",
+                  "expanded": "true",
+                  "bodyHidden": false
+                }
+              },
+              "mapScroll": {
+                "left": 32,
+                "top": 100,
+                "maxX": 32,
+                "maxY": 374
+              },
+              "windowY": 0,
+              "zoomLabel": "120%",
+              "appliedTransform": "matrix(1.2, 0, 0, 1.2, 0, 0)",
+              "canvasScale": {
+                "x": 1.2,
+                "y": 1.2001656707022628
+              },
+              "nodes": {
+                "purpose": {
+                  "rect": {
+                    "x": 396,
+                    "y": 149.7531280517578,
+                    "width": 360,
+                    "height": 96.71250915527344
+                  },
+                  "layoutWidth": 300,
+                  "layoutHeight": 81
+                },
+                "instruction": {
+                  "rect": {
+                    "x": 396,
+                    "y": 265.6656494140625,
+                    "width": 360,
+                    "height": 121.9124755859375
+                  },
+                  "layoutWidth": 300,
+                  "layoutHeight": 102
+                },
+                "decision": {
+                  "rect": {
+                    "x": 396,
+                    "y": 406.77813720703125,
+                    "width": 360,
+                    "height": 121.91253662109375
+                  },
+                  "layoutWidth": 300,
+                  "layoutHeight": 102
+                },
+                "home": {
+                  "rect": {
+                    "x": 955.2000122070312,
+                    "y": 283.2531433105469,
+                    "width": 417.60003662109375,
+                    "height": 52.79998779296875
+                  },
+                  "layoutWidth": 348,
+                  "layoutHeight": 44
+                },
+                "task": {
+                  "rect": {
+                    "x": 955.2000122070312,
+                    "y": 604.2906494140625,
+                    "width": 417.60003662109375,
+                    "height": 52.79998779296875
+                  },
+                  "layoutWidth": 348,
+                  "layoutHeight": 44
+                },
+                "next": {
+                  "rect": {
+                    "x": 955.2000122070312,
+                    "y": 844.721923828125,
+                    "width": 417.60003662109375,
+                    "height": 52.79998779296875
+                  },
+                  "layoutWidth": 348,
+                  "layoutHeight": 44
+                },
+                "restore": {
+                  "rect": {
+                    "x": 955.2000122070312,
+                    "y": 911.9219360351562,
+                    "width": 417.60003662109375,
+                    "height": 52.79998779296875
+                  },
+                  "layoutWidth": 348,
+                  "layoutHeight": 44
+                }
+              },
+              "helpOpen": true,
+              "related": [
+                "home",
+                "task",
+                "next",
+                "restore"
+              ],
+              "active": "purpose",
+              "mapHidden": false,
+              "focusHidden": true,
+              "peekCount": 0,
+              "prepOpen": false,
+              "devicePixelRatio": 1,
+              "overflow": {
+                "sw": 1440,
+                "cw": 1440
+              }
+            },
+            "nodeCoordinateDeltas": {
+              "purpose": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "instruction": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "decision": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "home": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.0,
+                "height": 0.0
+              },
+              "task": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.0,
+                "height": 0.0
+              },
+              "next": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.0,
+                "height": 0.0
+              },
+              "restore": {
+                "x": 0.0,
+                "y": 0.0,
+                "width": 0.0,
+                "height": 0.0
+              }
+            },
+            "edgeGeometry": {
+              "display": "block",
+              "paths": [
+                {
+                  "start": {
+                    "x": 756.0000162124634,
+                    "y": 198.10938220471144
+                  },
+                  "end": {
+                    "x": 955.2000241279602,
+                    "y": 309.65315494760944
+                  },
+                  "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 244.04688517252606 506.00001017252606 244.04688517252606"
+                },
+                {
+                  "start": {
+                    "x": 756.0000162124634,
+                    "y": 198.10938220471144
+                  },
+                  "end": {
+                    "x": 955.2000241279602,
+                    "y": 630.6906493939459
+                  },
+                  "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 511.57814025878906 506.00001017252606 511.57814025878906"
+                },
+                {
+                  "start": {
+                    "x": 756.0000162124634,
+                    "y": 198.10938220471144
+                  },
+                  "end": {
+                    "x": 955.2000241279602,
+                    "y": 871.1219821900158
+                  },
+                  "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 711.9375356038412 506.00001017252606 711.9375356038412"
+                },
+                {
+                  "start": {
+                    "x": 756.0000162124634,
+                    "y": 198.10938220471144
+                  },
+                  "end": {
+                    "x": 955.2000241279602,
+                    "y": 938.3219848603039
+                  },
+                  "d": "M340 151.0937563578288 C410 151.0937563578288 436.00001017252606 767.9375457763672 506.00001017252606 767.9375457763672"
+                }
+              ],
+              "origin": {
+                "x": 756,
+                "y": 198.10938262939453
+              },
+              "targets": [
+                {
+                  "id": "home",
+                  "x": 955.2000122070312,
+                  "y": 309.65313720703125
+                },
+                {
+                  "id": "task",
+                  "x": 955.2000122070312,
+                  "y": 630.6906433105469
+                },
+                {
+                  "id": "next",
+                  "x": 955.2000122070312,
+                  "y": 871.1219177246094
+                },
+                {
+                  "id": "restore",
+                  "x": 955.2000122070312,
+                  "y": 938.3219299316406
+                }
+              ]
+            },
+            "measurementBeforeAnyPostReturnScroll": true
+          }
+        }
+      ],
+      "httpStatus": 200,
+      "httpResponseSHA256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+      "initialMap": {
+        "selected": [],
+        "depths": {
+          "home": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "task": {
+            "depth": "2",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "next": {
+            "depth": "0",
+            "expanded": "false",
+            "bodyHidden": true
+          },
+          "restore": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          }
+        },
+        "mapScroll": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        },
+        "windowY": 0,
+        "zoomLabel": "100%",
+        "appliedTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "canvasScale": {
+          "x": 1,
+          "y": 0.9996764053254438
+        },
+        "nodes": {
+          "purpose": {
+            "rect": {
+              "x": 420,
+              "y": 227.59375,
+              "width": 300,
+              "height": 80.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 81
+          },
+          "instruction": {
+            "rect": {
+              "x": 420,
+              "y": 324.1875,
+              "width": 300,
+              "height": 101.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 102
+          },
+          "decision": {
+            "rect": {
+              "x": 420,
+              "y": 441.78125,
+              "width": 300,
+              "height": 101.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 102
+          },
+          "home": {
+            "rect": {
+              "x": 886,
+              "y": 259.84375,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "task": {
+            "rect": {
+              "x": 886,
+              "y": 376.03125,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "next": {
+            "rect": {
+              "x": 886,
+              "y": 576.390625,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "restore": {
+            "rect": {
+              "x": 886,
+              "y": 632.390625,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          }
+        },
+        "helpOpen": false,
+        "related": [],
+        "active": "",
+        "mapHidden": false,
+        "focusHidden": true,
+        "peekCount": 0,
+        "prepOpen": false,
+        "devicePixelRatio": 1,
+        "overflow": {
+          "sw": 1440,
+          "cw": 1440
+        }
+      },
+      "defaultGoal": {
+        "text": "이 프로젝트의 목표: AI와 만드는 프로그램의 구상과 변화를 살피고, 필요한 부분을 이어 맡기는 공간",
+        "geometry": {
+          "box": {
+            "x": 166.828125,
+            "y": 15,
+            "width": 1173.640625,
+            "height": 20.796875,
+            "bottom": 35.796875,
+            "right": 1340.46875
+          },
+          "full": true,
+          "hit": true,
+          "cover": "aim",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          }
+        }
+      },
+      "beforeUserDepthChange": {
+        "selected": [
+          "instruction"
+        ],
+        "depths": {
+          "home": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "task": {
+            "depth": "2",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "next": {
+            "depth": "0",
+            "expanded": "false",
+            "bodyHidden": true
+          },
+          "restore": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          }
+        },
+        "mapScroll": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        },
+        "windowY": 0,
+        "zoomLabel": "100%",
+        "appliedTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "canvasScale": {
+          "x": 1,
+          "y": 0.9996764053254438
+        },
+        "nodes": {
+          "purpose": {
+            "rect": {
+              "x": 420,
+              "y": 227.59375,
+              "width": 300,
+              "height": 80.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 81
+          },
+          "instruction": {
+            "rect": {
+              "x": 420,
+              "y": 324.1875,
+              "width": 300,
+              "height": 101.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 102
+          },
+          "decision": {
+            "rect": {
+              "x": 420,
+              "y": 441.78125,
+              "width": 300,
+              "height": 101.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 102
+          },
+          "home": {
+            "rect": {
+              "x": 886,
+              "y": 259.84375,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "task": {
+            "rect": {
+              "x": 886,
+              "y": 376.03125,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "next": {
+            "rect": {
+              "x": 886,
+              "y": 576.390625,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "restore": {
+            "rect": {
+              "x": 886,
+              "y": 632.390625,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          }
+        },
+        "helpOpen": false,
+        "related": [
+          "home",
+          "task",
+          "next"
+        ],
+        "active": "instruction",
+        "mapHidden": false,
+        "focusHidden": true,
+        "peekCount": 0,
+        "prepOpen": false,
+        "devicePixelRatio": 1,
+        "overflow": {
+          "sw": 1440,
+          "cw": 1440
+        }
+      },
+      "afterUserDepthChange": {
+        "selected": [
+          "instruction"
+        ],
+        "depths": {
+          "home": {
+            "depth": "2",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "task": {
+            "depth": "2",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "next": {
+            "depth": "0",
+            "expanded": "false",
+            "bodyHidden": true
+          },
+          "restore": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          }
+        },
+        "mapScroll": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 113
+        },
+        "windowY": 0,
+        "zoomLabel": "100%",
+        "appliedTransform": "matrix(1, 0, 0, 1, 0, 0)",
+        "canvasScale": {
+          "x": 1,
+          "y": 1.0001511487303507
+        },
+        "nodes": {
+          "purpose": {
+            "rect": {
+              "x": 420,
+              "y": 227.59375,
+              "width": 300,
+              "height": 80.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 81
+          },
+          "instruction": {
+            "rect": {
+              "x": 420,
+              "y": 324.1875,
+              "width": 300,
+              "height": 101.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 102
+          },
+          "decision": {
+            "rect": {
+              "x": 420,
+              "y": 441.78125,
+              "width": 300,
+              "height": 101.59375
+            },
+            "layoutWidth": 300,
+            "layoutHeight": 102
+          },
+          "home": {
+            "rect": {
+              "x": 886,
+              "y": 259.84375,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "task": {
+            "rect": {
+              "x": 886,
+              "y": 527.375,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "next": {
+            "rect": {
+              "x": 886,
+              "y": 727.734375,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          },
+          "restore": {
+            "rect": {
+              "x": 886,
+              "y": 783.734375,
+              "width": 348,
+              "height": 44
+            },
+            "layoutWidth": 348,
+            "layoutHeight": 44
+          }
+        },
+        "helpOpen": false,
+        "related": [
+          "home",
+          "task",
+          "next"
+        ],
+        "active": "more",
+        "mapHidden": false,
+        "focusHidden": true,
+        "peekCount": 0,
+        "prepOpen": false,
+        "devicePixelRatio": 1,
+        "overflow": {
+          "sw": 1440,
+          "cw": 1440
+        }
+      },
+      "helpGeometry": {
+        "box": {
+          "x": 954,
+          "y": 180.05313110351562,
+          "width": 420,
+          "height": 90,
+          "bottom": 270.0531311035156,
+          "right": 1374
+        },
+        "full": true,
+        "hit": true,
+        "cover": "P",
+        "ancestors": [
+          {
+            "id": "mapScroll",
+            "overflow": "auto"
+          }
+        ],
+        "clip": {
+          "l": 380,
+          "t": 116.796875,
+          "r": 1440,
+          "b": 831
+        }
+      },
+      "helpText": "문서에 함께 언급된 곳을 살펴보려고 묶은 연구 배치입니다. 선(좁은 화면에서는 ‘함께 언급’ 표시)은 함께 언급됨만 뜻하며, 실행 순서나 자동 분석 결과가 아닙니다. 지도의 묶음은 실제 포함 관계를 입증하지 않습니다."
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "steps": [
+        {
+          "stage": 1,
+          "status": "PASS",
+          "mapAfterSetup": {
+            "selected": [
+              "instruction"
+            ],
+            "depths": {
+              "home": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "task": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "next": {
+                "depth": "0",
+                "expanded": "false",
+                "bodyHidden": true
+              },
+              "restore": {
+                "depth": "1",
+                "expanded": "true",
+                "bodyHidden": false
+              }
+            },
+            "mapScroll": {
+              "left": 0,
+              "top": 0,
+              "maxX": 0,
+              "maxY": 0
+            },
+            "windowY": 420,
+            "zoomLabel": "100%",
+            "appliedTransform": "none",
+            "canvasScale": {
+              "x": 1,
+              "y": 1.0003708843797856
+            },
+            "nodes": {
+              "purpose": {
+                "rect": {
+                  "x": 16,
+                  "y": 211.96875,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "instruction": {
+                "rect": {
+                  "x": 16,
+                  "y": 299.5625,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "decision": {
+                "rect": {
+                  "x": 16,
+                  "y": 387.15625,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "home": {
+                "rect": {
+                  "x": 32,
+                  "y": 674.796875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "task": {
+                "rect": {
+                  "x": 32,
+                  "y": 942.328125,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "next": {
+                "rect": {
+                  "x": 32,
+                  "y": 1187.46875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "restore": {
+                "rect": {
+                  "x": 32,
+                  "y": 1243.46875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              }
+            },
+            "helpOpen": true,
+            "related": [
+              "home",
+              "task",
+              "next"
+            ],
+            "active": "",
+            "mapHidden": false,
+            "focusHidden": true,
+            "peekCount": 0,
+            "prepOpen": false,
+            "devicePixelRatio": 1,
+            "overflow": {
+              "sw": 390,
+              "cw": 390
+            }
+          }
+        },
+        {
+          "stage": 2,
+          "status": "PASS",
+          "preEntry": {
+            "selected": [
+              "purpose"
+            ],
+            "depths": {
+              "home": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "task": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "next": {
+                "depth": "0",
+                "expanded": "false",
+                "bodyHidden": true
+              },
+              "restore": {
+                "depth": "1",
+                "expanded": "true",
+                "bodyHidden": false
+              }
+            },
+            "mapScroll": {
+              "left": 0,
+              "top": 0,
+              "maxX": 0,
+              "maxY": 0
+            },
+            "windowY": 420,
+            "zoomLabel": "100%",
+            "appliedTransform": "none",
+            "canvasScale": {
+              "x": 1,
+              "y": 1.0003708843797856
+            },
+            "nodes": {
+              "purpose": {
+                "rect": {
+                  "x": 16,
+                  "y": 211.96875,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "instruction": {
+                "rect": {
+                  "x": 16,
+                  "y": 299.5625,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "decision": {
+                "rect": {
+                  "x": 16,
+                  "y": 387.15625,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "home": {
+                "rect": {
+                  "x": 32,
+                  "y": 674.796875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "task": {
+                "rect": {
+                  "x": 32,
+                  "y": 942.328125,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "next": {
+                "rect": {
+                  "x": 32,
+                  "y": 1187.46875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "restore": {
+                "rect": {
+                  "x": 32,
+                  "y": 1243.46875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              }
+            },
+            "helpOpen": true,
+            "related": [
+              "home",
+              "task",
+              "next",
+              "restore"
+            ],
+            "active": "purpose",
+            "mapHidden": false,
+            "focusHidden": true,
+            "peekCount": 0,
+            "prepOpen": false,
+            "devicePixelRatio": 1,
+            "overflow": {
+              "sw": 390,
+              "cw": 390
+            }
+          },
+          "edges": {
+            "display": "none",
+            "paths": [],
+            "origin": {
+              "x": 374,
+              "y": 250.765625
+            },
+            "targets": [
+              {
+                "id": "home",
+                "x": 32,
+                "y": 696.796875
+              },
+              {
+                "id": "task",
+                "x": 32,
+                "y": 964.328125
+              },
+              {
+                "id": "next",
+                "x": 32,
+                "y": 1209.46875
+              },
+              {
+                "id": "restore",
+                "x": 32,
+                "y": 1265.46875
+              }
+            ]
+          }
+        },
+        {
+          "stage": 3,
+          "status": "PASS",
+          "opened": {
+            "before": {
+              "scroll": {
+                "windowY": 0,
+                "reading": 0,
+                "prep": 0,
+                "focus": "focusTitle"
+              },
+              "button": {
+                "box": {
+                  "x": 332.515625,
+                  "y": 519.65625,
+                  "width": 27.921875,
+                  "height": 20.796875,
+                  "bottom": 540.453125,
+                  "right": 360.4375
+                },
+                "full": true,
+                "hit": true,
+                "cover": "evbtn",
+                "ancestors": [],
+                "clip": {
+                  "l": 0,
+                  "t": 0,
+                  "r": 390,
+                  "b": 844
+                }
+              }
+            },
+            "text": "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”\n닫기\n문서 보고 FIX058 변경 보고, 226–237행에서 옮긴 발췌. 원문 전체가 아닙니다.\nAI 해석이 낡아도 정정은 홈·작업문에 보이고 재정리 요청에 실린다.\n검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.\n이 설명이 읽은 방식\n\n요청에 ‘실린다’는 것까지가 보고 내용입니다.\n\n이 기록으로 알 수 없는 것\n\n실제 AI가 정정을 읽고 따랐는지, 해석 품질이 어떤지는 확인되지 않았습니다. 검증은 합성 응답과 MOCK입니다.\n\nGitHub에서 원문 위치 열기 (외부 페이지, 새 탭)",
+            "panel": {
+              "scrollTop": 0,
+              "clientHeight": 438,
+              "scrollHeight": 438,
+              "overflow": "visible"
+            },
+            "body": {
+              "clientHeight": 377,
+              "scrollHeight": 377,
+              "overflow": "visible"
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 315.078125,
+                "y": 409.046875,
+                "width": 45.921875,
+                "height": 28.796875,
+                "bottom": 437.84375,
+                "right": 361
+              },
+              "full": true,
+              "hit": true,
+              "cover": "peek-close",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "noInternalScrollablePane": true
+          }
+        },
+        {
+          "stage": 4,
+          "status": "PASS",
+          "buttonClosed": {
+            "afterImmediate": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 332.515625,
+                "y": 519.65625,
+                "width": 27.921875,
+                "height": 20.796875,
+                "bottom": 540.453125,
+                "right": 360.4375
+              },
+              "full": true,
+              "hit": true,
+              "cover": "evbtn",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "tabAfterClosed": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p4"
+            },
+            "removedPanelAndLinks": true
+          },
+          "reopened": {
+            "before": {
+              "scroll": {
+                "windowY": 0,
+                "reading": 0,
+                "prep": 0,
+                "focus": "p3"
+              },
+              "button": {
+                "box": {
+                  "x": 332.515625,
+                  "y": 519.65625,
+                  "width": 27.921875,
+                  "height": 20.796875,
+                  "bottom": 540.453125,
+                  "right": 360.4375
+                },
+                "full": true,
+                "hit": true,
+                "cover": "evbtn",
+                "ancestors": [],
+                "clip": {
+                  "l": 0,
+                  "t": 0,
+                  "r": 390,
+                  "b": 844
+                }
+              }
+            },
+            "text": "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”\n닫기\n문서 보고 FIX058 변경 보고, 226–237행에서 옮긴 발췌. 원문 전체가 아닙니다.\nAI 해석이 낡아도 정정은 홈·작업문에 보이고 재정리 요청에 실린다.\n검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.\n이 설명이 읽은 방식\n\n요청에 ‘실린다’는 것까지가 보고 내용입니다.\n\n이 기록으로 알 수 없는 것\n\n실제 AI가 정정을 읽고 따랐는지, 해석 품질이 어떤지는 확인되지 않았습니다. 검증은 합성 응답과 MOCK입니다.\n\nGitHub에서 원문 위치 열기 (외부 페이지, 새 탭)",
+            "panel": {
+              "scrollTop": 0,
+              "clientHeight": 438,
+              "scrollHeight": 438,
+              "overflow": "visible"
+            },
+            "body": {
+              "clientHeight": 377,
+              "scrollHeight": 377,
+              "overflow": "visible"
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 315.078125,
+                "y": 409.046875,
+                "width": 45.921875,
+                "height": 28.796875,
+                "bottom": 437.84375,
+                "right": 361
+              },
+              "full": true,
+              "hit": true,
+              "cover": "peek-close",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "noInternalScrollablePane": true
+          },
+          "escapeClosed": {
+            "afterImmediate": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 332.515625,
+                "y": 519.65625,
+                "width": 27.921875,
+                "height": 20.796875,
+                "bottom": 540.453125,
+                "right": 360.4375
+              },
+              "full": true,
+              "hit": true,
+              "cover": "evbtn",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "tabAfterClosed": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p4"
+            },
+            "removedPanelAndLinks": true
+          }
+        },
+        {
+          "stage": 5,
+          "status": "PASS",
+          "prep": {
+            "before": {
+              "windowY": 251,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 16,
+                "y": 774.828125,
+                "width": 295.546875,
+                "height": 44,
+                "bottom": 818.828125,
+                "right": 311.546875
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepBtn",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "text": "이어 맡길 내용\n\n목적 정정 · 준비 제안이며 보내지 않습니다\n\n닫기\n대상\n목적 정정 (이 개발 기록에서 보고한 변경)\n이 부분이 하는 일\n목적 정정은 별도 기록에 저장하고, 작업 지시(직접 쓴 이해·범위, 현재 요청 원문)는 덮지 않는 동작.\n범위\n홈, 작업문, 다음 AI 요청, 저장 복구에서 문서가 보고한 내용. 같은 문서의 후속 보완 FIX059·FIX061은 제외.\n기준 기록\nflow049-outcome-home.md, 고정 커밋 f0fa532, FIX058 226–237행\n비교용 앞선 설명 AI055 175–187행\n문서에 적힌 제품 기준 d5ef9a4 (코드 대조 안 함)\n지켜야 할 조건\n작업 카드 직접 수정을 목적 정정으로 올리지 않기\n정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지\n사용자 결정은 AI 해석보다 앞선 조건으로 다루기\n이 기록으로 알 수 없는 것\n실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)\n별도 검토자의 최종 확인 결과\n사용자 원요청\n받을 담당자: 기록에 없음\n\n이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.",
+            "lowerReadings": [
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(1)",
+                "text": "작업 카드 직접 수정을 목적 정정으로 올리지 않기",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 563.40625,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 585.796875,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(2)",
+                "text": "정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 588.796875,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 611.1875,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(3)",
+                "text": "사용자 결정은 AI 해석보다 앞선 조건으로 다루기",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 614.1875,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 636.578125,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(1)",
+                "text": "실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 677.375,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 699.765625,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(2)",
+                "text": "별도 검토자의 최종 확인 결과",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 702.765625,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 725.15625,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(3)",
+                "text": "사용자 원요청",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 728.15625,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 750.546875,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(4)",
+                "text": "받을 담당자: 기록에 없음",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 753.546875,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 775.9375,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 0,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody .nosend",
+                "text": "이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.",
+                "geometry": {
+                  "box": {
+                    "x": 20,
+                    "y": 738.9375,
+                    "width": 350,
+                    "height": 84.78125,
+                    "bottom": 823.71875,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "nosend",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              }
+            ],
+            "bodyMetrics": {
+              "top": 57,
+              "max": 57,
+              "clientHeight": 698,
+              "scrollHeight": 755
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 308.390625,
+                "y": 85.53125,
+                "width": 61.609375,
+                "height": 44,
+                "bottom": 129.53125,
+                "right": 370
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepClose",
+              "ancestors": [
+                {
+                  "id": "prep",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 0,
+                "t": 67.53125,
+                "r": 390,
+                "b": 844
+              }
+            }
+          }
+        },
+        {
+          "stage": 6,
+          "status": "PASS",
+          "closed": {
+            "afterImmediate": {
+              "windowY": 251,
+              "reading": 0,
+              "prep": 0,
+              "focus": "prepBtn"
+            },
+            "dialogGeometry": {
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "full": false,
+              "hit": false,
+              "cover": "rail",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "originGeometry": {
+              "box": {
+                "x": 16,
+                "y": 774.828125,
+                "width": 295.546875,
+                "height": 44,
+                "bottom": 818.828125,
+                "right": 311.546875
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepBtn",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            }
+          }
+        },
+        {
+          "stage": 7,
+          "status": "PASS",
+          "returned": {
+            "afterImmediate": {
+              "selected": [
+                "purpose"
+              ],
+              "depths": {
+                "home": {
+                  "depth": "2",
+                  "expanded": "true",
+                  "bodyHidden": false
+                },
+                "task": {
+                  "depth": "2",
+                  "expanded": "true",
+                  "bodyHidden": false
+                },
+                "next": {
+                  "depth": "0",
+                  "expanded": "false",
+                  "bodyHidden": true
+                },
+                "restore": {
+                  "depth": "1",
+                  "expanded": "true",
+                  "bodyHidden": false
+                }
+              },
+              "mapScroll": {
+                "left": 0,
+                "top": 0,
+                "maxX": 0,
+                "maxY": 0
+              },
+              "windowY": 420,
+              "zoomLabel": "100%",
+              "appliedTransform": "none",
+              "canvasScale": {
+                "x": 1,
+                "y": 1.0003708843797856
+              },
+              "nodes": {
+                "purpose": {
+                  "rect": {
+                    "x": 16,
+                    "y": 211.96875,
+                    "width": 358,
+                    "height": 77.59375
+                  },
+                  "layoutWidth": 358,
+                  "layoutHeight": 78
+                },
+                "instruction": {
+                  "rect": {
+                    "x": 16,
+                    "y": 299.5625,
+                    "width": 358,
+                    "height": 77.59375
+                  },
+                  "layoutWidth": 358,
+                  "layoutHeight": 78
+                },
+                "decision": {
+                  "rect": {
+                    "x": 16,
+                    "y": 387.15625,
+                    "width": 358,
+                    "height": 77.59375
+                  },
+                  "layoutWidth": 358,
+                  "layoutHeight": 78
+                },
+                "home": {
+                  "rect": {
+                    "x": 32,
+                    "y": 674.796875,
+                    "width": 326,
+                    "height": 44
+                  },
+                  "layoutWidth": 326,
+                  "layoutHeight": 44
+                },
+                "task": {
+                  "rect": {
+                    "x": 32,
+                    "y": 942.328125,
+                    "width": 326,
+                    "height": 44
+                  },
+                  "layoutWidth": 326,
+                  "layoutHeight": 44
+                },
+                "next": {
+                  "rect": {
+                    "x": 32,
+                    "y": 1187.46875,
+                    "width": 326,
+                    "height": 44
+                  },
+                  "layoutWidth": 326,
+                  "layoutHeight": 44
+                },
+                "restore": {
+                  "rect": {
+                    "x": 32,
+                    "y": 1243.46875,
+                    "width": 326,
+                    "height": 44
+                  },
+                  "layoutWidth": 326,
+                  "layoutHeight": 44
+                }
+              },
+              "helpOpen": true,
+              "related": [
+                "home",
+                "task",
+                "next",
+                "restore"
+              ],
+              "active": "purpose",
+              "mapHidden": false,
+              "focusHidden": true,
+              "peekCount": 0,
+              "prepOpen": false,
+              "devicePixelRatio": 1,
+              "overflow": {
+                "sw": 390,
+                "cw": 390
+              }
+            },
+            "nodeCoordinateDeltas": {
+              "purpose": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "instruction": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "decision": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "home": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0
+              },
+              "task": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0
+              },
+              "next": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0
+              },
+              "restore": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0
+              }
+            },
+            "edgeGeometry": {
+              "display": "none",
+              "paths": [],
+              "origin": {
+                "x": 374,
+                "y": 250.765625
+              },
+              "targets": [
+                {
+                  "id": "home",
+                  "x": 32,
+                  "y": 696.796875
+                },
+                {
+                  "id": "task",
+                  "x": 32,
+                  "y": 964.328125
+                },
+                {
+                  "id": "next",
+                  "x": 32,
+                  "y": 1209.46875
+                },
+                {
+                  "id": "restore",
+                  "x": 32,
+                  "y": 1265.46875
+                }
+              ]
+            },
+            "measurementBeforeAnyPostReturnScroll": true
+          }
+        },
+        {
+          "stage": 8,
+          "status": "PASS",
+          "preEntry": {
+            "selected": [
+              "purpose"
+            ],
+            "depths": {
+              "home": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "task": {
+                "depth": "2",
+                "expanded": "true",
+                "bodyHidden": false
+              },
+              "next": {
+                "depth": "0",
+                "expanded": "false",
+                "bodyHidden": true
+              },
+              "restore": {
+                "depth": "1",
+                "expanded": "true",
+                "bodyHidden": false
+              }
+            },
+            "mapScroll": {
+              "left": 0,
+              "top": 0,
+              "maxX": 0,
+              "maxY": 0
+            },
+            "windowY": 420,
+            "zoomLabel": "100%",
+            "appliedTransform": "none",
+            "canvasScale": {
+              "x": 1,
+              "y": 1.0003708843797856
+            },
+            "nodes": {
+              "purpose": {
+                "rect": {
+                  "x": 16,
+                  "y": 211.96875,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "instruction": {
+                "rect": {
+                  "x": 16,
+                  "y": 299.5625,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "decision": {
+                "rect": {
+                  "x": 16,
+                  "y": 387.15625,
+                  "width": 358,
+                  "height": 77.59375
+                },
+                "layoutWidth": 358,
+                "layoutHeight": 78
+              },
+              "home": {
+                "rect": {
+                  "x": 32,
+                  "y": 674.796875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "task": {
+                "rect": {
+                  "x": 32,
+                  "y": 942.328125,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "next": {
+                "rect": {
+                  "x": 32,
+                  "y": 1187.46875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              },
+              "restore": {
+                "rect": {
+                  "x": 32,
+                  "y": 1243.46875,
+                  "width": 326,
+                  "height": 44
+                },
+                "layoutWidth": 326,
+                "layoutHeight": 44
+              }
+            },
+            "helpOpen": true,
+            "related": [
+              "home",
+              "task",
+              "next",
+              "restore"
+            ],
+            "active": "purpose",
+            "mapHidden": false,
+            "focusHidden": true,
+            "peekCount": 0,
+            "prepOpen": false,
+            "devicePixelRatio": 1,
+            "overflow": {
+              "sw": 390,
+              "cw": 390
+            }
+          },
+          "peek": {
+            "before": {
+              "scroll": {
+                "windowY": 0,
+                "reading": 0,
+                "prep": 0,
+                "focus": "focusTitle"
+              },
+              "button": {
+                "box": {
+                  "x": 332.515625,
+                  "y": 519.65625,
+                  "width": 27.921875,
+                  "height": 20.796875,
+                  "bottom": 540.453125,
+                  "right": 360.4375
+                },
+                "full": true,
+                "hit": true,
+                "cover": "evbtn",
+                "ancestors": [],
+                "clip": {
+                  "l": 0,
+                  "t": 0,
+                  "r": 390,
+                  "b": 844
+                }
+              }
+            },
+            "text": "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”\n닫기\n문서 보고 FIX058 변경 보고, 226–237행에서 옮긴 발췌. 원문 전체가 아닙니다.\nAI 해석이 낡아도 정정은 홈·작업문에 보이고 재정리 요청에 실린다.\n검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.\n이 설명이 읽은 방식\n\n요청에 ‘실린다’는 것까지가 보고 내용입니다.\n\n이 기록으로 알 수 없는 것\n\n실제 AI가 정정을 읽고 따랐는지, 해석 품질이 어떤지는 확인되지 않았습니다. 검증은 합성 응답과 MOCK입니다.\n\nGitHub에서 원문 위치 열기 (외부 페이지, 새 탭)",
+            "panel": {
+              "scrollTop": 0,
+              "clientHeight": 438,
+              "scrollHeight": 438,
+              "overflow": "visible"
+            },
+            "body": {
+              "clientHeight": 377,
+              "scrollHeight": 377,
+              "overflow": "visible"
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 315.078125,
+                "y": 409.046875,
+                "width": 45.921875,
+                "height": 28.796875,
+                "bottom": 437.84375,
+                "right": 361
+              },
+              "full": true,
+              "hit": true,
+              "cover": "peek-close",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "noInternalScrollablePane": true
+          },
+          "peekClosed": {
+            "afterImmediate": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 332.515625,
+                "y": 519.65625,
+                "width": 27.921875,
+                "height": 20.796875,
+                "bottom": 540.453125,
+                "right": 360.4375
+              },
+              "full": true,
+              "hit": true,
+              "cover": "evbtn",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "tabAfterClosed": {
+              "windowY": 0,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p4"
+            },
+            "removedPanelAndLinks": true
+          },
+          "prep": {
+            "before": {
+              "windowY": 251,
+              "reading": 0,
+              "prep": 0,
+              "focus": "p3"
+            },
+            "originGeometry": {
+              "box": {
+                "x": 16,
+                "y": 774.828125,
+                "width": 295.546875,
+                "height": 44,
+                "bottom": 818.828125,
+                "right": 311.546875
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepBtn",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "text": "이어 맡길 내용\n\n목적 정정 · 준비 제안이며 보내지 않습니다\n\n닫기\n대상\n목적 정정 (이 개발 기록에서 보고한 변경)\n이 부분이 하는 일\n목적 정정은 별도 기록에 저장하고, 작업 지시(직접 쓴 이해·범위, 현재 요청 원문)는 덮지 않는 동작.\n범위\n홈, 작업문, 다음 AI 요청, 저장 복구에서 문서가 보고한 내용. 같은 문서의 후속 보완 FIX059·FIX061은 제외.\n기준 기록\nflow049-outcome-home.md, 고정 커밋 f0fa532, FIX058 226–237행\n비교용 앞선 설명 AI055 175–187행\n문서에 적힌 제품 기준 d5ef9a4 (코드 대조 안 함)\n지켜야 할 조건\n작업 카드 직접 수정을 목적 정정으로 올리지 않기\n정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지\n사용자 결정은 AI 해석보다 앞선 조건으로 다루기\n이 기록으로 알 수 없는 것\n실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)\n별도 검토자의 최종 확인 결과\n사용자 원요청\n받을 담당자: 기록에 없음\n\n이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.",
+            "lowerReadings": [
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(1)",
+                "text": "작업 카드 직접 수정을 목적 정정으로 올리지 않기",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 506.40625,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 528.796875,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(2)",
+                "text": "정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 531.796875,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 554.1875,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(5) li:nth-child(3)",
+                "text": "사용자 결정은 AI 해석보다 앞선 조건으로 다루기",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 557.1875,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 579.578125,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(1)",
+                "text": "실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 620.375,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 642.765625,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(2)",
+                "text": "별도 검토자의 최종 확인 결과",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 645.765625,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 668.15625,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(3)",
+                "text": "사용자 원요청",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 671.15625,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 693.546875,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody dd:nth-of-type(6) li:nth-child(4)",
+                "text": "받을 담당자: 기록에 없음",
+                "geometry": {
+                  "box": {
+                    "x": 38,
+                    "y": 696.546875,
+                    "width": 332,
+                    "height": 22.390625,
+                    "bottom": 718.9375,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "LI",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              },
+              {
+                "selector": "#prepBody .nosend",
+                "text": "이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.",
+                "geometry": {
+                  "box": {
+                    "x": 20,
+                    "y": 738.9375,
+                    "width": 350,
+                    "height": 84.78125,
+                    "bottom": 823.71875,
+                    "right": 370
+                  },
+                  "full": true,
+                  "hit": true,
+                  "cover": "nosend",
+                  "ancestors": [
+                    {
+                      "id": "prepBody",
+                      "overflow": "auto"
+                    },
+                    {
+                      "id": "prep",
+                      "overflow": "auto"
+                    }
+                  ],
+                  "clip": {
+                    "l": 0,
+                    "t": 145.90625,
+                    "r": 390,
+                    "b": 844
+                  }
+                },
+                "scroll": {
+                  "windowY": 251,
+                  "reading": 0,
+                  "prep": 57,
+                  "focus": "prepClose"
+                }
+              }
+            ],
+            "bodyMetrics": {
+              "top": 57,
+              "max": 57,
+              "clientHeight": 698,
+              "scrollHeight": 755
+            },
+            "closeGeometry": {
+              "box": {
+                "x": 308.390625,
+                "y": 85.53125,
+                "width": 61.609375,
+                "height": 44,
+                "bottom": 129.53125,
+                "right": 370
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepClose",
+              "ancestors": [
+                {
+                  "id": "prep",
+                  "overflow": "auto"
+                }
+              ],
+              "clip": {
+                "l": 0,
+                "t": 67.53125,
+                "r": 390,
+                "b": 844
+              }
+            }
+          },
+          "prepClosed": {
+            "afterImmediate": {
+              "windowY": 251,
+              "reading": 0,
+              "prep": 0,
+              "focus": "prepBtn"
+            },
+            "dialogGeometry": {
+              "box": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "bottom": 0,
+                "right": 0
+              },
+              "full": false,
+              "hit": false,
+              "cover": "rail",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            },
+            "originGeometry": {
+              "box": {
+                "x": 16,
+                "y": 774.828125,
+                "width": 295.546875,
+                "height": 44,
+                "bottom": 818.828125,
+                "right": 311.546875
+              },
+              "full": true,
+              "hit": true,
+              "cover": "prepBtn",
+              "ancestors": [],
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              }
+            }
+          },
+          "returned": {
+            "afterImmediate": {
+              "selected": [
+                "purpose"
+              ],
+              "depths": {
+                "home": {
+                  "depth": "2",
+                  "expanded": "true",
+                  "bodyHidden": false
+                },
+                "task": {
+                  "depth": "2",
+                  "expanded": "true",
+                  "bodyHidden": false
+                },
+                "next": {
+                  "depth": "0",
+                  "expanded": "false",
+                  "bodyHidden": true
+                },
+                "restore": {
+                  "depth": "1",
+                  "expanded": "true",
+                  "bodyHidden": false
+                }
+              },
+              "mapScroll": {
+                "left": 0,
+                "top": 0,
+                "maxX": 0,
+                "maxY": 0
+              },
+              "windowY": 420,
+              "zoomLabel": "100%",
+              "appliedTransform": "none",
+              "canvasScale": {
+                "x": 1,
+                "y": 1.0003708843797856
+              },
+              "nodes": {
+                "purpose": {
+                  "rect": {
+                    "x": 16,
+                    "y": 211.96875,
+                    "width": 358,
+                    "height": 77.59375
+                  },
+                  "layoutWidth": 358,
+                  "layoutHeight": 78
+                },
+                "instruction": {
+                  "rect": {
+                    "x": 16,
+                    "y": 299.5625,
+                    "width": 358,
+                    "height": 77.59375
+                  },
+                  "layoutWidth": 358,
+                  "layoutHeight": 78
+                },
+                "decision": {
+                  "rect": {
+                    "x": 16,
+                    "y": 387.15625,
+                    "width": 358,
+                    "height": 77.59375
+                  },
+                  "layoutWidth": 358,
+                  "layoutHeight": 78
+                },
+                "home": {
+                  "rect": {
+                    "x": 32,
+                    "y": 674.796875,
+                    "width": 326,
+                    "height": 44
+                  },
+                  "layoutWidth": 326,
+                  "layoutHeight": 44
+                },
+                "task": {
+                  "rect": {
+                    "x": 32,
+                    "y": 942.328125,
+                    "width": 326,
+                    "height": 44
+                  },
+                  "layoutWidth": 326,
+                  "layoutHeight": 44
+                },
+                "next": {
+                  "rect": {
+                    "x": 32,
+                    "y": 1187.46875,
+                    "width": 326,
+                    "height": 44
+                  },
+                  "layoutWidth": 326,
+                  "layoutHeight": 44
+                },
+                "restore": {
+                  "rect": {
+                    "x": 32,
+                    "y": 1243.46875,
+                    "width": 326,
+                    "height": 44
+                  },
+                  "layoutWidth": 326,
+                  "layoutHeight": 44
+                }
+              },
+              "helpOpen": true,
+              "related": [
+                "home",
+                "task",
+                "next",
+                "restore"
+              ],
+              "active": "purpose",
+              "mapHidden": false,
+              "focusHidden": true,
+              "peekCount": 0,
+              "prepOpen": false,
+              "devicePixelRatio": 1,
+              "overflow": {
+                "sw": 390,
+                "cw": 390
+              }
+            },
+            "nodeCoordinateDeltas": {
+              "purpose": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "instruction": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "decision": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0.0
+              },
+              "home": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0
+              },
+              "task": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0
+              },
+              "next": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0
+              },
+              "restore": {
+                "x": 0,
+                "y": 0.0,
+                "width": 0,
+                "height": 0
+              }
+            },
+            "edgeGeometry": {
+              "display": "none",
+              "paths": [],
+              "origin": {
+                "x": 374,
+                "y": 250.765625
+              },
+              "targets": [
+                {
+                  "id": "home",
+                  "x": 32,
+                  "y": 696.796875
+                },
+                {
+                  "id": "task",
+                  "x": 32,
+                  "y": 964.328125
+                },
+                {
+                  "id": "next",
+                  "x": 32,
+                  "y": 1209.46875
+                },
+                {
+                  "id": "restore",
+                  "x": 32,
+                  "y": 1265.46875
+                }
+              ]
+            },
+            "measurementBeforeAnyPostReturnScroll": true
+          }
+        }
+      ],
+      "httpStatus": 200,
+      "httpResponseSHA256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+      "initialMap": {
+        "selected": [],
+        "depths": {
+          "home": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "task": {
+            "depth": "2",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "next": {
+            "depth": "0",
+            "expanded": "false",
+            "bodyHidden": true
+          },
+          "restore": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          }
+        },
+        "mapScroll": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        },
+        "windowY": 0,
+        "zoomLabel": "100%",
+        "appliedTransform": "none",
+        "canvasScale": {
+          "x": 1,
+          "y": 1.0001306923791822
+        },
+        "nodes": {
+          "purpose": {
+            "rect": {
+              "x": 16,
+              "y": 631.96875,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "instruction": {
+            "rect": {
+              "x": 16,
+              "y": 719.5625,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "decision": {
+            "rect": {
+              "x": 16,
+              "y": 807.15625,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "home": {
+            "rect": {
+              "x": 32,
+              "y": 1015.796875,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "task": {
+            "rect": {
+              "x": 32,
+              "y": 1131.984375,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "next": {
+            "rect": {
+              "x": 32,
+              "y": 1377.125,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "restore": {
+            "rect": {
+              "x": 32,
+              "y": 1433.125,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          }
+        },
+        "helpOpen": false,
+        "related": [],
+        "active": "",
+        "mapHidden": false,
+        "focusHidden": true,
+        "peekCount": 0,
+        "prepOpen": false,
+        "devicePixelRatio": 1,
+        "overflow": {
+          "sw": 390,
+          "cw": 390
+        }
+      },
+      "defaultGoal": {
+        "text": "이 프로젝트의 목표: AI와 만드는 프로그램의 구상과 변화를 살피고, 필요한 부분을 이어 맡기는 공간",
+        "geometry": {
+          "box": {
+            "x": 16,
+            "y": 36,
+            "width": 358,
+            "height": 37.6875,
+            "bottom": 73.6875,
+            "right": 374
+          },
+          "full": true,
+          "hit": true,
+          "cover": "aim",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        }
+      },
+      "beforeUserDepthChange": {
+        "selected": [
+          "instruction"
+        ],
+        "depths": {
+          "home": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "task": {
+            "depth": "2",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "next": {
+            "depth": "0",
+            "expanded": "false",
+            "bodyHidden": true
+          },
+          "restore": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          }
+        },
+        "mapScroll": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        },
+        "windowY": 0,
+        "zoomLabel": "100%",
+        "appliedTransform": "none",
+        "canvasScale": {
+          "x": 1,
+          "y": 1.0001306923791822
+        },
+        "nodes": {
+          "purpose": {
+            "rect": {
+              "x": 16,
+              "y": 631.96875,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "instruction": {
+            "rect": {
+              "x": 16,
+              "y": 719.5625,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "decision": {
+            "rect": {
+              "x": 16,
+              "y": 807.15625,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "home": {
+            "rect": {
+              "x": 32,
+              "y": 1015.796875,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "task": {
+            "rect": {
+              "x": 32,
+              "y": 1131.984375,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "next": {
+            "rect": {
+              "x": 32,
+              "y": 1377.125,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "restore": {
+            "rect": {
+              "x": 32,
+              "y": 1433.125,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          }
+        },
+        "helpOpen": false,
+        "related": [
+          "home",
+          "task",
+          "next"
+        ],
+        "active": "instruction",
+        "mapHidden": false,
+        "focusHidden": true,
+        "peekCount": 0,
+        "prepOpen": false,
+        "devicePixelRatio": 1,
+        "overflow": {
+          "sw": 390,
+          "cw": 390
+        }
+      },
+      "afterUserDepthChange": {
+        "selected": [
+          "instruction"
+        ],
+        "depths": {
+          "home": {
+            "depth": "2",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "task": {
+            "depth": "2",
+            "expanded": "true",
+            "bodyHidden": false
+          },
+          "next": {
+            "depth": "0",
+            "expanded": "false",
+            "bodyHidden": true
+          },
+          "restore": {
+            "depth": "1",
+            "expanded": "true",
+            "bodyHidden": false
+          }
+        },
+        "mapScroll": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        },
+        "windowY": 420,
+        "zoomLabel": "100%",
+        "appliedTransform": "none",
+        "canvasScale": {
+          "x": 1,
+          "y": 1.0003947636511819
+        },
+        "nodes": {
+          "purpose": {
+            "rect": {
+              "x": 16,
+              "y": 211.96875,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "instruction": {
+            "rect": {
+              "x": 16,
+              "y": 299.5625,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "decision": {
+            "rect": {
+              "x": 16,
+              "y": 387.15625,
+              "width": 358,
+              "height": 77.59375
+            },
+            "layoutWidth": 358,
+            "layoutHeight": 78
+          },
+          "home": {
+            "rect": {
+              "x": 32,
+              "y": 595.796875,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "task": {
+            "rect": {
+              "x": 32,
+              "y": 863.328125,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "next": {
+            "rect": {
+              "x": 32,
+              "y": 1108.46875,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          },
+          "restore": {
+            "rect": {
+              "x": 32,
+              "y": 1164.46875,
+              "width": 326,
+              "height": 44
+            },
+            "layoutWidth": 326,
+            "layoutHeight": 44
+          }
+        },
+        "helpOpen": false,
+        "related": [
+          "home",
+          "task",
+          "next"
+        ],
+        "active": "more",
+        "mapHidden": false,
+        "focusHidden": true,
+        "peekCount": 0,
+        "prepOpen": false,
+        "devicePixelRatio": 1,
+        "overflow": {
+          "sw": 390,
+          "cw": 390
+        }
+      },
+      "helpGeometry": {
+        "box": {
+          "x": 31,
+          "y": 588.796875,
+          "width": 328,
+          "height": 75,
+          "bottom": 663.796875,
+          "right": 359
+        },
+        "full": true,
+        "hit": true,
+        "cover": "P",
+        "ancestors": [],
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 390,
+          "b": 844
+        }
+      },
+      "helpText": "문서에 함께 언급된 곳을 살펴보려고 묶은 연구 배치입니다. 선(좁은 화면에서는 ‘함께 언급’ 표시)은 함께 언급됨만 뜻하며, 실행 순서나 자동 분석 결과가 아닙니다. 지도의 묶음은 실제 포함 관계를 입증하지 않습니다."
+    }
+  ],
+  "actions": [
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".part[data-id=\"instruction\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 420,
+            "y": 324.1875,
+            "width": 300,
+            "height": 101.59375,
+            "bottom": 425.78125,
+            "right": 720
+          },
+          "full": true,
+          "hit": true,
+          "cover": "ln",
+          "ancestors": [
+            {
+              "id": "mapScroll",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 380,
+            "t": 116.796875,
+            "r": 1440,
+            "b": 838
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".area[data-id=\"home\"] .more",
+        "geometryBefore": {
+          "box": {
+            "x": 898,
+            "y": 332.234375,
+            "width": 35.890625,
+            "height": 20.796875,
+            "bottom": 353.03125,
+            "right": 933.890625
+          },
+          "full": true,
+          "hit": true,
+          "cover": "more",
+          "ancestors": [
+            {
+              "id": "mapScroll",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 380,
+            "t": 116.796875,
+            "r": 1440,
+            "b": 831
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "more"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#zoomIn",
+        "geometryBefore": {
+          "box": {
+            "x": 1389,
+            "y": 67.390625,
+            "width": 32,
+            "height": 30,
+            "bottom": 97.390625,
+            "right": 1421
+          },
+          "full": true,
+          "hit": true,
+          "cover": "zoomIn",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "more"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 40,
+        "dy": 100,
+        "pointer": [
+          1000,
+          500
+        ],
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".help summary",
+        "geometryBefore": {
+          "box": {
+            "x": 954,
+            "y": 151.2531280517578,
+            "width": 107.1187744140625,
+            "height": 24,
+            "bottom": 175.2531280517578,
+            "right": 1061.1187744140625
+          },
+          "full": true,
+          "hit": true,
+          "cover": "SUMMARY",
+          "ancestors": [
+            {
+              "id": "mapScroll",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 380,
+            "t": 116.796875,
+            "r": 1440,
+            "b": 831
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".part[data-id=\"purpose\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 396,
+            "y": 149.7531280517578,
+            "width": 360,
+            "height": 96.71250915527344,
+            "bottom": 246.46563720703125,
+            "right": 756
+          },
+          "full": true,
+          "hit": true,
+          "cover": "nm",
+          "ancestors": [
+            {
+              "id": "mapScroll",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 380,
+            "t": 116.796875,
+            "r": 1440,
+            "b": 831
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#enterFocus",
+        "geometryBefore": {
+          "box": {
+            "x": 1310.59375,
+            "y": 844,
+            "width": 111.40625,
+            "height": 44,
+            "bottom": 888,
+            "right": 1422
+          },
+          "full": true,
+          "hit": true,
+          "cover": "enterFocus",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "focusTitle"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".evbtn[data-claim=\"p3\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 428.59375,
+            "y": 324.546875,
+            "width": 27.921875,
+            "height": 20.796875,
+            "bottom": 345.34375,
+            "right": 456.515625
+          },
+          "full": true,
+          "hit": true,
+          "cover": "evbtn",
+          "ancestors": [
+            {
+              "id": "reading",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 300,
+            "t": 49,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "focusTitle"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#peek-p3 .peek-close",
+        "geometryBefore": {
+          "box": {
+            "x": 897.078125,
+            "y": 367.546875,
+            "width": 45.921875,
+            "height": 28.796875,
+            "bottom": 396.34375,
+            "right": 943
+          },
+          "full": true,
+          "hit": true,
+          "cover": "peek-close",
+          "ancestors": [
+            {
+              "id": "reading",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 300,
+            "t": 49,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".evbtn[data-claim=\"p3\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 428.59375,
+            "y": 324.546875,
+            "width": 27.921875,
+            "height": 20.796875,
+            "bottom": 345.34375,
+            "right": 456.515625
+          },
+          "full": true,
+          "hit": true,
+          "cover": "evbtn",
+          "ancestors": [
+            {
+              "id": "reading",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 300,
+            "t": 49,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-keyboard",
+      "data": {
+        "key": "Escape"
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#prepBtn",
+        "geometryBefore": {
+          "box": {
+            "x": 344,
+            "y": 760.328125,
+            "width": 295.546875,
+            "height": 44,
+            "bottom": 804.328125,
+            "right": 639.546875
+          },
+          "full": true,
+          "hit": true,
+          "cover": "prepBtn",
+          "ancestors": [
+            {
+              "id": "reading",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 300,
+            "t": 49,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepClose"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#prepClose",
+        "geometryBefore": {
+          "box": {
+            "x": 1358.390625,
+            "y": 18,
+            "width": 61.609375,
+            "height": 44,
+            "bottom": 62,
+            "right": 1420
+          },
+          "full": true,
+          "hit": true,
+          "cover": "prepClose",
+          "ancestors": [
+            {
+              "id": "prep",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 970,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepClose"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepBtn"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#returnAll",
+        "geometryBefore": {
+          "box": {
+            "x": 22,
+            "y": 71,
+            "width": 185.8125,
+            "height": 44,
+            "bottom": 115,
+            "right": 207.8125
+          },
+          "full": true,
+          "hit": true,
+          "cover": "returnAll",
+          "ancestors": [
+            {
+              "id": "",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 49,
+            "r": 300,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepBtn"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".part[data-id=\"purpose\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 396,
+            "y": 149.7531280517578,
+            "width": 360,
+            "height": 96.71250915527344,
+            "bottom": 246.46563720703125,
+            "right": 756
+          },
+          "full": true,
+          "hit": true,
+          "cover": "nm",
+          "ancestors": [
+            {
+              "id": "mapScroll",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 380,
+            "t": 116.796875,
+            "r": 1440,
+            "b": 831
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#enterFocus",
+        "geometryBefore": {
+          "box": {
+            "x": 1310.59375,
+            "y": 844,
+            "width": 111.40625,
+            "height": 44,
+            "bottom": 888,
+            "right": 1422
+          },
+          "full": true,
+          "hit": true,
+          "cover": "enterFocus",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "focusTitle"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".evbtn[data-claim=\"p3\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 428.59375,
+            "y": 324.546875,
+            "width": 27.921875,
+            "height": 20.796875,
+            "bottom": 345.34375,
+            "right": 456.515625
+          },
+          "full": true,
+          "hit": true,
+          "cover": "evbtn",
+          "ancestors": [
+            {
+              "id": "reading",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 300,
+            "t": 49,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "focusTitle"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#peek-p3 .peek-close",
+        "geometryBefore": {
+          "box": {
+            "x": 897.078125,
+            "y": 367.546875,
+            "width": 45.921875,
+            "height": 28.796875,
+            "bottom": 396.34375,
+            "right": 943
+          },
+          "full": true,
+          "hit": true,
+          "cover": "peek-close",
+          "ancestors": [
+            {
+              "id": "reading",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 300,
+            "t": 49,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#prepBtn",
+        "geometryBefore": {
+          "box": {
+            "x": 344,
+            "y": 760.328125,
+            "width": 295.546875,
+            "height": 44,
+            "bottom": 804.328125,
+            "right": 639.546875
+          },
+          "full": true,
+          "hit": true,
+          "cover": "prepBtn",
+          "ancestors": [
+            {
+              "id": "reading",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 300,
+            "t": 49,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepClose"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#prepClose",
+        "geometryBefore": {
+          "box": {
+            "x": 1358.390625,
+            "y": 18,
+            "width": 61.609375,
+            "height": 44,
+            "bottom": 62,
+            "right": 1420
+          },
+          "full": true,
+          "hit": true,
+          "cover": "prepClose",
+          "ancestors": [
+            {
+              "id": "prep",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 970,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepClose"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepBtn"
+        }
+      }
+    },
+    {
+      "case": "1440x900",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#returnAll",
+        "geometryBefore": {
+          "box": {
+            "x": 22,
+            "y": 71,
+            "width": 185.8125,
+            "height": 44,
+            "bottom": 115,
+            "right": 207.8125
+          },
+          "full": true,
+          "hit": true,
+          "cover": "returnAll",
+          "ancestors": [
+            {
+              "id": "",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 49,
+            "r": 300,
+            "b": 900
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepBtn"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".part[data-id=\"instruction\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 16,
+            "y": 719.5625,
+            "width": 358,
+            "height": 77.59375,
+            "bottom": 797.15625,
+            "right": 374
+          },
+          "full": true,
+          "hit": true,
+          "cover": "nm",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": 289.984375,
+        "pointer": [
+          195.0,
+          548.6
+        ],
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 290,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": 130,
+        "pointer": [
+          195.0,
+          548.6
+        ],
+        "before": {
+          "windowY": 290,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".area[data-id=\"home\"] .more",
+        "geometryBefore": {
+          "box": {
+            "x": 44,
+            "y": 668.1875,
+            "width": 35.890625,
+            "height": 20.796875,
+            "bottom": 688.984375,
+            "right": 79.890625
+          },
+          "full": true,
+          "hit": true,
+          "cover": "more",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "more"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".help summary",
+        "geometryBefore": {
+          "box": {
+            "x": 31,
+            "y": 564.796875,
+            "width": 89.265625,
+            "height": 20,
+            "bottom": 584.796875,
+            "right": 120.265625
+          },
+          "full": true,
+          "hit": true,
+          "cover": "SUMMARY",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "more"
+        },
+        "after": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".part[data-id=\"purpose\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 16,
+            "y": 211.96875,
+            "width": 358,
+            "height": 77.59375,
+            "bottom": 289.5625,
+            "right": 374
+          },
+          "full": true,
+          "hit": true,
+          "cover": "nm",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": ""
+        },
+        "after": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#enterFocus",
+        "geometryBefore": {
+          "box": {
+            "x": 262.59375,
+            "y": 781.3125,
+            "width": 111.40625,
+            "height": 44,
+            "bottom": 825.3125,
+            "right": 374
+          },
+          "full": true,
+          "hit": true,
+          "cover": "enterFocus",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "focusTitle"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".evbtn[data-claim=\"p3\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 332.515625,
+            "y": 519.65625,
+            "width": 27.921875,
+            "height": 20.796875,
+            "bottom": 540.453125,
+            "right": 360.4375
+          },
+          "full": true,
+          "hit": true,
+          "cover": "evbtn",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "focusTitle"
+        },
+        "after": {
+          "windowY": 184,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#peek-p3 .peek-close",
+        "geometryBefore": {
+          "box": {
+            "x": 315.078125,
+            "y": 409.046875,
+            "width": 45.921875,
+            "height": 28.796875,
+            "bottom": 437.84375,
+            "right": 361
+          },
+          "full": true,
+          "hit": true,
+          "cover": "peek-close",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 184,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".evbtn[data-claim=\"p3\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 332.515625,
+            "y": 519.65625,
+            "width": 27.921875,
+            "height": 20.796875,
+            "bottom": 540.453125,
+            "right": 360.4375
+          },
+          "full": true,
+          "hit": true,
+          "cover": "evbtn",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 184,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-keyboard",
+      "data": {
+        "key": "Escape"
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": 250.828125,
+        "pointer": [
+          195.0,
+          548.6
+        ],
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#prepBtn",
+        "geometryBefore": {
+          "box": {
+            "x": 16,
+            "y": 774.828125,
+            "width": 295.546875,
+            "height": 44,
+            "bottom": 818.828125,
+            "right": 311.546875
+          },
+          "full": true,
+          "hit": true,
+          "cover": "prepBtn",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepClose"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": 70,
+        "pointer": [
+          234.0,
+          564.7625
+        ],
+        "before": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepClose"
+        },
+        "after": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 57,
+          "focus": "prepClose"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#prepClose",
+        "geometryBefore": {
+          "box": {
+            "x": 308.390625,
+            "y": 85.53125,
+            "width": 61.609375,
+            "height": 44,
+            "bottom": 129.53125,
+            "right": 370
+          },
+          "full": true,
+          "hit": true,
+          "cover": "prepClose",
+          "ancestors": [
+            {
+              "id": "prep",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 67.53125,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 57,
+          "focus": "prepClose"
+        },
+        "after": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepBtn"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#returnAll",
+        "geometryBefore": {
+          "box": {
+            "x": 16,
+            "y": 8,
+            "width": 177.8125,
+            "height": 40,
+            "bottom": 48,
+            "right": 193.8125
+          },
+          "full": true,
+          "hit": true,
+          "cover": "returnAll",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepBtn"
+        },
+        "after": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".part[data-id=\"purpose\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 16,
+            "y": 211.96875,
+            "width": 358,
+            "height": 77.59375,
+            "bottom": 289.5625,
+            "right": 374
+          },
+          "full": true,
+          "hit": true,
+          "cover": "nm",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#enterFocus",
+        "geometryBefore": {
+          "box": {
+            "x": 262.59375,
+            "y": 781.3125,
+            "width": 111.40625,
+            "height": 44,
+            "bottom": 825.3125,
+            "right": 374
+          },
+          "full": true,
+          "hit": true,
+          "cover": "enterFocus",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "focusTitle"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": ".evbtn[data-claim=\"p3\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 332.515625,
+            "y": 519.65625,
+            "width": 27.921875,
+            "height": 20.796875,
+            "bottom": 540.453125,
+            "right": 360.4375
+          },
+          "full": true,
+          "hit": true,
+          "cover": "evbtn",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "focusTitle"
+        },
+        "after": {
+          "windowY": 184,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#peek-p3 .peek-close",
+        "geometryBefore": {
+          "box": {
+            "x": 315.078125,
+            "y": 409.046875,
+            "width": 45.921875,
+            "height": 28.796875,
+            "bottom": 437.84375,
+            "right": 361
+          },
+          "full": true,
+          "hit": true,
+          "cover": "peek-close",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 184,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": 250.828125,
+        "pointer": [
+          195.0,
+          548.6
+        ],
+        "before": {
+          "windowY": 0,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#prepBtn",
+        "geometryBefore": {
+          "box": {
+            "x": 16,
+            "y": 774.828125,
+            "width": 295.546875,
+            "height": 44,
+            "bottom": 818.828125,
+            "right": 311.546875
+          },
+          "full": true,
+          "hit": true,
+          "cover": "prepBtn",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "p3"
+        },
+        "after": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 57,
+          "focus": "prepClose"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#prepClose",
+        "geometryBefore": {
+          "box": {
+            "x": 308.390625,
+            "y": 85.53125,
+            "width": 61.609375,
+            "height": 44,
+            "bottom": 129.53125,
+            "right": 370
+          },
+          "full": true,
+          "hit": true,
+          "cover": "prepClose",
+          "ancestors": [
+            {
+              "id": "prep",
+              "overflow": "auto"
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 67.53125,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 57,
+          "focus": "prepClose"
+        },
+        "after": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepBtn"
+        }
+      }
+    },
+    {
+      "case": "390x844",
+      "kind": "actual-click",
+      "data": {
+        "selector": "#returnAll",
+        "geometryBefore": {
+          "box": {
+            "x": 16,
+            "y": 8,
+            "width": 177.8125,
+            "height": 40,
+            "bottom": 48,
+            "right": 193.8125
+          },
+          "full": true,
+          "hit": true,
+          "cover": "returnAll",
+          "ancestors": [],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          }
+        },
+        "before": {
+          "windowY": 251,
+          "reading": 0,
+          "prep": 0,
+          "focus": "prepBtn"
+        },
+        "after": {
+          "windowY": 420,
+          "reading": 0,
+          "prep": 0,
+          "focus": "part is-selected"
+        }
+      }
+    }
+  ],
+  "server": [
+    "\"GET /return-flow-study.html HTTP/1.1\" 200 -",
+    "code 404, message File not found",
+    "\"GET /favicon.ico HTTP/1.1\" 404 -",
+    "\"GET /return-flow-study.html HTTP/1.1\" 200 -"
+  ],
+  "console": [
+    {
+      "case": "1440x900",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+    }
+  ],
+  "pageerrors": [],
+  "fatal": null,
+  "cleanup_errors": [],
+  "playwright": "1.57.0",
+  "browser_path": "/usr/bin/chromium",
+  "unrun": [
+    "author flow_check.py (reference only)",
+    "previous reading-study tests",
+    "actual touch swipe",
+    "human comprehension",
+    "external original roundtrip",
+    "real sending"
+  ],
+  "plan": [
+    "1 map summary, distinct depths and user change, zoom/help",
+    "2 purpose select and pre-entry baseline",
+    "3 actual evidence p3 open",
+    "4 button close, same evidence reopen, Escape",
+    "5 handoff prep and actual wheel to lower conditions/unknowns",
+    "6 prep close and reading/focus restore",
+    "7 map return with immediate geometry comparison",
+    "8 repeat small flow once"
+  ],
+  "fileHashBefore": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+  "actualHTTPURL": "http://127.0.0.1:33687/return-flow-study.html",
+  "chromium": "154.0.8037.57",
+  "fileHashAfter": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+  "executed_steps": 16,
+  "complete": true,
+  "counts": {
+    "PASS": 16,
+    "FAIL": 0
+  },
+  "exit_code": 0,
+  "finished_utc": "2026-10-15T17:18:18.840667+00:00"
+}
