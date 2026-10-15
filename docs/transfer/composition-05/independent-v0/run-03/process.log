@@ -1,0 +1,5 @@
+PASS 1440/S1
+PASS 1440/S2
+PASS 1440/S3
+FAIL 1440/S4 Noninitial native focus scroll not achieved
+{"counts": {"PASS": 3, "FAIL": 1}, "executed": 4, "complete": false, "missing": ["1440/S5", "1440/S6"], "fatal": null, "exit_code": 1}

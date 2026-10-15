@@ -1,0 +1,78 @@
+{
+  "source": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/10d1f03f6944a2787079cdb49cf009c6b1fbd302/docs/transfer/composition-05/author-v0/composition-study.html",
+  "target_commit": "10d1f03f6944a2787079cdb49cf009c6b1fbd302",
+  "started_utc": "2026-10-15T19:25:37.723685+00:00",
+  "environment": {
+    "python": "/workspace/browser-env/venv/bin/python",
+    "playwright": "1.57.0",
+    "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+    "browser_executable": "/usr/bin/chromium"
+  },
+  "probe": true,
+  "expected": [
+    "1440/S1",
+    "1440/S2",
+    "1440/S3",
+    "1440/S4",
+    "1440/S5",
+    "1440/S6",
+    "390/S1",
+    "390/S2",
+    "390/S3",
+    "390/S4",
+    "390/S5",
+    "390/S6",
+    "390/G3-nested",
+    "390/G1-prep"
+  ],
+  "stages": [],
+  "actions": [],
+  "HTTP": [],
+  "server": [],
+  "console": [],
+  "pageerrors": [],
+  "fatal": {
+    "at": "setup",
+    "type": "ValueError",
+    "message": "SYNTHETIC expected hash mismatch",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 124, in <module>\n    if R['fileHashBefore']!=('0'*64 if args.probe else HASH):raise ValueError('SYNTHETIC expected hash mismatch' if args.probe else 'Wrong source bytes')\n                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: SYNTHETIC expected hash mismatch\n"
+  },
+  "cleanup_errors": [],
+  "unrun": [
+    "official Folding access retry",
+    "previous cycles",
+    "author checker",
+    "human usability/comprehension",
+    "actual AI compliance",
+    "touch/pinch",
+    "external original roundtrip",
+    "actual transmission/acceptance"
+  ],
+  "fileHashBefore": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+  "fileBytes": 46924,
+  "fileHashAfter": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+  "executed": 0,
+  "missing": [
+    "1440/S1",
+    "1440/S2",
+    "1440/S3",
+    "1440/S4",
+    "1440/S5",
+    "1440/S6",
+    "390/S1",
+    "390/S2",
+    "390/S3",
+    "390/S4",
+    "390/S5",
+    "390/S6",
+    "390/G3-nested",
+    "390/G1-prep"
+  ],
+  "complete": false,
+  "counts": {
+    "PASS": 0,
+    "FAIL": 0
+  },
+  "exit_code": 1,
+  "finished_utc": "2026-10-15T19:25:37.725000+00:00"
+}

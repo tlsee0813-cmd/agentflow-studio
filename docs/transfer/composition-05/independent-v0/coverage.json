@@ -1,0 +1,220 @@
+{
+  "kind": "Offline exact coverage accounting of scoped UI runs; not wrapper-only success",
+  "expected": [
+    "1440/S1",
+    "1440/S2",
+    "1440/S3",
+    "1440/S4",
+    "1440/S5",
+    "1440/S6",
+    "390/S1",
+    "390/S2",
+    "390/S3",
+    "390/S4",
+    "390/S5",
+    "390/S6",
+    "390/G3-nested",
+    "390/G1-prep"
+  ],
+  "selected": [
+    {
+      "id": "390/S1",
+      "status": "PASS",
+      "source": "run-02/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "390/S2",
+      "status": "PASS",
+      "source": "run-02/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "390/S3",
+      "status": "PASS",
+      "source": "run-02/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "390/S4",
+      "status": "PASS",
+      "source": "run-02/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "390/S5",
+      "status": "PASS",
+      "source": "run-02/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "390/S6",
+      "status": "PASS",
+      "source": "run-02/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "390/G3-nested",
+      "status": "PASS",
+      "source": "run-02/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "390/G1-prep",
+      "status": "PASS",
+      "source": "run-02/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "1440/S1",
+      "status": "PASS",
+      "source": "run-04/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "1440/S2",
+      "status": "PASS",
+      "source": "run-04/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "1440/S3",
+      "status": "PASS",
+      "source": "run-04/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "1440/S4",
+      "status": "PASS",
+      "source": "run-04/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "1440/S5",
+      "status": "PASS",
+      "source": "run-04/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    },
+    {
+      "id": "1440/S6",
+      "status": "PASS",
+      "source": "run-04/result.json",
+      "environment": {
+        "python": "/workspace/browser-env/venv/bin/python",
+        "playwright": "1.57.0",
+        "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+        "browser_executable": "/usr/bin/chromium",
+        "browser_version": "154.0.8037.57"
+      }
+    }
+  ],
+  "sources": {
+    "run-02": {
+      "raw_result_sha256": "0fd48bbbeb1d6171976819af4a7414ee0d1f28449b61acebf65be7539e660461",
+      "actual_child_exit": 1,
+      "whole_run_complete": false,
+      "raw_counts": {
+        "PASS": 10,
+        "FAIL": 1
+      },
+      "selected_scope": "390/",
+      "selected_count": 8,
+      "note": "run-02 full child exit1 is retained: only its completed 390 scope is accepted; its failed 1440 harness stage is superseded by run-04, not hidden"
+    },
+    "run-04": {
+      "raw_result_sha256": "44282769e4580a171682a987aa66c479db4e9393f868b71fe3f85ff2e32a82ea",
+      "actual_child_exit": 0,
+      "whole_run_complete": true,
+      "raw_counts": {
+        "PASS": 6,
+        "FAIL": 0
+      },
+      "selected_scope": "1440/",
+      "selected_count": 6,
+      "note": "run-02 full child exit1 is retained: only its completed 390 scope is accepted; its failed 1440 harness stage is superseded by run-04, not hidden"
+    }
+  },
+  "fatal": null,
+  "syntheticProbeExit": 1,
+  "executed_unique_accepted": 14,
+  "complete": true,
+  "exit_code": 0
+}

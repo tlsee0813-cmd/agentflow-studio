@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/composition-v0/verify.py",
+    "--out",
+    "run-04",
+    "--only-wide"
+  ],
+  "actual_child_exit": 0,
+  "JSON_exit": 0,
+  "matches": true,
+  "syntheticProbe": false
+}

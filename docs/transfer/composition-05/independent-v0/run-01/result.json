@@ -1,0 +1,4282 @@
+{
+  "source": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/10d1f03f6944a2787079cdb49cf009c6b1fbd302/docs/transfer/composition-05/author-v0/composition-study.html",
+  "target_commit": "10d1f03f6944a2787079cdb49cf009c6b1fbd302",
+  "started_utc": "2026-10-15T19:25:25.832329+00:00",
+  "environment": {
+    "python": "/workspace/browser-env/venv/bin/python",
+    "playwright": "1.57.0",
+    "playwright_module": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+    "browser_executable": "/usr/bin/chromium",
+    "browser_version": "154.0.8037.57"
+  },
+  "probe": false,
+  "expected": [
+    "1440/S1",
+    "1440/S2",
+    "1440/S3",
+    "1440/S4",
+    "1440/S5",
+    "1440/S6",
+    "390/S1",
+    "390/S2",
+    "390/S3",
+    "390/S4",
+    "390/S5",
+    "390/S6",
+    "390/G3-nested",
+    "390/G1-prep"
+  ],
+  "stages": [
+    {
+      "id": "1440/S1",
+      "status": "PASS",
+      "detail": {
+        "viewport": [
+          1440,
+          900
+        ],
+        "HTTPStatus": 200,
+        "firstResponseBodySHA256": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+        "bodyBytes": 46924,
+        "initial": {
+          "pressed": [],
+          "depth": {
+            "G2": "0",
+            "G3": "1",
+            "G4": "0"
+          },
+          "map": {
+            "left": 0,
+            "top": 0,
+            "maxX": 0,
+            "maxY": 0
+          },
+          "main": 0,
+          "focusTop": 0,
+          "transform": "matrix(0.9, 0, 0, 0.9, 0, 0)",
+          "scale": {
+            "x": 0.9,
+            "y": 0.9
+          },
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          },
+          "focusing": false,
+          "prepHidden": true,
+          "peekCount": 0,
+          "stable": {
+            "G1": {
+              "box": {
+                "x": 29.69999885559082,
+                "y": 353.45001220703125,
+                "width": 172.8000030517578,
+                "height": 46.125,
+                "right": 202.50000190734863,
+                "bottom": 399.57501220703125
+              },
+              "hasBox": true,
+              "full": true,
+              "clip": {
+                "l": 0,
+                "t": 143.75,
+                "r": 1100,
+                "b": 900
+              },
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SPAN",
+                "class": "gname"
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 143.75,
+                    "right": 1100,
+                    "bottom": 900
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "G2": {
+              "box": {
+                "x": 249.29998779296875,
+                "y": 330.04998779296875,
+                "width": 203.39999389648438,
+                "height": 27.45001220703125,
+                "right": 452.6999816894531,
+                "bottom": 357.5
+              },
+              "hasBox": true,
+              "full": true,
+              "clip": {
+                "l": 0,
+                "t": 143.75,
+                "r": 1100,
+                "b": 900
+              },
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SPAN",
+                "class": "gname"
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 143.75,
+                    "right": 1100,
+                    "bottom": 900
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "G3": {
+              "box": {
+                "x": 521.0999755859375,
+                "y": 171.64999389648438,
+                "width": 214.20001220703125,
+                "height": 27.45001220703125,
+                "right": 735.2999877929688,
+                "bottom": 199.10000610351562
+              },
+              "hasBox": true,
+              "full": true,
+              "clip": {
+                "l": 0,
+                "t": 143.75,
+                "r": 1100,
+                "b": 900
+              },
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SPAN",
+                "class": "gname"
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 143.75,
+                    "right": 1100,
+                    "bottom": 900
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "G4": {
+              "box": {
+                "x": 521.0999755859375,
+                "y": 495.6499938964844,
+                "width": 214.20001220703125,
+                "height": 27.449981689453125,
+                "right": 735.2999877929688,
+                "bottom": 523.0999755859375
+              },
+              "hasBox": true,
+              "full": true,
+              "clip": {
+                "l": 0,
+                "t": 143.75,
+                "r": 1100,
+                "b": 900
+              },
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SPAN",
+                "class": "gname"
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 143.75,
+                    "right": 1100,
+                    "bottom": 900
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "G5": {
+              "box": {
+                "x": 810.8999633789062,
+                "y": 353.45001220703125,
+                "width": 196.20001220703125,
+                "height": 46.125,
+                "right": 1007.0999755859375,
+                "bottom": 399.57501220703125
+              },
+              "hasBox": true,
+              "full": true,
+              "clip": {
+                "l": 0,
+                "t": 143.75,
+                "r": 1100,
+                "b": 900
+              },
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SPAN",
+                "class": "gname"
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 143.75,
+                    "right": 1100,
+                    "bottom": 900
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "C32": {
+              "box": {
+                "x": 521.0999755859375,
+                "y": 260.07501220703125,
+                "width": 214.20001220703125,
+                "height": 50.17498779296875,
+                "right": 735.2999877929688,
+                "bottom": 310.25
+              },
+              "hasBox": true,
+              "full": true,
+              "clip": {
+                "l": 0,
+                "t": 143.75,
+                "r": 1100,
+                "b": 900
+              },
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SPAN",
+                "class": "kname"
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 143.75,
+                    "right": 1100,
+                    "bottom": 900
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "block"
+            }
+          }
+        },
+        "headerText": "AgentFlow · 배경 사본 기능 일부 지도\nFLOW091-C 과거 개발 계약·MOCK 검사 보고를 읽는 연구 시안\n바뀐 것\n목적이 작업문의 분리된 배경 블록에만 들어감 — 작업문과 미리보기\n지킬 것\n이미 맡긴 요청의 사본은 그대로, 다음 명시 새 요청만 최신 구상\n자료 범위",
+        "headerGeometry": {
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 98.75,
+            "right": 1440,
+            "bottom": 98.75
+          },
+          "hasBox": true,
+          "full": true,
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          },
+          "hit": true,
+          "cover": {
+            "id": "",
+            "tag": "SPAN",
+            "class": ""
+          },
+          "scrollAncestors": [],
+          "display": "block"
+        }
+      }
+    },
+    {
+      "id": "1440/S2",
+      "status": "PASS",
+      "detail": {
+        "initialRelations": {
+          "rawGroups": [
+            {
+              "ids": [
+                "R1"
+              ],
+              "from": "G1",
+              "to": "G2",
+              "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정",
+              "start": {
+                "x": 210.59999442100525,
+                "y": 377.41249381005764
+              },
+              "end": {
+                "x": 241.19999361038208,
+                "y": 361.7749942243099
+              },
+              "fromRect": {
+                "x": 21.599998474121094,
+                "y": 347.1499938964844,
+                "right": 210.5999984741211,
+                "bottom": 407.67498779296875,
+                "width": 189,
+                "height": 60.524993896484375
+              },
+              "toRect": {
+                "x": 241.1999969482422,
+                "y": 323.75,
+                "right": 460.79998779296875,
+                "bottom": 399.79998779296875,
+                "width": 219.59999084472656,
+                "height": 76.04998779296875
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R2"
+              ],
+              "from": "G2",
+              "to": "C31",
+              "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본",
+              "start": {
+                "x": 460.79998779296875,
+                "y": 361.7749942243099
+              },
+              "end": {
+                "x": 521.0999861955643,
+                "y": 229.5874908596279
+              },
+              "fromRect": {
+                "x": 241.1999969482422,
+                "y": 323.75,
+                "right": 460.79998779296875,
+                "bottom": 399.79998779296875,
+                "width": 219.59999084472656,
+                "height": 76.04998779296875
+              },
+              "toRect": {
+                "x": 521.0999755859375,
+                "y": 204.5,
+                "right": 735.2999877929688,
+                "bottom": 254.67498779296875,
+                "width": 214.20001220703125,
+                "height": 50.17498779296875
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R3"
+              ],
+              "from": "G2",
+              "to": "C32",
+              "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본",
+              "start": {
+                "x": 460.79998779296875,
+                "y": 361.7749942243099
+              },
+              "end": {
+                "x": 521.0999861955643,
+                "y": 285.1624962538481
+              },
+              "fromRect": {
+                "x": 241.1999969482422,
+                "y": 323.75,
+                "right": 460.79998779296875,
+                "bottom": 399.79998779296875,
+                "width": 219.59999084472656,
+                "height": 76.04998779296875
+              },
+              "toRect": {
+                "x": 521.0999755859375,
+                "y": 260.07501220703125,
+                "right": 735.2999877929688,
+                "bottom": 310.25,
+                "width": 214.20001220703125,
+                "height": 50.17498779296875
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R4"
+              ],
+              "from": "C32",
+              "to": "G5",
+              "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본",
+              "start": {
+                "x": 735.2999805212021,
+                "y": 285.1624962538481
+              },
+              "end": {
+                "x": 802.7999787330627,
+                "y": 377.41249381005764
+              },
+              "fromRect": {
+                "x": 521.0999755859375,
+                "y": 260.07501220703125,
+                "right": 735.2999877929688,
+                "bottom": 310.25,
+                "width": 214.20001220703125,
+                "height": 50.17498779296875
+              },
+              "toRect": {
+                "x": 802.7999877929688,
+                "y": 347.1499938964844,
+                "right": 1015.199951171875,
+                "bottom": 407.67498779296875,
+                "width": 212.39996337890625,
+                "height": 60.524993896484375
+              },
+              "rings": 0
+            },
+            {
+              "ids": [
+                "R5"
+              ],
+              "from": "G5",
+              "to": "G4",
+              "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자",
+              "start": {
+                "x": 802.7999787330627,
+                "y": 377.41249381005764
+              },
+              "end": {
+                "x": 743.3999253749862,
+                "y": 527.3749898374081
+              },
+              "fromRect": {
+                "x": 802.7999877929688,
+                "y": 347.1499938964844,
+                "right": 1015.199951171875,
+                "bottom": 407.67498779296875,
+                "width": 212.39996337890625,
+                "height": 60.524993896484375
+              },
+              "toRect": {
+                "x": 513,
+                "y": 489.3499755859375,
+                "right": 743.3999633789062,
+                "bottom": 565.4000244140625,
+                "width": 230.39996337890625,
+                "height": 76.050048828125
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R6"
+              ],
+              "from": "G2",
+              "to": "G4",
+              "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본",
+              "start": {
+                "x": 460.79998779296875,
+                "y": 361.7749942243099
+              },
+              "end": {
+                "x": 512.999986410141,
+                "y": 527.3749898374081
+              },
+              "fromRect": {
+                "x": 241.1999969482422,
+                "y": 323.75,
+                "right": 460.79998779296875,
+                "bottom": 399.79998779296875,
+                "width": 219.59999084472656,
+                "height": 76.04998779296875
+              },
+              "toRect": {
+                "x": 513,
+                "y": 489.3499755859375,
+                "right": 743.3999633789062,
+                "bottom": 565.4000244140625,
+                "width": 230.39996337890625,
+                "height": 76.050048828125
+              },
+              "rings": 2
+            }
+          ],
+          "rawFlattenedIDs": [
+            "R1",
+            "R2",
+            "R3",
+            "R4",
+            "R5",
+            "R6"
+          ],
+          "IDCountsBeforeAnyDictionary": {
+            "R1": 1,
+            "R2": 1,
+            "R3": 1,
+            "R4": 1,
+            "R5": 1,
+            "R6": 1
+          },
+          "contractChecks": [
+            {
+              "id": "R1",
+              "originalFrom": "G1",
+              "originalTo": "C21",
+              "kind": "명시 새 요청 때만 사본 고정",
+              "drawnRepresentatives": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "R2",
+              "originalFrom": "C21",
+              "originalTo": "C31",
+              "kind": "요청 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "C31"
+              ]
+            },
+            {
+              "id": "R3",
+              "originalFrom": "C21",
+              "originalTo": "C32",
+              "kind": "요청 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "C32"
+              ]
+            },
+            {
+              "id": "R4",
+              "originalFrom": "C32",
+              "originalTo": "G5",
+              "kind": "내보내기 기록의 사본",
+              "drawnRepresentatives": [
+                "C32",
+                "G5"
+              ]
+            },
+            {
+              "id": "R5",
+              "originalFrom": "G5",
+              "originalTo": "C42",
+              "kind": "일치하는 반환 식별자",
+              "drawnRepresentatives": [
+                "G5",
+                "G4"
+              ]
+            },
+            {
+              "id": "R6",
+              "originalFrom": "C21",
+              "originalTo": "C41",
+              "kind": "정확히 연결된 대상 작업의 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "G4"
+              ]
+            }
+          ],
+          "depth": {
+            "G2": "0",
+            "G3": "1",
+            "G4": "0"
+          }
+        },
+        "collapsedChangeAggregation": "안에 바뀐 부분 · 작업문과 미리보기\n세부 2개 접힘 · 묶음 전체 변경 아님",
+        "afterDepths": {
+          "rawGroups": [
+            {
+              "ids": [
+                "R1"
+              ],
+              "from": "G1",
+              "to": "G2",
+              "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정",
+              "start": {
+                "x": 210.59999442100525,
+                "y": 377.41249381005764
+              },
+              "end": {
+                "x": 241.19999361038208,
+                "y": 361.7749942243099
+              },
+              "fromRect": {
+                "x": 21.599998474121094,
+                "y": 347.1499938964844,
+                "right": 210.5999984741211,
+                "bottom": 407.67498779296875,
+                "width": 189,
+                "height": 60.524993896484375
+              },
+              "toRect": {
+                "x": 241.1999969482422,
+                "y": 323.75,
+                "right": 460.79998779296875,
+                "bottom": 399.79998779296875,
+                "width": 219.59999084472656,
+                "height": 76.04998779296875
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R2",
+                "R3"
+              ],
+              "from": "G2",
+              "to": "G3",
+              "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본\nR3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본",
+              "start": {
+                "x": 460.79998779296875,
+                "y": 361.7749942243099
+              },
+              "end": {
+                "x": 512.999986410141,
+                "y": 203.71249841153622
+              },
+              "fromRect": {
+                "x": 241.1999969482422,
+                "y": 323.75,
+                "right": 460.79998779296875,
+                "bottom": 399.79998779296875,
+                "width": 219.59999084472656,
+                "height": 76.04998779296875
+              },
+              "toRect": {
+                "x": 513,
+                "y": 165.35000610351562,
+                "right": 743.3999633789062,
+                "bottom": 242.0749969482422,
+                "width": 230.39996337890625,
+                "height": 76.72499084472656
+              },
+              "rings": 2
+            },
+            {
+              "ids": [
+                "R4"
+              ],
+              "from": "G3",
+              "to": "G5",
+              "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본",
+              "start": {
+                "x": 743.3999253749862,
+                "y": 203.71249841153622
+              },
+              "end": {
+                "x": 802.7999787330627,
+                "y": 377.41249381005764
+              },
+              "fromRect": {
+                "x": 513,
+                "y": 165.35000610351562,
+                "right": 743.3999633789062,
+                "bottom": 242.0749969482422,
+                "width": 230.39996337890625,
+                "height": 76.72499084472656
+              },
+              "toRect": {
+                "x": 802.7999877929688,
+                "y": 347.1499938964844,
+                "right": 1015.199951171875,
+                "bottom": 407.67498779296875,
+                "width": 212.39996337890625,
+                "height": 60.524993896484375
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R5"
+              ],
+              "from": "G5",
+              "to": "C42",
+              "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자",
+              "start": {
+                "x": 802.7999787330627,
+                "y": 377.41249381005764
+              },
+              "end": {
+                "x": 735.2999805212021,
+                "y": 609.1624876707792
+              },
+              "fromRect": {
+                "x": 802.7999877929688,
+                "y": 347.1499938964844,
+                "right": 1015.199951171875,
+                "bottom": 407.67498779296875,
+                "width": 212.39996337890625,
+                "height": 60.524993896484375
+              },
+              "toRect": {
+                "x": 521.0999755859375,
+                "y": 584.074951171875,
+                "right": 735.2999877929688,
+                "bottom": 634.25,
+                "width": 214.20001220703125,
+                "height": 50.175048828125
+              },
+              "rings": 0
+            },
+            {
+              "ids": [
+                "R6"
+              ],
+              "from": "G2",
+              "to": "C41",
+              "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본",
+              "start": {
+                "x": 460.79998779296875,
+                "y": 361.7749942243099
+              },
+              "end": {
+                "x": 521.0999861955643,
+                "y": 553.587489143014
+              },
+              "fromRect": {
+                "x": 241.1999969482422,
+                "y": 323.75,
+                "right": 460.79998779296875,
+                "bottom": 399.79998779296875,
+                "width": 219.59999084472656,
+                "height": 76.04998779296875
+              },
+              "toRect": {
+                "x": 521.0999755859375,
+                "y": 528.5,
+                "right": 735.2999877929688,
+                "bottom": 578.6749877929688,
+                "width": 214.20001220703125,
+                "height": 50.17498779296875
+              },
+              "rings": 1
+            }
+          ],
+          "rawFlattenedIDs": [
+            "R1",
+            "R2",
+            "R3",
+            "R4",
+            "R5",
+            "R6"
+          ],
+          "IDCountsBeforeAnyDictionary": {
+            "R1": 1,
+            "R2": 1,
+            "R3": 1,
+            "R4": 1,
+            "R5": 1,
+            "R6": 1
+          },
+          "contractChecks": [
+            {
+              "id": "R1",
+              "originalFrom": "G1",
+              "originalTo": "C21",
+              "kind": "명시 새 요청 때만 사본 고정",
+              "drawnRepresentatives": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "R2",
+              "originalFrom": "C21",
+              "originalTo": "C31",
+              "kind": "요청 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "G3"
+              ]
+            },
+            {
+              "id": "R3",
+              "originalFrom": "C21",
+              "originalTo": "C32",
+              "kind": "요청 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "G3"
+              ]
+            },
+            {
+              "id": "R4",
+              "originalFrom": "C32",
+              "originalTo": "G5",
+              "kind": "내보내기 기록의 사본",
+              "drawnRepresentatives": [
+                "G3",
+                "G5"
+              ]
+            },
+            {
+              "id": "R5",
+              "originalFrom": "G5",
+              "originalTo": "C42",
+              "kind": "일치하는 반환 식별자",
+              "drawnRepresentatives": [
+                "G5",
+                "C42"
+              ]
+            },
+            {
+              "id": "R6",
+              "originalFrom": "C21",
+              "originalTo": "C41",
+              "kind": "정확히 연결된 대상 작업의 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "C41"
+              ]
+            }
+          ],
+          "depth": {
+            "G2": "0",
+            "G3": "0",
+            "G4": "1"
+          }
+        },
+        "bundleClicked": {
+          "click": {
+            "x": 471.9972531213425,
+            "y": 349.87802340910093,
+            "fraction": 0.1,
+            "hitTag": "path",
+            "group": "G2>G3"
+          },
+          "actualEndpointsUI": [
+            {
+              "id": "R2",
+              "text": "R2요청 사본\n실제 끝: 새 요청의 배경 고정 (‹요청 맥락› 안) → AI 입력 (‹전달할 내용› 안)\n이 관계만 보기",
+              "controlGeometry": {
+                "box": {
+                  "x": 1129,
+                  "y": 280.5,
+                  "width": 92.484375,
+                  "height": 26,
+                  "right": 1221.484375,
+                  "bottom": 306.5
+                },
+                "hasBox": true,
+                "full": true,
+                "clip": {
+                  "l": 1100,
+                  "t": 98.75,
+                  "r": 1440,
+                  "b": 900
+                },
+                "hit": true,
+                "cover": {
+                  "id": "",
+                  "tag": "BUTTON",
+                  "class": "btn sm"
+                },
+                "scrollAncestors": [
+                  {
+                    "id": "panel",
+                    "rect": {
+                      "x": 1100,
+                      "y": 98.75,
+                      "right": 1440,
+                      "bottom": 900
+                    },
+                    "left": 0,
+                    "top": 0,
+                    "maxX": 0,
+                    "maxY": 0
+                  }
+                ],
+                "display": "block"
+              }
+            },
+            {
+              "id": "R3",
+              "text": "R3요청 사본\n실제 끝: 새 요청의 배경 고정 (‹요청 맥락› 안) → 작업문과 미리보기 (‹전달할 내용› 안)\n이 관계만 보기",
+              "controlGeometry": {
+                "box": {
+                  "x": 1129,
+                  "y": 389.5,
+                  "width": 92.484375,
+                  "height": 26,
+                  "right": 1221.484375,
+                  "bottom": 415.5
+                },
+                "hasBox": true,
+                "full": true,
+                "clip": {
+                  "l": 1100,
+                  "t": 98.75,
+                  "r": 1440,
+                  "b": 900
+                },
+                "hit": true,
+                "cover": {
+                  "id": "",
+                  "tag": "BUTTON",
+                  "class": "btn sm"
+                },
+                "scrollAncestors": [
+                  {
+                    "id": "panel",
+                    "rect": {
+                      "x": 1100,
+                      "y": 98.75,
+                      "right": 1440,
+                      "bottom": 900
+                    },
+                    "left": 0,
+                    "top": 0,
+                    "maxX": 0,
+                    "maxY": 0
+                  }
+                ],
+                "display": "block"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1440/S3",
+      "status": "FAIL",
+      "error": "{'cannotExpose': '#n-C32', 'geometry': {'box': {'x': 0, 'y': 0, 'width': 0, 'height': 0, 'right': 0, 'bottom': 0}, 'hasBox': False, 'full': False, 'clip': {'l': 0, 't': 143.75, 'r': 1100, 'b': 900}, 'hit': False, 'cover': {'id': 'top', 'tag': 'HEADER', 'class': ''}, 'scrollAncestors': [{'id': 'mapScroll', 'rect': {'x': 0, 'y': 143.75, 'right': 1100, 'bottom': 900}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 0}], 'display': 'block'}}",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 117, in run\n    try:data=fn();R['stages'].append({'id':id,'status':'PASS','detail':data});print('PASS',id,flush=True);return True\n             ^^^^\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 72, in enter_c32\n    click('#panel button[data-goto=\"C32\"]' if page.locator('#panel button[data-goto=\"C32\"]').count() else '#n-C32');click('#zIn')\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 36, in click\n    g=ensure(selector) if assist else geom(selector);assert g['full'] and g['hit'],{'selector':selector,'geometry':g};before=positions();page.mouse.click(g['box']['x']+g['box']['width']/2,g['box']['y']+g['box']['height']/2);page.wait_for_timeout(200);note('actual-click',{'selector':selector,'geometryBefore':g,'before':before,'after':positions()})\n      ^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 31, in ensure\n    if not candidates:raise AssertionError({'cannotExpose':selector,'geometry':g})\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'cannotExpose': '#n-C32', 'geometry': {'box': {'x': 0, 'y': 0, 'width': 0, 'height': 0, 'right': 0, 'bottom': 0}, 'hasBox': False, 'full': False, 'clip': {'l': 0, 't': 143.75, 'r': 1100, 'b': 900}, 'hit': False, 'cover': {'id': 'top', 'tag': 'HEADER', 'class': ''}, 'scrollAncestors': [{'id': 'mapScroll', 'rect': {'x': 0, 'y': 143.75, 'right': 1100, 'bottom': 900}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 0}], 'display': 'block'}}\n",
+      "position": {
+        "map": [
+          0,
+          0
+        ],
+        "main": 0,
+        "focus": 0,
+        "prep": 0,
+        "active": {
+          "id": "mapScroll",
+          "sel": null,
+          "key": null
+        }
+      }
+    },
+    {
+      "id": "390/S1",
+      "status": "PASS",
+      "detail": {
+        "viewport": [
+          390,
+          844
+        ],
+        "HTTPStatus": 200,
+        "firstResponseBodySHA256": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+        "bodyBytes": 46924,
+        "initial": {
+          "pressed": [],
+          "depth": {
+            "G2": "0",
+            "G3": "1",
+            "G4": "0"
+          },
+          "map": {
+            "left": 0,
+            "top": 0,
+            "maxX": 0,
+            "maxY": 694
+          },
+          "main": 0,
+          "focusTop": 0,
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "scale": {
+            "x": 1,
+            "y": 1
+          },
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          },
+          "focusing": false,
+          "prepHidden": true,
+          "peekCount": 0,
+          "stable": {
+            "G1": {
+              "box": {
+                "x": 17,
+                "y": 290.75,
+                "width": 238,
+                "height": 51.25,
+                "right": 255,
+                "bottom": 342
+              },
+              "hasBox": true,
+              "full": true,
+              "clip": {
+                "l": 0,
+                "t": 271.75,
+                "r": 390,
+                "b": 567.484375
+              },
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SPAN",
+                "class": "gname"
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 271.75,
+                    "right": 390,
+                    "bottom": 567.484375
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 694
+                },
+                {
+                  "id": "main",
+                  "rect": {
+                    "x": 0,
+                    "y": 180.25,
+                    "right": 390,
+                    "bottom": 844
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "G2": {
+              "box": {
+                "x": 17,
+                "y": 406.75,
+                "width": 238,
+                "height": 30.5,
+                "right": 255,
+                "bottom": 437.25
+              },
+              "hasBox": true,
+              "full": true,
+              "clip": {
+                "l": 0,
+                "t": 271.75,
+                "r": 390,
+                "b": 567.484375
+              },
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SPAN",
+                "class": "gname"
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 271.75,
+                    "right": 390,
+                    "bottom": 567.484375
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 694
+                },
+                {
+                  "id": "main",
+                  "rect": {
+                    "x": 0,
+                    "y": 180.25,
+                    "right": 390,
+                    "bottom": 844
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "G3": {
+              "box": {
+                "x": 17,
+                "y": 652.75,
+                "width": 238,
+                "height": 30.5,
+                "right": 255,
+                "bottom": 683.25
+              },
+              "hasBox": true,
+              "full": false,
+              "clip": {
+                "l": 0,
+                "t": 271.75,
+                "r": 390,
+                "b": 567.484375
+              },
+              "hit": false,
+              "cover": {
+                "id": "",
+                "tag": "P",
+                "class": ""
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 271.75,
+                    "right": 390,
+                    "bottom": 567.484375
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 694
+                },
+                {
+                  "id": "main",
+                  "rect": {
+                    "x": 0,
+                    "y": 180.25,
+                    "right": 390,
+                    "bottom": 844
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "G4": {
+              "box": {
+                "x": 17,
+                "y": 1018.75,
+                "width": 238,
+                "height": 30.5,
+                "right": 255,
+                "bottom": 1049.25
+              },
+              "hasBox": true,
+              "full": false,
+              "clip": {
+                "l": 0,
+                "t": 271.75,
+                "r": 390,
+                "b": 567.484375
+              },
+              "hit": false,
+              "cover": null,
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 271.75,
+                    "right": 390,
+                    "bottom": 567.484375
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 694
+                },
+                {
+                  "id": "main",
+                  "rect": {
+                    "x": 0,
+                    "y": 180.25,
+                    "right": 390,
+                    "bottom": 844
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "G5": {
+              "box": {
+                "x": 17,
+                "y": 898.75,
+                "width": 238,
+                "height": 51.25,
+                "right": 255,
+                "bottom": 950
+              },
+              "hasBox": true,
+              "full": false,
+              "clip": {
+                "l": 0,
+                "t": 271.75,
+                "r": 390,
+                "b": 567.484375
+              },
+              "hit": false,
+              "cover": null,
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 271.75,
+                    "right": 390,
+                    "bottom": 567.484375
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 694
+                },
+                {
+                  "id": "main",
+                  "rect": {
+                    "x": 0,
+                    "y": 180.25,
+                    "right": 390,
+                    "bottom": 844
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "flex"
+            },
+            "C32": {
+              "box": {
+                "x": 17,
+                "y": 751,
+                "width": 238,
+                "height": 55.75,
+                "right": 255,
+                "bottom": 806.75
+              },
+              "hasBox": true,
+              "full": false,
+              "clip": {
+                "l": 0,
+                "t": 271.75,
+                "r": 390,
+                "b": 567.484375
+              },
+              "hit": false,
+              "cover": {
+                "id": "main",
+                "tag": "MAIN",
+                "class": ""
+              },
+              "scrollAncestors": [
+                {
+                  "id": "mapScroll",
+                  "rect": {
+                    "x": 0,
+                    "y": 271.75,
+                    "right": 390,
+                    "bottom": 567.484375
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 694
+                },
+                {
+                  "id": "main",
+                  "rect": {
+                    "x": 0,
+                    "y": 180.25,
+                    "right": 390,
+                    "bottom": 844
+                  },
+                  "left": 0,
+                  "top": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                }
+              ],
+              "display": "block"
+            }
+          }
+        },
+        "headerText": "AgentFlow · 배경 사본 기능 일부 지도\nFLOW091-C 과거 개발 계약·MOCK 검사 보고를 읽는 연구 시안\n바뀐 것\n목적이 작업문의 분리된 배경 블록에만 들어감 — 작업문과 미리보기\n지킬 것\n이미 맡긴 요청의 사본은 그대로, 다음 명시 새 요청만 최신 구상\n자료 범위",
+        "headerGeometry": {
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 180.25,
+            "right": 390,
+            "bottom": 180.25
+          },
+          "hasBox": true,
+          "full": true,
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          },
+          "hit": true,
+          "cover": {
+            "id": "",
+            "tag": "SPAN",
+            "class": ""
+          },
+          "scrollAncestors": [],
+          "display": "block"
+        }
+      }
+    },
+    {
+      "id": "390/S2",
+      "status": "PASS",
+      "detail": {
+        "initialRelations": {
+          "rawGroups": [
+            {
+              "ids": [
+                "R1"
+              ],
+              "from": "G1",
+              "to": "G2",
+              "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정",
+              "start": {
+                "x": 264,
+                "y": 317.375
+              },
+              "end": {
+                "x": 264,
+                "y": 442
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 283.75,
+                "right": 264,
+                "bottom": 351,
+                "width": 256,
+                "height": 67.25
+              },
+              "toRect": {
+                "x": 8,
+                "y": 399.75,
+                "right": 264,
+                "bottom": 484.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R2"
+              ],
+              "from": "G2",
+              "to": "C31",
+              "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본",
+              "start": {
+                "x": 264,
+                "y": 442
+              },
+              "end": {
+                "x": 255,
+                "y": 717.125
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 399.75,
+                "right": 264,
+                "bottom": 484.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "toRect": {
+                "x": 17,
+                "y": 689.25,
+                "right": 255,
+                "bottom": 745,
+                "width": 238,
+                "height": 55.75
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R3"
+              ],
+              "from": "G2",
+              "to": "C32",
+              "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본",
+              "start": {
+                "x": 264,
+                "y": 442
+              },
+              "end": {
+                "x": 255,
+                "y": 778.875
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 399.75,
+                "right": 264,
+                "bottom": 484.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "toRect": {
+                "x": 17,
+                "y": 751,
+                "right": 255,
+                "bottom": 806.75,
+                "width": 238,
+                "height": 55.75
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R4"
+              ],
+              "from": "C32",
+              "to": "G5",
+              "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본",
+              "start": {
+                "x": 255,
+                "y": 778.875
+              },
+              "end": {
+                "x": 264,
+                "y": 925.375
+              },
+              "fromRect": {
+                "x": 17,
+                "y": 751,
+                "right": 255,
+                "bottom": 806.75,
+                "width": 238,
+                "height": 55.75
+              },
+              "toRect": {
+                "x": 8,
+                "y": 891.75,
+                "right": 264,
+                "bottom": 959,
+                "width": 256,
+                "height": 67.25
+              },
+              "rings": 0
+            },
+            {
+              "ids": [
+                "R5"
+              ],
+              "from": "G5",
+              "to": "G4",
+              "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자",
+              "start": {
+                "x": 264,
+                "y": 925.375
+              },
+              "end": {
+                "x": 264,
+                "y": 1054
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 891.75,
+                "right": 264,
+                "bottom": 959,
+                "width": 256,
+                "height": 67.25
+              },
+              "toRect": {
+                "x": 8,
+                "y": 1011.75,
+                "right": 264,
+                "bottom": 1096.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R6"
+              ],
+              "from": "G2",
+              "to": "G4",
+              "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본",
+              "start": {
+                "x": 264,
+                "y": 442
+              },
+              "end": {
+                "x": 264,
+                "y": 1054
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 399.75,
+                "right": 264,
+                "bottom": 484.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "toRect": {
+                "x": 8,
+                "y": 1011.75,
+                "right": 264,
+                "bottom": 1096.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "rings": 2
+            }
+          ],
+          "rawFlattenedIDs": [
+            "R1",
+            "R2",
+            "R3",
+            "R4",
+            "R5",
+            "R6"
+          ],
+          "IDCountsBeforeAnyDictionary": {
+            "R1": 1,
+            "R2": 1,
+            "R3": 1,
+            "R4": 1,
+            "R5": 1,
+            "R6": 1
+          },
+          "contractChecks": [
+            {
+              "id": "R1",
+              "originalFrom": "G1",
+              "originalTo": "C21",
+              "kind": "명시 새 요청 때만 사본 고정",
+              "drawnRepresentatives": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "R2",
+              "originalFrom": "C21",
+              "originalTo": "C31",
+              "kind": "요청 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "C31"
+              ]
+            },
+            {
+              "id": "R3",
+              "originalFrom": "C21",
+              "originalTo": "C32",
+              "kind": "요청 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "C32"
+              ]
+            },
+            {
+              "id": "R4",
+              "originalFrom": "C32",
+              "originalTo": "G5",
+              "kind": "내보내기 기록의 사본",
+              "drawnRepresentatives": [
+                "C32",
+                "G5"
+              ]
+            },
+            {
+              "id": "R5",
+              "originalFrom": "G5",
+              "originalTo": "C42",
+              "kind": "일치하는 반환 식별자",
+              "drawnRepresentatives": [
+                "G5",
+                "G4"
+              ]
+            },
+            {
+              "id": "R6",
+              "originalFrom": "C21",
+              "originalTo": "C41",
+              "kind": "정확히 연결된 대상 작업의 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "G4"
+              ]
+            }
+          ],
+          "depth": {
+            "G2": "0",
+            "G3": "1",
+            "G4": "0"
+          }
+        },
+        "collapsedChangeAggregation": "안에 바뀐 부분 · 작업문과 미리보기\n세부 2개 접힘 · 묶음 전체 변경 아님",
+        "afterDepths": {
+          "rawGroups": [
+            {
+              "ids": [
+                "R1"
+              ],
+              "from": "G1",
+              "to": "G2",
+              "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정",
+              "start": {
+                "x": 264,
+                "y": -47.625
+              },
+              "end": {
+                "x": 264,
+                "y": 77
+              },
+              "fromRect": {
+                "x": 8,
+                "y": -81.25,
+                "right": 264,
+                "bottom": -14,
+                "width": 256,
+                "height": 67.25
+              },
+              "toRect": {
+                "x": 8,
+                "y": 34.75,
+                "right": 264,
+                "bottom": 119.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R2",
+                "R3"
+              ],
+              "from": "G2",
+              "to": "G3",
+              "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본\nR3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본",
+              "start": {
+                "x": 264,
+                "y": 77
+              },
+              "end": {
+                "x": 264,
+                "y": 323.375
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 34.75,
+                "right": 264,
+                "bottom": 119.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "toRect": {
+                "x": 8,
+                "y": 280.75,
+                "right": 264,
+                "bottom": 366,
+                "width": 256,
+                "height": 85.25
+              },
+              "rings": 2
+            },
+            {
+              "ids": [
+                "R4"
+              ],
+              "from": "G3",
+              "to": "G5",
+              "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본",
+              "start": {
+                "x": 264,
+                "y": 323.375
+              },
+              "end": {
+                "x": 264,
+                "y": 560.375
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 280.75,
+                "right": 264,
+                "bottom": 366,
+                "width": 256,
+                "height": 85.25
+              },
+              "toRect": {
+                "x": 8,
+                "y": 526.75,
+                "right": 264,
+                "bottom": 594,
+                "width": 256,
+                "height": 67.25
+              },
+              "rings": 1
+            },
+            {
+              "ids": [
+                "R5"
+              ],
+              "from": "G5",
+              "to": "C42",
+              "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자",
+              "start": {
+                "x": 264,
+                "y": 560.375
+              },
+              "end": {
+                "x": 255,
+                "y": 779.875
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 526.75,
+                "right": 264,
+                "bottom": 594,
+                "width": 256,
+                "height": 67.25
+              },
+              "toRect": {
+                "x": 17,
+                "y": 752,
+                "right": 255,
+                "bottom": 807.75,
+                "width": 238,
+                "height": 55.75
+              },
+              "rings": 0
+            },
+            {
+              "ids": [
+                "R6"
+              ],
+              "from": "G2",
+              "to": "C41",
+              "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본",
+              "start": {
+                "x": 264,
+                "y": 77
+              },
+              "end": {
+                "x": 255,
+                "y": 718.125
+              },
+              "fromRect": {
+                "x": 8,
+                "y": 34.75,
+                "right": 264,
+                "bottom": 119.25,
+                "width": 256,
+                "height": 84.5
+              },
+              "toRect": {
+                "x": 17,
+                "y": 690.25,
+                "right": 255,
+                "bottom": 746,
+                "width": 238,
+                "height": 55.75
+              },
+              "rings": 1
+            }
+          ],
+          "rawFlattenedIDs": [
+            "R1",
+            "R2",
+            "R3",
+            "R4",
+            "R5",
+            "R6"
+          ],
+          "IDCountsBeforeAnyDictionary": {
+            "R1": 1,
+            "R2": 1,
+            "R3": 1,
+            "R4": 1,
+            "R5": 1,
+            "R6": 1
+          },
+          "contractChecks": [
+            {
+              "id": "R1",
+              "originalFrom": "G1",
+              "originalTo": "C21",
+              "kind": "명시 새 요청 때만 사본 고정",
+              "drawnRepresentatives": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "R2",
+              "originalFrom": "C21",
+              "originalTo": "C31",
+              "kind": "요청 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "G3"
+              ]
+            },
+            {
+              "id": "R3",
+              "originalFrom": "C21",
+              "originalTo": "C32",
+              "kind": "요청 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "G3"
+              ]
+            },
+            {
+              "id": "R4",
+              "originalFrom": "C32",
+              "originalTo": "G5",
+              "kind": "내보내기 기록의 사본",
+              "drawnRepresentatives": [
+                "G3",
+                "G5"
+              ]
+            },
+            {
+              "id": "R5",
+              "originalFrom": "G5",
+              "originalTo": "C42",
+              "kind": "일치하는 반환 식별자",
+              "drawnRepresentatives": [
+                "G5",
+                "C42"
+              ]
+            },
+            {
+              "id": "R6",
+              "originalFrom": "C21",
+              "originalTo": "C41",
+              "kind": "정확히 연결된 대상 작업의 사본",
+              "drawnRepresentatives": [
+                "G2",
+                "C41"
+              ]
+            }
+          ],
+          "depth": {
+            "G2": "0",
+            "G3": "0",
+            "G4": "1"
+          }
+        },
+        "bundleClicked": {
+          "click": {
+            "x": 288.7427062988281,
+            "y": 279.650146484375,
+            "fraction": 0.8,
+            "hitTag": "path",
+            "group": "G2>G3"
+          },
+          "actualEndpointsUI": [
+            {
+              "id": "R2",
+              "text": "R2요청 사본\n실제 끝: 새 요청의 배경 고정 (‹요청 맥락› 안) → AI 입력 (‹전달할 내용› 안)\n이 관계만 보기",
+              "controlGeometry": {
+                "box": {
+                  "x": 26,
+                  "y": 729.484375,
+                  "width": 92.484375,
+                  "height": 26,
+                  "right": 118.484375,
+                  "bottom": 755.484375
+                },
+                "hasBox": true,
+                "full": true,
+                "clip": {
+                  "l": 0,
+                  "t": 180.25,
+                  "r": 390,
+                  "b": 844
+                },
+                "hit": true,
+                "cover": {
+                  "id": "",
+                  "tag": "BUTTON",
+                  "class": "btn sm"
+                },
+                "scrollAncestors": [
+                  {
+                    "id": "main",
+                    "rect": {
+                      "x": 0,
+                      "y": 180.25,
+                      "right": 390,
+                      "bottom": 844
+                    },
+                    "left": 0,
+                    "top": 0,
+                    "maxX": 0,
+                    "maxY": 55
+                  }
+                ],
+                "display": "block"
+              }
+            },
+            {
+              "id": "R3",
+              "text": "R3요청 사본\n실제 끝: 새 요청의 배경 고정 (‹요청 맥락› 안) → 작업문과 미리보기 (‹전달할 내용› 안)\n이 관계만 보기",
+              "controlGeometry": {
+                "box": {
+                  "x": 26,
+                  "y": 783.484375,
+                  "width": 92.484375,
+                  "height": 26,
+                  "right": 118.484375,
+                  "bottom": 809.484375
+                },
+                "hasBox": true,
+                "full": true,
+                "clip": {
+                  "l": 0,
+                  "t": 180.25,
+                  "r": 390,
+                  "b": 844
+                },
+                "hit": true,
+                "cover": {
+                  "id": "",
+                  "tag": "BUTTON",
+                  "class": "btn sm"
+                },
+                "scrollAncestors": [
+                  {
+                    "id": "main",
+                    "rect": {
+                      "x": 0,
+                      "y": 180.25,
+                      "right": 390,
+                      "bottom": 844
+                    },
+                    "left": 0,
+                    "top": 55,
+                    "maxX": 0,
+                    "maxY": 55
+                  }
+                ],
+                "display": "block"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "390/S3",
+      "status": "FAIL",
+      "error": "{'unreachable': '#n-C32', 'geometry': {'box': {'x': 0, 'y': 0, 'width': 0, 'height': 0, 'right': 0, 'bottom': 0}, 'hasBox': False, 'full': False, 'clip': {'l': 0, 't': 271.75, 'r': 390, 'b': 567.484375}, 'hit': False, 'cover': {'id': 'top', 'tag': 'HEADER', 'class': ''}, 'scrollAncestors': [{'id': 'mapScroll', 'rect': {'x': 0, 'y': 271.75, 'right': 390, 'bottom': 567.484375}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 694}, {'id': 'main', 'rect': {'x': 0, 'y': 180.25, 'right': 390, 'bottom': 844}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 55}], 'display': 'block'}}",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 117, in run\n    try:data=fn();R['stages'].append({'id':id,'status':'PASS','detail':data});print('PASS',id,flush=True);return True\n             ^^^^\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 72, in enter_c32\n    click('#panel button[data-goto=\"C32\"]' if page.locator('#panel button[data-goto=\"C32\"]').count() else '#n-C32');click('#zIn')\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 36, in click\n    g=ensure(selector) if assist else geom(selector);assert g['full'] and g['hit'],{'selector':selector,'geometry':g};before=positions();page.mouse.click(g['box']['x']+g['box']['width']/2,g['box']['y']+g['box']['height']/2);page.wait_for_timeout(200);note('actual-click',{'selector':selector,'geometryBefore':g,'before':before,'after':positions()})\n      ^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/composition-v0/verify.py\", line 34, in ensure\n    raise AssertionError({'unreachable':selector,'geometry':geom(selector)})\nAssertionError: {'unreachable': '#n-C32', 'geometry': {'box': {'x': 0, 'y': 0, 'width': 0, 'height': 0, 'right': 0, 'bottom': 0}, 'hasBox': False, 'full': False, 'clip': {'l': 0, 't': 271.75, 'r': 390, 'b': 567.484375}, 'hit': False, 'cover': {'id': 'top', 'tag': 'HEADER', 'class': ''}, 'scrollAncestors': [{'id': 'mapScroll', 'rect': {'x': 0, 'y': 271.75, 'right': 390, 'bottom': 567.484375}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 694}, {'id': 'main', 'rect': {'x': 0, 'y': 180.25, 'right': 390, 'bottom': 844}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 55}], 'display': 'block'}}\n",
+      "position": {
+        "map": [
+          0,
+          0
+        ],
+        "main": 0,
+        "focus": 0,
+        "prep": 0,
+        "active": {
+          "id": "mapScroll",
+          "sel": null,
+          "key": null
+        }
+      }
+    }
+  ],
+  "actions": [
+    {
+      "case": "1440",
+      "kind": "actual-click",
+      "data": {
+        "selector": "[data-tog=\"G4\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 685.6875,
+            "y": 499.25,
+            "width": 49.61248779296875,
+            "height": 21.5999755859375,
+            "right": 735.2999877929688,
+            "bottom": 520.8499755859375
+          },
+          "hasBox": true,
+          "full": true,
+          "clip": {
+            "l": 0,
+            "t": 143.75,
+            "r": 1100,
+            "b": 900
+          },
+          "hit": true,
+          "cover": {
+            "id": "",
+            "tag": "BUTTON",
+            "class": "gtog"
+          },
+          "scrollAncestors": [
+            {
+              "id": "mapScroll",
+              "rect": {
+                "x": 0,
+                "y": 143.75,
+                "right": 1100,
+                "bottom": 900
+              },
+              "left": 0,
+              "top": 0,
+              "maxX": 0,
+              "maxY": 0
+            }
+          ],
+          "display": "block"
+        },
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "1440",
+      "kind": "actual-click",
+      "data": {
+        "selector": "[data-tog=\"G3\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 695.6156005859375,
+            "y": 175.25,
+            "width": 39.68438720703125,
+            "height": 21.600006103515625,
+            "right": 735.2999877929688,
+            "bottom": 196.85000610351562
+          },
+          "hasBox": true,
+          "full": true,
+          "clip": {
+            "l": 0,
+            "t": 143.75,
+            "r": 1100,
+            "b": 900
+          },
+          "hit": true,
+          "cover": {
+            "id": "",
+            "tag": "BUTTON",
+            "class": "gtog"
+          },
+          "scrollAncestors": [
+            {
+              "id": "mapScroll",
+              "rect": {
+                "x": 0,
+                "y": 143.75,
+                "right": 1100,
+                "bottom": 900
+              },
+              "left": 0,
+              "top": 0,
+              "maxX": 0,
+              "maxY": 0
+            }
+          ],
+          "display": "block"
+        },
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "1440",
+      "kind": "actual-SVG-bundle-click",
+      "data": {
+        "x": 471.9972531213425,
+        "y": 349.87802340910093,
+        "fraction": 0.1,
+        "hitTag": "path",
+        "group": "G2>G3"
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": 260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            260
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": 239.265625,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            260
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            499
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-click",
+      "data": {
+        "selector": "[data-tog=\"G4\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 199.875,
+            "y": 523.75,
+            "width": 55.125,
+            "height": 24,
+            "right": 255,
+            "bottom": 547.75
+          },
+          "hasBox": true,
+          "full": true,
+          "clip": {
+            "l": 0,
+            "t": 271.75,
+            "r": 390,
+            "b": 567.484375
+          },
+          "hit": true,
+          "cover": {
+            "id": "",
+            "tag": "BUTTON",
+            "class": "gtog"
+          },
+          "scrollAncestors": [
+            {
+              "id": "mapScroll",
+              "rect": {
+                "x": 0,
+                "y": 271.75,
+                "right": 390,
+                "bottom": 567.484375
+              },
+              "left": 0,
+              "top": 499,
+              "maxX": 0,
+              "maxY": 694
+            },
+            {
+              "id": "main",
+              "rect": {
+                "x": 0,
+                "y": 180.25,
+                "right": 390,
+                "bottom": 844
+              },
+              "left": 0,
+              "top": 0,
+              "maxX": 0,
+              "maxY": 0
+            }
+          ],
+          "display": "block"
+        },
+        "before": {
+          "map": [
+            0,
+            499
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            499
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -134.0,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            499
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            365
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-click",
+      "data": {
+        "selector": "[data-tog=\"G3\"]",
+        "geometryBefore": {
+          "box": {
+            "x": 210.90625,
+            "y": 291.75,
+            "width": 44.09375,
+            "height": 24,
+            "right": 255,
+            "bottom": 315.75
+          },
+          "hasBox": true,
+          "full": true,
+          "clip": {
+            "l": 0,
+            "t": 271.75,
+            "r": 390,
+            "b": 567.484375
+          },
+          "hit": true,
+          "cover": {
+            "id": "",
+            "tag": "BUTTON",
+            "class": "gtog"
+          },
+          "scrollAncestors": [
+            {
+              "id": "mapScroll",
+              "rect": {
+                "x": 0,
+                "y": 271.75,
+                "right": 390,
+                "bottom": 567.484375
+              },
+              "left": 0,
+              "top": 365,
+              "maxX": 0,
+              "maxY": 694
+            },
+            {
+              "id": "main",
+              "rect": {
+                "x": 0,
+                "y": 180.25,
+                "right": 390,
+                "bottom": 844
+              },
+              "left": 0,
+              "top": 0,
+              "maxX": 0,
+              "maxY": 0
+            }
+          ],
+          "display": "block"
+        },
+        "before": {
+          "map": [
+            0,
+            365
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            365
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-SVG-bundle-click",
+      "data": {
+        "x": 288.7427062988281,
+        "y": 279.650146484375,
+        "fraction": 0.8,
+        "hitTag": "path",
+        "group": "G2>G3"
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": 65,
+        "point": [
+          382,
+          819
+        ],
+        "before": {
+          "map": [
+            0,
+            365
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            365
+          ],
+          "main": 55,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -236.75,
+        "point": [
+          382,
+          487.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            365
+          ],
+          "main": 55,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            129
+          ],
+          "main": 55,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -236.75,
+        "point": [
+          382,
+          487.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            129
+          ],
+          "main": 55,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 55,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -236.75,
+        "point": [
+          382,
+          487.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 55,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    },
+    {
+      "case": "390",
+      "kind": "actual-wheel",
+      "data": {
+        "dx": 0,
+        "dy": -260,
+        "point": [
+          382,
+          542.484375
+        ],
+        "before": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        },
+        "after": {
+          "map": [
+            0,
+            0
+          ],
+          "main": 0,
+          "focus": 0,
+          "prep": 0,
+          "active": {
+            "id": "mapScroll",
+            "sel": null,
+            "key": null
+          }
+        }
+      }
+    }
+  ],
+  "HTTP": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "HTTPStatus": 200,
+      "firstResponseBodySHA256": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+      "bodyBytes": 46924,
+      "headerText": "AgentFlow · 배경 사본 기능 일부 지도\nFLOW091-C 과거 개발 계약·MOCK 검사 보고를 읽는 연구 시안\n바뀐 것\n목적이 작업문의 분리된 배경 블록에만 들어감 — 작업문과 미리보기\n지킬 것\n이미 맡긴 요청의 사본은 그대로, 다음 명시 새 요청만 최신 구상\n자료 범위",
+      "headerGeometry": {
+        "box": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 98.75,
+          "right": 1440,
+          "bottom": 98.75
+        },
+        "hasBox": true,
+        "full": true,
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1440,
+          "b": 900
+        },
+        "hit": true,
+        "cover": {
+          "id": "",
+          "tag": "SPAN",
+          "class": ""
+        },
+        "scrollAncestors": [],
+        "display": "block"
+      }
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "HTTPStatus": 200,
+      "firstResponseBodySHA256": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+      "bodyBytes": 46924,
+      "headerText": "AgentFlow · 배경 사본 기능 일부 지도\nFLOW091-C 과거 개발 계약·MOCK 검사 보고를 읽는 연구 시안\n바뀐 것\n목적이 작업문의 분리된 배경 블록에만 들어감 — 작업문과 미리보기\n지킬 것\n이미 맡긴 요청의 사본은 그대로, 다음 명시 새 요청만 최신 구상\n자료 범위",
+      "headerGeometry": {
+        "box": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 180.25,
+          "right": 390,
+          "bottom": 180.25
+        },
+        "hasBox": true,
+        "full": true,
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 390,
+          "b": 844
+        },
+        "hit": true,
+        "cover": {
+          "id": "",
+          "tag": "SPAN",
+          "class": ""
+        },
+        "scrollAncestors": [],
+        "display": "block"
+      }
+    }
+  ],
+  "server": [
+    "\"GET /composition-study.html HTTP/1.1\" 200 -",
+    "code 404, message File not found",
+    "\"GET /favicon.ico HTTP/1.1\" 404 -",
+    "\"GET /composition-study.html HTTP/1.1\" 200 -"
+  ],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+    }
+  ],
+  "pageerrors": [],
+  "fatal": null,
+  "cleanup_errors": [],
+  "unrun": [
+    "official Folding access retry",
+    "previous cycles",
+    "author checker",
+    "human usability/comprehension",
+    "actual AI compliance",
+    "touch/pinch",
+    "external original roundtrip",
+    "actual transmission/acceptance"
+  ],
+  "fileHashBefore": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+  "fileBytes": 46924,
+  "actualHTTPURL": "http://127.0.0.1:44939/composition-study.html",
+  "fileHashAfter": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+  "executed": 6,
+  "missing": [
+    "1440/S4",
+    "1440/S5",
+    "1440/S6",
+    "390/S4",
+    "390/S5",
+    "390/S6",
+    "390/G3-nested",
+    "390/G1-prep"
+  ],
+  "complete": false,
+  "counts": {
+    "PASS": 4,
+    "FAIL": 2
+  },
+  "exit_code": 1,
+  "finished_utc": "2026-10-15T19:25:37.579669+00:00"
+}

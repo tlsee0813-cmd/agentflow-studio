@@ -1,0 +1,7 @@
+PASS 1440/S1
+PASS 1440/S2
+FAIL 1440/S3 {'cannotExpose': '#n-C32', 'geometry': {'box': {'x': 0, 'y': 0, 'width': 0, 'height': 0, 'right': 0, 'bottom': 0}, 'hasBox': False, 'full': False, 'clip': {'l': 0, 't': 143.75, 'r': 1100, 'b': 900}, 'hit': False, 'cover': {'id': 'top', 'tag': 'HEADER', 'class': ''}, 'scrollAncestors': [{'id': 'mapScroll', 'rect': {'x': 0, 'y': 143.75, 'right': 1100, 'bottom': 900}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 0}], 'display': 'block'}}
+PASS 390/S1
+PASS 390/S2
+FAIL 390/S3 {'unreachable': '#n-C32', 'geometry': {'box': {'x': 0, 'y': 0, 'width': 0, 'height': 0, 'right': 0, 'bottom': 0}, 'hasBox': False, 'full': False, 'clip': {'l': 0, 't': 271.75, 'r': 390, 'b': 567.484375}, 'hit': False, 'cover': {'id': 'top', 'tag': 'HEADER', 'class': ''}, 'scrollAncestors': [{'id': 'mapScroll', 'rect': {'x': 0, 'y': 271.75, 'right': 390, 'bottom': 567.484375}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 694}, {'id': 'main', 'rect': {'x': 0, 'y': 180.25, 'right': 390, 'bottom': 844}, 'left': 0, 'top': 0, 'maxX': 0, 'maxY': 55}], 'display': 'block'}}
+{"counts": {"PASS": 4, "FAIL": 2}, "executed": 6, "complete": false, "missing": ["1440/S4", "1440/S5", "1440/S6", "390/S4", "390/S5", "390/S6", "390/G3-nested", "390/G1-prep"], "fatal": null, "exit_code": 1}
