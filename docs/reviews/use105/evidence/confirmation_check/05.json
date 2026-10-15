@@ -1,0 +1,24 @@
+{
+  "seq": 5,
+  "action": {
+    "op": "click",
+    "role": "button",
+    "name": "휴지통으로 옮기기",
+    "accept_dialog": true
+  },
+  "error": null,
+  "url": "http://127.0.0.1:8765/agentflow-studio/",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "screenshot": "/workspace/work/use105/evidence/confirmation_check/05.jpg",
+  "snapshot": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n  - text: 지금 이어가는 프로젝트\n  - strong: USE105 확인창 재현 전용\n  - paragraph: 작업 1 · 합성 공방 안내 문구만 준비해 주세요. 결제와 회원은 미정입니다.\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - group: 브라우저 MOCK · AI 아님\n- main:\n  - region \"내 프로젝트\":\n    - paragraph: MY PROJECTS\n    - heading \"내 프로젝트\" [level=1]\n    - paragraph: 이 브라우저에 저장된 프로젝트예요. 다른 기기와는 백업 파일로 옮길 수 있어요.\n    - button \"＋ 새 프로젝트\"\n    - status:\n      - text: ‘USE105 확인창 재현 전용’을(를) 휴지통으로 옮겼어요.\n      - button \"되돌리기\"\n    - list:\n      - listitem: 아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 예제를 둘러보세요.\n    - button \"↑ 백업 파일 불러오기 (새 사본으로 추가)\"\n    - button \"예제 둘러보기 · 저장 안 됨\"\n    - group: 휴지통 1\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일",
+  "dialogs": [
+    {
+      "type": "confirm",
+      "message": "‘USE105 확인창 재현 전용’을(를) 휴지통으로 옮길까요?\n원문·기준·요청·돌아온 결과가 모두 함께 옮겨지고, 휴지통에서 그대로 되살릴 수 있어요.\n개발 도구에서 이미 한 작업이 취소되지는 않아요.",
+      "response": "accept"
+    }
+  ]
+}

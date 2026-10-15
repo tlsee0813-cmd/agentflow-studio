@@ -1,0 +1,16 @@
+{
+  "seq": 3,
+  "action": {
+    "op": "fill",
+    "label": "무엇을 만드나요? 프로젝트 목적 · 작업 요청과 따로 보관해요",
+    "value": "동네 소규모 도예 공방의 수업 일정과 예약 방법을 안내하는 웹사이트를 만들고 싶습니다. 방문자는 수업과 날짜별 잔여 자리를 확인하고 예약을 문의합니다. 결제와 회원 가입 도입 여부는 아직 미정입니다."
+  },
+  "error": null,
+  "url": "http://127.0.0.1:8765/agentflow-studio/",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "screenshot": "/workspace/work/use105/evidence/middle/03.jpg",
+  "snapshot": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 소규모 공방 예약 안내\n  - paragraph: 첫 작업을 기다리고 있어요.\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 소규모 공방 예약 안내\n  - group: 브라우저 MOCK · AI 아님\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 소규모 공방 예약 안내\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - button \"↑ 백업 파일 불러오기\"\n  - region \"AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.\":\n    - paragraph: AGENTFLOW STUDIO\n    - heading \"AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.\" [level=2]\n    - paragraph: 만들고 싶은 것을 평소 말로 적으면, Claude Code·Cursor 같은 개발 도구에 붙여넣을 작업문을 만들어 드려요. 도구가 돌려준 결과를 가져오면 앞에서 정한 것을 이어서 다음 작업문을 준비해요.\n    - text: 무엇을 만드나요? 프로젝트 목적 · 작업 요청과 따로 보관해요\n    - textbox \"무엇을 만드나요? 프로젝트 목적 · 작업 요청과 따로 보관해요\":\n      - /placeholder: \"예: 동네 미용실 손님이 휴대폰으로 날짜와 시간을 골라 예약하는 서비스\"\n      - text: 동네 소규모 도예 공방의 수업 일정과 예약 방법을 안내하는 웹사이트를 만들고 싶습니다. 방문자는 수업과 날짜별 잔여 자리를 확인하고 예약을 문의합니다. 결제와 회원 가입 도입 여부는 아직 미정입니다.\n    - button \"영역 나누러 가기\"\n    - text: \"큰 영역(예: 예약, 알림)으로 나눈 뒤 영역마다 요청을 이어가요. 바로 첫 요청부터 써도 돼요(아래).\"\n    - button \"예제 둘러보기 · 저장 안 됨\"\n  - region \"현재 작업\"\n  - group:\n    - paragraph: LET’S START\n    - heading \"또는 바로 첫 요청 쓰기\" [level=2]\n    - group \"입력 종류\":\n      - button \"요청 / 다음 변경\" [pressed]\n      - button \"돌아온 결과\"\n    - paragraph: AI 연결 없음 · 규칙으로 흉내 내는 체험판이에요. 입력은 이 브라우저에만 저장되고 다른 곳으로 보내지 않아요. 작업문을 복사·저장해도 개발 도구가 실행되지는 않아요.\n    - text: 요청 또는 돌아온 결과 원문\n    - textbox \"요청 또는 돌아온 결과 원문\":\n      - /placeholder: 무엇을 만들고 싶나요? 이미 작업 중이라면, 지금 바꾸고 싶은 부분만 알려주세요.\n    - text: 이렇게 시작해 보세요\n    - button \"문구 하나 바꾸기\"\n    - button \"새 기능 구상하기\"\n    - button \"문제 해결 시작하기\"\n    - paragraph: 필요한 질문만 받고, 바로 전달할 작업문을 준비해요.\n    - group: 출처 구분\n    - paragraph: 비밀번호나 API 키는 넣지 마세요.\n    - button \"작업문 준비하기 ↗\" [disabled]\n    - group: 결과 파일로 가져오기 · 선택\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일"
+}

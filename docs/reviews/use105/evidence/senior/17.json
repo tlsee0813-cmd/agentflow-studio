@@ -1,0 +1,16 @@
+{
+  "seq": 17,
+  "action": {
+    "op": "click",
+    "role": "button",
+    "name": "휴지통으로"
+  },
+  "error": null,
+  "url": "http://127.0.0.1:8765/agentflow-studio/",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "screenshot": "/workspace/work/use105/evidence/senior/17.jpg",
+  "snapshot": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 나의 프로젝트\n  - paragraph: 첫 작업을 기다리고 있어요.\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - group: 브라우저 MOCK · AI 아님\n- main:\n  - region \"내 프로젝트\":\n    - paragraph: MY PROJECTS\n    - heading \"내 프로젝트\" [level=1]\n    - paragraph: 이 브라우저에 저장된 프로젝트예요. 다른 기기와는 백업 파일로 옮길 수 있어요.\n    - button \"＋ 새 프로젝트\"\n    - list:\n      - listitem:\n        - strong: 소규모 공방 예약 안내\n        - paragraph: 마지막 요청 · 기존 코드와 라우팅 구조를 먼저 확인하고 최소 변경으로 공방 수업 소개와 예약 방법 안내 화면을 만들어 주세요. 수업명·소요 시간·정원·문의 연…\n        - paragraph: 최근 활동 · 10월 15일 07:03 · 영역 1개 · 요청 1개 · 가져온 결과 1개\n        - button \"이어서 하기\"\n        - button \"휴지통으로\"\n    - button \"↑ 백업 파일 불러오기 (새 사본으로 추가)\"\n    - button \"예제 둘러보기 · 저장 안 됨\"\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일"
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "role": "novice",
+    "events": 21,
+    "actions": 20,
+    "snapshots": 1,
+    "errors": 0,
+    "review_exists": true
+  },
+  {
+    "role": "junior",
+    "events": 21,
+    "actions": 20,
+    "snapshots": 1,
+    "errors": 0,
+    "review_exists": true
+  },
+  {
+    "role": "middle",
+    "events": 22,
+    "actions": 20,
+    "snapshots": 2,
+    "errors": 0,
+    "review_exists": true
+  },
+  {
+    "role": "senior",
+    "events": 19,
+    "actions": 17,
+    "snapshots": 2,
+    "errors": 0,
+    "review_exists": true
+  },
+  {
+    "role": "staff",
+    "events": 22,
+    "actions": 20,
+    "snapshots": 2,
+    "errors": 0,
+    "review_exists": true
+  }
+]

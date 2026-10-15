@@ -1,0 +1,16 @@
+{
+  "seq": 20,
+  "action": {
+    "op": "click",
+    "role": "button",
+    "name": "지난 요청과 결과 2"
+  },
+  "error": null,
+  "url": "http://127.0.0.1:8765/agentflow-studio/",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "screenshot": "/workspace/work/use105/evidence/junior/20.jpg",
+  "snapshot": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n    - button \"전체 공간 1\"\n    - button \"현재 작업\"\n    - button \"기준 · 출처 1\"\n    - button \"지난 요청과 결과 2\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 소규모 공방 예약 안내\n  - paragraph: 작업 2 · 작업 1에 받은 보고 · 후속 확인 작업문 초안\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 소규모 공방 예약 안내\n  - group: 브라우저 MOCK · AI 아님\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 소규모 공방 예약 안내\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - button \"＋ 새 프로젝트\"\n    - button \"↓ 백업 파일 저장\"\n    - button \"↑ 백업 파일 불러오기\"\n    - button \"휴지통으로 옮기기\"\n  - region \"지난 요청과 결과\":\n    - paragraph: PROJECT HISTORY\n    - heading \"지난 요청과 결과\" [level=1]\n    - paragraph: 내가 남긴 요청과 가져온 결과, 그때 복사·저장한 작업문 기록이에요. 개발 도구에서 실제로 실행됐는지는 이 앱이 알 수 없어요.\n    - button \"현재 작업으로\"\n    - group:\n      - text: 요청·결과 기록 2\n      - strong: 가져온 결과 · 구현 보고\n      - text: \"#2 작업문 준비됨 · 미실행\"\n      - paragraph: \"[합성 실수 기록] 다른 프로젝트인 카페 메뉴 페이지 작업 결과를 잘못 붙였습니다. 메뉴 카드 3개를 만들었다는 보고이며 …\"\n      - text: 10월 15일 07:04\n      - paragraph: \"#1 ‘공방 수업 안내 페이지에 날짜별 클래스 이름, 시작 시간, 남은 자리를 목록으로 보여주세요. 우선 샘플 데이터 3개로 만들…’의 작업문에 대해 가져온 결과 · 작업문을 아직 복사·저장하지 않았어요\"\n      - group: 입력 원문 · 내보낸 기록\n      - strong: 내 요청\n      - text: \"#1 구현 보고 도착 · 앱 미검증\"\n      - paragraph: 공방 수업 안내 페이지에 날짜별 클래스 이름, 시작 시간, 남은 자리를 목록으로 보여주세요. 우선 샘플 데이터 3개로 만들…\n      - text: 10월 15일 07:00\n      - paragraph: 작업문을 아직 복사·저장하지 않았어요 · 이후 가져온 결과 1개\n      - group: 입력 원문 · 내보낸 기록\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일"
+}

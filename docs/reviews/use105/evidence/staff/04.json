@@ -1,0 +1,16 @@
+{
+  "seq": 4,
+  "action": {
+    "op": "click",
+    "role": "button",
+    "name": "영역 나누러 가기"
+  },
+  "error": null,
+  "url": "http://127.0.0.1:8765/agentflow-studio/",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "screenshot": "/workspace/work/use105/evidence/staff/04.jpg",
+  "snapshot": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n    - button \"전체 공간 0\"\n    - button \"현재 작업\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 소규모 공방 예약 안내\n  - paragraph: 첫 작업을 기다리고 있어요.\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 소규모 공방 예약 안내\n  - group: 브라우저 MOCK · AI 아님\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 소규모 공방 예약 안내\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - button \"↑ 백업 파일 불러오기\"\n    - button \"휴지통으로 옮기기\"\n  - region \"전체 공간\":\n    - navigation \"공간 경로\":\n      - strong: 전체 공간\n      - text: 프로젝트 전체\n    - heading \"전체 공간\" [level=1]\n    - text: 프로젝트 목적\n    - paragraph: 소규모 공방의 수업 일정과 예약 방법을 안내하는 웹사이트. 방문자가 수업 종류, 소요 시간, 예약 가능 시간을 확인하고 전화로 문의한다. 결제와 회원 기능은 아직 미정이다. 안내 화면과 운영자 정보 관리를 나누어 병렬로 검토하고 싶다.\n    - group: 목적 전체 보기 · 고치기\n    - button \"영역 추가\"\n    - button \"바로 첫 요청 쓰기 · 영역 없이\"\n    - region \"영역 지도\":\n      - heading \"영역\" [level=2]\n      - form \"영역 추가\":\n        - textbox \"영역 이름\":\n          - /placeholder: \"영역 이름 (예: 예약)\"\n        - textbox \"영역 설명\":\n          - /placeholder: 한 줄 구상 · 아이디어나 아직 못 정한 점 (선택)\n        - button \"＋ 영역 추가\"\n      - paragraph: 아직 영역이 없어요. 위에서 큰 덩어리부터 추가해 보세요. 설명에는 아이디어도, 아직 못 정한 점도 적을 수 있고 비워 둬도 돼요.\n      - button \"－\"\n      - text: 100%\n      - button \"＋\"\n      - button \"전체 맞춤\"\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일"
+}
