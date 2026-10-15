@@ -1,0 +1,12 @@
+PASS baseline: 원본 exit=0, browser: pass 308 fail 0 (INFO 10 별도, 검사 수 미포함) · 17.5s
+DETECTED m1_no_restore: 예상 RT-FOCUS, RT-SCROLL 가 예상 화면 모두에서 실패 · browser: pass 270 fail 38 (INFO 10 별도, 검사 수 미포함) · 17.5s
+     예상 밖 실패 ID(정보): ['(무ID)']
+DETECTED m2_same_tab_link: 예상 LINK-NEWTAB 가 예상 화면 모두에서 실패 · browser: pass 252 fail 8 (INFO 10 별도, 검사 수 미포함) · 31.9s
+     ABORT 동반(시나리오 중단, 판정에 쓰지 않음): ['1280x720', '1440x900', '390x664', '390x844']
+DETECTED m3_switch_no_origin: 예상 SW-ORIGIN 가 예상 화면 모두에서 실패 · browser: pass 304 fail 4 (INFO 10 별도, 검사 수 미포함) · 17.7s
+DETECTED m4_sheet_covers: 예상 SHEET-SWITCH-HIT, SHEET-ORIGIN-VIS 가 예상 화면 모두에서 실패 · browser: pass 276 fail 24 (INFO 10 별도, 검사 수 미포함) · 16.7s
+     ABORT 동반(시나리오 중단, 판정에 쓰지 않음): ['390x664', '390x844']
+     예상 밖 실패 ID(정보): ['(무ID)', 'SW-ORIGIN']
+DETECTED m5_pvscroll_stale: 예상 PV-TOP-AFTER 가 예상 화면 모두에서 실패 · browser: pass 304 fail 4 (INFO 10 별도, 검사 수 미포함) · 17.5s
+DETECTED m6_hidden_overridden: 예상 PANEL-INIT, PANEL-CLOSED-BTN, PANEL-CLOSED-ESC, PANEL-CLOSED-KEY 가 예상 화면 모두에서 실패 · browser: pass 296 fail 12 (INFO 10 별도, 검사 수 미포함) · 17.8s
+mutation: detected 6 missed 0 fatal 0 (총 6개 변형)

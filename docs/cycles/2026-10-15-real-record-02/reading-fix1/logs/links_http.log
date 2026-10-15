@@ -1,0 +1,24 @@
+PASS extracted 11 links (expected 11)
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/1ec44ccecc10f11e41f60f32ad516497706eed15/docs/cycles/2026-10-15-real-record-02/INPUT.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/1ec44ccecc10f11e41f60f32ad516497706eed15/docs/cycles/2026-10-15-real-record-02/INPUT.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/acceptance9/REPORT.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/acceptance9/REPORT.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/ENVIRONMENT.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/ENVIRONMENT.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/INPUT.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/INPUT.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI02_CODE_REVIEW_INITIAL.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI02_CODE_REVIEW_INITIAL.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI02_RESULT.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI02_RESULT.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI03_RESEARCH.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI03_RESEARCH.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/author-fixed/REPORT.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/author-fixed/REPORT.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/independent/REPORT.md
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/independent/REPORT.md
+PASS raw=200 https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/prototype.html
+INFO blob=403 https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/prototype.html
+links: pass 12 fail 0 (추출 수 검사 1 + 링크 11개; INFO 11 별도, 검사 수 미포함)

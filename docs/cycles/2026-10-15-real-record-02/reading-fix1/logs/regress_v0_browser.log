@@ -1,0 +1,319 @@
+INFO [-] chromium 141.0.7390.37, url http://127.0.0.1:39215/reading-study-v0.html
+PASS [1440x900] HTTP 200으로 로드
+FAIL [1440x900] PANEL-INIT 첫 화면: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 118.5], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1440x900] A 문장 25·B 행 25·근거 버튼 각 25, 같은 사실 순서
+PASS [1440x900] 요약은 A/B 밖의 공통 영역
+PASS [1440x900] A 가로 넘침 없음(문서·요소)
+PASS [1440x900] A 끝까지 스크롤해도 가로 넘침 없음
+PASS [1440x900] B 가로 넘침 없음(문서·요소)
+PASS [1440x900] B 끝까지 스크롤해도 가로 넘침 없음
+PASS [1440x900] A f14 근거 버튼이 가려지지 않음
+PASS [1440x900] A f14 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [1440x900] A f14 출발 위치가 현재 표현으로 표시
+PASS [1440x900] PANEL-OPEN A f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [1440x900] PV-TOP A f14 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [1440x900] A f14 닫기 버튼이 보이고 가려지지 않음
+PASS [1440x900] SHEET-SWITCH-HIT A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [1440x900] A f14 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [1440x900] RT-FOCUS A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀
+FAIL [1440x900] PANEL-CLOSED-ESC A f14 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 616.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1440x900] RT-SCROLL A f14 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)
+PASS [1440x900] A f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [1440x900] A f14 닫은 뒤 시트 여백 해제
+PASS [1440x900] A f19 근거 버튼이 가려지지 않음
+PASS [1440x900] A f19 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [1440x900] A f19 출발 위치가 현재 표현으로 표시
+PASS [1440x900] PANEL-OPEN A f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [1440x900] PV-TOP A f19 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [1440x900] A f19 닫기 버튼이 보이고 가려지지 않음
+PASS [1440x900] SHEET-SWITCH-HIT A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+INFO [1440x900] A f19 미리보기 연 채 휠 스크롤 1633→1705
+PASS [1440x900] A f19 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [1440x900] RT-FOCUS A f19 닫기(button) 후 초점이 출발 버튼으로 복귀
+FAIL [1440x900] PANEL-CLOSED-BTN A f19 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 616.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1440x900] RT-SCROLL A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px)
+PASS [1440x900] A f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [1440x900] A f19 닫은 뒤 시트 여백 해제
+PASS [1440x900] B f14 근거 버튼이 가려지지 않음
+PASS [1440x900] B f14 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [1440x900] B f14 출발 위치가 현재 표현으로 표시
+PASS [1440x900] PANEL-OPEN B f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [1440x900] PV-TOP B f14 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [1440x900] B f14 닫기 버튼이 보이고 가려지지 않음
+PASS [1440x900] SHEET-SWITCH-HIT B f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+INFO [1440x900] B f14 미리보기 연 채 휠 스크롤 2405→2905
+PASS [1440x900] B f14 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [1440x900] RT-FOCUS B f14 닫기(button) 후 초점이 출발 버튼으로 복귀
+FAIL [1440x900] PANEL-CLOSED-BTN B f14 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 616.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1440x900] RT-SCROLL B f14 닫기(button) 후 읽던 스크롤 위치 복원(±2px)
+PASS [1440x900] B f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [1440x900] B f14 닫은 뒤 시트 여백 해제
+PASS [1440x900] B f19 근거 버튼이 가려지지 않음
+PASS [1440x900] B f19 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [1440x900] B f19 출발 위치가 현재 표현으로 표시
+PASS [1440x900] PANEL-OPEN B f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [1440x900] PV-TOP B f19 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [1440x900] B f19 닫기 버튼이 보이고 가려지지 않음
+PASS [1440x900] SHEET-SWITCH-HIT B f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [1440x900] B f19 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [1440x900] RT-FOCUS B f19 닫기(esc) 후 초점이 출발 버튼으로 복귀
+FAIL [1440x900] PANEL-CLOSED-ESC B f19 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 616.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1440x900] RT-SCROLL B f19 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)
+PASS [1440x900] B f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [1440x900] B f19 닫은 뒤 시트 여백 해제
+PASS [1440x900] LINK-NEWTAB 원문 링크가 새 탭·noopener·'새 탭' 표기
+PASS [1440x900] 원문 링크가 가려지지 않음
+PASS [1440x900] 링크 클릭은 새 탭 하나를 고정 출처 URL로 엶
+PASS [1440x900] 링크 클릭 뒤 읽기 페이지 URL·스크롤·미리보기·선택·표현 유지
+PASS [1440x900] 링크 클릭 뒤 미리보기 안 스크롤도 유지
+PASS [1440x900] PV-TOP-AFTER 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임
+PASS [1440x900] P01은 원문 링크 없이 '원문 링크 미제공'과 이유를 보임
+PASS [1440x900] SW-ORIGIN 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜
+PASS [1440x900] 열린 채 A→B 전환: B의 같은 셀 버튼이 화면에 보임
+PASS [1440x900] 전환 뒤 닫기: 초점이 B의 같은 사실 버튼으로, 화면 안
+PASS [1440x900] 선택 상태로 B→A 전환: A의 같은 문장이 선택된 채 같은 높이에 보임
+PASS [1440x900] 조작 뒤 승인·수정·읽음 같은 자동 표기가 생기지 않음
+FAIL [1440x900] PANEL-CLOSED-KEY 키보드 Enter로 닫은 뒤: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 616.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1440x900] 키보드: Enter로 열기 → Tab으로 닫기 버튼 → Enter로 닫고 출발로 복귀
+PASS [1440x900] 페이지 오류·콘솔 오류 없음
+PASS [1280x720] HTTP 200으로 로드
+FAIL [1280x720] PANEL-INIT 첫 화면: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 118.5], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1280x720] A 문장 25·B 행 25·근거 버튼 각 25, 같은 사실 순서
+PASS [1280x720] 요약은 A/B 밖의 공통 영역
+PASS [1280x720] A 가로 넘침 없음(문서·요소)
+PASS [1280x720] A 끝까지 스크롤해도 가로 넘침 없음
+PASS [1280x720] B 가로 넘침 없음(문서·요소)
+PASS [1280x720] B 끝까지 스크롤해도 가로 넘침 없음
+PASS [1280x720] A f14 근거 버튼이 가려지지 않음
+PASS [1280x720] A f14 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [1280x720] A f14 출발 위치가 현재 표현으로 표시
+PASS [1280x720] PANEL-OPEN A f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [1280x720] PV-TOP A f14 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [1280x720] A f14 닫기 버튼이 보이고 가려지지 않음
+PASS [1280x720] SHEET-SWITCH-HIT A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [1280x720] A f14 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [1280x720] RT-FOCUS A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀
+FAIL [1280x720] PANEL-CLOSED-ESC A f14 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 436.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1280x720] RT-SCROLL A f14 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)
+PASS [1280x720] A f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [1280x720] A f14 닫은 뒤 시트 여백 해제
+PASS [1280x720] A f19 근거 버튼이 가려지지 않음
+PASS [1280x720] A f19 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [1280x720] A f19 출발 위치가 현재 표현으로 표시
+PASS [1280x720] PANEL-OPEN A f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [1280x720] PV-TOP A f19 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [1280x720] A f19 닫기 버튼이 보이고 가려지지 않음
+PASS [1280x720] SHEET-SWITCH-HIT A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+INFO [1280x720] A f19 미리보기 연 채 휠 스크롤 2069→2356
+PASS [1280x720] A f19 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [1280x720] RT-FOCUS A f19 닫기(button) 후 초점이 출발 버튼으로 복귀
+FAIL [1280x720] PANEL-CLOSED-BTN A f19 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 436.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1280x720] RT-SCROLL A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px)
+PASS [1280x720] A f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [1280x720] A f19 닫은 뒤 시트 여백 해제
+PASS [1280x720] B f14 근거 버튼이 가려지지 않음
+PASS [1280x720] B f14 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [1280x720] B f14 출발 위치가 현재 표현으로 표시
+PASS [1280x720] PANEL-OPEN B f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [1280x720] PV-TOP B f14 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [1280x720] B f14 닫기 버튼이 보이고 가려지지 않음
+PASS [1280x720] SHEET-SWITCH-HIT B f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+INFO [1280x720] B f14 미리보기 연 채 휠 스크롤 2967→3467
+PASS [1280x720] B f14 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [1280x720] RT-FOCUS B f14 닫기(button) 후 초점이 출발 버튼으로 복귀
+FAIL [1280x720] PANEL-CLOSED-BTN B f14 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 436.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1280x720] RT-SCROLL B f14 닫기(button) 후 읽던 스크롤 위치 복원(±2px)
+PASS [1280x720] B f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [1280x720] B f14 닫은 뒤 시트 여백 해제
+PASS [1280x720] B f19 근거 버튼이 가려지지 않음
+PASS [1280x720] B f19 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [1280x720] B f19 출발 위치가 현재 표현으로 표시
+PASS [1280x720] PANEL-OPEN B f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [1280x720] PV-TOP B f19 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [1280x720] B f19 닫기 버튼이 보이고 가려지지 않음
+PASS [1280x720] SHEET-SWITCH-HIT B f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [1280x720] B f19 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [1280x720] RT-FOCUS B f19 닫기(esc) 후 초점이 출발 버튼으로 복귀
+FAIL [1280x720] PANEL-CLOSED-ESC B f19 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 436.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1280x720] RT-SCROLL B f19 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)
+PASS [1280x720] B f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [1280x720] B f19 닫은 뒤 시트 여백 해제
+PASS [1280x720] LINK-NEWTAB 원문 링크가 새 탭·noopener·'새 탭' 표기
+PASS [1280x720] 원문 링크가 가려지지 않음
+PASS [1280x720] 링크 클릭은 새 탭 하나를 고정 출처 URL로 엶
+PASS [1280x720] 링크 클릭 뒤 읽기 페이지 URL·스크롤·미리보기·선택·표현 유지
+PASS [1280x720] 링크 클릭 뒤 미리보기 안 스크롤도 유지
+PASS [1280x720] PV-TOP-AFTER 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임
+PASS [1280x720] P01은 원문 링크 없이 '원문 링크 미제공'과 이유를 보임
+PASS [1280x720] SW-ORIGIN 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜
+PASS [1280x720] 열린 채 A→B 전환: B의 같은 셀 버튼이 화면에 보임
+PASS [1280x720] 전환 뒤 닫기: 초점이 B의 같은 사실 버튼으로, 화면 안
+PASS [1280x720] 선택 상태로 B→A 전환: A의 같은 문장이 선택된 채 같은 높이에 보임
+PASS [1280x720] 조작 뒤 승인·수정·읽음 같은 자동 표기가 생기지 않음
+FAIL [1280x720] PANEL-CLOSED-KEY 키보드 Enter로 닫은 뒤: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임 — {"bodyHiddenAttr": true, "bodyDisplay": "flex", "bodyBox": [358, 436.4], "bodyVis": true, "closeBox": [157.3, 38], "closeVis": true, "closeHit": true, "closeFocusable": true, "emptyVis": true, "previewDisplay": "flex", "headText": "근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아"}
+PASS [1280x720] 키보드: Enter로 열기 → Tab으로 닫기 버튼 → Enter로 닫고 출발로 복귀
+PASS [1280x720] 페이지 오류·콘솔 오류 없음
+PASS [390x664] HTTP 200으로 로드
+PASS [390x664] PANEL-INIT 첫 화면: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x664] A 문장 25·B 행 25·근거 버튼 각 25, 같은 사실 순서
+PASS [390x664] 요약은 A/B 밖의 공통 영역
+PASS [390x664] A 가로 넘침 없음(문서·요소)
+PASS [390x664] A 끝까지 스크롤해도 가로 넘침 없음
+PASS [390x664] B 가로 넘침 없음(문서·요소)
+PASS [390x664] B 끝까지 스크롤해도 가로 넘침 없음
+PASS [390x664] A f14 근거 버튼이 가려지지 않음
+PASS [390x664] A f14 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [390x664] A f14 출발 위치가 현재 표현으로 표시
+PASS [390x664] PANEL-OPEN A f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [390x664] PV-TOP A f14 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [390x664] A f14 닫기 버튼이 보이고 가려지지 않음
+PASS [390x664] SHEET-SWITCH-HIT A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [390x664] SHEET-ORIGIN-VIS A f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임
+PASS [390x664] A f14 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [390x664] RT-FOCUS A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀
+PASS [390x664] PANEL-CLOSED-ESC A f14 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x664] RT-SCROLL A f14 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)
+PASS [390x664] A f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [390x664] A f14 닫은 뒤 시트 여백 해제
+PASS [390x664] A f19 근거 버튼이 가려지지 않음
+PASS [390x664] A f19 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [390x664] A f19 출발 위치가 현재 표현으로 표시
+PASS [390x664] PANEL-OPEN A f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [390x664] PV-TOP A f19 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [390x664] A f19 닫기 버튼이 보이고 가려지지 않음
+PASS [390x664] SHEET-SWITCH-HIT A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [390x664] SHEET-ORIGIN-VIS A f19 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임
+INFO [390x664] A f19 미리보기 연 채 휠 스크롤 3210→3710
+PASS [390x664] A f19 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [390x664] RT-FOCUS A f19 닫기(button) 후 초점이 출발 버튼으로 복귀
+PASS [390x664] PANEL-CLOSED-BTN A f19 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x664] RT-SCROLL A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px)
+PASS [390x664] A f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [390x664] A f19 닫은 뒤 시트 여백 해제
+PASS [390x664] B f14 근거 버튼이 가려지지 않음
+PASS [390x664] B f14 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [390x664] B f14 출발 위치가 현재 표현으로 표시
+PASS [390x664] PANEL-OPEN B f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [390x664] PV-TOP B f14 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [390x664] B f14 닫기 버튼이 보이고 가려지지 않음
+PASS [390x664] SHEET-SWITCH-HIT B f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [390x664] SHEET-ORIGIN-VIS B f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임
+INFO [390x664] B f14 미리보기 연 채 휠 스크롤 5144→5644
+PASS [390x664] B f14 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [390x664] RT-FOCUS B f14 닫기(button) 후 초점이 출발 버튼으로 복귀
+PASS [390x664] PANEL-CLOSED-BTN B f14 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x664] RT-SCROLL B f14 닫기(button) 후 읽던 스크롤 위치 복원(±2px)
+PASS [390x664] B f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [390x664] B f14 닫은 뒤 시트 여백 해제
+PASS [390x664] B f19 근거 버튼이 가려지지 않음
+PASS [390x664] B f19 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [390x664] B f19 출발 위치가 현재 표현으로 표시
+PASS [390x664] PANEL-OPEN B f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [390x664] PV-TOP B f19 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [390x664] B f19 닫기 버튼이 보이고 가려지지 않음
+PASS [390x664] SHEET-SWITCH-HIT B f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [390x664] SHEET-ORIGIN-VIS B f19 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임
+PASS [390x664] B f19 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [390x664] RT-FOCUS B f19 닫기(esc) 후 초점이 출발 버튼으로 복귀
+PASS [390x664] PANEL-CLOSED-ESC B f19 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x664] RT-SCROLL B f19 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)
+PASS [390x664] B f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [390x664] B f19 닫은 뒤 시트 여백 해제
+PASS [390x664] LINK-NEWTAB 원문 링크가 새 탭·noopener·'새 탭' 표기
+PASS [390x664] 원문 링크가 가려지지 않음
+PASS [390x664] 링크 클릭은 새 탭 하나를 고정 출처 URL로 엶
+PASS [390x664] 링크 클릭 뒤 읽기 페이지 URL·스크롤·미리보기·선택·표현 유지
+PASS [390x664] 링크 클릭 뒤 미리보기 안 스크롤도 유지
+PASS [390x664] PV-TOP-AFTER 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임
+PASS [390x664] P01은 원문 링크 없이 '원문 링크 미제공'과 이유를 보임
+PASS [390x664] SW-ORIGIN 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜
+PASS [390x664] 열린 채 A→B 전환: B의 같은 셀 버튼이 화면에 보임
+PASS [390x664] 전환 뒤 닫기: 초점이 B의 같은 사실 버튼으로, 화면 안
+PASS [390x664] 선택 상태로 B→A 전환: A의 같은 문장이 선택된 채 같은 높이에 보임
+PASS [390x664] 조작 뒤 승인·수정·읽음 같은 자동 표기가 생기지 않음
+PASS [390x664] PANEL-CLOSED-KEY 키보드 Enter로 닫은 뒤: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x664] 키보드: Enter로 열기 → Tab으로 닫기 버튼 → Enter로 닫고 출발로 복귀
+PASS [390x664] 페이지 오류·콘솔 오류 없음
+PASS [390x844] HTTP 200으로 로드
+PASS [390x844] PANEL-INIT 첫 화면: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x844] A 문장 25·B 행 25·근거 버튼 각 25, 같은 사실 순서
+PASS [390x844] 요약은 A/B 밖의 공통 영역
+PASS [390x844] A 가로 넘침 없음(문서·요소)
+PASS [390x844] A 끝까지 스크롤해도 가로 넘침 없음
+PASS [390x844] B 가로 넘침 없음(문서·요소)
+PASS [390x844] B 끝까지 스크롤해도 가로 넘침 없음
+PASS [390x844] A f14 근거 버튼이 가려지지 않음
+PASS [390x844] A f14 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [390x844] A f14 출발 위치가 현재 표현으로 표시
+PASS [390x844] PANEL-OPEN A f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [390x844] PV-TOP A f14 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [390x844] A f14 닫기 버튼이 보이고 가려지지 않음
+PASS [390x844] SHEET-SWITCH-HIT A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [390x844] SHEET-ORIGIN-VIS A f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임
+PASS [390x844] A f14 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [390x844] RT-FOCUS A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀
+PASS [390x844] PANEL-CLOSED-ESC A f14 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x844] RT-SCROLL A f14 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)
+PASS [390x844] A f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [390x844] A f14 닫은 뒤 시트 여백 해제
+PASS [390x844] A f19 근거 버튼이 가려지지 않음
+PASS [390x844] A f19 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [390x844] A f19 출발 위치가 현재 표현으로 표시
+PASS [390x844] PANEL-OPEN A f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [390x844] PV-TOP A f19 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [390x844] A f19 닫기 버튼이 보이고 가려지지 않음
+PASS [390x844] SHEET-SWITCH-HIT A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [390x844] SHEET-ORIGIN-VIS A f19 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임
+INFO [390x844] A f19 미리보기 연 채 휠 스크롤 3191→3691
+PASS [390x844] A f19 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [390x844] RT-FOCUS A f19 닫기(button) 후 초점이 출발 버튼으로 복귀
+PASS [390x844] PANEL-CLOSED-BTN A f19 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x844] RT-SCROLL A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px)
+PASS [390x844] A f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [390x844] A f19 닫은 뒤 시트 여백 해제
+PASS [390x844] B f14 근거 버튼이 가려지지 않음
+PASS [390x844] B f14 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [390x844] B f14 출발 위치가 현재 표현으로 표시
+PASS [390x844] PANEL-OPEN B f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [390x844] PV-TOP B f14 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [390x844] B f14 닫기 버튼이 보이고 가려지지 않음
+PASS [390x844] SHEET-SWITCH-HIT B f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [390x844] SHEET-ORIGIN-VIS B f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임
+INFO [390x844] B f14 미리보기 연 채 휠 스크롤 5144→5644
+PASS [390x844] B f14 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [390x844] RT-FOCUS B f14 닫기(button) 후 초점이 출발 버튼으로 복귀
+PASS [390x844] PANEL-CLOSED-BTN B f14 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x844] RT-SCROLL B f14 닫기(button) 후 읽던 스크롤 위치 복원(±2px)
+PASS [390x844] B f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [390x844] B f14 닫은 뒤 시트 여백 해제
+PASS [390x844] B f19 근거 버튼이 가려지지 않음
+PASS [390x844] B f19 미리보기 열림·초점이 미리보기 제목으로 이동
+PASS [390x844] B f19 출발 위치가 현재 표현으로 표시
+PASS [390x844] PANEL-OPEN B f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김
+PASS [390x844] PV-TOP B f19 새로 연 미리보기는 처음(출발 문장)부터 보임
+PASS [390x844] B f19 닫기 버튼이 보이고 가려지지 않음
+PASS [390x844] SHEET-SWITCH-HIT B f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음
+PASS [390x844] SHEET-ORIGIN-VIS B f19 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임
+PASS [390x844] B f19 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED
+PASS [390x844] RT-FOCUS B f19 닫기(esc) 후 초점이 출발 버튼으로 복귀
+PASS [390x844] PANEL-CLOSED-ESC B f19 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x844] RT-SCROLL B f19 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)
+PASS [390x844] B f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지
+PASS [390x844] B f19 닫은 뒤 시트 여백 해제
+PASS [390x844] LINK-NEWTAB 원문 링크가 새 탭·noopener·'새 탭' 표기
+PASS [390x844] 원문 링크가 가려지지 않음
+PASS [390x844] 링크 클릭은 새 탭 하나를 고정 출처 URL로 엶
+PASS [390x844] 링크 클릭 뒤 읽기 페이지 URL·스크롤·미리보기·선택·표현 유지
+PASS [390x844] 링크 클릭 뒤 미리보기 안 스크롤도 유지
+PASS [390x844] PV-TOP-AFTER 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임
+PASS [390x844] P01은 원문 링크 없이 '원문 링크 미제공'과 이유를 보임
+PASS [390x844] SW-ORIGIN 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜
+PASS [390x844] 열린 채 A→B 전환: B의 같은 셀 버튼이 화면에 보임
+PASS [390x844] 전환 뒤 닫기: 초점이 B의 같은 사실 버튼으로, 화면 안
+PASS [390x844] 선택 상태로 B→A 전환: A의 같은 문장이 선택된 채 같은 높이에 보임
+PASS [390x844] 조작 뒤 승인·수정·읽음 같은 자동 표기가 생기지 않음
+PASS [390x844] PANEL-CLOSED-KEY 키보드 Enter로 닫은 뒤: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음
+PASS [390x844] 키보드: Enter로 열기 → Tab으로 닫기 버튼 → Enter로 닫고 출발로 복귀
+PASS [390x844] 페이지 오류·콘솔 오류 없음
+INFO [-] external requests intercepted by stub: ['https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html']
+browser: pass 296 fail 12 (INFO 10 별도, 검사 수 미포함) · 17.6s

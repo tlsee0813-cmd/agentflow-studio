@@ -26,7 +26,7 @@
 | Pro 두 세션 + Astra High | 실제 개발 기록의 범위별 결과/미결 및 자료별 이름 비교 | 입력·연구 회수 완료, 새 읽기 화면 구현·사람 검증 미실행 |
 | [새 Pro 공간·탐색 비교](https://chatgpt.com/c/6ad0ec2b-71b8-83ec-8e3a-798f622b57dc) + 내부 6.1 Sol High | Dify·Cytoscape 확장·VS Code 3사례 | 연구 회수·고정 코드 대조 완료. 선택·전체 시점 보존으로 확대 해석하지 않음 |
 | [새 Pro 기록·근거 읽기](https://chatgpt.com/c/6ad0ec53-18e8-83ee-80c6-7b95b2dc8239) + 내부 Astra High | Hypothesis·Zotero·Langfuse·Dify 4사례 | 연구 회수·후보 반박 완료. 새 두 읽기 후보는 아래 조건부 비교 |
-| [새 Opus 읽기 시안](https://claude.ai/chat/b209c7e7-b87f-403a-bd50-825c47578f57) | 동결 실제 기록의 A/B 단일 HTML 및 작성자 검사 | 1ec44ccecc10f11e41f60f32ad516497706eed15 기준 배정·응답 시작 확인. 산출물 회수·독립 검증 대기 |
+| [새 Opus 읽기 시안](https://claude.ai/chat/b209c7e7-b87f-403a-bd50-825c47578f57) | 동결 실제 기록의 A/B 단일 HTML 및 작성자 검사 | v0 닫힘 결함 독립 재현 후 fix1 원본 수신·별도 보존. 내부 내용/코드 감사 및 Cloud 독립 검증 진행 |
 
 ## GitHub 전달 경로
 
@@ -44,7 +44,7 @@
 
 다음 범위는 [기존 메커니즘 비교와 총괄 판단](2026-10-15-real-record-02/MECHANISM_REVIEW.md)에 따라 같은 동결 기록을 A 판단본문+문장별 근거와 B 자료·관측 범위별 중립 대조에 놓아 비교하는 것이다. 기존 확인할 부분 목록안은 역사적 후보로 남기며 세 안을 동시에 구현하지 않는다. 두 안의 공간 조건과 사실·근거 접근은 맞춘다. [사전 읽기 관찰표](2026-10-15-real-record-02/READING_TRIAL.md)는 미실행이며, UI03 넓은 읽기 본문도 후보로 유지한다.
 
-새 화면 구현, 사람 읽기 검증, 새 Cloud 작업 환경 복원은 완료한 것으로 기록하지 않는다. main/gh-pages 배포, 전체 수집기·DB·연결기, 과거 HOLD 통합, 실제 유료 AI 실행은 이 배정에 포함하지 않는다.
+새 읽기 화면 v0는 구현됐으나 [독립 검토와 총괄 재현](2026-10-15-real-record-02/READING_V0_RESULT.md)에서 닫힘 결함을 확인해 조작 기준 수용을 보류했다. Cloud도 같은 결함을 두 화면 크기에서 재현하고 [GitHub에 원본 증거](https://github.com/tlsee0813-cmd/agentflow-studio/tree/7e79392080157be693429da40d54c2a206b8aa7b/docs/transfer/real-record-02/v0-preflight)를 전달했다. [Cloud 감사](2026-10-15-real-record-02/READING_V0_CLOUD_AUDIT.md)는 원본 해시·증상·종료코드를 확인했으며 시각 표기 차이만 설명 대기로 분리했다. [fix1 작성자 원본](2026-10-15-real-record-02/reading-fix1/REPORT_FIX1.md)을 별도 보존하고 독립 검증 중이다. 모바일 B의 비교 상대 맥락 미보존은 표현 한계로 남긴다. 사람 읽기 검증·새 Cloud 작업 환경 복원은 완료하지 않았다. main/gh-pages 배포, 전체 수집기·DB·연결기, 과거 HOLD 통합, 실제 유료 AI 실행은 이 배정에 포함하지 않는다.
 
 새 Opus는 같은 공간 조건에서 A/B 읽기 표현만 만드는 작성자다. 총괄은 [내용 대조 기준](2026-10-15-real-record-02/CONTENT_CONTRACT.md)과 [독립 브라우저 사전 계약](2026-10-15-real-record-02/BROWSER_CONTRACT.md)에 따라 산출물을 분리 검토한다. 두 문서는 사전 기준이며 아직 화면 합격·사람 읽기 결과가 아니다. 원격 통합·선택 판단은 총괄이 담당하며 기존 시안·제품 소스를 다시 설계하는 배정이 아니다.
 

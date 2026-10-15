@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기록 읽기 비교 v0</title>
+<style>
+:root{
+  --bg:#f6f5f2; --surface:#ffffff; --ink:#1c1e22; --ink2:#454a52; --ink3:#676c75;
+  --line:#e2dfd8; --line2:#d0ccc3; --accent:#2c5a86; --accent-ink:#ffffff; --sel:#edf2f8; --sel-line:#2c5a86;
+  --pass:#2d6a59; --fail:#9c4428; --wait:#7d5c12; --neutral:#555b64;
+  --code:#f0eee9;
+  --fs:16px; --fs-s:13.5px; --fs-xs:12.5px; --lh:1.72;
+  --hdr:56px;
+  font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR","Malgun Gothic",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-size:var(--fs);line-height:var(--lh);word-break:keep-all;overflow-wrap:anywhere}
+code{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:.86em;background:var(--code);padding:.05em .3em;border-radius:3px;word-break:break-all}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* header */
+.hdr{position:sticky;top:0;z-index:30;height:var(--hdr);background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 24px}
+.brand{display:flex;flex-direction:column;line-height:1.25;min-width:0;flex:1}
+.brand b{font-size:15px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand span{font-size:var(--fs-xs);color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.switch{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.switch-l{font-size:var(--fs-xs);color:var(--ink3)}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;background:var(--surface);padding:2px}
+.seg button{border:0;background:transparent;border-radius:6px;padding:0 12px;min-height:38px;min-width:44px;font-size:14px;cursor:pointer;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg button .long{margin-left:4px}
+
+/* layout */
+.wrap{display:grid;grid-template-columns:248px minmax(0,1fr) 360px;gap:32px;padding:24px 32px 64px;max-width:1440px;margin:0 auto;align-items:start}
+.ctx{position:sticky;top:calc(var(--hdr) + 16px);max-height:calc(100vh - var(--hdr) - 32px);overflow:auto;font-size:var(--fs-s);line-height:1.6;color:var(--ink2)}
+.main{min-width:0}
+.pvcol{position:sticky;top:calc(var(--hdr) + 16px)}
+
+/* context */
+.ctx h2{font-size:var(--fs-xs);letter-spacing:.02em;color:var(--ink3);font-weight:600;margin:0 0 6px}
+.ctx section{margin:0 0 18px}
+.ctx p{margin:0 0 6px}
+.ctx dl{margin:0}
+.ctx dt{font-weight:600;color:var(--ink)}
+.ctx dd{margin:0 0 8px}
+.ctx .lead{color:var(--ink);font-size:14px}
+.ctx details{border-top:1px solid var(--line);padding-top:10px}
+.ctx summary{cursor:pointer;font-weight:600;color:var(--ink);font-size:14px;min-height:32px;display:flex;align-items:center}
+.legend{list-style:none;padding:0;margin:0}
+.legend li{margin:0 0 7px}
+.legend .tag{margin-right:6px}
+
+/* common summary */
+.study-note{font-size:var(--fs-s);color:var(--ink3);margin:0 0 14px}
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:0 0 28px}
+.summary h2{font-size:15px;margin:0 0 8px}
+.summary ul{margin:0;padding:0;list-style:none}
+.summary li{display:grid;grid-template-columns:7.5em 1fr;gap:12px;padding:6px 0;border-top:1px solid var(--line)}
+.summary li:first-child{border-top:0}
+.summary li b{font-weight:600;font-size:var(--fs-s);color:var(--ink2);padding-top:2px}
+.summary .ev{color:var(--ink3);font-size:var(--fs-xs);white-space:nowrap}
+.repline{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;border-bottom:1px solid var(--line2);padding-bottom:10px;margin:0 0 6px}
+.repline h2{font-size:18px;margin:0}
+.repline p{margin:0;font-size:var(--fs-s);color:var(--ink3)}
+
+/* groups (shared by A and B) */
+.grp{margin:26px 0 0}
+.grp>h2{font-size:17px;margin:0 0 4px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.grp>h2 .er{font-size:var(--fs-xs);color:var(--ink3);font-weight:500}
+.gnote{font-size:var(--fs-s);color:var(--ink3);margin:0 0 8px}
+.sub{font-size:var(--fs-s);font-weight:600;color:var(--ink2);margin:14px 0 4px}
+
+/* status tags (shared) */
+.tag{display:inline-block;font-size:var(--fs-xs);line-height:1.5;padding:0 6px;border-radius:4px;border:1px solid currentColor;white-space:nowrap;vertical-align:.08em;font-weight:500}
+.t-neutral{color:var(--neutral)}
+.t-pass{color:var(--pass)}
+.t-fail{color:var(--fail)}
+.t-wait{color:var(--wait)}
+.t-absent{color:var(--neutral);border-style:dashed}
+
+/* evidence button (shared) */
+.evbtn{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:0 9px;min-height:30px;font-size:var(--fs-xs);color:var(--accent);cursor:pointer;vertical-align:.05em;white-space:nowrap}
+.evbtn::before{content:"";width:0;height:0;border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent}
+.evbtn[aria-expanded="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.evbtn:hover{border-color:var(--accent)}
+.marks{display:inline-flex;gap:6px;align-items:center;white-space:nowrap;margin-left:4px}
+
+/* A: prose */
+.prose{margin:0 0 4px}
+.unit{padding:2px 2px;border-radius:4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.unit.sel{background:var(--sel);box-shadow:inset 0 -2px 0 var(--sel-line)}
+
+/* B: contrast table */
+.ct{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:var(--fs);line-height:1.6;table-layout:fixed}
+.ct th,.ct td{text-align:left;vertical-align:top;padding:10px 12px;border-top:1px solid var(--line)}
+.ct thead th{font-size:var(--fs-xs);color:var(--ink3);font-weight:600;border-top:0;padding-top:8px;padding-bottom:8px}
+.ct col.c1{width:27%} .ct col.c2{width:12%} .ct col.c3{width:31%} .ct col.c4{width:30%}
+.ct .subrow th{font-size:var(--fs-s);font-weight:600;color:var(--ink2);background:#faf9f6;padding-top:7px;padding-bottom:7px}
+.ct tbody th[scope="row"]{font-weight:600}
+.ct td.lim{color:var(--ink2)}
+.ct tr.sel>*{background:var(--sel)}
+.ct tr.sel>th[scope="row"]{box-shadow:inset 3px 0 0 var(--sel-line)}
+.cellfoot{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+
+/* preview (shared) */
+.preview{background:var(--surface);border:1px solid var(--line2);border-radius:12px;max-height:calc(100vh - var(--hdr) - 32px);display:flex;flex-direction:column;overflow:hidden}
+.pv-empty{padding:18px 20px;font-size:var(--fs-s);color:var(--ink3);line-height:1.65}
+.pv-empty p{margin:0 0 8px}
+.pv-body{display:flex;flex-direction:column;min-height:0;flex:1}
+.pv-head{padding:14px 18px 12px;border-bottom:1px solid var(--line);flex-shrink:0}
+.pv-kicker{margin:0 0 4px;font-size:var(--fs-xs);color:var(--ink3)}
+.pv-head h2{font-size:16px;margin:0 0 10px;line-height:1.45}
+.pv-head h2:focus{outline:none}
+.pv-head h2:focus-visible{outline:2px solid var(--accent)}
+.pv-close{border:1px solid var(--line2);background:var(--bg);border-radius:8px;min-height:38px;padding:0 12px;font-size:14px;cursor:pointer}
+.pv-close kbd{font-family:inherit;font-size:11px;border:1px solid var(--line2);border-radius:3px;padding:0 4px;margin-left:6px;color:var(--ink3)}
+.pv-scroll{overflow:auto;padding:4px 18px 18px;font-size:var(--fs-s);line-height:1.65;min-height:0}
+.pv-scroll h3{font-size:var(--fs-xs);color:var(--ink3);font-weight:600;margin:14px 0 6px;letter-spacing:.02em}
+.pv-origin .where{margin:0 0 4px;color:var(--ink3);font-size:var(--fs-xs)}
+.pv-origin blockquote{margin:0;padding:8px 10px;border-left:3px solid var(--sel-line);background:var(--sel);border-radius:0 6px 6px 0;color:var(--ink)}
+.evdl{margin:0 0 10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.evdl .eh{font-weight:600;margin:0 0 4px;color:var(--ink)}
+.evdl dl{margin:0;display:grid;grid-template-columns:4.6em 1fr;gap:3px 8px}
+.evdl dt{color:var(--ink3)}
+.evdl dd{margin:0}
+.pv-note{color:var(--ink3);font-size:var(--fs-xs);margin:0 0 6px}
+.srcs{list-style:none;margin:0;padding:0}
+.src{border-top:1px solid var(--line);padding:9px 0}
+.src:first-child{border-top:0}
+.src .sid{font-size:var(--fs-xs);color:var(--ink3);margin:0}
+.src .stitle{margin:0;font-weight:600;color:var(--ink)}
+.src .sloc{margin:0;color:var(--ink2)}
+.src .snote{margin:2px 0 0;color:var(--ink2)}
+.srclink{display:inline-flex;align-items:center;gap:6px;margin-top:6px;min-height:34px;padding:0 10px;border:1px solid var(--accent);border-radius:8px;color:var(--accent);text-decoration:none;font-size:var(--fs-xs);font-weight:600}
+.srclink .nt{font-weight:400;color:var(--ink3)}
+.srclink:hover{background:var(--sel)}
+.nolink{margin-top:6px;padding:6px 8px;border:1px dashed var(--line2);border-radius:8px;color:var(--ink2);font-size:var(--fs-xs)}
+.nolink b{color:var(--ink)}
+
+footer.foot{grid-column:1/-1;font-size:var(--fs-xs);color:var(--ink3);border-top:1px solid var(--line);padding-top:12px}
+
+/* medium: context moves on top of reading column */
+@media (max-width:1199px){
+  .wrap{grid-template-columns:minmax(0,1fr) 340px;gap:24px;padding:20px 20px 56px}
+  .ctx{position:static;max-height:none;overflow:visible;grid-column:1/2;grid-row:1}
+  .main{grid-column:1/2;grid-row:2}
+  .pvcol{grid-column:2/3;grid-row:1/3}
+}
+/* narrow: single column, preview as bottom sheet */
+@media (max-width:759px){
+  :root{--hdr:52px}
+  .hdr{padding:0 12px;gap:8px}
+  .brand b{font-size:14px}
+  .switch-l{display:none}
+  .seg button{padding:0 9px;font-size:13.5px}
+  .wrap{display:block;padding:14px 16px 40px}
+  .ctx{margin-bottom:16px}
+  .ctx .more-wide{display:none}
+  .pvcol{position:static}
+  .preview{position:fixed;left:0;right:0;bottom:0;z-index:40;max-height:62vh;border-radius:14px 14px 0 0;border-bottom:0;box-shadow:0 -8px 24px rgba(0,0,0,.12)}
+  .preview.closed{display:none}
+  .pv-empty{display:none}
+  .pv-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:10px 16px}
+  .pv-head .pv-kicker{flex:1 1 100%}
+  .pv-head h2{flex:1 1 0;margin:0;font-size:15px;min-width:0}
+  .pv-scroll{padding:2px 16px 18px}
+  .summary{padding:12px 14px}
+  .summary li{grid-template-columns:1fr;gap:0}
+  /* B rows become stacked cards; same type sizes */
+  .ct,.ct thead,.ct tbody,.ct tr,.ct th,.ct td{display:block;width:auto}
+  .ct{border:0;background:transparent}
+  .ct colgroup,.ct thead{display:none}
+  .ct .subrow th{background:transparent;padding:12px 0 4px;border:0}
+  .ct tbody tr:not(.subrow){background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:0 0 8px}
+  .ct tbody th[scope="row"]{border-top:0;padding:10px 12px 2px}
+  .ct td{border-top:0;padding:2px 12px 8px}
+  .ct td::before{content:attr(data-label);display:block;font-size:var(--fs-xs);color:var(--ink3);font-weight:600}
+  .ct tr.sel>*{background:transparent}
+  .ct tbody tr.sel:not(.subrow){background:var(--sel);box-shadow:inset 3px 0 0 var(--sel-line)}
+  .ct tr.sel>th[scope="row"]{box-shadow:none}
+}
+@media (min-width:760px){ .ctx .more-narrow{display:none} }
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="brand"><b>기록 읽기 비교 v0</b><span>AgentFlow Studio · 연구 시안 · 최종 UI 아님</span></div>
+  <div class="switch" role="group" aria-label="읽기 표현 전환">
+    <span class="switch-l">같은 사실, 표현만 다름</span>
+    <div class="seg">
+      <button type="button" id="repA" aria-pressed="true">A<span class="long"> 판단 본문</span></button>
+      <button type="button" id="repB" aria-pressed="false">B<span class="long"> 범위 대조</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside class="ctx" aria-label="이 기록의 맥락">
+    <section>
+      <h2>이 화면</h2>
+      <p class="lead">합성 도서 대여 예제를 만든 <b>실제 AI 개발·검증 기록</b>을 두 표현으로 읽어 보는 연구 시안입니다. 실제 고객 기록이 아닙니다.</p>
+      <p>동결점 <b>E10</b>까지의 상태입니다. 이후 fix2/fix3의 수정·검사는 이 화면의 상태에 넣지 않았습니다.</p>
+    </section>
+    <details class="more-narrow"><summary>맥락·기록자·상태 표기 보기</summary><div id="ctxNarrow"></div></details>
+    <div class="more-wide" id="ctxWide"></div>
+  </aside>
+
+  <main class="main" id="main">
+    <p class="study-note">두 표현은 같은 사건 E01~E10, 같은 요약·출처·근거 미리보기를 씁니다. 사건 번호는 읽기 순서이며 시각·우선순위·배정이 아닙니다.</p>
+    <section class="summary" aria-labelledby="sumh">
+      <h2 id="sumh">동결점(E10) 기준 상태 — 두 표현 공통</h2>
+      <ul id="summary"></ul>
+    </section>
+    <div id="viewA" data-rep="A"></div>
+    <div id="viewB" data-rep="B" hidden></div>
+  </main>
+
+  <div class="pvcol">
+    <aside id="preview" class="preview closed" role="region" aria-label="근거 미리보기">
+      <div class="pv-empty" id="pvEmpty">
+        <p><b>근거 미리보기 자리</b></p>
+        <p>문장이나 셀 옆의 <b>근거</b>를 누르면 여기서 동결 INPUT의 사건 기술과 출처를 잠깐 읽습니다. 읽던 자리는 그대로 둡니다.</p>
+        <p>실제 원문으로 가는 것은 미리보기 안의 <b>원문 열기 ↗ 새 탭</b>으로 따로 합니다.</p>
+      </div>
+      <div class="pv-body" id="pvBody" hidden>
+        <div class="pv-head">
+          <p class="pv-kicker">근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아님)</p>
+          <h2 id="pvH" tabindex="-1"></h2>
+          <button type="button" class="pv-close" id="pvClose">닫고 읽던 곳으로<kbd>Esc</kbd></button>
+        </div>
+        <div class="pv-scroll" id="pvScroll"></div>
+      </div>
+    </aside>
+  </div>
+  <footer class="foot">reading-study v0 · 입력 기준 커밋 1ec44cc · 표본 동결점 E10 · 사람 사용성·독립 검증 미실행</footer>
+</div>
+<div class="sr" aria-live="polite" id="live"></div>
+
+<script type="application/json" id="data">
+{
+ "tagClass": {
+  "관측":"t-neutral","작성자 설명":"t-neutral","수정":"t-neutral","정정":"t-neutral","합성 내용":"t-neutral",
+  "통과·범위 한정":"t-pass",
+  "실패":"t-fail","누락":"t-fail","부분 누락":"t-fail",
+  "미실행":"t-absent","기록 미확인":"t-absent","범위 밖":"t-absent",
+  "대기":"t-wait","제안":"t-wait"
+ },
+ "legend": [
+  ["통과·범위 한정","표시된 검사 범위 안의 통과입니다. 전체 완료가 아닙니다."],
+  ["실패","기록된 검사 실패 결과입니다."],
+  ["누락","지정 위치에서 확인된 표시·이동의 빠짐입니다. 부분 누락은 일부만 있습니다."],
+  ["미실행","그 검사·관찰을 하지 않았습니다. 실패와 다릅니다."],
+  ["기록 미확인","있었는지 이 기록으로 알 수 없습니다. 없었다는 뜻이 아닙니다."],
+  ["범위 밖","그 검사가 다루지 않은 대상입니다. 실패가 아닙니다."],
+  ["대기","후속 결과가 아직 없습니다."],
+  ["제안","제안 단계입니다. 배정·완료와 다릅니다."],
+  ["관측","기록된 사실의 종류를 나타냅니다(작성자 설명·수정·정정·합성 내용도 같음)."]
+ ],
+ "context": {
+  "product": "AgentFlow Studio는 서로 다른 AI 작업과 세션의 결과를 프로그램의 목적·구성·관계에 맞춰 이해하고, 필요한 수정·판단·인계를 돕는 공간을 목표로 합니다. 이 화면은 그중 개발 기록을 읽는 부분만 다룹니다.",
+  "example": "합성 예제: 작은 도서 대여 서비스 구상. A 대여 경험(A1~A6), B 알림 구상. 이 기록에 나오는 부분은 A2 대여 신청, A3 내 대여 목록입니다. (S01 9행)",
+  "artifacts": [
+   ["의미 시안","prototype.html"],
+   ["캔버스 H0","SHA256 d0f3b7d3…7840a"],
+   ["캔버스 H1(fix1)","SHA256 869c76a4…32157"]
+  ],
+  "roles": [["가","작성자"],["나","독립 검토자"],["다","환경 검토자"],["라","통합 판단자"]],
+  "rolesNote": "가명은 역할을 묶는 이름이며, 실제 대화 하나와의 일대일 대응이나 수신·열람·수락을 뜻하지 않습니다."
+ },
+ "summary": [
+  ["확인된 표기","‘내 목록’과 ‘내 대여 목록’의 자료별 차이. 작성자 설명은 있으나 확정 정정 지시는 미확인.","E01"],
+  ["좁게 해결된 동작","H1의 목록 스크롤 저장 수정. 작성자 브라우저 기록과 독립 Node 5사례는 별도로 존재.","E04–E07"],
+  ["남은 보완","INPUT 9의 지정 위치에서 A2 소유 미결 참조와 이동 제공. H1 위치별 검사에 실패 결과가 있고, 후속 수정본의 결과는 없음.","E09–E10"],
+  ["남은 검증","독립 실제 브라우저 재실행, 읽기 공간의 효용과 사람 이해도. 상태 검사 통과로 닫지 않음.","E08"]
+ ],
+ "groups": [
+  {"id":"g1","title":"A3의 자료별 이름","er":"E01","note":"이름이 다른 자료를 나란히 두지만, 이전/이후나 승인된 변경으로 놓지 않습니다."},
+  {"id":"g2","title":"목록 복귀: 검사별 관측과 H1 수정","er":"E02–E07","note":"서로 다른 검사의 수(84·36·5·10)는 합산하거나 완료율로 바꾸지 않습니다."},
+  {"id":"g3","title":"INPUT 9: 지정 위치의 A2 미결 참조","er":"E09–E10","note":"기존 독립 5사례의 통과와 위치별 검사의 실패는 서로 다른 범위입니다. 5사례·13사례·90단언을 합산하거나 같은 측정으로 놓지 않습니다."},
+  {"id":"g4","title":"아직 실행되지 않은 검증","er":"E08","note":"미실행·기록 미확인·실패는 서로 다른 상태입니다."}
+ ],
+ "subs": {
+  "g1a":"자료별 표기와 설명 (E01)",
+  "g2a":"검사 기록 읽기 (E02·E03)",
+  "g2b":"목록 복귀 결함과 H1 수정 (E04–E07)",
+  "g3a":"지정 위치의 관측 (E09)",
+  "g3b":"검사 범위 (E09·E10)",
+  "g3c":"두 층위의 미결",
+  "g4a":"독립 브라우저와 읽기 공간 (E08)"
+ },
+ "events": {
+  "E01":{"role":"가","label":"표기 차이","obs":"의미 시안 A3는 ‘내 목록’, 캔버스 A3와 입력은 ‘내 대여 목록’이다.","claim":"가의 짧은 발화: “INPUT 원문 표기(A3 내 대여 목록,D2 대여 확정 후 알림)를 따랐습니다. 기존 prototype.html의 축약 표기와는 다릅니다.”","dec":"이 입력은 ‘산출물 표기 차이 + 작성자 설명’으로 기록한다.","open":"정정 요청 원문·시각·승인·변경 의도는 미확인. 발췌는 총괄의 직접 열람 전달이며 검토자가 원 대화를 독립 확인하지 않았다.","src":["S01","S02","S03","P01"]},
+  "E02":{"role":"가","label":"초기 검사 반환","obs":"H0 반환 묶음에 `canvas pass 84 fail 0`, `render pass 37 fail 0` 로그가 있다.","claim":"가가 제공한 실행 결과는 두 검사 묶음의 통과다.","dec":"전체 완료 판정은 이 사건에서 하지 않는다.","open":"84는 단언 수다. 모든 복귀 경로, 모든 요구, 독립 브라우저 검증 통과를 뜻하지 않는다. 로그만으로 대상 바이트·과거 실행 시각을 확정하지 않는다.","src":["S04"]},
+  "E03":{"role":"나","label":"집계와 검사 근거 정정","obs":"렌더 통과 37 중 1은 무조건 참인 안내행이다. 단언 실패가 종료 코드에 반영되지 않을 수 있는 코드를 확인했다.","claim":"37은 조건 검사 36 + 안내 1로 읽어야 한다.","dec":"집계와 실패 종료 처리를 보완 대상으로 삼는다.","open":"초기 동봉 로그가 실제 실패했다는 뜻이 아니다. 이 문제는 시안 기능결함과 별개다.","src":["S04"]},
+  "E04":{"role":"나","label":"목록 복귀 결함","obs":"독립 Node 대역 5개 중 4 통과·1 실패. 목록→상세→목록에서 합성 위치 120이 0이 됐다.","claim":"좁은 목록 복귀 경로에 상태 보존 결함이 있다.","dec":"해당 경로를 수정·재현 대상으로 한정한다.","open":"실제 브라우저 픽셀 관측은 아니다. 초기 통과 수와 합산하지 않는다.","src":["S04"]},
+  "E05":{"role":"가","label":"수정 전 브라우저 재현 반환","obs":"반환 로그에 390×664는 120→0, 390×844는 49→0, 각 7 통과·3 실패가 있다.","claim":"가가 실제 Chromium에서 복귀 결함을 재현했다고 보고했다.","dec":"두 화면 높이의 조건을 따로 보존한다.","open":"844 높이의 최대 스크롤은 49여서 120 조건을 만들지 못했다. 나의 독립 브라우저 실행으로 승격하지 않는다.","src":["S05","S06"]},
+  "E06":{"role":"가","label":"H1 수정과 재검사 반환","obs":"H0→H1은 상태 전환 전에 목록 위치를 저장하도록 바뀌었다. 로그는 jsdom 84/0, 렌더 36/0 + INFO 1, 두 높이 복귀 각 10/0이다.","claim":"가는 수정 뒤 위치 120→120, 49→49와 실패 대조 사본의 종료 코드 1을 보고했다.","dec":"H1을 좁은 재검사 대상으로 삼는다.","open":"작성자 실행 근거다. 나가 작성자의 브라우저 검사나 종료 코드를 독립 재측정했다는 뜻은 아니다.","src":["S05","S06"]},
+  "E07":{"role":"나","label":"기존 독립 5개 통과","obs":"H1의 동일 독립 5개 Node 상태/마크업 검사 통과. 목록 대역 위치 120→120.","claim":"이전 복귀 결함은 이 검사 범위에서 해소됐다.","dec":"H1의 좁은 수정은 수용한다.","open":"새 기능 검사는 추가하지 않았다. 모든 INPUT 항목이나 실제 화면·사람 사용성의 승인으로 확장하지 않는다.","src":["S06","S07"]},
+  "E08":{"role":"다·라","label":"독립 화면과 읽기 판단 미결","obs":"독립 환경의 실제 브라우저 경로는 확보하지 못했다. 기존 화면 검토는 전체/집중의 읽기 경험 차이가 작다고 기록했다.","claim":"가의 브라우저 실행과 독립 환경 재실행은 서로 다른 증거다. 읽기 공간 대안은 연구 제안이다.","dec":"기준 시안은 보존하고 최종 UI 채택은 보류한다.","open":"독립 브라우저 재검증과 집중 읽기의 실제 효용은 미완료다. 후자의 제안·배정·완료는 각각 다른 상태다.","src":["S07","S08","S09"]},
+  "E09":{"role":"나","label":"기존 INPUT 9의 위치별 누락 재검토","obs":"H1의 접힌 A 요약과 그 끝점 목록 A2 행에 A2 소유 미결 참조가 없다. B 상세 끝점 A2 행에는 변경·미결 참조가 없다. B 미결 구역에는 내용·소유 A2는 있으나 직접 A2 이동이 없다.","claim":"기존 독립 5개는 그 위치별 노출·이동을 검사하지 않았다.","dec":"기존 합격 기준 9의 보완 범위를 C/L1/L2/B 위치로 좁힌다.","open":"새 요구가 생긴 것이 아니다. B의 미결 내용 자체가 없다고 확대하지 않는다. 기존 5개 통과 기록도 취소하지 않는다.","src":["S01","S03","P02"]},
+  "E10":{"role":"나·라","label":"위치별 상태 검사와 수정 대기","obs":"H1에 새 위치별 검사를 실행한 반환 결과는 사례 13개 중 3 통과·10 실패, 단언 90개 중 72 통과·18 실패다. S2/S3의 C/L1/L2/B 관련 실패가 기록됐다.","claim":"기존 5개 통과와 다른 범위를 검사하자 INPUT 9의 누락이 확인됐다.","dec":"기존 통과와 새 실패를 범위별로 보존하고 후속 수정본을 기다린다.","open":"Node 이벤트·요소 대역/생성 마크업 검사다. 실제 DOM·브라우저가 아니다. 13사례와 90단언을 합산하지 않는다. 후속 수정본의 완료·재검사 결과는 아직 없다.","src":["P02","P03"]},
+  "NOW":{"role":"—","label":"이 표본의 현재 상태(동결점 기준)","obs":"남은 보완: INPUT 9의 지정 위치에서 A2 소유 미결 참조와 이동을 제공하는 일. 남은 검증: 독립 실제 브라우저 재실행, 읽기 공간의 효용과 사람 이해도. 상태 통과로 닫지 않는다.","claim":"도서 대여 예제 내부의 ‘A2 실패 알림 정책 미정’은 합성 내용이다. 실제 개발 기록의 미결은 그 합성 미결을 요구된 화면 위치에서 제대로 보여 주고 이동시키는지에 관한 문제다.","dec":"두 층위의 미결을 하나로 합치지 않는다.","open":"이 절은 INPUT 작성자의 동결점 요약이며 개별 사건 행이 아니다.","src":["IN"]}
+ },
+ "sources": {
+  "IN":{"title":"동결 INPUT — 실제 AI 개발·검증 기록 1건","loc":"‘이 표본의 현재 상태’ 절과 사건 표","kind":"고정 파일 · 커밋 1ec44cc","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/1ec44ccecc10f11e41f60f32ad516497706eed15/docs/cycles/2026-10-15-real-record-02/INPUT.md"},
+  "S01":{"title":"도서 대여 INPUT — A3 표기 및 합격 기준 9","loc":"9·38행","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/INPUT.md"},
+  "S02":{"title":"의미 시안 prototype.html","loc":"121행","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/prototype.html"},
+  "S03":{"title":"캔버스 H1 canvas-study.html","loc":"196·339~348·468~474행","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html"},
+  "S04":{"title":"초도 독립 코드 검토","loc":"‘독립 최소 실행’, ‘작성자 자기검사와 근거 품질’","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI02_CODE_REVIEW_INITIAL.md"},
+  "S05":{"title":"작성자 fix1 근거 패키지","loc":"소속 출력과 검사 설명","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/author-fixed/REPORT.md"},
+  "S06":{"title":"H1 독립 재검사","loc":"‘결과’, ‘실제 관측’, ‘작성자 검사 변경 검토’","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/independent/REPORT.md"},
+  "S07":{"title":"UI-02 수용 범위","loc":"문서 전체","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI02_RESULT.md"},
+  "S08":{"title":"브라우저 검증 환경 상태","loc":"문서 전체","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/ENVIRONMENT.md"},
+  "S09":{"title":"집중 읽기 연구와 조건부 선택","loc":"문서 전체","kind":"고정 파일 · 커밋 666437a","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/UI03_RESEARCH.md"},
+  "P01":{"title":"E01 작성자 발화의 전달 발췌","loc":"위 ‘주장’ 칸의 짧은 인용","kind":"전달 발췌","url":null,"why":"총괄이 원 작성자 발화를 직접 열람해 전달한 발췌입니다. 검토자는 원 대화를 독립 열람하지 않았고, 대화 ID·원문 URL·시각은 입력에 없습니다. 원문처럼 열 수 있는 링크는 제공하지 않습니다."},
+  "P02":{"title":"‘INPUT 합격 기준 9 — 독립 검증 계약 초안’ 작업 문서","loc":"위치별 공백과 당시 A9 실행 미실행 기록","kind":"작업 문서 · 공개 고정 링크 없음","url":null,"why":"검토자가 직접 읽고 S03의 위치와 대조한 작업 문서입니다. 고정 커밋에 수록됐다고 주장하지 않으며 아직 공개 고정 링크가 없습니다."},
+  "P03":{"title":"위치별 검사 반환 results.fix1.json · check-regression.cjs","loc":"입력 H1 해시 · 검사 SHA256 8b2e536d…3f2b","kind":"반환 결과 · 공개 고정 링크 없음","url":null,"why":"검토자가 반환 결과를 읽었고 새로 실행하지 않았습니다. 실제 브라우저는 NOT_RUN입니다. 390 구조 목록의 직접 미결 경로 부재는 선택적 발견이며 필수 실패 집계에 들어 있지 않습니다. 최초 JSON의 공개 고정 링크는 없습니다."},
+  "R1":{"title":"v1 검사 재실행 결과와 보존 설명","loc":"‘Version and provenance’, ‘Results’의 Fix1 / frozen v1 행","kind":"고정 파일 · 커밋 3847a9b · 재실행 결과","url":"https://github.com/tlsee0813-cmd/agentflow-studio/blob/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/acceptance9/REPORT.md","note":"최초 E10 관측 뒤 같은 해시의 v1 검사 코드로 같은 수치를 다시 실행한 새 실행 시각의 결과입니다. 최초 JSON을 복구한 것이 아닙니다. 이 문서에는 동결점 이후 fix2/fix3 결과도 함께 있으며, 이 화면의 상태에는 반영하지 않았습니다."}
+ },
+ "facts": [
+  {"id":"f01","g":"g1","s":"g1a","ev":["E01"],"src":["S02"],"tag":"관측","keys":["‘내 목록’","의미 시안"],
+   "a":"같은 A3를 의미 시안(prototype.html)은 ‘내 목록’으로 적었다.",
+   "b":{"subj":"의미 시안 · prototype.html","target":"의미 시안","obs":"A3 표기 ‘내 목록’","lim":"산출물의 표기"}},
+  {"id":"f02","g":"g1","s":"g1a","ev":["E01"],"src":["S03"],"tag":"관측","keys":["‘내 대여 목록’","H1"],
+   "a":"캔버스 H1(canvas-study.html)의 A3는 ‘내 대여 목록’이다.",
+   "b":{"subj":"캔버스 · canvas-study.html","target":"H1(fix1)","obs":"A3 표기 ‘내 대여 목록’","lim":"산출물의 표기"}},
+  {"id":"f03","g":"g1","s":"g1a","ev":["E01"],"src":["S01"],"tag":"관측","keys":["‘내 대여 목록’","INPUT"],
+   "a":"도서 대여 INPUT의 A3도 ‘내 대여 목록’이다.",
+   "b":{"subj":"도서 대여 INPUT","target":"합성 예제 입력","obs":"A3 표기 ‘내 대여 목록’","lim":"입력 원문의 표기"}},
+  {"id":"f04","g":"g1","s":"g1a","ev":["E01"],"src":["P01"],"tag":"작성자 설명","keys":["축약 표기","전달한 짧은 발췌","독립 확인"],
+   "a":"작성자 가는 INPUT 원문 표기를 따랐고 기존 prototype.html의 축약 표기와 다르다고 설명했다. 이 설명은 총괄이 전달한 짧은 발췌이며 원 대화의 독립 확인은 아니다.",
+   "b":{"subj":"작성자 가의 설명","target":"A3 표기","obs":"INPUT 원문 표기를 따랐고 기존 prototype.html의 축약 표기와 다르다고 설명","lim":"총괄이 전달한 짧은 발췌. 원 대화의 독립 확인 아님"}},
+  {"id":"f05","g":"g1","s":"g1a","ev":["E01"],"src":["P01","S01","S02","S03"],"tag":"기록 미확인","keys":["정정 요청 원문·시각·승인·변경 의도","‘산출물 표기 차이 + 작성자 설명’"],
+   "a":"정정 요청 원문·시각·승인·변경 의도는 이 기록에서 확인되지 않으며, 기록은 이 차이를 ‘산출물 표기 차이 + 작성자 설명’으로 둔다.",
+   "b":{"subj":"정정 요청 원문·시각·승인·변경 의도","target":"A3 표기","obs":"이 기록에서 확인되지 않음","lim":"기록된 판단: ‘산출물 표기 차이 + 작성자 설명’"}},
+
+  {"id":"f06","g":"g2","s":"g2a","ev":["E02"],"src":["S04"],"tag":"통과·범위 한정","keys":["`canvas pass 84 fail 0`","단언 수","대상 바이트","전체 완료 판정"],
+   "a":"H0 반환 묶음의 작성자 로그 `canvas pass 84 fail 0`은 84 단언의 통과다. 84는 단언 수일 뿐 모든 복귀 경로·모든 요구·독립 브라우저 검증의 통과를 뜻하지 않고, 로그만으로 대상 바이트와 실행 시각을 확정하지 않으며, 이 사건에서 전체 완료 판정은 하지 않는다.",
+   "b":{"subj":"작성자 상태 검사 로그 (가)","target":"H0","obs":"`canvas pass 84 fail 0` — 84 단언 통과","lim":"단언 수. 모든 복귀 경로·모든 요구·독립 브라우저 검증의 통과 아님. 로그만으로 대상 바이트·실행 시각 미확정. 기록된 판단: 이 사건에서 전체 완료 판정 안 함"}},
+  {"id":"f07","g":"g2","s":"g2a","ev":["E02","E03"],"src":["S04"],"tag":"정정","keys":["`render pass 37 fail 0`","무조건 참","조건 검사 36 + 안내 1"],
+   "a":"같은 묶음의 렌더 로그 `render pass 37 fail 0`에서 독립 검토자 나는 1행이 무조건 참인 안내행임을 확인했고, 37은 조건 검사 36 + 안내 1로 읽어야 한다고 정정했다.",
+   "b":{"subj":"작성자 렌더 검사 로그 (가)","target":"H0","obs":"`render pass 37 fail 0`","lim":"독립 검토자 나: 1행은 무조건 참인 안내행 → 조건 검사 36 + 안내 1"}},
+  {"id":"f08","g":"g2","s":"g2a","ev":["E03"],"src":["S04"],"tag":"정정","keys":["종료 코드","보완 대상","초기 동봉 로그","기능 결함과 별개"],
+   "a":"나는 단언 실패가 종료 코드에 반영되지 않을 수 있는 검사 코드도 확인해 집계와 실패 종료 처리를 보완 대상으로 삼았다. 이는 초기 동봉 로그가 실제로 실패했다는 뜻이 아니며 시안 기능 결함과 별개다.",
+   "b":{"subj":"검사 코드의 실패 종료 처리 (나의 검토)","target":"H0 반환 검사 코드","obs":"단언 실패가 종료 코드에 반영되지 않을 수 있음","lim":"기록된 판단: 집계와 실패 종료 처리를 보완 대상으로. 초기 동봉 로그의 실제 실패 아님. 시안 기능 결함과 별개"}},
+  {"id":"f09","g":"g2","s":"g2b","ev":["E04"],"src":["S04"],"tag":"실패","keys":["4 통과·1 실패","120","수정·재현 대상","실제 브라우저 픽셀 관측"],
+   "a":"독립 검토자 나의 Node 대역 5사례는 H0에서 4 통과·1 실패였다. 좁은 목록→상세→목록 경로에서 합성 위치 120이 0이 됐고 이 경로를 수정·재현 대상으로 한정했으며, 실제 브라우저 픽셀 관측은 아니다.",
+   "b":{"subj":"독립 Node 대역 5사례 (나)","target":"H0","obs":"4 통과·1 실패 — 목록→상세→목록에서 합성 위치 120→0","lim":"실제 브라우저 픽셀 관측 아님. 기록된 판단: 이 경로를 수정·재현 대상으로 한정"}},
+  {"id":"f10","g":"g2","s":"g2b","ev":["E05"],"src":["S05","S06"],"tag":"실패","keys":["390×664","390×844","7 통과·3 실패","최대 스크롤","독립 브라우저 실행"],
+   "a":"작성자 가는 수정 전 Chromium에서 390×664는 120→0, 390×844는 49→0으로 각 7 통과·3 실패를 재현했다고 보고했다. 844 높이는 최대 스크롤이 49여서 120 조건을 만들 수 없었고, 이 보고는 나의 독립 브라우저 실행이 아니다.",
+   "b":{"subj":"작성자 Chromium 복귀 재현 (가의 보고)","target":"H0","obs":"390×664: 120→0 · 390×844: 49→0 · 각 7 통과·3 실패","lim":"844 높이는 최대 스크롤 49 — 120 조건 불가. 나의 독립 브라우저 실행 아님"}},
+  {"id":"f11","g":"g2","s":"g2b","ev":["E06"],"src":["S05","S06"],"tag":"수정","keys":["상태 전환 전에 목록 위치를 저장","좁은 재검사 대상"],
+   "a":"H1(fix1)은 상태 전환 전에 목록 위치를 저장하도록 바뀌었고, H1이 좁은 재검사 대상이 됐다.",
+   "b":{"subj":"H0에서 H1로의 변경 내용 (가)","target":"H1(fix1)","obs":"상태 전환 전에 목록 위치를 저장","lim":"기록된 판단: H1을 좁은 재검사 대상으로"}},
+  {"id":"f12","g":"g2","s":"g2b","ev":["E06"],"src":["S05","S06"],"tag":"통과·범위 한정","keys":["jsdom 84/0","36/0 + INFO 1","10/0","종료 코드 1","독립 재측정"],
+   "a":"가의 H1 재검사 로그는 jsdom 84/0, 렌더 36/0 + INFO 1, 두 높이 복귀 각 10/0(120→120, 49→49)과 실패 대조 사본의 종료 코드 1을 보고한다. 작성자 실행 근거이며, 나가 이 브라우저 검사나 종료 코드를 독립 재측정한 것은 아니다.",
+   "b":{"subj":"작성자 재검사 로그 (가)","target":"H1","obs":"jsdom 84/0 · 렌더 36/0 + INFO 1 · 두 높이 복귀 각 10/0 (120→120, 49→49) · 실패 대조 사본 종료 코드 1","lim":"작성자 실행 근거. 나의 독립 재측정 아님"}},
+  {"id":"f13","g":"g2","s":"g2b","ev":["E07"],"src":["S06","S07"],"tag":"통과·범위 한정","keys":["120→120","이 검사 범위","좁은 수정","새 기능 검사","사람 사용성"],
+   "a":"나는 H1에서 같은 독립 5사례를 다시 실행해 모두 통과(목록 대역 120→120)를 확인했고, 이 검사 범위에서 복귀 결함이 해소돼 좁은 수정이 수용됐다. 새 기능 검사는 추가되지 않았으며 모든 INPUT 항목이나 실제 화면·사람 사용성의 승인으로 넓히지 않는다.",
+   "b":{"subj":"독립 Node 대역 5사례 (나)","target":"H1","obs":"5사례 통과 · 목록 대역 120→120","lim":"기록된 판단: 이 검사 범위에서 해소, 좁은 수정 수용. 새 기능 검사 추가 없음. 모든 INPUT 항목·실제 화면·사람 사용성의 승인 아님"}},
+
+  {"id":"f14","g":"g3","s":"g3a","ev":["E09"],"src":["S01","S03","P02"],"tag":"누락","keys":["위치 C","A2 소유 미결 참조","새 요구 아님"],
+   "a":"나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+   "b":{"subj":"위치 C · 접힌 A 요약","target":"H1","obs":"A2 소유 미결 참조 없음","lim":"기존 합격 기준 9와의 대조(새 요구 아님)"}},
+  {"id":"f15","g":"g3","s":"g3a","ev":["E09"],"src":["S01","S03","P02"],"tag":"누락","keys":["위치 L1","A2 소유 미결 참조"],
+   "a":"그 끝점 목록의 A2 행(위치 L1)에도 A2 소유 미결 참조가 없다.",
+   "b":{"subj":"위치 L1 · 접힌 A 끝점 목록의 A2 행","target":"H1","obs":"A2 소유 미결 참조 없음","lim":"기존 합격 기준 9와의 대조"}},
+  {"id":"f16","g":"g3","s":"g3a","ev":["E09"],"src":["S01","S03","P02"],"tag":"누락","keys":["위치 L2","변경·미결 참조"],
+   "a":"B 상세의 끝점 A2 행(위치 L2)에는 변경·미결 참조가 없다.",
+   "b":{"subj":"위치 L2 · B 상세 끝점의 A2 행","target":"H1","obs":"변경·미결 참조 없음","lim":"기존 합격 기준 9와의 대조"}},
+  {"id":"f17","g":"g3","s":"g3a","ev":["E09"],"src":["S01","S03","P02","IN"],"tag":"부분 누락","keys":["위치 B","소유 A2","직접 A2","총괄의 조작 보완","미결 내용 자체"],
+   "a":"B의 미결 구역(위치 B)에는 미결 내용과 소유 A2가 있으나 직접 A2로 가는 이동이 없다. 이 직접 이동은 총괄의 조작 보완이어서 INPUT 9의 표시 누락과 구분되며, B의 미결 내용 자체가 없다는 뜻이 아니다.",
+   "b":{"subj":"위치 B · B 미결 구역","target":"H1","obs":"미결 내용·소유 A2 있음 · 직접 A2 이동 없음","lim":"직접 이동은 총괄의 조작 보완 — INPUT 9 표시 누락과 구분. B의 미결 내용 자체가 없다는 뜻 아님"}},
+  {"id":"f18","g":"g3","s":"g3b","ev":["E09","E07"],"src":["S06","P02"],"tag":"범위 밖","keys":["5사례","노출·이동","함께 성립"],
+   "a":"H1의 기존 독립 5사례는 위치 C/L1/L2/B의 노출·이동을 검사하지 않았으므로, 5사례 통과 기록은 취소되지 않고 위치별 누락과 함께 성립한다.",
+   "b":{"subj":"기존 독립 5사례 (나)","target":"H1","obs":"위치 C/L1/L2/B의 노출·이동: 이 검사의 범위 아님","lim":"5사례 통과 기록 유지 — 위치별 누락과 함께 성립"}},
+  {"id":"f19","g":"g3","s":"g3b","ev":["E10"],"src":["P03","P02","R1"],"tag":"실패","keys":["3 통과·10 실패","72 통과·18 실패","장면 S2/S3","실제 DOM·브라우저","합산하지 않"],
+   "a":"H1에 새 위치별 상태 검사를 실행한 반환 결과는 사례 13개 중 3 통과·10 실패, 단언 90개 중 72 통과·18 실패이며, 장면 S2/S3의 C/L1/L2/B 관련 실패가 기록됐다. Node 이벤트·요소 대역과 생성 마크업 검사로 실제 DOM·브라우저가 아니며, 13사례와 90단언은 합산하지 않는다.",
+   "b":{"subj":"위치별 상태 검사 (나·라)","target":"H1","obs":"사례 13개 중 3 통과·10 실패 · 단언 90개 중 72 통과·18 실패 · 장면 S2/S3의 C/L1/L2/B 관련 실패","lim":"Node 이벤트·요소 대역/생성 마크업 검사. 실제 DOM·브라우저 아님. 13사례와 90단언은 합산하지 않음"}},
+  {"id":"f20","g":"g3","s":"g3b","ev":["E10"],"src":["P03"],"tag":"대기","keys":["완료·재검사 결과","범위별로 보존","후속 수정본"],
+   "a":"이 동결 시점에는 후속 수정본의 완료·재검사 결과가 없어, 기존 통과와 새 실패를 범위별로 보존한 채 후속 수정본을 기다린다.",
+   "b":{"subj":"후속 수정본","target":"H1 이후","obs":"동결 시점 기준 완료·재검사 결과 없음","lim":"기록된 판단: 기존 통과와 새 실패를 범위별로 보존, 후속 수정본 대기"}},
+  {"id":"f21","g":"g3","s":"g3c","ev":["NOW"],"src":["IN","S01"],"srcNote":{"S01":"합성 예제의 정책 미결은 이 파일의 합성 사건 E04 행(16행)에 있습니다. 이 위치는 시안 작성자가 고정 파일에서 확인한 것이며 INPUT에는 적혀 있지 않습니다. 합성 사건 E04는 실제 기록의 E04와 다른 사건입니다."},"tag":"합성 내용","keys":["‘A2 실패 알림 정책 미정’","합성 내용"],
+   "a":"도서 대여 예제 안의 ‘A2 실패 알림 정책 미정’은 합성 내용의 미결이다.",
+   "b":{"subj":"합성 예제 내용의 미결","target":"합성 A2 대여 신청","obs":"‘A2 실패 알림 정책 미정’","lim":"합성 내용의 미결. 이 기록의 화면 결함과 다른 층위"}},
+  {"id":"f22","g":"g3","s":"g3c","ev":["NOW","E09"],"src":["IN","S01","S03"],"tag":"대기","keys":["지정 위치","보완 대기","소유","합치지 않"],
+   "a":"실제 개발 기록의 미결은 그 합성 미결(소유 A2)을 지정 위치에서 보여 주고 이동시키는 H1 화면의 일로 보완 대기 상태이며, 두 미결은 소유와 범위가 달라 하나로 합치지 않는다.",
+   "b":{"subj":"실제 개발 기록의 미결","target":"H1 화면","obs":"지정 위치에서 A2 소유 미결 참조와 이동 제공 — 보완 대기","lim":"합성 정책 미결과 소유·범위가 다름 — 하나로 합치지 않음"}},
+
+  {"id":"f23","g":"g4","s":"g4a","ev":["E08"],"src":["S08","S07"],"tag":"미실행","keys":["실제 브라우저 경로","미완료","서로 다른 증거"],
+   "a":"독립 환경의 실제 브라우저 경로는 확보되지 않아 독립 브라우저 재검증은 미완료이고, 가의 브라우저 실행과 독립 환경 재실행은 서로 다른 증거다.",
+   "b":{"subj":"독립 환경의 실제 브라우저 재실행 (다·라)","target":"독립 환경","obs":"실제 브라우저 경로 미확보 — 재검증 미완료","lim":"가의 브라우저 실행과 서로 다른 증거"}},
+  {"id":"f24","g":"g4","s":"g4a","ev":["E08"],"src":["S09","S07"],"tag":"제안","keys":["차이가 작다","연구 제안","제안·배정·완료","최종 UI 채택"],
+   "a":"기존 화면 검토는 전체/집중의 읽기 경험 차이가 작다고 기록했고, 읽기 공간 대안은 연구 제안이다. 집중 읽기의 제안·배정·완료는 각각 다른 상태이며, 기준 시안은 보존하고 최종 UI 채택은 보류됐다.",
+   "b":{"subj":"읽기 공간 검토 (다·라)","target":"기준 시안","obs":"전체/집중의 읽기 경험 차이가 작다고 기록 · 읽기 공간 대안은 연구 제안","lim":"집중 읽기의 제안·배정·완료는 각각 다른 상태. 기록된 판단: 기준 시안 보존, 최종 UI 채택 보류"}},
+  {"id":"f25","g":"g4","s":"g4a","ev":["NOW"],"src":["IN"],"tag":"미실행","keys":["사람 이해도","남은 검증","통과로 닫지 않"],
+   "a":"읽기 공간의 효용과 사람 이해도는 남은 검증이며, 상태 검사 통과로 닫지 않는다.",
+   "b":{"subj":"읽기 공간의 효용 · 사람 이해도","target":"—","obs":"남은 검증 — 실행 기록 없음","lim":"상태 검사 통과로 닫지 않음"}}
+ ]
+}
+</script>
+<script>
+(function(){
+"use strict";
+var D = JSON.parse(document.getElementById('data').textContent);
+var FX = {}; D.facts.forEach(function(f){ FX[f.id] = f; });
+var GT = {}; D.groups.forEach(function(g){ GT[g.id] = g; });
+var state = { rep:'A', sel:null, open:null };
+var narrowMQ = window.matchMedia('(max-width: 759px)');
+var $ = function(id){ return document.getElementById(id); };
+var pv = $('preview'), pvBody = $('pvBody'), pvEmpty = $('pvEmpty'), pvH = $('pvH'), pvScroll = $('pvScroll'), live = $('live');
+
+function el(tag, cls, text){ var e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
+function rich(parent, s){ String(s).split('`').forEach(function(part, i){ if(i % 2){ parent.appendChild(el('code', null, part)); } else if(part){ parent.appendChild(document.createTextNode(part)); } }); return parent; }
+function tagEl(t){ return el('span', 'tag ' + (D.tagClass[t] || 't-neutral'), t); }
+function evLabel(f){ return f.ev.map(function(e){ return e === 'NOW' ? 'INPUT 요약' : e; }).join('·'); }
+function evBtn(f, rep){
+  var b = el('button', 'evbtn', '근거 ' + evLabel(f));
+  b.type = 'button'; b.id = (rep === 'A' ? 'ab-' : 'bb-') + f.id; b.dataset.fact = f.id;
+  b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-controls', 'preview');
+  b.setAttribute('aria-label', evLabel(f) + ' 근거 미리보기, 이 화면 안에서 열기');
+  return b;
+}
+function groupHead(g){
+  var h = el('h2'); h.appendChild(document.createTextNode(g.title + ' ')); h.appendChild(el('span', 'er', g.er));
+  return h;
+}
+
+/* ---------- shared context + summary ---------- */
+function buildContext(){
+  var c = D.context;
+  function block(){
+    var w = el('div');
+    var s1 = el('section'); s1.appendChild(el('h2', null, '제품 맥락')); s1.appendChild(el('p', null, c.product)); w.appendChild(s1);
+    var s2 = el('section'); s2.appendChild(el('h2', null, '합성 예제와 산출물'));
+    s2.appendChild(el('p', null, c.example));
+    var dl = el('dl'); c.artifacts.forEach(function(a){ dl.appendChild(el('dt', null, a[0])); dl.appendChild(el('dd', null, a[1])); }); s2.appendChild(dl); w.appendChild(s2);
+    var s3 = el('section'); s3.appendChild(el('h2', null, '기록자(가명)'));
+    s3.appendChild(el('p', null, c.roles.map(function(r){ return r[0] + ' ' + r[1]; }).join(' · ')));
+    s3.appendChild(el('p', null, c.rolesNote)); w.appendChild(s3);
+    var s4 = el('section'); s4.appendChild(el('h2', null, '상태 표기'));
+    var ul = el('ul', 'legend'); D.legend.forEach(function(l){ var li = el('li'); li.appendChild(tagEl(l[0])); li.appendChild(document.createTextNode(l[1])); ul.appendChild(li); });
+    s4.appendChild(ul); w.appendChild(s4);
+    return w;
+  }
+  $('ctxWide').appendChild(block());
+  $('ctxNarrow').appendChild(block());
+  var ul = $('summary');
+  D.summary.forEach(function(s){ var li = el('li'); li.appendChild(el('b', null, s[0])); var p = el('span'); p.appendChild(document.createTextNode(s[1] + ' ')); p.appendChild(el('span', 'ev', s[2])); li.appendChild(p); ul.appendChild(li); });
+}
+
+/* ---------- A: judgement prose with per-sentence evidence ---------- */
+function buildA(){
+  var v = $('viewA');
+  var rl = el('div', 'repline'); rl.appendChild(el('h2', null, '표현 A · 판단 본문')); rl.appendChild(el('p', null, '문장마다 근거를 제자리에서 미리 봅니다.')); v.appendChild(rl);
+  D.groups.forEach(function(g){
+    var sec = el('section', 'grp'); sec.id = 'A-' + g.id; sec.appendChild(groupHead(g)); sec.appendChild(el('p', 'gnote', g.note));
+    var subs = []; D.facts.forEach(function(f){ if(f.g === g.id && subs.indexOf(f.s) < 0) subs.push(f.s); });
+    subs.forEach(function(sid){
+      sec.appendChild(el('h3', 'sub', D.subs[sid]));
+      var p = el('p', 'prose');
+      D.facts.filter(function(f){ return f.s === sid; }).forEach(function(f, i){
+        var u = el('span', 'unit'); u.id = 'a-' + f.id; u.dataset.fact = f.id;
+        rich(u, f.a);
+        var m = el('span', 'marks'); m.appendChild(tagEl(f.tag)); m.appendChild(evBtn(f, 'A')); u.appendChild(m);
+        if(i) p.appendChild(document.createTextNode(' '));
+        p.appendChild(u);
+      });
+      sec.appendChild(p);
+    });
+    v.appendChild(sec);
+  });
+}
+
+/* ---------- B: neutral contrast with subject = source / location / check ---------- */
+function buildB(){
+  var v = $('viewB');
+  var rl = el('div', 'repline'); rl.appendChild(el('h2', null, '표현 B · 자료·검사 범위 대조')); rl.appendChild(el('p', null, '행마다 자료·위치·검사를 주어로 두고, 셀의 근거를 제자리에서 미리 봅니다. 행 순서는 시간·승패가 아닙니다.')); v.appendChild(rl);
+  D.groups.forEach(function(g){
+    var sec = el('section', 'grp'); sec.id = 'B-' + g.id; sec.appendChild(groupHead(g)); sec.appendChild(el('p', 'gnote', g.note));
+    var t = el('table', 'ct'); t.appendChild(el('caption', 'sr', g.title + ' — 자료·검사 범위 대조'));
+    var cg = el('colgroup'); ['c1','c2','c3','c4'].forEach(function(c){ cg.appendChild(el('col', c)); }); t.appendChild(cg);
+    var th = el('thead'), tr = el('tr'); ['자료·위치·검사','대상','관측','범위·한계·기록된 판단'].forEach(function(h){ var c = el('th', null, h); c.scope = 'col'; tr.appendChild(c); }); th.appendChild(tr); t.appendChild(th);
+    var subs = []; D.facts.forEach(function(f){ if(f.g === g.id && subs.indexOf(f.s) < 0) subs.push(f.s); });
+    subs.forEach(function(sid){
+      var tb = el('tbody');
+      var sr = el('tr', 'subrow'); var sh = el('th', null, D.subs[sid]); sh.colSpan = 4; sh.scope = 'colgroup'; sr.appendChild(sh); tb.appendChild(sr);
+      D.facts.filter(function(f){ return f.s === sid; }).forEach(function(f){
+        var r = el('tr'); r.id = 'b-' + f.id; r.dataset.fact = f.id;
+        var c1 = el('th'); c1.scope = 'row'; rich(c1, f.b.subj); r.appendChild(c1);
+        var c2 = el('td'); c2.dataset.label = '대상'; rich(c2, f.b.target); r.appendChild(c2);
+        var c3 = el('td'); c3.dataset.label = '관측'; rich(c3, f.b.obs);
+        var cf = el('div', 'cellfoot'); cf.appendChild(tagEl(f.tag)); cf.appendChild(evBtn(f, 'B')); c3.appendChild(cf); r.appendChild(c3);
+        var c4 = el('td', 'lim'); c4.dataset.label = '범위·한계·기록된 판단'; rich(c4, f.b.lim); r.appendChild(c4);
+        tb.appendChild(r);
+      });
+      t.appendChild(tb);
+    });
+    sec.appendChild(t);
+    v.appendChild(sec);
+  });
+}
+
+/* ---------- helpers for positions ---------- */
+function unitOf(rep, id){ return $((rep === 'A' ? 'a-' : 'b-') + id); }
+function btnOf(rep, id){ return $((rep === 'A' ? 'ab-' : 'bb-') + id); }
+function hdrBottom(){ return document.querySelector('.hdr').getBoundingClientRect().bottom; }
+function viewBottom(){ if(state.open && narrowMQ.matches){ return pv.getBoundingClientRect().top; } return window.innerHeight; }
+function topmostVisible(rep){
+  var hb = hdrBottom(), list = document.querySelectorAll('#view' + rep + ' [data-fact].unit, #view' + rep + ' tr[data-fact]');
+  for(var i = 0; i < list.length; i++){ var r = list[i].getBoundingClientRect(); if(r.bottom > hb + 4 && r.top < viewBottom()) return list[i].dataset.fact; }
+  return null;
+}
+function isVisible(node){ var r = node.getBoundingClientRect(); return r.bottom > hdrBottom() && r.top < viewBottom(); }
+function applySel(){
+  document.querySelectorAll('.sel').forEach(function(n){ n.classList.remove('sel'); });
+  if(!state.sel) return;
+  ['A','B'].forEach(function(r){ var u = unitOf(r, state.sel); if(u) u.classList.add('sel'); });
+}
+function setExpanded(){
+  document.querySelectorAll('.evbtn[aria-expanded="true"]').forEach(function(b){ b.setAttribute('aria-expanded', 'false'); });
+  if(state.open){ var b = btnOf(state.rep, state.open.fact); if(b) b.setAttribute('aria-expanded', 'true'); }
+}
+function say(msg){ live.textContent = ''; setTimeout(function(){ live.textContent = msg; }, 30); }
+
+/* ---------- preview ---------- */
+function originDesc(f){
+  var g = GT[f.g], subFacts = D.facts.filter(function(x){ return x.s === f.s; }), n = subFacts.indexOf(f) + 1;
+  if(state.rep === 'A') return { where: '표현 A · ' + g.title + ' · ' + D.subs[f.s] + ' · ' + n + '번째 문장 단위', text: f.a };
+  return { where: '표현 B · ' + g.title + ' 표 · ‘' + f.b.subj.replace(/`/g, '') + '’ 행의 관측 셀', text: f.b.subj + ' · 대상 ' + f.b.target + ' — ' + f.b.obs };
+}
+function renderOrigin(){
+  var f = FX[state.open.fact], o = originDesc(f), box = $('pvOrigin');
+  box.textContent = '';
+  box.appendChild(el('h3', null, '출발 — 읽던 자리'));
+  box.appendChild(el('p', 'where', o.where));
+  var q = el('blockquote'); rich(q, o.text); box.appendChild(q);
+  var st = el('p', 'pv-note'); st.appendChild(document.createTextNode('상태 표기 ')); st.appendChild(tagEl(f.tag)); box.appendChild(st);
+}
+function renderPreview(){
+  var f = FX[state.open.fact];
+  pvH.textContent = f.ev.map(function(e){ var ev = D.events[e]; return (e === 'NOW' ? 'INPUT 요약' : e) + ' · ' + ev.label; }).join(' / ');
+  pvScroll.textContent = '';
+  var o = el('section', 'pv-origin'); o.id = 'pvOrigin'; pvScroll.appendChild(o); renderOrigin();
+  var es = el('section'); es.appendChild(el('h3', null, '동결 INPUT의 사건 기술'));
+  f.ev.forEach(function(e){
+    var ev = D.events[e], box = el('div', 'evdl');
+    box.appendChild(el('p', 'eh', (e === 'NOW' ? 'INPUT 요약' : e) + ' · 기록자 ' + ev.role + ' · ' + ev.label));
+    var dl = el('dl');
+    [['관측', ev.obs], ['주장', ev.claim], ['결정', ev.dec], ['미결·경계', ev.open]].forEach(function(p){ dl.appendChild(el('dt', null, p[0])); rich(dl.appendChild(el('dd')), p[1]); });
+    box.appendChild(dl); es.appendChild(box);
+  });
+  es.appendChild(el('p', 'pv-note', '위 내용은 동결 INPUT이 요약한 기술입니다. 출처 원문 자체가 아니며, 미리보기를 연 것으로 내용이 확인·승인되지 않습니다.'));
+  pvScroll.appendChild(es);
+  var ss = el('section'); ss.appendChild(el('h3', null, '출처 — 원문 이동은 따로'));
+  var ul = el('ul', 'srcs');
+  f.src.forEach(function(sid){
+    var s = D.sources[sid], li = el('li', 'src'); li.dataset.src = sid;
+    li.appendChild(el('p', 'sid', sid + ' · ' + s.kind));
+    li.appendChild(el('p', 'stitle', s.title));
+    li.appendChild(el('p', 'sloc', '위치: ' + s.loc));
+    if(s.note) li.appendChild(el('p', 'snote', s.note));
+    if(f.srcNote && f.srcNote[sid]) li.appendChild(el('p', 'snote', f.srcNote[sid]));
+    if(s.url){
+      var a = el('a', 'srclink'); a.href = s.url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.setAttribute('aria-label', sid + ' 원문을 GitHub에서 새 탭으로 열기');
+      a.appendChild(document.createTextNode('원문 열기 ↗')); a.appendChild(el('span', 'nt', 'GitHub · 새 탭'));
+      li.appendChild(a);
+    } else {
+      var n = el('div', 'nolink'); n.appendChild(el('b', null, '원문 링크 미제공 · ')); n.appendChild(document.createTextNode(s.why)); li.appendChild(n);
+    }
+    ul.appendChild(li);
+  });
+  ss.appendChild(ul); pvScroll.appendChild(ss);
+  pvScroll.scrollTop = 0;
+}
+function arrangeSheet(){
+  if(!narrowMQ.matches || !state.open){ document.body.style.paddingBottom = ''; return; }
+  var h = pv.getBoundingClientRect().height;
+  document.body.style.paddingBottom = Math.ceil(h) + 'px';
+  var b = btnOf(state.rep, state.open.fact);
+  if(!b) return;
+  var u = state.rep === 'A' ? unitOf('A', state.open.fact) : b.closest('td');
+  var hb = hdrBottom(), top = window.innerHeight - h, ur = u.getBoundingClientRect(), br = b.getBoundingClientRect();
+  var avail = top - hb - 16;
+  if(ur.top >= hb + 6 && ur.bottom <= top - 6) return;
+  if(ur.height <= avail){ window.scrollBy(0, ur.top - (hb + 10)); }
+  else { window.scrollBy(0, br.bottom - (top - 10)); }
+}
+function openPreview(id, btn){
+  var r = btn.getBoundingClientRect();
+  state.open = { fact: id, top: r.top };
+  state.sel = id; applySel();
+  renderPreview();
+  pvEmpty.hidden = true; pvBody.hidden = false; pv.classList.remove('closed');
+  pvScroll.scrollTop = 0;
+  setExpanded();
+  arrangeSheet();
+  pvH.focus({ preventScroll: true });
+  say('근거 미리보기를 열었습니다. Esc로 닫으면 읽던 곳으로 돌아갑니다.');
+}
+function closePreview(){
+  if(!state.open) return;
+  var id = state.open.fact, top = state.open.top;
+  state.open = null;
+  pvBody.hidden = true; pvEmpty.hidden = false; pv.classList.add('closed');
+  document.body.style.paddingBottom = '';
+  setExpanded();
+  var b = btnOf(state.rep, id);
+  if(b){ window.scrollBy(0, b.getBoundingClientRect().top - top); b.focus({ preventScroll: true }); }
+  say('미리보기를 닫고 읽던 곳으로 돌아왔습니다.');
+}
+function setRep(rep){
+  if(rep === state.rep) return;
+  var old = state.rep;
+  var anchor = null;
+  if(state.open) anchor = state.open.fact;
+  else if(state.sel && isVisible(unitOf(old, state.sel))) anchor = state.sel;
+  else anchor = topmostVisible(old);
+  var oldTop = anchor ? unitOf(old, anchor).getBoundingClientRect().top : null;
+  state.rep = rep;
+  $('viewA').hidden = rep !== 'A'; $('viewB').hidden = rep !== 'B';
+  $('repA').setAttribute('aria-pressed', String(rep === 'A')); $('repB').setAttribute('aria-pressed', String(rep === 'B'));
+  if(anchor){
+    var nu = unitOf(rep, anchor);
+    window.scrollBy(0, nu.getBoundingClientRect().top - oldTop);
+  }
+  if(state.open){ renderOrigin(); setExpanded(); arrangeSheet(); }
+  say('표현 ' + rep + '로 바꿨습니다.' + (state.sel ? ' 선택한 사실의 자리를 유지합니다.' : ''));
+}
+
+/* ---------- events ---------- */
+buildContext(); buildA(); buildB();
+$('main').addEventListener('click', function(e){
+  var b = e.target.closest('.evbtn'); if(!b) return;
+  if(state.open && state.open.fact === b.dataset.fact){ closePreview(); return; }
+  openPreview(b.dataset.fact, b);
+});
+$('pvClose').addEventListener('click', closePreview);
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && state.open){ e.preventDefault(); closePreview(); } });
+$('repA').addEventListener('click', function(){ setRep('A'); });
+$('repB').addEventListener('click', function(){ setRep('B'); });
+window.addEventListener('resize', function(){ if(state.open){ if(narrowMQ.matches){ document.body.style.paddingBottom = Math.ceil(pv.getBoundingClientRect().height) + 'px'; } else { document.body.style.paddingBottom = ''; } } });
+window.__study = { state: state, open: openPreview, close: closePreview, setRep: setRep };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,2217 @@
+{
+ "kind": "author Chromium HTTP interaction check (not independent; no human usability)",
+ "html": "reading-study.html",
+ "html_sha256": "9add34fc341db08e6ef54e6e99d1fbfac6b39e7de61f5d8bd6415b32fa28ed1d",
+ "checker_sha256": "c73c42e840a5104f8748a8d315ff45a62ea51a73dd38d1db84a592cb3764273c",
+ "external_pages": "GitHub requests fulfilled by local stub; real external page content not loaded",
+ "results": [
+  {
+   "viewport": "1440x900",
+   "id": "HTTP",
+   "name": "HTTP 200으로 로드",
+   "pass": true,
+   "detail": "200"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-INIT",
+   "name": "PANEL-INIT 첫 화면: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A 문장 25·B 행 25·근거 버튼 각 25, 같은 사실 순서",
+   "pass": true,
+   "detail": "{\"a\": 25, \"b\": 25, \"ab\": 25, \"bb\": 25, \"same\": true, \"summaryShared\": true}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "요약은 A/B 밖의 공통 영역",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A 가로 넘침 없음(문서·요소)",
+   "pass": true,
+   "detail": "{\"sw\": 1440, \"cw\": 1440, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A 끝까지 스크롤해도 가로 넘침 없음",
+   "pass": true,
+   "detail": "{\"sw\": 1440, \"cw\": 1440, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B 가로 넘침 없음(문서·요소)",
+   "pass": true,
+   "detail": "{\"sw\": 1440, \"cw\": 1440, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B 끝까지 스크롤해도 가로 넘침 없음",
+   "pass": true,
+   "detail": "{\"sw\": 1440, \"cw\": 1440, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f14 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f14 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E09 · 기존 INPUT 9의 위치별 누락 재검토\", \"where\": \"표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위\", \"exp\": \"ab-f14\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f14 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN A f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [358, 810], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PV-TOP",
+   "name": "PV-TOP A f14 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f14 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f14 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "ab-f14"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-CLOSED-ESC",
+   "name": "PANEL-CLOSED-ESC A f14 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL A f14 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 1360→1360, top 378.0→378.0"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f14', 'b-f14']"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f14 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f19 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f19 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E10 · 위치별 상태 검사와 수정 대기\", \"where\": \"표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 검사 범위 (E09·E10) · 2번째 문장 단위\", \"exp\": \"ab-f19\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f19 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 검사 범위 (E09·E10) · 2번째 문장 단위"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN A f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [358, 810], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PV-TOP",
+   "name": "PV-TOP A f19 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f19 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f19 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS A f19 닫기(button) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "ab-f19"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-CLOSED-BTN",
+   "name": "PANEL-CLOSED-BTN A f19 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 1660→1660, top 378.3→378.3"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f19', 'b-f19']"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "A f19 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f14 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f14 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E09 · 기존 INPUT 9의 위치별 누락 재검토\", \"where\": \"표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치 C · 접힌 A 요약’ 행의 관측 셀\", \"exp\": \"bb-f14\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f14 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치 C · 접힌 A 요약’ 행의 관측 셀"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN B f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [358, 810], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PV-TOP",
+   "name": "PV-TOP B f14 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f14 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT B f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f14 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS B f14 닫기(button) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "bb-f14"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-CLOSED-BTN",
+   "name": "PANEL-CLOSED-BTN B f14 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL B f14 닫기(button) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 2405→2405, top 378.4→378.4"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f14', 'b-f14']"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f14 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f19 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f19 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E10 · 위치별 상태 검사와 수정 대기\", \"where\": \"표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치별 상태 검사 (나·라)’ 행의 관측 셀\", \"exp\": \"bb-f19\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f19 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치별 상태 검사 (나·라)’ 행의 관측 셀"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN B f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [358, 810], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PV-TOP",
+   "name": "PV-TOP B f19 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f19 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT B f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f19 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS B f19 닫기(esc) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "bb-f19"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-CLOSED-ESC",
+   "name": "PANEL-CLOSED-ESC B f19 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL B f19 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 2998→2998, top 378.1→378.1"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f19', 'b-f19']"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "B f19 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": "LINK-NEWTAB",
+   "name": "LINK-NEWTAB 원문 링크가 새 탭·noopener·'새 탭' 표기",
+   "pass": true,
+   "detail": "{\"t\": \"_blank\", \"rel\": \"noopener noreferrer\", \"label\": \"S03 원문을 GitHub에서 새 탭으로 열기\", \"text\": \"원문 열기 ↗GitHub · 새 탭\", \"href\": \"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "원문 링크가 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "링크 클릭은 새 탭 하나를 고정 출처 URL로 엶",
+   "pass": true,
+   "detail": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "링크 클릭 뒤 읽기 페이지 URL·스크롤·미리보기·선택·표현 유지",
+   "pass": true,
+   "detail": "{\"before\": {\"y\": 1360, \"top\": 378.03125, \"active\": \"pvH\", \"open\": true, \"sel\": [\"a-f14\", \"b-f14\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}, \"after\": {\"y\": 1360, \"top\": 378.03125, \"active\": \"\", \"open\": true, \"sel\": [\"a-f14\", \"b-f14\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "링크 클릭 뒤 미리보기 안 스크롤도 유지",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PV-TOP-AFTER",
+   "name": "PV-TOP-AFTER 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임",
+   "pass": true,
+   "detail": "scrollTop=0"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "P01은 원문 링크 없이 '원문 링크 미제공'과 이유를 보임",
+   "pass": true,
+   "detail": "{\"link\": false, \"why\": \"원문 링크 미제공 · 총괄이 원 작성자 발화를 직접 열람해 전달한 발췌입니다. 검토자는 원 대화를 독립 열람하지 않았고, 대화 ID·원문 URL·시각은 입력에 없습니다. 원문처럼 열 수 있는 링크는 제공하지 않습니다.\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "SW-ORIGIN",
+   "name": "SW-ORIGIN 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜",
+   "pass": true,
+   "detail": "{\"open\": true, \"h\": \"E07 · 기존 독립 5개 통과\", \"where\": \"표현 B · 목록 복귀: 검사별 관측과 H1 수정 표 · ‘독립 Node 대역 5사례 (나)’ 행의 관측 셀\", \"exp\": \"true\", \"rowSel\": true, \"visible\": true}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "열린 채 A→B 전환: B의 같은 셀 버튼이 화면에 보임",
+   "pass": true,
+   "detail": "{\"open\": true, \"h\": \"E07 · 기존 독립 5개 통과\", \"where\": \"표현 B · 목록 복귀: 검사별 관측과 H1 수정 표 · ‘독립 Node 대역 5사례 (나)’ 행의 관측 셀\", \"exp\": \"true\", \"rowSel\": true, \"visible\": true}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "전환 뒤 닫기: 초점이 B의 같은 사실 버튼으로, 화면 안",
+   "pass": true,
+   "detail": "{\"active\": \"bb-f13\", \"top\": 378.1875, \"bottom\": 408.1875, \"ih\": 900}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "선택 상태로 B→A 전환: A의 같은 문장이 선택된 채 같은 높이에 보임",
+   "pass": true,
+   "detail": "{\"bTop\": 259.265625, \"sel\": true, \"top\": 259.546875, \"bottom\": 372.953125, \"ih\": 900, \"y\": 1692, \"maxy\": 1733}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "조작 뒤 승인·수정·읽음 같은 자동 표기가 생기지 않음",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "viewport": "1440x900",
+   "id": "PANEL-CLOSED-KEY",
+   "name": "PANEL-CLOSED-KEY 키보드 Enter로 닫은 뒤: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "키보드: Enter로 열기 → Tab으로 닫기 버튼 → Enter로 닫고 출발로 복귀",
+   "pass": true,
+   "detail": "{\"a1\": \"pvH\", \"a2\": \"pvClose\", \"s0\": {\"y\": 896, \"top\": 378.171875, \"active\": \"ab-f09\", \"open\": false, \"sel\": [\"a-f19\", \"b-f19\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}, \"s1\": {\"y\": 896, \"top\": 378.171875, \"active\": \"ab-f09\", \"open\": false, \"sel\": [\"a-f09\", \"b-f09\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}}"
+  },
+  {
+   "viewport": "1440x900",
+   "id": null,
+   "name": "페이지 오류·콘솔 오류 없음",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "HTTP",
+   "name": "HTTP 200으로 로드",
+   "pass": true,
+   "detail": "200"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-INIT",
+   "name": "PANEL-INIT 첫 화면: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A 문장 25·B 행 25·근거 버튼 각 25, 같은 사실 순서",
+   "pass": true,
+   "detail": "{\"a\": 25, \"b\": 25, \"ab\": 25, \"bb\": 25, \"same\": true, \"summaryShared\": true}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "요약은 A/B 밖의 공통 영역",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A 가로 넘침 없음(문서·요소)",
+   "pass": true,
+   "detail": "{\"sw\": 1280, \"cw\": 1280, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A 끝까지 스크롤해도 가로 넘침 없음",
+   "pass": true,
+   "detail": "{\"sw\": 1280, \"cw\": 1280, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B 가로 넘침 없음(문서·요소)",
+   "pass": true,
+   "detail": "{\"sw\": 1280, \"cw\": 1280, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B 끝까지 스크롤해도 가로 넘침 없음",
+   "pass": true,
+   "detail": "{\"sw\": 1280, \"cw\": 1280, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f14 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f14 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E09 · 기존 INPUT 9의 위치별 누락 재검토\", \"where\": \"표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위\", \"exp\": \"ab-f14\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f14 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN A f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [358, 630], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PV-TOP",
+   "name": "PV-TOP A f14 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f14 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f14 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "ab-f14"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-CLOSED-ESC",
+   "name": "PANEL-CLOSED-ESC A f14 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL A f14 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 1683→1683, top 302.7→302.7"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f14', 'b-f14']"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f14 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f19 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f19 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E10 · 위치별 상태 검사와 수정 대기\", \"where\": \"표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 검사 범위 (E09·E10) · 2번째 문장 단위\", \"exp\": \"ab-f19\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f19 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 검사 범위 (E09·E10) · 2번째 문장 단위"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN A f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [358, 630], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PV-TOP",
+   "name": "PV-TOP A f19 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f19 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f19 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS A f19 닫기(button) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "ab-f19"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-CLOSED-BTN",
+   "name": "PANEL-CLOSED-BTN A f19 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 2069→2069, top 302.4→302.4"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f19', 'b-f19']"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "A f19 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f14 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f14 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E09 · 기존 INPUT 9의 위치별 누락 재검토\", \"where\": \"표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치 C · 접힌 A 요약’ 행의 관측 셀\", \"exp\": \"bb-f14\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f14 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치 C · 접힌 A 요약’ 행의 관측 셀"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN B f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [358, 630], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PV-TOP",
+   "name": "PV-TOP B f14 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f14 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT B f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f14 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS B f14 닫기(button) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "bb-f14"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-CLOSED-BTN",
+   "name": "PANEL-CLOSED-BTN B f14 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL B f14 닫기(button) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 2967→2967, top 302.1→302.1"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f14', 'b-f14']"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f14 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f19 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f19 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E10 · 위치별 상태 검사와 수정 대기\", \"where\": \"표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치별 상태 검사 (나·라)’ 행의 관측 셀\", \"exp\": \"bb-f19\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f19 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치별 상태 검사 (나·라)’ 행의 관측 셀"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN B f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [358, 630], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PV-TOP",
+   "name": "PV-TOP B f19 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f19 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT B f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f19 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS B f19 닫기(esc) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "bb-f19"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-CLOSED-ESC",
+   "name": "PANEL-CLOSED-ESC B f19 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL B f19 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 3714→3714, top 302.5→302.5"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f19', 'b-f19']"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "B f19 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": "LINK-NEWTAB",
+   "name": "LINK-NEWTAB 원문 링크가 새 탭·noopener·'새 탭' 표기",
+   "pass": true,
+   "detail": "{\"t\": \"_blank\", \"rel\": \"noopener noreferrer\", \"label\": \"S03 원문을 GitHub에서 새 탭으로 열기\", \"text\": \"원문 열기 ↗GitHub · 새 탭\", \"href\": \"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "원문 링크가 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "링크 클릭은 새 탭 하나를 고정 출처 URL로 엶",
+   "pass": true,
+   "detail": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "링크 클릭 뒤 읽기 페이지 URL·스크롤·미리보기·선택·표현 유지",
+   "pass": true,
+   "detail": "{\"before\": {\"y\": 1683, \"top\": 302.671875, \"active\": \"pvH\", \"open\": true, \"sel\": [\"a-f14\", \"b-f14\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}, \"after\": {\"y\": 1683, \"top\": 302.671875, \"active\": \"\", \"open\": true, \"sel\": [\"a-f14\", \"b-f14\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "링크 클릭 뒤 미리보기 안 스크롤도 유지",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PV-TOP-AFTER",
+   "name": "PV-TOP-AFTER 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임",
+   "pass": true,
+   "detail": "scrollTop=0"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "P01은 원문 링크 없이 '원문 링크 미제공'과 이유를 보임",
+   "pass": true,
+   "detail": "{\"link\": false, \"why\": \"원문 링크 미제공 · 총괄이 원 작성자 발화를 직접 열람해 전달한 발췌입니다. 검토자는 원 대화를 독립 열람하지 않았고, 대화 ID·원문 URL·시각은 입력에 없습니다. 원문처럼 열 수 있는 링크는 제공하지 않습니다.\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "SW-ORIGIN",
+   "name": "SW-ORIGIN 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜",
+   "pass": true,
+   "detail": "{\"open\": true, \"h\": \"E07 · 기존 독립 5개 통과\", \"where\": \"표현 B · 목록 복귀: 검사별 관측과 H1 수정 표 · ‘독립 Node 대역 5사례 (나)’ 행의 관측 셀\", \"exp\": \"true\", \"rowSel\": true, \"visible\": true}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "열린 채 A→B 전환: B의 같은 셀 버튼이 화면에 보임",
+   "pass": true,
+   "detail": "{\"open\": true, \"h\": \"E07 · 기존 독립 5개 통과\", \"where\": \"표현 B · 목록 복귀: 검사별 관측과 H1 수정 표 · ‘독립 Node 대역 5사례 (나)’ 행의 관측 셀\", \"exp\": \"true\", \"rowSel\": true, \"visible\": true}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "전환 뒤 닫기: 초점이 B의 같은 사실 버튼으로, 화면 안",
+   "pass": true,
+   "detail": "{\"active\": \"bb-f13\", \"top\": 302.421875, \"bottom\": 332.421875, \"ih\": 720}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "선택 상태로 B→A 전환: A의 같은 문장이 선택된 채 같은 높이에 보임",
+   "pass": true,
+   "detail": "{\"bTop\": 158.0625, \"sel\": true, \"top\": 158.078125, \"bottom\": 299, \"ih\": 720, \"y\": 2099, \"maxy\": 2356}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "조작 뒤 승인·수정·읽음 같은 자동 표기가 생기지 않음",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "viewport": "1280x720",
+   "id": "PANEL-CLOSED-KEY",
+   "name": "PANEL-CLOSED-KEY 키보드 Enter로 닫은 뒤: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 빈자리 안내만 보임",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": true, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "키보드: Enter로 열기 → Tab으로 닫기 버튼 → Enter로 닫고 출발로 복귀",
+   "pass": true,
+   "detail": "{\"a1\": \"pvH\", \"a2\": \"pvClose\", \"s0\": {\"y\": 1137, \"top\": 302.265625, \"active\": \"ab-f09\", \"open\": false, \"sel\": [\"a-f19\", \"b-f19\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}, \"s1\": {\"y\": 1137, \"top\": 302.265625, \"active\": \"ab-f09\", \"open\": false, \"sel\": [\"a-f09\", \"b-f09\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}}"
+  },
+  {
+   "viewport": "1280x720",
+   "id": null,
+   "name": "페이지 오류·콘솔 오류 없음",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "viewport": "390x664",
+   "id": "HTTP",
+   "name": "HTTP 200으로 로드",
+   "pass": true,
+   "detail": "200"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-INIT",
+   "name": "PANEL-INIT 첫 화면: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A 문장 25·B 행 25·근거 버튼 각 25, 같은 사실 순서",
+   "pass": true,
+   "detail": "{\"a\": 25, \"b\": 25, \"ab\": 25, \"bb\": 25, \"same\": true, \"summaryShared\": true}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "요약은 A/B 밖의 공통 영역",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A 가로 넘침 없음(문서·요소)",
+   "pass": true,
+   "detail": "{\"sw\": 390, \"cw\": 390, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A 끝까지 스크롤해도 가로 넘침 없음",
+   "pass": true,
+   "detail": "{\"sw\": 390, \"cw\": 390, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B 가로 넘침 없음(문서·요소)",
+   "pass": true,
+   "detail": "{\"sw\": 390, \"cw\": 390, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B 끝까지 스크롤해도 가로 넘침 없음",
+   "pass": true,
+   "detail": "{\"sw\": 390, \"cw\": 390, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f14 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f14 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E09 · 기존 INPUT 9의 위치별 누락 재검토\", \"where\": \"표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위\", \"exp\": \"ab-f14\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f14 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN A f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [388, 410.7], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PV-TOP",
+   "name": "PV-TOP A f14 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f14 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SHEET-ORIGIN-VIS",
+   "name": "SHEET-ORIGIN-VIS A f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임",
+   "pass": true,
+   "detail": "{\"btop\": 117.921875, \"bbot\": 147.921875, \"sheetTop\": 252.328125, \"hdr\": 52}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f14 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "ab-f14"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-CLOSED-ESC",
+   "name": "PANEL-CLOSED-ESC A f14 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL A f14 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 2593→2593, top 278.9→278.9"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f14', 'b-f14']"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f14 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f19 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f19 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E10 · 위치별 상태 검사와 수정 대기\", \"where\": \"표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 검사 범위 (E09·E10) · 2번째 문장 단위\", \"exp\": \"ab-f19\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f19 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 검사 범위 (E09·E10) · 2번째 문장 단위"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN A f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [388, 410.7], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PV-TOP",
+   "name": "PV-TOP A f19 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f19 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SHEET-ORIGIN-VIS",
+   "name": "SHEET-ORIGIN-VIS A f19 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임",
+   "pass": true,
+   "detail": "{\"btop\": 212.71875, \"bbot\": 242.71875, \"sheetTop\": 252.328125, \"hdr\": 52}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f19 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS A f19 닫기(button) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "ab-f19"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-CLOSED-BTN",
+   "name": "PANEL-CLOSED-BTN A f19 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 3144→3144, top 278.7→278.7"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f19', 'b-f19']"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "A f19 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f14 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f14 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E09 · 기존 INPUT 9의 위치별 누락 재검토\", \"where\": \"표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치 C · 접힌 A 요약’ 행의 관측 셀\", \"exp\": \"bb-f14\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f14 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치 C · 접힌 A 요약’ 행의 관측 셀"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN B f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [388, 410.7], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PV-TOP",
+   "name": "PV-TOP B f14 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f14 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT B f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SHEET-ORIGIN-VIS",
+   "name": "SHEET-ORIGIN-VIS B f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임",
+   "pass": true,
+   "detail": "{\"btop\": 115.484375, \"bbot\": 145.484375, \"sheetTop\": 252.328125, \"hdr\": 52}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f14 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS B f14 닫기(button) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "bb-f14"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-CLOSED-BTN",
+   "name": "PANEL-CLOSED-BTN B f14 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL B f14 닫기(button) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 4981→4981, top 278.5→278.5"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f14', 'b-f14']"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f14 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f19 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f19 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E10 · 위치별 상태 검사와 수정 대기\", \"where\": \"표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치별 상태 검사 (나·라)’ 행의 관측 셀\", \"exp\": \"bb-f19\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f19 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치별 상태 검사 (나·라)’ 행의 관측 셀"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN B f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [388, 410.7], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PV-TOP",
+   "name": "PV-TOP B f19 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f19 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT B f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SHEET-ORIGIN-VIS",
+   "name": "SHEET-ORIGIN-VIS B f19 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임",
+   "pass": true,
+   "detail": "{\"btop\": 166.734375, \"bbot\": 196.734375, \"sheetTop\": 252.328125, \"hdr\": 52}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f19 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS B f19 닫기(esc) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "bb-f19"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-CLOSED-ESC",
+   "name": "PANEL-CLOSED-ESC B f19 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL B f19 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 6347→6347, top 278.7→278.7"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f19', 'b-f19']"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "B f19 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": "LINK-NEWTAB",
+   "name": "LINK-NEWTAB 원문 링크가 새 탭·noopener·'새 탭' 표기",
+   "pass": true,
+   "detail": "{\"t\": \"_blank\", \"rel\": \"noopener noreferrer\", \"label\": \"S03 원문을 GitHub에서 새 탭으로 열기\", \"text\": \"원문 열기 ↗GitHub · 새 탭\", \"href\": \"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "원문 링크가 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "링크 클릭은 새 탭 하나를 고정 출처 URL로 엶",
+   "pass": true,
+   "detail": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "링크 클릭 뒤 읽기 페이지 URL·스크롤·미리보기·선택·표현 유지",
+   "pass": true,
+   "detail": "{\"before\": {\"y\": 2754, \"top\": 117.921875, \"active\": \"pvH\", \"open\": true, \"sel\": [\"a-f14\", \"b-f14\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"412px\"}, \"after\": {\"y\": 2754, \"top\": 117.921875, \"active\": \"\", \"open\": true, \"sel\": [\"a-f14\", \"b-f14\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"412px\"}}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "링크 클릭 뒤 미리보기 안 스크롤도 유지",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x664",
+   "id": "PV-TOP-AFTER",
+   "name": "PV-TOP-AFTER 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임",
+   "pass": true,
+   "detail": "scrollTop=0"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "P01은 원문 링크 없이 '원문 링크 미제공'과 이유를 보임",
+   "pass": true,
+   "detail": "{\"link\": false, \"why\": \"원문 링크 미제공 · 총괄이 원 작성자 발화를 직접 열람해 전달한 발췌입니다. 검토자는 원 대화를 독립 열람하지 않았고, 대화 ID·원문 URL·시각은 입력에 없습니다. 원문처럼 열 수 있는 링크는 제공하지 않습니다.\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": "SW-ORIGIN",
+   "name": "SW-ORIGIN 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜",
+   "pass": true,
+   "detail": "{\"open\": true, \"h\": \"E07 · 기존 독립 5개 통과\", \"where\": \"표현 B · 목록 복귀: 검사별 관측과 H1 수정 표 · ‘독립 Node 대역 5사례 (나)’ 행의 관측 셀\", \"exp\": \"true\", \"rowSel\": true, \"visible\": true}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "열린 채 A→B 전환: B의 같은 셀 버튼이 화면에 보임",
+   "pass": true,
+   "detail": "{\"open\": true, \"h\": \"E07 · 기존 독립 5개 통과\", \"where\": \"표현 B · 목록 복귀: 검사별 관측과 H1 수정 표 · ‘독립 Node 대역 5사례 (나)’ 행의 관측 셀\", \"exp\": \"true\", \"rowSel\": true, \"visible\": true}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "전환 뒤 닫기: 초점이 B의 같은 사실 버튼으로, 화면 안",
+   "pass": true,
+   "detail": "{\"active\": \"bb-f13\", \"top\": 278.4375, \"bottom\": 308.4375, \"ih\": 664}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "선택 상태로 B→A 전환: A의 같은 문장이 선택된 채 같은 높이에 보임",
+   "pass": true,
+   "detail": "{\"bTop\": 79.765625, \"sel\": true, \"top\": 79.390625, \"bottom\": 275.34375, \"ih\": 664, \"y\": 3174, \"maxy\": 3594}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "조작 뒤 승인·수정·읽음 같은 자동 표기가 생기지 않음",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "viewport": "390x664",
+   "id": "PANEL-CLOSED-KEY",
+   "name": "PANEL-CLOSED-KEY 키보드 Enter로 닫은 뒤: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "키보드: Enter로 열기 → Tab으로 닫기 버튼 → Enter로 닫고 출발로 복귀",
+   "pass": true,
+   "detail": "{\"a1\": \"pvH\", \"a2\": \"pvClose\", \"s0\": {\"y\": 1831, \"top\": 278.6875, \"active\": \"ab-f09\", \"open\": false, \"sel\": [\"a-f19\", \"b-f19\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}, \"s1\": {\"y\": 1831, \"top\": 278.6875, \"active\": \"ab-f09\", \"open\": false, \"sel\": [\"a-f09\", \"b-f09\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}}"
+  },
+  {
+   "viewport": "390x664",
+   "id": null,
+   "name": "페이지 오류·콘솔 오류 없음",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "viewport": "390x844",
+   "id": "HTTP",
+   "name": "HTTP 200으로 로드",
+   "pass": true,
+   "detail": "200"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-INIT",
+   "name": "PANEL-INIT 첫 화면: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A 문장 25·B 행 25·근거 버튼 각 25, 같은 사실 순서",
+   "pass": true,
+   "detail": "{\"a\": 25, \"b\": 25, \"ab\": 25, \"bb\": 25, \"same\": true, \"summaryShared\": true}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "요약은 A/B 밖의 공통 영역",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A 가로 넘침 없음(문서·요소)",
+   "pass": true,
+   "detail": "{\"sw\": 390, \"cw\": 390, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A 끝까지 스크롤해도 가로 넘침 없음",
+   "pass": true,
+   "detail": "{\"sw\": 390, \"cw\": 390, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B 가로 넘침 없음(문서·요소)",
+   "pass": true,
+   "detail": "{\"sw\": 390, \"cw\": 390, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B 끝까지 스크롤해도 가로 넘침 없음",
+   "pass": true,
+   "detail": "{\"sw\": 390, \"cw\": 390, \"bad\": [], \"nbad\": 0}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f14 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f14 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E09 · 기존 INPUT 9의 위치별 누락 재검토\", \"where\": \"표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위\", \"exp\": \"ab-f14\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f14 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN A f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [388, 522.3], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PV-TOP",
+   "name": "PV-TOP A f14 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f14 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SHEET-ORIGIN-VIS",
+   "name": "SHEET-ORIGIN-VIS A f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임",
+   "pass": true,
+   "detail": "{\"btop\": 117.921875, \"bbot\": 147.921875, \"sheetTop\": 320.734375, \"hdr\": 52}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f14 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "ab-f14"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-CLOSED-ESC",
+   "name": "PANEL-CLOSED-ESC A f14 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL A f14 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 2517→2517, top 354.9→354.9"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f14', 'b-f14']"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f14 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f19 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f19 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E10 · 위치별 상태 검사와 수정 대기\", \"where\": \"표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 검사 범위 (E09·E10) · 2번째 문장 단위\", \"exp\": \"ab-f19\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f19 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 검사 범위 (E09·E10) · 2번째 문장 단위"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN A f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [388, 522.3], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PV-TOP",
+   "name": "PV-TOP A f19 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f19 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SHEET-ORIGIN-VIS",
+   "name": "SHEET-ORIGIN-VIS A f19 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임",
+   "pass": true,
+   "detail": "{\"btop\": 231.71875, \"bbot\": 261.71875, \"sheetTop\": 320.734375, \"hdr\": 52}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f19 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS A f19 닫기(button) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "ab-f19"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-CLOSED-BTN",
+   "name": "PANEL-CLOSED-BTN A f19 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 3068→3068, top 354.7→354.7"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f19', 'b-f19']"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "A f19 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f14 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f14 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E09 · 기존 INPUT 9의 위치별 누락 재검토\", \"where\": \"표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치 C · 접힌 A 요약’ 행의 관측 셀\", \"exp\": \"bb-f14\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f14 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치 C · 접힌 A 요약’ 행의 관측 셀"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN B f14 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [388, 522.3], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PV-TOP",
+   "name": "PV-TOP B f14 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f14 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT B f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SHEET-ORIGIN-VIS",
+   "name": "SHEET-ORIGIN-VIS B f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임",
+   "pass": true,
+   "detail": "{\"btop\": 115.484375, \"bbot\": 145.484375, \"sheetTop\": 320.734375, \"hdr\": 52}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f14 닫기(button) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS B f14 닫기(button) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "bb-f14"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-CLOSED-BTN",
+   "name": "PANEL-CLOSED-BTN B f14 닫기(button) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL B f14 닫기(button) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 4905→4905, top 354.5→354.5"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f14 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f14', 'b-f14']"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f14 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f19 근거 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f19 미리보기 열림·초점이 미리보기 제목으로 이동",
+   "pass": true,
+   "detail": "{\"open\": true, \"active\": \"pvH\", \"h\": \"E10 · 위치별 상태 검사와 수정 대기\", \"where\": \"표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치별 상태 검사 (나·라)’ 행의 관측 셀\", \"exp\": \"bb-f19\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f19 출발 위치가 현재 표현으로 표시",
+   "pass": true,
+   "detail": "표현 B · INPUT 9: 지정 위치의 A2 미결 참조 표 · ‘위치별 상태 검사 (나·라)’ 행의 관측 셀"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-OPEN",
+   "name": "PANEL-OPEN B f19 열림: 미리보기 본문·닫기 버튼이 실제로 보이고 조작 가능, 빈자리 안내는 숨김",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": false, \"bodyDisplay\": \"flex\", \"bodyBox\": [388, 522.3], \"bodyVis\": true, \"closeBox\": [157.3, 38], \"closeVis\": true, \"closeHit\": true, \"closeFocusable\": true, \"emptyVis\": false, \"previewDisplay\": \"flex\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PV-TOP",
+   "name": "PV-TOP B f19 새로 연 미리보기는 처음(출발 문장)부터 보임",
+   "pass": true,
+   "detail": "{\"st\": 0, \"inside\": true}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f19 닫기 버튼이 보이고 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SHEET-SWITCH-HIT",
+   "name": "SHEET-SWITCH-HIT B f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SHEET-ORIGIN-VIS",
+   "name": "SHEET-ORIGIN-VIS B f19 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임",
+   "pass": true,
+   "detail": "{\"btop\": 166.734375, \"bbot\": 196.734375, \"sheetTop\": 320.734375, \"hdr\": 52}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f19 닫기(esc) 후 상태값이 닫힘(hidden 속성) — 표시 판정은 PANEL-CLOSED",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": "RT-FOCUS",
+   "name": "RT-FOCUS B f19 닫기(esc) 후 초점이 출발 버튼으로 복귀",
+   "pass": true,
+   "detail": "bb-f19"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-CLOSED-ESC",
+   "name": "PANEL-CLOSED-ESC B f19 닫기(esc) 후: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "RT-SCROLL",
+   "name": "RT-SCROLL B f19 닫기(esc) 후 읽던 스크롤 위치 복원(±2px)",
+   "pass": true,
+   "detail": "y 6271→6271, top 354.7→354.7"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f19 닫은 뒤 근거 버튼으로 고른 사실의 선택 표시 유지",
+   "pass": true,
+   "detail": "['a-f19', 'b-f19']"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "B f19 닫은 뒤 시트 여백 해제",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": "LINK-NEWTAB",
+   "name": "LINK-NEWTAB 원문 링크가 새 탭·noopener·'새 탭' 표기",
+   "pass": true,
+   "detail": "{\"t\": \"_blank\", \"rel\": \"noopener noreferrer\", \"label\": \"S03 원문을 GitHub에서 새 탭으로 열기\", \"text\": \"원문 열기 ↗GitHub · 새 탭\", \"href\": \"https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "원문 링크가 가려지지 않음",
+   "pass": true,
+   "detail": "ok"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "링크 클릭은 새 탭 하나를 고정 출처 URL로 엶",
+   "pass": true,
+   "detail": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "링크 클릭 뒤 읽기 페이지 URL·스크롤·미리보기·선택·표현 유지",
+   "pass": true,
+   "detail": "{\"before\": {\"y\": 2754, \"top\": 117.921875, \"active\": \"pvH\", \"open\": true, \"sel\": [\"a-f14\", \"b-f14\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"524px\"}, \"after\": {\"y\": 2754, \"top\": 117.921875, \"active\": \"\", \"open\": true, \"sel\": [\"a-f14\", \"b-f14\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"524px\"}}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "링크 클릭 뒤 미리보기 안 스크롤도 유지",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "viewport": "390x844",
+   "id": "PV-TOP-AFTER",
+   "name": "PV-TOP-AFTER 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임",
+   "pass": true,
+   "detail": "scrollTop=0"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "P01은 원문 링크 없이 '원문 링크 미제공'과 이유를 보임",
+   "pass": true,
+   "detail": "{\"link\": false, \"why\": \"원문 링크 미제공 · 총괄이 원 작성자 발화를 직접 열람해 전달한 발췌입니다. 검토자는 원 대화를 독립 열람하지 않았고, 대화 ID·원문 URL·시각은 입력에 없습니다. 원문처럼 열 수 있는 링크는 제공하지 않습니다.\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": "SW-ORIGIN",
+   "name": "SW-ORIGIN 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜",
+   "pass": true,
+   "detail": "{\"open\": true, \"h\": \"E07 · 기존 독립 5개 통과\", \"where\": \"표현 B · 목록 복귀: 검사별 관측과 H1 수정 표 · ‘독립 Node 대역 5사례 (나)’ 행의 관측 셀\", \"exp\": \"true\", \"rowSel\": true, \"visible\": true}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "열린 채 A→B 전환: B의 같은 셀 버튼이 화면에 보임",
+   "pass": true,
+   "detail": "{\"open\": true, \"h\": \"E07 · 기존 독립 5개 통과\", \"where\": \"표현 B · 목록 복귀: 검사별 관측과 H1 수정 표 · ‘독립 Node 대역 5사례 (나)’ 행의 관측 셀\", \"exp\": \"true\", \"rowSel\": true, \"visible\": true}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "전환 뒤 닫기: 초점이 B의 같은 사실 버튼으로, 화면 안",
+   "pass": true,
+   "detail": "{\"active\": \"bb-f13\", \"top\": 354.4375, \"bottom\": 384.4375, \"ih\": 844}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "선택 상태로 B→A 전환: A의 같은 문장이 선택된 채 같은 높이에 보임",
+   "pass": true,
+   "detail": "{\"bTop\": 155.765625, \"sel\": true, \"top\": 155.390625, \"bottom\": 351.34375, \"ih\": 844, \"y\": 3098, \"maxy\": 3414}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "조작 뒤 승인·수정·읽음 같은 자동 표기가 생기지 않음",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "viewport": "390x844",
+   "id": "PANEL-CLOSED-KEY",
+   "name": "PANEL-CLOSED-KEY 키보드 Enter로 닫은 뒤: 미리보기 본문·닫기 버튼이 실제로 표시되지 않고 박스 0·클릭/초점 불가, 시트 없음",
+   "pass": true,
+   "detail": "{\"bodyHiddenAttr\": true, \"bodyDisplay\": \"none\", \"bodyBox\": [0, 0], \"bodyVis\": false, \"closeBox\": [0, 0], \"closeVis\": false, \"closeHit\": false, \"closeFocusable\": false, \"emptyVis\": false, \"previewDisplay\": \"none\", \"headText\": \"근거 미리보기 · 이 화면 안에서 읽기 (원문 이동 아\"}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "키보드: Enter로 열기 → Tab으로 닫기 버튼 → Enter로 닫고 출발로 복귀",
+   "pass": true,
+   "detail": "{\"a1\": \"pvH\", \"a2\": \"pvClose\", \"s0\": {\"y\": 1755, \"top\": 354.6875, \"active\": \"ab-f09\", \"open\": false, \"sel\": [\"a-f19\", \"b-f19\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}, \"s1\": {\"y\": 1755, \"top\": 354.6875, \"active\": \"ab-f09\", \"open\": false, \"sel\": [\"a-f09\", \"b-f09\"], \"rep\": \"A\", \"url\": \"http://127.0.0.1:39411/reading-study.html\", \"pad\": \"\"}}"
+  },
+  {
+   "viewport": "390x844",
+   "id": null,
+   "name": "페이지 오류·콘솔 오류 없음",
+   "pass": true,
+   "detail": "[]"
+  }
+ ],
+ "info": [
+  {
+   "viewport": "-",
+   "msg": "chromium 141.0.7390.37, url http://127.0.0.1:39411/reading-study.html"
+  },
+  {
+   "viewport": "1440x900",
+   "msg": "A f19 미리보기 연 채 휠 스크롤 1660→1733"
+  },
+  {
+   "viewport": "1440x900",
+   "msg": "B f14 미리보기 연 채 휠 스크롤 2405→2905"
+  },
+  {
+   "viewport": "1280x720",
+   "msg": "A f19 미리보기 연 채 휠 스크롤 2069→2356"
+  },
+  {
+   "viewport": "1280x720",
+   "msg": "B f14 미리보기 연 채 휠 스크롤 2967→3467"
+  },
+  {
+   "viewport": "1280x720",
+   "msg": "screenshot fix1_closed_A_1280x720.png (E09 미리보기를 닫기 버튼으로 닫은 뒤)"
+  },
+  {
+   "viewport": "390x664",
+   "msg": "A f19 미리보기 연 채 휠 스크롤 3210→3710"
+  },
+  {
+   "viewport": "390x664",
+   "msg": "B f14 미리보기 연 채 휠 스크롤 5144→5644"
+  },
+  {
+   "viewport": "390x664",
+   "msg": "screenshot fix1_open_A_f15_390x664.png (A f15 근거 미리보기 열림)"
+  },
+  {
+   "viewport": "390x844",
+   "msg": "A f19 미리보기 연 채 휠 스크롤 3191→3691"
+  },
+  {
+   "viewport": "390x844",
+   "msg": "B f14 미리보기 연 채 휠 스크롤 5144→5644"
+  },
+  {
+   "viewport": "-",
+   "msg": "external requests intercepted by stub: ['https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html']"
+  }
+ ],
+ "pass": 308,
+ "fail": 0
+}
