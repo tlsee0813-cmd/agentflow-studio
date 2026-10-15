@@ -1,0 +1,93 @@
+[PASS] 1440x900 0 첫 HTTP 응답 본문 SHA = 원본 파일 SHA {"status": 200, "bytes": 33837, "sha": "d0201cfa16bf5be4b17c921dac5c5fb1ab4211fcc480ea812a879245af787723"}
+[PASS] 1440x900 1 초기: 목적 문장 표시(가림·잘림 없음) {"exists": true, "w": 536.046875, "h": 24.015625, "top": 42.796875, "bottom": 66.8125, "inVp": true, "inClip": true, "uncovered": true, "hit": "purposeTxt", "textClipped": false, "clip": null, "ok": true}
+[OBS ] 1440x900 1 초기 지도 시야 안 대상 {"X1": true, "P1": true, "X2": true}
+[PASS] 1440x900 1 초기(큰 화면): 세 대상이 지도 시야 안 {"X1": {"x": 24, "y": 413.40625, "w": 220, "h": 87.984375, "inPane": true}, "P1": {"x": 380, "y": 381.40625, "w": 300, "h": 195.1875, "inPane": true}, "X2": {"x": 826, "y": 413.40625, "w": 196, "h": 103.984375, "inPane": true}}
+[PASS] 1440x900 1 초기: 가로 넘침 없음 {"doc": 1440, "vw": 1440}
+[PASS] 1440x900 1 선택해도 지도 배치·배율·스크롤 불변, 선택=P1 ["P1"]
+[PASS] 1440x900 1 선택(측면 설명): 역할·조건·두 맥락·역할읽기 표시 {"#panel h2": true, "#panel .keepbox": true, "#panel [data-pick=X1]": true, "#panel [data-pick=X2]": true, "#panel .act.wide [data-act=read]": true}
+[PASS] 1440x900 1 읽기 시작 화면: 복귀·준비·목적·역할·조건이 스크롤 없이 표시 {"#rBack": true, "#rPrep": true, "#reader .crumb": true, "#p-role": true, "#p-keep": true}
+[OBS ] 1440x900 1 읽기 본문 자연 스크롤 여유(px) 65
+[OBS ] 1440x900 1 읽기 첫 화면에 맥락 행 X1 보임 true
+[OBS ] 1440x900 1 읽기 첫 화면에 맥락 행 X2 보임 true
+[PASS] 1440x900 1 읽기: 가로 넘침 없음 {"doc": 1440, "vw": 1440}
+[OBS ] 1440x900 2 X2 위치 보기 직전 읽기 scrollTop 0
+[PASS] 1440x900 2 X2 지도에서 위치 보기: 대상 시야 안·선택 P1 유지·이동 여부 정직 {"moved": "0", "scrollBefore": [0, 0], "scrollAfter": [0, 0], "targetInPaneBefore": true, "active": "X2"}
+[OBS ] 1440x900 2 X1 위치 보기 직전 읽기 scrollTop 0
+[PASS] 1440x900 2 X1 지도에서 위치 보기: 대상 시야 안·선택 P1 유지·이동 여부 정직 {"moved": "0", "scrollBefore": [0, 0], "scrollAfter": [0, 0], "targetInPaneBefore": true, "active": "X1"}
+[OBS ] 1440x900 2 왕복 전 자연 최대 읽기 scrollTop 102
+[FAIL] 1440x900 2 비초기 읽기 위치(102px)에서 X2 위치 보기→읽던 곳: 위치·행 rect·초점 유지 {"before": 102, "after": 102, "active": "X2"}
+[OBS ] 1440x900 2 원문 열기 전 실제 읽기 scrollTop(자연 길이 한계) 102
+[PASS] 1440x900 2 원문 열기(role) 인라인 {"open": true, "n": 1, "exp": "true", "top": 102}
+[PASS] 1440x900 2 원문 닫기(button): 본문·링크·버튼 제거, 읽기 위치·출발 초점 유지 {"peeks": 0, "links": 0, "exp": "false", "active": "role", "top": 102, "before": 102, "closeBtn": true}
+[PASS] 1440x900 2 같은 원문 재열기 
+[PASS] 1440x900 2 원문 닫기(reopen-escape): 본문·링크·버튼 제거, 읽기 위치·출발 초점 유지 {"peeks": 0, "links": 0, "exp": "false", "active": "role", "top": 102, "before": 102, "closeBtn": null}
+[PASS] 1440x900 2 준비 기본문: 작은 작업 정리 요청 + 유지 조건 + 운영 배포 금지 {"open": true, "active": "pf-ask", "ask": "출연자가 낸 소개글을 행사 홈페이지에 옮길 때 같은 내용을 다시 입력하지 않도록, 먼저 만들 작은 작업 하나를 코드를 잘 모르는 사람도 이해할 말로 정리해 주세요.", "keep": "- 담당자가 내용을 확인하고 게시를 선택한 뒤에만 홈페이지에 공개한다. 이 확인과 선택을 건너뛰거나 자동으로 게시하지 않는다.\n- 운영 홈페이지에 바로 배포하지 않는다."}
+[PASS] 1440x900 2 준비: 가로 넘침 없음 {"doc": 1440, "vw": 1440}
+[PASS] 1440x900 2 직접 편집과 ‘직접 고침’ 표시 ["ask", "keep"]
+[OBS ] 1440x900 2 준비 영역 스크롤 필요 여부 {"scrollable": false}
+[PASS] 1440x900 2 준비 닫기: 출발 버튼 초점·읽기 위치 {"hidden": true, "active": "rPrep", "top": 102, "before": 102}
+[PASS] 1440x900 2 준비 재열기: 직접 고친 문장 보존 
+[PASS] 1440x900 2 준비 Escape 닫기 {"hidden": true, "active": "rPrep"}
+[PASS] 1440x900 2 진입 전 지도로(초기 시야에서 진입한 경우) "n-P1"
+[PASS] 1440x900 3 진입 전 지도: 115% 배율·비초기 스크롤·선택 P1 {"scale": 1.15, "transform": "scale(1.15)", "sl": 148, "st": 0, "center": [580.8695652173914, 329.13043478260875], "sel": ["P1"]}
+[PASS] 1440x900 3 [1] 역할 읽기 버튼이 그 자리에서 접근 가능 {"exists": true, "w": 104.421875, "h": 37.6875, "top": 578.3125, "bottom": 616, "inVp": true, "inClip": true, "uncovered": true, "hit": "btn primary", "textClipped": false, "clip": "panel", "ok": true}
+[PASS] 1440x900 3 [1] X1 위치 보기: 대상 시야 안·선택 P1 {"sl": 0, "st": 0, "moved": "1"}
+[PASS] 1440x900 3 [1] X2 위치 보기: 대상 시야 안·선택 P1 {"sl": 156, "st": 0, "moved": "1"}
+[PASS] 1440x900 3 [1] 전체 복귀를 거쳐도 직접 고친 준비문 보존 
+[PASS] 1440x900 3 [1] 진입 전 지도 복귀: transform·scroll·중심·선택·3대상 rect 동일, 초점 P1 {"diff": {}, "post": {"scale": 1.15, "transform": "scale(1.15)", "sl": 148, "st": 0, "center": [580.8695652173914, 329.13043478260875], "sel": ["P1"], "active": "n-P1"}}
+[PASS] 1440x900 3 [2] 역할 읽기 버튼이 그 자리에서 접근 가능 {"exists": true, "w": 104.421875, "h": 37.6875, "top": 578.3125, "bottom": 616, "inVp": true, "inClip": true, "uncovered": true, "hit": "btn primary", "textClipped": false, "clip": "panel", "ok": true}
+[PASS] 1440x900 3 [2] X1 위치 보기: 대상 시야 안·선택 P1 {"sl": 0, "st": 0, "moved": "1"}
+[PASS] 1440x900 3 [2] X2 위치 보기: 대상 시야 안·선택 P1 {"sl": 156, "st": 0, "moved": "1"}
+[PASS] 1440x900 3 [2] 전체 복귀를 거쳐도 직접 고친 준비문 보존 
+[PASS] 1440x900 3 [2] 진입 전 지도 복귀: transform·scroll·중심·선택·3대상 rect 동일, 초점 P1 {"diff": {}, "post": {"scale": 1.15, "transform": "scale(1.15)", "sl": 148, "st": 0, "center": [580.8695652173914, 329.13043478260875], "sel": ["P1"], "active": "n-P1"}}
+[PASS] 1440x900 3 복귀 후 가로 넘침 없음 {"doc": 1440, "vw": 1440}
+[PASS] 1440x900 0 pageerror·console error 없음 []
+[PASS] 390x844 0 첫 HTTP 응답 본문 SHA = 원본 파일 SHA {"status": 200, "bytes": 33837, "sha": "d0201cfa16bf5be4b17c921dac5c5fb1ab4211fcc480ea812a879245af787723"}
+[PASS] 390x844 1 초기: 목적 문장 표시(가림·잘림 없음) {"exists": true, "w": 313, "h": 43.375, "top": 65.28125, "bottom": 108.65625, "inVp": true, "inClip": true, "uncovered": true, "hit": "purposeTxt", "textClipped": false, "clip": null, "ok": true}
+[OBS ] 390x844 1 초기 지도 시야 안 대상 {"X1": true, "P1": true, "X2": false}
+[PASS] 390x844 1 초기: 가로 넘침 없음 {"doc": 390, "vw": 390}
+[PASS] 390x844 1 선택해도 지도 배치·배율·스크롤 불변, 선택=P1 ["P1"]
+[PASS] 390x844 1 선택(예약영역): 역할·조건·두 맥락 이름·역할읽기 표시, 잘림 없음, 지도와 겹치지 않음 {"panel": {"sh": 175, "ch": 175}, "items": {"#panel h2": true, "#panel .strip-role": true, "#panel .strip-keep": true, "#panel .strip-ctx span:nth-child(1)": true, "#panel .strip-ctx span:nth-child(2)": true, "#panel .strip-head [data-act=read]": true}}
+[PASS] 390x844 1 예약영역이 지도를 덮지 않음 {"mapBottom": 668.0, "panelTop": 668}
+[PASS] 390x844 1 읽기 시작 화면: 복귀·준비·목적·역할·조건이 스크롤 없이 표시 {"#rBack": true, "#rPrep": true, "#reader .crumb": true, "#p-role": true, "#p-keep": true}
+[OBS ] 390x844 1 읽기 본문 자연 스크롤 여유(px) 129
+[OBS ] 390x844 1 읽기 첫 화면에 맥락 행 X1 보임 true
+[OBS ] 390x844 1 읽기 첫 화면에 맥락 행 X2 보임 true
+[PASS] 390x844 1 읽기: 가로 넘침 없음 {"doc": 390, "vw": 390}
+[OBS ] 390x844 2 X2 위치 보기 직전 읽기 scrollTop 0
+[PASS] 390x844 2 X2 지도에서 위치 보기: 대상 시야 안·선택 P1 유지·이동 여부 정직 {"moved": "1", "scrollBefore": [0, 0], "scrollAfter": [0, 290], "targetInPaneBefore": false, "active": "backRead"}
+[PASS] 390x844 2 위치 화면에서 ‘읽던 곳으로’ 표시 {"exists": true, "w": 118.421875, "h": 37.6875, "top": 753.75, "bottom": 791.4375, "inVp": true, "inClip": true, "uncovered": true, "hit": "backRead", "textClipped": false, "clip": "panel", "ok": true}
+[PASS] 390x844 2 X2 읽던 곳으로: 읽기 위치·행 rect·출발 버튼 초점 {"before": 0, "after": 0, "active": "X2"}
+[OBS ] 390x844 2 X1 위치 보기 직전 읽기 scrollTop 0
+[PASS] 390x844 2 X1 지도에서 위치 보기: 대상 시야 안·선택 P1 유지·이동 여부 정직 {"moved": "1", "scrollBefore": [0, 290], "scrollAfter": [0, 0], "targetInPaneBefore": null, "active": "backRead"}
+[PASS] 390x844 2 위치 화면에서 ‘읽던 곳으로’ 표시 {"exists": true, "w": 118.421875, "h": 37.6875, "top": 753.75, "bottom": 791.4375, "inVp": true, "inClip": true, "uncovered": true, "hit": "backRead", "textClipped": false, "clip": "panel", "ok": true}
+[PASS] 390x844 2 X1 읽던 곳으로: 읽기 위치·행 rect·출발 버튼 초점 {"before": 0, "after": 0, "active": "X1"}
+[OBS ] 390x844 2 왕복 전 자연 최대 읽기 scrollTop 128
+[PASS] 390x844 2 비초기 읽기 위치(128px)에서 X2 위치 보기→읽던 곳: 위치·행 rect·초점 유지 {"before": 128, "after": 128, "active": "X2"}
+[OBS ] 390x844 2 원문 열기 전 실제 읽기 scrollTop(자연 길이 한계) 128
+[PASS] 390x844 2 원문 열기(role) 인라인 {"open": true, "n": 1, "exp": "true", "top": 128}
+[PASS] 390x844 2 원문 닫기(button): 본문·링크·버튼 제거, 읽기 위치·출발 초점 유지 {"peeks": 0, "links": 0, "exp": "false", "active": "role", "top": 128, "before": 128, "closeBtn": true}
+[PASS] 390x844 2 같은 원문 재열기 
+[PASS] 390x844 2 원문 닫기(reopen-escape): 본문·링크·버튼 제거, 읽기 위치·출발 초점 유지 {"peeks": 0, "links": 0, "exp": "false", "active": "role", "top": 128, "before": 128, "closeBtn": null}
+[PASS] 390x844 2 준비 기본문: 작은 작업 정리 요청 + 유지 조건 + 운영 배포 금지 {"open": true, "active": "pf-ask", "ask": "출연자가 낸 소개글을 행사 홈페이지에 옮길 때 같은 내용을 다시 입력하지 않도록, 먼저 만들 작은 작업 하나를 코드를 잘 모르는 사람도 이해할 말로 정리해 주세요.", "keep": "- 담당자가 내용을 확인하고 게시를 선택한 뒤에만 홈페이지에 공개한다. 이 확인과 선택을 건너뛰거나 자동으로 게시하지 않는다.\n- 운영 홈페이지에 바로 배포하지 않는다."}
+[PASS] 390x844 2 준비: 가로 넘침 없음 {"doc": 390, "vw": 390}
+[PASS] 390x844 2 직접 편집과 ‘직접 고침’ 표시 ["ask", "keep"]
+[OBS ] 390x844 2 준비 영역 스크롤 필요 여부 {"scrollable": false}
+[PASS] 390x844 2 준비 닫기: 출발 버튼 초점·읽기 위치 {"hidden": true, "active": "rPrep", "top": 128, "before": 128}
+[PASS] 390x844 2 준비 재열기: 직접 고친 문장 보존 
+[PASS] 390x844 2 준비 Escape 닫기 {"hidden": true, "active": "rPrep"}
+[PASS] 390x844 2 진입 전 지도로(초기 시야에서 진입한 경우) "n-P1"
+[PASS] 390x844 3 진입 전 지도: 115% 배율·비초기 스크롤·선택 P1 {"scale": 1.15, "transform": "scale(1.15)", "sl": 24, "st": 127, "center": [190.43478260869566, 326.0869565217392], "sel": ["P1"]}
+[PASS] 390x844 3 [1] 역할 읽기 버튼이 그 자리에서 접근 가능 {"exists": true, "w": 90.234375, "h": 27.375, "top": 696.90625, "bottom": 724.28125, "inVp": true, "inClip": true, "uncovered": true, "hit": "btn primary sm narrow", "textClipped": false, "clip": "panel", "ok": true}
+[PASS] 390x844 3 [1] X1 위치 보기: 대상 시야 안·선택 P1 {"sl": 12, "st": 0, "moved": "1"}
+[PASS] 390x844 3 [1] X2 위치 보기: 대상 시야 안·선택 P1 {"sl": 12, "st": 416, "moved": "1"}
+[PASS] 390x844 3 [1] 전체 복귀를 거쳐도 직접 고친 준비문 보존 
+[PASS] 390x844 3 [1] 진입 전 지도 복귀: transform·scroll·중심·선택·3대상 rect 동일, 초점 P1 {"diff": {}, "post": {"scale": 1.15, "transform": "scale(1.15)", "sl": 24, "st": 127, "center": [190.43478260869566, 326.0869565217392], "sel": ["P1"], "active": "n-P1"}}
+[PASS] 390x844 3 [2] 역할 읽기 버튼이 그 자리에서 접근 가능 {"exists": true, "w": 90.234375, "h": 27.375, "top": 696.90625, "bottom": 724.28125, "inVp": true, "inClip": true, "uncovered": true, "hit": "btn primary sm narrow", "textClipped": false, "clip": "panel", "ok": true}
+[PASS] 390x844 3 [2] X1 위치 보기: 대상 시야 안·선택 P1 {"sl": 12, "st": 0, "moved": "1"}
+[PASS] 390x844 3 [2] X2 위치 보기: 대상 시야 안·선택 P1 {"sl": 12, "st": 416, "moved": "1"}
+[PASS] 390x844 3 [2] 전체 복귀를 거쳐도 직접 고친 준비문 보존 
+[PASS] 390x844 3 [2] 진입 전 지도 복귀: transform·scroll·중심·선택·3대상 rect 동일, 초점 P1 {"diff": {}, "post": {"scale": 1.15, "transform": "scale(1.15)", "sl": 24, "st": 127, "center": [190.43478260869566, 326.0869565217392], "sel": ["P1"], "active": "n-P1"}}
+[PASS] 390x844 3 복귀 후 가로 넘침 없음 {"doc": 390, "vw": 390}
+[PASS] 390x844 0 pageerror·console error 없음 []
+== failed 1 fatal None file_unchanged True

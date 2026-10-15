@@ -1,0 +1,14 @@
+[PASS] 1440x900 0 첫 HTTP 응답 본문 SHA = 원본 파일 SHA {"status": 200, "bytes": 33837, "sha": "d0201cfa16bf5be4b17c921dac5c5fb1ab4211fcc480ea812a879245af787723"}
+[PASS] 1440x900 1 초기: 목적 문장 표시(가림·잘림 없음) {"exists": true, "w": 536.046875, "h": 24.015625, "top": 42.796875, "bottom": 66.8125, "inVp": true, "inClip": true, "uncovered": true, "hit": "purposeTxt", "textClipped": false, "clip": null, "ok": true}
+[OBS ] 1440x900 1 초기 지도 시야 안 대상 {"X1": true, "P1": true, "X2": true}
+[PASS] 1440x900 1 초기(큰 화면): 세 대상이 지도 시야 안 {"X1": {"x": 24, "y": 413.40625, "w": 220, "h": 87.984375, "inPane": true}, "P1": {"x": 380, "y": 381.40625, "w": 300, "h": 195.1875, "inPane": true}, "X2": {"x": 826, "y": 413.40625, "w": 196, "h": 103.984375, "inPane": true}}
+[PASS] 1440x900 1 초기: 가로 넘침 없음 {"doc": 1440, "vw": 1440}
+[PASS] 1440x900 1 선택해도 지도 배치·배율·스크롤 불변, 선택=P1 ["P1"]
+[FAIL] 1440x900 FATAL 경로 실행 중단 "Error(\"Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '#panel [data-act=read]:visible' is not a valid selector.\\n    at eval (eval at evaluate (:290:30), <anonymous>:2:22)\\n    at UtilityScript.evaluate (<anonymous>:297:18)\\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\")"
+[PASS] 390x844 0 첫 HTTP 응답 본문 SHA = 원본 파일 SHA {"status": 200, "bytes": 33837, "sha": "d0201cfa16bf5be4b17c921dac5c5fb1ab4211fcc480ea812a879245af787723"}
+[PASS] 390x844 1 초기: 목적 문장 표시(가림·잘림 없음) {"exists": true, "w": 313, "h": 43.375, "top": 65.28125, "bottom": 108.65625, "inVp": true, "inClip": true, "uncovered": true, "hit": "purposeTxt", "textClipped": false, "clip": null, "ok": true}
+[OBS ] 390x844 1 초기 지도 시야 안 대상 {"X1": true, "P1": true, "X2": false}
+[PASS] 390x844 1 초기: 가로 넘침 없음 {"doc": 390, "vw": 390}
+[PASS] 390x844 1 선택해도 지도 배치·배율·스크롤 불변, 선택=P1 ["P1"]
+[FAIL] 390x844 FATAL 경로 실행 중단 "Error(\"Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '#panel [data-act=read]:visible' is not a valid selector.\\n    at eval (eval at evaluate (:290:30), <anonymous>:2:22)\\n    at UtilityScript.evaluate (<anonymous>:297:18)\\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\")"
+== failed 2 fatal None file_unchanged True
