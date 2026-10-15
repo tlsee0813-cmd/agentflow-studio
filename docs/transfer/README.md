@@ -2,6 +2,7 @@
 
 이 브랜치는 세션 간 원본 파일을 전달하는 공간이다. 제품 배포나 현재 연구 상태의 별도 사본이 아니다.
 
+- [책임 변화·후속 요청 cycle07 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a738280b994b4872ada81574850747e291bc1418/docs/cycles/2026-10-16-change-record-07/RESULT.md)
 - [목적·역할 cycle06 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d17667c1c519492f6edf8ea064a9f87b5d51fc12/docs/cycles/2026-10-16-purpose-06/RESULT.md)
 - [구성 지도 cycle05 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9b4a422f4e46085acb0841e9d9201c7ff86d6b81/docs/cycles/2026-10-16-composition-05/RESULT.md)
 - [현재 상태와 다음 범위](https://github.com/tlsee0813-cmd/agentflow-studio/blob/checkpoint/2026-10-15/docs/cycles/ACTIVE.md)
@@ -11,6 +12,9 @@
 
 | 묶음 | 고정 원본 | 읽는 순서와 범위 |
 |---|---|---|
+| cycle07 작성자 v0 | [원본27파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/9ec6a58398c95a4ad5617f50eb16d2aa98052a4a/docs/transfer/change-record-07/author-v0) | 첫6FAIL 및 뒤의작성자실행·PNG4·원본코드보존. 준비문 수정방향 선결정은fix1에서 정정 |
+| cycle07 작성자 fix1 | [준비문3줄 정정·원본14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/0dfadba788e0f2f035bbe51b899b9c02e4260e45/docs/transfer/change-record-07/author-fix1) | HTML42,420B/SHA d10e7dca… 단일75 PASS·child/collector0. 값존재와전체가독성은구별 |
+| cycle07 fix1 독립 관측 | [원시기록·PNG4·35파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0) | 최신run03 단일6장면·60 PASS·실제child/collector0. 최초실패보존, payload34/34 bytesSHA·원격tree일치. launcher는자기종료전전파기록이며별도외부실측아님 |
 | cycle06 목적·역할 작성자 v0 | [원본 45파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/d16e66742fd487ef11a776fedb5b76fd35e964ea/docs/transfer/purpose-06/author-v0) | 첫 검사 오류·실제 비초기 행높이 결함·수정 후 실행을 모두 보존. 원격45/45 바이트 일치 |
 | cycle06 목적·역할 작성자 fix1 | [HTML·기본문·PNG·검사 원본 13파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/fbea41f245c4020bc044c7e0c7502d106fc900ae/docs/transfer/purpose-06/author-fix1) | ‘정보 없음’을 ‘미결정’으로 단정한 네 문구만 수정. 원격13/13 바이트 일치. 배율/중심 측정의 한계는 통합 결과 참조 |
 | cycle06 fix1 독립 관측 | [원본 24파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1) | 최신 run02 단일 6장면·39단언, 실제 child/collector 0. computed 배율·세 대상 좌표·근거 닫힘·기본 준비문과 요청 칸 편집. 측정기 첫 실패·합성 해시 probe 보존. 원격 payload23/23 bytes/SHA 일치 |
@@ -39,3 +43,6 @@ cycle05 대표 첫 화면: [1440×900](https://github.com/tlsee0813-cmd/agentflo
 
 
 cycle06 대표 화면: [첫 화면1440](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/initial-1440.png) · [첫 화면390](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/initial-390.png) · [390 역할·조건 읽기](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/role-condition-390.png) · [편집 전 준비문](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/prep-default-1440.png). N01은 개발자 합성 초기 구상이다. 외부 실제 작업 기록 후보는 통합 판단의 다음 입력으로 구별하며, 이 시안에서 실제 요구 변경이나 AI 수행을 검증했다고 쓰지 않는다.
+
+## cycle07 바로 보는 화면
+[1440 초기 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/initial-1440.png) · [변경 전 비교](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/comparison-before-1440.png) · [390 후속 읽기](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/390-P3-follow.png) · [390 편집 전 준비문](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/prep-default-P1-390.png). 좁은 준비 이미지는 입력칸 내부를 스크롤한 끝부분이며 모든 문장이 동시에 보였다는 증거가 아니다.
