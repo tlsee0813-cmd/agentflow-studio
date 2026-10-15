@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src data:">
+<title>SPATIAL101 두 안 비교</title>
+<style>
+:root{--ink:#22223a;--muted:#62627c;--line:#dcdbe8;--paper:#fff;--bg:#f6f6fb;--accent:#5b4bd6;--soft:#efedfc;--warn:#9a520f;--warnbg:#fdf3e7;--ok:#2f6d47;--new:#7a2fe0}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:var(--ink);background:var(--bg)}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:4px 10px;color:var(--ink)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid #a99cff;outline-offset:2px}
+h2{font-size:16px;margin:0 0 6px}h3{font-size:14px;margin:0 0 3px}h4{font-size:13px;margin:12px 0 4px}
+.muted{color:var(--muted);font-size:12px}
+.tag{font-size:11px;border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap;font-weight:400}
+.have{background:#e5f2ea;color:var(--ok)}.prop{border:1px dashed var(--new);color:var(--new)}
+.top{display:flex;align-items:center;gap:8px 12px;padding:8px 14px;background:var(--paper);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.top h1{font-size:15px;margin:0}
+.mode button[aria-pressed=true]{background:var(--soft);border-color:var(--accent);font-weight:600}
+.bar2{display:flex;align-items:center;gap:8px 12px;padding:6px 14px;background:#fbfbfe;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.crumb{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.crumb a{color:var(--accent);cursor:pointer;text-decoration:underline}
+.layer{font-size:12px;background:var(--soft);color:var(--accent);border-radius:99px;padding:1px 8px}
+.cur{font-size:12px}.right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.attn{background:var(--warnbg);color:var(--warn);border-color:#efc58f}
+.pop{position:absolute;z-index:30;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px #0002;padding:10px;min-width:260px}
+.pop button{display:block;width:100%;text-align:left;margin:4px 0}
+.app{display:grid;min-height:calc(100vh - 92px)}
+.app.A{grid-template-columns:230px minmax(0,1fr) 320px}.app.B,.app.full{grid-template-columns:minmax(0,1fr)}
+main{padding:14px;min-width:0}
+aside.tree{background:var(--paper);border-right:1px solid var(--line);padding:10px;overflow:auto}
+aside.detail{background:var(--paper);border-left:1px solid var(--line);padding:12px;overflow:auto}
+.tree ul{list-style:none;margin:0;padding-left:14px}.tree>ul{padding-left:0}
+.tree a{display:block;padding:3px 6px;border-radius:6px;cursor:pointer;color:var(--ink);text-decoration:none}
+.tree a.here{background:var(--soft);font-weight:600}.tree .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn);margin-left:5px}
+.next{background:var(--soft);border-radius:8px;padding:8px 10px;margin:6px 0}
+.status{font-size:12px;color:var(--muted)}.status.warn{color:var(--warn)}
+.canvas{position:relative;background:#fbfbfe;border:1px solid var(--line);border-radius:12px;height:420px;overflow:auto}
+.inner{position:relative;width:980px;height:640px}
+svg.lines{position:absolute;inset:0;width:980px;height:640px;pointer-events:none}
+.card{position:absolute;width:210px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:9px 10px;box-shadow:0 1px 2px #0001;cursor:pointer}
+.card.sel{border-color:var(--accent);box-shadow:0 0 0 3px #d8d2ff}
+.card p{margin:2px 0;color:var(--muted);font-size:12px}
+.card.blocked{border-left:4px solid var(--warn)}
+.card.proposal{border-style:dashed;border-color:var(--new);background:#faf6ff;cursor:default}
+.card .row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.card .ttl{all:unset;font-weight:600;cursor:pointer;color:var(--ink)}
+.card .ttl:hover{text-decoration:underline}
+.under{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-top:6px}
+.mini{position:relative;flex:none;width:140px;height:92px;background:#fff;border:1px solid var(--line);border-radius:6px;cursor:pointer;overflow:hidden}
+svg.lines text{paint-order:stroke;stroke:#fbfbfe;stroke-width:5px}
+.mini i{position:absolute;background:#d2cbff;border-radius:2px}
+.mini b{position:absolute;border:2px solid var(--accent);border-radius:3px;pointer-events:none}
+.legend{display:flex;gap:4px 14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.listview{display:none}
+.lrow{display:flex;gap:8px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:6px;flex-wrap:wrap}
+.lrow.sel{border-color:var(--accent);box-shadow:0 0 0 2px #d8d2ff}.lrow .grow{flex:1;min-width:140px}
+.lrow code{font-size:11px;color:var(--muted)}.lrow p{margin:2px 0}
+.quick{display:flex;gap:6px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.quick input{border:1px solid var(--line);border-radius:8px;padding:6px 9px;flex:1;min-width:180px}
+.quick select{border:1px solid var(--line);border-radius:8px;padding:5px}
+.projects{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.pcard{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer}
+.work{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;max-width:900px}
+.work section{border-top:1px solid var(--line);padding-top:6px;margin-top:10px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}.box{border:1px solid var(--line);border-radius:8px;padding:8px}
+.box.ext{border-style:dashed}
+.empty{background:var(--paper);border:1px dashed var(--line);border-radius:12px;padding:22px;max-width:560px}
+.empty textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+.help{font-size:12px;color:var(--muted);margin-top:8px}
+.info{background:var(--paper);border:1px solid var(--accent);border-radius:10px;padding:10px;margin-top:10px}
+.toolbar{display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap;align-items:center}
+.toolbar input{border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+.toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#22223a;color:#fff;padding:8px 14px;border-radius:8px;display:none;z-index:50;max-width:90vw}
+.drawer-btn{display:none}
+@media (max-width:760px){
+  .app.A{grid-template-columns:minmax(0,1fr)}
+  aside.tree{display:none}
+  aside.tree.open{display:block;position:fixed;top:0;bottom:0;left:0;width:78%;z-index:40;box-shadow:4px 0 16px #0003}
+  .drawer-btn{display:inline-block}
+  aside.detail{position:fixed;left:0;right:0;bottom:0;max-height:52vh;border-top:1px solid var(--line);box-shadow:0 -6px 16px #0002;z-index:20;display:none}
+  aside.detail.open{display:block}
+  .canvas,.under{display:none}.listview{display:block}
+  .split{grid-template-columns:1fr}.right{margin-left:0}
+  .lrow button{min-height:44px;min-width:56px}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>SPATIAL101 · 화면 구조 두 안 <span class="muted">(검토용 시안 · 가상 데이터 · 저장·네트워크 없음)</span></h1>
+  <span class="mode" role="group" aria-label="안 선택">
+    <button id="mA" aria-pressed="true">A 선택 우선 · 고정 트리 + 3단</button>
+    <button id="mB" aria-pressed="false">B 진입 우선 · 공간 + 작업 전용 화면</button>
+  </span>
+</div>
+<div class="bar2">
+  <button class="drawer-btn" id="drawer" aria-label="트리 열기">☰ 트리</button>
+  <nav class="crumb" id="crumb" aria-label="경로 (계층 위치)"></nav>
+  <span class="right">
+    <button class="cur" id="cur" title="이어가는 작업은 ‘이 작업 이어서 하기’로만 바뀝니다. 지도 이동으로 바뀌지 않아요."></button>
+    <button class="attn" id="attn" aria-haspopup="true"></button>
+  </span>
+</div>
+<div class="app A" id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+/* Read-only demo state. Everything below is fictional; nothing is saved and there is no network (CSP connect-src 'none').
+ * 현재 = exists in the app at 2a40ac3d; 제안 = design proposal, not implemented. */
+const H = '<span class="tag have" title="지금 앱(2a40ac3d)에 있는 기능">현재</span>';
+const P = '<span class="tag prop" title="설계 제안 · 아직 없음">제안</span>';
+const NEEDS = new Set(['question', 'report']); // statuses that need the user's decision or review
+const projects = [
+  {id: 'P_kiln', name: '도자기 공방 원데이 클래스 예약', brief: '공방 원데이 클래스를 온라인으로 예약받는 사이트', updated: '오늘 10:20',
+    recent: '오늘 10:20 · ‘확인 대기 표시’에 구현 보고를 붙여넣음 (앱 미검증)',
+    areas: [
+      {id: 'A_book', name: '예약', note: '예약받기 · 확정은 공방이 확인한 뒤', x: 40, y: 40, sub: [{id: 'S_wait', name: '대기자 처리', note: '빈자리가 나면 대기자에게 알리기 (구상만)'}],
+        tasks: [
+          {id: 'T_form', title: '접수 화면 입력 항목 설계', st: 'exported', status: '작업문 내보냄 · 실행 여부 모름',
+            next: '개발 도구에서 결과가 돌아오면 ‘결과 붙여넣기’로 가져오세요.', instr: '접수 화면의 입력 항목 설계만 정리해 주세요. 코드 수정과 배포는 하지 마세요.',
+            log: ['10:05 작업문 복사함'], ext: null, bases: ['D2 사용자 확정 · 배포는 하지 않는다']},
+          {id: 'T_pend', title: '확인 대기 표시', st: 'report', status: '구현 보고 도착 · 앱 미검증',
+            next: '보고를 요청과 대조하고, 확인 못 한 동작은 다음 요청으로 남기세요.', instr: '접수 직후 ‘확인 대기’로 보이게 해 주세요.',
+            log: ['09:40 작업문 복사함', '10:20 보고 붙여넣음'], ext: '보고문: “확인 대기 문구 추가, 테스트 통과” — 외부 도구의 주장', bases: ['D3 사용자 답변 · 공방 확인 뒤 확정']}]},
+      {id: 'A_pay', name: '결제', note: '현장 결제 또는 카드 결제 — 미정', x: 440, y: 40, sub: [],
+        tasks: [{id: 'T_paym', title: '결제 방식 정하기', st: 'question', status: '제품 선택 항목 있음',
+          next: '카드 결제와 현장 결제 중 하나를 고르세요. 고르기 전까지 결제 화면 요청은 보류돼요.', instr: null, log: ['어제 질문 생김'], ext: null, bases: []}]},
+      {id: 'A_sms', name: '알림 문자', note: '예약 확정 후 문자 안내', x: 440, y: 300, sub: [], tasks: []},
+      {id: 'A_work', name: '작품 소개', note: '', x: 40, y: 300, sub: [], tasks: []}],
+    rel: [['A_book', 'A_sms', '흐름', '확정되면 알림'], ['A_book', 'A_pay', '먼저 필요', '결제는 예약 뒤']]},
+  {id: 'P_csv', name: '설문 CSV 정리', brief: '로컬 CSV 설문 응답 확인', updated: '어제', recent: '어제 · 영역 추가',
+    areas: [{id: 'A_rows', name: '응답 정리', note: '중복 처리 정책 미정', x: 40, y: 40, sub: [], tasks: []}], rel: []}];
+
+const S = {mode: 'A', view: 'projects', pid: null, aid: null, tid: null, sel: null, info: null, empty: false, q: '',
+  current: {pid: 'P_kiln', aid: 'A_book', tid: 'T_pend'}, // the work the user continues: changed only by an explicit button
+  draftTarget: 'A_book',                                   // where a new request goes: changed only by the user's own choice
+  vs: {}};                                                 // per-layer view state (selection, scroll), restored on return
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const proj = () => projects.find(p => p.id === S.pid);
+const area = () => proj()?.areas.find(a => a.id === S.aid);
+const task = () => area()?.tasks.find(t => t.id === S.tid);
+const findTask = (pid, tid) => projects.find(p => p.id === pid)?.areas.flatMap(a => a.tasks.map(t => ({a, t}))).find(x => x.t.id === tid);
+const attention = p => p ? p.areas.flatMap(a => a.tasks.filter(t => NEEDS.has(t.st)).map(t => ({a, t}))) : [];
+const layerKey = () => `${S.mode}|${S.pid}|${S.view === 'area' ? S.aid : ''}`;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 3200); }
+
+/* Navigation. Moving changes only what is shown: never the continued work, the request target or any permission. */
+function saveLayer() { if (S.view === 'space' || S.view === 'area') { const c = $('.canvas'); S.vs[layerKey()] = {sel: S.sel, x: c?.scrollLeft || 0, y: c?.scrollTop || 0}; } }
+function go(view, ids = {}) {
+  saveLayer(); closePop();
+  Object.assign(S, ids, {view, info: null});
+  const v = S.vs[layerKey()]; S.sel = (view === 'space' || view === 'area') && v ? v.sel : null;
+  render();
+  if (v) { const c = $('.canvas'); if (c) { c.scrollLeft = v.x; c.scrollTop = v.y; drawViewport(); } }
+  focusMain();
+}
+function up() {
+  if (S.view === 'task') go('area', {tid: null}); else if (S.view === 'area') go('space', {aid: null}); else if (S.view === 'space') go('projects', {pid: null});
+}
+function focusMain() {
+  setTimeout(() => {
+    const now = document.activeElement; if (now && now !== document.body && document.contains(now)) return; // the user already moved focus
+    const t = S.sel && (document.querySelector(`.card[data-id="${S.sel}"]`) || document.querySelector(`.lrow[data-id="${S.sel}"] button`)); (t && t.offsetParent ? t : document.querySelector('main h2'))?.focus?.(); }, 0);
+}
+const LAYER = {projects: '모든 프로젝트', space: '1층 · 프로젝트 전체 (영역들)', area: '2층 · 영역 안 (요청·작업)', task: '작업'};
+
+function renderBar() {
+  const c = $('#crumb'); c.innerHTML = '';
+  const add = (label, fn) => {
+    if (c.children.length) c.append(el('span', '', '›'));
+    const a = el(fn ? 'a' : 'strong', '', label);
+    if (fn) { a.tabIndex = 0; a.onclick = fn; a.onkeydown = e => { if (e.key === 'Enter') fn(); }; } else a.setAttribute('aria-current', 'location');
+    c.append(a);
+  };
+  add('모든 프로젝트', S.view === 'projects' ? null : () => go('projects', {pid: null, aid: null, tid: null}));
+  if (S.pid) add(proj().name, S.view === 'space' ? null : () => go('space', {aid: null, tid: null}));
+  if (S.aid) add(area().name, S.view === 'area' ? null : () => go('area', {tid: null}));
+  if (S.tid) add(task().title, null);
+  c.append(el('span', 'layer', LAYER[S.view]));
+  const cur = findTask(S.current.pid, S.current.tid), cb = $('#cur');
+  cb.innerHTML = `이어가는 작업: <b>${cur.t.title}</b> ${H}`;
+  cb.onclick = () => go('task', {pid: S.current.pid, aid: cur.a.id, tid: cur.t.id});
+  const n = attention(proj()).length, b = $('#attn');
+  b.style.display = S.pid ? '' : 'none'; b.innerHTML = `판단 필요 <b>${n}</b> <span class="muted">(앱 기록 기준)</span>`;
+  b.onclick = e => { e.stopPropagation(); togglePop(b); };
+  $('#drawer').style.display = S.mode === 'A' && S.view !== 'projects' ? '' : 'none';
+}
+/* Attention list: every area of the open project, so a blockage elsewhere is not missed. Opening one is an explicit choice. */
+function togglePop(anchor) {
+  if ($('.pop')) return closePop();
+  const p = el('div', 'pop'); p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', '판단 필요 목록');
+  p.append(el('div', 'muted', `모든 영역의 질문과 미검증 보고 ${P}`));
+  for (const {a, t} of attention(proj())) { const b = el('button', '', `<b>${a.name}</b> · ${t.title}<br><span class="status warn">${t.status}</span>`); b.onclick = () => go('task', {aid: a.id, tid: t.id}); p.append(b); }
+  const r = anchor.getBoundingClientRect(); p.style.top = (r.bottom + scrollY + 4) + 'px'; p.style.left = Math.max(8, Math.min(r.left, innerWidth - 290)) + 'px';
+  document.body.append(p); p.querySelector('button')?.focus();
+}
+function closePop() { $('.pop')?.remove(); }
+
+function render() {
+  renderBar();
+  const app = $('#app'); app.innerHTML = '';
+  if (S.view === 'projects') { app.className = 'app full'; app.append(projectsView()); return; }
+  if (S.mode === 'A') {
+    app.className = 'app A';
+    const m = el('main'), d = el('aside', 'detail'); d.setAttribute('aria-label', '상세');
+    app.append(treeView(), m, d);
+    if (S.view === 'task') { m.append(workView()); d.append(taskSide()); }
+    else { m.append(layerView()); d.append(detailView()); if (S.sel) d.classList.add('open'); }
+  } else {
+    app.className = 'app B';
+    const m = el('main'); app.append(m);
+    m.append(S.view === 'task' ? workView() : layerView());
+  }
+  drawViewport();
+}
+
+function projectsView() {
+  const m = el('main');
+  m.append(el('h2', '', `프로젝트 ${H}`)); m.querySelector('h2').tabIndex = -1;
+  const tb = el('div', 'toolbar'), s = el('input');
+  s.placeholder = '프로젝트 검색'; s.value = S.q; s.setAttribute('aria-label', '프로젝트 검색');
+  s.oninput = () => { S.q = s.value; render(); const i = $('.toolbar input'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); };
+  const e = el('button', '', S.empty ? '예시 프로젝트 보기' : '빈 첫 화면 보기'); e.id = 'toggle-empty';
+  e.onclick = () => { S.empty = !S.empty; render(); };
+  tb.append(s, el('span', 'muted', '최근 수정순'), e); m.append(tb);
+  const list = S.empty ? [] : projects.filter(p => p.name.includes(S.q));
+  if (!list.length) {
+    m.append(el('div', 'empty', S.empty ? `<h3>무엇을 만들고 싶나요?</h3>
+      <p class="muted">목적을 한두 문장으로 적으면 시작돼요. 영역은 나중에 필요할 때 나누면 돼요. ${H}</p>
+      <textarea rows="2" aria-label="프로젝트 목적" placeholder="예: 공방 원데이 클래스를 온라인으로 예약받고 싶어요"></textarea>
+      <p><button class="primary" disabled title="시안에서는 만들지 않아요">시작하기</button> <button disabled>예시 둘러보기</button></p>
+      <p class="muted">할 일을 이미 알면 목적 없이 바로 첫 요청을 써도 돼요. ${H}</p>` : '<h3>검색 결과가 없어요</h3>'));
+    return m;
+  }
+  const g = el('div', 'projects');
+  for (const p of list) {
+    const n = attention(p).length;
+    const c = el('div', 'pcard', `<h3>${p.name}</h3><p class="muted">${p.brief}</p><p class="status">영역 ${p.areas.length}개 · ${p.updated}</p>${n ? `<p class="status warn">판단 필요 ${n}건 ${P}</p>` : ''}`);
+    c.tabIndex = 0; c.dataset.id = p.id; c.setAttribute('role', 'link');
+    c.onclick = () => go('space', {pid: p.id}); c.onkeydown = ev => { if (ev.key === 'Enter') go('space', {pid: p.id}); };
+    g.append(c);
+  }
+  m.append(g); return m;
+}
+
+/* A: fixed tree = the containment path, always visible, with blockage dots on every area. */
+function treeView() {
+  const t = el('aside', 'tree'); t.setAttribute('aria-label', '프로젝트 트리');
+  t.append(el('p', 'muted', `트리 ${P} · 포함 관계만 보여요`));
+  const p = proj(), ul = el('ul'), li = el('li');
+  const top = el('a', S.view === 'space' ? 'here' : '', p.name); top.onclick = () => go('space', {aid: null, tid: null});
+  li.append(top); const ul2 = el('ul');
+  for (const a of p.areas) {
+    const l = el('li'), blocked = a.tasks.some(x => NEEDS.has(x.st));
+    const x = el('a', S.aid === a.id && S.view === 'area' ? 'here' : '', a.name + (blocked ? '<span class="dot" title="판단 필요"></span>' : ''));
+    x.onclick = () => go('area', {aid: a.id, tid: null}); l.append(x);
+    if (S.aid === a.id) {
+      const u3 = el('ul');
+      for (const tk of a.tasks) { const y = el('a', S.tid === tk.id ? 'here' : '', tk.title); y.onclick = () => go('task', {aid: a.id, tid: tk.id}); const yl = el('li'); yl.append(y); u3.append(yl); }
+      for (const s of a.sub) u3.append(el('li', '', `<span class="muted">${s.name}</span> ${P}`));
+      l.append(u3);
+    }
+    ul2.append(l);
+  }
+  li.append(ul2); ul.append(li); t.append(ul);
+  t.querySelectorAll('a').forEach(a => { a.tabIndex = 0; a.addEventListener('keydown', e => { if (e.key === 'Enter') a.click(); }); });
+  $('#drawer').onclick = () => t.classList.toggle('open');
+  return t;
+}
+
+function items() {
+  if (S.view === 'space') return proj().areas.map(a => ({id: a.id, kind: 'area', o: a, x: a.x, y: a.y}));
+  const a = area();
+  return [...a.tasks.map((t, i) => ({id: t.id, kind: 'task', o: t, x: 40 + i * 320, y: 40})),
+    ...a.sub.map((s, i) => ({id: s.id, kind: 'sub', o: s, x: 40 + i * 320, y: 210}))];
+}
+const blockedOf = it => it.kind === 'area' ? it.o.tasks.some(t => NEEDS.has(t.st)) : it.kind === 'task' && NEEDS.has(it.o.st);
+function cardBody(it) {
+  const o = it.o, b = blockedOf(it);
+  if (it.kind === 'area') return `<p>${o.note || '구상 미기재'}</p><p class="status ${b ? 'warn' : ''}">요청 ${o.tasks.length}개${b ? ' · 판단 필요' : ''}${o.sub.length ? ` · 하위 구상 ${o.sub.length} ${P}` : ''}</p>`;
+  if (it.kind === 'task') return `<p class="status ${b ? 'warn' : ''}">${o.status}</p>`;
+  return `<p>${o.note}</p><p class="status">사용자가 만들 때만 생기는 한 층 ${P}</p>`;
+}
+const nameOf = it => it.o.name || it.o.title;
+/* A = select first: click selects, the right panel reads the selection, a separate action opens the lower layer.
+ * B = enter first: one click on the card (title/arrow) opens the lower layer; information is a separate ⓘ button. */
+function activate(it, how) {
+  if (it.kind === 'sub') return toast('하위 구상은 제안이에요. 지금 앱에는 없고, 쓸모 있을 때 사용자가 한 층만 만드는 방식을 검토 중이에요.');
+  if (S.mode === 'A' && how !== 'open' && S.sel !== it.id) { S.sel = it.id; render(); focusMain(); return; }
+  if (it.kind === 'area') go('area', {aid: it.id, tid: null}); else go('task', {tid: it.id});
+}
+function showInfo(it) { S.info = S.info === it.id ? null : it.id; render(); setTimeout(() => $('.info')?.focus(), 0); }
+
+function layerView() {
+  const w = el('div'), p = proj(), isSpace = S.view === 'space';
+  w.append(el('h2', '', isSpace ? `${p.name} <span class="muted">목적: ${p.brief}</span> ${H}` : `${area().name} <span class="muted">구상: ${area().note || '구상 미기재'}</span> ${H}`));
+  w.querySelector('h2').tabIndex = -1;
+  const att = attention(p), here = isSpace ? att[0] : area().tasks.filter(t => NEEDS.has(t.st)).map(t => ({a: area(), t}))[0];
+  const nx = el('div', 'next');
+  if (here) { nx.innerHTML = `<b>지금 할 일</b> ${P} · ${here.a.name} — ${here.t.title}: ${here.t.next} `; const b = el('button', '', '이 작업 보기'); b.onclick = () => go('task', {aid: here.a.id, tid: here.t.id}); nx.append(b); }
+  else nx.innerHTML = `<b>지금 할 일</b> ${P} · 이 영역에서 판단할 일은 없어요.${area().tasks.length ? '' : ` 첫 요청을 쓰거나 ‘무엇을 요청할지 같이 정하기’로 시작하세요. ${H}`}`;
+  w.append(nx);
+  if (isSpace) w.append(el('p', 'muted', `최근 변경: ${p.recent} ${H} · 전체 이력은 ‘지난 요청과 결과’에서 ${H}`));
+  else if (att.some(x => x.a.id !== S.aid)) w.append(el('p', 'status warn', `다른 영역에도 판단할 일 ${att.filter(x => x.a.id !== S.aid).length}건 · 위 ‘판단 필요’에서 보기 ${P}`));
+  // Quick request for people who already know what they want. The target is the user's own choice, shown; never the map position.
+  const qk = el('div', 'quick', `<b>빠른 요청</b> ${H}`);
+  const s = el('select'); s.id = 'quick-target'; s.setAttribute('aria-label', '요청 대상 영역');
+  for (const a of p.areas) { const o = el('option', '', a.name); o.value = a.id; o.selected = a.id === S.draftTarget; s.append(o); }
+  s.onchange = () => { S.draftTarget = s.value; toast(`요청 대상을 ‘${p.areas.find(a => a.id === s.value).name}’로 직접 바꿨어요.`); render(); };
+  const inp = el('input'); inp.id = 'quick'; inp.placeholder = '이번에 맡기거나 바꿀 일 (Enter: 요청 입력칸에 넣기)';
+  inp.setAttribute('aria-label', '빠른 요청');
+  inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) { toast(`‘${p.areas.find(a => a.id === S.draftTarget).name}’ 요청 입력칸에 넣었어요 (시연 · 저장 안 함). 보내기 전 확인은 지금과 같아요.`); inp.value = ''; } };
+  qk.append(s, inp);
+  if (S.view === 'area' && S.draftTarget !== S.aid) qk.append(el('span', 'muted', `보고 있는 곳(${area().name})과 요청 대상이 달라요. 지도 이동은 대상을 바꾸지 않아요.`));
+  w.append(qk);
+
+  const c = el('div', 'canvas'), inner = el('div', 'inner'); c.append(inner);
+  c.setAttribute('aria-label', LAYER[S.view] + ' 지도');
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'lines'); inner.append(svg);
+  svg.innerHTML = '<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#9d93e0"/></marker></defs>';
+  const list = el('div', 'listview'); list.setAttribute('aria-label', LAYER[S.view] + ' 목록');
+  list.append(el('p', 'muted', `좁은 화면: 같은 항목을 ID와 함께 목록으로 ${H}`));
+  const its = items();
+  for (const it of its) {
+    const blocked = blockedOf(it);
+    const d = el('div', 'card' + (S.sel === it.id ? ' sel' : '') + (blocked ? ' blocked' : '') + (it.kind === 'sub' ? ' proposal' : ''));
+    d.style.left = it.x + 'px'; d.style.top = it.y + 'px'; d.tabIndex = 0; d.dataset.id = it.id;
+    d.setAttribute('aria-label', `${nameOf(it)}${blocked ? ', 판단 필요' : ''}`);
+    if (S.mode === 'A') {
+      d.setAttribute('aria-pressed', String(S.sel === it.id)); d.setAttribute('role', 'button');
+      d.innerHTML = `<h3>${nameOf(it)}</h3>` + cardBody(it);
+      d.onclick = () => activate(it, 'click'); d.ondblclick = () => activate(it, 'open');
+      d.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); activate(it, e.altKey ? 'open' : 'key'); } };
+    } else {
+      d.setAttribute('role', 'link');
+      d.innerHTML = `<h3><span class="ttl">${nameOf(it)}${it.kind === 'sub' ? '' : ' ↘'}</span></h3>` + cardBody(it);
+      const row = el('div', 'row'), ib = el('button', '', 'ⓘ 정보'); ib.setAttribute('aria-label', `${nameOf(it)} 정보 보기 (들어가지 않음)`); ib.tabIndex = -1;
+      ib.onclick = e => { e.stopPropagation(); showInfo(it); }; row.append(ib); d.append(row);
+      d.onclick = () => activate(it, 'open');
+      d.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); activate(it, 'open'); } else if (e.key === 'i') showInfo(it); };
+    }
+    inner.append(d);
+    const r = el('div', 'lrow' + (S.sel === it.id ? ' sel' : ''), `<span class="grow"><b>${nameOf(it)}</b> <code>${it.id}</code>${cardBody(it)}</span>`); r.dataset.id = it.id;
+    if (it.kind !== 'sub') {
+      if (S.mode === 'A') { const sb = el('button', '', '상세'); sb.onclick = () => activate(it, 'key'); r.append(sb); }
+      else { const ib = el('button', '', 'ⓘ'); ib.setAttribute('aria-label', `${nameOf(it)} 정보`); ib.onclick = () => showInfo(it); r.append(ib); }
+      const ob = el('button', 'primary', '열기'); ob.setAttribute('aria-label', `${nameOf(it)} 열기`); ob.onclick = () => activate(it, 'open'); r.append(ob);
+    }
+    list.append(r);
+  }
+  if (isSpace) for (const [f, t, kind, note] of p.rel) {
+    const A = p.areas.find(a => a.id === f), B = p.areas.find(a => a.id === t), ns = svg.namespaceURI;
+    const l = document.createElementNS(ns, 'line');
+    const x1 = A.x + 105, y1 = A.y + 50, x2 = B.x + 105, y2 = B.y + 50, dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy), k = 120 / len;
+    for (const [n, v] of [['x1', x1 + dx * k], ['y1', y1 + dy * k], ['x2', x2 - dx * k], ['y2', y2 - dy * k], ['stroke', '#9d93e0'], ['stroke-width', 2], ['stroke-dasharray', '6 4'], ['marker-end', 'url(#arr)']]) l.setAttribute(n, v);
+    svg.append(l);
+    const tx = document.createElementNS(ns, 'text'); tx.setAttribute('text-anchor', 'middle'); tx.setAttribute('font-size', 12); tx.setAttribute('fill', '#55557a');
+    [kind, note].forEach((line, n) => { const ts = document.createElementNS(ns, 'tspan'); ts.setAttribute('x', (x1 + x2) / 2 + (dy ? 70 : 0)); ts.setAttribute('y', (y1 + y2) / 2 + (dy ? 0 : -24) + n * 15); ts.textContent = line; tx.append(ts); });
+    svg.append(tx);
+  }
+  if (isSpace && p.rel.length) list.append(el('p', 'muted', '관계: ' + p.rel.map(([f, t, k]) => `${p.areas.find(a => a.id === f).name} → ${p.areas.find(a => a.id === t).name} (${k})`).join(', ')));
+  // Minimap = where the visible screen sits inside this layer only. Depth moves go through the path or the tree.
+  const mini = el('div', 'mini'); mini.title = '미니맵: 지금 보이는 화면 위치 (클릭해서 이동)'; mini.setAttribute('aria-hidden', 'true');
+  for (const it of its) { const i = el('i'); Object.assign(i.style, {left: it.x / 7 + 'px', top: it.y / 7 + 'px', width: '30px', height: '14px'}); mini.append(i); }
+  mini.append(el('b')); mini.onclick = e => { const r = mini.getBoundingClientRect(); c.scrollLeft = (e.clientX - r.left) * 7 - c.clientWidth / 2; c.scrollTop = (e.clientY - r.top) * 7 - c.clientHeight / 2; };
+  c.onscroll = drawViewport;
+  if (!its.length) {
+    // An empty layer offers the two existing starts instead of a blank map.
+    const empty = () => {
+      const e = el('div', 'empty', `<h3>이 영역에 아직 요청이 없어요</h3><p class="muted">구상 한 줄에서 시작해 질문 최대 1개를 거쳐 검토할 초안을 받거나, 바로 요청을 쓸 수 있어요.</p>`);
+      const g = el('button', 'primary', `무엇을 요청할지 같이 정하기 ${H}`); g.onclick = () => toast('지금 앱의 영역 안내 패널을 여는 자리예요.');
+      const q = el('button', '', `바로 요청 쓰기 ${H}`); q.onclick = () => $('#quick').focus();
+      e.append(g, ' ', q); return e;
+    };
+    const e = empty(); e.id = 'layer-empty'; e.style.margin = '30px';
+    inner.replaceChildren(e); inner.style.height = 'auto'; c.style.height = 'auto'; list.append(empty()); mini.style.display = 'none';
+  }
+  w.append(c, list);
+  const under = el('div', 'under'); w.append(under);
+  under.append(el('div', 'legend', `<span><b>경로</b>(위) = 계층 위치 ${H}</span><span><b>미니맵</b>(오른쪽 작은 상자) = 이 층 안에서 지금 보이는 화면 위치 ${P}</span><span><b>점선 화살표</b> = 영역 사이 관계(흐름·먼저 필요). 포함도, 실행 순서도 아님 ${H}</span>`), mini);
+  if (S.mode === 'B' && S.info) w.append(infoBox(its.find(i => i.id === S.info)));
+  w.append(el('p', 'help', S.mode === 'A'
+    ? '<b>A 선택 우선</b> · 클릭/Enter/Space = 선택(오른쪽 상세) · 선택된 카드에서 다시 클릭·Enter 또는 상세의 ‘열기’ = 한 층 들어가기 · 더블클릭·Alt+Enter = 바로 들어가기 · 방향키 = 선택 이동 · Backspace/Alt+↑ = 위층(선택·스크롤 복원) · / = 빠른 요청 · Esc = 선택 해제'
+    : '<b>B 진입 우선</b> · 카드 클릭/Enter = 바로 한 층 들어가기 · ⓘ 버튼 또는 i = 들어가지 않고 정보 보기 · 방향키 = 포커스 이동 · Backspace/Alt+↑ = 위층(위치 복원) · / = 빠른 요청 · Esc = 정보 닫기'));
+  return w;
+}
+function infoBox(it) {
+  const b = el('div', 'info'); b.tabIndex = -1; b.setAttribute('role', 'region'); b.setAttribute('aria-label', '정보');
+  b.innerHTML = `<b>${nameOf(it)}</b> <span class="muted">(정보만 · 들어가지 않음)</span>` + summary(it);
+  const x = el('button', '', '닫기'); x.onclick = () => { S.info = null; render(); }; b.append(x); return b;
+}
+function summary(it) {
+  const o = it.o;
+  if (it.kind === 'area') {
+    const nt = o.tasks.find(t => NEEDS.has(t.st)) || o.tasks[0];
+    return `<p><b>영역 구상</b> ${H}<br>${o.note || '구상 미기재'}</p><div class="next"><b>지금 할 일</b> · ${nt ? nt.next : `아직 요청이 없어요. ‘무엇을 요청할지 같이 정하기’ ${H}`}</div>`
+      + `<h4>요청 ${o.tasks.length}개</h4>` + o.tasks.map(t => `<p class="status ${NEEDS.has(t.st) ? 'warn' : ''}">${t.title} · ${t.status}</p>`).join('')
+      + `<details><summary>참고 후보 ${P}</summary><p class="muted">‘해결하려는 문제 → 참고 후보’ 대장을 나중에 연결할 자리예요. 등록은 채택·설치 승인이 아니에요. 지금은 비어 있어요.</p></details>`;
+  }
+  if (it.kind === 'task') return `<p class="status ${NEEDS.has(o.st) ? 'warn' : ''}">${o.status}</p><div class="next"><b>지금 할 일</b> · ${o.next}</div>`;
+  return `<p>${o.note}</p><p class="muted">층을 더 나누는 일은 사용자가 필요할 때만. 자동으로 만들지 않아요.</p>`;
+}
+function detailView() {
+  const d = el('div'), p = proj(), it = items().find(i => i.id === S.sel);
+  if (!it) {
+    d.append(el('p', 'muted', '항목을 클릭하면 여기에 요약이 보여요. 들어가지 않고도 지금 할 일과 막힌 이유를 볼 수 있어요.'));
+    d.append(el('h4', '', `최근 변경 ${H}`), el('p', 'muted', p.recent));
+    d.append(el('h4', '', `판단 필요 · 모든 영역 ${P}`));
+    for (const {a, t} of attention(p)) { const b = el('button', '', `${a.name} · ${t.title}`); b.onclick = () => go('task', {aid: a.id, tid: t.id}); d.append(b, el('br')); }
+    return d;
+  }
+  d.append(el('h2', '', nameOf(it)));
+  d.insertAdjacentHTML('beforeend', summary(it));
+  if (it.kind !== 'sub') { const b = el('button', 'primary', it.kind === 'area' ? '영역 열기 ↘' : '작업 열기 ↘'); b.id = 'open-selected'; b.onclick = () => activate(it, 'open'); d.append(b); }
+  const x = el('button', '', '닫기'); x.onclick = () => { S.sel = null; render(); }; d.append(' ', x);
+  return d;
+}
+
+function workView() {
+  const t = task(), a = area(), w = el('div', 'work');
+  const back = el('button', '', `← ${a.name} 영역으로`); back.id = 'back'; back.onclick = up; w.append(back);
+  w.append(el('p', 'muted', `${S.mode === 'A' ? 'A: 트리와 기준 패널을 둔 채 가운데서 작업을 엽니다' : 'B: 작업 전용 화면 (공간에서 한 단계 확장)'} · 여기 기능은 지금 앱의 ‘현재 작업’과 같아요 ${H}`));
+  const h = el('h2', '', t.title); h.tabIndex = -1; w.append(h);
+  w.append(el('p', 'status' + (NEEDS.has(t.st) ? ' warn' : ''), t.status));
+  const isCur = S.current.tid === t.id;
+  const cb = el('button', isCur ? '' : 'primary', isCur ? '이어가는 작업이에요' : '이 작업 이어서 하기'); cb.disabled = isCur; cb.id = 'continue';
+  cb.onclick = () => { S.current = {pid: S.pid, aid: a.id, tid: t.id}; toast('이어가는 작업을 바꿨어요 (명시 행동 · 시연).'); render(); };
+  w.append(cb, el('span', 'muted', isCur ? '' : ' 이 화면을 연 것만으로는 이어가는 작업이 바뀌지 않아요'));
+  w.append(el('div', 'next', `<b>지금 할 일</b> · ${t.next}`));
+  if (t.st === 'question') {
+    const s = el('section', '', `<h4>제품 선택 질문 ${H}</h4><p>카드 결제와 현장 결제 중 무엇으로 할까요?</p>`);
+    for (const l of ['카드 결제', '현장 결제', '모름', '보류']) { const b = el('button', '', l); b.onclick = () => toast(`‘${l}’ 답을 기록하는 자리예요 (시연 · 저장 안 함)`); s.append(b, ' '); }
+    w.append(s);
+  }
+  w.append(el('section', '', `<h4>이번 요청 원문 ${H}</h4><p>${t.instr || '<span class="muted">(아직 요청 없음 · 질문 답을 기다림)</span>'}</p>`));
+  const st = el('section', '', '<h4>상태 근거</h4>'), sp = el('div', 'split');
+  sp.append(el('div', 'box', `<b>앱 기록</b> ${H}<br>${t.log.join('<br>')}`),
+    el('div', 'box ext', `<b>외부 도구(Codex·Claude 등)</b><br>${t.ext ? t.ext + '<br><span class="status warn">앱이 확인한 것 아님</span>' : '실행 중인지·끝났는지 <b>알 수 없음</b>. 앱에 근거가 없어요.'}<br><span class="muted">실행 상태는 붙여넣은 결과 같은 근거가 있을 때만 표시 ${P}</span>`));
+  st.append(sp); w.append(st);
+  w.append(el('section', '', `<h4>작업문 전달 ${H}</h4><button disabled>작업문 복사</button> <button disabled>Markdown 저장</button> <span class="muted">복사해도 개발 도구가 실행되지는 않아요</span>`));
+  w.append(el('section', '', `<h4>결과 회수 ${H}</h4><button disabled>결과 붙여넣기</button> <button disabled>결과 파일 가져오기</button>${t.st === 'report' ? '<p class="status warn">보고 1건 · 앱 미검증. 요청과 대조 필요</p>' : ''}`));
+  const ai = el('section', '', '<h4>AI 도움</h4>');
+  const g1 = el('button', '', `다음 작업 구체화 ${H}`); g1.onclick = () => toast('지금 앱의 영역 안내(한 줄 구상 → 질문 최대 1개 → 검토할 초안)를 여는 자리예요.');
+  const g2 = el('button', '', `변경 영향 보기 ${P}`); g2.disabled = true; g2.title = '아직 없음';
+  const g3 = el('button', '', `인계 작업문 ${H}`); g3.onclick = () => toast('지금 앱의 작업문 만들기와 같아요.');
+  ai.append(g1, ' ', g2, ' ', g3, el('p', 'muted', '변경 영향(제안): 이 작업에 걸린 기준·관계를 공유하는 다른 영역 요청을 보여 주기만 함. 자동 수정 없음.'));
+  w.append(ai);
+  w.append(el('details', '', `<summary>지난 기록 펼치기 ${H}</summary><p class="muted">기본은 접혀 있어요. 전체 이력을 늘 펼치지 않아요.</p><p>${t.log.join('<br>')}</p>`));
+  return w;
+}
+function taskSide() {
+  const t = task(), d = el('div');
+  d.append(el('h2', '', '기준 · 출처'), el('p', 'muted', `이 작업에 걸린 사용자 결정과 원문 ${H}`));
+  for (const b of t.bases) d.append(el('p', '', b));
+  if (!t.bases.length) d.append(el('p', 'muted', '걸린 기준 없음'));
+  d.append(el('h4', '', `보류 · 다음 행동 ${H}`), el('p', '', t.next));
+  return d;
+}
+function drawViewport() {
+  const c = $('.canvas'), b = $('.mini b'); if (!c || !b) return;
+  const W = 980, Hh = 640, vw = Math.min(c.clientWidth, W), vh = Math.min(c.clientHeight, Hh); // the frame never exceeds the layer
+  Object.assign(b.style, {left: c.scrollLeft / 7 + 'px', top: c.scrollTop / 7 + 'px', width: vw / 7 + 'px', height: vh / 7 + 'px'});
+}
+addEventListener('resize', drawViewport);
+document.addEventListener('click', e => { if (!e.target.closest('.pop') && !e.target.closest('#attn')) closePop(); });
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  if (e.key === 'Escape') { if ($('.pop')) return closePop(); $('aside.tree')?.classList.remove('open'); if (S.info || S.sel) { S.info = null; S.sel = null; render(); } return; }
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.key === '/') { e.preventDefault(); $('#quick')?.focus(); }
+  else if (e.key === 'Backspace' || (e.altKey && e.key === 'ArrowUp')) { e.preventDefault(); up(); }
+  else if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key) && (S.view === 'space' || S.view === 'area') && !e.altKey) {
+    const its = items(), on = document.activeElement?.dataset?.id; let i = its.findIndex(x => x.id === (on || S.sel));
+    i = (i + (e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1) + its.length) % its.length; e.preventDefault();
+    if (S.mode === 'A') { S.sel = its[i].id; render(); }
+    document.querySelector(`.card[data-id="${its[i].id}"]`)?.focus();
+  }
+});
+function setMode(m) { saveLayer(); S.mode = m; S.sel = null; S.info = null; $('#mA').setAttribute('aria-pressed', String(m === 'A')); $('#mB').setAttribute('aria-pressed', String(m === 'B')); render(); }
+$('#mA').onclick = () => setMode('A'); $('#mB').onclick = () => setMode('B');
+render();
+</script>
+</body>
+</html>
