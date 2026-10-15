@@ -1,0 +1,162 @@
+{
+  "archive": "C:/Users/이준혁/Downloads/cycle03-fix1.zip",
+  "zipSHA256": "d5a90e0557ea232553f5308af950196d9d933cc2611a16dab9b5b2c9c6a7d423",
+  "destination": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\return-flow03-fix1",
+  "preExtractionDestinationAbsent": true,
+  "pathValidation": {
+    "safe": true,
+    "duplicatePaths": 0,
+    "symlinks": 0,
+    "entries": 13,
+    "directories": 2
+  },
+  "fileCount": 11,
+  "totalBytes": 325892.0,
+  "manifest": {
+    "listed": 10,
+    "matched": 10,
+    "missing": [],
+    "unlisted": [
+      "MANIFEST.sha256"
+    ]
+  },
+  "htmlSHA256Expected": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+  "htmlSHA256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+  "httpCopy": {
+    "path": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\cycle\\docs\\cycles\\2026-10-15-mixed-depth-01\\return-flow-study-fix1.html",
+    "sha256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e"
+  },
+  "files": [
+    {
+      "path": "FIX1_REPORT.md",
+      "bytes": 4146,
+      "sha256": "e9d075274bc38e01b6b50efba32fba07941812328beaa85854af591092447ed4",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "html_fix1.diff",
+      "bytes": 6737,
+      "sha256": "bf9cab3daed324fa3e86fbfb534bbdfcc5d8fbc1030274527ae14e758ec17be5",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/flow_log.json",
+      "bytes": 42675,
+      "sha256": "79c74a5679d7390ba732ac2f883e560a820583830212d6105d93859a247706ee",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/flow_log.txt",
+      "bytes": 1950,
+      "sha256": "44a863ff0f51fc39da4c1225c3bdbdf82b01c1cff1e0aaf842439fb81cb4ae77",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/run_record.txt",
+      "bytes": 608,
+      "sha256": "30f549f81e56673f9f5c31075fb9f35f366a4f36920a1c6da47039c3cb197bba",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/stdout.txt",
+      "bytes": 1950,
+      "sha256": "44a863ff0f51fc39da4c1225c3bdbdf82b01c1cff1e0aaf842439fb81cb4ae77",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "MANIFEST.sha256",
+      "bytes": 871,
+      "sha256": "58676f59ac5effe527e249732e0841b21c747a94e5a8fd8bcae3620ac6775f11",
+      "manifestListed": false,
+      "manifestMatch": null
+    },
+    {
+      "path": "png/default_1440x900.png",
+      "bytes": 146055,
+      "sha256": "51af9d166f180d0d397328be2d77345b773f3dba7d114514f2e9b3b17a084f3d",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "png/default_390x844.png",
+      "bytes": 78659,
+      "sha256": "feeca46b3560d73088aa80aae88ada8487098ae81728037b2125a63ed49bf1a8",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "return-flow-study.html",
+      "bytes": 42241,
+      "sha256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+      "manifestListed": true,
+      "manifestMatch": true
+    }
+  ],
+  "authorStartedRaw": "2026-10-16T02:11:59+0900",
+  "recordedVerdict": {
+    "exit_code": 0,
+    "failures": {}
+  },
+  "recordedRuns": [
+    {
+      "name": "d1440",
+      "info": {
+        "viewport": "1440x900",
+        "mobile_emulation": false,
+        "browser": "141.0.7390.37",
+        "url": "http://127.0.0.1:8766/return-flow-study.html",
+        "http_status": 200,
+        "zoom_browser": "100%",
+        "external_requests": [],
+        "console_errors": [],
+        "page_errors": [],
+        "external_source_roundtrip": "NOT_RUN (링크 존재·href만 확인, 클릭·외부 페이지 왕복 관측 안 함)"
+      },
+      "steps": 14,
+      "pass": 14,
+      "fail": 0
+    },
+    {
+      "name": "m390",
+      "info": {
+        "viewport": "390x844",
+        "mobile_emulation": true,
+        "browser": "141.0.7390.37",
+        "url": "http://127.0.0.1:8766/return-flow-study.html",
+        "http_status": 200,
+        "zoom_browser": "100%",
+        "external_requests": [],
+        "console_errors": [],
+        "page_errors": [],
+        "external_source_roundtrip": "NOT_RUN (링크 존재·href만 확인, 클릭·외부 페이지 왕복 관측 안 함)"
+      },
+      "steps": 14,
+      "pass": 14,
+      "fail": 0
+    }
+  ],
+  "recordedActualExit": 0,
+  "exitEvidence": "logs/run_record.txt",
+  "referencedCheckerSHA256": "5ec3234d306cc7eea16d04779ca4cd0ee3e976ffa61cd5f45c67a97e79c4b108",
+  "scriptChangeCheck": {
+    "scriptCountOld": 1,
+    "scriptCountNew": 1,
+    "equalAfterRestoringSingleDisplayString": true
+  },
+  "independentExecution": false,
+  "originalFolderModified": false,
+  "remoteWrites": false
+}

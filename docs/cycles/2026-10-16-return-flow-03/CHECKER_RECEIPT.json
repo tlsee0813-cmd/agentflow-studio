@@ -1,0 +1,327 @@
+{
+  "archive": "C:/Users/이준혁/Downloads/cycle03-checker-followup.zip",
+  "zipSHA256": "5457918e47478184d75c7d767a4494cac9949088010a4f4634614d5032203259",
+  "destination": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\return-flow03-checker-followup",
+  "preExtractionDestinationAbsent": true,
+  "pathValidation": {
+    "safe": true,
+    "duplicatePaths": 0,
+    "symlinks": 0,
+    "entries": 21,
+    "directories": 5
+  },
+  "fileCount": 16,
+  "totalBytes": 170627.0,
+  "manifest": {
+    "listed": 15,
+    "matched": 15,
+    "missing": [],
+    "unlisted": [
+      "MANIFEST.sha256"
+    ]
+  },
+  "files": [
+    {
+      "path": "check/flow_check.py",
+      "bytes": 25747,
+      "sha256": "5ec3234d306cc7eea16d04779ca4cd0ee3e976ffa61cd5f45c67a97e79c4b108",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "check/probe_fail_one_step.py",
+      "bytes": 1193,
+      "sha256": "84f699f159e213e2c67469e6315b0b7d2caa8f2bb023abf90ea08751fbd9f42f",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "check/run_exit_proof.sh",
+      "bytes": 1398,
+      "sha256": "6539e82a18b110525484ba128d3af0c302b3a8ffda44b0938f90b03c31294e59",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "FOLLOWUP_REPORT.md",
+      "bytes": 3902,
+      "sha256": "cdbbab2a346e8eeb1c16dcf54b6cb7c0cf41ab8b2783f6102c2db517b5f1b815",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/normal/flow_log.json",
+      "bytes": 42669,
+      "sha256": "65fd371c96188cd68410c133e65608060b636aa43f0a79a3031c89c7fe3bec9d",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/normal/flow_log.txt",
+      "bytes": 1950,
+      "sha256": "7c15e6b8e5f54bfd0efb096ead9b97557bd565f8b28d899448bd0b6d37589838",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/normal/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/normal/stdout.txt",
+      "bytes": 1950,
+      "sha256": "7c15e6b8e5f54bfd0efb096ead9b97557bd565f8b28d899448bd0b6d37589838",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/original_first_run/flow_log.json",
+      "bytes": 41114,
+      "sha256": "c8ace4e95949aa8d883674f424a7d9025c90e4a74823fdf11fdff013c1a8325f",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/original_first_run/flow_log.txt",
+      "bytes": 1828,
+      "sha256": "e94cbfa66806b7275e9d61a2b981349230da493fe105080e15e59fce7e7b63d9",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/probe_fail/flow_log.json",
+      "bytes": 42843,
+      "sha256": "481d2b9f5f2783847e8fbd48930ee409f4f440fbeb6e0489a11b38176da4c276",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/probe_fail/flow_log.txt",
+      "bytes": 2012,
+      "sha256": "2b3fedf35c041e9334e28f5da6abbf5fd6612c65e156e6aad5af7583d4a80327",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/probe_fail/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/probe_fail/stdout.txt",
+      "bytes": 2012,
+      "sha256": "2b3fedf35c041e9334e28f5da6abbf5fd6612c65e156e6aad5af7583d4a80327",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/process_exit.txt",
+      "bytes": 590,
+      "sha256": "337e341e8d1424bd8a8d44883687b6482c102b43a0ba3ae00170d17e9966dede",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "MANIFEST.sha256",
+      "bytes": 1419,
+      "sha256": "2982f8cbac643d44c6623b1362031e14276ea59d1dc5200a252c6530e0153f09",
+      "manifestListed": false,
+      "manifestMatch": null
+    }
+  ],
+  "recordedRuns": [
+    {
+      "name": "original_first_run",
+      "htmlSHA256": "7c07cea4db1c7049db8aa6d06814e7204c3ca28c482449f9b625668effa4254e",
+      "startedRaw": "2026-10-16T01:59:57+0900",
+      "verdict": null,
+      "viewports": [
+        {
+          "name": "d1440",
+          "steps": 14,
+          "pass": 14,
+          "fail": 0,
+          "closePositions": [
+            {
+              "step": 4,
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 0,
+                "after_close": 0
+              }
+            },
+            {
+              "step": "8.4",
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 0,
+                "after_close": 0
+              }
+            }
+          ]
+        },
+        {
+          "name": "m390",
+          "steps": 14,
+          "pass": 14,
+          "fail": 0,
+          "closePositions": [
+            {
+              "step": 4,
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 0,
+                "after_close": 168
+              }
+            },
+            {
+              "step": "8.4",
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 0,
+                "after_close": 168
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "normal",
+      "htmlSHA256": "f19011eb3b0b31d9ff57ba3fdd519eccb7a01e75ba789d3442f11f5b09778768",
+      "startedRaw": "2026-10-16T02:07:37+0900",
+      "verdict": {
+        "exit_code": 0,
+        "failures": {}
+      },
+      "viewports": [
+        {
+          "name": "d1440",
+          "steps": 14,
+          "pass": 14,
+          "fail": 0,
+          "closePositions": [
+            {
+              "step": 4,
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 0,
+                "after_close": 0
+              }
+            },
+            {
+              "step": "8.4",
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 0,
+                "after_close": 0
+              }
+            }
+          ]
+        },
+        {
+          "name": "m390",
+          "steps": 14,
+          "pass": 14,
+          "fail": 0,
+          "closePositions": [
+            {
+              "step": 4,
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 120,
+                "after_close": 120
+              }
+            },
+            {
+              "step": "8.4",
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 120,
+                "after_close": 120
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "probe_fail",
+      "htmlSHA256": "f19011eb3b0b31d9ff57ba3fdd519eccb7a01e75ba789d3442f11f5b09778768",
+      "startedRaw": "2026-10-16T02:07:55+0900",
+      "verdict": {
+        "exit_code": 1,
+        "failures": {
+          "d1440": [
+            "단계 4 FAIL"
+          ]
+        }
+      },
+      "viewports": [
+        {
+          "name": "d1440",
+          "steps": 14,
+          "pass": 13,
+          "fail": 1,
+          "closePositions": [
+            {
+              "step": 4,
+              "status": "FAIL",
+              "read_pos": {
+                "before_open": 0,
+                "after_close": 0
+              }
+            },
+            {
+              "step": "8.4",
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 0,
+                "after_close": 0
+              }
+            }
+          ]
+        },
+        {
+          "name": "m390",
+          "steps": 14,
+          "pass": 14,
+          "fail": 0,
+          "closePositions": [
+            {
+              "step": 4,
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 120,
+                "after_close": 120
+              }
+            },
+            {
+              "step": "8.4",
+              "status": "PASS",
+              "read_pos": {
+                "before_open": 120,
+                "after_close": 120
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actualProcessExitReported": {
+    "normal": 0,
+    "probe_fail": 1,
+    "evidence": "logs/process_exit.txt"
+  },
+  "firstRunHTMLPreserved": false,
+  "firstRunCheckerPreserved": false,
+  "independentExecution": false,
+  "originalFolderModified": false,
+  "remoteWrites": false
+}
