@@ -1,7 +1,7 @@
 # AgentFlow 활성 연구·검증 배정
 2026-10-16 갱신 · 단일 총괄: 현재 Codex 대화. 현재 상태는 여기만 갱신한다.
 
-## 현재: cycle07 통합 완료 · cycle08 구현 계약 고정
+## 현재: cycle07 통합 완료 · cycle08 Opus 시안 구현 진행
 [cycle07 결과](2026-10-16-change-record-07/RESULT.md): 실제 공개 사람–Copilot 기록에서 세 역할과 두 기존 호출의 책임 변화를 표현했다. 준비문이 과거 요청을 지금의 수정 방향으로 선결정하던 문제는 fix1의3문구로 정정했다. 독립 최신 단일6장면·60 PASS, 실제 child/collector0. 원시 기록·PNG·원격 회수 감사까지 완료했다. 사람 이해나 원 프로젝트 성공을 뜻하지 않는다.
 
 [cycle08 범위](2026-10-16-overview-08/BRIEF.md)는 같은 입력의 **첫 전체 조망→한 부분 상세→전체 맥락 복귀**다. 1280에서 카드 일부가 잘리고 반복된 책임 설명이 기본을 무겁게 하는 문제를 다룬다. 기존 기능·증거를 다시 만드는 범위가 아니다.
@@ -13,7 +13,8 @@
 | Astra High | 세 역할·두 기존 호출과 이동 사실이 축약에서 사라지는 반례 검토 완료 |
 | 6.1 Sol High | 원문 감사 완료. BFA5판 노드 표시 접기·React Flow 배율 조건/시야 API와 고정 코드 귀속을 구별. 총괄의 공식 복원 실제 조작·코드탭 관측을 별도 보강 |
 | 총괄 | [선택](2026-10-16-overview-08/DECISION.md)·[계약](2026-10-16-overview-08/IMPLEMENTATION.md) 고정. 간결한 기본 지도＋명시 상세·문맥별 위치/복귀 선택 |
-| Opus / Cloud | cycle07 완료. cycle08 구현·검사는 아직 미배정 |
+| [Opus](https://claude.ai/chat/c4b2aa44-1b79-4f2a-9a5a-1d412872b647) | 계약502d681…로 새 overview-study.html 구현·3폭×2흐름 작성자 관측 배정. 응답/실행 시작 확인, 원본 수령 전 |
+| Cloud | cycle07 종료. cycle08은 작성자 원본 고정 후 독립 관측 배정 |
 
 ## 공유 결과와 근거
 [cycle07 고정 작성자 fix1](https://github.com/tlsee0813-cmd/agentflow-studio/tree/0dfadba788e0f2f035bbe51b899b9c02e4260e45/docs/transfer/change-record-07/author-fix1) · [독립 원본 35파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0).
