@@ -1,0 +1,2860 @@
+{
+  "startedUTC": "2026-10-15T20:31:05.419275+00:00",
+  "sourceURL": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/fbea41f245c4020bc044c7e0c7502d106fc900ae/docs/transfer/purpose-06/author-fix1/purpose-study.html",
+  "sourcePath": "/workspace/browser-env/purpose-fix1/site/purpose-study.html",
+  "expectedSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "expectedBytes": 33944,
+  "plannedIDs": [
+    "1440/context-X2",
+    "390/context-X2"
+  ],
+  "completedIDs": [
+    "1440/context-X2",
+    "390/context-X2"
+  ],
+  "observations": [
+    {
+      "id": "1440/before-click/#panel [data-pick=\"P1\"]",
+      "data": {
+        "exists": true,
+        "text": "소개글 재사용 고르기",
+        "value": "",
+        "rect": {
+          "x": 1061,
+          "y": 234.59375,
+          "width": 151.203125,
+          "height": 37.6875,
+          "top": 234.59375,
+          "bottom": 272.28125,
+          "left": 1061,
+          "right": 1212.203125
+        },
+        "selfContentClip": null,
+        "clip": {
+          "left": 1041,
+          "top": 100.40625,
+          "right": 1440,
+          "bottom": 900
+        },
+        "visibleIntersection": {
+          "left": 1061,
+          "right": 1212.203125,
+          "top": 234.59375,
+          "bottom": 272.28125
+        },
+        "clips": [
+          {
+            "id": "panel",
+            "tag": "ASIDE",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 1041,
+              "top": 100.40625,
+              "right": 1440,
+              "bottom": 900
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 1098.80078125,
+            "y": 253.4375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn"
+            }
+          },
+          {
+            "x": 1136.6015625,
+            "y": 253.4375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn"
+            }
+          },
+          {
+            "x": 1174.40234375,
+            "y": 253.4375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 1075,
+            "y": 243.59375,
+            "width": 123.203125,
+            "height": 19,
+            "top": 243.59375,
+            "bottom": 262.59375,
+            "left": 1075,
+            "right": 1198.203125
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "1440/before-click/#panel .act.wide [data-act=\"read\"]",
+      "data": {
+        "exists": true,
+        "text": "역할 읽기 →",
+        "value": "",
+        "rect": {
+          "x": 1061,
+          "y": 556.625,
+          "width": 100.8125,
+          "height": 37.6875,
+          "top": 556.625,
+          "bottom": 594.3125,
+          "left": 1061,
+          "right": 1161.8125
+        },
+        "selfContentClip": null,
+        "clip": {
+          "left": 1041,
+          "top": 100.40625,
+          "right": 1440,
+          "bottom": 900
+        },
+        "visibleIntersection": {
+          "left": 1061,
+          "right": 1161.8125,
+          "top": 556.625,
+          "bottom": 594.3125
+        },
+        "clips": [
+          {
+            "id": "panel",
+            "tag": "ASIDE",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 1041,
+              "top": 100.40625,
+              "right": 1440,
+              "bottom": 900
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 1086.203125,
+            "y": 575.46875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn primary"
+            }
+          },
+          {
+            "x": 1111.40625,
+            "y": 575.46875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn primary"
+            }
+          },
+          {
+            "x": 1136.609375,
+            "y": 575.46875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn primary"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 1075,
+            "y": 565.625,
+            "width": 72.8125,
+            "height": 19,
+            "top": 565.625,
+            "bottom": 584.625,
+            "left": 1075,
+            "right": 1147.8125
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "1440/reader-initial",
+      "data": {
+        "reader": {
+          "top": 0,
+          "left": 0,
+          "max": 119,
+          "clientHeight": 800,
+          "scrollHeight": 919
+        },
+        "row": {
+          "exists": true,
+          "text": "행사 홈페이지\n옮길 대상 · 내용을 옮길 대상\n지도에서 위치 보기",
+          "value": null,
+          "rect": {
+            "x": 1063,
+            "y": 603.234375,
+            "width": 355,
+            "height": 80.0625,
+            "top": 603.234375,
+            "bottom": 683.296875,
+            "left": 1063,
+            "right": 1418
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 1041,
+            "top": 100.40625,
+            "right": 1440,
+            "bottom": 900
+          },
+          "visibleIntersection": {
+            "left": 1063,
+            "right": 1418,
+            "top": 603.234375,
+            "bottom": 683.296875
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 1041,
+                "top": 100.40625,
+                "right": 1440,
+                "bottom": 900
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 1151.75,
+              "y": 643.265625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 1240.5,
+              "y": 643.265625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 1329.25,
+              "y": 643.265625,
+              "hit": true,
+              "cover": {
+                "id": "row-X2",
+                "tag": "DIV",
+                "cls": "row"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 1063,
+              "y": 613.234375,
+              "width": 20,
+              "height": 16,
+              "top": 613.234375,
+              "bottom": 629.234375,
+              "left": 1063,
+              "right": 1083
+            },
+            {
+              "x": 1093,
+              "y": 613.234375,
+              "width": 194.484375,
+              "height": 61.0625,
+              "top": 613.234375,
+              "bottom": 674.296875,
+              "left": 1093,
+              "right": 1287.484375
+            },
+            {
+              "x": 1093,
+              "y": 614.234375,
+              "width": 80.921875,
+              "height": 19,
+              "top": 614.234375,
+              "bottom": 633.234375,
+              "left": 1093,
+              "right": 1173.921875
+            },
+            {
+              "x": 1093,
+              "y": 635.921875,
+              "width": 146.109375,
+              "height": 17,
+              "top": 635.921875,
+              "bottom": 652.921875,
+              "left": 1093,
+              "right": 1239.109375
+            },
+            {
+              "x": 1297.484375,
+              "y": 613.234375,
+              "width": 120.515625,
+              "height": 27.375,
+              "top": 613.234375,
+              "bottom": 640.609375,
+              "left": 1297.484375,
+              "right": 1418
+            },
+            {
+              "x": 1308.484375,
+              "y": 618.234375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 618.234375,
+              "bottom": 635.234375,
+              "left": 1308.484375,
+              "right": 1407
+            }
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "button": {
+          "exists": true,
+          "text": "지도에서 위치 보기",
+          "value": "",
+          "rect": {
+            "x": 1297.484375,
+            "y": 613.234375,
+            "width": 120.515625,
+            "height": 27.375,
+            "top": 613.234375,
+            "bottom": 640.609375,
+            "left": 1297.484375,
+            "right": 1418
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 1041,
+            "top": 100.40625,
+            "right": 1440,
+            "bottom": 900
+          },
+          "visibleIntersection": {
+            "left": 1297.484375,
+            "right": 1418,
+            "top": 613.234375,
+            "bottom": 640.609375
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 1041,
+                "top": 100.40625,
+                "right": 1440,
+                "bottom": 900
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 1327.61328125,
+              "y": 626.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 1357.7421875,
+              "y": 626.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 1387.87109375,
+              "y": 626.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 1308.484375,
+              "y": 618.234375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 618.234375,
+              "bottom": 635.234375,
+              "left": 1308.484375,
+              "right": 1407
+            }
+          ],
+          "display": "block",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "selection": [
+          "P1"
+        ],
+        "focus": {
+          "id": "rBack",
+          "loc": null,
+          "tag": "BUTTON",
+          "text": "← 진입 전 지도 보기로"
+        }
+      }
+    },
+    {
+      "id": "1440/before-location",
+      "data": {
+        "reader": {
+          "top": 100,
+          "left": 0,
+          "max": 119,
+          "clientHeight": 800,
+          "scrollHeight": 919
+        },
+        "row": {
+          "exists": true,
+          "text": "행사 홈페이지\n옮길 대상 · 내용을 옮길 대상\n지도에서 위치 보기",
+          "value": null,
+          "rect": {
+            "x": 1063,
+            "y": 503.234375,
+            "width": 355,
+            "height": 80.0625,
+            "top": 503.234375,
+            "bottom": 583.296875,
+            "left": 1063,
+            "right": 1418
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 1041,
+            "top": 100.40625,
+            "right": 1440,
+            "bottom": 900
+          },
+          "visibleIntersection": {
+            "left": 1063,
+            "right": 1418,
+            "top": 503.234375,
+            "bottom": 583.296875
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 1041,
+                "top": 100.40625,
+                "right": 1440,
+                "bottom": 900
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 1151.75,
+              "y": 543.265625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 1240.5,
+              "y": 543.265625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 1329.25,
+              "y": 543.265625,
+              "hit": true,
+              "cover": {
+                "id": "row-X2",
+                "tag": "DIV",
+                "cls": "row"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 1063,
+              "y": 513.234375,
+              "width": 20,
+              "height": 16,
+              "top": 513.234375,
+              "bottom": 529.234375,
+              "left": 1063,
+              "right": 1083
+            },
+            {
+              "x": 1093,
+              "y": 513.234375,
+              "width": 194.484375,
+              "height": 61.0625,
+              "top": 513.234375,
+              "bottom": 574.296875,
+              "left": 1093,
+              "right": 1287.484375
+            },
+            {
+              "x": 1093,
+              "y": 514.234375,
+              "width": 80.921875,
+              "height": 19,
+              "top": 514.234375,
+              "bottom": 533.234375,
+              "left": 1093,
+              "right": 1173.921875
+            },
+            {
+              "x": 1093,
+              "y": 535.921875,
+              "width": 146.109375,
+              "height": 17,
+              "top": 535.921875,
+              "bottom": 552.921875,
+              "left": 1093,
+              "right": 1239.109375
+            },
+            {
+              "x": 1297.484375,
+              "y": 513.234375,
+              "width": 120.515625,
+              "height": 27.375,
+              "top": 513.234375,
+              "bottom": 540.609375,
+              "left": 1297.484375,
+              "right": 1418
+            },
+            {
+              "x": 1308.484375,
+              "y": 518.234375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 518.234375,
+              "bottom": 535.234375,
+              "left": 1308.484375,
+              "right": 1407
+            }
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "button": {
+          "exists": true,
+          "text": "지도에서 위치 보기",
+          "value": "",
+          "rect": {
+            "x": 1297.484375,
+            "y": 513.234375,
+            "width": 120.515625,
+            "height": 27.375,
+            "top": 513.234375,
+            "bottom": 540.609375,
+            "left": 1297.484375,
+            "right": 1418
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 1041,
+            "top": 100.40625,
+            "right": 1440,
+            "bottom": 900
+          },
+          "visibleIntersection": {
+            "left": 1297.484375,
+            "right": 1418,
+            "top": 513.234375,
+            "bottom": 540.609375
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 1041,
+                "top": 100.40625,
+                "right": 1440,
+                "bottom": 900
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 1327.61328125,
+              "y": 526.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 1357.7421875,
+              "y": 526.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 1387.87109375,
+              "y": 526.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 1308.484375,
+              "y": 518.234375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 518.234375,
+              "bottom": 535.234375,
+              "left": 1308.484375,
+              "right": 1407
+            }
+          ],
+          "display": "block",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "selection": [
+          "P1"
+        ],
+        "focus": {
+          "id": "rBack",
+          "loc": null,
+          "tag": "BUTTON",
+          "text": "← 진입 전 지도 보기로"
+        }
+      }
+    },
+    {
+      "id": "1440/wheel",
+      "data": {
+        "method": "page.mouse.wheel",
+        "deltaX": 0,
+        "deltaY": 100,
+        "beforeTop": 0,
+        "afterTop": 100,
+        "note": "No DOM scroll, state injection, helper scroll, or target-value enforcement."
+      }
+    },
+    {
+      "id": "1440/before-click/[data-loc=\"X2\"]",
+      "data": {
+        "exists": true,
+        "text": "지도에서 위치 보기",
+        "value": "",
+        "rect": {
+          "x": 1297.484375,
+          "y": 513.234375,
+          "width": 120.515625,
+          "height": 27.375,
+          "top": 513.234375,
+          "bottom": 540.609375,
+          "left": 1297.484375,
+          "right": 1418
+        },
+        "selfContentClip": null,
+        "clip": {
+          "left": 1041,
+          "top": 100.40625,
+          "right": 1440,
+          "bottom": 900
+        },
+        "visibleIntersection": {
+          "left": 1297.484375,
+          "right": 1418,
+          "top": 513.234375,
+          "bottom": 540.609375
+        },
+        "clips": [
+          {
+            "id": "reader",
+            "tag": "SECTION",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 1041,
+              "top": 100.40625,
+              "right": 1440,
+              "bottom": 900
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 1327.61328125,
+            "y": 526.921875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn sm"
+            }
+          },
+          {
+            "x": 1357.7421875,
+            "y": 526.921875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn sm"
+            }
+          },
+          {
+            "x": 1387.87109375,
+            "y": 526.921875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn sm"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 1308.484375,
+            "y": 518.234375,
+            "width": 98.515625,
+            "height": 17,
+            "top": 518.234375,
+            "bottom": 535.234375,
+            "left": 1308.484375,
+            "right": 1407
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "1440/located-target",
+      "data": {
+        "exists": true,
+        "text": "옮길 대상 · 프로그램 바깥\n행사 홈페이지\n소개글이 실릴 곳",
+        "value": null,
+        "rect": {
+          "x": 826,
+          "y": 413.40625,
+          "width": 196,
+          "height": 103.984375,
+          "top": 413.40625,
+          "bottom": 517.390625,
+          "left": 826,
+          "right": 1022
+        },
+        "selfContentClip": {
+          "left": 827,
+          "top": 414.40609975961536,
+          "right": 1021,
+          "bottom": 516.3907752403846
+        },
+        "clip": {
+          "left": 0,
+          "top": 143.40625,
+          "right": 1040,
+          "bottom": 900
+        },
+        "visibleIntersection": {
+          "left": 826,
+          "right": 1022,
+          "top": 413.40625,
+          "bottom": 517.390625
+        },
+        "clips": [
+          {
+            "id": "",
+            "tag": "SPAN",
+            "self": true,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 827,
+              "top": 414.40609975961536,
+              "right": 1021,
+              "bottom": 516.3907752403846
+            }
+          },
+          {
+            "id": "mapScroll",
+            "tag": "DIV",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 0,
+              "top": 143.40625,
+              "right": 1040,
+              "bottom": 900
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 875,
+            "y": 465.3984375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          },
+          {
+            "x": 924,
+            "y": 465.3984375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          },
+          {
+            "x": 973,
+            "y": 465.3984375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 827,
+            "y": 414.40625,
+            "width": 194,
+            "height": 18,
+            "top": 414.40625,
+            "bottom": 432.40625,
+            "left": 827,
+            "right": 1021
+          },
+          {
+            "x": 827,
+            "y": 432.40625,
+            "width": 194,
+            "height": 83.984375,
+            "top": 432.40625,
+            "bottom": 516.390625,
+            "left": 827,
+            "right": 1021
+          },
+          {
+            "x": 843,
+            "y": 443.40625,
+            "width": 122.765625,
+            "height": 15,
+            "top": 443.40625,
+            "bottom": 458.40625,
+            "left": 843,
+            "right": 965.765625
+          },
+          {
+            "x": 843,
+            "y": 461.21875,
+            "width": 91.375,
+            "height": 22,
+            "top": 461.21875,
+            "bottom": 483.21875,
+            "left": 843,
+            "right": 934.375
+          },
+          {
+            "x": 843,
+            "y": 486.015625,
+            "width": 87.015625,
+            "height": 17,
+            "top": 486.015625,
+            "bottom": 503.015625,
+            "left": 843,
+            "right": 930.015625
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "1440/immediate-after-location-return",
+      "data": {
+        "reader": {
+          "top": 100,
+          "left": 0,
+          "max": 119,
+          "clientHeight": 800,
+          "scrollHeight": 919
+        },
+        "row": {
+          "exists": true,
+          "text": "행사 홈페이지\n옮길 대상 · 내용을 옮길 대상\n이미 보이는 위치에 표시\n지도에서 위치 보기",
+          "value": null,
+          "rect": {
+            "x": 1063,
+            "y": 503.234375,
+            "width": 355,
+            "height": 80.0625,
+            "top": 503.234375,
+            "bottom": 583.296875,
+            "left": 1063,
+            "right": 1418
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 1041,
+            "top": 100.40625,
+            "right": 1440,
+            "bottom": 900
+          },
+          "visibleIntersection": {
+            "left": 1063,
+            "right": 1418,
+            "top": 503.234375,
+            "bottom": 583.296875
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 1041,
+                "top": 100.40625,
+                "right": 1440,
+                "bottom": 900
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 1151.75,
+              "y": 543.265625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 1240.5,
+              "y": 543.265625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 1329.25,
+              "y": 543.265625,
+              "hit": true,
+              "cover": {
+                "id": "row-X2",
+                "tag": "DIV",
+                "cls": "row"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 1063,
+              "y": 513.234375,
+              "width": 20,
+              "height": 16,
+              "top": 513.234375,
+              "bottom": 529.234375,
+              "left": 1063,
+              "right": 1083
+            },
+            {
+              "x": 1093,
+              "y": 513.234375,
+              "width": 194.484375,
+              "height": 61.0625,
+              "top": 513.234375,
+              "bottom": 574.296875,
+              "left": 1093,
+              "right": 1287.484375
+            },
+            {
+              "x": 1093,
+              "y": 514.234375,
+              "width": 80.921875,
+              "height": 19,
+              "top": 514.234375,
+              "bottom": 533.234375,
+              "left": 1093,
+              "right": 1173.921875
+            },
+            {
+              "x": 1093,
+              "y": 535.921875,
+              "width": 146.109375,
+              "height": 17,
+              "top": 535.921875,
+              "bottom": 552.921875,
+              "left": 1093,
+              "right": 1239.109375
+            },
+            {
+              "x": 1093,
+              "y": 556.296875,
+              "width": 119.765625,
+              "height": 17,
+              "top": 556.296875,
+              "bottom": 573.296875,
+              "left": 1093,
+              "right": 1212.765625
+            },
+            {
+              "x": 1297.484375,
+              "y": 513.234375,
+              "width": 120.515625,
+              "height": 27.375,
+              "top": 513.234375,
+              "bottom": 540.609375,
+              "left": 1297.484375,
+              "right": 1418
+            },
+            {
+              "x": 1308.484375,
+              "y": 518.234375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 518.234375,
+              "bottom": 535.234375,
+              "left": 1308.484375,
+              "right": 1407
+            }
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "button": {
+          "exists": true,
+          "text": "지도에서 위치 보기",
+          "value": "",
+          "rect": {
+            "x": 1297.484375,
+            "y": 513.234375,
+            "width": 120.515625,
+            "height": 27.375,
+            "top": 513.234375,
+            "bottom": 540.609375,
+            "left": 1297.484375,
+            "right": 1418
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 1041,
+            "top": 100.40625,
+            "right": 1440,
+            "bottom": 900
+          },
+          "visibleIntersection": {
+            "left": 1297.484375,
+            "right": 1418,
+            "top": 513.234375,
+            "bottom": 540.609375
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 1041,
+                "top": 100.40625,
+                "right": 1440,
+                "bottom": 900
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 1327.61328125,
+              "y": 526.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 1357.7421875,
+              "y": 526.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 1387.87109375,
+              "y": 526.921875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 1308.484375,
+              "y": 518.234375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 518.234375,
+              "bottom": 535.234375,
+              "left": 1308.484375,
+              "right": 1407
+            }
+          ],
+          "display": "block",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "selection": [
+          "P1"
+        ],
+        "focus": {
+          "id": "",
+          "loc": "X2",
+          "tag": "BUTTON",
+          "text": "지도에서 위치 보기"
+        }
+      }
+    },
+    {
+      "id": "1440/deltas",
+      "data": {
+        "rowRawDelta": {
+          "x": 0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0.0
+        },
+        "readerTopDelta": 0,
+        "measurement": "immediate after normal click/return; no auxiliary wheel"
+      }
+    },
+    {
+      "id": "390/before-click/#panel [data-pick=\"P1\"]",
+      "data": {
+        "exists": true,
+        "text": "소개글 재사용 고르기",
+        "value": "",
+        "rect": {
+          "x": 14,
+          "y": 773.125,
+          "width": 151.203125,
+          "height": 37.6875,
+          "top": 773.125,
+          "bottom": 810.8125,
+          "left": 14,
+          "right": 165.203125
+        },
+        "selfContentClip": null,
+        "clip": {
+          "left": 0,
+          "top": 669,
+          "right": 390,
+          "bottom": 844
+        },
+        "visibleIntersection": {
+          "left": 14,
+          "right": 165.203125,
+          "top": 773.125,
+          "bottom": 810.8125
+        },
+        "clips": [
+          {
+            "id": "panel",
+            "tag": "ASIDE",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 0,
+              "top": 669,
+              "right": 390,
+              "bottom": 844
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 51.80078125,
+            "y": 791.96875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn"
+            }
+          },
+          {
+            "x": 89.6015625,
+            "y": 791.96875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn"
+            }
+          },
+          {
+            "x": 127.40234375,
+            "y": 791.96875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 28,
+            "y": 782.125,
+            "width": 123.203125,
+            "height": 19,
+            "top": 782.125,
+            "bottom": 801.125,
+            "left": 28,
+            "right": 151.203125
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "390/before-click/#panel [data-act=\"read\"].narrow",
+      "data": {
+        "exists": true,
+        "text": "역할 읽기 →",
+        "value": "",
+        "rect": {
+          "x": 288.984375,
+          "y": 696.90625,
+          "width": 87.015625,
+          "height": 27.375,
+          "top": 696.90625,
+          "bottom": 724.28125,
+          "left": 288.984375,
+          "right": 376
+        },
+        "selfContentClip": null,
+        "clip": {
+          "left": 0,
+          "top": 669,
+          "right": 390,
+          "bottom": 844
+        },
+        "visibleIntersection": {
+          "left": 288.984375,
+          "right": 376,
+          "top": 696.90625,
+          "bottom": 724.28125
+        },
+        "clips": [
+          {
+            "id": "panel",
+            "tag": "ASIDE",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 0,
+              "top": 669,
+              "right": 390,
+              "bottom": 844
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 310.73828125,
+            "y": 710.59375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn primary sm narrow"
+            }
+          },
+          {
+            "x": 332.4921875,
+            "y": 710.59375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn primary sm narrow"
+            }
+          },
+          {
+            "x": 354.24609375,
+            "y": 710.59375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn primary sm narrow"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 299.984375,
+            "y": 701.90625,
+            "width": 65.015625,
+            "height": 17,
+            "top": 701.90625,
+            "bottom": 718.90625,
+            "left": 299.984375,
+            "right": 365
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "390/reader-initial",
+      "data": {
+        "reader": {
+          "top": 0,
+          "left": 0,
+          "max": 183,
+          "clientHeight": 726,
+          "scrollHeight": 909
+        },
+        "row": {
+          "exists": true,
+          "text": "행사 홈페이지\n옮길 대상 · 내용을 옮길 대상\n지도에서 위치 보기",
+          "value": null,
+          "rect": {
+            "x": 16,
+            "y": 614.484375,
+            "width": 358,
+            "height": 80.0625,
+            "top": 614.484375,
+            "bottom": 694.546875,
+            "left": 16,
+            "right": 374
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 0,
+            "top": 117.65625,
+            "right": 390,
+            "bottom": 844
+          },
+          "visibleIntersection": {
+            "left": 16,
+            "right": 374,
+            "top": 614.484375,
+            "bottom": 694.546875
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 0,
+                "top": 117.65625,
+                "right": 390,
+                "bottom": 844
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 105.5,
+              "y": 654.515625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 195,
+              "y": 654.515625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 284.5,
+              "y": 654.515625,
+              "hit": true,
+              "cover": {
+                "id": "row-X2",
+                "tag": "DIV",
+                "cls": "row"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 16,
+              "y": 624.484375,
+              "width": 20,
+              "height": 16,
+              "top": 624.484375,
+              "bottom": 640.484375,
+              "left": 16,
+              "right": 36
+            },
+            {
+              "x": 46,
+              "y": 624.484375,
+              "width": 197.484375,
+              "height": 61.0625,
+              "top": 624.484375,
+              "bottom": 685.546875,
+              "left": 46,
+              "right": 243.484375
+            },
+            {
+              "x": 46,
+              "y": 625.484375,
+              "width": 80.921875,
+              "height": 19,
+              "top": 625.484375,
+              "bottom": 644.484375,
+              "left": 46,
+              "right": 126.921875
+            },
+            {
+              "x": 46,
+              "y": 647.171875,
+              "width": 146.109375,
+              "height": 17,
+              "top": 647.171875,
+              "bottom": 664.171875,
+              "left": 46,
+              "right": 192.109375
+            },
+            {
+              "x": 253.484375,
+              "y": 624.484375,
+              "width": 120.515625,
+              "height": 27.375,
+              "top": 624.484375,
+              "bottom": 651.859375,
+              "left": 253.484375,
+              "right": 374
+            },
+            {
+              "x": 264.484375,
+              "y": 629.484375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 629.484375,
+              "bottom": 646.484375,
+              "left": 264.484375,
+              "right": 363
+            }
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "button": {
+          "exists": true,
+          "text": "지도에서 위치 보기",
+          "value": "",
+          "rect": {
+            "x": 253.484375,
+            "y": 624.484375,
+            "width": 120.515625,
+            "height": 27.375,
+            "top": 624.484375,
+            "bottom": 651.859375,
+            "left": 253.484375,
+            "right": 374
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 0,
+            "top": 117.65625,
+            "right": 390,
+            "bottom": 844
+          },
+          "visibleIntersection": {
+            "left": 253.484375,
+            "right": 374,
+            "top": 624.484375,
+            "bottom": 651.859375
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 0,
+                "top": 117.65625,
+                "right": 390,
+                "bottom": 844
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 283.61328125,
+              "y": 638.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 313.7421875,
+              "y": 638.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 343.87109375,
+              "y": 638.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 264.484375,
+              "y": 629.484375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 629.484375,
+              "bottom": 646.484375,
+              "left": 264.484375,
+              "right": 363
+            }
+          ],
+          "display": "block",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "selection": [
+          "P1"
+        ],
+        "focus": {
+          "id": "rBack",
+          "loc": null,
+          "tag": "BUTTON",
+          "text": "← 진입 전 지도 보기로"
+        }
+      }
+    },
+    {
+      "id": "390/before-location",
+      "data": {
+        "reader": {
+          "top": 100,
+          "left": 0,
+          "max": 183,
+          "clientHeight": 726,
+          "scrollHeight": 909
+        },
+        "row": {
+          "exists": true,
+          "text": "행사 홈페이지\n옮길 대상 · 내용을 옮길 대상\n지도에서 위치 보기",
+          "value": null,
+          "rect": {
+            "x": 16,
+            "y": 514.484375,
+            "width": 358,
+            "height": 80.0625,
+            "top": 514.484375,
+            "bottom": 594.546875,
+            "left": 16,
+            "right": 374
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 0,
+            "top": 117.65625,
+            "right": 390,
+            "bottom": 844
+          },
+          "visibleIntersection": {
+            "left": 16,
+            "right": 374,
+            "top": 514.484375,
+            "bottom": 594.546875
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 0,
+                "top": 117.65625,
+                "right": 390,
+                "bottom": 844
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 105.5,
+              "y": 554.515625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 195,
+              "y": 554.515625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 284.5,
+              "y": 554.515625,
+              "hit": true,
+              "cover": {
+                "id": "row-X2",
+                "tag": "DIV",
+                "cls": "row"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 16,
+              "y": 524.484375,
+              "width": 20,
+              "height": 16,
+              "top": 524.484375,
+              "bottom": 540.484375,
+              "left": 16,
+              "right": 36
+            },
+            {
+              "x": 46,
+              "y": 524.484375,
+              "width": 197.484375,
+              "height": 61.0625,
+              "top": 524.484375,
+              "bottom": 585.546875,
+              "left": 46,
+              "right": 243.484375
+            },
+            {
+              "x": 46,
+              "y": 525.484375,
+              "width": 80.921875,
+              "height": 19,
+              "top": 525.484375,
+              "bottom": 544.484375,
+              "left": 46,
+              "right": 126.921875
+            },
+            {
+              "x": 46,
+              "y": 547.171875,
+              "width": 146.109375,
+              "height": 17,
+              "top": 547.171875,
+              "bottom": 564.171875,
+              "left": 46,
+              "right": 192.109375
+            },
+            {
+              "x": 253.484375,
+              "y": 524.484375,
+              "width": 120.515625,
+              "height": 27.375,
+              "top": 524.484375,
+              "bottom": 551.859375,
+              "left": 253.484375,
+              "right": 374
+            },
+            {
+              "x": 264.484375,
+              "y": 529.484375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 529.484375,
+              "bottom": 546.484375,
+              "left": 264.484375,
+              "right": 363
+            }
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "button": {
+          "exists": true,
+          "text": "지도에서 위치 보기",
+          "value": "",
+          "rect": {
+            "x": 253.484375,
+            "y": 524.484375,
+            "width": 120.515625,
+            "height": 27.375,
+            "top": 524.484375,
+            "bottom": 551.859375,
+            "left": 253.484375,
+            "right": 374
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 0,
+            "top": 117.65625,
+            "right": 390,
+            "bottom": 844
+          },
+          "visibleIntersection": {
+            "left": 253.484375,
+            "right": 374,
+            "top": 524.484375,
+            "bottom": 551.859375
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 0,
+                "top": 117.65625,
+                "right": 390,
+                "bottom": 844
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 283.61328125,
+              "y": 538.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 313.7421875,
+              "y": 538.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 343.87109375,
+              "y": 538.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 264.484375,
+              "y": 529.484375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 529.484375,
+              "bottom": 546.484375,
+              "left": 264.484375,
+              "right": 363
+            }
+          ],
+          "display": "block",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "selection": [
+          "P1"
+        ],
+        "focus": {
+          "id": "rBack",
+          "loc": null,
+          "tag": "BUTTON",
+          "text": "← 진입 전 지도 보기로"
+        }
+      }
+    },
+    {
+      "id": "390/wheel",
+      "data": {
+        "method": "page.mouse.wheel",
+        "deltaX": 0,
+        "deltaY": 100,
+        "beforeTop": 0,
+        "afterTop": 100,
+        "note": "No DOM scroll, state injection, helper scroll, or target-value enforcement."
+      }
+    },
+    {
+      "id": "390/before-click/[data-loc=\"X2\"]",
+      "data": {
+        "exists": true,
+        "text": "지도에서 위치 보기",
+        "value": "",
+        "rect": {
+          "x": 253.484375,
+          "y": 524.484375,
+          "width": 120.515625,
+          "height": 27.375,
+          "top": 524.484375,
+          "bottom": 551.859375,
+          "left": 253.484375,
+          "right": 374
+        },
+        "selfContentClip": null,
+        "clip": {
+          "left": 0,
+          "top": 117.65625,
+          "right": 390,
+          "bottom": 844
+        },
+        "visibleIntersection": {
+          "left": 253.484375,
+          "right": 374,
+          "top": 524.484375,
+          "bottom": 551.859375
+        },
+        "clips": [
+          {
+            "id": "reader",
+            "tag": "SECTION",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 0,
+              "top": 117.65625,
+              "right": 390,
+              "bottom": 844
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 283.61328125,
+            "y": 538.171875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn sm"
+            }
+          },
+          {
+            "x": 313.7421875,
+            "y": 538.171875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn sm"
+            }
+          },
+          {
+            "x": 343.87109375,
+            "y": 538.171875,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "BUTTON",
+              "cls": "btn sm"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 264.484375,
+            "y": 529.484375,
+            "width": 98.515625,
+            "height": 17,
+            "top": 529.484375,
+            "bottom": 546.484375,
+            "left": 264.484375,
+            "right": 363
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "390/located-target",
+      "data": {
+        "exists": true,
+        "text": "옮길 대상 · 프로그램 바깥\n행사 홈페이지\n소개글이 실릴 곳",
+        "value": null,
+        "rect": {
+          "x": 44,
+          "y": 467.65625,
+          "width": 272,
+          "height": 103.984375,
+          "top": 467.65625,
+          "bottom": 571.640625,
+          "left": 44,
+          "right": 316
+        },
+        "selfContentClip": {
+          "left": 45,
+          "top": 468.65609975961536,
+          "right": 315,
+          "bottom": 570.6407752403846
+        },
+        "clip": {
+          "left": 0,
+          "top": 117.65625,
+          "right": 390,
+          "bottom": 668
+        },
+        "visibleIntersection": {
+          "left": 44,
+          "right": 316,
+          "top": 467.65625,
+          "bottom": 571.640625
+        },
+        "clips": [
+          {
+            "id": "",
+            "tag": "SPAN",
+            "self": true,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 45,
+              "top": 468.65609975961536,
+              "right": 315,
+              "bottom": 570.6407752403846
+            }
+          },
+          {
+            "id": "mapScroll",
+            "tag": "DIV",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 0,
+              "top": 117.65625,
+              "right": 390,
+              "bottom": 668
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 112,
+            "y": 519.6484375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          },
+          {
+            "x": 180,
+            "y": 519.6484375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          },
+          {
+            "x": 248,
+            "y": 519.6484375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 45,
+            "y": 468.65625,
+            "width": 270,
+            "height": 18,
+            "top": 468.65625,
+            "bottom": 486.65625,
+            "left": 45,
+            "right": 315
+          },
+          {
+            "x": 45,
+            "y": 486.65625,
+            "width": 270,
+            "height": 83.984375,
+            "top": 486.65625,
+            "bottom": 570.640625,
+            "left": 45,
+            "right": 315
+          },
+          {
+            "x": 61,
+            "y": 497.65625,
+            "width": 122.765625,
+            "height": 15,
+            "top": 497.65625,
+            "bottom": 512.65625,
+            "left": 61,
+            "right": 183.765625
+          },
+          {
+            "x": 61,
+            "y": 515.46875,
+            "width": 91.375,
+            "height": 22,
+            "top": 515.46875,
+            "bottom": 537.46875,
+            "left": 61,
+            "right": 152.375
+          },
+          {
+            "x": 61,
+            "y": 540.265625,
+            "width": 87.015625,
+            "height": 17,
+            "top": 540.265625,
+            "bottom": 557.265625,
+            "left": 61,
+            "right": 148.015625
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "390/before-click/#backRead",
+      "data": {
+        "exists": true,
+        "text": "← 읽던 곳으로",
+        "value": "",
+        "rect": {
+          "x": 14,
+          "y": 753.75,
+          "width": 113.6875,
+          "height": 37.6875,
+          "top": 753.75,
+          "bottom": 791.4375,
+          "left": 14,
+          "right": 127.6875
+        },
+        "selfContentClip": null,
+        "clip": {
+          "left": 0,
+          "top": 669,
+          "right": 390,
+          "bottom": 844
+        },
+        "visibleIntersection": {
+          "left": 14,
+          "right": 127.6875,
+          "top": 753.75,
+          "bottom": 791.4375
+        },
+        "clips": [
+          {
+            "id": "panel",
+            "tag": "ASIDE",
+            "self": false,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 0,
+              "top": 669,
+              "right": 390,
+              "bottom": 844
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 42.421875,
+            "y": 772.59375,
+            "hit": true,
+            "cover": {
+              "id": "backRead",
+              "tag": "BUTTON",
+              "cls": "btn primary"
+            }
+          },
+          {
+            "x": 70.84375,
+            "y": 772.59375,
+            "hit": true,
+            "cover": {
+              "id": "backRead",
+              "tag": "BUTTON",
+              "cls": "btn primary"
+            }
+          },
+          {
+            "x": 99.265625,
+            "y": 772.59375,
+            "hit": true,
+            "cover": {
+              "id": "backRead",
+              "tag": "BUTTON",
+              "cls": "btn primary"
+            }
+          }
+        ],
+        "rangeRects": [
+          {
+            "x": 28,
+            "y": 762.75,
+            "width": 85.6875,
+            "height": 19,
+            "top": 762.75,
+            "bottom": 781.75,
+            "left": 28,
+            "right": 113.6875
+          }
+        ],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    },
+    {
+      "id": "390/immediate-after-location-return",
+      "data": {
+        "reader": {
+          "top": 100,
+          "left": 0,
+          "max": 183,
+          "clientHeight": 726,
+          "scrollHeight": 909
+        },
+        "row": {
+          "exists": true,
+          "text": "행사 홈페이지\n옮길 대상 · 내용을 옮길 대상\n지도에서 위치 보기",
+          "value": null,
+          "rect": {
+            "x": 16,
+            "y": 514.484375,
+            "width": 358,
+            "height": 80.0625,
+            "top": 514.484375,
+            "bottom": 594.546875,
+            "left": 16,
+            "right": 374
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 0,
+            "top": 117.65625,
+            "right": 390,
+            "bottom": 844
+          },
+          "visibleIntersection": {
+            "left": 16,
+            "right": 374,
+            "top": 514.484375,
+            "bottom": 594.546875
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 0,
+                "top": 117.65625,
+                "right": 390,
+                "bottom": 844
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 105.5,
+              "y": 554.515625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 195,
+              "y": 554.515625,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "SMALL",
+                "cls": ""
+              }
+            },
+            {
+              "x": 284.5,
+              "y": 554.515625,
+              "hit": true,
+              "cover": {
+                "id": "row-X2",
+                "tag": "DIV",
+                "cls": "row"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 16,
+              "y": 524.484375,
+              "width": 20,
+              "height": 16,
+              "top": 524.484375,
+              "bottom": 540.484375,
+              "left": 16,
+              "right": 36
+            },
+            {
+              "x": 46,
+              "y": 524.484375,
+              "width": 197.484375,
+              "height": 61.0625,
+              "top": 524.484375,
+              "bottom": 585.546875,
+              "left": 46,
+              "right": 243.484375
+            },
+            {
+              "x": 46,
+              "y": 525.484375,
+              "width": 80.921875,
+              "height": 19,
+              "top": 525.484375,
+              "bottom": 544.484375,
+              "left": 46,
+              "right": 126.921875
+            },
+            {
+              "x": 46,
+              "y": 547.171875,
+              "width": 146.109375,
+              "height": 17,
+              "top": 547.171875,
+              "bottom": 564.171875,
+              "left": 46,
+              "right": 192.109375
+            },
+            {
+              "x": 253.484375,
+              "y": 524.484375,
+              "width": 120.515625,
+              "height": 27.375,
+              "top": 524.484375,
+              "bottom": 551.859375,
+              "left": 253.484375,
+              "right": 374
+            },
+            {
+              "x": 264.484375,
+              "y": 529.484375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 529.484375,
+              "bottom": 546.484375,
+              "left": 264.484375,
+              "right": 363
+            }
+          ],
+          "display": "flex",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "button": {
+          "exists": true,
+          "text": "지도에서 위치 보기",
+          "value": "",
+          "rect": {
+            "x": 253.484375,
+            "y": 524.484375,
+            "width": 120.515625,
+            "height": 27.375,
+            "top": 524.484375,
+            "bottom": 551.859375,
+            "left": 253.484375,
+            "right": 374
+          },
+          "selfContentClip": null,
+          "clip": {
+            "left": 0,
+            "top": 117.65625,
+            "right": 390,
+            "bottom": 844
+          },
+          "visibleIntersection": {
+            "left": 253.484375,
+            "right": 374,
+            "top": 524.484375,
+            "bottom": 551.859375
+          },
+          "clips": [
+            {
+              "id": "reader",
+              "tag": "SECTION",
+              "self": false,
+              "x": true,
+              "y": true,
+              "box": {
+                "left": 0,
+                "top": 117.65625,
+                "right": 390,
+                "bottom": 844
+              }
+            }
+          ],
+          "samples": [
+            {
+              "x": 283.61328125,
+              "y": 538.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 313.7421875,
+              "y": 538.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            },
+            {
+              "x": 343.87109375,
+              "y": 538.171875,
+              "hit": true,
+              "cover": {
+                "id": "",
+                "tag": "BUTTON",
+                "cls": "btn sm"
+              }
+            }
+          ],
+          "rangeRects": [
+            {
+              "x": 264.484375,
+              "y": 529.484375,
+              "width": 98.515625,
+              "height": 17,
+              "top": 529.484375,
+              "bottom": 546.484375,
+              "left": 264.484375,
+              "right": 363
+            }
+          ],
+          "display": "block",
+          "visibility": "visible",
+          "hidden": false,
+          "full": true,
+          "hit": true
+        },
+        "selection": [
+          "P1"
+        ],
+        "focus": {
+          "id": "",
+          "loc": "X2",
+          "tag": "BUTTON",
+          "text": "지도에서 위치 보기"
+        }
+      }
+    },
+    {
+      "id": "390/deltas",
+      "data": {
+        "rowRawDelta": {
+          "x": 0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0.0
+        },
+        "readerTopDelta": 0,
+        "measurement": "immediate after normal click/return; no auxiliary wheel"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "id": "1440/HTTP",
+      "status": "PASS",
+      "details": {
+        "viewport": [
+          1440,
+          900
+        ],
+        "URL": "http://127.0.0.1:42249/purpose-study.html",
+        "status": 200,
+        "bytes": 33944,
+        "sha256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd"
+      }
+    },
+    {
+      "id": "1440/natural-noninitial",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "1440/target-clip-hit",
+      "status": "PASS",
+      "details": {
+        "ancestorClip": {
+          "left": 0,
+          "top": 143.40625,
+          "right": 1040,
+          "bottom": 900
+        },
+        "selfContentClip": {
+          "left": 827,
+          "top": 414.40609975961536,
+          "right": 1021,
+          "bottom": 516.3907752403846
+        },
+        "representativeHits": [
+          {
+            "x": 875,
+            "y": 465.3984375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          },
+          {
+            "x": 924,
+            "y": 465.3984375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          },
+          {
+            "x": 973,
+            "y": 465.3984375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "1440/reader-position",
+      "status": "PASS",
+      "details": {
+        "before": {
+          "top": 100,
+          "left": 0,
+          "max": 119,
+          "clientHeight": 800,
+          "scrollHeight": 919
+        },
+        "after": {
+          "top": 100,
+          "left": 0,
+          "max": 119,
+          "clientHeight": 800,
+          "scrollHeight": 919
+        }
+      }
+    },
+    {
+      "id": "1440/row-position-size",
+      "status": "PASS",
+      "details": {
+        "x": 0,
+        "y": 0.0,
+        "width": 0,
+        "height": 0.0
+      }
+    },
+    {
+      "id": "1440/source-button-focus",
+      "status": "PASS",
+      "details": {
+        "id": "",
+        "loc": "X2",
+        "tag": "BUTTON",
+        "text": "지도에서 위치 보기"
+      }
+    },
+    {
+      "id": "1440/P1-selection",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "1440/returned-button-access",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "390/HTTP",
+      "status": "PASS",
+      "details": {
+        "viewport": [
+          390,
+          844
+        ],
+        "URL": "http://127.0.0.1:42249/purpose-study.html",
+        "status": 200,
+        "bytes": 33944,
+        "sha256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd"
+      }
+    },
+    {
+      "id": "390/natural-noninitial",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "390/target-clip-hit",
+      "status": "PASS",
+      "details": {
+        "ancestorClip": {
+          "left": 0,
+          "top": 117.65625,
+          "right": 390,
+          "bottom": 668
+        },
+        "selfContentClip": {
+          "left": 45,
+          "top": 468.65609975961536,
+          "right": 315,
+          "bottom": 570.6407752403846
+        },
+        "representativeHits": [
+          {
+            "x": 112,
+            "y": 519.6484375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          },
+          {
+            "x": 180,
+            "y": 519.6484375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          },
+          {
+            "x": 248,
+            "y": 519.6484375,
+            "hit": true,
+            "cover": {
+              "id": "",
+              "tag": "SPAN",
+              "cls": "nm"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "390/reader-position",
+      "status": "PASS",
+      "details": {
+        "before": {
+          "top": 100,
+          "left": 0,
+          "max": 183,
+          "clientHeight": 726,
+          "scrollHeight": 909
+        },
+        "after": {
+          "top": 100,
+          "left": 0,
+          "max": 183,
+          "clientHeight": 726,
+          "scrollHeight": 909
+        }
+      }
+    },
+    {
+      "id": "390/row-position-size",
+      "status": "PASS",
+      "details": {
+        "x": 0,
+        "y": 0.0,
+        "width": 0,
+        "height": 0.0
+      }
+    },
+    {
+      "id": "390/source-button-focus",
+      "status": "PASS",
+      "details": {
+        "id": "",
+        "loc": "X2",
+        "tag": "BUTTON",
+        "text": "지도에서 위치 보기"
+      }
+    },
+    {
+      "id": "390/P1-selection",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "390/returned-button-access",
+      "status": "PASS",
+      "details": null
+    }
+  ],
+  "http": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "URL": "http://127.0.0.1:42249/purpose-study.html",
+      "status": 200,
+      "bytes": 33944,
+      "sha256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd"
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "URL": "http://127.0.0.1:42249/purpose-study.html",
+      "status": 200,
+      "bytes": 33944,
+      "sha256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd"
+    }
+  ],
+  "pageerrors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+    }
+  ],
+  "fatal": null,
+  "cleanupErrors": [],
+  "environment": {
+    "python": "/workspace/browser-env/venv/bin/python",
+    "playwrightPackage": "1.57.0",
+    "browserExecutable": "/usr/bin/chromium",
+    "browserVersion": "154.0.8037.57"
+  },
+  "beforeSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "sourceBytes": 33944,
+  "actualHTTPURL": "http://127.0.0.1:42249/purpose-study.html",
+  "afterSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "complete": true,
+  "finishedUTC": "2026-10-15T20:31:09.359854+00:00",
+  "exitCode": 0
+}

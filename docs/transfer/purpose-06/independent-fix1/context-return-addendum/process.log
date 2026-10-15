@@ -1,0 +1,40 @@
+HTTP "GET /purpose-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1440/HTTP
+1440/before-click/#panel [data-pick="P1"]
+1440/before-click/#panel .act.wide [data-act="read"]
+1440/reader-initial
+1440/before-location
+1440/wheel
+PASS 1440/natural-noninitial
+1440/before-click/[data-loc="X2"]
+1440/located-target
+PASS 1440/target-clip-hit
+1440/immediate-after-location-return
+1440/deltas
+PASS 1440/reader-position
+PASS 1440/row-position-size
+PASS 1440/source-button-focus
+PASS 1440/P1-selection
+PASS 1440/returned-button-access
+HTTP "GET /purpose-study.html HTTP/1.1" 200 -
+PASS 390/HTTP
+390/before-click/#panel [data-pick="P1"]
+390/before-click/#panel [data-act="read"].narrow
+390/reader-initial
+390/before-location
+390/wheel
+PASS 390/natural-noninitial
+390/before-click/[data-loc="X2"]
+390/located-target
+PASS 390/target-clip-hit
+390/before-click/#backRead
+390/immediate-after-location-return
+390/deltas
+PASS 390/reader-position
+PASS 390/row-position-size
+PASS 390/source-button-focus
+PASS 390/P1-selection
+PASS 390/returned-button-access
+CHILD_EXIT 0

@@ -1,0 +1,82 @@
+{
+  "UTC": "2026-10-15T20:31:50.191530+00:00",
+  "scope": "All files except this manifest itself",
+  "files": [
+    {
+      "path": "REPORT.md",
+      "bytes": 3410,
+      "sha256": "2245d9b1b5d79cfbade03ff5b78747d1a0e6debe615029476a41eb12290b50f9"
+    },
+    {
+      "path": "actual-exit.json",
+      "bytes": 139,
+      "sha256": "73bc80d742f6e1dced5cd6f133459eb0bd694d2fd33ed1fd9fb8e06e68fdee24"
+    },
+    {
+      "path": "check.py",
+      "bytes": 6339,
+      "sha256": "83f7ab7fc888e23f0b181e416fdbdfdd05e0cd6a1da7295e4547c7e2f5f0191b"
+    },
+    {
+      "path": "child-exit.json",
+      "bytes": 92,
+      "sha256": "f3442cc2d64418c7efaaafde6ad72965e6acb2324c857ef24306a1d33b58e9b7"
+    },
+    {
+      "path": "first-harness-failure/actual-exit.json",
+      "bytes": 139,
+      "sha256": "f461ce2dc85cd85023f28fec027c77e2433b423fb3a688209792a62d6aa0175b"
+    },
+    {
+      "path": "first-harness-failure/check.py",
+      "bytes": 6327,
+      "sha256": "0e75d00c2e21a2cb1c50f8245cc6a84c0a45e44afa51f5ff1f10f19bbf1d5d37"
+    },
+    {
+      "path": "first-harness-failure/child-exit.json",
+      "bytes": 92,
+      "sha256": "cb77183fe68033f959b8b520bea73666d59104b7368b7167e648f6827534acf3"
+    },
+    {
+      "path": "first-harness-failure/process.log",
+      "bytes": 296,
+      "sha256": "5695c92446da6c1101a7397eab848f5ed743cdddee7eb3b1f00b058ceb242350"
+    },
+    {
+      "path": "first-harness-failure/result.json",
+      "bytes": 1528,
+      "sha256": "22c1a80fb29e857b170245b8f041c79a4692310e8340b423333bf46e293108cc"
+    },
+    {
+      "path": "geometry.py",
+      "bytes": 1956,
+      "sha256": "81208b448ae68b48fc5d4ee7213812c5b6d2e812f5bcce9229dc9985f77236ef"
+    },
+    {
+      "path": "launch.py",
+      "bytes": 654,
+      "sha256": "a4439dff2abee49f61ee16ab19e5f38daf8b25b9b9dbcef0f4834a01b930c5d6"
+    },
+    {
+      "path": "process.log",
+      "bytes": 1109,
+      "sha256": "ace0cf80769c2864c5fb6d920e59c6559df2b7a851a824277bef2ce52800787a"
+    },
+    {
+      "path": "result.json",
+      "bytes": 70596,
+      "sha256": "dfafa627e861945955a2b2a1c0a0cda14954183de884b7774c06a7404b9cc3af"
+    },
+    {
+      "path": "wrapper.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "wrapper.py",
+      "bytes": 530,
+      "sha256": "80d9bd6823e2e85a8065d392c98bec80d0f36bcff4a1954c2a3e8b30c2c3b81d"
+    }
+  ],
+  "totalBytesExcludingManifest": 93207
+}

@@ -1,0 +1,34 @@
+{
+  "startedUTC": "2026-10-15T20:30:56.489451+00:00",
+  "sourceURL": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/fbea41f245c4020bc044c7e0c7502d106fc900ae/docs/transfer/purpose-06/author-fix1/purpose-study.html",
+  "sourcePath": "/workspace/browser-env/purpose-fix1/site/purpose-study.html",
+  "expectedSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "expectedBytes": 33944,
+  "plannedIDs": [
+    "1440/context-X2",
+    "390/context-X2"
+  ],
+  "completedIDs": [],
+  "observations": [],
+  "checks": [],
+  "http": [],
+  "pageerrors": [],
+  "console": [],
+  "fatal": {
+    "type": "UnboundLocalError",
+    "message": "cannot access local variable 'http' where it is not associated with a value",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/purpose-context-addendum/check.py\", line 18, in main\n    class H(http.server.SimpleHTTPRequestHandler):\n            ^^^^\nUnboundLocalError: cannot access local variable 'http' where it is not associated with a value\n"
+  },
+  "cleanupErrors": [],
+  "environment": {
+    "python": "/workspace/browser-env/venv/bin/python",
+    "playwrightPackage": "1.57.0",
+    "browserExecutable": "/usr/bin/chromium"
+  },
+  "beforeSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "sourceBytes": 33944,
+  "afterSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "complete": false,
+  "finishedUTC": "2026-10-15T20:30:56.491454+00:00",
+  "exitCode": 1
+}

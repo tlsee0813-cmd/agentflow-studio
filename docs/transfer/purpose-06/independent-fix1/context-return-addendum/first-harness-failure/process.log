@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/purpose-context-addendum/check.py", line 18, in main
+    class H(http.server.SimpleHTTPRequestHandler):
+            ^^^^
+UnboundLocalError: cannot access local variable 'http' where it is not associated with a value
+
+CHILD_EXIT 1
