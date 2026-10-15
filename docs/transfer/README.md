@@ -2,6 +2,7 @@
 
 이 브랜치는 세션 간 원본 파일을 전달하는 공간이다. 제품 배포나 현재 연구 상태의 별도 사본이 아니다.
 
+- [첫 전체 조망 cycle08 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/ce0f9eeec6b7ea55cb630e4b1b5df68e345c2e5f/docs/cycles/2026-10-16-overview-08/RESULT.md)
 - [책임 변화·후속 요청 cycle07 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a738280b994b4872ada81574850747e291bc1418/docs/cycles/2026-10-16-change-record-07/RESULT.md)
 - [목적·역할 cycle06 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d17667c1c519492f6edf8ea064a9f87b5d51fc12/docs/cycles/2026-10-16-purpose-06/RESULT.md)
 - [구성 지도 cycle05 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9b4a422f4e46085acb0841e9d9201c7ff86d6b81/docs/cycles/2026-10-16-composition-05/RESULT.md)
@@ -12,6 +13,9 @@
 
 | 묶음 | 고정 원본 | 읽는 순서와 범위 |
 |---|---|---|
+| cycle08 작성자 v0 | [원본27파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/bbdf2234c6523de86b64510843282ac1003124bd/docs/transfer/overview-08/author-v0) | 첫 조망/명시 상세. run01 장면부족·run02 실제폭결함·run03 단일78 PASS를 구별. 모두 보존 |
+| cycle08 작성자 fix1 | [문구10줄 정정14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/167f86b8ac783a15bc1b2991b73017ee2f1e0d6a/docs/transfer/overview-08/author-fix1) | 누락 확인 책임범위 복구. HTML42,025B/SHA85f07ee4… 단일 좁은24 PASS. v0와 합산 안 함 |
+| cycle08 fix1 독립 관측 | [원시기록·PNG4·23파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0) | 최신run02 단일6/6·73 PASS·실제child/외부collector0. raw전후·개별문구노출 보완. payload22/22 bytesSHA·원격tree일치. launcher 별도외부로그 미제공 |
 | cycle07 작성자 v0 | [원본27파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/9ec6a58398c95a4ad5617f50eb16d2aa98052a4a/docs/transfer/change-record-07/author-v0) | 첫6FAIL 및 뒤의작성자실행·PNG4·원본코드보존. 준비문 수정방향 선결정은fix1에서 정정 |
 | cycle07 작성자 fix1 | [준비문3줄 정정·원본14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/0dfadba788e0f2f035bbe51b899b9c02e4260e45/docs/transfer/change-record-07/author-fix1) | HTML42,420B/SHA d10e7dca… 단일75 PASS·child/collector0. 값존재와전체가독성은구별 |
 | cycle07 fix1 독립 관측 | [원시기록·PNG4·35파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0) | 최신run03 단일6장면·60 PASS·실제child/collector0. 최초실패보존, payload34/34 bytesSHA·원격tree일치. launcher는자기종료전전파기록이며별도외부실측아님 |
@@ -46,3 +50,6 @@ cycle06 대표 화면: [첫 화면1440](https://github.com/tlsee0813-cmd/agentfl
 
 ## cycle07 바로 보는 화면
 [1440 초기 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/initial-1440.png) · [변경 전 비교](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/comparison-before-1440.png) · [390 후속 읽기](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/390-P3-follow.png) · [390 편집 전 준비문](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/prep-default-P1-390.png). 좁은 준비 이미지는 입력칸 내부를 스크롤한 끝부분이며 모든 문장이 동시에 보였다는 증거가 아니다.
+
+
+cycle08 대표 화면: [1280 첫 전체](https://github.com/tlsee0813-cmd/agentflow-studio/blob/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0/initial-1280.png) · [390 첫 전체](https://github.com/tlsee0813-cmd/agentflow-studio/blob/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0/initial-390.png) · [선택 상세](https://github.com/tlsee0813-cmd/agentflow-studio/blob/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0/selected-detail-1440.png) · [편집 전 준비](https://github.com/tlsee0813-cmd/agentflow-studio/blob/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0/default-preparation-390.png). 준비문 전체 동시노출·사람이해·큰지도·모든배율 성공으로 확대하지 않는다.
