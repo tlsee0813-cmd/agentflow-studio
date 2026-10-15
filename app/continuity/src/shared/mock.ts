@@ -110,6 +110,10 @@ export function mockGuidance(req:GuideRequest):GuideReply {
   const open:string[]=[...(a.note===null?['영역 구상이 비어 있어 무엇을 만들지 — 초안을 직접 고쳐 적어 주세요']:[]),...(req.areaWork.length?['이 영역의 이전 요청과 겹치는지 — 직접 확인']:[])];
   // MOCK picks no defaults: it never fills in details on the user's behalf.
   const proposal=(scope:string,checks:string,more:string[]=[]):GuideReply=>({question:null,proposal:{goal:idea,scope,checks,open:[...more,...open],defaults:[]} satisfies Proposal});
+  // GUIDE099: a typed instruction is the user's current request. MOCK cannot read it, so it neither asks nor designs anything:
+  // the draft defers to the instruction as written (it travels whole in the draft's own section).
+  if(req.currentInstruction!==null)return proposal('이번 요청은 아래 ‘이번에 맡기거나 바꿀 일’ 원문을 그대로 따릅니다. MOCK은 그 뜻을 해석하거나 범위를 새로 정하지 않습니다. 원문이 명시적으로 바꾸지 않은 저장된 결정은 그대로이며, 원문에 없는 구현·실행·배포·정책은 더하지 않습니다.',
+    '이번 요청 원문이 요청한 행동과 범위만 다뤘는지, 원문이 요청하지 않은 구현·실행·배포나 정책을 새로 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 나눠 보고합니다.');
   if(reservation) {
     const ans=req.answer,said=ans?.disposition==='provided'?ans.text:null;
     // Only this MOCK's own option, by its exact label. Anything else the user wrote is followed as written.

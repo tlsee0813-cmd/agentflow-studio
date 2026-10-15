@@ -149,6 +149,48 @@ class AreaGuidance(unittest.TestCase):
         with self.page.expect_download() as d:self.page.locator('#download-work').click()
         path=base.OUT/'guide097-r2-long-answer.md';d.value.save_as(path);self.assertIn(end,path.read_text(encoding='utf-8'))
 
+    # ---------- GUIDE099: optional current instruction in the open panel ----------
+    def test_06_instruction_visible_neutral_draft_and_composer_untouched(self):
+        import json
+        instr='예약 확정 방식은 정하지 말고, 접수 화면의 입력 항목 설계만 정리해 주세요.\n코드 수정과 배포는 하지 마세요.'
+        (booking,)=self.start([('예약','예약받기')]);self.open_area('예약')
+        self.page.locator('#area-new-request').click();self.page.locator('#draft').fill('작성 중인 내 요청');self.open_area('예약')
+        panel=self.page.locator(f'#guide-{booking}');expect(self.page.locator('#guide-instruction')).to_be_visible();expect(self.page.locator('#guide-start')).to_be_visible()
+        self.assertEqual(panel.locator('details').count(),0,'no folded box inside the panel');self.assertEqual(self.page.locator('#guide-instruction').input_value(),'','composer text is not copied')
+        sent=self.calls('/api/guidance');self.page.locator('#guide-instruction').fill(instr);self.page.locator('#guide-start').click()
+        text=self.page.locator('#guide-text');text.wait_for();self.assertEqual(sent[0]['currentInstruction'],instr);self.assertIsNone(sent[0]['answer'])
+        self.assertEqual(sent[0]['area']['note'],'예약받기');expect(self.page.locator('#guide-question')).to_have_count(0)
+        self.assertEqual(text.input_value().count(instr),1,'the instruction appears whole, once')
+        self.assertEqual(self.state()['draft'],'작성 중인 내 요청');self.page.locator('#guide-adopt').click()
+        expect(self.page.locator('#guide-notice')).to_contain_text('작성 중인 요청이 있어');self.assertEqual(self.state()['draft'],'작성 중인 내 요청')
+        self.page.screenshot(path=str(base.OUT/'guide099-instruction.png'),full_page=True)
+        # Over the request limit: refused with an explicit notice, the input is not shortened, nothing is sent.
+        n=len(sent);self.page.locator('#guide-instruction').fill('가'*12001);self.page.locator('#guide-fresh').click()
+        expect(self.page.locator('#guide-notice')).to_contain_text('12,000자를 넘어 보내지 않았어요');self.assertEqual(len(sent),n)
+        self.assertEqual(len(self.page.locator('#guide-instruction').input_value()),12001)
+
+    def test_07_changed_instruction_is_not_reused_edits_kept_and_late_reply_dropped(self):
+        (booking,)=self.start([('예약','예약받기')]);self.open_area('예약');sent=self.calls('/api/guidance')
+        self.page.locator('#guide-start').click();self.page.locator('#guide-option-0').wait_for()
+        self.page.locator('#guide-instruction').fill('접수 화면 설계만 해 주세요.')
+        expect(self.page.locator('#guide-stale')).to_be_visible();expect(self.page.locator('#guide-option-0')).to_have_count(0)
+        self.page.locator('#guide-fresh').click();text=self.page.locator('#guide-text');text.wait_for()
+        self.assertIsNone(sent[-1]['answer'],'the earlier question and answer are not sent again');self.assertEqual(sent[-1]['currentInstruction'],'접수 화면 설계만 해 주세요.')
+        expect(self.page.locator('#guide-stale')).to_have_count(0);self.assertIn('접수 화면 설계만 해 주세요.',text.input_value())
+        # An edited draft survives a changed instruction: the new reply is held until the user chooses.
+        mine=text.input_value()+'\n(직접 메모)';text.fill(mine);self.page.locator('#guide-instruction').fill('입력 항목 목록만 정리해 주세요.')
+        expect(self.page.locator('#guide-stale')).to_be_visible();self.page.locator('#guide-fresh').click()
+        expect(self.page.locator('#guide-take-incoming')).to_be_visible();expect(text).to_have_value(mine)
+        self.page.locator('#guide-take-incoming').click();expect(text).to_have_value(text_re('입력 항목 목록만 정리해 주세요.'))
+        # Late reply after the instruction was edited while waiting: not applied; the screen stays as it was.
+        before=text.input_value();held=self.hold();self.page.locator('#guide-instruction').fill('다른 지시 C');self.page.locator('#guide-fresh').click()
+        self.page.wait_for_function('()=>document.querySelector("#guide-stop")');self.page.locator('#guide-instruction').fill('다른 지시 D');held[0].continue_()
+        expect(self.page.locator('#guide-notice')).to_contain_text('바뀌어 이 응답은 적용하지 않았어요');expect(text).to_have_value(before)
+        self.page.unroute('**/api/guidance')
+        # Discarding the draft keeps what was typed as the instruction.
+        self.page.locator('#guide-discard').click();expect(self.page.locator('#guide-instruction')).to_have_value('다른 지시 D');expect(self.page.locator('#guide-start')).to_be_visible()
+        self.assertEqual(self.state()['tasks'],[],'nothing written before adoption')
+
 def text_re(fragment):
     import re;return re.compile(re.escape(fragment))
 

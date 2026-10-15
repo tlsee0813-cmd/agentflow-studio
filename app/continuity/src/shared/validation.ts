@@ -372,7 +372,8 @@ function guideTicket(v: unknown): asserts v is GuideTicket { obj(v,['projectId',
 const GUIDE_WORK = 5;
 /** Shape and size of the guidance material. It carries no sources, tasks or bases to write back. */
 export function validateGuideRequest(v: unknown): GuideRequest {
-  obj(v,['schemaVersion','ticket','projectName','brief','area','decisions','areaWork','answer']); ensure(v.schemaVersion===GUIDE_SCHEMA);
+  obj(v,['schemaVersion','ticket','projectName','brief','area','decisions','areaWork','answer','currentInstruction']); ensure(v.schemaVersion===GUIDE_SCHEMA);
+  if(v.currentInstruction!==null)text(v.currentInstruction); // Same limit as a request draft; blank means none (null), never ''.
   guideTicket(v.ticket); text(v.projectName,120); if(v.brief!==null)text(v.brief);
   obj(v.area,['id','name','note']); id(v.area.id); text(v.area.name,60); if(v.area.note!==null)text(v.area.note,2000);
   ensure(v.area.id===(v.ticket as GuideTicket).areaId);

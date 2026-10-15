@@ -2339,3 +2339,5 @@ body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
 .guide-panel textarea,.guide-panel input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper);width:100%;box-sizing:border-box;font:inherit}
 .guide-panel .row{gap:6px;flex-wrap:wrap}
 .guide-notice{color:var(--ink);background:var(--soft,#f4f2fb);border-radius:10px;padding:8px 10px}
+.guide-panel .guide-instruction-label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+.guide-stale{border-left:3px solid var(--line);padding:4px 10px;margin:8px 0}

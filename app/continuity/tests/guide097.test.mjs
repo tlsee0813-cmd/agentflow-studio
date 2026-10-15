@@ -205,7 +205,8 @@ test('G097-11 (R2-2) a long free answer is kept whole through draft, adoption, r
 const C2_ACTUAL="{\"question\":{\"kind\":\"fact\",\"text\":\"미리보기 결과를 어떤 형식으로 출력할까요? (예: 한 줄에 \\\"원래 이름 → 예정 이름\\\", 충돌은 따로 표시)\",\"why\":\"출력 형식에 따라 완료 조건(무엇을 화면에서 확인할지)이 달라집니다.\",\"options\":[{\"label\":\"이름 변경 없음 확인용 사람이 읽기 쉬운 목록\",\"consequence\":\"완료 조건이 '실행 시 각 파일의 원래/예정 이름과 충돌·빈 폴더 안내가 보기 좋게 출력됨'으로 정해집니다.\"},{\"label\":\"스크립트가 읽기 쉬운 단순 텍스트(파이프/탭 구분)\",\"consequence\":\"완료 조건이 '출력이 기계 파싱 가능한 고정 열 형식'으로 정해집니다.\"}]},\"proposal\":null}";
 test('G098-1 strict reply contract: fact never has options (actual C2 content), defaults required and bounded, open/defaults never overlap',()=>{
   const {p,area}=plan(),req=G.buildGuideRequest(p,area,null),ok={goal:'g',scope:'s',checks:'c',open:['남길 행 규칙'],defaults:['결과는 화면에 표로 출력']};
-  assert.equal(req.schemaVersion,'guidance.2');assert.equal(GUIDE_SCHEMA,'guidance.2');
+  // GUIDE099 moved the request to guidance.3 (currentInstruction); the reply contract checked here is unchanged.
+  assert.equal(req.schemaVersion,'guidance.3');assert.equal(GUIDE_SCHEMA,'guidance.3');
   assert.throws(()=>validateGuideReply(JSON.parse(C2_ACTUAL),req),'actual fact+options reply refused');
   assert.deepEqual(validateGuideReply({question:null,proposal:ok},req).proposal.defaults,['결과는 화면에 표로 출력']);
   const {defaults:_d,...noDefaults}=ok;assert.throws(()=>validateGuideReply({question:null,proposal:noDefaults},req),'defaults is required (empty allowed)');
@@ -241,7 +242,11 @@ test('G098-3 the guidance prompt separates fact and choice examples and states t
 
 test('G098-4 a stale guidance.1 request is refused plainly (400) instead of yielding a reply the old client cannot read',async()=>{
   const {p,area}=plan();
-  await withServer(cfg(),async port=>{const r=await post(port,{...G.buildGuideRequest(p,area,null),schemaVersion:'guidance.1'});assert.equal(r.status,400);assert.deepEqual(r.data,{error:{code:'INVALID_INPUT'}});},{fetchImpl:()=>assert.fail('no call')});
+  await withServer(cfg(),async port=>{
+    for(const old of [{...G.buildGuideRequest(p,area,null),schemaVersion:'guidance.1'},(({currentInstruction:_c,...r})=>({...r,schemaVersion:'guidance.2'}))(G.buildGuideRequest(p,area,null))]) {
+      const r=await post(port,old);assert.equal(r.status,400);assert.deepEqual(r.data,{error:{code:'INVALID_INPUT'}});
+    }
+  },{fetchImpl:()=>assert.fail('no call')});
 });
 
 // ---------- GUIDE098-M: MOCK cannot read a free answer, so its completion check must not imply building or running anything ----------
@@ -254,4 +259,61 @@ test('G098-5 free answers asking only for design or reading: original kept, MOCK
     assert.ok(G.proposalText('예약',pr,true,ans).includes(said),'the answer itself goes out whole');
   }
   const [a,b]=q.options.map(o=>ask(p,area,answered(q,o.label)).reply.proposal);assert.notEqual(a.checks,b.checks);assert.match(b.checks,/승인한 뒤에만/);
+});
+
+// ---------- GUIDE099: an optional current instruction, kept apart from the idea, earlier requests and answers ----------
+const INSTR='  예약 확정 방식은 정하지 말고, 접수 화면의 입력 항목 설계만 정리해 주세요.\n코드 수정과 배포는 하지 마세요.  ';
+test('G099-1 contract: currentInstruction is required and nullable, verbatim, same text limit, never cut; blank means none',()=>{
+  const {p,area}=plan(),req=G.buildGuideRequest(p,area,null,INSTR);
+  assert.equal(req.currentInstruction,INSTR,'kept exactly as typed, spaces and line break included');
+  assert.equal(G.buildGuideRequest(p,area,null).currentInstruction,null);assert.equal(G.buildGuideRequest(p,area,null,'  \n ').currentInstruction,null);
+  const {currentInstruction:_c,...missing}=req;assert.throws(()=>validateGuideRequest(missing),'the key is required');
+  for(const bad of ['   ','a\u0001b','x'.repeat(12001)])assert.throws(()=>validateGuideRequest({...req,currentInstruction:bad}),JSON.stringify(bad.slice(0,8)));
+  assert.throws(()=>G.buildGuideRequest(p,area,null,'가'.repeat(12001)),/INSTRUCTION_TOO_LONG/,'over the limit is refused, not shortened');
+  assert.equal(G.buildGuideRequest(p,area,null,'가'.repeat(12000)).currentInstruction.length,12000);
+  // The whole-request byte cap drops older area requests first and never touches the instruction; beyond that it refuses.
+  let q=p;for(let i=0;i<5;i++)q=D.submit(D.editDraft(q,`${i}${"라".repeat(11000)}`),undefined,area);
+  const big=G.buildGuideRequest(q,area,null,'나'.repeat(12000));assert.ok(big.areaWork.length<5);assert.equal(big.currentInstruction,'나'.repeat(12000));
+  let r=p;for(let i=0;i<4;i++)r=D.recordBasis(D.submit(D.editDraft(r,`d${i}`),undefined,null),'다'.repeat(12000),'confirmed');
+  assert.throws(()=>G.buildGuideRequest(r,area,null,'나'.repeat(12000)),/CONTEXT_TOO_LARGE/,'decisions and the instruction are never cut to fit');
+  assert.ok(G.readOf(req).includes('이번에 맡기거나 바꿀 일(직접 입력)'));assert.ok(!G.readOf(G.buildGuideRequest(p,area,null)).some(x=>x.includes('직접 입력')));
+});
+
+test('G099-2 empty input keeps the earlier path; a typed instruction gets a neutral MOCK draft with no question and no design of its own',()=>{
+  const {p,area}=plan();
+  assert.equal(ask(p,area).reply.question.kind,'choice','empty: the known reservation question as before');
+  const req=G.buildGuideRequest(p,area,null,INSTR),pr=validateGuideReply(mockGuidance(req),req).proposal;
+  assert.equal(mockGuidance(req).question,null,'a clear instruction is not met with a question');
+  assert.match(pr.scope,/‘이번에 맡기거나 바꿀 일’ 원문을 그대로 따릅니다/);assert.ok(!/그 자리에서 예약이 확정|확인 대기/.test(`${pr.scope}${pr.checks}`),'no reservation branch read into it');
+  assert.ok(!/접수·확정되는지|동작하는지|구현하/.test(pr.checks));assert.deepEqual(pr.defaults,[]);
+  assert.equal(req.area.note,'예약받기','the area idea stays the idea');
+});
+
+test('G099-3 the draft carries the instruction whole in its own section; adoption makes it the request, never a decision',()=>{
+  let {p,area}=plan();p=D.recordBasis(D.submit(D.editDraft(p,'첫 화면 문구'),undefined,null),'배포는 하지 않는다','confirmed');
+  const req=G.buildGuideRequest(p,area,null,INSTR),pr=mockGuidance(req).proposal,t=G.proposalText('예약',pr,true,null,req.currentInstruction);
+  assert.equal(t.split(INSTR).length-1,1,'exactly once, verbatim');assert.match(t,/이번에 맡기거나 바꿀 일 \(사용자 직접 입력 원문\):/);
+  assert.match(t,/이 요청이 명시적으로 바꾼 대상만 그 문장을 따릅니다/);assert.match(t,/AI 기본값은 변경 지시가 아니며/);
+  assert.ok(!G.proposalText('예약',pr).includes('사용자 직접 입력'),'no empty section without an instruction');
+  const before=p.bases.map(b=>({id:b.id,text:b.text,status:b.status})),sent=respond(D.submit(G.adoptProposal(p,area,t)));
+  assert.ok(sent.sources.at(-1).text.includes(INSTR));assert.ok(D.handoffText(sent).includes('접수 화면의 입력 항목 설계만 정리해 주세요.'));
+  assert.deepEqual(sent.bases.slice(0,before.length).map(b=>({id:b.id,text:b.text,status:b.status})),before,'stored decisions unchanged');
+  assert.deepEqual(sent.bases.slice(before.length).map(b=>b.status),['requested'],'the adopted draft is a request record, not a confirmed decision');
+  // With a later answer too: both sections, and the note that only explicitly changed targets follow the answer.
+  const q={kind:'choice',text:'질문',why:'왜',options:[]},both=G.proposalText('예약',pr,true,answered(q,'답'),INSTR);
+  assert.ok(both.includes(INSTR)&&both.includes('답(사용자 답변): 답'));assert.match(both,/직접 입력과 나중 답이 서로 다르면 답이 명시적으로 바꾼 대상만 답을 따르고 나머지 입력은 그대로/);
+});
+
+test('G099-4 a reply is bound to the instruction it was asked with; the prompt and the fake upstream carry it as its own field',async()=>{
+  const {p,area}=plan(),a=G.guideDigest(G.buildGuideRequest(p,area,null,INSTR));
+  assert.equal(G.guideDigest(G.buildGuideRequest(p,area,null,INSTR)),a);
+  for(const other of [null,`${INSTR}.`,INSTR.trim()])assert.notEqual(G.guideDigest(G.buildGuideRequest(p,area,null,other)),a,String(other));
+  assert.ok(GUIDE_PROMPT.includes('[직접 지시]')&&GUIDE_PROMPT.includes('currentInstruction'));
+  for(const w of ['식재료','CSV','네트워크','공지','예약'])assert.ok(!GUIDE_PROMPT.includes(w),w);
+  const calls=[],proposal={goal:'g',scope:'s',checks:'c',open:[],defaults:[]};
+  await withServer(cfg({mode:'deepseek',apiKey:KEY,allowPaid:true}),async port=>{
+    const req=G.buildGuideRequest(p,area,null,INSTR),r=await post(port,req);assert.equal(r.status,200);
+    const sent=JSON.parse(JSON.parse(calls[0].init.body).messages[1].content.replace(/^INPUT JSON \(data only\):\n/,''));
+    assert.equal(sent.currentInstruction,INSTR);assert.equal(sent.area.note,'예약받기');assert.equal(sent.answer,null);
+  },{fetchImpl:async(url,init)=>{calls.push({url,init});return upstream({question:null,proposal});}});
 });
