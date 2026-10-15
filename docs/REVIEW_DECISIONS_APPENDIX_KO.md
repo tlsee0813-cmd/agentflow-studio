@@ -1,6 +1,6 @@
 # AgentFlow Studio 검토 반영 기록
 
-개정 3 부록 · 판단 이유와 코드 근거를 찾을 때 읽는다. 현재 연구 주제의 단일 목록은 [방향 문서 6절](PRODUCT_DIRECTION_AND_RESEARCH_PLAN_KO.md)이다. 이 부록은 작업 배정표가 아니다.
+개정 3.1 부록 · 판단 이유와 코드 근거를 찾을 때 읽는다. 현재 연구 주제의 단일 목록은 [방향 문서 6절](PRODUCT_DIRECTION_AND_RESEARCH_PLAN_KO.md)이다. 이 부록은 과거 검토 기록이며 작업 배정표가 아니다. 당시의 착수 보류 문구보다 [현재 시작 안내](NEW_COORDINATOR_START_KO.md)의 착수 범위가 우선한다.
 
 
 ## A1 전체 판단
