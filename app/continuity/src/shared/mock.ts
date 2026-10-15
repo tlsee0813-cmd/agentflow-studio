@@ -120,7 +120,8 @@ export function mockGuidance(req:GuideRequest):GuideReply {
       '접수 직후에는 ‘확인 대기’로 보이고 확정으로 보이지 않는지, 공방이 승인한 뒤에만 ‘예약 확정’으로 바뀌는지 확인합니다.',['승인 기한과 거절 안내']);
     // A long answer is not copied into this field: the draft carries the whole answer in its own section (proposalText).
     if(said!==null)return proposal(`${said.length<=QUOTE?`예약 확정 방식은 사용자 답변 원문을 따릅니다: ‘${said}’.`:'예약 확정 방식은 이 요청 끝의 ‘안내 질문과 사용자 답변 원문’ 전문을 그대로 따릅니다(답이 길어 이 줄에는 옮기지 않음).'} MOCK은 이 답의 뜻을 해석하지 않으며, 답변에 없는 정책은 더하지 않습니다.`,
-      '답변 원문에 적힌 대로 예약이 접수·확정되는지 확인하고, 답변이 정하지 않은 동작은 만들지 않았는지 확인합니다.');
+      // GUIDE098-M: MOCK cannot read a free answer, so the check names no action of its own (no build, run or behaviour test).
+      '답변 원문이 요청한 행동과 범위만 다뤘는지, 원문이 요청하지 않은 구현·실행·배포나 정책을 새로 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 나눠 보고합니다.');
     if(ans)return proposal('고객이 원하는 시간을 골라 예약 요청을 남기는 접수까지만 만듭니다. 확정 방식(바로/확인 뒤)은 사용자가 아직 정하지 않았으므로 확정 처리는 만들지 않습니다.',
       '예약 요청이 접수 기록으로 남는지 확인하고, 확정·승인 동작이 새로 생기지 않았는지 확인합니다.',[`예약 확정 방식 — 사용자 ${ans.disposition==='unknown'?'모름':'보류'}`]);
     // Existing material that already speaks about confirmation is respected as written, never re-asked or read as a choice.

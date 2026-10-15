@@ -243,3 +243,15 @@ test('G098-4 a stale guidance.1 request is refused plainly (400) instead of yiel
   const {p,area}=plan();
   await withServer(cfg(),async port=>{const r=await post(port,{...G.buildGuideRequest(p,area,null),schemaVersion:'guidance.1'});assert.equal(r.status,400);assert.deepEqual(r.data,{error:{code:'INVALID_INPUT'}});},{fetchImpl:()=>assert.fail('no call')});
 });
+
+// ---------- GUIDE098-M: MOCK cannot read a free answer, so its completion check must not imply building or running anything ----------
+test('G098-5 free answers asking only for design or reading: original kept, MOCK checks add no implementation or run; option branches unchanged',()=>{
+  const {p,area}=plan(),q=ask(p,area).reply.question;
+  for(const said of ['[검증용 답] 예약 확정은 보류하고 접수 화면의 설계만 다뤄 주세요. 코드 수정과 배포는 하지 마세요.','관련 문서만 읽고 지금 구조를 설명해 주세요. 아무것도 실행하지 마세요.']) {
+    const ans=answered(q,said),pr=validateGuideReply(mockGuidance(G.buildGuideRequest(p,area,ans)),G.buildGuideRequest(p,area,ans)).proposal;
+    assert.ok(!/접수·확정되는지|동작하는지|실행해|구현하/.test(pr.checks),`checks imply building or running: ${pr.checks}`);
+    assert.match(pr.checks,/답변 원문이 요청한 행동과 범위/);assert.match(pr.checks,/새로 하지 않았는지/);
+    assert.ok(G.proposalText('예약',pr,true,ans).includes(said),'the answer itself goes out whole');
+  }
+  const [a,b]=q.options.map(o=>ask(p,area,answered(q,o.label)).reply.proposal);assert.notEqual(a.checks,b.checks);assert.match(b.checks,/승인한 뒤에만/);
+});
