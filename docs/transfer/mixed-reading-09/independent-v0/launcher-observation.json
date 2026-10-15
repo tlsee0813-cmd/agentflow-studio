@@ -1,0 +1,12 @@
+{
+  "observer": "functions.exec tools.write_stdin actual process exit_code",
+  "run01": {
+    "sessionID": 68203,
+    "observedLauncherExit": 0
+  },
+  "run02": {
+    "sessionID": 75330,
+    "observedLauncherExit": 0
+  },
+  "note": "External tool observations after launcher terminated. Collector exit in actual-exit.json is separately measured by launcher subprocess after collector terminated, not inferred from launcherIntendedExit."
+}

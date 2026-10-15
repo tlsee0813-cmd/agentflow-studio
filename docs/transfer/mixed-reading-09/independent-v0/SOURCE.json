@@ -1,0 +1,17 @@
+{
+  "SOURCE_COMMIT": "08a04afb7515efc5f4007b5d9bf5bb787c908c20",
+  "SOURCE_HTML": "docs/transfer/mixed-reading-09/author-fix1/mixed-reading-study.html",
+  "SOURCE_BYTES": 54524,
+  "SOURCE_SHA256": "90141c4c5cfc509cafef3c038a9c1c14f0062f7e009e4359f5f97bd5541e3173",
+  "URL": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/08a04afb7515efc5f4007b5d9bf5bb787c908c20/docs/transfer/mixed-reading-09/author-fix1/mixed-reading-study.html",
+  "contract": "a3e2091c9d8bf47d453a5dcd65daecbec237e487 docs/cycles/2026-10-16-mixed-reading-09/IMPLEMENTATION.md + DECISION.md + REUSE_AUDIT.md",
+  "retrieval": "Existing authenticated GitHub git fetch then git show fixed commit:path into temporary site. Source unchanged and not duplicated.",
+  "authorReferencesOnly": [
+    "author-fix1/REPORT-fix1.md",
+    "author-fix1/v0-to-fix1.diff"
+  ],
+  "notUsedAsIndependentPassCounts": [
+    "author-v0 299",
+    "author-fix1 separate 100"
+  ]
+}

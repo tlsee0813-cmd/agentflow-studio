@@ -1,0 +1,124 @@
+{
+  "UTC": "2026-10-15T23:03:17.817971+00:00",
+  "scope": "Exact delivered payload set except this manifest itself (self-reference excluded)",
+  "files": [
+    {
+      "path": "R3-reference-390.png",
+      "bytes": 80351,
+      "sha256": "79f8fa22102321b0c6908d7f1d3595fd6e79eb8c0e13bb973e88ba14d5cb220b"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 6920,
+      "sha256": "1abc9f8ec28f5af1588f7259f01f69bcb39d4a98dc72adb4c639bfb4fe0ee1b2"
+    },
+    {
+      "path": "SOURCE.json",
+      "bytes": 942,
+      "sha256": "b9736c691e68cfb35de2906e6e910654ae3ebf74da6db5fe06e09a70f83b7af5"
+    },
+    {
+      "path": "collect.py",
+      "bytes": 1080,
+      "sha256": "17ba60505b300d1643bef7998bad729b8abd1244b27c97cf1626da7f3fb4a79f"
+    },
+    {
+      "path": "derived-summary.json",
+      "bytes": 34357,
+      "sha256": "bea93ecf13c1930e1c9e364227eb68b37b75e235829d87fe67e815c0aff06ec2"
+    },
+    {
+      "path": "edited-preparation-1280.png",
+      "bytes": 140740,
+      "sha256": "a0967de0f43ff5c604d0696f295ea2761b876d1d250c8057b77e53ac0c95d575"
+    },
+    {
+      "path": "initial-1280.png",
+      "bytes": 98853,
+      "sha256": "d2f9fd079b5b2746a0b0c03a029f022d1009828de30163d734c488675c06a5a9"
+    },
+    {
+      "path": "initial-390.png",
+      "bytes": 85029,
+      "sha256": "ae9fbb55d213344dd619ceba1a66fe92016b4f6864788217f95a79858c47598f"
+    },
+    {
+      "path": "launch.py",
+      "bytes": 881,
+      "sha256": "64072ffa56eaef83a91b36920f5fe244ad761e02a4e6f8e1329c249ac74aaae9"
+    },
+    {
+      "path": "launcher-observation.json",
+      "bytes": 437,
+      "sha256": "c80c7bf5aff2f70bb020fb35c75ff302fac27c11c616d7546b519286de966cc7"
+    },
+    {
+      "path": "run01/actual-exit.json",
+      "bytes": 285,
+      "sha256": "ac1d0177500371d9106fe118c0ef55b7d057fab6e91d213b9d21549510a927c1"
+    },
+    {
+      "path": "run01/child-exit.json",
+      "bytes": 506,
+      "sha256": "a07d1b96d5f197b044f33761a04f6fcd1c33b22963a63bc74f83f2e6df039243"
+    },
+    {
+      "path": "run01/collector.log",
+      "bytes": 64,
+      "sha256": "ac25ba1b76ac819d30374718fdef338d6599ecee788c071b1cd0fcc92d4303b4"
+    },
+    {
+      "path": "run01/process.log",
+      "bytes": 8774,
+      "sha256": "4bd2f0bcaf576f3d17c692fd34a54bd61c301c9ea036dac514b21a474f5f8bfd"
+    },
+    {
+      "path": "run01/result.json",
+      "bytes": 1676784,
+      "sha256": "b4d5ae96b4b6d711ead2fb97274907b6f9fe5d96295d85a4a010eef60cce021b"
+    },
+    {
+      "path": "run02/actual-exit.json",
+      "bytes": 285,
+      "sha256": "164c929c4a91d8e8e1488a7b36f01662c181f0a62b0a6116d8fbcc4762a30389"
+    },
+    {
+      "path": "run02/child-exit.json",
+      "bytes": 506,
+      "sha256": "0900f1b174f339d91fda7446851f61de3fdff83c86c12ca67cb23b37e4b09559"
+    },
+    {
+      "path": "run02/collector.log",
+      "bytes": 64,
+      "sha256": "ac25ba1b76ac819d30374718fdef338d6599ecee788c071b1cd0fcc92d4303b4"
+    },
+    {
+      "path": "run02/process.log",
+      "bytes": 10202,
+      "sha256": "b113f95ebcbdf5fe9ac65562f3a640652277914aeda482aa4f5c8cffa0f2962a"
+    },
+    {
+      "path": "run02/result.json",
+      "bytes": 1918164,
+      "sha256": "9b0820374e2b71c25dfa453d81b84cee0c526d9dbe6215c8cd8ccc9360c02d99"
+    },
+    {
+      "path": "snapshots/check-0e6baa72afa2096dd5af24c7a4365a2a2d358365a6717e233edb620baffe4307.py",
+      "bytes": 23928,
+      "sha256": "0e6baa72afa2096dd5af24c7a4365a2a2d358365a6717e233edb620baffe4307"
+    },
+    {
+      "path": "snapshots/check-9caca8102b953d5aa0ec08317e3471e4c8c123dea952567240745add53b554d9.py",
+      "bytes": 24610,
+      "sha256": "9caca8102b953d5aa0ec08317e3471e4c8c123dea952567240745add53b554d9"
+    },
+    {
+      "path": "summarize.py",
+      "bytes": 1477,
+      "sha256": "ecc308e62bd49e4371b30feb65300f0615a2278cb41d89f3fc3b159a015ef09c"
+    }
+  ],
+  "totalBytesExcludingManifest": 4115239,
+  "payloadSetSHA256": "37bd75962ab630833b7b418385a6f22fe0bba166c810f71d49ec2eec54e8c0ec",
+  "payloadSetHashDefinition": "SHA256 of UTF-8 json.dumps(files, ensure_ascii=False, sort_keys=True, separators=(comma,colon)); files in path order; each entry contains path,bytes,sha256"
+}

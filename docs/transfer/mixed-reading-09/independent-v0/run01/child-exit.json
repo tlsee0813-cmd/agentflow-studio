@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/mixed09/snapshots/check-0e6baa72afa2096dd5af24c7a4365a2a2d358365a6717e233edb620baffe4307.py",
+    "--source",
+    "/workspace/browser-env/mixed09/site/mixed-reading-study.html",
+    "--out",
+    "/workspace/browser-env/mixed09/run01"
+  ],
+  "codeSHA256": "0e6baa72afa2096dd5af24c7a4365a2a2d358365a6717e233edb620baffe4307",
+  "actualChildExit": 0,
+  "jsonExit": 0,
+  "agreement": true,
+  "collectorIntendedExit": 0
+}

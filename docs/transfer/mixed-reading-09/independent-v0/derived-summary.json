@@ -1,0 +1,1301 @@
+{
+  "method": "Derived from run02 result only; raw pre/post retained. Not a new browser execution or extra assertions.",
+  "viewports": {
+    "1280": {
+      "entryScrolls": {
+        "main": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        },
+        "mapScroll": {
+          "left": 136,
+          "top": 0,
+          "maxX": 136,
+          "maxY": 0
+        },
+        "panel": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        },
+        "focusView": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        }
+      },
+      "entryTransform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+      "mapWheelBefore": {
+        "left": 74,
+        "top": 0,
+        "maxX": 136,
+        "maxY": 0,
+        "clientWidth": 980,
+        "clientHeight": 576,
+        "scrollWidth": 1116,
+        "scrollHeight": 576
+      },
+      "mapWheelAfter": {
+        "left": 136,
+        "top": 0,
+        "maxX": 136,
+        "maxY": 0,
+        "clientWidth": 980,
+        "clientHeight": 576,
+        "scrollWidth": 1116,
+        "scrollHeight": 576
+      },
+      "mapWheelActualDelta": {
+        "left": 62,
+        "top": 0
+      },
+      "restoreCardDeltas": {
+        "n-G1": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-G2": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C21": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "n-C22": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "n-G3": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C31": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C32": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-G4": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C41": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C42": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-G5": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0.0
+        }
+      },
+      "restorePathWorldNumericDeltas": [
+        {
+          "ids": [
+            "R1"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137
+          ],
+          "maxAbsWorldDelta": 0.05000000000001137,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.057464599609375,
+            "width": 0,
+            "height": 0
+          }
+        },
+        {
+          "ids": [
+            "R2"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -0.04999999999998295,
+            0.0,
+            -0.04999999999998295
+          ],
+          "maxAbsWorldDelta": 0.04999999999998295,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.0574951171875,
+            "width": 0.0,
+            "height": 0.0574951171875
+          }
+        },
+        {
+          "ids": [
+            "R3"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137
+          ],
+          "maxAbsWorldDelta": 0.05000000000001137,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.057464599609375,
+            "width": 0.0,
+            "height": 0.057464599609375
+          }
+        },
+        {
+          "ids": [
+            "R4"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137
+          ],
+          "maxAbsWorldDelta": 0.05000000000001137,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.057464599609375,
+            "width": 0.0,
+            "height": 0.0
+          }
+        },
+        {
+          "ids": [
+            "R5"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.049999999999954525,
+            0.0,
+            -0.049999999999954525
+          ],
+          "maxAbsWorldDelta": 0.05000000000001137,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.057464599609375,
+            "width": 0.0,
+            "height": -3.0517578125e-05
+          }
+        },
+        {
+          "ids": [
+            "R6"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -0.14999999999997726,
+            0.0,
+            -0.14999999999997726
+          ],
+          "maxAbsWorldDelta": 0.14999999999997726,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 0.0,
+            "height": -0.1724853515625
+          }
+        }
+      ],
+      "maxAbsPathWorldDelta": 0.14999999999997726,
+      "allowedPathWorldDelta": 0.5,
+      "firstSelectionScreenEndpointPairs": {
+        "before": [
+          {
+            "ids": [
+              "R1"
+            ],
+            "representativeFrom": "G1",
+            "representativeTo": "G2",
+            "aggregation": "to",
+            "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정",
+            "d": "M202 199.45000000000002C222 199.45000000000002 222 199.45000000000002 242 199.45000000000002",
+            "rect": {
+              "x": 202,
+              "y": 343.20001220703125,
+              "width": 40,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 202,
+              "y": 343.1999969482422
+            },
+            "screenEnd": {
+              "x": 242,
+              "y": 343.1999969482422
+            }
+          },
+          {
+            "ids": [
+              "R2"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "C31",
+            "aggregation": "from ",
+            "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본",
+            "d": "M452 199.45000000000002C476.5 199.45000000000002 476.5 114.19999999999999 501 114.19999999999999",
+            "rect": {
+              "x": 452,
+              "y": 257.95001220703125,
+              "width": 49,
+              "height": 85.25
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 452,
+              "y": 343.1999969482422
+            },
+            "screenEnd": {
+              "x": 501,
+              "y": 257.9499969482422
+            }
+          },
+          {
+            "ids": [
+              "R3"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "C32",
+            "aggregation": "from ",
+            "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본",
+            "d": "M452 175.9C476.5 175.9 476.5 175.9 501 175.9",
+            "rect": {
+              "x": 452,
+              "y": 319.6499938964844,
+              "width": 49,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 452,
+              "y": 319.6499938964844
+            },
+            "screenEnd": {
+              "x": 501,
+              "y": 319.6499938964844
+            }
+          },
+          {
+            "ids": [
+              "R4"
+            ],
+            "representativeFrom": "C32",
+            "representativeTo": "G5",
+            "aggregation": "",
+            "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본",
+            "d": "M719 184.8C743.5 184.8 743.5 184.8 768 184.8",
+            "rect": {
+              "x": 719,
+              "y": 328.54998779296875,
+              "width": 49,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 719,
+              "y": 328.5500030517578
+            },
+            "screenEnd": {
+              "x": 768,
+              "y": 328.5500030517578
+            }
+          },
+          {
+            "ids": [
+              "R5"
+            ],
+            "representativeFrom": "G5",
+            "representativeTo": "G4",
+            "aggregation": "to",
+            "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자",
+            "d": "M768 199.45000000000002C748 199.45000000000002 748 314.8 728 314.8",
+            "rect": {
+              "x": 728,
+              "y": 343.20001220703125,
+              "width": 40,
+              "height": 115.3499755859375
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 768,
+              "y": 343.1999969482422
+            },
+            "screenEnd": {
+              "x": 728,
+              "y": 458.54998779296875
+            }
+          },
+          {
+            "ids": [
+              "R6"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "G4",
+            "aggregation": "from to",
+            "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본",
+            "d": "M452 199.45000000000002C472 199.45000000000002 472 314.8 492 314.8",
+            "rect": {
+              "x": 452,
+              "y": 343.20001220703125,
+              "width": 40,
+              "height": 115.3499755859375
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 452,
+              "y": 343.1999969482422
+            },
+            "screenEnd": {
+              "x": 492,
+              "y": 458.54998779296875
+            }
+          }
+        ],
+        "after": [
+          {
+            "ids": [
+              "R1"
+            ],
+            "representativeFrom": "G1",
+            "representativeTo": "G2",
+            "aggregation": "to",
+            "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정",
+            "d": "M202 199.45000000000002C222 199.45000000000002 222 199.45000000000002 242 199.45000000000002",
+            "rect": {
+              "x": 202,
+              "y": 343.20001220703125,
+              "width": 40,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 202,
+              "y": 343.1999969482422
+            },
+            "screenEnd": {
+              "x": 242,
+              "y": 343.1999969482422
+            }
+          },
+          {
+            "ids": [
+              "R2"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "C31",
+            "aggregation": "from ",
+            "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본",
+            "d": "M452 199.45000000000002C476.5 199.45000000000002 476.5 114.19999999999999 501 114.19999999999999",
+            "rect": {
+              "x": 452,
+              "y": 257.95001220703125,
+              "width": 49,
+              "height": 85.25
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 452,
+              "y": 343.1999969482422
+            },
+            "screenEnd": {
+              "x": 501,
+              "y": 257.9499969482422
+            }
+          },
+          {
+            "ids": [
+              "R3"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "C32",
+            "aggregation": "from ",
+            "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본",
+            "d": "M452 175.9C476.5 175.9 476.5 175.9 501 175.9",
+            "rect": {
+              "x": 452,
+              "y": 319.6499938964844,
+              "width": 49,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 452,
+              "y": 319.6499938964844
+            },
+            "screenEnd": {
+              "x": 501,
+              "y": 319.6499938964844
+            }
+          },
+          {
+            "ids": [
+              "R4"
+            ],
+            "representativeFrom": "C32",
+            "representativeTo": "G5",
+            "aggregation": "",
+            "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본",
+            "d": "M719 184.8C743.5 184.8 743.5 184.8 768 184.8",
+            "rect": {
+              "x": 719,
+              "y": 328.54998779296875,
+              "width": 49,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 719,
+              "y": 328.5500030517578
+            },
+            "screenEnd": {
+              "x": 768,
+              "y": 328.5500030517578
+            }
+          },
+          {
+            "ids": [
+              "R5"
+            ],
+            "representativeFrom": "G5",
+            "representativeTo": "G4",
+            "aggregation": "to",
+            "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자",
+            "d": "M768 199.45000000000002C748 199.45000000000002 748 314.8 728 314.8",
+            "rect": {
+              "x": 728,
+              "y": 343.20001220703125,
+              "width": 40,
+              "height": 115.3499755859375
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 768,
+              "y": 343.1999969482422
+            },
+            "screenEnd": {
+              "x": 728,
+              "y": 458.54998779296875
+            }
+          },
+          {
+            "ids": [
+              "R6"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "G4",
+            "aggregation": "from to",
+            "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본",
+            "d": "M452 199.45000000000002C472 199.45000000000002 472 314.8 492 314.8",
+            "rect": {
+              "x": 452,
+              "y": 343.20001220703125,
+              "width": 40,
+              "height": 115.3499755859375
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 143.75
+            },
+            "screenStart": {
+              "x": 452,
+              "y": 343.1999969482422
+            },
+            "screenEnd": {
+              "x": 492,
+              "y": 458.54998779296875
+            }
+          }
+        ]
+      },
+      "postCloseEProof": "See each new-panel-after-E-xref-closed-* immediate DOM snapshot, then after-new-panel-*-E check (actual preparation reentry). E is not read through hidden app state."
+    },
+    "390": {
+      "entryScrolls": {
+        "main": {
+          "left": 0,
+          "top": 275,
+          "maxX": 0,
+          "maxY": 293
+        },
+        "mapScroll": {
+          "left": 31,
+          "top": 132,
+          "maxX": 31,
+          "maxY": 148
+        },
+        "panel": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        },
+        "focusView": {
+          "left": 0,
+          "top": 0,
+          "maxX": 0,
+          "maxY": 0
+        }
+      },
+      "entryTransform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+      "mapWheelBefore": {
+        "left": 29,
+        "top": 42,
+        "maxX": 31,
+        "maxY": 148,
+        "clientWidth": 390,
+        "clientHeight": 557,
+        "scrollWidth": 421,
+        "scrollHeight": 705
+      },
+      "mapWheelAfter": {
+        "left": 31,
+        "top": 132,
+        "maxX": 31,
+        "maxY": 148,
+        "clientWidth": 390,
+        "clientHeight": 557,
+        "scrollWidth": 421,
+        "scrollHeight": 705
+      },
+      "mapWheelActualDelta": {
+        "left": 2,
+        "top": 90
+      },
+      "restoreCardDeltas": {
+        "n-G1": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-G2": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C21": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "n-C22": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "n-G3": {
+          "x": 0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C31": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C32": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-G4": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C41": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-C42": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "n-G5": {
+          "x": 0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        }
+      },
+      "restorePathWorldNumericDeltas": [
+        {
+          "ids": [
+            "R1"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            -0.06199999999999051,
+            0.0,
+            -0.06199999999999051,
+            0.0,
+            -0.13800000000000523,
+            0.0,
+            -0.13800000000000523
+          ],
+          "maxAbsWorldDelta": 0.13800000000000523,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.0713043212890625,
+            "width": 0.0,
+            "height": -0.08740234375
+          }
+        },
+        {
+          "ids": [
+            "R2"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137,
+            0.0,
+            -0.05000000000001137
+          ],
+          "maxAbsWorldDelta": 0.05000000000001137,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.0575103759765625,
+            "width": 0.0,
+            "height": 0
+          }
+        },
+        {
+          "ids": [
+            "R3"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            -0.14999999999997726,
+            0.0,
+            -0.14999999999997726,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxAbsWorldDelta": 0.14999999999997726,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.1725006103515625,
+            "width": 0.0,
+            "height": 0.1725006103515625
+          }
+        },
+        {
+          "ids": [
+            "R4"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -0.1379999999999768,
+            0.0,
+            -0.1379999999999768
+          ],
+          "maxAbsWorldDelta": 0.1379999999999768,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 0.0,
+            "height": -0.15869140625
+          }
+        },
+        {
+          "ids": [
+            "R5"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            -0.14999999999997726,
+            0.0,
+            -0.14999999999997726,
+            0.0,
+            -0.09999999999990905,
+            0.0,
+            -0.09999999999990905
+          ],
+          "maxAbsWorldDelta": 0.14999999999997726,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.172515869140625,
+            "width": 0.0,
+            "height": 0.057586669921875
+          }
+        },
+        {
+          "ids": [
+            "R6"
+          ],
+          "worldNumericDeltas": [
+            0.0,
+            -0.16200000000000614,
+            0.0,
+            -0.16200000000000614,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "maxAbsWorldDelta": 0.16200000000000614,
+          "screenRectDelta": {
+            "x": 0.0,
+            "y": -0.1862945556640625,
+            "width": 0.0,
+            "height": 0.18634033203125
+          }
+        }
+      ],
+      "maxAbsPathWorldDelta": 0.16200000000000614,
+      "allowedPathWorldDelta": 0.5,
+      "firstSelectionScreenEndpointPairs": {
+        "before": [
+          {
+            "ids": [
+              "R1"
+            ],
+            "representativeFrom": "G1",
+            "representativeTo": "G2",
+            "aggregation": "to",
+            "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정",
+            "d": "M14 49.245999999999995C2 49.245999999999995 2 149.274 14 149.274",
+            "rect": {
+              "x": 5,
+              "y": 263.9960021972656,
+              "width": 9,
+              "height": 100.02798461914062
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 14,
+              "y": 263.99599838256836
+            },
+            "screenEnd": {
+              "x": 14,
+              "y": 364.0240020751953
+            }
+          },
+          {
+            "ids": [
+              "R2"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "C31",
+            "aggregation": "from ",
+            "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본",
+            "d": "M154 200.20000000000002C170.5 200.20000000000002 170.5 200.20000000000002 187 200.20000000000002",
+            "rect": {
+              "x": 154,
+              "y": 414.95001220703125,
+              "width": 33,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 154,
+              "y": 414.9499969482422
+            },
+            "screenEnd": {
+              "x": 187,
+              "y": 414.9499969482422
+            }
+          },
+          {
+            "ids": [
+              "R3"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "C32",
+            "aggregation": "from ",
+            "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본",
+            "d": "M154 166.95C170.5 166.95 170.5 270.4 187 270.4",
+            "rect": {
+              "x": 154,
+              "y": 381.70001220703125,
+              "width": 33,
+              "height": 103.44998168945312
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 154,
+              "y": 381.6999969482422
+            },
+            "screenEnd": {
+              "x": 187,
+              "y": 485.1499938964844
+            }
+          },
+          {
+            "ids": [
+              "R4"
+            ],
+            "representativeFrom": "C32",
+            "representativeTo": "G5",
+            "aggregation": "",
+            "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본",
+            "d": "M345 279.376C364 279.376 364 359.854 352 359.854",
+            "rect": {
+              "x": 345,
+              "y": 494.1260070800781,
+              "width": 15.27447509765625,
+              "height": 80.47799682617188
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 345,
+              "y": 494.1260070800781
+            },
+            "screenEnd": {
+              "x": 352,
+              "y": 574.60400390625
+            }
+          },
+          {
+            "ids": [
+              "R5"
+            ],
+            "representativeFrom": "G5",
+            "representativeTo": "G4",
+            "aggregation": "to",
+            "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자",
+            "d": "M180 367.45000000000005C167 367.45000000000005 167 367.45000000000005 154 367.45000000000005",
+            "rect": {
+              "x": 154,
+              "y": 582.2000122070312,
+              "width": 26,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 180,
+              "y": 582.2000122070312
+            },
+            "screenEnd": {
+              "x": 154,
+              "y": 582.2000122070312
+            }
+          },
+          {
+            "ids": [
+              "R6"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "G4",
+            "aggregation": "from to",
+            "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본",
+            "d": "M14 184.626C2 184.626 2 398.88 14 398.88",
+            "rect": {
+              "x": 5,
+              "y": 399.3760070800781,
+              "width": 9,
+              "height": 214.25399780273438
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 14,
+              "y": 399.3760070800781
+            },
+            "screenEnd": {
+              "x": 14,
+              "y": 613.6300048828125
+            }
+          }
+        ],
+        "after": [
+          {
+            "ids": [
+              "R1"
+            ],
+            "representativeFrom": "G1",
+            "representativeTo": "G2",
+            "aggregation": "to",
+            "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정",
+            "d": "M14 49.245999999999995C2 49.245999999999995 2 149.274 14 149.274",
+            "rect": {
+              "x": 5,
+              "y": 263.9960021972656,
+              "width": 9,
+              "height": 100.02798461914062
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 14,
+              "y": 263.99599838256836
+            },
+            "screenEnd": {
+              "x": 14,
+              "y": 364.0240020751953
+            }
+          },
+          {
+            "ids": [
+              "R2"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "C31",
+            "aggregation": "from ",
+            "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본",
+            "d": "M154 200.20000000000002C170.5 200.20000000000002 170.5 200.20000000000002 187 200.20000000000002",
+            "rect": {
+              "x": 154,
+              "y": 414.95001220703125,
+              "width": 33,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 154,
+              "y": 414.9499969482422
+            },
+            "screenEnd": {
+              "x": 187,
+              "y": 414.9499969482422
+            }
+          },
+          {
+            "ids": [
+              "R3"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "C32",
+            "aggregation": "from ",
+            "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본",
+            "d": "M154 166.95C170.5 166.95 170.5 270.4 187 270.4",
+            "rect": {
+              "x": 154,
+              "y": 381.70001220703125,
+              "width": 33,
+              "height": 103.44998168945312
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 154,
+              "y": 381.6999969482422
+            },
+            "screenEnd": {
+              "x": 187,
+              "y": 485.1499938964844
+            }
+          },
+          {
+            "ids": [
+              "R4"
+            ],
+            "representativeFrom": "C32",
+            "representativeTo": "G5",
+            "aggregation": "",
+            "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본",
+            "d": "M345 279.376C364 279.376 364 359.854 352 359.854",
+            "rect": {
+              "x": 345,
+              "y": 494.1260070800781,
+              "width": 15.27447509765625,
+              "height": 80.47799682617188
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 345,
+              "y": 494.1260070800781
+            },
+            "screenEnd": {
+              "x": 352,
+              "y": 574.60400390625
+            }
+          },
+          {
+            "ids": [
+              "R5"
+            ],
+            "representativeFrom": "G5",
+            "representativeTo": "G4",
+            "aggregation": "to",
+            "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자",
+            "d": "M180 367.45000000000005C167 367.45000000000005 167 367.45000000000005 154 367.45000000000005",
+            "rect": {
+              "x": 154,
+              "y": 582.2000122070312,
+              "width": 26,
+              "height": 0
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 180,
+              "y": 582.2000122070312
+            },
+            "screenEnd": {
+              "x": 154,
+              "y": 582.2000122070312
+            }
+          },
+          {
+            "ids": [
+              "R6"
+            ],
+            "representativeFrom": "G2",
+            "representativeTo": "G4",
+            "aggregation": "from to",
+            "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본",
+            "d": "M14 184.626C2 184.626 2 398.88 14 398.88",
+            "rect": {
+              "x": 5,
+              "y": 399.3760070800781,
+              "width": 9,
+              "height": 214.25399780273438
+            },
+            "matrix": {
+              "a": 1,
+              "b": 0,
+              "c": 0,
+              "d": 1,
+              "e": 0,
+              "f": 214.75
+            },
+            "screenStart": {
+              "x": 14,
+              "y": 399.3760070800781
+            },
+            "screenEnd": {
+              "x": 14,
+              "y": 613.6300048828125
+            }
+          }
+        ]
+      },
+      "postCloseEProof": "See each new-panel-after-E-xref-closed-* immediate DOM snapshot, then after-new-panel-*-E check (actual preparation reentry). E is not read through hidden app state."
+    }
+  }
+}
