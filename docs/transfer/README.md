@@ -2,6 +2,7 @@
 
 이 브랜치는 세션 간 원본 파일을 전달하는 공간이다. 제품 배포나 현재 연구 상태의 별도 사본이 아니다.
 
+- [구성 지도 cycle05 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9b4a422f4e46085acb0841e9d9201c7ff86d6b81/docs/cycles/2026-10-16-composition-05/RESULT.md)
 - [현재 상태와 다음 범위](https://github.com/tlsee0813-cmd/agentflow-studio/blob/checkpoint/2026-10-15/docs/cycles/ACTIVE.md)
 - [첫 진입 A/B cycle04 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/571e7a7030039b4d4354757949cdabc8533c70aa/docs/cycles/2026-10-16-orientation-04/RESULT.md)
 - [공간 복귀 cycle03 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/35b064841e3649378c4e11c019625e569a2fc7c6/docs/cycles/2026-10-16-return-flow-03/RESULT.md)
@@ -9,6 +10,9 @@
 
 | 묶음 | 고정 원본 | 읽는 순서와 범위 |
 |---|---|---|
+| cycle05 구성 작성자 원본 | [HTML·코드·첫 실패·PNG5·manifest 24파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/10d1f03f6944a2787079cdb49cf009c6b1fbd302/docs/transfer/composition-05/author-v0) | 원격24/24 bytes대조. README의 모든묶음 준비불가 주장은 통합결과에서 미세분화기능 예외로 정정 |
+| cycle05 구성 독립 관측 | [원본34파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/2f80732664686669f623d3f32238c39807c1112d/docs/transfer/composition-05/independent-v0) | 390의8장면(run02 전체child1) +1440의6장면(run04 child0),14는오프라인집계. 최초검사오류3회와합성probe보존. aria상태 미측정·상위수집기exit0 경계는 통합결과 참조. 원격payload33/33 bytesSHA일치 |
+| cycle05 공식 참고 관측 접근 실패 | [접속실패 원본6파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/bb2bb37b106c0ec1cf4063b27fb1c666229f2f50/docs/transfer/composition-05/reference-folding) | ERR_TUNNEL_CONNECTION_FAILED·전장면NOT_RUN·PNG없음. 우리시안검증이나 총괄 IAB관측과 합산하지 않음. 버전기록불일치 주석은 연구SOURCE_AUDIT |
 | UI02 fix3 | [원본·별도 검증기 보완](https://github.com/tlsee0813-cmd/agentflow-studio/tree/4f4dfe5adec05b849753391d6a8932ec0377966c/docs/transfer/ui02-fix3) | 첫 사이클의 합격 기준9와 실제 화면 증거. 작성자·독립 검사를 구별 |
 | 읽기 v0 결함 재현 | [v0-preflight](https://github.com/tlsee0813-cmd/agentflow-studio/tree/7e79392080157be693429da40d54c2a206b8aa7b/docs/transfer/real-record-02/v0-preflight) | 수정 전 닫힘 결함. 6통과·4실패·exit1을 그대로 보존 |
 | 읽기 fix1 독립 검증 | [fix1 전체](https://github.com/tlsee0813-cmd/agentflow-studio/tree/ce91a08fe8ff641a491d34bf35de732f85816792/docs/transfer/real-record-02/fix1) | REPORT의 당시 미검증6건은 아래 continuity-addendum과 함께 읽음 |
@@ -24,3 +28,6 @@
 
 
 cycle04 대표 첫 화면: [A · 1440×900](https://github.com/tlsee0813-cmd/agentflow-studio/blob/1202cea9e5b97a79b3a55e268e6040b67a16aa9e/docs/transfer/orientation-04/fix1/output/a-1440x900-initial.png) · [B · 1440×900](https://github.com/tlsee0813-cmd/agentflow-studio/blob/1202cea9e5b97a79b3a55e268e6040b67a16aa9e/docs/transfer/orientation-04/fix1/output/b-1440x900-initial.png). 나머지 네 초기 PNG와 실제 실행 기록은 위 독립 검증 원본에서 직접 회수한다. A 관계 개요의 조건부 유지와 B 긴 설명 배치 보류는 총괄 판단이며, 사람 사용성·최종 제품 문법의 확정이 아니다.
+
+
+cycle05 대표 첫 화면: [1440×900](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2f80732664686669f623d3f32238c39807c1112d/docs/transfer/composition-05/independent-v0/png/1440-initial.png) · [390×844](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2f80732664686669f623d3f32238c39807c1112d/docs/transfer/composition-05/independent-v0/png/390-initial.png). 독립PNG 나머지3개는 검사기 오류 진단 화면이며 성공 대표 화면으로 바꾸어 부르지 않는다. 작성자 집중·준비 PNG5개와 구분한다. 입력은 과거 개발계약/MOCK보고이며 실제 사용자 원대화가 아니다. 위치 복원·국소관계 접근을 전체 프로그램 이해로 확대하지 않는다.
