@@ -1,0 +1,140 @@
+{
+  "archive": "C:/Users/이준혁/Downloads/cycle03-return-flow-study.zip",
+  "zipSHA256": "a4f0283db3a5cc2775d6f1aa40c7bbb8e2c3a131dd045c5ec1182f2ad6b9bbff",
+  "destination": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\return-flow03-v0",
+  "preExtractionDestinationAbsent": true,
+  "pathValidation": {
+    "safe": true,
+    "duplicatePaths": 0,
+    "symlinks": 0,
+    "entries": 12,
+    "directories": 3
+  },
+  "fileCount": 9,
+  "totalBytes": 563451.0,
+  "manifest": {
+    "listed": 8,
+    "matched": 8,
+    "missing": [],
+    "unlisted": [
+      "MANIFEST.sha256"
+    ]
+  },
+  "htmlSHA256": "f19011eb3b0b31d9ff57ba3fdd519eccb7a01e75ba789d3442f11f5b09778768",
+  "httpCopy": {
+    "path": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\cycle\\docs\\cycles\\2026-10-15-mixed-depth-01\\return-flow-study.html",
+    "sha256": "f19011eb3b0b31d9ff57ba3fdd519eccb7a01e75ba789d3442f11f5b09778768"
+  },
+  "files": [
+    {
+      "path": "check/flow_check.py",
+      "bytes": 23420,
+      "sha256": "157416adc40249923d67431280c6e76ab7332a88aa5da2ef68388d09feb4b106",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/flow_log.json",
+      "bytes": 42570,
+      "sha256": "b951af068be48cc08af557dcc1e1bce261eb4737ba4d9eb432e04e8db4046046",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "logs/flow_log.txt",
+      "bytes": 1828,
+      "sha256": "dddd689e4d47883807908923d81b3899d7529fd5e63d2516beb9cd4596827057",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "MANIFEST.sha256",
+      "bytes": 705,
+      "sha256": "7c9c2dad486262c6c5c45a464b38eca8a716b435a4f1e11d5d60eac7a540e054",
+      "manifestListed": false,
+      "manifestMatch": null
+    },
+    {
+      "path": "png/1_base_map_1440.png",
+      "bytes": 164301,
+      "sha256": "5f50c8fb33137d3c4ff8f9da57db7d4c18ef1468a912618d7abb33428b656c78",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "png/2_focus_peek_390.png",
+      "bytes": 92417,
+      "sha256": "da73325b6d184204b3031402502419533f6d0884d5ad998791f692f64fbde734",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "png/3_return_1440.png",
+      "bytes": 189525,
+      "sha256": "8497ba87d5a0f555e84e03fad951fe0c4e75a3032be130b2b0bc6f22f796723c",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 7209,
+      "sha256": "72e211bd0652b6e5ba43918a8852a05cadd7573ad5cff394e0cee5c3a1e30436",
+      "manifestListed": true,
+      "manifestMatch": true
+    },
+    {
+      "path": "return-flow-study.html",
+      "bytes": 41476,
+      "sha256": "f19011eb3b0b31d9ff57ba3fdd519eccb7a01e75ba789d3442f11f5b09778768",
+      "manifestListed": true,
+      "manifestMatch": true
+    }
+  ],
+  "authorRuns": [
+    {
+      "name": "d1440",
+      "info": {
+        "viewport": "1440x900",
+        "mobile_emulation": false,
+        "browser": "141.0.7390.37",
+        "url": "http://127.0.0.1:8765/return-flow-study.html",
+        "http_status": 200,
+        "zoom_browser": "100%",
+        "external_requests": [],
+        "console_errors": [],
+        "external_source_roundtrip": "NOT_RUN (링크 존재·href만 확인, 클릭·외부 페이지 왕복 관측 안 함)"
+      },
+      "stepCount": 14,
+      "passSteps": 14,
+      "failedSteps": 0,
+      "unobservedSteps": 0,
+      "checks": 110,
+      "failedChecks": 0,
+      "actionCount": 22
+    },
+    {
+      "name": "m390",
+      "info": {
+        "viewport": "390x844",
+        "mobile_emulation": true,
+        "browser": "141.0.7390.37",
+        "url": "http://127.0.0.1:8765/return-flow-study.html",
+        "http_status": 200,
+        "zoom_browser": "100%",
+        "external_requests": [],
+        "console_errors": [],
+        "external_source_roundtrip": "NOT_RUN (링크 존재·href만 확인, 클릭·외부 페이지 왕복 관측 안 함)"
+      },
+      "stepCount": 14,
+      "passSteps": 14,
+      "failedSteps": 0,
+      "unobservedSteps": 0,
+      "checks": 110,
+      "failedChecks": 0,
+      "actionCount": 21
+    }
+  ],
+  "authorStartedRaw": "2026-10-16T02:01:40+0900",
+  "independentBrowserRun": false,
+  "remoteWrites": false
+}
