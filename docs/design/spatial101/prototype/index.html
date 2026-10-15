@@ -133,11 +133,13 @@ const projects = [
       {id: 'A_work', name: '작품 소개', note: '', x: 40, y: 300, sub: [], tasks: []}],
     rel: [['A_book', 'A_sms', '흐름', '확정되면 알림'], ['A_book', 'A_pay', '먼저 필요', '결제는 예약 뒤']]},
   {id: 'P_csv', name: '설문 CSV 정리', brief: '로컬 CSV 설문 응답 확인', updated: '어제', recent: '어제 · 영역 추가',
-    areas: [{id: 'A_rows', name: '응답 정리', note: '중복 처리 정책 미정', x: 40, y: 40, sub: [], tasks: []}], rel: []}];
+    areas: [{id: 'A_rows', name: '응답 정리', note: '중복 처리 정책 미정', x: 40, y: 40, sub: [], tasks: []}], rel: []},
+  {id: 'P_new', name: '새 프로젝트', brief: null, updated: '방금', recent: '방금 · 만듦', areas: [], rel: []}];
 
 const S = {mode: 'A', view: 'projects', pid: null, aid: null, tid: null, sel: null, info: null, empty: false, q: '',
   current: {pid: 'P_kiln', aid: 'A_book', tid: 'T_pend'}, // the work the user continues: changed only by an explicit button
-  draftTarget: 'A_book',                                   // where a new request goes: changed only by the user's own choice
+  targets: {P_kiln: 'A_book'},                            // where a new request goes, per project: changed only by the user's own choice
+  drafts: {},                                              // unsent quick-request text, per project (stands in for the existing composer draft)
   vs: {}};                                                 // per-layer view state (selection, scroll), restored on return
 const $ = s => document.querySelector(s);
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
@@ -146,6 +148,14 @@ const area = () => proj()?.areas.find(a => a.id === S.aid);
 const task = () => area()?.tasks.find(t => t.id === S.tid);
 const findTask = (pid, tid) => projects.find(p => p.id === pid)?.areas.flatMap(a => a.tasks.map(t => ({a, t}))).find(x => x.t.id === tid);
 const attention = p => p ? p.areas.flatMap(a => a.tasks.filter(t => NEEDS.has(t.st)).map(t => ({a, t}))) : [];
+const target = () => S.targets[S.pid] ?? '';
+const targetName = () => proj().areas.find(a => a.id === target())?.name ?? '영역 없이';
+/* Explicit "request in this area": like the app's writeInArea, it sets the exact target, but never moves an unsent draft. */
+function requestHere(areaId) {
+  const draft = S.drafts[S.pid] ?? '';
+  if (draft.trim() && target() !== areaId) { toast(`작성 중인 요청이 ‘${targetName()}’ 대상으로 남아 있어요. 보내거나 비운 뒤 바꿀 수 있어요.`); $('#quick')?.focus(); return; }
+  S.targets[S.pid] = areaId; render(); $('#quick')?.focus();
+}
 const layerKey = () => `${S.mode}|${S.pid}|${S.view === 'area' ? S.aid : ''}`;
 function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 3200); }
 
@@ -298,11 +308,12 @@ function showInfo(it) { S.info = S.info === it.id ? null : it.id; render(); setT
 
 function layerView() {
   const w = el('div'), p = proj(), isSpace = S.view === 'space';
-  w.append(el('h2', '', isSpace ? `${p.name} <span class="muted">목적: ${p.brief}</span> ${H}` : `${area().name} <span class="muted">구상: ${area().note || '구상 미기재'}</span> ${H}`));
+  w.append(el('h2', '', isSpace ? `${p.name} <span class="muted">목적: ${p.brief ?? '목적 미기재'}</span> ${H}` : `${area().name} <span class="muted">구상: ${area().note || '구상 미기재'}</span> ${H}`));
   w.querySelector('h2').tabIndex = -1;
   const att = attention(p), here = isSpace ? att[0] : area().tasks.filter(t => NEEDS.has(t.st)).map(t => ({a: area(), t}))[0];
   const nx = el('div', 'next');
   if (here) { nx.innerHTML = `<b>지금 할 일</b> ${P} · ${here.a.name} — ${here.t.title}: ${here.t.next} `; const b = el('button', '', '이 작업 보기'); b.onclick = () => go('task', {aid: here.a.id, tid: here.t.id}); nx.append(b); }
+  else if (isSpace) nx.innerHTML = `<b>지금 할 일</b> ${P} · 이 프로젝트에서 판단할 일은 없어요.${p.areas.length ? '' : ' 영역을 나누거나 바로 첫 요청을 쓰세요.'}`;
   else nx.innerHTML = `<b>지금 할 일</b> ${P} · 이 영역에서 판단할 일은 없어요.${area().tasks.length ? '' : ` 첫 요청을 쓰거나 ‘무엇을 요청할지 같이 정하기’로 시작하세요. ${H}`}`;
   w.append(nx);
   if (isSpace) w.append(el('p', 'muted', `최근 변경: ${p.recent} ${H} · 전체 이력은 ‘지난 요청과 결과’에서 ${H}`));
@@ -310,13 +321,17 @@ function layerView() {
   // Quick request for people who already know what they want. The target is the user's own choice, shown; never the map position.
   const qk = el('div', 'quick', `<b>빠른 요청</b> ${H}`);
   const s = el('select'); s.id = 'quick-target'; s.setAttribute('aria-label', '요청 대상 영역');
-  for (const a of p.areas) { const o = el('option', '', a.name); o.value = a.id; o.selected = a.id === S.draftTarget; s.append(o); }
-  s.onchange = () => { S.draftTarget = s.value; toast(`요청 대상을 ‘${p.areas.find(a => a.id === s.value).name}’로 직접 바꿨어요.`); render(); };
+  for (const [id, name] of [['', '영역 없이'], ...p.areas.map(a => [a.id, a.name])]) { const o = el('option', '', name); o.value = id; o.selected = id === target(); s.append(o); }
+  s.onchange = () => { S.targets[S.pid] = s.value; toast(`요청 대상을 ‘${targetName()}’로 직접 바꿨어요.`); render(); };
   const inp = el('input'); inp.id = 'quick'; inp.placeholder = '이번에 맡기거나 바꿀 일 (Enter: 요청 입력칸에 넣기)';
-  inp.setAttribute('aria-label', '빠른 요청');
-  inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) { toast(`‘${p.areas.find(a => a.id === S.draftTarget).name}’ 요청 입력칸에 넣었어요 (시연 · 저장 안 함). 보내기 전 확인은 지금과 같아요.`); inp.value = ''; } };
+  inp.setAttribute('aria-label', '빠른 요청'); inp.value = S.drafts[S.pid] ?? '';
+  inp.oninput = () => { S.drafts[S.pid] = inp.value; };
+  inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) { toast(`‘${targetName()}’ 요청 입력칸에 넣었어요 (시연 · 저장 안 함). 보내기 전 확인은 지금과 같아요.`); inp.value = ''; S.drafts[S.pid] = ''; } };
   qk.append(s, inp);
-  if (S.view === 'area' && S.draftTarget !== S.aid) qk.append(el('span', 'muted', `보고 있는 곳(${area().name})과 요청 대상이 달라요. 지도 이동은 대상을 바꾸지 않아요.`));
+  if (S.view === 'area' && target() !== S.aid) {
+    qk.append(el('span', 'muted', `보고 있는 곳(${area().name})과 요청 대상이 달라요. 지도 이동은 대상을 바꾸지 않아요.`));
+    const here = el('button', '', '이 영역에 요청'); here.id = 'request-here'; here.onclick = () => requestHere(S.aid); qk.append(here);
+  }
   w.append(qk);
 
   const c = el('div', 'canvas'), inner = el('div', 'inner'); c.append(inner);
@@ -372,9 +387,15 @@ function layerView() {
   if (!its.length) {
     // An empty layer offers the two existing starts instead of a blank map.
     const empty = () => {
+      if (isSpace) {
+        const e = el('div', 'empty', `<h3>아직 영역이 없어요</h3><p class="muted">큰 부분으로 나눠 두면 나중에 찾기 쉬워요. 나누지 않고 바로 첫 요청을 써도 돼요.</p>`);
+        const g = el('button', 'primary', `영역 나누기 ${H}`); g.onclick = () => toast('지금 앱의 ‘영역 추가’를 여는 자리예요.');
+        const q = el('button', '', `바로 첫 요청 쓰기 ${H}`); q.className = 'start-request'; q.onclick = () => requestHere('');
+        e.append(g, ' ', q); return e;
+      }
       const e = el('div', 'empty', `<h3>이 영역에 아직 요청이 없어요</h3><p class="muted">구상 한 줄에서 시작해 질문 최대 1개를 거쳐 검토할 초안을 받거나, 바로 요청을 쓸 수 있어요.</p>`);
       const g = el('button', 'primary', `무엇을 요청할지 같이 정하기 ${H}`); g.onclick = () => toast('지금 앱의 영역 안내 패널을 여는 자리예요.');
-      const q = el('button', '', `바로 요청 쓰기 ${H}`); q.onclick = () => $('#quick').focus();
+      const q = el('button', '', `바로 요청 쓰기 ${H}`); q.className = 'start-request'; q.onclick = () => requestHere(S.aid);
       e.append(g, ' ', q); return e;
     };
     const e = empty(); e.id = 'layer-empty'; e.style.margin = '30px';
@@ -450,12 +471,14 @@ function workView() {
   const g3 = el('button', '', `인계 작업문 ${H}`); g3.onclick = () => toast('지금 앱의 작업문 만들기와 같아요.');
   ai.append(g1, ' ', g2, ' ', g3, el('p', 'muted', '변경 영향(제안): 이 작업에 걸린 기준·관계를 공유하는 다른 영역 요청을 보여 주기만 함. 자동 수정 없음.'));
   w.append(ai);
+  if (S.mode === 'B') { const bs = el('details'); bs.id = 'task-bases'; bs.append(el('summary', '', `기준 · 출처와 보류 ${H}`), taskSide(true)); w.append(bs); }
   w.append(el('details', '', `<summary>지난 기록 펼치기 ${H}</summary><p class="muted">기본은 접혀 있어요. 전체 이력을 늘 펼치지 않아요.</p><p>${t.log.join('<br>')}</p>`));
   return w;
 }
-function taskSide() {
+function taskSide(folded = false) {
   const t = task(), d = el('div');
-  d.append(el('h2', '', '기준 · 출처'), el('p', 'muted', `이 작업에 걸린 사용자 결정과 원문 ${H}`));
+  if (!folded) d.append(el('h2', '', '기준 · 출처'));
+  d.append(el('p', 'muted', `이 작업에 걸린 사용자 결정과 원문 ${H}`));
   for (const b of t.bases) d.append(el('p', '', b));
   if (!t.bases.length) d.append(el('p', 'muted', '걸린 기준 없음'));
   d.append(el('h4', '', `보류 · 다음 행동 ${H}`), el('p', '', t.next));

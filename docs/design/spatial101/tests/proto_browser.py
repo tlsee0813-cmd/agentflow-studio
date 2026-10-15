@@ -113,10 +113,43 @@ def narrow(page):
         if mode == 'B': shot(page, 'B-narrow-list')
     page.set_viewport_size({'width': 1280, 'height': 860})
 
+
+ERRORS = []
+
+def d1_empty_area_request_targets_this_area(page):
+    page.click('#mB'); home(page); page.click('.pcard[data-id="P_kiln"]'); page.click('.card[data-id="A_sms"]')
+    page.click('#layer-empty .start-request')
+    assert page.locator('#quick-target').input_value() == 'A_sms', 'explicit request action targets the open area'
+    assert page.evaluate('document.activeElement.id') == 'quick'
+    page.fill('#quick', '문자 문구 초안')                      # an unsent draft for 알림 문자
+    page.click('.crumb a:has-text("도자기 공방")'); page.click('.card[data-id="A_work"]')
+    page.click('#layer-empty .start-request')
+    assert page.locator('#quick-target').input_value() == 'A_sms', 'unsent draft keeps its target'
+    assert page.locator('#quick').input_value() == '문자 문구 초안', 'unsent draft kept'
+    expect(page.locator('#toast')).to_contain_text('작성 중인 요청')
+    page.fill('#quick', ''); page.click('#request-here')
+    assert page.locator('#quick-target').input_value() == 'A_work'
+
+def d2_b_task_keeps_bases(page):
+    page.click('#mB'); home(page); page.click('.pcard[data-id="P_kiln"]'); page.click('.card[data-id="A_book"]'); page.click('.card[data-id="T_pend"]')
+    page.click('#task-bases summary'); expect(page.locator('#task-bases')).to_contain_text('D3 사용자 답변')
+
+def d3_projects_without_attention_or_areas(page):
+    before = len(ERRORS)
+    for mode in ('A', 'B'):
+        page.click(f'#m{mode}'); home(page); page.click('.pcard[data-id="P_csv"]')
+        expect(page.locator('main .next')).to_contain_text('이 프로젝트에서 판단할 일은 없어요')
+        page.click('.card[data-id="A_rows"]')
+        if mode == 'A': page.click('#open-selected')
+        expect(page.locator('#layer-empty')).to_contain_text('이 영역에 아직 요청이 없어요')
+        home(page); page.click('.pcard[data-id="P_new"]')
+        expect(page.locator('#layer-empty')).to_contain_text('아직 영역이 없어요')
+    assert len(ERRORS) == before, ERRORS[before:]
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM') or None)
     page = b.new_page(viewport={'width': 1280, 'height': 860})
-    errors, requests = [], []
+    errors, requests = ERRORS, []
     page.on('pageerror', lambda e: errors.append(str(e)))
     page.on('console', lambda m: m.type == 'error' and errors.append(m.text))
     page.on('request', lambda r: not r.url.startswith('file:') and requests.append(r.url))
@@ -128,7 +161,10 @@ with sync_playwright() as pw:
                      ('keyboard (A): Enter, arrows, /, Backspace, Esc', keyboard_a),
                      ('sub-idea is shown as proposal, does not enter', sub_idea_is_proposal),
                      ('empty first screen', empty_first_screen),
-                     ('narrow: list with IDs, open, A sheet, no horizontal scroll', narrow)]:
+                     ('narrow: list with IDs, open, A sheet, no horizontal scroll', narrow),
+                     ('D1 empty-area request targets that area; unsent draft protected', d1_empty_area_request_targets_this_area),
+                     ('D2 B task screen keeps bases/sources (folded)', d2_b_task_keeps_bases),
+                     ('D3 project without attention, empty area and empty project open without errors', d3_projects_without_attention_or_areas)]:
         check(name, fn, page)
     results.append(('no page errors', 'PASS' if not errors else 'FAIL', '; '.join(errors)))
     results.append(('no network requests', 'PASS' if not requests else 'FAIL', '; '.join(requests)))
