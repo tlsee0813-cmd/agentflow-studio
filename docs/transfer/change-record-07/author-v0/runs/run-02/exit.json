@@ -1,0 +1,12 @@
+{
+ "cmd": [
+  "/usr/bin/python3",
+  "-I",
+  "/home/claude/change-v0/checks/author_check.py",
+  "/home/claude/change-v0/change-record-study.html",
+  "/home/claude/change-v0/runs/run-02"
+ ],
+ "started": "2026-10-15T21:02:45.719777+00:00",
+ "finished": "2026-10-15T21:03:06.174336+00:00",
+ "child_exit_code": 0
+}

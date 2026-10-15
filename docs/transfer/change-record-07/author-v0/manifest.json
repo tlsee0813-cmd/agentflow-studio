@@ -1,0 +1,130 @@
+{
+ "note": "cycle07 change-record author-v0. MANIFEST.sha256과 manifest.json 자신은 목록에서 제외.",
+ "files": [
+  {
+   "path": "README.md",
+   "bytes": 9613,
+   "sha256": "755cf126af5db771310a9df88b57935c0bba8ca2241198ab977e39d474861a0f"
+  },
+  {
+   "path": "change-record-study.html",
+   "bytes": 42113,
+   "sha256": "3fd8a0ad0b1b7aa548f14adb1da235260b123aa6824a004e9475bc6ffb94fb8c"
+  },
+  {
+   "path": "checks/author_check.py",
+   "bytes": 27452,
+   "sha256": "094e354773f0e383b53d4da8c20aad421fe90dee531390678a84b257b557249c"
+  },
+  {
+   "path": "checks/run_all.sh",
+   "bytes": 338,
+   "sha256": "776ac053001f4922cec4917bf981d16affa433fc6889515e850af289c10c7268"
+  },
+  {
+   "path": "checks/run_checks.py",
+   "bytes": 1246,
+   "sha256": "27823346f76cacebcc5ad495e6082bedaf61c44f21812de6da900955cbff2afb"
+  },
+  {
+   "path": "runs/run-01/NOTE.md",
+   "bytes": 1297,
+   "sha256": "848c8aa8fe3ec2edb920f7358c960c9455197e02eaf14a94897a5d704a6f3c57"
+  },
+  {
+   "path": "runs/run-01/author_check.used.py",
+   "bytes": 26692,
+   "sha256": "60217b60bd8d20b1dc3cfa33aa4e3a812df6acab87778fd44c07269f83e8b814"
+  },
+  {
+   "path": "runs/run-01/collector_exit.txt",
+   "bytes": 2,
+   "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  {
+   "path": "runs/run-01/exit.json",
+   "bytes": 330,
+   "sha256": "851678c63a13d1b6b095c949e6f66aa687f59298906c65ba62790c3923e83ce0"
+  },
+  {
+   "path": "runs/run-01/results.json",
+   "bytes": 29130,
+   "sha256": "1f568a95a3010f95b54c0c79adc6e975a78a0b111a0702fa6b818005d5f80fde"
+  },
+  {
+   "path": "runs/run-01/run.log",
+   "bytes": 17819,
+   "sha256": "8e15b2013193efe35d33e49f7cd9d7fd05d7028ef08c54365684a3085bbcc378"
+  },
+  {
+   "path": "runs/run-02/NOTE.md",
+   "bytes": 423,
+   "sha256": "52612910788f08166cdc6a20ffa82b9c748ec02f4fdaf126c7e63f600447425a"
+  },
+  {
+   "path": "runs/run-02/author_check.used.py",
+   "bytes": 27386,
+   "sha256": "52c6c2f14013e0e5aa6d6100ced7d89c4171037d5c7b4b81a37150e6c58d4514"
+  },
+  {
+   "path": "runs/run-02/collector_exit.txt",
+   "bytes": 2,
+   "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+   "path": "runs/run-02/exit.json",
+   "bytes": 309,
+   "sha256": "a3fcb9f2e8000ef62ac1550ce8a40b07898fb89a4674ae57d89bb784a80e2938"
+  },
+  {
+   "path": "runs/run-02/results.json",
+   "bytes": 27443,
+   "sha256": "00aa6fe7dda89ced90661a74ea42a065923060b8311e6a99ced13fa0e03cd162"
+  },
+  {
+   "path": "runs/run-02/run.log",
+   "bytes": 16726,
+   "sha256": "f7ae94e9acd37f7d3061d41f1f218af73e75284c78d199e9120acaeb1181f13f"
+  },
+  {
+   "path": "runs/run-03/A-1440-initial.png",
+   "bytes": 156111,
+   "sha256": "b4a291b2131ab2e5a837667c28757ea897069da85cecb219028390e579e3f1ff"
+  },
+  {
+   "path": "runs/run-03/B-1440-compare-before.png",
+   "bytes": 174692,
+   "sha256": "fb29945351b520367002c4c329802c02acc8f790cb8e9238454a4e623f9aa8fb"
+  },
+  {
+   "path": "runs/run-03/C-390-selection-follow.png",
+   "bytes": 93458,
+   "sha256": "e1d51859360a3952406f782b82ab2d54b46d9b60150f20192b9c91b79c981310"
+  },
+  {
+   "path": "runs/run-03/D-1440-prep-before-edit.png",
+   "bytes": 273951,
+   "sha256": "7309693282979f7e157f2775b33f290d4d3875dde205632005d73a0324e28e43"
+  },
+  {
+   "path": "runs/run-03/collector_exit.txt",
+   "bytes": 2,
+   "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+   "path": "runs/run-03/exit.json",
+   "bytes": 309,
+   "sha256": "71052e741005db0a3530485586074546e4370f97a54df84d5b3649eabb9f19f7"
+  },
+  {
+   "path": "runs/run-03/results.json",
+   "bytes": 27443,
+   "sha256": "c775279a8998438e018b346673401dfaac93a5cff358c522d54d6401334c5d21"
+  },
+  {
+   "path": "runs/run-03/run.log",
+   "bytes": 16726,
+   "sha256": "f7ae94e9acd37f7d3061d41f1f218af73e75284c78d199e9120acaeb1181f13f"
+  }
+ ]
+}
