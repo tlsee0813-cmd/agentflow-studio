@@ -1,0 +1,8 @@
+{
+  "UTC": "2026-10-15T23:47:11.107243+00:00",
+  "actualChildExit": 1,
+  "actualCollectorExit": 1,
+  "agreement": true,
+  "launcherIntendedExit": 1,
+  "note": "Collector code measured by launcher subprocess after termination. Launcher own exit is observed by tool, not by this file."
+}

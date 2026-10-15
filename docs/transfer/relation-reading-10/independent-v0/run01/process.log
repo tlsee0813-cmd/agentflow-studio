@@ -1,0 +1,52 @@
+PASS static-fixed-source-comparison
+HTTP "GET /relation-reading-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1280/HTTP
+1280/initial
+1280/initial-glyphs
+PASS 1280/initial-names-roles-children-glyphs
+PASS 1280/initial-depth
+1280/relations-initial
+PASS 1280/relations-initial-six-originals
+1280/initial-screen-endpoint-samples
+PASS 1280/screen-ends-match-representatives
+1280/first-selection-before
+1280/click/#n-C32
+1280/first-selection-after
+PASS 1280/first-selection-no-geometry-depth-change
+1280/click/#n-G3 .gsel
+Traceback (most recent call last):
+  File "/workspace/browser-env/relation10/snapshots/check-44a3b3b29278eca53f0dfc4c9789e723fb0c1f04d6ef78833fad62bf4df33000.py", line 142, in main
+    mapclick('#n-G3 .gsel');s2=receiver_selector('C31');s3=receiver_selector('C32');record(f'{w}/G3-list-before-open',{'snapshot':snap(),'headingNames':p.locator('#panel .xgrp b').all_inner_texts(),'buttonNames':p.locator('#panel .xbtn').all_inner_texts()});a=xopen('G3','G3-R2',rid='R2',selector=s2);a=xopen('G3','G3-R3-replace',selector=s3)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/relation10/snapshots/check-44a3b3b29278eca53f0dfc4c9789e723fb0c1f04d6ef78833fad62bf4df33000.py", line 94, in receiver_selector
+    heads=p.locator('#panel .xgrp').evaluate_all('(es)=>es.map(e=>({id:e.id,text:e.querySelector("b").textContent,full:e.textContent}))');head=next(x for x in heads if x['text']==NAMES[receiver]);hs='#'+head['id'];ensure(hs,pc);hg=glyph(hs);sel=f'#panel .xbtn[aria-describedby="{head["id"]}"]:has-text("받음")';ensure(sel,pc);bg=glyph(sel);desc=p.locator(sel).get_attribute('aria-describedby');record(f'{w}/receiver-list-{receiver}',{'heads':heads,'heading':hg,'button':bg,'ariaDescribedby':desc,'resolvedDescription':p.locator('#'+desc).inner_text(),'buttonAccessibleNameDOMText':p.locator(sel).inner_text(),'actualRelationID':p.locator(sel).get_attribute('data-xref')});check(f'{w}/receiver-list-{receiver}-visible-description',hg['glyphObservation']['badCount']==0 and bg['glyphObservation']['badCount']==0 and p.locator(sel).count()==1 and desc==head['id'] and p.locator(sel).get_attribute('data-xref')==('R2' if receiver=='C31' else 'R3'));return sel
+                                                                                                                                                                                                                                                                                                                       ^^^^^^^^^^^^^^
+  File "/workspace/browser-env/relation10/snapshots/check-44a3b3b29278eca53f0dfc4c9789e723fb0c1f04d6ef78833fad62bf4df33000.py", line 56, in ensure
+    g=geom(s)
+      ^^^^^^^
+  File "/workspace/browser-env/relation10/snapshots/check-44a3b3b29278eca53f0dfc4c9789e723fb0c1f04d6ef78833fad62bf4df33000.py", line 38, in geom
+    def geom(s):return p.evaluate(GEOM,s)
+                       ^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py", line 8562, in evaluate
+    self._sync(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_page.py", line 464, in evaluate
+    return await self._main_frame.evaluate(expression, arg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py", line 320, in evaluate
+    await self._channel.send(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.evaluate: SyntaxError: Failed to execute 'querySelector' on 'Document': '#panel .xbtn[aria-describedby="xg-G3-C31"]:has-text("받음")' is not a valid selector.
+    at eval (eval at evaluate (:290:30), <anonymous>:1:22)
+    at UtilityScript.evaluate (<anonymous>:297:18)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+
+CHILD_EXIT 1

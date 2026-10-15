@@ -1,0 +1,50 @@
+PASS static-fixed-source-comparison
+HTTP "GET /relation-reading-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1280/HTTP
+1280/initial
+1280/initial-glyphs
+PASS 1280/initial-names-roles-children-glyphs
+PASS 1280/initial-depth
+1280/relations-initial
+PASS 1280/relations-initial-six-originals
+1280/initial-screen-endpoint-samples
+PASS 1280/screen-ends-match-representatives
+1280/first-selection-before
+1280/click/#n-C32
+1280/first-selection-after
+PASS 1280/first-selection-no-geometry-depth-change
+1280/click/#n-G3 .gsel
+1280/receiver-list-C31
+PASS 1280/receiver-list-C31-visible-description
+1280/receiver-list-C32
+PASS 1280/receiver-list-C32-visible-description
+1280/G3-list-before-open
+1280/click/#panel .xbtn[aria-describedby="xg-G3-C31"]:nth-child(2)
+1280/G3-R2-top-close-visible
+1280/wheel/#panel
+1280/wheel/#panel
+1280/G3-R2-xref-open
+PASS 1280/G3-R2-xref-content
+PASS 1280/G3-R2-xref-visible-glyphs
+PASS 1280/G3-R2-only-one-reference
+Traceback (most recent call last):
+  File "/workspace/browser-env/relation10/snapshots/check-97ecea30bc7e3a6a0ee9167ec55832fa20cfe0e089b017b956b6da2da92b8a41.py", line 144, in main
+    mapclick('#n-G3 .gsel');s2=receiver_selector('C31');s3=receiver_selector('C32');record(f'{w}/G3-list-before-open',{'snapshot':snap(),'headingNames':p.locator('#panel .xgrp b').all_inner_texts(),'buttonNames':p.locator('#panel .xbtn').all_inner_texts()});a=xopen('G3','G3-R2',rid='R2',selector=s2);a=xopen('G3','G3-R3-replace',selector=s3)
+                                                                                                                                                                                                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/relation10/snapshots/check-97ecea30bc7e3a6a0ee9167ec55832fa20cfe0e089b017b956b6da2da92b8a41.py", line 98, in xopen
+    before=snap();before['_referenceID']=rid;previous=p.locator('.xpeek').evaluate_all('(es)=>es.map(e=>e.id)');panelclick(selector or f'#panel [data-xref="{rid}"]');base='#xr-'+rid;text=p.locator(base).inner_text();parts={}
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/relation10/snapshots/check-97ecea30bc7e3a6a0ee9167ec55832fa20cfe0e089b017b956b6da2da92b8a41.py", line 74, in panelclick
+    def panelclick(s):click(s,pc)
+                      ^^^^^^^^^^^
+  File "/workspace/browser-env/relation10/snapshots/check-97ecea30bc7e3a6a0ee9167ec55832fa20cfe0e089b017b956b6da2da92b8a41.py", line 67, in click
+    g=ensure(s,container) if container else geom(s);record(f'{w}/click/{s}',g)
+      ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/relation10/snapshots/check-97ecea30bc7e3a6a0ee9167ec55832fa20cfe0e089b017b956b6da2da92b8a41.py", line 58, in ensure
+    b=g['rect'];v=geom(container)['visibleIntersection'];dy=dx=0
+      ~^^^^^^^^
+KeyError: 'rect'
+
+CHILD_EXIT 1

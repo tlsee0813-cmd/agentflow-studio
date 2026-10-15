@@ -1,0 +1,538 @@
+PASS static-fixed-source-comparison
+HTTP "GET /relation-reading-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1280/HTTP
+1280/initial
+1280/initial-glyphs
+PASS 1280/initial-names-roles-children-glyphs
+PASS 1280/initial-depth
+1280/relations-initial
+PASS 1280/relations-initial-six-originals
+1280/initial-screen-endpoint-samples
+PASS 1280/screen-ends-match-representatives
+1280/first-selection-before
+1280/click/#n-C32
+1280/first-selection-after
+PASS 1280/first-selection-no-geometry-depth-change
+1280/click/#n-G3 .gsel
+1280/receiver-list-C31
+PASS 1280/receiver-list-C31-visible-description
+1280/receiver-list-C32
+PASS 1280/receiver-list-C32-visible-description
+1280/G3-list-before-open
+1280/click/#panel .xbtn[aria-describedby="xg-G3-C31"]:nth-of-type(1)
+1280/G3-R2-top-close-visible
+1280/wheel/#panel
+1280/wheel/#panel
+1280/G3-R2-xref-open
+PASS 1280/G3-R2-xref-content
+PASS 1280/G3-R2-xref-visible-glyphs
+PASS 1280/G3-R2-only-one-reference
+1280/wheel/#panel
+1280/wheel/#panel
+1280/click/#panel .xbtn[aria-describedby="xg-G3-C32"]:nth-of-type(2)
+1280/G3-R3-replace-top-close-visible
+1280/G3-R3-replace-xref-open
+PASS 1280/G3-R3-replace-xref-content
+PASS 1280/G3-R3-replace-xref-visible-glyphs
+PASS 1280/G3-R3-replace-only-one-reference
+1280/click/#panel [data-xref="R3"]
+1280/G3-R3-xref-closed-same-button
+PASS 1280/G3-R3-xref-close-same-button
+1280/click/#panel [data-xref="R3"]
+1280/G3-R3-repeat-top-close-visible
+1280/G3-R3-repeat-xref-open
+PASS 1280/G3-R3-repeat-xref-content
+PASS 1280/G3-R3-repeat-xref-visible-glyphs
+PASS 1280/G3-R3-repeat-only-one-reference
+1280/click/#xr-R3 [data-act="xref-close"]
+1280/G3-R3-repeat-xref-closed-button
+PASS 1280/G3-R3-repeat-xref-close-button
+1280/click/#panel .xbtn[aria-describedby="xg-G3-C31"]:nth-of-type(1)
+1280/G3-R2-repeat-top-close-visible
+1280/wheel/#panel
+1280/wheel/#panel
+1280/G3-R2-repeat-xref-open
+PASS 1280/G3-R2-repeat-xref-content
+PASS 1280/G3-R2-repeat-xref-visible-glyphs
+PASS 1280/G3-R2-repeat-only-one-reference
+1280/G3-R2-repeat-xref-closed-Escape
+PASS 1280/G3-R2-repeat-xref-close-Escape
+1280/focus-entry
+1280/click/#panel [data-act="focus"]
+PASS 1280/G3-no-preparation
+1280/click/#fBack
+1280/map-return-immediate
+1280/click/#panel [data-xref="R3"]
+1280/G3-explicit-C21-top-close-visible
+1280/wheel/#panel
+1280/wheel/#panel
+1280/wheel/#panel
+1280/wheel/#panel
+1280/G3-explicit-C21-xref-open
+PASS 1280/G3-explicit-C21-xref-content
+PASS 1280/G3-explicit-C21-xref-visible-glyphs
+PASS 1280/G3-explicit-C21-only-one-reference
+1280/wheel/#panel
+1280/click/#xr-R3 [data-goto="C21"]
+PASS 1280/explicit-only-C21-move
+1280/C21-flat-list
+PASS 1280/C21-no-redundant-group-heads
+1280/click/#panel .xbtn:nth-of-type(2)
+1280/C21-R2-top-close-visible
+1280/C21-R2-xref-open
+PASS 1280/C21-R2-xref-content
+PASS 1280/C21-R2-xref-visible-glyphs
+PASS 1280/C21-R2-only-one-reference
+1280/wheel/#panel
+1280/click/#panel .xbtn:nth-of-type(3)
+1280/C21-R3-replace-top-close-visible
+1280/C21-R3-replace-xref-open
+PASS 1280/C21-R3-replace-xref-content
+PASS 1280/C21-R3-replace-xref-visible-glyphs
+PASS 1280/C21-R3-replace-only-one-reference
+1280/C21-R3-xref-closed-Escape
+PASS 1280/C21-R3-xref-close-Escape
+1280/click/#n-G2 .gsel
+1280/click/#panel [data-xref="R1"]
+1280/six-relations-R1-top-close-visible
+1280/wheel/#panel
+1280/six-relations-R1-xref-open
+PASS 1280/six-relations-R1-xref-content
+PASS 1280/six-relations-R1-xref-visible-glyphs
+PASS 1280/six-relations-R1-only-one-reference
+1280/click/#xr-R1 [data-act="xref-close"]
+1280/six-relations-R1-xref-closed-button
+PASS 1280/six-relations-R1-xref-close-button
+1280/click/#n-G3 .gsel
+1280/click/#panel [data-xref="R4"]
+1280/six-relations-R4-top-close-visible
+1280/wheel/#panel
+1280/wheel/#panel
+1280/wheel/#panel
+1280/wheel/#panel
+1280/wheel/#panel
+1280/wheel/#panel
+1280/six-relations-R4-xref-open
+PASS 1280/six-relations-R4-xref-content
+PASS 1280/six-relations-R4-xref-visible-glyphs
+PASS 1280/six-relations-R4-only-one-reference
+1280/click/#xr-R4 [data-act="xref-close"]
+1280/six-relations-R4-xref-closed-button
+PASS 1280/six-relations-R4-xref-close-button
+1280/click/#n-G4 .gsel
+1280/click/#panel [data-xref="R5"]
+1280/six-relations-R5-top-close-visible
+1280/wheel/#panel
+1280/wheel/#panel
+1280/wheel/#panel
+1280/six-relations-R5-xref-open
+PASS 1280/six-relations-R5-xref-content
+PASS 1280/six-relations-R5-xref-visible-glyphs
+PASS 1280/six-relations-R5-only-one-reference
+1280/click/#xr-R5 [data-act="xref-close"]
+1280/six-relations-R5-xref-closed-button
+PASS 1280/six-relations-R5-xref-close-button
+1280/click/#n-G4 .gsel
+1280/click/#panel [data-xref="R6"]
+1280/six-relations-R6-top-close-visible
+1280/wheel/#panel
+1280/six-relations-R6-xref-open
+PASS 1280/six-relations-R6-xref-content
+PASS 1280/six-relations-R6-xref-visible-glyphs
+PASS 1280/six-relations-R6-only-one-reference
+1280/click/#xr-R6 [data-act="xref-close"]
+1280/six-relations-R6-xref-closed-button
+PASS 1280/six-relations-R6-xref-close-button
+1280/relations-all-reference-kinds
+PASS 1280/relations-all-reference-kinds-six-originals
+1280/click/[data-tog="G2"]
+1280/click/[data-tog="G4"]
+1280/click/#zIn
+1280/wheel/#mapScroll
+1280/click/#n-C32
+1280/C-map-entry-before
+PASS 1280/C-nondefault-scale-depth
+1280/focus-entry
+1280/click/#panel [data-act="focus"]
+1280/wheel/#focusView
+1280/pre-edit-peek-before
+1280/click/[data-key="C32-F1"]
+1280/pre-edit-peek-open
+PASS 1280/pre-edit-peek-body-visible
+1280/click/#pk-C32-F1 [data-act="peek-close"]
+1280/pre-edit-peek-after
+PASS 1280/pre-edit-peek-return
+1280/click/#fPrep
+1280/preparation
+PASS 1280/C32-four-fields-default
+1280/click/#pf-target
+PASS 1280/meaningful-edit-only-target
+1280/click/#prepClose
+1280/click/#fBack
+1280/map-return-immediate
+1280/C-map-pre-post-deltas
+PASS 1280/C-restore-map
+1280/focus-entry
+1280/click/#panel [data-act="focus"]
+1280/wheel/#focusView
+1280/after-E-reentry-peek-before
+1280/click/[data-key="C32-F1"]
+1280/after-E-reentry-peek-open
+PASS 1280/after-E-reentry-peek-body-visible
+1280/after-E-reentry-peek-after
+PASS 1280/after-E-reentry-peek-return
+1280/click/#fPrep
+1280/preparation
+PASS 1280/E-after-focus-peek
+1280/click/#prepClose
+1280/click/#fBack
+1280/map-return-immediate
+1280/click/#panel [data-xref="R3"]
+1280/new-panel-after-E-button-top-close-visible
+1280/new-panel-after-E-button-xref-open
+PASS 1280/new-panel-after-E-button-xref-content
+PASS 1280/new-panel-after-E-button-xref-visible-glyphs
+PASS 1280/new-panel-after-E-button-only-one-reference
+1280/click/#xr-R3 [data-act="xref-close"]
+1280/new-panel-after-E-xref-closed-button
+PASS 1280/new-panel-after-E-xref-close-button
+1280/focus-entry
+1280/click/#panel [data-act="focus"]
+1280/click/#fPrep
+1280/preparation
+PASS 1280/after-new-panel-button-E
+1280/click/#prepClose
+1280/click/#fBack
+1280/map-return-immediate
+1280/click/#panel [data-xref="R3"]
+1280/new-panel-after-E-Escape-top-close-visible
+1280/new-panel-after-E-Escape-xref-open
+PASS 1280/new-panel-after-E-Escape-xref-content
+PASS 1280/new-panel-after-E-Escape-xref-visible-glyphs
+PASS 1280/new-panel-after-E-Escape-only-one-reference
+1280/new-panel-after-E-xref-closed-Escape
+PASS 1280/new-panel-after-E-xref-close-Escape
+1280/focus-entry
+1280/click/#panel [data-act="focus"]
+1280/click/#fPrep
+1280/preparation
+PASS 1280/after-new-panel-Escape-E
+1280/click/#prepClose
+1280/click/#fBack
+1280/map-return-immediate
+1280/click/#panel [data-xref="R3"]
+1280/wheel/#panel
+1280/click/#xr-R3 [data-goto="C21"]
+1280/focus-entry
+1280/click/#panel [data-act="focus"]
+1280/click/#fPrep
+1280/preparation
+PASS 1280/C21-edit-isolation
+1280/click/#prepClose
+1280/click/#fBack
+1280/map-return-immediate
+1280/click/#n-C32
+1280/focus-entry
+1280/click/#panel [data-act="focus"]
+1280/click/#fPrep
+1280/preparation
+PASS 1280/after-C21-E
+1280/click/#prepClose
+1280/click/#fBack
+1280/map-return-immediate
+HTTP "GET /relation-reading-study.html HTTP/1.1" 200 -
+PASS 390/HTTP
+390/initial
+390/initial-glyphs
+PASS 390/initial-names-roles-children-glyphs
+PASS 390/initial-depth
+390/relations-initial
+PASS 390/relations-initial-six-originals
+390/initial-screen-endpoint-samples
+PASS 390/screen-ends-match-representatives
+390/first-selection-before
+390/click/#n-C32
+390/first-selection-after
+PASS 390/first-selection-no-geometry-depth-change
+390/click/#n-G3 .gsel
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/receiver-list-C31
+PASS 390/receiver-list-C31-visible-description
+390/wheel/#main
+390/wheel/#main
+390/receiver-list-C32
+PASS 390/receiver-list-C32-visible-description
+390/G3-list-before-open
+390/click/#panel .xbtn[aria-describedby="xg-G3-C31"]:nth-of-type(1)
+390/G3-R2-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/G3-R2-xref-open
+PASS 390/G3-R2-xref-content
+PASS 390/G3-R2-xref-visible-glyphs
+PASS 390/G3-R2-only-one-reference
+390/wheel/#main
+390/click/#panel .xbtn[aria-describedby="xg-G3-C32"]:nth-of-type(2)
+390/G3-R3-replace-top-close-visible
+390/G3-R3-replace-xref-open
+PASS 390/G3-R3-replace-xref-content
+PASS 390/G3-R3-replace-xref-visible-glyphs
+PASS 390/G3-R3-replace-only-one-reference
+390/click/#panel [data-xref="R3"]
+390/G3-R3-xref-closed-same-button
+PASS 390/G3-R3-xref-close-same-button
+390/click/#panel [data-xref="R3"]
+390/G3-R3-repeat-top-close-visible
+390/G3-R3-repeat-xref-open
+PASS 390/G3-R3-repeat-xref-content
+PASS 390/G3-R3-repeat-xref-visible-glyphs
+PASS 390/G3-R3-repeat-only-one-reference
+390/click/#xr-R3 [data-act="xref-close"]
+390/G3-R3-repeat-xref-closed-button
+PASS 390/G3-R3-repeat-xref-close-button
+390/click/#panel .xbtn[aria-describedby="xg-G3-C31"]:nth-of-type(1)
+390/G3-R2-repeat-top-close-visible
+390/wheel/#main
+390/G3-R2-repeat-xref-open
+PASS 390/G3-R2-repeat-xref-content
+PASS 390/G3-R2-repeat-xref-visible-glyphs
+PASS 390/G3-R2-repeat-only-one-reference
+390/G3-R2-repeat-xref-closed-Escape
+PASS 390/G3-R2-repeat-xref-close-Escape
+390/focus-entry
+390/click/#panel [data-act="focus"]
+PASS 390/G3-no-preparation
+390/click/#fBack
+390/map-return-immediate
+390/click/#panel [data-xref="R3"]
+390/G3-explicit-C21-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/G3-explicit-C21-xref-open
+PASS 390/G3-explicit-C21-xref-content
+PASS 390/G3-explicit-C21-xref-visible-glyphs
+PASS 390/G3-explicit-C21-only-one-reference
+390/wheel/#main
+390/click/#xr-R3 [data-goto="C21"]
+PASS 390/explicit-only-C21-move
+390/C21-flat-list
+PASS 390/C21-no-redundant-group-heads
+390/click/#panel .xbtn:nth-of-type(2)
+390/C21-R2-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/C21-R2-xref-open
+PASS 390/C21-R2-xref-content
+PASS 390/C21-R2-xref-visible-glyphs
+PASS 390/C21-R2-only-one-reference
+390/wheel/#main
+390/click/#panel .xbtn:nth-of-type(3)
+390/C21-R3-replace-top-close-visible
+390/C21-R3-replace-xref-open
+PASS 390/C21-R3-replace-xref-content
+PASS 390/C21-R3-replace-xref-visible-glyphs
+PASS 390/C21-R3-replace-only-one-reference
+390/C21-R3-xref-closed-Escape
+PASS 390/C21-R3-xref-close-Escape
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/click/#n-G2 .gsel
+390/wheel/#main
+390/wheel/#main
+390/click/#panel [data-xref="R1"]
+390/wheel/#main
+390/six-relations-R1-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/six-relations-R1-xref-open
+PASS 390/six-relations-R1-xref-content
+PASS 390/six-relations-R1-xref-visible-glyphs
+PASS 390/six-relations-R1-only-one-reference
+390/click/#xr-R1 [data-act="xref-close"]
+390/six-relations-R1-xref-closed-button
+PASS 390/six-relations-R1-xref-close-button
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/click/#n-G3 .gsel
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/click/#panel [data-xref="R4"]
+390/wheel/#main
+390/six-relations-R4-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/six-relations-R4-xref-open
+PASS 390/six-relations-R4-xref-content
+PASS 390/six-relations-R4-xref-visible-glyphs
+PASS 390/six-relations-R4-only-one-reference
+390/click/#xr-R4 [data-act="xref-close"]
+390/six-relations-R4-xref-closed-button
+PASS 390/six-relations-R4-xref-close-button
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/click/#n-G4 .gsel
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/click/#panel [data-xref="R5"]
+390/wheel/#main
+390/six-relations-R5-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/six-relations-R5-xref-open
+PASS 390/six-relations-R5-xref-content
+PASS 390/six-relations-R5-xref-visible-glyphs
+PASS 390/six-relations-R5-only-one-reference
+390/click/#xr-R5 [data-act="xref-close"]
+390/six-relations-R5-xref-closed-button
+PASS 390/six-relations-R5-xref-close-button
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/click/#n-G4 .gsel
+390/wheel/#main
+390/wheel/#main
+390/click/#panel [data-xref="R6"]
+390/wheel/#main
+390/six-relations-R6-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/six-relations-R6-xref-open
+PASS 390/six-relations-R6-xref-content
+PASS 390/six-relations-R6-xref-visible-glyphs
+PASS 390/six-relations-R6-only-one-reference
+390/click/#xr-R6 [data-act="xref-close"]
+390/six-relations-R6-xref-closed-button
+PASS 390/six-relations-R6-xref-close-button
+390/relations-all-reference-kinds
+PASS 390/relations-all-reference-kinds-six-originals
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/click/[data-tog="G2"]
+390/click/[data-tog="G4"]
+390/click/#zIn
+390/wheel/#mapScroll
+390/click/#n-C32
+390/wheel/#main
+390/wheel/#main
+390/C-map-entry-before
+PASS 390/C-nondefault-scale-depth
+390/focus-entry
+390/click/#panel [data-act="focus"]
+390/wheel/#focusView
+390/pre-edit-peek-before
+390/click/[data-key="C32-F1"]
+390/wheel/#focusView
+390/pre-edit-peek-open
+PASS 390/pre-edit-peek-body-visible
+390/wheel/#focusView
+390/click/#pk-C32-F1 [data-act="peek-close"]
+390/pre-edit-peek-after
+PASS 390/pre-edit-peek-return
+390/click/#fPrep
+390/preparation
+PASS 390/C32-four-fields-default
+390/click/#pf-target
+PASS 390/meaningful-edit-only-target
+390/click/#prepClose
+390/click/#fBack
+390/map-return-immediate
+390/C-map-pre-post-deltas
+PASS 390/C-restore-map
+390/focus-entry
+390/click/#panel [data-act="focus"]
+390/wheel/#focusView
+390/after-E-reentry-peek-before
+390/click/[data-key="C32-F1"]
+390/wheel/#focusView
+390/after-E-reentry-peek-open
+PASS 390/after-E-reentry-peek-body-visible
+390/after-E-reentry-peek-after
+PASS 390/after-E-reentry-peek-return
+390/click/#fPrep
+390/preparation
+PASS 390/E-after-focus-peek
+390/click/#prepClose
+390/click/#fBack
+390/map-return-immediate
+390/click/#panel [data-xref="R3"]
+390/new-panel-after-E-button-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/wheel/#main
+390/new-panel-after-E-button-xref-open
+PASS 390/new-panel-after-E-button-xref-content
+PASS 390/new-panel-after-E-button-xref-visible-glyphs
+PASS 390/new-panel-after-E-button-only-one-reference
+390/click/#xr-R3 [data-act="xref-close"]
+390/new-panel-after-E-xref-closed-button
+PASS 390/new-panel-after-E-xref-close-button
+390/focus-entry
+390/click/#panel [data-act="focus"]
+390/click/#fPrep
+390/preparation
+PASS 390/after-new-panel-button-E
+390/click/#prepClose
+390/click/#fBack
+390/map-return-immediate
+390/click/#panel [data-xref="R3"]
+390/new-panel-after-E-Escape-top-close-visible
+390/wheel/#main
+390/wheel/#main
+390/new-panel-after-E-Escape-xref-open
+PASS 390/new-panel-after-E-Escape-xref-content
+PASS 390/new-panel-after-E-Escape-xref-visible-glyphs
+PASS 390/new-panel-after-E-Escape-only-one-reference
+390/new-panel-after-E-xref-closed-Escape
+PASS 390/new-panel-after-E-xref-close-Escape
+390/focus-entry
+390/click/#panel [data-act="focus"]
+390/click/#fPrep
+390/preparation
+PASS 390/after-new-panel-Escape-E
+390/click/#prepClose
+390/click/#fBack
+390/map-return-immediate
+HTTP "GET /relation-reading-study.html HTTP/1.1" 200 -
+PASS 1440/HTTP
+1440/initial
+1440/initial-glyphs
+PASS 1440/initial-names-roles-children-glyphs
+PASS 1440/initial-depth
+1440/relations-initial
+PASS 1440/relations-initial-six-originals
+1440/initial-screen-endpoint-samples
+PASS 1440/screen-ends-match-representatives
+CHILD_EXIT 0

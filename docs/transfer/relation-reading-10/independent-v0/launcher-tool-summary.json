@@ -1,0 +1,16 @@
+{
+  "provenance": "Manual transcription of external tool process exit_code observations only; NOT a full tool transcript or independently signed log.",
+  "run01": {
+    "sessionID": 79066,
+    "observedLauncherExit": 1
+  },
+  "run02": {
+    "sessionID": 93847,
+    "observedLauncherExit": 1
+  },
+  "run03": {
+    "sessionID": 81657,
+    "observedLauncherExit": 0
+  },
+  "collectorEvidence": "run*/actual-exit.json measures collector returncode after collector process termination; run*/child-exit.json measures child after child termination."
+}

@@ -1,0 +1,11 @@
+{
+  "SOURCE_COMMIT": "76feae052f716bfe8d0bc09df5a6770048b1f687",
+  "SOURCE_HTML": "docs/transfer/relation-reading-10/author-v0/relation-reading-study.html",
+  "SOURCE_BYTES": 55724,
+  "SOURCE_SHA256": "96e791d25bcb8fadc41ba1e30351bddd4b0feb3d6ebe1e7ef70941bbd359ceae",
+  "URL": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/76feae052f716bfe8d0bc09df5a6770048b1f687/docs/transfer/relation-reading-10/author-v0/relation-reading-study.html",
+  "contract": "0f46935a297eb6698054f83aab243ac3a8c825cc docs/cycles/2026-10-16-relation-reading-10/DECISION.md",
+  "comparison09": "08a04afb7515efc5f4007b5d9bf5bb787c908c20 docs/transfer/mixed-reading-09/author-fix1/mixed-reading-study.html",
+  "retrieval": "Existing authenticated GitHub git fetch + git show fixed commit:path into temporary HTTP site. No source modification or duplicate HTML in evidence.",
+  "authorReference": "REPORT.md read as limitations/reference only; no author checker imported or run"
+}

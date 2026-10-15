@@ -1,0 +1,206 @@
+{
+  "method": "Read-only source comparison against pinned cycle09 (not UI execution). Explicit F line+anchor literals, not a regex-shape-only acceptance. No application JS executed.",
+  "fixedFactExpectations": {
+    "F1": {
+      "expected": {
+        "line": "L52",
+        "anchor": "#L52"
+      },
+      "actual": {
+        "line": "L52",
+        "anchor": "#L52"
+      },
+      "match": true
+    },
+    "F2": {
+      "expected": {
+        "line": "L10",
+        "anchor": "#L10"
+      },
+      "actual": {
+        "line": "L10",
+        "anchor": "#L10"
+      },
+      "match": true
+    },
+    "F3": {
+      "expected": {
+        "line": "L11",
+        "anchor": "#L11"
+      },
+      "actual": {
+        "line": "L11",
+        "anchor": "#L11"
+      },
+      "match": true
+    },
+    "F4": {
+      "expected": {
+        "line": "L12",
+        "anchor": "#L12"
+      },
+      "actual": {
+        "line": "L12",
+        "anchor": "#L12"
+      },
+      "match": true
+    },
+    "F5": {
+      "expected": {
+        "line": "L13",
+        "anchor": "#L13"
+      },
+      "actual": {
+        "line": "L13",
+        "anchor": "#L13"
+      },
+      "match": true
+    },
+    "F6": {
+      "expected": {
+        "line": "L14 · L55",
+        "anchor": "#L14"
+      },
+      "actual": {
+        "line": "L14 · L55",
+        "anchor": "#L14"
+      },
+      "match": true
+    },
+    "F7": {
+      "expected": {
+        "line": "L15",
+        "anchor": "#L15"
+      },
+      "actual": {
+        "line": "L15",
+        "anchor": "#L15"
+      },
+      "match": true
+    },
+    "F8": {
+      "expected": {
+        "line": "L16",
+        "anchor": "#L16"
+      },
+      "actual": {
+        "line": "L16",
+        "anchor": "#L16"
+      },
+      "match": true
+    },
+    "F9": {
+      "expected": {
+        "line": "L17",
+        "anchor": "#L17"
+      },
+      "actual": {
+        "line": "L17",
+        "anchor": "#L17"
+      },
+      "match": true
+    },
+    "F10": {
+      "expected": {
+        "line": "L18–22",
+        "anchor": "#L18-L22"
+      },
+      "actual": {
+        "line": "L18–22",
+        "anchor": "#L18-L22"
+      },
+      "match": true
+    },
+    "F11": {
+      "expected": {
+        "line": "L33–41",
+        "anchor": "#L33-L41"
+      },
+      "actual": {
+        "line": "L33–41",
+        "anchor": "#L33-L41"
+      },
+      "match": true
+    }
+  },
+  "sourceFunctionComparison": {
+    "buildMap": {
+      "oldSHA256": "3be6a540f25ea747739b5e3ed78265c9c003bf81723a5313a9e0c22757f3323c",
+      "newSHA256": "3be6a540f25ea747739b5e3ed78265c9c003bf81723a5313a9e0c22757f3323c",
+      "identical": true
+    },
+    "syncSize": {
+      "oldSHA256": "90723dcb52dc386d80f355fd7e28f47abc85f8d9accae8410662c5ec05e706f5",
+      "newSHA256": "90723dcb52dc386d80f355fd7e28f47abc85f8d9accae8410662c5ec05e706f5",
+      "identical": true
+    },
+    "applyLayout": {
+      "oldSHA256": "bb5a20a1a7bf1633cf391e85915c41381b594ff06d4134a7526e935630c03723",
+      "newSHA256": "bb5a20a1a7bf1633cf391e85915c41381b594ff06d4134a7526e935630c03723",
+      "identical": true
+    },
+    "applyScale": {
+      "oldSHA256": "0fe88301366a4187501f4ec695497e09d6b23bff1fdbab98ecb015d13e89882c",
+      "newSHA256": "0fe88301366a4187501f4ec695497e09d6b23bff1fdbab98ecb015d13e89882c",
+      "identical": true
+    },
+    "zoom": {
+      "oldSHA256": "cb42b3c80e35fa969fb38d8d12c8f5f1f8c6a4af58c777552c5e7765afcd123e",
+      "newSHA256": "cb42b3c80e35fa969fb38d8d12c8f5f1f8c6a4af58c777552c5e7765afcd123e",
+      "identical": true
+    },
+    "applyDepth": {
+      "oldSHA256": "ea93f9eb35ad4b767a845b3b7686cb284e5f0c0dd22e5823d3b4674a587f5d5c",
+      "newSHA256": "ea93f9eb35ad4b767a845b3b7686cb284e5f0c0dd22e5823d3b4674a587f5d5c",
+      "identical": true
+    },
+    "wrect": {
+      "oldSHA256": "9f254fa4f8990ca4dd62a1d4fed19bbde4e64069373d2e1a3c6df3a0dc0e6047",
+      "newSHA256": "9f254fa4f8990ca4dd62a1d4fed19bbde4e64069373d2e1a3c6df3a0dc0e6047",
+      "identical": true
+    },
+    "bundles": {
+      "oldSHA256": "7286f13abf7679aec7aa1100b629f96fa8f8defb50ec628a8d41e7346e7878df",
+      "newSHA256": "7286f13abf7679aec7aa1100b629f96fa8f8defb50ec628a8d41e7346e7878df",
+      "identical": true
+    },
+    "drawEdges": {
+      "oldSHA256": "0e314be6d8c3f5b7e94ab53dff0e32fd7ca8b18402469f927cb7c5395e3cb92d",
+      "newSHA256": "0e314be6d8c3f5b7e94ab53dff0e32fd7ca8b18402469f927cb7c5395e3cb92d",
+      "identical": true
+    },
+    "enterFocus": {
+      "oldSHA256": "6f695ea526a7dbbf6b2446b90bfb4840e4626d7a861051173895b00682eacb99",
+      "newSHA256": "6f695ea526a7dbbf6b2446b90bfb4840e4626d7a861051173895b00682eacb99",
+      "identical": true
+    },
+    "returnAll": {
+      "oldSHA256": "c2e208e33325961eacc00a3cad35469d9ff26c751d29432d9fa90b55443897da",
+      "newSHA256": "c2e208e33325961eacc00a3cad35469d9ff26c751d29432d9fa90b55443897da",
+      "identical": true
+    },
+    "defaults": {
+      "oldSHA256": "9d1b34a8e0060b950b3b3443e1d5edd47f4e15ef495d35a62bfa84c999b7f491",
+      "newSHA256": "9d1b34a8e0060b950b3b3443e1d5edd47f4e15ef495d35a62bfa84c999b7f491",
+      "identical": true
+    }
+  },
+  "dataBlocks": {
+    "FACTS": {
+      "oldSHA256": "a9749a6e128e685454d70dd3f06b6652bc3e6973741a40a85f25b9e988720e9c",
+      "newSHA256": "a9749a6e128e685454d70dd3f06b6652bc3e6973741a40a85f25b9e988720e9c",
+      "identical": true
+    },
+    "N": {
+      "oldSHA256": "201f4c7855d1846c3dc873ae3a649424d1f589480029aef7236247e4751e5dc8",
+      "newSHA256": "201f4c7855d1846c3dc873ae3a649424d1f589480029aef7236247e4751e5dc8",
+      "identical": true
+    },
+    "RELS": {
+      "oldSHA256": "39fd1fd2dabc0aeb14a97519119a579f5053ec970be7acb14e41f6947471b9af",
+      "newSHA256": "39fd1fd2dabc0aeb14a97519119a579f5053ec970be7acb14e41f6947471b9af",
+      "identical": true
+    }
+  },
+  "pass": true
+}

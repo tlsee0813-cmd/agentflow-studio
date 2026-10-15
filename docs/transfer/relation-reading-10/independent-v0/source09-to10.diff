@@ -1,0 +1,99 @@
+--- pinned-cycle09
++++ pinned-cycle10
+@@ -118,15 +118,22 @@
+ .xbtn[aria-expanded=true]{border-color:var(--rel);background:#eef3f8}
+ .xbtn .dir{color:var(--rel);font-weight:700;margin-right:4px}
+ .xbtn small{display:block;color:var(--ink3);font-size:12px}
+-.xpeek{border-left:3px solid var(--rel);background:#eef3f8;border-radius:0 8px 8px 0;padding:8px 11px;font-size:13px}
++.xpeek{border-left:3px solid var(--rel);background:#eef3f8;border-radius:0 8px 8px 0;padding:7px 11px 9px;font-size:13px}
++.xpeek p{margin:5px 0}
++.xhd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+ .xpeek .pkh{font-size:11.5px;color:var(--rel);font-weight:650}
+-.xpeek p{margin:6px 0}
+-.xends{display:grid;gap:2px;margin:6px 0}
+-.xends > div{background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+-.xends small{display:block;color:var(--ink3);font-size:11.5px}
+-.xends .arr{background:none;border:0;padding:0 8px;color:var(--rel);font-weight:650;font-size:12px}
+-.xpeek .pka{flex-wrap:wrap;gap:8px;margin-top:6px}
++.xflow{font-size:14px;line-height:1.45}
++.xflow .xar{color:var(--rel);font-weight:700;margin:0 1px}
++.xkind{font-size:12.5px;color:var(--ink2)}
++.xwh{list-style:none;margin:4px 0 6px;padding:0;font-size:12.5px;color:var(--ink2)}
++.xwh li{padding:1px 0}
++.xwh b{color:var(--ink);font-weight:650;margin-right:2px}
++.xmeta{font-size:12px;color:var(--ink3)}
+ .xpeek .mv small{display:block;color:var(--ink3);font-size:11.5px;margin-top:2px}
++/* 묶음을 골랐을 때: 실제로 주고받는 세부별로 나눠 같은 출발점의 다른 전달을 열기 전에 구별 */
++.xgrp{font-size:12.5px;color:var(--ink2);margin:6px 0 -2px}
++.xgrp:first-child{margin-top:0}
++.xgrp b{color:var(--ink);font-weight:650;font-size:13px}
+ 
+ /* focus */
+ #focusView{overflow:auto;min-height:0;background:var(--bg)}
+@@ -498,26 +505,43 @@
+  return `<button class="rbtn" data-goto="${id}">${nm(id)}<small>${where(id)}${hid?' · 지금 접혀 있음, 눌러서 펼쳐 선택':''}</small></button>`;
+ }
+ /* 선택한 부분이 받거나 넘기는 관계: 누르면 읽기용 참고가 열리고, 지도 선택·깊이·준비 대상은 그대로다 */
+-function xBtn(r,ids){
+- const inn=ids.includes(r.to),out=ids.includes(r.from),other=inn&&!out?r.from:r.to;
+- const dir=inn&&out?'안에서':inn?'받음 ←':'넘김 →';
+- return `<button class="xbtn" data-xref="${r.id}" aria-expanded="false" aria-controls="xr-${r.id}"><span class="dir">${dir}</span>${nm(other)}<small>${r.kind} · ${where(other)}</small></button>`;
+-}
+-function endLine(id,role){
++function relSide(r,ids){
++ const inn=ids.includes(r.to),out=ids.includes(r.from);
++ return {inn,out,other:inn&&!out?r.from:r.to,mine:inn&&!out?r.to:r.from,dir:inn&&out?'안에서':inn?'받음 ←':'넘김 →'};
++}
++function xBtn(r,ids,desc){
++ const x=relSide(r,ids);
++ return `<button class="xbtn" data-xref="${r.id}" aria-expanded="false" aria-controls="xr-${r.id}"${desc?` aria-describedby="${desc}"`:''}><span class="dir">${x.dir}</span>${nm(x.other)}<small>${r.kind} · ${where(x.other)}</small></button>`;
++}
++/* 세부를 골랐으면 목록 그대로(상대가 이미 서로 다름). 묶음을 골랐으면 실제 이쪽 끝(세부)별로 나눈다. */
++function relList(id,rels){
++ const ids=N[id].kids?[id,...N[id].kids]:[id];
++ if(!N[id].kids)return `<div class="list">${rels.map(r=>xBtn(r,ids)).join('')}</div>`;
++ let h='';
++ for(const k of N[id].kids){
++  const mine=rels.filter(r=>relSide(r,ids).mine===k);if(!mine.length)continue;
++  const gid=`xg-${id}-${k}`;
++  h+=`<div class="xgrp" id="${gid}"><b>${nm(k)}</b> · 이 묶음 안 세부</div>`+mine.map(r=>xBtn(r,ids,gid)).join('');
++ }
++ return `<div class="list">${h}</div>`;
++}
++function whereLine(id,role){
+  const me=state.sel&&state.sel.t==='node'&&state.sel.id===id;
+- return `<div><small>${role}</small><b>${nm(id)}</b><small>${where(id)}${isHidden(id)?` · 지도에서는 접힌 ‹${nm(parentOf(id))}› 자리로 보임`:''}${me?' · 지금 선택':''}</small></div>`;
++ const base=N[id].p?`‹${nm(N[id].p)}› 안`:'보기용 묶음';
++ return `<li><b>${role}</b> ${base}${isHidden(id)?` · 지도에선 접힌 ‹${nm(parentOf(id))}› 자리`:''}${me?' · 지금 선택':''}</li>`;
+ }
+ function openXref(btn){
+  closeXref(false);
+  const r=RELS.find(x=>x.id===btn.dataset.xref),f=FACTS[r.f],s=state.sel;
+  const ids=N[s.id].kids?[s.id,...N[s.id].kids]:[s.id];
+- const other=ids.includes(r.to)&&!ids.includes(r.from)?r.from:r.to;
+- const d=document.createElement('div');d.className='xpeek';d.id='xr-'+r.id;d.setAttribute('role','region');d.setAttribute('aria-label','관계 참고 · '+r.kind);
+- d.innerHTML=`<div class="pkh">참고 · 읽기 전용 — 지도 선택은 ‹${nm(s.id)}› 그대로 · 참고는 준비문을 바꾸지 않음</div>
+-  <div class="xends">${endLine(r.from,'보내는 쪽')}<div class="arr">↓ ${r.kind}</div>${endLine(r.to,'받는 쪽')}</div>
+-  <p>${r.cond}</p>
+-  <p class="muted">원문 FLOW091-C ${f.l} · <a href="${SRC}${f.a}" target="_blank" rel="noopener">원문 줄 ↗</a> · 관계 ${r.id}</p>
+-  <div class="pka"><button class="btn sm" data-act="xref-close">참고 닫기</button></div>
++ const other=relSide(r,ids).other;
++ const d=document.createElement('div');d.className='xpeek';d.id='xr-'+r.id;d.setAttribute('role','region');d.setAttribute('aria-label',`관계 참고 · ${nm(r.from)}에서 ${nm(r.to)}로`);
++ d.innerHTML=`<div class="xhd"><span class="pkh">관계 참고 · 읽기 전용</span><button class="btn sm" data-act="xref-close">참고 닫기</button></div>
++  <p class="xflow"><b>${nm(r.from)}</b><span class="xar"> → </span><b>${nm(r.to)}</b></p>
++  <p class="xkind">전달: ${r.kind}</p>
++  <ul class="xwh">${whereLine(r.from,'보내는 쪽')}${whereLine(r.to,'받는 쪽')}</ul>
++  <p class="xcond">${r.cond}</p>
++  <p class="xmeta">지도 선택은 ‹${nm(s.id)}› 그대로 · 참고는 준비문을 바꾸지 않음<br>근거 FLOW091-C ${f.l} · <a href="${SRC}${f.a}" target="_blank" rel="noopener">원문 줄 ↗</a> · 관계 ${r.id}</p>
+   <div class="mv"><button class="btn sm" data-goto="${other}" data-mv="1">지도에서 ‘${nm(other)}’ 선택</button><small>선택만 옮깁니다. 요청을 보내거나 사본·준비문을 바꾸지 않습니다.</small></div>`;
+  btn.after(d);btn.setAttribute('aria-expanded','true');
+  state.xref={id:r.id};
+@@ -546,7 +570,7 @@
+    h+=`<h3>세부 ${n.kids.length}개</h3><div class="list">${n.kids.map(endBtn).join('')}</div>`;
+   }
+   h+=`<h3>주고받는 전달 · 원문 계약</h3>`;
+-  h+=rels.length?`<div class="list">${rels.map(r=>xBtn(r,ids)).join('')}</div>`:`<p class="muted">원문에 이 부분의 전달 관계는 적혀 있지 않습니다. 무관하다는 뜻은 아닙니다.</p>`;
++  h+=rels.length?relList(s.id,rels):`<p class="muted">원문에 이 부분의 전달 관계는 적혀 있지 않습니다. 무관하다는 뜻은 아닙니다.</p>`;
+   h+=`<div class="act"><button class="btn primary" data-act="focus">${n.kids?'이 묶음 자세히 보기 →':'자세히 읽고 확인·조정 준비 →'}</button></div>`;
+  }else{
+   const ids=s.t==='rel'?[s.id]:s.ids,rs=RELS.filter(r=>ids.includes(r.id));

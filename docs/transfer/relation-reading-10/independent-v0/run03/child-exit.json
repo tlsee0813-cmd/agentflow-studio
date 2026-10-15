@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/relation10/snapshots/check-705e774a598b88719d11a618870a55f087b159b607786b20c84a7aeb21190c31.py",
+    "--source",
+    "/workspace/browser-env/relation10/site/relation-reading-study.html",
+    "--out",
+    "/workspace/browser-env/relation10/run03"
+  ],
+  "codeSHA256": "705e774a598b88719d11a618870a55f087b159b607786b20c84a7aeb21190c31",
+  "actualChildExit": 0,
+  "jsonExit": 0,
+  "agreement": true,
+  "collectorIntendedExit": 0
+}

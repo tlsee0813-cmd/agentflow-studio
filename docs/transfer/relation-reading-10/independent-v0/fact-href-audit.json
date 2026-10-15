@@ -1,0 +1,95 @@
+{
+  "method": "Static all-F literal line+exact constructed href comparison; not merely #L-number pattern; not external navigation or source reading in browser. Actual UI link checks separately present in browser xref and F1 peek records.",
+  "sourceSHA256": "96e791d25bcb8fadc41ba1e30351bddd4b0feb3d6ebe1e7ef70941bbd359ceae",
+  "rows": [
+    {
+      "id": "F1",
+      "expectedLine": "L52",
+      "actualLine": "L52",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L52",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L52",
+      "pass": true
+    },
+    {
+      "id": "F2",
+      "expectedLine": "L10",
+      "actualLine": "L10",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L10",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L10",
+      "pass": true
+    },
+    {
+      "id": "F3",
+      "expectedLine": "L11",
+      "actualLine": "L11",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L11",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L11",
+      "pass": true
+    },
+    {
+      "id": "F4",
+      "expectedLine": "L12",
+      "actualLine": "L12",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L12",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L12",
+      "pass": true
+    },
+    {
+      "id": "F5",
+      "expectedLine": "L13",
+      "actualLine": "L13",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L13",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L13",
+      "pass": true
+    },
+    {
+      "id": "F6",
+      "expectedLine": "L14 · L55",
+      "actualLine": "L14 · L55",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L14",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L14",
+      "pass": true
+    },
+    {
+      "id": "F7",
+      "expectedLine": "L15",
+      "actualLine": "L15",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L15",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L15",
+      "pass": true
+    },
+    {
+      "id": "F8",
+      "expectedLine": "L16",
+      "actualLine": "L16",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L16",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L16",
+      "pass": true
+    },
+    {
+      "id": "F9",
+      "expectedLine": "L17",
+      "actualLine": "L17",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L17",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L17",
+      "pass": true
+    },
+    {
+      "id": "F10",
+      "expectedLine": "L18–22",
+      "actualLine": "L18–22",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L18-L22",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L18-L22",
+      "pass": true
+    },
+    {
+      "id": "F11",
+      "expectedLine": "L33–41",
+      "actualLine": "L33–41",
+      "expectedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L33-L41",
+      "actualConstructedHref": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L33-L41",
+      "pass": true
+    }
+  ],
+  "pass": true
+}
