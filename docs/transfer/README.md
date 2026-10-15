@@ -2,7 +2,7 @@
 
 이 브랜치는 세션 간 원본 파일을 전달하는 공간이다. 제품 배포나 현재 연구 상태의 별도 사본이 아니다.
 
-- [혼합 깊이 읽기·준비 cycle09 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/6565fb94850a17d7eed228638f3a768fbaff71fb/docs/cycles/2026-10-16-mixed-reading-09/RESULT.md)
+- [혼합 깊이 읽기·준비 cycle09 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/0f46935a297eb6698054f83aab243ac3a8c825cc/docs/cycles/2026-10-16-mixed-reading-09/RESULT.md)
 - [첫 전체 조망 cycle08 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/ce0f9eeec6b7ea55cb630e4b1b5df68e345c2e5f/docs/cycles/2026-10-16-overview-08/RESULT.md)
 - [책임 변화·후속 요청 cycle07 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a738280b994b4872ada81574850747e291bc1418/docs/cycles/2026-10-16-change-record-07/RESULT.md)
 - [목적·역할 cycle06 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d17667c1c519492f6edf8ea064a9f87b5d51fc12/docs/cycles/2026-10-16-purpose-06/RESULT.md)
