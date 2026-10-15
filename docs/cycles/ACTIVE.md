@@ -16,6 +16,8 @@
 기존 cycle05의 혼합 깊이 제안 구성에 cycle08의 간결한 조망·명시 상세를 연결할 범위를 고른다. **일부만 펼쳐도 역할·변경 소유·접힌 외부 상대와의 관계가 한 부분의 준비까지 이어지는가?**
 기존 펼침/복귀를 다시 만들지 않는다. 보기용 묶음·실제 관계 양끝·범위 경계를 유지하고 요약↔상세의 의미 연결을 본다. cycle05는 계약/MOCK 기반 AI 제안이라는 한계를 유지하며, VS Code와 한 프로그램으로 합치거나 근거 없는 부모·새 실제 사건을 만들지 않는다. [cycle09 범위](2026-10-16-mixed-reading-09/BRIEF.md)를 고정하고 Pro 정보량/공간, Pro 외부관계/범위 연구를 나눈다. Astra는 입력 의미, Sol은 기존 코드 재사용·최소 관측을 감사한다. 구현 배정은 아직 하지 않았다.
 
+새 Pro 세션: [정보량·공간](https://chatgpt.com/c/6ad14ec4-7c30-83ee-88ed-494c789fb0a1), [접힌 외부관계·범위](https://chatgpt.com/c/6ad14ee9-98ac-83ee-a198-6c86d267b78f). 두 세션의 응답 시작을 확인했다. [입력 감사](2026-10-16-mixed-reading-09/INPUT_AUDIT.md) · [코드 재사용 경계](2026-10-16-mixed-reading-09/REUSE_AUDIT.md) · [기존 화면 관측](2026-10-16-mixed-reading-09/BASELINE_OBSERVATION.md).
+
 ## 공유 결과
 [cycle08 fix1](https://github.com/tlsee0813-cmd/agentflow-studio/tree/167f86b8ac783a15bc1b2991b73017ee2f1e0d6a/docs/transfer/overview-08/author-fix1) · [독립23파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0) · [공유 증거 목록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/delivery/ui02-fix3-evidence/docs/transfer/README.md).
 HTML42,025B/SHA85f07ee4…0eb81. 독립 payload22/22 bytesSHA·원격 tree/집합 대조 완료. 실제 child/collector와 launcher의 별도 외부 로그 미제공을 구별한다. 390 수동130% 넘침·더 긴 문구/모든 대상 편집·사람 이해·큰 지도는 성공으로 확대하지 않는다.
