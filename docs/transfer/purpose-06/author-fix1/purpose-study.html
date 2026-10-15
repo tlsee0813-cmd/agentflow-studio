@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>목적과 역할 · cycle06 시안</title>
+<style>
+:root{
+  --bg:#f4f1ea; --paper:#fffdf8; --ink:#1e2227; --ink2:#50555c; --ink3:#848990; --line:#dcd6ca;
+  --prog:#e8edf2; --progline:#8fa2b5; --prog-ink:#2d4a66;
+  --keep:#2f6a4c; --keep-bg:#e5f0e8;
+  --rel:#7a8796;
+  --focus:#1867c8; --loc:#c26a12;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:14px/1.55 system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+
+/* header */
+#top{background:var(--paper);border-bottom:1px solid var(--line);padding:12px 22px 10px}
+.t1{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.t1 h1{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.t1 .scope{font-size:12px;color:var(--ink3)}
+.purpose{display:flex;gap:10px;align-items:baseline;margin-top:6px}
+.purpose .lbl{flex:none;font-size:11.5px;font-weight:700;color:var(--prog-ink);background:var(--prog);padding:1px 8px;border-radius:99px}
+.purpose .txt{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+#top details{font-size:12px;color:var(--ink2);margin-top:4px}
+#top summary{cursor:pointer;color:var(--ink3);width:max-content}
+#top details p{margin:4px 0 0;max-width:860px}
+
+/* main */
+#main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 400px}
+#mapView{display:flex;flex-direction:column;min-width:0;min-height:0}
+.tools{display:flex;align-items:center;gap:14px;padding:7px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw-p{width:18px;height:13px;border:1.5px solid var(--ink);border-radius:4px;background:#fff}
+.sw-d{width:13px;height:15px;background:#fbf5e6;border:1px solid #cdbf9f;clip-path:polygon(0 0,70% 0,100% 30%,100% 100%,0 100%)}
+.sw-w{width:18px;height:13px;border:1px solid #9aa3ad;border-top:4px solid #9aa3ad;border-radius:3px;background:#fff}
+.legend .readnote{display:none;font-weight:600;color:var(--prog-ink)}
+#app.reading .legend .readnote{display:inline-flex}
+.zoom{margin-left:auto;display:flex;align-items:center;gap:4px}
+.zoom button{width:28px;height:28px;border:1px solid var(--line);background:var(--paper);border-radius:7px}
+.zoom output{min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+#mapScroll{flex:1;min-height:0;overflow:auto;position:relative;background:radial-gradient(circle,#dbd5c9 1px,transparent 1.2px) 0 0/24px 24px}
+#sizer{position:relative}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
+#edges{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#edges path{fill:none;stroke:var(--rel);stroke-width:1.6;stroke-dasharray:1 0}
+#edges .lab rect{fill:var(--paper);stroke:#cfc8bb}
+#edges .lab text{font-size:12px;fill:var(--ink2);font-weight:600}
+
+.region{position:absolute;border:1.5px dashed var(--progline);background:#e8edf2b3;border-radius:22px}
+.region .rl{position:absolute;left:16px;top:10px;font-size:12px;font-weight:650;color:var(--prog-ink)}
+
+.node{position:absolute;text-align:left;border:0;padding:0;background:none}
+.node .face{display:block}
+.node .k{display:block;font-size:11.5px;color:var(--ink3);font-weight:600;letter-spacing:.01em}
+.node .nm{display:block;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.node .ds{display:block;font-size:12.5px;color:var(--ink2)}
+.node.is-sel .face{outline:3px solid var(--focus);outline-offset:3px}
+.node.located .face{box-shadow:0 0 0 4px #fff,0 0 0 7px var(--loc)}
+#app.reading .node{cursor:default}
+
+.np .face{background:#fff;border:1.8px solid var(--ink);border-radius:16px;overflow:hidden;box-shadow:0 3px 0 #1e22270f}
+.np .body{display:block;padding:12px 16px 10px}
+.np .nm{font-size:19px}
+.np .role{display:block;margin-top:4px;font-size:13.5px;color:var(--ink2)}
+.keepband{display:flex;gap:9px;align-items:flex-start;background:var(--keep-bg);border-top:1px solid #c6dccd;padding:9px 16px 10px}
+.keepband svg{flex:none;margin-top:2px}
+.keepband b{display:block;font-size:11.5px;color:var(--keep)}
+.keepband span{display:block;font-size:13px;color:#1f3d2d;font-weight:600}
+
+.nd .face{display:block;background:#fbf5e6;border:1px solid #d3c5a5;padding:12px 16px 12px;clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%);position:relative;border-radius:4px 0 4px 4px}
+.nd .face::after{content:"";position:absolute;right:0;top:0;width:20px;height:20px;background:linear-gradient(225deg,var(--bg) 50%,#e7dcc0 50%)}
+.nw .face{display:block;background:#fff;border:1px solid #a9b1ba;border-radius:10px;overflow:hidden}
+.nw .bar{display:flex;gap:4px;align-items:center;height:18px;padding:0 8px;background:#e6e9ec;border-bottom:1px solid #cfd4da}
+.nw .bar i{width:6px;height:6px;border-radius:50%;background:#b5bcc4}
+.nw .wb{display:block;padding:10px 16px 12px}
+
+/* panel / strip */
+#panel{background:var(--paper);border-left:1px solid var(--line);overflow:auto;padding:18px 20px 24px}
+#app.reading #panel{display:none}
+.pk{font-size:11.5px;color:var(--ink3);font-weight:600}
+#panel h2{font-size:20px;margin:2px 0 6px;letter-spacing:-.015em}
+#panel h2:focus,#reader h2:focus{outline:none}
+#panel p{margin:6px 0}
+.keepbox{border-left:4px solid var(--keep);background:var(--keep-bg);border-radius:0 10px 10px 0;padding:9px 12px;margin:12px 0}
+.keepbox b{display:block;font-size:12px;color:var(--keep)}
+.keepbox .sc{display:block;margin-top:6px;font-size:12.5px;color:var(--ink2)}
+.ctxlist{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.ctx{display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;text-align:left;width:100%}
+.ctx small{display:block;color:var(--ink3);font-size:12px}
+.ic-d,.ic-w{flex:none}
+.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 13px;font-weight:600}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.sm{padding:3px 10px;font-size:12.5px}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.muted{color:var(--ink3);font-size:12.5px}
+h3.sub{font-size:12.5px;color:var(--ink2);margin:16px 0 4px;font-weight:650}
+
+/* reader */
+#reader{display:none;background:var(--paper);border-left:1px solid var(--line);overflow:auto;min-height:0}
+#app.reading #reader{display:block}
+.rbar{position:sticky;top:0;z-index:4;display:flex;gap:8px;align-items:center;padding:10px 16px;background:var(--paper);border-bottom:1px solid var(--line)}
+.rbar .sp{flex:1}
+.rbody{padding:16px 22px 40px}
+.crumb{font-size:12px;color:var(--prog-ink);background:var(--prog);border-radius:8px;padding:5px 10px;margin-bottom:12px}
+#reader h2{font-size:22px;margin:2px 0 4px;letter-spacing:-.02em}
+.lead{margin:0 0 6px;font-size:14.5px}
+.blk{margin-top:18px}
+.blk h3{font-size:13px;margin:0 0 6px;color:var(--ink2)}
+.row{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid #ece7dd}
+.row:first-of-type{border-top:0}
+.row .rt{flex:1;min-width:0}
+.row .rt b{display:block}
+.row .rt small{display:block;color:var(--ink3);font-size:12.5px}
+.status{display:block;font-size:12px;line-height:18px;height:18px;color:var(--loc);margin-top:2px;white-space:nowrap;overflow:hidden}
+.ev{border:1px solid #b9c6d3;background:#eef2f6;color:var(--prog-ink);font-size:11.5px;font-weight:650;border-radius:99px;padding:0 9px;margin-left:4px;vertical-align:1px}
+.ev[aria-expanded=true]{background:var(--prog-ink);color:#fff;border-color:var(--prog-ink)}
+.peek{border-left:3px solid var(--prog-ink);background:#eef2f6;border-radius:0 9px 9px 0;padding:8px 12px;margin:4px 0 10px;font-size:13px}
+.peek .ph{font-size:11.5px;font-weight:650;color:var(--prog-ink)}
+.peek q{display:block;margin:5px 0;quotes:"“" "”";color:var(--ink)}
+.peek .ia{color:var(--ink2);margin:4px 0}
+.peek .pa{display:flex;gap:12px;align-items:center}
+.peek a{color:var(--prog-ink)}
+ul.unk{margin:4px 0 4px;padding-left:18px}
+ul.unk li{margin:2px 0}
+
+/* locate strip (narrow) */
+.locbar{display:none}
+
+/* prep */
+.prep{position:fixed;inset:0;z-index:20;background:#1e222766;display:flex;align-items:center;justify-content:center;padding:20px}
+.prep[hidden]{display:none}
+.prepbox{background:var(--paper);border-radius:14px;width:min(640px,100%);max-height:min(780px,100%);display:flex;flex-direction:column;box-shadow:0 20px 50px #0003}
+.preph{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px 18px 10px;border-bottom:1px solid var(--line)}
+.preph h2{margin:2px 0 0;font-size:17px}
+.prepscroll{overflow:auto;padding:10px 18px 18px}
+.prepscroll label{display:block;font-size:12.5px;font-weight:650;color:var(--ink2);margin:12px 0 4px}
+.prepscroll .edited{margin-left:6px;font-size:11px;color:var(--prog-ink)}
+.prepscroll textarea{display:block;width:100%;font:13.5px/1.55 inherit;font-family:inherit;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:#fff;resize:vertical}
+.sendnote{margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink2)}
+
+/* narrow */
+@media (max-width:700px){
+  #top{padding:9px 14px 8px}
+  .t1 h1{font-size:14.5px}
+  .t1 .scope{font-size:11.5px}
+  .purpose .txt{font-size:14px}
+  #top details{display:none}
+  #main{display:flex;flex-direction:column}
+  #mapView{flex:1}
+  .tools{padding:5px 12px;gap:8px;flex-wrap:nowrap;align-items:flex-start}
+  .legend{flex:1;min-width:0}
+  .zoom{flex:none}
+  .legend{gap:9px;font-size:11px}
+  #panel{flex:none;height:176px;border-left:0;border-top:1px solid var(--line);padding:10px 14px 10px;overflow:hidden}
+  #panel .wide{display:none}
+  #panel h2{font-size:16.5px;margin:0 0 2px}
+  .strip-head{display:flex;align-items:center;gap:8px}
+  .strip-head h2{flex:1;min-width:0}
+  .strip-head .btn{flex:none}
+  .strip-role{font-size:12.5px;margin:0 0 4px;color:var(--ink2)}
+  .strip-keep{font-size:12px;color:#1f3d2d;font-weight:600;background:var(--keep-bg);border-radius:7px;padding:3px 8px;margin:0 0 6px}
+  .strip-ctx{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-bottom:6px}
+  .strip-ctx span{border:1px solid var(--line);border-radius:99px;padding:0 8px;background:#fff}
+  .act{margin-top:6px}
+  #app.reading #mapView,#app.reading .tools{display:none}
+  #app.reading #reader{flex:1;border-left:0}
+  #app.locating #mapView{display:flex}
+  #app.locating #reader{display:none}
+  #app.locating #panel{display:block}
+  .rbar{padding:8px 12px}
+  .rbody{padding:14px 16px 36px}
+  .prep{padding:0}
+  .prepbox{width:100%;height:100%;max-height:none;border-radius:0}
+}
+@media (min-width:701px){
+  #panel .narrow{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top">
+    <div class="t1"><h1>공연장 안내 · 목적과 역할</h1><span class="scope">개발자가 만든 합성 초기 구상 · 실제 변경·완료 기록 아님</span></div>
+    <div class="purpose"><span class="lbl">목적</span><span class="txt" id="purposeTxt">출연자가 낸 소개글을 행사 홈페이지로 옮길 때 같은 내용을 다시 적는 일 줄이기</span></div>
+    <details><summary>자료 범위</summary><p>입력은 <a href="https://github.com/tlsee0813-cmd/agentflow-studio/blob/9b4a422f4e46085acb0841e9d9201c7ff86d6b81/docs/research/quality024/NEW_INPUTS.md#L5-L7" target="_blank" rel="noopener">N01</a> 한 문단(개발자가 설계한 합성 입력)입니다. 부분 이름·역할 문장·두 연결 그림은 AI 해석 제안이고, 실제 코드·저장 방식·홈페이지 적용 방식은 주어지지 않았습니다.</p></details>
+  </header>
+  <main id="main">
+    <section id="mapView" aria-label="구상 지도">
+      <div class="tools">
+        <div class="legend">
+          <span><i class="sw-p"></i>프로그램 부분 (제안)</span>
+          <span><i class="sw-d"></i>업무 자료</span>
+          <span><i class="sw-w"></i>옮길 대상</span>
+          <span><svg width="26" height="10" aria-hidden="true"><path d="M1 5H25" stroke="#7a8796" stroke-width="1.6"/></svg>제안 관계 · 자동 연동 아님</span>
+          <span class="readnote">역할 읽는 중 · 지도는 위치 확인용</span>
+        </div>
+        <div class="zoom" role="group" aria-label="배율"><button id="zOut" aria-label="축소">−</button><output id="zVal" aria-live="polite"></output><button id="zIn" aria-label="확대">+</button></div>
+      </div>
+      <div id="mapScroll" tabindex="0" aria-label="지도 영역 (스크롤 가능)">
+        <div id="sizer"><div id="world">
+          <svg id="edges" aria-hidden="true"></svg>
+          <div class="region" id="region"><span class="rl">프로그램 구상 · 이 목적을 위한 제안</span></div>
+          <button class="node nd" id="n-X1" data-id="X1" aria-pressed="false"><span class="face"><span class="k">업무 자료 · 프로그램 바깥</span><span class="nm">출연자가 낸 소개글</span><span class="ds">출연자가 보내 온 글</span></span></button>
+          <button class="node np" id="n-P1" data-id="P1" aria-pressed="false"><span class="face"><span class="body"><span class="k">프로그램 부분 · AI가 붙인 이름</span><span class="nm">소개글 재사용</span><span class="role">받은 소개글을 홈페이지에 옮길 때 다시 쓰도록 돕는다</span></span><span class="keepband"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M7 1L13 3.5V8c0 3.5-2.6 6-6 7C3.6 14 1 11.5 1 8V3.5z" fill="none" stroke="#2f6a4c" stroke-width="1.6"/><path d="M4.3 8.2l2 2 3.6-3.8" fill="none" stroke="#2f6a4c" stroke-width="1.6"/></svg><span><b>그대로 지킬 조건</b><span>담당자가 내용을 확인하고 게시를 선택한 뒤에만 공개</span></span></span></span></button>
+          <button class="node nw" id="n-X2" data-id="X2" aria-pressed="false"><span class="face"><span class="bar"><i></i><i></i><i></i></span><span class="wb"><span class="k">옮길 대상 · 프로그램 바깥</span><span class="nm">행사 홈페이지</span><span class="ds">소개글이 실릴 곳</span></span></span></button>
+        </div></div>
+      </div>
+    </section>
+    <aside id="panel" aria-label="선택 설명"></aside>
+    <section id="reader" aria-label="역할 읽기"></section>
+  </main>
+  <div id="prep" class="prep" hidden>
+    <div class="prepbox" role="dialog" aria-modal="true" aria-labelledby="prepTitle">
+      <div class="preph"><div><div class="pk">작은 계획 준비 · 보내지 않음</div><h2 id="prepTitle">소개글 재사용</h2></div><button id="prepClose" class="btn">닫기</button></div>
+      <div class="prepscroll" id="prepScroll">
+        <p class="muted">먼저 만들 작은 작업을 정리해 보자는 요청 초안입니다. 실행·전송·배포·수락이 아닙니다.</p>
+        <label for="pf-ask">요청<span class="edited" data-ed="ask" hidden>직접 고침</span></label><textarea id="pf-ask" data-f="ask" rows="4"></textarea>
+        <label for="pf-keep">꼭 지킬 조건<span class="edited" data-ed="keep" hidden>직접 고침</span></label><textarea id="pf-keep" data-f="keep" rows="4"></textarea>
+        <label for="pf-unknown">이 입력에서 알 수 없는 것<span class="edited" data-ed="unknown" hidden>직접 고침</span></label><textarea id="pf-unknown" data-f="unknown" rows="4"></textarea>
+        <p class="sendnote" id="sendNote">이 초안은 어디에도 보내지 않았습니다. 직접 고친 문장은 닫았다 다시 열어도, 진입 전 지도로 돌아가도 남습니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(()=>{
+const SRC='https://github.com/tlsee0813-cmd/agentflow-studio/blob/9b4a422f4e46085acb0841e9d9201c7ff86d6b81/docs/research/quality024/NEW_INPUTS.md#L7';
+const NODES={
+ P1:{name:'소개글 재사용',kind:'프로그램 부분 · AI가 붙인 이름',role:'받은 소개글을 홈페이지에 옮길 때 다시 쓰도록 돕는 부분.'},
+ X1:{name:'출연자가 낸 소개글',kind:'업무 자료 · 프로그램 바깥',rel:'활용할 원자료',role:'출연자가 보내 온 글. 소개글 재사용이 다시 활용할 원자료로 제안됐습니다.'},
+ X2:{name:'행사 홈페이지',kind:'옮길 대상 · 프로그램 바깥',rel:'내용을 옮길 대상',role:'소개글이 실릴 곳. 소개글 재사용이 내용을 옮길 대상으로 제안됐습니다. 공개는 담당자의 확인·게시 선택 뒤입니다.'}
+};
+const KEEP='담당자가 내용을 확인하고 게시를 선택한 뒤에만 공개';
+const PEEKS={
+ role:{h:'N01 원문 · L7',q:'출연자가 낸 소개글을 행사 홈페이지에 옮길 때 같은 내용을 다시 적는 일을 줄이고 싶어요.',ia:'‘소개글 재사용’이라는 이름, 역할 문장, 지도의 두 연결은 이 문장을 AI가 해석해 붙인 제안입니다.'},
+ keep:{h:'N01 원문 · L7',q:'담당자가 내용을 확인하고 게시를 선택한 뒤에만 홈페이지에 공개하는 현재 방식은 그대로 두세요.',ia:'같은 문단: “운영 홈페이지에 바로 배포하지는 마세요.” 이 조건은 합성 상황 안의 현재 방식이며, 실제 운영 절차를 확인한 것은 아닙니다.'},
+ unk:{h:'N01 원문 · L7',q:'실제 코드나 파일 구조는 여기 제공하지 않았습니다.',ia:'같은 문단: “코드는 잘 모르니 먼저 만들 작은 작업으로 적어 주세요.”'}
+};
+const POS={
+ wide:{W:1040,H:600,region:[362,168,336,330],X1:[24,270,220],P1:[380,238,300],X2:[826,270,196]},
+ narrow:{W:360,H:840,region:[10,236,340,316],X1:[44,40,272],P1:[24,296,312],X2:[44,640,272]}
+};
+const STEPS=[0.85,1,1.15,1.3];
+
+const $=s=>document.querySelector(s);
+const app=$('#app'),ms=$('#mapScroll'),sizer=$('#sizer'),world=$('#world'),svg=$('#edges'),panel=$('#panel'),reader=$('#reader'),prep=$('#prep');
+const state={layout:null,scale:1,sel:null,mode:'map',saved:null,mapView:null,readTop:0,locFrom:null,peek:null,prep:null,prepOpener:null,prepTop:0};
+window.__study={state};
+const nodeEl=id=>document.getElementById('n-'+id);
+const narrow=()=>state.layout==='narrow';
+
+/* ---------- map ---------- */
+function applyLayout(){
+ const L=matchMedia('(max-width:700px)').matches?'narrow':'wide';
+ if(L===state.layout)return;
+ state.layout=L;const P=POS[L];
+ world.style.width=P.W+'px';world.style.height=P.H+'px';svg.setAttribute('width',P.W);svg.setAttribute('height',P.H);
+ const [rx,ry,rw,rh]=P.region,rg=$('#region');Object.assign(rg.style,{left:rx+'px',top:ry+'px',width:rw+'px',height:rh+'px'});
+ for(const id of ['X1','P1','X2']){const [x,y,w]=P[id],e=nodeEl(id);Object.assign(e.style,{left:x+'px',top:y+'px',width:w+'px'});}
+ state.scale=1;applyScale();drawEdges();
+}
+function applyScale(){
+ const P=POS[state.layout];
+ world.style.transform=`scale(${state.scale})`;
+ sizer.style.width=P.W*state.scale+'px';sizer.style.height=P.H*state.scale+'px';sizer.dataset.scale=state.scale;
+ $('#zVal').textContent=Math.round(state.scale*100)+'%';
+ $('#zOut').disabled=state.scale<=STEPS[0];$('#zIn').disabled=state.scale>=STEPS[STEPS.length-1];
+}
+function zoom(d){
+ const i=STEPS.indexOf(state.scale),s1=STEPS[Math.max(0,Math.min(STEPS.length-1,i+d))],s0=state.scale;if(s1===s0)return;
+ const cx=(ms.scrollLeft+ms.clientWidth/2)/s0,cy=(ms.scrollTop+ms.clientHeight/2)/s0;
+ state.scale=s1;applyScale();ms.scrollLeft=cx*s1-ms.clientWidth/2;ms.scrollTop=cy*s1-ms.clientHeight/2;
+}
+function wrect(el){const w=world.getBoundingClientRect(),r=el.getBoundingClientRect(),s=state.scale;return {x:(r.left-w.left)/s,y:(r.top-w.top)/s,w:r.width/s,h:r.height/s};}
+function drawEdges(){
+ if(!state.layout||!world.offsetParent)return;
+ const NS='http://www.w3.org/2000/svg';svg.innerHTML='';
+ const P=nodeEl('P1').querySelector('.face');
+ for(const [id,label] of [['X1','활용할 원자료'],['X2','내용을 옮길 대상']]){
+  const A=wrect(nodeEl(id).querySelector('.face')),B=wrect(P);let d,mx,my,sx,sy,ex,ey;
+  if(!narrow()){
+   if(A.x<B.x){sx=A.x+A.w;ex=B.x;}else{sx=A.x;ex=B.x+B.w;}
+   sy=A.y+A.h/2;ey=sy;d=`M${sx} ${sy}L${ex} ${ey}`;
+  }else{
+   sx=A.x+A.w/2;ex=B.x+B.w/2;
+   if(A.y<B.y){sy=A.y+A.h;ey=B.y;}else{sy=A.y;ey=B.y+B.h;}
+   d=`M${sx} ${sy}L${ex} ${ey}`;
+  }
+  mx=(sx+ex)/2;my=(sy+ey)/2;
+  const g=document.createElementNS(NS,'g');g.dataset.ctx=id;g.dataset.ends=[sx,sy,ex,ey].map(v=>Math.round(v*10)/10).join(',');
+  const p=document.createElementNS(NS,'path');p.setAttribute('d',d);g.appendChild(p);
+  const lg=document.createElementNS(NS,'g');lg.setAttribute('class','lab');
+  const t=document.createElementNS(NS,'text');t.textContent=label;t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');
+  lg.appendChild(t);g.appendChild(lg);svg.appendChild(g);
+  const bb=t.getBBox(),pw=bb.width+16,ph=22;
+  t.setAttribute('x',mx);t.setAttribute('y',my);
+  const r=document.createElementNS(NS,'rect');r.setAttribute('x',mx-pw/2);r.setAttribute('y',my-ph/2);r.setAttribute('width',pw);r.setAttribute('height',ph);r.setAttribute('rx',11);
+  lg.insertBefore(r,t);
+ }
+}
+function markSel(){
+ for(const id of ['X1','P1','X2']){const e=nodeEl(id),on=state.sel===id;e.classList.toggle('is-sel',on);e.setAttribute('aria-pressed',on);}
+}
+function select(id,fromPanel){
+ if(state.mode!=='map')return;
+ state.sel=id;markSel();renderPanel();
+ if(fromPanel){const h=panel.querySelector('h2');h&&h.focus({preventScroll:true});}
+}
+
+/* ---------- panel (wide: side panel / narrow: reserved strip) ---------- */
+const icD='<svg class="ic-d" width="16" height="19" viewBox="0 0 16 19" aria-hidden="true"><path d="M1 1h10l4 4v13H1z" fill="#fbf5e6" stroke="#b8a77f"/></svg>';
+const icW='<svg class="ic-w" width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><rect x="1" y="1" width="18" height="14" rx="2" fill="#fff" stroke="#9aa3ad"/><path d="M1 5h18" stroke="#9aa3ad"/></svg>';
+function renderPanel(){
+ const s=state.sel;let h='';
+ if(!s){
+  h=`<div class="pk">선택 설명</div><h2 tabindex="-1">한 곳을 골라 보세요</h2>
+   <p class="wide">가운데 상자는 목적을 위해 제안된 프로그램 부분이고, 양쪽은 프로그램 바깥의 업무 자료와 옮길 대상입니다.</p>
+   <p class="narrow strip-role">가운데가 제안된 프로그램 부분, 위아래는 바깥 자료와 옮길 대상입니다.</p>
+   <div class="act"><button class="btn" data-pick="P1">소개글 재사용 고르기</button></div>`;
+ }else if(s==='P1'){
+  const n=NODES.P1;
+  h=`<div class="pk">${n.kind}</div><div class="strip-head"><h2 tabindex="-1">${n.name}</h2><button class="btn primary sm narrow" data-act="read">역할 읽기 →</button></div>
+   <p class="wide">${n.role} 줄이려는 일은 같은 내용의 재입력입니다.</p>
+   <div class="keepbox wide"><b>그대로 지킬 조건</b>${KEEP}합니다. 이 부분은 확인과 게시 선택을 건너뛰지 않습니다.<span class="sc">요청 범위 · 운영 홈페이지에 바로 배포하지 않음</span></div>
+   <h3 class="sub wide">바깥 맥락 두 곳</h3>
+   <div class="ctxlist wide">
+    <button class="ctx" data-pick="X1">${icD}<span><b>출연자가 낸 소개글</b><small>업무 자료 · 활용할 원자료</small></span></button>
+    <button class="ctx" data-pick="X2">${icW}<span><b>행사 홈페이지</b><small>옮길 대상 · 내용을 옮길 대상</small></span></button>
+   </div>
+   <p class="muted wide">두 연결은 제안을 설명하는 관계입니다. 자동 연동이나 게시 순서가 아닙니다.</p>
+   <p class="narrow strip-role">${n.role}</p>
+   <p class="narrow strip-keep">지킬 조건 · 담당자 확인·게시 선택 뒤에만 공개</p>
+   <div class="narrow strip-ctx"><span>자료 · 출연자가 낸 소개글</span><span>대상 · 행사 홈페이지</span></div>
+   <div class="act wide"><button class="btn primary" data-act="read">역할 읽기 →</button></div>`;
+ }else{
+  const n=NODES[s];
+  h=`<div class="pk">${n.kind}</div><h2 tabindex="-1">${n.name}</h2>
+   <p class="wide">${n.role}</p>
+   <p class="muted wide">프로그램 부분이 아니므로 작은 계획 준비의 대상이 아닙니다.</p>
+   <p class="narrow strip-role">${n.kind.split(' · ')[0]} · 소개글 재사용과의 관계: ${n.rel}</p>
+   <p class="narrow muted" style="margin:0">프로그램 바깥 · 계획 준비 대상 아님</p>
+   <div class="act"><button class="btn" data-pick="P1">이 맥락을 쓰는 부분 · 소개글 재사용</button></div>`;
+ }
+ panel.innerHTML=h;
+}
+function renderLocateStrip(id){
+ const n=NODES[id];
+ panel.innerHTML=`<div class="pk">선택은 그대로 · 소개글 재사용</div><h2 tabindex="-1">${n.name} 위치</h2>
+  <p class="strip-role" id="locNote">${n.kind.split(' · ')[0]} · ${n.rel}</p>
+  <div class="act"><button class="btn primary" id="backRead">← 읽던 곳으로</button></div>`;
+}
+
+/* ---------- reader ---------- */
+function ev(key,label){return `<button class="ev" data-peek="${key}" aria-expanded="false" aria-controls="pk-${key}">${label}</button>`;}
+function renderReader(){
+ reader.innerHTML=`<div class="rbar"><button class="btn" id="rBack">← 진입 전 지도 보기로</button><span class="sp"></span><button class="btn primary" id="rPrep">작은 계획 준비</button></div>
+ <div class="rbody">
+  <div class="crumb">목적 · 같은 소개글을 다시 적는 일 줄이기</div>
+  <div class="pk">프로그램 부분 · AI가 붙인 이름</div>
+  <h2 tabindex="-1">소개글 재사용</h2>
+  <p class="lead" id="p-role">받은 소개글을 홈페이지에 옮길 때 다시 쓸 수 있도록 돕는 부분입니다. 줄이려는 일은 같은 내용의 재입력입니다. ${ev('role','원문과 해석')}</p>
+  <div class="keepbox" id="p-keep"><b>그대로 지킬 조건</b>담당자가 내용을 확인하고 게시를 선택한 뒤에만 홈페이지에 공개합니다. 이 부분은 그 확인과 선택을 건너뛰지 않습니다. ${ev('keep','원문')}<span class="sc">요청 범위 · 운영 홈페이지에 바로 배포하지 않음</span></div>
+  <div class="blk"><h3>바깥 맥락 두 곳</h3>
+   <div class="row" id="row-X1">${icD}<div class="rt"><b>출연자가 낸 소개글</b><small>업무 자료 · 활용할 원자료</small><span class="status" id="st-X1"></span></div><button class="btn sm" data-loc="X1">지도에서 위치 보기</button></div>
+   <div class="row" id="row-X2">${icW}<div class="rt"><b>행사 홈페이지</b><small>옮길 대상 · 내용을 옮길 대상</small><span class="status" id="st-X2"></span></div><button class="btn sm" data-loc="X2">지도에서 위치 보기</button></div>
+   <p class="muted">두 연결은 제안을 설명하는 관계입니다. 자동 연동이나 게시 순서가 아닙니다.</p></div>
+  <div class="blk"><h3>왜 이 부분인가</h3><p style="margin:0">받은 글을 다시 활용하게 하면 재입력이 줄 것이라는 생각에서 나온 제안입니다. 효과는 아직 확인하지 않았습니다.</p></div>
+  <div class="blk"><h3>이 입력에서 알 수 없는 것</h3>
+   <ul class="unk" id="p-unk"><li>실제 코드와 파일 구조 (주어지지 않음)</li><li>소개글을 받고 저장하는 방식</li><li>홈페이지에 적용하는 방식</li></ul>
+   <p class="muted" style="margin:0">이 입력에 제시되지 않았을 뿐, 아직 정해지지 않았다거나 문제·끊긴 연결이라는 뜻은 아닙니다. ${ev('unk','원문')}</p></div>
+ </div>`;
+}
+function enterRead(){
+ state.saved={scale:state.scale,sl:ms.scrollLeft,st:ms.scrollTop,sel:state.sel};
+ state.mapView={sl:ms.scrollLeft,st:ms.scrollTop};
+ state.mode='read';renderReader();app.classList.add('reading');
+ reader.scrollTop=0;$('#rBack').focus({preventScroll:true});
+}
+function showMapAgain(){ /* narrow: map was display:none, restore the last map view before measuring */
+ app.classList.add('locating');
+ if(state.mapView){ms.scrollLeft=state.mapView.sl;ms.scrollTop=state.mapView.st;}
+ drawEdges();
+}
+function locate(id,btn){
+ if(narrow()){state.readTop=reader.scrollTop;state.locFrom=id;state.mode='locate';showMapAgain();renderLocateStrip(id);}
+ document.querySelectorAll('.node.located').forEach(e=>e.classList.remove('located'));
+ const el=nodeEl(id),face=el.querySelector('.face');el.classList.add('located');
+ const pr=ms.getBoundingClientRect(),r=face.getBoundingClientRect();
+ const inView=r.left>=pr.left&&r.right<=pr.right&&r.top>=pr.top&&r.bottom<=pr.bottom;
+ if(!inView){
+  ms.scrollLeft+=(r.left+r.width/2)-(pr.left+ms.clientWidth/2);
+  ms.scrollTop+=(r.top+r.height/2)-(pr.top+ms.clientHeight/2);
+ }
+ state.mapView={sl:ms.scrollLeft,st:ms.scrollTop};
+ el.dataset.moved=inView?'0':'1';
+ const msg=inView?'이미 보이는 위치에 표시':'지도를 옮겨 표시';
+ if(narrow()){$('#locNote').textContent=msg+' · '+NODES[id].rel;$('#backRead').focus({preventScroll:true});}
+ else{document.querySelectorAll('.status').forEach(s=>s.textContent='');$('#st-'+id).textContent=msg;btn.focus({preventScroll:true});}
+}
+function backToReading(){
+ const id=state.locFrom;
+ state.mapView={sl:ms.scrollLeft,st:ms.scrollTop};
+ app.classList.remove('locating');state.mode='read';
+ reader.scrollTop=state.readTop;
+ const b=reader.querySelector(`[data-loc="${id}"]`);b&&b.focus({preventScroll:true});
+}
+function returnAll(){
+ closePeek(false);if(!prep.hidden)closePrep(false);
+ const sv=state.saved;
+ app.classList.remove('reading','locating');state.mode='map';
+ document.querySelectorAll('.node.located').forEach(e=>e.classList.remove('located'));
+ state.scale=sv.scale;applyScale();ms.scrollLeft=sv.sl;ms.scrollTop=sv.st;
+ state.sel=sv.sel;markSel();renderPanel();drawEdges();
+ if(state.sel)nodeEl(state.sel).focus({preventScroll:true});
+}
+
+/* ---------- peek ---------- */
+function openPeek(btn){
+ if(state.peek)closePeek(false);
+ const key=btn.dataset.peek,p=PEEKS[key];
+ const d=document.createElement('div');d.className='peek';d.id='pk-'+key;d.setAttribute('role','region');d.setAttribute('aria-label','원문 미리보기');
+ d.innerHTML=`<div class="ph">${p.h} · 개발자가 만든 합성 입력</div><q>${p.q}</q><p class="ia">${p.ia}</p><div class="pa"><a href="${SRC}" target="_blank" rel="noopener">원문 줄 열기 ↗</a><button class="btn sm" data-act="peek-close">닫기</button></div>`;
+ const host=btn.closest('p,.keepbox,ul,.lead')||btn.parentElement;
+ host.after(d);btn.setAttribute('aria-expanded','true');
+ state.peek={key,top:reader.scrollTop};
+}
+function closePeek(restore=true){
+ const pk=state.peek;if(!pk)return;
+ const d=document.getElementById('pk-'+pk.key);if(d)d.remove();
+ const b=reader.querySelector(`.ev[data-peek="${pk.key}"]`);if(b)b.setAttribute('aria-expanded','false');
+ state.peek=null;
+ if(restore){reader.scrollTop=pk.top;b&&b.focus({preventScroll:true});}
+}
+
+/* ---------- prep ---------- */
+function prepDefaults(){
+ return {
+  ask:'출연자가 낸 소개글을 행사 홈페이지에 옮길 때 같은 내용을 다시 입력하지 않도록, 먼저 만들 작은 작업 하나를 코드를 잘 모르는 사람도 이해할 말로 정리해 주세요.',
+  keep:'- 담당자가 내용을 확인하고 게시를 선택한 뒤에만 홈페이지에 공개한다. 이 확인과 선택을 건너뛰거나 자동으로 게시하지 않는다.\n- 운영 홈페이지에 바로 배포하지 않는다.',
+  unknown:'- 실제 코드와 파일 구조는 주어지지 않았다.\n- 소개글을 받고 저장하는 방식, 홈페이지에 적용하는 방식은 이 입력에 제시되지 않았다.\n- 재입력이 실제로 줄어드는지는 아직 확인하지 않았다.'
+ };
+}
+function openPrep(){
+ if(!state.prep)state.prep={val:prepDefaults(),def:prepDefaults()};
+ prep.querySelectorAll('textarea').forEach(t=>t.value=state.prep.val[t.dataset.f]);markEdited();
+ state.prepOpener=$('#rPrep');state.prepTop=reader.scrollTop;
+ prep.hidden=false;reader.inert=true;$('#prepScroll').scrollTop=0;
+ $('#pf-ask').focus({preventScroll:true});
+}
+function markEdited(){prep.querySelectorAll('[data-ed]').forEach(s=>s.hidden=state.prep.val[s.dataset.ed]===state.prep.def[s.dataset.ed]);}
+function closePrep(restore=true){
+ prep.hidden=true;reader.inert=false;
+ if(restore){reader.scrollTop=state.prepTop;state.prepOpener&&state.prepOpener.focus({preventScroll:true});}
+}
+prep.addEventListener('input',e=>{const f=e.target.dataset.f;if(f){state.prep.val[f]=e.target.value;markEdited();}});
+$('#prepClose').addEventListener('click',()=>closePrep());
+
+/* ---------- events ---------- */
+world.addEventListener('click',e=>{const n=e.target.closest('.node');if(n)select(n.dataset.id);});
+panel.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.pick)select(b.dataset.pick,true);
+ else if(b.dataset.act==='read')enterRead();
+ else if(b.id==='backRead')backToReading();
+});
+reader.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.id==='rBack')returnAll();
+ else if(b.id==='rPrep')openPrep();
+ else if(b.dataset.loc)locate(b.dataset.loc,b);
+ else if(b.dataset.peek){b.getAttribute('aria-expanded')==='true'?closePeek():openPeek(b);}
+ else if(b.dataset.act==='peek-close')closePeek();
+});
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Escape')return;
+ if(!prep.hidden){e.preventDefault();closePrep();}
+ else if(state.peek&&state.mode==='read'){e.preventDefault();closePeek();}
+});
+$('#zIn').addEventListener('click',()=>zoom(1));
+$('#zOut').addEventListener('click',()=>zoom(-1));
+matchMedia('(max-width:700px)').addEventListener('change',applyLayout);
+new ResizeObserver(()=>drawEdges()).observe(nodeEl('P1'));
+
+applyLayout();renderPanel();
+if(document.fonts)document.fonts.ready.then(drawEdges);
+})();
+</script>
+</body>
+</html>

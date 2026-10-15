@@ -1,0 +1,12 @@
+{
+ "cmd": [
+  "/usr/bin/python3",
+  "-I",
+  "/home/claude/purpose-fix1/checks/author_check.py",
+  "/home/claude/purpose-fix1/run/snapshot/purpose-study.html",
+  "/home/claude/purpose-fix1/run"
+ ],
+ "started": "2026-10-15T20:16:09.517273+00:00",
+ "finished": "2026-10-15T20:16:26.039780+00:00",
+ "child_pid_exit_code": 0
+}

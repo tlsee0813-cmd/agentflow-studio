@@ -1,0 +1,60 @@
+{
+ "note": "cycle06 purpose author-fix1. manifest 자신은 목록에 없음.",
+ "files": [
+  {
+   "path": "README.md",
+   "bytes": 3367,
+   "sha256": "863ddba63b3ddf80305af63a2cc58d4d731c82b498ab6600d19c1f19e5676797"
+  },
+  {
+   "path": "checks/author_check.py",
+   "bytes": 23098,
+   "sha256": "b60af1ecd1a4d9267273edc9a71d9850af5e46e76cdc49c29f1e9400a41a2ed3"
+  },
+  {
+   "path": "checks/run_checks.py",
+   "bytes": 1040,
+   "sha256": "a10a0a8fbdcdb197339c3f3041dd5d329b0e5d02dae2542914e421f6c4355d33"
+  },
+  {
+   "path": "purpose-study.html",
+   "bytes": 33944,
+   "sha256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd"
+  },
+  {
+   "path": "run/A-1440-initial.png",
+   "bytes": 94258,
+   "sha256": "8e746d2451ee7c686c08b6d09314643f74ab36ffc4578a413a0cc72345b14b12"
+  },
+  {
+   "path": "run/C-390-role-condition.png",
+   "bytes": 74949,
+   "sha256": "a15276d703ec93ad4cefa13e08ed9113926e501dc09a3daba2143947b7713805"
+  },
+  {
+   "path": "run/E-1440-prep-edited.png",
+   "bytes": 198722,
+   "sha256": "c0704af31f4f35be397f23761b3c6770e01a3a545a835aab2ed7014d62fadea6"
+  },
+  {
+   "path": "run/exit.json",
+   "bytes": 321,
+   "sha256": "cef813a6b5604f184d7ad36ed280d98edd7bce97055b7a3d690193f51a36746d"
+  },
+  {
+   "path": "run/results.json",
+   "bytes": 23938,
+   "sha256": "bf8277bddc5ae5ba1e84278cfc4e0526deae2332de0fc7a2af375c45a6d0e6ed"
+  },
+  {
+   "path": "run/run.log",
+   "bytes": 13777,
+   "sha256": "fb166332d292e1eb4f0b3e090a407d7c456ae748b72cf64dbdeacf84740064ec"
+  },
+  {
+   "path": "run/snapshot/purpose-study.html",
+   "bytes": 33944,
+   "sha256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd"
+  }
+ ]
+}
