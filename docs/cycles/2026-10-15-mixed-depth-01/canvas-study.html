@@ -107,6 +107,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2.5px solid var(--acc);out
 .chip.mut{color:var(--ink3);border-color:var(--line2)}
 .chip.unk{color:var(--unk);background:var(--unk-bg);border:1px dashed var(--unk)}
 .chip.info{color:var(--acc);background:var(--acc-bg)}
+.chip.open{color:var(--ink2);background:var(--surface2);border:1px dashed var(--ink3)}
 .node.b{border-width:1.5px}
 .node.b.ext{border-style:dashed}
 .n-line{font-size:12px;color:var(--ink2)}
@@ -170,6 +171,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:2.5px solid var(--acc);out
 .ol-item{display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;margin:4px 0;text-align:left}
 .ol-item.child{margin-left:14px;width:calc(100% - 14px)}
 .ol-item .sp{flex:1}
+.ol-item.wrap{flex-wrap:wrap;row-gap:6px}
+.ol-badges{display:flex;flex-wrap:wrap;gap:4px;width:100%}
 .ol-item[aria-pressed="true"]{border:2px solid var(--acc);padding:7px 9px}
 
 .app[data-narrow="true"] .canvas-wrap,
@@ -256,6 +259,8 @@ function seg(label, action, val, pressed, extra){
   return '<button type="button" class="seg" data-action="'+action+'" data-val="'+val+'" data-key="'+action+'-'+val+'" aria-pressed="'+pressed+'"'+(extra||'')+'>'+label+'</button>';
 }
 function chip(cls, text){ return '<span class="chip '+cls+'">'+text+'</span>'; }
+/* 합격 9: A2 소유 미결 참조 (결정 변경과 별도 표시, B·A4·A6 소유 아님) */
+function openChip(){ return '<span class="chip open" data-open-ref="A2">◇ 미결 1 · 소유 A2</span>'; }
 function kidTags(id, forCard){
   var t = "";
   if(conf()){
@@ -340,11 +345,13 @@ function canvasHTML(){
       h += '<button type="button" class="ref" data-action="toggleList" data-key="cv-list" aria-expanded="'+d.listOpen+'"><b>연결된 하위 3곳</b><span class="sp"></span>'+chip("rel","실제 끝점 3")+'<span aria-hidden="true">'+(d.listOpen?'▴':'▾')+'</span></button>';
       if(d.listOpen){
         h += '<ul class="c-list" data-testid="collapsed-list">'+LINKED.map(function(id){
-          return '<li><button type="button" data-action="jump" data-val="'+id+'" data-key="cl-'+id+'" data-relation="'+id+'-B">'+
-            '<b>'+id+'</b> '+nm(id)+' — B'+(id==="A2"?' '+chip("chg","Δ 결정 변경"):'')+'</button></li>';
+          return '<li><button type="button" data-action="jump" data-val="'+id+'" data-key="cl-'+id+'" data-relation="'+id+'-B"'+
+            (id==="A2"?' aria-label="A2 대여 신청 — B, 결정 변경 1건, 미결 1건 소유 A2"':'')+'>'+
+            '<b>'+id+'</b> '+nm(id)+' — B'+(id==="A2"?' '+chip("chg","Δ 결정 변경 1")+openChip():'')+'</button></li>';
         }).join('')+'</ul>';
       }
       h += '<button type="button" class="ref" style="margin-top:6px" data-action="jump" data-val="A2" data-key="cv-chg" data-testid="change-ref">'+chip("chg","Δ")+'A2 관련 결정 변경 1건 (E04)<span class="sp"></span>→ A2</button>';
+      h += '<button type="button" class="ref" style="margin-top:4px" data-action="jump" data-val="A2" data-key="cv-open" data-testid="open-ref">'+chip("open","◇ 미결")+'A2 소유 미결 1건 · 실패 알림 정책<span class="sp"></span>→ A2</button>';
       h += '<p class="note" style="margin:6px 0 0">E01 상위 관련은 구체화 이력 · 네 번째 관계 아님</p>';
     } else {
       h += '<p style="margin:4px 0 0">B 관련: '+chip("unk","? 세부 대상 미확인")+'</p><p class="note" style="margin:4px 0 0">자식 연결 0 · 하위로 복제하지 않음</p>';
@@ -466,12 +473,14 @@ function insB(){
   var b = sec("현재", '<p>미세분화 · 하위 없음</p>'+(focus?'<p class="note">A 집중 화면의 외부 참조 — 원본 B와 같은 식별자, 복제 아님</p>':''));
   if(!conf()){ b += sec("A와의 관계", '<p>A–B 관련(E01) · A 쪽 '+chip("unk","? 세부 대상 미확인")+'</p>'); return b; }
   b += sec("실제 끝점 3 · E03", '<div class="reflist" data-testid="b-endpoints">'+LINKED.map(function(o){
-    return refBtn("jump",o,"ins-ep-"+o,'<b>'+o+'</b> '+nm(o)+'<span class="sp"></span>→');
+    return refBtn("jump",o,"ins-ep-"+o,'<b>'+o+'</b> '+nm(o)+(o==="A2"?' '+chip("chg","Δ 결정 변경 1")+openChip():'')+'<span class="sp"></span>→');
   }).join('')+'</div>');
   b += sec("관련 결정 변경 참조", '<p data-testid="b-change-ref">A2 '+A2.decId+': <span class="was">'+A2.decBefore+'</span> → '+A2.decAfter+' (E04)</p>'+
     '<p class="note">B 자체·관계 자체의 변경 아님 · A4·A6 전파 없음</p>'+
     '<div class="reflist">'+refBtn("jump","A2","ins-bchg",chip("chg","Δ")+' A2 결정 변경 보기<span class="sp"></span>→')+'</div>');
-  b += sec("미결 참조", '<p data-testid="b-open-ref">'+A2.open+' · 소유 A2</p>');
+  b += sec("미결 참조", '<div class="reflist"><button type="button" class="ref" data-action="jump" data-val="A2" data-key="ins-bopen" data-testid="b-open-ref"'+
+    ' aria-label="미결 1건, 실패 알림 정책, 소유 A2 — A2 대여 신청 상세로 이동">'+
+    chip("open","◇ 미결")+'<span>'+A2.open+' · 소유 A2</span><span class="sp"></span>→ A2</button></div>');
   return b;
 }
 function insScene(){
@@ -521,7 +530,12 @@ function outlineHTML(){
     }).join('')+
     '<button type="button" class="ol-item" data-action="select" data-val="B" data-key="ol-B" aria-pressed="'+(d.sel==="B")+'"><b>B</b> 알림 구상<span class="sp"></span>'+chip("mut","미세분화")+'</button></div>';
   h += '<div class="ol-sec"><p class="ol-t">관계</p>'+(conf()
-    ? LINKED.map(function(id){ return '<button type="button" class="ol-item" data-action="jump" data-val="'+id+'" data-key="ol-rel-'+id+'"><b>'+id+'</b> — B<span class="sp"></span>'+chip("rel","E03 확인")+'</button>'; }).join('')+
+    ? LINKED.map(function(id){
+        var a2 = id==="A2";
+        return '<button type="button" class="ol-item'+(a2?' wrap':'')+'" data-action="jump" data-val="'+id+'" data-key="ol-rel-'+id+'"'+
+          (a2?' aria-label="A2 — B, E03 확인, 결정 변경 1건, 미결 1건 소유 A2"':'')+'><b>'+id+'</b> — B<span class="sp"></span>'+chip("rel","E03 확인")+
+          (a2?'<span class="ol-badges">'+chip("chg","Δ 결정 변경 1")+openChip()+'</span>':'')+'</button>';
+      }).join('')+
       '<p class="note">E01 상위 관련은 구체화 이력 · A1·A3·A5는 관측 연결 없음(무관 확정 아님)</p>'
     : '<p>A — B '+chip("unk","? 세부 대상 미확인")+' <span class="note">자식 연결 0</span></p>')+'</div>';
   return '<section class="outline" id="outline" aria-label="구조 목록">'+h+'</section>';

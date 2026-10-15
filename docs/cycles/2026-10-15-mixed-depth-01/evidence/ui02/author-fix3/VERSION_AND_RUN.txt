@@ -1,0 +1,25 @@
+UI-02 fix3 — 합격 9 마무리: 390 구조 목록 관계 행 + B 상세 미결 이동 버튼
+기준: checkpoint/2026-10-15 @666437a427b3039fb6321dfec41edd6eb24e164f, docs/cycles/2026-10-15-mixed-depth-01/INPUT.md 합격 9 + 총괄 판단(ol-rel-*은 실제 끝점 목록)
+이전 canvas-study.html (fix2) SHA256 = 8E6BE6B02A711F525941FE4408E7679C58696BD99C64C6A2D020BA23C1E78A1C
+새   canvas-study.html (fix3) SHA256 = 0AEEDD515E7F80F4B091BA1B395F90E0D19355A9EB3CA6C7E1174AD48FA2898C
+
+검사 구분: 아래 모두 작성자 검사(Claude가 작성·실행). 독립 검사 아님.
+도구: Node v22.22.0, jsdom 24.1.3, Python 3.13, Playwright 1.56.0, headless Chromium (chromium-1194)
+모든 검사: FAIL 1개 이상이면 종료코드 1. INFO 행은 PASS/FAIL 수에 포함하지 않음.
+
+명령 (이 폴더에서):
+  export PLAYWRIGHT_BROWSERS_PATH=<브라우저 경로>
+  python3 tests/check_open_ref.py "$(pwd)/canvas-study.html" screenshots   # 합격 9 지역별 (기존 59 + fix3 53)
+  node tests/check_canvas.js canvas-study.html                              # 기존 의미 (jsdom, 렌더링 아님)
+  python3 tests/render_check.py "$(pwd)/canvas-study.html" <임시폴더>        # 기존 렌더링 (PNG 미포함)
+  python3 tests/repro_outline_scroll.py "$(pwd)/canvas-study.html" - 664
+  python3 tests/repro_outline_scroll.py "$(pwd)/canvas-study.html" - 844
+
+outputs/ (실제 로그)
+  open_ref_fix3_chromium.txt            fix3 112 PASS / 0 FAIL (기존 59 + 신규 53), INFO 2, exit 0
+  open_ref_fix2_negative_chromium.txt   fix2  88 PASS / 20 FAIL, INFO 2, exit 1 (음성 대조)
+  state_check_jsdom.txt                 fix3  84 / 0, exit 0
+  render_check_chromium.txt             fix3  36 / 0, INFO 1, exit 0
+  outline_scroll_390x664.txt            fix3  10 / 0, INFO 3, exit 0
+  outline_scroll_390x844.txt            fix3  10 / 0, INFO 3, exit 0
+screenshots/ 대표 PNG 4장: 390 구조 목록 관계, 390 B 상세, 1440 접힌 A, 1440 B 상세

@@ -1,0 +1,101 @@
+# S1 — 부분 상세화
+PASS 넓은 화면 판정
+PASS A 하위 6 + B 노드
+PASS S1 펼침: 영역 수준 미확인 선 1개, 자식 선 0 → A-B-area:unconfirmed
+PASS S1 선은 A 경계(영역)에 붙음, 자식 포트 없음
+PASS S1 선 라벨
+PASS S1 자식 카드에 B 관련 표시 없음
+PASS S1 접힘: 여전히 미확인 선 1개, 자식 연결 0
+PASS S1 접힘: "연결된 하위 3곳" 없음
+# S2 — 관계와 결정 변경
+PASS S2 펼침: 실제 관계 정확히 3개, 상위 선 없음 → A2-B:confirmed,A4-B:confirmed,A6-B:confirmed
+PASS S2 경계 통과점 A2·A4·A6
+PASS Δ 결정 변경은 A2 카드에만 → A2
+PASS B 카드에 A2 결정 변경 참조
+PASS A1·A3·A5 "관측 연결 없음"
+PASS 관계 라벨에 방향 화살표 없음
+PASS S2 접힘: 원래 끝점 3개 유지 → A2-B:confirmed,A4-B:confirmed,A6-B:confirmed
+PASS S2 접힘: 끝점 이름 라벨 A2·A4·A6
+PASS 접힌 A: 상위 관측은 이력, 네 번째 관계 아님
+PASS 연결된 하위 3곳 목록
+PASS 목록에서 A4로 이동(펼침, 복귀점 저장)
+PASS 보기 복귀: 접힘·목록 열림 복원
+# 핵심 비교 장면 ① 전체 펼침: A4 → A2 변경+B 관계 → A4 복귀
+  A4 보는 중: scene=2 dest=overview sel=A4 exp=true list=true vp=-64,-68,1 stack=0
+PASS A4 상세: B 관계 + 같은 B의 다른 끝점(A2 변경 표시)
+  A2 읽는 중: scene=2 dest=overview sel=A2 exp=true list=true vp=-64,-68,1 stack=1:A4
+PASS A2 상세: 설명·D2 변경 전후
+PASS A2 상세: 이유·근거·미결
+PASS A2 상세: B 관계, 관계 변경 아님
+PASS S2 A2 상세에 작업·세션 식별자 섞이지 않음
+PASS A2 선택 시 A2–B 선만 강조
+  복귀 후: scene=2 dest=overview sel=A4 exp=true list=true vp=-64,-68,1 stack=0
+PASS A4·위치/배율·펼침 복원, 복귀점 소진
+PASS 복귀는 데이터 되돌림 아님 (A2는 여전히 E04 현재값)
+# 핵심 비교 장면 ② A 집중: A4 → (A 집중) A2 → 경로 "전체" → A4
+  집중 직전(전체): scene=2 dest=overview sel=A4 exp=true list=true vp=-80,-85,1.25 stack=0
+  A 집중 진입: scene=2 dest=focus sel=A4 exp=true list=false vp=16,12,1 stack=0
+PASS A에 집중: A4 선택 유지해 진입
+PASS 집중 화면: B는 같은 식별자의 외부 참조
+PASS 집중 화면도 실제 관계 3개 유지
+PASS 집중 화면 카드: A2 짧은 설명(읽기 집중)
+PASS 집중 화면에서 A2 변경 읽기
+PASS 집중 화면 조작이 전체 저장값을 바꾸지 않음
+  경로 "전체" 복귀: scene=2 dest=overview sel=A4 exp=true list=true vp=-80,-85,1.25 stack=0
+PASS 전체 복귀: A4·펼침·위치/배율 복원
+PASS 도구줄로 다시 집중: 집중 화면 자신의 선택(A2)·위치 복원
+# 배율 불변 (상세 수준은 배율로 바뀌지 않음)
+PASS 배율 변경 전후 노드·글·관계·펼침 동일 (vp -51,-54,0.8)
+PASS 100%로 복귀
+PASS 선택만으로 자동 전체맞춤·배율 변경 없음
+# B 선택 상세
+PASS B: 실제 끝점 3 이동 버튼
+PASS B: A2 결정 변경 참조
+PASS B: 전파 없음, 미결 참조(소유 A2)
+PASS B 선택 시 세 관계 모두 강조
+# S3 — 재방문·인계
+PASS S3 기준 표시
+PASS 장면 전환 후에도 기준 불변
+PASS 띠의 변경 바로가기 → A2, E03 이후 표시
+PASS 작업·세션 별도 구역, 준비·미전달
+PASS 인계문: 작은 도서 대여 서비스
+PASS 인계문: A2 대여 신청의 실패 알림 정책 검토
+PASS 인계문: A2 대여 신청만
+PASS 인계문: E04
+PASS 인계문: A2 — B 알림 구상
+PASS 인계문: 미세분화
+PASS 인계문: 재고 확인 뒤 확정
+PASS 인계문: D2 대여 확정 후 알림
+PASS 인계문: D2 신청 시 알림
+PASS 인계문: 재고 불일치 방지
+PASS 인계문: 실패 알림 정책
+PASS 인계문: E01
+PASS 인계문: E02
+PASS 인계문: E03
+PASS 인계문: 완료 조건
+PASS 인계문: SESSION-02
+PASS 인계문: 준비·미전달
+PASS 인계문: A4·A6는 범위 아님
+PASS 프로젝트 목적과 작업 목적 별도 행
+PASS 인계문이 수신·수락·전달을 주장하지 않음
+PASS A4: W2 인계 범위 아님
+PASS 장면별 독립: S1 상태 그대로
+# 접근성·표시 (DOM 수준)
+PASS 모든 조작이 실제 button (36개)
+PASS 모든 button에 이름
+PASS 선택은 색 외에 "● 선택" 글자·aria-pressed
+PASS 변경은 Δ 글자 표시
+PASS 미확인은 ? 글자 + 점선 라벨
+PASS undefined/NaN 없음
+PASS JS 오류 없음 
+# 390 — 구조 목록 우선
+PASS 좁은 화면 판정, 구조 목록이 기본
+PASS 구조 목록: 변경·관계 3곳 바로 보임
+PASS 목록에서 A4 → 상세
+PASS 상세에서 A2 변경 읽기
+PASS A4로 보기 복귀
+PASS ← 구조 목록
+PASS 캔버스 탭은 배율 100% 유지 (축소해 통과시키지 않음)
+PASS 390 JS 오류 없음 
+canvas pass 84 fail 0
+exit=0

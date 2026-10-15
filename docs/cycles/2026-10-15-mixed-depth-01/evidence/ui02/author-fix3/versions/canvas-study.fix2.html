@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>계층 캔버스 연구 UI-02</title>
+<style>
+:root{
+  --bg:#f2f4f7;--surface:#ffffff;--surface2:#f9fafb;--ink:#101828;--ink2:#344054;--ink3:#667085;
+  --line:#e4e7ec;--line2:#d0d5dd;--dot:#d0d5dd;
+  --acc:#155eef;--acc-bg:#eff4ff;--acc-ring:rgba(21,94,239,.18);
+  --chg:#b54708;--chg-bg:#fffaeb;--chg-line:#f79009;
+  --unk:#6941c6;--unk-bg:#f4f3ff;
+  --ok:#067647;--ok-bg:#ecfdf3;
+  --edge:#98a2b3;--edge-hi:#155eef;
+  --frame-bg:rgba(255,255,255,.62);
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0c111d;--surface:#161b26;--surface2:#1f242f;--ink:#f5f5f6;--ink2:#cecfd2;--ink3:#94969c;
+    --line:#2b303b;--line2:#3d4350;--dot:#333741;
+    --acc:#84adff;--acc-bg:#102a56;--acc-ring:rgba(132,173,255,.22);
+    --chg:#fdb022;--chg-bg:#3a2a0b;--chg-line:#fdb022;
+    --unk:#bdb4fe;--unk-bg:#27215a;
+    --ok:#75e0a7;--ok-bg:#0b2e1c;
+    --edge:#61646c;--edge-hi:#84adff;
+    --frame-bg:rgba(22,27,38,.7);
+    --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:13px/1.45 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans CJK KR","Noto Sans KR",sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:2.5px solid var(--acc);outline-offset:2px}
+.app{display:grid;grid-template-rows:auto auto minmax(0,1fr);height:100vh;min-height:600px}
+.app[data-narrow="true"]{grid-template-rows:auto auto auto minmax(0,1fr);min-height:0}
+
+/* 상단 도구줄 */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px 14px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{font-weight:700;font-size:14px;margin-right:4px}
+.brand small{font-weight:500;color:var(--ink3);margin-left:6px}
+.grp{display:inline-flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:2px}
+.grp-l{font-size:11px;color:var(--ink3);margin:0 4px 0 6px}
+.seg{border:0;background:transparent;border-radius:6px;padding:4px 9px;font-size:12px;color:var(--ink2)}
+.seg[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.ibtn{border:1px solid var(--line2);background:var(--surface);border-radius:7px;padding:3px 9px;font-size:12px}
+.ibtn:hover{border-color:var(--acc)}
+.ibtn:disabled{opacity:.45;cursor:default}
+.zoomv{min-width:44px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums}
+.syn{font-size:11px;color:var(--chg);background:var(--chg-bg);border-radius:999px;padding:2px 9px;margin-left:auto}
+
+/* 장면 띠 */
+.banner{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:6px 14px;background:var(--surface);border-bottom:1px solid var(--line);font-size:12px}
+.banner b{font-size:12.5px}
+.banner .muted{color:var(--ink3)}
+.bl{display:inline-flex;align-items:center;gap:6px;background:var(--acc-bg);color:var(--ink2);border-radius:7px;padding:2px 8px}
+.linkbtn{border:0;background:none;color:var(--acc);padding:0;text-decoration:underline;text-underline-offset:2px;font-size:inherit}
+
+/* 좁은 화면 탭 */
+.panes{display:none;gap:2px;padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--line)}
+.app[data-narrow="true"] .panes{display:flex}
+.panes .seg{flex:1;padding:7px 4px}
+
+.main{display:grid;grid-template-columns:minmax(0,1fr) 360px;min-height:0}
+.app[data-dest="focus"] .main{grid-template-columns:minmax(0,1fr) 420px}
+.app[data-narrow="true"] .main{grid-template-columns:minmax(0,1fr)}
+
+/* 캔버스 */
+.canvas-wrap{position:relative;overflow:hidden;min-height:0;touch-action:none;
+  background-color:var(--bg);background-image:radial-gradient(var(--dot) 1px,transparent 1.2px);background-size:16px 16px}
+.canvas-wrap:focus-visible{outline-offset:-3px}
+.world{position:absolute;left:0;top:0;transform-origin:0 0}
+.edges{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.edges path{fill:none;stroke:var(--edge);stroke-width:1.6}
+.edges path[data-hi="true"]{stroke:var(--edge-hi);stroke-width:2.6}
+.edges path[data-state="unconfirmed"]{stroke:var(--unk);stroke-dasharray:6 5}
+.edges circle{fill:var(--surface);stroke:var(--edge);stroke-width:1.6}
+.edges circle[data-hi="true"]{stroke:var(--edge-hi);stroke-width:2.4}
+.frame{position:absolute;border:1.5px solid var(--line2);border-radius:14px;background:var(--frame-bg)}
+.frame-h{display:flex;align-items:center;gap:6px;height:52px;padding:0 10px 0 14px;border-bottom:1px dashed var(--line2)}
+.frame-t{font-weight:700;font-size:13.5px}
+.frame-h .sp{flex:1}
+.frame[data-selected="true"]{border:2px solid var(--acc);box-shadow:0 0 0 4px var(--acc-ring)}
+.port{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;border:2px solid var(--edge);background:var(--surface);border-radius:2px;pointer-events:none}
+.port[data-hi="true"]{border-color:var(--edge-hi)}
+.port.unk{border-color:var(--unk);border-style:dashed;border-radius:50%}
+.elabel{position:absolute;transform:translate(-50%,-50%);font-size:11px;line-height:1.3;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink3);white-space:nowrap;pointer-events:none}
+.elabel[data-hi="true"]{border-color:var(--acc);color:var(--acc);font-weight:600}
+.elabel.unk{border-style:dashed;border-color:var(--unk);color:var(--unk);white-space:normal;width:118px;text-align:center}
+
+.node{position:absolute;display:flex;flex-direction:column;align-items:stretch;gap:5px;text-align:left;
+  background:var(--surface);border:1px solid var(--line2);border-radius:10px;padding:8px 10px;box-shadow:var(--shadow)}
+.node:hover{border-color:var(--acc)}
+.node[aria-pressed="true"]{border:2px solid var(--acc);padding:7px 9px;box-shadow:0 0 0 4px var(--acc-ring)}
+.n-head{display:flex;align-items:center;gap:6px;min-width:0}
+.n-id{flex:none;font-size:11px;font-weight:700;color:var(--ink2);background:var(--surface2);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+.n-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-sel{flex:none;margin-left:auto;font-size:11px;font-weight:600;color:var(--acc)}
+.n-desc{font-size:12px;color:var(--ink2)}
+.n-tags{display:flex;flex-wrap:wrap;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;line-height:17px;border-radius:999px;padding:0 7px;border:1px solid transparent;white-space:nowrap}
+.chip.rel{color:var(--ok);background:var(--ok-bg)}
+.chip.chg{color:var(--chg);background:var(--chg-bg);border-color:var(--chg-line)}
+.chip.mut{color:var(--ink3);border-color:var(--line2)}
+.chip.unk{color:var(--unk);background:var(--unk-bg);border:1px dashed var(--unk)}
+.chip.info{color:var(--acc);background:var(--acc-bg)}
+.chip.open{color:var(--ink2);background:var(--surface2);border:1px dashed var(--ink3)}
+.node.b{border-width:1.5px}
+.node.b.ext{border-style:dashed}
+.n-line{font-size:12px;color:var(--ink2)}
+
+.collapsed{position:absolute;background:var(--surface);border:1.5px solid var(--line2);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px}
+.collapsed[data-selected="true"]{border:2px solid var(--acc);box-shadow:0 0 0 4px var(--acc-ring)}
+.c-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.c-list{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px}
+.c-list button{width:100%;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface2);border-radius:7px;padding:3px 7px;font-size:12px;text-align:left}
+.c-ports{position:absolute;right:-1px;top:0;width:0}
+
+.crumb{position:absolute;left:12px;top:10px;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 8px;box-shadow:var(--shadow);font-size:12px;z-index:3}
+.crumb [aria-current]{font-weight:700}
+.ctools{position:absolute;left:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:4px;box-shadow:var(--shadow);z-index:3}
+.ctools .ibtn{padding:3px 8px}
+.legend{position:absolute;right:12px;bottom:12px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:6px 10px;box-shadow:var(--shadow);font-size:11px;color:var(--ink2);z-index:3;display:grid;gap:3px}
+.lg{display:flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:22px;height:0;border-top:2px solid var(--edge)}
+.lg i.d{border-top:2px dashed var(--unk)}
+.lg i.f{height:10px;border:1.5px solid var(--line2);border-radius:3px}
+.lg i.p{width:9px;height:9px;border:2px solid var(--edge);border-radius:2px}
+.selbar{display:none}
+.app[data-narrow="true"] .selbar{display:flex;position:absolute;left:10px;right:10px;top:52px;z-index:3;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--acc);border-radius:9px;padding:6px 10px;box-shadow:var(--shadow);font-size:12px}
+.selbar .sp{flex:1}
+
+/* 선택 상세 */
+.inspector{overflow:auto;background:var(--surface);border-left:1px solid var(--line);min-height:0}
+.ins-h{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--line);padding:12px 16px 10px;z-index:1}
+.ins-path{font-size:11px;color:var(--ink3);margin-bottom:2px}
+.ins-t{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700}
+.ins-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.back{display:flex;flex-direction:column;align-items:flex-start;width:100%;margin-top:8px;border:1px solid var(--acc);background:var(--acc-bg);color:var(--acc);border-radius:8px;padding:5px 9px;text-align:left}
+.back b{font-size:12.5px}
+.back span{font-size:11px;color:var(--ink2)}
+.sec{padding:10px 16px;border-bottom:1px solid var(--line)}
+.sec-t{font-size:11px;font-weight:700;letter-spacing:.02em;color:var(--ink3);margin:0 0 5px}
+.sec p{margin:3px 0}
+.kv{display:grid;grid-template-columns:76px minmax(0,1fr);gap:4px 10px;margin:0}
+.kv dt{color:var(--ink3);font-size:12px}
+.kv dd{margin:0}
+.was{color:var(--ink3);text-decoration:line-through;text-decoration-thickness:1px}
+.cmp{width:100%;border-collapse:collapse;font-size:12px}
+.cmp th,.cmp td{border:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+.cmp th{background:var(--surface2);font-weight:600;color:var(--ink2)}
+.reflist{display:grid;gap:4px;margin-top:4px}
+.ref{display:flex;align-items:center;gap:6px;width:100%;border:1px solid var(--line);background:var(--surface2);border-radius:7px;padding:5px 8px;text-align:left;font-size:12px}
+.ref:hover{border-color:var(--acc)}
+.ref .sp{flex:1}
+.note{font-size:11.5px;color:var(--ink3)}
+.workbox{border:1px dashed var(--line2);border-radius:8px;padding:8px 10px;background:var(--surface2)}
+.handoff{margin-top:8px;border:1px solid var(--chg-line);border-radius:8px;padding:8px 10px;background:var(--surface)}
+.handoff .kv{grid-template-columns:96px minmax(0,1fr)}
+.handoff ul{margin:0;padding-left:16px}
+.evlist{margin:0;padding-left:18px}
+.evlist li{margin:2px 0}
+
+/* 구조 목록(좁은 화면) */
+.outline{display:none;overflow:auto;background:var(--surface);min-height:0;padding:6px 0}
+.ol-sec{padding:8px 14px;border-bottom:1px solid var(--line)}
+.ol-t{font-size:11px;font-weight:700;color:var(--ink3);margin:0 0 6px}
+.ol-item{display:flex;align-items:center;gap:8px;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;margin:4px 0;text-align:left}
+.ol-item.child{margin-left:14px;width:calc(100% - 14px)}
+.ol-item .sp{flex:1}
+.ol-item[aria-pressed="true"]{border:2px solid var(--acc);padding:7px 9px}
+
+.app[data-narrow="true"] .canvas-wrap,
+.app[data-narrow="true"] .inspector,
+.app[data-narrow="true"] .outline{display:none}
+.app[data-narrow="true"][data-pane="canvas"] .canvas-wrap{display:block}
+.app[data-narrow="true"][data-pane="detail"] .inspector{display:block;border-left:0}
+.app[data-narrow="true"][data-pane="outline"] .outline{display:block}
+.app[data-narrow="true"] .top{gap:6px 8px;padding:8px 10px}
+.app[data-narrow="true"] .syn{margin-left:0}
+.app[data-narrow="true"] .legend{display:none}
+.narrow-only{display:none}
+.app[data-narrow="true"] .narrow-only{display:flex}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+(function(){
+"use strict";
+
+/* ===== 합성 입력 (INPUT.md, 기준 73fc284 · 의미 변경 없음) ===== */
+var KIDS = [["A1","도서 찾기"],["A2","대여 신청"],["A3","내 대여 목록"],["A4","반납"],["A5","운영 검토"],["A6","연체 처리"]];
+var LINKED = ["A2","A4","A6"];
+var PROJECT_GOAL = "작은 도서 대여 서비스를 구상하고 부분을 외부 개발 세션에 이어 맡기는 것";
+var A2 = {
+  descBefore:"신청 즉시 확정", descAfter:"재고 확인 뒤 확정",
+  decId:"D2", decBefore:"신청 시 알림", decAfter:"대여 확정 후 알림",
+  reason:"재고 불일치 방지", open:"실패 알림 정책 (아직 결정하지 않음)"
+};
+var EVENTS = [
+  {id:"E01",scene:1,t:"A–B 관련 관측. 하위 대상은 미확인."},
+  {id:"E02",scene:1,t:"A를 A1~A6으로 상세화. B에는 자식 없음. B 연결을 A1~A6에 자동 복제하지 않음."},
+  {id:"E03",scene:2,t:"관측된 A–B 관계의 구체 대상: A2·A4·A6. 나머지는 관측 없음(관계 없음 아님). 상위 관계는 구체화 이력."},
+  {id:"E04",scene:2,t:"A2 설명 “신청 즉시 확정”→“재고 확인 뒤 확정”, D2 “신청 시 알림”→“대여 확정 후 알림”. 이유: 재고 불일치 방지. 실패 알림 정책 미결."},
+  {id:"E05",scene:3,t:"사용자가 E03까지 본 상태로 돌아옴(합성). A2 실패 알림 정책 검토 인계문을 SESSION-02 후보용으로 준비. 전달·수락 아님."}
+];
+var SCENES = {
+  1:{t:"S1 · 부분 상세화",r:"E01~E02",last:2},
+  2:{t:"S2 · 관계와 결정 변경",r:"E03~E04",last:4},
+  3:{t:"S3 · 재방문·인계",r:"E05",last:5}
+};
+var ZOOMS = [0.5,0.67,0.8,1,1.25,1.5,2];
+
+/* ===== 배치 (세계 좌표, 배율과 무관한 고정 구조) ===== */
+var GEO = {
+  overview:{
+    world:{w:920,h:430},
+    frame:{x:40,y:40,w:472,h:356}, node:{w:200,h:80}, cols:[64,288], rows:[92,192,292],
+    collapsed:{x:40,y:110,w:310}, cPortY:[58,88,118],
+    B:{x:650,y:140,w:230,h:150}, bPortY:[180,215,250]
+  },
+  focus:{
+    world:{w:980,h:520},
+    frame:{x:40,y:40,w:552,h:436}, node:{w:240,h:104}, cols:[64,328], rows:[96,224,352],
+    B:{x:712,y:178,w:236,h:176}, bPortY:[222,262,302]
+  }
+};
+
+/* ===== 상태: 장면별 독립, 목적지(전체·A 집중)별 독립 ===== */
+var ST = {scene:1, narrow:false, pane:"outline", scenes:{}};
+function newDest(kind){
+  return {sel:null, expanded:true, listOpen:false, vp:{x:16,y:12,k:1}, stack:[]};
+}
+function SC(){
+  if(!ST.scenes[ST.scene]) ST.scenes[ST.scene] = {dest:"overview", overview:newDest("overview"), focus:null, handoff:false, olScroll:0};
+  return ST.scenes[ST.scene];
+}
+function D(){ var s = SC(); return s.dest === "focus" ? s.focus : s.overview; }
+function conf(){ return ST.scene >= 2; }
+function isKid(id){ return /^A[1-6]$/.test(id); }
+function nm(id){
+  if(id==="A") return "대여 경험"; if(id==="B") return "알림 구상";
+  for(var i=0;i<KIDS.length;i++) if(KIDS[i][0]===id) return KIDS[i][1];
+  return "";
+}
+function full(id){ return id+" "+nm(id); }
+function idx(id){ for(var i=0;i<KIDS.length;i++) if(KIDS[i][0]===id) return i; return -1; }
+
+/* ===== 조각 ===== */
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function seg(label, action, val, pressed, extra){
+  return '<button type="button" class="seg" data-action="'+action+'" data-val="'+val+'" data-key="'+action+'-'+val+'" aria-pressed="'+pressed+'"'+(extra||'')+'>'+label+'</button>';
+}
+function chip(cls, text){ return '<span class="chip '+cls+'">'+text+'</span>'; }
+/* 합격 9: A2 소유 미결 참조 (결정 변경과 별도 표시, B·A4·A6 소유 아님) */
+function openChip(){ return '<span class="chip open" data-open-ref="A2">◇ 미결 1 · 소유 A2</span>'; }
+function kidTags(id, forCard){
+  var t = "";
+  if(conf()){
+    t += LINKED.indexOf(id)>=0 ? chip("rel","B 관련") : chip("mut","관측 연결 없음");
+    if(id==="A2") t += chip("chg","Δ 결정 변경");
+    if(id==="A2" && ST.scene===3) t += chip("info","E03 이후");
+  }
+  return t;
+}
+function kidAria(id){
+  var a = [full(id)];
+  if(D().sel===id) a.push("선택됨");
+  if(conf()){
+    a.push(LINKED.indexOf(id)>=0 ? "B와 관련 (E03 확인)" : "이번 관측에 연결 없음");
+    if(id==="A2") a.push("결정 변경 1건");
+  } else a.push("B 연결은 세부 대상 미확인");
+  return a.join(", ");
+}
+
+/* ===== 캔버스 ===== */
+function edgePath(x1,y1,x2,y2){
+  var dx = Math.max(40,(x2-x1)/2);
+  return "M"+x1+","+y1+" C"+(x1+dx)+","+y1+" "+(x2-dx)+","+y2+" "+x2+","+y2;
+}
+function hiFor(id){
+  var s = D().sel;
+  if(!s) return false;
+  return s===id || s==="B" || (s==="A");
+}
+function canvasHTML(){
+  var sc = SC(), d = D(), focus = sc.dest==="focus";
+  var g = focus ? GEO.focus : GEO.overview;
+  var h = '', svg = '', labels = '';
+  var expanded = focus || d.expanded;
+  var B = g.B;
+
+  /* A: 펼친 프레임 또는 접힌 요약 */
+  if(expanded){
+    var f = g.frame;
+    var fSel = d.sel==="A";
+    h += '<div class="frame" data-box="A" data-selected="'+fSel+'" style="left:'+f.x+'px;top:'+f.y+'px;width:'+f.w+'px;height:'+f.h+'px">'+
+      '<div class="frame-h"><span class="frame-t">A 대여 경험</span>'+chip("mut","하위 6 · E02")+
+      (focus?chip("info","집중 중"):'')+'<span class="sp"></span>'+
+      '<button type="button" class="ibtn" data-action="select" data-val="A" data-key="cv-selA" aria-pressed="'+fSel+'">A 선택</button>'+
+      (focus?'':'<button type="button" class="ibtn" data-action="toggleA" data-key="cv-toggleA" aria-expanded="true">접기</button>'+
+        '<button type="button" class="ibtn" data-action="focus" data-val="carry" data-key="cv-focusA">A에 집중 →</button>')+
+      '</div></div>';
+    KIDS.forEach(function(k,i){
+      var x = g.cols[i%2], y = g.rows[Math.floor(i/2)], sel = d.sel===k[0];
+      var desc = (focus && k[0]==="A2") ? '<span class="n-desc">'+(conf()?A2.descAfter:A2.descBefore)+'</span>' :
+                 (focus ? '<span class="n-desc note">설명 기록 없음 (합성 입력)</span>' : '');
+      h += '<button type="button" class="node" data-action="select" data-val="'+k[0]+'" data-node="'+k[0]+'" data-key="node-'+k[0]+'" aria-pressed="'+sel+'" aria-label="'+esc(kidAria(k[0]))+'"'+
+        ' style="left:'+x+'px;top:'+y+'px;width:'+g.node.w+'px;height:'+g.node.h+'px">'+
+        '<span class="n-head"><span class="n-id">'+k[0]+'</span><span class="n-name">'+k[1]+'</span>'+(sel?'<span class="n-sel">● 선택</span>':'')+'</span>'+
+        desc+'<span class="n-tags">'+kidTags(k[0],true)+'</span></button>';
+    });
+    var fx = f.x + f.w;
+    if(conf()){
+      LINKED.forEach(function(id,j){
+        var i = idx(id), nx = g.cols[1]+g.node.w, cy = g.rows[Math.floor(i/2)] + g.node.h/2, by = g.bPortY[j];
+        var hi = hiFor(id);
+        svg += '<path data-edge="'+id+'-B" data-state="confirmed" data-hi="'+hi+'" d="M'+nx+','+cy+' L'+fx+','+cy+' '+edgePath(fx,cy,B.x,by).slice(1).replace(/^/, 'L')+'"/>';
+        svg += '<circle data-hi="'+hi+'" cx="'+nx+'" cy="'+cy+'" r="3.5"/><circle data-hi="'+hi+'" cx="'+B.x+'" cy="'+by+'" r="3.5"/>';
+        h += '<span class="port" data-port="'+id+'" data-hi="'+hi+'" style="left:'+fx+'px;top:'+cy+'px" aria-hidden="true"></span>';
+        labels += '<span class="elabel" data-elabel="'+id+'-B" data-hi="'+hi+'" style="left:'+((fx+B.x)/2+4)+'px;top:'+((cy+by)/2)+'px">'+id+' — B</span>';
+      });
+    } else {
+      var my = f.y + f.h/2, bmy = B.y + B.h/2;
+      svg += '<path data-edge="A-B-area" data-state="unconfirmed" d="'+edgePath(fx,my,B.x,bmy)+'"/>';
+      h += '<span class="port unk" data-port="A-area" style="left:'+fx+'px;top:'+my+'px" aria-hidden="true"></span>';
+      labels += '<span class="elabel unk" data-elabel="A-B-area" style="left:'+((fx+B.x)/2)+'px;top:'+(my-34)+'px">A 영역 수준 · 세부 대상 미확인 · 자식 연결 0</span>';
+    }
+  } else {
+    var c = g.collapsed, cSel = d.sel==="A";
+    h += '<div class="collapsed" data-box="A" data-collapsed="true" data-selected="'+cSel+'" style="left:'+c.x+'px;top:'+c.y+'px;width:'+c.w+'px">'+
+      '<div class="c-row"><span class="frame-t">A 대여 경험</span>'+chip("mut","하위 6 · 접힘")+'</div>'+
+      '<div class="c-row">'+
+        '<button type="button" class="ibtn" data-action="select" data-val="A" data-key="cv-selA" aria-pressed="'+cSel+'">A 선택</button>'+
+        '<button type="button" class="ibtn" data-action="toggleA" data-key="cv-toggleA" aria-expanded="false">펼치기</button>'+
+        '<button type="button" class="ibtn" data-action="focus" data-val="carry" data-key="cv-focusA">A에 집중 →</button></div>';
+    if(conf()){
+      h += '<button type="button" class="ref" data-action="toggleList" data-key="cv-list" aria-expanded="'+d.listOpen+'"><b>연결된 하위 3곳</b><span class="sp"></span>'+chip("rel","실제 끝점 3")+'<span aria-hidden="true">'+(d.listOpen?'▴':'▾')+'</span></button>';
+      if(d.listOpen){
+        h += '<ul class="c-list" data-testid="collapsed-list">'+LINKED.map(function(id){
+          return '<li><button type="button" data-action="jump" data-val="'+id+'" data-key="cl-'+id+'" data-relation="'+id+'-B"'+
+            (id==="A2"?' aria-label="A2 대여 신청 — B, 결정 변경 1건, 미결 1건 소유 A2"':'')+'>'+
+            '<b>'+id+'</b> '+nm(id)+' — B'+(id==="A2"?' '+chip("chg","Δ 결정 변경 1")+openChip():'')+'</button></li>';
+        }).join('')+'</ul>';
+      }
+      h += '<button type="button" class="ref" style="margin-top:6px" data-action="jump" data-val="A2" data-key="cv-chg" data-testid="change-ref">'+chip("chg","Δ")+'A2 관련 결정 변경 1건 (E04)<span class="sp"></span>→ A2</button>';
+      h += '<button type="button" class="ref" style="margin-top:4px" data-action="jump" data-val="A2" data-key="cv-open" data-testid="open-ref">'+chip("open","◇ 미결")+'A2 소유 미결 1건 · 실패 알림 정책<span class="sp"></span>→ A2</button>';
+      h += '<p class="note" style="margin:6px 0 0">E01 상위 관련은 구체화 이력 · 네 번째 관계 아님</p>';
+    } else {
+      h += '<p style="margin:4px 0 0">B 관련: '+chip("unk","? 세부 대상 미확인")+'</p><p class="note" style="margin:4px 0 0">자식 연결 0 · 하위로 복제하지 않음</p>';
+    }
+    h += '</div>';
+    var cx = c.x + c.w;
+    if(conf()){
+      LINKED.forEach(function(id,j){
+        var py = c.y + g.cPortY[j], by = g.bPortY[j], hi = hiFor(id);
+        svg += '<path data-edge="'+id+'-B" data-state="confirmed" data-hi="'+hi+'" d="'+edgePath(cx,py,B.x,by)+'"/>'+
+               '<circle data-hi="'+hi+'" cx="'+B.x+'" cy="'+by+'" r="3.5"/>';
+        h += '<span class="port" data-port="'+id+'" data-hi="'+hi+'" style="left:'+cx+'px;top:'+py+'px" aria-hidden="true"></span>';
+        labels += '<span class="elabel" data-elabel="'+id+'-B" data-hi="'+hi+'" style="left:'+(cx+40)+'px;top:'+(py-11)+'px">'+id+'</span>';
+      });
+    } else {
+      var cmy = c.y + 70, bmy2 = B.y + B.h/2;
+      svg += '<path data-edge="A-B-area" data-state="unconfirmed" d="'+edgePath(cx,cmy,B.x,bmy2)+'"/>';
+      h += '<span class="port unk" data-port="A-area" style="left:'+cx+'px;top:'+cmy+'px" aria-hidden="true"></span>';
+      labels += '<span class="elabel unk" data-elabel="A-B-area" style="left:'+((cx+B.x)/2)+'px;top:'+(cmy-38)+'px">A 영역 수준 · 세부 대상 미확인 · 자식 연결 0</span>';
+    }
+  }
+
+  /* B: 같은 식별자. 집중 화면에서는 외부 참조 */
+  var bSel = d.sel==="B";
+  var bLines = conf()
+    ? '<span class="n-line">실제 끝점 3: A2 · A4 · A6</span><span class="n-tags">'+chip("chg","참조: A2 결정 변경 1")+chip("mut","미결 참조 1")+'</span>'
+    : '<span class="n-line">A 쪽 대상</span><span class="n-tags">'+chip("unk","? 세부 대상 미확인")+'</span>';
+  h += '<button type="button" class="node b'+(focus?' ext':'')+'" data-action="select" data-val="B" data-node="B" data-key="node-B" aria-pressed="'+bSel+'"'+
+    ' aria-label="'+esc((focus?"외부 참조, 원본 B, ":"")+"B 알림 구상, 미세분화"+(bSel?", 선택됨":""))+'"'+
+    ' style="left:'+B.x+'px;top:'+B.y+'px;width:'+B.w+'px;height:'+B.h+'px">'+
+    (focus?'<span class="n-line note">외부 참조 · 원본 B (복제 아님)</span>':'')+
+    '<span class="n-head"><span class="n-id">B</span><span class="n-name">알림 구상</span>'+(bSel?'<span class="n-sel">● 선택</span>':'')+'</span>'+
+    '<span class="n-tags">'+chip("mut","미세분화 · 하위 없음")+'</span>'+bLines+'</button>';
+
+  var W = g.world;
+  return '<div class="world" id="world" style="width:'+W.w+'px;height:'+W.h+'px">'+
+    '<svg class="edges" width="'+W.w+'" height="'+W.h+'" aria-hidden="true">'+svg+'</svg>'+h+labels+'</div>';
+}
+
+/* ===== 선택 상세 ===== */
+function sec(t, body, attrs){ return '<section class="sec"'+(attrs||'')+'><h3 class="sec-t">'+t+'</h3>'+body+'</section>'; }
+function refBtn(action, val, key, inner){
+  return '<button type="button" class="ref" data-action="'+action+'" data-val="'+val+'" data-key="'+key+'">'+inner+'</button>';
+}
+function handoffDoc(){
+  return '<article class="handoff" data-testid="handoff-doc" aria-label="W2 인계문 준비본">'+
+    '<p style="margin:0 0 6px">'+chip("chg","준비·미전달")+' <span class="note">SESSION-02가 수신·수락한 기록 없음</span></p>'+
+    '<dl class="kv">'+
+    '<dt>프로젝트 목적</dt><dd data-testid="ho-project">'+PROJECT_GOAL+' (합성)</dd>'+
+    '<dt>작업 목적</dt><dd data-testid="ho-work">A2 대여 신청의 실패 알림 정책 검토 (W2)</dd>'+
+    '<dt>범위·기준</dt><dd>A2 대여 신청만 · 반영 기준 E04 · 합성 입력 기준 73fc284 · A4·A6는 범위 아님</dd>'+
+    '<dt>B 관계</dt><dd>A2 — B 알림 구상 (E03 확인) · B는 미세분화</dd>'+
+    '<dt>현재 설명</dt><dd>'+A2.descAfter+'</dd>'+
+    '<dt>현재 결정</dt><dd>'+A2.decId+' '+A2.decAfter+'</dd>'+
+    '<dt>대체된 결정</dt><dd>'+A2.decId+' '+A2.decBefore+'</dd>'+
+    '<dt>이유</dt><dd>'+A2.reason+'</dd>'+
+    '<dt>미결</dt><dd>'+A2.open+'</dd>'+
+    '<dt>근거</dt><dd><ul><li>E01 A–B 관련 관측(하위 미확인)</li><li>E02 A를 A1~A6으로 상세화</li><li>E03 구체 대상 A2·A4·A6</li><li>E04 A2 설명·D2 변경, 실패 알림 미결</li></ul></dd>'+
+    '<dt>완료 조건</dt><dd>미정 — 총괄이 정함</dd>'+
+    '<dt>작업·세션</dt><dd>작업 W2 · 후보 세션 SESSION-02 (후보, 배정·전달 아님)</dd>'+
+    '<dt>상태</dt><dd data-testid="ho-state">준비·미전달</dd>'+
+    '</dl></article>';
+}
+function insA2(){
+  var b = '';
+  if(!conf()){
+    b += sec("설명", '<p>'+A2.descBefore+'</p><p class="note">합성 입력에 기록 시점 미지정 (E04 이전 값)</p>');
+    b += sec("현재 결정", '<p>'+A2.decId+' '+A2.decBefore+'</p>');
+    b += sec("변경", '<p class="note">이 장면에 변경 없음</p>');
+    b += sec("B와의 관계", '<p>'+chip("unk","? 세부 대상 미확인")+' A 영역 수준 관련만 관측(E01). A2 연결로 표시하지 않음.</p>');
+    return b;
+  }
+  b += sec("현재", '<dl class="kv"><dt>설명</dt><dd>'+A2.descAfter+'</dd><dt>결정 '+A2.decId+'</dt><dd><b>'+A2.decAfter+'</b></dd></dl>');
+  b += sec("변경 전후 · E04", '<table class="cmp" data-testid="compare"><thead><tr><th>항목</th><th>이전</th><th>현재</th></tr></thead><tbody>'+
+    '<tr><td>설명</td><td><span class="was">'+A2.descBefore+'</span></td><td>'+A2.descAfter+'</td></tr>'+
+    '<tr><td>결정 '+A2.decId+'</td><td><span class="was">'+A2.decBefore+'</span></td><td>'+A2.decAfter+'</td></tr></tbody></table>'+
+    '<dl class="kv" style="margin-top:6px"><dt>이유</dt><dd>'+A2.reason+'</dd><dt>근거</dt><dd>E04 (합성)</dd><dt>미결</dt><dd>'+A2.open+'</dd></dl>');
+  b += sec("B와의 관계", '<p>A2 — B 알림 구상 · E03 확인</p><p class="note">관계 자체의 변경이 아님 — A2 결정 변경을 B에 참조로만 노출</p>'+
+    '<div class="reflist">'+refBtn("jump","B","ins-toB",'<b>B</b> 알림 구상 보기<span class="sp"></span>→')+'</div>'+
+    '<p class="note" style="margin-top:6px">같은 B에 연결된 다른 끝점 A4 · A6에는 변경 전파 없음</p>');
+  if(ST.scene===3){
+    var s = SC();
+    b += sec("작업·세션 (구조 아님)", '<div class="workbox" data-testid="work">'+
+      '<dl class="kv"><dt>작업</dt><dd>W2 · A2 실패 알림 정책 검토</dd><dt>후보 세션</dt><dd>SESSION-02 (후보)</dd><dt>상태</dt><dd><b data-testid="work-state">준비·미전달</b></dd></dl>'+
+      '<button type="button" class="ibtn" style="margin-top:6px" data-action="handoff" data-key="ins-handoff" aria-expanded="'+s.handoff+'">'+(s.handoff?'인계문 접기':'인계문 준비 내용 보기')+'</button>'+
+      (s.handoff?handoffDoc():'')+'</div>');
+  }
+  return b;
+}
+function insKid(id){
+  var b = sec("현재", '<dl class="kv"><dt>설명</dt><dd class="note">합성 입력에 기록 없음</dd><dt>결정</dt><dd class="note">기록 없음</dd></dl>');
+  b += sec("변경", '<p class="note">없음</p>');
+  if(!conf()){
+    b += sec("B와의 관계", '<p>'+chip("unk","? 세부 대상 미확인")+' A 영역 수준 관련만 관측(E01).</p>');
+  } else if(LINKED.indexOf(id)>=0){
+    var others = LINKED.filter(function(x){return x!==id;});
+    b += sec("B와의 관계", '<p>'+id+' — B 알림 구상 · E03 확인</p><p class="note">이 관계에 변경 기록 없음</p>'+
+      '<div class="reflist">'+refBtn("jump","B","ins-toB",'<b>B</b> 알림 구상 보기<span class="sp"></span>→')+'</div>');
+    b += sec("같은 B에 연결된 다른 끝점", '<div class="reflist">'+others.map(function(o){
+      return refBtn("jump",o,"ins-peer-"+o,'<b>'+o+'</b> '+nm(o)+(o==="A2"?' '+chip("chg","Δ 결정 변경 1건 · "+A2.decId):'')+'<span class="sp"></span>→');
+    }).join('')+'</div>');
+  } else {
+    b += sec("B와의 관계", '<p>이번 관측에 연결 없음</p><p class="note">무관 확정 아님</p>');
+  }
+  if(ST.scene===3 && (id==="A4"||id==="A6")) b += sec("인계", '<p class="note">W2 인계 범위 아님</p>');
+  return b;
+}
+function insA(){
+  var b = sec("하위 6 · E02", '<div class="reflist">'+KIDS.map(function(k){
+    return refBtn("jump",k[0],"ins-kid-"+k[0],'<b>'+k[0]+'</b> '+k[1]+'<span class="sp"></span>'+kidTags(k[0]));
+  }).join('')+'</div>');
+  b += conf()
+    ? sec("B와의 관계", '<p>연결된 하위 3곳: A2 · A4 · A6 (E03)</p><p class="note">이력: E01 상위 A–B 관련 → E03 구체화. 네 번째 관계 아님.</p><p class="note">A1 · A3 · A5: 이번 관측에 연결 없음 (무관 확정 아님)</p>')
+    : sec("B와의 관계", '<p>'+chip("unk","? 세부 대상 미확인")+' A 영역 수준(E01) · 자식 연결 0</p>');
+  return b;
+}
+function insB(){
+  var focus = SC().dest==="focus";
+  var b = sec("현재", '<p>미세분화 · 하위 없음</p>'+(focus?'<p class="note">A 집중 화면의 외부 참조 — 원본 B와 같은 식별자, 복제 아님</p>':''));
+  if(!conf()){ b += sec("A와의 관계", '<p>A–B 관련(E01) · A 쪽 '+chip("unk","? 세부 대상 미확인")+'</p>'); return b; }
+  b += sec("실제 끝점 3 · E03", '<div class="reflist" data-testid="b-endpoints">'+LINKED.map(function(o){
+    return refBtn("jump",o,"ins-ep-"+o,'<b>'+o+'</b> '+nm(o)+(o==="A2"?' '+chip("chg","Δ 결정 변경 1")+openChip():'')+'<span class="sp"></span>→');
+  }).join('')+'</div>');
+  b += sec("관련 결정 변경 참조", '<p data-testid="b-change-ref">A2 '+A2.decId+': <span class="was">'+A2.decBefore+'</span> → '+A2.decAfter+' (E04)</p>'+
+    '<p class="note">B 자체·관계 자체의 변경 아님 · A4·A6 전파 없음</p>'+
+    '<div class="reflist">'+refBtn("jump","A2","ins-bchg",chip("chg","Δ")+' A2 결정 변경 보기<span class="sp"></span>→')+'</div>');
+  b += sec("미결 참조", '<p data-testid="b-open-ref">'+A2.open+' · 소유 A2</p>');
+  return b;
+}
+function insScene(){
+  var sc = SCENES[ST.scene];
+  var b = sec("장면 기록 (합성)", '<ol class="evlist">'+EVENTS.filter(function(e){return Number(e.id.slice(1))<=sc.last;}).map(function(e){
+    return '<li'+(e.scene===ST.scene?' style="font-weight:600"':'')+'><b>'+e.id+'</b> '+e.t+'</li>';
+  }).join('')+'</ol>');
+  if(conf()) b += sec("변경", '<div class="reflist">'+refBtn("jump","A2","ins-scene-chg",chip("chg","Δ")+' A2 '+A2.decId+' 결정 변경 1건 (E04)<span class="sp"></span>→')+'</div>');
+  b += sec("읽는 법", '<p class="note">사각 테두리 = 포함 경계(A의 하위). 실선 = 실제 관계(E03 확인), 경계의 작은 사각 = 경계 통과점. 점선 = 상위 관련·세부 대상 미확인. 화살표 없음 = 방향 근거 없음. 배율은 상세 수준을 바꾸지 않음.</p>');
+  return b;
+}
+function inspectorHTML(){
+  var d = D(), id = d.sel, sc = SC(), title, body, tags = '', path;
+  var focus = sc.dest==="focus";
+  path = focus ? "A 집중 · 전체 › A 대여 경험" : "전체 펼침";
+  if(!id){ title = "장면 개요"; body = insScene(); }
+  else if(id==="A"){ title = "A 대여 경험"; body = insA(); tags = chip("mut","영역 · 하위 6"); }
+  else if(id==="B"){ title = "B 알림 구상"; body = insB(); tags = chip("mut","영역 · 미세분화")+(focus?chip("info","외부 참조"):''); }
+  else { title = full(id); body = id==="A2" ? insA2() : insKid(id); tags = chip("mut","A 하위")+kidTags(id); path += " › "+id; }
+  var back = '';
+  if(d.stack.length){
+    var top = d.stack[d.stack.length-1];
+    back = '<button type="button" class="back" data-action="back" data-key="ins-back" data-testid="back">'+
+      '<b>← '+(top.sel?full(top.sel):'장면 개요')+'(으)로 보기 복귀</b><span>선택·펼침·목록·위치·배율만 복원 · 데이터 변경 없음</span></button>';
+  }
+  var narrowBar = '<div class="narrow-only" style="gap:6px;margin-top:8px">'+
+    '<button type="button" class="ibtn" data-action="pane" data-val="outline" data-key="ins-to-outline">← 구조 목록</button>'+
+    (id?'<button type="button" class="ibtn" data-action="showOnCanvas" data-key="ins-to-canvas">캔버스에서 보기</button>':'')+'</div>';
+  var focusBtn = (!focus && id && (id==="A" || isKid(id)))
+    ? '<div style="margin-top:8px"><button type="button" class="ibtn" data-action="focus" data-val="carry" data-key="ins-focusA">A에 집중해 읽기 → (선택 유지)</button></div>' : '';
+  return '<aside class="inspector" id="insp" aria-label="선택 상세" data-selected="'+(id||"none")+'">'+
+    '<div class="ins-h"><div class="ins-path">'+path+'</div><h2 class="ins-t" style="margin:0">'+title+'</h2>'+
+    (tags?'<div class="ins-tags">'+tags+'</div>':'')+back+focusBtn+narrowBar+'</div>'+body+'</aside>';
+}
+
+/* ===== 구조 목록 (좁은 화면의 기본 탐색) ===== */
+function outlineHTML(){
+  var d = D(), h = '';
+  if(conf()){
+    h += '<div class="ol-sec"><p class="ol-t">변경</p>'+
+      '<button type="button" class="ol-item" data-action="jump" data-val="A2" data-key="ol-chg">'+chip("chg","Δ")+'<span>A2 '+A2.decId+' 결정 변경 1건 (E04)</span><span class="sp"></span>→</button></div>';
+  }
+  h += '<div class="ol-sec"><p class="ol-t">구조</p>'+
+    '<button type="button" class="ol-item" data-action="select" data-val="A" data-key="ol-A" aria-pressed="'+(d.sel==="A")+'"><b>A</b> 대여 경험<span class="sp"></span>'+chip("mut","하위 6")+'</button>'+
+    KIDS.map(function(k){
+      return '<button type="button" class="ol-item child" data-action="select" data-val="'+k[0]+'" data-key="ol-'+k[0]+'" aria-pressed="'+(d.sel===k[0])+'"><b>'+k[0]+'</b> '+k[1]+'<span class="sp"></span>'+kidTags(k[0])+'</button>';
+    }).join('')+
+    '<button type="button" class="ol-item" data-action="select" data-val="B" data-key="ol-B" aria-pressed="'+(d.sel==="B")+'"><b>B</b> 알림 구상<span class="sp"></span>'+chip("mut","미세분화")+'</button></div>';
+  h += '<div class="ol-sec"><p class="ol-t">관계</p>'+(conf()
+    ? LINKED.map(function(id){ return '<button type="button" class="ol-item" data-action="jump" data-val="'+id+'" data-key="ol-rel-'+id+'"><b>'+id+'</b> — B<span class="sp"></span>'+chip("rel","E03 확인")+'</button>'; }).join('')+
+      '<p class="note">E01 상위 관련은 구체화 이력 · A1·A3·A5는 관측 연결 없음(무관 확정 아님)</p>'
+    : '<p>A — B '+chip("unk","? 세부 대상 미확인")+' <span class="note">자식 연결 0</span></p>')+'</div>';
+  return '<section class="outline" id="outline" aria-label="구조 목록">'+h+'</section>';
+}
+
+/* ===== 전체 그리기 ===== */
+function render(focusKey){
+  var app = document.getElementById("app");
+  var sc = SC(), d = D(), focus = sc.dest==="focus";
+  var activeKey = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute("data-key") : null;
+  var zi = ZOOMS.indexOf(d.vp.k);
+  var top = '<header class="top">'+
+    '<span class="brand">계층 캔버스 연구<small>UI-02 · 구성 ① 포함 프레임</small></span>'+
+    '<span class="grp" role="group" aria-label="장면"><span class="grp-l">장면</span>'+
+      [1,2,3].map(function(n){return seg("S"+n,"scene",n,ST.scene===n,' title="'+SCENES[n].t+' ('+SCENES[n].r+')"');}).join('')+'</span>'+
+    '<span class="grp" role="group" aria-label="탐색"><span class="grp-l">탐색</span>'+
+      seg("전체 펼침","dest","overview",!focus)+seg("A 집중","dest","focus",focus)+'</span>'+
+    '<span class="grp" role="group" aria-label="배율">'+
+      '<button type="button" class="seg" data-action="zoom" data-val="-1" data-key="zoom-out" aria-label="축소"'+(zi<=0?' disabled':'')+'>−</button>'+
+      '<span class="zoomv" id="zoomv" data-testid="zoom">'+Math.round(d.vp.k*100)+'%</span>'+
+      '<button type="button" class="seg" data-action="zoom" data-val="1" data-key="zoom-in" aria-label="확대"'+(zi>=ZOOMS.length-1?' disabled':'')+'>+</button>'+
+      '<button type="button" class="seg" data-action="zoom100" data-key="zoom-100" aria-label="배율 100%로">100%로</button></span>'+
+    '<span class="syn" id="synthetic-note">모든 데이터 합성 · 자동 추출·실제 전달 없음</span></header>';
+  var s = SCENES[ST.scene];
+  var banner = '<div class="banner" data-testid="scene-banner"><b>'+s.t+'</b><span class="muted">'+s.r+'</span>';
+  if(ST.scene===1) banner += '<span class="muted">A만 6개로 상세화 · B 미세분화 · A–B는 영역 수준만 관측</span>';
+  if(ST.scene===2) banner += '<span class="muted">A–B 구체 대상 A2·A4·A6 확인 · A2 설명·결정 변경</span>';
+  if(ST.scene===3){
+    banner += '<span class="bl" data-testid="baseline"><b>합성 열람 E03 / 반영 E04</b><span class="muted">실제 열람 측정 아님 · 장면 전환으로 갱신 안 함</span></span>'+
+      '<span>E03 이후 변경 1건 <button type="button" class="linkbtn" data-action="jump" data-val="A2" data-key="bn-chg">A2 '+A2.decId+' 보기</button></span>'+
+      '<span>'+chip("chg","W2 인계 준비·미전달")+'</span>';
+  }
+  banner += '</div>';
+  var panes = '<nav class="panes" aria-label="보기 전환">'+
+    seg("구조 목록","pane","outline",ST.pane==="outline")+seg("캔버스","pane","canvas",ST.pane==="canvas")+seg("상세","pane","detail",ST.pane==="detail")+'</nav>';
+  var crumb = '<nav class="crumb" aria-label="경로">'+(focus
+    ? '<button type="button" class="linkbtn" data-action="dest" data-val="overview" data-key="crumb-root">전체</button><span aria-hidden="true">›</span><span aria-current="page">A 대여 경험</span>'
+    : '<span aria-current="page">전체</span>')+'</nav>';
+  var selbar = d.sel ? '<div class="selbar">선택: <b>'+(isKid(d.sel)?full(d.sel):d.sel==="A"?"A 대여 경험":"B 알림 구상")+'</b><span class="sp"></span>'+
+    '<button type="button" class="ibtn" data-action="pane" data-val="detail" data-key="sb-detail">상세 보기 →</button></div>' : '';
+  var tools = '<div class="ctools" role="group" aria-label="캔버스 이동">'+
+    '<button type="button" class="ibtn" data-action="pan" data-val="-1,0" data-key="pan-l" aria-label="왼쪽으로 이동">←</button>'+
+    '<button type="button" class="ibtn" data-action="pan" data-val="0,-1" data-key="pan-u" aria-label="위로 이동">↑</button>'+
+    '<button type="button" class="ibtn" data-action="pan" data-val="0,1" data-key="pan-d" aria-label="아래로 이동">↓</button>'+
+    '<button type="button" class="ibtn" data-action="pan" data-val="1,0" data-key="pan-r" aria-label="오른쪽으로 이동">→</button>'+
+    '<button type="button" class="ibtn" data-action="toSel" data-key="to-sel"'+(d.sel?'':' disabled')+'>선택 위치로</button>'+
+    '<button type="button" class="ibtn" data-action="fit" data-key="fit">전체 맞춤</button></div>';
+  var legend = '<div class="legend" aria-label="범례"><span class="lg"><i class="f"></i>포함 경계</span><span class="lg"><i></i>실제 관계 (E03)</span>'+
+    '<span class="lg"><i class="d"></i>상위 관련 · 세부 미확인</span><span class="lg"><i class="p"></i>경계 통과점</span><span class="lg">Δ 변경 · ● 선택 · ? 미확인</span></div>';
+  var canvas = '<section class="canvas-wrap" id="cwrap" tabindex="0" aria-label="구조 캔버스. 방향키로 이동, 더하기·빼기로 배율">'+
+    crumb+selbar+canvasHTML()+tools+legend+'</section>';
+
+  app.innerHTML = top + banner + panes + '<div class="main">'+outlineHTML()+canvas+inspectorHTML()+'</div>';
+  app.setAttribute("data-scene", ST.scene);
+  app.setAttribute("data-dest", sc.dest);
+  app.setAttribute("data-sel", d.sel||"none");
+  app.setAttribute("data-expanded", String(focus || d.expanded));
+  app.setAttribute("data-list", String(d.listOpen));
+  app.setAttribute("data-stack", d.stack.length ? d.stack.length+":"+(d.stack[d.stack.length-1].sel||"none") : "0");
+  app.setAttribute("data-narrow", String(ST.narrow));
+  app.setAttribute("data-pane", ST.pane);
+  app.setAttribute("data-overview", JSON.stringify(snap(sc.overview)));
+  app.setAttribute("data-focusstate", sc.focus ? JSON.stringify(snap(sc.focus)) : "");
+  applyVP();
+  var ol = document.getElementById("outline");
+  if(ol && ST.narrow && ST.pane==="outline") ol.scrollTop = sc.olScroll || 0;
+  var key = focusKey || activeKey;
+  if(key){
+    var el = app.querySelector('[data-key="'+key+'"]');
+    if(el){ try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); } }
+  }
+}
+function snap(d){ return {sel:d.sel, expanded:d.expanded, listOpen:d.listOpen, vp:{x:d.vp.x,y:d.vp.y,k:d.vp.k}}; }
+function applyVP(){
+  var d = D(), w = document.getElementById("world"), cw = document.getElementById("cwrap");
+  if(w) w.style.transform = "translate("+d.vp.x+"px,"+d.vp.y+"px) scale("+d.vp.k+")";
+  if(cw){ cw.style.backgroundSize = (16*d.vp.k)+"px "+(16*d.vp.k)+"px"; cw.style.backgroundPosition = d.vp.x+"px "+d.vp.y+"px"; }
+  var zv = document.getElementById("zoomv"); if(zv) zv.textContent = Math.round(d.vp.k*100)+"%";
+  var a = document.getElementById("app"), sc = SC();
+  a.setAttribute("data-vp", d.vp.x+","+d.vp.y+","+d.vp.k);
+  a.setAttribute("data-overview", JSON.stringify(snap(sc.overview)));
+  a.setAttribute("data-focusstate", sc.focus ? JSON.stringify(snap(sc.focus)) : "");
+}
+
+/* ===== 보기 조작 ===== */
+function canvasSize(){ var c = document.getElementById("cwrap"); return c ? {w:c.clientWidth, h:c.clientHeight} : {w:0,h:0}; }
+function nodeRect(id){
+  var sc = SC(), focus = sc.dest==="focus", g = focus ? GEO.focus : GEO.overview, d = D();
+  if(id==="B") return {x:g.B.x,y:g.B.y,w:g.B.w,h:g.B.h};
+  if(id==="A") return focus||d.expanded ? {x:g.frame.x,y:g.frame.y,w:g.frame.w,h:g.frame.h} : {x:g.collapsed.x,y:g.collapsed.y,w:g.collapsed.w,h:180};
+  var i = idx(id); if(i<0) return null;
+  return {x:g.cols[i%2], y:g.rows[Math.floor(i/2)], w:g.node.w, h:g.node.h};
+}
+/* 자동 전체맞춤 없음: 대상이 화면 밖일 때만 최소 이동, 배율 유지 */
+function ensureVisible(id){
+  var r = nodeRect(id), c = canvasSize(), vp = D().vp, m = 48;
+  if(!r || !c.w || !c.h) return;
+  var sx = vp.x + r.x*vp.k, sy = vp.y + r.y*vp.k, sw = r.w*vp.k, sh = r.h*vp.k;
+  if(sx < m) vp.x += m - sx; else if(sx+sw > c.w-m) vp.x -= Math.min(sx - m, sx+sw-(c.w-m));
+  if(sy < m) vp.y += m - sy; else if(sy+sh > c.h-m) vp.y -= Math.min(sy - m, sy+sh-(c.h-m));
+}
+function centerOn(id){
+  var r = nodeRect(id), c = canvasSize(), vp = D().vp;
+  if(!r || !c.w) return;
+  vp.x = Math.round(c.w/2 - (r.x + r.w/2)*vp.k); vp.y = Math.round(c.h/2 - (r.y + r.h/2)*vp.k);
+}
+function fitAll(){
+  var focus = SC().dest==="focus", W = (focus?GEO.focus:GEO.overview).world, c = canvasSize(), vp = D().vp;
+  if(!c.w) return;
+  var k = Math.min((c.w-32)/W.w, (c.h-90)/W.h, 1), best = ZOOMS[0];
+  ZOOMS.forEach(function(z){ if(z<=k) best = z; });
+  vp.k = best; vp.x = Math.round((c.w - W.w*best)/2); vp.y = Math.round((c.h - W.h*best)/2) - 10;
+}
+function zoomTo(k, cx, cy){
+  var vp = D().vp, c = canvasSize();
+  if(cx==null){ cx = c.w/2 || 0; cy = c.h/2 || 0; }
+  var wx = (cx - vp.x)/vp.k, wy = (cy - vp.y)/vp.k;
+  vp.k = k; vp.x = Math.round(cx - wx*k); vp.y = Math.round(cy - wy*k);
+}
+
+function select(id){ D().sel = id; }
+function jump(id){
+  var d = D(), sc = SC();
+  d.stack.push(snap(d));
+  d.sel = id;
+  if(isKid(id) && sc.dest==="overview") d.expanded = true;
+  ensureVisible(id);
+}
+function back(){
+  var d = D(), s = d.stack.pop();
+  if(!s) return;
+  d.sel = s.sel; d.expanded = s.expanded; d.listOpen = s.listOpen; d.vp = {x:s.vp.x,y:s.vp.y,k:s.vp.k};
+}
+function goDest(dest, carry){
+  var sc = SC();
+  if(dest==="focus"){
+    if(!sc.focus) sc.focus = newDest("focus");
+    if(carry){
+      var cur = sc.overview.sel;
+      if(cur && (cur==="A" || isKid(cur))) sc.focus.sel = cur;
+    }
+  }
+  sc.dest = dest;
+}
+
+/* ===== 이벤트 ===== */
+var app = document.getElementById("app");
+app.addEventListener("click", function(ev){
+  var b = ev.target.closest("button[data-action]");
+  if(!b || b.disabled) return;
+  /* 구조 목록 스크롤은 상태(장면·탭)를 바꾸기 전에, 지금 장면에 저장 — 캔버스 vp·상세 위치와 별도 */
+  if(ST.narrow && ST.pane==="outline"){
+    var olNow = document.getElementById("outline");
+    if(olNow) SC().olScroll = olNow.scrollTop;
+  }
+  var a = b.getAttribute("data-action"), v = b.getAttribute("data-val"), d = D(), fk = b.getAttribute("data-key");
+  switch(a){
+    case "scene": ST.scene = Number(v); break;
+    case "dest": goDest(v, false); fk = v==="overview" ? "dest-overview" : "dest-focus"; break;
+    case "focus": goDest("focus", true); fk = "crumb-root"; break;
+    case "toggleA": d.expanded = !d.expanded; break;
+    case "toggleList": d.listOpen = !d.listOpen; break;
+    case "select":
+      select(v);
+      if(ST.narrow && b.classList.contains("ol-item")){ ST.pane = "detail"; fk = "ins-to-outline"; }
+      else fk = "node-"+v;
+      if(!document.querySelector('[data-key="'+fk+'"]') && v==="A") fk = "cv-selA";
+      break;
+    case "jump":
+      jump(v);
+      if(ST.narrow && ST.pane!=="canvas") ST.pane = "detail";
+      fk = "ins-back"; break;
+    case "back": back(); fk = (ST.narrow && ST.pane!=="canvas") ? "ins-to-outline" : (d.sel ? "node-"+d.sel : null); break;
+    case "handoff": SC().handoff = !SC().handoff; break;
+    case "pane": ST.pane = v; fk = "pane-"+v; break;
+    case "showOnCanvas": ST.pane = "canvas"; if(d.sel){ ensureVisibleAfter = d.sel; } fk = d.sel ? "node-"+d.sel : null; break;
+    case "zoom":
+      var i = ZOOMS.indexOf(d.vp.k) + Number(v);
+      if(i>=0 && i<ZOOMS.length) zoomTo(ZOOMS[i]);
+      break;
+    case "zoom100": zoomTo(1); break;
+    case "pan":
+      var p = v.split(",").map(Number); d.vp.x -= p[0]*80; d.vp.y -= p[1]*80; applyVP(); return;
+    case "toSel": if(d.sel) centerOn(d.sel); applyVP(); return;
+    case "fit": fitAll(); applyVP(); return;
+  }
+  render(fk);
+  if(ensureVisibleAfter){ ensureVisible(ensureVisibleAfter); ensureVisibleAfter = null; applyVP(); }
+});
+var ensureVisibleAfter = null;
+
+/* 캔버스 끌기·휠·키보드 이동 (화면만 이동, 구조·상세 수준 불변) */
+var drag = null;
+app.addEventListener("pointerdown", function(ev){
+  var cw = ev.target.closest && ev.target.closest("#cwrap");
+  if(!cw || ev.target.closest("button")) return;
+  drag = {x:ev.clientX, y:ev.clientY, vx:D().vp.x, vy:D().vp.y};
+  try{ cw.setPointerCapture(ev.pointerId); }catch(e){}
+});
+app.addEventListener("pointermove", function(ev){
+  if(!drag) return;
+  var vp = D().vp; vp.x = drag.vx + (ev.clientX - drag.x); vp.y = drag.vy + (ev.clientY - drag.y); applyVP();
+});
+app.addEventListener("pointerup", function(){ drag = null; });
+app.addEventListener("pointercancel", function(){ drag = null; });
+app.addEventListener("wheel", function(ev){
+  var cw = ev.target.closest && ev.target.closest("#cwrap");
+  if(!cw) return;
+  ev.preventDefault();
+  var vp = D().vp;
+  if(ev.ctrlKey || ev.metaKey){
+    var i = ZOOMS.indexOf(vp.k) + (ev.deltaY < 0 ? 1 : -1);
+    if(i>=0 && i<ZOOMS.length){
+      var r = cw.getBoundingClientRect(); zoomTo(ZOOMS[i], ev.clientX - r.left, ev.clientY - r.top);
+      render(null);
+    }
+  } else { vp.x -= ev.deltaX; vp.y -= ev.deltaY; applyVP(); }
+}, {passive:false});
+app.addEventListener("keydown", function(ev){
+  if(!ev.target || ev.target.id !== "cwrap") return;
+  var vp = D().vp, step = 60, k = ev.key;
+  if(k==="ArrowLeft"){ vp.x += step; } else if(k==="ArrowRight"){ vp.x -= step; }
+  else if(k==="ArrowUp"){ vp.y += step; } else if(k==="ArrowDown"){ vp.y -= step; }
+  else if(k==="+"||k==="="){ var i=ZOOMS.indexOf(vp.k)+1; if(i<ZOOMS.length){ zoomTo(ZOOMS[i]); render("cwrap-focus"); document.getElementById("cwrap").focus(); } ev.preventDefault(); return; }
+  else if(k==="-"){ var j=ZOOMS.indexOf(vp.k)-1; if(j>=0){ zoomTo(ZOOMS[j]); render(null); document.getElementById("cwrap").focus(); } ev.preventDefault(); return; }
+  else return;
+  ev.preventDefault(); applyVP();
+});
+
+/* 폭 판정: 390류 좁은 화면은 구조 목록을 기본 탐색으로 */
+function measure(){
+  var n = (window.innerWidth || 1024) <= 760;
+  if(n !== ST.narrow){ ST.narrow = n; if(n) ST.pane = "outline"; render(null); }
+}
+window.addEventListener("resize", measure);
+ST.narrow = (window.innerWidth || 1024) <= 760;
+render(null);
+window.__canvasStudy = {state:ST, geo:GEO}; /* 검사용 */
+})();
+</script>
+</body>
+</html>

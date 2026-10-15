@@ -1,0 +1,490 @@
+{
+  "sourcePath": "version:fix1;sha256:869C76A45F16042EC0A5063C81D1E638D21A2A3E87CE079B6BC5A60843632157",
+  "sourceSha256": "869C76A45F16042EC0A5063C81D1E638D21A2A3E87CE079B6BC5A60843632157",
+  "checkerSha256": "9F51C7507BB2CE901613B808AEB8461C9BFFE0F9EF97AFF49257DAF2F124A2FF",
+  "timestampUTC": "2026-10-15T14:19:09.203Z",
+  "environment": "Node v24.19.0; synthetic event/element stubs and local generated-markup tree; no DOM or browser",
+  "summary": {
+    "cases": {
+      "total": 15,
+      "passed": 3,
+      "failed": 12
+    },
+    "atomicAssertions": {
+      "total": 108,
+      "passed": 86,
+      "failed": 22
+    },
+    "failedScopeCounts": {
+      "input9-reference-and-regression": 18,
+      "coordinator-usability-B-direct-action": 4
+    },
+    "discoveryObservations": [
+      {
+        "scene": 2,
+        "outlineOwnedPendingRoutePresent": false,
+        "mandatory": false
+      },
+      {
+        "scene": 3,
+        "outlineOwnedPendingRoutePresent": false,
+        "mandatory": false
+      }
+    ]
+  },
+  "results": [
+    {
+      "id": "A9-01",
+      "scene": 1,
+      "location": "C / B / A2 / focus / 390 outline",
+      "status": "PASS",
+      "checks": {
+        "noFutureInCollapsed": true,
+        "unconfirmedOnly": true,
+        "noFutureInB": true,
+        "noFutureInA2": true,
+        "noFutureInFocus": true,
+        "narrowDefaultsToOutline": true,
+        "noFutureInOutline": true
+      },
+      "observed": {
+        "edges": [
+          "A-B-area:unconfirmed"
+        ]
+      },
+      "assertionScopes": {
+        "noFutureInCollapsed": "input9-reference-and-regression",
+        "unconfirmedOnly": "input9-reference-and-regression",
+        "noFutureInB": "input9-reference-and-regression",
+        "noFutureInA2": "input9-reference-and-regression",
+        "noFutureInFocus": "input9-reference-and-regression",
+        "narrowDefaultsToOutline": "input9-reference-and-regression",
+        "noFutureInOutline": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-02",
+      "scene": 2,
+      "location": "C collapsed summary, excluding endpoint list",
+      "status": "FAIL",
+      "checks": {
+        "changed": true,
+        "A2OwnedPending": false,
+        "localA2Action": false,
+        "pendingSurvivesReturn": false,
+        "staysCollapsed": true,
+        "collapsedFocusRoundtrip": true,
+        "pendingSurvivesFocusRoundtrip": false
+      },
+      "observed": {
+        "localText": "A 대여 경험 하위 6 · 접힘 A 선택 펼치기 A에 집중 → 연결된 하위 3곳  실제 끝점 3 ▾ Δ A2 관련 결정 변경 1건 (E04)  → A2 E01 상위 관련은 구체화 이력 · 네 번째 관계 아님",
+        "actionKeys": []
+      },
+      "assertionScopes": {
+        "changed": "input9-reference-and-regression",
+        "A2OwnedPending": "input9-reference-and-regression",
+        "localA2Action": "input9-reference-and-regression",
+        "pendingSurvivesReturn": "input9-reference-and-regression",
+        "staysCollapsed": "input9-reference-and-regression",
+        "collapsedFocusRoundtrip": "input9-reference-and-regression",
+        "pendingSurvivesFocusRoundtrip": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-03",
+      "scene": 2,
+      "location": "L1 A2 row only",
+      "status": "FAIL",
+      "checks": {
+        "changed": true,
+        "A2OwnedPending": false,
+        "localA2Action": true,
+        "arrivesAtCurrentA2Unresolved": true,
+        "viewRestored": true,
+        "A4NoPropagation": true,
+        "A6NoPropagation": true,
+        "threeRelations": true
+      },
+      "observed": {
+        "localText": "A2  대여 신청 — B  Δ 결정 변경",
+        "actionKeys": [
+          "cl-A2"
+        ]
+      },
+      "assertionScopes": {
+        "changed": "input9-reference-and-regression",
+        "A2OwnedPending": "input9-reference-and-regression",
+        "localA2Action": "input9-reference-and-regression",
+        "arrivesAtCurrentA2Unresolved": "input9-reference-and-regression",
+        "viewRestored": "input9-reference-and-regression",
+        "A4NoPropagation": "input9-reference-and-regression",
+        "A6NoPropagation": "input9-reference-and-regression",
+        "threeRelations": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-03",
+      "scene": 2,
+      "location": "L2 A2 row only",
+      "status": "FAIL",
+      "checks": {
+        "changed": false,
+        "A2OwnedPending": false,
+        "localA2Action": true,
+        "arrivesAtCurrentA2Unresolved": true,
+        "viewRestored": true,
+        "A4NoPropagation": true,
+        "A6NoPropagation": true,
+        "threeRelations": true
+      },
+      "observed": {
+        "localText": "A2  대여 신청  →",
+        "actionKeys": [
+          "ins-ep-A2"
+        ]
+      },
+      "assertionScopes": {
+        "changed": "input9-reference-and-regression",
+        "A2OwnedPending": "input9-reference-and-regression",
+        "localA2Action": "input9-reference-and-regression",
+        "arrivesAtCurrentA2Unresolved": "input9-reference-and-regression",
+        "viewRestored": "input9-reference-and-regression",
+        "A4NoPropagation": "input9-reference-and-regression",
+        "A6NoPropagation": "input9-reference-and-regression",
+        "threeRelations": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-03",
+      "scene": 2,
+      "location": "L3 A2 row only",
+      "status": "FAIL",
+      "checks": {
+        "changed": false,
+        "A2OwnedPending": false,
+        "localA2Action": true,
+        "arrivesAtCurrentA2Unresolved": true,
+        "viewRestored": true,
+        "A4NoPropagation": true,
+        "A6NoPropagation": true,
+        "threeRelations": true,
+        "outlineScrollRestored": true
+      },
+      "observed": {
+        "localText": "A2  — B  E03 확인",
+        "actionKeys": [
+          "ol-rel-A2"
+        ]
+      },
+      "assertionScopes": {
+        "changed": "input9-reference-and-regression",
+        "A2OwnedPending": "input9-reference-and-regression",
+        "localA2Action": "input9-reference-and-regression",
+        "arrivesAtCurrentA2Unresolved": "input9-reference-and-regression",
+        "viewRestored": "input9-reference-and-regression",
+        "A4NoPropagation": "input9-reference-and-regression",
+        "A6NoPropagation": "input9-reference-and-regression",
+        "threeRelations": "input9-reference-and-regression",
+        "outlineScrollRestored": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-04",
+      "scene": 2,
+      "location": "B unresolved section only",
+      "status": "FAIL",
+      "checks": {
+        "policyReferenced": true,
+        "ownerA2": true,
+        "localA2Action": false,
+        "returnsB": true,
+        "noRelationMutation": true
+      },
+      "observed": {
+        "localText": "미결 참조 실패 알림 정책 (아직 결정하지 않음) · 소유 A2",
+        "actionKeys": []
+      },
+      "assertionScopes": {
+        "policyReferenced": "input9-reference-and-regression",
+        "ownerA2": "input9-reference-and-regression",
+        "localA2Action": "coordinator-usability-B-direct-action",
+        "returnsB": "input9-reference-and-regression",
+        "noRelationMutation": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-05",
+      "scene": 2,
+      "location": "A4/A6 own fields, view roundtrip and A2",
+      "status": "PASS",
+      "checks": {
+        "A4CardNoPropagation": true,
+        "A4OwnFieldsUnchanged": true,
+        "A6CardNoPropagation": true,
+        "A6OwnFieldsUnchanged": true,
+        "expandRoundtrip": true,
+        "focusA2Unresolved": true,
+        "focusThreeRelations": true,
+        "overviewRestored": true,
+        "unresolvedNotResolved": true,
+        "overviewThreeRelations": true
+      },
+      "observed": {
+        "edges": [
+          "A2-B:confirmed",
+          "A4-B:confirmed",
+          "A6-B:confirmed"
+        ]
+      },
+      "assertionScopes": {
+        "A4CardNoPropagation": "input9-reference-and-regression",
+        "A4OwnFieldsUnchanged": "input9-reference-and-regression",
+        "A6CardNoPropagation": "input9-reference-and-regression",
+        "A6OwnFieldsUnchanged": "input9-reference-and-regression",
+        "expandRoundtrip": "input9-reference-and-regression",
+        "focusA2Unresolved": "input9-reference-and-regression",
+        "focusThreeRelations": "input9-reference-and-regression",
+        "overviewRestored": "input9-reference-and-regression",
+        "unresolvedNotResolved": "input9-reference-and-regression",
+        "overviewThreeRelations": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-06-state-only",
+      "scene": 2,
+      "location": "390 generated outline/detail route; no visibility assertion",
+      "status": "FAIL",
+      "checks": {
+        "defaultPaneOutline": true,
+        "bOwnerA2": true,
+        "bDirectA2Route": false
+      },
+      "observed": {
+        "outlineOwnedPendingRoutePresent": false,
+        "outlineObservationScope": "Optional generic structure row ol-A2 observation only, excluded from mandatory acceptance 9 assertions. Relation row ol-rel-A2 is separately required as L3.",
+        "routeKeys": [],
+        "limit": "Generated markup and event state only; does not establish visible or scroll-reachable access."
+      },
+      "assertionScopes": {
+        "defaultPaneOutline": "input9-reference-and-regression",
+        "bOwnerA2": "input9-reference-and-regression",
+        "bDirectA2Route": "coordinator-usability-B-direct-action"
+      }
+    },
+    {
+      "id": "A9-02",
+      "scene": 3,
+      "location": "C collapsed summary, excluding endpoint list",
+      "status": "FAIL",
+      "checks": {
+        "changed": true,
+        "A2OwnedPending": false,
+        "localA2Action": false,
+        "pendingSurvivesReturn": false,
+        "staysCollapsed": true,
+        "collapsedFocusRoundtrip": true,
+        "pendingSurvivesFocusRoundtrip": false
+      },
+      "observed": {
+        "localText": "A 대여 경험 하위 6 · 접힘 A 선택 펼치기 A에 집중 → 연결된 하위 3곳  실제 끝점 3 ▾ Δ A2 관련 결정 변경 1건 (E04)  → A2 E01 상위 관련은 구체화 이력 · 네 번째 관계 아님",
+        "actionKeys": []
+      },
+      "assertionScopes": {
+        "changed": "input9-reference-and-regression",
+        "A2OwnedPending": "input9-reference-and-regression",
+        "localA2Action": "input9-reference-and-regression",
+        "pendingSurvivesReturn": "input9-reference-and-regression",
+        "staysCollapsed": "input9-reference-and-regression",
+        "collapsedFocusRoundtrip": "input9-reference-and-regression",
+        "pendingSurvivesFocusRoundtrip": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-03",
+      "scene": 3,
+      "location": "L1 A2 row only",
+      "status": "FAIL",
+      "checks": {
+        "changed": true,
+        "A2OwnedPending": false,
+        "localA2Action": true,
+        "arrivesAtCurrentA2Unresolved": true,
+        "viewRestored": true,
+        "A4NoPropagation": true,
+        "A6NoPropagation": true,
+        "threeRelations": true
+      },
+      "observed": {
+        "localText": "A2  대여 신청 — B  Δ 결정 변경",
+        "actionKeys": [
+          "cl-A2"
+        ]
+      },
+      "assertionScopes": {
+        "changed": "input9-reference-and-regression",
+        "A2OwnedPending": "input9-reference-and-regression",
+        "localA2Action": "input9-reference-and-regression",
+        "arrivesAtCurrentA2Unresolved": "input9-reference-and-regression",
+        "viewRestored": "input9-reference-and-regression",
+        "A4NoPropagation": "input9-reference-and-regression",
+        "A6NoPropagation": "input9-reference-and-regression",
+        "threeRelations": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-03",
+      "scene": 3,
+      "location": "L2 A2 row only",
+      "status": "FAIL",
+      "checks": {
+        "changed": false,
+        "A2OwnedPending": false,
+        "localA2Action": true,
+        "arrivesAtCurrentA2Unresolved": true,
+        "viewRestored": true,
+        "A4NoPropagation": true,
+        "A6NoPropagation": true,
+        "threeRelations": true
+      },
+      "observed": {
+        "localText": "A2  대여 신청  →",
+        "actionKeys": [
+          "ins-ep-A2"
+        ]
+      },
+      "assertionScopes": {
+        "changed": "input9-reference-and-regression",
+        "A2OwnedPending": "input9-reference-and-regression",
+        "localA2Action": "input9-reference-and-regression",
+        "arrivesAtCurrentA2Unresolved": "input9-reference-and-regression",
+        "viewRestored": "input9-reference-and-regression",
+        "A4NoPropagation": "input9-reference-and-regression",
+        "A6NoPropagation": "input9-reference-and-regression",
+        "threeRelations": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-03",
+      "scene": 3,
+      "location": "L3 A2 row only",
+      "status": "FAIL",
+      "checks": {
+        "changed": false,
+        "A2OwnedPending": false,
+        "localA2Action": true,
+        "arrivesAtCurrentA2Unresolved": true,
+        "viewRestored": true,
+        "A4NoPropagation": true,
+        "A6NoPropagation": true,
+        "threeRelations": true,
+        "outlineScrollRestored": true
+      },
+      "observed": {
+        "localText": "A2  — B  E03 확인",
+        "actionKeys": [
+          "ol-rel-A2"
+        ]
+      },
+      "assertionScopes": {
+        "changed": "input9-reference-and-regression",
+        "A2OwnedPending": "input9-reference-and-regression",
+        "localA2Action": "input9-reference-and-regression",
+        "arrivesAtCurrentA2Unresolved": "input9-reference-and-regression",
+        "viewRestored": "input9-reference-and-regression",
+        "A4NoPropagation": "input9-reference-and-regression",
+        "A6NoPropagation": "input9-reference-and-regression",
+        "threeRelations": "input9-reference-and-regression",
+        "outlineScrollRestored": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-04",
+      "scene": 3,
+      "location": "B unresolved section only",
+      "status": "FAIL",
+      "checks": {
+        "policyReferenced": true,
+        "ownerA2": true,
+        "localA2Action": false,
+        "returnsB": true,
+        "noRelationMutation": true
+      },
+      "observed": {
+        "localText": "미결 참조 실패 알림 정책 (아직 결정하지 않음) · 소유 A2",
+        "actionKeys": []
+      },
+      "assertionScopes": {
+        "policyReferenced": "input9-reference-and-regression",
+        "ownerA2": "input9-reference-and-regression",
+        "localA2Action": "coordinator-usability-B-direct-action",
+        "returnsB": "input9-reference-and-regression",
+        "noRelationMutation": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-05",
+      "scene": 3,
+      "location": "A4/A6 own fields, view roundtrip and A2",
+      "status": "PASS",
+      "checks": {
+        "A4CardNoPropagation": true,
+        "A4OwnFieldsUnchanged": true,
+        "A6CardNoPropagation": true,
+        "A6OwnFieldsUnchanged": true,
+        "expandRoundtrip": true,
+        "focusA2Unresolved": true,
+        "focusThreeRelations": true,
+        "overviewRestored": true,
+        "unresolvedNotResolved": true,
+        "overviewThreeRelations": true
+      },
+      "observed": {
+        "edges": [
+          "A2-B:confirmed",
+          "A4-B:confirmed",
+          "A6-B:confirmed"
+        ]
+      },
+      "assertionScopes": {
+        "A4CardNoPropagation": "input9-reference-and-regression",
+        "A4OwnFieldsUnchanged": "input9-reference-and-regression",
+        "A6CardNoPropagation": "input9-reference-and-regression",
+        "A6OwnFieldsUnchanged": "input9-reference-and-regression",
+        "expandRoundtrip": "input9-reference-and-regression",
+        "focusA2Unresolved": "input9-reference-and-regression",
+        "focusThreeRelations": "input9-reference-and-regression",
+        "overviewRestored": "input9-reference-and-regression",
+        "unresolvedNotResolved": "input9-reference-and-regression",
+        "overviewThreeRelations": "input9-reference-and-regression"
+      }
+    },
+    {
+      "id": "A9-06-state-only",
+      "scene": 3,
+      "location": "390 generated outline/detail route; no visibility assertion",
+      "status": "FAIL",
+      "checks": {
+        "defaultPaneOutline": true,
+        "bOwnerA2": true,
+        "bDirectA2Route": false,
+        "baselineFixed": true
+      },
+      "observed": {
+        "outlineOwnedPendingRoutePresent": false,
+        "outlineObservationScope": "Optional generic structure row ol-A2 observation only, excluded from mandatory acceptance 9 assertions. Relation row ol-rel-A2 is separately required as L3.",
+        "routeKeys": [],
+        "limit": "Generated markup and event state only; does not establish visible or scroll-reachable access."
+      },
+      "assertionScopes": {
+        "defaultPaneOutline": "input9-reference-and-regression",
+        "bOwnerA2": "input9-reference-and-regression",
+        "bDirectA2Route": "coordinator-usability-B-direct-action",
+        "baselineFixed": "input9-reference-and-regression"
+      }
+    }
+  ],
+  "browser": {
+    "status": "NOT_RUN",
+    "reason": "State/markup checker cannot establish actual 1440/390 visibility, clipping or clickability."
+  }
+}

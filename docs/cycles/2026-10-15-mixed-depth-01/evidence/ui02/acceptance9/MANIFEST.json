@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "evidenceLayer": "Generated-markup/event/state regression in Node stubs; not browser evidence",
+  "v1Recovery": "Exact checker content restored and hash verified. v1 result is a newly timestamped re-execution, not a replacement of the original timestamped result.",
+  "transformPolicy": "Only JSON sourcePath is replaced with a version identifier and existing source hash. Timestamps and observations are retained. Checker files are byte-identical copies.",
+  "files": [
+    {
+      "file": "check.v1-frozen.cjs",
+      "sha256": "8B2E536D82D73FA0E72B76EC07082DA1BFEBB36B02008117177055A103443F2B",
+      "transformedFields": []
+    },
+    {
+      "file": "check.v2-L3.cjs",
+      "sha256": "9F51C7507BB2CE901613B808AEB8461C9BFFE0F9EF97AFF49257DAF2F124A2FF",
+      "transformedFields": []
+    },
+    {
+      "file": "check.I1-I5.fix3.cjs",
+      "sha256": "2CEEEA4775ABD6052DF98CBF9C960F14B9E2912663D959ECABBB418EA704812F",
+      "transformedFields": []
+    },
+    {
+      "file": "results.fix1.v1-reexecution.json",
+      "originalReportSha256": "8AC32F65109FE988D2B6AA35124758FB7E524B2290012CA07180075F4F20F622",
+      "packagedSha256": "90017F4224A3970FF88346B5E9DAD3E0F7B6F5B14D319DD7A382A001CC55532D",
+      "transformedFields": [
+        "sourcePath"
+      ],
+      "executionTimestampUTC": "2026-10-15T14:19:43.945Z"
+    },
+    {
+      "file": "results.fix1.v2-L3.json",
+      "originalReportSha256": "AEB82D466203D219024E24FCACAA151AC5A88454F61B7D2A5EA9B5C796C9C4E4",
+      "packagedSha256": "56150DBA7ECA4DBBBD94B752FF28E75D1C6A6910BE84CF3EB175E584CFBADDF0",
+      "transformedFields": [
+        "sourcePath"
+      ],
+      "executionTimestampUTC": "2026-10-15T14:19:09.203Z"
+    },
+    {
+      "file": "results.fix2.v2-L3.json",
+      "originalReportSha256": "D1088B8A2856A231D39E5944B01B561FD56E5818E73BEE7DA915A3BE40116EDC",
+      "packagedSha256": "A14624B7B7EDA795FABC36C32771CF09DE88B351A29C3921C13FDCCEC23E75E8",
+      "transformedFields": [
+        "sourcePath"
+      ],
+      "executionTimestampUTC": "2026-10-15T14:19:09.230Z"
+    },
+    {
+      "file": "results.fix3.v2-L3.json",
+      "originalReportSha256": "43F581E22456A9A022283A267C0FF203DA99D703283DB448177940C5CF7E530D",
+      "packagedSha256": "294F22E0E6D5064CDA3BEBC1435FE66F6E2305E1EF56AD64BD9816B7FD627757",
+      "transformedFields": [
+        "sourcePath"
+      ],
+      "executionTimestampUTC": "2026-10-15T14:23:18.678Z"
+    },
+    {
+      "file": "results.I1-I5.fix3.json",
+      "originalReportSha256": "DA22F7AAA08D360ECAE3BEC3C6204113DAE259EB2CA650A19DF7B5AEFA5FA5A2",
+      "packagedSha256": "A223E5DFBE6A579238CF8B1F9F8C1463ECD6E48C6E4C2A8CF58D9306F589CD3F",
+      "transformedFields": [
+        "sourcePath"
+      ],
+      "executionTimestampUTC": "2026-10-15T14:23:37.780Z"
+    },
+    {
+      "file": "REPORT.md",
+      "sha256": "129A0780C23A5321DC9246F5456FDB30B439EF7022421CB04C5D974754F6AB7A",
+      "transformedFields": []
+    }
+  ],
+  "existingRegression": {
+    "originalCheckerSha256": "8F03A7BD0AABB485B5D68D9F85DF7E57BFC161BCE492895B51F8419FC630FAC6",
+    "copyPolicy": "Only candidate SHA and input/output path bindings adapted. I1–I5 assertions retained; original checker and its old evidence unchanged."
+  }
+}
