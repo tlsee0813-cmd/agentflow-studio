@@ -23,6 +23,9 @@
 
 [fix1 고정 원본](https://github.com/tlsee0813-cmd/agentflow-studio/tree/0dfadba788e0f2f035bbe51b899b9c02e4260e45/docs/transfer/change-record-07/author-fix1) 14파일/696,425B(12 payload＋manifest2), HTML42,420B/SHA d10e7dca… 보존·원격 원본 바이트 일치. [준비문 정정 확인](2026-10-16-change-record-07/FIX1_SEMANTIC_AUDIT.md). [실제 화면 비평](2026-10-16-change-record-07/VISUAL_REVIEW.md)은 다음 과제를 첫 전체 조망으로 좁혔다. 현재 검사 완료를 뜻하지 않는다.
 
+## 병렬 다음 연구
+[cycle08 범위](2026-10-16-overview-08/BRIEF.md): 같은 실제 표본에서 첫 전체 조망의 정보량과 명시 탐색을 두 Pro에 나눠 연구 중. [Dify 관찰](2026-10-16-overview-08/DIFY_OBSERVATION.md)을 참고하되 다른 공식 UI/오픈소스 메커니즘과 비교한다. 다음 구현은 미배정이며 cycle07 독립 검증 완료를 가정하지 않는다.
+
 ## 직전 결과
 [cycle06 통합 판단](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d17667c1c519492f6edf8ea064a9f87b5d51fc12/docs/cycles/2026-10-16-purpose-06/RESULT.md): 목적→부분 역할→지킬 조건과 명시 왕복을 잠정 유지. 정보 없음/미결정 단정은 fix1에서 교정했다. 독립 단일 6장면/39단언과 별도 비초기 X2 왕복 2경로/16단언은 각각 완료했다. 새 하위 기능을 만들어 채우지 않았으며 입력 N01은 개발자 합성 초기 구상이다.
 [고정 공유 증거 목록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/965b44eabbe6966284e27e0bf0192eb6b83868b9/docs/transfer/README.md). 대표 PNG·HTML·검사 코드·실패·종료·manifest는 GitHub에서 회수한다. 같은 검사 중복 착수 없음.
