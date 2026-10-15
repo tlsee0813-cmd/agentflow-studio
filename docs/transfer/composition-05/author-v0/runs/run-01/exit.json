@@ -1,0 +1,12 @@
+{
+ "cmd": [
+  "/usr/bin/python3",
+  "-I",
+  "/home/claude/author-v0/checks/author_check.py",
+  "/home/claude/author-v0/runs/run-01/snapshot/composition-study.html",
+  "/home/claude/author-v0/runs/run-01"
+ ],
+ "started": "2026-10-15T19:13:21.903441+00:00",
+ "finished": "2026-10-15T19:13:35.773017+00:00",
+ "child_pid_exit_code": 1
+}

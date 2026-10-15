@@ -1,0 +1,115 @@
+{
+ "note": "cycle05 author-v0 원본 묶음. 이 manifest 파일 자체는 목록에 없음.",
+ "files": [
+  {
+   "path": "README.md",
+   "bytes": 6821,
+   "sha256": "4988038a5833a2ef46fb691d3cb78dec2afb0b534ca28cb464ad858eecf1a1a4"
+  },
+  {
+   "path": "checks/author_check.py",
+   "bytes": 24253,
+   "sha256": "7ef9b8a81bc1cf9cb5180da2661893887b65844869e266f598473b541f5661a4"
+  },
+  {
+   "path": "checks/run_checks.py",
+   "bytes": 1040,
+   "sha256": "a10a0a8fbdcdb197339c3f3041dd5d329b0e5d02dae2542914e421f6c4355d33"
+  },
+  {
+   "path": "composition-study.html",
+   "bytes": 46924,
+   "sha256": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6"
+  },
+  {
+   "path": "runs/run-01/NOTE.md",
+   "bytes": 589,
+   "sha256": "c29011e789e1c65722e9ce949552df34f3ca9e3a18c8413e2e3826ea5b0c0bc7"
+  },
+  {
+   "path": "runs/run-01/exit.json",
+   "bytes": 332,
+   "sha256": "9edf6dca45b26555dad849abf03ac14ec7ce3879b3f038611fad7903916c2fa6"
+  },
+  {
+   "path": "runs/run-01/results.json",
+   "bytes": 28548,
+   "sha256": "1c69f90f884c1c086d2373d5183fc1d0f4fb3f7c873036cc5d5b65aadb720254"
+  },
+  {
+   "path": "runs/run-01/run.log",
+   "bytes": 16808,
+   "sha256": "f2944242fa28cfa89b0781759fd0ed0f073c74f197eb8b94438a20aa860073bd"
+  },
+  {
+   "path": "runs/run-01/snapshot/author_check.py",
+   "bytes": 24201,
+   "sha256": "4c3e2dc921083f2b473cb5fb1075afe6967d46364aeb240ade2be60287f8787a"
+  },
+  {
+   "path": "runs/run-01/snapshot/composition-study.html",
+   "bytes": 46924,
+   "sha256": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6"
+  },
+  {
+   "path": "runs/run-01/snapshot/run_checks.py",
+   "bytes": 1040,
+   "sha256": "a10a0a8fbdcdb197339c3f3041dd5d329b0e5d02dae2542914e421f6c4355d33"
+  },
+  {
+   "path": "runs/run-02/A-1440-map-mixed-aggregate.png",
+   "bytes": 119742,
+   "sha256": "bade855a48328fa74c5ff1b578f4e77e3df621c48a4e70c8e414f9a832fad1eb"
+  },
+  {
+   "path": "runs/run-02/B-1440-focus-evidence-open.png",
+   "bytes": 196519,
+   "sha256": "f3074a2ca257f358421e69bcdca27a2492376bed7a58873d1d62e6078bfe8d81"
+  },
+  {
+   "path": "runs/run-02/C-1440-prep-edited.png",
+   "bytes": 181474,
+   "sha256": "c28a7d0b1f8c94c0277d8c2b95c6ad918f2d1b30d06c60aae16887b944186d31"
+  },
+  {
+   "path": "runs/run-02/D-390-map-after-return.png",
+   "bytes": 75702,
+   "sha256": "10cd86dbc77f49f6406bfc196885122cbfe26866083cba3b75f967064870ab42"
+  },
+  {
+   "path": "runs/run-02/E-390-prep-after-reentry.png",
+   "bytes": 69826,
+   "sha256": "5ae361420298b3c6bcd5f6230c1a9e20d194d1042ba63fbe2bea56f23805d84b"
+  },
+  {
+   "path": "runs/run-02/exit.json",
+   "bytes": 332,
+   "sha256": "220c0aa8330c43d3b5f6b4910a03400db0f1e325365925e188572400060a3ab8"
+  },
+  {
+   "path": "runs/run-02/results.json",
+   "bytes": 28644,
+   "sha256": "3a29e20141aa144ba069948eb14abd37683d14804a214b84c4c7d84d69897f9a"
+  },
+  {
+   "path": "runs/run-02/run.log",
+   "bytes": 16904,
+   "sha256": "be2052d033e89ce6c907408259548dce65dd631d0f49124a9e4f2903052847a2"
+  },
+  {
+   "path": "runs/run-02/snapshot/author_check.py",
+   "bytes": 24253,
+   "sha256": "7ef9b8a81bc1cf9cb5180da2661893887b65844869e266f598473b541f5661a4"
+  },
+  {
+   "path": "runs/run-02/snapshot/composition-study.html",
+   "bytes": 46924,
+   "sha256": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6"
+  },
+  {
+   "path": "runs/run-02/snapshot/run_checks.py",
+   "bytes": 1040,
+   "sha256": "a10a0a8fbdcdb197339c3f3041dd5d329b0e5d02dae2542914e421f6c4355d33"
+  }
+ ]
+}

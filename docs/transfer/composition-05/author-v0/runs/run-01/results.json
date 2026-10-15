@@ -1,0 +1,1468 @@
+{
+ "meta": {
+  "started": "2026-10-15T19:13:22.242144+00:00",
+  "html": "composition-study.html",
+  "file_sha256": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6",
+  "file_bytes": 46924,
+  "url": "http://127.0.0.1:45121/composition-study.html",
+  "http": {
+   "1440x900": {
+    "status": 200,
+    "bytes": 46924,
+    "sha": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6"
+   },
+   "390x844": {
+    "status": 200,
+    "bytes": 46924,
+    "sha": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6"
+   }
+  },
+  "errors": {
+   "1440x900": [],
+   "390x844": []
+  },
+  "browser": "chromium 141.0.7390.37 (Playwright, headless)",
+  "server_exit": -15,
+  "finished": "2026-10-15T19:13:35.717029+00:00",
+  "fatal": null,
+  "total": 72,
+  "failed": 4,
+  "scenes_note": "S1~S5 장면 단위 단언. 안내 문구 존재만 보는 단언은 넣지 않음."
+ },
+ "checks": [
+  {
+   "size": "1440x900",
+   "scene": "S0",
+   "check": "첫 HTTP 응답 본문 SHA = 원본 파일 SHA",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 46924,
+    "sha": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6"
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "초기 깊이 (요청 맥락 접힘·전달할 내용 펼침·결과 연결 접힘)",
+   "status": "PASS",
+   "detail": {
+    "G2": 0,
+    "G3": 1,
+    "G4": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "관계 실제 끝점·집계 (초기)",
+   "status": "PASS",
+   "detail": {
+    "depth": {
+     "G2": 0,
+     "G3": 1,
+     "G4": 0
+    },
+    "bundles": [
+     [
+      "G1",
+      "G2",
+      [
+       "R1"
+      ]
+     ],
+     [
+      "G2",
+      "C31",
+      [
+       "R2"
+      ]
+     ],
+     [
+      "G2",
+      "C32",
+      [
+       "R3"
+      ]
+     ],
+     [
+      "C32",
+      "G5",
+      [
+       "R4"
+      ]
+     ],
+     [
+      "G5",
+      "G4",
+      [
+       "R5"
+      ]
+     ],
+     [
+      "G2",
+      "G4",
+      [
+       "R6"
+      ]
+     ]
+    ],
+    "problems": []
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "변경 소유는 작업문과 미리보기 한 곳 (초기)",
+   "status": "PASS",
+   "detail": {
+    "kidChg": [
+     "n-C32"
+    ],
+    "kchg": 1,
+    "grpChg": 0,
+    "agg": {
+     "G2": "",
+     "G3": null,
+     "G4": ""
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "가로 넘침 없음 (지도)",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "body": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "두 영역을 서로 다르게 직접 조정 (다른 영역 불변)",
+   "status": "PASS",
+   "detail": {
+    "G2": 1,
+    "G3": 0,
+    "G4": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "관계 실제 끝점·집계 (요청 맥락 펼침·전달할 내용 접힘)",
+   "status": "PASS",
+   "detail": {
+    "depth": {
+     "G2": 1,
+     "G3": 0,
+     "G4": 0
+    },
+    "bundles": [
+     [
+      "G1",
+      "C21",
+      [
+       "R1"
+      ]
+     ],
+     [
+      "C21",
+      "G3",
+      [
+       "R2",
+       "R3"
+      ]
+     ],
+     [
+      "G3",
+      "G5",
+      [
+       "R4"
+      ]
+     ],
+     [
+      "G5",
+      "G4",
+      [
+       "R5"
+      ]
+     ],
+     [
+      "C21",
+      "G4",
+      [
+       "R6"
+      ]
+     ]
+    ],
+    "problems": []
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "변경 소유는 작업문과 미리보기 한 곳 (전달할 내용 접힘)",
+   "status": "PASS",
+   "detail": {
+    "kidChg": [
+     "n-C32"
+    ],
+    "kchg": 1,
+    "grpChg": 0,
+    "agg": {
+     "G2": null,
+     "G3": "안에 바뀐 부분 · 작업문과 미리보기\n세부 2개 접힘 · 묶음 전체 변경 아님",
+     "G4": ""
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "집계선 클릭 → 실제 관계 2개와 실제 끝 표시",
+   "status": "PASS",
+   "detail": {
+    "clickPoint": {
+     "rels": "R2 R3",
+     "x": 482.85,
+     "y": 296.85001373291016
+    },
+    "elementAtPoint": "hit",
+    "panelHead": "모아 그린 선 · 원문 관계 2개\n이 선에 담긴 실제 관계\n\n접힌 묶음 때문에 같은 자리로 모였을 뿐, 관계는 각각 따로입니다.\n\nR2요청 사본\n실제 끝: 새 요청의 배경 고정 (‹요청 맥락› 안) → AI 입력 (‹전달할 내용› 안)\n이 관계만 보기\nR3요청 사본\n실제 끝: 새 요청의"
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "펼침(높이 변화) 뒤 선택 유지",
+   "status": "PASS",
+   "detail": "{\"t\":\"bundle\",\"ids\":[\"R2\",\"R3\"]}"
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "관계 실제 끝점·집계 (전달할 내용 다시 펼침)",
+   "status": "PASS",
+   "detail": {
+    "depth": {
+     "G2": 1,
+     "G3": 1,
+     "G4": 0
+    },
+    "bundles": [
+     [
+      "G1",
+      "C21",
+      [
+       "R1"
+      ]
+     ],
+     [
+      "C21",
+      "C31",
+      [
+       "R2"
+      ]
+     ],
+     [
+      "C21",
+      "C32",
+      [
+       "R3"
+      ]
+     ],
+     [
+      "C32",
+      "G5",
+      [
+       "R4"
+      ]
+     ],
+     [
+      "G5",
+      "G4",
+      [
+       "R5"
+      ]
+     ],
+     [
+      "C21",
+      "G4",
+      [
+       "R6"
+      ]
+     ]
+    ],
+    "problems": []
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S1",
+   "check": "변경 소유는 작업문과 미리보기 한 곳 (다시 펼침)",
+   "status": "PASS",
+   "detail": {
+    "kidChg": [
+     "n-C32"
+    ],
+    "kchg": 1,
+    "grpChg": 0,
+    "agg": {
+     "G2": null,
+     "G3": null,
+     "G4": ""
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S4",
+   "check": "진입 전 상태가 비초기 위치·비기본 배율",
+   "status": "PASS",
+   "detail": {
+    "sl": 234,
+    "st": 0,
+    "mainSt": 0,
+    "scale": 1.15,
+    "depth": {
+     "G2": 1,
+     "G3": 1,
+     "G4": 0
+    },
+    "pressed": [
+     "C32"
+    ],
+    "rect": {
+     "x": 431.8499755859375,
+     "y": 293.38751220703125,
+     "w": 273.70001220703125,
+     "h": 64.11248779296875
+    },
+    "active": "zIn",
+    "mapVisible": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S5",
+   "check": "선택 설명에서 관계(R3·R4)와 ‘이 부분 보기’ 접근",
+   "status": "PASS",
+   "detail": {
+    "mainSt": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S4",
+   "check": "집중: 상위 묶음 한 줄과 바깥 실제 연결 R3·R4 유지",
+   "status": "PASS",
+   "detail": {
+    "focusing": true,
+    "rail": "상위 묶음 · AI 제안\n전달할 내용\n함께 묶인 세부: AI 입력\n바깥 연결 · 원문 계약\n← 받음 새 요청의 배경 고정\n‹요청 맥락› 안 · 요청 사본 · R3\n→ 보냄 저장·복구\n묶음 · 내보내기 기록의 사본 · R4",
+    "active": "fBack"
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S5",
+   "check": "가로 넘침 없음 (집중)",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "body": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S2",
+   "check": "실제 휠로 비초기 읽기 위치",
+   "status": "PASS",
+   "detail": {
+    "scrollTop": 520
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S5",
+   "check": "스크롤 중에도 전체 복귀·준비 버튼 화면 안",
+   "status": "PASS",
+   "detail": {
+    "fBack": {
+     "top": 109.75,
+     "bottom": 146.75,
+     "left": 20,
+     "right": 136.421875,
+     "ok": true
+    },
+    "fPrep": {
+     "top": 109.75,
+     "bottom": 146.75,
+     "left": 1302,
+     "right": 1420,
+     "ok": true
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S2",
+   "check": "근거 열림 (인라인)",
+   "status": "PASS",
+   "detail": {
+    "key": "C32-F3",
+    "peek": true,
+    "exp": "true",
+    "top": 520
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S2",
+   "check": "근거 닫기(button) 후 위치·초점·제거",
+   "status": "PASS",
+   "detail": {
+    "before_top": 520,
+    "before_rect": {
+     "x": 503,
+     "y": 170.6875,
+     "w": 682,
+     "h": 46.1875
+    },
+    "after": {
+     "peek": false,
+     "anyPeek": 0,
+     "exp": "false",
+     "activeKey": "C32-F3",
+     "top": 520,
+     "pr": {
+      "x": 503,
+      "y": 170.6875,
+      "w": 682,
+      "h": 46.1875
+     }
+    },
+    "closeBtnInView": {
+     "top": 297.125,
+     "bottom": 323.125,
+     "left": 616.0625,
+     "right": 687.09375,
+     "ok": true
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S2",
+   "check": "같은 근거 재열기",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1440x900",
+   "scene": "S2",
+   "check": "근거 닫기(escape) 후 위치·초점·제거",
+   "status": "PASS",
+   "detail": {
+    "before_top": 520,
+    "before_rect": {
+     "x": 503,
+     "y": 170.6875,
+     "w": 682,
+     "h": 46.1875
+    },
+    "after": {
+     "peek": false,
+     "anyPeek": 0,
+     "exp": "false",
+     "activeKey": "C32-F3",
+     "top": 520,
+     "pr": {
+      "x": 503,
+      "y": 170.6875,
+      "w": 682,
+      "h": 46.1875
+     }
+    },
+    "closeBtnInView": null
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S3",
+   "check": "준비문 열림 (선택한 작업문 배경 동작에 한정된 대상)",
+   "status": "PASS",
+   "detail": {
+    "open": true,
+    "active": "pf-target",
+    "title": "작업문과 미리보기",
+    "target": "작업문과 미리보기 — 작업문·미리보기·Markdown에서 목적을 분리된 배경 블록으로 넣는 동작만 확인한다. 다른 기능을 구현하라는 요청이 아니다."
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S5",
+   "check": "가로 넘침 없음 (준비문)",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "body": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S3",
+   "check": "직접 편집 반영과 ‘직접 고침’ 표시",
+   "status": "PASS",
+   "detail": {
+    "target": "작성자검사: 직접 고친 대상 문장",
+    "keep": "- 목적은 분리된 배경 블록 안에만 넣고, 요청·출처·기준·지시로 쓰지 않는다.\n- 다시 만들기·다시 내보내기·구상 수정으로 이미 맡긴 사본을 바꾸지 않는다. 다음 명시 새 요청만 최신.\n- 배경 블록은 이번 요청 범위와 구분하고, 배경 전체 구현이나 미정 사항 확정을 지시하지 않는다. 사본이 없거나 비면 블록을 넣지 않는다.\n- 배경을 출처·기준·새 결정으로 올리지 않는다. 직접 고친 범위·다음 단계·검사가 우선한다.\n- 구상이 바뀌어도 기존 사본은 그대로라고 안내한다. 옛 형식은 null로 옮기고 소급하지 않는다.\n- 작성자검사: 직접 추가한 조건",
+    "marks": [
+     "target",
+     "keep"
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S3",
+   "check": "준비문 하단(보내지 않음 안내) 실제 휠로 도달",
+   "status": "PASS",
+   "detail": {
+    "scrollTop": 0,
+    "scrollable": false,
+    "noteInView": true,
+    "note": "이 준비문은 어디에도 보내지 않았습니다. 전달·수락·완료 상태가 아닙니다. 직접 고친 문장은 닫았다 다시 열어도, 전체 지도로 돌아가도 그대로 남습니다."
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S3",
+   "check": "닫기 버튼 → 출발 버튼 초점·읽기 위치",
+   "status": "PASS",
+   "detail": {
+    "before": 520,
+    "hidden": true,
+    "active": "fPrep",
+    "top": 520
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S3",
+   "check": "재열기에서 직접 고친 문장 보존",
+   "status": "PASS",
+   "detail": {
+    "reopenStartScrollTop": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S3",
+   "check": "Escape 닫기 → 출발 버튼 초점·읽기 위치",
+   "status": "PASS",
+   "detail": {
+    "before": 520,
+    "hidden": true,
+    "active": "fPrep",
+    "top": 520
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S4",
+   "check": "전체 복귀: 위치·배율·선택·깊이·실제 대상 rect",
+   "status": "PASS",
+   "detail": {
+    "pre": {
+     "sl": 234,
+     "st": 0,
+     "mainSt": 0,
+     "scale": 1.15,
+     "depth": {
+      "G2": 1,
+      "G3": 1,
+      "G4": 0
+     },
+     "pressed": [
+      "C32"
+     ],
+     "rect": {
+      "x": 431.8499755859375,
+      "y": 293.38751220703125,
+      "w": 273.70001220703125,
+      "h": 64.11248779296875
+     },
+     "active": "zIn",
+     "mapVisible": true
+    },
+    "post": {
+     "sl": 234,
+     "st": 0,
+     "mainSt": 0,
+     "scale": 1.15,
+     "depth": {
+      "G2": 1,
+      "G3": 1,
+      "G4": 0
+     },
+     "pressed": [
+      "C32"
+     ],
+     "rect": {
+      "x": 431.8499755859375,
+      "y": 293.38751220703125,
+      "w": 273.70001220703125,
+      "h": 64.11248779296875
+     },
+     "active": "n-C32",
+     "mapVisible": true
+    },
+    "diffs": {}
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S4",
+   "check": "복귀 초점이 선택한 작업문과 미리보기",
+   "status": "FAIL",
+   "detail": "n-C32"
+  },
+  {
+   "size": "1440x900",
+   "scene": "S4",
+   "check": "관계 실제 끝점·집계 (복귀 후)",
+   "status": "PASS",
+   "detail": {
+    "depth": {
+     "G2": 1,
+     "G3": 1,
+     "G4": 0
+    },
+    "bundles": [
+     [
+      "G1",
+      "C21",
+      [
+       "R1"
+      ]
+     ],
+     [
+      "C21",
+      "C31",
+      [
+       "R2"
+      ]
+     ],
+     [
+      "C21",
+      "C32",
+      [
+       "R3"
+      ]
+     ],
+     [
+      "C32",
+      "G5",
+      [
+       "R4"
+      ]
+     ],
+     [
+      "G5",
+      "G4",
+      [
+       "R5"
+      ]
+     ],
+     [
+      "C21",
+      "G4",
+      [
+       "R6"
+      ]
+     ]
+    ],
+    "problems": []
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S3",
+   "check": "전체 복귀 후 재진입에도 직접 고친 준비문 보존",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1440x900",
+   "scene": "S4",
+   "check": "두 번째 복귀: 누적·상쇄 없음",
+   "status": "FAIL",
+   "detail": {
+    "post2": {
+     "sl": 234,
+     "st": 0,
+     "mainSt": 0,
+     "scale": 1.15,
+     "depth": {
+      "G2": 1,
+      "G3": 1,
+      "G4": 0
+     },
+     "pressed": [
+      "C32"
+     ],
+     "rect": {
+      "x": 431.8499755859375,
+      "y": 293.38751220703125,
+      "w": 273.70001220703125,
+      "h": 64.11248779296875
+     },
+     "active": "n-C32",
+     "mapVisible": true
+    },
+    "diffs": {}
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S5",
+   "check": "가로 넘침 없음 (복귀 후 지도)",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "body": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "scene": "S0",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  },
+  {
+   "size": "390x844",
+   "scene": "S0",
+   "check": "첫 HTTP 응답 본문 SHA = 원본 파일 SHA",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 46924,
+    "sha": "5e937f9e9cab6143f7eee68aac90d9ae0d457513d82ec0ebd450daff797831d6"
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "초기 깊이 (요청 맥락 접힘·전달할 내용 펼침·결과 연결 접힘)",
+   "status": "PASS",
+   "detail": {
+    "G2": 0,
+    "G3": 1,
+    "G4": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "관계 실제 끝점·집계 (초기)",
+   "status": "PASS",
+   "detail": {
+    "depth": {
+     "G2": 0,
+     "G3": 1,
+     "G4": 0
+    },
+    "bundles": [
+     [
+      "G1",
+      "G2",
+      [
+       "R1"
+      ]
+     ],
+     [
+      "G2",
+      "C31",
+      [
+       "R2"
+      ]
+     ],
+     [
+      "G2",
+      "C32",
+      [
+       "R3"
+      ]
+     ],
+     [
+      "C32",
+      "G5",
+      [
+       "R4"
+      ]
+     ],
+     [
+      "G5",
+      "G4",
+      [
+       "R5"
+      ]
+     ],
+     [
+      "G2",
+      "G4",
+      [
+       "R6"
+      ]
+     ]
+    ],
+    "problems": []
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "변경 소유는 작업문과 미리보기 한 곳 (초기)",
+   "status": "PASS",
+   "detail": {
+    "kidChg": [
+     "n-C32"
+    ],
+    "kchg": 1,
+    "grpChg": 0,
+    "agg": {
+     "G2": "",
+     "G3": null,
+     "G4": ""
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "가로 넘침 없음 (지도)",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "body": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "두 영역을 서로 다르게 직접 조정 (다른 영역 불변)",
+   "status": "PASS",
+   "detail": {
+    "G2": 1,
+    "G3": 0,
+    "G4": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "관계 실제 끝점·집계 (요청 맥락 펼침·전달할 내용 접힘)",
+   "status": "PASS",
+   "detail": {
+    "depth": {
+     "G2": 1,
+     "G3": 0,
+     "G4": 0
+    },
+    "bundles": [
+     [
+      "G1",
+      "C21",
+      [
+       "R1"
+      ]
+     ],
+     [
+      "C21",
+      "G3",
+      [
+       "R2",
+       "R3"
+      ]
+     ],
+     [
+      "G3",
+      "G5",
+      [
+       "R4"
+      ]
+     ],
+     [
+      "G5",
+      "G4",
+      [
+       "R5"
+      ]
+     ],
+     [
+      "C21",
+      "G4",
+      [
+       "R6"
+      ]
+     ]
+    ],
+    "problems": []
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "변경 소유는 작업문과 미리보기 한 곳 (전달할 내용 접힘)",
+   "status": "PASS",
+   "detail": {
+    "kidChg": [
+     "n-C32"
+    ],
+    "kchg": 1,
+    "grpChg": 0,
+    "agg": {
+     "G2": null,
+     "G3": "안에 바뀐 부분 · 작업문과 미리보기\n세부 2개 접힘 · 묶음 전체 변경 아님",
+     "G4": ""
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "집계선 클릭 → 실제 관계 2개와 실제 끝 표시",
+   "status": "PASS",
+   "detail": {
+    "clickPoint": {
+     "rels": "R2 R3",
+     "x": 294.328369140625,
+     "y": 328.77252197265625
+    },
+    "elementAtPoint": "hit",
+    "panelHead": "모아 그린 선 · 원문 관계 2개\n이 선에 담긴 실제 관계\n\n접힌 묶음 때문에 같은 자리로 모였을 뿐, 관계는 각각 따로입니다.\n\nR2요청 사본\n실제 끝: 새 요청의 배경 고정 (‹요청 맥락› 안) → AI 입력 (‹전달할 내용› 안)\n이 관계만 보기\nR3요청 사본\n실제 끝: 새 요청의"
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "펼침(높이 변화) 뒤 선택 유지",
+   "status": "PASS",
+   "detail": "{\"t\":\"bundle\",\"ids\":[\"R2\",\"R3\"]}"
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "관계 실제 끝점·집계 (전달할 내용 다시 펼침)",
+   "status": "PASS",
+   "detail": {
+    "depth": {
+     "G2": 1,
+     "G3": 1,
+     "G4": 0
+    },
+    "bundles": [
+     [
+      "G1",
+      "C21",
+      [
+       "R1"
+      ]
+     ],
+     [
+      "C21",
+      "C31",
+      [
+       "R2"
+      ]
+     ],
+     [
+      "C21",
+      "C32",
+      [
+       "R3"
+      ]
+     ],
+     [
+      "C32",
+      "G5",
+      [
+       "R4"
+      ]
+     ],
+     [
+      "G5",
+      "G4",
+      [
+       "R5"
+      ]
+     ],
+     [
+      "C21",
+      "G4",
+      [
+       "R6"
+      ]
+     ]
+    ],
+    "problems": []
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S1",
+   "check": "변경 소유는 작업문과 미리보기 한 곳 (다시 펼침)",
+   "status": "PASS",
+   "detail": {
+    "kidChg": [
+     "n-C32"
+    ],
+    "kchg": 1,
+    "grpChg": 0,
+    "agg": {
+     "G2": null,
+     "G3": null,
+     "G4": ""
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S4",
+   "check": "진입 전 상태가 비초기 위치·비기본 배율",
+   "status": "PASS",
+   "detail": {
+    "sl": 13,
+    "st": 379,
+    "mainSt": 0,
+    "scale": 1.15,
+    "depth": {
+     "G2": 1,
+     "G3": 1,
+     "G4": 0
+    },
+    "pressed": [
+     "C32"
+    ],
+    "rect": {
+     "x": 6.549999237060547,
+     "y": 443.88751220703125,
+     "w": 273.70001220703125,
+     "h": 64.11248779296875
+    },
+    "active": "zIn",
+    "mapVisible": true
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S5",
+   "check": "선택 설명에서 관계(R3·R4)와 ‘이 부분 보기’ 접근",
+   "status": "PASS",
+   "detail": {
+    "mainSt": 110
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S4",
+   "check": "집중: 상위 묶음 한 줄과 바깥 실제 연결 R3·R4 유지",
+   "status": "PASS",
+   "detail": {
+    "focusing": true,
+    "rail": "상위 묶음 · AI 제안\n전달할 내용\n함께 묶인 세부: AI 입력\n바깥 연결 · 원문 계약\n← 받음 새 요청의 배경 고정\n‹요청 맥락› 안 · 요청 사본 · R3\n→ 보냄 저장·복구\n묶음 · 내보내기 기록의 사본 · R4",
+    "active": "fBack"
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S5",
+   "check": "가로 넘침 없음 (집중)",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "body": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S2",
+   "check": "실제 휠로 비초기 읽기 위치",
+   "status": "PASS",
+   "detail": {
+    "scrollTop": 520
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S5",
+   "check": "스크롤 중에도 전체 복귀·준비 버튼 화면 안",
+   "status": "PASS",
+   "detail": {
+    "fBack": {
+     "top": 188.25,
+     "bottom": 225.25,
+     "left": 12,
+     "right": 128.421875,
+     "ok": true
+    },
+    "fPrep": {
+     "top": 188.25,
+     "bottom": 225.25,
+     "left": 260,
+     "right": 378,
+     "ok": true
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S2",
+   "check": "근거 열림 (인라인)",
+   "status": "PASS",
+   "detail": {
+    "key": "C32-F1",
+    "peek": true,
+    "exp": "true",
+    "top": 520
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S2",
+   "check": "근거 닫기(button) 후 위치·초점·제거",
+   "status": "PASS",
+   "detail": {
+    "before_top": 520,
+    "before_rect": {
+     "x": 35,
+     "y": 266.25,
+     "w": 320,
+     "h": 69.28125
+    },
+    "after": {
+     "peek": false,
+     "anyPeek": 0,
+     "exp": "false",
+     "activeKey": "C32-F1",
+     "top": 520,
+     "pr": {
+      "x": 35,
+      "y": 266.25,
+      "w": 320,
+      "h": 69.28125
+     }
+    },
+    "closeBtnInView": {
+     "top": 435.28125,
+     "bottom": 461.28125,
+     "left": 148.0625,
+     "right": 219.09375,
+     "ok": true
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S2",
+   "check": "같은 근거 재열기",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "390x844",
+   "scene": "S2",
+   "check": "근거 닫기(escape) 후 위치·초점·제거",
+   "status": "PASS",
+   "detail": {
+    "before_top": 520,
+    "before_rect": {
+     "x": 35,
+     "y": 266.25,
+     "w": 320,
+     "h": 69.28125
+    },
+    "after": {
+     "peek": false,
+     "anyPeek": 0,
+     "exp": "false",
+     "activeKey": "C32-F1",
+     "top": 520,
+     "pr": {
+      "x": 35,
+      "y": 266.25,
+      "w": 320,
+      "h": 69.28125
+     }
+    },
+    "closeBtnInView": null
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S3",
+   "check": "준비문 열림 (선택한 작업문 배경 동작에 한정된 대상)",
+   "status": "PASS",
+   "detail": {
+    "open": true,
+    "active": "pf-target",
+    "title": "작업문과 미리보기",
+    "target": "작업문과 미리보기 — 작업문·미리보기·Markdown에서 목적을 분리된 배경 블록으로 넣는 동작만 확인한다. 다른 기능을 구현하라는 요청이 아니다."
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S5",
+   "check": "가로 넘침 없음 (준비문)",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "body": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S3",
+   "check": "직접 편집 반영과 ‘직접 고침’ 표시",
+   "status": "PASS",
+   "detail": {
+    "target": "작성자검사: 직접 고친 대상 문장",
+    "keep": "- 목적은 분리된 배경 블록 안에만 넣고, 요청·출처·기준·지시로 쓰지 않는다.\n- 다시 만들기·다시 내보내기·구상 수정으로 이미 맡긴 사본을 바꾸지 않는다. 다음 명시 새 요청만 최신.\n- 배경 블록은 이번 요청 범위와 구분하고, 배경 전체 구현이나 미정 사항 확정을 지시하지 않는다. 사본이 없거나 비면 블록을 넣지 않는다.\n- 배경을 출처·기준·새 결정으로 올리지 않는다. 직접 고친 범위·다음 단계·검사가 우선한다.\n- 구상이 바뀌어도 기존 사본은 그대로라고 안내한다. 옛 형식은 null로 옮기고 소급하지 않는다.\n- 작성자검사: 직접 추가한 조건",
+    "marks": [
+     "target",
+     "keep"
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S3",
+   "check": "준비문 하단(보내지 않음 안내) 실제 휠로 도달",
+   "status": "PASS",
+   "detail": {
+    "scrollTop": 0,
+    "scrollable": false,
+    "noteInView": true,
+    "note": "이 준비문은 어디에도 보내지 않았습니다. 전달·수락·완료 상태가 아닙니다. 직접 고친 문장은 닫았다 다시 열어도, 전체 지도로 돌아가도 그대로 남습니다."
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S3",
+   "check": "닫기 버튼 → 출발 버튼 초점·읽기 위치",
+   "status": "PASS",
+   "detail": {
+    "before": 520,
+    "hidden": true,
+    "active": "fPrep",
+    "top": 520
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S3",
+   "check": "재열기에서 직접 고친 문장 보존",
+   "status": "PASS",
+   "detail": {
+    "reopenStartScrollTop": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S3",
+   "check": "Escape 닫기 → 출발 버튼 초점·읽기 위치",
+   "status": "PASS",
+   "detail": {
+    "before": 520,
+    "hidden": true,
+    "active": "fPrep",
+    "top": 520
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S4",
+   "check": "전체 복귀: 위치·배율·선택·깊이·실제 대상 rect",
+   "status": "PASS",
+   "detail": {
+    "pre": {
+     "sl": 13,
+     "st": 379,
+     "mainSt": 110,
+     "scale": 1.15,
+     "depth": {
+      "G2": 1,
+      "G3": 1,
+      "G4": 0
+     },
+     "pressed": [
+      "C32"
+     ],
+     "rect": {
+      "x": 6.549999237060547,
+      "y": 333.88751220703125,
+      "w": 273.70001220703125,
+      "h": 64.11248779296875
+     },
+     "active": "zIn",
+     "mapVisible": true
+    },
+    "post": {
+     "sl": 13,
+     "st": 379,
+     "mainSt": 110,
+     "scale": 1.15,
+     "depth": {
+      "G2": 1,
+      "G3": 1,
+      "G4": 0
+     },
+     "pressed": [
+      "C32"
+     ],
+     "rect": {
+      "x": 6.549999237060547,
+      "y": 333.88751220703125,
+      "w": 273.70001220703125,
+      "h": 64.11248779296875
+     },
+     "active": "n-C32",
+     "mapVisible": true
+    },
+    "diffs": {}
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S4",
+   "check": "복귀 초점이 선택한 작업문과 미리보기",
+   "status": "FAIL",
+   "detail": "n-C32"
+  },
+  {
+   "size": "390x844",
+   "scene": "S4",
+   "check": "관계 실제 끝점·집계 (복귀 후)",
+   "status": "PASS",
+   "detail": {
+    "depth": {
+     "G2": 1,
+     "G3": 1,
+     "G4": 0
+    },
+    "bundles": [
+     [
+      "G1",
+      "C21",
+      [
+       "R1"
+      ]
+     ],
+     [
+      "C21",
+      "C31",
+      [
+       "R2"
+      ]
+     ],
+     [
+      "C21",
+      "C32",
+      [
+       "R3"
+      ]
+     ],
+     [
+      "C32",
+      "G5",
+      [
+       "R4"
+      ]
+     ],
+     [
+      "G5",
+      "G4",
+      [
+       "R5"
+      ]
+     ],
+     [
+      "C21",
+      "G4",
+      [
+       "R6"
+      ]
+     ]
+    ],
+    "problems": []
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S3",
+   "check": "전체 복귀 후 재진입에도 직접 고친 준비문 보존",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "390x844",
+   "scene": "S4",
+   "check": "두 번째 복귀: 누적·상쇄 없음",
+   "status": "FAIL",
+   "detail": {
+    "post2": {
+     "sl": 13,
+     "st": 379,
+     "mainSt": 110,
+     "scale": 1.15,
+     "depth": {
+      "G2": 1,
+      "G3": 1,
+      "G4": 0
+     },
+     "pressed": [
+      "C32"
+     ],
+     "rect": {
+      "x": 6.549999237060547,
+      "y": 333.88751220703125,
+      "w": 273.70001220703125,
+      "h": 64.11248779296875
+     },
+     "active": "n-C32",
+     "mapVisible": true
+    },
+    "diffs": {}
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S5",
+   "check": "가로 넘침 없음 (복귀 후 지도)",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "body": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "scene": "S0",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  }
+ ]
+}
