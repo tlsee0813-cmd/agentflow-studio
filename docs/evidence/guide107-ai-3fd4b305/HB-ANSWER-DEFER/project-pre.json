@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_4eae635b-5642-49fe-b1d1-c784022a12c5",
+  "revision": 8,
+  "name": "오프라인 리듬 연습",
+  "sources": [
+    {
+      "id": "S_974ef174-7b3d-4ffc-b4d9-303da64fabbf",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-15T00:44:38.359Z",
+      "taskId": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_fd896da9-83db-4894-905b-c60b5d9f6195",
+      "kind": "manual_decision",
+      "text": "네트워크를 사용하지 않아요.",
+      "at": "2026-10-15T00:44:38.359Z",
+      "taskId": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_8a219c07-c256-4400-bd92-583e4c3d0b04",
+      "kind": "manual_decision",
+      "text": "개인 연습 기록을 저장하지 않아요.",
+      "at": "2026-10-15T00:44:38.360Z",
+      "taskId": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_974ef174-7b3d-4ffc-b4d9-303da64fabbf",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "네트워크를 사용하지 않아요.",
+      "status": "confirmed",
+      "sourceId": "S_fd896da9-83db-4894-905b-c60b5d9f6195",
+      "revision": 7,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "개인 연습 기록을 저장하지 않아요.",
+      "status": "confirmed",
+      "sourceId": "S_8a219c07-c256-4400-bd92-583e4c3d0b04",
+      "revision": 8,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+      "sourceIds": [
+        "S_974ef174-7b3d-4ffc-b4d9-303da64fabbf",
+        "S_fd896da9-83db-4894-905b-c60b5d9f6195",
+        "S_8a219c07-c256-4400-bd92-583e4c3d0b04"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "박자 맞춰 누른 연습 결과 이해",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "박자 맞춰 누른 연습 결과 이해",
+      "at": "2026-10-15T00:44:38.358Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835",
+        "name": "연습 결과",
+        "note": "박자 시각과 그 박자에 대응하는 키 입력 시각을 제공해요. 연습 결과를 이해하고 싶고, 성공 허용오차는 아직 정하지 않았어요.",
+        "archived": false,
+        "createdAt": "2026-10-15T00:44:38.359Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

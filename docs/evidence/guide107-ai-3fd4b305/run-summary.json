@@ -1,0 +1,422 @@
+{
+  "sourceSHA": "3fd4b3055328862c8b8471b356ee5f3772a8deee",
+  "parentSHA": "2931b50938af037a43e20ed7aba69b96ab79843d",
+  "productGenerationAttempts": 17,
+  "providerHTTPResponses": 17,
+  "localUnsent429": 0,
+  "sourceAndPlanUnchanged": true,
+  "mockGenerations": 0,
+  "neutralCalls": 0,
+  "diagnosticRetries": 0,
+  "results": [
+    {
+      "slot": "C1-INITIAL",
+      "caseId": "C1",
+      "public": true,
+      "channel": "INITIAL",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C1-DIRECT-A",
+      "caseId": "C1",
+      "public": true,
+      "channel": "DIRECT_CURRENT_INSTRUCTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C1-DIRECT-B",
+      "caseId": "C1",
+      "public": true,
+      "channel": "DIRECT_CURRENT_INSTRUCTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C2-INITIAL",
+      "caseId": "C2",
+      "public": true,
+      "channel": "INITIAL",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C3-INITIAL",
+      "caseId": "C3",
+      "public": true,
+      "channel": "INITIAL",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C3-DIRECT-UNKNOWN",
+      "caseId": "C3",
+      "public": true,
+      "channel": "DIRECT_CURRENT_INSTRUCTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C3-DIRECT-DEFERRED",
+      "caseId": "C3",
+      "public": true,
+      "channel": "DIRECT_CURRENT_INSTRUCTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C3-DIRECT-LATEST",
+      "caseId": "C3",
+      "public": true,
+      "channel": "DIRECT_CURRENT_INSTRUCTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_d79994a9-f632-4681-9aa5-5a226de4d376"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C4-INITIAL",
+      "caseId": "C4",
+      "public": true,
+      "channel": "INITIAL",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_47e85546-b580-420e-8fba-b09fe584056d"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C4-DIRECT-A",
+      "caseId": "C4",
+      "public": true,
+      "channel": "DIRECT_CURRENT_INSTRUCTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_47e85546-b580-420e-8fba-b09fe584056d"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "C4-DIRECT-B",
+      "caseId": "C4",
+      "public": true,
+      "channel": "DIRECT_CURRENT_INSTRUCTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_47e85546-b580-420e-8fba-b09fe584056d"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "HB-INITIAL",
+      "caseId": "HB",
+      "public": true,
+      "channel": "INITIAL",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": true,
+      "proposal": false,
+      "adoption": null
+    },
+    {
+      "slot": "HB-ANSWER-DEFER",
+      "caseId": "HB",
+      "public": true,
+      "channel": "ACTUAL_QUESTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "HB-ANSWER-WITHIN_100MS",
+      "caseId": "HB",
+      "public": true,
+      "channel": "ACTUAL_QUESTION",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "HA-INITIAL",
+      "caseId": "HA",
+      "public": true,
+      "channel": "INITIAL",
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoption": {
+        "accepted": true,
+        "unsent": true,
+        "draftExact": true,
+        "draftTarget": {
+          "area": "A_d3c1a75a-c072-419c-af02-56cf99f65b76"
+        },
+        "rawCurrentInstructionPreserved": true,
+        "actualQuestionPreserved": true,
+        "actualAnswerPreserved": true,
+        "manualEditPreserved": true,
+        "basesUnchanged": true,
+        "sourcesUnchanged": true,
+        "tasksUnchanged": true,
+        "originalUnchanged": true,
+        "defaultsLabeled": true
+      }
+    },
+    {
+      "slot": "PRIVATE-01-INITIAL",
+      "public": false,
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoptionAccepted": true
+    },
+    {
+      "slot": "PRIVATE-02-INITIAL",
+      "public": false,
+      "productHTTP": 200,
+      "errorCode": null,
+      "question": false,
+      "proposal": true,
+      "adoptionAccepted": true
+    }
+  ],
+  "stop": null,
+  "privateRawEvidenceExcluded": true
+}

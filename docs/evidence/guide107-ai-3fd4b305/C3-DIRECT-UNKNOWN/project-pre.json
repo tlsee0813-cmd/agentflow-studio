@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_4f0a13cb-38b2-4876-a028-5754aa7ed3d0",
+  "revision": 7,
+  "name": "CSV 설문 중복 정책",
+  "sources": [
+    {
+      "id": "S_d4b20342-6318-4dd6-8eee-a1e00d15970a",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-14T22:45:02.189Z",
+      "taskId": "T_1f3893e7-81ec-4461-8346-41e123e4b911",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_0accd6e7-bd1a-461f-8238-bef27eadaf1e",
+      "kind": "manual_decision",
+      "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+      "at": "2026-10-14T22:45:02.189Z",
+      "taskId": "T_1f3893e7-81ec-4461-8346-41e123e4b911",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_d4b20342-6318-4dd6-8eee-a1e00d15970a",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "로컬에서만 다루며 원본 파일은 바꾸지 마세요.",
+      "status": "confirmed",
+      "sourceId": "S_0accd6e7-bd1a-461f-8238-bef27eadaf1e",
+      "revision": 7,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_1f3893e7-81ec-4461-8346-41e123e4b911",
+      "sourceIds": [
+        "S_d4b20342-6318-4dd6-8eee-a1e00d15970a",
+        "S_0accd6e7-bd1a-461f-8238-bef27eadaf1e"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_1f3893e7-81ec-4461-8346-41e123e4b911",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "로컬 CSV 설문 응답을 확인하고 싶어요.",
+      "at": "2026-10-14T22:45:02.189Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+        "name": "설문 응답 정리",
+        "note": "CSV에 응답자ID, 시간, 응답 열이 있어요. 응답을 정리하고 싶고 중복 응답 처리 정책은 아직 정하지 않았어요.",
+        "archived": false,
+        "createdAt": "2026-10-14T22:45:02.189Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_d79994a9-f632-4681-9aa5-5a226de4d376": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

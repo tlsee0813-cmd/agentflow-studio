@@ -1,0 +1,39 @@
+{
+  "preparation": [
+    {
+      "operation": "reuse frozen synthetic pre-project without alteration",
+      "original": "guide097-ai/prepared/C4/project-pre.json",
+      "sha256": "e560ab3f24c53cdd83fa65db02dc0af3258b60d0a4b977950431871e0c36292d"
+    },
+    {
+      "operation": "buildGuideRequest",
+      "signature": "(project, areaId, answer, currentInstruction, requestId)",
+      "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d",
+      "answer": null,
+      "currentInstruction": null,
+      "requestId": "G_GUIDE099_C4_PREP"
+    }
+  ],
+  "channel": {
+    "kind": "DIRECT_CURRENT_INSTRUCTION",
+    "provenance": {
+      "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+      "originalSource": "original-fixed-scenarios.json",
+      "originalTextUnchanged": true,
+      "adaptation": null
+    },
+    "originalFixedAnswer": {
+      "id": "A",
+      "text": "오프라인을 유지할게요. 파일 반입 방식으로 설계만 하고 실제 전송과 배포는 하지 마세요.",
+      "disposition": "provided"
+    },
+    "frozenControlSlot": "C4-DIRECT-A",
+    "actualQuestion": null
+  },
+  "operation": "candidate buildGuideRequest",
+  "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d",
+  "actualAnswer": null,
+  "currentInstruction": "오프라인을 유지할게요. 파일 반입 방식으로 설계만 하고 실제 전송과 배포는 하지 마세요.",
+  "freshInstruction": true,
+  "noProjectMutation": true
+}

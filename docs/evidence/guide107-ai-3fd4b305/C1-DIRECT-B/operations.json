@@ -1,0 +1,39 @@
+{
+  "preparation": [
+    {
+      "operation": "reuse frozen synthetic pre-project without alteration",
+      "original": "guide097-ai/prepared/C1/project-pre.json",
+      "sha256": "f81e73f703087008e46e417f810f89c249b7ef222f7ed05f1774f6ae1181ebf2"
+    },
+    {
+      "operation": "buildGuideRequest",
+      "signature": "(project, areaId, answer, currentInstruction, requestId)",
+      "areaId": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b",
+      "answer": null,
+      "currentInstruction": null,
+      "requestId": "G_GUIDE099_C1_PREP"
+    }
+  ],
+  "channel": {
+    "kind": "DIRECT_CURRENT_INSTRUCTION",
+    "provenance": {
+      "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+      "originalSource": "original-fixed-scenarios.json",
+      "originalTextUnchanged": true,
+      "adaptation": null
+    },
+    "originalFixedAnswer": {
+      "id": "B",
+      "text": "집에서 어떤 재료를 먼저 먹을지 찾고 싶어요.",
+      "disposition": "provided"
+    },
+    "frozenControlSlot": "C1-DIRECT-B",
+    "actualQuestion": null
+  },
+  "operation": "candidate buildGuideRequest",
+  "areaId": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b",
+  "actualAnswer": null,
+  "currentInstruction": "집에서 어떤 재료를 먼저 먹을지 찾고 싶어요.",
+  "freshInstruction": true,
+  "noProjectMutation": true
+}

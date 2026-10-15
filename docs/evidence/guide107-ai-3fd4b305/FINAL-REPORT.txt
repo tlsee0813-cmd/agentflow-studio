@@ -1,0 +1,22 @@
+GUIDE107 actual validation — 의미품질 HOLD
+exact 3fd4b3055328862c8b8471b356ee5f3772a8deee / parent2931b50938af037a43e20ed7aba69b96ab79843d
+Node22.16/TS5.8.3, 53 exact Git blobs (partial runtime/build snapshot), build exit0. CI38700663131 exactcompleted/success 관측; 독립delta검토와수용은별개.
+호출17 = 8초기 + 7직접지시 + 2실제질문답변. provider200/product200/finishstop17, question1/proposal16, 미전송채택16. retry/mock/neutral/local429=0.
+기본15s/2048/deepseek-flash/thinkingdisabled/temperature미전송, native rate6/process20.
+
+C1: PARTIAL — Initial slice is useful without a question. Direct controls are meaningful changes, but the first-to-eat result/data/criterion boundary remains unclear; do not claim that full workflow is proven. The fallback in A mitigates the unsupported existing-data phrase, so do not label A as the same complete input omission as baseline.
+C2: PASS this sample — Observed semantic constraints and editing/adoption pass. A draft asking the eventual implementer to run a readonly preview is consistent with the request; this evaluator did not rename or execute generated code.
+C3: HOLD (G107-B1) — Useful safe scope and improved latest-row check do not cancel the contradictory deferred completion criterion.
+C4: PASS core preservation/amendment, limited design detail — The scoped latest amendment now has coherent scope/checks and provenance as direct input. Some timing/transport design details remain open; no deployment or general network grant was inferred. A current independent file-based design can be valid without forcing a question.
+HB: HOLD (G107-B2); actual question path observed — Question protocol and real answer preservation pass, but question necessity is only partial and the deferred logic is materially wrong. The later 100ms response does not repair the deferred raw response.
+HA: PASS core explicit amendment; minor open duplication — Core baseline HA scope/provenance defects are not reproduced in this sample. Redundant open items are clarity notes, not proof the old prohibition was restored or a blocking functional defect.
+
+제품품질차단 근거(원문은각응답그대로):
+G107-B1 C3-DIRECT-DEFERRED checks: CSV의 응답 열에서 읽은 전체 행 수와 정리 결과에 포함된 행 수의 합이 입력과 같은지 확인한다. 중복 응답자ID 탐지 결과의 중복 건수가 실제 중복 행 수와 일치하는지 확인한다. 원본 CSV 파일의 내용과 수정 시간이 요청 전후로 그대로인지 확인한다. 출력에 중복 응답자ID 목록과 각 건수가 표시되는지 확인한다.
+영향: 관찰만해서N행을보존해야하는데 입력N+결과N=N을요구하여 올바른결과도실패하게만듦.
+G107-B2 HB-ANSWER-DEFER default1: 대응 규칙: 각 박자에 대해 그 박자 시각 이후 가장 가까운 키 입력 하나를 짝짓고, 이미 짝지어진 입력은 다시 쓰지 않는다.
+영향: 이미제공된대응관계를다시만들고이른입력을놓칠수있음; 음수차이표시약속과도모순.
+
+새private2건은로컬보존, 공개원문0. 블라인드판정은각각핵심PASS/핵심PASS(문구주의). 위치·해시는private-blind-handoff.json.
+실제질문경로는HB만관측. C1/C3/C4는direct currentInstruction으로출처분리; 질문받은척answer생성0. 미실행경로는routing파일에명시.
+기존baseline/PLAN/FREEZE불변. 제품소스/프롬프트수정0, 새사례/탐색/재평가0. 허용증거게시까지만마치고정지.

@@ -1,0 +1,31 @@
+GUIDE107 exact 3fd4b3055328862c8b8471b356ee5f3772a8deee — 원문 기반 증거
+
+FINAL-REPORT.txt: 최종판정/차단결함
+semantic-assessment.json: 사례별관측/판정/한계와2차단결함원문
+call-table.json: 17회안전한상태/모델/usage/latency(새private내용없음)
+source-identity.json, experiment.json: exactsource/부모/manifest/빌드/실제기본값/동결계획hash
+private-blind-handoff.json: 새holdout원문미공개, 로컬위치/hash/블라인드판정만
+
+C1-INITIAL [INITIAL] -> C1-INITIAL/request.json -> C1-INITIAL/provider-response.raw.txt -> C1-INITIAL/response.json -> semantic-assessment.json (case C1)
+C1-DIRECT-A [DIRECT_CURRENT_INSTRUCTION] -> C1-DIRECT-A/request.json -> C1-DIRECT-A/provider-response.raw.txt -> C1-DIRECT-A/response.json -> semantic-assessment.json (case C1)
+C1-DIRECT-B [DIRECT_CURRENT_INSTRUCTION] -> C1-DIRECT-B/request.json -> C1-DIRECT-B/provider-response.raw.txt -> C1-DIRECT-B/response.json -> semantic-assessment.json (case C1)
+C2-INITIAL [INITIAL] -> C2-INITIAL/request.json -> C2-INITIAL/provider-response.raw.txt -> C2-INITIAL/response.json -> semantic-assessment.json (case C2)
+C3-INITIAL [INITIAL] -> C3-INITIAL/request.json -> C3-INITIAL/provider-response.raw.txt -> C3-INITIAL/response.json -> semantic-assessment.json (case C3)
+C3-DIRECT-UNKNOWN [DIRECT_CURRENT_INSTRUCTION] -> C3-DIRECT-UNKNOWN/request.json -> C3-DIRECT-UNKNOWN/provider-response.raw.txt -> C3-DIRECT-UNKNOWN/response.json -> semantic-assessment.json (case C3)
+C3-DIRECT-DEFERRED [DIRECT_CURRENT_INSTRUCTION] -> C3-DIRECT-DEFERRED/request.json -> C3-DIRECT-DEFERRED/provider-response.raw.txt -> C3-DIRECT-DEFERRED/response.json -> semantic-assessment.json (case C3)
+C3-DIRECT-LATEST [DIRECT_CURRENT_INSTRUCTION] -> C3-DIRECT-LATEST/request.json -> C3-DIRECT-LATEST/provider-response.raw.txt -> C3-DIRECT-LATEST/response.json -> semantic-assessment.json (case C3)
+C4-INITIAL [INITIAL] -> C4-INITIAL/request.json -> C4-INITIAL/provider-response.raw.txt -> C4-INITIAL/response.json -> semantic-assessment.json (case C4)
+C4-DIRECT-A [DIRECT_CURRENT_INSTRUCTION] -> C4-DIRECT-A/request.json -> C4-DIRECT-A/provider-response.raw.txt -> C4-DIRECT-A/response.json -> semantic-assessment.json (case C4)
+C4-DIRECT-B [DIRECT_CURRENT_INSTRUCTION] -> C4-DIRECT-B/request.json -> C4-DIRECT-B/provider-response.raw.txt -> C4-DIRECT-B/response.json -> semantic-assessment.json (case C4)
+HB-INITIAL [INITIAL] -> HB-INITIAL/request.json -> HB-INITIAL/provider-response.raw.txt -> HB-INITIAL/response.json -> semantic-assessment.json (case HB)
+HB-ANSWER-DEFER [ACTUAL_QUESTION] -> HB-ANSWER-DEFER/request.json -> HB-ANSWER-DEFER/provider-response.raw.txt -> HB-ANSWER-DEFER/response.json -> semantic-assessment.json (case HB)
+HB-ANSWER-WITHIN_100MS [ACTUAL_QUESTION] -> HB-ANSWER-WITHIN_100MS/request.json -> HB-ANSWER-WITHIN_100MS/provider-response.raw.txt -> HB-ANSWER-WITHIN_100MS/response.json -> semantic-assessment.json (case HB)
+HA-INITIAL [INITIAL] -> HA-INITIAL/request.json -> HA-INITIAL/provider-response.raw.txt -> HA-INITIAL/response.json -> semantic-assessment.json (case HA)
+
+각slot의project-pre/operations는합성입력과출처, provider-request는실제품body(헤더0), provider-response.raw는실수신원문(choices[0].message.content), response는제품수용, edited-draft/project-adopted/outcome은실제미전송채택.
+C1/C3/C4 initialproposal -> *_DIRECT는정상currentInstruction, answer:null. C3UNKNOWN의주어보충은사전동결된adaptation이며원래Q답변과동일문장이라고주장하지않음.
+HB initial실제question -> 두 *_ANSWER가그질문과고정답변을그대로전송. DIRECT-HB는미실행. 나머지case의실제질문경로는미검증. routing.json이경로증거.
+질문0도완결된독립작업이면허용; HTTP200이나proposal만으로의미PASS아님. true인질문/답보존boolean은answer:null일때조건부참일수있어실제Q경로통과로세지않음.
+원raw를판정에맞춰편집하지않음. 원문읽고판단할것. 기존합성사례15회전체포함, 성공결과선별0. 새private2건은원문/criteria/providerbody/초안모두게시제외.
+이전3411375증거의6초기응답과이번15공개응답은분기출처와설정/프롬프트가다르므로전체원인효과나일반실패율로추정하지않음. 실제사람평가/전체품질보증아님.
+게시범위는이폴더의텍스트/JSON합성데이터와안전메타데이터뿐. adapter/runner/env/key/headers/설치파일/고객자료/새private본문제외. 추가DeepSeek0, 제품변경0.

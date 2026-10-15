@@ -1,0 +1,27 @@
+{
+  "preparation": [
+    {
+      "operation": "reuse frozen synthetic pre-project without alteration",
+      "original": "guide097-ai/prepared/C2/project-pre.json",
+      "sha256": "279a066d97c57151554e2dc7c9d2d83f5b7399977c0c25dac05c01b8aa364082"
+    },
+    {
+      "operation": "buildGuideRequest",
+      "signature": "(project, areaId, answer, currentInstruction, requestId)",
+      "areaId": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9",
+      "answer": null,
+      "currentInstruction": null,
+      "requestId": "G_GUIDE099_C2_PREP"
+    }
+  ],
+  "channel": {
+    "kind": "INITIAL",
+    "source": "unchanged frozen initial material / private frozen synthetic input"
+  },
+  "operation": "candidate buildGuideRequest",
+  "areaId": "A_c27a8287-daf9-4d8d-a023-b8af9c4028c9",
+  "actualAnswer": null,
+  "currentInstruction": null,
+  "freshInstruction": false,
+  "noProjectMutation": true
+}

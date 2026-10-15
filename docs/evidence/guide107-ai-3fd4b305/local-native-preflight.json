@@ -1,0 +1,9 @@
+{
+  "configHTTP": 200,
+  "mode": "deepseek",
+  "configured": true,
+  "paidEnabled": true,
+  "invalidRequestHTTP": 400,
+  "errorCode": "INVALID_INPUT",
+  "providerSends": 0
+}

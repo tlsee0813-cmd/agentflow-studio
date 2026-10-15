@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_d022fed1-e34b-4d40-a242-6fb1bc363e9f",
+  "revision": 11,
+  "name": "초보 — 가정 식재료",
+  "sources": [
+    {
+      "id": "S_dc6f34a1-0f9c-41c1-93ae-d485f7a53f17",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-14T22:45:02.179Z",
+      "taskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_c1b76f4b-e17e-4130-bed7-48edd4ec5907",
+      "kind": "manual_decision",
+      "text": "혼자 한 기기에서 사용해요.",
+      "at": "2026-10-14T22:45:02.179Z",
+      "taskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_b0607379-9bd9-4e03-beb4-69ee07b7609e",
+      "kind": "manual_decision",
+      "text": "재고는 수동으로 입력해요.",
+      "at": "2026-10-14T22:45:02.180Z",
+      "taskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_783b2b82-2fa1-46f5-8e15-b0df7003a300",
+      "kind": "manual_decision",
+      "text": "주문과 배송은 이번 범위에서 제외해요.",
+      "at": "2026-10-14T22:45:02.180Z",
+      "taskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_dc6f34a1-0f9c-41c1-93ae-d485f7a53f17",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "혼자 한 기기에서 사용해요.",
+      "status": "confirmed",
+      "sourceId": "S_c1b76f4b-e17e-4130-bed7-48edd4ec5907",
+      "revision": 7,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "재고는 수동으로 입력해요.",
+      "status": "confirmed",
+      "sourceId": "S_b0607379-9bd9-4e03-beb4-69ee07b7609e",
+      "revision": 8,
+      "history": []
+    },
+    {
+      "id": "D4",
+      "text": "주문과 배송은 이번 범위에서 제외해요.",
+      "status": "confirmed",
+      "sourceId": "S_783b2b82-2fa1-46f5-8e15-b0df7003a300",
+      "revision": 9,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "sourceIds": [
+        "S_dc6f34a1-0f9c-41c1-93ae-d485f7a53f17",
+        "S_c1b76f4b-e17e-4130-bed7-48edd4ec5907",
+        "S_b0607379-9bd9-4e03-beb4-69ee07b7609e",
+        "S_783b2b82-2fa1-46f5-8e15-b0df7003a300"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "가정 식재료 재고로 낭비를 줄이고 싶어요.",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+  "draft": "‘남은 재료 보기’ 영역의 첫 작업을 해 주세요.\n목표: 외출 중에도 집에 남아 있는 재료를 수동으로 입력된 재고 기준으로 확인할 수 있게 한다.\n이번 범위: 이번 직접 지시('장을 보면서 집에 무엇이 남아 있는지 확인하고 싶어요')에 따라, 확정 결정 D3(재고 수동 입력)로 이미 들어간 재료를 조회해 보는 화면을 만든다. 할 일: 이미 저장된 재고 항목을 목록으로 보여주고, 이름으로 찾을 수 있게 한다. 재고 저장 경로가 현재 코드·자료에 이미 있는지 실행 도구가 먼저 확인하고, 없으면 이번 범위에 최소한의 재고 입력·저장 경로를 함께 만든다. 하지 않을 것: 새 재고 데이터 자동 수집, 확정 결정 D4에 따른 주문·배송 연동, D2를 넘어선 다중 기기·다중 사용자 기능.\n완료 조건: 저장된 재고 항목이 목록에 모두 나오고, 이름으로 찾으면 해당 항목이 걸리며, 목록·검색 결과의 항목 수가 저장된 항목 수와 어긋나지 않는다. 기존에 저장돼 있던 항목이 조회 과정에서 바뀌거나 사라지지 않는다.\nAI가 정한 기본값 (사용자 결정 아님 · 바꿀 수 있음): 목록은 재료 이름 가나다순으로 정렬한다. / 검색은 이름 부분 일치로 한다. / 재고가 없을 때는 '저장된 재료가 없어요' 문구를 보여준다.\n\n이 요청이 저장된 기준과 다르면, 저장된 기준은 기록으로 그대로 두고 이번 요청에서는 이 요청이 명시적으로 바꾼 대상만 그 문장을 따릅니다. 요청 속 인용·가정·다른 사람의 제안·AI 기본값은 변경 지시가 아니며, 바꾸지 않은 조건과 실행 권한은 그대로입니다.\n\n이번에 맡기거나 바꿀 일 (사용자 직접 입력 원문):\n장을 보면서 집에 무엇이 남아 있는지 확인하고 싶어요.",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "가정 식재료 재고로 낭비를 줄이고 싶어요.",
+      "at": "2026-10-14T22:45:02.178Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b",
+        "name": "남은 재료 보기",
+        "note": "집에 남아 있는 재료를 보고 싶어요.",
+        "archived": false,
+        "createdAt": "2026-10-14T22:45:02.179Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": {
+      "area": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b"
+    },
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

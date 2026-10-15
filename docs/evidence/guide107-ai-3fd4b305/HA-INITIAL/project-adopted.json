@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_87e5622c-96d3-4a52-8f78-2f492b43c227",
+  "revision": 9,
+  "name": "PNG 이미지 내보내기 — 명시적 변경",
+  "sources": [
+    {
+      "id": "S_cc3487e8-1bcb-484c-a58c-6e1cfceecb68",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-15T02:45:01.606Z",
+      "taskId": "T_8b8fe3bb-cba6-4773-ab90-76cc8a1f35dc",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_8066fb64-2aab-4741-9a07-8c4dd0b0666d",
+      "kind": "manual_decision",
+      "text": "이미지 크기는 변경하지 않는다",
+      "at": "2026-10-15T02:45:01.607Z",
+      "taskId": "T_8b8fe3bb-cba6-4773-ab90-76cc8a1f35dc",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_cc3487e8-1bcb-484c-a58c-6e1cfceecb68",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "이미지 크기는 변경하지 않는다",
+      "status": "confirmed",
+      "sourceId": "S_8066fb64-2aab-4741-9a07-8c4dd0b0666d",
+      "revision": 7,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_8b8fe3bb-cba6-4773-ab90-76cc8a1f35dc",
+      "sourceIds": [
+        "S_cc3487e8-1bcb-484c-a58c-6e1cfceecb68",
+        "S_8066fb64-2aab-4741-9a07-8c4dd0b0666d"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "전자책 표지 이미지 준비",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_8b8fe3bb-cba6-4773-ab90-76cc8a1f35dc",
+  "draft": "‘PNG 내보내기’ 영역의 첫 작업을 해 주세요.\n목표: 큰 이미지만 긴 변 1600px로 줄이고(비율 유지), 작은 이미지는 확대 없이 원래 크기로 복사하는 내보내기 규칙을 설계한다. 이번 작업은 설계 문서 산출까지이며 구현·실행은 하지 않는다.\n이번 범위: 이번 직접 지시(R7 변경)에 따라: (1) 큰 이미지 정의(긴 변이 1600px 초과)와 작은 이미지 정의(긴 변이 1600px 이하)를 구분하는 기준을 문서화한다. (2) 큰 이미지: 긴 변을 1600px로 축소, 가로세로 비율 유지, 나머지 변은 비율에 따라 계산. (3) 작은 이미지: 확대 없이 원래 크기 그대로 복사. (4) 별도 폴더로 출력, 원본 파일은 유지(이동·삭제 없음). (5) 위 규칙을 담은 설계 문서 1건 작성. 하지 않을 것: 실제 코드 구현, 이미지 처리 실행, 파일 생성·이동·삭제, 결과 이미지 검증. 결정 D2('이미지 크기는 변경하지 않는다')는 이번 직접 지시가 R7 대상에 한해 바꾸는 것으로, 이번 설계 범위에는 크기 조정 규칙을 포함하되 D2 기록 자체는 앱이 변경하지 않는다.\n완료 조건: 설계 문서에 (a) 큰/작은 이미지 판별 기준(긴 변 1600px 초과 여부)이 명시되어 있다. (b) 큰 이미지의 축소 규칙(긴 변 1600px, 비율 유지)이 명시되어 있다. (c) 작은 이미지의 무확대 원본 크기 복사 규칙이 명시되어 있다. (d) 별도 폴더 출력, 원본 유지가 명시되어 있다. (e) 구현·실행을 하지 않았다는 범위 진술이 있다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 출력 별도 폴더의 이름·경로 규칙(지정 없음) / 지원 입력 포맷 범위(PNG만인지 등) / 긴 변이 정확히 1600px인 이미지의 처리(축소 대상 여부)는 1600px 초과 기준으로 도출되나 사용자 확인 여지\nAI가 정한 기본값 (사용자 결정 아님 · 바꿀 수 있음): 설계 문서는 Markdown 1개 파일로 작성 / 규칙 서술은 판별 → 큰 이미지 처리 → 작은 이미지 처리 → 출력/원본 순서 / 비율 유지 시 반올림은 반올림(round) 사용\n\n이 요청이 저장된 기준과 다르면, 저장된 기준은 기록으로 그대로 두고 이번 요청에서는 이 요청이 명시적으로 바꾼 대상만 그 문장을 따릅니다. 요청 속 인용·가정·다른 사람의 제안·AI 기본값은 변경 지시가 아니며, 바꾸지 않은 조건과 실행 권한은 그대로입니다.\n\n이번에 맡기거나 바꿀 일 (사용자 직접 입력 원문):\nR7을 바꿔요. 큰 이미지만 긴 변1600px로줄이고비율유지. 작은이미지는확대없이원래크기로복사. 별도폴더출력/원본유지/이번은설계만.",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "전자책 표지 이미지 준비",
+      "at": "2026-10-15T02:45:01.606Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_d3c1a75a-c072-419c-af02-56cf99f65b76",
+        "name": "PNG 내보내기",
+        "note": "",
+        "archived": false,
+        "createdAt": "2026-10-15T02:45:01.606Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": {
+      "area": "A_d3c1a75a-c072-419c-af02-56cf99f65b76"
+    },
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_d3c1a75a-c072-419c-af02-56cf99f65b76": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

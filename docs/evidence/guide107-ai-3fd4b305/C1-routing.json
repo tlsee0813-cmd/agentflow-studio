@@ -1,0 +1,9 @@
+{
+  "actualQuestion": null,
+  "selectedChannel": "DIRECT_CURRENT_INSTRUCTION",
+  "actualQuestionPath": "UNVERIFIED",
+  "directControls": [
+    "C1-DIRECT-A",
+    "C1-DIRECT-B"
+  ]
+}

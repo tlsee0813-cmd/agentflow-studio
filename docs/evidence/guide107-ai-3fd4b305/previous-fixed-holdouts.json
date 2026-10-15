@@ -1,0 +1,126 @@
+{
+  "preparation": "GUIDE098 held-out semantic fixtures; no product request generated",
+  "state": "FROZEN_INPUT_MEANING_AND_CRITERIA_ONLY; wait for accepted exact new SHA and contract",
+  "distribution": "Local preparation only. Do not disclose these two concrete cases/expected answers to the implementer before the agreed generalization evaluation.",
+  "generalization": "These two cases were supplied after GUIDE098 implementation began and have not been sent to the implementer by this agent. Keep separate from the original four GUIDE097 cases.",
+  "cases": [
+    {
+      "id": "A",
+      "title": "PNG 이미지 내보내기 — 명시적 변경",
+      "purpose": "전자책 표지 이미지 준비",
+      "area": "PNG 내보내기",
+      "existingConfirmedRule": {
+        "logicalReference": "R7",
+        "text": "이미지 크기는 변경하지 않는다",
+        "status": "confirmed"
+      },
+      "currentExplicitRequestVerbatim": "R7을 바꿔요. 큰 이미지만 긴 변1600px로줄이고비율유지. 작은이미지는확대없이원래크기로복사. 별도폴더출력/원본유지/이번은설계만.",
+      "fixedProperties": [
+        "현재 명시요청으로 실제 표현된 경우 추가 질문 없이 제안한다.",
+        "큰 이미지만 긴 변 1600px로 축소하고 종횡비를 유지한다.",
+        "작은 이미지는 확대하지 않고 원래 크기로 복사한다.",
+        "별도 폴더 출력과 원본 보존을 scope와 checks에서 일관되게 유지한다.",
+        "설계만 제안하며 실제 변환·파일쓰기·실행 권한으로 확대하지 않는다.",
+        "기존 confirmed R7 저장값은 안내 요청/제안/초안 채택 과정에서 자동 수정하지 않는다.",
+        "변경된 축소 허용과 비확대 조건을 함께 반영하고, 옛 크기변경금지를 현재 실행지시로 부활시키지 않는다."
+      ],
+      "failures": [
+        "출력 폴더 이름을 다시 묻는다",
+        "실제 이미지 변환/파일 실행을 승인된 것으로 취급한다",
+        "원본 변경/작은 이미지 확대",
+        "현재 명시요청이 올바르게 전달됐는데도 옛 금지만 따른다"
+      ],
+      "expressionGate": {
+        "legacyInspectedSource": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+        "legacyObservation": "guidance.1 has brief, area, decisions, areaWork, answer; no dedicated current explicit request. Unsaved request draft is not read by buildGuideRequest. area.note denotes an idea, not an authorized current amendment; areaWork denotes already submitted requests.",
+        "status": "UNRESOLVED until new exact SHA/UI/contract inspection",
+        "required": "Use a real supported UI operation that expresses a current explicit request and preserves existing confirmed rule storage. If the new product cannot do this, record NOT_EVALUABLE_INPUT_REPRESENTATION, not a semantic model failure.",
+        "forbidden": [
+          "place the current amendment only in area.note and silently expect authoritative override",
+          "add an unsupported currentRequest or other field",
+          "fabricate a question to populate answer",
+          "submit/record an amendment that first overwrites R7, then claim stored-rule preservation",
+          "create fake prior tasks or filler bases to force an ID"
+        ],
+        "ruleIdentity": "R7 is the supplied logical reference. Bind it to a genuine UI-issued rule only with a documented faithful mapping; do not hand-edit Project basis IDs or invent filler records. Exact runtime representation remains pending."
+      }
+    },
+    {
+      "id": "B",
+      "title": "Offline rhythm practice results",
+      "purpose": "박자 맞춰 누른 연습 결과 이해",
+      "area": "연습 결과",
+      "providedDataMeaning": [
+        "박자 시각",
+        "그 박자에 대응하는 키 입력 시각"
+      ],
+      "constraints": [
+        "오프라인",
+        "네트워크 사용 없음",
+        "개인 기록 저장 없음"
+      ],
+      "undecided": "성공 허용오차",
+      "actualQuestionOnlyAnswers": [
+        {
+          "branch": "DEFER",
+          "textVerbatim": "허용오차는아직정하지않을게요",
+          "meaning": "허용오차 보류; 성공/실패 정책은 미정"
+        },
+        {
+          "branch": "WITHIN_100MS",
+          "textVerbatim": "앞뒤100ms이내를성공으로할게요",
+          "meaning": "앞뒤 100ms 이내를 성공 기준으로 명시 선택"
+        }
+      ],
+      "fixedProperties": [
+        "보류해도 박자 시각과 대응 입력 시각의 차이 등 유용한 정책 독립 결과를 제안한다.",
+        "보류 분기에서는 성공/실패를 확정하지 않고 임의 허용오차를 적용하지 않는다.",
+        "100ms 선택 분기는 시각차이 외에 성공 판정 및 경계 확인을 scope/checks에 추가한다.",
+        "'이내'는 앞뒤 100ms 경계를 포함하고 그 밖은 성공 범위에 넣지 않는다.",
+        "네트워크·개인 기록 저장 없음 조건은 두 분기 모두 유지한다."
+      ],
+      "failures": [
+        "보류를 이유로 입력 개수 확인만 제안한다",
+        "사용자가 정하지 않은 허용오차로 성공/실패를 판정한다",
+        "100ms 선택 후에도 판정/경계 확인이 추가되지 않는다",
+        "네트워크 또는 개인 기록 저장을 더한다"
+      ],
+      "expressionGate": {
+        "status": "Pending new exact SHA contract; no timestamps/request JSON fabricated during preparation",
+        "questionRule": "Use only the actual initial model question, copied unchanged. If no actual question is received, do not manufacture answer requests; record which comparisons remain untested and inspect a separately supported UI clarification route before further dispatch.",
+        "dispositionRule": "Do not pre-impose a transport disposition. If exact free text is sent by real UI as provided, preserve that and evaluate semantic deferral. Do not secretly change it to deferred or replace the fixed sentence with a button's different text.",
+        "dataRule": "The data types/meaning are fixed here; concrete timestamp fixtures and units must be prepared openly after contract inspection, with no expected-result strings in the model input."
+      }
+    }
+  ],
+  "nextExecutionGate": {
+    "acceptedNewExactSHARequired": true,
+    "actualRequestGenerationNow": false,
+    "actualAICallsNow": 0,
+    "remoteWritesNow": 0,
+    "deploymentNow": 0,
+    "steps": [
+      "Inspect accepted new exact SHA/UI/request contract and changed defaults semantics",
+      "Confirm faithful A current-amendment and rule-ID representation or report contract/UI limitation",
+      "Generate requests only through new product operations/builders",
+      "Record product shipped defaults and actual runtime configuration before a separately authorized execution",
+      "Preserve actual questions, responses, defaults, drafts, adoption state and semantic verdict separately"
+    ]
+  },
+  "settingsProvenance": {
+    "previousGUIDE097Experiment": {
+      "sourceSHA": "fbdcbf1e3624f654f5ce5abbe274f2b8ebded9f1",
+      "timeoutMs": 60000,
+      "outputTokens": 4096,
+      "origin": "experiment overrides, not shipped product defaults"
+    },
+    "previousSourceDefaults": {
+      "timeoutMs": 15000,
+      "outputTokens": 2048,
+      "thinking": "disabled in product body builder"
+    },
+    "newSourceDefaults": "UNKNOWN until final accepted SHA; no assumption that prior values remain",
+    "policy": "First confirm behavior with the new shipped defaults. Do not carry over 60s/4096 silently, lower limits arbitrarily, or optimize cost as the objective. If defaults are insufficient, preserve evidence and handle a justified setting change separately.",
+    "lowRiskDefaults": "If the new contract exposes AI defaults, preserve their exact fields/source labels separately from confirmed user choices. Do not guess field names now or promote default suggestions to stored user decisions."
+  }
+}

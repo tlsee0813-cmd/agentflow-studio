@@ -1,0 +1,46 @@
+{
+  "slot": "HB-ANSWER-DEFER",
+  "sourceSHA": "3fd4b3055328862c8b8471b356ee5f3772a8deee",
+  "channel": "ACTUAL_QUESTION",
+  "productHTTPStatus": 200,
+  "latencyMs": 4974,
+  "requestBytes": 1655,
+  "productResponseBytes": 2276,
+  "providerSendOrdinal": 13,
+  "providerEvents": [
+    {
+      "slot": "HB-ANSWER-DEFER",
+      "timeUTC": "2026-10-15T07:58:51.530Z",
+      "sendOrdinal": 13,
+      "event": "transport_attempt",
+      "requestBytes": 12247
+    },
+    {
+      "slot": "HB-ANSWER-DEFER",
+      "timeUTC": "2026-10-15T07:58:56.498Z",
+      "sendOrdinal": 13,
+      "event": "provider_response",
+      "status": 200,
+      "responseBytes": 2565,
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 3243,
+        "completion_tokens": 580,
+        "total_tokens": 3823,
+        "prompt_tokens_details": {
+          "cached_tokens": 2560
+        },
+        "prompt_cache_hit_tokens": 2560,
+        "prompt_cache_miss_tokens": 683
+      },
+      "finishReason": "stop"
+    }
+  ],
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "state": "PLAN_ONLY_NOT_SENT",
+  "separateEvidenceChannel": true,
+  "controls": [
+    {
+      "slot": "C1-DIRECT-A",
+      "caseId": "C1",
+      "branchId": "A",
+      "originalFixedQuestionAnswer": {
+        "id": "A",
+        "text": "장을 보면서 집에 무엇이 남아 있는지 확인하고 싶어요.",
+        "disposition": "provided"
+      },
+      "currentInstructionVerbatim": "장을 보면서 집에 무엇이 남아 있는지 확인하고 싶어요.",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+        "originalSource": "original-fixed-scenarios.json",
+        "originalTextUnchanged": true,
+        "adaptation": null
+      },
+      "dispatchCondition": "Only if this case initial response has no actual question; preserve the initial project/input and use the product-supported fresh instruction path. Do not count as actual question-followup coverage."
+    },
+    {
+      "slot": "C1-DIRECT-B",
+      "caseId": "C1",
+      "branchId": "B",
+      "originalFixedQuestionAnswer": {
+        "id": "B",
+        "text": "집에서 어떤 재료를 먼저 먹을지 찾고 싶어요.",
+        "disposition": "provided"
+      },
+      "currentInstructionVerbatim": "집에서 어떤 재료를 먼저 먹을지 찾고 싶어요.",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+        "originalSource": "original-fixed-scenarios.json",
+        "originalTextUnchanged": true,
+        "adaptation": null
+      },
+      "dispatchCondition": "Only if this case initial response has no actual question; preserve the initial project/input and use the product-supported fresh instruction path. Do not count as actual question-followup coverage."
+    },
+    {
+      "slot": "C3-DIRECT-UNKNOWN",
+      "caseId": "C3",
+      "branchId": "UNKNOWN",
+      "originalFixedQuestionAnswer": {
+        "id": "UNKNOWN",
+        "text": "아직 모르겠어요.",
+        "disposition": "unknown"
+      },
+      "currentInstructionVerbatim": "중복 처리 정책은 아직 모르겠어요.",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+        "originalSource": "original-fixed-scenarios.json",
+        "originalTextUnchanged": false,
+        "adaptation": "Adds only the duplicate-policy referent so an otherwise elliptical unknown sentence can stand alone; no expected operation/result added."
+      },
+      "dispatchCondition": "Only if this case initial response has no actual question; preserve the initial project/input and use the product-supported fresh instruction path. Do not count as actual question-followup coverage."
+    },
+    {
+      "slot": "C3-DIRECT-DEFERRED",
+      "caseId": "C3",
+      "branchId": "DEFERRED",
+      "originalFixedQuestionAnswer": {
+        "id": "DEFERRED",
+        "text": "중복 처리 정책은 보류할게요.",
+        "disposition": "deferred"
+      },
+      "currentInstructionVerbatim": "중복 처리 정책은 보류할게요.",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+        "originalSource": "original-fixed-scenarios.json",
+        "originalTextUnchanged": true,
+        "adaptation": null
+      },
+      "dispatchCondition": "Only if this case initial response has no actual question; preserve the initial project/input and use the product-supported fresh instruction path. Do not count as actual question-followup coverage."
+    },
+    {
+      "slot": "C3-DIRECT-LATEST",
+      "caseId": "C3",
+      "branchId": "LATEST",
+      "originalFixedQuestionAnswer": {
+        "id": "LATEST",
+        "text": "응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+        "disposition": "provided"
+      },
+      "currentInstructionVerbatim": "응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+        "originalSource": "original-fixed-scenarios.json",
+        "originalTextUnchanged": true,
+        "adaptation": null
+      },
+      "dispatchCondition": "Only if this case initial response has no actual question; preserve the initial project/input and use the product-supported fresh instruction path. Do not count as actual question-followup coverage."
+    },
+    {
+      "slot": "C4-DIRECT-A",
+      "caseId": "C4",
+      "branchId": "A",
+      "originalFixedQuestionAnswer": {
+        "id": "A",
+        "text": "오프라인을 유지할게요. 파일 반입 방식으로 설계만 하고 실제 전송과 배포는 하지 마세요.",
+        "disposition": "provided"
+      },
+      "currentInstructionVerbatim": "오프라인을 유지할게요. 파일 반입 방식으로 설계만 하고 실제 전송과 배포는 하지 마세요.",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+        "originalSource": "original-fixed-scenarios.json",
+        "originalTextUnchanged": true,
+        "adaptation": null
+      },
+      "dispatchCondition": "Only if this case initial response has no actual question; preserve the initial project/input and use the product-supported fresh instruction path. Do not count as actual question-followup coverage."
+    },
+    {
+      "slot": "C4-DIRECT-B",
+      "caseId": "C4",
+      "branchId": "B",
+      "originalFixedQuestionAnswer": {
+        "id": "B",
+        "text": "공지 전달용 네트워크만 허용하도록 기존 네트워크 금지 조건을 바꿀게요. 이번에는 설계만 하고 실제 전송과 배포는 하지 마세요.",
+        "disposition": "provided"
+      },
+      "currentInstructionVerbatim": "공지 전달용 네트워크만 허용하도록 기존 네트워크 금지 조건을 바꿀게요. 이번에는 설계만 하고 실제 전송과 배포는 하지 마세요.",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+        "originalSource": "original-fixed-scenarios.json",
+        "originalTextUnchanged": true,
+        "adaptation": null
+      },
+      "dispatchCondition": "Only if this case initial response has no actual question; preserve the initial project/input and use the product-supported fresh instruction path. Do not count as actual question-followup coverage."
+    },
+    {
+      "slot": "HB-DIRECT-DEFER",
+      "caseId": "HB",
+      "branchId": "DEFER",
+      "currentInstructionVerbatim": "허용오차는아직정하지않을게요",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared direct user clarification, not response to an actual model question",
+        "originalSource": "previous-fixed-holdouts.json",
+        "originalTextUnchanged": true
+      },
+      "dispatchCondition": "Only if HB initial response has no actual question; use genuine currentInstruction, never fabricate question/answer."
+    },
+    {
+      "slot": "HB-DIRECT-WITHIN_100MS",
+      "caseId": "HB",
+      "branchId": "WITHIN_100MS",
+      "currentInstructionVerbatim": "앞뒤100ms이내를성공으로할게요",
+      "answer": null,
+      "provenance": {
+        "kind": "predeclared direct user clarification, not response to an actual model question",
+        "originalSource": "previous-fixed-holdouts.json",
+        "originalTextUnchanged": true
+      },
+      "dispatchCondition": "Only if HB initial response has no actual question; use genuine currentInstruction, never fabricate question/answer."
+    }
+  ],
+  "limits": [
+    "Direct controls are separate from frozen initial requests.",
+    "No actual-Q branch is claimed tested when the direct channel is used.",
+    "The C3 unknown referent adaptation is predeclared and must not be passed off as an exact repeat of the original question-answer sentence.",
+    "If candidate UI/contract lacks a faithful direct-input route, mark NOT_EVALUABLE_INPUT_REPRESENTATION rather than field injection."
+  ]
+}

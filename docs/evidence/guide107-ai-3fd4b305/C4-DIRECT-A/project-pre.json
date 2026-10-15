@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_0fc9bbaf-3d21-4c73-903e-2fb3aef49c3d",
+  "revision": 9,
+  "name": "전시장 단말 — 권한 충돌",
+  "sources": [
+    {
+      "id": "S_105bcad1-5b8a-4c88-b406-f0fdbc63935d",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-14T22:45:02.192Z",
+      "taskId": "T_df62cc9e-8281-4ddd-9520-9bed37a5a36c",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_094c2d85-8338-447c-890d-c813772cb82c",
+      "kind": "manual_decision",
+      "text": "네트워크 사용은 금지합니다.",
+      "at": "2026-10-14T22:45:02.192Z",
+      "taskId": "T_df62cc9e-8281-4ddd-9520-9bed37a5a36c",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_91475eb7-b576-4566-a697-d4b1a964a200",
+      "kind": "manual_decision",
+      "text": "공지는 파일로 반입합니다.",
+      "at": "2026-10-14T22:45:02.193Z",
+      "taskId": "T_df62cc9e-8281-4ddd-9520-9bed37a5a36c",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_bef0674b-df3f-43bb-acb4-8fa490f39ac6",
+      "kind": "manual_decision",
+      "text": "이번에는 설계만 하며 실제 전송과 배포는 하지 않습니다.",
+      "at": "2026-10-14T22:45:02.193Z",
+      "taskId": "T_df62cc9e-8281-4ddd-9520-9bed37a5a36c",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_105bcad1-5b8a-4c88-b406-f0fdbc63935d",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "네트워크 사용은 금지합니다.",
+      "status": "confirmed",
+      "sourceId": "S_094c2d85-8338-447c-890d-c813772cb82c",
+      "revision": 7,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "공지는 파일로 반입합니다.",
+      "status": "confirmed",
+      "sourceId": "S_91475eb7-b576-4566-a697-d4b1a964a200",
+      "revision": 8,
+      "history": []
+    },
+    {
+      "id": "D4",
+      "text": "이번에는 설계만 하며 실제 전송과 배포는 하지 않습니다.",
+      "status": "confirmed",
+      "sourceId": "S_bef0674b-df3f-43bb-acb4-8fa490f39ac6",
+      "revision": 9,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_df62cc9e-8281-4ddd-9520-9bed37a5a36c",
+      "sourceIds": [
+        "S_105bcad1-5b8a-4c88-b406-f0fdbc63935d",
+        "S_094c2d85-8338-447c-890d-c813772cb82c",
+        "S_91475eb7-b576-4566-a697-d4b1a964a200",
+        "S_bef0674b-df3f-43bb-acb4-8fa490f39ac6"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "전시장 단말에서 최신 공지를 보여 주고 싶어요.",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_df62cc9e-8281-4ddd-9520-9bed37a5a36c",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "전시장 단말에서 최신 공지를 보여 주고 싶어요.",
+      "at": "2026-10-14T22:45:02.192Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_47e85546-b580-420e-8fba-b09fe584056d",
+        "name": "단말 공지 갱신",
+        "note": "휴대폰으로 전체 단말의 공지를 바꾸는 방식도 생각 중이지만 아직 정하지 않았어요.",
+        "archived": false,
+        "createdAt": "2026-10-14T22:45:02.192Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_47e85546-b580-420e-8fba-b09fe584056d": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

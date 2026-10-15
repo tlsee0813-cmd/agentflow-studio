@@ -1,0 +1,10 @@
+{
+  "credentialPatternFindings": [],
+  "newPrivateContentFindings": [],
+  "UTF8TextJSONOnly": true,
+  "sourceAndFrozenPlanUnchanged": true,
+  "actualCalls": 17,
+  "furtherCalls": 0,
+  "intendedPublication": "previously approved synthetic cases only, safe aggregate metadata and anonymous private hash/verdict handoff",
+  "noSourceAdapterRunnerEnvHeadersKeysPackages": true
+}

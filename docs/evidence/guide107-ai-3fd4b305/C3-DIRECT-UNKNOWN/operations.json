@@ -1,0 +1,39 @@
+{
+  "preparation": [
+    {
+      "operation": "reuse frozen synthetic pre-project without alteration",
+      "original": "guide097-ai/prepared/C3/project-pre.json",
+      "sha256": "5b5ad0fbe5f3a5492482feefc578ec790febd11c647fbb28c134f05bd39f1d37"
+    },
+    {
+      "operation": "buildGuideRequest",
+      "signature": "(project, areaId, answer, currentInstruction, requestId)",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "answer": null,
+      "currentInstruction": null,
+      "requestId": "G_GUIDE099_C3_PREP"
+    }
+  ],
+  "channel": {
+    "kind": "DIRECT_CURRENT_INSTRUCTION",
+    "provenance": {
+      "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+      "originalSource": "original-fixed-scenarios.json",
+      "originalTextUnchanged": false,
+      "adaptation": "Adds only the duplicate-policy referent so an otherwise elliptical unknown sentence can stand alone; no expected operation/result added."
+    },
+    "originalFixedAnswer": {
+      "id": "UNKNOWN",
+      "text": "아직 모르겠어요.",
+      "disposition": "unknown"
+    },
+    "frozenControlSlot": "C3-DIRECT-UNKNOWN",
+    "actualQuestion": null
+  },
+  "operation": "candidate buildGuideRequest",
+  "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+  "actualAnswer": null,
+  "currentInstruction": "중복 처리 정책은 아직 모르겠어요.",
+  "freshInstruction": true,
+  "noProjectMutation": true
+}

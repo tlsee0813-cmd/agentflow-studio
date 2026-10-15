@@ -1,0 +1,32 @@
+{
+  "httpStatus": 200,
+  "body": {
+    "id": "3790d635-406c-4a7c-8816-4ead396d4723",
+    "object": "chat.completion",
+    "created": 1792051076,
+    "model": "deepseek-flash",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\"question\":null,\"proposal\":{\"goal\":\"설문 응답 정리 영역에서 응답자ID가 같은 응답들 중 시간이 가장 최신인 응답 1개만 남기고 정리된 결과를 확인할 수 있게 한다.\",\"scope\":\"이번 직접 지시에 따라 응답자ID를 기준으로 같은 ID의 응답들을 묶고, 시간 열을 비교해 가장 최신인 응답 1개를 선택한다. 최신 선택 규칙은 이번 직접 지시에서 도출했다(시간 값이 같을 때의 처리는 open). 정리된 결과를 확인할 수 있는 형태로 출력한다. 원본 CSV 파일은 수정하지 않고(확정 결정 D2), 메모리에서만 처리한다. 하지 않을 것: 원본 파일 덮어쓰기·이동·삭제, 중복 정책에 대한 추가 규칙 임의 결정. 실행 도구는 먼저 현재 CSV 경로와 열 형식(응답자ID, 시간, 응답)이 실제로 존재하는지 확인하고, 없으면 사용자에게 묻지 말고 그 사실을 결과에 보고한다.\",\"checks\":\"입력 CSV의 전체 행 수와 정리 후 남은 행 수를 비교해, 남은 행들이 응답자ID별로 정확히 1개인지 확인한다. 각 응답자ID에 대해 선택된 행의 시간이 그 ID의 다른 응답 시간들보다 크거나 같은지(최신인지) 확인한다. 원본 CSV 파일이 처리 전후로 동일한 바이트인지 확인한다.\",\"open\":[\"시간 값이 같은 응답이 여러 개일 때 어떤 것을 선택할지\"],\"defaults\":[\"정리 결과 출력 형식은 CSV와 같은 열 순서의 표로 보여준다.\",\"결과 옆에 원본 행 수와 정리 후 행 수를 함께 표시한다.\"]}}"
+        },
+        "logprobs": null,
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 2999,
+      "completion_tokens": 423,
+      "total_tokens": 3422,
+      "prompt_tokens_details": {
+        "cached_tokens": 2560
+      },
+      "prompt_cache_hit_tokens": 2560,
+      "prompt_cache_miss_tokens": 439
+    },
+    "system_fingerprint": "aeb56401ca74e127821c4f9126dcb669"
+  },
+  "nonJson": false
+}

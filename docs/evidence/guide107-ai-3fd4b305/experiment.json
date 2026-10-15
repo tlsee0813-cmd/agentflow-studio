@@ -1,0 +1,25 @@
+{
+  "sourceSHA": "3fd4b3055328862c8b8471b356ee5f3772a8deee",
+  "parentSHA": "2931b50938af037a43e20ed7aba69b96ab79843d",
+  "snapshot": "partial exact runtime/build plus guidance reference snapshot; 53 verified tracked files, not full checkout",
+  "verifiedGitBlobs": 53,
+  "planAggregateSHA256": "867023ec029e44426fa2a780caa2b3459dbd9dc3fdb3124b3cc45485d92d5a17",
+  "runnerSHA256": "47acb68aae78b37601471ebc97f25bb725b33b46acc253205e5ce54122432cb7",
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false,
+    "rate": 6,
+    "processCap": 20
+  },
+  "productSendCap": 17,
+  "initialCap": 8,
+  "conditionalOrDirectCap": 9,
+  "privateRawInputsAndResponsesNotForPublication": true,
+  "sourceEdits": 0,
+  "CI": "38700663131 observed completed/success for exact SHA before execution; independent delta review pending at user authorization; experiment is not acceptance/integration",
+  "sourcePreparation": "Initial partial snapshot missed attention.ts; fetched exact candidate blob and rebuilt, not source repair",
+  "path": "candidate buildGuideRequest -> native HTTP /api/guidance -> createContinuityApp({fetchImpl}) -> existing protected adapter -> exact pinned curl transport -> approved HTTPS provider"
+}

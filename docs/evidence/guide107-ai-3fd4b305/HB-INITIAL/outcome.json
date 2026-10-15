@@ -1,0 +1,11 @@
+{
+  "slot": "HB-INITIAL",
+  "caseId": "HB",
+  "public": true,
+  "channel": "INITIAL",
+  "productHTTP": 200,
+  "errorCode": null,
+  "question": true,
+  "proposal": false,
+  "adoption": null
+}

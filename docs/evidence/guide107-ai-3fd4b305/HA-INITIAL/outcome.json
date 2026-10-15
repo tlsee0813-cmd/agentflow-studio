@@ -1,0 +1,27 @@
+{
+  "slot": "HA-INITIAL",
+  "caseId": "HA",
+  "public": true,
+  "channel": "INITIAL",
+  "productHTTP": 200,
+  "errorCode": null,
+  "question": false,
+  "proposal": true,
+  "adoption": {
+    "accepted": true,
+    "unsent": true,
+    "draftExact": true,
+    "draftTarget": {
+      "area": "A_d3c1a75a-c072-419c-af02-56cf99f65b76"
+    },
+    "rawCurrentInstructionPreserved": true,
+    "actualQuestionPreserved": true,
+    "actualAnswerPreserved": true,
+    "manualEditPreserved": true,
+    "basesUnchanged": true,
+    "sourcesUnchanged": true,
+    "tasksUnchanged": true,
+    "originalUnchanged": true,
+    "defaultsLabeled": true
+  }
+}

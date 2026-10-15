@@ -1,0 +1,127 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_4eae635b-5642-49fe-b1d1-c784022a12c5",
+  "revision": 10,
+  "name": "오프라인 리듬 연습",
+  "sources": [
+    {
+      "id": "S_974ef174-7b3d-4ffc-b4d9-303da64fabbf",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-15T00:44:38.359Z",
+      "taskId": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_fd896da9-83db-4894-905b-c60b5d9f6195",
+      "kind": "manual_decision",
+      "text": "네트워크를 사용하지 않아요.",
+      "at": "2026-10-15T00:44:38.359Z",
+      "taskId": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_8a219c07-c256-4400-bd92-583e4c3d0b04",
+      "kind": "manual_decision",
+      "text": "개인 연습 기록을 저장하지 않아요.",
+      "at": "2026-10-15T00:44:38.360Z",
+      "taskId": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_974ef174-7b3d-4ffc-b4d9-303da64fabbf",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "네트워크를 사용하지 않아요.",
+      "status": "confirmed",
+      "sourceId": "S_fd896da9-83db-4894-905b-c60b5d9f6195",
+      "revision": 7,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "개인 연습 기록을 저장하지 않아요.",
+      "status": "confirmed",
+      "sourceId": "S_8a219c07-c256-4400-bd92-583e4c3d0b04",
+      "revision": 8,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+      "sourceIds": [
+        "S_974ef174-7b3d-4ffc-b4d9-303da64fabbf",
+        "S_fd896da9-83db-4894-905b-c60b5d9f6195",
+        "S_8a219c07-c256-4400-bd92-583e4c3d0b04"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "박자 맞춰 누른 연습 결과 이해",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_4705e57f-2db2-4be0-88b9-bbb59aa9546b",
+  "draft": "‘연습 결과’ 영역의 첫 작업을 해 주세요.\n목표: 연습에서 나온 박자 시각과 그에 대응하는 키 입력 시각을 나란히 보여줘, 사용자가 각 입력이 박자에 얼마나 가까웠는지 차이를 스스로 이해할 수 있게 한다.\n이번 범위: 이번에 할 것: 연습 1회분에 대해 박자 시각 목록과 각 박자에 대응하는 키 입력 시각을 짝지어 표시하고, 각 짝의 시간 차이(밀리초)를 함께 보여준다. 입력이 없는 박자는 입력 없음으로 표시한다. 이번 직접 지시는 없고 앞선 질문에 대한 답에서 허용오차를 아직 정하지 않는다고 했으므로, 성공/실패 판정이나 허용오차 값은 만들지 않는다. 대응 규칙 등 세부는 defaults를 따른다. 하지 않을 것: 성공/실패 판정, 허용오차 값 지정, 점수·등급·요약 통계 산출, 개인 연습 기록 저장, 네트워크 사용.\n완료 조건: 박자 시각과 키 입력 시각이 각각 짝지어 표시되고, 각 짝에 시간 차이가 밀리초로 함께 보인다. 입력이 없는 박자는 입력 없음으로 보인다. 화면 어디에도 성공/실패 판정이나 허용오차 값, 점수·등급이 나타나지 않는다. 표시된 항목 수가 연습에서 발생한 박자 수와 일치한다. 저장된 기록이나 네트워크 호출이 없다.\n아직 정하지 않은 것 (임의로 정하지 마세요): 성공/실패 판정과 허용오차 값은 사용자가 아직 정하지 않음(이번 요청에서는 판정 없음).\nAI가 정한 기본값 (사용자 결정 아님 · 바꿀 수 있음): 대응 규칙: 각 박자에 대해 그 박자 시각 이후 가장 가까운 키 입력 하나를 짝짓고, 이미 짝지어진 입력은 다시 쓰지 않는다. / 시간 차이는 부호 있는 밀리초(예: +35ms, -40ms)로 표시하고, 이른 입력은 음수로 표시한다. / 박자 시각과 키 입력 시각은 밀리초 단위, 소수점 없이 표시한다. / 짝 목록은 박자 시각 오름차순으로 정렬한다. / 한 화면에 목록으로 표시하고, 시각 비교를 위해 박자 시각과 입력 시각을 같은 열에 나란히 둔다.\n\n이 답이 저장된 기준과 다르면, 저장된 기준은 기록으로 그대로 두고 이번 요청에서는 답이 명시적으로 바꾼 대상만 답을 따릅니다. 답 속 인용·가정·다른 사람의 제안은 변경 지시가 아니며, 바꾸지 않은 조건과 실행 권한은 그대로입니다.\n\n안내 질문과 사용자 답변 원문:\n질문: 성공 허용오차를 어떻게 정할까요?\n답(사용자 답변): 허용오차는아직정하지않을게요",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "박자 맞춰 누른 연습 결과 이해",
+      "at": "2026-10-15T00:44:38.358Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835",
+        "name": "연습 결과",
+        "note": "박자 시각과 그 박자에 대응하는 키 입력 시각을 제공해요. 연습 결과를 이해하고 싶고, 성공 허용오차는 아직 정하지 않았어요.",
+        "archived": false,
+        "createdAt": "2026-10-15T00:44:38.359Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": {
+      "area": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835"
+    },
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

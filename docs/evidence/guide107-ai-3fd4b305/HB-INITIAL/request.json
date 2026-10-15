@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "guidance.3",
+  "ticket": {
+    "projectId": "P_4eae635b-5642-49fe-b1d1-c784022a12c5",
+    "revision": 8,
+    "requestId": "G_4f332a52-a0d4-4bb4-a77b-bef61ef6b9bd",
+    "areaId": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835"
+  },
+  "projectName": "오프라인 리듬 연습",
+  "brief": "박자 맞춰 누른 연습 결과 이해",
+  "area": {
+    "id": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835",
+    "name": "연습 결과",
+    "note": "박자 시각과 그 박자에 대응하는 키 입력 시각을 제공해요. 연습 결과를 이해하고 싶고, 성공 허용오차는 아직 정하지 않았어요."
+  },
+  "decisions": [
+    {
+      "id": "D2",
+      "text": "네트워크를 사용하지 않아요.",
+      "status": "confirmed"
+    },
+    {
+      "id": "D3",
+      "text": "개인 연습 기록을 저장하지 않아요.",
+      "status": "confirmed"
+    }
+  ],
+  "areaWork": [],
+  "answer": null,
+  "currentInstruction": null
+}

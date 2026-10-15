@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "guidance.3",
+  "ticket": {
+    "projectId": "P_0fc9bbaf-3d21-4c73-903e-2fb3aef49c3d",
+    "revision": 9,
+    "requestId": "G_1b9d3402-3f30-4f07-87ff-f7f3666f26a6",
+    "areaId": "A_47e85546-b580-420e-8fba-b09fe584056d"
+  },
+  "projectName": "전시장 단말 — 권한 충돌",
+  "brief": "전시장 단말에서 최신 공지를 보여 주고 싶어요.",
+  "area": {
+    "id": "A_47e85546-b580-420e-8fba-b09fe584056d",
+    "name": "단말 공지 갱신",
+    "note": "휴대폰으로 전체 단말의 공지를 바꾸는 방식도 생각 중이지만 아직 정하지 않았어요."
+  },
+  "decisions": [
+    {
+      "id": "D2",
+      "text": "네트워크 사용은 금지합니다.",
+      "status": "confirmed"
+    },
+    {
+      "id": "D3",
+      "text": "공지는 파일로 반입합니다.",
+      "status": "confirmed"
+    },
+    {
+      "id": "D4",
+      "text": "이번에는 설계만 하며 실제 전송과 배포는 하지 않습니다.",
+      "status": "confirmed"
+    }
+  ],
+  "areaWork": [],
+  "answer": null,
+  "currentInstruction": null
+}

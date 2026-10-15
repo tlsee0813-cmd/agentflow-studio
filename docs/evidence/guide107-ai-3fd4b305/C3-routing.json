@@ -1,0 +1,10 @@
+{
+  "actualQuestion": null,
+  "selectedChannel": "DIRECT_CURRENT_INSTRUCTION",
+  "actualQuestionPath": "UNVERIFIED",
+  "directControls": [
+    "C3-DIRECT-UNKNOWN",
+    "C3-DIRECT-DEFERRED",
+    "C3-DIRECT-LATEST"
+  ]
+}

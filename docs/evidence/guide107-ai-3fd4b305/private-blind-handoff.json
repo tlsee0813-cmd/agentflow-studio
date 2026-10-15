@@ -1,0 +1,19 @@
+{
+  "sourceSHA": "3fd4b3055328862c8b8471b356ee5f3772a8deee",
+  "rawPrivatePublished": false,
+  "privateEvidenceDirectory": "/workspace/work/guide107-ai-3fd4b305/results-private/",
+  "privateAggregateSHA256": "f7ac924081fdb2b2bc8320afb6d2f6068682b8e317affadc16c681640649690e",
+  "privateHashManifest": "/workspace/work/guide107-ai-3fd4b305/results-private/PRIVATE-HASHES.json",
+  "frozenPrivateFixtureSHA256": "0649a11234d074692d392dec1aabedb019e4c937af4bb83d18f9e2a96e3a68e0",
+  "blindVerdicts": [
+    {
+      "id": "PRIVATE-01",
+      "verdict": "PASS core properties this sample"
+    },
+    {
+      "id": "PRIVATE-02",
+      "verdict": "PASS core properties, nonblocking wording ambiguity"
+    }
+  ],
+  "rawCaseInputsCriteriaResponsesOmitted": true
+}

@@ -1,0 +1,56 @@
+{
+  "preparation": [
+    {
+      "operation": "createProject"
+    },
+    {
+      "operation": "rename",
+      "value": "PNG 이미지 내보내기 — 명시적 변경"
+    },
+    {
+      "operation": "setBrief",
+      "value": "전자책 표지 이미지 준비"
+    },
+    {
+      "operation": "addArea",
+      "name": "PNG 내보내기",
+      "note": "",
+      "areaId": "A_d3c1a75a-c072-419c-af02-56cf99f65b76",
+      "noteReason": "Current amendment is not an unconfirmed area idea."
+    },
+    {
+      "operation": "editDraft",
+      "value": "프로젝트의 사용 조건을 기록해 주세요."
+    },
+    {
+      "operation": "submit",
+      "areaId": null,
+      "note": "Normal unplaced condition-recording task required by recordBasis; no AI, no filler to force IDs."
+    },
+    {
+      "operation": "recordBasis",
+      "text": "이미지 크기는 변경하지 않는다",
+      "status": "confirmed",
+      "id": null,
+      "issuedId": "D2"
+    },
+    {
+      "operation": "buildGuideRequest",
+      "signature": "(project, areaId, answer, currentInstruction, requestId)",
+      "areaId": "A_d3c1a75a-c072-419c-af02-56cf99f65b76",
+      "answer": null,
+      "currentInstruction": "R7을 바꿔요. 큰 이미지만 긴 변1600px로줄이고비율유지. 작은이미지는확대없이원래크기로복사. 별도폴더출력/원본유지/이번은설계만.",
+      "requestId": "G_GUIDE099_HA_PREP"
+    }
+  ],
+  "channel": {
+    "kind": "INITIAL",
+    "source": "unchanged frozen initial material / private frozen synthetic input"
+  },
+  "operation": "candidate buildGuideRequest",
+  "areaId": "A_d3c1a75a-c072-419c-af02-56cf99f65b76",
+  "actualAnswer": null,
+  "currentInstruction": "R7을 바꿔요. 큰 이미지만 긴 변1600px로줄이고비율유지. 작은이미지는확대없이원래크기로복사. 별도폴더출력/원본유지/이번은설계만.",
+  "freshInstruction": false,
+  "noProjectMutation": true
+}

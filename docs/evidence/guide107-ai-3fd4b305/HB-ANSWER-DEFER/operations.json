@@ -1,0 +1,51 @@
+{
+  "preparation": [
+    {
+      "operation": "reuse unchanged GUIDE098 holdout B pre-project",
+      "original": "guide097-ai/prepared-guide098/HB/project-pre.json",
+      "sha256": "a0b7bc584a07004a9615e9fa8bf90b4cbfd5897a9e4a7075b594f22fb52ed394"
+    },
+    {
+      "operation": "buildGuideRequest",
+      "signature": "(project, areaId, answer, currentInstruction, requestId)",
+      "areaId": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835",
+      "answer": null,
+      "currentInstruction": null,
+      "requestId": "G_GUIDE099_HB_PREP"
+    }
+  ],
+  "channel": {
+    "kind": "ACTUAL_QUESTION",
+    "actualQuestionSlot": "HB-INITIAL",
+    "fixedAnswerId": "DEFER",
+    "actualQuestionCopiedVerbatim": true
+  },
+  "operation": "candidate buildGuideRequest",
+  "areaId": "A_4bc2bdb4-a3c3-45ed-a9ec-e50173be5835",
+  "actualAnswer": {
+    "question": {
+      "kind": "choice",
+      "text": "성공 허용오차를 어떻게 정할까요?",
+      "why": "허용오차가 정해져야 '결과 이해'의 핵심 동작(성공/실패 판정)과 완료 조건을 정할 수 있어요.",
+      "options": [
+        {
+          "label": "입력 시각 그대로 표시만 (판정 없음)",
+          "consequence": "박자 시각과 키 입력 시각의 차이를 보여주기만 하고 성공/실패 판정은 넣지 않아요."
+        },
+        {
+          "label": "고정 허용오차 값으로 성공/실패 판정",
+          "consequence": "정한 값(예: ±80ms) 기준으로 각 입력의 성공 여부와 전체 요약을 보여줘요."
+        },
+        {
+          "label": "지금은 임시 기본값으로 두고 나중에 조정",
+          "consequence": "낮은 위험의 기본 허용오차로 판정하되, 값을 바꿀 수 있게 열어둬요."
+        }
+      ]
+    },
+    "text": "허용오차는아직정하지않을게요",
+    "disposition": "provided"
+  },
+  "currentInstruction": null,
+  "freshInstruction": false,
+  "noProjectMutation": true
+}

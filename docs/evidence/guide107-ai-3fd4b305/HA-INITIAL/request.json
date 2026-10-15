@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "guidance.3",
+  "ticket": {
+    "projectId": "P_87e5622c-96d3-4a52-8f78-2f492b43c227",
+    "revision": 7,
+    "requestId": "G_0a65fb24-4050-4c7b-9aa2-9642a9780112",
+    "areaId": "A_d3c1a75a-c072-419c-af02-56cf99f65b76"
+  },
+  "projectName": "PNG 이미지 내보내기 — 명시적 변경",
+  "brief": "전자책 표지 이미지 준비",
+  "area": {
+    "id": "A_d3c1a75a-c072-419c-af02-56cf99f65b76",
+    "name": "PNG 내보내기",
+    "note": null
+  },
+  "decisions": [
+    {
+      "id": "D2",
+      "text": "이미지 크기는 변경하지 않는다",
+      "status": "confirmed"
+    }
+  ],
+  "areaWork": [],
+  "answer": null,
+  "currentInstruction": "R7을 바꿔요. 큰 이미지만 긴 변1600px로줄이고비율유지. 작은이미지는확대없이원래크기로복사. 별도폴더출력/원본유지/이번은설계만."
+}

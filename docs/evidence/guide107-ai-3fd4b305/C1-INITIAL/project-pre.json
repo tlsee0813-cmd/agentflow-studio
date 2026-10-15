@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_d022fed1-e34b-4d40-a242-6fb1bc363e9f",
+  "revision": 9,
+  "name": "초보 — 가정 식재료",
+  "sources": [
+    {
+      "id": "S_dc6f34a1-0f9c-41c1-93ae-d485f7a53f17",
+      "kind": "request",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "at": "2026-10-14T22:45:02.179Z",
+      "taskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_c1b76f4b-e17e-4130-bed7-48edd4ec5907",
+      "kind": "manual_decision",
+      "text": "혼자 한 기기에서 사용해요.",
+      "at": "2026-10-14T22:45:02.179Z",
+      "taskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_b0607379-9bd9-4e03-beb4-69ee07b7609e",
+      "kind": "manual_decision",
+      "text": "재고는 수동으로 입력해요.",
+      "at": "2026-10-14T22:45:02.180Z",
+      "taskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_783b2b82-2fa1-46f5-8e15-b0df7003a300",
+      "kind": "manual_decision",
+      "text": "주문과 배송은 이번 범위에서 제외해요.",
+      "at": "2026-10-14T22:45:02.180Z",
+      "taskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "프로젝트의 사용 조건을 기록해 주세요.",
+      "status": "requested",
+      "sourceId": "S_dc6f34a1-0f9c-41c1-93ae-d485f7a53f17",
+      "revision": 6,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "혼자 한 기기에서 사용해요.",
+      "status": "confirmed",
+      "sourceId": "S_c1b76f4b-e17e-4130-bed7-48edd4ec5907",
+      "revision": 7,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "재고는 수동으로 입력해요.",
+      "status": "confirmed",
+      "sourceId": "S_b0607379-9bd9-4e03-beb4-69ee07b7609e",
+      "revision": 8,
+      "history": []
+    },
+    {
+      "id": "D4",
+      "text": "주문과 배송은 이번 범위에서 제외해요.",
+      "status": "confirmed",
+      "sourceId": "S_783b2b82-2fa1-46f5-8e15-b0df7003a300",
+      "revision": 9,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+      "sourceIds": [
+        "S_dc6f34a1-0f9c-41c1-93ae-d485f7a53f17",
+        "S_c1b76f4b-e17e-4130-bed7-48edd4ec5907",
+        "S_b0607379-9bd9-4e03-beb4-69ee07b7609e",
+        "S_783b2b82-2fa1-46f5-8e15-b0df7003a300"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "가정 식재료 재고로 낭비를 줄이고 싶어요.",
+        "area": null
+      }
+    }
+  ],
+  "currentTaskId": "T_af72bde8-78f1-424a-8aed-a8d2a9398ea8",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "가정 식재료 재고로 낭비를 줄이고 싶어요.",
+      "at": "2026-10-14T22:45:02.178Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b",
+        "name": "남은 재료 보기",
+        "note": "집에 남아 있는 재료를 보고 싶어요.",
+        "archived": false,
+        "createdAt": "2026-10-14T22:45:02.179Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_bf8ab63f-3c26-458b-b6a4-8cc7d39c4c5b": {
+          "x": 40,
+          "y": 40
+        }
+      }
+    }
+  }
+}

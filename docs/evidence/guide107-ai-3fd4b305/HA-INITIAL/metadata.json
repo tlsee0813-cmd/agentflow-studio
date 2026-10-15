@@ -1,0 +1,46 @@
+{
+  "slot": "HA-INITIAL",
+  "sourceSHA": "3fd4b3055328862c8b8471b356ee5f3772a8deee",
+  "channel": "INITIAL",
+  "productHTTPStatus": 200,
+  "latencyMs": 4780,
+  "requestBytes": 739,
+  "productResponseBytes": 2285,
+  "providerSendOrdinal": 15,
+  "providerEvents": [
+    {
+      "slot": "HA-INITIAL",
+      "timeUTC": "2026-10-15T07:59:01.282Z",
+      "sendOrdinal": 15,
+      "event": "transport_attempt",
+      "requestBytes": 11271
+    },
+    {
+      "slot": "HA-INITIAL",
+      "timeUTC": "2026-10-15T07:59:06.059Z",
+      "sendOrdinal": 15,
+      "event": "provider_response",
+      "status": 200,
+      "responseBytes": 2574,
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 2989,
+        "completion_tokens": 618,
+        "total_tokens": 3607,
+        "prompt_tokens_details": {
+          "cached_tokens": 2560
+        },
+        "prompt_cache_hit_tokens": 2560,
+        "prompt_cache_miss_tokens": 429
+      },
+      "finishReason": "stop"
+    }
+  ],
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false
+  }
+}

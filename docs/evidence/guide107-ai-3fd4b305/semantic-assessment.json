@@ -1,0 +1,230 @@
+{
+  "sourceSHA": "3fd4b3055328862c8b8471b356ee5f3772a8deee",
+  "overallVerdict": "HOLD — two material semantic defects remain; protocol and local adoption passed",
+  "blockers": [
+    {
+      "id": "G107-B1",
+      "case": "C3",
+      "slot": "C3-DIRECT-DEFERRED",
+      "kind": "incorrect completion invariant",
+      "evidenceRequest": "C3-DIRECT-DEFERRED/request.json",
+      "evidenceRaw": "C3-DIRECT-DEFERRED/provider-response.raw.txt",
+      "field": "reply.proposal.checks",
+      "original": "CSV의 응답 열에서 읽은 전체 행 수와 정리 결과에 포함된 행 수의 합이 입력과 같은지 확인한다. 중복 응답자ID 탐지 결과의 중복 건수가 실제 중복 행 수와 일치하는지 확인한다. 원본 CSV 파일의 내용과 수정 시간이 요청 전후로 그대로인지 확인한다. 출력에 중복 응답자ID 목록과 각 건수가 표시되는지 확인한다.",
+      "observation": "The first sentence requires input row count plus retained result row count to equal the input count, although this branch removes/selects no rows.",
+      "impact": "For any nonempty input preserved in the result, that condition is impossible. An implementer following the generated checks can fail correct work or be pushed toward dropping rows. This is semantic completion-criteria failure despite HTTP200.",
+      "reasoningExample": "Two input rows retained as two result rows would require 2+2=2. This example is evaluator reasoning, not a model request or executed fixture.",
+      "minimalFutureFixIdea": "State the actual preservation relation (result rows equal input rows for observation-only processing); do not add overlapping counts. No product/prompt repair is performed here."
+    },
+    {
+      "id": "G107-B2",
+      "case": "HB",
+      "slot": "HB-ANSWER-DEFER",
+      "kind": "harmful AI default changes supplied correspondence",
+      "evidenceRequest": "HB-ANSWER-DEFER/request.json",
+      "evidenceRaw": "HB-ANSWER-DEFER/provider-response.raw.txt",
+      "field": "reply.proposal.defaults",
+      "original": [
+        "대응 규칙: 각 박자에 대해 그 박자 시각 이후 가장 가까운 키 입력 하나를 짝짓고, 이미 짝지어진 입력은 다시 쓰지 않는다.",
+        "시간 차이는 부호 있는 밀리초(예: +35ms, -40ms)로 표시하고, 이른 입력은 음수로 표시한다.",
+        "박자 시각과 키 입력 시각은 밀리초 단위, 소수점 없이 표시한다.",
+        "짝 목록은 박자 시각 오름차순으로 정렬한다.",
+        "한 화면에 목록으로 표시하고, 시각 비교를 위해 박자 시각과 입력 시각을 같은 열에 나란히 둔다."
+      ],
+      "observation": "Input says beat timestamps and their corresponding key timestamps are provided. Default1 re-pairs each beat only to a closest key AFTER that beat, while default2 says early inputs have negative differences.",
+      "impact": "Early corresponding inputs can be dropped or paired with another beat. With after-only pairing, the promised negative early difference cannot occur. A data-association rule is substantive logic, not harmless display default.",
+      "reasoningExample": "A known corresponding key time before its beat should retain the pair and yield a negative difference; an after-only rule cannot do that. This is logical impact analysis, not an additional executed test.",
+      "minimalFutureFixIdea": "Use the supplied correspondence unchanged; if genuinely absent, leave matching policy unresolved or ask one relevant question. Do not invent a rematching policy under defaults. No repair or extra generation here."
+    }
+  ],
+  "cases": [
+    {
+      "case": "C1",
+      "verdict": "PARTIAL",
+      "slots": [
+        "C1-INITIAL",
+        "C1-DIRECT-A",
+        "C1-DIRECT-B"
+      ],
+      "observations": [
+        "Initial now includes manual input -> save -> view, with checks; prior first-input omission improved.",
+        "DIRECT-A retains shopping-time lookup and a conditional minimal input path if no existing one is found; it still wrongly describes a manual-input constraint as evidence data is already entered.",
+        "DIRECT-B differs toward first-to-eat prioritisation and leaves priority criterion open; no supplied expiry/input-time data is established."
+      ],
+      "judgement": "Initial slice is useful without a question. Direct controls are meaningful changes, but the first-to-eat result/data/criterion boundary remains unclear; do not claim that full workflow is proven. The fallback in A mitigates the unsupported existing-data phrase, so do not label A as the same complete input omission as baseline.",
+      "limits": [
+        "No actual C1 question-answer path.",
+        "No actual inventory implementation/data entry executed."
+      ],
+      "evidence": [
+        "C1-INITIAL/request.json",
+        "C1-INITIAL/response.json",
+        "C1-DIRECT-A/response.json",
+        "C1-DIRECT-B/response.json"
+      ]
+    },
+    {
+      "case": "C2",
+      "verdict": "PASS this sample",
+      "slots": [
+        "C2-INITIAL"
+      ],
+      "observations": [
+        "Immediate proposal, no irrelevant question. Python/standard library/direct-folder regular files/preview only, original/planned names, collisions and empty folder are preserved.",
+        "Exact dotfile sentence appended manually and adopted as unsent draft; old sources/tasks/bases preserved."
+      ],
+      "judgement": "Observed semantic constraints and editing/adoption pass. A draft asking the eventual implementer to run a readonly preview is consistent with the request; this evaluator did not rename or execute generated code.",
+      "limits": [
+        "No real filesystem rename/Python execution or browser UI race test."
+      ],
+      "evidence": [
+        "C2-INITIAL/request.json",
+        "C2-INITIAL/response.json",
+        "C2-INITIAL/edited-draft.txt",
+        "C2-INITIAL/outcome.json"
+      ]
+    },
+    {
+      "case": "C3",
+      "verdict": "HOLD (G107-B1)",
+      "slots": [
+        "C3-INITIAL",
+        "C3-DIRECT-UNKNOWN",
+        "C3-DIRECT-DEFERRED",
+        "C3-DIRECT-LATEST"
+      ],
+      "observations": [
+        "Initial/unknown/deferred all propose policy-independent duplicate observation without destructive processing.",
+        "UNKNOWN direct instruction uses the predeclared explicit policy referent, not a manufactured answer.",
+        "LATEST genuinely uses the user direct latest-one rule and checks that each retained timestamp is >= all other timestamps in its ID group; original remains unchanged. Ties remain open.",
+        "DEFERRED has a false row-count conservation check."
+      ],
+      "judgement": "Useful safe scope and improved latest-row check do not cancel the contradictory deferred completion criterion.",
+      "limits": [
+        "All C3 initial responses were proposal-based, so actual C3 question-answer path is untested.",
+        "Equal-time tie policy remains open; no actual CSV was processed."
+      ],
+      "evidence": [
+        "C3-DIRECT-DEFERRED/request.json",
+        "C3-DIRECT-DEFERRED/provider-response.raw.txt",
+        "C3-DIRECT-LATEST/response.json"
+      ]
+    },
+    {
+      "case": "C4",
+      "verdict": "PASS core preservation/amendment, limited design detail",
+      "slots": [
+        "C4-INITIAL",
+        "C4-DIRECT-A",
+        "C4-DIRECT-B"
+      ],
+      "observations": [
+        "Initial and A preserve offline/file-import/design-only scope. A includes file errors in the design.",
+        "B explicitly changes only notice-delivery network allowance in the current design, retains file-import decision, stored rule and no actual transfer/deployment.",
+        "Unconfirmed phone idea is not promoted to authorization."
+      ],
+      "judgement": "The scoped latest amendment now has coherent scope/checks and provenance as direct input. Some timing/transport design details remain open; no deployment or general network grant was inferred. A current independent file-based design can be valid without forcing a question.",
+      "limits": [
+        "No actual C4 question-answer path or live transfer."
+      ],
+      "evidence": [
+        "C4-DIRECT-A/request.json",
+        "C4-DIRECT-A/response.json",
+        "C4-DIRECT-B/request.json",
+        "C4-DIRECT-B/response.json"
+      ]
+    },
+    {
+      "case": "HB",
+      "verdict": "HOLD (G107-B2); actual question path observed",
+      "slots": [
+        "HB-INITIAL",
+        "HB-ANSWER-DEFER",
+        "HB-ANSWER-WITHIN_100MS"
+      ],
+      "observations": [
+        "Actual initial question asks success tolerance. The exact question/options were copied into both actual fixed answer requests. No HB direct controls were sent.",
+        "Question why claims success/failure judgement is essential despite a useful judgement-free path; its offered provisional threshold is not a chosen user decision.",
+        "DEFER produces useful timestamp differences with no invented success tolerance, but adds a harmful after-only rematching default.",
+        "WITHIN_100MS uses the actual answer +/-100ms inclusive rule, differences and judgement counts, no network/personal storage; explicit boundary-example checks are not enumerated."
+      ],
+      "judgement": "Question protocol and real answer preservation pass, but question necessity is only partial and the deferred logic is materially wrong. The later 100ms response does not repair the deferred raw response.",
+      "limits": [
+        "No generated rhythm algorithm was executed.",
+        "No direct HB controls or additional threshold variants were dispatched."
+      ],
+      "evidence": [
+        "HB-INITIAL/response.json",
+        "HB-ANSWER-DEFER/request.json",
+        "HB-ANSWER-DEFER/provider-response.raw.txt",
+        "HB-ANSWER-WITHIN_100MS/request.json",
+        "HB-ANSWER-WITHIN_100MS/response.json"
+      ]
+    },
+    {
+      "case": "HA",
+      "verdict": "PASS core explicit amendment; minor open duplication",
+      "slots": [
+        "HA-INITIAL"
+      ],
+      "observations": [
+        "Current instruction is the frozen amendment, answer=null, stored confirmed D2 unchanged. Logical R7 is still only the documented fixture reference, not a manufactured runtime ID.",
+        "Scope/checks explicitly use long side>1600 vs <=1600, aspect ratio/no enlargement/separate folder/original preservation/design only.",
+        "No required error class is arbitrarily excluded as an AI default; source is called direct instruction, not answer.",
+        "Open repeats the already derived exactly1600 classification and leaves a harmless output-folder name open."
+      ],
+      "judgement": "Core baseline HA scope/provenance defects are not reproduced in this sample. Redundant open items are clarity notes, not proof the old prohibition was restored or a blocking functional defect.",
+      "limits": [
+        "No image transformation or UI field persistence test."
+      ],
+      "evidence": [
+        "HA-INITIAL/request.json",
+        "HA-INITIAL/response.json",
+        "HA-INITIAL/project-adopted.json"
+      ]
+    }
+  ],
+  "facts": {
+    "calls": 17,
+    "publicCalls": 15,
+    "privateCalls": 2,
+    "provider200": 17,
+    "product200": 17,
+    "finishStop": 17,
+    "questions": 1,
+    "proposals": 16,
+    "actualAnswerCalls": 2,
+    "directInstructionCalls": 7,
+    "initialCalls": 8,
+    "acceptedUnsentAdoptions": 16,
+    "allExistingSourcesTasksBasesPreserved": true,
+    "localUnsent429": 0,
+    "mock": 0,
+    "neutral": 0,
+    "retries": 0,
+    "settings": {
+      "model": "deepseek-flash",
+      "timeoutMs": 15000,
+      "maxTokens": 2048,
+      "thinking": "disabled",
+      "temperatureSent": false,
+      "nativeRate": 6,
+      "nativeCap": 20
+    }
+  },
+  "limits": [
+    "One actual response per slot, not overall efficacy or failure-rate estimate.",
+    "Only HB actual question-answer path was observed; C1/C3/C4 use direct-input controls and cannot establish their question-path behaviour.",
+    "Question/no-question decision is judged by whether a safe complete useful slice exists, not by a required question count.",
+    "Public raw data include only the previously approved synthetic cases; two new private held-outs are excluded.",
+    "This candidate experiment is not automatic source acceptance/integration; independent diff review was parallel."
+  ],
+  "comparisonToGuide099": [
+    "C1 initial now grounds a manual entry path.",
+    "C4 notice-only network amendment is tested as direct input, not a fake answer.",
+    "HA has explicit threshold boundary, correct direct-instruction provenance, and no arbitrary error exclusion default in this sample.",
+    "The actual HB question/answers are now observed, revealing a harmful pairing default; not an assumed question.",
+    "C3 DEFERRED still exposes invalid checks despite useful policy-independent scope."
+  ],
+  "stopDecision": "Complete only this frozen experiment and its evidence handoff. No new cases, exploration, retries or automatic reevaluation cycles."
+}

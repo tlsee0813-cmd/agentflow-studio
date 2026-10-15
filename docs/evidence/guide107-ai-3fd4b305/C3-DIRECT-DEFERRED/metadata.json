@@ -1,0 +1,46 @@
+{
+  "slot": "C3-DIRECT-DEFERRED",
+  "sourceSHA": "3fd4b3055328862c8b8471b356ee5f3772a8deee",
+  "channel": "DIRECT_CURRENT_INSTRUCTION",
+  "productHTTPStatus": 200,
+  "latencyMs": 3767,
+  "requestBytes": 764,
+  "productResponseBytes": 1770,
+  "providerSendOrdinal": 7,
+  "providerEvents": [
+    {
+      "slot": "C3-DIRECT-DEFERRED",
+      "timeUTC": "2026-10-15T07:57:51.422Z",
+      "sendOrdinal": 7,
+      "event": "transport_attempt",
+      "requestBytes": 11298
+    },
+    {
+      "slot": "C3-DIRECT-DEFERRED",
+      "timeUTC": "2026-10-15T07:57:55.181Z",
+      "sendOrdinal": 7,
+      "event": "provider_response",
+      "status": 200,
+      "responseBytes": 2055,
+      "model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 2985,
+        "completion_tokens": 430,
+        "total_tokens": 3415,
+        "prompt_tokens_details": {
+          "cached_tokens": 2560
+        },
+        "prompt_cache_hit_tokens": 2560,
+        "prompt_cache_miss_tokens": 425
+      },
+      "finishReason": "stop"
+    }
+  ],
+  "settings": {
+    "model": "deepseek-flash",
+    "timeoutMs": 15000,
+    "maxTokens": 2048,
+    "thinking": "disabled",
+    "temperatureSent": false
+  }
+}

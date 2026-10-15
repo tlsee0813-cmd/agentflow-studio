@@ -1,0 +1,39 @@
+{
+  "preparation": [
+    {
+      "operation": "reuse frozen synthetic pre-project without alteration",
+      "original": "guide097-ai/prepared/C3/project-pre.json",
+      "sha256": "5b5ad0fbe5f3a5492482feefc578ec790febd11c647fbb28c134f05bd39f1d37"
+    },
+    {
+      "operation": "buildGuideRequest",
+      "signature": "(project, areaId, answer, currentInstruction, requestId)",
+      "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+      "answer": null,
+      "currentInstruction": null,
+      "requestId": "G_GUIDE099_C3_PREP"
+    }
+  ],
+  "channel": {
+    "kind": "DIRECT_CURRENT_INSTRUCTION",
+    "provenance": {
+      "kind": "predeclared experimenter-encoded direct user clarification, not an observed answer to a model question",
+      "originalSource": "original-fixed-scenarios.json",
+      "originalTextUnchanged": true,
+      "adaptation": null
+    },
+    "originalFixedAnswer": {
+      "id": "LATEST",
+      "text": "응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+      "disposition": "provided"
+    },
+    "frozenControlSlot": "C3-DIRECT-LATEST",
+    "actualQuestion": null
+  },
+  "operation": "candidate buildGuideRequest",
+  "areaId": "A_d79994a9-f632-4681-9aa5-5a226de4d376",
+  "actualAnswer": null,
+  "currentInstruction": "응답자ID가 같은 응답은 시간이 가장 최신인 응답 1개를 선택해요.",
+  "freshInstruction": true,
+  "noProjectMutation": true
+}
