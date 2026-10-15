@@ -1,0 +1,104 @@
+{
+ "runId": "t03",
+ "started": "2026-10-15T23:33:16.853Z",
+ "before": {
+  "html": {
+   "bytes": 55753,
+   "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+  },
+  "check": {
+   "bytes": 27850,
+   "sha256": "2d05f854e72c5c853be15d7aa32df234fd789e7d28572ff3bb1538e6559c7dbb"
+  },
+  "pagelib": {
+   "bytes": 8762,
+   "sha256": "851ae11d2a069f395fda33b94dd5d26363ca7f7eacbf3b03c7a92be58a1bb2c9"
+  },
+  "collector": {
+   "bytes": 2616,
+   "sha256": "c4df5c08a263372b53d71996864f48f4b9b0c71038a03b52d194065f8d16f8e1"
+  },
+  "check1440": {
+   "bytes": 3568,
+   "sha256": "caff43bd623eab568dc694c8d7a84e108b34227302cfc6c939a1d2c55027ff5a"
+  }
+ },
+ "children": [
+  {
+   "viewport": "1280x720",
+   "script": "check10.mjs",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 13811,
+   "assertions": 157,
+   "clickWheelPreconditions": 44,
+   "failed": 0,
+   "wheels": 6,
+   "missingScenes": [],
+   "consoleErrors": 0,
+   "receivedMatchesSource": true,
+   "pngs": [
+    "1280-c32-prep-edited.png"
+   ]
+  },
+  {
+   "viewport": "390x844",
+   "script": "check10.mjs",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 17320,
+   "assertions": 158,
+   "clickWheelPreconditions": 44,
+   "failed": 0,
+   "wheels": 21,
+   "missingScenes": [],
+   "consoleErrors": 0,
+   "receivedMatchesSource": true,
+   "pngs": [
+    "390-initial.png",
+    "390-g3-two-items.png",
+    "390-compact-reference.png"
+   ]
+  },
+  {
+   "viewport": "1440x900",
+   "script": "check10-1440.mjs",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 960,
+   "assertions": 11,
+   "clickWheelPreconditions": 0,
+   "failed": 0,
+   "wheels": 0,
+   "missingScenes": [],
+   "consoleErrors": 0,
+   "receivedMatchesSource": true,
+   "pngs": []
+  }
+ ],
+ "after": {
+  "html": {
+   "bytes": 55753,
+   "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+  },
+  "check": {
+   "bytes": 27850,
+   "sha256": "2d05f854e72c5c853be15d7aa32df234fd789e7d28572ff3bb1538e6559c7dbb"
+  },
+  "pagelib": {
+   "bytes": 8762,
+   "sha256": "851ae11d2a069f395fda33b94dd5d26363ca7f7eacbf3b03c7a92be58a1bb2c9"
+  },
+  "collector": {
+   "bytes": 2616,
+   "sha256": "c4df5c08a263372b53d71996864f48f4b9b0c71038a03b52d194065f8d16f8e1"
+  },
+  "check1440": {
+   "bytes": 3568,
+   "sha256": "caff43bd623eab568dc694c8d7a84e108b34227302cfc6c939a1d2c55027ff5a"
+  }
+ },
+ "finished": "2026-10-15T23:33:48.948Z",
+ "sourceUnchangedDuringRun": true,
+ "allChildrenZero": true
+}

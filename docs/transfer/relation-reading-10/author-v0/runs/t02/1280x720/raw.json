@@ -1,0 +1,2632 @@
+{
+ "viewport": [
+  1280,
+  720
+ ],
+ "sourceStart": {
+  "bytes": 55753,
+  "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+ },
+ "http": [
+  {
+   "bytes": 55753,
+   "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+  },
+  {
+   "bytes": 55753,
+   "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+  },
+  {
+   "bytes": 55753,
+   "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+  },
+  {
+   "bytes": 55753,
+   "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+  }
+ ],
+ "consoleErrors": [],
+ "scenes": {
+  "S0-initial": {
+   "id": "S0-initial",
+   "assertions": [
+    {
+     "name": "초기 깊이 G2=0 G3=1 G4=0·무선택",
+     "pass": true,
+     "data": {
+      "depth": {
+       "G2": 0,
+       "G3": 1,
+       "G4": 0
+      },
+      "sel": []
+     }
+    },
+    {
+     "name": "초기 지도 스크롤 없음",
+     "pass": true,
+     "data": {
+      "sl": 0,
+      "st": 0,
+      "sw": 980,
+      "sh": 575,
+      "cw": 980,
+      "ch": 575
+     }
+    },
+    {
+     "name": "초기 지도 글자 #n-G1 .gname",
+     "pass": true,
+     "data": {
+      "chars": 5,
+      "ok": 5,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 지도 글자 #n-G2 .gname",
+     "pass": true,
+     "data": {
+      "chars": 4,
+      "ok": 4,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 지도 글자 #n-G3 .gname",
+     "pass": true,
+     "data": {
+      "chars": 5,
+      "ok": 5,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 지도 글자 #n-G4 .gname",
+     "pass": true,
+     "data": {
+      "chars": 4,
+      "ok": 4,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 지도 글자 #n-G5 .gname",
+     "pass": true,
+     "data": {
+      "chars": 5,
+      "ok": 5,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 지도 글자 #n-C31 .kname",
+     "pass": true,
+     "data": {
+      "chars": 4,
+      "ok": 4,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 지도 글자 #n-C32 .kname",
+     "pass": true,
+     "data": {
+      "chars": 8,
+      "ok": 8,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 지도 글자 #n-C32 .kchg",
+     "pass": true,
+     "data": {
+      "chars": 4,
+      "ok": 4,
+      "fails": []
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 카드",
+     "pass": true,
+     "data": {
+      "x": 571.765625,
+      "y": 330,
+      "inView": true,
+      "hit": "span.kname",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "첫 선택 전후 카드 bounds 동일(허용 0.6px)",
+     "pass": true,
+     "data": []
+    },
+    {
+     "name": "첫 선택 전후 선 경로 동일(좌표 허용 0.5px, 원시 최대차 기록)",
+     "pass": true,
+     "data": [
+      {
+       "k": "G1>G2",
+       "max": 0
+      },
+      {
+       "k": "G2>C31",
+       "max": 0
+      },
+      {
+       "k": "G2>C32",
+       "max": 0
+      },
+      {
+       "k": "C32>G5",
+       "max": 0
+      },
+      {
+       "k": "G5>G4",
+       "max": 0
+      },
+      {
+       "k": "G2>G4",
+       "max": 0
+      }
+     ]
+    },
+    {
+     "name": "첫 선택: C32 선택·깊이 불변",
+     "pass": true,
+     "data": {
+      "sel": [
+       "C32"
+      ],
+      "depth": {
+       "G2": 0,
+       "G3": 1,
+       "G4": 0
+      }
+     }
+    }
+   ],
+   "raw": {
+    "initial": {
+     "viewport": [
+      1280,
+      720
+     ],
+     "view": "map",
+     "depth": {
+      "G2": 0,
+      "G3": 1,
+      "G4": 0
+     },
+     "scale": {
+      "data": "1",
+      "label": "100%",
+      "style": "scale(1)",
+      "computed": "matrix(1, 0, 0, 1, 0, 0)"
+     },
+     "map": {
+      "sl": 0,
+      "st": 0,
+      "sw": 980,
+      "sh": 575,
+      "cw": 980,
+      "ch": 575
+     },
+     "main": {
+      "st": 0,
+      "sh": 620,
+      "ch": 620
+     },
+     "panelSt": 0,
+     "fvSt": 0,
+     "sel": [],
+     "isSel": [],
+     "panelH2": "한 부분을 골라 보세요",
+     "panelPk": "선택 설명",
+     "active": "body",
+     "activeText": "AgentFlow · 배경 사본 기능 일부 지도\nFLOW091-C 과거 개발 계약·MOCK 검사 보고를 읽는",
+     "nodes": {
+      "G1": {
+       "x": 22,
+       "y": 310.5,
+       "w": 180,
+       "h": 86
+      },
+      "G2": {
+       "x": 242,
+       "y": 291.5,
+       "w": 210,
+       "h": 124
+      },
+      "C21": null,
+      "C22": null,
+      "G3": {
+       "x": 492,
+       "y": 166.8,
+       "w": 236,
+       "h": 209.5
+      },
+      "C31": {
+       "x": 501,
+       "y": 249.8,
+       "w": 218,
+       "h": 55.8
+      },
+      "C32": {
+       "x": 501,
+       "y": 311.5,
+       "w": 218,
+       "h": 55.8
+      },
+      "G4": {
+       "x": 492,
+       "y": 416.3,
+       "w": 236,
+       "h": 124
+      },
+      "C41": null,
+      "C42": null,
+      "G5": {
+       "x": 768,
+       "y": 319.9,
+       "w": 180,
+       "h": 67.3
+      }
+     },
+     "edges": [
+      {
+       "k": "G1>G2",
+       "rels": "R1",
+       "repFrom": "G1",
+       "repTo": "G2",
+       "ends": "202,208.8,242,208.8",
+       "agg": "to",
+       "cls": "",
+       "d": "M202 208.8C222 208.8 222 208.8 242 208.8",
+       "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정"
+      },
+      {
+       "k": "G2>C31",
+       "rels": "R2",
+       "repFrom": "G2",
+       "repTo": "C31",
+       "ends": "452,208.8,501,132.9",
+       "agg": "from ",
+       "cls": "",
+       "d": "M452 208.8C476.5 208.8 476.5 132.9 501 132.9",
+       "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본"
+      },
+      {
+       "k": "G2>C32",
+       "rels": "R3",
+       "repFrom": "G2",
+       "repTo": "C32",
+       "ends": "452,194.7,501,194.7",
+       "agg": "from ",
+       "cls": "",
+       "d": "M452 194.70000000000002C476.5 194.70000000000002 476.5 194.70000000000002 501 194.70000000000002",
+       "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본"
+      },
+      {
+       "k": "C32>G5",
+       "rels": "R4",
+       "repFrom": "C32",
+       "repTo": "G5",
+       "ends": "719,198.9,768,198.9",
+       "agg": "",
+       "cls": "",
+       "d": "M719 198.85000000000002C743.5 198.85000000000002 743.5 198.85000000000002 768 198.85000000000002",
+       "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본"
+      },
+      {
+       "k": "G5>G4",
+       "rels": "R5",
+       "repFrom": "G5",
+       "repTo": "G4",
+       "ends": "768,208.8,728,333.5",
+       "agg": "to",
+       "cls": "",
+       "d": "M768 208.75C748 208.75 748 333.5 728 333.5",
+       "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자"
+      },
+      {
+       "k": "G2>G4",
+       "rels": "R6",
+       "repFrom": "G2",
+       "repTo": "G4",
+       "ends": "452,208.8,492,333.5",
+       "agg": "from to",
+       "cls": "",
+       "d": "M452 208.8C472 208.8 472 333.5 492 333.5",
+       "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본"
+      }
+     ]
+    },
+    "afterSelect": {
+     "viewport": [
+      1280,
+      720
+     ],
+     "view": "map",
+     "depth": {
+      "G2": 0,
+      "G3": 1,
+      "G4": 0
+     },
+     "scale": {
+      "data": "1",
+      "label": "100%",
+      "style": "scale(1)",
+      "computed": "matrix(1, 0, 0, 1, 0, 0)"
+     },
+     "map": {
+      "sl": 0,
+      "st": 0,
+      "sw": 980,
+      "sh": 575,
+      "cw": 980,
+      "ch": 575
+     },
+     "main": {
+      "st": 0,
+      "sh": 620,
+      "ch": 620
+     },
+     "panelSt": 0,
+     "fvSt": 0,
+     "sel": [
+      "C32"
+     ],
+     "isSel": [
+      "n-C32"
+     ],
+     "panelH2": "작업문과 미리보기",
+     "panelPk": "‹전달할 내용› 묶음 안 세부 · AI 제안 구분",
+     "active": "button#n-C32.kid.chg.is-sel[data-sel=C32]",
+     "activeText": "작업문과 미리보기이번 변경\n배경을 별도 블록으로",
+     "nodes": {
+      "G1": {
+       "x": 22,
+       "y": 310.5,
+       "w": 180,
+       "h": 86
+      },
+      "G2": {
+       "x": 242,
+       "y": 291.5,
+       "w": 210,
+       "h": 124
+      },
+      "C21": null,
+      "C22": null,
+      "G3": {
+       "x": 492,
+       "y": 166.8,
+       "w": 236,
+       "h": 209.5
+      },
+      "C31": {
+       "x": 501,
+       "y": 249.8,
+       "w": 218,
+       "h": 55.8
+      },
+      "C32": {
+       "x": 501,
+       "y": 311.5,
+       "w": 218,
+       "h": 55.8
+      },
+      "G4": {
+       "x": 492,
+       "y": 416.3,
+       "w": 236,
+       "h": 124
+      },
+      "C41": null,
+      "C42": null,
+      "G5": {
+       "x": 768,
+       "y": 319.9,
+       "w": 180,
+       "h": 67.3
+      }
+     },
+     "edges": [
+      {
+       "k": "G1>G2",
+       "rels": "R1",
+       "repFrom": "G1",
+       "repTo": "G2",
+       "ends": "202,208.8,242,208.8",
+       "agg": "to",
+       "cls": "dim",
+       "d": "M202 208.8C222 208.8 222 208.8 242 208.8",
+       "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정"
+      },
+      {
+       "k": "G2>C31",
+       "rels": "R2",
+       "repFrom": "G2",
+       "repTo": "C31",
+       "ends": "452,208.8,501,132.9",
+       "agg": "from ",
+       "cls": "dim",
+       "d": "M452 208.8C476.5 208.8 476.5 132.9 501 132.9",
+       "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본"
+      },
+      {
+       "k": "G2>C32",
+       "rels": "R3",
+       "repFrom": "G2",
+       "repTo": "C32",
+       "ends": "452,194.7,501,194.7",
+       "agg": "from ",
+       "cls": "on",
+       "d": "M452 194.70000000000002C476.5 194.70000000000002 476.5 194.70000000000002 501 194.70000000000002",
+       "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본"
+      },
+      {
+       "k": "C32>G5",
+       "rels": "R4",
+       "repFrom": "C32",
+       "repTo": "G5",
+       "ends": "719,198.9,768,198.9",
+       "agg": "",
+       "cls": "on",
+       "d": "M719 198.85000000000002C743.5 198.85000000000002 743.5 198.85000000000002 768 198.85000000000002",
+       "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본"
+      },
+      {
+       "k": "G5>G4",
+       "rels": "R5",
+       "repFrom": "G5",
+       "repTo": "G4",
+       "ends": "768,208.8,728,333.5",
+       "agg": "to",
+       "cls": "dim",
+       "d": "M768 208.75C748 208.75 748 333.5 728 333.5",
+       "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자"
+      },
+      {
+       "k": "G2>G4",
+       "rels": "R6",
+       "repFrom": "G2",
+       "repTo": "G4",
+       "ends": "452,208.8,492,333.5",
+       "agg": "from to",
+       "cls": "dim",
+       "d": "M452 208.8C472 208.8 472 333.5 492 333.5",
+       "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본"
+      }
+     ]
+    },
+    "firstSelectDiff": {
+     "boxes": [],
+     "paths": [
+      {
+       "k": "G1>G2",
+       "max": 0
+      },
+      {
+       "k": "G2>C31",
+       "max": 0
+      },
+      {
+       "k": "G2>C32",
+       "max": 0
+      },
+      {
+       "k": "C32>G5",
+       "max": 0
+      },
+      {
+       "k": "G5>G4",
+       "max": 0
+      },
+      {
+       "k": "G2>G4",
+       "max": 0
+      }
+     ]
+    }
+   },
+   "complete": true,
+   "failShot": null,
+   "received": {
+    "status": 200,
+    "bytes": 55753,
+    "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+   }
+  },
+  "S1-G3": {
+   "id": "S1-G3",
+   "assertions": [
+    {
+     "name": "클릭 지점 화면 안·대상 위: G3 묶음 이름",
+     "pass": true,
+     "data": {
+      "x": 584,
+      "y": 189,
+      "inView": true,
+      "hit": "span.gname",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G3 목록: R2는 ‘AI 입력’ 아래, R3는 ‘작업문과 미리보기’ 아래(열기 전 구별)",
+     "pass": true,
+     "data": [
+      {
+       "id": "R2",
+       "text": "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+       "group": "AI 입력",
+       "describedBy": "AI 입력이 묶음 안 세부",
+       "expanded": "false"
+      },
+      {
+       "id": "R3",
+       "text": "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+       "group": "작업문과 미리보기",
+       "describedBy": "작업문과 미리보기이 묶음 안 세부",
+       "expanded": "false"
+      },
+      {
+       "id": "R4",
+       "text": "넘김 →저장·복구 내보내기 기록의 사본 · 묶음",
+       "group": "작업문과 미리보기",
+       "describedBy": "작업문과 미리보기이 묶음 안 세부",
+       "expanded": "false"
+      }
+     ]
+    },
+    {
+     "name": "G3 목록: 두 항목 모두 같은 보내는 곳·요청 사본 유지",
+     "pass": true,
+     "data": [
+      "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+      "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안"
+     ]
+    },
+    {
+     "name": "G3 목록: 버튼의 설명(aria-describedby)이 실제 받는 세부를 가리킴",
+     "pass": true,
+     "data": [
+      "AI 입력이 묶음 안 세부",
+      "작업문과 미리보기이 묶음 안 세부"
+     ]
+    },
+    {
+     "name": "G3 목록: R4는 작업문과 미리보기 아래 넘김 → 저장·복구",
+     "pass": true,
+     "data": {
+      "id": "R4",
+      "text": "넘김 →저장·복구 내보내기 기록의 사본 · 묶음",
+      "group": "작업문과 미리보기",
+      "describedBy": "작업문과 미리보기이 묶음 안 세부",
+      "expanded": "false"
+     }
+    },
+    {
+     "name": "G3 목록: 기본 목록에 관계 ID 없음",
+     "pass": true,
+     "data": [
+      "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+      "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+      "넘김 →저장·복구 내보내기 기록의 사본 · 묶음"
+     ]
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) G3 목록 #xg-G3-C31",
+     "pass": true,
+     "data": {
+      "chars": 10,
+      "ok": 10,
+      "minFontPx": 12.5,
+      "fails": [],
+      "text": "AI 입력이 묶음 안 세부"
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) G3 목록 #xg-G3-C32",
+     "pass": true,
+     "data": {
+      "chars": 14,
+      "ok": 14,
+      "minFontPx": 12.5,
+      "fails": [],
+      "text": "작업문과 미리보기이 묶음 안 세부"
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) G3 목록 #panel .xbtn[data-xref=\"R2\"]",
+     "pass": true,
+     "data": {
+      "chars": 23,
+      "ok": 23,
+      "minFontPx": 12,
+      "fails": [],
+      "text": "받음 ←새 요청의 배경 고정\n요청 사본 · ‹요청 맥락› 안"
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) G3 목록 #panel .xbtn[data-xref=\"R3\"]",
+     "pass": true,
+     "data": {
+      "chars": 23,
+      "ok": 23,
+      "minFontPx": 12,
+      "fails": [],
+      "text": "받음 ←새 요청의 배경 고정\n요청 사본 · ‹요청 맥락› 안"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G3 R2 참고 열기",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 516.75,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R2]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G3 R2 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → AI 입력\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→AI 입력"
+    },
+    {
+     "name": "G3 R2 참고: 종류 기대 문자열 \"요청 사본\"",
+     "pass": true,
+     "data": "전달: 요청 사본"
+    },
+    {
+     "name": "G3 R2 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "명시 새 요청 때 고정한 그 요청의 배경 사본을 AI 입력의 전용 필드로 싣습니다. 출처·기준과 분리되고 실행 범위는 이번 요청이 정합니다."
+    },
+    {
+     "name": "G3 R2 참고: 소속·접힌 대표·지금 선택",
+     "pass": true,
+     "data": [
+      "보내는 쪽‹요청 맥락› 안 · 지도에선 접힌 ‹요청 맥락› 자리",
+      "받는 쪽‹전달할 내용› 안"
+     ]
+    },
+    {
+     "name": "G3 R2 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹전달할 내용› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L15 · 원문 줄 ↗ · 관계 R2"
+    },
+    {
+     "name": "R2 참고 중 G3 선택·깊이 유지",
+     "pass": true,
+     "data": {
+      "sel": [
+       "G3"
+      ],
+      "depth": {
+       "G2": 0,
+       "G3": 1,
+       "G4": 0
+      }
+     }
+    },
+    {
+     "name": "참고 열어도 지도 카드 bounds 동일",
+     "pass": true,
+     "data": []
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: R2 열린 채 R3 누름",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 557.296875,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R3]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "바꿔 읽기: R2 본문 제거·R3만 열림",
+     "pass": true,
+     "data": {
+      "r2": false,
+      "r3": true,
+      "e2": "false",
+      "e3": "true"
+     }
+    },
+    {
+     "name": "G3 R3 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → 작업문과 미리보기\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→작업문과 미리보기"
+    },
+    {
+     "name": "G3 R3 참고: 종류 기대 문자열 \"요청 사본\"",
+     "pass": true,
+     "data": "전달: 요청 사본"
+    },
+    {
+     "name": "G3 R3 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "명시 새 요청 때 고정한 그 요청의 배경 사본을 작업문·미리보기의 별도 블록으로 넣습니다. 지금 지도에 보이는 최신 구상을 가져오는 것이 아닙니다. 사본이 없거나 비면 블록을 넣지 않습니다."
+    },
+    {
+     "name": "G3 R3 참고: 소속·접힌 대표·지금 선택",
+     "pass": true,
+     "data": [
+      "보내는 쪽‹요청 맥락› 안 · 지도에선 접힌 ‹요청 맥락› 자리",
+      "받는 쪽‹전달할 내용› 안"
+     ]
+    },
+    {
+     "name": "G3 R3 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹전달할 내용› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L16 · 원문 줄 ↗ · 관계 R3"
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xhd",
+     "pass": true,
+     "data": {
+      "chars": 13,
+      "ok": 13,
+      "minFontPx": 11.5,
+      "fails": [],
+      "text": "관계 참고 · 읽기 전용\n참고 닫기"
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xflow",
+     "pass": true,
+     "data": {
+      "chars": 17,
+      "ok": 17,
+      "minFontPx": 14,
+      "fails": [],
+      "text": "새 요청의 배경 고정→작업문과 미리보기"
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xkind",
+     "pass": true,
+     "data": {
+      "chars": 7,
+      "ok": 7,
+      "minFontPx": 12.5,
+      "fails": [],
+      "text": "전달: 요청 사본"
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xwh",
+     "pass": true,
+     "data": {
+      "chars": 37,
+      "ok": 37,
+      "minFontPx": 12.5,
+      "fails": [],
+      "text": "보내는 쪽‹요청 맥락› 안 · 지도에선 접힌 ‹요청 맥락› 자리\n받는 쪽‹전달할 내용› 안"
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xcond",
+     "pass": true,
+     "data": {
+      "chars": 80,
+      "ok": 80,
+      "minFontPx": 13,
+      "fails": [],
+      "text": "명시 새 요청 때 고정한 그 요청의 배경 사본을 작업문·미리보기의 별도 블록으로 넣습니다. 지금 지도에 보이는 최신 구상을 가져오는 것이 아닙니다. 사본이 없거나 비면 블록을 넣지 않습니다."
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 참고 #xr-R3 [data-mv]",
+     "pass": true,
+     "data": {
+      "chars": 16,
+      "ok": 16,
+      "minFontPx": 12,
+      "fails": [],
+      "text": "지도에서 ‘새 요청의 배경 고정’ 선택"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 참고 닫기 버튼",
+     "pass": true,
+     "data": {
+      "x": 1215.484375,
+      "y": 232,
+      "inView": true,
+      "hit": "button.btn.sm[data-act=xref-close]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "닫기 버튼: 본문 제거·글자 부재·초점 R3 항목·G3 선택 유지",
+     "pass": true,
+     "data": {
+      "gone": {
+       "dom": false,
+       "txt": false
+      },
+      "active": "button.xbtn[data-xref=R3]",
+      "sel": [
+       "G3"
+      ]
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: R3 재열기",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 557.5,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R3]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "Escape: 본문 제거·초점 R3 항목·선택 유지",
+     "pass": true,
+     "data": {
+      "gone": {
+       "dom": false
+      },
+      "active": "button.xbtn[data-xref=R3]",
+      "sel": [
+       "G3"
+      ]
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: R2 열기",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 468.75,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R2]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: R2 같은 버튼 다시 누름",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 468.75,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R2]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "반복 버튼: 같은 항목 다시 누르면 닫힘·초점 그 항목",
+     "pass": true,
+     "data": {
+      "gone": {
+       "dom": false,
+       "e": "false"
+      },
+      "active": "button.xbtn[data-xref=R2]"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: R3 열기(이동용)",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 557.5,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R3]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "이동 버튼 이름",
+     "pass": true,
+     "data": "지도에서 ‘새 요청의 배경 고정’ 선택"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 명시 이동",
+     "pass": true,
+     "data": {
+      "x": 1118.0859375,
+      "y": 683.09375,
+      "inView": true,
+      "hit": "button.btn.sm[data-goto=C21][data-mv=1]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "명시 이동: C21 선택·G2만 펼침·G3/G4 유지·초점 제목",
+     "pass": true,
+     "data": {
+      "sel": [
+       "C21"
+      ],
+      "depth": {
+       "G2": 1,
+       "G3": 1,
+       "G4": 0
+      },
+      "h2": "새 요청의 배경 고정",
+      "active": "h2"
+     }
+    }
+   ],
+   "raw": {
+    "list": [
+     {
+      "id": "R2",
+      "text": "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+      "group": "AI 입력",
+      "describedBy": "AI 입력이 묶음 안 세부",
+      "expanded": "false"
+     },
+     {
+      "id": "R3",
+      "text": "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+      "group": "작업문과 미리보기",
+      "describedBy": "작업문과 미리보기이 묶음 안 세부",
+      "expanded": "false"
+     },
+     {
+      "id": "R4",
+      "text": "넘김 →저장·복구 내보내기 기록의 사본 · 묶음",
+      "group": "작업문과 미리보기",
+      "describedBy": "작업문과 미리보기이 묶음 안 세부",
+      "expanded": "false"
+     }
+    ],
+    "refHeight": {
+     "h": 411.6,
+     "cards": 0
+    },
+    "afterMove": {
+     "viewport": [
+      1280,
+      720
+     ],
+     "view": "map",
+     "depth": {
+      "G2": 1,
+      "G3": 1,
+      "G4": 0
+     },
+     "scale": {
+      "data": "1",
+      "label": "100%",
+      "style": "scale(1)",
+      "computed": "matrix(1, 0, 0, 1, 0, 0)"
+     },
+     "map": {
+      "sl": 0,
+      "st": 0,
+      "sw": 980,
+      "sh": 575,
+      "cw": 980,
+      "ch": 575
+     },
+     "main": {
+      "st": 0,
+      "sh": 620,
+      "ch": 620
+     },
+     "panelSt": 0,
+     "fvSt": 0,
+     "sel": [
+      "C21"
+     ],
+     "isSel": [
+      "n-C21"
+     ],
+     "panelH2": "새 요청의 배경 고정",
+     "panelPk": "‹요청 맥락› 묶음 안 세부 · AI 제안 구분",
+     "active": "h2",
+     "activeText": "새 요청의 배경 고정",
+     "nodes": {
+      "G1": {
+       "x": 22,
+       "y": 310.5,
+       "w": 180,
+       "h": 86
+      },
+      "G2": {
+       "x": 242,
+       "y": 258.1,
+       "w": 210,
+       "h": 190.8
+      },
+      "C21": {
+       "x": 251,
+       "y": 322.4,
+       "w": 192,
+       "h": 55.8
+      },
+      "C22": {
+       "x": 251,
+       "y": 384.1,
+       "w": 192,
+       "h": 55.8
+      },
+      "G3": {
+       "x": 492,
+       "y": 166.8,
+       "w": 236,
+       "h": 209.5
+      },
+      "C31": {
+       "x": 501,
+       "y": 249.8,
+       "w": 218,
+       "h": 55.8
+      },
+      "C32": {
+       "x": 501,
+       "y": 311.5,
+       "w": 218,
+       "h": 55.8
+      },
+      "G4": {
+       "x": 492,
+       "y": 416.3,
+       "w": 236,
+       "h": 124
+      },
+      "C41": null,
+      "C42": null,
+      "G5": {
+       "x": 768,
+       "y": 319.9,
+       "w": 180,
+       "h": 67.3
+      }
+     },
+     "edges": [
+      {
+       "k": "G1>C21",
+       "rels": "R1",
+       "repFrom": "G1",
+       "repTo": "C21",
+       "ends": "202,205.5,251,205.5",
+       "agg": "",
+       "cls": "on",
+       "d": "M202 205.5C226.5 205.5 226.5 205.5 251 205.5",
+       "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정"
+      },
+      {
+       "k": "C21>C31",
+       "rels": "R2",
+       "repFrom": "C21",
+       "repTo": "C31",
+       "ends": "443,205.5,501,132.9",
+       "agg": "",
+       "cls": "on",
+       "d": "M443 205.5C472 205.5 472 132.9 501 132.9",
+       "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본"
+      },
+      {
+       "k": "C21>C32",
+       "rels": "R3",
+       "repFrom": "C21",
+       "repTo": "C32",
+       "ends": "443,200.1,501,200.1",
+       "agg": "",
+       "cls": "on",
+       "d": "M443 200.10000000000002C472 200.10000000000002 472 200.10000000000002 501 200.10000000000002",
+       "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본"
+      },
+      {
+       "k": "C32>G5",
+       "rels": "R4",
+       "repFrom": "C32",
+       "repTo": "G5",
+       "ends": "719,198.9,768,198.9",
+       "agg": "",
+       "cls": "dim",
+       "d": "M719 198.85000000000002C743.5 198.85000000000002 743.5 198.85000000000002 768 198.85000000000002",
+       "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본"
+      },
+      {
+       "k": "G5>G4",
+       "rels": "R5",
+       "repFrom": "G5",
+       "repTo": "G4",
+       "ends": "768,208.8,728,333.5",
+       "agg": "to",
+       "cls": "dim",
+       "d": "M768 208.75C748 208.75 748 333.5 728 333.5",
+       "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자"
+      },
+      {
+       "k": "C21>G4",
+       "rels": "R6",
+       "repFrom": "C21",
+       "repTo": "G4",
+       "ends": "443,205.5,492,333.5",
+       "agg": "to",
+       "cls": "on",
+       "d": "M443 205.5C467.5 205.5 467.5 333.5 492 333.5",
+       "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본"
+      }
+     ]
+    }
+   },
+   "complete": true,
+   "failShot": null,
+   "received": {
+    "status": 200,
+    "bytes": 55753,
+    "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+   }
+  },
+  "S2-C21": {
+   "id": "S2-C21",
+   "assertions": [
+    {
+     "name": "C21 목록: 묶음 머리 없이 평평한 4항목(받음/넘김·수신부 이름)",
+     "pass": true,
+     "data": [
+      {
+       "id": "R1",
+       "text": "받음 ←구상과 목적 명시 새 요청 때만 사본 고정 · 묶음",
+       "group": null,
+       "describedBy": null,
+       "expanded": "false"
+      },
+      {
+       "id": "R2",
+       "text": "넘김 →AI 입력 요청 사본 · ‹전달할 내용› 안",
+       "group": null,
+       "describedBy": null,
+       "expanded": "false"
+      },
+      {
+       "id": "R3",
+       "text": "넘김 →작업문과 미리보기 요청 사본 · ‹전달할 내용› 안",
+       "group": null,
+       "describedBy": null,
+       "expanded": "false"
+      },
+      {
+       "id": "R6",
+       "text": "넘김 →일반 보고 연결 정확히 연결된 대상 작업의 사본 · ‹결과 연결› 안",
+       "group": null,
+       "describedBy": null,
+       "expanded": "false"
+      }
+     ]
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) C21 목록 #panel .xbtn[data-xref=\"R2\"]",
+     "pass": true,
+     "data": {
+      "chars": 20,
+      "ok": 20,
+      "minFontPx": 12,
+      "fails": [],
+      "text": "넘김 →AI 입력\n요청 사본 · ‹전달할 내용› 안"
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) C21 목록 #panel .xbtn[data-xref=\"R3\"]",
+     "pass": true,
+     "data": {
+      "chars": 24,
+      "ok": 24,
+      "minFontPx": 12,
+      "fails": [],
+      "text": "넘김 →작업문과 미리보기\n요청 사본 · ‹전달할 내용› 안"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C21 R2 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 336.25,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R2]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "C21 R2 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → AI 입력\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→AI 입력"
+    },
+    {
+     "name": "C21 R2 참고: 종류 기대 문자열 \"요청 사본\"",
+     "pass": true,
+     "data": "전달: 요청 사본"
+    },
+    {
+     "name": "C21 R2 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "명시 새 요청 때 고정한 그 요청의 배경 사본을 AI 입력의 전용 필드로 싣습니다. 출처·기준과 분리되고 실행 범위는 이번 요청이 정합니다."
+    },
+    {
+     "name": "C21 R2 참고: 소속·접힌 대표·지금 선택",
+     "pass": true,
+     "data": [
+      "보내는 쪽‹요청 맥락› 안 · 지금 선택",
+      "받는 쪽‹전달할 내용› 안"
+     ]
+    },
+    {
+     "name": "C21 R2 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹새 요청의 배경 고정› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L15 · 원문 줄 ↗ · 관계 R2"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C21 R3로 바꿔 읽기",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 539.296875,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R3]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "C21 R3 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → 작업문과 미리보기\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→작업문과 미리보기"
+    },
+    {
+     "name": "C21 R3 참고: 종류 기대 문자열 \"요청 사본\"",
+     "pass": true,
+     "data": "전달: 요청 사본"
+    },
+    {
+     "name": "C21 R3 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "명시 새 요청 때 고정한 그 요청의 배경 사본을 작업문·미리보기의 별도 블록으로 넣습니다. 지금 지도에 보이는 최신 구상을 가져오는 것이 아닙니다. 사본이 없거나 비면 블록을 넣지 않습니다."
+    },
+    {
+     "name": "C21 R3 참고: 소속·접힌 대표·지금 선택",
+     "pass": true,
+     "data": [
+      "보내는 쪽‹요청 맥락› 안 · 지금 선택",
+      "받는 쪽‹전달할 내용› 안"
+     ]
+    },
+    {
+     "name": "C21 R3 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹새 요청의 배경 고정› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L16 · 원문 줄 ↗ · 관계 R3"
+    },
+    {
+     "name": "C21: Escape 닫힘·초점·선택 유지",
+     "pass": true,
+     "data": {
+      "active": "button.xbtn[data-xref=R3]",
+      "sel": [
+       "C21"
+      ]
+     }
+    }
+   ],
+   "raw": {
+    "list": [
+     {
+      "id": "R1",
+      "text": "받음 ←구상과 목적 명시 새 요청 때만 사본 고정 · 묶음",
+      "group": null,
+      "describedBy": null,
+      "expanded": "false"
+     },
+     {
+      "id": "R2",
+      "text": "넘김 →AI 입력 요청 사본 · ‹전달할 내용› 안",
+      "group": null,
+      "describedBy": null,
+      "expanded": "false"
+     },
+     {
+      "id": "R3",
+      "text": "넘김 →작업문과 미리보기 요청 사본 · ‹전달할 내용› 안",
+      "group": null,
+      "describedBy": null,
+      "expanded": "false"
+     },
+     {
+      "id": "R6",
+      "text": "넘김 →일반 보고 연결 정확히 연결된 대상 작업의 사본 · ‹결과 연결› 안",
+      "group": null,
+      "describedBy": null,
+      "expanded": "false"
+     }
+    ]
+   },
+   "complete": true,
+   "failShot": null
+  },
+  "S3-kinds": {
+   "id": "S3-kinds",
+   "assertions": [
+    {
+     "name": "클릭 지점 화면 안·대상 위: G2 묶음 이름",
+     "pass": true,
+     "data": {
+      "x": 315,
+      "y": 313.75,
+      "inView": true,
+      "hit": "span.gname",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G2 R1 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 489.75,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R1]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G2 R1 참고: 실제 양끝·방향 \"구상과 목적 → 새 요청의 배경 고정\"",
+     "pass": true,
+     "data": "구상과 목적→새 요청의 배경 고정"
+    },
+    {
+     "name": "G2 R1 참고: 종류 기대 문자열 \"명시 새 요청 때만 사본 고정\"",
+     "pass": true,
+     "data": "전달: 명시 새 요청 때만 사본 고정"
+    },
+    {
+     "name": "G2 R1 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "명시적인 새 요청을 보낼 때만 그때의 목적과 그 요청의 대상 영역 하나를 사본으로 고정합니다. 지도에서 고르거나 둘러보는 것은 새 요청이 아닙니다."
+    },
+    {
+     "name": "G2 R1 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹요청 맥락› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L10 · 원문 줄 ↗ · 관계 R1"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G2 R2 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 548.75,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R2]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G2 R2 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → AI 입력\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→AI 입력"
+    },
+    {
+     "name": "G2 R2 참고: 종류 기대 문자열 \"요청 사본\"",
+     "pass": true,
+     "data": "전달: 요청 사본"
+    },
+    {
+     "name": "G2 R2 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "명시 새 요청 때 고정한 그 요청의 배경 사본을 AI 입력의 전용 필드로 싣습니다. 출처·기준과 분리되고 실행 범위는 이번 요청이 정합니다."
+    },
+    {
+     "name": "G2 R2 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹요청 맥락› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L15 · 원문 줄 ↗ · 관계 R2"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G2 R3 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 607.75,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R3]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G2 R3 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → 작업문과 미리보기\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→작업문과 미리보기"
+    },
+    {
+     "name": "G2 R3 참고: 종류 기대 문자열 \"요청 사본\"",
+     "pass": true,
+     "data": "전달: 요청 사본"
+    },
+    {
+     "name": "G2 R3 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "명시 새 요청 때 고정한 그 요청의 배경 사본을 작업문·미리보기의 별도 블록으로 넣습니다. 지금 지도에 보이는 최신 구상을 가져오는 것이 아닙니다. 사본이 없거나 비면 블록을 넣지 않습니다."
+    },
+    {
+     "name": "G2 R3 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹요청 맥락› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L16 · 원문 줄 ↗ · 관계 R3"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G2 R6 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 675.75,
+      "inView": true,
+      "hit": "small",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G2 R6 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → 일반 보고 연결\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→일반 보고 연결"
+    },
+    {
+     "name": "G2 R6 참고: 종류 기대 문자열 \"정확히 연결된 대상 작업의 사본\"",
+     "pass": true,
+     "data": "전달: 정확히 연결된 대상 작업의 사본"
+    },
+    {
+     "name": "G2 R6 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "일반 보고는 정확히 연결된 대상 작업의 사본을 그대로 잇습니다. 대상이 없으면 빈 값 그대로입니다."
+    },
+    {
+     "name": "G2 R6 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹요청 맥락› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L12 · 원문 줄 ↗ · 관계 R6"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G4 묶음 이름",
+     "pass": true,
+     "data": {
+      "x": 578,
+      "y": 438.5,
+      "inView": true,
+      "hit": "span.gname",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G4 R6 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 498.75,
+      "inView": true,
+      "hit": "small",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G4 R6 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → 일반 보고 연결\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→일반 보고 연결"
+    },
+    {
+     "name": "G4 R6 참고: 종류 기대 문자열 \"정확히 연결된 대상 작업의 사본\"",
+     "pass": true,
+     "data": "전달: 정확히 연결된 대상 작업의 사본"
+    },
+    {
+     "name": "G4 R6 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "일반 보고는 정확히 연결된 대상 작업의 사본을 그대로 잇습니다. 대상이 없으면 빈 값 그대로입니다."
+    },
+    {
+     "name": "G4 R6 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹결과 연결› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L12 · 원문 줄 ↗ · 관계 R6"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G4 R5 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 596.5,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R5]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G4 R5 참고: 실제 양끝·방향 \"저장·복구 → 파일 반환 연결\"",
+     "pass": true,
+     "data": "저장·복구→파일 반환 연결"
+    },
+    {
+     "name": "G4 R5 참고: 종류 기대 문자열 \"일치하는 반환 식별자\"",
+     "pass": true,
+     "data": "전달: 일치하는 반환 식별자"
+    },
+    {
+     "name": "G4 R5 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "반환 식별자가 일치하는 내보내기 기록의 사본을 씁니다. 옛 기록에 사본이 없으면 빈 값 그대로이며 최신 구상으로 메우지 않습니다."
+    },
+    {
+     "name": "G4 R5 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹결과 연결› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L13 · 원문 줄 ↗ · 관계 R5"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G3 묶음 이름",
+     "pass": true,
+     "data": {
+      "x": 584,
+      "y": 189,
+      "inView": true,
+      "hit": "span.gname",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G3 R4 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 664.5,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R4]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G3 R4 참고: 실제 양끝·방향 \"작업문과 미리보기 → 저장·복구\"",
+     "pass": true,
+     "data": "작업문과 미리보기→저장·복구"
+    },
+    {
+     "name": "G3 R4 참고: 종류 기대 문자열 \"내보내기 기록의 사본\"",
+     "pass": true,
+     "data": "전달: 내보내기 기록의 사본"
+    },
+    {
+     "name": "G3 R4 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "작업문에 실제로 넣은 사본을 내보내기 기록에 남깁니다. 작업문 전문 저장이나 외부에서 받거나 수락했다는 증거가 아닙니다."
+    },
+    {
+     "name": "G3 R4 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹전달할 내용› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L14 · L55 · 원문 줄 ↗ · 관계 R4"
+    },
+    {
+     "name": "R1–R6 모두 참고로 대조",
+     "pass": true,
+     "data": [
+      "R1",
+      "R2",
+      "R3",
+      "R6",
+      "R5",
+      "R4"
+     ]
+    },
+    {
+     "name": "G4 목록: 일반 보고 연결 ← 새 요청의 배경 고정 / 파일 반환 연결 ← 저장·복구 (R5≠R6 별도 항목)",
+     "pass": true,
+     "data": [
+      {
+       "id": "R6",
+       "text": "받음 ←새 요청의 배경 고정 정확히 연결된 대상 작업의 사본 · ‹요청 맥락› 안",
+       "group": "일반 보고 연결",
+       "describedBy": "일반 보고 연결이 묶음 안 세부",
+       "expanded": "false"
+      },
+      {
+       "id": "R5",
+       "text": "받음 ←저장·복구 일치하는 반환 식별자 · 묶음",
+       "group": "파일 반환 연결",
+       "describedBy": "파일 반환 연결이 묶음 안 세부",
+       "expanded": "false"
+      }
+     ]
+    },
+    {
+     "name": "G2 목록: 실제 보내는 세부 ‘새 요청의 배경 고정’ 한 머리 아래 4항목(머리 반복 없음)",
+     "pass": true,
+     "data": [
+      {
+       "id": "R1",
+       "text": "받음 ←구상과 목적 명시 새 요청 때만 사본 고정 · 묶음",
+       "group": "새 요청의 배경 고정",
+       "describedBy": "새 요청의 배경 고정이 묶음 안 세부",
+       "expanded": "false"
+      },
+      {
+       "id": "R2",
+       "text": "넘김 →AI 입력 요청 사본 · ‹전달할 내용› 안",
+       "group": "새 요청의 배경 고정",
+       "describedBy": "새 요청의 배경 고정이 묶음 안 세부",
+       "expanded": "false"
+      },
+      {
+       "id": "R3",
+       "text": "넘김 →작업문과 미리보기 요청 사본 · ‹전달할 내용› 안",
+       "group": "새 요청의 배경 고정",
+       "describedBy": "새 요청의 배경 고정이 묶음 안 세부",
+       "expanded": "false"
+      },
+      {
+       "id": "R6",
+       "text": "넘김 →일반 보고 연결 정확히 연결된 대상 작업의 사본 · ‹결과 연결› 안",
+       "group": "새 요청의 배경 고정",
+       "describedBy": "새 요청의 배경 고정이 묶음 안 세부",
+       "expanded": "false"
+      }
+     ]
+    }
+   ],
+   "raw": {
+    "listG2": [
+     {
+      "id": "R1",
+      "text": "받음 ←구상과 목적 명시 새 요청 때만 사본 고정 · 묶음",
+      "group": "새 요청의 배경 고정",
+      "describedBy": "새 요청의 배경 고정이 묶음 안 세부",
+      "expanded": "false"
+     },
+     {
+      "id": "R2",
+      "text": "넘김 →AI 입력 요청 사본 · ‹전달할 내용› 안",
+      "group": "새 요청의 배경 고정",
+      "describedBy": "새 요청의 배경 고정이 묶음 안 세부",
+      "expanded": "false"
+     },
+     {
+      "id": "R3",
+      "text": "넘김 →작업문과 미리보기 요청 사본 · ‹전달할 내용› 안",
+      "group": "새 요청의 배경 고정",
+      "describedBy": "새 요청의 배경 고정이 묶음 안 세부",
+      "expanded": "false"
+     },
+     {
+      "id": "R6",
+      "text": "넘김 →일반 보고 연결 정확히 연결된 대상 작업의 사본 · ‹결과 연결› 안",
+      "group": "새 요청의 배경 고정",
+      "describedBy": "새 요청의 배경 고정이 묶음 안 세부",
+      "expanded": "false"
+     }
+    ],
+    "listG4": [
+     {
+      "id": "R6",
+      "text": "받음 ←새 요청의 배경 고정 정확히 연결된 대상 작업의 사본 · ‹요청 맥락› 안",
+      "group": "일반 보고 연결",
+      "describedBy": "일반 보고 연결이 묶음 안 세부",
+      "expanded": "false"
+     },
+     {
+      "id": "R5",
+      "text": "받음 ←저장·복구 일치하는 반환 식별자 · 묶음",
+      "group": "파일 반환 연결",
+      "describedBy": "파일 반환 연결이 묶음 안 세부",
+      "expanded": "false"
+     }
+    ],
+    "listG3": [
+     {
+      "id": "R2",
+      "text": "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+      "group": "AI 입력",
+      "describedBy": "AI 입력이 묶음 안 세부",
+      "expanded": "false"
+     },
+     {
+      "id": "R3",
+      "text": "받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안",
+      "group": "작업문과 미리보기",
+      "describedBy": "작업문과 미리보기이 묶음 안 세부",
+      "expanded": "false"
+     },
+     {
+      "id": "R4",
+      "text": "넘김 →저장·복구 내보내기 기록의 사본 · 묶음",
+      "group": "작업문과 미리보기",
+      "describedBy": "작업문과 미리보기이 묶음 안 세부",
+      "expanded": "false"
+     }
+    ]
+   },
+   "complete": true,
+   "failShot": null,
+   "received": {
+    "status": 200,
+    "bytes": 55753,
+    "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+   }
+  },
+  "S4-C32-prep": {
+   "id": "S4-C32-prep",
+   "assertions": [
+    {
+     "name": "클릭 지점 화면 안·대상 위: G4 펼치기",
+     "pass": true,
+     "data": {
+      "x": 690,
+      "y": 439.25,
+      "inView": true,
+      "hit": "button.gtog[data-tog=G4]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 확대",
+     "pass": true,
+     "data": {
+      "x": 950,
+      "y": 121.75,
+      "inView": true,
+      "hit": "button#zIn",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 카드",
+     "pass": true,
+     "data": {
+      "x": 583.5304565429688,
+      "y": 354.78749084472656,
+      "inView": true,
+      "hit": "span.kname",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "비초기: G4 펼침·115%·C32 선택",
+     "pass": true,
+     "data": {
+      "depth": {
+       "G2": 0,
+       "G3": 1,
+       "G4": 1
+      },
+      "scale": {
+       "data": "1.15",
+       "label": "115%",
+       "style": "scale(1.15)",
+       "computed": "matrix(1.15, 0, 0, 1.15, 0, 0)"
+      },
+      "sel": [
+       "C32"
+      ]
+     }
+    },
+    {
+     "name": "지도 실제 휠 이동(여지 있는 축)",
+     "pass": true,
+     "data": {
+      "ext": {
+       "x": 136,
+       "y": 3
+      },
+      "map": {
+       "sl": 134,
+       "st": 3,
+       "sw": 1116,
+       "sh": 578,
+       "cw": 980,
+       "ch": 575
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 집중",
+     "pass": true,
+     "data": {
+      "x": 1104.96875,
+      "y": 460.25,
+      "inView": true,
+      "hit": "button.btn.primary[data-act=focus]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 준비 열기",
+     "pass": true,
+     "data": {
+      "x": 1201,
+      "y": 128.25,
+      "inView": true,
+      "hit": "button#fPrep.btn.primary",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "C32 준비 4필드",
+     "pass": true,
+     "data": [
+      "target",
+      "keep",
+      "evidence",
+      "unknown"
+     ]
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 대상 필드",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 201.25,
+      "inView": true,
+      "hit": "textarea#pf-target",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "E 추가(대상), 나머지 기본값",
+     "pass": true,
+     "data": " 다른 기능을 구현하라는 요청이 아니다.\n이번 확인은 배경 블록의 유무와 요청 당시 사본 유지까지만 다룬다."
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 준비 닫기",
+     "pass": true,
+     "data": {
+      "x": 935,
+      "y": 52.5,
+      "inView": true,
+      "hit": "button#prepClose.btn",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 전체 지도로",
+     "pass": true,
+     "data": {
+      "x": 78.2109375,
+      "y": 128.25,
+      "inView": true,
+      "hit": "button#fBack.btn",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "복귀 직후: 깊이·배율(label·computed)·지도·main·패널 스크롤·선택 동일",
+     "pass": true,
+     "data": {
+      "entry": [
+       {
+        "G2": 0,
+        "G3": 1,
+        "G4": 1
+       },
+       "115%",
+       134,
+       3,
+       0,
+       0,
+       [
+        "C32"
+       ]
+      ],
+      "ret": [
+       {
+        "G2": 0,
+        "G3": 1,
+        "G4": 1
+       },
+       "115%",
+       134,
+       3,
+       0,
+       0,
+       [
+        "C32"
+       ]
+      ]
+     }
+    },
+    {
+     "name": "복귀 직후: 화면 카드 bounds·선 경로 동일(허용차)·초점 호출 버튼",
+     "pass": true,
+     "data": {
+      "rb": [],
+      "rp": [
+       {
+        "k": "G1>G2",
+        "max": 0
+       },
+       {
+        "k": "G2>C31",
+        "max": 0.05000000000001137
+       },
+       {
+        "k": "G2>C32",
+        "max": 0.05000000000001137
+       },
+       {
+        "k": "C32>G5",
+        "max": 0.05000000000001137
+       },
+       {
+        "k": "G5>C42",
+        "max": 0.05000000000001137
+       },
+       {
+        "k": "G2>C41",
+        "max": 0.049999999999954525
+       }
+      ],
+      "active": "button.btn.primary[data-act=focus]"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 R3 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 340.25,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R3]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "C32 R3 참고: 실제 양끝·방향 \"새 요청의 배경 고정 → 작업문과 미리보기\"",
+     "pass": true,
+     "data": "새 요청의 배경 고정→작업문과 미리보기"
+    },
+    {
+     "name": "C32 R3 참고: 종류 기대 문자열 \"요청 사본\"",
+     "pass": true,
+     "data": "전달: 요청 사본"
+    },
+    {
+     "name": "C32 R3 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "명시 새 요청 때 고정한 그 요청의 배경 사본을 작업문·미리보기의 별도 블록으로 넣습니다. 지금 지도에 보이는 최신 구상을 가져오는 것이 아닙니다. 사본이 없거나 비면 블록을 넣지 않습니다."
+    },
+    {
+     "name": "C32 R3 참고: 소속·접힌 대표·지금 선택",
+     "pass": true,
+     "data": [
+      "보내는 쪽‹요청 맥락› 안 · 지도에선 접힌 ‹요청 맥락› 자리",
+      "받는 쪽‹전달할 내용› 안 · 지금 선택"
+     ]
+    },
+    {
+     "name": "C32 R3 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹작업문과 미리보기› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L16 · 원문 줄 ↗ · 관계 R3"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 참고 닫기 버튼",
+     "pass": true,
+     "data": {
+      "x": 1215.484375,
+      "y": 392.75,
+      "inView": true,
+      "hit": "button.btn.sm[data-act=xref-close]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "버튼 닫기 제거",
+     "pass": true,
+     "data": null
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 R4 참고",
+     "pass": true,
+     "data": {
+      "x": 1130.5,
+      "y": 399.25,
+      "inView": true,
+      "hit": "button.xbtn[data-xref=R4]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "C32 R4 참고: 실제 양끝·방향 \"작업문과 미리보기 → 저장·복구\"",
+     "pass": true,
+     "data": "작업문과 미리보기→저장·복구"
+    },
+    {
+     "name": "C32 R4 참고: 종류 기대 문자열 \"내보내기 기록의 사본\"",
+     "pass": true,
+     "data": "전달: 내보내기 기록의 사본"
+    },
+    {
+     "name": "C32 R4 참고: 조건 전문 일치",
+     "pass": true,
+     "data": "작업문에 실제로 넣은 사본을 내보내기 기록에 남깁니다. 작업문 전문 저장이나 외부에서 받거나 수락했다는 증거가 아닙니다."
+    },
+    {
+     "name": "C32 R4 참고: 소속·접힌 대표·지금 선택",
+     "pass": true,
+     "data": [
+      "보내는 쪽‹전달할 내용› 안 · 지금 선택",
+      "받는 쪽보기용 묶음"
+     ]
+    },
+    {
+     "name": "C32 R4 참고: 근거 줄에 관계 ID·원문(상세 근거)",
+     "pass": true,
+     "data": "지도 선택은 ‹작업문과 미리보기› 그대로 · 참고는 준비문을 바꾸지 않음\n근거 FLOW091-C L14 · L55 · 원문 줄 ↗ · 관계 R4"
+    },
+    {
+     "name": "Escape 제거",
+     "pass": true,
+     "data": null
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 재진입",
+     "pass": true,
+     "data": {
+      "x": 1104.96875,
+      "y": 460.25,
+      "inView": true,
+      "hit": "button.btn.primary[data-act=focus]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 준비 재열기",
+     "pass": true,
+     "data": {
+      "x": 1201,
+      "y": 128.25,
+      "inView": true,
+      "hit": "button#fPrep.btn.primary",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "재진입: E 보존·다른 3필드 기본값",
+     "pass": true,
+     "data": " 다른 기능을 구현하라는 요청이 아니다.\n이번 확인은 배경 블록의 유무와 요청 당시 사본 유지까지만 다룬다."
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 전체 지도로(2)",
+     "pass": true,
+     "data": {
+      "x": 78.2109375,
+      "y": 128.25,
+      "inView": true,
+      "hit": "button#fBack.btn",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G3 이름",
+     "pass": true,
+     "data": {
+      "x": 537.5999755859375,
+      "y": 192.6374969482422,
+      "inView": true,
+      "hit": "span.gname",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: G3 집중",
+     "pass": true,
+     "data": {
+      "x": 1081.734375,
+      "y": 677.5,
+      "inView": true,
+      "hit": "button.btn.primary[data-act=focus]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "G3 집중: 준비 버튼 없음(묶음은 준비 대상 아님)",
+     "pass": true,
+     "data": null
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: AI 입력으로 전환",
+     "pass": true,
+     "data": {
+      "x": 1061.9765625,
+      "y": 368.625,
+      "inView": true,
+      "hit": "button.btn.sm",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C31 준비",
+     "pass": true,
+     "data": {
+      "x": 1201,
+      "y": 128.25,
+      "inView": true,
+      "hit": "button#fPrep.btn.primary",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "C31 준비: 자기 기본값·E 없음",
+     "pass": true,
+     "data": {
+      "title": "AI 입력",
+      "t": "AI 입력 — 이 부분이 아래 원문 조건대로 동작하는지"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 전체 지도로(3)",
+     "pass": true,
+     "data": {
+      "x": 78.2109375,
+      "y": 128.25,
+      "inView": true,
+      "hit": "button#fBack.btn",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 카드(재)",
+     "pass": true,
+     "data": {
+      "x": 523.5304565429688,
+      "y": 354.78749084472656,
+      "inView": true,
+      "hit": "span.kname",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 집중(재)",
+     "pass": true,
+     "data": {
+      "x": 1104.96875,
+      "y": 460.25,
+      "inView": true,
+      "hit": "button.btn.primary[data-act=focus]",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 준비(재)",
+     "pass": true,
+     "data": {
+      "x": 1201,
+      "y": 128.25,
+      "inView": true,
+      "hit": "button#fPrep.btn.primary",
+      "hitInside": true
+     }
+    },
+    {
+     "name": "다른 대상 다녀온 뒤 C32 E 보존",
+     "pass": true,
+     "data": " 다른 기능을 구현하라는 요청이 아니다.\n이번 확인은 배경 블록의 유무와 요청 당시 사본 유지까지만 다룬다."
+    }
+   ],
+   "raw": {
+    "mapExtent": {
+     "x": 136,
+     "y": 3
+    },
+    "entry": {
+     "viewport": [
+      1280,
+      720
+     ],
+     "view": "map",
+     "depth": {
+      "G2": 0,
+      "G3": 1,
+      "G4": 1
+     },
+     "scale": {
+      "data": "1.15",
+      "label": "115%",
+      "style": "scale(1.15)",
+      "computed": "matrix(1.15, 0, 0, 1.15, 0, 0)"
+     },
+     "map": {
+      "sl": 134,
+      "st": 3,
+      "sw": 1116,
+      "sh": 578,
+      "cw": 980,
+      "ch": 575
+     },
+     "main": {
+      "st": 0,
+      "sh": 620,
+      "ch": 620
+     },
+     "panelSt": 0,
+     "fvSt": 0,
+     "sel": [
+      "C32"
+     ],
+     "isSel": [
+      "n-C32"
+     ],
+     "panelH2": "작업문과 미리보기",
+     "panelPk": "‹전달할 내용› 묶음 안 세부 · AI 제안 구분",
+     "active": "button#n-C32.kid.chg.is-sel[data-sel=C32]",
+     "activeText": "작업문과 미리보기이번 변경\n배경을 별도 블록으로",
+     "nodes": {
+      "G1": {
+       "x": -108.7,
+       "y": 381.5,
+       "w": 207,
+       "h": 98.9
+      },
+      "G2": {
+       "x": 144.3,
+       "y": 359.7,
+       "w": 241.5,
+       "h": 142.6
+      },
+      "C21": null,
+      "C22": null,
+      "G3": {
+       "x": 431.8,
+       "y": 167.1,
+       "w": 271.4,
+       "h": 240.9
+      },
+      "C31": {
+       "x": 442.1,
+       "y": 262.5,
+       "w": 250.7,
+       "h": 64.1
+      },
+      "C32": {
+       "x": 442.1,
+       "y": 333.5,
+       "w": 250.7,
+       "h": 64.1
+      },
+      "G4": {
+       "x": 431.8,
+       "y": 454,
+       "w": 271.4,
+       "h": 240.9
+      },
+      "C41": {
+       "x": 442.1,
+       "y": 549.4,
+       "w": 250.7,
+       "h": 64.1
+      },
+      "C42": {
+       "x": 442.1,
+       "y": 620.4,
+       "w": 250.7,
+       "h": 64.1
+      },
+      "G5": {
+       "x": 749.2,
+       "y": 392.3,
+       "w": 207,
+       "h": 77.3
+      }
+     },
+     "edges": [
+      {
+       "k": "G1>G2",
+       "rels": "R1",
+       "repFrom": "G1",
+       "repTo": "G2",
+       "ends": "202,251.5,242,251.5",
+       "agg": "to",
+       "cls": "dim",
+       "d": "M202 251.5C222 251.5 222 251.5 242 251.5",
+       "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정"
+      },
+      {
+       "k": "G2>C31",
+       "rels": "R2",
+       "repFrom": "G2",
+       "repTo": "C31",
+       "ends": "452,251.5,501,132.9",
+       "agg": "from ",
+       "cls": "dim",
+       "d": "M452 251.5C476.5 251.5 476.5 132.9 501 132.9",
+       "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본"
+      },
+      {
+       "k": "G2>C32",
+       "rels": "R3",
+       "repFrom": "G2",
+       "repTo": "C32",
+       "ends": "452,206.1,501,206.1",
+       "agg": "from ",
+       "cls": "on",
+       "d": "M452 206.05C476.5 206.05 476.5 206.05 501 206.05",
+       "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본"
+      },
+      {
+       "k": "C32>G5",
+       "rels": "R4",
+       "repFrom": "C32",
+       "repTo": "G5",
+       "ends": "719,194.7,768,251.6",
+       "agg": "",
+       "cls": "on",
+       "d": "M719 194.70000000000002C743.5 194.70000000000002 743.5 251.55 768 251.55",
+       "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본"
+      },
+      {
+       "k": "G5>C42",
+       "rels": "R5",
+       "repFrom": "G5",
+       "repTo": "C42",
+       "ends": "768,251.6,719,444.2",
+       "agg": "",
+       "cls": "dim",
+       "d": "M768 251.55C743.5 251.55 743.5 444.2 719 444.2",
+       "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자"
+      },
+      {
+       "k": "G2>C41",
+       "rels": "R6",
+       "repFrom": "G2",
+       "repTo": "C41",
+       "ends": "452,251.5,501,382.4",
+       "agg": "from ",
+       "cls": "dim",
+       "d": "M452 251.5C476.5 251.5 476.5 382.4 501 382.4",
+       "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본"
+      }
+     ]
+    },
+    "noRoom": "1280 main sh=620 ch=620",
+    "defaults": {
+     "target": "작업문과 미리보기 — 작업문·미리보기·Markdown에서 목적을 분리된 배경 블록으로 넣는 동작만 확인한다. 다른 기능을 구현하라는 요청이 아니다.",
+     "keep": "- 목적은 분리된 배경 블록 안에만 넣고, 요청·출처·기준·지시로 쓰지 않는다.\n- 다시 만들기·다시 내보내기·구상 수정으로 이미 맡긴 사본을 바꾸지 않는다. 다음 명시 새 요청만 최신.\n- 배경 블록은 이번 요청 범위와 구분하고, 배경 전체 구현이나 미정 사항 확정을 지시하지 않는다. 사본이 없거나 비면 블록을 넣지 않는다.\n- 배경을 출처·기준·새 결정으로 올리지 않는다. 직접 고친 범위·다음 단계·검사가 우선한다.\n- 구상이 바뀌어도 기존 사본은 그대로라고 안내한다. 옛 형식은 null로 옮기고 소급하지 않는다.",
+     "evidence": "FLOW091-C (commit 5416dec) L52, L11, L16, L17, L18–22",
+     "unknown": "- 실제 AI가 배경과 이번 요청 범위를 구분하는지: 실제 호출 없이 형식·프롬프트만 검사됨 (L58)\n- 현재 제품 코드의 동작: 이 준비문 작성 시점에 확인하지 않음\n- 과거 작업문 전문: 내보내기 기록에 보존되지 않음 (L55)"
+    },
+    "returned": {
+     "viewport": [
+      1280,
+      720
+     ],
+     "view": "map",
+     "depth": {
+      "G2": 0,
+      "G3": 1,
+      "G4": 1
+     },
+     "scale": {
+      "data": "1.15",
+      "label": "115%",
+      "style": "scale(1.15)",
+      "computed": "matrix(1.15, 0, 0, 1.15, 0, 0)"
+     },
+     "map": {
+      "sl": 134,
+      "st": 3,
+      "sw": 1116,
+      "sh": 578,
+      "cw": 980,
+      "ch": 575
+     },
+     "main": {
+      "st": 0,
+      "sh": 620,
+      "ch": 620
+     },
+     "panelSt": 0,
+     "fvSt": 0,
+     "sel": [
+      "C32"
+     ],
+     "isSel": [
+      "n-C32"
+     ],
+     "panelH2": "작업문과 미리보기",
+     "panelPk": "‹전달할 내용› 묶음 안 세부 · AI 제안 구분",
+     "active": "button.btn.primary[data-act=focus]",
+     "activeText": "자세히 읽고 확인·조정 준비 →",
+     "nodes": {
+      "G1": {
+       "x": -108.7,
+       "y": 381.5,
+       "w": 207,
+       "h": 98.9
+      },
+      "G2": {
+       "x": 144.3,
+       "y": 359.7,
+       "w": 241.5,
+       "h": 142.6
+      },
+      "C21": null,
+      "C22": null,
+      "G3": {
+       "x": 431.8,
+       "y": 167.1,
+       "w": 271.4,
+       "h": 240.9
+      },
+      "C31": {
+       "x": 442.1,
+       "y": 262.5,
+       "w": 250.7,
+       "h": 64.1
+      },
+      "C32": {
+       "x": 442.1,
+       "y": 333.5,
+       "w": 250.7,
+       "h": 64.1
+      },
+      "G4": {
+       "x": 431.8,
+       "y": 454,
+       "w": 271.4,
+       "h": 240.9
+      },
+      "C41": {
+       "x": 442.1,
+       "y": 549.4,
+       "w": 250.7,
+       "h": 64.1
+      },
+      "C42": {
+       "x": 442.1,
+       "y": 620.4,
+       "w": 250.7,
+       "h": 64.1
+      },
+      "G5": {
+       "x": 749.2,
+       "y": 392.3,
+       "w": 207,
+       "h": 77.3
+      }
+     },
+     "edges": [
+      {
+       "k": "G1>G2",
+       "rels": "R1",
+       "repFrom": "G1",
+       "repTo": "G2",
+       "ends": "202,251.5,242,251.5",
+       "agg": "to",
+       "cls": "dim",
+       "d": "M202 251.5C222 251.5 222 251.5 242 251.5",
+       "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정"
+      },
+      {
+       "k": "G2>C31",
+       "rels": "R2",
+       "repFrom": "G2",
+       "repTo": "C31",
+       "ends": "452,251.5,501,132.9",
+       "agg": "from ",
+       "cls": "dim",
+       "d": "M452 251.5C476.5 251.5 476.5 132.85 501 132.85",
+       "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본"
+      },
+      {
+       "k": "G2>C32",
+       "rels": "R3",
+       "repFrom": "G2",
+       "repTo": "C32",
+       "ends": "452,206,501,206",
+       "agg": "from ",
+       "cls": "on",
+       "d": "M452 206C476.5 206 476.5 206 501 206",
+       "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본"
+      },
+      {
+       "k": "C32>G5",
+       "rels": "R4",
+       "repFrom": "C32",
+       "repTo": "G5",
+       "ends": "719,194.7,768,251.5",
+       "agg": "",
+       "cls": "on",
+       "d": "M719 194.65C743.5 194.65 743.5 251.5 768 251.5",
+       "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본"
+      },
+      {
+       "k": "G5>C42",
+       "rels": "R5",
+       "repFrom": "G5",
+       "repTo": "C42",
+       "ends": "768,251.5,719,444.2",
+       "agg": "",
+       "cls": "dim",
+       "d": "M768 251.5C743.5 251.5 743.5 444.15000000000003 719 444.15000000000003",
+       "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자"
+      },
+      {
+       "k": "G2>C41",
+       "rels": "R6",
+       "repFrom": "G2",
+       "repTo": "C41",
+       "ends": "452,251.5,501,382.4",
+       "agg": "from ",
+       "cls": "dim",
+       "d": "M452 251.5C476.5 251.5 476.5 382.35 501 382.35",
+       "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본"
+      }
+     ]
+    },
+    "returnDiff": {
+     "boxes": [],
+     "paths": [
+      {
+       "k": "G1>G2",
+       "max": 0
+      },
+      {
+       "k": "G2>C31",
+       "max": 0.05000000000001137
+      },
+      {
+       "k": "G2>C32",
+       "max": 0.05000000000001137
+      },
+      {
+       "k": "C32>G5",
+       "max": 0.05000000000001137
+      },
+      {
+       "k": "G5>C42",
+       "max": 0.05000000000001137
+      },
+      {
+       "k": "G2>C41",
+       "max": 0.049999999999954525
+      }
+     ]
+    },
+    "reopened": {
+     "target": "작업문과 미리보기 — 작업문·미리보기·Markdown에서 목적을 분리된 배경 블록으로 넣는 동작만 확인한다. 다른 기능을 구현하라는 요청이 아니다.\n이번 확인은 배경 블록의 유무와 요청 당시 사본 유지까지만 다룬다.",
+     "keep": "- 목적은 분리된 배경 블록 안에만 넣고, 요청·출처·기준·지시로 쓰지 않는다.\n- 다시 만들기·다시 내보내기·구상 수정으로 이미 맡긴 사본을 바꾸지 않는다. 다음 명시 새 요청만 최신.\n- 배경 블록은 이번 요청 범위와 구분하고, 배경 전체 구현이나 미정 사항 확정을 지시하지 않는다. 사본이 없거나 비면 블록을 넣지 않는다.\n- 배경을 출처·기준·새 결정으로 올리지 않는다. 직접 고친 범위·다음 단계·검사가 우선한다.\n- 구상이 바뀌어도 기존 사본은 그대로라고 안내한다. 옛 형식은 null로 옮기고 소급하지 않는다.",
+     "evidence": "FLOW091-C (commit 5416dec) L52, L11, L16, L17, L18–22",
+     "unknown": "- 실제 AI가 배경과 이번 요청 범위를 구분하는지: 실제 호출 없이 형식·프롬프트만 검사됨 (L58)\n- 현재 제품 코드의 동작: 이 준비문 작성 시점에 확인하지 않음\n- 과거 작업문 전문: 내보내기 기록에 보존되지 않음 (L55)"
+    },
+    "c31": {
+     "title": "AI 입력",
+     "v": {
+      "target": "AI 입력 — 이 부분이 아래 원문 조건대로 동작하는지만 확인한다. 다른 기능을 구현하라는 요청이 아니다.",
+      "keep": "- 배경은 출처·기준과 분리된 자료. 실행 범위는 이번 요청이 정한다.\n- 배경을 출처·기준·새 결정으로 올리지 않는다. 직접 고친 범위·다음 단계·검사가 우선한다.",
+      "evidence": "FLOW091-C (commit 5416dec) L15, L17",
+      "unknown": "- 실제 AI가 배경과 이번 요청 범위를 구분하는지: 실제 호출 없이 형식·프롬프트만 검사됨 (L58)\n- 현재 제품 코드의 동작: 이 준비문 작성 시점에 확인하지 않음"
+     }
+    }
+   },
+   "complete": true,
+   "failShot": null,
+   "received": {
+    "status": 200,
+    "bytes": 55753,
+    "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+   }
+  }
+ },
+ "wheels": 6,
+ "domScrollCalls": 0,
+ "pngs": [
+  "1280-c32-prep-edited.png"
+ ],
+ "started": "2026-10-15T23:32:32.271Z",
+ "browser": "141.0.7390.37",
+ "sourceEnd": {
+  "bytes": 55753,
+  "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+ },
+ "finished": "2026-10-15T23:32:45.713Z",
+ "crash": null,
+ "receivedMatchesSource": true,
+ "assertions": 157,
+ "failed": 0,
+ "clickPreconditions": 44,
+ "missingScenes": [],
+ "exitCode": 0
+}

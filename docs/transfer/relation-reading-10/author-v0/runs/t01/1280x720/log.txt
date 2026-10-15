@@ -1,0 +1,164 @@
+== S0-initial @ 1280x720
+PASS [S0-initial] 초기 깊이 G2=0 G3=1 G4=0·무선택 
+PASS [S0-initial] 초기 지도 스크롤 없음 
+PASS [S0-initial] 초기 지도 글자 #n-G1 .gname 
+PASS [S0-initial] 초기 지도 글자 #n-G2 .gname 
+PASS [S0-initial] 초기 지도 글자 #n-G3 .gname 
+PASS [S0-initial] 초기 지도 글자 #n-G4 .gname 
+PASS [S0-initial] 초기 지도 글자 #n-G5 .gname 
+PASS [S0-initial] 초기 지도 글자 #n-C31 .kname 
+PASS [S0-initial] 초기 지도 글자 #n-C32 .kname 
+PASS [S0-initial] 초기 지도 글자 #n-C32 .kchg 
+PASS [S0-initial] 클릭 지점 화면 안·대상 위: C32 카드 
+PASS [S0-initial] 첫 선택 전후 카드 bounds 동일(허용 0.6px) 
+PASS [S0-initial] 첫 선택 전후 선 경로 동일(좌표 허용 0.5px, 원시 최대차 기록) 
+PASS [S0-initial] 첫 선택: C32 선택·깊이 불변 
+== S1-G3 @ 1280x720
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: G3 묶음 이름 
+PASS [S1-G3] G3 목록: R2는 ‘AI 입력’ 아래, R3는 ‘작업문과 미리보기’ 아래(열기 전 구별) 
+FAIL [S1-G3] G3 목록: 두 항목 모두 같은 보내는 곳·요청 사본 유지 ["받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안","받음 ←새 요청의 배경 고정 요청 사본 · ‹요청 맥락› 안"]
+PASS [S1-G3] G3 목록: 버튼의 설명(aria-describedby)이 실제 받는 세부를 가리킴 
+FAIL [S1-G3] G3 목록: R4는 작업문과 미리보기 아래 넘김 → 저장·복구 {"id":"R4","text":"넘김 →저장·복구 내보내기 기록의 사본 · 묶음","group":"작업문과 미리보기","describedBy":"작업문과 미리보기이 묶음 안 세부","expanded":"false"}
+PASS [S1-G3] G3 목록: 기본 목록에 관계 ID 없음 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) G3 목록 #xg-G3-C31 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) G3 목록 #xg-G3-C32 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) G3 목록 #panel .xbtn[data-xref="R2"] 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) G3 목록 #panel .xbtn[data-xref="R3"] 
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: G3 R2 참고 열기 
+PASS [S1-G3] G3 R2 참고: 실제 양끝·방향 "새 요청의 배경 고정 → AI 입력" 
+PASS [S1-G3] G3 R2 참고: 종류 기대 문자열 "요청 사본" 
+PASS [S1-G3] G3 R2 참고: 조건 전문 일치 
+FAIL [S1-G3] G3 R2 참고: 소속·접힌 대표·지금 선택 ["보내는 쪽‹요청 맥락› 안 · 지도에선 접힌 ‹요청 맥락› 자리","받는 쪽‹전달할 내용› 안"]
+PASS [S1-G3] G3 R2 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S1-G3] R2 참고 중 G3 선택·깊이 유지 
+PASS [S1-G3] 참고 열어도 지도 카드 bounds 동일 
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: R2 열린 채 R3 누름 
+PASS [S1-G3] 바꿔 읽기: R2 본문 제거·R3만 열림 
+PASS [S1-G3] G3 R3 참고: 실제 양끝·방향 "새 요청의 배경 고정 → 작업문과 미리보기" 
+PASS [S1-G3] G3 R3 참고: 종류 기대 문자열 "요청 사본" 
+PASS [S1-G3] G3 R3 참고: 조건 전문 일치 
+FAIL [S1-G3] G3 R3 참고: 소속·접힌 대표·지금 선택 ["보내는 쪽‹요청 맥락› 안 · 지도에선 접힌 ‹요청 맥락› 자리","받는 쪽‹전달할 내용› 안"]
+PASS [S1-G3] G3 R3 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xhd 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xflow 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xkind 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xwh 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) 참고 #xr-R3 .xcond 
+PASS [S1-G3] 글자 관측(개별 글자·clip·hit) 참고 #xr-R3 [data-mv] 
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: 참고 닫기 버튼 
+PASS [S1-G3] 닫기 버튼: 본문 제거·글자 부재·초점 R3 항목·G3 선택 유지 
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: R3 재열기 
+PASS [S1-G3] Escape: 본문 제거·초점 R3 항목·선택 유지 
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: R2 열기 
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: R2 같은 버튼 다시 누름 
+PASS [S1-G3] 반복 버튼: 같은 항목 다시 누르면 닫힘·초점 그 항목 
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: R3 열기(이동용) 
+PASS [S1-G3] 이동 버튼 이름 
+PASS [S1-G3] 클릭 지점 화면 안·대상 위: 명시 이동 
+PASS [S1-G3] 명시 이동: C21 선택·G2만 펼침·G3/G4 유지·초점 제목 
+== S2-C21 @ 1280x720
+FAIL [S2-C21] C21 목록: 묶음 머리 없이 평평한 4항목(받음/넘김·수신부 이름) [{"id":"R1","text":"받음 ←구상과 목적 명시 새 요청 때만 사본 고정 · 묶음","group":null,"describedBy":null,"expanded":"false"},{"id":"R2","text":"넘김 →AI 입력 요청 사본 · ‹전달할 내용› 안","group":null,"describedBy":null,"expanded":"false"},{"id":"R3","text":"넘김 →작업문과 미리보기 요청 사본 · ‹전달할 내용› 안","group":null,"describedBy":null,"expanded":"false"},{"id":"R6","text":"넘김 →일반 보고 연결 정확히 연결된 대상 작업의 사본 · ‹결과 연결› 안","group":null,"describedBy":null,"expanded":"false"}]
+PASS [S2-C21] 글자 관측(개별 글자·clip·hit) C21 목록 #panel .xbtn[data-xref="R2"] 
+PASS [S2-C21] 글자 관측(개별 글자·clip·hit) C21 목록 #panel .xbtn[data-xref="R3"] 
+PASS [S2-C21] 클릭 지점 화면 안·대상 위: C21 R2 참고 
+PASS [S2-C21] C21 R2 참고: 실제 양끝·방향 "새 요청의 배경 고정 → AI 입력" 
+PASS [S2-C21] C21 R2 참고: 종류 기대 문자열 "요청 사본" 
+PASS [S2-C21] C21 R2 참고: 조건 전문 일치 
+FAIL [S2-C21] C21 R2 참고: 소속·접힌 대표·지금 선택 ["보내는 쪽‹요청 맥락› 안 · 지금 선택","받는 쪽‹전달할 내용› 안"]
+PASS [S2-C21] C21 R2 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S2-C21] 클릭 지점 화면 안·대상 위: C21 R3로 바꿔 읽기 
+PASS [S2-C21] C21 R3 참고: 실제 양끝·방향 "새 요청의 배경 고정 → 작업문과 미리보기" 
+PASS [S2-C21] C21 R3 참고: 종류 기대 문자열 "요청 사본" 
+PASS [S2-C21] C21 R3 참고: 조건 전문 일치 
+FAIL [S2-C21] C21 R3 참고: 소속·접힌 대표·지금 선택 ["보내는 쪽‹요청 맥락› 안 · 지금 선택","받는 쪽‹전달할 내용› 안"]
+PASS [S2-C21] C21 R3 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S2-C21] C21: Escape 닫힘·초점·선택 유지 
+== S3-kinds @ 1280x720
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G2 묶음 이름 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G2 R1 참고 
+PASS [S3-kinds] G2 R1 참고: 실제 양끝·방향 "구상과 목적 → 새 요청의 배경 고정" 
+PASS [S3-kinds] G2 R1 참고: 종류 기대 문자열 "명시 새 요청 때만 사본 고정" 
+PASS [S3-kinds] G2 R1 참고: 조건 전문 일치 
+PASS [S3-kinds] G2 R1 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G2 R2 참고 
+PASS [S3-kinds] G2 R2 참고: 실제 양끝·방향 "새 요청의 배경 고정 → AI 입력" 
+PASS [S3-kinds] G2 R2 참고: 종류 기대 문자열 "요청 사본" 
+PASS [S3-kinds] G2 R2 참고: 조건 전문 일치 
+PASS [S3-kinds] G2 R2 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G2 R3 참고 
+PASS [S3-kinds] G2 R3 참고: 실제 양끝·방향 "새 요청의 배경 고정 → 작업문과 미리보기" 
+PASS [S3-kinds] G2 R3 참고: 종류 기대 문자열 "요청 사본" 
+PASS [S3-kinds] G2 R3 참고: 조건 전문 일치 
+PASS [S3-kinds] G2 R3 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G2 R6 참고 
+PASS [S3-kinds] G2 R6 참고: 실제 양끝·방향 "새 요청의 배경 고정 → 일반 보고 연결" 
+PASS [S3-kinds] G2 R6 참고: 종류 기대 문자열 "정확히 연결된 대상 작업의 사본" 
+PASS [S3-kinds] G2 R6 참고: 조건 전문 일치 
+PASS [S3-kinds] G2 R6 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G4 묶음 이름 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G4 R6 참고 
+PASS [S3-kinds] G4 R6 참고: 실제 양끝·방향 "새 요청의 배경 고정 → 일반 보고 연결" 
+PASS [S3-kinds] G4 R6 참고: 종류 기대 문자열 "정확히 연결된 대상 작업의 사본" 
+PASS [S3-kinds] G4 R6 참고: 조건 전문 일치 
+PASS [S3-kinds] G4 R6 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G4 R5 참고 
+PASS [S3-kinds] G4 R5 참고: 실제 양끝·방향 "저장·복구 → 파일 반환 연결" 
+PASS [S3-kinds] G4 R5 참고: 종류 기대 문자열 "일치하는 반환 식별자" 
+PASS [S3-kinds] G4 R5 참고: 조건 전문 일치 
+PASS [S3-kinds] G4 R5 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G3 묶음 이름 
+PASS [S3-kinds] 클릭 지점 화면 안·대상 위: G3 R4 참고 
+PASS [S3-kinds] G3 R4 참고: 실제 양끝·방향 "작업문과 미리보기 → 저장·복구" 
+PASS [S3-kinds] G3 R4 참고: 종류 기대 문자열 "내보내기 기록의 사본" 
+PASS [S3-kinds] G3 R4 참고: 조건 전문 일치 
+PASS [S3-kinds] G3 R4 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S3-kinds] R1–R6 모두 참고로 대조 
+PASS [S3-kinds] G4 목록: 일반 보고 연결 ← 새 요청의 배경 고정 / 파일 반환 연결 ← 저장·복구 (R5≠R6 별도 항목) 
+PASS [S3-kinds] G2 목록: 실제 보내는 세부 ‘새 요청의 배경 고정’ 한 머리 아래 4항목(머리 반복 없음) 
+== S4-C32-prep @ 1280x720
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: G4 펼치기 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 확대 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C32 카드 
+PASS [S4-C32-prep] 비초기: G4 펼침·115%·C32 선택 
+PASS [S4-C32-prep] 지도 실제 휠 이동(여지 있는 축) 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C32 집중 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 준비 열기 
+PASS [S4-C32-prep] C32 준비 4필드 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 대상 필드 
+PASS [S4-C32-prep] E 추가(대상), 나머지 기본값 
+  PNG 1280-c32-prep-edited.png
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 준비 닫기 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 전체 지도로 
+PASS [S4-C32-prep] 복귀 직후: 깊이·배율(label·computed)·지도·main·패널 스크롤·선택 동일 
+PASS [S4-C32-prep] 복귀 직후: 화면 카드 bounds·선 경로 동일(허용차)·초점 호출 버튼 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C32 R3 참고 
+PASS [S4-C32-prep] C32 R3 참고: 실제 양끝·방향 "새 요청의 배경 고정 → 작업문과 미리보기" 
+PASS [S4-C32-prep] C32 R3 참고: 종류 기대 문자열 "요청 사본" 
+PASS [S4-C32-prep] C32 R3 참고: 조건 전문 일치 
+FAIL [S4-C32-prep] C32 R3 참고: 소속·접힌 대표·지금 선택 ["보내는 쪽‹요청 맥락› 안 · 지도에선 접힌 ‹요청 맥락› 자리","받는 쪽‹전달할 내용› 안 · 지금 선택"]
+PASS [S4-C32-prep] C32 R3 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 참고 닫기 버튼 
+PASS [S4-C32-prep] 버튼 닫기 제거 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C32 R4 참고 
+PASS [S4-C32-prep] C32 R4 참고: 실제 양끝·방향 "작업문과 미리보기 → 저장·복구" 
+PASS [S4-C32-prep] C32 R4 참고: 종류 기대 문자열 "내보내기 기록의 사본" 
+PASS [S4-C32-prep] C32 R4 참고: 조건 전문 일치 
+FAIL [S4-C32-prep] C32 R4 참고: 소속·접힌 대표·지금 선택 ["보내는 쪽‹전달할 내용› 안 · 지금 선택","받는 쪽보기용 묶음"]
+PASS [S4-C32-prep] C32 R4 참고: 근거 줄에 관계 ID·원문(상세 근거) 
+PASS [S4-C32-prep] Escape 제거 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C32 재진입 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 준비 재열기 
+PASS [S4-C32-prep] 재진입: E 보존·다른 3필드 기본값 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 전체 지도로(2) 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: G3 이름 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: G3 집중 
+PASS [S4-C32-prep] G3 집중: 준비 버튼 없음(묶음은 준비 대상 아님) 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: AI 입력으로 전환 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C31 준비 
+PASS [S4-C32-prep] C31 준비: 자기 기본값·E 없음 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: 전체 지도로(3) 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C32 카드(재) 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C32 집중(재) 
+PASS [S4-C32-prep] 클릭 지점 화면 안·대상 위: C32 준비(재) 
+PASS [S4-C32-prep] 다른 대상 다녀온 뒤 C32 E 보존 
+assertions=157 (클릭·휠 전제 44) failed=9 wheels=6 domScrollCalls=0 missingScenes=[] consoleErrors=0 receivedMatchesSource=true exit=1

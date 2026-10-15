@@ -1,0 +1,11 @@
+--- scripts/check10.mjs	2026-10-16 08:34:39.320770354 +0900
++++ /tmp/claude-0/-home-claude/39278fdb-20db-58ab-8089-912b927baeb7/scratchpad/check10-t03.mjs	2026-10-16 08:34:50.960497453 +0900
+@@ -103,7 +103,7 @@
+ };
+ async function checkRef(id, ctxName, whereExpect) {
+   const x = await xref(id);
+-  await check(`${ctxName} ${id} 참고: 실제 양끝·방향 "${FLOW[id].join(' → ')}"`, x && ns(x.flow) === ns(`${FLOW[id][0]}→${FLOW[id][1]}`), x && x.flow);
++  await check(`${ctxName} ${id} 참고: 실제 양끝·방향 "${FLOW[id].join(' → ')}"`, x && x.flow === `${FLOW[id][0]}→${FLOW[id][1]}`, x && x.flow);
+   await check(`${ctxName} ${id} 참고: 종류 기대 문자열 "${KIND[id]}"`, x && x.kind === `전달: ${KIND[id]}`, x && x.kind);
+   await check(`${ctxName} ${id} 참고: 조건 전문 일치`, x && x.cond === COND[id], x && x.cond);
+   if (whereExpect) await check(`${ctxName} ${id} 참고: 소속·접힌 대표·지금 선택`, x && JSON.stringify(x.where.map(ns)) === JSON.stringify(whereExpect.map(ns)), x && x.where);

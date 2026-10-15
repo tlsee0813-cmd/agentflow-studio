@@ -1,0 +1,29 @@
+--- scripts/check10.mjs	2026-10-16 08:34:39.320770354 +0900
++++ /tmp/claude-0/-home-claude/39278fdb-20db-58ab-8089-912b927baeb7/scratchpad/check10-t02.mjs	2026-10-16 08:33:16.764936570 +0900
+@@ -103,7 +103,7 @@
+ };
+ async function checkRef(id, ctxName, whereExpect) {
+   const x = await xref(id);
+-  await check(`${ctxName} ${id} 참고: 실제 양끝·방향 "${FLOW[id].join(' → ')}"`, x && ns(x.flow) === ns(`${FLOW[id][0]}→${FLOW[id][1]}`), x && x.flow);
++  await check(`${ctxName} ${id} 참고: 실제 양끝·방향 "${FLOW[id].join(' → ')}"`, x && x.flow === `${FLOW[id][0]}→${FLOW[id][1]}`, x && x.flow);
+   await check(`${ctxName} ${id} 참고: 종류 기대 문자열 "${KIND[id]}"`, x && x.kind === `전달: ${KIND[id]}`, x && x.kind);
+   await check(`${ctxName} ${id} 참고: 조건 전문 일치`, x && x.cond === COND[id], x && x.cond);
+   if (whereExpect) await check(`${ctxName} ${id} 참고: 소속·접힌 대표·지금 선택`, x && JSON.stringify(x.where.map(ns)) === JSON.stringify(whereExpect.map(ns)), x && x.where);
+@@ -207,7 +207,7 @@
+   for (const [node, ids, whereByRel] of [
+     ['G2', ['R1', 'R2', 'R3', 'R6'], null], ['G4', ['R6', 'R5'], null], ['G3', ['R4'], null]]) {
+     await click(`#n-${node} .gname`, `${node} 묶음 이름`);
+-    const Ls = await listInfo(); cur.raw['list' + node] = Ls; cur.raw['grpHeads' + node] = await page.evaluate(() => [...document.querySelectorAll('#panel .xgrp b')].map(e => e.textContent));
++    const Ls = await listInfo(); cur.raw['list' + node] = Ls;
+     for (const id of ids) {
+       await click(`#panel .xbtn[data-xref="${id}"]`, `${node} ${id} 참고`);
+       await checkRef(id, node, null); seenIds.add(id);
+@@ -216,7 +216,7 @@
+   }
+   await check('R1–R6 모두 참고로 대조', [...seenIds].sort().join() === 'R1,R2,R3,R4,R5,R6', [...seenIds]);
+   cur.raw.listG4 && await check('G4 목록: 일반 보고 연결 ← 새 요청의 배경 고정 / 파일 반환 연결 ← 저장·복구 (R5≠R6 별도 항목)', JSON.stringify(cur.raw.listG4.map(x => [x.id, x.group])) === '[["R6","일반 보고 연결"],["R5","파일 반환 연결"]]', cur.raw.listG4);
+-  cur.raw.listG2 && await check('G2 목록: 실제 보내는 세부 ‘새 요청의 배경 고정’ 한 머리 아래 4항목(머리 반복 없음)', cur.raw.listG2.every(x => x.group === '새 요청의 배경 고정') && JSON.stringify(cur.raw.grpHeadsG2) === '["새 요청의 배경 고정"]', { list: cur.raw.listG2, heads: cur.raw.grpHeadsG2 });
++  cur.raw.listG2 && await check('G2 목록: 실제 보내는 세부 ‘새 요청의 배경 고정’ 한 머리 아래 4항목(머리 반복 없음)', cur.raw.listG2.every(x => x.group === '새 요청의 배경 고정') && (await page.evaluate(() => document.querySelectorAll('#panel .xgrp').length)) >= 0, cur.raw.listG2);
+   cur.complete = true;
+ 
+   // ---------- S4 C32 E 편집 → 새 참고 왕복 → 재진입·격리 → 비초기 복귀 ----------

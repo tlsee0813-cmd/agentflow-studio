@@ -1,0 +1,293 @@
+{
+ "viewport": [
+  1440,
+  900
+ ],
+ "sourceStart": {
+  "bytes": 55753,
+  "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+ },
+ "scenes": {
+  "I": {
+   "id": "I",
+   "assertions": [
+    {
+     "name": "초기 깊이·무선택",
+     "pass": true,
+     "data": {
+      "G2": 0,
+      "G3": 1,
+      "G4": 0
+     }
+    },
+    {
+     "name": "카드 겹침 없음",
+     "pass": true,
+     "data": []
+    },
+    {
+     "name": "지도 스크롤 없음",
+     "pass": true,
+     "data": {
+      "sl": 0,
+      "st": 0,
+      "sw": 1140,
+      "sh": 755,
+      "cw": 1140,
+      "ch": 755
+     }
+    },
+    {
+     "name": "초기 글자 #n-G1 .gname",
+     "pass": true,
+     "data": {
+      "ok": 5,
+      "chars": 5,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 글자 #n-G2 .gname",
+     "pass": true,
+     "data": {
+      "ok": 4,
+      "chars": 4,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 글자 #n-G3 .gname",
+     "pass": true,
+     "data": {
+      "ok": 5,
+      "chars": 5,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 글자 #n-G4 .gname",
+     "pass": true,
+     "data": {
+      "ok": 4,
+      "chars": 4,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 글자 #n-G5 .gname",
+     "pass": true,
+     "data": {
+      "ok": 5,
+      "chars": 5,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 글자 #n-C31 .kname",
+     "pass": true,
+     "data": {
+      "ok": 4,
+      "chars": 4,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 글자 #n-C32 .kname",
+     "pass": true,
+     "data": {
+      "ok": 8,
+      "chars": 8,
+      "fails": []
+     }
+    },
+    {
+     "name": "초기 글자 #n-C32 .kchg",
+     "pass": true,
+     "data": {
+      "ok": 4,
+      "chars": 4,
+      "fails": []
+     }
+    }
+   ],
+   "complete": true,
+   "received": {
+    "bytes": 55753,
+    "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+   },
+   "raw": {
+    "initial": {
+     "viewport": [
+      1440,
+      900
+     ],
+     "view": "map",
+     "depth": {
+      "G2": 0,
+      "G3": 1,
+      "G4": 0
+     },
+     "scale": {
+      "data": "1",
+      "label": "100%",
+      "style": "scale(1)",
+      "computed": "matrix(1, 0, 0, 1, 0, 0)"
+     },
+     "map": {
+      "sl": 0,
+      "st": 0,
+      "sw": 1140,
+      "sh": 755,
+      "cw": 1140,
+      "ch": 755
+     },
+     "main": {
+      "st": 0,
+      "sh": 800,
+      "ch": 800
+     },
+     "panelSt": 0,
+     "fvSt": 0,
+     "sel": [],
+     "isSel": [],
+     "panelH2": "한 부분을 골라 보세요",
+     "panelPk": "선택 설명",
+     "active": "body",
+     "activeText": "AgentFlow · 배경 사본 기능 일부 지도\nFLOW091-C 과거 개발 계약·MOCK 검사 보고를 읽는",
+     "nodes": {
+      "G1": {
+       "x": 22,
+       "y": 310.5,
+       "w": 180,
+       "h": 86
+      },
+      "G2": {
+       "x": 242,
+       "y": 291.5,
+       "w": 210,
+       "h": 124
+      },
+      "C21": null,
+      "C22": null,
+      "G3": {
+       "x": 492,
+       "y": 166.8,
+       "w": 236,
+       "h": 209.5
+      },
+      "C31": {
+       "x": 501,
+       "y": 249.8,
+       "w": 218,
+       "h": 55.8
+      },
+      "C32": {
+       "x": 501,
+       "y": 311.5,
+       "w": 218,
+       "h": 55.8
+      },
+      "G4": {
+       "x": 492,
+       "y": 416.3,
+       "w": 236,
+       "h": 124
+      },
+      "C41": null,
+      "C42": null,
+      "G5": {
+       "x": 768,
+       "y": 319.9,
+       "w": 180,
+       "h": 67.3
+      }
+     },
+     "edges": [
+      {
+       "k": "G1>G2",
+       "rels": "R1",
+       "repFrom": "G1",
+       "repTo": "G2",
+       "ends": "202,208.8,242,208.8",
+       "agg": "to",
+       "cls": "",
+       "d": "M202 208.8C222 208.8 222 208.8 242 208.8",
+       "title": "R1 구상과 목적 → 새 요청의 배경 고정 · 명시 새 요청 때만 사본 고정"
+      },
+      {
+       "k": "G2>C31",
+       "rels": "R2",
+       "repFrom": "G2",
+       "repTo": "C31",
+       "ends": "452,208.8,501,132.9",
+       "agg": "from ",
+       "cls": "",
+       "d": "M452 208.8C476.5 208.8 476.5 132.9 501 132.9",
+       "title": "R2 새 요청의 배경 고정 → AI 입력 · 요청 사본"
+      },
+      {
+       "k": "G2>C32",
+       "rels": "R3",
+       "repFrom": "G2",
+       "repTo": "C32",
+       "ends": "452,194.7,501,194.7",
+       "agg": "from ",
+       "cls": "",
+       "d": "M452 194.70000000000002C476.5 194.70000000000002 476.5 194.70000000000002 501 194.70000000000002",
+       "title": "R3 새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본"
+      },
+      {
+       "k": "C32>G5",
+       "rels": "R4",
+       "repFrom": "C32",
+       "repTo": "G5",
+       "ends": "719,198.9,768,198.9",
+       "agg": "",
+       "cls": "",
+       "d": "M719 198.85000000000002C743.5 198.85000000000002 743.5 198.85000000000002 768 198.85000000000002",
+       "title": "R4 작업문과 미리보기 → 저장·복구 · 내보내기 기록의 사본"
+      },
+      {
+       "k": "G5>G4",
+       "rels": "R5",
+       "repFrom": "G5",
+       "repTo": "G4",
+       "ends": "768,208.8,728,333.5",
+       "agg": "to",
+       "cls": "",
+       "d": "M768 208.75C748 208.75 748 333.5 728 333.5",
+       "title": "R5 저장·복구 → 파일 반환 연결 · 일치하는 반환 식별자"
+      },
+      {
+       "k": "G2>G4",
+       "rels": "R6",
+       "repFrom": "G2",
+       "repTo": "G4",
+       "ends": "452,208.8,492,333.5",
+       "agg": "from to",
+       "cls": "",
+       "d": "M452 208.8C472 208.8 472 333.5 492 333.5",
+       "title": "R6 새 요청의 배경 고정 → 일반 보고 연결 · 정확히 연결된 대상 작업의 사본"
+      }
+     ]
+    },
+    "overlaps": []
+   }
+  }
+ },
+ "consoleErrors": [],
+ "pngs": [],
+ "browser": "141.0.7390.37",
+ "sourceEnd": {
+  "bytes": 55753,
+  "sha256": "7b3da9744173085a4c928ecfbe834a50f08ea23523d0ebfd07937a72802da979"
+ },
+ "receivedMatchesSource": true,
+ "assertions": 11,
+ "failed": 0,
+ "clickPreconditions": 0,
+ "wheels": 0,
+ "missingScenes": [],
+ "exitCode": 0,
+ "crash": null
+}

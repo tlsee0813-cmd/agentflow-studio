@@ -1,0 +1,11 @@
+PASS [I] 초기 깊이·무선택 
+PASS [I] 카드 겹침 없음 
+PASS [I] 지도 스크롤 없음 
+PASS [I] 초기 글자 #n-G1 .gname 
+PASS [I] 초기 글자 #n-G2 .gname 
+PASS [I] 초기 글자 #n-G3 .gname 
+PASS [I] 초기 글자 #n-G4 .gname 
+PASS [I] 초기 글자 #n-G5 .gname 
+PASS [I] 초기 글자 #n-C31 .kname 
+PASS [I] 초기 글자 #n-C32 .kname 
+PASS [I] 초기 글자 #n-C32 .kchg 

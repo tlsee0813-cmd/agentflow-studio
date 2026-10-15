@@ -1,0 +1,49 @@
+--- relation-reading-study.html	2026-10-16 08:34:39.319940753 +0900
++++ /tmp/claude-0/-home-claude/39278fdb-20db-58ab-8089-912b927baeb7/scratchpad/html-t01.html	2026-10-16 08:34:50.976529331 +0900
+@@ -123,17 +123,17 @@
+ .xhd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+ .xpeek .pkh{font-size:11.5px;color:var(--rel);font-weight:650}
+ .xflow{font-size:14px;line-height:1.45}
+-.xflow .xar{color:var(--rel);font-weight:700;margin:0 1px}
++.xflow .xar{color:var(--rel);font-weight:700;margin:0 5px}
+ .xkind{font-size:12.5px;color:var(--ink2)}
+ .xwh{list-style:none;margin:4px 0 6px;padding:0;font-size:12.5px;color:var(--ink2)}
+ .xwh li{padding:1px 0}
+-.xwh b{color:var(--ink);font-weight:650;margin-right:2px}
++.xwh b{color:var(--ink);font-weight:650;margin-right:5px}
+ .xmeta{font-size:12px;color:var(--ink3)}
+ .xpeek .mv small{display:block;color:var(--ink3);font-size:11.5px;margin-top:2px}
+ /* 묶음을 골랐을 때: 실제로 주고받는 세부별로 나눠 같은 출발점의 다른 전달을 열기 전에 구별 */
+ .xgrp{font-size:12.5px;color:var(--ink2);margin:6px 0 -2px}
+ .xgrp:first-child{margin-top:0}
+-.xgrp b{color:var(--ink);font-weight:650;font-size:13px}
++.xgrp b{color:var(--ink);font-weight:650;font-size:13px;margin-right:6px}
+ 
+ /* focus */
+ #focusView{overflow:auto;min-height:0;background:var(--bg)}
+@@ -521,14 +521,14 @@
+  for(const k of N[id].kids){
+   const mine=rels.filter(r=>relSide(r,ids).mine===k);if(!mine.length)continue;
+   const gid=`xg-${id}-${k}`;
+-  h+=`<div class="xgrp" id="${gid}"><b>${nm(k)}</b> · 이 묶음 안 세부</div>`+mine.map(r=>xBtn(r,ids,gid)).join('');
++  h+=`<div class="xgrp" id="${gid}"><b>${nm(k)}</b>이 묶음 안 세부</div>`+mine.map(r=>xBtn(r,ids,gid)).join('');
+  }
+  return `<div class="list">${h}</div>`;
+ }
+ function whereLine(id,role){
+  const me=state.sel&&state.sel.t==='node'&&state.sel.id===id;
+  const base=N[id].p?`‹${nm(N[id].p)}› 안`:'보기용 묶음';
+- return `<li><b>${role}</b> ${base}${isHidden(id)?` · 지도에선 접힌 ‹${nm(parentOf(id))}› 자리`:''}${me?' · 지금 선택':''}</li>`;
++ return `<li><b>${role}</b>${base}${isHidden(id)?` · 지도에선 접힌 ‹${nm(parentOf(id))}› 자리`:''}${me?' · 지금 선택':''}</li>`;
+ }
+ function openXref(btn){
+  closeXref(false);
+@@ -537,7 +537,7 @@
+  const other=relSide(r,ids).other;
+  const d=document.createElement('div');d.className='xpeek';d.id='xr-'+r.id;d.setAttribute('role','region');d.setAttribute('aria-label',`관계 참고 · ${nm(r.from)}에서 ${nm(r.to)}로`);
+  d.innerHTML=`<div class="xhd"><span class="pkh">관계 참고 · 읽기 전용</span><button class="btn sm" data-act="xref-close">참고 닫기</button></div>
+-  <p class="xflow"><b>${nm(r.from)}</b><span class="xar"> → </span><b>${nm(r.to)}</b></p>
++  <p class="xflow"><b>${nm(r.from)}</b><span class="xar" aria-hidden="true">→</span><b>${nm(r.to)}</b></p>
+   <p class="xkind">전달: ${r.kind}</p>
+   <ul class="xwh">${whereLine(r.from,'보내는 쪽')}${whereLine(r.to,'받는 쪽')}</ul>
+   <p class="xcond">${r.cond}</p>
