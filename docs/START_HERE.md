@@ -6,6 +6,7 @@
 |---|---|---|
 | 현재 개발 흐름 | [continuity README](../app/continuity/README.md) | 요청·답변 → 작업문 → 돌아온 결과 → 다음 변경, 기준 편집과 저장·복구 |
 | 개발 브랜치 후보 (미병합) | [GUIDE097 영역 안내](guide097-area-guidance.md) (`feat/area-guidance097`) | 영역 구상 → 질문 하나 → 요청 초안 → 기존 요청 입력칸. 실제 AI 미검증 |
+| 개발 브랜치 후보 (미병합) | [SPATIAL102 진입 중심 공간](spatial102-enter-first.md) (같은 브랜치), 비교 시안 [SPATIAL101](design/spatial101/README.md) | 카드 클릭 = 진입, ‘정보’ = 선택, 읽기 전용 작업 화면, 복귀 위치, ‘확인할 일’. 사람 사용성 시험 전 |
 | 현재 상태·한계 | [PROJECT_STATUS](PROJECT_STATUS.md) | 수용된 소스, Cloud 검증, 미검증 품질과 다음 작업 |
 | 기존 INIT009 앱 | `app/src/`, `app/server/`, `app/public/` | `npm run demo`의 기존 화면과 계약·평가 도구 |
 | 과거 탐색·합성 비교 | [IDEA012](../prototypes/idea012-rehearsal/README.md), [IDEA013 결과](research/idea013-results.md), [IDEA014 결과](research/idea014-results.md) | 현재 UI의 실제 모델 품질과 구분하는 연구 기록 |

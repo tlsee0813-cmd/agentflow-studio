@@ -18,7 +18,7 @@ class AreaGuidance(unittest.TestCase):
             expect(self.page.locator('.area-node',has_text=name)).to_be_visible()
         return [next(a['id'] for a in self.state()['space']['areas'] if a['name']==n) for n,_ in areas]
     def open_area(self,name):
-        self.page.locator('#nav-space').click();self.page.locator('.area-node',has_text=name).first.locator('.area-open').click()
+        self.page.locator('#nav-space').click();self.page.locator('.area-node',has_text=name).first.locator('.node-enter').click()  # SPATIAL102: the card body enters
         expect(self.page.locator('#space-title')).to_have_text(name)
     def calls(self,path):
         out=[];self.page.on('request',lambda r:out.append(r.post_data_json) if r.method=='POST' and r.url.endswith(path) else None);return out

@@ -74,7 +74,8 @@ class StaticWeb(unittest.TestCase):
                           'client/presentation.js', 'client/runtime.js',
                           *('shared/' + n + '.js' for n in
                             # GUIDE097 adds shared/guidance.js (area guidance, browser MOCK only); the network/key checks below cover it.
-                            ['types', 'domain', 'validation', 'storage', 'plan-facts', 'mock', 'outcome', 'guidance'])}
+                            # SPATIAL102 adds shared/attention.js ('확인할 일', a pure read of the project; no network or storage).
+                            ['types', 'domain', 'validation', 'storage', 'plan-facts', 'mock', 'outcome', 'guidance', 'attention'])}
         files = {str(p.relative_to(self.site)).replace('\\', '/') for p in self.site.rglob('*') if p.is_file()}
         self.assertEqual(files, expected_files, 'publish only UI/shared/browser-MOCK modules')
         for p in self.site.rglob('*.js'):

@@ -148,6 +148,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/guide097_browser.py 2>&1 | tee test-results/guide097-browser.log
+      - name: Enter-first space, read-only task screen, return place and '확인할 일' (native HTTP, MOCK; not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/spatial102
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/spatial102_browser.py 2>&1 | tee test-results/spatial102-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:
