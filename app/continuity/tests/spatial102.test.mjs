@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as D from '../dist/public/shared/domain.js';
-import {checkItems} from '../dist/public/shared/attention.js';
+import {checkItems,pointedReturn,returnPath} from '../dist/public/shared/attention.js';
 import {serializeProject} from '../dist/public/shared/storage.js';
 import {mockAdvice} from '../server/mock.mjs';
 const put=(p,text,kind='request',target,area)=>D.submit(D.editDraft(D.setKind(p,kind),text),target,area);
@@ -59,4 +59,19 @@ test('S102-5 a report returning to a follow-up handoff opens the original reques
   const before=serializeProject(p);checkItems(p);assert.equal(serializeProject(p),before,'computing never changes the project');
   assert.deepEqual(Object.keys(JSON.parse(before)).sort(),Object.keys(JSON.parse(serializeProject(D.createProject()))).sort(),'no new stored field');
   assert.equal(q.areaId,notify);
+});
+
+test('S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report',()=>{
+  let {p,booking,notify}=planned();p=exported(respond(put(p,'예약 화면 만들기',undefined,undefined,booking)));const A=p.tasks[0];
+  p=put(p,'보고 R1','report');const R1=p.tasks.at(-1);p=exported(respond(p),R1.id);
+  p=put(p,'보고 R2','report',R1.id);const R2=p.tasks.at(-1);assert.equal(R2.parentTaskId,R1.id);
+  // The reviewed reproduction: the item points to R2 while A's direct returns are [R1].
+  const item=checkItems(p).find(i=>i.kind==='report');assert.equal(item.taskId,A.id);assert.equal(item.returnId,R2.id);
+  assert.deepEqual(p.tasks.filter(x=>x.parentTaskId===A.id&&D.isReturnTask(p,x)).map(x=>x.id),[R1.id]);
+  assert.equal(pointedReturn(p,A.id,R2.id)?.id,R2.id,'the pointed report is found through the follow-up chain');
+  assert.deepEqual(returnPath(p,R2).map(x=>x.id),[A.id,R1.id,R2.id]);
+  assert.equal(pointedReturn(p,A.id,R1.id)?.id,R1.id,'a direct return still resolves');
+  p=respond(put(p,'알림 문자',undefined,undefined,notify));const B=p.tasks.at(-1);
+  for(const [task,ret,why] of [[A.id,'T_missing','gone'],[A.id,A.id,'the request itself is not a report'],[B.id,R2.id,"another request's report"],[A.id,B.id,'another request']])
+    assert.equal(pointedReturn(p,task,ret),null,why);
 });

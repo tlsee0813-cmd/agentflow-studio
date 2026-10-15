@@ -146,4 +146,55 @@ class EnterFirstSpace(unittest.TestCase):
         self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390)
         self.page.screenshot(path=str(base.OUT/'spatial102-390.png'))
 
+    # ---------- SPATIAL102-R1: the item's report reaches the read-only screen (a report returning to a follow-up handoff) ----------
+    def chain(self):
+        """A exported -> report R1 -> follow-up handoff exported from R1 -> report R2 (returns to R1, not to A)."""
+        booking,=self.start(['예약']);A=self.request_in(booking,'A: 예약 화면 만들기')
+        with self.page.expect_download():self.page.locator('#download-work').click()
+        self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('R1 보고: 일부만 만들었다고 주장 ZZ-R1');self.page.locator('#send').click()
+        expect(self.page.locator('#working')).to_have_text('');R1=self.state()['tasks'][-1]['id'];self.assertEqual(self.state()['currentTaskId'],R1)
+        with self.page.expect_download():self.page.locator('#download-work').click()
+        self.assertTrue(next(t for t in self.state()['tasks'] if t['id']==R1)['handoffs'],'follow-up handoff exported from R1')
+        self.page.locator('#home-paste-result').click();self.page.locator('#return-task').select_option(R1)
+        self.page.locator('#draft').fill('R2 보고: 후속 확인 결과 ZZ-R2');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        R2=self.state()['tasks'][-1]['id'];self.assertEqual(self.state()['tasks'][-1]['parentTaskId'],R1)
+        return booking,A,R1,R2
+
+    def test_08_check_item_opens_the_report_it_points_to(self):
+        booking,A,R1,R2=self.chain()
+        current=self.state()['currentTaskId'];target=self.state()['space']['draftTarget'];saved=self.state()
+        self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R2}').click()
+        expect(self.title()).to_contain_text('A: 예약 화면');pointed=self.page.locator('#task-pointed')
+        expect(pointed).to_contain_text('ZZ-R2');expect(pointed).not_to_contain_text('ZZ-R1')
+        expect(pointed).to_contain_text('후속 확인 작업문');expect(pointed).to_contain_text('앱 미검증')
+        self.assertEqual(self.state()['currentTaskId'],current,'viewing never continues the work');self.assertEqual(self.state()['space']['draftTarget'],target)
+        self.assertEqual(self.state(),saved,'nothing is written by viewing')
+        self.page.screenshot(path=str(base.OUT/'spatial102-r1-pointed.png'),full_page=True)
+        # Reload keeps the pointed report; back to the area as before.
+        self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');expect(self.page.locator('#task-pointed')).to_contain_text('ZZ-R2')
+        self.page.locator('#space-crumb-area').click();expect(self.title()).to_have_text('예약')
+
+    def test_09_a_stale_or_foreign_report_id_is_not_replaced_by_another_report(self):
+        booking,A,R1,R2=self.chain()
+        self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R2}').click();expect(self.page.locator('#task-pointed')).to_contain_text('ZZ-R2')
+        place=json.loads(self.page.evaluate("sessionStorage.getItem('agentflow.workspace.place')"))
+        for bad in ['T_missing',A]:  # gone, or not a report of this request
+            place['ret']=bad;self.page.evaluate(f"sessionStorage.setItem('agentflow.workspace.place', {json.dumps(json.dumps(place))})")
+            self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');expect(self.title()).to_contain_text('A: 예약 화면')
+            pointed=self.page.locator('#task-pointed');expect(pointed).to_contain_text('찾을 수 없어요');expect(pointed).not_to_contain_text('ZZ-R2')
+            expect(pointed).not_to_contain_text('ZZ-R1')
+        self.assertEqual(self.errors,[])
+
+    def test_10_a_direct_report_item_still_opens_its_task_with_results_and_return(self):
+        booking,=self.start(['예약']);A=self.request_in(booking,'A: 예약 화면 만들기')
+        with self.page.expect_download():self.page.locator('#download-work').click()
+        self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('보고: 만들었다고 주장 ZZ-D1');self.page.locator('#send').click()
+        expect(self.page.locator('#working')).to_have_text('');R=self.state()['tasks'][-1]['id']
+        self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R}').click()
+        expect(self.page.locator('#task-pointed')).to_contain_text('ZZ-D1');expect(self.page.locator('#task-view')).to_contain_text('돌아온 결과 1개')
+        self.page.locator('#space-crumb-area').click();expect(self.title()).to_have_text('예약')
+        # Opening the task by its title (not from the list) shows no pointed report.
+        self.page.locator(f'#task-open-{A}').click();expect(self.page.locator('#task-pointed')).to_have_count(0)
+        expect(self.page.locator('#task-view')).to_contain_text('ZZ-D1')
+
 if __name__=='__main__':unittest.main()

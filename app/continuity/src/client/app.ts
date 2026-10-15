@@ -9,7 +9,7 @@ import { mockAdvice } from '../shared/mock.js';
 import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview, fitViewport, FIT_MIN, ZOOM_MIN, ZOOM_MAX } from './presentation.js';
 import { loadConfig, requestAdvice, requestGuidance, runtimeStorage, runtimeFailure, type RuntimeConfig } from './runtime.js';
 import { outcomeOf } from '../shared/outcome.js';
-import { checkItems, type CheckItem } from '../shared/attention.js';
+import { checkItems, pointedReturn, returnPath, type CheckItem } from '../shared/attention.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HTMLElementTagNameMap[K] {
   const e=document.createElement(tag);e.textContent=content;if(cls)e.className=cls;return e;
@@ -42,6 +42,8 @@ let view:'work'|'history'|'space'|'area'|'task'='work',contextOpen=false,hasSave
 let viewArea:string|null=null;
 // SPATIAL102: the request shown read-only (view 'task'). Looking at it never changes currentTaskId or the request target.
 let viewTask:string|null=null;
+// SPATIAL102-R1: the report a '확인할 일' item pointed to, shown on the task screen (may be a report to a follow-up handoff).
+let viewReturn:string|null=null;
 // SPATIAL102: this tab's memory of each layer of the open project (scroll, the card or request the user came back from).
 type LayerMemo={space:number|null;from:string|null;areas:Record<string,{y:number;task:string|null}>};
 let layerMemo:LayerMemo={space:null,from:null,areas:{}};
@@ -73,20 +75,21 @@ function recallMap() {
 const spaceInputs:Record<string,string>={};
 const PLACE_KEY='agentflow.workspace.place';
 const hasSpace=(p:Project)=>!!p.space.brief||p.space.areas.length>0;
-function rememberPlace(){try{session?.setItem(PLACE_KEY,JSON.stringify({entry:target.kind==='entry'?target.ref.entryId:'',view,area:viewArea,task:viewTask}));}catch{/* Per-tab convenience only. */}}
+function rememberPlace(){try{session?.setItem(PLACE_KEY,JSON.stringify({entry:target.kind==='entry'?target.ref.entryId:'',view,area:viewArea,task:viewTask,ret:viewReturn}));}catch{/* Per-tab convenience only. */}}
 function recallPlace(entryId:string) {
   try {
-    const v=JSON.parse(session?.getItem(PLACE_KEY)||'null') as {entry?:unknown;view?:unknown;area?:unknown;task?:unknown}|null;
+    const v=JSON.parse(session?.getItem(PLACE_KEY)||'null') as {entry?:unknown;view?:unknown;area?:unknown;task?:unknown;ret?:unknown}|null;
     if(!v||v.entry!==entryId)return null;
     const areaOk=(id:unknown)=>typeof id==='string'&&(id==='unassigned'||project.space.areas.some(a=>a.id===id));
     const placed=['work','history','space','area','task'].includes(v.view as string)?v.view as typeof view:'work';
     // SPATIAL102: a remembered task that no longer exists (or is a return) falls back to its area, then to the whole space.
     if(placed==='task') {
       const t=typeof v.task==='string'?project.tasks.find(x=>x.id===v.task&&!isReturnTask(project,x)):undefined;
-      if(t)return {view:'task' as const,area:areaOf(project,t)??'unassigned',task:t.id};
-      return {view:areaOk(v.area)?'area' as const:'space' as const,area:areaOk(v.area)?v.area as string:null,task:null};
+      // The pointed report is checked when shown (a stale one is reported, never swapped for another report).
+      if(t)return {view:'task' as const,area:areaOf(project,t)??'unassigned',task:t.id,ret:typeof v.ret==='string'?v.ret:null};
+      return {view:areaOk(v.area)?'area' as const:'space' as const,area:areaOk(v.area)?v.area as string:null,task:null,ret:null};
     }
-    return {view:placed==='area'&&!areaOk(v.area)?'space' as const:placed,area:areaOk(v.area)?v.area as string:null,task:null};
+    return {view:placed==='area'&&!areaOk(v.area)?'space' as const:placed,area:areaOk(v.area)?v.area as string:null,task:null,ret:null};
   } catch {return null;}
 }
 let selectedReturnTaskId:string|undefined;
@@ -103,7 +106,7 @@ let contextReturn:HTMLElement|null=null;
 const unreadable='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 않습니다. 이 화면의 입력은 메모리에 남으며 복구 파일로 저장할 수 있습니다.';
 function resetEphemeral() {
   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
-  resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;layerMemo={space:null,from:null,areas:{}};
+  resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
   mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
@@ -116,7 +119,7 @@ function openEntry(entry:WorkspaceEntry) {
   // A reload keeps this tab's place; opening from the list starts at the space once the project has one.
   const place=recallPlace(entry.entryId);
   recallMap();
-  if(place){view=place.view;viewArea=place.area;viewTask=place.task;} else view=hasSpace(project)?'space':'work';
+  if(place){view=place.view;viewArea=place.area;viewTask=place.task;viewReturn=place.ret;} else view=hasSpace(project)?'space':'work';
 }
 /** The pre-workspace value while it is not migrated: shown read-only, never written. */
 function openLegacy() {
@@ -230,22 +233,23 @@ function focusFirst(...ids:string[]):boolean {
 }
 /** Coming back restores this layer's scroll and the card the user entered; an ID that no longer exists is just skipped. */
 function openSpace() {
-  leaveLayer();view='space';viewArea=null;viewTask=null;sheetOpen=false;render();
+  leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;render();
   const from=layerMemo.from;window.scrollTo({top:layerMemo.space??0});
   if(!(from&&focusFirst(`node-enter-${from}`,`list-enter-${from}`)))$('space-title')?.focus({preventScroll:true});
 }
 function openArea(id:string) {
   if(view==='space')layerMemo.from=id;
-  leaveLayer();view='area';viewArea=id;viewTask=null;render();
+  leaveLayer();view='area';viewArea=id;viewTask=null;viewReturn=null;render();
   const memo=layerMemo.areas[id];window.scrollTo({top:memo?.y??0});
   if(!(memo?.task&&focusFirst(`task-open-${memo.task}`)))$('space-title')?.focus({preventScroll:true});
 }
-/** SPATIAL102: the read-only task screen. Opening it never changes the continued work or the request target. */
-function openTaskView(id:string) {
+/** SPATIAL102: the read-only task screen. Opening it never changes the continued work or the request target.
+ * returnId (SPATIAL102-R1): the report a check item points to, shown on that screen. */
+function openTaskView(id:string,returnId:string|null=null) {
   const t=project.tasks.find(x=>x.id===id);if(!t)return;
   const area=areaOf(project,t)??'unassigned';
   leaveLayer();layerMemo.areas[area]={y:layerMemo.areas[area]?.y??0,task:id};
-  view='task';viewArea=area;viewTask=id;render();window.scrollTo({top:0});$('space-title')?.focus({preventScroll:true});
+  view='task';viewArea=area;viewTask=id;viewReturn=returnId;render();window.scrollTo({top:0});$('space-title')?.focus({preventScroll:true});
 }
 /** Explicit: continue this task (or go back to it when its return is what is open). Viewing never does this. */
 function continueTask(id:string) {
@@ -1065,7 +1069,7 @@ function renderSpace() {
   root.hidden=route==='projects'; // shown before building, so the map is measured at its real size (fit)
   // A task that is gone (another tab, a restored backup) falls back to its area screen.
   const t=view==='task'?project.tasks.find(x=>x.id===viewTask&&!isReturnTask(project,x))??null:null;
-  if(view==='task'&&!t){view=viewArea?'area':'space';viewTask=null;}
+  if(view==='task'&&!t){view=viewArea?'area':'space';viewTask=null;viewReturn=null;}
   // SPATIAL102: one path on all three layers, ending with the layer's name.
   const area=view!=='space'?areaById(viewArea):null,crumb=node('nav','','space-crumb');crumb.id='space-crumb';crumb.setAttribute('aria-label','공간 경로');
   const layer=(label:string)=>node('span',label,'layer-chip');
@@ -1085,7 +1089,7 @@ const CHECK_SHOWN=4;
 function checkRow(it:CheckItem):HTMLElement {
   const li=node('li','','check-item');li.dataset.kind=it.kind;const t=project.tasks.find(x=>x.id===it.taskId),a=areaById(it.areaId);
   li.append(node('span',`${a?a.name:'영역 미지정'}${a?.archived?' · 보관됨':''}`,'check-area'),node('strong',t?taskTitle(project,t):''),node('span',it.kind==='decision'?`${it.status} · 답을 기다려요`:`${it.status} · 아직 다음 요청이나 확인 작업문 없음`,'hint'));
-  li.append(btn('보기',()=>openTaskView(it.taskId),'quiet',`check-open-${it.returnId??it.taskId}`));return li;
+  li.append(btn('보기',()=>openTaskView(it.taskId,it.returnId),'quiet',`check-open-${it.returnId??it.taskId}`));return li;
 }
 /** Shown once the project has requests. Items with evidence only: an open question, a report nothing was done with yet. */
 function checkSection():HTMLElement|null {
@@ -1338,6 +1342,7 @@ function renderTaskView(root:HTMLElement,t:Task) {
   else actions.append(btn('이 작업 이어서 하기',()=>continueTask(t.id),'primary','task-view-continue'));
   head.append(actions);if(!currentGroup(t))head.append(node('p','이 화면을 보는 것만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.','hint'));
   root.append(head);
+  if(viewReturn!==null)root.append(pointedSection(t,viewReturn));
   const body=node('section','','area-tasks task-view');body.id='task-view';
   body.append(node('h2','요청 원문'));if(first)body.append(node('p',`${sourceName[first.kind]} · ${dateLabel(first.at)}`,'source-id'),node('div',first.text,'source-raw'));
   body.append(node('h2',`돌아온 결과 ${results.length}개`));
@@ -1349,6 +1354,17 @@ function renderTaskView(root:HTMLElement,t:Task) {
   for(const b of bases)box.append(node('p',`${BASIS_LABEL[b.status]} · ${shortText(b.text,90)}`,'source-raw'));
   if(!bases.length)box.append(node('p','이 작업에서 나온 기준이 없어요.','hint'));
   box.append(btn('기준 · 출처 전체 보기',showContext,'quiet'));root.append(box);
+}
+/** SPATIAL102-R1: the report the check item pointed to, with where it belongs. A stale or foreign id is said so plainly. */
+function pointedSection(t:Task,returnId:string):HTMLElement {
+  const box=node('section','','area-tasks task-pointed');box.id='task-pointed';box.append(node('h2','확인할 일에서 연 보고'));
+  const r=pointedReturn(project,t.id,returnId),src=r?project.sources.find(s=>s.id===r.sourceIds[0]):undefined;
+  if(!r||!src){box.append(node('p','가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 작업의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래는 이 작업의 기록이에요.','alert warning'));return box;}
+  const no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`,path=returnPath(project,r);
+  const hops=path.map((x,i)=>i===0?`${no(x)} 요청`:i===path.length-1?`${no(x)} 이 보고`:`${no(x)} 보고 · 후속 확인 작업문 내보냄`);
+  box.append(node('p',path.length>2?`연결: ${hops.join(' › ')} (후속 확인 작업문에 돌아온 보고)`:`연결: ${hops.join(' › ')} (이 요청에 직접 돌아온 보고)`,'hint'),
+    node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));
+  return box;
 }
 function renderUnplaced(root:HTMLElement) {
   const head=node('div','','space-head'),title=node('h1','영역 미지정 작업');title.id='space-title';title.tabIndex=-1;

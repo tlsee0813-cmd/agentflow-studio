@@ -14,12 +14,26 @@ export type CheckItem = {
 const DECISION = new Set(['사실 확인 항목 있음', '제품 선택 항목 있음']);
 const childOf = (p: Project, id: string) => p.tasks.filter(x => x.parentTaskId === id);
 /** The user request a task belongs to (a return follows its parent; a follow-up return can return to a return). */
-function rootRequest(p: Project, t: Task): Task {
+export function rootRequest(p: Project, t: Task): Task {
   const seen = new Set<string>(); let cur = t;
   while (isReturnTask(p, cur) && cur.parentTaskId && !seen.has(cur.id)) {
     seen.add(cur.id); const up = p.tasks.find(x => x.id === cur.parentTaskId); if (!up) break; cur = up;
   }
   return cur;
+}
+/** SPATIAL102-R1: the return a check item points to, only while it is still a return of that request (directly or
+ * through follow-up handoffs). A missing id, a non-return or another request's return gives null: never another report. */
+export function pointedReturn(p: Project, taskId: string, returnId: string): Task | null {
+  const r = p.tasks.find(x => x.id === returnId);
+  return r && isReturnTask(p, r) && rootRequest(p, r).id === taskId ? r : null;
+}
+/** The chain from the request to that return (request, earlier returns, the return), for where-it-belongs on screen. */
+export function returnPath(p: Project, r: Task): Task[] {
+  const path = [r], seen = new Set([r.id]); let cur = r;
+  while (isReturnTask(p, cur) && cur.parentTaskId && !seen.has(cur.parentTaskId)) {
+    const up = p.tasks.find(x => x.id === cur.parentTaskId); if (!up) break; path.unshift(up); seen.add(up.id); cur = up;
+  }
+  return path;
 }
 /** A return the user has not acted on yet: nothing continues from it and no follow-up handoff was exported from it. */
 const untouched = (p: Project, r: Task) => !r.handoffs.length && !childOf(p, r.id).length;
