@@ -1,0 +1,18 @@
+{
+  "url": "https://www.yfiles.com/demos/application-features/folding/",
+  "timeUTC": "2026-10-15T19:06:34.560994+00:00",
+  "viewport": [
+    1280,
+    720
+  ],
+  "errors": [
+    {
+      "url": "https://www.yfiles.com/demos/application-features/folding/",
+      "failure": "net::ERR_TUNNEL_CONNECTION_FAILED"
+    }
+  ],
+  "responses": [],
+  "chromium": "154.0.8037.57",
+  "navigationError": "Page.goto: net::ERR_TUNNEL_CONNECTION_FAILED at https://www.yfiles.com/demos/application-features/folding/\nCall log:\n  - navigating to \"https://www.yfiles.com/demos/application-features/folding/\", waiting until \"domcontentloaded\"\n",
+  "finalURL": "about:blank"
+}

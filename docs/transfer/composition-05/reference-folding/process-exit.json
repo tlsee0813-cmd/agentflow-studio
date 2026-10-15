@@ -1,0 +1,10 @@
+{
+  "actual_process_exit": 0,
+  "evidence": "Original exec_command/write_stdin session 7400 completed with exit_code 0",
+  "command": "python inline code exactly preserved in observe.py, preceded by read-only git fetch",
+  "meaning": "Access observer caught and recorded navigation failure; exit 0 is NOT a successful demo interaction",
+  "interaction_status": "NOT_RUN",
+  "playwright": "1.62.0",
+  "http_status": null,
+  "first_HTML_hash": null
+}
