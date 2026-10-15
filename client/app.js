@@ -1,10 +1,11 @@
-import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES } from '../shared/types.js';
+import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, TEXT_LIMIT } from '../shared/types.js';
 import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion, currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask, areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
-import { parseProject, parseResultFile, validateRequest, validateAdvice } from '../shared/validation.js';
+import { parseProject, parseResultFile, validateRequest, validateAdvice, validateGuideEnvelope } from '../shared/validation.js';
+import { buildGuideRequest, guideDigest, readOf, proposalText, adoptProposal, instructionOf } from '../shared/guidance.js';
 import { WorkspaceStore, serializeProject, storageErrorCode } from '../shared/storage.js';
 import { mockAdvice } from '../shared/mock.js';
 import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview, fitViewport, FIT_MIN, ZOOM_MIN, ZOOM_MAX } from './presentation.js';
-import { loadConfig, requestAdvice, runtimeStorage, runtimeFailure } from './runtime.js';
+import { loadConfig, requestAdvice, requestGuidance, runtimeStorage, runtimeFailure } from './runtime.js';
 import { outcomeOf } from '../shared/outcome.js';
 const $ = (id) => document.getElementById(id);
 function node(tag, content = '', cls = '') {
@@ -58,6 +59,7 @@ let view = 'work', contextOpen = false, hasSaved = false, memoryDirty = false;
 // project data; looking around never changes currentTaskId (the work the user continues).
 let viewArea = null;
 let mapView = null, mapSelected = null, sheetOpen = false, areaListOpen = null;
+const guides = new Map();
 /** FLOW091-C: the task whose background preview the user opened (survives redraws such as an autosave). */
 let backgroundOpen = null;
 // One move = one command. Undo re-applies only that position, only while it is still where the move put it.
@@ -113,6 +115,9 @@ const unreadable = '기존 저장 내용을 읽지 못했습니다. 덮어쓰지
 function resetEphemeral() {
     controller?.abort();
     controller = null;
+    for (const g of guides.values())
+        g.pending?.controller.abort();
+    guides.clear();
     selectedReturnTaskId = undefined;
     projectEpoch++;
     resultRead++;
@@ -1776,7 +1781,7 @@ function areaPanel(a) {
     row.append(btn('반영', () => { if (!name.value.trim())
         return; commit(editArea(project, a.id, name.value, note.value)); clearInputs(nameKey, noteKey); }, 'secondary', 'panel-save'), btn('취소', () => { clearInputs(nameKey, noteKey); render(); }, 'quiet', 'panel-cancel'));
     const go = node('div', '', 'row');
-    go.append(btn('영역 열기 ↗', () => openArea(a.id), 'primary', 'panel-open'), btn('이 영역에 새 요청', () => writeInArea(a.id), 'quiet', 'panel-new-request'));
+    go.append(btn('영역 열기 ↗', () => openArea(a.id), 'primary', 'panel-open'), btn('이 영역에 새 요청', () => writeInArea(a.id), 'quiet', 'panel-new-request'), btn('무엇을 요청할지 같이 정하기', () => { guideOf(a.id); openArea(a.id); document.getElementById(`guide-${a.id}`)?.scrollIntoView({ block: 'start' }); }, 'quiet', 'panel-guide'));
     panel.append(head, node('label', '이름'), name, node('label', '한 줄 구상'), note, node('p', '아이디어도, 아직 못 정한 점도 적을 수 있어요.', 'hint'), row, node('p', areaSummary(a), 'hint'));
     const requests = areaRequests(a.id);
     if (requests.some(currentGroup))
@@ -1929,6 +1934,293 @@ function taskEntry(t, placing) {
     item.append(raw);
     return item;
 }
+/* ---------- GUIDE097: area guidance. Per tab, in memory, keyed by project and area; nothing is saved until the user adopts. ---------- */
+const guideKey = (areaId) => `${project.id}:${areaId}`;
+function guideOf(areaId) {
+    let g = guides.get(guideKey(areaId));
+    if (!g) {
+        g = { question: null, answer: null, proposal: null, mode: null, read: [], text: '', base: '', answerDraft: '', pending: null, notice: null, gen: 0, incoming: null, instruction: '', used: null };
+        guides.set(guideKey(areaId), g);
+    }
+    return g;
+}
+const guideEdited = (g) => g.proposal !== null && g.text !== g.base;
+const guideStale = (g) => (g.question !== null || g.proposal !== null) && instructionOf(g.instruction) !== g.used;
+/** GUIDE099-R1: a held reply still matches what is on screen now (purpose, area, decisions, area requests, its answer, the instruction). */
+function incomingCurrent(areaId, g) {
+    if (!g.incoming)
+        return false;
+    try {
+        return guideDigest(buildGuideRequest(project, areaId, g.incoming.answer, instructionOf(g.instruction))) === g.incoming.digest;
+    }
+    catch {
+        return false;
+    }
+}
+function applyGuide(g, x) {
+    g.mode = x.mode;
+    g.read = x.read;
+    g.incoming = null;
+    g.answer = x.answer;
+    g.used = x.instruction;
+    if (x.reply.question) {
+        g.question = x.reply.question;
+        g.proposal = null;
+    }
+    else {
+        const prop = x.reply.proposal;
+        g.proposal = prop;
+        g.text = g.base = proposalText(x.areaName, prop, x.first, x.answer, x.instruction);
+    }
+}
+/** One request for this area. A reply is applied only to the same project activation, the same pending request, and only
+ * while the material it was built from (purpose, this area, decisions, this area's requests, the answer) is unchanged. */
+/** fresh: the instruction changed, so the earlier question and answer are not sent again. */
+async function askGuide(areaId, fresh = false) {
+    const g = guideOf(areaId);
+    if (g.pending || route === 'example')
+        return;
+    if (g.instruction.length > TEXT_LIMIT) {
+        g.notice = `‘이번에 맡기거나 바꿀 일’이 ${TEXT_LIMIT.toLocaleString()}자를 넘어 보내지 않았어요. 자르지 않았으니 줄인 뒤 다시 누르세요.`;
+        render();
+        return;
+    }
+    if (!readyForAI()) {
+        g.notice = config?.mode === 'deepseek' ? '실제 AI 안내는 서버 설정과 위 연결 메뉴의 전송 동의가 필요해요. 직접 쓰는 요청은 그대로 쓸 수 있어요.' : '정리 방식을 확인하지 못했어요.';
+        render();
+        return;
+    }
+    let req;
+    const instruction = instructionOf(g.instruction), protect = guideEdited(g);
+    try {
+        req = buildGuideRequest(project, areaId, fresh ? null : g.answer, instruction);
+    }
+    catch {
+        g.notice = '보낼 자료가 한도(128 KiB)를 넘거나 유효하지 않아 보내지 않았어요. 사용자 결정은 잘라 보내지 않아요. 직접 요청을 쓸 수 있어요.';
+        render();
+        return;
+    }
+    const active = new AbortController(), key = guideKey(areaId), digest = guideDigest(req), epoch = projectEpoch, gen = g.gen;
+    g.pending = { requestId: req.ticket.requestId, controller: active };
+    g.notice = null;
+    render();
+    const mine = () => epoch === projectEpoch && guides.get(key) === g && g.pending?.requestId === req.ticket.requestId;
+    try {
+        const data = validateGuideEnvelope(await requestGuidance(req, active.signal), req);
+        if (!mine())
+            return;
+        if (data.mode !== config.mode)
+            throw new Error('INVALID_RESPONSE');
+        let now = null;
+        try {
+            now = guideDigest(buildGuideRequest(project, areaId, req.answer, instructionOf(g.instruction)));
+        }
+        catch { /* area archived or removed, or input over the limit */ }
+        if (now !== digest) {
+            g.notice = '기다리는 동안 목적·영역 구상·결정이나 ‘이번에 맡기거나 바꿀 일’이 바뀌어 이 응답은 적용하지 않았어요. 입력과 초안은 그대로예요. 다시 받을 수 있어요.';
+            return;
+        }
+        const x = { reply: data.reply, mode: data.mode, read: readOf(req), areaName: areaById(areaId)?.name ?? req.area.name, first: !req.areaWork.length, answer: req.answer, instruction: req.currentInstruction, digest };
+        // GUIDE097-R1: any edit after the request was sent (even one back to the same text) keeps the screen as it is.
+        // GUIDE099: so does a draft the user had already edited when asking again after changing the instruction.
+        if (g.proposal !== null && (g.gen !== gen || protect)) {
+            g.incoming = x;
+            g.notice = '기다리는 동안 직접 고친 내용이 있어 새 초안으로 바꾸지 않았어요. 화면의 초안은 그대로예요. 새 응답을 쓰려면 ‘새 응답으로 바꾸기’를 누르세요(지금 초안은 버려져요).';
+            return;
+        }
+        applyGuide(g, x);
+    }
+    catch (e) {
+        if (!active.signal.aborted && mine()) {
+            const code = e instanceof Error ? e.message : '';
+            g.notice = `${errorMessages[code] ?? (e instanceof Error && e.name === 'ContextError' ? errorMessages.INVALID_RESPONSE : '요청이 실패했어요.')} 입력·답·초안은 그대로예요. 다시 받을 수 있어요.`;
+        }
+    }
+    finally {
+        if (guides.get(key) === g && g.pending?.requestId === req.ticket.requestId)
+            g.pending = null;
+        if (epoch === projectEpoch)
+            render();
+    }
+}
+function stopGuide(areaId) { const g = guideOf(areaId); g.pending?.controller.abort(); g.pending = null; g.notice = '중단했어요. 입력·답·초안은 그대로예요. 이미 보낸 유료 요청의 과금 취소를 뜻하지는 않아요.'; render(); }
+function answerGuide(areaId, value, disposition) {
+    const g = guideOf(areaId);
+    if (g.pending || !g.question || !value.trim() || guideStale(g))
+        return;
+    g.answer = { question: g.question, text: value, disposition };
+    g.answerDraft = '';
+    void askGuide(areaId);
+}
+function adoptGuide(a) {
+    const g = guideOf(a.id);
+    if (!g.text.trim())
+        return;
+    // GUIDE099-R1: a draft made for another instruction is not adopted; it stays on screen, nothing is removed.
+    if (guideStale(g)) {
+        g.notice = '‘이번에 맡기거나 바꿀 일’이 바뀌어 이 초안은 넣지 않았어요. 초안은 그대로 두었어요. ‘바뀐 입력으로 새로 받기’로 지금 입력에 맞는 초안을 받거나, 입력을 이 초안을 만들 때로 되돌리세요.';
+        render();
+        return;
+    }
+    try {
+        commit(adoptProposal(project, a.id, g.text));
+    }
+    catch (e) {
+        g.notice = e instanceof Error && e.message === 'DRAFT_IN_USE' ? '작성 중인 요청이 있어 초안을 넣지 않았어요. 작업 화면에서 그 요청을 보내거나 비운 뒤 다시 누르세요. 이 초안은 여기 그대로예요.'
+            : g.text.length > TEXT_LIMIT ? `초안이 요청 한 건의 한도(${TEXT_LIMIT.toLocaleString()}자)를 넘어 넣지 않았어요. 자르지 않았으니 직접 줄인 뒤 다시 누르세요. 이 초안은 여기 그대로예요.` : '초안을 넣지 못했어요. 이 초안은 여기 그대로예요.';
+        render();
+        return;
+    }
+    guides.delete(guideKey(a.id));
+    view = 'work';
+    render();
+    project = { ...project, notice: `초안을 ‘${a.name}’ 영역의 요청 입력칸에 넣었어요. 아직 보내지 않았어요. 확인·수정한 뒤 ‘작업문 준비하기’를 누르세요.` };
+    renderStatus();
+    $('compose-panel').open = true;
+    $('draft').focus();
+}
+function guidePanel(a, hasRequests) {
+    const g = guides.get(guideKey(a.id)), box = details(hasRequests ? '다음 요청 같이 정하기 · 선택' : '무엇을 요청할지 같이 정하기 · 선택', `guide-${a.id}`);
+    box.classList.add('guide-panel');
+    box.dataset.areaId = a.id;
+    box.open = !!g || !hasRequests;
+    const mock = config?.mode !== 'deepseek', label = mock ? 'MOCK 규칙 · AI 아님' : 'DeepSeek 초안 · 검토 전';
+    box.append(node('p', `목적·이 영역의 구상·사용자 결정·이 영역의 요청을 읽고, 꼭 필요할 때만 질문 하나를 한 뒤 요청 초안을 보여줘요. 초안은 고치거나 버릴 수 있고, ‘이 초안으로 요청 쓰기’를 누르기 전에는 구상·작업·결정이 바뀌지 않아요. ${mock ? '지금은 MOCK 규칙이라 예약 확정 방식 한 가지만 묻고, 그 밖에는 중립적인 첫 단계를 만들어요.' : '서버의 DeepSeek에 이 자료를 보내요.'}`, 'hint'));
+    // GUIDE099: optional current instruction, visible as soon as the panel is open (not another folded box).
+    const ins = node('textarea');
+    ins.id = 'guide-instruction';
+    ins.rows = 3;
+    ins.value = g?.instruction ?? '';
+    ins.setAttribute('aria-label', '이번에 맡기거나 바꿀 일 (선택)');
+    ins.placeholder = '예: 이번에는 무엇만 하거나, 어떤 조건을 바꿀지 적어 주세요. 비워 두어도 돼요.';
+    ins.addEventListener('input', () => { const gg = guideOf(a.id), was = [guideStale(gg), incomingCurrent(a.id, gg)].join(); gg.instruction = ins.value; if ([guideStale(gg), incomingCurrent(a.id, gg)].join() !== was)
+        render(); });
+    box.append(node('label', '이번에 맡기거나 바꿀 일 (선택)', 'guide-instruction-label'), ins, node('p', '영역 구상은 그대로 두고, 이번 요청이나 바뀐 조건만 적으세요. 비워 두면 목적과 구상으로 시작해요. 적은 내용은 이 탭에만 있고 새로고침하면 사라져요. 요청 입력칸에 쓴 내용은 가져오지 않아요.', 'hint'));
+    if (g?.notice) {
+        const n = node('p', g.notice, 'guide-notice');
+        n.id = 'guide-notice';
+        n.setAttribute('role', 'status');
+        box.append(n);
+    }
+    if (g?.pending) {
+        const row = node('div', '', 'row');
+        row.append(node('span', '받는 중…', 'hint'), btn('중단', () => stopGuide(a.id), 'quiet', 'guide-stop'));
+        box.append(row);
+    }
+    const busy = !!g?.pending, stale = !!g && guideStale(g);
+    if (stale) {
+        const n = node('div', '', 'guide-stale');
+        n.id = 'guide-stale';
+        const fresh = btn('바뀐 입력으로 새로 받기', () => void askGuide(a.id, true), 'secondary', 'guide-fresh');
+        fresh.disabled = busy;
+        n.append(node('p', '‘이번에 맡기거나 바꿀 일’이 바뀌었어요. 아래 질문·답·초안은 바뀌기 전 입력으로 만든 것이라 새 요청에 다시 쓰지 않아요. 직접 고친 초안은 그대로 두고, 새 응답이 오면 바꿀지 고르게 해요.', 'hint'), fresh);
+        box.append(n);
+    }
+    if (!g || (!g.question && !g.proposal)) {
+        const start = btn(mock ? '질문 또는 초안 받기 (MOCK)' : '질문 또는 초안 받기', () => void askGuide(a.id), 'secondary', 'guide-start');
+        start.disabled = busy;
+        box.append(start);
+        return box;
+    }
+    if (g.question && !g.proposal) {
+        const q = g.question, sec = node('section', '', 'guide-question');
+        sec.id = 'guide-question';
+        sec.append(node('p', `${label} · ${q.kind === 'fact' ? '사실 확인' : '선택'} 질문 하나`, 'eyebrow'), node('strong', q.text), node('p', q.why, 'hint'));
+        if (stale)
+            sec.append(node('p', '바뀌기 전 입력으로 받은 질문이에요. 새로 받으면 이 질문과 답은 다시 보내지 않아요.', 'hint'));
+        else if (g.answer) {
+            // The answer is kept after a failure, cancel or discarded late reply: asking again sends it, never the question again.
+            sec.append(node('p', `보낸 답: ${g.answer.disposition === 'provided' ? g.answer.text : g.answer.disposition === 'unknown' ? '모름' : '보류'}`, 'hint'));
+            const row = node('div', '', 'row'), again = btn('이 답으로 다시 받기', () => void askGuide(a.id), 'secondary', 'guide-retry'), change = btn('답 바꾸기', () => { g.answer = null; render(); }, 'quiet', 'guide-change-answer');
+            again.disabled = change.disabled = busy;
+            row.append(again, change);
+            sec.append(row);
+        }
+        else {
+            const opts = node('div', '', 'row');
+            for (const [i, o] of q.options.entries()) {
+                const b = btn(o.label, () => answerGuide(a.id, o.label, 'provided'), 'quiet guide-option', `guide-option-${i}`);
+                b.title = o.consequence;
+                b.disabled = busy;
+                opts.append(b);
+            }
+            const field = node('input');
+            field.id = 'guide-answer';
+            field.value = g.answerDraft;
+            field.placeholder = '직접 답하기';
+            field.setAttribute('aria-label', '질문에 직접 답하기');
+            field.maxLength = 2000;
+            field.addEventListener('input', () => { g.answerDraft = field.value; });
+            const row = node('div', '', 'row');
+            for (const [text, id, act] of [['이 답으로', 'guide-answer-send', () => answerGuide(a.id, field.value, 'provided')], ['모름', 'guide-unknown', () => answerGuide(a.id, '모름', 'unknown')], ['보류', 'guide-defer', () => answerGuide(a.id, '보류', 'deferred')]]) {
+                const b = btn(text, act, 'quiet', id);
+                b.disabled = busy;
+                row.append(b);
+            }
+            for (const o of q.options)
+                sec.append(node('p', `${o.label}: ${o.consequence}`, 'hint'));
+            sec.append(opts, field, row);
+        }
+        box.append(sec);
+        return box;
+    }
+    const sec = node('section', '', 'guide-proposal');
+    sec.id = 'guide-proposal';
+    sec.append(node('p', `${label} · 요청 초안 · 아직 보내지 않음`, 'eyebrow'), node('p', `읽은 자료: ${g.read.join(' · ')}`, 'hint'));
+    if (g.answer)
+        sec.append(node('p', `질문: ${g.answer.question.text} → ${g.answer.disposition === 'provided' ? g.answer.text : g.answer.disposition === 'unknown' ? '모름' : '보류'}`, 'hint'));
+    const area = node('textarea');
+    area.id = 'guide-text';
+    area.rows = 8;
+    area.maxLength = 12000;
+    area.value = g.text;
+    area.setAttribute('aria-label', '요청 초안');
+    const edited = node('p', guideEdited(g) ? '직접 고친 초안이에요.' : '', 'hint');
+    edited.id = 'guide-edited';
+    area.addEventListener('input', () => { g.text = area.value; g.gen++; edited.textContent = guideEdited(g) ? '직접 고친 초안이에요.' : ''; });
+    if (g.incoming) {
+        const hold = node('div', '', 'row');
+        hold.id = 'guide-incoming';
+        // GUIDE099-R1: the held reply is re-checked against the current input before it may replace the draft.
+        const take = btn('새 응답으로 바꾸기 · 지금 초안 버림', () => {
+            if (!incomingCurrent(a.id, g)) {
+                g.notice = '보관된 새 응답은 지금 입력과 다른 기준으로 만든 것이라 적용하지 않았어요. 초안은 그대로예요. 입력을 그때로 되돌리거나 ‘바뀐 입력으로 새로 받기’를 누르세요.';
+                render();
+                return;
+            }
+            applyGuide(g, g.incoming);
+            g.notice = null;
+            render();
+        }, 'quiet', 'guide-take-incoming');
+        take.disabled = busy || !incomingCurrent(a.id, g);
+        hold.append(btn('내 초안 유지', () => { g.incoming = null; g.notice = null; render(); }, 'secondary', 'guide-keep-mine'), take);
+        if (take.disabled && !busy)
+            hold.append(node('span', '지금 입력과 다른 기준의 응답이라 바꿀 수 없어요.', 'hint'));
+        sec.append(hold);
+    }
+    const row = node('div', '', 'row'), use = btn('이 초안으로 요청 쓰기', () => adoptGuide(a), 'primary', 'guide-adopt');
+    use.disabled = busy || stale;
+    row.append(use);
+    if (stale)
+        row.append(node('span', '입력이 바뀌어 이 초안은 쓸 수 없어요. 고친 내용은 그대로 남아요.', 'hint'));
+    if (guideEdited(g))
+        row.append(btn('고친 내용 되돌리기', () => { g.text = g.base; g.gen++; render(); }, 'quiet', 'guide-revert'));
+    else if (!stale) {
+        const again = btn('다시 받기', () => void askGuide(a.id), 'quiet', 'guide-again');
+        again.disabled = busy;
+        row.append(again);
+        if (g.answer) {
+            const change = btn('질문 답 바꾸기', () => { g.question = g.answer.question; g.answer = null; g.proposal = null; g.text = g.base = ''; render(); }, 'quiet', 'guide-change-answer');
+            change.disabled = busy;
+            row.append(change);
+        }
+    }
+    // Discarding the draft keeps what the user typed as the instruction.
+    row.append(btn('초안 버리기', () => { g.pending?.controller.abort(); Object.assign(g, { question: null, answer: null, proposal: null, text: '', base: '', pending: null, notice: null, incoming: null, used: null }); render(); }, 'quiet', 'guide-discard'));
+    sec.append(area, edited, row, node('p', '쓰면 이 영역의 요청 입력칸에 들어가고, 거기서 다시 고친 뒤 ‘작업문 준비하기’로 보내요. 영역 구상·기존 작업·결정은 바뀌지 않아요.', 'hint'));
+    box.append(sec);
+    return box;
+}
 function renderArea(root, a) {
     const head = node('div', '', 'space-head'), title = node('h1', a.name);
     title.id = 'space-title';
@@ -1956,6 +2248,8 @@ function renderArea(root, a) {
     root.append(head);
     const tasks = areaRequests(a.id), list = node('section', '', 'area-tasks');
     list.id = 'area-tasks';
+    if (!a.archived && route !== 'example')
+        root.append(guidePanel(a, tasks.length > 0));
     list.append(node('h2', '이 영역의 요청과 작업'));
     for (const t of tasks)
         list.append(taskEntry(t, false));

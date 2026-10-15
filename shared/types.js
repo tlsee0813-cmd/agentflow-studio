@@ -28,3 +28,7 @@ export const SOURCE_LABEL = {
 export const BASIS_LABEL = {
     requested: '요청 원문 · 해석 미확정', answered: '사용자 답변 원문', confirmed: '사용자 확정', deferred: '사용자 보류'
 };
+/* ---------- GUIDE097: area guidance. A separate, unsaved preview before the user's own request; never project data. ---------- */
+/** guidance.2 (GUIDE098): the reply's proposal gains defaults. guidance.3 (GUIDE099): the request gains currentInstruction.
+ * The version moves each time so a stale client and server refuse each other plainly. Never stored. */
+export const GUIDE_SCHEMA = 'guidance.3';

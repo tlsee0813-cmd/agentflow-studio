@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES } from './types.js';
+import { API_SCHEMA, SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, GUIDE_SCHEMA } from './types.js';
 export class ContextError extends Error {
     constructor(code) { super(code); this.name = 'ContextError'; }
 }
@@ -152,21 +152,22 @@ export function validateAdvice(v, basisIds, request) {
         text(s.text, 2000);
         text(s.why, 2000);
     }
-    if (v.question !== null) {
-        const q = v.question;
-        obj(q, ['kind', 'text', 'why', 'options']);
-        ensure(['fact', 'choice'].includes(q.kind));
-        text(q.text, 2000);
-        text(q.why, 2000);
-        list(q.options, 3);
-        ensure(q.kind !== 'fact' || q.options.length === 0);
-        for (const o of q.options) {
-            obj(o, ['label', 'consequence']);
-            text(o.label, 500);
-            text(o.consequence, 1000);
-        }
-    }
+    if (v.question !== null)
+        question(v.question);
     return structuredClone(v);
+}
+function question(q) {
+    obj(q, ['kind', 'text', 'why', 'options']);
+    ensure(['fact', 'choice'].includes(q.kind));
+    text(q.text, 2000);
+    text(q.why, 2000);
+    list(q.options, 3);
+    ensure(q.kind !== 'fact' || q.options.length === 0);
+    for (const o of q.options) {
+        obj(o, ['label', 'consequence']);
+        text(o.label, 500);
+        text(o.consequence, 1000);
+    }
 }
 export function validateEnvelope(v, req) {
     obj(v, ['mode', 'ticket', 'advice']);
@@ -625,4 +626,85 @@ export function parseProject(raw) {
     const project = schema === LEGACY_SCHEMA ? migrateLegacy(v) : schema === PREVIOUS_SCHEMA ? migrateV2(v) : schema === V3_SCHEMA ? migrateV3(v) : schema === V4_SCHEMA ? migrateV4(v) : v;
     assertProject(project);
     return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
+}
+/* ---------- GUIDE097 ---------- */
+function guideTicket(v) { obj(v, ['projectId', 'revision', 'requestId', 'areaId']); id(v.projectId); integer(v.revision); id(v.requestId); id(v.areaId); }
+const GUIDE_WORK = 5;
+/** Shape and size of the guidance material. It carries no sources, tasks or bases to write back. */
+export function validateGuideRequest(v) {
+    obj(v, ['schemaVersion', 'ticket', 'projectName', 'brief', 'area', 'decisions', 'areaWork', 'answer', 'currentInstruction']);
+    ensure(v.schemaVersion === GUIDE_SCHEMA);
+    if (v.currentInstruction !== null)
+        text(v.currentInstruction); // Same limit as a request draft; blank means none (null), never ''.
+    guideTicket(v.ticket);
+    text(v.projectName, 120);
+    if (v.brief !== null)
+        text(v.brief);
+    obj(v.area, ['id', 'name', 'note']);
+    id(v.area.id);
+    text(v.area.name, 60);
+    if (v.area.note !== null)
+        text(v.area.note, 2000);
+    ensure(v.area.id === v.ticket.areaId);
+    list(v.decisions);
+    const ids = new Set();
+    for (const d of v.decisions) {
+        obj(d, ['id', 'text', 'status']);
+        id(d.id);
+        text(d.text);
+        ensure(['confirmed', 'deferred', 'answered'].includes(d.status));
+        ensure(!ids.has(d.id));
+        ids.add(d.id);
+    }
+    list(v.areaWork, GUIDE_WORK);
+    for (const w of v.areaWork) {
+        obj(w, ['taskId', 'request', 'scope', 'checks']);
+        id(w.taskId);
+        text(w.request);
+        if (w.scope !== null)
+            text(w.scope, 6000, true);
+        if (w.checks !== null)
+            text(w.checks, 6000, true);
+    } // Blank manual values are valid, as in editTask.
+    if (v.answer !== null) {
+        obj(v.answer, ['question', 'text', 'disposition']);
+        question(v.answer.question);
+        text(v.answer.text);
+        ensure(['provided', 'unknown', 'deferred'].includes(v.answer.disposition));
+    }
+    ensure(new TextEncoder().encode(JSON.stringify(v)).length <= REQUEST_BYTES, 'CONTEXT_TOO_LARGE');
+    return structuredClone(v);
+}
+/** Exactly one of question/proposal. Once the question is answered only a proposal is accepted: at most one question. */
+export function validateGuideReply(v, req) {
+    obj(v, ['question', 'proposal']);
+    ensure((v.question === null) !== (v.proposal === null));
+    if (v.question !== null) {
+        ensure(req.answer === null);
+        question(v.question);
+    }
+    if (v.proposal !== null) {
+        const p = v.proposal;
+        obj(p, ['goal', 'scope', 'checks', 'open', 'defaults']);
+        text(p.goal, 2000);
+        text(p.scope, 2000);
+        text(p.checks, 2000);
+        list(p.open, 6);
+        for (const o of p.open)
+            text(o, 500);
+        list(p.defaults, 6);
+        for (const d of p.defaults)
+            text(d, 500);
+        // One point is either still the user's to decide (open) or an editable suggestion (defaults), never both.
+        const undecided = new Set(p.open.map(o => o.trim()));
+        ensure(p.defaults.every(d => !undecided.has(d.trim())));
+    }
+    return structuredClone(v);
+}
+export function validateGuideEnvelope(v, req) {
+    obj(v, ['mode', 'ticket', 'reply']);
+    ensure(['mock', 'deepseek'].includes(v.mode));
+    guideTicket(v.ticket);
+    ensure(Object.keys(req.ticket).every(k => req.ticket[k] === v.ticket[k]));
+    return { mode: v.mode, ticket: { ...v.ticket }, reply: validateGuideReply(v.reply, req) };
 }

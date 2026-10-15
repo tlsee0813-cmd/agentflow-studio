@@ -1,5 +1,5 @@
-import { validateRequest, validateAdvice } from '../shared/validation.js';
-import { mockAdvice } from '../shared/mock.js';
+import { validateRequest, validateAdvice, validateGuideRequest, validateGuideReply } from '../shared/validation.js';
+import { mockAdvice, mockGuidance } from '../shared/mock.js';
 // Build-selected adapter. Prefix ALL store keys, including legacy backups/conflict checks.
 const prefix = 'agentflow.studio.browser-demo:';
 export const runtimeStorage = (storage) => ({
@@ -18,4 +18,11 @@ export async function requestAdvice(request, signal) {
     const advice = validateAdvice(mockAdvice(checked), checked.bases.map(b => b.id));
     signal.throwIfAborted();
     return { mode: 'mock', ticket: checked.ticket, advice };
+}
+/** GUIDE097: the same rules as server MOCK, in the browser. Never presented as AI. */
+export async function requestGuidance(request, signal) {
+    signal.throwIfAborted();
+    const checked = validateGuideRequest(request), reply = validateGuideReply(mockGuidance(checked), checked);
+    signal.throwIfAborted();
+    return { mode: 'mock', ticket: checked.ticket, reply };
 }
