@@ -191,6 +191,34 @@ class AreaGuidance(unittest.TestCase):
         self.page.locator('#guide-discard').click();expect(self.page.locator('#guide-instruction')).to_have_value('다른 지시 D');expect(self.page.locator('#guide-start')).to_be_visible()
         self.assertEqual(self.state()['tasks'],[],'nothing written before adoption')
 
+    # ---------- GUIDE099-R1: a draft or held reply made for another instruction is never adopted or applied ----------
+    def force_click(self,sel):
+        # Defence check of the handler itself: a disabled button is re-enabled in the page and clicked.
+        self.page.locator(sel).evaluate('(b)=>{b.disabled=false;b.click();}')
+    def test_08_stale_draft_and_held_reply_follow_the_current_instruction(self):
+        A='접수 화면 입력 항목만 정리해 주세요.';B='접수 화면 입력 항목과 안내 문구까지 정리해 주세요.';C='세 번째 지시'
+        (booking,)=self.start([('예약','예약받기')]);self.open_area('예약')
+        ins=self.page.locator('#guide-instruction');ins.fill(A);self.page.locator('#guide-start').click();text=self.page.locator('#guide-text');text.wait_for()
+        self.assertIn(A,text.input_value())
+        # A -> B: the draft made for A cannot be adopted (button and handler), and stays on screen.
+        ins.fill(B);expect(self.page.locator('#guide-stale')).to_be_visible();expect(self.page.locator('#guide-adopt')).to_be_disabled()
+        self.force_click('#guide-adopt');expect(self.page.locator('#guide-notice')).to_contain_text('바뀌어 이 초안은 넣지 않았어요')
+        self.assertEqual(self.state()['draft'],'');self.assertIn(A,text.input_value())
+        # B -> A (ABA): the draft matches the input again and can be adopted.
+        ins.fill(A);expect(self.page.locator('#guide-stale')).to_have_count(0);expect(self.page.locator('#guide-adopt')).to_be_enabled()
+        # A manual edit is kept across a change; the reply for B is held, and is not applied once the input moved on to C.
+        mine=text.input_value()+'\n(직접 메모)';text.fill(mine);ins.fill(B);self.page.locator('#guide-fresh').click()
+        expect(self.page.locator('#guide-take-incoming')).to_be_visible();expect(text).to_have_value(mine)
+        ins.fill(C);expect(self.page.locator('#guide-take-incoming')).to_be_disabled()
+        self.force_click('#guide-take-incoming');expect(self.page.locator('#guide-notice')).to_contain_text('지금 입력과 다른 기준으로 만든 것이라 적용하지 않았어요');expect(text).to_have_value(mine)
+        expect(self.page.locator('#guide-adopt')).to_be_disabled()
+        # Back to B: the held reply matches again, is applied on request, and that valid draft is adopted with B, not A.
+        ins.fill(B);expect(self.page.locator('#guide-take-incoming')).to_be_enabled();self.page.locator('#guide-take-incoming').click()
+        expect(text).to_have_value(text_re(B));self.assertNotIn(A,text.input_value());self.page.locator('#guide-adopt').click()
+        expect(self.page.locator('#draft')).to_have_value(text_re(B));self.assertNotIn(A,self.state()['draft']);self.assertEqual(self.state()['tasks'],[])
+        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+        s=self.state();self.assertIn(B,s['sources'][0]['text']);self.assertEqual([b['status'] for b in s['bases']],['requested'],'a request record, not a decision')
+
 def text_re(fragment):
     import re;return re.compile(re.escape(fragment))
 

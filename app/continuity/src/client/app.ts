@@ -44,7 +44,8 @@ type MapView={x:number;y:number;s:number};
 let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
 /** GUIDE097: area guidance per project and area, in this tab's memory only (declared early: resets use it). */
 /** gen counts the user's edits of the draft; a reply that arrives after one is held in incoming, never applied over it. */
-type GuideApply={reply:GuideReply;mode:'mock'|'deepseek';read:string[];areaName:string;first:boolean;answer:GuideAnswer|null;instruction:string|null};
+/** digest = the material the reply was made from; a held reply is applied only while the current material still matches it. */
+type GuideApply={reply:GuideReply;mode:'mock'|'deepseek';read:string[];areaName:string;first:boolean;answer:GuideAnswer|null;instruction:string|null;digest:string};
 /** GUIDE099: instruction = the optional 'work to hand over or change' input as typed (tab memory only); used = the instruction the
  * current question/answer/draft were made with. When they differ, that state is shown as made before the change and not reused. */
 type Guide={question:Question|null;answer:GuideAnswer|null;proposal:Proposal|null;mode:'mock'|'deepseek'|null;read:string[];text:string;base:string;
@@ -1072,6 +1073,11 @@ function guideOf(areaId:string):Guide {
 }
 const guideEdited=(g:Guide)=>g.proposal!==null&&g.text!==g.base;
 const guideStale=(g:Guide)=>(g.question!==null||g.proposal!==null)&&instructionOf(g.instruction)!==g.used;
+/** GUIDE099-R1: a held reply still matches what is on screen now (purpose, area, decisions, area requests, its answer, the instruction). */
+function incomingCurrent(areaId:string,g:Guide):boolean {
+  if(!g.incoming)return false;
+  try{return guideDigest(buildGuideRequest(project,areaId,g.incoming.answer,instructionOf(g.instruction)))===g.incoming.digest;}catch{return false;}
+}
 function applyGuide(g:Guide,x:GuideApply) {
   g.mode=x.mode;g.read=x.read;g.incoming=null;g.answer=x.answer;g.used=x.instruction;
   if(x.reply.question){g.question=x.reply.question;g.proposal=null;}
@@ -1096,7 +1102,7 @@ async function askGuide(areaId:string,fresh=false) {
     if(data.mode!==config!.mode)throw new Error('INVALID_RESPONSE');
     let now:string|null=null;try{now=guideDigest(buildGuideRequest(project,areaId,req.answer,instructionOf(g.instruction)));}catch{/* area archived or removed, or input over the limit */}
     if(now!==digest){g.notice='기다리는 동안 목적·영역 구상·결정이나 ‘이번에 맡기거나 바꿀 일’이 바뀌어 이 응답은 적용하지 않았어요. 입력과 초안은 그대로예요. 다시 받을 수 있어요.';return;}
-    const x:GuideApply={reply:data.reply,mode:data.mode,read:readOf(req),areaName:areaById(areaId)?.name??req.area.name,first:!req.areaWork.length,answer:req.answer,instruction:req.currentInstruction};
+    const x:GuideApply={reply:data.reply,mode:data.mode,read:readOf(req),areaName:areaById(areaId)?.name??req.area.name,first:!req.areaWork.length,answer:req.answer,instruction:req.currentInstruction,digest};
     // GUIDE097-R1: any edit after the request was sent (even one back to the same text) keeps the screen as it is.
     // GUIDE099: so does a draft the user had already edited when asking again after changing the instruction.
     if(g.proposal!==null&&(g.gen!==gen||protect)){g.incoming=x;g.notice='기다리는 동안 직접 고친 내용이 있어 새 초안으로 바꾸지 않았어요. 화면의 초안은 그대로예요. 새 응답을 쓰려면 ‘새 응답으로 바꾸기’를 누르세요(지금 초안은 버려져요).';return;}
@@ -1112,6 +1118,8 @@ function answerGuide(areaId:string,value:string,disposition:GuideAnswer['disposi
 }
 function adoptGuide(a:Area) {
   const g=guideOf(a.id);if(!g.text.trim())return;
+  // GUIDE099-R1: a draft made for another instruction is not adopted; it stays on screen, nothing is removed.
+  if(guideStale(g)){g.notice='‘이번에 맡기거나 바꿀 일’이 바뀌어 이 초안은 넣지 않았어요. 초안은 그대로 두었어요. ‘바뀐 입력으로 새로 받기’로 지금 입력에 맞는 초안을 받거나, 입력을 이 초안을 만들 때로 되돌리세요.';render();return;}
   try {commit(adoptProposal(project,a.id,g.text));}
   catch(e){g.notice=e instanceof Error&&e.message==='DRAFT_IN_USE'?'작성 중인 요청이 있어 초안을 넣지 않았어요. 작업 화면에서 그 요청을 보내거나 비운 뒤 다시 누르세요. 이 초안은 여기 그대로예요.'
     :g.text.length>TEXT_LIMIT?`초안이 요청 한 건의 한도(${TEXT_LIMIT.toLocaleString()}자)를 넘어 넣지 않았어요. 자르지 않았으니 직접 줄인 뒤 다시 누르세요. 이 초안은 여기 그대로예요.`:'초안을 넣지 못했어요. 이 초안은 여기 그대로예요.';render();return;}
@@ -1127,7 +1135,7 @@ function guidePanel(a:Area,hasRequests:boolean):HTMLElement {
   // GUIDE099: optional current instruction, visible as soon as the panel is open (not another folded box).
   const ins=node('textarea');ins.id='guide-instruction';ins.rows=3;ins.value=g?.instruction??'';ins.setAttribute('aria-label','이번에 맡기거나 바꿀 일 (선택)');
   ins.placeholder='예: 이번에는 무엇만 하거나, 어떤 조건을 바꿀지 적어 주세요. 비워 두어도 돼요.';
-  ins.addEventListener('input',()=>{const gg=guideOf(a.id),was=guideStale(gg);gg.instruction=ins.value;if(guideStale(gg)!==was)render();});
+  ins.addEventListener('input',()=>{const gg=guideOf(a.id),was=[guideStale(gg),incomingCurrent(a.id,gg)].join();gg.instruction=ins.value;if([guideStale(gg),incomingCurrent(a.id,gg)].join()!==was)render();});
   box.append(node('label','이번에 맡기거나 바꿀 일 (선택)','guide-instruction-label'),ins,
     node('p','영역 구상은 그대로 두고, 이번 요청이나 바뀐 조건만 적으세요. 비워 두면 목적과 구상으로 시작해요. 적은 내용은 이 탭에만 있고 새로고침하면 사라져요. 요청 입력칸에 쓴 내용은 가져오지 않아요.','hint'));
   if(g?.notice){const n=node('p',g.notice,'guide-notice');n.id='guide-notice';n.setAttribute('role','status');box.append(n);}
@@ -1170,10 +1178,15 @@ function guidePanel(a:Area,hasRequests:boolean):HTMLElement {
   const edited=node('p',guideEdited(g)?'직접 고친 초안이에요.':'','hint');edited.id='guide-edited';
   area.addEventListener('input',()=>{g.text=area.value;g.gen++;edited.textContent=guideEdited(g)?'직접 고친 초안이에요.':'';});
   if(g.incoming){const hold=node('div','','row');hold.id='guide-incoming';
-    hold.append(btn('내 초안 유지',()=>{g.incoming=null;g.notice=null;render();},'secondary','guide-keep-mine'),
-      btn('새 응답으로 바꾸기 · 지금 초안 버림',()=>{applyGuide(g,g.incoming!);g.notice=null;render();},'quiet','guide-take-incoming'));
+    // GUIDE099-R1: the held reply is re-checked against the current input before it may replace the draft.
+    const take=btn('새 응답으로 바꾸기 · 지금 초안 버림',()=>{
+      if(!incomingCurrent(a.id,g)){g.notice='보관된 새 응답은 지금 입력과 다른 기준으로 만든 것이라 적용하지 않았어요. 초안은 그대로예요. 입력을 그때로 되돌리거나 ‘바뀐 입력으로 새로 받기’를 누르세요.';render();return;}
+      applyGuide(g,g.incoming!);g.notice=null;render();},'quiet','guide-take-incoming');take.disabled=busy||!incomingCurrent(a.id,g);
+    hold.append(btn('내 초안 유지',()=>{g.incoming=null;g.notice=null;render();},'secondary','guide-keep-mine'),take);
+    if(take.disabled&&!busy)hold.append(node('span','지금 입력과 다른 기준의 응답이라 바꿀 수 없어요.','hint'));
     sec.append(hold);}
-  const row=node('div','','row'),use=btn('이 초안으로 요청 쓰기',()=>adoptGuide(a),'primary','guide-adopt');use.disabled=busy;row.append(use);
+  const row=node('div','','row'),use=btn('이 초안으로 요청 쓰기',()=>adoptGuide(a),'primary','guide-adopt');use.disabled=busy||stale;row.append(use);
+  if(stale)row.append(node('span','입력이 바뀌어 이 초안은 쓸 수 없어요. 고친 내용은 그대로 남아요.','hint'));
   if(guideEdited(g))row.append(btn('고친 내용 되돌리기',()=>{g.text=g.base;g.gen++;render();},'quiet','guide-revert'));
   else if(!stale) {
     const again=btn('다시 받기',()=>void askGuide(a.id),'quiet','guide-again');again.disabled=busy;row.append(again);
