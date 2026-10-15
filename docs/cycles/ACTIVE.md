@@ -1,7 +1,7 @@
 # AgentFlow 활성 연구·검증 배정
 2026-10-16 갱신 · 단일 총괄: 현재 Codex 대화. 현재 상태는 여기만 갱신한다.
 
-## 현재: cycle08 통합 완료 · cycle09 구현 계약 고정
+## 현재: cycle08 통합 완료 · cycle09 fix1 독립 검증 진행
 [cycle08 결과](2026-10-16-overview-08/RESULT.md): 기본의 긴 책임 설명을 줄이고, 세 역할·두 기존 호출·책임 이동을 먼저 본 뒤 선택 상세로 이어지게 했다. 축약에서 사라진 ‘누락 확인’은 문구10줄 fix1으로 복구했다. 독립 최신 단일3폭×2흐름6/6·73 PASS·실제 child/외부 collector0, 원시·PNG·원격 회수 감사 완료. 사람 이해·큰 지도 적합성은 미검증이다.
 
 | 담당 | 완료 범위 |
@@ -12,11 +12,18 @@
 | Astra High / 6.1 Sol High | 의미·실제 PNG·코드/원시값·원격 전달 감사. 중요 추가 불일치 없음 |
 | 총괄 | 실제 원문·이미지·조작과 보고 귀속을 대조하고 이번 표현을 다음 연구에 유지. 제품 확정 아님 |
 
-## cycle09 한 질문
-기존 cycle05의 혼합 깊이 제안 구성에 cycle08의 간결한 조망·명시 상세를 연결할 범위를 고른다. **일부만 펼쳐도 역할·변경 소유·접힌 외부 상대와의 관계가 한 부분의 준비까지 이어지는가?**
-기존 펼침/복귀를 다시 만들지 않는다. 보기용 묶음·실제 관계 양끝·범위 경계를 유지하고 요약↔상세의 의미 연결을 본다. cycle05는 계약/MOCK 기반 AI 제안이라는 한계를 유지하며, VS Code와 한 프로그램으로 합치거나 근거 없는 부모·새 실제 사건을 만들지 않는다. [cycle09 범위](2026-10-16-mixed-reading-09/BRIEF.md)를 고정하고 Pro 정보량/공간, Pro 외부관계/범위 연구를 나눈다. Astra는 입력 의미, Sol은 기존 코드 재사용·최소 관측을 감사한다. 총괄은 두 조사와 소스 감사를 통합해 [선택](2026-10-16-mixed-reading-09/DECISION.md)·[구현 계약](2026-10-16-mixed-reading-09/IMPLEMENTATION.md)을 고정했다. 문자 목차로 지도 대체는 거절하고, 간결한 공간 지도와 작업 대상을 유지하는 관계 참고를 채택했다. 실제 새 시안의 성공은 아직 확인하지 않았다.
+## cycle09: 혼합 깊이 읽기와 준비
+다섯 보기용 묶음·여섯 실제 전달 관계가 있는 cycle05에 간결한 기본/명시 상세를 적용했다. 문자 목차로 지도 대체는 거절했고 공간 지도·한 묶음만 펼침·C32 변경 소유를 유지했다. [범위](2026-10-16-mixed-reading-09/BRIEF.md) · [선택 근거](2026-10-16-mixed-reading-09/DECISION.md) · [구현 계약](2026-10-16-mixed-reading-09/IMPLEMENTATION.md).
 
-새 Pro 세션: [정보량·공간](https://chatgpt.com/c/6ad14ec4-7c30-83ee-88ed-494c789fb0a1), [접힌 외부관계·범위](https://chatgpt.com/c/6ad14ee9-98ac-83ee-a198-6c86d267b78f). 두 세션의 최종 답변을 읽었고 Pro A 후속은 문자 목차 추천을 철회했다. [새 Opus 구현 세션](https://claude.ai/chat/f4a50f7c-1576-4298-99ae-0fb2862adce0)은 정확05/08 원본 회수·해시 일치를 확인하고 계약을 받을 준비를 마쳤다. Opus에 고정 a3e2091 계약을 전달했고 구현 응답 시작을 확인했다. 기존 Cloud 세션에는 계약을 읽고 독립 관측 위험과 기존 환경만 확인하는 준비를 병렬 배정했다. 새 HTML의 고정 SHA를 전달하기 전에는 독립 실행·게시를 시작하지 않는다. 작성자 산출물 회수 후 정확 소스를 지정한다. [입력 감사](2026-10-16-mixed-reading-09/INPUT_AUDIT.md) · [코드 재사용 경계](2026-10-16-mixed-reading-09/REUSE_AUDIT.md) · [기존 화면 관측](2026-10-16-mixed-reading-09/BASELINE_OBSERVATION.md) · [정보량 소스 감사](2026-10-16-mixed-reading-09/DENSITY_SOURCE_AUDIT.md) · [관계 소스 감사](2026-10-16-mixed-reading-09/RELATIONS_SOURCE_AUDIT.md).
+- Pro 두 세션은 정보량/공간과 접힌 외부 관계/범위를 나눠 조사했다. 공식 문서·고정 코드 감사를 거쳐 개요/상세 분리, 참고/이동 구분만 적용했다. 추가 Pro는 실제 PNG3장의 정적 평가를 했으며 사람 사용성 검사가 아니다.
+- [작성자 v0](https://github.com/tlsee0813-cmd/agentflow-studio/tree/017dec57df289cc9c4cbff7344ec7fdb71ab734d/docs/transfer/mixed-reading-09/author-v0): 168파일/12,898,459B. 마지막 r05는1280/390 ABC와1440초기,299단언(클릭 전제58포함)·세child/collector0. 최초 짧은 묶음선 클릭 결함과 검사 오류의 실패기록을 보존했다.
+- Astra의 코드/이미지 감사에서 묶음까지 준비 대상으로 부르는 공통 안내를 발견해 총괄이 실제 코드를 대조했다. [fix1](https://github.com/tlsee0813-cmd/agentflow-studio/tree/08a04afb7515efc5f4007b5d9bf5bb787c908c20/docs/transfer/mixed-reading-09/author-fix1)은516행1줄만 정정. 37파일/1,810,457B. 작성자 f02 두폭각50단언(각클릭전제27)·child/collector0, 실질문장 편집 뒤 새 관계참고 닫힘/다른세부격리를 별도 확인했다. 299와 합산하지 않는다.
+- Sol 원시 감사는 v0 A/B의 DOM 스크롤 보조, E 뒤 기존 근거와 새 관계창의 차이, 선 복귀의 정확동일이 아닌 최대0.15world차이/허용0.5 통과를 구분했다. fix1의 새xref 편집보존 관측도 감사했다. v0/fix1 원격파일집합·Gitblob·manifest·원본 정확일치 확인 완료.
+- **기존 Cloud는 고정 fix1 54,524B/SHA256 90141c4c5cfc509cafef3c038a9c1c14f0062f7e009e4359f5f97bd5541e3173로 독립 검증 중이다.** 작성자 결과를 독립 성공으로 쓰지 않는다. 지정 출력은 delivery의 mixed-reading-09/independent-v0뿐이며 연구/제품을 수정하지 않는다.
+
+총괄은 실제 fix1을1280/390에서 열어 초기 다섯 역할과 C32 위치, C32→R3참고, G3의 동일 받음 이름 두 줄을 확인했다. 전체 공간 구조는 유지할 가치가 있으나 열린 참고의 상대/소속 반복과 같은 출발점의 두 관계 구분은 남은 읽기 부담이다. 사람 이해/더 큰 지도/실제AI 송신수락은 미검증이다. 독립 결과를 받은 뒤 통합 판정한다.
+
+연구 세션: [정보량·공간/이미지 평가](https://chatgpt.com/c/6ad14ec4-7c30-83ee-88ed-494c789fb0a1), [외부관계·범위](https://chatgpt.com/c/6ad14ee9-98ac-83ee-a198-6c86d267b78f), [Opus 구현](https://claude.ai/chat/f4a50f7c-1576-4298-99ae-0fb2862adce0).
 
 ## 공유 결과
 [cycle08 fix1](https://github.com/tlsee0813-cmd/agentflow-studio/tree/167f86b8ac783a15bc1b2991b73017ee2f1e0d6a/docs/transfer/overview-08/author-fix1) · [독립23파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0) · [공유 증거 목록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/delivery/ui02-fix3-evidence/docs/transfer/README.md).
