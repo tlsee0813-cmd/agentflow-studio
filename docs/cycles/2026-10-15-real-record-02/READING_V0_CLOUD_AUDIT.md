@@ -1,6 +1,6 @@
 # reading-v0 Cloud preflight 원본 감사
 
-2026-10-16 · **닫힘 렌더링 결함 재현 근거 확인 / 실행시각 provenance 1건 설명 대기**
+2026-10-16 · **닫힘 렌더링 결함 재현 근거 확인 / 원본 시각 일치 확인·감사자의 시각 오판 정정**
 
 고정 [공유 commit `7e793920…aa7b`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/7e79392080157be693429da40d54c2a206b8aa7b)의 `docs/transfer/real-record-02/v0-preflight/` 7파일을 GitHub connector로 읽었다. `fetch_file(encoding=base64, ref=정확commit)` 결과를 원본 바이트로 디코딩해 임시 사본에 보관하고, PNG는 `view_image(detail=original)`로 직접 열었다. **이번 감사자는 브라우저를 재실행하지 않았다.** CUA로 화면을 조작했다고 보고하지 않는다. 임시 회수 위치는 `work/reading-v0-preflight-audit/raw/`이며 내구 근거는 고정 GitHub 원본이다.
 
@@ -26,8 +26,8 @@
 
 `fatal=null`, JSON exit_code1, run.log의6/4·exit1, [process-exit.json](https://github.com/tlsee0813-cmd/agentflow-studio/blob/7e79392080157be693429da40d54c2a206b8aa7b/docs/transfer/real-record-02/v0-preflight/process-exit.json)의 실제 subprocess exit1이 일치한다. 코드도 fatal/cleanup/pageerror/검사실패/10개 미완주에서 nonzero를 선택하며 finally에서 exit0으로 덮지 않는다. 별도 process 측정 driver는 패키지에 없어 그 구현 자체나 새로운 fatal 주입은 감사하지 않았다. 이 실행은 제품 동작 FAIL이며 실행 fatal이 아니다.
 
-## 분리할 provenance 불일치·범위
+## 시각 감사 오류 정정·범위
 
-**설명 대기:** 수신 코드의 started_at/finished_at은 `datetime.now(timezone.utc).isoformat()`인데 JSON은 `2026-10-16T01:09:04.344441+09:00` / `01:09:07.831683+09:00`을 기록한다. 그대로 실행한 이 호출은 UTC offset+00이어야 하므로, 표시용 timezone 후처리인지 실행 뒤 코드 차이인지 설명이 필요하다. manifest 일치는 현재 공유 파일들의 무결성을 입증하지만 그 자체로 이 불일치를 해소하지 않는다. 원본 파일을 고치거나 정확한 실행시각을 추정해 채우지 않았다. 이 한계를 닫힘 결함의 box/PNG/실제 클릭 증거와 분리한다.
+**정정:** 앞선 ‘코드는 UTC, 원본 JSON은+09’라는 감사 지적은 잘못됐다. 최초 회수한 raw파일을 날짜 파싱 없이 직접 읽고, 같은 고정 commit의 GitHub UTF-8 본문과 새 base64 원본 디코드 사본을 다시 대조했다. 모두 started_at=`2026-10-15T16:09:04.344441+00:00`, finished_at=`2026-10-15T16:09:07.831683+00:00`이며 코드의 UTC 출력과 일치한다. 기존 raw·새 디코드 사본의 SHA256도 모두 `3951b1cee0ef36a4934f25ec7abf77c2470d89124db8dcfe85c178a2f5858147`로 같다. +09 시각은 감사자가 `ConvertFrom-Json | Select-Object | ConvertTo-Json`으로 날짜를 파싱·재출력한 관측 표시에서 생겼다. 이를 원문 변경으로 오인한 감사자의 오류이며 Cloud 원본·전달 사본의 불일치가 아니다. 관련 불일치 주장과 Cloud 설명 요청을 철회한다. 원본은 변경하지 않았으며 이 사안의 재실행은 필요 없다. 이후 원본 시각 대조에는 파싱·재직렬화를 사용하지 않는다. 이 정정은 box/PNG·실제 클릭·6/4·종료코드에 근거한 닫힘 결함 판정을 바꾸지 않는다.
 
 이번 범위는 **A의 E09 버튼 클릭과 닫기 버튼, 두 넓은 viewport의 초기/열림/닫힘뿐**이다. B, Escape, 390 두 높이, 미리보기/본문 wheel, A/B전환·선택복귀·원문 GitHub 왕복, 작성자203 전체, fix1, 사람 읽기·이해도는 미실행이다. 독립 결함 재현을 기존 입력 E10 당시의 사실로 소급하지 않는다. 다음 수정본은 정확한 새 commit/hash로 예정된 Cloud 본검사를 수행하며 v0 결과를 덮어쓰지 않는다. 새 검사·환경 변경·원격 쓰기는 하지 않았다.
