@@ -1,0 +1,215 @@
+HTTP "GET /overview-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1280/HTTP
+PASS 1280/raw-ID-unique
+1280/initial
+PASS 1280/initial-names-roles-cues
+PASS 1280/initial-two-visible-call-endpoints
+1280/first-selection-pre
+1280/click/#n-P3
+1280/first-selection-post
+PASS 1280/first-selection-no-map-reflow
+1280/panel-P3-after
+PASS 1280/panel-P3-after-text-boxes
+1280/click/#vBefore
+1280/comparison-before
+1280/before-view
+PASS 1280/before-view-names-roles-cues
+PASS 1280/before-view-two-visible-call-endpoints
+PASS 1280/responsibility-before
+1280/click/#vAfter
+1280/comparison-after
+PASS 1280/comparison-stable-existing-relations
+PASS 1280/responsibility-after
+1280/click/#zIn
+1280/click/#zIn
+1280/wheel/#mapScroll
+1280/manual-zoom-boundary
+1280/click/#fitAll
+1280/after-fit
+PASS 1280/after-fit-names-roles-cues
+PASS 1280/after-fit-two-visible-call-endpoints
+PASS 1280/fit-preserves-selection-view
+1280/click/#zIn
+1280/wheel/#mapScroll
+1280/click/#n-P3
+1280/detail-entry-map-pre
+PASS 1280/entry-is-nondefault
+1280/panel-P3-entry
+PASS 1280/panel-P3-entry-text-boxes
+1280/click/#panel .act.wide [data-act="read"]
+1280/explicit-reader-detail
+PASS 1280/detail-two-responsibilities-input-remain
+1280/wheel/#reader
+1280/related-context-before
+1280/click/[data-loc="P2"]
+1280/located-P2
+PASS 1280/located-menu-access
+1280/related-context-after-immediate
+PASS 1280/related-row-scroll-focus
+1280/click/#rPrep
+1280/default-preparation
+PASS 1280/fix1-default-boundary
+1280/click/#pf-ask
+1280/click/#prepClose
+1280/click/#rPrep
+PASS 1280/E-close-reopen
+1280/click/#prepClose
+1280/click/#rBack
+1280/detail-return-map-post-immediate
+PASS 1280/entry-map-restored
+1280/click/#panel .act.wide [data-act="read"]
+1280/click/#rPrep
+PASS 1280/E-after-whole-return
+1280/click/#prepClose
+HTTP "GET /overview-study.html HTTP/1.1" 200 -
+PASS 1440/HTTP
+PASS 1440/raw-ID-unique
+1440/initial
+PASS 1440/initial-names-roles-cues
+PASS 1440/initial-two-visible-call-endpoints
+1440/first-selection-pre
+1440/click/#n-P3
+1440/first-selection-post
+PASS 1440/first-selection-no-map-reflow
+1440/panel-P3-after
+PASS 1440/panel-P3-after-text-boxes
+1440/click/#vBefore
+1440/comparison-before
+1440/before-view
+PASS 1440/before-view-names-roles-cues
+PASS 1440/before-view-two-visible-call-endpoints
+PASS 1440/responsibility-before
+1440/click/#vAfter
+1440/comparison-after
+PASS 1440/comparison-stable-existing-relations
+PASS 1440/responsibility-after
+1440/click/#zIn
+1440/click/#zIn
+1440/wheel/#mapScroll
+1440/manual-zoom-boundary
+1440/click/#fitAll
+1440/after-fit
+PASS 1440/after-fit-names-roles-cues
+PASS 1440/after-fit-two-visible-call-endpoints
+PASS 1440/fit-preserves-selection-view
+1440/click/#zOut
+1440/wheel/#mapScroll
+1440/click/#n-P3
+1440/detail-entry-map-pre
+PASS 1440/entry-is-nondefault
+1440/panel-P3-entry
+PASS 1440/panel-P3-entry-text-boxes
+1440/click/#panel .act.wide [data-act="read"]
+1440/explicit-reader-detail
+PASS 1440/detail-two-responsibilities-input-remain
+1440/wheel/#reader
+1440/related-context-before
+1440/click/[data-loc="P2"]
+1440/located-P2
+PASS 1440/located-menu-access
+1440/related-context-after-immediate
+PASS 1440/related-row-scroll-focus
+1440/click/#rPrep
+1440/default-preparation
+PASS 1440/fix1-default-boundary
+1440/click/#pf-ask
+1440/click/#prepClose
+1440/click/#rPrep
+PASS 1440/E-close-reopen
+1440/click/#prepClose
+1440/click/#rBack
+1440/detail-return-map-post-immediate
+PASS 1440/entry-map-restored
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+PASS 1440/E-after-whole-return
+1440/click/#prepClose
+1440/click/#rBack
+1440/click/#n-P1
+1440/panel-P1-representative
+PASS 1440/panel-P1-representative-text-boxes
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+1440/other-target-default
+PASS 1440/other-target-not-E
+1440/click/#prepClose
+1440/click/#rBack
+1440/click/#n-P3
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+PASS 1440/E-survives-other-target
+1440/click/#prepClose
+HTTP "GET /overview-study.html HTTP/1.1" 200 -
+PASS 390/HTTP
+PASS 390/raw-ID-unique
+390/initial
+PASS 390/initial-names-roles-cues
+PASS 390/initial-two-visible-call-endpoints
+390/first-selection-pre
+390/click/#n-P3
+390/first-selection-post
+PASS 390/first-selection-no-map-reflow
+390/panel-P3-after
+PASS 390/panel-P3-after-text-boxes
+390/click/#vBefore
+390/comparison-before
+390/before-view
+PASS 390/before-view-names-roles-cues
+PASS 390/before-view-two-visible-call-endpoints
+PASS 390/responsibility-before
+390/click/#vAfter
+390/comparison-after
+PASS 390/comparison-stable-existing-relations
+PASS 390/responsibility-after
+390/click/#zIn
+390/click/#zIn
+390/wheel/#mapScroll
+390/manual-zoom-boundary
+390/click/#fitAll
+390/after-fit
+PASS 390/after-fit-names-roles-cues
+PASS 390/after-fit-two-visible-call-endpoints
+PASS 390/fit-preserves-selection-view
+390/click/#zIn
+390/click/#zIn
+390/wheel/#mapScroll
+390/wheel/#mapScroll
+390/click/#n-P3
+390/detail-entry-map-pre
+PASS 390/entry-is-nondefault
+390/panel-P3-entry
+PASS 390/panel-P3-entry-text-boxes
+390/click/#panel [data-act="read"].narrow
+390/explicit-reader-detail
+PASS 390/detail-two-responsibilities-input-remain
+390/wheel/#reader
+390/related-context-before
+390/click/[data-loc="P2"]
+390/located-P2
+PASS 390/located-menu-access
+390/click/#backRead
+390/related-context-after-immediate
+PASS 390/related-row-scroll-focus
+390/click/#rPrep
+390/default-preparation
+PASS 390/fix1-default-boundary
+390/click/#pf-ask
+390/click/#prepClose
+390/click/#rPrep
+PASS 390/E-close-reopen
+390/click/#prepClose
+390/click/#rBack
+390/detail-return-map-post-immediate
+PASS 390/entry-map-restored
+390/click/#panel [data-act="read"].narrow
+390/click/#rPrep
+PASS 390/E-after-whole-return
+390/click/#prepClose
+390/click/#rBack
+390/wheel/#mapScroll
+390/click/#n-P1
+390/panel-P1-after
+PASS 390/panel-P1-after-text-boxes
+CHILD_EXIT 0

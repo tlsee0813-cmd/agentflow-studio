@@ -1,0 +1,4 @@
+import subprocess,sys,json,datetime
+from pathlib import Path
+root=Path(__file__).resolve().parent;p=subprocess.run([sys.executable,str(root/'collect.py'),*sys.argv[1:]],capture_output=True,text=True);out=root/sys.argv[1];(out/'collector.log').write_text(p.stdout+p.stderr);child=json.loads((out/'child-exit.json').read_text());exit=p.returncode if p.returncode==child['actualChildExit'] else 2
+(out/'actual-exit.json').write_text(json.dumps({'UTC':datetime.datetime.now(datetime.timezone.utc).isoformat(),'actualChildExit':child['actualChildExit'],'actualCollectorExit':p.returncode,'agreement':p.returncode==child['actualChildExit'],'launcherIntendedExit':exit,'note':'Collector code measured by launcher subprocess after termination. Launcher own exit is observed by tool, not by this file.'},indent=2));print(p.stdout);print('ACTUAL_COLLECTOR_EXIT',p.returncode);sys.exit(exit)

@@ -1,0 +1,275 @@
+{
+  "method": "Read-only subtraction of run02 raw records; not new execution or added PASS count",
+  "viewports": {
+    "1280": {
+      "entryMapRawReference": "1280/detail-entry-map-pre",
+      "returnMapRawReference": "1280/detail-return-map-post-immediate",
+      "cardRawDeltas": {
+        "P1": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0.0
+        },
+        "P2": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0.0
+        },
+        "P3": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0
+        }
+      },
+      "edgePathRectDeltas": {
+        "R1": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -6.103515625e-05,
+          "height": 0.0
+        },
+        "R2": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -6.103515625e-05,
+          "height": 0.0
+        }
+      },
+      "readerRowDelta": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0.0
+      },
+      "readerBefore": {
+        "left": 0,
+        "top": 100,
+        "maxX": 0,
+        "maxY": 446,
+        "clientWidth": 371,
+        "scrollWidth": 371,
+        "clientHeight": 630,
+        "scrollHeight": 1076
+      },
+      "readerAfter": {
+        "left": 0,
+        "top": 100,
+        "maxX": 0,
+        "maxY": 446,
+        "clientWidth": 371,
+        "scrollWidth": 371,
+        "clientHeight": 630,
+        "scrollHeight": 1076
+      },
+      "entryMapScroll": {
+        "left": 81,
+        "top": 0,
+        "maxX": 81,
+        "maxY": 0
+      },
+      "returnMapScroll": {
+        "left": 81,
+        "top": 0,
+        "maxX": 81,
+        "maxY": 0
+      },
+      "manualZoomCommonWidth": 410.79998779296875,
+      "manualZoomCommonFull": true,
+      "initialMatrix": "matrix(1, 0, 0, 1, 0, 0)",
+      "fitMatrix": "matrix(1.019, 0, 0, 1.019, 0, 0)",
+      "computedNameFont": {
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "pointerEvents": "auto"
+      },
+      "computedRoleFont": {
+        "fontSize": "12.5px",
+        "lineHeight": "18.75px",
+        "pointerEvents": "auto"
+      }
+    },
+    "1440": {
+      "entryMapRawReference": "1440/detail-entry-map-pre",
+      "returnMapRawReference": "1440/detail-return-map-post-immediate",
+      "cardRawDeltas": {
+        "P1": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0
+        },
+        "P2": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0.0
+        },
+        "P3": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0
+        }
+      },
+      "edgePathRectDeltas": {
+        "R1": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -6.103515625e-05,
+          "height": 0.0
+        },
+        "R2": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": -6.103515625e-05,
+          "height": 0.0
+        }
+      },
+      "readerRowDelta": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0.0
+      },
+      "readerBefore": {
+        "left": 0,
+        "top": 100,
+        "maxX": 0,
+        "maxY": 266,
+        "clientWidth": 371,
+        "scrollWidth": 371,
+        "clientHeight": 810,
+        "scrollHeight": 1076
+      },
+      "readerAfter": {
+        "left": 0,
+        "top": 100,
+        "maxX": 0,
+        "maxY": 266,
+        "clientWidth": 371,
+        "scrollWidth": 371,
+        "clientHeight": 810,
+        "scrollHeight": 1076
+      },
+      "entryMapScroll": {
+        "left": 0,
+        "top": 0,
+        "maxX": 0,
+        "maxY": 0
+      },
+      "returnMapScroll": {
+        "left": 0,
+        "top": 0,
+        "maxX": 0,
+        "maxY": 0
+      },
+      "manualZoomCommonWidth": 410.79998779296875,
+      "manualZoomCommonFull": true,
+      "initialMatrix": "matrix(1, 0, 0, 1, 0, 0)",
+      "fitMatrix": "matrix(1.205, 0, 0, 1.205, 0, 0)",
+      "computedNameFont": {
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "pointerEvents": "auto"
+      },
+      "computedRoleFont": {
+        "fontSize": "12.5px",
+        "lineHeight": "18.75px",
+        "pointerEvents": "auto"
+      }
+    },
+    "390": {
+      "entryMapRawReference": "390/detail-entry-map-pre",
+      "returnMapRawReference": "390/detail-return-map-post-immediate",
+      "cardRawDeltas": {
+        "P1": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "P2": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "P3": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0
+        }
+      },
+      "edgePathRectDeltas": {
+        "R1": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        },
+        "R2": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        }
+      },
+      "readerRowDelta": {
+        "x": 0,
+        "y": 0.0,
+        "width": 0,
+        "height": 0.0
+      },
+      "readerBefore": {
+        "left": 0,
+        "top": 100,
+        "maxX": 0,
+        "maxY": 358,
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "clientHeight": 691,
+        "scrollHeight": 1049
+      },
+      "readerAfter": {
+        "left": 0,
+        "top": 100,
+        "maxX": 0,
+        "maxY": 358,
+        "clientWidth": 390,
+        "scrollWidth": 390,
+        "clientHeight": 691,
+        "scrollHeight": 1049
+      },
+      "entryMapScroll": {
+        "left": 11,
+        "top": 34,
+        "maxX": 24,
+        "maxY": 35
+      },
+      "returnMapScroll": {
+        "left": 11,
+        "top": 34,
+        "maxX": 24,
+        "maxY": 35
+      },
+      "manualZoomCommonWidth": 428.9999694824219,
+      "manualZoomCommonFull": false,
+      "initialMatrix": "matrix(1, 0, 0, 1, 0, 0)",
+      "fitMatrix": "matrix(0.994, 0, 0, 0.994, 0, 0)",
+      "computedNameFont": {
+        "fontSize": "16px",
+        "lineHeight": "24px",
+        "pointerEvents": "auto"
+      },
+      "computedRoleFont": {
+        "fontSize": "12.5px",
+        "lineHeight": "18.75px",
+        "pointerEvents": "auto"
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/overview08/snapshots/check-5092ab49e319ac7cbd14a67d54bafb11f07f049404dfac500c3300fb0441948a.py",
+    "--source",
+    "/workspace/browser-env/overview08/site/overview-study.html",
+    "--out",
+    "/workspace/browser-env/overview08/run02"
+  ],
+  "codeSHA256": "5092ab49e319ac7cbd14a67d54bafb11f07f049404dfac500c3300fb0441948a",
+  "actualChildExit": 0,
+  "jsonExit": 0,
+  "agreement": true,
+  "collectorIntendedExit": 0
+}

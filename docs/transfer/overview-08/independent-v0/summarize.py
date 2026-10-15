@@ -1,0 +1,8 @@
+# Read-only derived deltas from the raw pre/post records. No browser operations.
+import json,hashlib
+from pathlib import Path
+root=Path(__file__).resolve().parent;r=json.loads((root/'run02/result.json').read_text());obs={x['id']:x['data'] for x in r['observations']};out={}
+for w in [1280,1440,390]:
+ a=obs[f'{w}/detail-entry-map-pre'];b=obs[f'{w}/detail-return-map-post-immediate'];x=obs[f'{w}/related-context-before'];y=obs[f'{w}/related-context-after-immediate'];initial=obs[f'{w}/initial'];fit=obs[f'{w}/after-fit'];manual=obs[f'{w}/manual-zoom-boundary']
+ out[str(w)]={'entryMapRawReference':f'{w}/detail-entry-map-pre','returnMapRawReference':f'{w}/detail-return-map-post-immediate','cardRawDeltas':{u['id']:{k:v['rect'][k]-u['rect'][k] for k in u['rect']} for u,v in zip(a['cards'],b['cards'])},'edgePathRectDeltas':{u['id']:{k:v['pathRect'][k]-u['pathRect'][k] for k in u['pathRect']} for u,v in zip(a['edges'],b['edges'])},'readerRowDelta':{k:y['row']['rect'][k]-x['row']['rect'][k] for k in ['x','y','width','height']},'readerBefore':x['reader'],'readerAfter':y['reader'],'entryMapScroll':a['scrolls']['mapScroll'],'returnMapScroll':b['scrolls']['mapScroll'],'manualZoomCommonWidth':manual['commonCard']['rect']['width'],'manualZoomCommonFull':manual['commonCard']['full'],'initialMatrix':initial['snapshot']['transform'],'fitMatrix':fit['snapshot']['transform'],'computedNameFont':fit['content']['#n-P3 .nm']['font'],'computedRoleFont':fit['content']['#n-P3 .role']['font']}
+(root/'derived-summary.json').write_text(json.dumps({'method':'Read-only subtraction of run02 raw records; not new execution or added PASS count','viewports':out},ensure_ascii=False,indent=2));print(json.dumps(out,ensure_ascii=False)[:1000])
