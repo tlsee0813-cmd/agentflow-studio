@@ -1,0 +1,109 @@
+{
+ "runId": "r01",
+ "started": "2026-10-15T22:38:41.567Z",
+ "source": {
+  "bytes": 54349,
+  "sha256": "89389334d8bfa94d3fc9b5f30bfbc7ce138318d1fd50266bf0a32dfea613d4fb"
+ },
+ "node": "v22.22.0",
+ "children": [
+  {
+   "viewport": "1280x720",
+   "flows": "A,B,C",
+   "childExitCode": 1,
+   "signal": null,
+   "error": null,
+   "ms": 10887,
+   "assertions": 142,
+   "failed": 7,
+   "consoleErrors": 0,
+   "httpMatchesSource": true,
+   "perFlow": {
+    "A": {
+     "count": 41,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54349,
+      "sha256": "89389334d8bfa94d3fc9b5f30bfbc7ce138318d1fd50266bf0a32dfea613d4fb"
+     }
+    },
+    "B": {
+     "count": 46,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54349,
+      "sha256": "89389334d8bfa94d3fc9b5f30bfbc7ce138318d1fd50266bf0a32dfea613d4fb"
+     }
+    },
+    "C": {
+     "count": 55,
+     "failed": 7,
+     "received": {
+      "status": 200,
+      "bytes": 54349,
+      "sha256": "89389334d8bfa94d3fc9b5f30bfbc7ce138318d1fd50266bf0a32dfea613d4fb"
+     }
+    }
+   }
+  },
+  {
+   "viewport": "390x844",
+   "flows": "A,B,C",
+   "childExitCode": 2,
+   "signal": null,
+   "error": null,
+   "ms": 2242,
+   "assertions": 54,
+   "failed": 3,
+   "consoleErrors": 0,
+   "httpMatchesSource": true,
+   "perFlow": {
+    "A": {
+     "count": 41,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54349,
+      "sha256": "89389334d8bfa94d3fc9b5f30bfbc7ce138318d1fd50266bf0a32dfea613d4fb"
+     }
+    },
+    "B": {
+     "count": 13,
+     "failed": 3,
+     "received": {
+      "status": 200,
+      "bytes": 54349,
+      "sha256": "89389334d8bfa94d3fc9b5f30bfbc7ce138318d1fd50266bf0a32dfea613d4fb"
+     }
+    }
+   }
+  },
+  {
+   "viewport": "1440x900",
+   "flows": "I",
+   "childExitCode": 0,
+   "signal": null,
+   "error": null,
+   "ms": 989,
+   "assertions": 20,
+   "failed": 0,
+   "consoleErrors": 0,
+   "httpMatchesSource": true,
+   "perFlow": {
+    "I": {
+     "count": 20,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54349,
+      "sha256": "89389334d8bfa94d3fc9b5f30bfbc7ce138318d1fd50266bf0a32dfea613d4fb"
+     }
+    }
+   }
+  }
+ ],
+ "finished": "2026-10-15T22:38:55.689Z",
+ "allChildrenZero": false
+}

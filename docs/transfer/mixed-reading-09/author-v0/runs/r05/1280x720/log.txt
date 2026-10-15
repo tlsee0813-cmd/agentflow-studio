@@ -1,0 +1,152 @@
+== flow A @ 1280x720
+PASS [A] 초기 깊이 G2=0 G3=1 G4=0 
+PASS [A] 초기 무선택 
+PASS [A] 초기 지도 스크롤 없음(전체 지도가 지도 창 안) 
+PASS [A] 묶음 카드끼리 겹침 없음 
+PASS [A] 글자 관측 초기 #n-G1 .gname 
+PASS [A] 글자 관측 초기 #n-G1 .gshort 
+PASS [A] 글자 관측 초기 #n-G2 .gname 
+PASS [A] 글자 관측 초기 #n-G2 .gshort 
+PASS [A] 글자 관측 초기 #n-G2 .gfold 
+PASS [A] 글자 관측 초기 #n-G3 .gname 
+PASS [A] 글자 관측 초기 #n-G3 .gshort 
+PASS [A] 글자 관측 초기 #n-C31 .kname 
+PASS [A] 글자 관측 초기 #n-C31 .kshort 
+PASS [A] 글자 관측 초기 #n-C32 .kname 
+PASS [A] 글자 관측 초기 #n-C32 .kchg 
+PASS [A] 글자 관측 초기 #n-C32 .kshort 
+PASS [A] 글자 관측 초기 #n-G4 .gname 
+PASS [A] 글자 관측 초기 #n-G4 .gshort 
+PASS [A] 글자 관측 초기 #n-G4 .gfold 
+PASS [A] 글자 관측 초기 #n-G5 .gname 
+PASS [A] 글자 관측 초기 #n-G5 .gshort 
+PASS [A] 다섯 묶음 이름 
+PASS [A] 변경 표시는 작업문과 미리보기 한 곳(전달할 내용 안) 
+PASS [A] C32가 전달할 내용 카드 안에 공간적으로 포함 
+PASS [A] 선에 담긴 원래 관계 ID 배열(중복 제거 전)이 R1–R6 각 1회 
+  · C32 지도 카드 실제 클릭
+PASS [A] 클릭 지점이 화면 안·대상 위: C32 카드 
+PASS [A] C32 선택(aria-pressed·is-sel) 
+PASS [A] 선택 전후 노드 bounds 동일 
+PASS [A] 선택 전후 선 경로 동일 
+PASS [A] 선택 전후 깊이·배율 동일 
+PASS [A] 선택 후 C32 관련 선 강조(R3·R4) 
+PASS [A] 선택 설명 제목 
+PASS [A] 선택 설명 기본 정보에 내부 식별자(C32/R3/F1 등) 없음 
+PASS [A] 선택 설명: 받음 새 요청의 배경 고정 / 넘김 저장·복구 
+PASS [A] 글자 관측 선택설명 #panel .pk 
+PASS [A] 글자 관측 선택설명 #panel h2 
+PASS [A] 글자 관측 선택설명 #panel > p 
+PASS [A] 글자 관측 선택설명 #panel .chgnote 
+PASS [A] 글자 관측 선택설명 #panel .xbtn[data-xref="R3"] 
+PASS [A] 글자 관측 선택설명 #panel .xbtn[data-xref="R4"] 
+PASS [A] 글자 관측 선택설명 #panel [data-act="focus"] 
+== flow B @ 1280x720
+PASS [B] 단건 선(C32→저장·복구) 중앙 hit가 그 선 
+PASS [B] 단건 선 클릭→관계 선택(typed rel), 깊이 불변 
+  · G3 접기 실제 클릭
+PASS [B] 클릭 지점이 화면 안·대상 위: G3 접기 
+PASS [B] G3만 접힘(G2/G4 유지) 
+PASS [B] 접힌 G3 집계는 작업문과 미리보기만·묶음 전체 변경 아님 
+PASS [B] 글자 관측 G3접힘 #n-G3 .gfold .agg 
+PASS [B] 글자 관측 G3접힘 #n-G3 .gfold .sub 
+PASS [B] 글자 관측 G3접힘 #n-G3 .gname 
+PASS [B] 접힘 상태 원래 관계 ID 배열(중복 제거 전) R1–R6 각 1회 
+PASS [B] G2·G3 접힘에서 R2·R3이 한 묶음선(대표 G2→G3) 
+PASS [B] 묶음선 제목에 두 실제 끝(새 요청의 배경 고정→AI 입력 / →작업문과 미리보기) 
+PASS [B] 묶음선 중앙점의 실제 hit가 그 묶음선(선 또는 관계 수 표시) 
+PASS [B] 묶음선 클릭→bundle 선택 설명 
+PASS [B] 묶음 설명에 R2·R3 각각과 실제 끝 
+PASS [B] 묶음 선택은 깊이를 바꾸지 않음 
+PASS [B] 클릭 지점이 화면 안·대상 위: R3만 보기 
+PASS [B] R3 단건: 실제 양끝 C21·C32 
+PASS [B] R3 단건: 시작 끝은 접힌 요청 맥락 안으로 표기 
+PASS [B] 클릭 지점이 화면 안·대상 위: R3 실제 끝 C32 
+PASS [B] 실제 끝 선택: G3만 펼침·G2/G4 유지 
+PASS [B] 실제 끝 선택: C32 선택(대표 G3 아님) 
+PASS [B] R3 대표 끝이 실제 C32로 바뀜(G2 접힘이므로 시작 대표 G2) 
+PASS [B] 클릭 지점이 화면 안·대상 위: R3 참고 열기 
+PASS [B] 참고 열림 내용: 실제 C21 이름·소속·접힘·종류·요청시점 조건 
+PASS [B] 참고 열어도 C32 선택·G2 접힘·깊이 유지 
+PASS [B] 참고 열어도 지도 노드 bounds 동일 
+PASS [B] 글자 관측 참고 #xr-R3 .pkh 
+PASS [B] 글자 관측 참고 #xr-R3 .xends 
+PASS [B] 글자 관측 참고 #xr-R3 > p:not(.muted) 
+PASS [B] 글자 관측 참고 #xr-R3 [data-act="xref-close"] 
+PASS [B] 글자 관측 참고 #xr-R3 [data-mv] 
+PASS [B] 클릭 지점이 화면 안·대상 위: 참고 닫기 버튼 
+PASS [B] 닫기 버튼: 본문 DOM 제거·패널 글자 부재·aria-expanded=false 
+PASS [B] 닫기 버튼: 초점이 호출 버튼(R3 참고)으로 
+PASS [B] 닫기 버튼 뒤 C32 선택·깊이 유지 
+PASS [B] 클릭 지점이 화면 안·대상 위: R3 참고 재열기 
+PASS [B] 재열기 성공 
+PASS [B] Escape: 본문 제거·글자 부재 
+PASS [B] Escape: 초점이 호출 버튼으로 
+PASS [B] Escape 뒤 C32 선택·깊이 유지 
+PASS [B] 클릭 지점이 화면 안·대상 위: 집중 진입 
+PASS [B] 클릭 지점이 화면 안·대상 위: 준비 열기 
+PASS [B] 참고 후 준비 대상은 작업문과 미리보기(C21로 이동 안 함) 
+PASS [B] 클릭 지점이 화면 안·대상 위: 전체 지도로 
+PASS [B] 클릭 지점이 화면 안·대상 위: R3 참고 열기(이동용) 
+PASS [B] 이동 버튼은 이름을 밝힘 
+PASS [B] 클릭 지점이 화면 안·대상 위: 명시 이동 버튼 
+PASS [B] 명시 이동: C21 선택·G2만 펼침(G3/G4 유지) 
+== flow C @ 1280x720
+  · G4 펼치기(비기본 깊이) + 확대 1단계
+PASS [C] 클릭 지점이 화면 안·대상 위: G4 펼치기 
+PASS [C] 클릭 지점이 화면 안·대상 위: 확대 
+PASS [C] 클릭 지점이 화면 안·대상 위: C32 카드 
+PASS [C] 비기본 상태: G4 펼침·배율 115% 
+PASS [C] 지도 스크롤: 이동 여지가 있는 축은 실제로 움직임 
+PASS [C] C32 선택 유지(진입 직전) 
+PASS [C] 집중 버튼이 이미 화면 안(자동 스크롤 없이 누름) 
+PASS [C] 집중 진입 
+PASS [C] 글자 관측 집중-소속 .fbar .fpath 
+PASS [C] 글자 관측 집중-소속 #fBack 
+PASS [C] 글자 관측 집중-소속 #fPrep 
+PASS [C] 집중 화면 실제 휠 이동 
+PASS [C] 화면 안 근거 버튼 존재 
+PASS [C] 클릭 지점이 화면 안·대상 위: 근거 열기 
+PASS [C] 근거 참고 열림 
+PASS [C] 글자 관측 근거 #pk-C32-F3 .pkh 
+PASS [C] 글자 관측 근거 #pk-C32-F3 > p 
+PASS [C] 클릭 지점이 화면 안·대상 위: 근거 닫기 
+PASS [C] 근거 닫기: 제거·읽기 위치·버튼 초점 복귀 
+PASS [C] 클릭 지점이 화면 안·대상 위: 준비 열기 
+PASS [C] C32 준비 4필드·기본값 
+PASS [C] 클릭 지점이 화면 안·대상 위: 대상 필드 
+PASS [C] E 입력·직접 고침 표시 
+PASS [C] 클릭 지점이 화면 안·대상 위: 준비 닫기 
+PASS [C] 준비 닫기: 집중 읽기 위치·준비 버튼 초점 
+PASS [C] 클릭 지점이 화면 안·대상 위: 전체 지도로 
+PASS [C] 복귀: 지도 보기 
+PASS [C] 복귀: 깊이 동일 
+PASS [C] 복귀: 배율(data·label·computed) 동일 
+PASS [C] 복귀: 지도 스크롤 동일 
+PASS [C] 복귀: main 스크롤 동일 
+PASS [C] 복귀: 패널 읽기 위치 동일 
+PASS [C] 복귀: 선택 동일(C32) 
+PASS [C] 복귀: 화면상 노드 bounds 동일(대표 여러 개) 
+PASS [C] 복귀: 선 경로 동일 
+PASS [C] 복귀: 초점이 호출 버튼(자세히 읽고…)으로 
+PASS [C] 재진입 버튼 화면 안 
+PASS [C] 클릭 지점이 화면 안·대상 위: 준비 재열기 
+PASS [C] 재진입: E 보존(대상), 나머지 기본값 
+PASS [C] 재진입 후 화면 안 근거 버튼 
+PASS [C] 클릭 지점이 화면 안·대상 위: 근거 열기(재진입 후) 
+PASS [C] Escape로 근거 닫힘 
+PASS [C] 클릭 지점이 화면 안·대상 위: 준비 3번째 열기 
+PASS [C] 근거 열닫기 뒤에도 E 보존 
+PASS [C] 클릭 지점이 화면 안·대상 위: 전체 지도로(2) 
+  · 1280: C21 준비 격리
+PASS [C] 클릭 지점이 화면 안·대상 위: G2 펼치기 
+PASS [C] 클릭 지점이 화면 안·대상 위: C21 카드 
+PASS [C] 클릭 지점이 화면 안·대상 위: C21 집중 
+PASS [C] 클릭 지점이 화면 안·대상 위: C21 준비 
+PASS [C] C21 준비: 자기 기본값, E 없음, 직접 고침 표시 없음 
+PASS [C] 클릭 지점이 화면 안·대상 위: 전체 지도로(3) 
+PASS [C] 클릭 지점이 화면 안·대상 위: C32 카드(재) 
+PASS [C] 클릭 지점이 화면 안·대상 위: C32 집중(재) 
+PASS [C] 클릭 지점이 화면 안·대상 위: C32 준비(재) 
+PASS [C] C21 다녀온 뒤 C32 E 보존 
+assertions=144 failed=0 consoleErrors=0 httpMatchesSource=true exit=0

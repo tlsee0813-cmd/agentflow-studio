@@ -1,0 +1,22 @@
+== flow I @ 1440x900
+PASS [I] 초기 깊이 
+PASS [I] 묶음 카드 겹침 없음 
+PASS [I] 지도 스크롤 없음 
+PASS [I] 글자 관측 1440초기 #n-G1 .gname 
+PASS [I] 글자 관측 1440초기 #n-G1 .gshort 
+PASS [I] 글자 관측 1440초기 #n-G2 .gname 
+PASS [I] 글자 관측 1440초기 #n-G2 .gshort 
+PASS [I] 글자 관측 1440초기 #n-G2 .gfold 
+PASS [I] 글자 관측 1440초기 #n-G3 .gname 
+PASS [I] 글자 관측 1440초기 #n-G3 .gshort 
+PASS [I] 글자 관측 1440초기 #n-C31 .kname 
+PASS [I] 글자 관측 1440초기 #n-C31 .kshort 
+PASS [I] 글자 관측 1440초기 #n-C32 .kname 
+PASS [I] 글자 관측 1440초기 #n-C32 .kchg 
+PASS [I] 글자 관측 1440초기 #n-C32 .kshort 
+PASS [I] 글자 관측 1440초기 #n-G4 .gname 
+PASS [I] 글자 관측 1440초기 #n-G4 .gshort 
+PASS [I] 글자 관측 1440초기 #n-G4 .gfold 
+PASS [I] 글자 관측 1440초기 #n-G5 .gname 
+PASS [I] 글자 관측 1440초기 #n-G5 .gshort 
+assertions=20 failed=0 consoleErrors=0 httpMatchesSource=true exit=0

@@ -1,0 +1,64 @@
+== flow A @ 390x844
+PASS [A] 초기 깊이 G2=0 G3=1 G4=0 
+PASS [A] 초기 무선택 
+PASS [A] 초기 지도 스크롤 없음(전체 지도가 지도 창 안) 
+PASS [A] 묶음 카드끼리 겹침 없음 
+PASS [A] 글자 관측 초기 #n-G1 .gname 
+PASS [A] 글자 관측 초기 #n-G1 .gshort 
+PASS [A] 글자 관측 초기 #n-G2 .gname 
+PASS [A] 글자 관측 초기 #n-G2 .gshort 
+PASS [A] 글자 관측 초기 #n-G2 .gfold 
+PASS [A] 글자 관측 초기 #n-G3 .gname 
+PASS [A] 글자 관측 초기 #n-G3 .gshort 
+PASS [A] 글자 관측 초기 #n-C31 .kname 
+PASS [A] 글자 관측 초기 #n-C31 .kshort 
+PASS [A] 글자 관측 초기 #n-C32 .kname 
+PASS [A] 글자 관측 초기 #n-C32 .kchg 
+PASS [A] 글자 관측 초기 #n-C32 .kshort 
+PASS [A] 글자 관측 초기 #n-G4 .gname 
+PASS [A] 글자 관측 초기 #n-G4 .gshort 
+PASS [A] 글자 관측 초기 #n-G4 .gfold 
+PASS [A] 글자 관측 초기 #n-G5 .gname 
+PASS [A] 글자 관측 초기 #n-G5 .gshort 
+PASS [A] 다섯 묶음 이름 
+PASS [A] 변경 표시는 작업문과 미리보기 한 곳(전달할 내용 안) 
+PASS [A] C32가 전달할 내용 카드 안에 공간적으로 포함 
+PASS [A] 선에 담긴 원래 관계 ID 배열(중복 제거 전)이 R1–R6 각 1회 
+  · C32 지도 카드 실제 클릭
+PASS [A] 클릭 지점이 화면 안·대상 위: C32 카드 
+PASS [A] C32 선택(aria-pressed·is-sel) 
+PASS [A] 선택 전후 노드 bounds 동일 
+PASS [A] 선택 전후 선 경로 동일 
+PASS [A] 선택 전후 깊이·배율 동일 
+PASS [A] 선택 후 C32 관련 선 강조(R3·R4) 
+PASS [A] 선택 설명 제목 
+PASS [A] 선택 설명 기본 정보에 내부 식별자(C32/R3/F1 등) 없음 
+PASS [A] 선택 설명: 받음 새 요청의 배경 고정 / 넘김 저장·복구 
+PASS [A] 글자 관측 선택설명 #panel .pk 
+PASS [A] 글자 관측 선택설명 #panel h2 
+PASS [A] 글자 관측 선택설명 #panel > p 
+PASS [A] 글자 관측 선택설명 #panel .chgnote 
+PASS [A] 글자 관측 선택설명 #panel .xbtn[data-xref="R3"] 
+PASS [A] 글자 관측 선택설명 #panel .xbtn[data-xref="R4"] 
+PASS [A] 글자 관측 선택설명 #panel [data-act="focus"] 
+== flow B @ 390x844
+  · G3 접기 실제 클릭
+PASS [B] 클릭 지점이 화면 안·대상 위: G3 접기 
+PASS [B] G3만 접힘(G2/G4 유지) 
+PASS [B] 접힌 G3 집계는 작업문과 미리보기만·묶음 전체 변경 아님 
+PASS [B] 글자 관측 G3접힘 #n-G3 .gfold .agg 
+PASS [B] 글자 관측 G3접힘 #n-G3 .gfold .sub 
+PASS [B] 글자 관측 G3접힘 #n-G3 .gname 
+PASS [B] 접힘 상태 원래 관계 ID 배열(중복 제거 전) R1–R6 각 1회 
+PASS [B] G2·G3 접힘에서 R2·R3이 한 묶음선(대표 G2→G3) 
+PASS [B] 묶음선 제목에 두 실제 끝(새 요청의 배경 고정→AI 입력 / →작업문과 미리보기) 
+FAIL [B] 묶음선 중앙점의 실제 hit가 그 선 {"x":164,"y":404.25,"hit":"div#world.narrow","hitIsPath":false}
+FAIL [B] 묶음선 클릭→bundle 선택 설명 "한 부분을 골라 보세요"
+FAIL [B] 묶음 설명에 R2·R3 각각과 실제 끝 []
+PASS [B] 묶음 선택은 깊이를 바꾸지 않음 
+CRASH page.evaluate: TypeError: Cannot read properties of null (reading 'scrollIntoView')
+    at eval (eval at evaluate (:290:30), <anonymous>:1:55)
+    at UtilityScript.evaluate (<anonymous>:292:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at flowB (/home/claude/c09/scripts/check.mjs:161:14)
+    at async file:///home/claude/c09/scripts/check.mjs:374:55

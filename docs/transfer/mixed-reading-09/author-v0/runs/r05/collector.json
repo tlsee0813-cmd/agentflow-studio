@@ -1,0 +1,118 @@
+{
+ "runId": "r05",
+ "started": "2026-10-15T22:41:39.572Z",
+ "source": {
+  "bytes": 54498,
+  "sha256": "299343638287590e500be296b0ac6fc64ac05af6e516f2c5eb052f9f447b5eca"
+ },
+ "node": "v22.22.0",
+ "children": [
+  {
+   "viewport": "1280x720",
+   "flows": "A,B,C",
+   "childExitCode": 0,
+   "signal": null,
+   "error": null,
+   "ms": 11220,
+   "assertions": 144,
+   "failed": 0,
+   "consoleErrors": 0,
+   "httpMatchesSource": true,
+   "perFlow": {
+    "A": {
+     "count": 41,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54498,
+      "sha256": "299343638287590e500be296b0ac6fc64ac05af6e516f2c5eb052f9f447b5eca"
+     }
+    },
+    "B": {
+     "count": 48,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54498,
+      "sha256": "299343638287590e500be296b0ac6fc64ac05af6e516f2c5eb052f9f447b5eca"
+     }
+    },
+    "C": {
+     "count": 55,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54498,
+      "sha256": "299343638287590e500be296b0ac6fc64ac05af6e516f2c5eb052f9f447b5eca"
+     }
+    }
+   }
+  },
+  {
+   "viewport": "390x844",
+   "flows": "A,B,C",
+   "childExitCode": 0,
+   "signal": null,
+   "error": null,
+   "ms": 10782,
+   "assertions": 135,
+   "failed": 0,
+   "consoleErrors": 0,
+   "httpMatchesSource": true,
+   "perFlow": {
+    "A": {
+     "count": 41,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54498,
+      "sha256": "299343638287590e500be296b0ac6fc64ac05af6e516f2c5eb052f9f447b5eca"
+     }
+    },
+    "B": {
+     "count": 48,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54498,
+      "sha256": "299343638287590e500be296b0ac6fc64ac05af6e516f2c5eb052f9f447b5eca"
+     }
+    },
+    "C": {
+     "count": 46,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54498,
+      "sha256": "299343638287590e500be296b0ac6fc64ac05af6e516f2c5eb052f9f447b5eca"
+     }
+    }
+   }
+  },
+  {
+   "viewport": "1440x900",
+   "flows": "I",
+   "childExitCode": 0,
+   "signal": null,
+   "error": null,
+   "ms": 1072,
+   "assertions": 20,
+   "failed": 0,
+   "consoleErrors": 0,
+   "httpMatchesSource": true,
+   "perFlow": {
+    "I": {
+     "count": 20,
+     "failed": 0,
+     "received": {
+      "status": 200,
+      "bytes": 54498,
+      "sha256": "299343638287590e500be296b0ac6fc64ac05af6e516f2c5eb052f9f447b5eca"
+     }
+    }
+   }
+  }
+ ],
+ "finished": "2026-10-15T22:42:02.649Z",
+ "allChildrenZero": true
+}
