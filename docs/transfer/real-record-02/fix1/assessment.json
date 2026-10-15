@@ -1,0 +1,594 @@
+{
+  "method": "Offline assessment of existing observations only; no browser rerun",
+  "raw_result_sha256": "745ae6c13ff1cd5874cec77dcf316ec8a3aa5fa09e6b03b4c12361d7d7c2ad24",
+  "switch_review": [
+    {
+      "id": "A-1440x900/switch-same-peek",
+      "raw_checker_status": "PASS",
+      "assessment": "NOT_RUN",
+      "reason": "Same fact/source/selection/origin mapping and close-focus are observed. Actual visible preview text/range and pvScroll clientHeight/scrollHeight were not recorded, so internal reading continuity is not demonstrated. Nonzero previewTop alone is insufficient.",
+      "before": {
+        "scrollTop": 240,
+        "max": 435,
+        "distanceFromBottom": 195,
+        "originQuote": "나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 810,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "after": {
+        "scrollTop": 218,
+        "max": 413,
+        "distanceFromBottom": 195,
+        "originQuote": "위치 C · 접힌 A 요약 · 대상 H1 — A2 소유 미결 참조 없음",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 810,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "scrollTopDelta": -22,
+      "maxDelta": -22,
+      "atTopAfter": false,
+      "atMaxAfter": false,
+      "offsetMatchesExtentChange": true,
+      "interpretation": "Not a literal reset to zero and not an observed top/bottom clamp. Offset delta matches extent delta exactly or within one CSS pixel (see each raw value); bottom-relative offset is stable within one pixel, consistent with browser anchoring after origin text reflow. It does not prove the same evidence passage remained visible.",
+      "otherObservedChecks": {
+        "headingSame": true,
+        "sourceIDsSame": true,
+        "selectionSame": true,
+        "newExpandedMapping": [
+          "bb-f14"
+        ],
+        "focusAfterClose": "bb-f14"
+      },
+      "evidenceSource": "output/result.json (corrected second browser run); first failure values remain in harness-first/result.json/process.log, with only fields originally captured"
+    },
+    {
+      "id": "B-1440x900/switch-same-peek",
+      "raw_checker_status": "PASS",
+      "assessment": "NOT_RUN",
+      "reason": "Same fact/source/selection/origin mapping and close-focus are observed. Actual visible preview text/range and pvScroll clientHeight/scrollHeight were not recorded, so internal reading continuity is not demonstrated. Nonzero previewTop alone is insufficient.",
+      "before": {
+        "scrollTop": 240,
+        "max": 413,
+        "distanceFromBottom": 173,
+        "originQuote": "위치 C · 접힌 A 요약 · 대상 H1 — A2 소유 미결 참조 없음",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 810,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "after": {
+        "scrollTop": 262,
+        "max": 435,
+        "distanceFromBottom": 173,
+        "originQuote": "나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 810,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "scrollTopDelta": 22,
+      "maxDelta": 22,
+      "atTopAfter": false,
+      "atMaxAfter": false,
+      "offsetMatchesExtentChange": true,
+      "interpretation": "Not a literal reset to zero and not an observed top/bottom clamp. Offset delta matches extent delta exactly or within one CSS pixel (see each raw value); bottom-relative offset is stable within one pixel, consistent with browser anchoring after origin text reflow. It does not prove the same evidence passage remained visible.",
+      "otherObservedChecks": {
+        "headingSame": true,
+        "sourceIDsSame": true,
+        "selectionSame": true,
+        "newExpandedMapping": [
+          "ab-f14"
+        ],
+        "focusAfterClose": "ab-f14"
+      },
+      "evidenceSource": "output/result.json (corrected second browser run); first failure values remain in harness-first/result.json/process.log, with only fields originally captured"
+    },
+    {
+      "id": "A-390x664/switch-same-peek",
+      "raw_checker_status": "PASS",
+      "assessment": "NOT_RUN",
+      "reason": "Same fact/source/selection/origin mapping and close-focus are observed. Actual visible preview text/range and pvScroll clientHeight/scrollHeight were not recorded, so internal reading continuity is not demonstrated. Nonzero previewTop alone is insufficient.",
+      "before": {
+        "scrollTop": 240,
+        "max": 715,
+        "distanceFromBottom": 475,
+        "originQuote": "나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 410.671875,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "after": {
+        "scrollTop": 217,
+        "max": 693,
+        "distanceFromBottom": 476,
+        "originQuote": "위치 C · 접힌 A 요약 · 대상 H1 — A2 소유 미결 참조 없음",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 410.671875,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "scrollTopDelta": -23,
+      "maxDelta": -22,
+      "atTopAfter": false,
+      "atMaxAfter": false,
+      "offsetMatchesExtentChange": false,
+      "interpretation": "Not a literal reset to zero and not an observed top/bottom clamp. Offset delta matches extent delta exactly or within one CSS pixel (see each raw value); bottom-relative offset is stable within one pixel, consistent with browser anchoring after origin text reflow. It does not prove the same evidence passage remained visible.",
+      "otherObservedChecks": {
+        "headingSame": true,
+        "sourceIDsSame": true,
+        "selectionSame": true,
+        "newExpandedMapping": [
+          "bb-f14"
+        ],
+        "focusAfterClose": "bb-f14"
+      },
+      "evidenceSource": "output/result.json (corrected second browser run); first failure values remain in harness-first/result.json/process.log, with only fields originally captured"
+    },
+    {
+      "id": "B-390x664/switch-same-peek",
+      "raw_checker_status": "PASS",
+      "assessment": "NOT_RUN",
+      "reason": "Same fact/source/selection/origin mapping and close-focus are observed. Actual visible preview text/range and pvScroll clientHeight/scrollHeight were not recorded, so internal reading continuity is not demonstrated. Nonzero previewTop alone is insufficient.",
+      "before": {
+        "scrollTop": 240,
+        "max": 693,
+        "distanceFromBottom": 453,
+        "originQuote": "위치 C · 접힌 A 요약 · 대상 H1 — A2 소유 미결 참조 없음",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 410.671875,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "after": {
+        "scrollTop": 262,
+        "max": 715,
+        "distanceFromBottom": 453,
+        "originQuote": "나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 410.671875,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "scrollTopDelta": 22,
+      "maxDelta": 22,
+      "atTopAfter": false,
+      "atMaxAfter": false,
+      "offsetMatchesExtentChange": true,
+      "interpretation": "Not a literal reset to zero and not an observed top/bottom clamp. Offset delta matches extent delta exactly or within one CSS pixel (see each raw value); bottom-relative offset is stable within one pixel, consistent with browser anchoring after origin text reflow. It does not prove the same evidence passage remained visible.",
+      "otherObservedChecks": {
+        "headingSame": true,
+        "sourceIDsSame": true,
+        "selectionSame": true,
+        "newExpandedMapping": [
+          "ab-f14"
+        ],
+        "focusAfterClose": "ab-f14"
+      },
+      "evidenceSource": "output/result.json (corrected second browser run); first failure values remain in harness-first/result.json/process.log, with only fields originally captured"
+    },
+    {
+      "id": "A-390x844/switch-same-peek",
+      "raw_checker_status": "PASS",
+      "assessment": "NOT_RUN",
+      "reason": "Same fact/source/selection/origin mapping and close-focus are observed. Actual visible preview text/range and pvScroll clientHeight/scrollHeight were not recorded, so internal reading continuity is not demonstrated. Nonzero previewTop alone is insufficient.",
+      "before": {
+        "scrollTop": 240,
+        "max": 604,
+        "distanceFromBottom": 364,
+        "originQuote": "나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 522.265625,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "after": {
+        "scrollTop": 217,
+        "max": 582,
+        "distanceFromBottom": 365,
+        "originQuote": "위치 C · 접힌 A 요약 · 대상 H1 — A2 소유 미결 참조 없음",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 522.265625,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "scrollTopDelta": -23,
+      "maxDelta": -22,
+      "atTopAfter": false,
+      "atMaxAfter": false,
+      "offsetMatchesExtentChange": false,
+      "interpretation": "Not a literal reset to zero and not an observed top/bottom clamp. Offset delta matches extent delta exactly or within one CSS pixel (see each raw value); bottom-relative offset is stable within one pixel, consistent with browser anchoring after origin text reflow. It does not prove the same evidence passage remained visible.",
+      "otherObservedChecks": {
+        "headingSame": true,
+        "sourceIDsSame": true,
+        "selectionSame": true,
+        "newExpandedMapping": [
+          "bb-f14"
+        ],
+        "focusAfterClose": "bb-f14"
+      },
+      "evidenceSource": "output/result.json (corrected second browser run); first failure values remain in harness-first/result.json/process.log, with only fields originally captured"
+    },
+    {
+      "id": "B-390x844/switch-same-peek",
+      "raw_checker_status": "PASS",
+      "assessment": "NOT_RUN",
+      "reason": "Same fact/source/selection/origin mapping and close-focus are observed. Actual visible preview text/range and pvScroll clientHeight/scrollHeight were not recorded, so internal reading continuity is not demonstrated. Nonzero previewTop alone is insufficient.",
+      "before": {
+        "scrollTop": 240,
+        "max": 582,
+        "distanceFromBottom": 342,
+        "originQuote": "위치 C · 접힌 A 요약 · 대상 H1 — A2 소유 미결 참조 없음",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 522.265625,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "after": {
+        "scrollTop": 262,
+        "max": 604,
+        "distanceFromBottom": 342,
+        "originQuote": "나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+        "originQuoteVisible": false,
+        "pvBodyHeight": 522.265625,
+        "pvScrollClientHeight": null,
+        "pvScrollContentHeight": null,
+        "actualVisibleTextRange": null
+      },
+      "scrollTopDelta": 22,
+      "maxDelta": 22,
+      "atTopAfter": false,
+      "atMaxAfter": false,
+      "offsetMatchesExtentChange": true,
+      "interpretation": "Not a literal reset to zero and not an observed top/bottom clamp. Offset delta matches extent delta exactly or within one CSS pixel (see each raw value); bottom-relative offset is stable within one pixel, consistent with browser anchoring after origin text reflow. It does not prove the same evidence passage remained visible.",
+      "otherObservedChecks": {
+        "headingSame": true,
+        "sourceIDsSame": true,
+        "selectionSame": true,
+        "newExpandedMapping": [
+          "ab-f14"
+        ],
+        "focusAfterClose": "ab-f14"
+      },
+      "evidenceSource": "output/result.json (corrected second browser run); first failure values remain in harness-first/result.json/process.log, with only fields originally captured"
+    }
+  ],
+  "stages": [
+    {
+      "id": "A-1440x900/initial-closed",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-1440x900/content",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-1440x900/button-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-1440x900/escape-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-1440x900/switch-same-peek",
+      "status": "NOT_RUN",
+      "reason": "Internal reading continuity unverified; partial switch checks passed"
+    },
+    {
+      "id": "A-1440x900/reopen-f14",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-1440x900/new-f19",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-1440x900/P02-no-source",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-1440x900/link-contract",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-1440x900/overflow",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/initial-closed",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/content",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/button-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/escape-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/switch-same-peek",
+      "status": "NOT_RUN",
+      "reason": "Internal reading continuity unverified; partial switch checks passed"
+    },
+    {
+      "id": "B-1440x900/reopen-f14",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/new-f19",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/P02-no-source",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/link-contract",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-1440x900/overflow",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/initial-closed",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/content",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/button-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/escape-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/switch-same-peek",
+      "status": "NOT_RUN",
+      "reason": "Internal reading continuity unverified; partial switch checks passed"
+    },
+    {
+      "id": "A-390x664/reopen-f14",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/new-f19",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/P02-no-source",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/link-contract",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x664/overflow",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/initial-closed",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/content",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/button-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/escape-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/switch-same-peek",
+      "status": "NOT_RUN",
+      "reason": "Internal reading continuity unverified; partial switch checks passed"
+    },
+    {
+      "id": "B-390x664/reopen-f14",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/new-f19",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/P02-no-source",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/link-contract",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x664/overflow",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/initial-closed",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/content",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/button-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/escape-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/switch-same-peek",
+      "status": "NOT_RUN",
+      "reason": "Internal reading continuity unverified; partial switch checks passed"
+    },
+    {
+      "id": "A-390x844/reopen-f14",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/new-f19",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/P02-no-source",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/link-contract",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "A-390x844/overflow",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/initial-closed",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/content",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/button-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/escape-roundtrip",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/switch-same-peek",
+      "status": "NOT_RUN",
+      "reason": "Internal reading continuity unverified; partial switch checks passed"
+    },
+    {
+      "id": "B-390x844/reopen-f14",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/new-f19",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/P02-no-source",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/link-contract",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "B-390x844/overflow",
+      "status": "PASS",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "external/blob-read",
+      "status": "NOT_RUN",
+      "reason": "See raw recorded result"
+    },
+    {
+      "id": "external/blob-roundtrip",
+      "status": "NOT_RUN",
+      "reason": "See raw recorded result"
+    }
+  ],
+  "expected_local": 60,
+  "executed_local_browser": 60,
+  "verified_local_complete": false,
+  "counts": {
+    "PASS": 54,
+    "FAIL": 0,
+    "NOT_RUN": 8
+  },
+  "fatal": null,
+  "exit_code": 1,
+  "raw_browser_process_exit": 0,
+  "note": "Raw browser checker result 60 PASS/exit0 is preserved but overstates the six internal reading-continuity claims; this assessment does not overwrite it."
+}

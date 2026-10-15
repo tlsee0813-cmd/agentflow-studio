@@ -1,0 +1,388 @@
+{
+  "requestedURL": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html",
+  "before": {
+    "url": "http://127.0.0.1:44859/reading-study.html",
+    "rep": "A",
+    "y": 1582,
+    "maxY": 1733,
+    "button": {
+      "top": 156.03125,
+      "bottom": 186.03125,
+      "height": 30,
+      "expanded": "true"
+    },
+    "focus": "pvH",
+    "selected": [
+      "a-f14",
+      "b-f14"
+    ],
+    "expanded": [
+      "ab-f14"
+    ],
+    "previewTop": 435,
+    "previewMax": 435,
+    "heading": "E09 · 기존 INPUT 9의 위치별 누락 재검토",
+    "origin": "출발 — 읽던 자리\n\n표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위\n\n나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.\n\n상태 표기 누락",
+    "quote": "나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+    "sources": [
+      "S01",
+      "S03",
+      "P02"
+    ],
+    "originQuoteVisible": false,
+    "bodyPad": "",
+    "panel": {
+      "pvBody": {
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 1049,
+          "y": 73,
+          "width": 358,
+          "height": 810,
+          "bottom": 883,
+          "right": 1407
+        },
+        "hasBox": true,
+        "fullyInClip": true,
+        "centerHit": true,
+        "cover": {
+          "id": "",
+          "tag": "P",
+          "cls": "sid"
+        },
+        "ancestors": [
+          {
+            "id": "preview",
+            "overflow": "hidden",
+            "rect": {
+              "x": 1048,
+              "y": 72,
+              "width": 360,
+              "height": 812
+            }
+          }
+        ],
+        "clip": {
+          "left": 1048,
+          "top": 72,
+          "right": 1408,
+          "bottom": 884
+        },
+        "scrollWidth": 358,
+        "clientWidth": 358
+      },
+      "pvClose": {
+        "hidden": false,
+        "display": "inline-block",
+        "visibility": "visible",
+        "rect": {
+          "x": 1067,
+          "y": 145.6875,
+          "width": 157.25,
+          "height": 38,
+          "bottom": 183.6875,
+          "right": 1224.25
+        },
+        "hasBox": true,
+        "fullyInClip": true,
+        "centerHit": true,
+        "cover": {
+          "id": "pvClose",
+          "tag": "BUTTON",
+          "cls": "pv-close"
+        },
+        "ancestors": [
+          {
+            "id": "preview",
+            "overflow": "hidden",
+            "rect": {
+              "x": 1048,
+              "y": 72,
+              "width": 360,
+              "height": 812
+            }
+          }
+        ],
+        "clip": {
+          "left": 1048,
+          "top": 72,
+          "right": 1408,
+          "bottom": 884
+        },
+        "scrollWidth": 155,
+        "clientWidth": 155
+      },
+      "pvEmpty": {
+        "hidden": true,
+        "display": "none",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "bottom": 0,
+          "right": 0
+        },
+        "hasBox": false,
+        "fullyInClip": false,
+        "centerHit": false,
+        "cover": {
+          "id": "",
+          "tag": "HEADER",
+          "cls": "hdr"
+        },
+        "ancestors": [
+          {
+            "id": "preview",
+            "overflow": "hidden",
+            "rect": {
+              "x": 1048,
+              "y": 72,
+              "width": 360,
+              "height": 812
+            }
+          }
+        ],
+        "clip": {
+          "left": 1048,
+          "top": 72,
+          "right": 1408,
+          "bottom": 884
+        },
+        "scrollWidth": 0,
+        "clientWidth": 0
+      },
+      "preview": {
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 1048,
+          "y": 72,
+          "width": 360,
+          "height": 812,
+          "bottom": 884,
+          "right": 1408
+        },
+        "hasBox": true,
+        "fullyInClip": true,
+        "centerHit": true,
+        "cover": {
+          "id": "",
+          "tag": "P",
+          "cls": "sid"
+        },
+        "ancestors": [],
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    }
+  },
+  "responses": [],
+  "requestFailures": [
+    {
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html",
+      "failure": "net::ERR_CERT_AUTHORITY_INVALID"
+    }
+  ],
+  "finalURL": "chrome-error://chromewebdata/",
+  "title": "Privacy error",
+  "bodyTextSample": "Your connection is not private\n\nAttackers might be trying to steal your information from github.com (for example, passwords, messages, or credit cards). Learn more about this warning\n\nNET::ERR_CERT_AUTHORITY_INVALID\nReload\nAdvanced",
+  "reason": "Actual GitHub blob source rendering not established; see actual responses/body/errors. No policy/auth changes attempted.",
+  "afterTabClose": {
+    "url": "http://127.0.0.1:44859/reading-study.html",
+    "rep": "A",
+    "y": 1582,
+    "maxY": 1733,
+    "button": {
+      "top": 156.03125,
+      "bottom": 186.03125,
+      "height": 30,
+      "expanded": "true"
+    },
+    "focus": "",
+    "selected": [
+      "a-f14",
+      "b-f14"
+    ],
+    "expanded": [
+      "ab-f14"
+    ],
+    "previewTop": 435,
+    "previewMax": 435,
+    "heading": "E09 · 기존 INPUT 9의 위치별 누락 재검토",
+    "origin": "출발 — 읽던 자리\n\n표현 A · INPUT 9: 지정 위치의 A2 미결 참조 · 지정 위치의 관측 (E09) · 1번째 문장 단위\n\n나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.\n\n상태 표기 누락",
+    "quote": "나가 H1을 기존 합격 기준 9(새 요구 아님)와 대조하니, 접힌 A 요약(위치 C)에 A2 소유 미결 참조가 없다.",
+    "sources": [
+      "S01",
+      "S03",
+      "P02"
+    ],
+    "originQuoteVisible": false,
+    "bodyPad": "",
+    "panel": {
+      "pvBody": {
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 1049,
+          "y": 73,
+          "width": 358,
+          "height": 810,
+          "bottom": 883,
+          "right": 1407
+        },
+        "hasBox": true,
+        "fullyInClip": true,
+        "centerHit": true,
+        "cover": {
+          "id": "",
+          "tag": "P",
+          "cls": "sid"
+        },
+        "ancestors": [
+          {
+            "id": "preview",
+            "overflow": "hidden",
+            "rect": {
+              "x": 1048,
+              "y": 72,
+              "width": 360,
+              "height": 812
+            }
+          }
+        ],
+        "clip": {
+          "left": 1048,
+          "top": 72,
+          "right": 1408,
+          "bottom": 884
+        },
+        "scrollWidth": 358,
+        "clientWidth": 358
+      },
+      "pvClose": {
+        "hidden": false,
+        "display": "inline-block",
+        "visibility": "visible",
+        "rect": {
+          "x": 1067,
+          "y": 145.6875,
+          "width": 157.25,
+          "height": 38,
+          "bottom": 183.6875,
+          "right": 1224.25
+        },
+        "hasBox": true,
+        "fullyInClip": true,
+        "centerHit": true,
+        "cover": {
+          "id": "pvClose",
+          "tag": "BUTTON",
+          "cls": "pv-close"
+        },
+        "ancestors": [
+          {
+            "id": "preview",
+            "overflow": "hidden",
+            "rect": {
+              "x": 1048,
+              "y": 72,
+              "width": 360,
+              "height": 812
+            }
+          }
+        ],
+        "clip": {
+          "left": 1048,
+          "top": 72,
+          "right": 1408,
+          "bottom": 884
+        },
+        "scrollWidth": 155,
+        "clientWidth": 155
+      },
+      "pvEmpty": {
+        "hidden": true,
+        "display": "none",
+        "visibility": "visible",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "bottom": 0,
+          "right": 0
+        },
+        "hasBox": false,
+        "fullyInClip": false,
+        "centerHit": false,
+        "cover": {
+          "id": "",
+          "tag": "HEADER",
+          "cls": "hdr"
+        },
+        "ancestors": [
+          {
+            "id": "preview",
+            "overflow": "hidden",
+            "rect": {
+              "x": 1048,
+              "y": 72,
+              "width": 360,
+              "height": 812
+            }
+          }
+        ],
+        "clip": {
+          "left": 1048,
+          "top": 72,
+          "right": 1408,
+          "bottom": 884
+        },
+        "scrollWidth": 0,
+        "clientWidth": 0
+      },
+      "preview": {
+        "hidden": false,
+        "display": "flex",
+        "visibility": "visible",
+        "rect": {
+          "x": 1048,
+          "y": 72,
+          "width": 360,
+          "height": 812,
+          "bottom": 884,
+          "right": 1408
+        },
+        "hasBox": true,
+        "fullyInClip": true,
+        "centerHit": true,
+        "cover": {
+          "id": "",
+          "tag": "P",
+          "cls": "sid"
+        },
+        "ancestors": [],
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "scrollWidth": 358,
+        "clientWidth": 358
+      }
+    }
+  }
+}
