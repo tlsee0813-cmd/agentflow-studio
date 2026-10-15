@@ -1,0 +1,2 @@
+FAIL 390x664/S3/A4-A2-B-back-A2-back-A4 {'rect': {'x': 16, 'y': 460.03125, 'width': 358, 'height': 29.390625}, 'clip': {'l': 0, 't': 284.78125, 'r': 390, 'b': 664}, 'full': True, 'hit': False, 'text': 'B\n알림 구상 보기\n→', 'scrollWidth': 356, 'clientWidth': 356}
+{"passed": 85, "failed": 1}
