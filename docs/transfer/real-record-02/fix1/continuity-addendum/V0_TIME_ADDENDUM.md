@@ -1,0 +1,3 @@
+# V0 timestamp audit confirmation
+
+The coordinating auditor reports that GitHub UTF-8 source, base64-decoded content and raw file all contain +00:00 and have identical hashes. The +09:00 display arose in the auditor's PowerShell ConvertFrom-Json → Select-Object → ConvertTo-Json display pipeline and was mistaken for source content. The Cloud provenance-discrepancy concern is withdrawn. This agrees with the previously recorded original +00:00 evidence. No additional investigation, timestamp conversion, v0 execution or original-file change was performed here. Historical addenda remain preserved; this confirmation supersedes their unresolved question about the reported +09:00 copy.

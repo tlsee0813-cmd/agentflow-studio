@@ -1,0 +1,35 @@
+{
+  "algorithm": "SHA256",
+  "files": [
+    {
+      "path": "REPORT.md",
+      "bytes": 4512,
+      "sha256": "0562090942fe6e8208566410c48e6d97aef9c1adf90aa81578ca8d563e591766"
+    },
+    {
+      "path": "V0_TIME_ADDENDUM.md",
+      "bytes": 691,
+      "sha256": "31f4286e6796f452aa8c4488360804cfc24b47d277184b9406f3f5354afd2973"
+    },
+    {
+      "path": "observe.py",
+      "bytes": 10085,
+      "sha256": "8c22b98acbc69ddc46fde68a7d70c60f0db8493f0a36ec013cabb6ec35a9c6af"
+    },
+    {
+      "path": "process-exit.json",
+      "bytes": 73,
+      "sha256": "b6f436e20a1baab7c14f7fed00098d362802249940757282f2e24f6d7bccc8cb"
+    },
+    {
+      "path": "process.log",
+      "bytes": 22967,
+      "sha256": "a07330bbe15a4fee3e74c52cddfb8546cf0a7f2be9632c9260440249074cff44"
+    },
+    {
+      "path": "result.json",
+      "bytes": 290060,
+      "sha256": "0ce8476376f5817d1aa4a4b1aca906cadc7c7a8db13014eb03fbe59957bf593c"
+    }
+  ]
+}
