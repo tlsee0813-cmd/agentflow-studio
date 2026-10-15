@@ -1,0 +1,35 @@
+{
+  "algorithm": "SHA256",
+  "files": [
+    {
+      "path": "reproduce.py",
+      "bytes": 4994,
+      "sha256": "16d699d65804a377af292c484e2e3455fe9b603d188853e81fa7beee01fed19f"
+    },
+    {
+      "path": "result.json",
+      "bytes": 21687,
+      "sha256": "3951b1cee0ef36a4934f25ec7abf77c2470d89124db8dcfe85c178a2f5858147"
+    },
+    {
+      "path": "process-exit.json",
+      "bytes": 134,
+      "sha256": "8357f51b5081a76f344a5a6ac22f2dfb3d1c19236a8ccf933e0a589d168c136c"
+    },
+    {
+      "path": "run.log",
+      "bytes": 70,
+      "sha256": "d8c46dbbd2aad4211fe9650f6ae066dd69cbe3debc82c450930049224a6ad1ab"
+    },
+    {
+      "path": "1440x900-after-close.png",
+      "bytes": 371898,
+      "sha256": "602c2e0b2e2c38b033c29b9b79de62bc54a6468eff73c7f41a15d3a0652a3784"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 2197,
+      "sha256": "5a89e617860d4d7e1e8df47d8a441ae1b107906bf5854aba46e0413d530ecfda"
+    }
+  ]
+}
