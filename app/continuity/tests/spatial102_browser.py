@@ -166,7 +166,8 @@ class EnterFirstSpace(unittest.TestCase):
         self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R2}').click()
         expect(self.title()).to_contain_text('A: 예약 화면');pointed=self.page.locator('#task-pointed')
         expect(pointed).to_contain_text('ZZ-R2');expect(pointed).not_to_contain_text('ZZ-R1')
-        expect(pointed).to_contain_text('후속 확인 작업문');expect(pointed).to_contain_text('앱 미검증')
+        # SPATIAL102-R2: the chain line states links only (it said '후속 확인 작업문 내보냄', which a link alone does not show).
+        expect(pointed).to_contain_text('이전 보고에 연결된 보고');expect(pointed).not_to_contain_text('내보냄');expect(pointed).to_contain_text('앱 미검증')
         self.assertEqual(self.state()['currentTaskId'],current,'viewing never continues the work');self.assertEqual(self.state()['space']['draftTarget'],target)
         self.assertEqual(self.state(),saved,'nothing is written by viewing')
         self.page.screenshot(path=str(base.OUT/'spatial102-r1-pointed.png'),full_page=True)
@@ -196,5 +197,22 @@ class EnterFirstSpace(unittest.TestCase):
         # Opening the task by its title (not from the list) shows no pointed report.
         self.page.locator(f'#task-open-{A}').click();expect(self.page.locator('#task-pointed')).to_have_count(0)
         expect(self.page.locator('#task-view')).to_contain_text('ZZ-D1')
+
+    def test_11_a_chain_without_any_export_is_described_as_links_only(self):
+        """SPATIAL102-R2: request A (never exported) -> report R1 -> report R2. With no handoff the report goes to the
+        current work, so R2 links to R1. The screen must state the links only, never an export, delivery or run."""
+        booking,=self.start(['예약']);A=self.request_in(booking,'A: 예약 화면 만들기')
+        self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('R1 보고: 일부만 만들었다고 주장 ZZ-N1');self.page.locator('#send').click()
+        expect(self.page.locator('#working')).to_have_text('');R1=self.state()['tasks'][-1]['id']
+        self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('R2 보고: 이어서 붙여넣음 ZZ-N2');self.page.locator('#send').click()
+        expect(self.page.locator('#working')).to_have_text('');s=self.state();R2=s['tasks'][-1]['id']
+        self.assertEqual([t['id'] for t in s['tasks']],[A,R1,R2]);self.assertEqual(s['tasks'][-1]['parentTaskId'],R1)
+        self.assertEqual([len(t['handoffs']) for t in s['tasks']],[0,0,0],'nothing was exported')
+        current=s['currentTaskId'];target=s['space']['draftTarget']
+        self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R2}').click()
+        pointed=self.page.locator('#task-pointed');expect(pointed).to_contain_text('ZZ-N2');expect(pointed).not_to_contain_text('ZZ-N1')
+        expect(pointed).to_contain_text('이전 보고에 연결된 보고')
+        for claim in ['내보냄','내보낸','작업문','전달','실행','완료','검증됨']:expect(pointed).not_to_contain_text(claim)
+        self.assertEqual(self.state()['currentTaskId'],current);self.assertEqual(self.state()['space']['draftTarget'],target)
 
 if __name__=='__main__':unittest.main()

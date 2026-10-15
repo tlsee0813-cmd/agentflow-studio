@@ -1361,8 +1361,10 @@ function pointedSection(t:Task,returnId:string):HTMLElement {
   const r=pointedReturn(project,t.id,returnId),src=r?project.sources.find(s=>s.id===r.sourceIds[0]):undefined;
   if(!r||!src){box.append(node('p','가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 작업의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래는 이 작업의 기록이에요.','alert warning'));return box;}
   const no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`,path=returnPath(project,r);
-  const hops=path.map((x,i)=>i===0?`${no(x)} 요청`:i===path.length-1?`${no(x)} 이 보고`:`${no(x)} 보고 · 후속 확인 작업문 내보냄`);
-  box.append(node('p',path.length>2?`연결: ${hops.join(' › ')} (후속 확인 작업문에 돌아온 보고)`:`연결: ${hops.join(' › ')} (이 요청에 직접 돌아온 보고)`,'hint'),
+  // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run (a report can be pasted onto the
+  // current work with nothing exported), so the wording never infers one.
+  const hops=path.map((x,i)=>i===0?`${no(x)} 요청`:i===path.length-1?`${no(x)} 이 보고`:`${no(x)} 보고`);
+  box.append(node('p',`연결: ${hops.join(' › ')} (${path.length>2?'이전 보고에 연결된 보고':'이 요청에 바로 연결된 보고'})`,'hint'),
     node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));
   return box;
 }
