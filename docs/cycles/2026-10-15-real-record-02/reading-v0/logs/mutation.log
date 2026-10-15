@@ -1,0 +1,20 @@
+PASS m1_no_restore: exit=1, browser: pass 173 fail 30 (INFO 8 별도, 검사 수 미포함) · 13.4s
+     FAIL [1440x900] A f14 닫기(esc) 후 초점이 출발 버튼으로 복귀 — pvH
+     FAIL [1440x900] A f19 닫기(button) 후 초점이 출발 버튼으로 복귀 — pvClose
+     FAIL [1440x900] A f19 닫기(button) 후 읽던 스크롤 위치 복원(±2px) — y 1633→1705, top 377.8→305.8
+PASS m2_same_tab_link: exit=1, browser: pass 164 fail 6 (INFO 8 별도, 검사 수 미포함) · 24.1s
+     FAIL [1440x900] 원문 링크가 새 탭·noopener·'새 탭' 표기 — {"t": "", "rel": "noopener noreferrer", "label": "S03 원문을 GitHub에서 새 탭으로 열기", "text": "원문 열기 ↗GitHub · 새 탭", "href": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html"}
+     FAIL [1440x900] 조작 시나리오가 중단 없이 끝남 — TimeoutError: Timeout 5000ms exceeded while waiting for event "popup"
+     FAIL [390x664] 원문 링크가 새 탭·noopener·'새 탭' 표기 — {"t": "", "rel": "noopener noreferrer", "label": "S03 원문을 GitHub에서 새 탭으로 열기", "text": "원문 열기 ↗GitHub · 새 탭", "href": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html"}
+PASS m3_switch_no_origin: exit=1, browser: pass 200 fail 3 (INFO 8 별도, 검사 수 미포함) · 13.2s
+     FAIL [1440x900] 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜 — {"open": true, "h": "E07 · 기존 독립 5개 통과", "where": "표현 A · 목록 복귀: 검사별 관측과 H1 수정 · 목록 복귀 결함과 H1 수정 (E04–E07) · 5번째 문장 단위", "exp": "false", "rowSel": true, "visible": true}
+     FAIL [390x664] 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜 — {"open": true, "h": "E07 · 기존 독립 5개 통과", "where": "표현 A · 목록 복귀: 검사별 관측과 H1 수정 · 목록 복귀 결함과 H1 수정 (E04–E07) · 5번째 문장 단위", "exp": "false", "rowSel": true, "visible": true}
+     FAIL [390x844] 열린 채 A→B 전환: 같은 사실(E07) 미리보기 유지, 출발이 B 셀로 바뀜 — {"open": true, "h": "E07 · 기존 독립 5개 통과", "where": "표현 A · 목록 복귀: 검사별 관측과 H1 수정 · 목록 복귀 결함과 H1 수정 (E04–E07) · 5번째 문장 단위", "exp": "false", "rowSel": true, "visible": true}
+PASS m4_sheet_covers: exit=1, browser: pass 173 fail 24 (INFO 8 별도, 검사 수 미포함) · 12.4s
+     FAIL [390x664] A f14 미리보기 중에도 A/B 전환 버튼이 가려지지 않음 — covered by pv-kicker
+     FAIL [390x664] A f14 좁은 화면: 출발 버튼이 헤더와 시트 사이에 보임 — {"btop": -40.078125, "bbot": -10.078125, "sheetTop": 0, "hdr": 52}
+     FAIL [390x664] A f19 미리보기 중에도 A/B 전환 버튼이 가려지지 않음 — covered by pv-kicker
+PASS m5_pvscroll_stale: exit=1, browser: pass 201 fail 2 (INFO 8 별도, 검사 수 미포함) · 13.6s
+     FAIL [390x664] 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임 — scrollTop=505
+     FAIL [390x844] 앞 미리보기 안을 스크롤한 뒤 새로 연 미리보기도 처음부터 보임 — scrollTop=393
+mutation: pass 5 fail 0 (각 PASS = 깨뜨린 사본에서 browser_check가 실제로 실패함)
