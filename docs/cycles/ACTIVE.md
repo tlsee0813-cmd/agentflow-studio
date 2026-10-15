@@ -1,18 +1,18 @@
 # AgentFlow 활성 연구·검증 배정
 2026-10-16 갱신 · 단일 총괄: 현재 Codex 대화. 현재 상태는 여기만 갱신한다.
 
-## 현재: cycle07 실제 변경 기록의 공간·시점 표현 연구
+## 현재: cycle07 선택·구현 계약 통합, Opus 배정 준비
 [범위](2026-10-16-change-record-07/BRIEF.md) · [입력](2026-10-16-change-record-07/INPUT.md) · [고정 patch 감사](2026-10-16-change-record-07/STRUCTURE_AUDIT.md).
 
 질문은 사용자 목적을 유지하며 두 화면과 공통 계산의 변화·확인되지 않은 상태를 긴 검토문 없이 읽는 방법이다. 실제 공개 사람–Copilot 후속 수정 기록을 쓴다. 두 화면은 이미 공통 계산을 호출했으므로 이번 변경을 새 관계 생성으로 표시하지 않는다. 실제 되돌림·최종 수용·AI 세션 인계는 확인되지 않았다.
 
 | 담당 | 현재 상태 |
 |---|---|
-| [Pro 공간 표현](https://chatgpt.com/c/6ad11f6e-f728-83e8-9d0a-55ba32028487) | 공식 메커니즘·두 대안 조사 중 |
-| [Pro 시간/출처](https://chatgpt.com/c/6ad11f92-7fd0-83ec-b658-da441d3df6b5) | 고정 변경/나중 요청/AI 보고 구별의 두 대안 조사 중 |
+| [Pro 공간 표현](https://chatgpt.com/c/6ad11f6e-f728-83e8-9d0a-55ba32028487) | 조사 완료. 같은 자리의 책임 전후 A 선택, 인자 비교 B는 상세 |
+| [Pro 시간/출처](https://chatgpt.com/c/6ad11f92-7fd0-83ec-b658-da441d3df6b5) | 조사 완료. 고정 변경＋후속 기록 A 선택. 직접 서비스 조작은 없음 |
 | Astra High | 입력 사실표·세 장면 제안 완료 |
 | 6.1 Sol High | 두 소비부/공통 계산의 patch 감사 완료. 환경 준비의 추가 차단 없음 |
-| 총괄 | 입력 경계와 비교 장면 통합, 조사 결과 대조 후 구현 범위 선택 |
+| 총괄 | [선택](2026-10-16-change-record-07/DECISION.md)·[구현 계약](2026-10-16-change-record-07/IMPLEMENTATION.md) 통합. 공식 원문 감사·Astra 반례 반영 |
 | Opus·Cloud | cycle07 미배정. 이전 실행과 이번을 섞지 않음 |
 
 ## 직전 결과
