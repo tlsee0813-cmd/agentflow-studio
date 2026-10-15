@@ -28,7 +28,7 @@ Astra가 발견한 “묶음도 준비 대상이라고 부르는 공통 안내�
 
 [1280 초기 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/initial-1280.png) · [390 초기 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/initial-390.png) · [390 관계 참고](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/R3-reference-390.png) · [편집된 준비문](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/edited-preparation-1280.png).
 
-기본 지도는 검토 보고서 중심에서 벗어났지만 **열린 참고에는 상대·소속·선택 설명의 반복이 남는다.** G3의 두 받음 항목은 같은 출발점만 먼저 보여 실제 받는 세부 C31/C32를 열기 전에 구별하기 어렵다. 짧은 선의 일부 화살촉도 접힌 대표점 원과 겹쳐 방향 단서가 약하다. 이는 데이터 소실이나 선택/준비 범위의 자동 확장과 구분되는 읽기 부담이다.
+기본 지도는 검토 보고서 중심에서 벗어났지만 **열린 참고에는 상대·소속·선택 설명의 반복이 남는다.** G3의 두 받음 항목은 같은 출발점만 먼저 보여 실제 받는 세부 C31/C32를 열기 전에 구별하기 어렵다. 짧은 선의 방향 단서도 약하다. 후속 코드 대조에서 접힌 수신 끝에는 화살촉을 아예 생략한다는 점을 확인했으므로, 정적 그림만 보고 원과 겹친다고 설명했던 원인 추정은 정정한다. 이는 데이터 소실이나 선택/준비 범위의 자동 확장과 구분되는 읽기 부담이다.
 
 Pro의 작성자 PNG3장 평가, Astra의 작성자6장/독립4장 평가, 총괄의 실제 IAB 초기·선택·참고 관측은 서로의 방법을 구분한다. 정적 그림 평가를 독립 조작이나 사람 사용성으로 세지 않는다. 390 참고의 모든 내용과 지도 전체가 한 화면에 동시에 보이지 않으며 실제 스크롤이 필요하다.
 
