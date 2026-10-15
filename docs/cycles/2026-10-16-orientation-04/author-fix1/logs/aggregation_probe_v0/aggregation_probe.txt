@@ -1,0 +1,9 @@
+대상 wrapper: run_with_exit.sh sha256=ce73e4952d0af0837f38470cd4e68cd517c4aea5f6422d418ebf583c5c7dfc4b
+종류: 합성 집계 프로브(가짜 검사기). 브라우저·UI 실행 없음.
+가짜 종료 정상=0 프로브=1 → 실제 wrapper exit=0 (기대 0) 일치
+가짜 종료 정상=0 프로브=2 → 실제 wrapper exit=0 (기대 1) 불일치
+가짜 종료 정상=1 프로브=1 → 실제 wrapper exit=0 (기대 1) 불일치
+가짜 종료 정상=0 프로브=0 → 실제 wrapper exit=0 (기대 1) 불일치
+가짜 종료 정상=2 프로브=1 → 실제 wrapper exit=0 (기대 1) 불일치
+기대와 다른 쌍: 4
+probe_script_exit=1

@@ -1,0 +1,92 @@
+{
+ "created": "2026-10-16",
+ "base_v0": "35fdcd822b2ef5472a2079556103b65dd1f845ea/docs/cycles/2026-10-16-orientation-04/author-v0",
+ "html_sha256": "889317d56b5164495509821dfa7c8bbc498629507877b6d68fe9730edf36f08a",
+ "files": [
+  {
+   "path": "REPORT.md",
+   "bytes": 5523,
+   "sha256": "e6113fb71cc868efe915628b334363e4fb1bd36e0af8ecd56f8730393bd0368b"
+  },
+  {
+   "path": "check/aggregation_probe.sh",
+   "bytes": 1697,
+   "sha256": "08689a314d73aaa034c883ae7138287e30552a7d4831ddd49fb714e15fb9ab38"
+  },
+  {
+   "path": "check/fix1_check.py",
+   "bytes": 6871,
+   "sha256": "b2108ef539e58dfb8b1a2b5fbbd368c4271639f8ccb3ad5a381f3e8e5ce51f9c"
+  },
+  {
+   "path": "check/run_with_exit.sh",
+   "bytes": 1917,
+   "sha256": "6c5ee15aeac41bebfa49b470e425df9bc443c71ab4b51fe5df8410b562956529"
+  },
+  {
+   "path": "diff/html_v0_to_fix1.diff",
+   "bytes": 1081,
+   "sha256": "8f52192716b7f75ee2232061189ea238b6633a9b2bcdc8167ec90ff33f5b27ca"
+  },
+  {
+   "path": "diff/wrapper_v0_to_fix1.diff",
+   "bytes": 1014,
+   "sha256": "51a1cc2927caaf8b2ed67c6a0f5c228a4d8abecd4a4fb2a6bd1386155e351013"
+  },
+  {
+   "path": "logs/aggregation_probe_fix1/aggregation_probe.txt",
+   "bytes": 627,
+   "sha256": "907195474584655dfd8ec34dca7d911ee5d92a8c2fecd379a312bcac1e86e4b9"
+  },
+  {
+   "path": "logs/aggregation_probe_v0/aggregation_probe.txt",
+   "bytes": 639,
+   "sha256": "04a0bc62c2ccae0c0bf611cb43d0f3fb6c0150d4eda806ccb0ad581542ba7160"
+  },
+  {
+   "path": "logs/fix1_check/fix1_check.json",
+   "bytes": 3497,
+   "sha256": "c59a7f336ba1bbe1ceece59ed9f15453d83e83b6c32a75a4d43afb428ef2cbea"
+  },
+  {
+   "path": "logs/fix1_check/fix1_check.txt",
+   "bytes": 1286,
+   "sha256": "aa7d7e12f83a5012141e778fc9da12a88ec72e05b79bd73f41949fa0091e849a"
+  },
+  {
+   "path": "logs/fix1_check/process_exit.txt",
+   "bytes": 12,
+   "sha256": "bde294368bfed77c2cddf8cec271d398aee9cdbab3b26e1059281bd33adb0120"
+  },
+  {
+   "path": "logs/fix1_check/stderr.txt",
+   "bytes": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "path": "logs/fix1_check/stdout.txt",
+   "bytes": 1286,
+   "sha256": "aa7d7e12f83a5012141e778fc9da12a88ec72e05b79bd73f41949fa0091e849a"
+  },
+  {
+   "path": "orientation-study.html",
+   "bytes": 54262,
+   "sha256": "889317d56b5164495509821dfa7c8bbc498629507877b6d68fe9730edf36f08a"
+  },
+  {
+   "path": "png/b_1280_initial.png",
+   "bytes": 161275,
+   "sha256": "e0a0eec797e116326e47b4264886655e188c65b4d8be6ccd63e1afcf953b2778"
+  },
+  {
+   "path": "png/b_390_initial.png",
+   "bytes": 90142,
+   "sha256": "46ee32ed6b1b4ef3926d1b47bc862ed1d6ebf6eb41702e8f5f66971fdfdf928b"
+  },
+  {
+   "path": "png/b_390_restore_ref_pointed.png",
+   "bytes": 59330,
+   "sha256": "7fac09185648d5f80836cee097ff80d395c677ce937d3c931b1b097416d6f45d"
+  }
+ ]
+}

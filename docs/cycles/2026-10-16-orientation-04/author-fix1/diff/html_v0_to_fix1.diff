@@ -1,0 +1,11 @@
+--- v0/orientation-study.html	2026-10-16 03:18:56.561794681 +0900
++++ fix1/orientation-study.html	2026-10-16 03:19:10.919597528 +0900
+@@ -443,7 +443,7 @@
+   {part:"purpose", t:"{p:purpose}은 작업 지시와 따로 저장되고, 이 기록은 그것을 {a:home} · {a:task} · {a:next} · {a:restore}와 함께 적습니다."},
+   {part:"instruction", t:"작업 카드에서 직접 고친 {p:instruction}는 그 작업에만 남으며 {a:home} · {a:task} · {a:next}과 함께 적혀 있습니다."},
+   {part:"decision", t:"{p:decision}는 사용자 결정을 AI 해석보다 앞선 조건으로 보이게 하며 {a:home} · {a:task} · {a:next}과 함께 적혀 있습니다."},
+-  {part:null, t:"{a:restore}와 작업 지시·사용자 결정 표시의 관계는 이 기록에 적혀 있지 않습니다. 미지정이며 무관하다는 뜻은 아닙니다."}
++  {part:null, t:"이 지도에서 {a:restore}와 작업 카드의 직접 수정 동작·사용자 결정 표시의 연결은 미지정입니다. 무관하다는 뜻은 아닙니다."}
+ ];
+ 
+ var ZOOMS=[0.85,1,1.2];

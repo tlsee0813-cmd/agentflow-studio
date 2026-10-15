@@ -1,0 +1,14 @@
+--- v0/check/run_with_exit.sh	2026-10-16 03:18:57.037666386 +0900
++++ fix1/check/run_with_exit.sh	2026-10-16 03:19:10.920318476 +0900
+@@ -23,6 +23,9 @@
+ echo "cmd: orientation_check.py <URL> $(basename "$OTHER") probe_hash_mismatch/" >> "$REC"
+ echo "exit_code=$P" >> "$REC"
+ echo "served HTML file sha256 (after): $(sha256sum "$HTML" | cut -d' ' -f1)" >> "$REC"
+-if [ "$N" -eq 0 ] && [ "$P" -ne 0 ]; then echo "결과: 정상 exit 0, 의도한 해시 불일치 exit $P" >> "$REC"
+-else echo "결과 이상: 정상 exit $N, 의도한 실패 exit $P" >> "$REC"; fi
++# 집계: 정상 실행은 정확히 0, 의도한 해시 불일치 프로브는 정확히 1이어야 wrapper가 0으로 끝난다(임의 nonzero 불인정)
++if [ "$N" -eq 0 ] && [ "$P" -eq 1 ]; then echo "결과: 정상 exit 0, 의도한 해시 불일치 exit 1" >> "$REC"; RC=0
++else echo "결과 이상: 정상 exit $N (기대 0), 의도한 실패 exit $P (기대 1)" >> "$REC"; RC=1; fi
++echo "wrapper_exit=$RC" >> "$REC"
+ cat "$REC"
++exit "$RC"
