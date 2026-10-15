@@ -2249,6 +2249,9 @@ button.area-card:hover,button.area-card:focus-visible{border-color:var(--accent)
 .area-tasks{display:grid;gap:12px;margin-bottom:12px}
 .area-task{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px}
 .area-task h3{font-size:15px;margin:0 0 2px;overflow-wrap:anywhere}
+.task-open-link{all:unset;cursor:pointer;color:var(--ink);overflow-wrap:anywhere}
+.task-open-link:hover,.task-open-link:focus-visible{color:var(--accent);text-decoration:underline}
+.task-open-link:focus-visible{outline:3px solid var(--tint);outline-offset:2px}
 .area-task .hint{margin:0 0 6px}
 .area-task-result{margin:0 0 8px;color:var(--amber)}
 .area-task .row{gap:8px;align-items:center;flex-wrap:wrap}
@@ -2277,9 +2280,13 @@ button.area-card:hover,button.area-card:focus-visible{border-color:var(--accent)
 .area-node.dragging{opacity:.85;box-shadow:0 8px 24px rgba(30,30,60,.16)}
 .node-handle{position:absolute;left:6px;top:8px;width:22px;height:30px;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:grab;touch-action:none;font-size:15px;line-height:1}
 .node-handle:hover,.node-handle:focus-visible{background:var(--tint);color:var(--accent)}
-.node-select{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:none;border:0;padding:0;cursor:pointer}
-.node-select .area-card-note{overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.area-node .area-open{align-self:flex-start;padding:4px 10px}
+/* SPATIAL102: the card body enters; '정보' (top right) selects. The handle (left) is the only drag source. */
+.node-enter{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:none;border:0;padding:0 44px 0 0;cursor:pointer;color:inherit;font:inherit;min-height:84px}
+.node-enter:hover .area-card-name,.node-enter:focus-visible .area-card-name{color:var(--accent);text-decoration:underline}
+.node-enter .area-card-note{overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.area-card-go{color:var(--accent)}
+.node-info{position:absolute;right:8px;top:8px;padding:3px 8px;font-size:12px}
+.node-info[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
 .relation-layer{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
 .relation-line{stroke:#a9aabd;stroke-width:1.5;stroke-dasharray:6 5;fill:none}
 #relation-end path{fill:#a9aabd}
@@ -2329,8 +2336,8 @@ body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
   .area-list{display:block;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:8px 12px;margin:0 0 10px}
   .area-list>summary{font-size:14px;padding:4px 0}
   .area-list-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
-  .area-list-row.selected .area-list-select{border-color:var(--accent)}
-  .area-list-select{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;min-height:44px}
+  .area-list-row.selected .area-list-info{border-color:var(--accent)}
+  .area-list-enter{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;min-height:44px}
   .area-list-row>button:last-child{min-height:44px;flex:none}
 }
 /* GUIDE097: area guidance (optional, unsaved preview) */
@@ -2341,3 +2348,19 @@ body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
 .guide-notice{color:var(--ink);background:var(--soft,#f4f2fb);border-radius:10px;padding:8px 10px}
 .guide-panel .guide-instruction-label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
 .guide-stale{border-left:3px solid var(--line);padding:4px 10px;margin:8px 0}
+
+/* SPATIAL102: layer name at the end of the path, '확인할 일', start points, openable project cards. */
+.layer-chip{font-size:12px;color:var(--accent);background:var(--tint);border-radius:999px;padding:1px 8px}
+.check-list{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;margin:0 0 14px}
+.check-list h2{font-size:15px;margin:0 0 4px}
+.check-items{list-style:none;margin:6px 0 0;padding:0}
+.check-item{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:6px 0;border-top:1px solid var(--line)}
+.check-item strong{overflow-wrap:anywhere}
+.check-item .hint{margin:0;flex:1 1 220px}
+.check-item[data-kind="decision"] .hint,.check-item[data-kind="report"] .hint{color:#9a520f}
+.check-area{font-size:12px;color:var(--muted)}
+.check-item button{min-height:36px}
+.space-start,.area-start{gap:8px;margin:0 0 12px;flex-wrap:wrap}
+.area-checks{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.project-card.openable{cursor:pointer}
+.project-card.openable:hover{border-color:var(--accent)}

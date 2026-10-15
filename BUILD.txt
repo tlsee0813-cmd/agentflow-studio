@@ -1,11 +1,16 @@
-source 2a40ac3d7079b3984856b87abd4e085b43d35aa7 (feat/area-guidance097)
-browser MOCK only · CSP connect-src 'none' · not deployed
-sha256 per file:
+commit 2931b50938af037a43e20ed7aba69b96ab79843d (feat/area-guidance097)
+previous df5e1f666e3bfe9e4e275de711994eba252cfacb
+CI run 38689525012 on 2931b50: verify (ubuntu-24.04) success, verify (windows-2022) success
+static build: node continuity/scripts/build-static.mjs from app/ on a clean 2931b50 tree; CSP connect-src 'none'
+files: 15
+
+sha256  static-preview/<path>
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  .nojekyll
-7905c471bfd1097b2b800b505079ca751bf7f6b3d5792b2747a9b40c976f7142  client/app.js
+aab1d0704949d63bb8d71167d49325bcf07640847d163fef0adec76a49fea244  client/app.js
 4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d  client/presentation.js
 59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a  client/runtime.js
 3c6903aaed9c35fb6f56c93617829b04671dd304ce7abe53180cc854341ff7ae  index.html
+5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1  shared/attention.js
 2aa2c5ce08f4e74ac884022bc902611294db2bf37431800ca67f1e5957235128  shared/domain.js
 c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5  shared/guidance.js
 c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef  shared/mock.js
@@ -14,4 +19,4 @@ c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8  shared/outcome
 0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38  shared/storage.js
 ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d  shared/types.js
 b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385  shared/validation.js
-d041721103c0a12cd5efc2b87a870fb9a25f29f9f076be2cb04c921d51bb407b  styles.css
+7688eebb26d611df6535e90c8f47dc8634899323be24549a5db31ad9a0b20308  styles.css

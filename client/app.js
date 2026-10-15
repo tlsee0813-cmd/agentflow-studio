@@ -7,6 +7,7 @@ import { mockAdvice } from '../shared/mock.js';
 import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview, fitViewport, FIT_MIN, ZOOM_MIN, ZOOM_MAX } from './presentation.js';
 import { loadConfig, requestAdvice, requestGuidance, runtimeStorage, runtimeFailure } from './runtime.js';
 import { outcomeOf } from '../shared/outcome.js';
+import { checkItems, pointedReturn, returnPath } from '../shared/attention.js';
 const $ = (id) => document.getElementById(id);
 function node(tag, content = '', cls = '') {
     const e = document.createElement(tag);
@@ -58,6 +59,11 @@ let view = 'work', contextOpen = false, hasSaved = false, memoryDirty = false;
 // FLOW090: where this tab looks in the plan space, and which area the next request is written for. Per tab, never
 // project data; looking around never changes currentTaskId (the work the user continues).
 let viewArea = null;
+// SPATIAL102: the request shown read-only (view 'task'). Looking at it never changes currentTaskId or the request target.
+let viewTask = null;
+// SPATIAL102-R1: the report a '확인할 일' item pointed to, shown on the task screen (may be a report to a follow-up handoff).
+let viewReturn = null;
+let layerMemo = { space: null, from: null, areas: {} };
 let mapView = null, mapSelected = null, sheetOpen = false, areaListOpen = null;
 const guides = new Map();
 /** FLOW091-C: the task whose background preview the user opened (survives redraws such as an autosave). */
@@ -84,7 +90,7 @@ const spaceInputs = {};
 const PLACE_KEY = 'agentflow.workspace.place';
 const hasSpace = (p) => !!p.space.brief || p.space.areas.length > 0;
 function rememberPlace() { try {
-    session?.setItem(PLACE_KEY, JSON.stringify({ entry: target.kind === 'entry' ? target.ref.entryId : '', view, area: viewArea }));
+    session?.setItem(PLACE_KEY, JSON.stringify({ entry: target.kind === 'entry' ? target.ref.entryId : '', view, area: viewArea, task: viewTask, ret: viewReturn }));
 }
 catch { /* Per-tab convenience only. */ } }
 function recallPlace(entryId) {
@@ -93,8 +99,16 @@ function recallPlace(entryId) {
         if (!v || v.entry !== entryId)
             return null;
         const areaOk = (id) => typeof id === 'string' && (id === 'unassigned' || project.space.areas.some(a => a.id === id));
-        const placed = ['work', 'history', 'space', 'area'].includes(v.view) ? v.view : 'work';
-        return { view: placed === 'area' && !areaOk(v.area) ? 'space' : placed, area: areaOk(v.area) ? v.area : null };
+        const placed = ['work', 'history', 'space', 'area', 'task'].includes(v.view) ? v.view : 'work';
+        // SPATIAL102: a remembered task that no longer exists (or is a return) falls back to its area, then to the whole space.
+        if (placed === 'task') {
+            const t = typeof v.task === 'string' ? project.tasks.find(x => x.id === v.task && !isReturnTask(project, x)) : undefined;
+            // The pointed report is checked when shown (a stale one is reported, never swapped for another report).
+            if (t)
+                return { view: 'task', area: areaOf(project, t) ?? 'unassigned', task: t.id, ret: typeof v.ret === 'string' ? v.ret : null };
+            return { view: areaOk(v.area) ? 'area' : 'space', area: areaOk(v.area) ? v.area : null, task: null, ret: null };
+        }
+        return { view: placed === 'area' && !areaOk(v.area) ? 'space' : placed, area: areaOk(v.area) ? v.area : null, task: null, ret: null };
     }
     catch {
         return null;
@@ -127,6 +141,9 @@ function resetEphemeral() {
     lastFileExport = null;
     view = 'work';
     viewArea = null;
+    viewTask = null;
+    viewReturn = null;
+    layerMemo = { space: null, from: null, areas: {} };
     mapView = null;
     mapSelected = null;
     sheetOpen = false;
@@ -153,6 +170,8 @@ function openEntry(entry) {
     if (place) {
         view = place.view;
         viewArea = place.area;
+        viewTask = place.task;
+        viewReturn = place.ret;
     }
     else
         view = hasSpace(project) ? 'space' : 'work';
@@ -289,7 +308,7 @@ function displayView() {
     document.body.dataset.route = route;
     document.body.dataset.starting = String(starting);
     // FLOW091: inside a project (past the welcome) the head is one compact line so the map / next action come first.
-    document.body.dataset.compact = String(inProject && (view === 'space' || view === 'area' || !starting));
+    document.body.dataset.compact = String(inProject && (view === 'space' || view === 'area' || view === 'task' || !starting));
     $('projects-view').hidden = inProject;
     $('breadcrumb-project').hidden = !inProject;
     $('breadcrumb-sep').hidden = !inProject;
@@ -313,7 +332,7 @@ function displayView() {
     document.querySelector('.feedback-stack').hidden = !inProject;
     $('work-view').hidden = !inProject || view !== 'work';
     $('history-view').hidden = !inProject || view !== 'history';
-    const spatial = view === 'space' || view === 'area';
+    const spatial = view === 'space' || view === 'area' || view === 'task';
     $('space-view').hidden = !inProject || !spatial;
     $('nav-space').hidden = !inProject || route === 'example' || (starting && !hasSpace(project));
     $('nav-space').classList.toggle('active', inProject && spatial);
@@ -336,8 +355,69 @@ function displayView() {
     }
 }
 function showWork() { view = 'work'; displayView(); }
-function openSpace() { view = 'space'; viewArea = null; sheetOpen = false; render(); $('space-title')?.focus({ preventScroll: true }); window.scrollTo({ top: 0 }); }
-function openArea(id) { view = 'area'; viewArea = id; render(); $('space-title')?.focus({ preventScroll: true }); window.scrollTo({ top: 0 }); }
+/** SPATIAL102: remember the layer being left (scroll; in an area also which request was opened). Tab memory only. */
+function leaveLayer() {
+    if (view === 'space')
+        layerMemo.space = window.scrollY;
+    else if (view === 'area' && viewArea)
+        layerMemo.areas[viewArea] = { y: window.scrollY, task: layerMemo.areas[viewArea]?.task ?? null };
+}
+/** Focus the first of these that is shown (the map card on wide screens, the list row where the map is hidden). */
+function focusFirst(...ids) {
+    for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.offsetParent !== null) {
+            el.focus({ preventScroll: true });
+            return true;
+        }
+    }
+    return false;
+}
+/** Coming back restores this layer's scroll and the card the user entered; an ID that no longer exists is just skipped. */
+function openSpace() {
+    leaveLayer();
+    view = 'space';
+    viewArea = null;
+    viewTask = null;
+    viewReturn = null;
+    sheetOpen = false;
+    render();
+    const from = layerMemo.from;
+    window.scrollTo({ top: layerMemo.space ?? 0 });
+    if (!(from && focusFirst(`node-enter-${from}`, `list-enter-${from}`)))
+        $('space-title')?.focus({ preventScroll: true });
+}
+function openArea(id) {
+    if (view === 'space')
+        layerMemo.from = id;
+    leaveLayer();
+    view = 'area';
+    viewArea = id;
+    viewTask = null;
+    viewReturn = null;
+    render();
+    const memo = layerMemo.areas[id];
+    window.scrollTo({ top: memo?.y ?? 0 });
+    if (!(memo?.task && focusFirst(`task-open-${memo.task}`)))
+        $('space-title')?.focus({ preventScroll: true });
+}
+/** SPATIAL102: the read-only task screen. Opening it never changes the continued work or the request target.
+ * returnId (SPATIAL102-R1): the report a check item points to, shown on that screen. */
+function openTaskView(id, returnId = null) {
+    const t = project.tasks.find(x => x.id === id);
+    if (!t)
+        return;
+    const area = areaOf(project, t) ?? 'unassigned';
+    leaveLayer();
+    layerMemo.areas[area] = { y: layerMemo.areas[area]?.y ?? 0, task: id };
+    view = 'task';
+    viewArea = area;
+    viewTask = id;
+    viewReturn = returnId;
+    render();
+    window.scrollTo({ top: 0 });
+    $('space-title')?.focus({ preventScroll: true });
+}
 /** Explicit: continue this task (or go back to it when its return is what is open). Viewing never does this. */
 function continueTask(id) {
     if (project.pending)
@@ -350,6 +430,7 @@ function continueTask(id) {
     $('outcome-home').focus({ preventScroll: true });
     $('outcome-home').scrollIntoView({ block: 'start' });
 }
+/** Explicit: write the next request for this area (null = no area). The only way, besides the composer's own choice, to set the target. */
 function writeInArea(id) {
     // An unsent report or request keeps its kind and target: open it instead of relabelling or moving it.
     if (project.draft.trim()) {
@@ -1279,6 +1360,13 @@ function projectSummary(li, info) {
     const last = requests.at(-1), at = lastActivity(info);
     li.append(node('strong', info.name, 'project-card-name'), node('p', last ? `마지막 요청 · ${shortText(last.text, 80)}` : info.draft.trim() ? '아직 보낸 요청 없음 · 작성 중인 입력 있음' : '아직 보낸 요청 없음', 'project-card-summary'), node('p', `${at ? `최근 활동 · ${dateLabel(at)}` : '활동 기록 없음'} · ${info.space.areas.some(a => !a.archived) ? `영역 ${info.space.areas.filter(a => !a.archived).length}개 · ` : ''}요청 ${requests.length}개 · 가져온 결과 ${results.length}개`, 'hint'));
 }
+/** SPATIAL102: a card opens when its body is clicked, like the space cards. Its own buttons (and selecting text) do not. */
+function openOnClick(card, open) {
+    card.classList.add('openable');
+    card.addEventListener('click', e => { if (e.target.closest('button,a,input,select,textarea,summary'))
+        return; if (window.getSelection()?.toString())
+        return; guard(open); });
+}
 function projectCard(entry) {
     const li = node('li', '', 'project-card');
     li.dataset.entryId = entry.entryId;
@@ -1288,8 +1376,8 @@ function projectCard(entry) {
         li.querySelector('strong').append(' ', tag('휴지통'));
         row.append(btn('되살리기', () => void restoreProject(entry.entryId), 'secondary project-restore'));
     }
-    else
-        row.append(btn('이어서 하기', () => {
+    else {
+        const open = () => {
             const fresh = workspace.read()?.entries.find(e => e.entryId === entry.entryId && e.state === 'active');
             if (!fresh) {
                 listNotice = '다른 탭에서 바뀌어 이 프로젝트를 열지 않았어요. 목록을 새로 읽었어요.';
@@ -1300,7 +1388,10 @@ function projectCard(entry) {
             render();
             restoreDraftPanels();
             $('main').focus({ preventScroll: true });
-        }, 'primary project-open'), btn('휴지통으로', () => void trashProject(entry.entryId, entry.project.name), 'quiet project-trash'));
+        };
+        row.append(btn('이어서 하기', open, 'primary project-open'), btn('휴지통으로', () => void trashProject(entry.entryId, entry.project.name), 'quiet project-trash'));
+        openOnClick(li, open);
+    }
     li.append(row);
     return li;
 }
@@ -1314,9 +1405,11 @@ function legacyCard() {
     else
         li.append(node('strong', '읽지 못한 이전 저장 내용', 'project-card-name'));
     li.append(node('p', '이전 형식으로 이 브라우저에 남아 있는 내용이에요. 지우거나 덮어쓰지 않았고, 새 저장 형식으로 옮기지 않아 여기서는 저장되지 않아요.', 'hint'));
+    const open = () => { openLegacy(); render(); restoreDraftPanels(); };
     const row = node('div', '', 'row');
-    row.append(btn('열어 보기', () => { openLegacy(); render(); restoreDraftPanels(); }, 'secondary project-open'));
+    row.append(btn('열어 보기', open, 'secondary project-open'));
     li.append(row);
+    openOnClick(li, open);
     return li;
 }
 function renderProjects() {
@@ -1544,19 +1637,25 @@ function areaNode(a, plane, redraw) {
     handle.id = `node-move-${a.id}`;
     handle.setAttribute('aria-label', `${a.name} 위치 이동 (끌기 또는 방향키)`);
     handle.title = '끌어서 위치 이동 · 방향키로도 옮길 수 있어요';
-    const pick = node('button', '', 'node-select');
-    pick.type = 'button';
-    pick.id = `node-select-${a.id}`;
-    pick.setAttribute('aria-pressed', String(mapSelected === a.id));
-    pick.append(node('strong', a.name, 'area-card-name'), a.note ? node('span', a.note, 'area-card-note') : noNote(), node('span', areaSummary(a), 'hint'));
+    // SPATIAL102: the card body enters the area (click or Enter). Information is the separate '정보' button (the former selection).
+    const enter = node('button', '', 'node-enter');
+    enter.type = 'button';
+    enter.id = `node-enter-${a.id}`;
+    const name = node('strong', a.name, 'area-card-name');
+    name.append(node('span', ' ↘', 'area-card-go'));
+    enter.append(name, a.note ? node('span', a.note, 'area-card-note') : noNote(), node('span', areaSummary(a), 'hint'));
     if (areaRequests(a.id).some(currentGroup))
-        pick.append(appTag());
-    // Selecting shows the short properties; it never opens the area or changes the open work.
-    pick.addEventListener('click', () => { mapSelected = a.id; sheetOpen = true; rememberMap(); render(); $(`node-select-${a.id}`)?.focus({ preventScroll: true }); });
-    const open = btn('영역 열기 ↗', () => openArea(a.id), 'secondary area-open');
-    open.id = `node-open-${a.id}`;
-    el.append(handle, pick, open);
-    // Dragging uses only the handle; a drag never ends as a click on open/select.
+        enter.append(appTag());
+    enter.addEventListener('click', () => guard(() => openArea(a.id)));
+    // Information shows the short properties; it never opens the area or changes the open work.
+    const info = node('button', '정보', 'quiet node-info');
+    info.type = 'button';
+    info.id = `node-info-${a.id}`;
+    info.setAttribute('aria-pressed', String(mapSelected === a.id));
+    info.setAttribute('aria-label', `${a.name} 정보 (들어가지 않음)`);
+    info.addEventListener('click', () => { mapSelected = a.id; sheetOpen = true; rememberMap(); render(); $(`node-info-${a.id}`)?.focus({ preventScroll: true }); });
+    el.append(handle, enter, info);
+    // Dragging uses only the handle (outside the enter button); a drag never ends as a click on enter or information.
     handle.addEventListener('pointerdown', e => {
         if (e.button !== 0)
             return;
@@ -1743,7 +1842,7 @@ function panelDirty(a) {
 }
 /** FLOW091: the same areas as the map, by the same IDs, as a plain list zoom never shrinks (shown on narrow screens). */
 function areaList(active) {
-    const box = details(`영역 목록 ${active.length}개 · 지도 확대와 상관없이 고르기`, 'area-list');
+    const box = details(`영역 목록 ${active.length}개 · 지도 확대와 상관없이 열기`, 'area-list');
     box.className = 'area-list';
     box.open = areaListOpen ?? active.length <= 5;
     box.addEventListener('toggle', () => { areaListOpen = box.open; });
@@ -1751,12 +1850,15 @@ function areaList(active) {
         const row = node('div', '', 'area-list-row');
         row.dataset.areaId = a.id;
         row.classList.toggle('selected', mapSelected === a.id);
-        const pick = btn('', () => { mapSelected = a.id; sheetOpen = true; rememberMap(); render(); }, 'quiet area-list-select', `list-select-${a.id}`);
-        pick.setAttribute('aria-pressed', String(mapSelected === a.id));
-        pick.append(node('strong', a.name), node('span', a.note ? shortText(a.note, 40) : '구상 미기재', 'hint'));
+        // SPATIAL102: same contract as the map card: the row enters, '정보' selects (opens the properties sheet).
+        const enter = btn('', () => openArea(a.id), 'quiet area-list-enter', `list-enter-${a.id}`);
+        enter.append(node('strong', `${a.name} ↘`), node('span', a.note ? shortText(a.note, 40) : '구상 미기재', 'hint'));
         if (areaRequests(a.id).some(currentGroup))
-            pick.append(appTag());
-        row.append(pick, btn('열기 ↗', () => openArea(a.id), 'secondary', `list-open-${a.id}`));
+            enter.append(appTag());
+        const info = btn('정보', () => { mapSelected = a.id; sheetOpen = true; rememberMap(); render(); }, 'secondary area-list-info', `list-info-${a.id}`);
+        info.setAttribute('aria-pressed', String(mapSelected === a.id));
+        info.setAttribute('aria-label', `${a.name} 정보 (들어가지 않음)`);
+        row.append(enter, info);
         box.append(row);
     }
     return box;
@@ -1806,21 +1908,76 @@ function areaPanel(a) {
 function renderSpace() {
     const root = $('space-view');
     root.replaceChildren();
-    if (view !== 'space' && view !== 'area')
+    if (view !== 'space' && view !== 'area' && view !== 'task')
         return;
     root.hidden = route === 'projects'; // shown before building, so the map is measured at its real size (fit)
-    const area = view === 'area' ? areaById(viewArea) : null, crumb = node('nav', '', 'space-crumb');
+    // A task that is gone (another tab, a restored backup) falls back to its area screen.
+    const t = view === 'task' ? project.tasks.find(x => x.id === viewTask && !isReturnTask(project, x)) ?? null : null;
+    if (view === 'task' && !t) {
+        view = viewArea ? 'area' : 'space';
+        viewTask = null;
+        viewReturn = null;
+    }
+    // SPATIAL102: one path on all three layers, ending with the layer's name.
+    const area = view !== 'space' ? areaById(viewArea) : null, crumb = node('nav', '', 'space-crumb');
+    crumb.id = 'space-crumb';
     crumb.setAttribute('aria-label', '공간 경로');
-    if (view === 'area')
-        crumb.append(btn('전체 공간', openSpace, 'crumb-link', 'space-crumb-root'), node('span', '›', 'crumb-sep'), node('strong', area ? area.name : '영역 미지정 작업'));
-    if (view === 'area')
-        root.append(crumb);
+    const layer = (label) => node('span', label, 'layer-chip');
+    if (view === 'space')
+        crumb.append(node('strong', '전체 공간'), layer('프로젝트 전체'));
+    else {
+        const areaLabel = area ? area.name : '영역 미지정 작업';
+        crumb.append(btn('전체 공간', openSpace, 'crumb-link', 'space-crumb-root'), node('span', '›', 'crumb-sep'));
+        if (view === 'area')
+            crumb.append(node('strong', areaLabel), layer('영역'));
+        else
+            crumb.append(btn(areaLabel, () => openArea(viewArea ?? 'unassigned'), 'crumb-link', 'space-crumb-area'), node('span', '›', 'crumb-sep'), node('strong', taskTitle(project, t)), layer('작업'));
+    }
+    crumb.querySelector('strong').setAttribute('aria-current', 'location');
+    root.append(crumb);
     if (view === 'space')
         renderOverview(root);
+    else if (view === 'task')
+        renderTaskView(root, t);
     else if (area)
         renderArea(root, area);
     else
         renderUnplaced(root);
+}
+/* ---------- SPATIAL102: '확인할 일' (read-only, from existing records) ---------- */
+const CHECK_SHOWN = 4;
+function checkRow(it) {
+    const li = node('li', '', 'check-item');
+    li.dataset.kind = it.kind;
+    const t = project.tasks.find(x => x.id === it.taskId), a = areaById(it.areaId);
+    li.append(node('span', `${a ? a.name : '영역 미지정'}${a?.archived ? ' · 보관됨' : ''}`, 'check-area'), node('strong', t ? taskTitle(project, t) : ''), node('span', it.kind === 'decision' ? `${it.status} · 답을 기다려요` : `${it.status} · 아직 다음 요청이나 확인 작업문 없음`, 'hint'));
+    li.append(btn('보기', () => openTaskView(it.taskId, it.returnId), 'quiet', `check-open-${it.returnId ?? it.taskId}`));
+    return li;
+}
+/** Shown once the project has requests. Items with evidence only: an open question, a report nothing was done with yet. */
+function checkSection() {
+    if (!project.tasks.length)
+        return null;
+    const items = checkItems(project), box = node('section', '', 'check-list');
+    box.id = 'check-list';
+    box.append(node('h2', items.length ? `확인할 일 ${items.length}건` : '확인할 일'));
+    if (!items.length) {
+        box.append(node('p', '지금 앱 기록으로는 확인할 일이 없어요.', 'hint'));
+        return box;
+    }
+    box.append(node('p', '답을 기다리는 질문과, 받은 뒤 아직 손대지 않은 보고예요. 앱 기록 기준이며 개발 도구의 실행 상태는 아니에요.', 'hint'));
+    const list = node('ul', '', 'check-items');
+    for (const it of items.slice(0, CHECK_SHOWN))
+        list.append(checkRow(it));
+    box.append(list);
+    if (items.length > CHECK_SHOWN) {
+        const more = details(`나머지 ${items.length - CHECK_SHOWN}건`, 'check-more'), rest = node('ul', '', 'check-items');
+        for (const it of items.slice(CHECK_SHOWN))
+            rest.append(checkRow(it));
+        more.append(rest);
+        box.append(more);
+    }
+    return box;
 }
 function renderOverview(root) {
     const active = project.space.areas.filter(a => !a.archived), archived = project.space.areas.filter(a => a.archived), brief = project.space.brief;
@@ -1845,6 +2002,15 @@ function renderOverview(root) {
         edit.append(node('p', `이전에 적은 목적 ${brief.previous.length}개는 그대로 보관돼요.`, 'hint'));
     head.append(edit);
     root.append(head);
+    const checks = checkSection();
+    if (checks)
+        root.append(checks);
+    if (!active.length && route !== 'example') {
+        const start = node('div', '', 'row space-start');
+        start.id = 'space-start';
+        start.append(btn('영역 추가', () => $('area-name').focus(), 'secondary', 'start-add-area'), btn('바로 첫 요청 쓰기 · 영역 없이', () => writeInArea(null), 'quiet', 'start-first-request'));
+        root.append(start);
+    }
     renderMap(root, active);
     if (active.length > 1 || project.space.relations.length) {
         const rel = node('section', '', 'area-relations');
@@ -1896,7 +2062,10 @@ function taskEntry(t, placing) {
     const item = node('article', '', 'area-task');
     item.dataset.taskId = t.id;
     const first = sourceOf(project, t), results = returnsOf(t);
-    item.append(node('h3', taskTitle(project, t)), node('p', `${first ? dateLabel(first.at) : ''} · ${taskStatus(project, t)}`, 'hint'));
+    // SPATIAL102: the title enters the read-only task screen; continuing stays the explicit button below.
+    const title = node('h3');
+    title.append(btn(`${taskTitle(project, t)} ↘`, () => openTaskView(t.id), 'task-open-link', `task-open-${t.id}`));
+    item.append(title, node('p', `${first ? dateLabel(first.at) : ''} · ${taskStatus(project, t)}`, 'hint'));
     if (results.length) {
         const last = results.at(-1), src = project.sources.find(s => s.id === last.sourceIds[0]);
         item.append(node('p', `돌아온 결과 ${results.length}개 · 앱 미검증${src ? ` · 최근: ${shortText(reportBody(src), 60)}` : ''}`, 'area-task-result'));
@@ -2246,6 +2415,13 @@ function renderArea(root, a) {
         return; commit(editArea(project, a.id, name.value, note.value)); clearInputs(nameKey, noteKey); }, 'secondary', 'area-edit-save'), btn('취소', () => { clearInputs(nameKey, noteKey); edit.open = false; render(); }, 'quiet', 'area-edit-cancel'));
     head.append(edit);
     root.append(head);
+    const checks = checkItems(project), here = checks.filter(c => c.areaId === a.id).length, elsewhere = checks.length - here;
+    if (here || elsewhere) {
+        const line = node('p', `확인할 일 · 이 영역 ${here}건${elsewhere ? ` · 다른 영역 ${elsewhere}건` : ''} `, 'hint area-checks');
+        line.id = 'area-checks';
+        line.append(btn('전체 공간에서 보기', () => { openSpace(); $('check-list')?.scrollIntoView({ block: 'start' }); }, 'crumb-link', 'area-checks-open'));
+        root.append(line);
+    }
     const tasks = areaRequests(a.id), list = node('section', '', 'area-tasks');
     list.id = 'area-tasks';
     if (!a.archived && route !== 'example')
@@ -2253,8 +2429,16 @@ function renderArea(root, a) {
     list.append(node('h2', '이 영역의 요청과 작업'));
     for (const t of tasks)
         list.append(taskEntry(t, false));
-    if (!tasks.length)
-        list.append(node('p', a.archived ? '이 영역에 연결된 요청이 없어요.' : '아직 이 영역의 요청이 없어요. ‘이 영역에 새 요청’으로 시작하세요.', 'hint'));
+    if (!tasks.length && a.archived)
+        list.append(node('p', '이 영역에 연결된 요청이 없어요.', 'hint'));
+    else if (!tasks.length) {
+        const start = node('div', '', 'row area-start');
+        start.id = 'area-start';
+        start.append(btn('이 영역에 새 요청', () => writeInArea(a.id), 'secondary', 'area-start-request'));
+        if (route !== 'example')
+            start.append(btn('무엇을 요청할지 같이 정하기', () => { guideOf(a.id); render(); const g = document.getElementById(`guide-${a.id}`); g?.scrollIntoView({ block: 'start' }); $('guide-instruction')?.focus({ preventScroll: true }); }, 'quiet', 'area-start-guide'));
+        list.append(node('p', '아직 이 영역의 요청이 없어요.', 'hint'), start);
+    }
     root.append(list);
     const own = new Set(tasks.flatMap(t => [t.id, ...returnsOf(t).map(r => r.id)])), bases = project.bases.filter(b => own.has(project.sources.find(s => s.id === b.sourceId)?.taskId ?? ''));
     const shared = project.bases.length - bases.length, box = details(`기준 · 이 영역 ${bases.length}개 · 다른 영역·미분류 기준 ${shared}개`, 'area-bases');
@@ -2262,6 +2446,65 @@ function renderArea(root, a) {
         box.append(node('p', `${BASIS_LABEL[b.status]} · ${shortText(b.text, 90)}`, 'source-raw'));
     box.append(node('p', '다른 영역·미분류 기준은 다른 영역의 요청에서 나왔거나 어느 영역에서 나왔는지 기록이 없는 기준이에요. 모두가 합의한 공통 기준이라는 뜻은 아니에요. 이 영역에 복사하지 않고, 기준 전체가 지금처럼 모든 작업문에 함께 들어가요.', 'hint'), btn('기준 · 출처 전체 보기', showContext, 'quiet'));
     root.append(box);
+}
+/** SPATIAL102: one request, read-only: its words, status, returned results and the bases that came from it. */
+function renderTaskView(root, t) {
+    const area = areaById(areaOf(project, t)), first = sourceOf(project, t), results = returnsOf(t);
+    const head = node('div', '', 'space-head'), title = node('h1', taskTitle(project, t));
+    title.id = 'space-title';
+    title.tabIndex = -1;
+    head.append(node('p', `TASK · 작업 ${pad(project.tasks.indexOf(t) + 1)}${area?.archived ? ' · 보관된 영역' : ''}`, 'eyebrow'), title, node('p', taskStatus(project, t), 'hint task-view-status'));
+    const actions = node('div', '', 'row');
+    if (currentGroup(t))
+        actions.append(appTag(), btn('작업 화면으로', () => continueTask(t.id), 'primary', 'task-view-continue'));
+    else
+        actions.append(btn('이 작업 이어서 하기', () => continueTask(t.id), 'primary', 'task-view-continue'));
+    head.append(actions);
+    if (!currentGroup(t))
+        head.append(node('p', '이 화면을 보는 것만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.', 'hint'));
+    root.append(head);
+    if (viewReturn !== null)
+        root.append(pointedSection(t, viewReturn));
+    const body = node('section', '', 'area-tasks task-view');
+    body.id = 'task-view';
+    body.append(node('h2', '요청 원문'));
+    if (first)
+        body.append(node('p', `${sourceName[first.kind]} · ${dateLabel(first.at)}`, 'source-id'), node('div', first.text, 'source-raw'));
+    body.append(node('h2', `돌아온 결과 ${results.length}개`));
+    if (!results.length)
+        body.append(node('p', t.handoffs.length ? '작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.' : '아직 돌아온 결과가 없어요.', 'hint'));
+    for (const r of results)
+        for (const id of r.sourceIds) {
+            const src = project.sources.find(s => s.id === id);
+            if (src)
+                body.append(node('p', `${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`, 'source-id'), node('div', reportBody(src), 'source-raw'));
+        }
+    root.append(body);
+    const own = new Set([t.id, ...results.map(r => r.id)]), bases = project.bases.filter(b => own.has(project.sources.find(s => s.id === b.sourceId)?.taskId ?? ''));
+    const box = details(`이 작업의 기준 ${bases.length}개`, 'task-view-bases');
+    for (const b of bases)
+        box.append(node('p', `${BASIS_LABEL[b.status]} · ${shortText(b.text, 90)}`, 'source-raw'));
+    if (!bases.length)
+        box.append(node('p', '이 작업에서 나온 기준이 없어요.', 'hint'));
+    box.append(btn('기준 · 출처 전체 보기', showContext, 'quiet'));
+    root.append(box);
+}
+/** SPATIAL102-R1: the report the check item pointed to, with where it belongs. A stale or foreign id is said so plainly. */
+function pointedSection(t, returnId) {
+    const box = node('section', '', 'area-tasks task-pointed');
+    box.id = 'task-pointed';
+    box.append(node('h2', '확인할 일에서 연 보고'));
+    const r = pointedReturn(project, t.id, returnId), src = r ? project.sources.find(s => s.id === r.sourceIds[0]) : undefined;
+    if (!r || !src) {
+        box.append(node('p', '가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 작업의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래는 이 작업의 기록이에요.', 'alert warning'));
+        return box;
+    }
+    const no = (x) => `작업 ${pad(project.tasks.indexOf(x) + 1)}`, path = returnPath(project, r);
+    // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run (a report can be pasted onto the
+    // current work with nothing exported), so the wording never infers one.
+    const hops = path.map((x, i) => i === 0 ? `${no(x)} 요청` : i === path.length - 1 ? `${no(x)} 이 보고` : `${no(x)} 보고`);
+    box.append(node('p', `연결: ${hops.join(' › ')} (${path.length > 2 ? '이전 보고에 연결된 보고' : '이 요청에 바로 연결된 보고'})`, 'hint'), node('p', `${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`, 'source-id'), node('div', reportBody(src), 'source-raw'));
+    return box;
 }
 function renderUnplaced(root) {
     const head = node('div', '', 'space-head'), title = node('h1', '영역 미지정 작업');
@@ -2291,7 +2534,7 @@ function renderPlace(t) {
     if (area)
         bar.append(node('span', '›', 'crumb-sep'), btn(area.name, () => openArea(area.id), 'crumb-link', 'place-area'));
     const receipt = t ? receiptOf(t) : null;
-    bar.append(node('span', '›', 'crumb-sep'), node('strong', !t ? '새 요청' : receipt !== null ? `${receipt >= 0 ? `작업 ${pad(receipt + 1)}의 보고 · ` : ''}후속 확인 작업문 초안` : '앱에서 이어갈 작업'));
+    bar.append(node('span', '›', 'crumb-sep'), node('strong', !t ? '새 요청' : receipt !== null ? `${receipt >= 0 ? `작업 ${pad(receipt + 1)}의 보고 · ` : ''}후속 확인 작업문 초안` : '앱에서 이어갈 작업'), node('span', '이어가는 작업', 'layer-chip'));
 }
 /** The area the next request goes to: explicit, visible and changeable. Shown once areas exist. */
 function renderComposeArea(t, returned) {
