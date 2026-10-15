@@ -1,0 +1,53 @@
+HTTP "GET /purpose-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1440/HTTP
+PASS 1440/rawIDs-unique
+1440/initial
+1440/click/#zIn
+1440/wheel/#mapScroll
+1440/click/#panel [data-pick="P1"]
+1440/map-entry-snapshot
+PASS 1440/115%-computed
+1440/click/#panel .act.wide [data-act="read"]
+1440/role-condition
+PASS 1440/role-boundaries
+1440/locate-X1-before
+1440/click/[data-loc="X1"]
+1440/located-X1
+PASS 1440/located-X1-actual
+PASS 1440/selection-stays-P1
+1440/locate-X2-before
+1440/click/[data-loc="X2"]
+1440/located-X2
+FAIL 1440/located-X2-actual
+PASS 1440/selection-stays-P1
+1440/locate-X1-before
+1440/click/[data-loc="X1"]
+1440/located-X1
+PASS 1440/located-X1-actual
+PASS 1440/selection-stays-P1
+1440/wheel/#reader
+1440/peek-before
+1440/click/[data-peek="keep"]
+1440/peek-open
+1440/click/#pk-keep [data-act="peek-close"]
+1440/peek-button-closed
+PASS 1440/peek-button-removal-return
+1440/click/[data-peek="keep"]
+1440/peek-escape
+PASS 1440/peek-Escape-removal
+1440/click/#rPrep
+1440/prep-defaults
+PASS 1440/default-small-plan
+1440/click/#pf-ask
+Traceback (most recent call last):
+  File "/workspace/browser-env/purpose-fix1/verify.py", line 61, in main
+    click('#pf-ask');p.keyboard.press('Control+A');p.keyboard.insert_text(edit);click('#prepClose');click('#rPrep');check(f'{width}/edit-close-reopen',p.locator('#pf-ask').input_value()==edit);click('#prepClose');result['scenes'].append(f'{width}/P2')
+    ^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/purpose-fix1/verify.py", line 38, in click
+    if not g.get('full') or not g.get('hit'):raise RuntimeError('normal click unavailable '+s)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: normal click unavailable #pf-ask
+
+ACTUAL_CHILD_EXIT 1

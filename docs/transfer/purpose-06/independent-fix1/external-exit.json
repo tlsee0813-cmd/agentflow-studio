@@ -1,0 +1,15 @@
+{
+  "observer": "functions.exec tools.write_stdin / exec_command tool returned process exit_code; no new execution",
+  "run01": {
+    "actualCollectorExit": 1,
+    "childExit": 1
+  },
+  "run02": {
+    "actualCollectorExit": 0,
+    "childExit": 0
+  },
+  "wrong-sha-probe": {
+    "actualCollectorExit": 1,
+    "childExit": 1
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "startedUTC": "2026-10-15T20:24:35.460315+00:00",
+  "sourceURL": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/fbea41f245c4020bc044c7e0c7502d106fc900ae/docs/transfer/purpose-06/author-fix1/purpose-study.html",
+  "expectedSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "expectedBytes": 33944,
+  "plannedSceneIDs": [
+    "1440/P1",
+    "1440/P2",
+    "1440/P3",
+    "390/P1",
+    "390/P2",
+    "390/P3"
+  ],
+  "scenes": [],
+  "observations": [],
+  "checks": [],
+  "fatal": {
+    "type": "ValueError",
+    "message": "source byte/hash mismatch (isolated wrong-SHA probe)",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/purpose-fix1/verify.py\", line 17, in main\n    if result['beforeSHA256']!=expected or result['sourceBytes']!=33944:raise ValueError('source byte/hash mismatch'+(' (isolated wrong-SHA probe)' if args.wrong_sha_probe else ''))\n                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: source byte/hash mismatch (isolated wrong-SHA probe)\n"
+  },
+  "cleanupErrors": [],
+  "pageerrors": [],
+  "console": [],
+  "http": [],
+  "environment": {
+    "python": "/workspace/browser-env/venv/bin/python",
+    "playwright": "1.57.0",
+    "chromiumPath": "/usr/bin/chromium"
+  },
+  "probe": true,
+  "beforeSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "sourceBytes": 33944,
+  "afterSHA256": "d3cc065a3f26f7f64a0d42c5fda9551d8ff3cd270f66badf7c262829375bc2cd",
+  "complete": false,
+  "finishedUTC": "2026-10-15T20:24:35.462400+00:00",
+  "exitCode": 1
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/purpose-fix1/verify.py", line 17, in main
+    if result['beforeSHA256']!=expected or result['sourceBytes']!=33944:raise ValueError('source byte/hash mismatch'+(' (isolated wrong-SHA probe)' if args.wrong_sha_probe else ''))
+                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: source byte/hash mismatch (isolated wrong-SHA probe)
+
+ACTUAL_CHILD_EXIT 1

@@ -1,0 +1,7 @@
+{
+  "python": "/workspace/browser-env/venv/bin/python",
+  "playwrightDistributionVersion": "1.57.0",
+  "playwrightModule": "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/__init__.py",
+  "chromiumExecutable": "/usr/bin/chromium",
+  "browserVersionFromActualRun": "154.0.8037.57"
+}

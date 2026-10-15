@@ -1,0 +1,134 @@
+HTTP "GET /purpose-study.html HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1440/HTTP
+PASS 1440/rawIDs-unique
+1440/initial
+1440/click/#zIn
+1440/wheel/#mapScroll
+1440/click/#panel [data-pick="P1"]
+1440/map-entry-snapshot
+PASS 1440/115%-computed
+1440/click/#panel .act.wide [data-act="read"]
+1440/role-condition
+PASS 1440/role-boundaries
+1440/locate-X1-before
+1440/click/[data-loc="X1"]
+1440/located-X1
+PASS 1440/located-X1-actual
+PASS 1440/selection-stays-P1
+1440/locate-X2-before
+1440/click/[data-loc="X2"]
+1440/located-X2
+PASS 1440/located-X2-actual
+PASS 1440/selection-stays-P1
+1440/locate-X1-before
+1440/click/[data-loc="X1"]
+1440/located-X1
+PASS 1440/located-X1-actual
+PASS 1440/selection-stays-P1
+1440/wheel/#reader
+1440/peek-before
+1440/click/[data-peek="keep"]
+1440/peek-open
+1440/click/#pk-keep [data-act="peek-close"]
+1440/peek-button-closed
+PASS 1440/peek-button-removal-return
+1440/click/[data-peek="keep"]
+1440/peek-escape
+PASS 1440/peek-Escape-removal
+1440/click/#rPrep
+1440/prep-defaults
+PASS 1440/default-small-plan
+1440/click/#pf-ask
+1440/click/#prepClose
+1440/click/#rPrep
+PASS 1440/edit-close-reopen
+1440/click/#prepClose
+1440/click/#rBack
+1440/whole-return-1
+PASS 1440/whole-map-exact-1
+1440/returned-visibility-1
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+PASS 1440/edit-whole-roundtrip-1
+1440/click/#prepClose
+1440/click/#rBack
+1440/whole-return-2
+PASS 1440/whole-map-exact-2
+1440/returned-visibility-2
+1440/click/#panel .act.wide [data-act="read"]
+1440/click/#rPrep
+PASS 1440/edit-whole-roundtrip-2
+1440/click/#prepClose
+HTTP "GET /purpose-study.html HTTP/1.1" 200 -
+PASS 390/HTTP
+PASS 390/rawIDs-unique
+390/initial
+390/click/#zIn
+390/wheel/#mapScroll
+390/click/#panel [data-pick="P1"]
+390/map-entry-snapshot
+PASS 390/115%-computed
+390/click/#panel [data-act="read"].narrow
+390/role-condition
+PASS 390/role-boundaries
+390/locate-X1-before
+390/click/[data-loc="X1"]
+390/located-X1
+PASS 390/located-X1-actual
+PASS 390/selection-stays-P1
+390/click/#backRead
+390/read-return-X1
+PASS 390/read-position-X1
+390/locate-X2-before
+390/click/[data-loc="X2"]
+390/located-X2
+PASS 390/located-X2-actual
+PASS 390/selection-stays-P1
+390/click/#backRead
+390/read-return-X2
+PASS 390/read-position-X2
+390/locate-X1-before
+390/click/[data-loc="X1"]
+390/located-X1
+PASS 390/located-X1-actual
+PASS 390/selection-stays-P1
+390/click/#backRead
+390/read-return-X1
+PASS 390/read-position-X1
+390/wheel/#reader
+390/peek-before
+390/click/[data-peek="keep"]
+390/peek-open
+390/click/#pk-keep [data-act="peek-close"]
+390/peek-button-closed
+PASS 390/peek-button-removal-return
+390/click/[data-peek="keep"]
+390/peek-escape
+PASS 390/peek-Escape-removal
+390/click/#rPrep
+390/prep-defaults
+PASS 390/default-small-plan
+390/click/#pf-ask
+390/click/#prepClose
+390/click/#rPrep
+PASS 390/edit-close-reopen
+390/click/#prepClose
+390/click/#rBack
+390/whole-return-1
+PASS 390/whole-map-exact-1
+390/returned-visibility-1
+390/click/#panel [data-act="read"].narrow
+390/click/#rPrep
+PASS 390/edit-whole-roundtrip-1
+390/click/#prepClose
+390/click/#rBack
+390/whole-return-2
+PASS 390/whole-map-exact-2
+390/returned-visibility-2
+390/click/#panel [data-act="read"].narrow
+390/click/#rPrep
+PASS 390/edit-whole-roundtrip-2
+390/click/#prepClose
+ACTUAL_CHILD_EXIT 0

@@ -1,0 +1,1226 @@
+{
+  "method": "Read-only derivation from run02/result.json. No browser reexecution. Intersection of every ancestor clip with target self-content clip; separate box and representative hit. Recorded Range rectangles are layout ranges (up to 16), not ink or human understanding. Textarea value is independently recorded; Range has no native textarea text.",
+  "derivedGeometry": [
+    {
+      "observation": "1440/initial",
+      "selector": "#purposeTxt",
+      "ancestorClip": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 1,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/initial",
+      "selector": "#n-P1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 8,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/initial",
+      "selector": "#n-X1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/initial",
+      "selector": "#n-X2",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/role-condition",
+      "selector": "#p-role",
+      "ancestorClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/role-condition",
+      "selector": "#p-keep",
+      "ancestorClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 9,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/role-condition",
+      "selector": "#p-unk",
+      "ancestorClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 6,
+      "rangeIndicesOutsideCombinedClip": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/located-X1",
+      "selector": "#n-X1 .face",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 6,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/located-X2",
+      "selector": "#n-X2 .face",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": {
+        "left": 795.049963192064,
+        "top": 455.0560772235577,
+        "right": 1018.1499269446548,
+        "bottom": 572.3384540264423
+      },
+      "combinedTextClip": {
+        "left": 795.049963192064,
+        "top": 455.0560772235577,
+        "right": 1018.1499269446548,
+        "bottom": 572.3384540264423
+      },
+      "recordedRangeCount": 5,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/located-X1",
+      "selector": "#n-X1 .face",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 6,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/peek-before",
+      "selector": "anchor",
+      "ancestorClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 9,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/peek-open",
+      "selector": "#pk-keep",
+      "ancestorClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 12,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/peek-open",
+      "selector": "#pk-keep a",
+      "ancestorClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 1,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/peek-open",
+      "selector": "#pk-keep [data-act=\"peek-close\"]",
+      "ancestorClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 1,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/peek-button-closed",
+      "selector": "anchor",
+      "ancestorClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 1041,
+        "top": 100.40625,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 9,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/prep-defaults",
+      "selector": "#pf-ask",
+      "ancestorClip": {
+        "left": 400,
+        "top": 238.890625,
+        "right": 1040,
+        "bottom": 732.265625
+      },
+      "selfContentClip": {
+        "left": 419,
+        "top": 317.640625,
+        "right": 1021,
+        "bottom": 405.640625
+      },
+      "combinedTextClip": {
+        "left": 419,
+        "top": 317.640625,
+        "right": 1021,
+        "bottom": 405.640625
+      },
+      "recordedRangeCount": 0,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "NO_RANGE_TEXT",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/prep-defaults",
+      "selector": "#pf-keep",
+      "ancestorClip": {
+        "left": 400,
+        "top": 238.890625,
+        "right": 1040,
+        "bottom": 732.265625
+      },
+      "selfContentClip": {
+        "left": 419,
+        "top": 443.015625,
+        "right": 1021,
+        "bottom": 531.015625
+      },
+      "combinedTextClip": {
+        "left": 419,
+        "top": 443.015625,
+        "right": 1021,
+        "bottom": 531.015625
+      },
+      "recordedRangeCount": 0,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "NO_RANGE_TEXT",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/prep-defaults",
+      "selector": "#pf-unknown",
+      "ancestorClip": {
+        "left": 400,
+        "top": 238.890625,
+        "right": 1040,
+        "bottom": 732.265625
+      },
+      "selfContentClip": {
+        "left": 419,
+        "top": 568.390625,
+        "right": 1021,
+        "bottom": 656.390625
+      },
+      "combinedTextClip": {
+        "left": 419,
+        "top": 568.390625,
+        "right": 1021,
+        "bottom": 656.390625
+      },
+      "recordedRangeCount": 0,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "NO_RANGE_TEXT",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/prep-defaults",
+      "selector": "#prepClose",
+      "ancestorClip": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900
+      },
+      "recordedRangeCount": 1,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/returned-visibility-1",
+      "selector": "#n-P1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 8,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/returned-visibility-1",
+      "selector": "#n-X1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/returned-visibility-1",
+      "selector": "#n-X2",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/returned-visibility-2",
+      "selector": "#n-P1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 8,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/returned-visibility-2",
+      "selector": "#n-X1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "1440/returned-visibility-2",
+      "selector": "#n-X2",
+      "ancestorClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 143.40625,
+        "right": 1040,
+        "bottom": 900
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/initial",
+      "selector": "#purposeTxt",
+      "ancestorClip": {
+        "left": 0,
+        "top": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 2,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/initial",
+      "selector": "#n-P1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 8,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/initial",
+      "selector": "#n-X1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/initial",
+      "selector": "#n-X2",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": false
+    },
+    {
+      "observation": "390/role-condition",
+      "selector": "#p-role",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/role-condition",
+      "selector": "#p-keep",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 9,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/role-condition",
+      "selector": "#p-unk",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 6,
+      "rangeIndicesOutsideCombinedClip": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": false
+    },
+    {
+      "observation": "390/located-X1",
+      "selector": "#n-X1 .face",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 6,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/located-X2",
+      "selector": "#n-X2 .face",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": {
+        "left": 39.749998429242304,
+        "top": 438.8060772235577,
+        "right": 350.2499863119686,
+        "bottom": 556.0884540264423
+      },
+      "combinedTextClip": {
+        "left": 39.749998429242304,
+        "top": 438.8060772235577,
+        "right": 350.2499863119686,
+        "bottom": 556.0884540264423
+      },
+      "recordedRangeCount": 5,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/located-X1",
+      "selector": "#n-X1 .face",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 6,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/peek-before",
+      "selector": "anchor",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 9,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/peek-open",
+      "selector": "#pk-keep",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 12,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/peek-open",
+      "selector": "#pk-keep a",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 1,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/peek-open",
+      "selector": "#pk-keep [data-act=\"peek-close\"]",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 1,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/peek-button-closed",
+      "selector": "anchor",
+      "ancestorClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 117.65625,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 9,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/prep-defaults",
+      "selector": "#pf-ask",
+      "ancestorClip": {
+        "left": 0,
+        "top": 71.15625,
+        "right": 390,
+        "bottom": 603.28125
+      },
+      "selfContentClip": {
+        "left": 19,
+        "top": 169.28125,
+        "right": 371,
+        "bottom": 257.28125
+      },
+      "combinedTextClip": {
+        "left": 19,
+        "top": 169.28125,
+        "right": 371,
+        "bottom": 257.28125
+      },
+      "recordedRangeCount": 0,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "NO_RANGE_TEXT",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/prep-defaults",
+      "selector": "#pf-keep",
+      "ancestorClip": {
+        "left": 0,
+        "top": 71.15625,
+        "right": 390,
+        "bottom": 603.28125
+      },
+      "selfContentClip": {
+        "left": 19,
+        "top": 294.65625,
+        "right": 371,
+        "bottom": 382.65625
+      },
+      "combinedTextClip": {
+        "left": 19,
+        "top": 294.65625,
+        "right": 371,
+        "bottom": 382.65625
+      },
+      "recordedRangeCount": 0,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "NO_RANGE_TEXT",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/prep-defaults",
+      "selector": "#pf-unknown",
+      "ancestorClip": {
+        "left": 0,
+        "top": 71.15625,
+        "right": 390,
+        "bottom": 603.28125
+      },
+      "selfContentClip": {
+        "left": 19,
+        "top": 420.03125,
+        "right": 371,
+        "bottom": 508.03125
+      },
+      "combinedTextClip": {
+        "left": 19,
+        "top": 420.03125,
+        "right": 371,
+        "bottom": 508.03125
+      },
+      "recordedRangeCount": 0,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "NO_RANGE_TEXT",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/prep-defaults",
+      "selector": "#prepClose",
+      "ancestorClip": {
+        "left": 0,
+        "top": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 0,
+        "right": 390,
+        "bottom": 844
+      },
+      "recordedRangeCount": 1,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/returned-visibility-1",
+      "selector": "#n-P1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 8,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/returned-visibility-1",
+      "selector": "#n-X1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/returned-visibility-1",
+      "selector": "#n-X2",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": false
+    },
+    {
+      "observation": "390/returned-visibility-2",
+      "selector": "#n-P1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 8,
+      "rangeIndicesOutsideCombinedClip": [],
+      "rangeClassification": "FULL_RECORDED_RANGES",
+      "actualBoxFullWithinAncestors": true,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/returned-visibility-2",
+      "selector": "#n-X1",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": true
+    },
+    {
+      "observation": "390/returned-visibility-2",
+      "selector": "#n-X2",
+      "ancestorClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "selfContentClip": null,
+      "combinedTextClip": {
+        "left": 0,
+        "top": 171.75,
+        "right": 390,
+        "bottom": 668
+      },
+      "recordedRangeCount": 4,
+      "rangeIndicesOutsideCombinedClip": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rangeClassification": "PARTIAL_LAYOUT",
+      "actualBoxFullWithinAncestors": false,
+      "actualSampleHit": false
+    }
+  ],
+  "supplementaryChecks": [
+    {
+      "id": "1440/Escape-reader-position",
+      "before": {
+        "left": 0,
+        "top": 119,
+        "maxX": 0,
+        "maxY": 119
+      },
+      "after": {
+        "left": 0,
+        "top": 119,
+        "maxX": 0,
+        "maxY": 119
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "390/Escape-reader-position",
+      "before": {
+        "left": 0,
+        "top": 160,
+        "maxX": 0,
+        "maxY": 183
+      },
+      "after": {
+        "left": 0,
+        "top": 160,
+        "maxX": 0,
+        "maxY": 183
+      },
+      "status": "PASS"
+    }
+  ]
+}

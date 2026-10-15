@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/purpose-fix1/verify.py",
+    "--out",
+    "/workspace/browser-env/purpose-fix1/run01"
+  ],
+  "actualChildExit": 1,
+  "jsonExit": 1,
+  "agreement": true,
+  "wrapperExit": 1,
+  "UTC": "2026-10-15T20:23:54.371439+00:00"
+}
