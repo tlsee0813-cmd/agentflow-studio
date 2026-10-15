@@ -1,0 +1,60 @@
+{
+  "algorithm": "SHA256",
+  "files": [
+    {
+      "path": "1280x720-initial.png",
+      "bytes": 126606,
+      "sha256": "335ddee844228de1bb90f576d6797b0bdf99eb9e49cbe0feb4fefd4f0d98c981"
+    },
+    {
+      "path": "1440x900-initial.png",
+      "bytes": 137509,
+      "sha256": "c429c6a3d4651de9acaa19a969f054fcf209a1986df9a4bc2d196fedef7cdab4"
+    },
+    {
+      "path": "390x844-initial.png",
+      "bytes": 73759,
+      "sha256": "e635ce52f759a2c33aba68dd3e49a7578d6ed706c1e625feb425fdc72ca883f8"
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 7247,
+      "sha256": "6941f4a2e9cd7a7977a858c07ef554a1861a77438bf05bbdb398b57300532bbe"
+    },
+    {
+      "path": "console.json",
+      "bytes": 131,
+      "sha256": "0a890d24a0436c5fde581024d54f25bb2b884db71f56f358c2859c1552eb970d"
+    },
+    {
+      "path": "observe.py",
+      "bytes": 9328,
+      "sha256": "16c545cd039943038371698fe9bcf11c8e3610c110e140445ab62b1f936765eb"
+    },
+    {
+      "path": "pageerrors.json",
+      "bytes": 64,
+      "sha256": "6bfbba4dcbfce3f8f4cad64af8fb260c940bbe1300e3afece0a85667734101c8"
+    },
+    {
+      "path": "process-exit.json",
+      "bytes": 73,
+      "sha256": "b6f436e20a1baab7c14f7fed00098d362802249940757282f2e24f6d7bccc8cb"
+    },
+    {
+      "path": "process.log",
+      "bytes": 80,
+      "sha256": "36d10d675ed63fc0c5e4c87a1e23f7fcb67c72cbe2034071d51b5005858168b2"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1385482,
+      "sha256": "b52f4be187d62da1bd4ed712a72c70991aa4c4b8253df9b82471dc49436188af"
+    },
+    {
+      "path": "server.log",
+      "bytes": 202,
+      "sha256": "4a6d48652c8f9d373c3314b8462896d45e59e431f1750ba5bc902791c0e4bbca"
+    }
+  ]
+}
