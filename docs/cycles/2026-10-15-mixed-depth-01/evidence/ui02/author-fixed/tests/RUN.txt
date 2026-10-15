@@ -1,0 +1,22 @@
+UI-02 fix1 작성자 검사 (독립 검사 아님). 기준 SHA 347465e, 합성 입력 INPUT.md 기준 73fc284.
+모든 검사는 실패가 하나라도 있으면 종료코드 1, 예외로 중단돼도 0이 아님.
+
+1) 상태 검사 (jsdom 24, Node 22) — 렌더링 아님
+   npm i jsdom@24 && node tests/check_canvas.js canvas-study.html
+2) 실제 렌더링 검사 (headless Chromium 1194, Playwright 1.56, Python 3.13)
+   PLAYWRIGHT_BROWSERS_PATH=<경로> python3 tests/render_check.py "$(pwd)/canvas-study.html" screenshots
+   INFO 행은 정보이며 PASS/FAIL 수에 포함하지 않음
+3) 390 구조 목록 스크롤 복귀 (Chromium, 실제 휠 입력)
+   python3 tests/repro_outline_scroll.py "$(pwd)/canvas-study.html" screenshots 664   # y=120 조건
+   python3 tests/repro_outline_scroll.py "$(pwd)/canvas-study.html" screenshots 844   # 이 높이에서 목록 최대 스크롤은 49
+
+outputs/
+  state_check_jsdom.txt              수정본 84 PASS / 0 FAIL, exit 0
+  render_check_chromium.txt          수정본 36 PASS / 0 FAIL + INFO 1, exit 0
+  outline_scroll_before_390x664.txt  수정 전 7 PASS / 3 FAIL (120 → 0)
+  outline_scroll_before_390x844.txt  수정 전 7 PASS / 3 FAIL (49 → 0)
+  outline_scroll_after_390x664.txt   수정본 10 PASS / 0 FAIL, exit 0
+  outline_scroll_after_390x844.txt   수정본 10 PASS / 0 FAIL, exit 0
+  negative_control_state.txt         일부러 깨뜨린 사본: 83 PASS / 1 FAIL, exit 1
+  negative_control_render.txt        일부러 깨뜨린 사본: 35 PASS / 1 FAIL + INFO 1, exit 1
+screenshots/  PNG 17장 (render_check 13장 + 목록 스크롤 4장)

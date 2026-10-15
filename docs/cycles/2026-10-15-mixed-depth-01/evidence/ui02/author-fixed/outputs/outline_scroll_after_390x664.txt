@@ -1,0 +1,15 @@
+INFO S2 구조 목록 크기: 목록 client 427 / scroll 656, 문서 client 664 / scroll 664
+INFO 실제 스크롤 주체: 목록=True, 문서=False
+PASS 390×664 S2에서 구조 목록 자체가 스크롤되는 높이 (목록 내용 > 보이는 높이)
+INFO 휠 후 목록 y=120, 문서 y=0
+PASS 목록이 실제로 y≥120까지 스크롤됨 (y=120, 최대 229)
+PASS 목록에서 A4 → 상세
+PASS 상세에서 A2 → 보기 복귀 → A4 (기존 의미 유지)
+PASS 구조 목록 복귀 시 스크롤 복원 (120 → 120)
+PASS 목록 스크롤이 캔버스 위치(vp)에 섞이지 않음
+PASS 캔버스 탭 왕복 후에도 목록 스크롤 복원
+PASS 다른 장면(S3) 목록은 S2 스크롤을 물려받지 않음 (y=0)
+PASS S2로 돌아오면 S2 목록 스크롤 복원
+PASS 브라우저 오류 없음 
+outline-scroll pass 10 fail 0
+outline 664 exit=0

@@ -1,0 +1,141 @@
+{
+  "sourcePath": "../../../canvas-study.html",
+  "sha256": "869C76A45F16042EC0A5063C81D1E638D21A2A3E87CE079B6BC5A60843632157",
+  "checkerSha256": "8F03A7BD0AABB485B5D68D9F85DF7E57BFC161BCE492895B51F8419FC630FAC6",
+  "timestampUTC": "2026-10-15T13:36:02.382Z",
+  "environment": "Node v24.19.0; synthetic DOM/event/geometry stubs; no browser",
+  "results": [
+    {
+      "id": "I1-relationship-endpoints",
+      "status": "PASS",
+      "checks": {
+        "s1OnlyUnconfirmed": true,
+        "s2ExactlyThree": true
+      },
+      "observed": {
+        "s1": [
+          "A-B-area:unconfirmed"
+        ],
+        "s1c": [
+          "A-B-area:unconfirmed"
+        ],
+        "s2": [
+          "A2-B:confirmed",
+          "A4-B:confirmed",
+          "A6-B:confirmed"
+        ],
+        "s2c": [
+          "A2-B:confirmed",
+          "A4-B:confirmed",
+          "A6-B:confirmed"
+        ]
+      }
+    },
+    {
+      "id": "I2-A4-A2-B-nested-return",
+      "status": "PASS",
+      "checks": {
+        "atB": true,
+        "firstBackA2": true,
+        "backA4Restores": true,
+        "currentDataNotReverted": true
+      },
+      "observed": {
+        "before": {
+          "sel": "A4",
+          "expanded": true,
+          "listOpen": false,
+          "vp": {
+            "x": -64,
+            "y": -68,
+            "k": 1
+          },
+          "stack": []
+        },
+        "atB": "B",
+        "back1": "A2",
+        "after": {
+          "sel": "A4",
+          "expanded": true,
+          "listOpen": false,
+          "vp": {
+            "x": -64,
+            "y": -68,
+            "k": 1
+          },
+          "stack": []
+        }
+      }
+    },
+    {
+      "id": "I3-overview-focus-independent",
+      "status": "PASS",
+      "checks": {
+        "overviewUnchanged": true,
+        "focusRetained": true
+      },
+      "observed": {
+        "overview": {
+          "sel": "A4",
+          "expanded": true,
+          "listOpen": false,
+          "vp": {
+            "x": -195,
+            "y": -87,
+            "k": 1.25
+          },
+          "stack": []
+        },
+        "back": {
+          "sel": "A4",
+          "expanded": true,
+          "listOpen": false,
+          "vp": {
+            "x": -195,
+            "y": -87,
+            "k": 1.25
+          },
+          "stack": []
+        },
+        "focused": {
+          "sel": "A2",
+          "expanded": true,
+          "listOpen": false,
+          "vp": {
+            "x": 96,
+            "y": 12,
+            "k": 1
+          },
+          "stack": []
+        }
+      }
+    },
+    {
+      "id": "I4-handoff-and-baseline",
+      "status": "PASS",
+      "checks": {
+        "projectPurpose": true,
+        "scopeA2": true,
+        "priorAndOpen": true,
+        "candidateAndUnsent": true,
+        "fixedBaseline": true
+      },
+      "observed": {
+        "handoffFound": true
+      }
+    },
+    {
+      "id": "I5-outline-scroll-return",
+      "status": "PASS",
+      "checks": {
+        "scrollPreserved": true
+      },
+      "observed": {
+        "expected": 120,
+        "savedOnExit": 120,
+        "actual": 120,
+        "limitation": "DOM replacement resets scrollTop in harness, matching normal element replacement; no real browser observation"
+      }
+    }
+  ]
+}
