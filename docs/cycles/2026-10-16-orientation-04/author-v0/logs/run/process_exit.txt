@@ -1,0 +1,11 @@
+served HTML file sha256: 80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3
+python: Python 3.13.16
+--- final: 2026-10-16T03:11:00+09:00
+cmd: orientation_check.py <URL> orientation-study.html final/
+exit_code=0
+--- probe_hash_mismatch: 2026-10-16T03:11:37+09:00
+의도: 서버는 orientation-study.html을 주지만 기대 파일로 base.html (af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e)를 넘긴다
+cmd: orientation_check.py <URL> base.html probe_hash_mismatch/
+exit_code=1
+served HTML file sha256 (after): 80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3
+결과: 정상 exit 0, 의도한 해시 불일치 exit 1

@@ -1,0 +1,4380 @@
+{
+ "started": "2026-10-16T03:11:00+0900",
+ "expected_html": "orientation-study.html",
+ "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+ "url": "http://127.0.0.1:8770/orientation-study.html",
+ "navigations": [
+  {
+   "cand": "a",
+   "vp": "390",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=a",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "a",
+   "vp": "1280",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=a",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "a",
+   "vp": "1440",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=a",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "a",
+   "vp": "390",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=a",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "a",
+   "vp": "390",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=a",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "a",
+   "vp": "1280",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=a",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "b",
+   "vp": "390",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=b",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "b",
+   "vp": "1280",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=b",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "b",
+   "vp": "1440",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=b",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "b",
+   "vp": "390",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=b",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "b",
+   "vp": "390",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=b",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  },
+  {
+   "cand": "b",
+   "vp": "1280",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=b",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "match": true
+  }
+ ],
+ "candidates": {
+  "a": {
+   "info": {
+    "page_errors": [],
+    "console_errors": [],
+    "actions": {
+     "a_390_0": [
+      "tap 목적 정정 노드 @(195,494)"
+     ],
+     "a_1280_1": [
+      "click 목적 정정 노드 @(247,375)"
+     ],
+     "a_1440_2": [],
+     "a_390_3": [
+      "tap 목적 정정 노드 @(195,494)",
+      "wheel (0,160) over (195,422) 관련 범위 확인",
+      "wheel (0,160) over (195,422) 관련 범위 확인",
+      "wheel (0,160) over (195,422) 관련 범위 확인",
+      "wheel (0,160) over (195,422) 관련 범위 확인"
+     ],
+     "a_390_4": [
+      "wheel (0,160) over (195,422) 작업문 자세히",
+      "wheel (0,160) over (195,422) 작업문 자세히",
+      "tap 작업문 자세히 @(67,794)",
+      "tap 홈 접기 @(195,652)",
+      "tap 목적 정정 노드 @(195,174)",
+      "wheel (0,-160) over (195,422) 기록 기준 더 보기",
+      "tap 기록 기준 더 보기 열기 @(70,117)",
+      "tap 기록 기준 더 보기 닫기 @(70,117)",
+      "wheel (0,160) over (195,422) 선과 표시의 뜻",
+      "tap 선과 표시의 뜻 열기 @(75,611)",
+      "tap 선과 표시의 뜻 닫기 @(75,611)",
+      "wheel (0,160) over (195,422) 저장 복구 표시",
+      "wheel (0,160) over (195,422) 저장 복구 표시",
+      "wheel (0,-200) over (195,422) 창 위치 조정",
+      "tap 이 부분 읽기 @(318,803)",
+      "wheel (0,260) over (195,422) 읽어 내려가기",
+      "tap p3 근거 열기 @(346,270)",
+      "tap 근거 닫기 @(338,347)",
+      "tap p3 근거 다시 열기 @(346,270)",
+      "key Escape",
+      "tap 준비 제안 열기 @(163,787)",
+      "wheel (0,160) over (195,600) 준비 하단 안내",
+      "tap 준비 닫기 @(339,107)",
+      "tap 전체 지도로 돌아가기 @(104,28)"
+     ],
+     "a_1280_5": [
+      "click 작업문 자세히 @(893,448)",
+      "click 홈 접기 @(772,329)",
+      "click 목적 정정 노드 @(247,375)",
+      "click 기록 기준 더 보기 열기 @(557,132)",
+      "click 기록 기준 더 보기 닫기 @(557,132)",
+      "click 선과 표시의 뜻 열기 @(621,288)",
+      "click 선과 표시의 뜻 닫기 @(621,288)",
+      "click 지도 확대(+) @(1245,180)",
+      "wheel (40,120) over (900,450) 지도 위치 옮기기",
+      "click 이 부분 읽기 @(1206,687)",
+      "wheel (0,260) over (900,400) 읽어 내려가기",
+      "click p3 근거 열기 @(442,170)",
+      "click 근거 닫기 @(920,217)",
+      "click p3 근거 다시 열기 @(442,170)",
+      "key Escape",
+      "click 전체 지도로 돌아가기 @(114,93)"
+     ]
+    },
+    "external_requests": []
+   },
+   "scenes": [
+    {
+     "scene": "S1@390",
+     "title": "새로 연 첫 화면",
+     "checks": [
+      [
+       "처음에는 선택 없음(꾸민 선택 없음)",
+       true,
+       null
+      ],
+      [
+       "중복 DOM id 없음",
+       true,
+       []
+      ],
+      [
+       "가로 넘침 없음",
+       true,
+       null
+      ],
+      [
+       "기록 기준·제목·핵심 문장이 첫 화면에 온전히 보임",
+       true,
+       null
+      ],
+      [
+       "관계 10개·미지정 2개가 BRIEF 표와 일치",
+       true,
+       null
+      ],
+      [
+       "기본 화면에 내부 식별자·해시 없음",
+       true,
+       []
+      ],
+      [
+       "발송·수락·승인 숙제 표현 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "state": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "exposure": [
+       {
+        "key": "목표 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 38,
+        "h": 38
+       },
+       {
+        "key": "기록 기준(과거 보고 당시)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 101,
+        "h": 42
+       },
+       {
+        "key": "제목",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 148,
+        "h": 57
+       },
+       {
+        "key": "핵심 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 213,
+        "h": 48
+       },
+       {
+        "key": "관계 한정(함께 언급·포함 아님)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 883,
+        "h": 36
+       },
+       {
+        "key": "다음 AI 요청 한정(미검증) 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1188,
+        "h": 45
+       },
+       {
+        "key": "동작:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 455,
+        "h": 26
+       },
+       {
+        "key": "동작:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 570,
+        "h": 26
+       },
+       {
+        "key": "동작:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 710,
+        "h": 26
+       },
+       {
+        "key": "영역:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 961,
+        "h": 24
+       },
+       {
+        "key": "영역:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1046,
+        "h": 24
+       },
+       {
+        "key": "영역:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1155,
+        "h": 24
+       },
+       {
+        "key": "영역:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1263,
+        "h": 24
+       },
+       {
+        "key": "관계칩:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 513,
+        "h": 21
+       },
+       {
+        "key": "관계칩:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 627,
+        "h": 47
+       },
+       {
+        "key": "관계칩:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 768,
+        "h": 47
+       },
+       {
+        "key": "미지정 안내",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 385,
+        "h": 38
+       }
+      ],
+      "fully_visible_initial": [
+       "목표 문장",
+       "기록 기준(과거 보고 당시)",
+       "제목",
+       "핵심 문장",
+       "동작:purpose",
+       "동작:instruction",
+       "동작:decision",
+       "관계칩:purpose",
+       "관계칩:instruction",
+       "관계칩:decision",
+       "미지정 안내"
+      ],
+      "not_fully_visible_initial": [
+       "관계 한정(함께 언급·포함 아님)",
+       "다음 AI 요청 한정(미검증) 문장",
+       "영역:home",
+       "영역:task",
+       "영역:next",
+       "영역:restore"
+      ],
+      "relations_dom": {
+       "purpose": {
+        "on": [
+         "home",
+         "task",
+         "next",
+         "restore"
+        ],
+        "off": []
+       },
+       "instruction": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "off": [
+         "restore"
+        ]
+       },
+       "decision": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "off": [
+         "restore"
+        ]
+       }
+      },
+      "shot": "a_390_S1_initial.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S1sel@390",
+     "title": "목적 정정 선택 직후",
+     "checks": [
+      [
+       "목적 정정이 실제 선택됨",
+       true,
+       null
+      ],
+      [
+       "선택이 다른 영역 깊이를 바꾸지 않음",
+       true,
+       {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "선택이 지도/창 위치·배율을 바꾸지 않음",
+       true,
+       null
+      ],
+      [
+       "관련 표시 4개가 렌더링됨(화면 안 여부는 노출 기록)",
+       true,
+       4
+      ],
+      [
+       "하단 선택 안내에 관련 영역",
+       true,
+       "목적 정정 선택됨\n함께 언급: 홈, 작업문, 다음 AI 요청, 저장 복구"
+      ]
+     ],
+     "notes": {
+      "before": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "after": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [
+        "purpose"
+       ],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "part(selected):purpose",
+       "dupIds": []
+      },
+      "exposure_after_select": [
+       {
+        "key": "관련:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 952,
+        "h": 42
+       },
+       {
+        "key": "관련:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1037,
+        "h": 42
+       },
+       {
+        "key": "관련:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1146,
+        "h": 42
+       },
+       {
+        "key": "관련:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1254,
+        "h": 42
+       },
+       {
+        "key": "선택 노드",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 442,
+        "h": 104
+       },
+       {
+        "key": "하단 선택 안내",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 773,
+        "h": 61
+       }
+      ],
+      "shot": "a_390_S1_selected.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S1@1280",
+     "title": "새로 연 첫 화면",
+     "checks": [
+      [
+       "처음에는 선택 없음(꾸민 선택 없음)",
+       true,
+       null
+      ],
+      [
+       "중복 DOM id 없음",
+       true,
+       []
+      ],
+      [
+       "가로 넘침 없음",
+       true,
+       null
+      ],
+      [
+       "기록 기준·제목·핵심 문장이 첫 화면에 온전히 보임",
+       true,
+       null
+      ],
+      [
+       "관계 10개·미지정 2개가 BRIEF 표와 일치",
+       true,
+       null
+      ],
+      [
+       "기본 화면에 내부 식별자·해시 없음",
+       true,
+       []
+      ],
+      [
+       "발송·수락·승인 숙제 표현 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "state": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "exposure": [
+       {
+        "key": "목표 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 13,
+        "h": 22
+       },
+       {
+        "key": "기록 기준(과거 보고 당시)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 63,
+        "h": 21
+       },
+       {
+        "key": "제목",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 88,
+        "h": 34
+       },
+       {
+        "key": "핵심 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 98,
+        "h": 24
+       },
+       {
+        "key": "관계 한정(함께 언급·포함 아님)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 258,
+        "h": 18
+       },
+       {
+        "key": "다음 AI 요청 한정(미검증) 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 522,
+        "h": 45
+       },
+       {
+        "key": "동작:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 336,
+        "h": 26
+       },
+       {
+        "key": "동작:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 453,
+        "h": 26
+       },
+       {
+        "key": "동작:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 571,
+        "h": 26
+       },
+       {
+        "key": "영역:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 318,
+        "h": 24
+       },
+       {
+        "key": "영역:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 403,
+        "h": 24
+       },
+       {
+        "key": "영역:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 489,
+        "h": 24
+       },
+       {
+        "key": "영역:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 597,
+        "h": 24
+       },
+       {
+        "key": "관계칩:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 393,
+        "h": 21
+       },
+       {
+        "key": "관계칩:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 511,
+        "h": 21
+       },
+       {
+        "key": "관계칩:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 628,
+        "h": 21
+       },
+       {
+        "key": "미지정 안내",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 263,
+        "h": 38
+       }
+      ],
+      "fully_visible_initial": [
+       "목표 문장",
+       "기록 기준(과거 보고 당시)",
+       "제목",
+       "핵심 문장",
+       "관계 한정(함께 언급·포함 아님)",
+       "다음 AI 요청 한정(미검증) 문장",
+       "동작:purpose",
+       "동작:instruction",
+       "동작:decision",
+       "영역:home",
+       "영역:task",
+       "영역:next",
+       "영역:restore",
+       "관계칩:purpose",
+       "관계칩:instruction",
+       "관계칩:decision",
+       "미지정 안내"
+      ],
+      "not_fully_visible_initial": [],
+      "relations_dom": {
+       "purpose": {
+        "on": [
+         "home",
+         "task",
+         "next",
+         "restore"
+        ],
+        "off": []
+       },
+       "instruction": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "off": [
+         "restore"
+        ]
+       },
+       "decision": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "off": [
+         "restore"
+        ]
+       }
+      },
+      "shot": "a_1280_S1_initial.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S1sel@1280",
+     "title": "목적 정정 선택 직후",
+     "checks": [
+      [
+       "목적 정정이 실제 선택됨",
+       true,
+       null
+      ],
+      [
+       "선택이 다른 영역 깊이를 바꾸지 않음",
+       true,
+       {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "선택이 지도/창 위치·배율을 바꾸지 않음",
+       true,
+       null
+      ],
+      [
+       "연결선 4개가 관련 영역 머리와 실제 좌표로 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "하단 선택 안내에 관련 영역",
+       true,
+       "목적 정정 선택됨 함께 언급: 홈, 작업문, 다음 AI 요청, 저장 복구"
+      ]
+     ],
+     "notes": {
+      "before": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "after": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [
+        "purpose"
+       ],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 4,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "part(selected):purpose",
+       "dupIds": []
+      },
+      "exposure_after_select": [
+       {
+        "key": "관련:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 309,
+        "h": 42
+       },
+       {
+        "key": "관련:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 394,
+        "h": 42
+       },
+       {
+        "key": "관련:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 480,
+        "h": 42
+       },
+       {
+        "key": "관련:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 588,
+        "h": 42
+       },
+       {
+        "key": "선택 노드",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 323,
+        "h": 105
+       },
+       {
+        "key": "하단 선택 안내",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 675,
+        "h": 24
+       }
+      ],
+      "shot": "a_1280_S1_selected.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S1@1440",
+     "title": "새로 연 첫 화면",
+     "checks": [
+      [
+       "처음에는 선택 없음(꾸민 선택 없음)",
+       true,
+       null
+      ],
+      [
+       "중복 DOM id 없음",
+       true,
+       []
+      ],
+      [
+       "가로 넘침 없음",
+       true,
+       null
+      ],
+      [
+       "기록 기준·제목·핵심 문장이 첫 화면에 온전히 보임",
+       true,
+       null
+      ],
+      [
+       "관계 10개·미지정 2개가 BRIEF 표와 일치",
+       true,
+       null
+      ],
+      [
+       "기본 화면에 내부 식별자·해시 없음",
+       true,
+       []
+      ],
+      [
+       "발송·수락·승인 숙제 표현 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "state": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "exposure": [
+       {
+        "key": "목표 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 13,
+        "h": 22
+       },
+       {
+        "key": "기록 기준(과거 보고 당시)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 63,
+        "h": 21
+       },
+       {
+        "key": "제목",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 88,
+        "h": 34
+       },
+       {
+        "key": "핵심 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 98,
+        "h": 24
+       },
+       {
+        "key": "관계 한정(함께 언급·포함 아님)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 258,
+        "h": 18
+       },
+       {
+        "key": "다음 AI 요청 한정(미검증) 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 522,
+        "h": 45
+       },
+       {
+        "key": "동작:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 336,
+        "h": 26
+       },
+       {
+        "key": "동작:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 453,
+        "h": 26
+       },
+       {
+        "key": "동작:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 571,
+        "h": 26
+       },
+       {
+        "key": "영역:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 318,
+        "h": 24
+       },
+       {
+        "key": "영역:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 403,
+        "h": 24
+       },
+       {
+        "key": "영역:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 489,
+        "h": 24
+       },
+       {
+        "key": "영역:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 597,
+        "h": 24
+       },
+       {
+        "key": "관계칩:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 393,
+        "h": 21
+       },
+       {
+        "key": "관계칩:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 511,
+        "h": 21
+       },
+       {
+        "key": "관계칩:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 628,
+        "h": 21
+       },
+       {
+        "key": "미지정 안내",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 263,
+        "h": 38
+       }
+      ],
+      "fully_visible_initial": [
+       "목표 문장",
+       "기록 기준(과거 보고 당시)",
+       "제목",
+       "핵심 문장",
+       "관계 한정(함께 언급·포함 아님)",
+       "다음 AI 요청 한정(미검증) 문장",
+       "동작:purpose",
+       "동작:instruction",
+       "동작:decision",
+       "영역:home",
+       "영역:task",
+       "영역:next",
+       "영역:restore",
+       "관계칩:purpose",
+       "관계칩:instruction",
+       "관계칩:decision",
+       "미지정 안내"
+      ],
+      "not_fully_visible_initial": [],
+      "relations_dom": {
+       "purpose": {
+        "on": [
+         "home",
+         "task",
+         "next",
+         "restore"
+        ],
+        "off": []
+       },
+       "instruction": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "off": [
+         "restore"
+        ]
+       },
+       "decision": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "off": [
+         "restore"
+        ]
+       }
+      },
+      "shot": "a_1440_S1_initial.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S2@390",
+     "title": "현재 부분과 관련 범위 찾기",
+     "checks": [
+      [
+       "선택됨, 깊이 유지",
+       true,
+       null
+      ],
+      [
+       "관련 영역 4곳이 표시와 함께 실제 화면에 들어옴",
+       true,
+       [
+        "home",
+        "task",
+        "next",
+        "restore"
+       ]
+      ],
+      [
+       "탐색 중 선택·깊이 유지",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "after_select": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [
+        "purpose"
+       ],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "part(selected):purpose",
+       "dupIds": []
+      },
+      "related_seen_at_winY": {
+       "home": 320,
+       "task": 480,
+       "next": 633,
+       "restore": 633
+      },
+      "wheel_steps": 4,
+      "distance_px": 633,
+      "shot": "a_390_S2_scope.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S3@390",
+     "title": "선택을 유지한 배치 변화",
+     "checks": [
+      [
+       "사용자 깊이 조정 반영",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "선택 후 깊이 그대로",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "접힘 조작 뒤 선택·깊이 유지",
+       true,
+       null
+      ],
+      [
+       "390 관련 표시가 기대 4영역에만",
+       true,
+       [
+        [
+         "home",
+         true,
+         true
+        ],
+        [
+         "task",
+         true,
+         true
+        ],
+        [
+         "next",
+         true,
+         true
+        ],
+        [
+         "restore",
+         true,
+         true
+        ]
+       ]
+      ],
+      [
+       "저장 복구 표시가 하단 고정바에 가리지 않음",
+       true,
+       {
+        "inPeek": false,
+        "inDialog": false,
+        "text": "선택한 동작과 함께 언급"
+       }
+      ]
+     ],
+     "notes": {
+      "depth": {
+       "home": 0,
+       "task": 2,
+       "next": 1,
+       "restore": 1
+      },
+      "shot": "a_390_S3_layout.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S4@390",
+     "title": "비초기 위치에서 근거 닫기·다시 열기·Escape",
+     "checks": [
+      [
+       "근거 1개 열림",
+       true,
+       null
+      ],
+      [
+       "출발 문장이 화면 안에 남음",
+       true,
+       230
+      ],
+      [
+       "문서 보고·해석·미확인 구분",
+       true,
+       null
+      ],
+      [
+       "외부 원문 링크 고정 커밋(열지 않음)",
+       true,
+       null
+      ],
+      [
+       "닫은 근거가 DOM·화면에서 사라짐",
+       true,
+       {
+        "inPeek": false,
+        "inDialog": false,
+        "text": "예전 형식으로 저장된 정정은 복원할 때 한 "
+       }
+      ],
+      [
+       "닫은 직후 읽던 위치 = 열기 전(비초기)",
+       true,
+       {
+        "before_open": 260,
+        "after_close": 260
+       }
+      ],
+      [
+       "초점이 출발 근거 버튼",
+       true,
+       "evbtn:p3"
+      ],
+      [
+       "출발 문장 위치 동일",
+       true,
+       [
+        230.65625,
+        230.65625
+       ]
+      ],
+      [
+       "다시 열어도 1개, 출발 인용 첫 줄",
+       true,
+       null
+      ],
+      [
+       "Escape로 닫힘·초점·위치 복귀",
+       true,
+       {
+        "pos": 260,
+        "active": "evbtn:p3"
+       }
+      ]
+     ],
+     "notes": {
+      "start": {
+       "pos": 260,
+       "active": "focusTitle"
+      },
+      "positions": {
+       "before_open": 260,
+       "after_close": 260,
+       "after_escape": 260
+      },
+      "shot_closed": "a_390_S4_closed.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S5prep@390",
+     "title": "준비 열기·하단 접근·닫기(390에서 한 번)",
+     "checks": [
+      [
+       "준비 화면 열림",
+       true,
+       null
+      ],
+      [
+       "준비 제안·보내지 않음 표시",
+       true,
+       null
+      ],
+      [
+       "준비 화면 버튼은 닫기뿐",
+       true,
+       [
+        "닫기"
+       ]
+      ],
+      [
+       "준비 닫힘·초점·위치",
+       true,
+       {
+        "pos": [
+         260,
+         260
+        ],
+        "active": "prepBtn"
+       }
+      ],
+      [
+       "발송·수락 표현 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "prep_wheel_steps_to_bottom": 1,
+      "prep_inner_scroll": 57
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S5@390",
+     "title": "전체로 돌아와 이어보기",
+     "checks": [
+      [
+       "비초기 지도/창 위치",
+       true,
+       {
+        "mapScroll": [
+         0,
+         0
+        ],
+        "winY": 440,
+        "zoom": "100%"
+       }
+      ],
+      [
+       "'이 부분 읽기'가 스크롤 없이 화면 안",
+       true,
+       {
+        "x": 262.59375,
+        "y": 781.3125,
+        "width": 111.40625,
+        "height": 44
+       }
+      ],
+      [
+       "읽기 공간 진입",
+       true,
+       null
+      ],
+      [
+       "전체 복귀 버튼이 지금 화면 안(추가 스크롤 불필요)",
+       true,
+       8
+      ],
+      [
+       "지도 보임·읽기 닫힘",
+       true,
+       null
+      ],
+      [
+       "같은 선택",
+       true,
+       null
+      ],
+      [
+       "사용자 깊이 유지",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "지도/창 위치·배율 복귀",
+       true,
+       {
+        "pre": [
+         [
+          0,
+          0
+         ],
+         440,
+         "100%"
+        ],
+        "post": [
+         [
+          0,
+          0
+         ],
+         440,
+         "100%"
+        ]
+       }
+      ],
+      [
+       "기준 노드 7개 좌표 동일(0.1px 반올림)",
+       true,
+       {}
+      ],
+      [
+       "초점이 선택 노드",
+       true,
+       "part(selected):purpose"
+      ],
+      [
+       "근거·준비 잔여 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "pre": {
+       "state": {
+        "map": true,
+        "focus": false,
+        "depth": {
+         "home": 0,
+         "task": 2,
+         "next": 1,
+         "restore": 1
+        },
+        "selected": [
+         "purpose"
+        ],
+        "mapScroll": [
+         0,
+         0
+        ],
+        "winY": 440,
+        "zoom": "100%",
+        "edges": 0,
+        "readingTop": 0,
+        "peeks": 0,
+        "dialog": false,
+        "refbar": false,
+        "pointed": [],
+        "active": "SUMMARY",
+        "dupIds": []
+       },
+       "nodes": {
+        "part_purpose": [
+         16,
+         2.4,
+         358,
+         104.5
+        ],
+        "part_decision": [
+         16,
+         257.2,
+         358,
+         130.3
+        ],
+        "home": [
+         32,
+         511.6,
+         326,
+         42
+        ],
+        "task": [
+         32,
+         564.6,
+         326,
+         42
+        ],
+        "next": [
+         32,
+         777.3,
+         326,
+         42
+        ],
+        "restore": [
+         32,
+         885.5,
+         326,
+         42
+        ],
+        "frame": [
+         16,
+         407.5,
+         358,
+         591.2
+        ]
+       }
+      },
+      "post": {
+       "state": {
+        "map": true,
+        "focus": false,
+        "depth": {
+         "home": 0,
+         "task": 2,
+         "next": 1,
+         "restore": 1
+        },
+        "selected": [
+         "purpose"
+        ],
+        "mapScroll": [
+         0,
+         0
+        ],
+        "winY": 440,
+        "zoom": "100%",
+        "edges": 0,
+        "readingTop": 0,
+        "peeks": 0,
+        "dialog": false,
+        "refbar": false,
+        "pointed": [],
+        "active": "part(selected):purpose",
+        "dupIds": []
+       },
+       "nodes": {
+        "part_purpose": [
+         16,
+         2.4,
+         358,
+         104.5
+        ],
+        "part_decision": [
+         16,
+         257.2,
+         358,
+         130.3
+        ],
+        "home": [
+         32,
+         511.6,
+         326,
+         42
+        ],
+        "task": [
+         32,
+         564.6,
+         326,
+         42
+        ],
+        "next": [
+         32,
+         777.3,
+         326,
+         42
+        ],
+        "restore": [
+         32,
+         885.5,
+         326,
+         42
+        ],
+        "frame": [
+         16,
+         407.5,
+         358,
+         591.2
+        ]
+       }
+      },
+      "shot": "a_390_S5_returned.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S3@1280",
+     "title": "선택을 유지한 배치 변화",
+     "checks": [
+      [
+       "사용자 깊이 조정 반영",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "선택 후 깊이 그대로",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "기록 기준 더 보기 연 뒤 재선택 없이 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "기록 기준 더 보기 닫은 뒤 재선택 없이 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "선과 표시의 뜻 연 뒤 재선택 없이 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "선과 표시의 뜻 닫은 뒤 재선택 없이 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "접힘 조작 뒤 선택·깊이 유지",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "depth": {
+       "home": 0,
+       "task": 2,
+       "next": 1,
+       "restore": 1
+      },
+      "shot": "a_1280_S3_layout.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S4@1280",
+     "title": "비초기 위치에서 근거 닫기·다시 열기·Escape",
+     "checks": [
+      [
+       "근거 1개 열림",
+       true,
+       null
+      ],
+      [
+       "출발 문장이 화면 안에 남음",
+       true,
+       131
+      ],
+      [
+       "문서 보고·해석·미확인 구분",
+       true,
+       null
+      ],
+      [
+       "외부 원문 링크 고정 커밋(열지 않음)",
+       true,
+       null
+      ],
+      [
+       "닫은 근거가 DOM·화면에서 사라짐",
+       true,
+       {
+        "inPeek": false,
+        "inDialog": false,
+        "text": "예전 형식으로 저장된 정정은 복원할 때 한 "
+       }
+      ],
+      [
+       "닫은 직후 읽던 위치 = 열기 전(비초기)",
+       true,
+       {
+        "before_open": 164,
+        "after_close": 164
+       }
+      ],
+      [
+       "초점이 출발 근거 버튼",
+       true,
+       "evbtn:p3"
+      ],
+      [
+       "출발 문장 위치 동일",
+       true,
+       [
+        131.546875,
+        131.546875
+       ]
+      ],
+      [
+       "다시 열어도 1개, 출발 인용 첫 줄",
+       true,
+       null
+      ],
+      [
+       "Escape로 닫힘·초점·위치 복귀",
+       true,
+       {
+        "pos": 164,
+        "active": "evbtn:p3"
+       }
+      ]
+     ],
+     "notes": {
+      "start": {
+       "pos": 164,
+       "active": "focusTitle"
+      },
+      "positions": {
+       "before_open": 164,
+       "after_close": 164,
+       "after_escape": 164
+      },
+      "shot_closed": "a_1280_S4_closed.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S5@1280",
+     "title": "전체로 돌아와 이어보기",
+     "checks": [
+      [
+       "비초기 지도/창 위치",
+       true,
+       {
+        "mapScroll": [
+         0,
+         120
+        ],
+        "winY": 0,
+        "zoom": "120%"
+       }
+      ],
+      [
+       "'이 부분 읽기'가 스크롤 없이 화면 안",
+       true,
+       {
+        "x": 1150.59375,
+        "y": 665,
+        "width": 111.40625,
+        "height": 44
+       }
+      ],
+      [
+       "읽기 공간 진입",
+       true,
+       null
+      ],
+      [
+       "전체 복귀 버튼이 지금 화면 안(추가 스크롤 불필요)",
+       true,
+       71
+      ],
+      [
+       "지도 보임·읽기 닫힘",
+       true,
+       null
+      ],
+      [
+       "같은 선택",
+       true,
+       null
+      ],
+      [
+       "사용자 깊이 유지",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "지도/창 위치·배율 복귀",
+       true,
+       {
+        "pre": [
+         [
+          0,
+          120
+         ],
+         0,
+         "120%"
+        ],
+        "post": [
+         [
+          0,
+          120
+         ],
+         0,
+         "120%"
+        ]
+       }
+      ],
+      [
+       "기준 노드 7개 좌표 동일(0.1px 반올림)",
+       true,
+       {}
+      ],
+      [
+       "초점이 선택 노드",
+       true,
+       "part(selected):purpose"
+      ],
+      [
+       "복귀 뒤 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "근거·준비 잔여 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "pre": {
+       "state": {
+        "map": true,
+        "focus": false,
+        "depth": {
+         "home": 0,
+         "task": 2,
+         "next": 1,
+         "restore": 1
+        },
+        "selected": [
+         "purpose"
+        ],
+        "mapScroll": [
+         0,
+         120
+        ],
+        "winY": 0,
+        "zoom": "120%",
+        "edges": 4,
+        "readingTop": 0,
+        "peeks": 0,
+        "dialog": false,
+        "refbar": false,
+        "pointed": [],
+        "active": "BODY",
+        "dupIds": []
+       },
+       "nodes": {
+        "part_purpose": [
+         38.4,
+         226.2,
+         516,
+         126.6
+        ],
+        "part_decision": [
+         38.4,
+         508.1,
+         516,
+         126.6
+        ],
+        "home": [
+         693.6,
+         208.9,
+         465.6,
+         50.4
+        ],
+        "task": [
+         693.6,
+         272.5,
+         465.6,
+         50.4
+        ],
+        "next": [
+         693.6,
+         500.9,
+         465.6,
+         50.4
+        ],
+        "restore": [
+         693.6,
+         630.8,
+         465.6,
+         50.4
+        ],
+        "frame": [
+         674.4,
+         105.8,
+         504,
+         660.8
+        ]
+       }
+      },
+      "post": {
+       "state": {
+        "map": true,
+        "focus": false,
+        "depth": {
+         "home": 0,
+         "task": 2,
+         "next": 1,
+         "restore": 1
+        },
+        "selected": [
+         "purpose"
+        ],
+        "mapScroll": [
+         0,
+         120
+        ],
+        "winY": 0,
+        "zoom": "120%",
+        "edges": 4,
+        "readingTop": 0,
+        "peeks": 0,
+        "dialog": false,
+        "refbar": false,
+        "pointed": [],
+        "active": "part(selected):purpose",
+        "dupIds": []
+       },
+       "nodes": {
+        "part_purpose": [
+         38.4,
+         226.2,
+         516,
+         126.6
+        ],
+        "part_decision": [
+         38.4,
+         508.1,
+         516,
+         126.6
+        ],
+        "home": [
+         693.6,
+         208.9,
+         465.6,
+         50.4
+        ],
+        "task": [
+         693.6,
+         272.5,
+         465.6,
+         50.4
+        ],
+        "next": [
+         693.6,
+         500.9,
+         465.6,
+         50.4
+        ],
+        "restore": [
+         693.6,
+         630.8,
+         465.6,
+         50.4
+        ],
+        "frame": [
+         674.4,
+         105.8,
+         504,
+         660.8
+        ]
+       }
+      },
+      "shot": "a_1280_S5_returned.png"
+     },
+     "status": "PASS"
+    }
+   ]
+  },
+  "b": {
+   "info": {
+    "page_errors": [],
+    "console_errors": [],
+    "actions": {
+     "b_390_0": [
+      "tap 설명의 '목적 정정' 참조 @(61,360)"
+     ],
+     "b_1280_1": [
+      "click 설명의 '목적 정정' 참조 @(71,343)"
+     ],
+     "b_1440_2": [],
+     "b_390_3": [
+      "tap 설명의 '목적 정정' 참조 @(61,360)",
+      "wheel (0,160) over (195,422) 관련 범위 확인",
+      "wheel (0,-160) over (195,422) 설명으로 돌아가기",
+      "wheel (0,-160) over (195,422) 설명으로 돌아가기",
+      "tap 설명으로 돌아가기 @(309,183)",
+      "tap 설명의 '다음 AI 요청' 참조 @(204,387)",
+      "tap 설명으로 돌아가기(2) @(309,53)"
+     ],
+     "b_390_4": [
+      "wheel (0,160) over (195,422) 작업문 자세히",
+      "wheel (0,160) over (195,422) 작업문 자세히",
+      "wheel (0,160) over (195,422) 작업문 자세히",
+      "wheel (0,160) over (195,422) 작업문 자세히",
+      "tap 작업문 자세히 @(67,684)",
+      "tap 홈 접기 @(195,543)",
+      "wheel (0,-160) over (195,422) 설명의 '목적 정정' 참조",
+      "wheel (0,-160) over (195,422) 설명의 '목적 정정' 참조",
+      "tap 설명의 '목적 정정' 참조 @(61,40)",
+      "wheel (0,-160) over (195,422) 기록 기준 더 보기",
+      "tap 기록 기준 더 보기 열기 @(70,117)",
+      "tap 기록 기준 더 보기 닫기 @(70,117)",
+      "wheel (0,160) over (195,422) 선과 표시의 뜻",
+      "wheel (0,160) over (195,422) 선과 표시의 뜻",
+      "tap 선과 표시의 뜻 열기 @(75,749)",
+      "tap 선과 표시의 뜻 닫기 @(75,749)",
+      "wheel (0,160) over (195,422) 저장 복구 표시",
+      "wheel (0,160) over (195,422) 저장 복구 표시",
+      "wheel (0,160) over (195,422) 저장 복구 표시",
+      "wheel (0,-200) over (195,422) 창 위치 조정",
+      "tap 이 부분 읽기 @(318,803)",
+      "wheel (0,260) over (195,422) 읽어 내려가기",
+      "tap p3 근거 열기 @(346,290)",
+      "tap 근거 닫기 @(338,368)",
+      "tap p3 근거 다시 열기 @(346,290)",
+      "key Escape",
+      "tap 전체 지도로 돌아가기 @(104,28)"
+     ],
+     "b_1280_5": [
+      "click 작업문 자세히 @(869,384)",
+      "click 홈 접기 @(998,243)",
+      "click 설명의 '목적 정정' 참조 @(71,343)",
+      "click 기록 기준 더 보기 열기 @(80,260)",
+      "click 기록 기준 더 보기 닫기 @(80,260)",
+      "click 선과 표시의 뜻 열기 @(877,265)",
+      "click 선과 표시의 뜻 닫기 @(877,265)",
+      "click 지도 확대(+) @(1245,74)",
+      "wheel (40,120) over (900,450) 지도 위치 옮기기",
+      "click 이 부분 읽기 @(1206,687)",
+      "wheel (0,260) over (900,400) 읽어 내려가기",
+      "click p3 근거 열기 @(442,170)",
+      "click 근거 닫기 @(920,217)",
+      "click p3 근거 다시 열기 @(442,170)",
+      "key Escape",
+      "click 전체 지도로 돌아가기 @(114,93)"
+     ]
+    },
+    "external_requests": []
+   },
+   "scenes": [
+    {
+     "scene": "S1@390",
+     "title": "새로 연 첫 화면",
+     "checks": [
+      [
+       "처음에는 선택 없음(꾸민 선택 없음)",
+       true,
+       null
+      ],
+      [
+       "중복 DOM id 없음",
+       true,
+       []
+      ],
+      [
+       "가로 넘침 없음",
+       true,
+       null
+      ],
+      [
+       "기록 기준·제목·핵심 문장이 첫 화면에 온전히 보임",
+       true,
+       null
+      ],
+      [
+       "관계 10개·미지정 2개가 BRIEF 표와 일치",
+       true,
+       null
+      ],
+      [
+       "기본 화면에 내부 식별자·해시 없음",
+       true,
+       []
+      ],
+      [
+       "발송·수락·승인 숙제 표현 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "state": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "exposure": [
+       {
+        "key": "목표 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 38,
+        "h": 38
+       },
+       {
+        "key": "기록 기준(과거 보고 당시)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 101,
+        "h": 42
+       },
+       {
+        "key": "제목",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 148,
+        "h": 57
+       },
+       {
+        "key": "핵심 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 213,
+        "h": 48
+       },
+       {
+        "key": "관계 한정(함께 언급·포함 아님)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1094,
+        "h": 36
+       },
+       {
+        "key": "다음 AI 요청 한정(미검증) 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1398,
+        "h": 45
+       },
+       {
+        "key": "동작:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 807,
+        "h": 26
+       },
+       {
+        "key": "동작:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 892,
+        "h": 26
+       },
+       {
+        "key": "동작:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 977,
+        "h": 26
+       },
+       {
+        "key": "영역:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1171,
+        "h": 24
+       },
+       {
+        "key": "영역:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1257,
+        "h": 24
+       },
+       {
+        "key": "영역:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1365,
+        "h": 24
+       },
+       {
+        "key": "영역:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 1473,
+        "h": 24
+       },
+       {
+        "key": "설명문:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 348,
+        "h": 79
+       },
+       {
+        "key": "설명문:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 437,
+        "h": 79
+       },
+       {
+        "key": "설명문:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 526,
+        "h": 79
+       },
+       {
+        "key": "미지정 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 614,
+        "h": 74
+       }
+      ],
+      "fully_visible_initial": [
+       "목표 문장",
+       "기록 기준(과거 보고 당시)",
+       "제목",
+       "핵심 문장",
+       "동작:purpose",
+       "설명문:purpose",
+       "설명문:instruction",
+       "설명문:decision",
+       "미지정 문장"
+      ],
+      "not_fully_visible_initial": [
+       "관계 한정(함께 언급·포함 아님)",
+       "다음 AI 요청 한정(미검증) 문장",
+       "동작:instruction",
+       "동작:decision",
+       "영역:home",
+       "영역:task",
+       "영역:next",
+       "영역:restore"
+      ],
+      "relations_dom": {
+       "purpose": {
+        "on": [
+         "home",
+         "task",
+         "next",
+         "restore"
+        ],
+        "self": [
+         "purpose"
+        ]
+       },
+       "instruction": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "self": [
+         "instruction"
+        ]
+       },
+       "decision": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "self": [
+         "decision"
+        ]
+       },
+       "__unspec": {
+        "refs": [
+         "a:restore"
+        ],
+        "text": "저장 복구와 작업 지시·사용자 결정 표시의 관계는 이 기록에 적혀 있지 않습니다. 미지정이며 무관하다는 뜻은 아닙니다."
+       }
+      },
+      "shot": "b_390_S1_initial.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S1sel@390",
+     "title": "목적 정정 선택 직후",
+     "checks": [
+      [
+       "목적 정정이 실제 선택됨",
+       true,
+       null
+      ],
+      [
+       "선택이 다른 영역 깊이를 바꾸지 않음",
+       true,
+       {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "참조 출발 안내가 보임",
+       true,
+       null
+      ],
+      [
+       "참조가 원래 노드를 가리킴(복제 없음)",
+       true,
+       null
+      ],
+      [
+       "관련 표시 4개가 렌더링됨(화면 안 여부는 노출 기록)",
+       true,
+       4
+      ],
+      [
+       "하단 선택 안내에 관련 영역",
+       true,
+       "목적 정정 선택됨\n함께 언급: 홈, 작업문, 다음 AI 요청, 저장 복구"
+      ]
+     ],
+     "notes": {
+      "before": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "after": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [
+        "purpose"
+       ],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 783,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": true,
+       "pointed": [
+        "p:purpose"
+       ],
+       "active": "part(selected):purpose",
+       "dupIds": []
+      },
+      "app_auto_move": {
+       "winY": [
+        0,
+        783
+       ],
+       "mapScroll": [
+        [
+         0,
+         0
+        ],
+        [
+         0,
+         0
+        ]
+       ]
+      },
+      "exposure_after_select": [
+       {
+        "key": "관련:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 466,
+        "h": 42
+       },
+       {
+        "key": "관련:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 552,
+        "h": 42
+       },
+       {
+        "key": "관련:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 660,
+        "h": 42
+       },
+       {
+        "key": "관련:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": false,
+        "y": 769,
+        "h": 42
+       },
+       {
+        "key": "선택 노드",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 99,
+        "h": 75
+       },
+       {
+        "key": "하단 선택 안내",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 773,
+        "h": 61
+       }
+      ],
+      "shot": "b_390_S1_selected.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S1@1280",
+     "title": "새로 연 첫 화면",
+     "checks": [
+      [
+       "처음에는 선택 없음(꾸민 선택 없음)",
+       true,
+       null
+      ],
+      [
+       "중복 DOM id 없음",
+       true,
+       []
+      ],
+      [
+       "가로 넘침 없음",
+       true,
+       null
+      ],
+      [
+       "기록 기준·제목·핵심 문장이 첫 화면에 온전히 보임",
+       true,
+       null
+      ],
+      [
+       "관계 10개·미지정 2개가 BRIEF 표와 일치",
+       true,
+       null
+      ],
+      [
+       "기본 화면에 내부 식별자·해시 없음",
+       true,
+       []
+      ],
+      [
+       "발송·수락·승인 숙제 표현 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "state": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "exposure": [
+       {
+        "key": "목표 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 13,
+        "h": 22
+       },
+       {
+        "key": "기록 기준(과거 보고 당시)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 73,
+        "h": 42
+       },
+       {
+        "key": "제목",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 121,
+        "h": 68
+       },
+       {
+        "key": "핵심 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 196,
+        "h": 48
+       },
+       {
+        "key": "관계 한정(함께 언급·포함 아님)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 154,
+        "h": 36
+       },
+       {
+        "key": "다음 AI 요청 한정(미검증) 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 458,
+        "h": 45
+       },
+       {
+        "key": "동작:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 172,
+        "h": 26
+       },
+       {
+        "key": "동작:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 259,
+        "h": 26
+       },
+       {
+        "key": "동작:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 368,
+        "h": 26
+       },
+       {
+        "key": "영역:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 231,
+        "h": 24
+       },
+       {
+        "key": "영역:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 317,
+        "h": 24
+       },
+       {
+        "key": "영역:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 425,
+        "h": 24
+       },
+       {
+        "key": "영역:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 533,
+        "h": 24
+       },
+       {
+        "key": "설명문:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 331,
+        "h": 79
+       },
+       {
+        "key": "설명문:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 420,
+        "h": 79
+       },
+       {
+        "key": "설명문:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 508,
+        "h": 79
+       },
+       {
+        "key": "미지정 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 597,
+        "h": 49
+       }
+      ],
+      "fully_visible_initial": [
+       "목표 문장",
+       "기록 기준(과거 보고 당시)",
+       "제목",
+       "핵심 문장",
+       "관계 한정(함께 언급·포함 아님)",
+       "다음 AI 요청 한정(미검증) 문장",
+       "동작:purpose",
+       "동작:instruction",
+       "동작:decision",
+       "영역:home",
+       "영역:task",
+       "영역:next",
+       "영역:restore",
+       "설명문:purpose",
+       "설명문:instruction",
+       "설명문:decision",
+       "미지정 문장"
+      ],
+      "not_fully_visible_initial": [],
+      "relations_dom": {
+       "purpose": {
+        "on": [
+         "home",
+         "task",
+         "next",
+         "restore"
+        ],
+        "self": [
+         "purpose"
+        ]
+       },
+       "instruction": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "self": [
+         "instruction"
+        ]
+       },
+       "decision": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "self": [
+         "decision"
+        ]
+       },
+       "__unspec": {
+        "refs": [
+         "a:restore"
+        ],
+        "text": "저장 복구와 작업 지시·사용자 결정 표시의 관계는 이 기록에 적혀 있지 않습니다. 미지정이며 무관하다는 뜻은 아닙니다."
+       }
+      },
+      "shot": "b_1280_S1_initial.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S1sel@1280",
+     "title": "목적 정정 선택 직후",
+     "checks": [
+      [
+       "목적 정정이 실제 선택됨",
+       true,
+       null
+      ],
+      [
+       "선택이 다른 영역 깊이를 바꾸지 않음",
+       true,
+       {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "참조 출발 안내가 보임",
+       true,
+       null
+      ],
+      [
+       "참조가 원래 노드를 가리킴(복제 없음)",
+       true,
+       null
+      ],
+      [
+       "연결선 4개가 관련 영역 머리와 실제 좌표로 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "하단 선택 안내에 관련 영역",
+       true,
+       "목적 정정 선택됨 함께 언급: 홈, 작업문, 다음 AI 요청, 저장 복구"
+      ]
+     ],
+     "notes": {
+      "before": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "after": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [
+        "purpose"
+       ],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 4,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": true,
+       "pointed": [
+        "p:purpose"
+       ],
+       "active": "part(selected):purpose",
+       "dupIds": []
+      },
+      "app_auto_move": {
+       "winY": [
+        0,
+        0
+       ],
+       "mapScroll": [
+        [
+         0,
+         0
+        ],
+        [
+         0,
+         0
+        ]
+       ]
+      },
+      "exposure_after_select": [
+       {
+        "key": "관련:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 286,
+        "h": 42
+       },
+       {
+        "key": "관련:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 371,
+        "h": 42
+       },
+       {
+        "key": "관련:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 480,
+        "h": 42
+       },
+       {
+        "key": "관련:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 588,
+        "h": 42
+       },
+       {
+        "key": "선택 노드",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 222,
+        "h": 76
+       },
+       {
+        "key": "하단 선택 안내",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 675,
+        "h": 24
+       }
+      ],
+      "shot": "b_1280_S1_selected.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S1@1440",
+     "title": "새로 연 첫 화면",
+     "checks": [
+      [
+       "처음에는 선택 없음(꾸민 선택 없음)",
+       true,
+       null
+      ],
+      [
+       "중복 DOM id 없음",
+       true,
+       []
+      ],
+      [
+       "가로 넘침 없음",
+       true,
+       null
+      ],
+      [
+       "기록 기준·제목·핵심 문장이 첫 화면에 온전히 보임",
+       true,
+       null
+      ],
+      [
+       "관계 10개·미지정 2개가 BRIEF 표와 일치",
+       true,
+       null
+      ],
+      [
+       "기본 화면에 내부 식별자·해시 없음",
+       true,
+       []
+      ],
+      [
+       "발송·수락·승인 숙제 표현 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "state": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 0,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": false,
+       "pointed": [],
+       "active": "BODY",
+       "dupIds": []
+      },
+      "exposure": [
+       {
+        "key": "목표 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 13,
+        "h": 22
+       },
+       {
+        "key": "기록 기준(과거 보고 당시)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 73,
+        "h": 42
+       },
+       {
+        "key": "제목",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 121,
+        "h": 68
+       },
+       {
+        "key": "핵심 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 196,
+        "h": 48
+       },
+       {
+        "key": "관계 한정(함께 언급·포함 아님)",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 154,
+        "h": 36
+       },
+       {
+        "key": "다음 AI 요청 한정(미검증) 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 458,
+        "h": 45
+       },
+       {
+        "key": "동작:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 172,
+        "h": 26
+       },
+       {
+        "key": "동작:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 259,
+        "h": 26
+       },
+       {
+        "key": "동작:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 368,
+        "h": 26
+       },
+       {
+        "key": "영역:home",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 231,
+        "h": 24
+       },
+       {
+        "key": "영역:task",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 317,
+        "h": 24
+       },
+       {
+        "key": "영역:next",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 425,
+        "h": 24
+       },
+       {
+        "key": "영역:restore",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 533,
+        "h": 24
+       },
+       {
+        "key": "설명문:purpose",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 331,
+        "h": 79
+       },
+       {
+        "key": "설명문:instruction",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 420,
+        "h": 79
+       },
+       {
+        "key": "설명문:decision",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 508,
+        "h": 79
+       },
+       {
+        "key": "미지정 문장",
+        "exists": true,
+        "shown": true,
+        "fully_visible": true,
+        "y": 597,
+        "h": 49
+       }
+      ],
+      "fully_visible_initial": [
+       "목표 문장",
+       "기록 기준(과거 보고 당시)",
+       "제목",
+       "핵심 문장",
+       "관계 한정(함께 언급·포함 아님)",
+       "다음 AI 요청 한정(미검증) 문장",
+       "동작:purpose",
+       "동작:instruction",
+       "동작:decision",
+       "영역:home",
+       "영역:task",
+       "영역:next",
+       "영역:restore",
+       "설명문:purpose",
+       "설명문:instruction",
+       "설명문:decision",
+       "미지정 문장"
+      ],
+      "not_fully_visible_initial": [],
+      "relations_dom": {
+       "purpose": {
+        "on": [
+         "home",
+         "task",
+         "next",
+         "restore"
+        ],
+        "self": [
+         "purpose"
+        ]
+       },
+       "instruction": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "self": [
+         "instruction"
+        ]
+       },
+       "decision": {
+        "on": [
+         "home",
+         "task",
+         "next"
+        ],
+        "self": [
+         "decision"
+        ]
+       },
+       "__unspec": {
+        "refs": [
+         "a:restore"
+        ],
+        "text": "저장 복구와 작업 지시·사용자 결정 표시의 관계는 이 기록에 적혀 있지 않습니다. 미지정이며 무관하다는 뜻은 아닙니다."
+       }
+      },
+      "shot": "b_1440_S1_initial.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S2@390",
+     "title": "현재 부분과 관련 범위 찾기",
+     "checks": [
+      [
+       "선택됨, 깊이 유지",
+       true,
+       null
+      ],
+      [
+       "관련 영역 4곳이 표시와 함께 실제 화면에 들어옴",
+       true,
+       [
+        "home",
+        "task",
+        "next",
+        "restore"
+       ]
+      ],
+      [
+       "탐색 중 선택·깊이 유지",
+       true,
+       null
+      ],
+      [
+       "출발 참조가 화면에 다시 보이고 초점이 그 참조에",
+       true,
+       "ref:p:purpose"
+      ],
+      [
+       "돌아간 위치가 참조 직전 창 위치",
+       true,
+       [
+        0,
+        0
+       ]
+      ],
+      [
+       "돌아가도 선택은 유지(새 선택과 구별)",
+       true,
+       null
+      ],
+      [
+       "원래 '다음 AI 요청' 영역을 가리킴(같은 DOM 1개)",
+       true,
+       null
+      ],
+      [
+       "가리킨 영역이 안내줄·하단바에 가리지 않고 화면 안",
+       true,
+       [
+        {
+         "x": 31,
+         "y": 512,
+         "width": 328,
+         "height": 99.1875
+        },
+        {
+         "x": 0,
+         "y": 0,
+         "width": 390,
+         "height": 108.78125
+        }
+       ]
+      ],
+      [
+       "안내줄에 함께 언급된 동작 3개",
+       true,
+       "설명의 ‘다음 AI 요청’ 영역입니다. 함께 언급된 동작: 목적 정정, 작업 지시, 사용자 결정 표시"
+      ],
+      [
+       "영역 참조는 선택을 바꾸지 않음",
+       true,
+       null
+      ],
+      [
+       "두 번째 복귀도 출발 참조·위치로",
+       true,
+       [
+        0,
+        0,
+        "ref:a:next"
+       ]
+      ]
+     ],
+     "notes": {
+      "after_select": {
+       "map": true,
+       "focus": false,
+       "depth": {
+        "home": 1,
+        "task": 1,
+        "next": 1,
+        "restore": 1
+       },
+       "selected": [
+        "purpose"
+       ],
+       "mapScroll": [
+        0,
+        0
+       ],
+       "winY": 783,
+       "zoom": "100%",
+       "edges": 0,
+       "readingTop": 0,
+       "peeks": 0,
+       "dialog": false,
+       "refbar": true,
+       "pointed": [
+        "p:purpose"
+       ],
+       "active": "part(selected):purpose",
+       "dupIds": []
+      },
+      "app_auto_move_winY": [
+       0,
+       783
+      ],
+      "related_seen_at_winY": {
+       "home": 783,
+       "task": 783,
+       "next": 783,
+       "restore": 931
+      },
+      "wheel_steps": 1,
+      "distance_px": 148,
+      "app_auto_move_area_ref_winY": [
+       0,
+       952
+      ],
+      "shot": "b_390_S2_scope.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S3@390",
+     "title": "선택을 유지한 배치 변화",
+     "checks": [
+      [
+       "사용자 깊이 조정 반영",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "선택 후 깊이 그대로",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "접힘 조작 뒤 선택·깊이 유지",
+       true,
+       null
+      ],
+      [
+       "390 관련 표시가 기대 4영역에만",
+       true,
+       [
+        [
+         "home",
+         true,
+         true
+        ],
+        [
+         "task",
+         true,
+         true
+        ],
+        [
+         "next",
+         true,
+         true
+        ],
+        [
+         "restore",
+         true,
+         true
+        ]
+       ]
+      ],
+      [
+       "저장 복구 표시가 하단 고정바에 가리지 않음",
+       true,
+       {
+        "inPeek": false,
+        "inDialog": false,
+        "text": "선택한 동작과 함께 언급"
+       }
+      ]
+     ],
+     "notes": {
+      "depth": {
+       "home": 0,
+       "task": 2,
+       "next": 1,
+       "restore": 1
+      },
+      "shot": "b_390_S3_layout.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S4@390",
+     "title": "비초기 위치에서 근거 닫기·다시 열기·Escape",
+     "checks": [
+      [
+       "근거 1개 열림",
+       true,
+       null
+      ],
+      [
+       "출발 문장이 화면 안에 남음",
+       true,
+       251
+      ],
+      [
+       "문서 보고·해석·미확인 구분",
+       true,
+       null
+      ],
+      [
+       "외부 원문 링크 고정 커밋(열지 않음)",
+       true,
+       null
+      ],
+      [
+       "닫은 근거가 DOM·화면에서 사라짐",
+       true,
+       {
+        "inPeek": false,
+        "inDialog": false,
+        "text": "예전 형식으로 저장된 정정은 복원할 때 한 "
+       }
+      ],
+      [
+       "닫은 직후 읽던 위치 = 열기 전(비초기)",
+       true,
+       {
+        "before_open": 260,
+        "after_close": 260
+       }
+      ],
+      [
+       "초점이 출발 근거 버튼",
+       true,
+       "evbtn:p3"
+      ],
+      [
+       "출발 문장 위치 동일",
+       true,
+       [
+        251.453125,
+        251.453125
+       ]
+      ],
+      [
+       "다시 열어도 1개, 출발 인용 첫 줄",
+       true,
+       null
+      ],
+      [
+       "Escape로 닫힘·초점·위치 복귀",
+       true,
+       {
+        "pos": 260,
+        "active": "evbtn:p3"
+       }
+      ]
+     ],
+     "notes": {
+      "start": {
+       "pos": 260,
+       "active": "focusTitle"
+      },
+      "positions": {
+       "before_open": 260,
+       "after_close": 260,
+       "after_escape": 260
+      },
+      "shot_closed": "b_390_S4_closed.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S5@390",
+     "title": "전체로 돌아와 이어보기",
+     "checks": [
+      [
+       "비초기 지도/창 위치",
+       true,
+       {
+        "mapScroll": [
+         0,
+         0
+        ],
+        "winY": 760,
+        "zoom": "100%"
+       }
+      ],
+      [
+       "'이 부분 읽기'가 스크롤 없이 화면 안",
+       true,
+       {
+        "x": 262.59375,
+        "y": 781.3125,
+        "width": 111.40625,
+        "height": 44
+       }
+      ],
+      [
+       "읽기 공간 진입",
+       true,
+       null
+      ],
+      [
+       "전체 복귀 버튼이 지금 화면 안(추가 스크롤 불필요)",
+       true,
+       8
+      ],
+      [
+       "지도 보임·읽기 닫힘",
+       true,
+       null
+      ],
+      [
+       "같은 선택",
+       true,
+       null
+      ],
+      [
+       "사용자 깊이 유지",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "지도/창 위치·배율 복귀",
+       true,
+       {
+        "pre": [
+         [
+          0,
+          0
+         ],
+         760,
+         "100%"
+        ],
+        "post": [
+         [
+          0,
+          0
+         ],
+         760,
+         "100%"
+        ]
+       }
+      ],
+      [
+       "기준 노드 7개 좌표 동일(0.1px 반올림)",
+       true,
+       {}
+      ],
+      [
+       "초점이 선택 노드",
+       true,
+       "part(selected):purpose"
+      ],
+      [
+       "B 출발 참조 안내가 진입 전과 같음",
+       true,
+       [
+        "설명의 ‘목적 정정’에서 이 동작을 골랐습니다.",
+        "설명의 ‘목적 정정’에서 이 동작을 골랐습니다."
+       ]
+      ],
+      [
+       "근거·준비 잔여 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "pre": {
+       "state": {
+        "map": true,
+        "focus": false,
+        "depth": {
+         "home": 0,
+         "task": 2,
+         "next": 1,
+         "restore": 1
+        },
+        "selected": [
+         "purpose"
+        ],
+        "mapScroll": [
+         0,
+         0
+        ],
+        "winY": 760,
+        "zoom": "100%",
+        "edges": 0,
+        "readingTop": 0,
+        "peeks": 0,
+        "dialog": false,
+        "refbar": true,
+        "pointed": [
+         "p:purpose"
+        ],
+        "active": "SUMMARY",
+        "dupIds": []
+       },
+       "nodes": {
+        "part_purpose": [
+         16,
+         121.6,
+         358,
+         74.6
+        ],
+        "part_decision": [
+         16,
+         290.8,
+         358,
+         74.6
+        ],
+        "home": [
+         32,
+         489.4,
+         326,
+         42
+        ],
+        "task": [
+         32,
+         542.4,
+         326,
+         42
+        ],
+        "next": [
+         32,
+         755.2,
+         326,
+         42
+        ],
+        "restore": [
+         32,
+         863.4,
+         326,
+         42
+        ],
+        "frame": [
+         16,
+         385.4,
+         358,
+         591.2
+        ]
+       }
+      },
+      "post": {
+       "state": {
+        "map": true,
+        "focus": false,
+        "depth": {
+         "home": 0,
+         "task": 2,
+         "next": 1,
+         "restore": 1
+        },
+        "selected": [
+         "purpose"
+        ],
+        "mapScroll": [
+         0,
+         0
+        ],
+        "winY": 760,
+        "zoom": "100%",
+        "edges": 0,
+        "readingTop": 0,
+        "peeks": 0,
+        "dialog": false,
+        "refbar": true,
+        "pointed": [
+         "p:purpose"
+        ],
+        "active": "part(selected):purpose",
+        "dupIds": []
+       },
+       "nodes": {
+        "part_purpose": [
+         16,
+         121.6,
+         358,
+         74.6
+        ],
+        "part_decision": [
+         16,
+         290.8,
+         358,
+         74.6
+        ],
+        "home": [
+         32,
+         489.4,
+         326,
+         42
+        ],
+        "task": [
+         32,
+         542.4,
+         326,
+         42
+        ],
+        "next": [
+         32,
+         755.2,
+         326,
+         42
+        ],
+        "restore": [
+         32,
+         863.4,
+         326,
+         42
+        ],
+        "frame": [
+         16,
+         385.4,
+         358,
+         591.2
+        ]
+       }
+      },
+      "shot": "b_390_S5_returned.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S3@1280",
+     "title": "선택을 유지한 배치 변화",
+     "checks": [
+      [
+       "사용자 깊이 조정 반영",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "선택 후 깊이 그대로",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "기록 기준 더 보기 연 뒤 재선택 없이 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "기록 기준 더 보기 닫은 뒤 재선택 없이 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "선과 표시의 뜻 연 뒤 재선택 없이 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "선과 표시의 뜻 닫은 뒤 재선택 없이 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "접힘 조작 뒤 선택·깊이 유지",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "depth": {
+       "home": 0,
+       "task": 2,
+       "next": 1,
+       "restore": 1
+      },
+      "shot": "b_1280_S3_layout.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S4@1280",
+     "title": "비초기 위치에서 근거 닫기·다시 열기·Escape",
+     "checks": [
+      [
+       "근거 1개 열림",
+       true,
+       null
+      ],
+      [
+       "출발 문장이 화면 안에 남음",
+       true,
+       131
+      ],
+      [
+       "문서 보고·해석·미확인 구분",
+       true,
+       null
+      ],
+      [
+       "외부 원문 링크 고정 커밋(열지 않음)",
+       true,
+       null
+      ],
+      [
+       "닫은 근거가 DOM·화면에서 사라짐",
+       true,
+       {
+        "inPeek": false,
+        "inDialog": false,
+        "text": "예전 형식으로 저장된 정정은 복원할 때 한 "
+       }
+      ],
+      [
+       "닫은 직후 읽던 위치 = 열기 전(비초기)",
+       true,
+       {
+        "before_open": 164,
+        "after_close": 164
+       }
+      ],
+      [
+       "초점이 출발 근거 버튼",
+       true,
+       "evbtn:p3"
+      ],
+      [
+       "출발 문장 위치 동일",
+       true,
+       [
+        131.546875,
+        131.546875
+       ]
+      ],
+      [
+       "다시 열어도 1개, 출발 인용 첫 줄",
+       true,
+       null
+      ],
+      [
+       "Escape로 닫힘·초점·위치 복귀",
+       true,
+       {
+        "pos": 164,
+        "active": "evbtn:p3"
+       }
+      ]
+     ],
+     "notes": {
+      "start": {
+       "pos": 164,
+       "active": "focusTitle"
+      },
+      "positions": {
+       "before_open": 164,
+       "after_close": 164,
+       "after_escape": 164
+      },
+      "shot_closed": "b_1280_S4_closed.png"
+     },
+     "status": "PASS"
+    },
+    {
+     "scene": "S5@1280",
+     "title": "전체로 돌아와 이어보기",
+     "checks": [
+      [
+       "비초기 지도/창 위치",
+       true,
+       {
+        "mapScroll": [
+         40,
+         120
+        ],
+        "winY": 0,
+        "zoom": "120%"
+       }
+      ],
+      [
+       "'이 부분 읽기'가 스크롤 없이 화면 안",
+       true,
+       {
+        "x": 1150.59375,
+        "y": 665,
+        "width": 111.40625,
+        "height": 44
+       }
+      ],
+      [
+       "읽기 공간 진입",
+       true,
+       null
+      ],
+      [
+       "전체 복귀 버튼이 지금 화면 안(추가 스크롤 불필요)",
+       true,
+       71
+      ],
+      [
+       "지도 보임·읽기 닫힘",
+       true,
+       null
+      ],
+      [
+       "같은 선택",
+       true,
+       null
+      ],
+      [
+       "사용자 깊이 유지",
+       true,
+       {
+        "home": 0,
+        "task": 2,
+        "next": 1,
+        "restore": 1
+       }
+      ],
+      [
+       "지도/창 위치·배율 복귀",
+       true,
+       {
+        "pre": [
+         [
+          40,
+          120
+         ],
+         0,
+         "120%"
+        ],
+        "post": [
+         [
+          40,
+          120
+         ],
+         0,
+         "120%"
+        ]
+       }
+      ],
+      [
+       "기준 노드 7개 좌표 동일(0.1px 반올림)",
+       true,
+       {}
+      ],
+      [
+       "초점이 선택 노드",
+       true,
+       "part(selected):purpose"
+      ],
+      [
+       "복귀 뒤 선-영역 대응",
+       true,
+       {
+        "edges": 4,
+        "unmatched": [],
+        "starts_ok": true
+       }
+      ],
+      [
+       "B 출발 참조 안내가 진입 전과 같음",
+       true,
+       [
+        "설명의 ‘목적 정정’에서 이 동작을 골랐습니다.",
+        "설명의 ‘목적 정정’에서 이 동작을 골랐습니다."
+       ]
+      ],
+      [
+       "근거·준비 잔여 없음",
+       true,
+       null
+      ]
+     ],
+     "notes": {
+      "pre": {
+       "state": {
+        "map": true,
+        "focus": false,
+        "depth": {
+         "home": 0,
+         "task": 2,
+         "next": 1,
+         "restore": 1
+        },
+        "selected": [
+         "purpose"
+        ],
+        "mapScroll": [
+         40,
+         120
+        ],
+        "winY": 0,
+        "zoom": "120%",
+        "edges": 4,
+        "readingTop": 0,
+        "peeks": 0,
+        "dialog": false,
+        "refbar": true,
+        "pointed": [
+         "p:purpose"
+        ],
+        "active": "BODY",
+        "dupIds": []
+       },
+       "nodes": {
+        "part_purpose": [
+         413.6,
+         114.2,
+         324,
+         90.7
+        ],
+        "part_decision": [
+         413.6,
+         349.6,
+         324,
+         115.9
+        ],
+        "home": [
+         876.8,
+         190.1,
+         393.6,
+         50.4
+        ],
+        "task": [
+         876.8,
+         253.7,
+         393.6,
+         50.4
+        ],
+        "next": [
+         876.8,
+         509,
+         393.6,
+         50.4
+        ],
+        "restore": [
+         876.8,
+         638.8,
+         393.6,
+         50.4
+        ],
+        "frame": [
+         857.6,
+         65.2,
+         432,
+         709.4
+        ]
+       }
+      },
+      "post": {
+       "state": {
+        "map": true,
+        "focus": false,
+        "depth": {
+         "home": 0,
+         "task": 2,
+         "next": 1,
+         "restore": 1
+        },
+        "selected": [
+         "purpose"
+        ],
+        "mapScroll": [
+         40,
+         120
+        ],
+        "winY": 0,
+        "zoom": "120%",
+        "edges": 4,
+        "readingTop": 0,
+        "peeks": 0,
+        "dialog": false,
+        "refbar": true,
+        "pointed": [
+         "p:purpose"
+        ],
+        "active": "part(selected):purpose",
+        "dupIds": []
+       },
+       "nodes": {
+        "part_purpose": [
+         413.6,
+         114.2,
+         324,
+         90.7
+        ],
+        "part_decision": [
+         413.6,
+         349.6,
+         324,
+         115.9
+        ],
+        "home": [
+         876.8,
+         190.1,
+         393.6,
+         50.4
+        ],
+        "task": [
+         876.8,
+         253.7,
+         393.6,
+         50.4
+        ],
+        "next": [
+         876.8,
+         509,
+         393.6,
+         50.4
+        ],
+        "restore": [
+         876.8,
+         638.8,
+         393.6,
+         50.4
+        ],
+        "frame": [
+         857.6,
+         65.2,
+         432,
+         709.4
+        ]
+       }
+      },
+      "shot": "b_1280_S5_returned.png"
+     },
+     "status": "PASS"
+    }
+   ]
+  }
+ },
+ "browser": "chromium 141.0.7390.37",
+ "verdict": {
+  "exit_code": 0,
+  "failures": {}
+ }
+}

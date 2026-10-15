@@ -1,0 +1,37 @@
+기대 HTML orientation-study.html sha256=80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3
+chromium 141.0.7390.37 · http://127.0.0.1:8770/orientation-study.html · 시작 2026-10-16T03:11:00+0900
+브라우저 응답 body: 탐색 12회, 고유 (sha256,status)=[('80c9b86100282838', 200)], 모두 일치=True
+
+== 후보 A
+[PASS] S1@390 새로 연 첫 화면
+[PASS] S1sel@390 목적 정정 선택 직후
+[PASS] S1@1280 새로 연 첫 화면
+[PASS] S1sel@1280 목적 정정 선택 직후
+[PASS] S1@1440 새로 연 첫 화면
+[PASS] S2@390 현재 부분과 관련 범위 찾기
+[PASS] S3@390 선택을 유지한 배치 변화
+[PASS] S4@390 비초기 위치에서 근거 닫기·다시 열기·Escape
+[PASS] S5prep@390 준비 열기·하단 접근·닫기(390에서 한 번)
+[PASS] S5@390 전체로 돌아와 이어보기
+[PASS] S3@1280 선택을 유지한 배치 변화
+[PASS] S4@1280 비초기 위치에서 근거 닫기·다시 열기·Escape
+[PASS] S5@1280 전체로 돌아와 이어보기
+   pageerror: 없음 / console error: 없음 / 외부 요청: 없음 / cleanup: 없음
+
+== 후보 B
+[PASS] S1@390 새로 연 첫 화면
+[PASS] S1sel@390 목적 정정 선택 직후
+[PASS] S1@1280 새로 연 첫 화면
+[PASS] S1sel@1280 목적 정정 선택 직후
+[PASS] S1@1440 새로 연 첫 화면
+[PASS] S2@390 현재 부분과 관련 범위 찾기
+[PASS] S3@390 선택을 유지한 배치 변화
+[PASS] S4@390 비초기 위치에서 근거 닫기·다시 열기·Escape
+[PASS] S5@390 전체로 돌아와 이어보기
+[PASS] S3@1280 선택을 유지한 배치 변화
+[PASS] S4@1280 비초기 위치에서 근거 닫기·다시 열기·Escape
+[PASS] S5@1280 전체로 돌아와 이어보기
+   pageerror: 없음 / console error: 없음 / 외부 요청: 없음 / cleanup: 없음
+
+외부 GitHub 원문 왕복: 미실행(href만 확인)
+판정: PASS (exit 0)

@@ -1,0 +1,77 @@
+{
+ "started": "2026-10-16T03:11:38+0900",
+ "expected_html": "base.html",
+ "expected_sha256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+ "url": "http://127.0.0.1:8770/orientation-study.html",
+ "navigations": [
+  {
+   "cand": "a",
+   "vp": "390",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=a",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+   "match": false
+  },
+  {
+   "cand": "b",
+   "vp": "390",
+   "url": "http://127.0.0.1:8770/orientation-study.html?v=b",
+   "status": 200,
+   "body_sha256": "80c9b86100282838543e0429c8678cf66c4c74315ce45c5746def03d8898d4b3",
+   "body_bytes": 54259,
+   "expected_sha256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+   "match": false
+  }
+ ],
+ "candidates": {
+  "a": {
+   "info": {},
+   "scenes": [],
+   "fatal": "응답 body 해시/상태 불일치: 200 80c9b8610028 != af748df1dfac"
+  },
+  "b": {
+   "info": {},
+   "scenes": [],
+   "fatal": "응답 body 해시/상태 불일치: 200 80c9b8610028 != af748df1dfac"
+  }
+ },
+ "browser": "chromium 141.0.7390.37",
+ "verdict": {
+  "exit_code": 1,
+  "failures": {
+   "*": [
+    "응답 body 해시/상태 불일치"
+   ],
+   "a": [
+    "fatal: 응답 body 해시/상태 불일치: 200 80c9b8610028 != af748df1dfac",
+    "미완주: S1@390 기록 없음",
+    "미완주: S1@1280 기록 없음",
+    "미완주: S1@1440 기록 없음",
+    "미완주: S1sel@390 기록 없음",
+    "미완주: S1sel@1280 기록 없음",
+    "미완주: S2@390 기록 없음",
+    "미완주: S3@390 기록 없음",
+    "미완주: S3@1280 기록 없음",
+    "미완주: S4@390 기록 없음",
+    "미완주: S5@390 기록 없음",
+    "미완주: S5@1280 기록 없음"
+   ],
+   "b": [
+    "fatal: 응답 body 해시/상태 불일치: 200 80c9b8610028 != af748df1dfac",
+    "미완주: S1@390 기록 없음",
+    "미완주: S1@1280 기록 없음",
+    "미완주: S1@1440 기록 없음",
+    "미완주: S1sel@390 기록 없음",
+    "미완주: S1sel@1280 기록 없음",
+    "미완주: S2@390 기록 없음",
+    "미완주: S3@390 기록 없음",
+    "미완주: S3@1280 기록 없음",
+    "미완주: S4@390 기록 없음",
+    "미완주: S5@390 기록 없음",
+    "미완주: S5@1280 기록 없음"
+   ]
+  }
+ }
+}
