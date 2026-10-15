@@ -1,5 +1,7 @@
 # AgentFlow Studio 현재 상태 — 2026-10-15 checkpoint
 
+**새 총괄 인계 추가:** 아래는 이전 개발 사이클의 종료 상태입니다. 개편 방향·새 연구 착수·역할 분담은 [새 총괄 시작 안내](NEW_COORDINATOR_START_KO.md)를 따릅니다. 이번 인계 변경은 문서뿐이며 제품 소스·공개 배포는 그대로입니다.
+
 **현재 사이클을 마무리하고 정지한다. 예약은 PAUSED이며 사용자 결정 없이 다음 조사·기능·실험·배포 사이클을 시작하지 않는다.** 이 문서가 현황의 단일 진입점이다. [첫 사용](START_HERE.md) · [공개 MOCK](https://tlsee0813-cmd.github.io/agentflow-studio/).
 
 ## 제품 목적과 현재 범위
