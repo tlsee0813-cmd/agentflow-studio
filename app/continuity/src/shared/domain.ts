@@ -286,7 +286,7 @@ function continuingLines(p:Project,t:Task,intent:CurrentIntent|null,ai:Intent|nu
   const label=t.mode==='mock'?'MOCK 정리':'AI 해석',e=earlier.manualGoal!==null?null:earlier.value;
   const kind=earlier.manualGoal!==null?'앞선 작업의 사용자 직접 정정':`앞선 작업의 ${label}`;
   return [`참고 · 앞선 목적 (${kind}, 현재 유효 여부는 확정하지 않음): ${shown(earlier.manualGoal??e!.goal)}`,
-    `그 당시 조건: ${(earlier.manualGoal!==null?earlier.manualConditions:e!.conditions.join(' / '))||'명시된 추가 조건 없음'}`,
+    `그 당시 조건: ${(earlier.manualGoal!==null?earlier.manualConditions:e!.conditions.join(' / '))||'별도 조건란의 값 없음 (원문 속 조건·금지가 없다는 뜻이 아님)'}`,
     ...(e?.retired.length?[`그 해석이 대체로 본 이전 요청 표현 (${label} · 사용자 결정은 대체하지 않음): ${e.retired.join(' / ')}`]:[]),
     '이번 요청 원문이나 사용자 정정이 이 목적의 폐기·교체·변경을 말하면 그쪽이 우선합니다. 이 참고는 앞선 목적을 지금 유지하라는 지시가 아닙니다.',
     `참고 출처: 작업 ${earlier.taskId} / ${earlier.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision}`).join(', ')}`];
@@ -436,7 +436,7 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
     const decisions=ai?p.bases.filter(b=>['confirmed','deferred','answered'].includes(b.status)):[];
     lines.push('\n## 이어가는 목적 · '+(correction?'사용자 직접 정정':t.mode==='mock'?'MOCK 정리 / 의미 이해 아님':'AI 해석 / 원문과 구분'),
       shown(correction?.goal??ai!.goal),
-      '유지할 조건: '+((correction?correction.conditions:ai!.conditions.join(' / '))||'명시된 추가 조건 없음'),
+      '유지할 조건: '+((correction?correction.conditions:ai!.conditions.join(' / '))||'별도 조건란의 값 없음 (원문 속 조건·금지가 없다는 뜻이 아님)'),
       ...(ai?.retired.length?[`대체된 지시 · 다시 실행하지 않음 (${interp} · 이전 요청 원문의 표현에만 적용, 사용자 결정 기준은 대체하지 않음): `+ai.retired.join(' / ')]:[]),
       ...(decisions.length?[`사용자 결정 기준 ${decisions.map(b=>`${b.id}(${BASIS_LABEL[b.status]})`).join(', ')}은 이 ${interp}보다 우선하며 아래 현재 값 그대로 유효합니다. 이번 요청 원문이 그 결정을 명시적으로 바꾼 부분만 요청 원문을 따르고, ${interp}만으로 결정을 폐기하지 마세요.`]:[]),
       ...continuingLines(p,t,intent,ai,shown),

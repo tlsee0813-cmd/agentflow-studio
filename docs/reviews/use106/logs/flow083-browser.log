@@ -1,0 +1,17 @@
+test_01_first_visit_starts_without_naming_and_the_example_is_never_saved (__main__.Flow083.test_01_first_visit_starts_without_naming_and_the_example_is_never_saved) ... ok
+test_02_revisit_lists_projects_switches_and_never_mixes_them (__main__.Flow083.test_02_revisit_lists_projects_switches_and_never_mixes_them) ... ok
+test_03_a_saved_older_project_is_migrated_once_and_its_key_is_never_written (__main__.Flow083.test_03_a_saved_older_project_is_migrated_once_and_its_key_is_never_written) ... ok
+test_04_trash_restore_and_backup_copy_keep_the_whole_project (__main__.Flow083.test_04_trash_restore_and_backup_copy_keep_the_whole_project) ... ok
+test_05_an_older_tab_cannot_save_into_a_project_trashed_or_restored_elsewhere (__main__.Flow083.test_05_an_older_tab_cannot_save_into_a_project_trashed_or_restored_elsewhere) ... ok
+test_06_request_input_stays_separate_and_each_handoff_step_says_what_happened (__main__.Flow083.test_06_request_input_stays_separate_and_each_handoff_step_says_what_happened) ... ok
+test_07_a_late_answer_after_switching_to_a_same_id_copy_changes_neither (__main__.Flow083.test_07_a_late_answer_after_switching_to_a_same_id_copy_changes_neither) ... ok
+test_08_without_web_locks_nothing_is_written_and_input_stays (__main__.Flow083.test_08_without_web_locks_nothing_is_written_and_input_stays) ... ok
+test_09_import_never_switches_over_input_that_failed_or_changed_while_saving (__main__.Flow083.test_09_import_never_switches_over_input_that_failed_or_changed_while_saving) ... ok
+test_10_a_normal_answer_survives_the_first_save_and_a_cancelled_import (__main__.Flow083.test_10_a_normal_answer_survives_the_first_save_and_a_cancelled_import) ... ok
+test_11_a_browser_that_refuses_storage_keeps_the_app_usable_and_says_so (__main__.Flow083.test_11_a_browser_that_refuses_storage_keeps_the_app_usable_and_says_so) ... ok
+test_12_consent_covers_only_the_input_shown_when_it_was_given (__main__.Flow083.test_12_consent_covers_only_the_input_shown_when_it_was_given) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 38.485s
+
+OK

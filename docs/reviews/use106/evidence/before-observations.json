@@ -1,0 +1,42 @@
+{
+  "phase": "before",
+  "viewportMeasurements": [
+    {
+      "viewport": 1280,
+      "scrollWidth": 1280,
+      "skipLinkBox": {
+        "x": 20,
+        "y": -100,
+        "width": 156.453125,
+        "height": 47.09375
+      }
+    },
+    {
+      "viewport": 390,
+      "scrollWidth": 390,
+      "skipLinkBox": {
+        "x": 20,
+        "y": -100,
+        "width": 156.453125,
+        "height": 47.09375
+      }
+    }
+  ],
+  "brief": null,
+  "background": {
+    "version": "background.1",
+    "revision": 3,
+    "brief": null,
+    "area": null
+  },
+  "sources": [
+    "첫 화면에 운영시간만 표시해 주세요. 자동 예약은 구현하지 마세요."
+  ],
+  "bases": [
+    "첫 화면에 운영시간만 표시해 주세요. 자동 예약은 구현하지 마세요."
+  ],
+  "purposeInHandoff": false,
+  "externalRequests": [],
+  "nonGetRequests": [],
+  "pageErrors": []
+}

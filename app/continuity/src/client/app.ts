@@ -105,6 +105,8 @@ function changeKind(kind:Project['draftKind']) {selectedReturnTaskId=undefined;c
 let contextReturn:HTMLElement|null=null;
 const unreadable='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 않습니다. 이 화면의 입력은 메모리에 남으며 복구 파일로 저장할 수 있습니다.';
 function resetEphemeral() {
+  // USE106: this unsubmitted entry field belongs to the project being left, never to the next project.
+  $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
   mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];
@@ -344,7 +346,7 @@ function renderOutcome(t:Task|null) {
   title.append(node('p','PROJECT OUTCOME','eyebrow'),node('h2','지금 이어갈 작업'));
   // FLOW091: the work text is reached from the '지금 할 일' row above; this head keeps only the next-request entry.
   const topActions=node('div','','outcome-actions');topActions.append(btn('방향 수정 / 다음 요청',()=>openComposer('request'),'secondary','change-direction'));
-  top.append(title,topActions);area.append(top);
+  top.append(title,topActions);area.append(top,handoffReview(t));
   // FIX088: received results and the user's latest request are shown, never merged into or swapped with this flow.
   const latest=flow.otherLatestRequest;
   if(latest) {
@@ -444,7 +446,7 @@ function renderOutcome(t:Task|null) {
   for(const s of [...flow.reports].reverse()) {
     const rt=project.tasks.find(x=>x.id===s.taskId)!,entry=node('div','','outcome-record');
     const parentIndex=project.tasks.findIndex(x=>x.id===rt.parentTaskId);
-    entry.append(tag(sourceName[s.kind]),node('p',`${dateLabel(s.at)} · ${parentIndex<0?'연결된 이전 작업 없음':`연결 작업 ${parentIndex+1}`}${rt.resultFile?` · 내보내기 ${rt.resultFile.returnId}`:' · 붙여넣기 / 내보내기 판본 미확인'}`,'hint'),node('div',reportBody(s),'source-raw'));results.append(entry);
+    entry.append(tag(sourceName[s.kind]),node('p',`${dateLabel(s.at)} · ${parentIndex<0?'연결된 이전 작업 없음':`연결 작업 ${parentIndex+1}`}${rt.resultFile?` · 내보내기 ${rt.resultFile.returnId}`:' · 붙여넣기 / 내보내기 판본 미확인'}`,'hint'),node('div',reportBody(s),'source-raw'),reportCorrectionHelp());results.append(entry);
   }
   if(!flow.reports.length)results.append(node('p','아직 이 작업 연결에서 받은 결과가 없습니다. 다른 작업의 보고는 작업 기록에서 볼 수 있어요.','hint'));
   grid.append(results);area.append(grid);
@@ -600,9 +602,38 @@ function renderHistory() {
     for(const h of t.handoffs){d.append(node('p',`${h.at} · ${h.method==='clipboard'?'복사':'파일 생성'} · 당시 기준 r${h.revision} · ${h.chars}자 · 식별 ${h.digest}${h.aiExcluded?' · 낡은 AI 문구 제외':''} (실행 여부 모름)`,'hint'));
       if(h.work)for(const [k,value] of Object.entries(h.work))if(value)d.append(node('div',`${k}: ${value}`,'source-raw'));
       if(h.legacyText){const old=details('이전 형식에서 보존한 내보낸 전문',`legacy-${t.id}-${h.digest}`);old.append(node('div',h.legacyText,'source-raw'));d.append(old);}}
+    if(kind==='report'||kind==='evidence')d.append(reportCorrectionHelp());
     e.append(d);list.append(e);
   }
   if(!project.tasks.length)list.append(node('p','아직 남긴 요청이 없습니다. 첫 요청을 남기면 이곳에서 다시 볼 수 있어요.','hint'));
+}
+/** Read-only guidance: there is no per-report removal or unlink operation in this version. */
+function reportCorrectionHelp():HTMLElement {
+  const help=node('aside','','report-correction-help');help.setAttribute('aria-label','잘못 가져온 결과 안내');
+  help.append(node('strong','잘못 가져온 결과인가요?'),
+    node('p','현재는 저장된 결과 원문을 직접 고치거나 한 건만 삭제·제외·연결 해제할 수 없어요.'),
+    node('p','현재 작업의 ‘방향 수정 / 다음 요청’에서 잘못된 보고의 작업 번호와 정정 내용을 새 요청으로 남길 수 있어요. 기존 보고와 연결은 그대로 남고 전달문에 포함될 수 있으니, 전달 전에 전체 문맥을 확인하세요.'),
+    node('p','입력 중인 초안을 비워도 저장된 결과는 바뀌지 않아요. ‘휴지통으로 옮기기’는 요청·결과를 포함한 프로젝트 전체에 적용돼요.'));
+  return help;
+}
+/** Existing records only. No extraction of conditions or unresolved choices from prose. */
+function handoffReview(t:Task):HTMLElement {
+  const flow=outcomeOf(project,t.id),intent=currentIntent(project,t),correction=intentCorrection(t);
+  const box=node('section','','handoff-review');box.id='handoff-review';box.setAttribute('aria-label','전달 전 확인');
+  box.append(node('h3','요청과 다음 행동 먼저 확인하기'),node('p','아래는 기록의 앞부분이에요. 의미 요약이나 새 결정을 만들지 않으며, 전체 원문·기준은 아래와 전체 전달문에 그대로 남아요.','hint'));
+  const grid=node('dl','','review-grid');
+  const item=(label:string,text:string)=>{const cell=node('div');cell.append(node('dt',label),node('dd',text));grid.append(cell);};
+  const changed=!!flow.requestBasis&&flow.requestBasis.text!==flow.request?.text;
+  item(changed?'이번 요청 · 현재 기준 값 앞부분':'이번 요청 · 원문 앞부분',shortText(flow.requestBasis?.text??flow.request?.text??'연결된 사용자 요청 없음. 가져온 보고를 새 요구로 바꾸지 않아요.',240));
+  const conditions=correction?.conditions??intent?.value.conditions.join(' / ')??'';
+  item(`별도 조건란 · ${correction?'직접 정정':intent?t.mode==='mock'?'MOCK 정리 값':'AI 정리 값':'기록 상태'}`,conditions?shortText(conditions,160):'별도 조건 값이 비어 있어요. 원문 속 조건·금지가 없다는 뜻은 아니에요.');
+  const unresolved=project.bases.filter(b=>b.status==='deferred'||project.sources.some(s=>s.id===b.sourceId&&(s.disposition==='unknown'||s.disposition==='deferred')));
+  const question=questionApplicability(project,t)==='active'?t.advice?.question:null;
+  const unresolvedText=unresolved.length?`프로젝트의 보류·모름 기록 ${unresolved.length}개 · ${unresolved.slice(0,2).map(b=>shortText(b.text,90)).join(' / ')} · 전체는 아래 기준·출처에서 확인하세요.`:'';
+  item('미정 · 열린 질문·보류·모름 기록',[question?`답변할 질문: ${shortText(question.text,180)}`:'',unresolvedText].filter(Boolean).join('\n')||'열린 질문이나 별도 보류·모름 기록은 없어요. 원문에 적힌 미정 사항은 자동 추출하지 않아요.');
+  const stage=stageOf(project,t);
+  item(`다음 행동 · ${stage.label}`,stage.kind==='ready'?'요청과 조건을 확인한 뒤 ‘작업문 복사’ 또는 ‘Markdown 저장’으로 가져가 쓰던 개발 도구에 붙여넣으세요. 복사·저장은 자동 실행이 아니에요.':stage.kind==='question'?'아래 질문에 답하거나 ‘잘 모르겠음’·‘이 질문은 보류’를 선택해 이어가세요.':stage.next);
+  box.append(grid);return box;
 }
 function renderWork(t:Task|null) {
   // FLOW083: the stage's actions live in the '지금 할 일' card; this card is the output and its editing.
@@ -1342,12 +1373,13 @@ function renderTaskView(root:HTMLElement,t:Task) {
   else actions.append(btn('이 작업 이어서 하기',()=>continueTask(t.id),'primary','task-view-continue'));
   head.append(actions);if(!currentGroup(t))head.append(node('p','이 화면을 보는 것만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.','hint'));
   root.append(head);
-  if(viewReturn!==null)root.append(pointedSection(t,viewReturn));
+  if(viewReturn!==null){root.append(pointedSection(t,viewReturn));if(pointedReturn(project,t.id,viewReturn))root.append(reportCorrectionHelp());}
   const body=node('section','','area-tasks task-view');body.id='task-view';
   body.append(node('h2','요청 원문'));if(first)body.append(node('p',`${sourceName[first.kind]} · ${dateLabel(first.at)}`,'source-id'),node('div',first.text,'source-raw'));
   body.append(node('h2',`돌아온 결과 ${results.length}개`));
   if(!results.length)body.append(node('p',t.handoffs.length?'작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.':'아직 돌아온 결과가 없어요.','hint'));
   for(const r of results)for(const id of r.sourceIds){const src=project.sources.find(s=>s.id===id);if(src)body.append(node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));}
+  if(results.length)body.append(reportCorrectionHelp());
   root.append(body);
   const own=new Set([t.id,...results.map(r=>r.id)]),bases=project.bases.filter(b=>own.has(project.sources.find(s=>s.id===b.sourceId)?.taskId??''));
   const box=details(`이 작업의 기준 ${bases.length}개`,'task-view-bases');
@@ -1412,7 +1444,7 @@ function render() {
   const others=activeEntries().some(e=>target.kind!=='entry'||e.entryId!==target.ref.entryId);
   $('welcome-title').textContent=others?'새 프로젝트 · 무엇을 만들고 싶나요?':'AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.';
   $('compose-eyebrow').textContent=returned?'CONTINUE WITH RESULTS':project.tasks.length?'NEXT REQUEST':"LET’S START";
-  $('input-hint').textContent=returned?'받은 보고를 그대로 붙여넣고 연결할 작업을 확인하세요. 검증 완료로 바꾸지 않습니다.':project.draftKind==='test_answer'?'합성 시험자료로만 보관합니다. 실제 요청과 확정 기준은 바꾸지 않습니다.':'필요한 질문만 받고, 바로 전달할 작업문을 준비해요.';
+  $('input-hint').textContent=returned?'받은 보고를 그대로 붙여넣고 연결할 작업을 확인하세요. 검증 완료로 바꾸지 않습니다.':project.draftKind==='test_answer'?'합성 시험자료로만 보관합니다. 실제 요청과 확정 기준은 바꾸지 않습니다.':config?.mode==='mock'?'MOCK은 정해진 규칙으로 작업문을 준비해요. 요청의 의미를 이해해 요약하거나 필요한 질문을 모두 찾아 주지는 않아요.':'필요한 질문만 받고, 바로 전달할 작업문을 준비해요.';
   $<HTMLTextAreaElement>('draft').placeholder=returned?'받은 결과 요약이나 변경 내용, 실행한 검사와 남은 일을 그대로 붙여넣으세요. 정해진 양식은 없어요.':project.tasks.length?'이번에 바꿀 부분만 적어 주세요. 앞에서 정한 기준은 함께 이어갑니다.':'무엇을 만들고 싶나요? 이미 작업 중이라면, 지금 바꾸고 싶은 부분만 알려주세요.';
   $('send').replaceChildren(document.createTextNode(returned?'결과에서 이어가기':'작업문 준비하기'),node('span',' ↗'));
   $('starter-examples').hidden=!!project.tasks.length||returned;
@@ -1426,11 +1458,23 @@ function render() {
 function submitInput(withAI:boolean) {
   if(project.pending||!project.draft.trim()||returnChoiceRequired()||(withAI&&!readyForAI()))return;
   guard(()=>{
-    // No naming step: a still-default name becomes the first request's opening words; it can be renamed any time.
-    if(!project.tasks.length&&project.name===createProject().name&&project.draftKind==='request')project=rename(project,shortText(project.draft,30));
     const parked=project.draftKind==='request'&&project.space.draftTarget?.area?project.space.areas.find(a=>a.id===project.space.draftTarget!.area&&a.archived):undefined;
     if(parked){project={...project,notice:`이 요청의 영역 ‘${parked.name}’은 보관돼 있어요. 영역을 되살리거나 다른 영역을 고른 뒤 보내세요.`};renderStatus();return;}
-    const next=submit(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);selectedReturnTaskId=undefined;commit(next);$<HTMLDetailsElement>('compose-panel').open=false;showWork();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});// FIX088: a result filed to another task leaves the current work as it was: no AI run on it, no edit panel.
+    // USE106: validate the visible first-purpose input and request together before changing live state.
+    // submit captures this existing brief as background, not as a source/decision; old task copies stay untouched.
+    let candidate=project;
+    const brief=$<HTMLTextAreaElement>('brief-input');
+    const firstRequest=!project.tasks.length&&project.draftKind==='request';
+    const entryBrief=firstRequest&&!$('brief-form').hidden?brief.value.trim():'';
+    if(entryBrief)candidate=setBrief(candidate,entryBrief);
+    // A rejected input event may leave invalid visible text beside the last valid draft. Never submit that older draft.
+    if(firstRequest&&$<HTMLTextAreaElement>('draft').value!==candidate.draft)candidate=editDraft(candidate,$<HTMLTextAreaElement>('draft').value);
+    // No naming step: a still-default name becomes the first request's opening words.
+    if(firstRequest&&candidate.name===createProject().name)candidate=rename(candidate,shortText(candidate.draft,30));
+    const next=submit(candidate,returnTargets(project).length>1?selectedReturnTaskId:undefined);
+    selectedReturnTaskId=undefined;commit(next);
+    if(firstRequest){brief.value='';$<HTMLButtonElement>('brief-start').disabled=true;}
+    $<HTMLDetailsElement>('compose-panel').open=false;showWork();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});// FIX088: a result filed to another task leaves the current work as it was: no AI run on it, no edit panel.
     if(next.currentTaskId!==next.tasks.at(-1)!.id)return;
     if(withAI)void generate(project.currentTaskId!);else {$<HTMLDetailsElement>('edit-work').open=true;$('work-next').focus();}});
 }

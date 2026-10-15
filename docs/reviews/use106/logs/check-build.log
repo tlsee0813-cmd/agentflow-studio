@@ -1,0 +1,6 @@
+IDEA015 type, syntax and client/server boundary checks passed.
+app/node_modules (locked dependency)
+IDEA015 built separately; existing app/dist and historic gates unchanged.
+app/node_modules (locked dependency)
+Explicit browser MOCK build: continuity/static-dist; no server adapter or provider files.
+app/node_modules (locked dependency)

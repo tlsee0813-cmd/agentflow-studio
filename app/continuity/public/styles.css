@@ -2364,3 +2364,14 @@ body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
 .area-checks{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .project-card.openable{cursor:pointer}
 .project-card.openable:hover{border-color:var(--accent)}
+
+/* USE106: a read-only review of existing records, ahead of tracking detail. */
+.handoff-review { margin:16px 0 22px; padding:18px; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+.handoff-review h3 { margin:0 0 8px; font-size:16px; }
+.review-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 22px; margin:14px 0 0; }
+.review-grid > div { min-width:0; }
+.review-grid dt { font-size:12px; font-weight:700; margin-bottom:5px; }
+.review-grid dd { margin:0; font-size:13px; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+.report-correction-help { margin-top:14px; padding:14px; border-left:3px solid var(--accent); background:var(--paper); font-size:13px; line-height:1.65; }
+.report-correction-help p { margin:6px 0 0; }
+@media(max-width:720px) { .review-grid { grid-template-columns:1fr; } .handoff-review { padding:14px; } }

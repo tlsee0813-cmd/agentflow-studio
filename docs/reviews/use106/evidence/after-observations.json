@@ -1,0 +1,46 @@
+{
+  "phase": "after",
+  "viewportMeasurements": [
+    {
+      "viewport": 1280,
+      "scrollWidth": 1280,
+      "skipLinkBox": {
+        "x": 20,
+        "y": -100,
+        "width": 156.453125,
+        "height": 47.09375
+      }
+    },
+    {
+      "viewport": 390,
+      "scrollWidth": 390,
+      "skipLinkBox": {
+        "x": 20,
+        "y": -100,
+        "width": 156.453125,
+        "height": 47.09375
+      }
+    }
+  ],
+  "brief": {
+    "text": "공방 안내. 휠체어 접근 정보와 쉬운 글씨를 고려한다. 결제·회원은 미정.",
+    "at": "2026-10-15T07:54:06.232Z",
+    "previous": []
+  },
+  "background": {
+    "version": "background.1",
+    "revision": 4,
+    "brief": "공방 안내. 휠체어 접근 정보와 쉬운 글씨를 고려한다. 결제·회원은 미정.",
+    "area": null
+  },
+  "sources": [
+    "첫 화면에 운영시간만 표시해 주세요. 자동 예약은 구현하지 마세요."
+  ],
+  "bases": [
+    "첫 화면에 운영시간만 표시해 주세요. 자동 예약은 구현하지 마세요."
+  ],
+  "purposeInHandoff": true,
+  "externalRequests": [],
+  "nonGetRequests": [],
+  "pageErrors": []
+}

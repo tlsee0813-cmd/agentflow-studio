@@ -1,0 +1,14 @@
+test_01_direct_first_request_captures_visible_purpose (__main__.EntryReview.test_01_direct_first_request_captures_visible_purpose) ... FAIL
+
+======================================================================
+FAIL: test_01_direct_first_request_captures_visible_purpose (__main__.EntryReview.test_01_direct_first_request_captures_visible_purpose)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/use106/repo/app/continuity/tests/use106_browser.py", line 34, in test_01_direct_first_request_captures_visible_purpose
+    self.assertIsNotNone(state['space']['brief'], 'visible purpose must enter the existing brief field')
+AssertionError: unexpectedly None : visible purpose must enter the existing brief field
+
+----------------------------------------------------------------------
+Ran 1 test in 1.626s
+
+FAILED (failures=1)

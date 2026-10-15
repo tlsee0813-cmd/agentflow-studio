@@ -155,6 +155,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/spatial102_browser.py 2>&1 | tee test-results/spatial102-browser.log
+      - name: USE106 first-request background, validation, storage and review guidance (native HTTP, MOCK)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/use106
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/use106_browser.py 2>&1 | tee test-results/use106-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:
