@@ -60,3 +60,13 @@ IcePanel의 **그룹 소속·C4 parent·시각 경계는 같은 의미가 아니
 
 **cycle05에 가져올 범위(해석):** 업무 대상/구조, 표시 깊이, 선택·가리킴, 진입 전 보기 복귀를 구분하고 stable ID로 연결한다는 설계 원칙까지다. 선택 취소나 범위 루트 설정 한 번으로 다른 깊이·외부 관계·미결 소유·지도 위치·읽기 초점까지 복원된다고 주장할 수 없다. 두 제품의 실제 조작이나 사람 이해 효과는 이번에 검증하지 않았다.
 
+
+## 이후의 공식 데모 관측 — 원문 감사와 분리
+
+2026-10-16(KST), 총괄은 공식 Demos 목록에서 [Folding 데모](https://www.yfiles.com/demos/application-features/folding/)를 찾아 IAB 1280×720에서 한 경로를 직접 조작했다. 기본 Automatic Group Node Alignment는 off였다. Group1 라벨 선택 후 SVG 라벨에 키를 직접 보내는 첫 시도는 실패했고, 그래프에 페이지 키를 보내 접기(Alt+Left) → 내부(Alt+Down) → 전체 범위(Alt+Up)를 실행했다.
+
+처음 내부3개·외부2개가 보였고, 접은 뒤 내부가 숨겨지고 외부2개와 선이 남았다. 내부 진입에서는 내부3개만 보이고 외부2개/연결은 보이지 않았다. 전체로 나왔을 때 접힌 그룹과 외부2개가 다시 보였다. 이는 집중 보기에서 외부 맥락을 별도로 남길 필요를 보여 주는 좁은 관측이다. 정밀 좌표·임의 배율·pan·모든 관계 매핑·사람 이해도를 확인한 것은 아니다. 화면4개를 도구 출력으로 열람했으나 GitHub에서 회수할 수 있는 이미지 파일은 확보하지 못했다.
+
+별도 Cloud 관측은 **접속 실패로 전 장면 NOT_RUN**이다. 지정 URL에서 `net::ERR_TUNNEL_CONNECTION_FAILED`, HTTP 응답 없음, finalURL=about:blank였고 PNG는 없다. [고정 원본 기록](https://github.com/tlsee0813-cmd/agentflow-studio/tree/bb2bb37b106c0ec1cf4063b27fb1c666229f2f50/docs/transfer/composition-05/reference-folding)의 observer exit0은 접근 오류를 기록하고 끝났다는 뜻으로, UI 검사 통과가 아니다. 총괄 관측과 합쳐 독립 검증 성공으로 세지 않는다.
+
+원본 REPORT의 Playwright1.57.0과 process-exit.json의1.62.0은 불일치한다. 어느 값이 실제 설치값인지 이 패킷만으로 확정하지 않는다. 원문은 보존하며 다음 시안 실행에는 설치 버전의 동적 기록을 요구한다. 접근 우회·TLS 완화·설치·추가 로그인은 하지 않았다.
