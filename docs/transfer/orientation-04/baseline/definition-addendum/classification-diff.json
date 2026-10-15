@@ -1,0 +1,216 @@
+{
+  "baseline_commit": "62d59d7ed6f4f460831ae88685bde5b7e2dac703",
+  "baseline_result_sha256": "b52f4be187d62da1bd4ed712a72c70991aa4c4b8253df9b82471dc49436188af",
+  "observations": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "oldLabelCounts": {
+        "action": {
+          "total": 3,
+          "fullyVisible": 2
+        },
+        "area": {
+          "total": 4,
+          "fullyVisible": 0
+        }
+      },
+      "newLabelCounts": {
+        "action": {
+          "total": 3,
+          "fullyVisible": 2
+        },
+        "area": {
+          "total": 4,
+          "fullyVisible": 0
+        }
+      },
+      "changes": [
+        {
+          "key": "project-purpose",
+          "before": "FULL",
+          "after": "PARTIAL_LAYOUT",
+          "namingOnly": false,
+          "beforeGlyphStatusCounts": {
+            "VISIBLE_FULL_GLYPH": 43
+          },
+          "afterGlyphStatusCounts": {
+            "CLIPPED_GLYPH": 26,
+            "VISIBLE_FULL_GLYPH": 17
+          },
+          "rect": {
+            "x": 16,
+            "y": 36,
+            "width": 358,
+            "height": 37.6875
+          },
+          "ancestorClip": {
+            "left": 0,
+            "top": 0,
+            "right": 390,
+            "bottom": 844
+          },
+          "selfClip": {
+            "appliedX": true,
+            "appliedY": true,
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "rect": {
+              "left": 16,
+              "top": 36,
+              "right": 374,
+              "bottom": 73.6875
+            }
+          },
+          "effectiveClip": {
+            "left": 16,
+            "top": 36,
+            "right": 374,
+            "bottom": 73.6875
+          }
+        },
+        {
+          "key": "action-decision",
+          "before": "PARTIAL",
+          "after": "PARTIAL_LAYOUT",
+          "namingOnly": true,
+          "beforeGlyphStatusCounts": {
+            "CLIPPED_GLYPH": 7
+          },
+          "afterGlyphStatusCounts": {
+            "CLIPPED_GLYPH": 7
+          },
+          "rect": {
+            "x": 31,
+            "y": 821.15625,
+            "width": 328,
+            "height": 25.59375
+          },
+          "ancestorClip": {
+            "left": 0,
+            "top": 0,
+            "right": 390,
+            "bottom": 844
+          },
+          "selfClip": {
+            "appliedX": false,
+            "appliedY": false,
+            "overflowX": "visible",
+            "overflowY": "visible",
+            "rect": {
+              "left": 31,
+              "top": 821.15625,
+              "right": 359,
+              "bottom": 846.75
+            }
+          },
+          "effectiveClip": {
+            "left": 0,
+            "top": 0,
+            "right": 390,
+            "bottom": 844
+          }
+        }
+      ]
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "oldLabelCounts": {
+        "action": {
+          "total": 3,
+          "fullyVisible": 3
+        },
+        "area": {
+          "total": 4,
+          "fullyVisible": 3
+        }
+      },
+      "newLabelCounts": {
+        "action": {
+          "total": 3,
+          "fullyVisible": 3
+        },
+        "area": {
+          "total": 4,
+          "fullyVisible": 3
+        }
+      },
+      "changes": [
+        {
+          "key": "area-restore",
+          "before": "PARTIAL",
+          "after": "PARTIAL_LAYOUT",
+          "namingOnly": true,
+          "beforeGlyphStatusCounts": {
+            "CLIPPED_GLYPH": 4
+          },
+          "afterGlyphStatusCounts": {
+            "CLIPPED_GLYPH": 4
+          },
+          "rect": {
+            "x": 924,
+            "y": 642.390625,
+            "width": 298,
+            "height": 24
+          },
+          "ancestorClip": {
+            "left": 380,
+            "top": 116.796875,
+            "right": 1280,
+            "bottom": 657.796875
+          },
+          "selfClip": {
+            "appliedX": false,
+            "appliedY": false,
+            "overflowX": "visible",
+            "overflowY": "visible",
+            "rect": {
+              "left": 924,
+              "top": 642.390625,
+              "right": 1222,
+              "bottom": 666.390625
+            }
+          },
+          "effectiveClip": {
+            "left": 380,
+            "top": 116.796875,
+            "right": 1280,
+            "bottom": 657.796875
+          }
+        }
+      ]
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "oldLabelCounts": {
+        "action": {
+          "total": 3,
+          "fullyVisible": 3
+        },
+        "area": {
+          "total": 4,
+          "fullyVisible": 4
+        }
+      },
+      "newLabelCounts": {
+        "action": {
+          "total": 3,
+          "fullyVisible": 3
+        },
+        "area": {
+          "total": 4,
+          "fullyVisible": 4
+        }
+      },
+      "changes": []
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "algorithm": "SHA256",
+  "preserved_baseline_commit": "62d59d7ed6f4f460831ae88685bde5b7e2dac703",
+  "files": [
+    {
+      "path": "REPORT.md",
+      "bytes": 4548,
+      "sha256": "3643f72ebd8977046180cc22b7a7b372520ddd613d0cc353ffe13483f2092f14"
+    },
+    {
+      "path": "classification-diff.json",
+      "bytes": 4873,
+      "sha256": "b2701f37f18ef97eb78e7f90bfa61d4465b3b8d465a7fb8e5be826e5c49edc21"
+    },
+    {
+      "path": "measurement.diff",
+      "bytes": 11281,
+      "sha256": "5f2d0283538e32aa885e6edc754308df453ceb040d38e35db9edafdc214425b1"
+    },
+    {
+      "path": "observe.py",
+      "bytes": 10241,
+      "sha256": "c21886a8397c56ff7f11eb2f9fee9b45a4b0c6b9fc4d2505cc5f66c3e2dde9ab"
+    },
+    {
+      "path": "process-exit.json",
+      "bytes": 73,
+      "sha256": "b6f436e20a1baab7c14f7fed00098d362802249940757282f2e24f6d7bccc8cb"
+    },
+    {
+      "path": "process.log",
+      "bytes": 80,
+      "sha256": "36d10d675ed63fc0c5e4c87a1e23f7fcb67c72cbe2034071d51b5005858168b2"
+    },
+    {
+      "path": "result.json",
+      "bytes": 1408482,
+      "sha256": "d4b5bfa7d4b6754fcdb48ba07feab5ea0d435236e39e700bc84ab09cedfd0c04"
+    }
+  ]
+}
