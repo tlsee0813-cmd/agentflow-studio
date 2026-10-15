@@ -1,0 +1,2127 @@
+{
+ "started": "2026-10-16T02:11:59+0900",
+ "html_sha256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+ "html": "return-flow-study.html",
+ "inputs": {
+  "brief_commit": "16e417af220361bc1926538b729decb3b3008208",
+  "source_doc": "docs/flow049-outcome-home.md @ f0fa5326c0f1c96fbc4360f7968b6be636836056 L175-187, L226-237"
+ },
+ "runs": {
+  "d1440": {
+   "info": {
+    "viewport": "1440x900",
+    "mobile_emulation": false,
+    "browser": "141.0.7390.37",
+    "url": "http://127.0.0.1:8766/return-flow-study.html",
+    "http_status": 200,
+    "zoom_browser": "100%",
+    "external_requests": [],
+    "console_errors": [],
+    "page_errors": [],
+    "external_source_roundtrip": "NOT_RUN (링크 존재·href만 확인, 클릭·외부 페이지 왕복 관측 안 함)"
+   },
+   "steps": [
+    {
+     "step": 1,
+     "title": "전체에서 변화 파악",
+     "checks": [
+      [
+       "첫 화면 요약 제목",
+       true,
+       null
+      ],
+      [
+       "관련 영역 4곳이 사용자 언어로 보임",
+       true,
+       null
+      ],
+      [
+       "기록의 한계 한 줄",
+       true,
+       null
+      ],
+      [
+       "다른 영역의 서로 다른 펼침 깊이",
+       true,
+       {
+        "home": 1,
+        "task": 2,
+        "next": 0,
+        "restore": 1
+       }
+      ],
+      [
+       "사건ID·해시·검사 수 기본 노출 없음",
+       true,
+       null
+      ],
+      [
+       "근거 없는 방문·인계·승인 표시 없음",
+       true,
+       null
+      ],
+      [
+       "기본에 근거 버튼 없음",
+       true,
+       null
+      ],
+      [
+       "연구 배치(모듈 구조 아님) 표시",
+       true,
+       null
+      ],
+      [
+       "기준 위치 기록(비초기 스크롤)",
+       true,
+       {
+        "mapScroll": [
+         32,
+         91
+        ],
+        "winY": 0,
+        "zoom": "120%"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "initial": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [],
+      "mapScroll": [
+       0,
+       0
+      ],
+      "winY": 0,
+      "zoom": "100%",
+      "edges": 0,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "BODY"
+     },
+     "base": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [],
+      "mapScroll": [
+       32,
+       91
+      ],
+      "winY": 0,
+      "zoom": "120%",
+      "edges": 0,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "BODY"
+     },
+     "shot": "d1440_s1_base.png"
+    },
+    {
+     "step": 2,
+     "title": "목적 정정 부분 선택",
+     "checks": [
+      [
+       "선택 표시가 화면에 보임",
+       true,
+       null
+      ],
+      [
+       "선택이 다른 영역 펼침 깊이를 바꾸지 않음",
+       true,
+       {
+        "home": 1,
+        "task": 2,
+        "next": 0,
+        "restore": 1
+       }
+      ],
+      [
+       "선택이 지도 위치·배율을 바꾸지 않음(전체맞춤 없음)",
+       true,
+       {
+        "before": [
+         [
+          32,
+          91
+         ],
+         0,
+         "120%"
+        ],
+        "after": [
+         [
+          32,
+          91
+         ],
+         0,
+         "120%"
+        ]
+       }
+      ],
+      [
+       "관련 영역 연결선이 그려짐(4개)",
+       true,
+       4
+      ],
+      [
+       "읽기 공간이 보이고 지도는 가려짐",
+       true,
+       null
+      ],
+      [
+       "제목이 목적 정정과 작업 지시를 구별",
+       true,
+       "목적 정정은 따로 저장되고, 작업 지시는 덮지 않습니다"
+      ],
+      [
+       "작업 지시와의 경계 문장이 보임",
+       true,
+       null
+      ],
+      [
+       "현재 위치(전체 지도 › 목적 정정) 표시",
+       true,
+       "전체 지도 › 목적 정정"
+      ],
+      [
+       "문서 기준 표시",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS",
+     "preEnterState": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [
+       "purpose"
+      ],
+      "mapScroll": [
+       32,
+       91
+      ],
+      "winY": 0,
+      "zoom": "120%",
+      "edges": 4,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "part is-selected:purpose"
+     },
+     "shot_selected": "d1440_r1_s2_selected.png"
+    },
+    {
+     "step": 3,
+     "title": "필요한 근거 한 곳 열기",
+     "checks": [
+      [
+       "근거 미리보기 1개가 실제 표시",
+       true,
+       1
+      ],
+      [
+       "출발 문장이 화면에 남고 강조됨",
+       true,
+       {
+        "origin_y": 295
+       }
+      ],
+      [
+       "문서 보고·발췌·해석·미확인 구분",
+       true,
+       null
+      ],
+      [
+       "목적 정정 소유·관련 범위 유지",
+       true,
+       null
+      ],
+      [
+       "외부 원문 링크는 고정 커밋 행 위치(클릭 안 함)",
+       true,
+       null
+      ],
+      [
+       "닫기 버튼이 실제 클릭 지점의 최상단 요소",
+       true,
+       {
+        "tag": "BUTTON",
+        "cls": "peek-close",
+        "inPeek": true,
+        "inDialog": false,
+        "text": "닫기"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "wheel_to_close": 0,
+     "shot_peek": "d1440_r1_s3_peek_open.png"
+    },
+    {
+     "step": 4,
+     "title": "근거 닫기와 다시 열기",
+     "checks": [
+      [
+       "닫은 미리보기가 DOM·화면에서 사라짐",
+       true,
+       null
+      ],
+      [
+       "옛 닫기 위치에 미리보기 요소 없음",
+       true,
+       {
+        "tag": "P",
+        "cls": "claim",
+        "inPeek": false,
+        "inDialog": false,
+        "text": "예전 형식으로 저장된 정정은 복원할 때 한 번 새 형식"
+       }
+      ],
+      [
+       "초점이 출발 '근거' 버튼으로",
+       true,
+       "evbtn:p3"
+      ],
+      [
+       "출발 문장이 화면에 보임(재탐색 불필요)",
+       true,
+       295
+      ],
+      [
+       "닫은 뒤 읽던 위치가 열기 전과 같음",
+       true,
+       {
+        "before_open": 0,
+        "after_close": 0
+       }
+      ],
+      [
+       "다시 열어도 미리보기 1개, 출발 인용이 첫 줄에 보임",
+       true,
+       "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”"
+      ],
+      [
+       "Escape로 닫은 뒤에도 읽던 위치가 열기 전과 같음",
+       true,
+       {
+        "before_open": 0,
+        "after_esc": 0
+       }
+      ],
+      [
+       "키보드 Escape로 닫힘·초점 복귀",
+       true,
+       "evbtn:p3"
+      ]
+     ],
+     "status": "PASS",
+     "read_pos": {
+      "before_open": 0,
+      "after_close": 0
+     },
+     "shot_closed": "d1440_r1_s4_peek_closed.png"
+    },
+    {
+     "step": 5,
+     "title": "선택 부분의 인계 준비 읽기",
+     "checks": [
+      [
+       "준비 화면이 실제 표시",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 대상",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 범위",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 기준 기록",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 지켜야 할 조건",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 이 기록으로 알 수 없는 것",
+       true,
+       null
+      ],
+      [
+       "작업 지시 경계가 준비본에 있음",
+       true,
+       null
+      ],
+      [
+       "받을 담당자를 지어내지 않음",
+       true,
+       null
+      ],
+      [
+       "보내지 않음 명시",
+       true,
+       null
+      ],
+      [
+       "준비 화면 버튼은 닫기뿐(보내기 없음)",
+       true,
+       [
+        "닫기"
+       ]
+      ],
+      [
+       "발송·수락·완료 표현 없음",
+       true,
+       null
+      ],
+      [
+       "닫기 버튼이 최상단 요소",
+       true,
+       {
+        "tag": "BUTTON",
+        "cls": "btn ghost",
+        "inPeek": false,
+        "inDialog": true,
+        "text": "닫기"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "shot_prep": "d1440_r1_s5_prep_open.png"
+    },
+    {
+     "step": 6,
+     "title": "준비 닫기",
+     "checks": [
+      [
+       "준비 화면이 닫히고 보이지 않음",
+       true,
+       null
+      ],
+      [
+       "옛 닫기 위치를 준비 화면이 가리지 않음",
+       true,
+       {
+        "tag": "HEADER",
+        "cls": "top",
+        "inPeek": false,
+        "inDialog": false,
+        "text": "AgentFlow Studio이 프로젝트의 목표: AI"
+       }
+      ],
+      [
+       "초점이 준비 버튼으로 복귀",
+       true,
+       "prepBtn"
+      ],
+      [
+       "읽기 위치 유지",
+       true,
+       {
+        "before": 0,
+        "after": 0
+       }
+      ],
+      [
+       "같은 부분 유지",
+       true,
+       null
+      ],
+      [
+       "보냄·배정 표시 없음",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS"
+    },
+    {
+     "step": 7,
+     "title": "전체로 복귀",
+     "checks": [
+      [
+       "전체 복귀 버튼이 현재 화면에서 바로 보임(스크롤 불필요)",
+       true,
+       71
+      ],
+      [
+       "지도가 보이고 읽기 공간이 닫힘",
+       true,
+       null
+      ],
+      [
+       "같은 목적 정정 부분 선택",
+       true,
+       null
+      ],
+      [
+       "다른 영역 펼침 깊이가 1단계와 동일",
+       true,
+       {
+        "base": {
+         "home": 1,
+         "task": 2,
+         "next": 0,
+         "restore": 1
+        },
+        "now": {
+         "home": 1,
+         "task": 2,
+         "next": 0,
+         "restore": 1
+        }
+       }
+      ],
+      [
+       "지도 위치·스크롤·배율이 진입 직전과 동일",
+       true,
+       {
+        "pre": [
+         [
+          32,
+          91
+         ],
+         0,
+         "120%"
+        ],
+        "now": [
+         [
+          32,
+          91
+         ],
+         0,
+         "120%"
+        ]
+       }
+      ],
+      [
+       "연결선이 같은 수로 다시 그려짐",
+       true,
+       4
+      ],
+      [
+       "초점이 선택 부분 노드에",
+       true,
+       "part is-selected:purpose"
+      ],
+      [
+       "선택 노드가 화면 안에 보임",
+       true,
+       [
+        396,
+        158
+       ]
+      ],
+      [
+       "근거·준비 잔여 없음",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS",
+     "shot_return": "d1440_r1_s7_return.png",
+     "state": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [
+       "purpose"
+      ],
+      "mapScroll": [
+       32,
+       91
+      ],
+      "winY": 0,
+      "zoom": "120%",
+      "edges": 4,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "part is-selected:purpose"
+     }
+    },
+    {
+     "step": "8.2",
+     "title": "목적 정정 부분 선택 (반복)",
+     "checks": [
+      [
+       "선택 표시가 화면에 보임",
+       true,
+       null
+      ],
+      [
+       "선택이 다른 영역 펼침 깊이를 바꾸지 않음",
+       true,
+       {
+        "home": 1,
+        "task": 2,
+        "next": 0,
+        "restore": 1
+       }
+      ],
+      [
+       "선택이 지도 위치·배율을 바꾸지 않음(전체맞춤 없음)",
+       true,
+       {
+        "before": [
+         [
+          32,
+          91
+         ],
+         0,
+         "120%"
+        ],
+        "after": [
+         [
+          32,
+          91
+         ],
+         0,
+         "120%"
+        ]
+       }
+      ],
+      [
+       "관련 영역 연결선이 그려짐(4개)",
+       true,
+       4
+      ],
+      [
+       "읽기 공간이 보이고 지도는 가려짐",
+       true,
+       null
+      ],
+      [
+       "제목이 목적 정정과 작업 지시를 구별",
+       true,
+       "목적 정정은 따로 저장되고, 작업 지시는 덮지 않습니다"
+      ],
+      [
+       "작업 지시와의 경계 문장이 보임",
+       true,
+       null
+      ],
+      [
+       "현재 위치(전체 지도 › 목적 정정) 표시",
+       true,
+       "전체 지도 › 목적 정정"
+      ],
+      [
+       "문서 기준 표시",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS",
+     "preEnterState": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [
+       "purpose"
+      ],
+      "mapScroll": [
+       32,
+       91
+      ],
+      "winY": 0,
+      "zoom": "120%",
+      "edges": 4,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "part is-selected:purpose"
+     },
+     "shot_selected": "d1440_r2_s2_selected.png"
+    },
+    {
+     "step": "8.3",
+     "title": "필요한 근거 한 곳 열기 (반복)",
+     "checks": [
+      [
+       "근거 미리보기 1개가 실제 표시",
+       true,
+       1
+      ],
+      [
+       "출발 문장이 화면에 남고 강조됨",
+       true,
+       {
+        "origin_y": 295
+       }
+      ],
+      [
+       "문서 보고·발췌·해석·미확인 구분",
+       true,
+       null
+      ],
+      [
+       "목적 정정 소유·관련 범위 유지",
+       true,
+       null
+      ],
+      [
+       "외부 원문 링크는 고정 커밋 행 위치(클릭 안 함)",
+       true,
+       null
+      ],
+      [
+       "닫기 버튼이 실제 클릭 지점의 최상단 요소",
+       true,
+       {
+        "tag": "BUTTON",
+        "cls": "peek-close",
+        "inPeek": true,
+        "inDialog": false,
+        "text": "닫기"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "wheel_to_close": 0,
+     "shot_peek": "d1440_r2_s3_peek_open.png"
+    },
+    {
+     "step": "8.4",
+     "title": "근거 닫기와 다시 열기 (반복)",
+     "checks": [
+      [
+       "닫은 미리보기가 DOM·화면에서 사라짐",
+       true,
+       null
+      ],
+      [
+       "옛 닫기 위치에 미리보기 요소 없음",
+       true,
+       {
+        "tag": "P",
+        "cls": "claim",
+        "inPeek": false,
+        "inDialog": false,
+        "text": "예전 형식으로 저장된 정정은 복원할 때 한 번 새 형식"
+       }
+      ],
+      [
+       "초점이 출발 '근거' 버튼으로",
+       true,
+       "evbtn:p3"
+      ],
+      [
+       "출발 문장이 화면에 보임(재탐색 불필요)",
+       true,
+       295
+      ],
+      [
+       "닫은 뒤 읽던 위치가 열기 전과 같음",
+       true,
+       {
+        "before_open": 0,
+        "after_close": 0
+       }
+      ],
+      [
+       "다시 열어도 미리보기 1개, 출발 인용이 첫 줄에 보임",
+       true,
+       "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”"
+      ],
+      [
+       "Escape로 닫은 뒤에도 읽던 위치가 열기 전과 같음",
+       true,
+       {
+        "before_open": 0,
+        "after_esc": 0
+       }
+      ],
+      [
+       "키보드 Escape로 닫힘·초점 복귀",
+       true,
+       "evbtn:p3"
+      ]
+     ],
+     "status": "PASS",
+     "read_pos": {
+      "before_open": 0,
+      "after_close": 0
+     },
+     "shot_closed": "d1440_r2_s4_peek_closed.png"
+    },
+    {
+     "step": "8.5",
+     "title": "선택 부분의 인계 준비 읽기 (반복)",
+     "checks": [
+      [
+       "준비 화면이 실제 표시",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 대상",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 범위",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 기준 기록",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 지켜야 할 조건",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 이 기록으로 알 수 없는 것",
+       true,
+       null
+      ],
+      [
+       "작업 지시 경계가 준비본에 있음",
+       true,
+       null
+      ],
+      [
+       "받을 담당자를 지어내지 않음",
+       true,
+       null
+      ],
+      [
+       "보내지 않음 명시",
+       true,
+       null
+      ],
+      [
+       "준비 화면 버튼은 닫기뿐(보내기 없음)",
+       true,
+       [
+        "닫기"
+       ]
+      ],
+      [
+       "발송·수락·완료 표현 없음",
+       true,
+       null
+      ],
+      [
+       "닫기 버튼이 최상단 요소",
+       true,
+       {
+        "tag": "BUTTON",
+        "cls": "btn ghost",
+        "inPeek": false,
+        "inDialog": true,
+        "text": "닫기"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "shot_prep": "d1440_r2_s5_prep_open.png"
+    },
+    {
+     "step": "8.6",
+     "title": "준비 닫기 (반복)",
+     "checks": [
+      [
+       "준비 화면이 닫히고 보이지 않음",
+       true,
+       null
+      ],
+      [
+       "옛 닫기 위치를 준비 화면이 가리지 않음",
+       true,
+       {
+        "tag": "HEADER",
+        "cls": "top",
+        "inPeek": false,
+        "inDialog": false,
+        "text": "AgentFlow Studio이 프로젝트의 목표: AI"
+       }
+      ],
+      [
+       "초점이 준비 버튼으로 복귀",
+       true,
+       "prepBtn"
+      ],
+      [
+       "읽기 위치 유지",
+       true,
+       {
+        "before": 0,
+        "after": 0
+       }
+      ],
+      [
+       "같은 부분 유지",
+       true,
+       null
+      ],
+      [
+       "보냄·배정 표시 없음",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS"
+    },
+    {
+     "step": "8.7",
+     "title": "전체로 복귀 (반복)",
+     "checks": [
+      [
+       "전체 복귀 버튼이 현재 화면에서 바로 보임(스크롤 불필요)",
+       true,
+       71
+      ],
+      [
+       "지도가 보이고 읽기 공간이 닫힘",
+       true,
+       null
+      ],
+      [
+       "같은 목적 정정 부분 선택",
+       true,
+       null
+      ],
+      [
+       "다른 영역 펼침 깊이가 1단계와 동일",
+       true,
+       {
+        "base": {
+         "home": 1,
+         "task": 2,
+         "next": 0,
+         "restore": 1
+        },
+        "now": {
+         "home": 1,
+         "task": 2,
+         "next": 0,
+         "restore": 1
+        }
+       }
+      ],
+      [
+       "지도 위치·스크롤·배율이 진입 직전과 동일",
+       true,
+       {
+        "pre": [
+         [
+          32,
+          91
+         ],
+         0,
+         "120%"
+        ],
+        "now": [
+         [
+          32,
+          91
+         ],
+         0,
+         "120%"
+        ]
+       }
+      ],
+      [
+       "연결선이 같은 수로 다시 그려짐",
+       true,
+       4
+      ],
+      [
+       "초점이 선택 부분 노드에",
+       true,
+       "part is-selected:purpose"
+      ],
+      [
+       "선택 노드가 화면 안에 보임",
+       true,
+       [
+        396,
+        158
+       ]
+      ],
+      [
+       "근거·준비 잔여 없음",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS",
+     "shot_return": "d1440_r2_s7_return.png",
+     "state": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [
+       "purpose"
+      ],
+      "mapScroll": [
+       32,
+       91
+      ],
+      "winY": 0,
+      "zoom": "120%",
+      "edges": 4,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "part is-selected:purpose"
+     }
+    },
+    {
+     "step": 8,
+     "title": "같은 작은 흐름 반복(1회차 복귀 상태와 대조)",
+     "checks": [
+      [
+       "두 번째 복귀 상태 = 첫 번째",
+       true,
+       {
+        "areas": true,
+        "selected": true,
+        "mapScroll": true,
+        "winY": true,
+        "zoom": true,
+        "edges": true,
+        "peeks": true,
+        "dialogOpen": true
+       }
+      ]
+     ],
+     "status": "PASS"
+    }
+   ],
+   "actions": [
+    "click 지도 확대(+) @(1389,67)",
+    "wheel map (60,140)",
+    "click 목적 정정 부분 @(396,158)",
+    "click 이 부분 읽기 @(1310,844)",
+    "wheel reading (0,120)",
+    "click p3 '근거' @(428,324)",
+    "click 근거 닫기 버튼 @(897,367)",
+    "click p3 '근거' 다시 @(428,324)",
+    "key Escape (초점: p3 근거 버튼)",
+    "click 이 부분을 이어 맡길 내용 보기 @(344,760)",
+    "click 준비 닫기 @(1358,18)",
+    "click 전체 지도로 돌아가기 @(22,71)",
+    "click 목적 정정 부분 @(396,158)",
+    "click 이 부분 읽기 @(1310,844)",
+    "wheel reading (0,120)",
+    "click p3 '근거' @(428,324)",
+    "click 근거 닫기 버튼 @(897,367)",
+    "click p3 '근거' 다시 @(428,324)",
+    "key Escape (초점: p3 근거 버튼)",
+    "click 이 부분을 이어 맡길 내용 보기 @(344,760)",
+    "click 준비 닫기 @(1358,18)",
+    "click 전체 지도로 돌아가기 @(22,71)"
+   ]
+  },
+  "m390": {
+   "info": {
+    "viewport": "390x844",
+    "mobile_emulation": true,
+    "browser": "141.0.7390.37",
+    "url": "http://127.0.0.1:8766/return-flow-study.html",
+    "http_status": 200,
+    "zoom_browser": "100%",
+    "external_requests": [],
+    "console_errors": [],
+    "page_errors": [],
+    "external_source_roundtrip": "NOT_RUN (링크 존재·href만 확인, 클릭·외부 페이지 왕복 관측 안 함)"
+   },
+   "steps": [
+    {
+     "step": 1,
+     "title": "전체에서 변화 파악",
+     "checks": [
+      [
+       "첫 화면 요약 제목",
+       true,
+       null
+      ],
+      [
+       "관련 영역 4곳이 사용자 언어로 보임",
+       true,
+       null
+      ],
+      [
+       "기록의 한계 한 줄",
+       true,
+       null
+      ],
+      [
+       "다른 영역의 서로 다른 펼침 깊이",
+       true,
+       {
+        "home": 1,
+        "task": 2,
+        "next": 0,
+        "restore": 1
+       }
+      ],
+      [
+       "사건ID·해시·검사 수 기본 노출 없음",
+       true,
+       null
+      ],
+      [
+       "근거 없는 방문·인계·승인 표시 없음",
+       true,
+       null
+      ],
+      [
+       "기본에 근거 버튼 없음",
+       true,
+       null
+      ],
+      [
+       "연구 배치(모듈 구조 아님) 표시",
+       true,
+       null
+      ],
+      [
+       "모바일 부분 버튼이 누를 만한 크기(높이≥44, 폭≥300)",
+       true,
+       {
+        "x": 16,
+        "y": 331.96875,
+        "width": 358,
+        "height": 77.59375
+       }
+      ],
+      [
+       "가로 넘침 없음",
+       true,
+       390
+      ],
+      [
+       "기준 위치 기록(비초기 스크롤)",
+       true,
+       {
+        "mapScroll": [
+         0,
+         0
+        ],
+        "winY": 300,
+        "zoom": "100%"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "initial": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [],
+      "mapScroll": [
+       0,
+       0
+      ],
+      "winY": 0,
+      "zoom": "100%",
+      "edges": 0,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "BODY"
+     },
+     "base": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [],
+      "mapScroll": [
+       0,
+       0
+      ],
+      "winY": 300,
+      "zoom": "100%",
+      "edges": 0,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "BODY"
+     },
+     "shot": "m390_s1_base.png"
+    },
+    {
+     "step": 2,
+     "title": "목적 정정 부분 선택",
+     "checks": [
+      [
+       "선택 표시가 화면에 보임",
+       true,
+       null
+      ],
+      [
+       "선택이 다른 영역 펼침 깊이를 바꾸지 않음",
+       true,
+       {
+        "home": 1,
+        "task": 2,
+        "next": 0,
+        "restore": 1
+       }
+      ],
+      [
+       "선택이 지도 위치·배율을 바꾸지 않음(전체맞춤 없음)",
+       true,
+       {
+        "before": [
+         [
+          0,
+          0
+         ],
+         300,
+         "100%"
+        ],
+        "after": [
+         [
+          0,
+          0
+         ],
+         300,
+         "100%"
+        ]
+       }
+      ],
+      [
+       "관련 영역 표시가 보임(4개)",
+       true,
+       4
+      ],
+      [
+       "읽기 공간이 보이고 지도는 가려짐",
+       true,
+       null
+      ],
+      [
+       "제목이 목적 정정과 작업 지시를 구별",
+       true,
+       "목적 정정은 따로 저장되고, 작업 지시는 덮지 않습니다"
+      ],
+      [
+       "작업 지시와의 경계 문장이 보임",
+       true,
+       null
+      ],
+      [
+       "현재 위치(전체 지도 › 목적 정정) 표시",
+       true,
+       "전체 지도 › 목적 정정"
+      ],
+      [
+       "문서 기준 표시",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS",
+     "preEnterState": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [
+       "purpose"
+      ],
+      "mapScroll": [
+       0,
+       0
+      ],
+      "winY": 300,
+      "zoom": "100%",
+      "edges": 0,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "part is-selected:purpose"
+     },
+     "shot_selected": "m390_r1_s2_selected.png"
+    },
+    {
+     "step": 3,
+     "title": "필요한 근거 한 곳 열기",
+     "checks": [
+      [
+       "근거 미리보기 1개가 실제 표시",
+       true,
+       1
+      ],
+      [
+       "출발 문장이 화면에 남고 강조됨",
+       true,
+       {
+        "origin_y": 306
+       }
+      ],
+      [
+       "문서 보고·발췌·해석·미확인 구분",
+       true,
+       null
+      ],
+      [
+       "목적 정정 소유·관련 범위 유지",
+       true,
+       null
+      ],
+      [
+       "외부 원문 링크는 고정 커밋 행 위치(클릭 안 함)",
+       true,
+       null
+      ],
+      [
+       "닫기 버튼이 실제 클릭 지점의 최상단 요소",
+       true,
+       {
+        "tag": "BUTTON",
+        "cls": "peek-close",
+        "inPeek": true,
+        "inDialog": false,
+        "text": "닫기"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "wheel_to_close": 0,
+     "shot_peek": "m390_r1_s3_peek_open.png"
+    },
+    {
+     "step": 4,
+     "title": "근거 닫기와 다시 열기",
+     "checks": [
+      [
+       "닫은 미리보기가 DOM·화면에서 사라짐",
+       true,
+       null
+      ],
+      [
+       "옛 닫기 위치에 미리보기 요소 없음",
+       true,
+       {
+        "tag": "DIV",
+        "cls": "claims",
+        "inPeek": false,
+        "inDialog": false,
+        "text": "목적을 바로잡으면 그 내용은 작업 지시와 별도의 정정 "
+       }
+      ],
+      [
+       "초점이 출발 '근거' 버튼으로",
+       true,
+       "evbtn:p3"
+      ],
+      [
+       "출발 문장이 화면에 보임(재탐색 불필요)",
+       true,
+       370
+      ],
+      [
+       "닫은 뒤 읽던 위치가 열기 전과 같음",
+       true,
+       {
+        "before_open": 120,
+        "after_close": 120
+       }
+      ],
+      [
+       "다시 열어도 미리보기 1개, 출발 인용이 첫 줄에 보임",
+       true,
+       "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”"
+      ],
+      [
+       "Escape로 닫은 뒤에도 읽던 위치가 열기 전과 같음",
+       true,
+       {
+        "before_open": 120,
+        "after_esc": 120
+       }
+      ],
+      [
+       "키보드 Escape로 닫힘·초점 복귀",
+       true,
+       "evbtn:p3"
+      ]
+     ],
+     "status": "PASS",
+     "read_pos": {
+      "before_open": 120,
+      "after_close": 120
+     },
+     "shot_closed": "m390_r1_s4_peek_closed.png"
+    },
+    {
+     "step": 5,
+     "title": "선택 부분의 인계 준비 읽기",
+     "checks": [
+      [
+       "준비 화면이 실제 표시",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 대상",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 범위",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 기준 기록",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 지켜야 할 조건",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 이 기록으로 알 수 없는 것",
+       true,
+       null
+      ],
+      [
+       "작업 지시 경계가 준비본에 있음",
+       true,
+       null
+      ],
+      [
+       "받을 담당자를 지어내지 않음",
+       true,
+       null
+      ],
+      [
+       "보내지 않음 명시",
+       true,
+       null
+      ],
+      [
+       "준비 화면 버튼은 닫기뿐(보내기 없음)",
+       true,
+       [
+        "닫기"
+       ]
+      ],
+      [
+       "발송·수락·완료 표현 없음",
+       true,
+       null
+      ],
+      [
+       "닫기 버튼이 최상단 요소",
+       true,
+       {
+        "tag": "BUTTON",
+        "cls": "btn ghost",
+        "inPeek": false,
+        "inDialog": true,
+        "text": "닫기"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "shot_prep": "m390_r1_s5_prep_open.png"
+    },
+    {
+     "step": 6,
+     "title": "준비 닫기",
+     "checks": [
+      [
+       "준비 화면이 닫히고 보이지 않음",
+       true,
+       null
+      ],
+      [
+       "옛 닫기 위치를 준비 화면이 가리지 않음",
+       true,
+       {
+        "tag": "DIV",
+        "cls": "claims",
+        "inPeek": false,
+        "inDialog": false,
+        "text": "목적을 바로잡으면 그 내용은 작업 지시와 별도의 정정 "
+       }
+      ],
+      [
+       "초점이 준비 버튼으로 복귀",
+       true,
+       "prepBtn"
+      ],
+      [
+       "읽기 위치 유지",
+       true,
+       {
+        "before": 280,
+        "after": 280
+       }
+      ],
+      [
+       "같은 부분 유지",
+       true,
+       null
+      ],
+      [
+       "보냄·배정 표시 없음",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS"
+    },
+    {
+     "step": 7,
+     "title": "전체로 복귀",
+     "checks": [
+      [
+       "전체 복귀 버튼이 현재 화면에서 바로 보임(스크롤 불필요)",
+       true,
+       8
+      ],
+      [
+       "지도가 보이고 읽기 공간이 닫힘",
+       true,
+       null
+      ],
+      [
+       "같은 목적 정정 부분 선택",
+       true,
+       null
+      ],
+      [
+       "다른 영역 펼침 깊이가 1단계와 동일",
+       true,
+       {
+        "base": {
+         "home": 1,
+         "task": 2,
+         "next": 0,
+         "restore": 1
+        },
+        "now": {
+         "home": 1,
+         "task": 2,
+         "next": 0,
+         "restore": 1
+        }
+       }
+      ],
+      [
+       "지도 위치·스크롤·배율이 진입 직전과 동일",
+       true,
+       {
+        "pre": [
+         [
+          0,
+          0
+         ],
+         300,
+         "100%"
+        ],
+        "now": [
+         [
+          0,
+          0
+         ],
+         300,
+         "100%"
+        ]
+       }
+      ],
+      [
+       "초점이 선택 부분 노드에",
+       true,
+       "part is-selected:purpose"
+      ],
+      [
+       "선택 노드가 화면 안에 보임",
+       true,
+       [
+        16,
+        331
+       ]
+      ],
+      [
+       "근거·준비 잔여 없음",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS",
+     "shot_return": "m390_r1_s7_return.png",
+     "state": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [
+       "purpose"
+      ],
+      "mapScroll": [
+       0,
+       0
+      ],
+      "winY": 300,
+      "zoom": "100%",
+      "edges": 0,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "part is-selected:purpose"
+     }
+    },
+    {
+     "step": "8.2",
+     "title": "목적 정정 부분 선택 (반복)",
+     "checks": [
+      [
+       "선택 표시가 화면에 보임",
+       true,
+       null
+      ],
+      [
+       "선택이 다른 영역 펼침 깊이를 바꾸지 않음",
+       true,
+       {
+        "home": 1,
+        "task": 2,
+        "next": 0,
+        "restore": 1
+       }
+      ],
+      [
+       "선택이 지도 위치·배율을 바꾸지 않음(전체맞춤 없음)",
+       true,
+       {
+        "before": [
+         [
+          0,
+          0
+         ],
+         300,
+         "100%"
+        ],
+        "after": [
+         [
+          0,
+          0
+         ],
+         300,
+         "100%"
+        ]
+       }
+      ],
+      [
+       "관련 영역 표시가 보임(4개)",
+       true,
+       4
+      ],
+      [
+       "읽기 공간이 보이고 지도는 가려짐",
+       true,
+       null
+      ],
+      [
+       "제목이 목적 정정과 작업 지시를 구별",
+       true,
+       "목적 정정은 따로 저장되고, 작업 지시는 덮지 않습니다"
+      ],
+      [
+       "작업 지시와의 경계 문장이 보임",
+       true,
+       null
+      ],
+      [
+       "현재 위치(전체 지도 › 목적 정정) 표시",
+       true,
+       "전체 지도 › 목적 정정"
+      ],
+      [
+       "문서 기준 표시",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS",
+     "preEnterState": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [
+       "purpose"
+      ],
+      "mapScroll": [
+       0,
+       0
+      ],
+      "winY": 300,
+      "zoom": "100%",
+      "edges": 0,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "part is-selected:purpose"
+     },
+     "shot_selected": "m390_r2_s2_selected.png"
+    },
+    {
+     "step": "8.3",
+     "title": "필요한 근거 한 곳 열기 (반복)",
+     "checks": [
+      [
+       "근거 미리보기 1개가 실제 표시",
+       true,
+       1
+      ],
+      [
+       "출발 문장이 화면에 남고 강조됨",
+       true,
+       {
+        "origin_y": 306
+       }
+      ],
+      [
+       "문서 보고·발췌·해석·미확인 구분",
+       true,
+       null
+      ],
+      [
+       "목적 정정 소유·관련 범위 유지",
+       true,
+       null
+      ],
+      [
+       "외부 원문 링크는 고정 커밋 행 위치(클릭 안 함)",
+       true,
+       null
+      ],
+      [
+       "닫기 버튼이 실제 클릭 지점의 최상단 요소",
+       true,
+       {
+        "tag": "BUTTON",
+        "cls": "peek-close",
+        "inPeek": true,
+        "inDialog": false,
+        "text": "닫기"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "wheel_to_close": 0,
+     "shot_peek": "m390_r2_s3_peek_open.png"
+    },
+    {
+     "step": "8.4",
+     "title": "근거 닫기와 다시 열기 (반복)",
+     "checks": [
+      [
+       "닫은 미리보기가 DOM·화면에서 사라짐",
+       true,
+       null
+      ],
+      [
+       "옛 닫기 위치에 미리보기 요소 없음",
+       true,
+       {
+        "tag": "DIV",
+        "cls": "claims",
+        "inPeek": false,
+        "inDialog": false,
+        "text": "목적을 바로잡으면 그 내용은 작업 지시와 별도의 정정 "
+       }
+      ],
+      [
+       "초점이 출발 '근거' 버튼으로",
+       true,
+       "evbtn:p3"
+      ],
+      [
+       "출발 문장이 화면에 보임(재탐색 불필요)",
+       true,
+       370
+      ],
+      [
+       "닫은 뒤 읽던 위치가 열기 전과 같음",
+       true,
+       {
+        "before_open": 120,
+        "after_close": 120
+       }
+      ],
+      [
+       "다시 열어도 미리보기 1개, 출발 인용이 첫 줄에 보임",
+       true,
+       "근거 미리보기: “AI 해석이 낡아도 정정 내용은 홈과 작…”"
+      ],
+      [
+       "Escape로 닫은 뒤에도 읽던 위치가 열기 전과 같음",
+       true,
+       {
+        "before_open": 120,
+        "after_esc": 120
+       }
+      ],
+      [
+       "키보드 Escape로 닫힘·초점 복귀",
+       true,
+       "evbtn:p3"
+      ]
+     ],
+     "status": "PASS",
+     "read_pos": {
+      "before_open": 120,
+      "after_close": 120
+     },
+     "shot_closed": "m390_r2_s4_peek_closed.png"
+    },
+    {
+     "step": "8.5",
+     "title": "선택 부분의 인계 준비 읽기 (반복)",
+     "checks": [
+      [
+       "준비 화면이 실제 표시",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 대상",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 범위",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 기준 기록",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 지켜야 할 조건",
+       true,
+       null
+      ],
+      [
+       "준비본 항목: 이 기록으로 알 수 없는 것",
+       true,
+       null
+      ],
+      [
+       "작업 지시 경계가 준비본에 있음",
+       true,
+       null
+      ],
+      [
+       "받을 담당자를 지어내지 않음",
+       true,
+       null
+      ],
+      [
+       "보내지 않음 명시",
+       true,
+       null
+      ],
+      [
+       "준비 화면 버튼은 닫기뿐(보내기 없음)",
+       true,
+       [
+        "닫기"
+       ]
+      ],
+      [
+       "발송·수락·완료 표현 없음",
+       true,
+       null
+      ],
+      [
+       "닫기 버튼이 최상단 요소",
+       true,
+       {
+        "tag": "BUTTON",
+        "cls": "btn ghost",
+        "inPeek": false,
+        "inDialog": true,
+        "text": "닫기"
+       }
+      ]
+     ],
+     "status": "PASS",
+     "shot_prep": "m390_r2_s5_prep_open.png"
+    },
+    {
+     "step": "8.6",
+     "title": "준비 닫기 (반복)",
+     "checks": [
+      [
+       "준비 화면이 닫히고 보이지 않음",
+       true,
+       null
+      ],
+      [
+       "옛 닫기 위치를 준비 화면이 가리지 않음",
+       true,
+       {
+        "tag": "DIV",
+        "cls": "claims",
+        "inPeek": false,
+        "inDialog": false,
+        "text": "목적을 바로잡으면 그 내용은 작업 지시와 별도의 정정 "
+       }
+      ],
+      [
+       "초점이 준비 버튼으로 복귀",
+       true,
+       "prepBtn"
+      ],
+      [
+       "읽기 위치 유지",
+       true,
+       {
+        "before": 280,
+        "after": 280
+       }
+      ],
+      [
+       "같은 부분 유지",
+       true,
+       null
+      ],
+      [
+       "보냄·배정 표시 없음",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS"
+    },
+    {
+     "step": "8.7",
+     "title": "전체로 복귀 (반복)",
+     "checks": [
+      [
+       "전체 복귀 버튼이 현재 화면에서 바로 보임(스크롤 불필요)",
+       true,
+       8
+      ],
+      [
+       "지도가 보이고 읽기 공간이 닫힘",
+       true,
+       null
+      ],
+      [
+       "같은 목적 정정 부분 선택",
+       true,
+       null
+      ],
+      [
+       "다른 영역 펼침 깊이가 1단계와 동일",
+       true,
+       {
+        "base": {
+         "home": 1,
+         "task": 2,
+         "next": 0,
+         "restore": 1
+        },
+        "now": {
+         "home": 1,
+         "task": 2,
+         "next": 0,
+         "restore": 1
+        }
+       }
+      ],
+      [
+       "지도 위치·스크롤·배율이 진입 직전과 동일",
+       true,
+       {
+        "pre": [
+         [
+          0,
+          0
+         ],
+         300,
+         "100%"
+        ],
+        "now": [
+         [
+          0,
+          0
+         ],
+         300,
+         "100%"
+        ]
+       }
+      ],
+      [
+       "초점이 선택 부분 노드에",
+       true,
+       "part is-selected:purpose"
+      ],
+      [
+       "선택 노드가 화면 안에 보임",
+       true,
+       [
+        16,
+        331
+       ]
+      ],
+      [
+       "근거·준비 잔여 없음",
+       true,
+       null
+      ]
+     ],
+     "status": "PASS",
+     "shot_return": "m390_r2_s7_return.png",
+     "state": {
+      "mapVisible": true,
+      "focusVisible": false,
+      "areas": {
+       "home": 1,
+       "task": 2,
+       "next": 0,
+       "restore": 1
+      },
+      "selected": [
+       "purpose"
+      ],
+      "mapScroll": [
+       0,
+       0
+      ],
+      "winY": 300,
+      "zoom": "100%",
+      "edges": 0,
+      "readingTop": 0,
+      "peeks": 0,
+      "dialogOpen": false,
+      "active": "part is-selected:purpose"
+     }
+    },
+    {
+     "step": 8,
+     "title": "같은 작은 흐름 반복(1회차 복귀 상태와 대조)",
+     "checks": [
+      [
+       "두 번째 복귀 상태 = 첫 번째",
+       true,
+       {
+        "areas": true,
+        "selected": true,
+        "mapScroll": true,
+        "winY": true,
+        "zoom": true,
+        "edges": true,
+        "peeks": true,
+        "dialogOpen": true
+       }
+      ]
+     ],
+     "status": "PASS"
+    }
+   ],
+   "actions": [
+    "wheel page (0,300)",
+    "tap 목적 정정 부분 @(16,331)",
+    "tap 이 부분 읽기 @(262,781)",
+    "wheel reading (0,120)",
+    "tap p3 '근거' @(332,399)",
+    "tap 근거 닫기 버튼 @(315,409)",
+    "tap p3 '근거' 다시 @(332,399)",
+    "key Escape (초점: p3 근거 버튼)",
+    "tap 이 부분을 이어 맡길 내용 보기 @(16,745)",
+    "tap 준비 닫기 @(308,85)",
+    "tap 전체 지도로 돌아가기 @(16,8)",
+    "tap 목적 정정 부분 @(16,331)",
+    "tap 이 부분 읽기 @(262,781)",
+    "wheel reading (0,120)",
+    "tap p3 '근거' @(332,399)",
+    "tap 근거 닫기 버튼 @(315,409)",
+    "tap p3 '근거' 다시 @(332,399)",
+    "key Escape (초점: p3 근거 버튼)",
+    "tap 이 부분을 이어 맡길 내용 보기 @(16,745)",
+    "tap 준비 닫기 @(308,85)",
+    "tap 전체 지도로 돌아가기 @(16,8)"
+   ]
+  }
+ },
+ "verdict": {
+  "exit_code": 0,
+  "failures": {}
+ }
+}

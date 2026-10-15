@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>복귀 흐름 연구</title>
+<style>
+:root{
+  --paper:#ECEFED; --sheet:#FAFBFA; --ink:#1C2630; --ink-2:#4A5763; --ink-3:#6B7781;
+  --rule:#C7CFCC; --rule-2:#DDE3E0;
+  --accent:#0D6570; --accent-ink:#0A4F58; --accent-soft:#D5EAEA; --accent-line:#0D6570;
+  --unk:#7D5200; --unk-soft:#F4E8CF;
+  --serif:"Noto Serif CJK KR","Noto Serif KR","Nanum Myeongjo",serif;
+  --sans:"Pretendard","Noto Sans CJK KR","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --code:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{word-break:keep-all;overflow-wrap:anywhere;margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+a{color:var(--accent-ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+
+/* header */
+.top{display:flex;align-items:baseline;gap:14px;padding:12px 24px;border-bottom:1px solid var(--rule);background:var(--sheet)}
+.top b{font-weight:700;letter-spacing:-.01em}
+.top span{color:var(--ink-3);font-size:13px}
+.top .aim{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-2)}
+.top .tag{font-size:12px;border:1px solid var(--rule);border-radius:4px;padding:0 6px;white-space:nowrap}
+
+/* ---------- map view ---------- */
+.narrow-only,.relm{display:none}
+.mapview{display:grid;grid-template-columns:380px 1fr;height:calc(100vh - 49px)}
+.brief{padding:28px 28px 24px;overflow:auto;border-right:1px solid var(--rule);background:var(--sheet)}
+.basis{font-size:13px;color:var(--ink-3);margin:0 0 10px}
+.brief h1{font-family:var(--serif);font-weight:600;font-size:27px;line-height:1.32;letter-spacing:-.02em;margin:0 0 16px}
+.brief p{margin:0 0 12px}
+.brief .areas-named{margin:0 0 12px}
+.brief .areas-named strong{font-weight:600}
+.limit{border-left:3px solid var(--unk);background:var(--unk-soft);padding:8px 12px;font-size:14px;margin:16px 0 12px;border-radius:0 4px 4px 0}
+.quiet{color:var(--ink-3);font-size:13px;margin:0}
+
+.mappane{display:flex;flex-direction:column;min-width:0;min-height:0}
+.maptools{display:flex;align-items:center;gap:8px;padding:10px 18px;border-bottom:1px solid var(--rule-2)}
+.maptools .hint{flex:1;color:var(--ink-3);font-size:13px}
+.zoom{display:flex;align-items:center;border:1px solid var(--rule);border-radius:6px;background:var(--sheet)}
+.zoom button{border:0;background:none;width:32px;height:30px;cursor:pointer;font-size:17px;line-height:1}
+.zoom button:disabled{color:#AEB6B3;cursor:default}
+.zoom output{min-width:48px;text-align:center;font-size:13px;color:var(--ink-2);border-left:1px solid var(--rule-2);border-right:1px solid var(--rule-2);line-height:30px}
+.mapscroll{flex:1;overflow:auto;min-height:0;position:relative}
+.sizer{position:relative}
+.canvas{position:absolute;left:0;top:0;transform-origin:0 0;display:grid;grid-template-columns:300px 150px 380px;padding:34px 40px 40px;align-items:start}
+.edges{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.colhead{font-size:13px;color:var(--ink-3);margin:0 0 10px;font-weight:500}
+
+.parts{grid-column:1;display:flex;flex-direction:column;gap:16px;padding-top:30px}
+.part{display:block;width:100%;text-align:left;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px 16px 15px;cursor:pointer;transition:border-color .15s, box-shadow .15s}
+.part:hover{border-color:var(--accent)}
+.part .nm{display:block;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.part .ln{display:block;color:var(--ink-2);font-size:14px;margin-top:3px;line-height:1.5}
+.part .chg{display:inline-block;font-size:12px;color:var(--accent-ink);margin-top:8px}
+.part.is-selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;background:#fff}
+.part.is-selected .nm::after{content:" — 선택됨";font-weight:500;font-size:13px;color:var(--accent-ink)}
+
+.frame{grid-column:3;border:1.5px dashed #9FAAA6;border-radius:12px;padding:12px 14px 14px;background:rgba(250,251,250,.55)}
+.frame .colhead{margin-bottom:4px;color:var(--ink-2)}
+.frame .framenote{font-size:12.5px;color:var(--ink-3);margin:0 0 4px;line-height:1.45}
+.help{font-size:12.5px;color:var(--ink-3);margin:0 0 10px}
+.help summary{cursor:pointer;color:var(--accent-ink);width:max-content}
+.help p{margin:4px 0 0;line-height:1.5}
+.area{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;margin-top:10px;transition:opacity .15s}
+.area-head{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:10px 12px;cursor:pointer;text-align:left}
+.area-head .nm{font-weight:600;flex:1}
+.area-head .chev{width:18px;height:18px;color:var(--ink-3);transition:transform .15s}
+.area-head[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.area-body{padding:0 12px 11px 12px;font-size:14px;color:var(--ink-2)}
+.area-body p{margin:0}
+.area-body ul{margin:8px 0 2px;padding-left:18px}
+.area-body li{margin:3px 0}
+.more{border:0;background:none;padding:0;margin-top:6px;color:var(--accent-ink);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.rel-mark{display:none;font-size:12px;color:var(--accent-ink);font-weight:500}
+.has-sel .area.is-related{border-color:var(--accent)}
+
+.has-sel .area:not(.is-related){opacity:.62}
+.unk{color:var(--unk);text-decoration:underline dotted;text-underline-offset:3px}
+
+.strip{display:flex;align-items:center;gap:14px;padding:12px 18px;border-top:1px solid var(--rule);background:var(--sheet);min-height:62px}
+.strip .what{flex:1;font-size:14px;color:var(--ink-2)}
+.strip .what strong{color:var(--ink);font-size:15px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:8px;padding:9px 16px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--accent-ink)}
+.btn.ghost:hover{background:var(--accent-soft)}
+
+/* ---------- focus view ---------- */
+.focusview{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 49px)}
+.rail{border-right:1px solid var(--rule);background:var(--sheet);padding:22px 22px;overflow:auto}
+.rail .crumb{font-size:13px;color:var(--ink-3);margin:18px 0 4px}
+.rail .crumb b{color:var(--ink);font-weight:600}
+.rail h3{font-size:13px;font-weight:500;color:var(--ink-3);margin:20px 0 6px}
+.rail ul{list-style:none;margin:0;padding:0}
+.rail li{padding:6px 0 6px 12px;border-left:2px solid var(--accent);margin:4px 0;font-size:14px}
+.rail .kept{font-size:12.5px;color:var(--ink-3);margin-top:22px;line-height:1.5}
+.reading{overflow:auto;min-height:0}
+.col{max-width:700px;padding:30px 44px 80px}
+.col h2{font-family:var(--serif);font-weight:600;font-size:25px;line-height:1.35;letter-spacing:-.02em;margin:4px 0 6px}
+.col h2:focus{outline:none}
+.col .sub{color:var(--ink-3);font-size:13px;margin:0 0 8px}
+.col h2{margin-bottom:22px}
+.claims{margin:0 0 8px}
+.claim{margin:0 0 14px;padding:2px 0 2px 14px;border-left:3px solid transparent;transition:border-color .15s}
+.claim.is-origin{border-left-color:var(--accent)}
+.evbtn{border:0;background:none;padding:0 2px;margin-left:4px;color:var(--accent-ink);font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.peek{margin:-4px 0 18px 14px;border:1px solid var(--accent);border-radius:10px;background:#fff;box-shadow:0 6px 18px rgba(13,60,70,.10)}
+.peek-head{display:flex;align-items:center;gap:10px;padding:9px 12px 9px 14px;border-bottom:1px solid var(--rule-2);background:var(--accent-soft);border-radius:10px 10px 0 0}
+.peek-head .t{flex:1;font-size:13px;color:var(--accent-ink);font-weight:600}
+.peek-close{border:1px solid var(--accent);background:#fff;color:var(--accent-ink);border-radius:6px;padding:3px 10px;font-size:13px;cursor:pointer}
+.peek-body{padding:12px 16px 14px}
+.peek h4{margin:10px 0 4px;font-size:13px;font-weight:600}
+.peek h4:first-child{margin-top:0}
+.peek h4 small{font-weight:400;color:var(--ink-3)}
+.peek blockquote{margin:0;padding:6px 10px;border-left:3px solid var(--rule);background:#F3F5F4;font-size:13.5px;line-height:1.55}
+.peek blockquote + blockquote{margin-top:6px}
+.peek code{font-family:var(--code);font-size:12.5px}
+.peek p{margin:0;font-size:14px}
+.peek .src{margin-top:12px;font-size:13px;color:var(--ink-3)}
+
+.section-t{font-size:15px;font-weight:700;margin:28px 0 8px}
+.boundary{background:#F3F5F4;border-radius:8px;padding:12px 14px;margin:0 0 6px}
+.boundary p{margin:0}
+.cmpbtn{margin-top:22px}
+.cmp{margin-top:12px;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:#fff}
+.cmp .cap{padding:9px 14px;font-size:13px;color:var(--ink-3);border-bottom:1px solid var(--rule-2)}
+.cmp .row{display:grid;grid-template-columns:170px 1fr 1fr;border-bottom:1px solid var(--rule-2)}
+.cmp .row:last-child{border-bottom:0}
+.cmp .row > div{padding:10px 14px;font-size:14px}
+.cmp .row .q{font-weight:600;background:#F6F8F7}
+.cmp .row .lbl{display:block;font-size:12px;color:var(--ink-3);margin-bottom:2px}
+.cmp .row .after{background:#FBFDFD;border-left:1px solid var(--rule-2)}
+details.srcb{margin-top:24px;border-top:1px solid var(--rule);padding-top:12px}
+details.srcb summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--ink-2)}
+details.srcb ul{padding-left:18px;font-size:13.5px;color:var(--ink-2)}
+details.srcb li{margin:5px 0}
+details.srcb code{font-family:var(--code);font-size:12.5px}
+.handoff{margin-top:28px;padding-top:18px;border-top:1px solid var(--rule)}
+.handoff p{margin:0 0 10px;font-size:14px;color:var(--ink-2)}
+
+/* handoff dialog */
+dialog.prep{border:0;padding:0;margin:0 0 0 auto;height:100vh;max-height:100vh;width:min(470px,100vw);background:var(--sheet);color:var(--ink);box-shadow:-10px 0 30px rgba(0,0,0,.15)}
+dialog.prep::backdrop{background:rgba(28,38,48,.28)}
+.prep-in{display:flex;flex-direction:column;height:100%}
+.prep-head{display:flex;align-items:flex-start;gap:10px;padding:18px 20px 12px;border-bottom:1px solid var(--rule)}
+.prep-head h2{flex:1;margin:0;font-size:18px;line-height:1.4}
+.prep-head p{margin:4px 0 0;font-size:13px;color:var(--ink-3);font-weight:400}
+.prep-body{flex:1;overflow:auto;padding:6px 20px 20px}
+.prep dl{margin:0}
+.prep dt{font-size:13px;font-weight:600;color:var(--ink-3);margin:16px 0 4px}
+.prep dd{margin:0;font-size:14px}
+.prep dd ul{margin:0;padding-left:18px}
+.prep dd li{margin:3px 0}
+.prep .nosend{margin:20px 0 0;padding:10px 12px;border-radius:8px;background:#F3F5F4;font-size:13.5px;color:var(--ink-2)}
+
+/* ---------- mobile ---------- */
+@media (max-width:899px){
+  html,body{font-size:15px}
+  .top{padding:10px 16px;flex-wrap:wrap;gap:2px 10px}
+  .top .aim{order:3;flex-basis:100%;white-space:normal;line-height:1.45}
+  .mapview,.focusview{display:block;height:auto}
+  .brief{border-right:0;border-bottom:1px solid var(--rule);padding:20px 16px 18px;overflow:visible}
+  .brief h1{font-size:23px}
+  .maptools{padding:12px 16px 4px;border-bottom:0}
+  .zoom{display:none}
+  .mapscroll{overflow:visible}
+  .sizer{width:auto !important;height:auto !important}
+  .canvas{position:static;transform:none !important;display:block;padding:4px 16px 110px}
+  .edges{display:none}
+  .parts{padding-top:0;gap:10px}
+  .frame{margin-top:22px}
+  .part{padding:13px 14px}
+  .strip{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:10px 16px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -4px 14px rgba(0,0,0,.08)}
+  .strip .what .ln{display:block;font-size:13px;line-height:1.4;margin-top:1px}
+  .strip.empty{display:none}
+  .wide-only{display:none}
+  .narrow-only{display:inline}
+  .has-sel .area.is-related .rel-mark{display:inline}
+  .rail{position:sticky;top:0;z-index:4;border-right:0;border-bottom:1px solid var(--rule);padding:8px 16px;overflow:visible;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .rail .btn{padding:7px 12px}
+  .rail .crumb{margin:0;font-size:13px}
+  .rail h3,.rail ul{display:none}
+  .relm{display:block;font-size:13px;color:var(--ink-2);margin:0 0 18px}
+  .rail .kept{display:none}
+  .reading{overflow:visible}
+  .col{padding:20px 16px 60px}
+  .col h2{font-size:22px}
+  .peek{margin-left:0}
+  .cmp .row{grid-template-columns:1fr}
+  .cmp .row .after{border-left:0;border-top:1px dashed var(--rule-2)}
+  dialog.prep{margin:auto 0 0 0;width:100vw;max-width:100vw;height:92vh;max-height:92vh;border-radius:14px 14px 0 0}
+}
+</style>
+</head>
+<body>
+<header class="top"><b>AgentFlow Studio</b><span class="aim">이 프로젝트의 목표: AI와 만드는 프로그램의 구상과 변화를 살피고, 필요한 부분을 이어 맡기는 공간</span><span class="tag">연구 시안</span></header>
+
+<!-- ===================== MAP VIEW ===================== -->
+<main id="mapView" class="mapview">
+  <section class="brief" aria-labelledby="briefTitle">
+    <p class="basis">이 개발 기록에서 보고한 변경</p>
+    <h1 id="briefTitle">목적 정정은 별도로, 작업 지시는 그대로</h1>
+    <p>개발 기록에는 목적을 바로잡아도 직접 쓴 작업 지시와 현재 요청은 유지하도록 바꿨다고 적혀 있습니다.</p>
+    <p class="areas-named">정정 내용은 <strong>홈</strong>과 <strong>작업문</strong>에 보이고 <strong>다음 AI 요청</strong>에도 실립니다. <strong>저장 복구</strong>로 이전 정정을 옮길 때도 작업 지시는 그대로입니다.</p>
+    <p class="limit">기록의 한계: 실제 AI 준수는 미검증이며, 사용자 원요청과 인계 결과는 이 기록에 없습니다.</p>
+    <p class="quiet">방문 이력이 없어 ‘지난 방문 이후’ 대신 이 개발 기록의 변경 시점을 기준으로 보여 줍니다. 이 기록이 지금 결정을 요청하는 항목은 없습니다.</p>
+  </section>
+
+  <section class="mappane" aria-label="변경 지도">
+    <div class="maptools">
+      <p class="hint" id="mapHint"><span class="wide-only">부분을 고르면 문서에서 함께 언급된 영역이 선으로 이어집니다.</span><span class="narrow-only">부분을 고르면 문서에서 함께 언급된 영역에 표시가 붙습니다.</span></p>
+      <div class="zoom" role="group" aria-label="지도 배율">
+        <button type="button" id="zoomOut" aria-label="지도 축소">−</button>
+        <output id="zoomVal" aria-live="polite">100%</output>
+        <button type="button" id="zoomIn" aria-label="지도 확대">+</button>
+      </div>
+    </div>
+    <div class="mapscroll" id="mapScroll" tabindex="-1">
+      <div class="sizer" id="sizer">
+        <div class="canvas" id="canvas">
+          <svg class="edges" id="edges" aria-hidden="true"></svg>
+          <div class="parts" id="parts" role="group" aria-label="변경된 동작">
+            <p class="colhead">기록이 바꿨다고 보고한 동작</p>
+          </div>
+          <div class="frame" id="frame" role="group" aria-labelledby="frameT">
+            <p class="colhead" id="frameT">영향 영역</p>
+            <p class="framenote">이 기록에서 함께 언급된 영역입니다. 모듈 구조나 포함 관계가 아닙니다.</p>
+            <details class="help"><summary>선과 묶음의 뜻</summary><p>문서에 함께 언급된 곳을 살펴보려고 묶은 연구 배치입니다. 선(좁은 화면에서는 ‘함께 언급’ 표시)은 함께 언급됨만 뜻하며, 실행 순서나 자동 분석 결과가 아닙니다. 지도의 묶음은 실제 포함 관계를 입증하지 않습니다.</p></details>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="strip empty" id="strip" aria-live="polite">
+      <div class="what" id="stripWhat">아직 고른 부분이 없습니다.</div>
+      <button type="button" class="btn" id="enterFocus" hidden>이 부분 읽기</button>
+    </div>
+  </section>
+</main>
+
+<!-- ===================== FOCUS VIEW ===================== -->
+<main id="focusView" class="focusview" hidden>
+  <nav class="rail" aria-label="현재 위치">
+    <div class="backbar"><button type="button" class="btn ghost" id="returnAll">← 전체 지도로 돌아가기</button></div>
+    <p class="crumb">전체 지도 › <b id="crumbPart"></b></p>
+    <h3>함께 언급된 영역</h3>
+    <ul id="railAreas"></ul>
+    <p class="kept">지도의 펼침, 위치, 배율과 이 선택은 그대로 두었습니다. 돌아가면 같은 자리에서 이어집니다.</p>
+  </nav>
+  <div class="reading" id="reading">
+    <article class="col" id="focusCol"></article>
+  </div>
+</main>
+
+<dialog class="prep" id="prep" aria-labelledby="prepTitle">
+  <div class="prep-in">
+    <div class="prep-head">
+      <h2 id="prepTitle">이어 맡길 내용<p id="prepSub">준비 제안이며 보내지 않습니다</p></h2>
+      <button type="button" class="btn ghost" id="prepClose">닫기</button>
+    </div>
+    <div class="prep-body" id="prepBody"></div>
+  </div>
+</dialog>
+
+<script>
+(function(){
+"use strict";
+var DOC = "https://github.com/tlsee0813-cmd/agentflow-studio/blob/f0fa5326c0f1c96fbc4360f7968b6be636836056/docs/flow049-outcome-home.md";
+var SRC = {
+  fix058:{label:"FIX058 변경 보고", lines:"226–237행", url:DOC+"#L226-L237"},
+  ai055:{label:"앞선 개발 설명(AI055)", lines:"175–187행", url:DOC+"#L175-L187"}
+};
+
+var AREAS = [
+  {id:"home", name:"홈", depth:1,
+   short:"정정한 목적이 AI 해석과 따로 보임",
+   detail:["AI 해석이 낡아도 정정 내용은 홈에 보인다고 보고합니다.","작업 카드에서 직접 고친 내용은 홈의 ‘직접 정정’으로 올라가지 않습니다.","사용자 결정은 AI 해석보다 앞선 현재 조건으로 표시합니다."]},
+  {id:"task", name:"작업문", depth:2,
+   short:"정정이 보이고, 직접 쓴 범위와 현재 요청은 남음",
+   detail:["사용자가 쓴 좁은 범위와 현재 요청 원문이 남습니다.","낡은 AI의 다음 할 일·확인 항목·질문은 빠집니다.","정정 내용이 함께 보입니다."]},
+  {id:"next", name:"다음 AI 요청", depth:0,
+   short:"재정리 요청에 정정 내용이 실림",
+   detail:["정정 내용이 재정리 요청에 포함된다고 보고합니다.","작업 카드 직접 수정은 다음 턴의 목적으로 넘어가지 않습니다.","<span class=\"unk\">AI가 실제로 따르는지는 미검증</span>입니다."]},
+  {id:"restore", name:"저장 복구", depth:1,
+   short:"옛 형식의 정정을 복원 때 한 번 새 형식으로 옮김",
+   detail:["이전 형식에 저장된 정정은 복원할 때 정정 내용만 새 형식으로 한 번 옮깁니다.","작업 지시 칸은 그대로 둡니다.","같은 문서의 후속 보완은 이 변경에 넣지 않았습니다."]}
+];
+var AREA = {}; AREAS.forEach(function(a){AREA[a.id]=a;});
+
+var EXC = {
+  b1:"B1: 작업 카드의 이해/범위 직접 수정은 그 작업의 작업 지시일 뿐이다. 다음 턴 <code>previousIntent.manualGoal</code>·홈 ‘직접 정정’으로 승격하지 않는다.",
+  b2a:"B2: 목적 정정은 <code>Task.intentEdit</code>(<code>intent-edit.2</code>: revision·goal·conditions)에만 저장하고 <code>manual.*</code>를 덮지 않는다.",
+  b2b:"정정 뒤 낡은 AI next/checks·질문 제외는 유지되며, 사용자가 쓴 좁은 범위와 현재 요청 원문이 작업문에 남는다.",
+  b2c:"AI 해석이 낡아도 정정은 홈·작업문에 보이고 재정리 요청에 실린다.",
+  v1:"<code>intent-edit.1</code>(이전 후보 저장값)은 복원 시 정정 내용을 복사해 <code>intent-edit.2</code>로 한 번 변환한다(<code>manual.*</code>는 그대로).",
+  mock:"검증은 손으로 쓴 합성 응답·명시 MOCK이며 실DeepSeek 해석 품질은 별도 평가가 필요하다.",
+  n1a:"사용자 결정이 있으면 그 ID를 해석보다 우선하는 현재 조건으로 명시한다.",
+  n1b:"N1: AI의 retired는 이전 요청 원문의 표현에만 적용하고 확정·답변·보류 기준을 대체하지 않는다고 작업문·홈에 표시한다.",
+  n1c:"prompt에 같은 규칙을 추가했고 실제 모델 준수는 미검증이다.",
+  ai055:"‘정리 바로잡기’/‘직전 정리로 되돌리기’는 기존 manual.understanding/scope를 편집한다. … <code>Task.intentEdit</code>는 <code>intent-edit.1</code>의 정정 revision만 기록한다."
+};
+
+var PARTS = [
+ {id:"purpose", name:"목적 정정", line:"바로잡은 목적은 작업 지시와 따로 저장", related:["home","task","next","restore"],
+  title:"목적 정정은 따로 저장되고, 작업 지시는 덮지 않습니다",
+  claims:[
+   {id:"p1", text:"목적을 바로잡으면 그 내용은 작업 지시와 별도의 정정 기록에 저장된다고 보고합니다. 작업 카드에 직접 쓴 이해·범위는 덮이지 않습니다.",
+    src:"fix058", ex:["b2a"], read:"‘별도 정정 기록’은 문서의 목적·조건·revision 묶음을, ‘작업 지시’는 작업의 이해/범위 칸을 가리킨다고 읽었습니다.", unk:"코드 변경 자체는 이 시안에서 확인하지 않았습니다. 문서가 보고한 동작입니다."},
+   {id:"p2", text:"정정 뒤에도 직접 쓴 좁은 범위와 현재 요청 원문은 작업문에 남고, 낡은 AI의 다음 할 일·확인 항목·질문만 빠집니다.",
+    src:"fix058", ex:["b2b"], read:"빠지는 것은 정정 전 AI가 낸 항목이며, 사용자가 쓴 지시나 과거 기록 전체가 지워진다는 뜻은 아닙니다.", unk:"실제 화면에서 어떻게 보이는지는 이 기록에 없습니다."},
+   {id:"p3", text:"AI 해석이 낡아도 정정 내용은 홈과 작업문에 보이고, 다음 AI 재정리 요청에 실린다고 적혀 있습니다.",
+    src:"fix058", ex:["b2c","mock"], read:"요청에 ‘실린다’는 것까지가 보고 내용입니다.", unk:"실제 AI가 정정을 읽고 따랐는지, 해석 품질이 어떤지는 확인되지 않았습니다. 검증은 합성 응답과 MOCK입니다."},
+   {id:"p4", text:"예전 형식으로 저장된 정정은 복원할 때 한 번 새 형식으로 옮기고, 작업 지시는 그대로 둔다고 보고합니다.",
+    src:"fix058", ex:["v1"], read:"복원 때의 일회 변환입니다. 기존 값이 언제나 옳다는 일반 정책은 아닙니다.", unk:"빈 목적 처리 같은 후속 보완(FIX059·FIX061)은 이 변경 후 상태에 넣지 않았습니다."}
+  ],
+  boundary:{id:"p5", text:"반대로, 작업 카드에서 직접 고친 이해·범위는 그 작업의 지시일 뿐 목적 정정으로 올라가지 않습니다.",
+    src:"fix058", ex:["b1"], read:"모든 사용자 편집이 목적 변경이라는 뜻이 아니라, 두 종류의 수정을 나눈다는 보고입니다.", unk:"어떤 사용자 편집이 실제로 있었는지는 이 기록에 없습니다."},
+  compare:true,
+  prep:{
+   aim:"목적 정정은 별도 기록에 저장하고, 작업 지시(직접 쓴 이해·범위, 현재 요청 원문)는 덮지 않는 동작.",
+   scope:"홈, 작업문, 다음 AI 요청, 저장 복구에서 문서가 보고한 내용. 같은 문서의 후속 보완 FIX059·FIX061은 제외.",
+   basis:["flow049-outcome-home.md, 고정 커밋 f0fa532, FIX058 226–237행","비교용 앞선 설명 AI055 175–187행","문서에 적힌 제품 기준 d5ef9a4 (코드 대조 안 함)"],
+   keep:["작업 카드 직접 수정을 목적 정정으로 올리지 않기","정정 뒤에도 사용자가 쓴 좁은 범위와 현재 요청 원문 유지","사용자 결정은 AI 해석보다 앞선 조건으로 다루기"],
+   open:["실제 AI가 정정을 따르는지 (검증은 합성 응답·MOCK)","별도 검토자의 최종 확인 결과","사용자 원요청","받을 담당자: 기록에 없음"]
+  }},
+ {id:"instruction", name:"작업 지시", line:"작업 카드에서 직접 고친 이해·범위는 그 작업에만", related:["task","next","home"],
+  title:"작업 카드에서 고친 내용은 그 작업의 지시로만 남습니다",
+  claims:[
+   {id:"i1", text:"작업 카드에서 이해나 범위를 직접 고치면 그 작업의 지시로 다룹니다. 다음 턴의 목적이나 홈의 ‘직접 정정’으로 올라가지 않는다고 보고합니다.",
+    src:"fix058", ex:["b1"], read:"목적 정정과 작업 지시를 다른 수정으로 나눈 보고입니다.", unk:"실제 사용자가 그 화면을 조작한 기록은 없습니다."},
+   {id:"i2", text:"목적을 정정해도 작업문에는 직접 쓴 좁은 범위와 현재 요청 원문이 남습니다.",
+    src:"fix058", ex:["b2b"], read:"작업 지시가 목적 정정에 밀려 지워지지 않는다는 뜻으로 읽었습니다.", unk:"화면 표시 모습은 이 기록에 없습니다."}
+  ],
+  prep:{
+   aim:"작업 카드의 직접 수정을 그 작업의 지시로 한정하는 동작.",
+   scope:"작업문, 다음 AI 요청, 홈에서 문서가 보고한 내용.",
+   basis:["flow049-outcome-home.md, 고정 커밋 f0fa532, FIX058 226–237행"],
+   keep:["직접 수정을 다음 턴 목적이나 홈 ‘직접 정정’으로 올리지 않기"],
+   open:["실제 사용자 편집 기록","받을 담당자: 기록에 없음"]
+  }},
+ {id:"decision", name:"사용자 결정 표시", line:"사용자 결정을 AI 해석보다 앞선 조건으로 표시", related:["task","home","next"],
+  title:"사용자 결정은 AI 해석보다 앞선 조건으로 표시합니다",
+  claims:[
+   {id:"d1", text:"사용자 결정이 있으면 AI 해석보다 우선하는 현재 조건으로 표시하고, AI가 ‘낡았다’고 한 표현은 이전 요청 문구에만 해당한다고 작업문·홈에 적는다고 보고합니다.",
+    src:"fix058", ex:["n1a","n1b"], read:"AI 해석만으로 사용자의 확정·답변·보류가 취소되지 않는다는 뜻입니다.", unk:"이 기록에는 실제 사용자 결정이 담겨 있지 않습니다."},
+   {id:"d2", text:"같은 규칙을 AI 요청문에도 넣었지만, 실제 모델이 따르는지는 확인되지 않았습니다.",
+    src:"fix058", ex:["n1c"], read:"규칙을 넣었다는 것과 지켜졌다는 것은 다릅니다.", unk:"실제 모델 준수는 미검증입니다."}
+  ],
+  prep:{
+   aim:"사용자 결정을 AI 해석보다 앞선 현재 조건으로 표시하는 동작.",
+   scope:"작업문, 홈, AI 요청문 규칙.",
+   basis:["flow049-outcome-home.md, 고정 커밋 f0fa532, FIX058 226–237행 (N1)"],
+   keep:["AI 해석만으로 사용자 확정·답변·보류를 바꾸지 않기"],
+   open:["실제 모델 준수","받을 담당자: 기록에 없음"]
+  }}
+];
+var PART = {}; PARTS.forEach(function(p){PART[p.id]=p;});
+
+var ZOOMS=[0.85,1,1.2];
+var state = {selected:null, hover:null, zoomIdx:1, mode:"map", saved:null, peek:null, prepFrom:null};
+var depth = {}; AREAS.forEach(function(a){depth[a.id]=a.depth;});
+
+var $ = function(id){return document.getElementById(id);};
+var mq = window.matchMedia("(max-width: 899px)");
+function mobile(){return mq.matches;}
+function esc(s){return s;}
+
+/* ---------- build map ---------- */
+var partsEl=$("parts"), frameEl=$("frame");
+PARTS.forEach(function(p){
+  var b=document.createElement("button");
+  b.type="button"; b.className="part"; b.dataset.id=p.id;
+  b.setAttribute("aria-pressed","false");
+  b.innerHTML='<span class="nm">'+p.name+'</span><span class="ln">'+p.line+'</span>';
+  b.addEventListener("click",function(){select(p.id);});
+  b.addEventListener("mouseenter",function(){state.hover=p.id;drawEdges();});
+  b.addEventListener("mouseleave",function(){state.hover=null;drawEdges();});
+  partsEl.appendChild(b);
+});
+AREAS.forEach(function(a){
+  var box=document.createElement("div");
+  box.className="area"; box.dataset.id=a.id;
+  box.innerHTML='<button type="button" class="area-head" aria-expanded="false" aria-controls="ab-'+a.id+'">'+
+    '<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>'+
+    '<span class="nm">'+a.name+'</span><span class="rel-mark">선택한 부분과 함께 언급</span></button>'+
+    '<div class="area-body" id="ab-'+a.id+'"></div>';
+  box.querySelector(".area-head").addEventListener("click",function(){
+    depth[a.id] = depth[a.id]===0 ? 1 : 0; renderArea(a.id);
+  });
+  frameEl.appendChild(box);
+  renderArea(a.id);
+});
+function renderArea(id){
+  var a=AREA[id], box=frameEl.querySelector('.area[data-id="'+id+'"]'), d=depth[id];
+  var head=box.querySelector(".area-head"), body=box.querySelector(".area-body");
+  head.setAttribute("aria-expanded", d>0?"true":"false");
+  box.dataset.depth=d;
+  if(d===0){body.hidden=true; body.innerHTML="";}
+  else{
+    body.hidden=false;
+    var h='<p>'+a.short+'</p>';
+    if(d===2) h+='<ul>'+a.detail.map(function(x){return '<li>'+x+'</li>';}).join("")+'</ul>';
+    h+='<button type="button" class="more" aria-expanded="'+(d===2)+'">'+(d===2?'간단히':'자세히')+'</button>';
+    body.innerHTML=h;
+    body.querySelector(".more").addEventListener("click",function(){
+      depth[id]= depth[id]===2?1:2; renderArea(id);
+      var m=box.querySelector(".more"); if(m) m.focus({preventScroll:true});
+    });
+  }
+  layout();
+}
+
+/* ---------- selection ---------- */
+function select(id){
+  state.selected=id;
+  document.querySelectorAll(".part").forEach(function(b){
+    var on=b.dataset.id===id; b.classList.toggle("is-selected",on); b.setAttribute("aria-pressed",on?"true":"false");
+  });
+  var rel=PART[id].related;
+  $("canvas").classList.add("has-sel");
+  document.querySelectorAll(".area").forEach(function(el){el.classList.toggle("is-related", rel.indexOf(el.dataset.id)>=0);});
+  var strip=$("strip"); strip.classList.remove("empty");
+  $("stripWhat").innerHTML='<strong>'+PART[id].name+'</strong> 선택됨 <span class="ln">함께 언급: '+rel.map(function(r){return AREA[r].name;}).join(", ")+'</span>';
+  $("enterFocus").hidden=false;
+  drawEdges();
+}
+
+/* ---------- zoom / layout / edges ---------- */
+function z(){return mobile()?1:ZOOMS[state.zoomIdx];}
+function layout(){
+  var c=$("canvas"), s=$("sizer");
+  if(mobile()){c.style.transform="";s.style.width="";s.style.height="";}
+  else{
+    c.style.transform="scale("+z()+")";
+    s.style.width=Math.ceil(c.offsetWidth*z())+"px";
+    s.style.height=Math.ceil(c.offsetHeight*z())+"px";
+  }
+  $("zoomVal").textContent=Math.round(ZOOMS[state.zoomIdx]*100)+"%";
+  $("zoomOut").disabled=state.zoomIdx===0; $("zoomIn").disabled=state.zoomIdx===ZOOMS.length-1;
+  drawEdges();
+}
+$("zoomOut").addEventListener("click",function(){if(state.zoomIdx>0){state.zoomIdx--;layout();}});
+$("zoomIn").addEventListener("click",function(){if(state.zoomIdx<ZOOMS.length-1){state.zoomIdx++;layout();}});
+function drawEdges(){
+  var svg=$("edges"), c=$("canvas");
+  svg.innerHTML="";
+  if(mobile()||state.mode!=="map") return;
+  svg.setAttribute("width",c.offsetWidth); svg.setAttribute("height",c.offsetHeight);
+  var cr=c.getBoundingClientRect(), k=z();
+  var list=[];
+  if(state.hover && state.hover!==state.selected) list.push([state.hover,false]);
+  if(state.selected) list.push([state.selected,true]);
+  list.forEach(function(pair){
+    var pb=partsEl.querySelector('.part[data-id="'+pair[0]+'"]').getBoundingClientRect();
+    var x1=(pb.right-cr.left)/k, y1=(pb.top+pb.height/2-cr.top)/k;
+    PART[pair[0]].related.forEach(function(aid){
+      var hb=frameEl.querySelector('.area[data-id="'+aid+'"] .area-head').getBoundingClientRect();
+      var x2=(hb.left-cr.left)/k, y2=(hb.top+hb.height/2-cr.top)/k;
+      var p=document.createElementNS("http://www.w3.org/2000/svg","path");
+      p.setAttribute("d","M"+x1+" "+y1+" C"+(x1+70)+" "+y1+" "+(x2-70)+" "+y2+" "+x2+" "+y2);
+      p.setAttribute("fill","none");
+      p.setAttribute("stroke", pair[1]?"#0D6570":"#8FA3A2");
+      p.setAttribute("stroke-width", pair[1]?"2":"1.4");
+      if(!pair[1]) p.setAttribute("stroke-dasharray","4 4");
+      svg.appendChild(p);
+      var d=document.createElementNS("http://www.w3.org/2000/svg","circle");
+      d.setAttribute("cx",x2);d.setAttribute("cy",y2);d.setAttribute("r",pair[1]?4:3);
+      d.setAttribute("fill",pair[1]?"#0D6570":"#8FA3A2");
+      svg.appendChild(d);
+    });
+  });
+}
+if(window.ResizeObserver){new ResizeObserver(function(){if(state.mode==="map")layout();}).observe($("canvas"));}
+window.addEventListener("resize",layout);
+
+/* ---------- focus (reading space) ---------- */
+function claimHTML(c){
+  return '<p class="claim" id="c-'+c.id+'">'+c.text+' <button type="button" class="evbtn" data-claim="'+c.id+'" aria-expanded="false" aria-controls="peek-'+c.id+'">근거</button></p>';
+}
+function findClaim(id){
+  for(var i=0;i<PARTS.length;i++){var p=PARTS[i];
+    for(var j=0;j<p.claims.length;j++) if(p.claims[j].id===id) return p.claims[j];
+    if(p.boundary && p.boundary.id===id) return p.boundary;}
+  return null;
+}
+function renderFocus(id){
+  var p=PART[id];
+  $("crumbPart").textContent=p.name;
+  $("railAreas").innerHTML=p.related.map(function(r){return '<li>'+AREA[r].name+'</li>';}).join("");
+  var h='<p class="sub">이 개발 기록에서 보고한 변경 › '+p.name+'</p>'+
+    '<h2 id="focusTitle" tabindex="-1">'+p.title+'</h2>'+
+    '<p class="relm">함께 언급된 영역: '+p.related.map(function(r){return AREA[r].name;}).join(", ")+'</p>'+
+    '<div class="claims">'+p.claims.map(claimHTML).join("")+'</div>';
+  if(p.boundary){
+    h+='<h3 class="section-t">작업 지시와의 경계</h3><div class="boundary">'+claimHTML(p.boundary)+'</div>';
+  }
+  if(p.compare){
+    h+='<button type="button" class="btn ghost cmpbtn" id="cmpBtn" aria-expanded="false" aria-controls="cmp">앞선 개발 설명과 비교해 보기</button>'+
+      '<div class="cmp" id="cmp" hidden>'+
+      '<div class="cap">두 내용 모두 개발 문서의 기술입니다. 사용자가 실제로 고친 전후 화면이 아닙니다.</div>'+
+      '<div class="row"><div class="q">목적을 바로잡으면 어디에 저장되나</div>'+
+        '<div><span class="lbl">앞선 설명 (AI055)</span>작업의 이해·범위 칸을 편집하고, 정정 기록에는 revision만 남김</div>'+
+        '<div class="after"><span class="lbl">FIX058 보고</span>별도 정정 기록(목적·조건)에만 저장, 이해·범위 칸은 덮지 않음</div></div>'+
+      '<div class="row"><div class="q">작업 카드의 직접 수정</div>'+
+        '<div><span class="lbl">앞선 설명 (AI055)</span>목적 바로잡기와 같은 칸을 씀 <span class="unk">(이 시안의 해석)</span></div>'+
+        '<div class="after"><span class="lbl">FIX058 보고</span>그 작업의 지시로만 다루고 목적으로 올리지 않음</div></div>'+
+      '</div>';
+  }
+  h+='<details class="srcb"><summary>기록의 출처와 경계</summary><ul>'+
+     '<li>문서: <code>docs/flow049-outcome-home.md</code>, 고정 커밋 <code>f0fa532</code>. FIX058은 226–237행, 비교용 AI055는 175–187행.</li>'+
+     '<li>문서에 적힌 제품 기준 커밋 <code>d5ef9a4</code>. 코드 diff는 이 시안에서 대조하지 않았습니다.</li>'+
+     '<li>Work 연결 장애로 독립 검토자가 구현했고, 최종 확인은 별도 검토자가 한다고 적혀 있습니다. 그 확인 결과는 이 구간에 없습니다.</li>'+
+     '<li>검증은 손으로 쓴 합성 응답과 명시 MOCK입니다. 실제 해석 품질은 별도 평가가 필요하다고 적혀 있습니다.</li>'+
+     '<li>이 기록에 없는 것: 사용자 원요청, 사용자 승인, 실제 인계의 수신·수락.</li>'+
+     '<li>같은 구간의 FIX059·FIX061 후속 보완은 이 변경 후 상태에 넣지 않았습니다.</li>'+
+     '</ul></details>';
+  h+='<div class="handoff"><p>이 부분을 다른 담당자가 이어 볼 때 필요한 내용을 모아 봅니다. 보내지는 않습니다.</p>'+
+     '<button type="button" class="btn" id="prepBtn">이 부분을 이어 맡길 내용 보기 (준비 제안)</button></div>';
+  $("focusCol").innerHTML=h;
+  var cb=$("cmpBtn");
+  if(cb) cb.addEventListener("click",function(){
+    var open=cb.getAttribute("aria-expanded")!=="true";
+    cb.setAttribute("aria-expanded",open); $("cmp").hidden=!open;
+    cb.textContent=open?"비교 닫기":"앞선 개발 설명과 비교해 보기";
+  });
+  $("prepBtn").addEventListener("click",function(e){openPrep(id,e.currentTarget);});
+}
+$("focusCol").addEventListener("click",function(e){
+  var b=e.target.closest(".evbtn"); if(!b) return;
+  if(state.peek===b.dataset.claim) closePeek(true); else openPeek(b.dataset.claim,b);
+});
+
+function enterFocus(){
+  if(!state.selected) return;
+  var ms=$("mapScroll");
+  state.saved={left:ms.scrollLeft, top:ms.scrollTop, winY:window.scrollY, zoomIdx:state.zoomIdx, selected:state.selected};
+  renderFocus(state.selected);
+  state.mode="focus";
+  $("mapView").hidden=true; $("focusView").hidden=false;
+  $("reading").scrollTop=0; window.scrollTo(0,0);
+  $("focusTitle").focus({preventScroll:true});
+}
+$("enterFocus").addEventListener("click",enterFocus);
+
+function returnAll(){
+  closePeek(false);
+  if($("prep").open) $("prep").close();
+  state.mode="map";
+  $("focusView").hidden=true; $("mapView").hidden=false;
+  $("focusCol").innerHTML="";
+  var sv=state.saved||{left:0,top:0,winY:0,zoomIdx:state.zoomIdx,selected:state.selected};
+  state.zoomIdx=sv.zoomIdx;
+  layout();
+  var ms=$("mapScroll"); ms.scrollLeft=sv.left; ms.scrollTop=sv.top;
+  window.scrollTo(0,sv.winY);
+  requestAnimationFrame(function(){
+    ms.scrollLeft=sv.left; ms.scrollTop=sv.top; window.scrollTo(0,sv.winY); drawEdges();
+    var node=partsEl.querySelector('.part[data-id="'+state.selected+'"]');
+    if(node) node.focus({preventScroll:true});
+  });
+}
+$("returnAll").addEventListener("click",returnAll);
+
+/* ---------- evidence peek (in place) ---------- */
+function openPeek(cid,btn){
+  closePeek(false);
+  var c=findClaim(cid), s=SRC[c.src];
+  var para=$("c-"+cid);
+  var sec=document.createElement("section");
+  sec.className="peek"; sec.id="peek-"+cid;
+  sec.setAttribute("aria-label","근거 미리보기");
+  var lead=c.text.length>22?c.text.slice(0,22)+"…":c.text;
+  sec.innerHTML='<div class="peek-head"><span class="t">근거 미리보기: “'+lead+'”</span><button type="button" class="peek-close">닫기</button></div>'+
+    '<div class="peek-body">'+
+    '<h4>문서 보고 <small>'+s.label+', '+s.lines+'에서 옮긴 발췌. 원문 전체가 아닙니다.</small></h4>'+
+    c.ex.map(function(k){return '<blockquote>'+EXC[k]+'</blockquote>';}).join("")+
+    '<h4>이 설명이 읽은 방식</h4><p>'+c.read+'</p>'+
+    '<h4>이 기록으로 알 수 없는 것</h4><p class="unk-p">'+c.unk+'</p>'+
+    '<p class="src"><a href="'+s.url+'" target="_blank" rel="noopener">GitHub에서 원문 위치 열기</a> (외부 페이지, 새 탭)</p>'+
+    '</div>';
+  state.peekPos = mobile() ? window.scrollY : $("reading").scrollTop;
+  para.after(sec);
+  para.classList.add("is-origin");
+  btn.setAttribute("aria-expanded","true"); btn.textContent="근거 닫기";
+  sec.querySelector(".peek-close").addEventListener("click",function(){closePeek(true);});
+  sec.addEventListener("keydown",function(e){if(e.key==="Escape"){e.stopPropagation();closePeek(true);}});
+  btn.addEventListener("keydown",peekEsc);
+  state.peek=cid;
+  /* bring the preview into view without pushing its origin sentence off the top */
+  var r=sec.getBoundingClientRect(), pr=para.getBoundingClientRect();
+  var topLimit = mobile() ? $("focusView").querySelector(".rail").getBoundingClientRect().bottom + 8
+                          : $("reading").getBoundingClientRect().top + 8;
+  var overflow=r.bottom-(window.innerHeight-12);
+  if(overflow>0){
+    var dy=Math.min(overflow, Math.max(0, pr.top-topLimit));
+    if(mobile()) window.scrollBy(0,dy); else $("reading").scrollTop+=dy;
+  }
+}
+function peekEsc(e){if(e.key==="Escape" && state.peek){closePeek(true);}}
+function closePeek(refocus){
+  if(!state.peek) return;
+  var cid=state.peek; state.peek=null;
+  var sec=$("peek-"+cid); if(sec) sec.remove();
+  /* return to the reading position the person had before opening the preview */
+  if(refocus && state.peekPos!=null){
+    if(mobile()) window.scrollTo(0,state.peekPos); else $("reading").scrollTop=state.peekPos;
+  }
+  state.peekPos=null;
+  var para=$("c-"+cid); if(para) para.classList.remove("is-origin");
+  var btn=document.querySelector('.evbtn[data-claim="'+cid+'"]');
+  if(btn){btn.setAttribute("aria-expanded","false");btn.textContent="근거";btn.removeEventListener("keydown",peekEsc);
+    if(refocus) btn.focus({preventScroll:true});}
+}
+
+/* ---------- handoff prep (no sending) ---------- */
+function li(arr){return '<ul>'+arr.map(function(x){return '<li>'+x+'</li>';}).join("")+'</ul>';}
+function openPrep(id,btn){
+  var p=PART[id], q=p.prep;
+  state.prepFrom=btn;
+  $("prepSub").textContent=p.name+" · 준비 제안이며 보내지 않습니다";
+  $("prepBody").innerHTML='<dl>'+
+    '<dt>대상</dt><dd>'+p.name+' (이 개발 기록에서 보고한 변경)</dd>'+
+    '<dt>이 부분이 하는 일</dt><dd>'+q.aim+'</dd>'+
+    '<dt>범위</dt><dd>'+q.scope+'</dd>'+
+    '<dt>기준 기록</dt><dd>'+li(q.basis)+'</dd>'+
+    '<dt>지켜야 할 조건</dt><dd>'+li(q.keep)+'</dd>'+
+    '<dt>이 기록으로 알 수 없는 것</dt><dd>'+li(q.open)+'</dd>'+
+    '</dl><p class="nosend">이 연구 시안에는 보내기 기능이 없습니다. 이 내용을 열어 본 것만으로 전달·수락·완료가 되지 않으며, 당신이 처리할 일로 배정되지도 않습니다.</p>';
+  $("prepBody").scrollTop=0;
+  $("prep").showModal();
+  $("prepClose").focus();
+}
+$("prepClose").addEventListener("click",function(){$("prep").close();});
+$("prep").addEventListener("close",function(){
+  if(state.prepFrom && document.body.contains(state.prepFrom)) state.prepFrom.focus({preventScroll:true});
+  state.prepFrom=null;
+});
+$("prep").addEventListener("click",function(e){if(e.target===$("prep")) $("prep").close();});
+
+mq.addEventListener("change",layout);
+layout();
+})();
+</script>
+</body>
+</html>

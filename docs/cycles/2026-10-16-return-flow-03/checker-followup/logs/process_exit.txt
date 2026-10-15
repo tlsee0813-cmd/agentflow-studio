@@ -1,0 +1,10 @@
+HTML sha256 (실행 전): f19011eb3b0b31d9ff57ba3fdd519eccb7a01e75ba789d3442f11f5b09778768
+python: Python 3.13.16
+--- normal: 2026-10-16T02:07:37+09:00
+cmd: python3 flow_check.py http://127.0.0.1:8765/return-flow-study.html return-flow-study.html normal/
+exit_code=0
+--- probe_fail: 2026-10-16T02:07:55+09:00
+cmd: python3 probe_fail_one_step.py http://127.0.0.1:8765/return-flow-study.html return-flow-study.html probe_fail/
+exit_code=1
+HTML sha256 (실행 후): f19011eb3b0b31d9ff57ba3fdd519eccb7a01e75ba789d3442f11f5b09778768
+증명: 정상 exit 0, 의도적 실패 exit 1 (기대대로)

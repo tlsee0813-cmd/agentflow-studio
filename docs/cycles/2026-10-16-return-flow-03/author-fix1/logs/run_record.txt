@@ -1,0 +1,7 @@
+검사기: check/flow_check.py sha256=5ec3234d306cc7eea16d04779ca4cd0ee3e976ffa61cd5f45c67a97e79c4b108 (후속 보완본, 이번에 수정 안 함)
+기록 HTML sha256=af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e
+HTTP 응답 바이트(실행 전) sha256=af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e status=200 size=42241
+--- run 2026-10-16T02:11:59+09:00
+exit_code=0
+HTTP 응답 바이트(실행 후) sha256=af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e
+기록 HTML(실행 후) sha256=af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e
