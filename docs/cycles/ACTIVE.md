@@ -1,7 +1,7 @@
 # AgentFlow 활성 연구·검증 배정
 2026-10-16 갱신 · 단일 총괄: 현재 Codex 대화. 현재 상태는 여기만 갱신한다.
 
-## 현재: cycle08 통합 완료 · cycle09 두 갈래 연구 진행
+## 현재: cycle08 통합 완료 · cycle09 구현 계약 고정
 [cycle08 결과](2026-10-16-overview-08/RESULT.md): 기본의 긴 책임 설명을 줄이고, 세 역할·두 기존 호출·책임 이동을 먼저 본 뒤 선택 상세로 이어지게 했다. 축약에서 사라진 ‘누락 확인’은 문구10줄 fix1으로 복구했다. 독립 최신 단일3폭×2흐름6/6·73 PASS·실제 child/외부 collector0, 원시·PNG·원격 회수 감사 완료. 사람 이해·큰 지도 적합성은 미검증이다.
 
 | 담당 | 완료 범위 |
@@ -14,9 +14,9 @@
 
 ## cycle09 한 질문
 기존 cycle05의 혼합 깊이 제안 구성에 cycle08의 간결한 조망·명시 상세를 연결할 범위를 고른다. **일부만 펼쳐도 역할·변경 소유·접힌 외부 상대와의 관계가 한 부분의 준비까지 이어지는가?**
-기존 펼침/복귀를 다시 만들지 않는다. 보기용 묶음·실제 관계 양끝·범위 경계를 유지하고 요약↔상세의 의미 연결을 본다. cycle05는 계약/MOCK 기반 AI 제안이라는 한계를 유지하며, VS Code와 한 프로그램으로 합치거나 근거 없는 부모·새 실제 사건을 만들지 않는다. [cycle09 범위](2026-10-16-mixed-reading-09/BRIEF.md)를 고정하고 Pro 정보량/공간, Pro 외부관계/범위 연구를 나눈다. Astra는 입력 의미, Sol은 기존 코드 재사용·최소 관측을 감사한다. 구현 배정은 아직 하지 않았다.
+기존 펼침/복귀를 다시 만들지 않는다. 보기용 묶음·실제 관계 양끝·범위 경계를 유지하고 요약↔상세의 의미 연결을 본다. cycle05는 계약/MOCK 기반 AI 제안이라는 한계를 유지하며, VS Code와 한 프로그램으로 합치거나 근거 없는 부모·새 실제 사건을 만들지 않는다. [cycle09 범위](2026-10-16-mixed-reading-09/BRIEF.md)를 고정하고 Pro 정보량/공간, Pro 외부관계/범위 연구를 나눈다. Astra는 입력 의미, Sol은 기존 코드 재사용·최소 관측을 감사한다. 총괄은 두 조사와 소스 감사를 통합해 [선택](2026-10-16-mixed-reading-09/DECISION.md)·[구현 계약](2026-10-16-mixed-reading-09/IMPLEMENTATION.md)을 고정했다. 문자 목차로 지도 대체는 거절하고, 간결한 공간 지도와 작업 대상을 유지하는 관계 참고를 채택했다. 실제 새 시안의 성공은 아직 확인하지 않았다.
 
-새 Pro 세션: [정보량·공간](https://chatgpt.com/c/6ad14ec4-7c30-83ee-88ed-494c789fb0a1), [접힌 외부관계·범위](https://chatgpt.com/c/6ad14ee9-98ac-83ee-a198-6c86d267b78f). 두 세션의 응답 시작을 확인했다. [입력 감사](2026-10-16-mixed-reading-09/INPUT_AUDIT.md) · [코드 재사용 경계](2026-10-16-mixed-reading-09/REUSE_AUDIT.md) · [기존 화면 관측](2026-10-16-mixed-reading-09/BASELINE_OBSERVATION.md).
+새 Pro 세션: [정보량·공간](https://chatgpt.com/c/6ad14ec4-7c30-83ee-88ed-494c789fb0a1), [접힌 외부관계·범위](https://chatgpt.com/c/6ad14ee9-98ac-83ee-a198-6c86d267b78f). 두 세션의 최종 답변을 읽었고 Pro A 후속은 문자 목차 추천을 철회했다. [새 Opus 구현 세션](https://claude.ai/chat/f4a50f7c-1576-4298-99ae-0fb2862adce0)은 정확05/08 원본 회수·해시 일치를 확인하고 계약을 받을 준비를 마쳤다. 계약 전달과 작성자 산출물 회수 후 독립 검증을 배정한다. Cloud 기존 세션은 cycle08 완료 상태다. [입력 감사](2026-10-16-mixed-reading-09/INPUT_AUDIT.md) · [코드 재사용 경계](2026-10-16-mixed-reading-09/REUSE_AUDIT.md) · [기존 화면 관측](2026-10-16-mixed-reading-09/BASELINE_OBSERVATION.md) · [정보량 소스 감사](2026-10-16-mixed-reading-09/DENSITY_SOURCE_AUDIT.md) · [관계 소스 감사](2026-10-16-mixed-reading-09/RELATIONS_SOURCE_AUDIT.md).
 
 ## 공유 결과
 [cycle08 fix1](https://github.com/tlsee0813-cmd/agentflow-studio/tree/167f86b8ac783a15bc1b2991b73017ee2f1e0d6a/docs/transfer/overview-08/author-fix1) · [독립23파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0) · [공유 증거 목록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/delivery/ui02-fix3-evidence/docs/transfer/README.md).
