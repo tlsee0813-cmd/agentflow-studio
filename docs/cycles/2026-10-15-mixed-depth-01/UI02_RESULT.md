@@ -11,16 +11,17 @@
 ## 버전
 
 - 초도 HTML SHA256: d0f3b7d378563b620aaa0ebfec34397f416b5d62b8d2f9d14df576b4f507840a.
-- 현재 fix1 HTML SHA256: 869c76a45f16042ec0a5063c81d1e638d21a2a3e87ce079b6bc5a60843632157.
+- fix1 HTML SHA256: 869c76a45f16042ec0a5063c81d1e638d21a2a3e87ce079b6bc5a60843632157. 아래 목록 복귀 수정과 당시 독립 5개 검사의 대상이다.
+- **현재 fix3 HTML SHA256:** `0AEEDD515E7F80F4B091BA1B395F90E0D19355A9EB3CA6C7E1174AD48FA2898C`. [고정 커밋의 시안](https://github.com/tlsee0813-cmd/agentflow-studio/blob/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/canvas-study.html)과 근거는 GitHub에서 회수할 수 있다.
 - 첫 의미 시안 prototype.html은 별도 보존한다. 그 fix3 검사 결과를 새 canvas-study.html의 검사 결과로 옮겨 쓰지 않는다.
 
 ## 어떤 증거를 받았는가
 
-작성자는 jsdom 상태 검사와 headless Chromium 1194의 실제 클릭·마우스·키보드·렌더링 검사 코드, 출력, 화면 캡처를 반환했다. 이는 작성자 실행 근거다. 독립 검토자는 코드·로그·전달 이미지와 별도의 최소 Node 상태 재현을 검토했다. 별도 Work 클라우드 브라우저에서 동일 화면 검사를 재실행하지는 못했다.
+작성자는 jsdom 상태 검사와 headless Chromium 1194의 실제 클릭·마우스·키보드·렌더링 검사 코드, 출력, 화면 캡처를 반환했다. 이는 작성자 실행 근거다. 독립 검토자는 코드·로그·전달 이미지와 별도의 Node 상태 재현을 검토했다. 초도·fix1 검토 당시 별도 Work 클라우드 브라우저 재실행은 미실행이었다. 현재는 fix3의 독립 클라우드 실제 Chromium 실행 원본을 회수했고 manifest의 13개 파일 크기·SHA256과 PNG 5장 직접 열람을 포함한 [원본 감사](evidence/ui02/cloud-fix3/REPORT.md)가 완료되었다. 이 감사는 새 브라우저 재실행이나 전체 품질 승인과 구분한다.
 
 초도 로그의 ‘37 PASS’에는 무조건 INFO가 1개 포함되어 있었다. 실제 조건 검사는 36개였다. 초도 전달 PNG도 설명의 14장이 아닌 13장이었다. 독립 검토가 이를 확인했고 작성자에게 정정시켰다. 또한 assertion 실패가 있어도 종료코드 0이 나올 수 있는 검사 코드를 고쳤다. 작성자는 실패 단언을 넣은 별도 사본에서 종료코드 1을 확인한 출력도 반환했다. 초도 결과는 [초도 코드 검토](UI02_CODE_REVIEW_INITIAL.md)에 보존한다.
 
-## 실제 발견과 수정
+## fix1의 목록 복귀 발견과 수정 — 이전 기록 보존
 
 독립 Node 검토는 핵심 의미·세 끝점·중첩 A4 복귀·전체/집중 상태·인계 항목을 유지함을 확인했지만, 좁은 화면의 목록→상세→목록에서 목록 스크롤이 초기화되는 경로를 재현했다.
 
@@ -28,10 +29,61 @@ Opus는 실제 Chromium에서 이를 재현했다. 390×844의 목록은 최대 
 
 수정본의 독립 Node 재검사는 기존 5개 모두 통과했고 목록 위치는 120→120으로 복원되었다. 소스·검사 해시와 재현 방법은 [독립 근거](evidence/ui02/independent/REPORT.md)에 있다. 실제 브라우저 독립 재실행은 아니다. 작성자 근거는 [fix1 패키지](evidence/ui02/author-fixed/REPORT.md)에 있고, 이전 근거는 [초도 패키지](evidence/ui02/author/REPORT.md)에 있다.
 
+## fix3의 합격 기준 9 보완과 현재 검증 범위
+
+fix1의 기존 독립 5개 통과는 접힌 A나 각 끝점 목록의 미결 소유 표시를 검사하지 않았다. 후속 지역 검사로 접힌 A 요약(C), 그 실제 끝점 목록의 A2 행(L1), B 상세 끝점 목록의 A2 행(L2)에 표시 누락을 확인했다. B의 미결 내용과 소유 A2는 이미 있었으므로 내용 자체의 누락으로 확대하지 않았다. 중간 fix2 뒤에는 구조 목록의 ‘관계’ 구획에 있는 실제 끝점 A2 행(L3)도 보완했다. B 미결 구역에서 직접 A2로 가는 조작은 총괄이 추가한 사용성 보완이다.
+
+fix3는 C/L1/L2/L3에 A2 결정 변경과 A2 소유 미결 참조를 제공한다. 관계를 추가·삭제하거나 A4·A6 자체의 변경으로 전파하지 않는다. [작성자 fix3 근거](evidence/ui02/author-fix3/REPORT.md)는 Chromium 위치별 112 PASS / 0 FAIL + INFO 2, jsdom 의미 회귀 84 PASS, 기존 렌더 36 PASS + INFO 1, 두 모바일 높이의 목록 복귀 각 10 PASS를 보고했다. 중간 fix2 음성 대조는 88 PASS / 20 FAIL이다. 각 수치는 별도 검사 단언이며 사용자 과업 수나 총 통과 수로 합산하지 않는다.
+
+[독립 fix3 상태 근거](evidence/ui02/acceptance9/REPORT.md)는 **15사례 / 118단언 모두 통과**했다. 참조·회귀 108단언과 B 직접 이동 사용성 보완 10단언을 구분한다. **기존 I1–I5는 별도로 5사례 / 14단언 모두 통과**했다. S1 미래 미결 비노출, S2/S3의 C/L1/L2/L3/B 참조·이동, A4·A6 비전파, 실제 관계 3개, 보기·목록 복귀를 생성 마크업·이벤트·상태 대역으로 확인했다. 이 결과는 실제 DOM·레이아웃·브라우저 독립 실행을 뜻하지 않는다. 일반 구조 A2 행의 별도 미결 배지는 선택적 발견성 관찰로 남긴다.
+
+fix1의 최초 지역 검사 관측은 13사례 중 3 통과·10 실패였다. 정확한 v1 검사 코드를 해시로 복원한 재실행 결과와 L3를 추가한 v2 결과는 [독립 근거](evidence/ui02/acceptance9/REPORT.md)에 나누어 보존했다. v1 JSON은 새 시각의 재실행이며 원 타임스탬프의 결과로 대체해 주장하지 않는다. 이후 fix3 통과로 과거의 5개 통과나 위치별 실패 기록을 지우지 않는다.
+
+## GitHub에서 회수할 수 있는 fix3 화면
+
+다음 원본 4장은 공유 커밋에 포함되어 있어 로컬 ZIP 없이 다른 세션에서 회수할 수 있다. 작성자가 반환한 정적 캡처이며 독립 브라우저 실행 결과가 아니다.
+
+| 화면 | 확인 가능한 위치 |
+|---|---|
+| [1440 접힌 A](https://github.com/tlsee0813-cmd/agentflow-studio/blob/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/author-fix3/screenshots/1440_S2_collapsed_open_ref.png) | C의 변경·A2 소유 미결. 실제 끝점 목록 L1은 닫혀 있음 |
+| [1440 B 상세](https://github.com/tlsee0813-cmd/agentflow-studio/blob/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/author-fix3/screenshots/1440_S2_B_endpoints_open_ref.png) | L2의 A2 행과 B 미결 직접 이동 표시 |
+| [390 B 상세](https://github.com/tlsee0813-cmd/agentflow-studio/blob/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/author-fix3/screenshots/390_S2_B_detail.png) | 좁은 화면의 L2와 B 미결 구역 |
+| [390 관계 목록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/author-fix3/screenshots/390_S2_outline_relations.png) | L3의 A2 소유 참조. A6 행 전체·스크롤 접근은 이 캡처로 미판정 |
+
+## 독립 클라우드 실제 브라우저 실행과 감사 범위
+
+[고정 전달 원본 `9afe18444d92cf5930e0af5406ad7efce309d7c7`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/9afe18444d92cf5930e0af5406ad7efce309d7c7/docs/transfer/ui02-fix3/)에 코드·최초/최종 JSON·로그·HTML·PNG가 보존되어 있다. 대상은 위 fix3 해시와 커밋 `3847a9b267d43dcc16bd1b999af446ad5cc38c91`이며, 기존 setup 세션에서 Playwright 1.57.0과 시스템 Chromium 154.0.8037.57로 로컬 HTTP URL을 실제 탐색했다. 새 Cloud 작업에서 게시 환경을 복원한 검증이나 제품 앱 전체 실행은 아니다. [클라우드 원본 감사 보고](evidence/ui02/cloud-fix3/REPORT.md)는 manifest의 13개 파일 크기·SHA256과 원본 PNG 5장 직접 열람을 완료했다.
+
+JSON 개별 결과를 대조하면 최초 완전 실행은 **85 통과 / 1 실패**, 최종 실행은 **86 통과 / 0 실패**다. 이 수치는 독립 브라우저 스크립트의 확인 묶음 수이며 작성자 단언이나 독립 Node 사례·단언과 합산하지 않는다. 1440×900·390×664·390×844에서 S1/S2/S3를 실행했다. pageerror는 없고 favicon 404가 기록되어 있다.
+
+실제 스크립트가 확인한 범위는 다음과 같다. 원본 REPORT의 넓은 요약보다 이 범위를 우선한다.
+
+- L1/L2/L3의 A2 행에서 결정 변경·미결·소유 A2 배지를 확인하고 hit-test 후 실제 클릭·복귀했다. B 미결 버튼의 소유 A2와 직접 A2 이동·B 복귀도 확인했다.
+- C는 `cv-open`의 실제 클릭·A2 선택·보기 복귀를 검사했다. **C의 별도 변경 버튼 `cv-chg`나 소유 문구는 이 스크립트가 별도로 단언하지 않았다.** 관련 내용의 근거는 앞선 지역 상태 검사와 작성자 반환 4장의 정적 관찰이다.
+- A4/A6 비전파는 상세 안의 미결 칩 부재와 상단 변경 칩 부재를 검사했다. **모든 카드나 실제 끝점 행의 비전파까지 검사한 것은 아니다.** confirmed 관계 path 수 3개와 A4→A2→B→A2→A4의 선택·overview 스냅샷 복귀는 확인했으나 정확한 edge ID 집합을 비교한 단언은 아니다.
+- 모바일 L3의 A2·A6을 DOM 스크롤로 노출한 뒤 hit-test·클릭·복귀했고, 문서 가로 넘침과 DOM으로 설정한 목록 스크롤의 복원을 확인했다. 전체/집중 실제 왕복, S3 인계문 읽기, 키보드·휠·터치·사람 사용성 검사는 포함하지 않았다.
+
+최초 실패는 390×664 S3의 A2→B 버튼이 화면 경계 안에 있으나 hit-test를 통과하지 못한 경우이며 sticky header 가림으로 보고되었다. HTML은 그대로 두고 helper에 `scrollIntoView({block:'end'})`로 대상을 아래쪽에 재배치하는 처리를 추가한 뒤 최종 실행이 통과했다. 따라서 추가 DOM 스크롤 뒤 클릭 가능하다는 결과이며, **모든 위치에서 sticky header 가림이 없다는 뜻은 아니다**. 최초 helper 코드 스냅샷은 보존되지 않아 정확한 전후 코드 차이를 독립 복원할 수 없다. 최초 JSON·로그는 그대로 남아 있다.
+
+목록은 DOM `scrollTop=120` 대입으로 설정했다. 실제 설정값/최대값과 복원값은 390×664 S2 **120/254→120**, S3 **120/302→120**, 390×844 S2 **74/74→74**, S3 **120/122→120**이다. 실제 브라우저의 레이아웃·위치 복원 관측이지만 **휠·터치로 그 위치까지 도달한 실행은 아니다**.
+
+원본 검사기의 `finally` 안 `sys.exit`가 `run()` 밖 예외를 정상 종료로 덮을 수 있는 버그도 발견했다. 최종 JSON에는 예정된 86개 확인 묶음이 모두 있어 조기 중단 정황은 없으며 기존 결과를 폐기하지 않는다. 다만 종료 코드만으로 완주·예외 검출을 보증할 수 없다는 한계를 함께 보존한다.
+
+새 클라우드 [1440 열린 L1 원본](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9afe18444d92cf5930e0af5406ad7efce309d7c7/docs/transfer/ui02-fix3/evidence/1440-L1.png)과 [PNG 5장](https://github.com/tlsee0813-cmd/agentflow-studio/tree/9afe18444d92cf5930e0af5406ad7efce309d7c7/docs/transfer/ui02-fix3/evidence)은 앞선 작성자 반환 4장과 다른 근거다. [원본 감사](evidence/ui02/cloud-fix3/REPORT.md)는 다섯 장을 직접 열어 S2의 L1 열린 목록, B 별도 미결, L3의 하단 A6를 확인했다. 390×844의 A6 행은 viewport 하단에 매우 가깝고, 390 B 상세는 아래로 스크롤되어 위 구역 일부가 header 아래 가려져 있다. 모든 구역이 동시에 무가림이라는 결과로 확대하지 않으며 S3 대표 PNG는 없다.
+
 ## 화면 판단과 남은 한계
 
 [독립 화면 검토](UI02_VISUAL_REVIEW.md)는 초도 13장 중 7장을 실제 열어 봤다. A의 포함 경계/B 외부, 선택과 변경 구별은 읽히지만 모든 상호작용을 이 이미지로 통과시키지 않았다. 복귀 화면의 카드 잘림은 원래 이동한 화면과 같으므로 복귀 실패로 오판하지 않았다.
 
+[fix3 독립 정적 검토](UI02_FIX3_VISUAL_REVIEW.md)는 작성자 반환 원본 4장을 열어 C/L2/L3/B에서 A2 소유와 참조를 확인했고 보이는 범위에 새 가림·잘림을 발견하지 못했다. **그 네 장에서는 열린 L1 목록이 없어 미관측이었다**는 기록을 보존한다. 새 클라우드 L1 PNG의 전달로 과거 관찰을 소급 수정하지 않는다. S3도 그 네 장으로 판정하지 않는다. C 미결 문구와 1440 B 미결 행의 줄바꿈 밀도는 후속 개선 관찰이다. 실제 클릭·도착·복귀·390 스크롤 도달성은 정적 이미지의 판정 범위 밖이다.
+
+독립 클라우드 실행과 원본 감사는 위 확인 묶음의 실제 브라우저 근거를 추가했지만, 코드 범위·추가 DOM 스크롤·검사기 예외 처리·S3 대표 화면 부재 등의 한계를 갖는다. 이를 [UI_QUALITY.md](UI_QUALITY.md)의 여섯 화면 수용 기준 전체 통과나 모든 위치의 접근성 완료로 표시하지 않는다.
+
 포함 프레임과 선 배치는 고정 합성 장면에 맞춰 직접 정했다. 연결된 하위가 우연히 오른쪽 열에 모인 조건을 넘어 임의 순서·B의 세분화·깊은 층위·관계 혼잡을 해결했다고 주장할 수 없다. 390폭은 구조 목록을 기본으로 하며 캔버스만으로 B까지 동시에 보는 경험은 약하다. Safari/Firefox·실제 터치기기·화면 판독기·색 대비 수치·사람 사용성·성능은 미검증이다.
 
-다음 비교는 [UI-03 집중 읽기](UI03_RESEARCH.md)로 좁혔다. 제품 소스·main·gh-pages·과거 HOLD 후보는 이번 시안 통합 대상이 아니다.
+다음에는 [실제 AI 개발·검증 기록 1건의 동결 INPUT](../2026-10-15-real-record-02/INPUT.md)을 먼저 읽고, 관측·주장·결정·미확인 정보와 미결 소유의 경계를 구별하는 연구를 진행한다. 이 입력은 fix1 위치별 누락을 확인한 시점까지 동결되어 있으므로, 여기의 fix3 후속 결과로 그 사건 당시 상태를 덮어쓰지 않는다. 합성 내용의 ‘실패 알림 정책 미정’과 실제 개발 기록의 ‘그 미결을 화면에서 제대로 참조하는지’를 구별한다.
+
+[UI-03 집중 읽기](UI03_RESEARCH.md)는 이후 표현 비교 후보로 유지한다. 실제 기록의 읽기 과업과 근거 경계를 검토한 뒤 필요한 표현을 결정하며, 다음 구현을 이미 확정한 것으로 쓰지 않는다. 제품 소스·main·gh-pages·과거 HOLD 후보는 이번 시안 통합 대상이 아니다.
+
+
+검증기 종료 처리도 별도로 보완했다. [보완 코드·원본 결과](https://github.com/tlsee0813-cmd/agentflow-studio/tree/b03f908c9a1ac23b56218d0fccc43fa3747fe061/docs/transfer/ui02-fix3/evidence-hardening)와 `check.hardened.py`는 기존 자료를 덮지 않고 추가됐다. 정상 실행은 동일 86그룹·exit 0, 의도적 설정 예외는 0그룹·미완주·fatal 기록·exit 1이며 외부 프로세스 종료코드도 일치했다. 이는 검사기의 오류 종료 보완이고 위 화면 검사 범위를 넓힌 결과는 아니다. 상세 코드·JSON 감사는 [클라우드 감사 보고](evidence/ui02/cloud-fix3/REPORT.md)의 별도 절을 따른다.

@@ -49,6 +49,8 @@
 
 ## 출처 목록
 
+공유 근거 보완: 최초 E10 관측 뒤 v1 검사 코드를 같은 해시로 복원해 같은 수치를 재실행했다. [검사·버전별 결과와 보존 설명](https://github.com/tlsee0813-cmd/agentflow-studio/blob/3847a9b267d43dcc16bd1b999af446ad5cc38c91/docs/cycles/2026-10-15-mixed-depth-01/evidence/ui02/acceptance9/REPORT.md)에서 회수할 수 있다. v1 재실행 JSON은 새 실행 시각의 결과이며 최초 JSON을 소급 복구한 것은 아니다. P02/P03의 당시 근거 상태는 아래에 보존한다. 또한 B 미결 구역의 직접 이동은 총괄의 조작 보완이며, 기존 INPUT 9의 표시 누락과 구분한다. 후속 v2/fix3 결과는 이 동결 입력의 사건 이후 기록이다.
+
 S01~S09는 검토 기준 커밋 `666437a427b3039fb6321dfec41edd6eb24e164f`의 고정 파일이다. 링크는 추적용이며 원문 전체의 비식별화를 보증하지 않는다.
 
 - **S01:** [INPUT — A3 표기 및 합격 기준 9](https://github.com/tlsee0813-cmd/agentflow-studio/blob/666437a427b3039fb6321dfec41edd6eb24e164f/docs/cycles/2026-10-15-mixed-depth-01/INPUT.md), 9·38행.
