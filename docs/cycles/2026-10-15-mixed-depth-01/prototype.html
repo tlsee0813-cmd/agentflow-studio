@@ -148,7 +148,7 @@ var ZOOMS = [80,90,100,115,130];
 /* ---------- 보기 상태 (장면별 독립) ---------- */
 var S = {scene:1, plan:"A", zoom:100, v:{}};
 function V(){
-  if(!S.v[S.scene]) S.v[S.scene] = {expanded:false,selected:null,relOpen:false,bLoc:"root",compare:false,handoff:false,fromA:false};
+  if(!S.v[S.scene]) S.v[S.scene] = {expanded:false,selected:null,relOpen:false,bLoc:"root",compare:false,handoff:false,fromA:false,aSnap:null,bRootSnap:null,bASnap:null};
   return S.v[S.scene];
 }
 function conf(){ return S.scene >= 2; }
@@ -295,7 +295,8 @@ function handoffDoc(){
   return '<article class="handoff" aria-label="W2 인계문 준비본" data-testid="handoff-doc">'+
     '<p><span class="tag warn">준비·미전달</span> <span class="small">SESSION-02에 전달·수신된 적 없음</span></p>'+
     '<dl>'+
-    '<dt>목적</dt><dd>A2 대여 신청의 실패 알림 정책 검토 (작업 W2)</dd>'+
+    '<dt>프로젝트 목적</dt><dd data-testid="handoff-project-goal">작은 도서 대여 서비스 (합성 사례)</dd>'+
+    '<dt>작업 목적</dt><dd data-testid="handoff-work-goal">A2 대여 신청의 실패 알림 정책 검토 (작업 W2)</dd>'+
     '<dt>범위·기준</dt><dd>A2 대여 신청만 · 기준 E04 · A4·A6는 인계 범위 아님</dd>'+
     '<dt>현재 설명</dt><dd>재고 확인 뒤 확정 (E04 · 이전: 신청 즉시 확정)</dd>'+
     '<dt>현재 결정</dt><dd>확정 후 알림 (E04)</dd>'+
@@ -403,7 +404,7 @@ function statusText(){
   return "상태 · 장면 "+S.scene+" · 안 "+S.plan+" · "+loc+" · 선택: "+(v.selected||"없음")+
     " · 관계 목록: "+(v.relOpen?"펼침":"접힘")+" · 확대 "+S.zoom+"%";
 }
-function render(focusKey){
+function render(focusKey, restoreY){
   var v = V(), sc = SCENES[S.scene];
   var active = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute("data-key") : null;
   var zi = ZOOMS.indexOf(S.zoom);
@@ -441,16 +442,47 @@ function render(focusKey){
   app.setAttribute("data-bloc", v.bLoc);
   app.setAttribute("data-zoom", S.zoom);
 
+  app.setAttribute("data-a-snapshot", v.aSnap ? (v.aSnap.selected||"none") : "");
+
   var key = focusKey || active;
   if(key){
     var el = app.querySelector('[data-key="'+key+'"]');
-    if(el) el.focus();
+    if(el){ try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); } }
   }
+  if(typeof restoreY === "number"){ try{ window.scrollTo(0, restoreY); }catch(e){} }
+}
+
+/* ---------- 안 A 진입 직전 보기 저장·복원 ---------- */
+function saveA(v){
+  v.aSnap = {selected:v.selected, expanded:v.expanded, relOpen:v.relOpen,
+             scrollY:(window.scrollY || window.pageYOffset || 0)};
+}
+function restoreA(v){
+  var s = v.aSnap;
+  if(!s) return null;
+  v.selected = s.selected; v.expanded = s.expanded; v.relOpen = s.relOpen;
+  v.aSnap = null;
+  return s.scrollY;
+}
+
+/* ---------- 안 B 내부 위치(전체 ↔ A)별 저장·복원 — aSnap과 분리 ---------- */
+function bSnapNow(v){
+  return {selected:v.selected, relOpen:v.relOpen, scrollY:(window.scrollY || window.pageYOffset || 0)};
+}
+function bMove(v, to){
+  if(v.bLoc === to) return null;
+  if(v.bLoc === "root") v.bRootSnap = bSnapNow(v); else v.bASnap = bSnapNow(v);
+  v.bLoc = to;
+  var s = to === "root" ? v.bRootSnap : v.bASnap;
+  if(!s) return null;
+  v.selected = s.selected; v.relOpen = s.relOpen;
+  return s.scrollY;
 }
 
 /* ---------- 동작 ---------- */
 function goto(id){
   var v = V();
+  if(S.plan==="B" && isChild(id) && v.bLoc==="root") v.bRootSnap = bSnapNow(v);
   v.selected = id;
   if(isChild(id)){
     if(S.plan==="A") v.expanded = true; else v.bLoc = "A";
@@ -465,15 +497,19 @@ document.getElementById("app").addEventListener("click", function(ev){
   var a = b.getAttribute("data-action"), val = b.getAttribute("data-val"), v = V();
   switch(a){
     case "scene": S.scene = Number(val); render("scene-"+val); return;
-    case "plan": S.plan = val; V().fromA = false; render("plan-"+val); return;
+    case "plan":
+      if(val===S.plan){ render("plan-"+val); return; }
+      if(val==="B"){ saveA(v); S.plan = "B"; v.fromA = false; render("plan-B"); return; }
+      var y = restoreA(v); S.plan = "A"; v.fromA = false; render("plan-A", y); return;
     case "zoom":
       var i = ZOOMS.indexOf(S.zoom) + Number(val);
       if(i>=0 && i<ZOOMS.length) S.zoom = ZOOMS[i];
       render(); return;
     case "toggleA": v.expanded = !v.expanded; render("toggleA"); return;
-    case "focusA": S.plan = "B"; v.bLoc = "A"; v.fromA = true; render("backA"); return;
-    case "backA": S.plan = "A"; v.fromA = false; render("focusA"); return;
-    case "bgo": v.bLoc = val; render(val==="A" ? "crumb-root" : "enterA"); return;
+    case "focusA": saveA(v); S.plan = "B"; v.bLoc = "A"; v.fromA = true; render("backA"); return;
+    case "backA":
+      var y2 = restoreA(v); S.plan = "A"; v.fromA = false; render("focusA", y2); return;
+    case "bgo": var y3 = bMove(v, val); render(val==="A" ? "crumb-root" : "enterA", y3); return;
     case "rel": v.relOpen = !v.relOpen; render(); return;
     case "compare": v.compare = !v.compare; render(); return;
     case "handoff": v.handoff = !v.handoff; render(); return;
@@ -487,4 +523,3 @@ window.__proto_state = S; /* 검사용 읽기 전용 노출 */
 </script>
 </body>
 </html>
-
