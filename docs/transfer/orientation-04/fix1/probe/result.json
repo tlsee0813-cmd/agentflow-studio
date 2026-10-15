@@ -1,0 +1,60 @@
+{
+  "target_commit": "fb87a21aed0ada58c637c7be7e878e6b459d70f6",
+  "source": "https://raw.githubusercontent.com/tlsee0813-cmd/agentflow-studio/fb87a21aed0ada58c637c7be7e878e6b459d70f6/docs/cycles/2026-10-16-orientation-04/author-fix1/orientation-study.html",
+  "measurement_definition_commit": "165c15205a2f89d591ab431df47be5b9592676ff",
+  "started_utc": "2026-10-15T18:29:32.881553+00:00",
+  "playwright": "1.57.0",
+  "browser_path": "/usr/bin/chromium",
+  "probe": true,
+  "expected": [
+    "S1-a-390",
+    "S1-a-1280",
+    "S1-a-1440",
+    "S1-b-390",
+    "S1-b-1280",
+    "S1-b-1440",
+    "S2-a-390",
+    "S4-a-390",
+    "PREP-a-390",
+    "S5-a-390",
+    "S2-b-390",
+    "S4-b-390",
+    "S5-b-390",
+    "S3-a-1280",
+    "S5-a-1280",
+    "S3-b-1280",
+    "S5-b-1280"
+  ],
+  "stages": [],
+  "initial": [],
+  "actions": [],
+  "pageerrors": [],
+  "console": [],
+  "server": [],
+  "fatal": {
+    "at": "setup",
+    "type": "ValueError",
+    "message": "SYNTHETIC expected-hash mismatch probe (not a UI defect)",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/orientation-fix1/verify.py\", line 110, in <module>\n    if R['fileHashBefore']!=expected:raise ValueError('SYNTHETIC expected-hash mismatch probe (not a UI defect)' if args.probe else 'Target file hash mismatch')\n                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: SYNTHETIC expected-hash mismatch probe (not a UI defect)\n"
+  },
+  "cleanup_errors": [],
+  "unrun": [
+    "cycle03 16-stage rerun",
+    "baseline rerun",
+    "author checker execution",
+    "actual finger swipe",
+    "human comprehension",
+    "external original roundtrip",
+    "real AI/sending"
+  ],
+  "fileHashBefore": "889317d56b5164495509821dfa7c8bbc498629507877b6d68fe9730edf36f08a",
+  "fileHashAfter": "889317d56b5164495509821dfa7c8bbc498629507877b6d68fe9730edf36f08a",
+  "executed": 0,
+  "complete": false,
+  "counts": {
+    "PASS": 0,
+    "FAIL": 0
+  },
+  "exit_code": 1,
+  "finished_utc": "2026-10-15T18:29:32.884419+00:00"
+}

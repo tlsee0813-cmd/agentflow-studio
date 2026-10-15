@@ -1,0 +1,9 @@
+{
+  "command": [
+    "verify.py"
+  ],
+  "actual_process_exit": 0,
+  "json_exit_code": 0,
+  "matches": true,
+  "syntheticProbe": false
+}
