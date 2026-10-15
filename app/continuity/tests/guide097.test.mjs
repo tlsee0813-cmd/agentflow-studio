@@ -12,6 +12,7 @@ import { serializeProject } from '../dist/public/shared/storage.js';
 import { mockGuidance, mockAdvice } from '../server/mock.mjs';
 import { createContinuityApp } from '../server/app.mjs';
 import { GUIDE_PROMPT } from '../server/prompt.mjs';
+import { GUIDE_SCHEMA } from '../dist/public/shared/types.js';
 import { readConfig } from '../../server/config.mjs';
 const PURPOSE='도자기 공방의 원데이 클래스를 온라인으로 예약받는 사이트';
 const plan=(note='예약받기',name='예약')=>{const p=D.addArea(D.setBrief(D.createProject(),PURPOSE),name,note);return {p,area:p.space.areas[0].id};};
@@ -55,8 +56,8 @@ test('G097-3 one question at most: after an answer only a proposal is accepted; 
   const {p,area}=plan(),q=ask(p,area).reply.question,req=G.buildGuideRequest(p,area,answered(q,'보류','deferred'));
   assert.throws(()=>validateGuideReply({question:q,proposal:null},req));
   assert.throws(()=>validateGuideReply({question:null,proposal:null},G.buildGuideRequest(p,area,null)));
-  assert.throws(()=>validateGuideReply({question:q,proposal:{goal:'g',scope:'s',checks:'c',open:[]}},G.buildGuideRequest(p,area,null)));
-  assert.throws(()=>validateGuideReply({question:null,proposal:{goal:'g',scope:'s',checks:'c',open:[],status:'done'}},req),'no extra fields');
+  assert.throws(()=>validateGuideReply({question:q,proposal:{goal:'g',scope:'s',checks:'c',open:[],defaults:[]}},G.buildGuideRequest(p,area,null)));
+  assert.throws(()=>validateGuideReply({question:null,proposal:{goal:'g',scope:'s',checks:'c',open:[],defaults:[],status:'done'}},req),'no extra fields');
 });
 
 test('G097-4 nothing is written before adoption; adoption fills only the request draft and never replaces an unsent one',()=>{
@@ -111,7 +112,7 @@ test('G097-6 HTTP: MOCK route, same origin checks; fake DeepSeek upstream gets t
     assert.equal((await post(port,G.buildGuideRequest(p,area,null),{origin:'https://outside.invalid'})).status,403);
     assert.equal((await post(port,{...G.buildGuideRequest(p,area,null),extra:1})).status,400);
   },{fetchImpl:()=>assert.fail('no external fetch in MOCK')});
-  const calls=[],proposal={goal:'예약 접수',scope:'접수 화면만',checks:'접수 기록 확인',open:[]};
+  const calls=[],proposal={goal:'예약 접수',scope:'접수 화면만',checks:'접수 기록 확인',open:[],defaults:[]};
   await withServer(cfg({mode:'deepseek',apiKey:KEY,allowPaid:true}),async port=>{
     const req=G.buildGuideRequest(p,area,null),r=await post(port,req);
     assert.equal(r.status,200);assert.equal(r.data.mode,'deepseek');assert.deepEqual(r.data.reply,{question:null,proposal});assert.ok(!r.raw.includes(KEY));
@@ -123,8 +124,8 @@ test('G097-6 HTTP: MOCK route, same origin checks; fake DeepSeek upstream gets t
 test('G097-7 fake upstream failures map to fixed codes; a second question, extra keys or an echoed key are refused; paid off sends nothing',async()=>{
   const {p,area}=plan(),q=ask(p,area).reply.question;
   const cases=[[()=>upstream({question:q,proposal:null}),answered(q,'모름','unknown'),502,'INVALID_RESPONSE'],
-    [()=>upstream({question:null,proposal:{goal:'g',scope:'s',checks:'c',open:[]},done:true}),null,502,'INVALID_RESPONSE'],
-    [()=>upstream({question:null,proposal:{goal:KEY,scope:'s',checks:'c',open:[]}}),null,502,'INVALID_RESPONSE'],
+    [()=>upstream({question:null,proposal:{goal:'g',scope:'s',checks:'c',open:[],defaults:[]},done:true}),null,502,'INVALID_RESPONSE'],
+    [()=>upstream({question:null,proposal:{goal:KEY,scope:'s',checks:'c',open:[],defaults:[]}}),null,502,'INVALID_RESPONSE'],
     [()=>new Response('{}',{status:401}),null,502,'AI_AUTH_FAILED'],[()=>new Response('{}',{status:429}),null,429,'AI_RATE_LIMIT'],
     [()=>{throw new TypeError('network');},null,503,'AI_NETWORK_ERROR']];
   for(const [reply,answer,status,code] of cases)
@@ -196,4 +197,49 @@ test('G097-11 (R2-2) a long free answer is kept whole through draft, adoption, r
   assert.ok(D.handoffText(respond(D.submit(G.adoptProposal(d,da,G.proposalText('예약',dp)))) ).includes('예약 확정 처리는 금지하고 접수만 받으세요.'),'the basis itself goes out whole');
   // Short option answers still map to their branch, and the draft names the answer too.
   const opt=answered(q,q.options[1].label),pr2=ask(p,area,opt).reply.proposal;assert.match(pr2.scope,/확인 대기/);assert.match(G.proposalText('예약',pr2,true,opt),/공방 확인 뒤 확정/);
+});
+
+// ---------- GUIDE098: reply contract after the actual-model run on fbdcbf1e (evidence commit f03e0594) ----------
+// Contract and rendering only. Meaning quality is checked again with the real model by the cloud run, not by MOCK or these tests.
+// Actual C2-INITIAL model content, unchanged: a fact question with two options. Still refused; nothing is relaxed.
+const C2_ACTUAL="{\"question\":{\"kind\":\"fact\",\"text\":\"미리보기 결과를 어떤 형식으로 출력할까요? (예: 한 줄에 \\\"원래 이름 → 예정 이름\\\", 충돌은 따로 표시)\",\"why\":\"출력 형식에 따라 완료 조건(무엇을 화면에서 확인할지)이 달라집니다.\",\"options\":[{\"label\":\"이름 변경 없음 확인용 사람이 읽기 쉬운 목록\",\"consequence\":\"완료 조건이 '실행 시 각 파일의 원래/예정 이름과 충돌·빈 폴더 안내가 보기 좋게 출력됨'으로 정해집니다.\"},{\"label\":\"스크립트가 읽기 쉬운 단순 텍스트(파이프/탭 구분)\",\"consequence\":\"완료 조건이 '출력이 기계 파싱 가능한 고정 열 형식'으로 정해집니다.\"}]},\"proposal\":null}";
+test('G098-1 strict reply contract: fact never has options (actual C2 content), defaults required and bounded, open/defaults never overlap',()=>{
+  const {p,area}=plan(),req=G.buildGuideRequest(p,area,null),ok={goal:'g',scope:'s',checks:'c',open:['남길 행 규칙'],defaults:['결과는 화면에 표로 출력']};
+  assert.equal(req.schemaVersion,'guidance.2');assert.equal(GUIDE_SCHEMA,'guidance.2');
+  assert.throws(()=>validateGuideReply(JSON.parse(C2_ACTUAL),req),'actual fact+options reply refused');
+  assert.deepEqual(validateGuideReply({question:null,proposal:ok},req).proposal.defaults,['결과는 화면에 표로 출력']);
+  const {defaults:_d,...noDefaults}=ok;assert.throws(()=>validateGuideReply({question:null,proposal:noDefaults},req),'defaults is required (empty allowed)');
+  assert.throws(()=>validateGuideReply({question:null,proposal:{...ok,defaults:Array(7).fill('x')}},req));
+  assert.throws(()=>validateGuideReply({question:null,proposal:{...ok,defaults:['x'.repeat(501)]}},req));
+  assert.throws(()=>validateGuideReply({question:null,proposal:{...ok,defaults:['   ']}},req),'a blank default is not a value');
+  assert.throws(()=>validateGuideReply({question:null,proposal:{...ok,defaults:[' 남길 행 규칙 ']}},req),'undecided and defaulted at once');
+  assert.ok(validateGuideReply(mockGuidance(req),req),'MOCK replies fit the new contract');
+  for(const r of [mockGuidance(req),mockGuidance(G.buildGuideRequest(p,area,answered(ask(p,area).reply.question,'보류','deferred')))])if(r.proposal)assert.deepEqual(r.proposal.defaults,[],'MOCK fills in nothing');
+});
+
+test('G098-2 the draft shows AI defaults apart from user decisions (hidden when empty) and explains a changed basis without a re-approval step',()=>{
+  const {p,area}=plan(),q=ask(p,area).reply.question;
+  const base={goal:'예약 접수',scope:'접수 화면',checks:'접수 기록',open:['승인 기한'],defaults:[]};
+  assert.ok(!G.proposalText('예약',base).includes('AI가 정한 기본값'),'no empty defaults line');
+  const t=G.proposalText('예약',{...base,defaults:['날짜는 달력으로 고름','목록은 최신순']},true,answered(q,'기존 조건 하나를 바꿀게요'));
+  assert.match(t,/AI가 정한 기본값 \(사용자 결정 아님 · 바꿀 수 있음\): 날짜는 달력으로 고름 \/ 목록은 최신순/);
+  assert.ok(t.indexOf('아직 정하지 않은 것')<t.indexOf('AI가 정한 기본값'),'undecided and suggested are separate lines');
+  assert.match(t,/저장된 기준은 기록으로 그대로 두고 이번 요청에서는 답이 명시적으로 바꾼 대상만 답을 따릅니다/);
+  assert.match(t,/인용·가정·다른 사람의 제안은 변경 지시가 아니며, 바꾸지 않은 조건과 실행 권한은 그대로/);
+  assert.ok(!/직접 (고쳐|수정)|재승인|다시 승인/.test(t),'no manual-edit or re-approval condition');
+  assert.ok(!/이 답이 우선/.test(t),'no unconditional precedence');
+});
+
+test('G098-3 the guidance prompt separates fact and choice examples and states the general rules (no case answers)',()=>{
+  assert.ok(!GUIDE_PROMPT.includes('"kind":"choice 또는 fact"'),'no combined example');
+  assert.ok(GUIDE_PROMPT.includes('"kind":"fact","text":"질문","why":"답에 따라 초안이 어떻게 달라지는지","options":[]'));
+  assert.ok(GUIDE_PROMPT.includes('"kind":"choice"')&&GUIDE_PROMPT.includes('"defaults":['));
+  for(const rule of ['[최신 사용자 변경]','[선택지와 자유 답]','[모름·보류]','[완료 조건]','[open과 defaults]'])assert.ok(GUIDE_PROMPT.includes(rule),rule);
+  // The four observed cases are regression material only: none of their domain words is written into the prompt.
+  for(const w of ['식재료','재료','CSV','응답자','네트워크','공지','단말','rename','밑줄','파일 이름'])assert.ok(!GUIDE_PROMPT.includes(w),w);
+});
+
+test('G098-4 a stale guidance.1 request is refused plainly (400) instead of yielding a reply the old client cannot read',async()=>{
+  const {p,area}=plan();
+  await withServer(cfg(),async port=>{const r=await post(port,{...G.buildGuideRequest(p,area,null),schemaVersion:'guidance.1'});assert.equal(r.status,400);assert.deepEqual(r.data,{error:{code:'INVALID_INPUT'}});},{fetchImpl:()=>assert.fail('no call')});
 });

@@ -141,7 +141,9 @@ export const BASIS_LABEL: Record<Basis['status'], string> = {
   requested: '요청 원문 · 해석 미확정', answered: '사용자 답변 원문', confirmed: '사용자 확정', deferred: '사용자 보류'
 };
 /* ---------- GUIDE097: area guidance. A separate, unsaved preview before the user's own request; never project data. ---------- */
-export const GUIDE_SCHEMA = 'guidance.1' as const;
+/** guidance.2 (GUIDE098): the reply's proposal gains defaults. The request shape is unchanged; the version moves so a stale
+ * client and server refuse each other plainly instead of the client rejecting a reply it cannot read. Never stored. */
+export const GUIDE_SCHEMA = 'guidance.2' as const;
 export interface GuideTicket { projectId: string; revision: number; requestId: string; areaId: string }
 /** The user's reply to the one guidance question, sent back with that question. Not a basis until the user sends a request. */
 export interface GuideAnswer { question: Question; text: string; disposition: Disposition }
@@ -155,8 +157,9 @@ export interface GuideRequest {
   areaWork: { taskId: string; request: string; scope: string | null; checks: string | null }[];
   answer: GuideAnswer | null;
 }
-/** A reviewable draft of the user's next request, not an instruction. open = points the draft leaves undecided. */
-export interface Proposal { goal: string; scope: string; checks: string; open: string[] }
+/** A reviewable draft of the user's next request, not an instruction. open = points the user still has to decide (the draft
+ * leaves them undecided). defaults = low-risk, reversible details the AI filled in as editable suggestions, never user decisions. */
+export interface Proposal { goal: string; scope: string; checks: string; open: string[]; defaults: string[] }
 /** Exactly one is non-null. After an answer the question is always null (one question at most). */
 export interface GuideReply { question: Question | null; proposal: Proposal | null }
 export interface GuideEnvelope { mode: 'mock' | 'deepseek'; ticket: GuideTicket; reply: GuideReply }

@@ -389,8 +389,11 @@ export function validateGuideReply(v: unknown, req: GuideRequest): GuideReply {
   obj(v,['question','proposal']); ensure((v.question===null)!==(v.proposal===null));
   if(v.question!==null) { ensure(req.answer===null); question(v.question); }
   if(v.proposal!==null) {
-    const p=v.proposal; obj(p,['goal','scope','checks','open']); text(p.goal,2000); text(p.scope,2000); text(p.checks,2000);
+    const p=v.proposal; obj(p,['goal','scope','checks','open','defaults']); text(p.goal,2000); text(p.scope,2000); text(p.checks,2000);
     list(p.open,6); for(const o of p.open) text(o,500);
+    list(p.defaults,6); for(const d of p.defaults) text(d,500);
+    // One point is either still the user's to decide (open) or an editable suggestion (defaults), never both.
+    const undecided=new Set((p.open as string[]).map(o=>o.trim()));ensure((p.defaults as string[]).every(d=>!undecided.has(d.trim())));
   }
   return structuredClone(v) as unknown as GuideReply;
 }

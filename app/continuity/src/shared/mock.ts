@@ -108,7 +108,8 @@ export function mockGuidance(req:GuideRequest):GuideReply {
   const a=req.area,idea=a.note??a.name;
   const reservation=/예약|대기/.test(`${a.name}\n${a.note??''}`);
   const open:string[]=[...(a.note===null?['영역 구상이 비어 있어 무엇을 만들지 — 초안을 직접 고쳐 적어 주세요']:[]),...(req.areaWork.length?['이 영역의 이전 요청과 겹치는지 — 직접 확인']:[])];
-  const proposal=(scope:string,checks:string,more:string[]=[]):GuideReply=>({question:null,proposal:{goal:idea,scope,checks,open:[...more,...open]} satisfies Proposal});
+  // MOCK picks no defaults: it never fills in details on the user's behalf.
+  const proposal=(scope:string,checks:string,more:string[]=[]):GuideReply=>({question:null,proposal:{goal:idea,scope,checks,open:[...more,...open],defaults:[]} satisfies Proposal});
   if(reservation) {
     const ans=req.answer,said=ans?.disposition==='provided'?ans.text:null;
     // Only this MOCK's own option, by its exact label. Anything else the user wrote is followed as written.
