@@ -1,0 +1,1474 @@
+{
+ "meta": {
+  "started": "2026-10-15T21:42:01.766724+00:00",
+  "html": "overview-study.html",
+  "file_sha256_before": "624a6e70082e2cca377080b5f4a67e1f29b3f8ed4f7aac8eda1cb3b07c32154b",
+  "file_bytes": 41912,
+  "url": "http://127.0.0.1:36327/overview-study.html",
+  "http": {
+   "1280x720": {
+    "status": 200,
+    "bytes": 41912,
+    "sha": "624a6e70082e2cca377080b5f4a67e1f29b3f8ed4f7aac8eda1cb3b07c32154b"
+   },
+   "1440x900": {
+    "status": 200,
+    "bytes": 41912,
+    "sha": "624a6e70082e2cca377080b5f4a67e1f29b3f8ed4f7aac8eda1cb3b07c32154b"
+   },
+   "390x844": {
+    "status": 200,
+    "bytes": 41912,
+    "sha": "624a6e70082e2cca377080b5f4a67e1f29b3f8ed4f7aac8eda1cb3b07c32154b"
+   }
+  },
+  "errors": {
+   "1280x720": [],
+   "1440x900": [],
+   "390x844": []
+  },
+  "playwright_python": "1.56.0",
+  "python": "3.13.16",
+  "browser": "chromium 141.0.7390.37 headless",
+  "http_server_exit": -15,
+  "file_sha256_after": "624a6e70082e2cca377080b5f4a67e1f29b3f8ed4f7aac8eda1cb3b07c32154b",
+  "file_unchanged": true,
+  "sizes_completed": [
+   "1280x720",
+   "1440x900",
+   "390x844"
+  ],
+  "finished": "2026-10-15T21:42:21.330884+00:00",
+  "fatal": null,
+  "failed": 0
+ },
+ "checks": [
+  {
+   "size": "1280x720",
+   "flow": "0",
+   "check": "최초 HTTP status/body SHA = 원본 파일",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 41912,
+    "sha": "624a6e70082e2cca377080b5f4a67e1f29b3f8ed4f7aac8eda1cb3b07c32154b"
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "초기 머리: 목적·1/16 범위·후속 요청·비교·전체 맞춤 표시",
+   "status": "PASS",
+   "detail": {
+    "#purposeTxt": true,
+    "#scope": true,
+    "#followTxt": true,
+    "#followOpen": true,
+    "#vBefore": true,
+    "#vAfter": true,
+    "#fitAll": true
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "초기 지도: 세 역할 카드 전체·두 호출 양끝·라벨이 지도 영역 안, 카드 내부 잘림 없음 (스크롤·맞춤 없이)",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 0)"
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "초기: 세 이름·역할 줄·이동 단서(메뉴의 →옮김, 공통의 ←칩) hit 표시",
+   "status": "PASS",
+   "detail": {
+    "P1": true,
+    "P2": true,
+    "P3": true,
+    "P1cue": true,
+    "P2cue": true,
+    "P3moved": true
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "1월 16일 보기 내용: 실제 담당 부분에만 확인·경과 계산",
+   "status": "PASS",
+   "detail": {
+    "chips": {
+     "n-P1": [
+      "표시 문구·분기"
+     ],
+     "n-P2": [
+      "표시 문구·분기"
+     ],
+     "n-P3": [
+      "남은 시간 추정",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ]
+    },
+    "cue": {
+     "n-P1": "확인·경과 계산은 공통 계산으로 옮김",
+     "n-P2": "확인·경과 계산은 공통 계산으로 옮김",
+     "n-P3": ""
+    },
+    "labels": [
+     "다운로드 상태 전달",
+     "다운로드 상태 전달"
+    ],
+    "summary": "1월 16일 변경 · 두 메뉴의 진행 정보 확인·경과 시간 계산을 기존 공통 계산으로 옮겼습니다. 표시 역할과 두 호출은 그대로입니다."
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "초기 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 1280,
+    "vw": 1280
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "변경 전 전환: 카드·선 raw rect·경로·transform·scroll 동일(외곽·배치 고정)",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "변경 전 내용: 두 메뉴가 확인·경과 계산, 공통 카드엔 추정만(가짜 행 없음)+짧은 설명",
+   "status": "PASS",
+   "detail": {
+    "chips": {
+     "n-P1": [
+      "표시 문구·분기",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ],
+     "n-P2": [
+      "표시 문구·분기",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ],
+     "n-P3": [
+      "남은 시간 추정"
+     ]
+    },
+    "cue": {
+     "n-P1": "",
+     "n-P2": "",
+     "n-P3": "확인·경과 계산은 두 메뉴에서 함"
+    },
+    "labels": [
+     "세 숫자 전달",
+     "세 숫자 전달"
+    ],
+    "summary": "변경 전 · 두 메뉴가 각각 진행 정보 확인과 경과 시간 계산을 하고 세 숫자를 넘겼습니다. 공통 계산과 두 호출은 이미 있었습니다."
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "변경 전에서도 세 역할·두 호출 노출 유지",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "1월 16일로 복귀: 처음 측정과 동일",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "전체 맞춤: 세 역할·두 호출 양끝·라벨 다시 지도 영역 안 (새 보기)",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(1.019, 0, 0, 1.019, 0, 0)",
+    "sl": 0,
+    "st": 0,
+    "zoomedTransform": "matrix(1.3, 0, 0, 1.3, 0, 0)"
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "check": "전체 맞춤이 선택·비교 보기를 바꾸지 않음",
+   "status": "PASS",
+   "detail": {
+    "sel": [
+     "n-P1"
+    ],
+    "view": [
+     "after"
+    ]
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "진입 전 지도가 초기와 다름(비기본 배율·실제 휠 이동)",
+   "status": "PASS",
+   "detail": {
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "sl": 81,
+    "st": 0
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "선택 상세(기존 패널): 두 책임의 전후 담당·넘기는 값·남는 역할",
+   "status": "PASS",
+   "detail": {
+    "#panel h2": true,
+    "#panel .rt-tbl": true,
+    "#panel .act.wide [data-act=read]": true,
+    "table": "\t변경 전\t1월 16일\n진행 정보 확인\t이 메뉴\t공통 계산\n경과 시간 계산\t이 메뉴\t공통 계산\n공통 계산에 넘김\t세 숫자\t다운로드 상태"
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "상세를 열어도 카드·선 위치 그대로(다른 카드 밀림 없음)",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "부분 읽기: 두 책임 표·복귀·준비 버튼 표시",
+   "status": "PASS",
+   "detail": {
+    "table": true
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "위치 보기: 공통 계산이 지도 안, 선택 유지, 읽기 위치 그대로",
+   "status": "PASS",
+   "detail": {
+    "moved": "0",
+    "scroll": [
+     81,
+     0
+    ]
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "읽던 곳: scrollTop 160→160, 출발 행 rect·출발 버튼 초점",
+   "status": "PASS",
+   "detail": {
+    "before": {
+     "x": 929,
+     "y": 372.75,
+     "w": 331,
+     "h": 96.5
+    },
+    "after": {
+     "x": 929,
+     "y": 372.75,
+     "w": 331,
+     "h": 96.5
+    },
+    "active": "loc-P3"
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "편집 전 준비문: cycle07 fix1 요청·미확인 문장 그대로",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "전체 복귀: 진입 전 raw rect·computed transform·native scroll·비교 보기·선택 동일, 초점 선택 카드",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "post": {
+     "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+     "sl": 81,
+     "st": 0,
+     "view": [
+      "after"
+     ],
+     "sel": [
+      "n-P1"
+     ],
+     "active": "n-P1"
+    }
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "복귀 뒤 재진입: 직접 고친 요청 유지",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "전체 맞춤 뒤 선택·비교 보기 유지",
+   "status": "PASS",
+   "detail": {
+    "sel": [
+     "n-P1"
+    ],
+    "view": [
+     "after"
+    ],
+    "transform": "matrix(1.019, 0, 0, 1.019, 0, 0)"
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "전체 맞춤 뒤에도 직접 고친 요청 유지",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "맞춤 뒤 진입·복귀: 그 진입 전(맞춤) 보기로 돌아옴",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "check": "끝 상태 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 1280,
+    "vw": 1280
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "0",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  },
+  {
+   "size": "1440x900",
+   "flow": "0",
+   "check": "최초 HTTP status/body SHA = 원본 파일",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 41912,
+    "sha": "624a6e70082e2cca377080b5f4a67e1f29b3f8ed4f7aac8eda1cb3b07c32154b"
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "초기 머리: 목적·1/16 범위·후속 요청·비교·전체 맞춤 표시",
+   "status": "PASS",
+   "detail": {
+    "#purposeTxt": true,
+    "#scope": true,
+    "#followTxt": true,
+    "#followOpen": true,
+    "#vBefore": true,
+    "#vAfter": true,
+    "#fitAll": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "초기 지도: 세 역할 카드 전체·두 호출 양끝·라벨이 지도 영역 안, 카드 내부 잘림 없음 (스크롤·맞춤 없이)",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 0)"
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "초기: 세 이름·역할 줄·이동 단서(메뉴의 →옮김, 공통의 ←칩) hit 표시",
+   "status": "PASS",
+   "detail": {
+    "P1": true,
+    "P2": true,
+    "P3": true,
+    "P1cue": true,
+    "P2cue": true,
+    "P3moved": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "1월 16일 보기 내용: 실제 담당 부분에만 확인·경과 계산",
+   "status": "PASS",
+   "detail": {
+    "chips": {
+     "n-P1": [
+      "표시 문구·분기"
+     ],
+     "n-P2": [
+      "표시 문구·분기"
+     ],
+     "n-P3": [
+      "남은 시간 추정",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ]
+    },
+    "cue": {
+     "n-P1": "확인·경과 계산은 공통 계산으로 옮김",
+     "n-P2": "확인·경과 계산은 공통 계산으로 옮김",
+     "n-P3": ""
+    },
+    "labels": [
+     "다운로드 상태 전달",
+     "다운로드 상태 전달"
+    ],
+    "summary": "1월 16일 변경 · 두 메뉴의 진행 정보 확인·경과 시간 계산을 기존 공통 계산으로 옮겼습니다. 표시 역할과 두 호출은 그대로입니다."
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "초기 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "변경 전 전환: 카드·선 raw rect·경로·transform·scroll 동일(외곽·배치 고정)",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "변경 전 내용: 두 메뉴가 확인·경과 계산, 공통 카드엔 추정만(가짜 행 없음)+짧은 설명",
+   "status": "PASS",
+   "detail": {
+    "chips": {
+     "n-P1": [
+      "표시 문구·분기",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ],
+     "n-P2": [
+      "표시 문구·분기",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ],
+     "n-P3": [
+      "남은 시간 추정"
+     ]
+    },
+    "cue": {
+     "n-P1": "",
+     "n-P2": "",
+     "n-P3": "확인·경과 계산은 두 메뉴에서 함"
+    },
+    "labels": [
+     "세 숫자 전달",
+     "세 숫자 전달"
+    ],
+    "summary": "변경 전 · 두 메뉴가 각각 진행 정보 확인과 경과 시간 계산을 하고 세 숫자를 넘겼습니다. 공통 계산과 두 호출은 이미 있었습니다."
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "변경 전에서도 세 역할·두 호출 노출 유지",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "1월 16일로 복귀: 처음 측정과 동일",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "전체 맞춤: 세 역할·두 호출 양끝·라벨 다시 지도 영역 안 (새 보기)",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(1.205, 0, 0, 1.205, 0, 0)",
+    "sl": 0,
+    "st": 0,
+    "zoomedTransform": "matrix(1.3, 0, 0, 1.3, 0, 0)"
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "check": "전체 맞춤이 선택·비교 보기를 바꾸지 않음",
+   "status": "PASS",
+   "detail": {
+    "sel": [
+     "n-P1"
+    ],
+    "view": [
+     "after"
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "진입 전 지도가 초기와 다름(비기본 배율·실제 휠 이동)",
+   "status": "PASS",
+   "detail": {
+    "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+    "sl": 50,
+    "st": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "선택 상세(기존 패널): 두 책임의 전후 담당·넘기는 값·남는 역할",
+   "status": "PASS",
+   "detail": {
+    "#panel h2": true,
+    "#panel .rt-tbl": true,
+    "#panel .act.wide [data-act=read]": true,
+    "table": "\t변경 전\t1월 16일\n진행 정보 확인\t이 메뉴\t공통 계산\n경과 시간 계산\t이 메뉴\t공통 계산\n공통 계산에 넘김\t세 숫자\t다운로드 상태"
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "상세를 열어도 카드·선 위치 그대로(다른 카드 밀림 없음)",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "부분 읽기: 두 책임 표·복귀·준비 버튼 표시",
+   "status": "PASS",
+   "detail": {
+    "table": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "위치 보기: 공통 계산이 지도 안, 선택 유지, 읽기 위치 그대로",
+   "status": "PASS",
+   "detail": {
+    "moved": "0",
+    "scroll": [
+     50,
+     0
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "읽던 곳: scrollTop 124→124, 출발 행 rect·출발 버튼 초점",
+   "status": "PASS",
+   "detail": {
+    "before": {
+     "x": 1089,
+     "y": 408.75,
+     "w": 331,
+     "h": 96.5
+    },
+    "after": {
+     "x": 1089,
+     "y": 408.75,
+     "w": 331,
+     "h": 96.5
+    },
+    "active": "loc-P3"
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "편집 전 준비문: cycle07 fix1 요청·미확인 문장 그대로",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "전체 복귀: 진입 전 raw rect·computed transform·native scroll·비교 보기·선택 동일, 초점 선택 카드",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "post": {
+     "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+     "sl": 50,
+     "st": 0,
+     "view": [
+      "after"
+     ],
+     "sel": [
+      "n-P1"
+     ],
+     "active": "n-P1"
+    }
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "복귀 뒤 재진입: 직접 고친 요청 유지",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "전체 맞춤 뒤 선택·비교 보기 유지",
+   "status": "PASS",
+   "detail": {
+    "sel": [
+     "n-P1"
+    ],
+    "view": [
+     "after"
+    ],
+    "transform": "matrix(1.205, 0, 0, 1.205, 0, 0)"
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "전체 맞춤 뒤에도 직접 고친 요청 유지",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "맞춤 뒤 진입·복귀: 그 진입 전(맞춤) 보기로 돌아옴",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "check": "끝 상태 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 1440,
+    "vw": 1440
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "0",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  },
+  {
+   "size": "390x844",
+   "flow": "0",
+   "check": "최초 HTTP status/body SHA = 원본 파일",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 41912,
+    "sha": "624a6e70082e2cca377080b5f4a67e1f29b3f8ed4f7aac8eda1cb3b07c32154b"
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "초기 머리: 목적·1/16 범위·후속 요청·비교·전체 맞춤 표시",
+   "status": "PASS",
+   "detail": {
+    "#purposeTxt": true,
+    "#scope": true,
+    "#followTxt": true,
+    "#followOpen": true,
+    "#vBefore": true,
+    "#vAfter": true,
+    "#fitAll": true
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "초기 지도: 세 역할 카드 전체·두 호출 양끝·라벨이 지도 영역 안, 카드 내부 잘림 없음 (스크롤·맞춤 없이)",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(1, 0, 0, 1, 0, 0)"
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "초기: 세 이름·역할 줄·이동 단서(메뉴의 →옮김, 공통의 ←칩) hit 표시",
+   "status": "PASS",
+   "detail": {
+    "P1": true,
+    "P2": true,
+    "P3": true,
+    "P1cue": true,
+    "P2cue": true,
+    "P3moved": true
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "1월 16일 보기 내용: 실제 담당 부분에만 확인·경과 계산",
+   "status": "PASS",
+   "detail": {
+    "chips": {
+     "n-P1": [
+      "표시 문구·분기"
+     ],
+     "n-P2": [
+      "표시 문구·분기"
+     ],
+     "n-P3": [
+      "남은 시간 추정",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ]
+    },
+    "cue": {
+     "n-P1": "확인·경과 계산은 공통 계산으로 옮김",
+     "n-P2": "확인·경과 계산은 공통 계산으로 옮김",
+     "n-P3": ""
+    },
+    "labels": [
+     "다운로드 상태 전달",
+     "다운로드 상태 전달"
+    ],
+    "summary": "1월 16일 변경 · 두 메뉴의 진행 정보 확인·경과 시간 계산을 기존 공통 계산으로 옮겼습니다. 표시 역할과 두 호출은 그대로입니다."
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "초기 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "변경 전 전환: 카드·선 raw rect·경로·transform·scroll 동일(외곽·배치 고정)",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "변경 전 내용: 두 메뉴가 확인·경과 계산, 공통 카드엔 추정만(가짜 행 없음)+짧은 설명",
+   "status": "PASS",
+   "detail": {
+    "chips": {
+     "n-P1": [
+      "표시 문구·분기",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ],
+     "n-P2": [
+      "표시 문구·분기",
+      "진행 정보 확인",
+      "경과 시간 계산"
+     ],
+     "n-P3": [
+      "남은 시간 추정"
+     ]
+    },
+    "cue": {
+     "n-P1": "",
+     "n-P2": "",
+     "n-P3": "확인·경과 계산은 두 메뉴에서 함"
+    },
+    "labels": [
+     "세 숫자 전달",
+     "세 숫자 전달"
+    ],
+    "summary": "변경 전 · 두 메뉴가 각각 진행 정보 확인과 경과 시간 계산을 하고 세 숫자를 넘겼습니다. 공통 계산과 두 호출은 이미 있었습니다."
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "변경 전에서도 세 역할·두 호출 노출 유지",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "1월 16일로 복귀: 처음 측정과 동일",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "전체 맞춤: 세 역할·두 호출 양끝·라벨 다시 지도 영역 안 (새 보기)",
+   "status": "PASS",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": true,
+     "n-P2": true,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(0.994, 0, 0, 0.994, 0, 0)",
+    "sl": 0,
+    "st": 0,
+    "zoomedTransform": "matrix(1.3, 0, 0, 1.3, 0, 0)"
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "check": "전체 맞춤이 선택·비교 보기를 바꾸지 않음",
+   "status": "PASS",
+   "detail": {
+    "sel": [
+     "n-P1"
+    ],
+    "view": [
+     "after"
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "진입 전 지도가 초기와 다름(비기본 배율·실제 휠 이동)",
+   "status": "PASS",
+   "detail": {
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "sl": 24,
+    "st": 33
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "좁은 선택 줄: 대상 이름·현재 시점 책임 위치·호출 관계·이 부분 보기 표시",
+   "status": "PASS",
+   "detail": {
+    "#panel h2": true,
+    "#panel .strip-c": true,
+    "#panel .strip-r": true,
+    "#panel .strip-head [data-act=read]": true
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "상세를 열어도 카드·선 위치 그대로(다른 카드 밀림 없음)",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "부분 읽기: 두 책임 표·복귀·준비 버튼 표시",
+   "status": "PASS",
+   "detail": {
+    "table": true
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "좁은 폭 위치 보기: 공통 계산이 지도 안, 선택 네이티브 메뉴 유지, 읽던 곳 버튼",
+   "status": "PASS",
+   "detail": {
+    "sel": [
+     "n-P1"
+    ],
+    "moved": "1",
+    "scroll": [
+     12,
+     34
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "읽던 곳: scrollTop 160→160, 출발 행 rect·출발 버튼 초점",
+   "status": "PASS",
+   "detail": {
+    "before": {
+     "x": 16,
+     "y": 429,
+     "w": 358,
+     "h": 96.5
+    },
+    "after": {
+     "x": 16,
+     "y": 429,
+     "w": 358,
+     "h": 96.5
+    },
+    "active": "loc-P3"
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "편집 전 준비문: cycle07 fix1 요청·미확인 문장 그대로",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "전체 복귀: 진입 전 raw rect·computed transform·native scroll·비교 보기·선택 동일, 초점 선택 카드",
+   "status": "PASS",
+   "detail": {
+    "diff": {},
+    "post": {
+     "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+     "sl": 24,
+     "st": 33,
+     "view": [
+      "after"
+     ],
+     "sel": [
+      "n-P1"
+     ],
+     "active": "n-P1"
+    }
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "복귀 뒤 재진입: 직접 고친 요청 유지",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "전체 맞춤 뒤 선택·비교 보기 유지",
+   "status": "PASS",
+   "detail": {
+    "sel": [
+     "n-P1"
+    ],
+    "view": [
+     "after"
+    ],
+    "transform": "matrix(0.994, 0, 0, 0.994, 0, 0)"
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "전체 맞춤 뒤에도 직접 고친 요청 유지",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "맞춤 뒤 진입·복귀: 그 진입 전(맞춤) 보기로 돌아옴",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "check": "끝 상태 가로 넘침 없음",
+   "status": "PASS",
+   "detail": {
+    "doc": 390,
+    "vw": 390
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "0",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  }
+ ],
+ "observations": [
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "observation": "초기 유효 글자 크기(px = computed font-size × 배율)",
+   "detail": {
+    "n-P1": [
+     16,
+     12.5
+    ],
+    "n-P2": [
+     16,
+     12.5
+    ],
+    "n-P3": [
+     16,
+     12.5
+    ]
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "observation": "확대·이동 후(맞춤 전) 노출",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": false,
+     "n-P2": false,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+    "sl": 210,
+    "st": 0
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "A",
+   "observation": "맞춤 후 유효 글자 크기(px)",
+   "detail": {
+    "n-P1": [
+     16.3,
+     12.74
+    ],
+    "n-P2": [
+     16.3,
+     12.74
+    ],
+    "n-P3": [
+     16.3,
+     12.74
+    ]
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "observation": "진입 전 지도",
+   "detail": {
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "sl": 81,
+    "st": 0,
+    "sel": [
+     "n-P1"
+    ],
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "observation": "읽기 자연 스크롤 여유(px)",
+   "detail": 304
+  },
+  {
+   "size": "1280x720",
+   "flow": "B",
+   "observation": "위치 보기 직전 읽기 scrollTop(실제 휠)",
+   "detail": {
+    "top": 160,
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "observation": "초기 유효 글자 크기(px = computed font-size × 배율)",
+   "detail": {
+    "n-P1": [
+     16,
+     12.5
+    ],
+    "n-P2": [
+     16,
+     12.5
+    ],
+    "n-P3": [
+     16,
+     12.5
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "observation": "확대·이동 후(맞춤 전) 노출",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": false,
+     "n-P2": false,
+     "n-P3": true
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+    "sl": 50,
+    "st": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "A",
+   "observation": "맞춤 후 유효 글자 크기(px)",
+   "detail": {
+    "n-P1": [
+     19.28,
+     15.06
+    ],
+    "n-P2": [
+     19.28,
+     15.06
+    ],
+    "n-P3": [
+     19.28,
+     15.06
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "observation": "진입 전 지도",
+   "detail": {
+    "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+    "sl": 50,
+    "st": 0,
+    "sel": [
+     "n-P1"
+    ],
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "observation": "읽기 자연 스크롤 여유(px)",
+   "detail": 124
+  },
+  {
+   "size": "1440x900",
+   "flow": "B",
+   "observation": "위치 보기 직전 읽기 scrollTop(실제 휠)",
+   "detail": {
+    "top": 124,
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "observation": "초기 유효 글자 크기(px = computed font-size × 배율)",
+   "detail": {
+    "n-P1": [
+     16,
+     12.5
+    ],
+    "n-P2": [
+     16,
+     12.5
+    ],
+    "n-P3": [
+     16,
+     12.5
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "observation": "확대·이동 후(맞춤 전) 노출",
+   "detail": {
+    "nodesInPane": {
+     "n-P1": false,
+     "n-P2": false,
+     "n-P3": false
+    },
+    "edgeEndsInPane": {
+     "e-R1": true,
+     "e-R2": true
+    },
+    "labelsInPane": {
+     "e-R1": false,
+     "e-R2": true
+    },
+    "faceClip": [
+     false,
+     false,
+     false
+    ],
+    "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)",
+    "sl": 78,
+    "st": 101
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "A",
+   "observation": "맞춤 후 유효 글자 크기(px)",
+   "detail": {
+    "n-P1": [
+     15.9,
+     12.43
+    ],
+    "n-P2": [
+     15.9,
+     12.43
+    ],
+    "n-P3": [
+     15.9,
+     12.43
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "observation": "진입 전 지도",
+   "detail": {
+    "transform": "matrix(1.15, 0, 0, 1.15, 0, 0)",
+    "sl": 24,
+    "st": 33,
+    "sel": [
+     "n-P1"
+    ],
+    "assistWheels": 0
+   }
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "observation": "읽기 자연 스크롤 여유(px)",
+   "detail": 212
+  },
+  {
+   "size": "390x844",
+   "flow": "B",
+   "observation": "위치 보기 직전 읽기 scrollTop(실제 휠)",
+   "detail": {
+    "top": 160,
+    "assistWheels": 0
+   }
+  }
+ ]
+}

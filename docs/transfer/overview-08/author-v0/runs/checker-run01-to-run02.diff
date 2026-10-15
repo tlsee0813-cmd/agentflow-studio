@@ -1,0 +1,15 @@
+--- /tmp/claude-0/-home-claude/4df88141-ae7c-5954-a073-948ee9c5e879/scratchpad/ac8_run01.py	2026-10-16 06:42:47.436687585 +0900
++++ checks/author_check.py	2026-10-16 06:41:18.226128543 +0900
+@@ -205,9 +205,12 @@
+     # ================= 흐름 B: 한 부분 이해·명시 왕복 =================
+     # 비초기 출발: 맞춤 상태에서 실제 확대·휠
+     page.click('#zIn'); page.wait_for_timeout(120)
++    if geo(page)['scale'] < 1.15: page.click('#zIn'); page.wait_for_timeout(120)  # 390: 맞춤(0.99)→100%는 스크롤 여유가 없어 한 단계 더
+     wheel(page, '#mapScroll', 40, 90)
+     okb, used = bring(page, '#mapScroll', '#n-P1 .face')
+     pre = geo(page)
++    rec(size, 'B', '진입 전 지도가 초기와 다름(비기본 배율·실제 휠 이동)', pre['transform'] != g0['transform'] and (pre['sl'] > 0 or pre['st'] > 0),
++        {'transform': pre['transform'], 'sl': pre['sl'], 'st': pre['st']})
+     note(size, 'B', '진입 전 지도', {'transform': pre['transform'], 'sl': pre['sl'], 'st': pre['st'], 'sel': pre['sel'], 'assistWheels': used})
+     if narrow:
+         sv = {k: vis(page, k)['ok'] for k in ('#panel h2', '#panel .strip-c', '#panel .strip-r', READBTN)}

@@ -1,0 +1,97 @@
+[PASS] 1280x720 0 최초 HTTP status/body SHA = 원본 파일 {"status": 200, "bytes": 41911, "sha": "307877ef49c42d0486ded00c14a06776c836d7e8465a809008a2bf719c2fdfe4"}
+[PASS] 1280x720 A 초기 머리: 목적·1/16 범위·후속 요청·비교·전체 맞춤 표시 {"#purposeTxt": true, "#scope": true, "#followTxt": true, "#followOpen": true, "#vBefore": true, "#vAfter": true, "#fitAll": true}
+[PASS] 1280x720 A 초기 지도: 세 역할 카드 전체·두 호출 양끝·라벨이 지도 영역 안, 카드 내부 잘림 없음 (스크롤·맞춤 없이) {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(1, 0, 0, 1, 0, 0)"}
+[PASS] 1280x720 A 초기: 세 이름·역할 줄·이동 단서(메뉴의 →옮김, 공통의 ←칩) hit 표시 {"P1": true, "P2": true, "P3": true, "P1cue": true, "P2cue": true, "P3moved": true}
+[PASS] 1280x720 A 1월 16일 보기 내용: 실제 담당 부분에만 확인·경과 계산 {"chips": {"n-P1": ["표시 문구·분기"], "n-P2": ["표시 문구·분기"], "n-P3": ["남은 시간 추정", "진행 정보 확인", "경과 시간 계산"]}, "cue": {"n-P1": "확인·경과 계산은 공통 계산으로 옮김", "n-P2": "확인·경과 계산은 공통 계산으로 옮김", "n-P3": ""}, "labels": ["다운로드 상태 전달", "다운로드 상태 전달"], "summary": "1월 16일 변경 · 두 메뉴의 진행 정보 확인·경과 시간 계산을 기존 공통 계산으로 옮겼습니다. 표시 역할과 두 호출은 그대로입니다."}
+[OBS ] 1280x720 A 초기 유효 글자 크기(px = computed font-size × 배율) {"n-P1": [16, 12.5], "n-P2": [16, 12.5], "n-P3": [16, 12.5]}
+[PASS] 1280x720 A 초기 가로 넘침 없음 {"doc": 1280, "vw": 1280}
+[PASS] 1280x720 A 변경 전 전환: 카드·선 raw rect·경로·transform·scroll 동일(외곽·배치 고정) {}
+[PASS] 1280x720 A 변경 전 내용: 두 메뉴가 확인·경과 계산, 공통 카드엔 추정만(가짜 행 없음)+짧은 설명 {"chips": {"n-P1": ["표시 문구·분기", "진행 정보 확인", "경과 시간 계산"], "n-P2": ["표시 문구·분기", "진행 정보 확인", "경과 시간 계산"], "n-P3": ["남은 시간 추정"]}, "cue": {"n-P1": "", "n-P2": "", "n-P3": "확인·경과 계산은 두 메뉴에서 함"}, "labels": ["세 숫자 전달", "세 숫자 전달"], "summary": "변경 전 · 두 메뉴가 각각 진행 정보 확인과 경과 시간 계산을 하고 세 숫자를 넘겼습니다. 공통 계산과 두 호출은 이미 있었습니다."}
+[PASS] 1280x720 A 변경 전에서도 세 역할·두 호출 노출 유지 {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false]}
+[PASS] 1280x720 A 1월 16일로 복귀: 처음 측정과 동일 {}
+[OBS ] 1280x720 A 확대·이동 후(맞춤 전) 노출 {"nodesInPane": {"n-P1": false, "n-P2": false, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)", "sl": 210, "st": 0}
+[PASS] 1280x720 A 전체 맞춤: 세 역할·두 호출 양끝·라벨 다시 지도 영역 안 (새 보기) {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(1.019, 0, 0, 1.019, 0, 0)", "sl": 0, "st": 0, "zoomedTransform": "matrix(1.3, 0, 0, 1.3, 0, 0)"}
+[PASS] 1280x720 A 전체 맞춤이 선택·비교 보기를 바꾸지 않음 {"sel": ["n-P1"], "view": ["after"]}
+[OBS ] 1280x720 A 맞춤 후 유효 글자 크기(px) {"n-P1": [16.3, 12.74], "n-P2": [16.3, 12.74], "n-P3": [16.3, 12.74]}
+[PASS] 1280x720 B 진입 전 지도가 초기와 다름(비기본 배율·실제 휠 이동) {"transform": "matrix(1.15, 0, 0, 1.15, 0, 0)", "sl": 81, "st": 0}
+[OBS ] 1280x720 B 진입 전 지도 {"transform": "matrix(1.15, 0, 0, 1.15, 0, 0)", "sl": 81, "st": 0, "sel": ["n-P1"], "assistWheels": 0}
+[PASS] 1280x720 B 선택 상세(기존 패널): 두 책임의 전후 담당·넘기는 값·남는 역할 {"#panel h2": true, "#panel .rt-tbl": true, "#panel .act.wide [data-act=read]": true, "table": "\t변경 전\t1월 16일\n진행 정보 확인\t이 메뉴\t공통 계산\n경과 시간 계산\t이 메뉴\t공통 계산\n공통 계산에 넘김\t세 숫자\t다운로드 상태"}
+[PASS] 1280x720 B 상세를 열어도 카드·선 위치 그대로(다른 카드 밀림 없음) {}
+[PASS] 1280x720 B 부분 읽기: 두 책임 표·복귀·준비 버튼 표시 {"table": true}
+[OBS ] 1280x720 B 읽기 자연 스크롤 여유(px) 304
+[OBS ] 1280x720 B 위치 보기 직전 읽기 scrollTop(실제 휠) {"top": 160, "assistWheels": 0}
+[PASS] 1280x720 B 위치 보기: 공통 계산이 지도 안, 선택 유지, 읽기 위치 그대로 {"moved": "0", "scroll": [81, 0]}
+[PASS] 1280x720 B 읽던 곳: scrollTop 160→160, 출발 행 rect·출발 버튼 초점 {"before": {"x": 929, "y": 372.75, "w": 331, "h": 96.5}, "after": {"x": 929, "y": 372.75, "w": 331, "h": 96.5}, "active": "loc-P3"}
+[PASS] 1280x720 B 편집 전 준비문: cycle07 fix1 요청·미확인 문장 그대로 
+[PASS] 1280x720 B 전체 복귀: 진입 전 raw rect·computed transform·native scroll·비교 보기·선택 동일, 초점 선택 카드 {"diff": {}, "post": {"transform": "matrix(1.15, 0, 0, 1.15, 0, 0)", "sl": 81, "st": 0, "view": ["after"], "sel": ["n-P1"], "active": "n-P1"}}
+[PASS] 1280x720 B 복귀 뒤 재진입: 직접 고친 요청 유지 
+[PASS] 1280x720 B 전체 맞춤 뒤 선택·비교 보기 유지 {"sel": ["n-P1"], "view": ["after"], "transform": "matrix(1.019, 0, 0, 1.019, 0, 0)"}
+[PASS] 1280x720 B 전체 맞춤 뒤에도 직접 고친 요청 유지 
+[PASS] 1280x720 B 맞춤 뒤 진입·복귀: 그 진입 전(맞춤) 보기로 돌아옴 {}
+[PASS] 1280x720 B 끝 상태 가로 넘침 없음 {"doc": 1280, "vw": 1280}
+[PASS] 1280x720 0 pageerror·console error 없음 []
+[PASS] 1440x900 0 최초 HTTP status/body SHA = 원본 파일 {"status": 200, "bytes": 41911, "sha": "307877ef49c42d0486ded00c14a06776c836d7e8465a809008a2bf719c2fdfe4"}
+[PASS] 1440x900 A 초기 머리: 목적·1/16 범위·후속 요청·비교·전체 맞춤 표시 {"#purposeTxt": true, "#scope": true, "#followTxt": true, "#followOpen": true, "#vBefore": true, "#vAfter": true, "#fitAll": true}
+[PASS] 1440x900 A 초기 지도: 세 역할 카드 전체·두 호출 양끝·라벨이 지도 영역 안, 카드 내부 잘림 없음 (스크롤·맞춤 없이) {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(1, 0, 0, 1, 0, 0)"}
+[PASS] 1440x900 A 초기: 세 이름·역할 줄·이동 단서(메뉴의 →옮김, 공통의 ←칩) hit 표시 {"P1": true, "P2": true, "P3": true, "P1cue": true, "P2cue": true, "P3moved": true}
+[PASS] 1440x900 A 1월 16일 보기 내용: 실제 담당 부분에만 확인·경과 계산 {"chips": {"n-P1": ["표시 문구·분기"], "n-P2": ["표시 문구·분기"], "n-P3": ["남은 시간 추정", "진행 정보 확인", "경과 시간 계산"]}, "cue": {"n-P1": "확인·경과 계산은 공통 계산으로 옮김", "n-P2": "확인·경과 계산은 공통 계산으로 옮김", "n-P3": ""}, "labels": ["다운로드 상태 전달", "다운로드 상태 전달"], "summary": "1월 16일 변경 · 두 메뉴의 진행 정보 확인·경과 시간 계산을 기존 공통 계산으로 옮겼습니다. 표시 역할과 두 호출은 그대로입니다."}
+[OBS ] 1440x900 A 초기 유효 글자 크기(px = computed font-size × 배율) {"n-P1": [16, 12.5], "n-P2": [16, 12.5], "n-P3": [16, 12.5]}
+[PASS] 1440x900 A 초기 가로 넘침 없음 {"doc": 1440, "vw": 1440}
+[PASS] 1440x900 A 변경 전 전환: 카드·선 raw rect·경로·transform·scroll 동일(외곽·배치 고정) {}
+[PASS] 1440x900 A 변경 전 내용: 두 메뉴가 확인·경과 계산, 공통 카드엔 추정만(가짜 행 없음)+짧은 설명 {"chips": {"n-P1": ["표시 문구·분기", "진행 정보 확인", "경과 시간 계산"], "n-P2": ["표시 문구·분기", "진행 정보 확인", "경과 시간 계산"], "n-P3": ["남은 시간 추정"]}, "cue": {"n-P1": "", "n-P2": "", "n-P3": "확인·경과 계산은 두 메뉴에서 함"}, "labels": ["세 숫자 전달", "세 숫자 전달"], "summary": "변경 전 · 두 메뉴가 각각 진행 정보 확인과 경과 시간 계산을 하고 세 숫자를 넘겼습니다. 공통 계산과 두 호출은 이미 있었습니다."}
+[PASS] 1440x900 A 변경 전에서도 세 역할·두 호출 노출 유지 {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false]}
+[PASS] 1440x900 A 1월 16일로 복귀: 처음 측정과 동일 {}
+[OBS ] 1440x900 A 확대·이동 후(맞춤 전) 노출 {"nodesInPane": {"n-P1": false, "n-P2": false, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)", "sl": 50, "st": 0}
+[PASS] 1440x900 A 전체 맞춤: 세 역할·두 호출 양끝·라벨 다시 지도 영역 안 (새 보기) {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(1.205, 0, 0, 1.205, 0, 0)", "sl": 0, "st": 0, "zoomedTransform": "matrix(1.3, 0, 0, 1.3, 0, 0)"}
+[PASS] 1440x900 A 전체 맞춤이 선택·비교 보기를 바꾸지 않음 {"sel": ["n-P1"], "view": ["after"]}
+[OBS ] 1440x900 A 맞춤 후 유효 글자 크기(px) {"n-P1": [19.28, 15.06], "n-P2": [19.28, 15.06], "n-P3": [19.28, 15.06]}
+[PASS] 1440x900 B 진입 전 지도가 초기와 다름(비기본 배율·실제 휠 이동) {"transform": "matrix(1.3, 0, 0, 1.3, 0, 0)", "sl": 50, "st": 0}
+[OBS ] 1440x900 B 진입 전 지도 {"transform": "matrix(1.3, 0, 0, 1.3, 0, 0)", "sl": 50, "st": 0, "sel": ["n-P1"], "assistWheels": 0}
+[PASS] 1440x900 B 선택 상세(기존 패널): 두 책임의 전후 담당·넘기는 값·남는 역할 {"#panel h2": true, "#panel .rt-tbl": true, "#panel .act.wide [data-act=read]": true, "table": "\t변경 전\t1월 16일\n진행 정보 확인\t이 메뉴\t공통 계산\n경과 시간 계산\t이 메뉴\t공통 계산\n공통 계산에 넘김\t세 숫자\t다운로드 상태"}
+[PASS] 1440x900 B 상세를 열어도 카드·선 위치 그대로(다른 카드 밀림 없음) {}
+[PASS] 1440x900 B 부분 읽기: 두 책임 표·복귀·준비 버튼 표시 {"table": true}
+[OBS ] 1440x900 B 읽기 자연 스크롤 여유(px) 124
+[OBS ] 1440x900 B 위치 보기 직전 읽기 scrollTop(실제 휠) {"top": 124, "assistWheels": 0}
+[PASS] 1440x900 B 위치 보기: 공통 계산이 지도 안, 선택 유지, 읽기 위치 그대로 {"moved": "0", "scroll": [50, 0]}
+[PASS] 1440x900 B 읽던 곳: scrollTop 124→124, 출발 행 rect·출발 버튼 초점 {"before": {"x": 1089, "y": 408.75, "w": 331, "h": 96.5}, "after": {"x": 1089, "y": 408.75, "w": 331, "h": 96.5}, "active": "loc-P3"}
+[PASS] 1440x900 B 편집 전 준비문: cycle07 fix1 요청·미확인 문장 그대로 
+[PASS] 1440x900 B 전체 복귀: 진입 전 raw rect·computed transform·native scroll·비교 보기·선택 동일, 초점 선택 카드 {"diff": {}, "post": {"transform": "matrix(1.3, 0, 0, 1.3, 0, 0)", "sl": 50, "st": 0, "view": ["after"], "sel": ["n-P1"], "active": "n-P1"}}
+[PASS] 1440x900 B 복귀 뒤 재진입: 직접 고친 요청 유지 
+[PASS] 1440x900 B 전체 맞춤 뒤 선택·비교 보기 유지 {"sel": ["n-P1"], "view": ["after"], "transform": "matrix(1.205, 0, 0, 1.205, 0, 0)"}
+[PASS] 1440x900 B 전체 맞춤 뒤에도 직접 고친 요청 유지 
+[PASS] 1440x900 B 맞춤 뒤 진입·복귀: 그 진입 전(맞춤) 보기로 돌아옴 {}
+[PASS] 1440x900 B 끝 상태 가로 넘침 없음 {"doc": 1440, "vw": 1440}
+[PASS] 1440x900 0 pageerror·console error 없음 []
+[PASS] 390x844 0 최초 HTTP status/body SHA = 원본 파일 {"status": 200, "bytes": 41911, "sha": "307877ef49c42d0486ded00c14a06776c836d7e8465a809008a2bf719c2fdfe4"}
+[PASS] 390x844 A 초기 머리: 목적·1/16 범위·후속 요청·비교·전체 맞춤 표시 {"#purposeTxt": true, "#scope": true, "#followTxt": true, "#followOpen": true, "#vBefore": true, "#vAfter": true, "#fitAll": true}
+[PASS] 390x844 A 초기 지도: 세 역할 카드 전체·두 호출 양끝·라벨이 지도 영역 안, 카드 내부 잘림 없음 (스크롤·맞춤 없이) {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(1, 0, 0, 1, 0, 0)"}
+[PASS] 390x844 A 초기: 세 이름·역할 줄·이동 단서(메뉴의 →옮김, 공통의 ←칩) hit 표시 {"P1": true, "P2": true, "P3": true, "P1cue": true, "P2cue": true, "P3moved": true}
+[PASS] 390x844 A 1월 16일 보기 내용: 실제 담당 부분에만 확인·경과 계산 {"chips": {"n-P1": ["표시 문구·분기"], "n-P2": ["표시 문구·분기"], "n-P3": ["남은 시간 추정", "진행 정보 확인", "경과 시간 계산"]}, "cue": {"n-P1": "확인·경과 계산은 공통 계산으로 옮김", "n-P2": "확인·경과 계산은 공통 계산으로 옮김", "n-P3": ""}, "labels": ["다운로드 상태 전달", "다운로드 상태 전달"], "summary": "1월 16일 변경 · 두 메뉴의 진행 정보 확인·경과 시간 계산을 기존 공통 계산으로 옮겼습니다. 표시 역할과 두 호출은 그대로입니다."}
+[OBS ] 390x844 A 초기 유효 글자 크기(px = computed font-size × 배율) {"n-P1": [16, 12.5], "n-P2": [16, 12.5], "n-P3": [16, 12.5]}
+[PASS] 390x844 A 초기 가로 넘침 없음 {"doc": 390, "vw": 390}
+[PASS] 390x844 A 변경 전 전환: 카드·선 raw rect·경로·transform·scroll 동일(외곽·배치 고정) {}
+[PASS] 390x844 A 변경 전 내용: 두 메뉴가 확인·경과 계산, 공통 카드엔 추정만(가짜 행 없음)+짧은 설명 {"chips": {"n-P1": ["표시 문구·분기", "진행 정보 확인", "경과 시간 계산"], "n-P2": ["표시 문구·분기", "진행 정보 확인", "경과 시간 계산"], "n-P3": ["남은 시간 추정"]}, "cue": {"n-P1": "", "n-P2": "", "n-P3": "확인·경과 계산은 두 메뉴에서 함"}, "labels": ["세 숫자 전달", "세 숫자 전달"], "summary": "변경 전 · 두 메뉴가 각각 진행 정보 확인과 경과 시간 계산을 하고 세 숫자를 넘겼습니다. 공통 계산과 두 호출은 이미 있었습니다."}
+[PASS] 390x844 A 변경 전에서도 세 역할·두 호출 노출 유지 {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false]}
+[PASS] 390x844 A 1월 16일로 복귀: 처음 측정과 동일 {}
+[OBS ] 390x844 A 확대·이동 후(맞춤 전) 노출 {"nodesInPane": {"n-P1": false, "n-P2": false, "n-P3": false}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": false, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(1.3, 0, 0, 1.3, 0, 0)", "sl": 78, "st": 101}
+[PASS] 390x844 A 전체 맞춤: 세 역할·두 호출 양끝·라벨 다시 지도 영역 안 (새 보기) {"nodesInPane": {"n-P1": true, "n-P2": true, "n-P3": true}, "edgeEndsInPane": {"e-R1": true, "e-R2": true}, "labelsInPane": {"e-R1": true, "e-R2": true}, "faceClip": [false, false, false], "transform": "matrix(0.994, 0, 0, 0.994, 0, 0)", "sl": 0, "st": 0, "zoomedTransform": "matrix(1.3, 0, 0, 1.3, 0, 0)"}
+[PASS] 390x844 A 전체 맞춤이 선택·비교 보기를 바꾸지 않음 {"sel": ["n-P1"], "view": ["after"]}
+[OBS ] 390x844 A 맞춤 후 유효 글자 크기(px) {"n-P1": [15.9, 12.43], "n-P2": [15.9, 12.43], "n-P3": [15.9, 12.43]}
+[PASS] 390x844 B 진입 전 지도가 초기와 다름(비기본 배율·실제 휠 이동) {"transform": "matrix(1.15, 0, 0, 1.15, 0, 0)", "sl": 24, "st": 33}
+[OBS ] 390x844 B 진입 전 지도 {"transform": "matrix(1.15, 0, 0, 1.15, 0, 0)", "sl": 24, "st": 33, "sel": ["n-P1"], "assistWheels": 0}
+[PASS] 390x844 B 좁은 선택 줄: 대상 이름·현재 시점 책임 위치·호출 관계·이 부분 보기 표시 {"#panel h2": true, "#panel .strip-c": true, "#panel .strip-r": true, "#panel .strip-head [data-act=read]": true}
+[PASS] 390x844 B 상세를 열어도 카드·선 위치 그대로(다른 카드 밀림 없음) {}
+[PASS] 390x844 B 부분 읽기: 두 책임 표·복귀·준비 버튼 표시 {"table": true}
+[OBS ] 390x844 B 읽기 자연 스크롤 여유(px) 212
+[OBS ] 390x844 B 위치 보기 직전 읽기 scrollTop(실제 휠) {"top": 160, "assistWheels": 0}
+[FAIL] 390x844 B 좁은 폭 위치 보기: 공통 계산이 지도 안, 선택 네이티브 메뉴 유지, 읽던 곳 버튼 {"sel": ["n-P1"], "moved": "1", "scroll": [12, 34]}
+[PASS] 390x844 B 읽던 곳: scrollTop 160→160, 출발 행 rect·출발 버튼 초점 {"before": {"x": 16, "y": 429, "w": 358, "h": 96.5}, "after": {"x": 16, "y": 429, "w": 358, "h": 96.5}, "active": "loc-P3"}
+[PASS] 390x844 B 편집 전 준비문: cycle07 fix1 요청·미확인 문장 그대로 
+[PASS] 390x844 B 전체 복귀: 진입 전 raw rect·computed transform·native scroll·비교 보기·선택 동일, 초점 선택 카드 {"diff": {}, "post": {"transform": "matrix(1.15, 0, 0, 1.15, 0, 0)", "sl": 24, "st": 33, "view": ["after"], "sel": ["n-P1"], "active": "n-P1"}}
+[PASS] 390x844 B 복귀 뒤 재진입: 직접 고친 요청 유지 
+[PASS] 390x844 B 전체 맞춤 뒤 선택·비교 보기 유지 {"sel": ["n-P1"], "view": ["after"], "transform": "matrix(0.994, 0, 0, 0.994, 0, 0)"}
+[PASS] 390x844 B 전체 맞춤 뒤에도 직접 고친 요청 유지 
+[PASS] 390x844 B 맞춤 뒤 진입·복귀: 그 진입 전(맞춤) 보기로 돌아옴 {}
+[PASS] 390x844 B 끝 상태 가로 넘침 없음 {"doc": 390, "vw": 390}
+[PASS] 390x844 0 pageerror·console error 없음 []
+== failed 1 fatal None completed ['1280x720', '1440x900', '390x844'] file_unchanged True
