@@ -1,0 +1,46 @@
+{
+ "runId": "f01",
+ "started": "2026-10-15T22:49:49.561Z",
+ "source": {
+  "bytes": 54524,
+  "sha256": "90141c4c5cfc509cafef3c038a9c1c14f0062f7e009e4359f5f97bd5541e3173"
+ },
+ "children": [
+  {
+   "viewport": "1280x720",
+   "childExitCode": 1,
+   "signal": null,
+   "ms": 9370,
+   "assertions": 50,
+   "clickPreconditions": 27,
+   "failed": 2,
+   "wheels": 4,
+   "consoleErrors": 0,
+   "receivedMatchesSource": true,
+   "received": {
+    "status": 200,
+    "bytes": 54524,
+    "sha256": "90141c4c5cfc509cafef3c038a9c1c14f0062f7e009e4359f5f97bd5541e3173"
+   }
+  },
+  {
+   "viewport": "390x844",
+   "childExitCode": 1,
+   "signal": null,
+   "ms": 11287,
+   "assertions": 50,
+   "clickPreconditions": 27,
+   "failed": 2,
+   "wheels": 18,
+   "consoleErrors": 0,
+   "receivedMatchesSource": true,
+   "received": {
+    "status": 200,
+    "bytes": 54524,
+    "sha256": "90141c4c5cfc509cafef3c038a9c1c14f0062f7e009e4359f5f97bd5541e3173"
+   }
+  }
+ ],
+ "finished": "2026-10-15T22:50:10.222Z",
+ "allChildrenZero": false
+}

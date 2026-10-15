@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기능 일부 지도 · cycle09 혼합 깊이 읽기 시안</title>
+<style>
+:root{
+  --bg:#f3f1ec; --paper:#fffdf8; --ink:#1d2126; --ink2:#4f545b; --ink3:#80858c; --line:#d8d3c9;
+  --grp:#e9e5dc; --grpline:#aaa292;
+  --rel:#2c5a86; --rel-weak:#a7bad0;
+  --chg:#b9500f; --chg-bg:#fbe8da;
+  --focus:#1867c8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:14px/1.5 system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+
+/* header */
+#top{padding:14px 20px 10px;border-bottom:1px solid var(--line);background:var(--paper)}
+.t1{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.t1 h1{font-size:17px;margin:0;font-weight:700;letter-spacing:-.01em}
+.t1 .scope{font-size:12px;color:var(--ink3)}
+.change{display:flex;gap:18px;flex-wrap:wrap;margin-top:6px;font-size:13.5px}
+.change .c{display:flex;gap:7px;align-items:baseline}
+.change .tag{font-size:11.5px;font-weight:650;padding:1px 7px;border-radius:99px;white-space:nowrap}
+.tag.chg{background:var(--chg-bg);color:var(--chg)}
+.tag.keep{background:#e4ebf3;color:var(--rel)}
+#top details{margin-top:4px;font-size:12px;color:var(--ink2)}
+#top summary{cursor:pointer;color:var(--ink3);width:max-content}
+#top details p{margin:4px 0 0;max-width:900px}
+
+/* main */
+#main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px}
+#app.focusing #mapView,#app.focusing #panel{display:none}
+#app.focusing #main{grid-template-columns:1fr}
+#mapView{display:flex;flex-direction:column;min-height:0;min-width:0}
+.tools{display:flex;align-items:center;gap:16px;padding:8px 16px;font-size:12px;color:var(--ink2);flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg-box{width:22px;height:14px;border:1.5px dashed var(--grpline);border-radius:4px;background:var(--grp)}
+.lg-chg{width:4px;height:14px;background:var(--chg);border-radius:2px}
+.zoom{margin-left:auto;display:flex;align-items:center;gap:4px}
+.zoom button{width:28px;height:28px;border:1px solid var(--line);background:var(--paper);border-radius:7px}
+.zoom output{min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+#mapScroll{flex:1;min-height:0;overflow:auto;position:relative;background:
+  radial-gradient(circle,#dcd7cd 1px,transparent 1.2px) 0 0/22px 22px}
+#sizer{position:relative}
+/* 공간 지도: 다섯 묶음의 자리는 격자로 고정, 높이는 실제 깊이(펼침)에 따라 늘어난다 */
+#world{position:absolute;left:0;top:0;transform-origin:0 0;display:grid;align-items:start}
+#world.wide{width:970px;padding:22px;grid-template-columns:180px 210px 236px 180px;column-gap:40px;row-gap:40px;
+  grid-template-areas:"g1 g2 g3 g5" "g1 g2 g4 g5"}
+#world.wide #n-G1,#world.wide #n-G2,#world.wide #n-G5{align-self:center}
+#world.wide #n-G3{align-self:end}
+#world.narrow{width:366px;padding:10px 14px;grid-template-columns:140px 172px;column-gap:26px;row-gap:20px;
+  grid-template-areas:"g1 g1" "g2 g3" "g4 g5"}
+#n-G1{grid-area:g1}#n-G2{grid-area:g2}#n-G3{grid-area:g3}#n-G4{grid-area:g4}#n-G5{grid-area:g5}
+#edges{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;z-index:2}
+#edges .vis{fill:none;stroke:var(--rel);stroke-width:1.7;opacity:.6;transition:opacity .15s}
+#edges .hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke;cursor:pointer}
+#edges g.on .vis{opacity:1;stroke-width:2.6}
+#edges g.dim .vis{opacity:.22}
+#edges .ring{fill:var(--paper);stroke:var(--rel);stroke-width:1.6}
+#edges g.dim .ring,#edges g.dim .cntc,#edges g.dim .cnt{opacity:.35}
+#edges .cntc{fill:var(--paper);stroke:var(--rel);stroke-width:1.4;pointer-events:all;cursor:pointer}
+#edges .cnt{pointer-events:none;font-size:10.5px;fill:var(--rel);font-weight:700;text-anchor:middle;dominant-baseline:central}
+
+.grp{position:relative;z-index:1;background:var(--grp);border:1.5px dashed var(--grpline);border-radius:14px;padding:6px 8px 8px}
+.grp.is-sel{outline:2.5px solid var(--focus);outline-offset:3px}
+.ghead{display:flex;align-items:flex-start;gap:4px 6px;flex-wrap:wrap}
+.gsel{flex:1 1 90px;text-align:left;background:none;border:0;padding:4px 6px;border-radius:8px;min-width:0}
+.gsel:hover{background:#ffffff70}
+.gname{display:block;font-weight:680;font-size:15px;letter-spacing:-.01em}
+.gshort{display:block;font-size:12.5px;color:var(--ink2);margin-top:2px}
+.gtog{flex:none;font-size:12px;border:1px solid var(--grpline);background:var(--paper);border-radius:99px;padding:2px 10px;margin-top:4px}
+.gfold{display:none;font-size:12.5px;color:var(--ink2);padding:0 6px 2px}
+.grp.collapsed .gfold{display:block}
+.grp.collapsed .kids{display:none}
+.gfold .agg{display:flex;gap:6px;align-items:center;color:var(--ink)}
+.gfold .dot{width:8px;height:8px;border-radius:50%;background:var(--chg);flex:none}
+.gfold .sub{color:var(--ink3);font-size:12px}
+.kid{display:block;width:100%;text-align:left;margin-top:6px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:7px 10px;position:relative}
+.kid:hover{border-color:#bcb4a5}
+.kid.is-sel{outline:2.5px solid var(--focus);outline-offset:1px}
+.kid.chg{border-left:5px solid var(--chg);padding-left:8px}
+.kname{font-weight:620;margin-right:6px}
+.kshort{display:block;font-size:12.5px;color:var(--ink2)}
+.kchg{display:inline-block;font-size:11px;font-weight:650;color:var(--chg);background:var(--chg-bg);padding:0 7px;border-radius:99px;white-space:nowrap}
+
+/* panel */
+#panel{border-left:1px solid var(--line);background:var(--paper);overflow:auto;padding:16px 18px 24px}
+.pk{font-size:11.5px;color:var(--ink3);letter-spacing:.02em}
+#panel h2{font-size:18px;margin:2px 0 6px;letter-spacing:-.01em}
+#panel h2:focus{outline:none}
+#panel h3{font-size:12.5px;color:var(--ink2);margin:16px 0 6px;font-weight:650}
+#panel p{margin:6px 0}
+.muted{color:var(--ink3);font-size:12.5px}
+.note{font-size:12.5px;color:var(--ink2);background:#f1eee7;border-radius:8px;padding:6px 9px}
+.chgnote{border-left:4px solid var(--chg);background:var(--chg-bg);padding:7px 10px;border-radius:0 8px 8px 0;font-size:13px;margin:10px 0}
+.chgnote.soft{background:#f7efe8}
+.list{display:flex;flex-direction:column;gap:6px}
+.rbtn,.cbtn{display:block;text-align:left;width:100%;border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 9px}
+.rbtn:hover,.cbtn:hover{border-color:var(--rel-weak)}
+.rid{font-size:11px;color:var(--rel);font-weight:700;margin-right:6px}
+.rbtn small,.cbtn small{display:block;color:var(--ink3);font-size:12px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 12px;font-weight:600}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.sm{padding:3px 9px;font-size:12px}
+.act{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.ends{display:grid;grid-template-columns:1fr;gap:6px}
+.ends .arr{color:var(--rel);font-weight:700;padding-left:10px}
+/* 관계 참고: 읽기 전용, 지도 선택·준비 대상은 그대로 */
+.xbtn{display:block;text-align:left;width:100%;border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 9px}
+.xbtn:hover{border-color:var(--rel-weak)}
+.xbtn[aria-expanded=true]{border-color:var(--rel);background:#eef3f8}
+.xbtn .dir{color:var(--rel);font-weight:700;margin-right:4px}
+.xbtn small{display:block;color:var(--ink3);font-size:12px}
+.xpeek{border-left:3px solid var(--rel);background:#eef3f8;border-radius:0 8px 8px 0;padding:8px 11px;font-size:13px}
+.xpeek .pkh{font-size:11.5px;color:var(--rel);font-weight:650}
+.xpeek p{margin:6px 0}
+.xends{display:grid;gap:2px;margin:6px 0}
+.xends > div{background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.xends small{display:block;color:var(--ink3);font-size:11.5px}
+.xends .arr{background:none;border:0;padding:0 8px;color:var(--rel);font-weight:650;font-size:12px}
+.xpeek .pka{flex-wrap:wrap;gap:8px;margin-top:6px}
+.xpeek .mv small{display:block;color:var(--ink3);font-size:11.5px;margin-top:2px}
+
+/* focus */
+#focusView{overflow:auto;min-height:0;background:var(--bg)}
+.fbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--paper);border-bottom:1px solid var(--line)}
+.fpath{flex:1;min-width:0;font-size:13px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fpath b{color:var(--ink)}
+.fwrap{display:grid;grid-template-columns:220px minmax(0,720px);gap:28px;justify-content:center;padding:22px 20px 80px}
+.rail{position:sticky;top:70px;align-self:start;font-size:12.5px}
+.rail h3{font-size:12px;color:var(--ink3);margin:0 0 8px;font-weight:650}
+.rail .parent{background:var(--grp);border:1.5px dashed var(--grpline);border-radius:10px;padding:8px 10px;margin-bottom:14px}
+.rail .parent small{display:block;color:var(--ink3)}
+.xrel{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 9px;margin-bottom:6px}
+.xrel .dir{color:var(--rel);font-weight:700}
+.xrel small{display:block;color:var(--ink3)}
+.fbody h2{font-size:24px;margin:0 0 4px;letter-spacing:-.02em}
+.fbody .lead{font-size:15px;color:var(--ink2);margin:0 0 18px}
+.fbody section{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:14px}
+.fbody h3{font-size:14.5px;margin:0 0 10px}
+.fact{margin:8px 0;line-height:1.65}
+.ev{border:1px solid var(--rel-weak);background:#eef3f8;color:var(--rel);font-size:11.5px;font-weight:650;border-radius:99px;padding:0 8px;margin-left:4px;vertical-align:1px}
+.ev[aria-expanded=true]{background:var(--rel);color:#fff}
+.peek{border-left:3px solid var(--rel);background:#eef3f8;border-radius:0 8px 8px 0;padding:8px 12px;margin:2px 0 12px;font-size:13px}
+.peek .pkh{font-size:11.5px;color:var(--rel);font-weight:650}
+.peek p{margin:4px 0}
+.peek code{font-size:12px;background:#fff;padding:0 4px;border-radius:4px}
+.pka{display:flex;gap:12px;align-items:center}
+.pka a{color:var(--rel)}
+.ba{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch;margin-bottom:6px}
+.ba > div{border-radius:10px;padding:9px 12px;border:1px solid var(--line)}
+.ba small{display:block;font-size:11px;color:var(--ink3)}
+.ba .b{background:#f4f2ee;color:var(--ink2)}
+.ba .a{background:var(--chg-bg);border-color:#efc9ad}
+.ba .arrow{align-self:center;border:0;color:var(--chg);font-weight:700;padding:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.two > div{border-radius:10px;padding:9px 12px;border:1px solid var(--line)}
+.two .ttl{font-weight:650;font-size:13px}
+.two .copy{background:#fff;border:2px solid var(--ink)}
+.two .now{background:#f4f2ee;border-style:dashed}
+.two p{margin:4px 0 0;font-size:13px;color:var(--ink2)}
+.rules{margin:4px 0 8px;padding:0;list-style:none}
+.rules li{padding:4px 0;border-top:1px solid #ece8e0;font-size:13.5px}
+.rules b{display:inline-block;min-width:76px;color:var(--ink)}
+.mock{border-style:dashed !important;background:#faf8f3 !important}
+.steps{margin:6px 0 4px;padding-left:20px}
+.steps li{margin:5px 0;font-size:13.5px}
+.syn{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#ece8df;padding:0 5px;border-radius:4px}
+.nul{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink2);border:1px dashed var(--ink3);padding:0 5px;border-radius:4px}
+.unv li{font-size:13px;color:var(--ink2);margin:3px 0}
+.kidrow{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid #ece8e0;padding:8px 0}
+.kidrow:first-of-type{border-top:0}
+.kidrow .kchg2{font-size:11px;font-weight:650;color:var(--chg);background:var(--chg-bg);padding:0 7px;border-radius:99px;margin-left:6px}
+
+/* prep */
+.prep{position:fixed;inset:0;background:#1d212666;display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+.prep[hidden]{display:none}
+.prepbox{background:var(--paper);border-radius:14px;width:min(680px,100%);max-height:min(760px,100%);display:flex;flex-direction:column;box-shadow:0 20px 50px #0003}
+.preph{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:14px 18px 10px;border-bottom:1px solid var(--line)}
+.preph h2{font-size:17px;margin:2px 0 0}
+.prepscroll{overflow:auto;padding:12px 18px 18px}
+.prepscroll label{display:block;font-size:12.5px;font-weight:650;color:var(--ink2);margin:12px 0 4px}
+.prepscroll .edited{font-size:11px;font-weight:650;color:var(--rel);margin-left:6px}
+.prepscroll textarea{display:block;width:100%;font:13.5px/1.55 inherit;font-family:inherit;border:1px solid var(--line);border-radius:9px;padding:8px 10px;resize:vertical;background:#fff;margin-top:4px}
+.sendnote{margin-top:14px;font-size:12.5px;color:var(--ink2);border-top:1px solid var(--line);padding-top:10px}
+
+/* narrow */
+@media (max-width:700px){
+  #top{padding:10px 14px 8px}
+  .t1 h1{font-size:15.5px}
+  .change{gap:4px;flex-direction:column;font-size:13px}
+  #main{display:block;overflow:auto}
+  #mapView{border-bottom:1px solid var(--line)}
+  #mapScroll{flex:none;max-height:66vh;max-height:66dvh}
+  .t1 .scope{display:none}
+  .tools{padding:5px 12px;gap:4px 8px;flex-wrap:nowrap;align-items:flex-start}
+  .legend{gap:1px 10px;font-size:11px}
+  .zoom button{width:26px;height:26px}
+  .zoom output{min-width:38px}
+  .gtog{padding:1px 8px;margin-top:2px}
+  #world.narrow .grp{padding:5px 6px 7px}
+  #world.narrow .gsel{padding:3px 5px}
+  #world.narrow .kid{padding:6px 8px}
+  #panel{border-left:0;overflow:visible;padding:14px 16px 28px}
+  #app.focusing #main{overflow:hidden;display:flex;flex-direction:column}
+  #focusView{flex:1}
+  .fbar{padding:8px 12px;gap:6px 8px;flex-wrap:wrap}
+  .fpath{order:3;flex-basis:100%;white-space:normal;font-size:12.5px}
+  .fbar .sp{flex:1}
+  .fwrap{grid-template-columns:minmax(0,1fr);padding:14px 16px 60px;gap:12px}
+  .rail{position:static}
+  .fbody h2{font-size:21px}
+  .ba{grid-template-columns:1fr}
+  .ba .arrow{transform:rotate(90deg);justify-self:center}
+  .two{grid-template-columns:1fr}
+  .prep{padding:0}
+  .prepbox{width:100%;height:100%;max-height:none;border-radius:0}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="top">
+    <div class="t1"><h1>AgentFlow · 배경 사본 기능 일부 지도</h1><span class="scope">FLOW091-C 과거 개발 계약·MOCK 검사 보고를 읽는 연구 시안</span></div>
+    <div class="change">
+      <div class="c"><span class="tag chg">바뀐 것</span><span>목적이 작업문의 <b>분리된 배경 블록</b>에만 들어감 — 작업문과 미리보기</span></div>
+      <div class="c"><span class="tag keep">지킬 것</span><span>이미 맡긴 요청의 사본은 그대로, 다음 명시 새 요청만 최신 구상</span></div>
+    </div>
+    <details><summary>자료 범위</summary>
+      <p>원문: <a href="https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md" target="_blank" rel="noopener">flow091-background-contract.md</a> (고정 commit 5416dec). 개발 계약과 MOCK 검사 보고이며, 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없습니다. 다섯 묶음과 세부 구분은 AI가 이해를 돕기 위해 제안한 구성이고, 선은 원문 계약에 적힌 전달 관계만 그렸습니다.</p>
+    </details>
+  </header>
+  <main id="main">
+    <section id="mapView" aria-label="기능 지도">
+      <div class="tools">
+        <div class="legend">
+          <span><i class="lg-box"></i>묶음 · AI 제안</span>
+          <span><svg width="30" height="12" aria-hidden="true"><path d="M1 6H24" stroke="#2c5a86" stroke-width="1.8"/><path d="M22 2L28 6L22 10" fill="none" stroke="#2c5a86" stroke-width="1.8"/></svg>원문 계약의 전달 (순서 아님)</span>
+          <span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="#fffdf8" stroke="#2c5a86" stroke-width="1.6"/></svg>접힌 묶음 안으로 모음 · 숫자는 관계 수</span>
+          <span><i class="lg-chg"></i>이번 변경</span>
+        </div>
+        <div class="zoom" role="group" aria-label="배율">
+          <button id="zOut" aria-label="축소">−</button><output id="zVal" aria-live="polite"></output><button id="zIn" aria-label="확대">+</button>
+        </div>
+      </div>
+      <div id="mapScroll" tabindex="0" aria-label="지도 영역 (스크롤 가능)">
+        <div id="sizer"><div id="world"><svg id="edges" aria-hidden="true"></svg></div></div>
+      </div>
+    </section>
+    <aside id="panel" aria-label="선택 설명"></aside>
+    <section id="focusView" hidden aria-label="집중 읽기"></section>
+  </main>
+  <div id="prep" class="prep" hidden>
+    <div class="prepbox" role="dialog" aria-modal="true" aria-labelledby="prepTitle">
+      <div class="preph">
+        <div><div class="pk">확인·조정 준비문 · 보내지 않음</div><h2 id="prepTitle"></h2></div>
+        <button id="prepClose" class="btn">닫기</button>
+      </div>
+      <div class="prepscroll" id="prepScroll">
+        <p class="muted">지도의 묶음은 이해를 돕는 AI 제안입니다. 실제로 확인·조정할 범위는 아래 문장에서 따로 정합니다.</p>
+        <label for="pf-target">대상과 범위<span class="edited" data-ed="target" hidden>직접 고침</span></label><textarea id="pf-target" data-f="target" rows="3"></textarea>
+        <label for="pf-keep">꼭 지킬 조건<span class="edited" data-ed="keep" hidden>직접 고침</span></label><textarea id="pf-keep" data-f="keep" rows="7"></textarea>
+        <label for="pf-evidence">필요한 근거<span class="edited" data-ed="evidence" hidden>직접 고침</span></label><textarea id="pf-evidence" data-f="evidence" rows="3"></textarea>
+        <label for="pf-unknown">아직 확인하지 않은 사실<span class="edited" data-ed="unknown" hidden>직접 고침</span></label><textarea id="pf-unknown" data-f="unknown" rows="4"></textarea>
+        <p class="sendnote" id="sendNote">이 준비문은 어디에도 보내지 않았습니다. 전달·수락·완료 상태가 아닙니다. 직접 고친 문장은 닫았다 다시 열어도, 전체 지도로 돌아가도 그대로 남습니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(()=>{
+const SRC='https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md';
+
+/* 원문 사실 (FLOW091-C, 고정 commit 5416dec) — 문장은 이 화면의 요약 */
+const FACTS={
+ F1:{l:'L52',a:'#L52',t:'목적은 ‘작업문에서 제외’에서 ‘분리된 배경 블록 안에만 포함’으로 바뀌었다. 목적을 요청·출처·기준·지시로 쓰지 않는 성질은 그대로다.',
+     s:'기존 테스트 변경표: ‘목적이 작업문에 없음’을 ‘목적은 분리된 배경 블록 안에만 있고 요청·출처·기준·지시에는 없음’으로 바꿨다고 적는다.',
+     k:'목적은 분리된 배경 블록 안에만 넣고, 요청·출처·기준·지시로 쓰지 않는다.'},
+ F2:{l:'L10',a:'#L10',t:'명시적인 새 요청을 보낼 때만 목적과 그 요청의 대상 영역 하나를 사본으로 고정한다. 지도에서 고른 영역이 아니며, 다른 영역·관계·좌표·목적 이력은 넣지 않는다. 빈 값은 null이고 ‘미정’ 같은 내용을 만들지 않는다.',
+     s:'<code>Task.background</code> = {version, revision, brief, area|null}. area는 submit이 정한 요청 대상 영역(지도 선택 아님).',
+     k:'사본은 명시 새 요청 때 고정된 목적과 대상 영역 하나뿐. 빈 값은 null 그대로.'},
+ F3:{l:'L11',a:'#L11',t:'목적·영역 이름·구상 수정, 보관, 재배치, 작업 옮기기, AI 재정리, 반복 내보내기, 탐색은 기존 사본을 바꾸지 않는다. 다음 명시 새 요청만 최신 구상을 쓴다. 합성 시험답변은 사용자 요청이 아니므로 null이다.',
+     s:'고정 행: 이후 수정·보관·재배치·작업 이동·재정리·반복 내보내기·탐색은 사본을 바꾸지 않음. <code>test_answer</code>는 null.',
+     k:'다시 만들기·다시 내보내기·구상 수정으로 이미 맡긴 사본을 바꾸지 않는다. 다음 명시 새 요청만 최신.'},
+ F4:{l:'L12',a:'#L12',t:'일반 보고는 정확히 연결된 반환 대상 작업의 사본을 그대로 잇는다. 대상이 없으면 null이다.',
+     s:'일반 보고 행: 반환 작업의 <code>background</code>는 연결된 대상 작업의 사본.',
+     k:'일반 보고는 정확히 연결된 대상 작업의 사본만. 대상이 없으면 null.'},
+ F5:{l:'L13',a:'#L13',t:'파일 반환은 반환 식별자가 일치하는 내보내기 기록의 사본을 쓴다. 옛 기록에 없으면 null이며 최신 구상으로 메우지 않는다.',
+     s:'파일 반환 행: 일치하는 <code>returnId</code>의 <code>ExportRecord.background</code>.',
+     k:'파일 반환은 일치하는 반환 식별자의 기록 사본. 없으면 null, 최신 구상으로 메우지 않는다.'},
+ F6:{l:'L14 · L55',a:'#L14',t:'내보내기 기록은 그때 작업문에 실제로 넣은 사본을 보존한다. 작업문 전문 전체는 보존하지 않는다. 기록은 외부에서 받았거나 수락했다는 증거가 아니다.',
+     s:'<code>markHandoff</code>가 작업문에 넣은 사본을 <code>ExportRecord.background</code>로 보존. 한계 L55: 전문은 저장하지 않음.',
+     k:'내보내기 기록에는 당시 넣은 사본만 남는다. 전문 보존이나 수신·수락 증거로 쓰지 않는다.'},
+ F7:{l:'L15',a:'#L15',t:'AI 입력의 배경은 출처·기준과 분리된 전용 필드다. 서버 검증기·공급자 프롬프트·MOCK 경로가 같은 형식을 받도록 정했고, 실행 범위는 이번 요청이 정한다.',
+     s:'<code>ContextRequest.background</code> (<code>idea022.context.7</code>), <code>sources</code>·<code>bases</code>와 분리.',
+     k:'배경은 출처·기준과 분리된 자료. 실행 범위는 이번 요청이 정한다.'},
+ F8:{l:'L16',a:'#L16',t:'작업문·미리보기·Markdown은 배경을 별도 블록으로 구분하고, 배경 전체 구현이나 아직 정하지 않은 점의 확정을 지시하지 않는다. 사본이 없거나 둘 다 비면 블록을 넣지 않는다.',
+     s:'<code>handoffText</code>에 ‘프로젝트 배경·영역 구상 — 이번 요청 범위와 구분’ 블록.',
+     k:'배경 블록은 이번 요청 범위와 구분하고, 배경 전체 구현이나 미정 사항 확정을 지시하지 않는다. 사본이 없거나 비면 블록을 넣지 않는다.'},
+ F9:{l:'L17',a:'#L17',t:'배경을 출처·기준·새 사용자 결정으로 자동 승격하지 않는다. 사용자가 직접 고친 범위·다음 단계·검사 내용의 우선권은 그대로다.',
+     s:'승격 금지 행: <code>sources</code>·<code>bases</code>·새 결정으로 올리지 않음. <code>manual.scope/next/checks</code> 우선.',
+     k:'배경을 출처·기준·새 결정으로 올리지 않는다. 직접 고친 범위·다음 단계·검사가 우선한다.'},
+ F10:{l:'L18–22',a:'#L18-L22',t:'구상이 뒤에 바뀌면 ‘이 사본은 그대로, 다음 새 요청부터 최신’이라고 안내한다. 옛 저장 형식은 현재 구상을 소급하지 않고 사본 없음(null)으로 옮긴다.',
+     s:'화면 행: ‘그 뒤 구상이 바뀜 (이 사본은 그대로)’ 표시. 형식 이관: project.1~4는 <code>background:null</code>.',
+     k:'구상이 바뀌어도 기존 사본은 그대로라고 안내한다. 옛 형식은 null로 옮기고 소급하지 않는다.'},
+ F11:{l:'L33–41',a:'#L33-L41',t:'‘A 내보내기 → 변경 → B → 늦은 A 보고’에서 A의 사본과 B의 포커스·요청·사본을 보존했다는 검사 보고가 있다. 가짜 호출을 쓴 MOCK 검사이며 실제 사용자 사건이나 실제 AI 처리 성공이 아니다.',
+     s:'노드 검사 c, 브라우저 test_16(실제 HTTP, MOCK). 실제 외부 AI 호출 없음(L4).',
+     k:''}
+};
+
+/* 보기용 기능 묶음 5개와 일부 세부 — AI 해석 제안 */
+const N={
+ G1:{name:'구상과 목적',short:'목적과 영역 구상, 지금 상태',role:'프로젝트 목적과 영역 구상을 다듬는 곳. 지금 구상은 계속 바뀔 수 있다.',facts:['F3','F10']},
+ G2:{name:'요청 맥락',short:'새 요청의 배경과 범위',kids:['C21','C22'],role:'새 요청이 어떤 배경과 범위로 나가는지 다루는 부분.'},
+ C21:{name:'새 요청의 배경 고정',p:'G2',short:'명시 새 요청 때만 사본',role:'명시적인 새 요청을 보낼 때만 목적과 대상 영역 하나를 사본으로 고정한다.',facts:['F2','F3']},
+ C22:{name:'요청 범위 구분',p:'G2',short:'실행 범위는 이번 요청',role:'실행 범위는 이번 요청이 정하고 배경은 자료로만 둔다.',facts:['F7','F9']},
+ G3:{name:'전달할 내용',short:'AI 입력과 사람이 읽는 작업문',kids:['C31','C32'],role:'AI에게 보내는 입력과 사람이 읽는 작업문, 두 형태.'},
+ C31:{name:'AI 입력',p:'G3',short:'배경은 전용 필드',role:'배경을 출처·기준과 분리된 전용 필드로 싣는다.',facts:['F7','F9']},
+ C32:{name:'작업문과 미리보기',p:'G3',short:'배경을 별도 블록으로',role:'작업문·미리보기·Markdown에 배경을 별도 블록으로 넣는다.',facts:['F1','F3','F8','F9','F10'],changed:true},
+ G4:{name:'결과 연결',short:'돌아온 결과를 어느 사본에 잇나',kids:['C41','C42'],role:'돌아온 결과를 어느 작업의 사본에 잇는지 다루는 부분.'},
+ C41:{name:'일반 보고 연결',p:'G4',short:'연결된 대상 작업의 사본',role:'정확히 연결된 대상 작업의 사본을 그대로 잇는다.',facts:['F4']},
+ C42:{name:'파일 반환 연결',p:'G4',short:'일치하는 반환 식별자',role:'반환 식별자가 일치하는 내보내기 기록의 사본을 쓴다.',facts:['F5']},
+ G5:{name:'저장·복구',short:'내보내기 기록·저장 형식',role:'내보내기 기록과 저장 형식. 당시 작업문에 넣은 사본을 보존한다.',facts:['F6','F10']}
+};
+const ORDER=['G1','G2','G3','G4','G5'];
+
+/* 원문 계약의 명시 관계 6개 */
+const RELS=[
+ {id:'R1',from:'G1',to:'C21',kind:'명시 새 요청 때만 사본 고정',f:'F2',
+  cond:'명시적인 새 요청을 보낼 때만 그때의 목적과 그 요청의 대상 영역 하나를 사본으로 고정합니다. 지도에서 고르거나 둘러보는 것은 새 요청이 아닙니다.'},
+ {id:'R2',from:'C21',to:'C31',kind:'요청 사본',f:'F7',
+  cond:'명시 새 요청 때 고정한 그 요청의 배경 사본을 AI 입력의 전용 필드로 싣습니다. 출처·기준과 분리되고 실행 범위는 이번 요청이 정합니다.'},
+ {id:'R3',from:'C21',to:'C32',kind:'요청 사본',f:'F8',
+  cond:'명시 새 요청 때 고정한 그 요청의 배경 사본을 작업문·미리보기의 별도 블록으로 넣습니다. 지금 지도에 보이는 최신 구상을 가져오는 것이 아닙니다. 사본이 없거나 비면 블록을 넣지 않습니다.'},
+ {id:'R4',from:'C32',to:'G5',kind:'내보내기 기록의 사본',f:'F6',
+  cond:'작업문에 실제로 넣은 사본을 내보내기 기록에 남깁니다. 작업문 전문 저장이나 외부에서 받거나 수락했다는 증거가 아닙니다.'},
+ {id:'R5',from:'G5',to:'C42',kind:'일치하는 반환 식별자',f:'F5',
+  cond:'반환 식별자가 일치하는 내보내기 기록의 사본을 씁니다. 옛 기록에 사본이 없으면 빈 값 그대로이며 최신 구상으로 메우지 않습니다.'},
+ {id:'R6',from:'C21',to:'C41',kind:'정확히 연결된 대상 작업의 사본',f:'F4',
+  cond:'일반 보고는 정확히 연결된 대상 작업의 사본을 그대로 잇습니다. 대상이 없으면 빈 값 그대로입니다.'}
+];
+
+const STEPS=[0.6,0.75,0.9,1,1.15,1.3];
+
+const $=(s,r=document)=>r.querySelector(s);
+const app=$('#app'),main=$('#main'),ms=$('#mapScroll'),sizer=$('#sizer'),world=$('#world'),svg=$('#edges'),panel=$('#panel'),fv=$('#focusView'),prep=$('#prep');
+const state={layout:null,scale:1,depth:{G2:0,G3:1,G4:0},sel:null,view:'map',focusId:null,saved:null,prep:{},prepOpener:null,prepFvTop:0,peek:null,xref:null};
+window.__study={state,RELS,N};
+
+const parentOf=id=>N[id].p||null;
+const isHidden=id=>{const p=parentOf(id);return !!(p&&!state.depth[p]);};
+const rep=id=>isHidden(id)?parentOf(id):id;
+const nodeEl=id=>document.getElementById('n-'+id);
+const focusTarget=id=>{const r=rep(id);return N[r].p?nodeEl(r):nodeEl(r).querySelector('.gsel');};
+const nm=id=>N[id].name;
+const where=id=>N[id].p?`‹${nm(N[id].p)}› 안`:'묶음';
+const relsTouching=id=>{const ids=N[id].kids?[id,...N[id].kids]:[id];return RELS.filter(r=>ids.includes(r.from)||ids.includes(r.to));};
+
+/* ---------- map ---------- */
+function buildMap(){
+ for(const g of ORDER){
+  const n=N[g],d=document.createElement('div');
+  d.className='grp'+(n.kids?'':' leaf');d.id='n-'+g;d.dataset.id=g;
+  let h=`<div class="ghead"><button class="gsel" data-sel="${g}" aria-pressed="false"><span class="gname">${n.name}</span><span class="gshort">${n.short}</span></button>`;
+  if(n.kids)h+=`<button class="gtog" data-tog="${g}" aria-expanded="false"></button>`;
+  h+='</div>';
+  if(n.kids){
+   h+='<div class="gfold"></div><div class="kids">'+n.kids.map(k=>{const c=N[k];return `<button class="kid${c.changed?' chg':''}" id="n-${k}" data-sel="${k}" aria-pressed="false"><span class="kname">${c.name}</span>${c.changed?'<span class="kchg">이번 변경</span>':''}<span class="kshort">${c.short}</span></button>`;}).join('')+'</div>';
+  }
+  d.innerHTML=h;world.appendChild(d);
+ }
+}
+/* 지도 크기: 실제 렌더된 world(펼침 깊이 포함)를 기준으로 sizer·선 캔버스를 맞춘다 */
+function syncSize(){
+ const w=world.offsetWidth,h=world.offsetHeight,s=state.scale;
+ sizer.style.width=w*s+'px';sizer.style.height=h*s+'px';
+ svg.setAttribute('width',w);svg.setAttribute('height',h);
+}
+function applyLayout(){
+ const L=matchMedia('(max-width:700px)').matches?'narrow':'wide';
+ if(L===state.layout)return;
+ state.layout=L;world.className=L;
+ state.scale=1;applyScale();drawEdges();
+}
+function applyScale(){
+ world.style.transform=`scale(${state.scale})`;
+ syncSize();
+ sizer.dataset.scale=state.scale;
+ $('#zVal').textContent=Math.round(state.scale*100)+'%';
+ $('#zOut').disabled=state.scale<=STEPS[0];$('#zIn').disabled=state.scale>=STEPS[STEPS.length-1];
+}
+function zoom(dir){
+ const i=STEPS.indexOf(state.scale),j=Math.max(0,Math.min(STEPS.length-1,(i<0?3:i)+dir));
+ const s0=state.scale,s1=STEPS[j];if(s0===s1)return;
+ const cx=(ms.scrollLeft+ms.clientWidth/2)/s0,cy=(ms.scrollTop+ms.clientHeight/2)/s0;
+ state.scale=s1;applyScale();
+ ms.scrollLeft=cx*s1-ms.clientWidth/2;ms.scrollTop=cy*s1-ms.clientHeight/2;
+}
+function applyDepth(){
+ for(const g of ['G2','G3','G4']){
+  const el=nodeEl(g),open=!!state.depth[g],n=N[g];
+  el.classList.toggle('collapsed',!open);el.dataset.depth=open?1:0;
+  const t=el.querySelector('.gtog');t.textContent=open?'접기':'펼치기';t.setAttribute('aria-expanded',open);
+  t.setAttribute('aria-label',`${n.name} ${open?'접기':'펼치기'}`);
+  const ch=n.kids.filter(k=>N[k].changed);
+  el.querySelector('.gfold').innerHTML=ch.length
+   ?`<div class="agg"><span class="dot"></span>안에 바뀐 부분 · ${ch.map(nm).join(', ')}</div><div class="sub">세부 ${n.kids.length}개 접힘 · 묶음 전체 변경 아님</div>`
+   :`<div class="sub">세부 ${n.kids.length}개 접힘 · ${n.kids.map(nm).join(', ')}</div>`;
+ }
+ syncSize();markSel();drawEdges();
+}
+function wrect(el){
+ const w=world.getBoundingClientRect(),r=el.getBoundingClientRect(),s=state.scale;
+ return {x:(r.left-w.left)/s,y:(r.top-w.top)/s,w:r.width/s,h:r.height/s};
+}
+function bundles(){
+ const m=new Map();
+ for(const r of RELS){const a=rep(r.from),b=rep(r.to),k=a+'>'+b;if(!m.has(k))m.set(k,{k,a,b,rels:[]});m.get(k).rels.push(r);}
+ return [...m.values()];
+}
+function drawEdges(){
+ if(!state.layout||!world.offsetWidth)return;
+ const NS='http://www.w3.org/2000/svg';
+ svg.innerHTML=`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2c5a86"/></marker></defs>`;
+ /* 끝점은 항상 카드의 좌우 옆면: 펼친 묶음 안 세부도 옆면은 묶음 여백에만 닿아 글자 위를 지나지 않는다.
+    같은 열에 쌓인 두 부분은 지도 바깥 여백 쪽으로 돌아간다. */
+ const W=world.offsetWidth;let laneL=0,laneR=0;
+ const q=v=>Math.round(v*10)/10,qr=o=>({x:q(o.x),y:q(o.y),w:q(o.w),h:q(o.h)});
+ for(const b of bundles()){
+  const A=qr(wrect(nodeEl(b.a))),B=qr(wrect(nodeEl(b.b)));
+  let sx,sy,ex,ey,d;
+  const ov=Math.min(A.y+A.h,B.y+B.h)-Math.max(A.y,B.y),mid=(Math.max(A.y,B.y)+Math.min(A.y+A.h,B.y+B.h))/2;
+  if(B.x>=A.x+A.w+8){sx=A.x+A.w;ex=B.x;if(ov>=24){sy=ey=mid;}else{sy=A.y+A.h/2;ey=B.y+B.h/2;}const m=(ex-sx)/2;d=`M${sx} ${sy}C${sx+m} ${sy} ${ex-m} ${ey} ${ex} ${ey}`;}
+  else if(A.x>=B.x+B.w+8){sx=A.x;ex=B.x+B.w;if(ov>=24){sy=ey=mid;}else{sy=A.y+A.h/2;ey=B.y+B.h/2;}const m=(sx-ex)/2;d=`M${sx} ${sy}C${sx-m} ${sy} ${ex+m} ${ey} ${ex} ${ey}`;}
+  else{
+   const left=(A.x+A.w/2+B.x+B.w/2)/2<W/2;
+   sy=A.y+A.h*.62;ey=B.y+B.h*.38;
+   if(left){sx=A.x;ex=B.x;const lx=Math.max(2,Math.min(sx,ex)-12-laneL*5);laneL++;d=`M${sx} ${sy}C${lx} ${sy} ${lx} ${ey} ${ex} ${ey}`;}
+   else{sx=A.x+A.w;ex=B.x+B.w;const lx=Math.min(W-2,Math.max(sx,ex)+12+laneR*5);laneR++;d=`M${sx} ${sy}C${lx} ${sy} ${lx} ${ey} ${ex} ${ey}`;}
+  }
+  const aggFrom=b.rels.some(r=>r.from!==b.a),aggTo=b.rels.some(r=>r.to!==b.b);
+  const g=document.createElementNS(NS,'g');
+  g.dataset.k=b.k;g.dataset.rels=b.rels.map(r=>r.id).join(' ');g.dataset.from=b.a;g.dataset.to=b.b;
+  g.dataset.ends=[sx,sy,ex,ey].map(v=>Math.round(v*10)/10).join(',');
+  g.dataset.agg=(aggFrom?'from ':'')+(aggTo?'to':'');
+  const t=document.createElementNS(NS,'title');t.textContent=b.rels.map(r=>`${r.id} ${nm(r.from)} → ${nm(r.to)} · ${r.kind}`).join('\n');g.appendChild(t);
+  const vis=document.createElementNS(NS,'path');vis.setAttribute('d',d);vis.setAttribute('class','vis');if(!aggTo)vis.setAttribute('marker-end','url(#ah)');g.appendChild(vis);
+  svg.appendChild(g);
+  /* 누르는 영역은 양 끝 12px을 뺀 선 몸통만: 카드 글자·버튼 위의 누름을 가로채지 않는다 */
+  const L=vis.getTotalLength(),pts=[],tr=Math.min(12,L*.2);
+  for(let i=0;i<=24;i++){const p=vis.getPointAtLength(tr+(L-2*tr)*i/24);pts.push(`${p.x.toFixed(1)} ${p.y.toFixed(1)}`);}
+  const hit=document.createElementNS(NS,'path');hit.setAttribute('d','M'+pts.join('L'));hit.setAttribute('class','hit');g.appendChild(hit);
+  for(const [on,x,y] of [[aggFrom,sx,sy],[aggTo,ex,ey]])if(on){const c=document.createElementNS(NS,'circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',4.5);c.setAttribute('class','ring');g.appendChild(c);}
+  if(b.rels.length>1){const p=vis.getPointAtLength(L*.5),cc=document.createElementNS(NS,'circle'),tx=document.createElementNS(NS,'text');
+   cc.setAttribute('cx',p.x);cc.setAttribute('cy',p.y);cc.setAttribute('r',7.5);cc.setAttribute('class','cntc');
+   tx.setAttribute('x',p.x);tx.setAttribute('y',p.y+.5);tx.setAttribute('class','cnt');tx.textContent=b.rels.length;g.appendChild(cc);g.appendChild(tx);}
+ }
+ markEdges();
+}
+function selRelIds(){
+ const s=state.sel;if(!s)return null;
+ if(s.t==='rel')return [s.id];if(s.t==='bundle')return s.ids;
+ return relsTouching(s.id).map(r=>r.id);
+}
+function markEdges(){
+ const ids=selRelIds();
+ svg.querySelectorAll('g[data-k]').forEach(g=>{
+  const rs=g.dataset.rels.split(' ');const on=ids&&rs.some(r=>ids.includes(r));
+  g.classList.toggle('on',!!on);g.classList.toggle('dim',!!ids&&!on);
+ });
+}
+function markSel(){
+ document.querySelectorAll('.is-sel').forEach(e=>e.classList.remove('is-sel'));
+ document.querySelectorAll('[data-sel][aria-pressed=true]').forEach(e=>e.setAttribute('aria-pressed','false'));
+ const s=state.sel;
+ if(s&&s.t==='node'){const r=rep(s.id);nodeEl(r).classList.add('is-sel');const b=N[r].p?nodeEl(r):nodeEl(r).querySelector('.gsel');b.setAttribute('aria-pressed','true');}
+ markEdges();
+}
+function select(sel,fromPanel){
+ state.sel=sel;markSel();renderPanel();
+ if(fromPanel){const h=panel.querySelector('h2');h&&h.focus({preventScroll:true});}
+}
+function selectNode(id,fromPanel){
+ if(isHidden(id)){state.depth[parentOf(id)]=1;applyDepth();}
+ select({t:'node',id},fromPanel);
+}
+
+/* ---------- panel ---------- */
+function endBtn(id){
+ const hid=isHidden(id);
+ return `<button class="rbtn" data-goto="${id}">${nm(id)}<small>${where(id)}${hid?' · 지금 접혀 있음, 눌러서 펼쳐 선택':''}</small></button>`;
+}
+/* 선택한 부분이 받거나 넘기는 관계: 누르면 읽기용 참고가 열리고, 지도 선택·깊이·준비 대상은 그대로다 */
+function xBtn(r,ids){
+ const inn=ids.includes(r.to),out=ids.includes(r.from),other=inn&&!out?r.from:r.to;
+ const dir=inn&&out?'안에서':inn?'받음 ←':'넘김 →';
+ return `<button class="xbtn" data-xref="${r.id}" aria-expanded="false" aria-controls="xr-${r.id}"><span class="dir">${dir}</span>${nm(other)}<small>${r.kind} · ${where(other)}</small></button>`;
+}
+function endLine(id,role){
+ const me=state.sel&&state.sel.t==='node'&&state.sel.id===id;
+ return `<div><small>${role}</small><b>${nm(id)}</b><small>${where(id)}${isHidden(id)?` · 지도에서는 접힌 ‹${nm(parentOf(id))}› 자리로 보임`:''}${me?' · 지금 선택':''}</small></div>`;
+}
+function openXref(btn){
+ closeXref(false);
+ const r=RELS.find(x=>x.id===btn.dataset.xref),f=FACTS[r.f],s=state.sel;
+ const ids=N[s.id].kids?[s.id,...N[s.id].kids]:[s.id];
+ const other=ids.includes(r.to)&&!ids.includes(r.from)?r.from:r.to;
+ const d=document.createElement('div');d.className='xpeek';d.id='xr-'+r.id;d.setAttribute('role','region');d.setAttribute('aria-label','관계 참고 · '+r.kind);
+ d.innerHTML=`<div class="pkh">참고 · 읽기 전용 — 지도 선택은 ‹${nm(s.id)}› 그대로 · 참고는 준비문을 바꾸지 않음</div>
+  <div class="xends">${endLine(r.from,'보내는 쪽')}<div class="arr">↓ ${r.kind}</div>${endLine(r.to,'받는 쪽')}</div>
+  <p>${r.cond}</p>
+  <p class="muted">원문 FLOW091-C ${f.l} · <a href="${SRC}${f.a}" target="_blank" rel="noopener">원문 줄 ↗</a> · 관계 ${r.id}</p>
+  <div class="pka"><button class="btn sm" data-act="xref-close">참고 닫기</button></div>
+  <div class="mv"><button class="btn sm" data-goto="${other}" data-mv="1">지도에서 ‘${nm(other)}’ 선택</button><small>선택만 옮깁니다. 요청을 보내거나 사본·준비문을 바꾸지 않습니다.</small></div>`;
+ btn.after(d);btn.setAttribute('aria-expanded','true');
+ state.xref={id:r.id};
+}
+function closeXref(restore=true){
+ const x=state.xref;if(!x)return;
+ const d=document.getElementById('xr-'+x.id);if(d)d.remove();
+ const b=panel.querySelector(`.xbtn[data-xref="${x.id}"]`);if(b)b.setAttribute('aria-expanded','false');
+ state.xref=null;
+ if(restore&&b)b.focus({preventScroll:true});
+}
+function renderPanel(){
+ const s=state.sel;let h='';state.xref=null;
+ if(!s){
+  h=`<div class="pk">선택 설명</div><h2 tabindex="-1">한 부분을 골라 보세요</h2>
+  <p>점선 영역은 이해를 돕기 위해 AI가 나눈 묶음이고, 선은 원문 계약에 적힌 전달만 그렸습니다. 이번에 바뀐 곳은 한 곳입니다.</p>
+  <div class="act"><button class="btn" data-goto="C32">바뀐 곳 고르기 · 작업문과 미리보기</button></div>`;
+ }else if(s.t==='node'){
+  const n=N[s.id],par=n.p?N[n.p]:null,rels=relsTouching(s.id),ids=n.kids?[s.id,...n.kids]:[s.id];
+  h=`<div class="pk">${par?`‹${par.name}› 묶음 안 세부 · AI 제안 구분`:'보기용 기능 묶음 · AI 제안'}</div><h2 tabindex="-1">${n.name}</h2><p>${n.role}</p>`;
+  if(isHidden(s.id))h+=`<p class="note">지금 접힌 ‹${par.name}› 안에 있어 지도에는 묶음 자리로 보입니다.</p>`;
+  if(n.changed)h+=`<div class="chgnote"><b>이번 변경</b> · 목적을 작업문의 분리된 배경 블록에만 넣음</div>`;
+  if(n.kids){
+   const ch=n.kids.filter(k=>N[k].changed);
+   if(ch.length)h+=`<div class="chgnote soft"><b>안에 바뀐 부분</b> · ${ch.map(nm).join(', ')} 한 곳. 묶음 전체가 바뀐 것은 아닙니다.</div>`;
+   h+=`<h3>세부 ${n.kids.length}개</h3><div class="list">${n.kids.map(endBtn).join('')}</div>`;
+  }
+  h+=`<h3>주고받는 전달 · 원문 계약</h3>`;
+  h+=rels.length?`<div class="list">${rels.map(r=>xBtn(r,ids)).join('')}</div>`:`<p class="muted">원문에 이 부분의 전달 관계는 적혀 있지 않습니다. 무관하다는 뜻은 아닙니다.</p>`;
+  h+=`<div class="act"><button class="btn primary" data-act="focus">${n.kids?'이 묶음 자세히 보기 →':'자세히 읽고 확인·조정 준비 →'}</button></div>`;
+ }else{
+  const ids=s.t==='rel'?[s.id]:s.ids,rs=RELS.filter(r=>ids.includes(r.id));
+  if(rs.length===1){
+   const r=rs[0],f=FACTS[r.f],a=rep(r.from)!==r.from||rep(r.to)!==r.to;
+   h=`<div class="pk">원문 계약의 전달 관계 · 실행 순서 아님 · ${r.id}</div><h2 tabindex="-1">${r.kind}</h2>
+   <div class="ends">${endBtn(r.from)}<div class="arr">↓ 전달</div>${endBtn(r.to)}</div>
+   ${a?`<p class="note">한쪽 끝이 접힌 묶음 안이라 지도에서는 묶음 자리로 모아 그렸습니다. 실제 끝은 위 두 부분입니다.</p>`:''}
+   <p>${r.cond}</p><p class="muted">FLOW091-C ${f.l} · <a href="${SRC}${f.a}" target="_blank" rel="noopener">원문 줄 ↗</a></p>`;
+  }else{
+   h=`<div class="pk">모아 그린 선 · 원문 관계 ${rs.length}개</div><h2 tabindex="-1">이 선에 담긴 실제 관계</h2>
+   <p class="muted">접힌 묶음 때문에 같은 자리로 모였을 뿐, 관계는 각각 따로입니다.</p>
+   <div class="list">${rs.map(r=>`<div class="rbtn" style="cursor:default" data-relrow="${r.id}">${r.kind}<small>실제 끝: ${nm(r.from)} (${where(r.from)}) → ${nm(r.to)} (${where(r.to)}) · ${r.id}</small><span class="act" style="margin-top:6px"><button class="btn sm" data-rel="${r.id}">이 관계만 보기</button></span></div>`).join('')}</div>`;
+  }
+ }
+ panel.innerHTML=h;
+}
+
+/* ---------- focus ---------- */
+function factP(fid,key){const f=FACTS[fid];return `<p class="fact" id="p-${key}">${f.t} <button class="ev" data-ev="${fid}" data-key="${key}" aria-expanded="false" aria-controls="pk-${key}">근거 ${f.l}</button></p>`;}
+function railHTML(id){
+ const n=N[id],par=n.p?N[n.p]:null;
+ const ids=n.kids?[id,...n.kids]:[id];
+ const out=relsTouching(id).filter(r=>!(ids.includes(r.from)&&ids.includes(r.to)));
+ let h=`<div class="parent"><small>${par?'상위 묶음 · AI 제안':'보기용 묶음 · AI 제안'}</small>${par?par.name:n.name}${par?` <small>함께 묶인 세부: ${par.kids.filter(k=>k!==id).map(nm).join(', ')}</small>`:''}</div>`;
+ h+=`<h3>바깥 연결 · 원문 계약</h3>`;
+ if(!out.length)h+=`<p class="muted">원문에 적힌 전달 관계가 없습니다. 무관하다는 뜻은 아닙니다.</p>`;
+ for(const r of out){
+  const inn=ids.includes(r.to),other=inn?r.from:r.to;
+  h+=`<div class="xrel" data-xrel="${r.id}"><span class="dir">${inn?'← 받음':'→ 보냄'}</span> ${nm(other)}<small>${where(other)} · ${r.kind} · ${r.id}${n.kids?` · 이쪽 끝: ${nm(inn?r.to:r.from)}`:''}</small></div>`;
+ }
+ return h;
+}
+function unverified(id){
+ let li=`<li>실제 AI가 배경과 이번 요청 범위를 구분해 다루는지 — 원문은 실제 호출 없이 가짜 호출로 형식·프롬프트만 검사했습니다 (L4, L58).</li><li>현재 제품 코드에서의 실제 동작 — 이 화면은 과거 계약을 읽을 뿐 확인하지 않습니다.</li>`;
+ if(id==='C32'||id==='G5')li+=`<li>과거 작업문 전문 — 내보내기 기록은 전문을 보존하지 않습니다 (L55).</li>`;
+ return `<section><h3>이 화면이 확인하지 않은 것</h3><ul class="unv">${li}</ul></section>`;
+}
+function renderFocus(){
+ const id=state.focusId,n=N[id],par=n.p?N[n.p]:null;
+ let h=`<div class="fbar"><button id="fBack" class="btn">← 전체 지도로</button><span class="fpath">${par?`‹${par.name}› 묶음 · AI 제안 › `:'보기용 묶음 · AI 제안 › '}<b>${n.name}</b></span><span class="sp"></span>`;
+ h+=n.kids?'':`<button id="fPrep" class="btn primary">확인·조정 준비</button>`;
+ h+=`</div><div class="fwrap"><aside class="rail">${railHTML(id)}</aside><article class="fbody">`;
+ h+=`<h2>${n.name}</h2><p class="lead">${n.role}</p>`;
+ if(n.changed){
+  h+=`<section><h3>무엇이 바뀌었나</h3><div class="ba"><div class="b"><small>전</small>목적을 작업문에서 제외</div><div class="arrow">→</div><div class="a"><small>후</small>목적은 작업문의 <b>분리된 배경 블록</b> 안에만</div></div>${factP('F1','C32-F1')}</section>`;
+  h+=`<section><h3>어느 시점의 배경인가</h3>
+   <div class="two"><div class="copy"><div class="ttl">이 작업의 요청 당시 사본</div><p>명시적인 새 요청을 보낼 때 고정. 목적과 그 요청의 대상 영역 하나만 담김.</p></div>
+   <div class="now"><div class="ttl">지금 구상</div><p>계속 다듬을 수 있음. 이미 맡긴 작업의 사본에는 들어가지 않음.</p></div></div>
+   <ul class="rules"><li><b>그대로</b>작업문을 다시 만들거나 다시 내보내도, 구상·이름을 고치거나 보관·재배치·재정리·탐색해도</li>
+   <li><b>최신</b>다음 명시 새 요청만 지금 구상을 사본으로 고정</li>
+   <li><b>비어 있음</b><span class="nul">null</span> 그대로 — ‘미정’으로 채우지 않음. 사본이 없거나 내용이 모두 비면 블록을 넣지 않음</li></ul>
+   ${factP('F3','C32-F3')}${factP('F10','C32-F10')}</section>`;
+  h+=`<section><h3>블록에 들어가는 방식</h3>${factP('F8','C32-F8')}${factP('F9','C32-F9')}</section>`;
+  h+=`<section class="mock"><h3>예시 · 문서의 MOCK 검사에서 재구성</h3>
+   <p class="muted">순서는 검사 보고를 재구성한 것이고, 목적 문장은 이 화면이 만든 합성값입니다. 실제 사용자 발화·날짜·승인·AI 처리 성공이 아닙니다.</p>
+   <ol class="steps">
+    <li><b>A 요청</b> · 목적 <span class="syn">합성 목적 1</span>, 대상 영역 ‘예약’ → A 사본 고정</li>
+    <li><b>목적 수정</b> · 지금 구상이 <span class="syn">합성 목적 2</span>로 바뀜 → A 사본은 그대로, A 작업에 ‘그 뒤 구상이 바뀜 (이 사본은 그대로)’</li>
+    <li><b>B 요청</b> · 대상 영역 ‘알림’, 구상 비어 있음 → B 사본: 목적 <span class="syn">합성 목적 2</span>, 구상 <span class="nul">null</span></li>
+    <li><b>늦은 A 보고</b> · 붙여넣기 보고와 파일 반환 모두 A 사본(<span class="syn">합성 목적 1</span>)으로 연결 → B의 포커스·요청·사본은 그대로</li>
+   </ol>${factP('F11','C32-F11')}</section>`;
+ }else if(n.kids){
+  h+=`<section><h3>이 묶음에 넣은 세부</h3><p class="muted">이 묶음 이름과 나눔은 원문에 없는 AI 제안입니다. 확인·조정 준비는 묶음이 아니라 세부 부분에서 시작합니다.</p>`;
+  h+=n.kids.map(k=>`<div class="kidrow"><div><b>${nm(k)}</b>${N[k].changed?'<span class="kchg2">이번 변경</span>':''}<div class="muted">${N[k].role}</div></div><button class="btn sm" data-fgo="${k}">이 세부 보기</button></div>`).join('');
+  h+=`</section>`;
+ }else{
+  h+=`<section><h3>원문 계약</h3>${n.facts.map(f=>factP(f,id+'-'+f)).join('')}</section>`;
+ }
+ if(!n.kids)h+=unverified(id);
+ h+=`</article></div>`;
+ fv.innerHTML=h;
+}
+function enterFocus(id){
+ const r=nodeEl(rep(id)).getBoundingClientRect();
+ state.saved={sl:ms.scrollLeft,st:ms.scrollTop,mainSt:main.scrollTop,panelSt:panel.scrollTop,scale:state.scale,sel:state.sel,depth:{...state.depth},rect:{x:r.x,y:r.y,w:r.width,h:r.height}};
+ closeXref(false);
+ state.view='focus';state.focusId=id;renderFocus();
+ app.classList.add('focusing');fv.hidden=false;fv.scrollTop=0;
+ $('#fBack').focus({preventScroll:true});
+}
+function switchFocus(id){closePeek(false);state.focusId=id;renderFocus();fv.scrollTop=0;$('#fBack').focus({preventScroll:true});}
+function returnAll(){
+ closePeek(false);if(!prep.hidden)closePrep(false);
+ const sv=state.saved;
+ app.classList.remove('focusing');fv.hidden=true;state.view='map';
+ state.depth={...sv.depth};applyDepth();
+ state.scale=sv.scale;applyScale();
+ main.scrollTop=sv.mainSt;ms.scrollLeft=sv.sl;ms.scrollTop=sv.st;
+ state.sel=sv.sel;markSel();renderPanel();drawEdges();
+ panel.scrollTop=sv.panelSt;
+ /* 호출했던 ‘자세히 읽고…’ 버튼으로 초점을 되돌린다(스크롤은 움직이지 않음) */
+ const opener=panel.querySelector('[data-act="focus"]');
+ if(opener)opener.focus({preventScroll:true});
+ else if(state.sel&&state.sel.t==='node')focusTarget(state.sel.id).focus({preventScroll:true});
+}
+
+/* ---------- evidence peek ---------- */
+function openPeek(btn){
+ if(state.peek)closePeek(false);
+ const key=btn.dataset.key,f=FACTS[btn.dataset.ev],p=document.getElementById('p-'+key);
+ const d=document.createElement('div');d.className='peek';d.id='pk-'+key;d.setAttribute('role','region');d.setAttribute('aria-label','근거 '+f.l);
+ d.innerHTML=`<div class="pkh">FLOW091-C ${f.l} · 고정 commit 5416dec</div><p>${f.s}</p><div class="pka"><a href="${SRC}${f.a}" target="_blank" rel="noopener">원문 줄 열기 ↗</a><button class="btn sm" data-act="peek-close">근거 닫기</button></div>`;
+ p.after(d);btn.setAttribute('aria-expanded','true');
+ state.peek={key,top:fv.scrollTop};
+}
+function closePeek(restore=true){
+ const pk=state.peek;if(!pk)return;
+ const d=document.getElementById('pk-'+pk.key);if(d)d.remove();
+ const b=fv.querySelector(`.ev[data-key="${pk.key}"]`);if(b)b.setAttribute('aria-expanded','false');
+ state.peek=null;
+ if(restore){fv.scrollTop=pk.top;b&&b.focus({preventScroll:true});}
+}
+
+/* ---------- prep ---------- */
+function defaults(id){
+ const n=N[id],facts=n.facts||[];
+ const lines=[...new Set(facts.map(f=>FACTS[f].l))];
+ const target=id==='C32'
+  ?'작업문과 미리보기 — 작업문·미리보기·Markdown에서 목적을 분리된 배경 블록으로 넣는 동작만 확인한다. 다른 기능을 구현하라는 요청이 아니다.'
+  :`${n.name} — 이 부분이 아래 원문 조건대로 동작하는지만 확인한다. 다른 기능을 구현하라는 요청이 아니다.`;
+ const keep=facts.map(f=>FACTS[f].k).filter(Boolean).map(t=>'- '+t).join('\n');
+ const evidence='FLOW091-C (commit 5416dec) '+lines.join(', ');
+ let unknown='- 실제 AI가 배경과 이번 요청 범위를 구분하는지: 실제 호출 없이 형식·프롬프트만 검사됨 (L58)\n- 현재 제품 코드의 동작: 이 준비문 작성 시점에 확인하지 않음';
+ if(id==='C32'||id==='G5')unknown+='\n- 과거 작업문 전문: 내보내기 기록에 보존되지 않음 (L55)';
+ return {target,keep,evidence,unknown};
+}
+function openPrep(){
+ const id=state.focusId;
+ if(!state.prep[id])state.prep[id]={val:defaults(id),def:defaults(id)};
+ const d=state.prep[id];
+ $('#prepTitle').textContent=N[id].name;
+ prep.querySelectorAll('textarea').forEach(t=>{t.value=d.val[t.dataset.f];});
+ markEdited();
+ state.prepOpener=$('#fPrep');state.prepFvTop=fv.scrollTop;
+ prep.hidden=false;fv.inert=true;$('#prepScroll').scrollTop=0;
+ $('#pf-target').focus({preventScroll:true});
+}
+function markEdited(){
+ const d=state.prep[state.focusId];if(!d)return;
+ prep.querySelectorAll('[data-ed]').forEach(s=>{s.hidden=d.val[s.dataset.ed]===d.def[s.dataset.ed];});
+}
+function closePrep(restore=true){
+ prep.hidden=true;fv.inert=false;
+ if(restore){fv.scrollTop=state.prepFvTop;state.prepOpener&&state.prepOpener.focus({preventScroll:true});}
+}
+prep.addEventListener('input',e=>{const t=e.target;if(t.dataset.f&&state.prep[state.focusId]){state.prep[state.focusId].val[t.dataset.f]=t.value;markEdited();}});
+$('#prepClose').addEventListener('click',()=>closePrep());
+
+/* ---------- events ---------- */
+world.addEventListener('click',e=>{
+ const tog=e.target.closest('[data-tog]');
+ if(tog){const g=tog.dataset.tog;state.depth[g]=state.depth[g]?0:1;applyDepth();renderPanel();return;}
+ const s=e.target.closest('[data-sel]');
+ if(s){select({t:'node',id:s.dataset.sel});return;}
+});
+svg.addEventListener('click',e=>{
+ const g=e.target.closest('g[data-k]');if(!g)return;
+ const ids=g.dataset.rels.split(' ');
+ select(ids.length===1?{t:'rel',id:ids[0]}:{t:'bundle',ids});
+});
+panel.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.xref){b.getAttribute('aria-expanded')==='true'?closeXref():openXref(b);}
+ else if(b.dataset.act==='xref-close')closeXref();
+ else if(b.dataset.rel)select({t:'rel',id:b.dataset.rel},true);
+ else if(b.dataset.goto)selectNode(b.dataset.goto,true);
+ else if(b.dataset.act==='focus'&&state.sel&&state.sel.t==='node')enterFocus(state.sel.id);
+});
+fv.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.id==='fBack')returnAll();
+ else if(b.id==='fPrep')openPrep();
+ else if(b.classList.contains('ev')){b.getAttribute('aria-expanded')==='true'?closePeek():openPeek(b);}
+ else if(b.dataset.act==='peek-close')closePeek();
+ else if(b.dataset.fgo)switchFocus(b.dataset.fgo);
+});
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Escape')return;
+ if(!prep.hidden){e.preventDefault();closePrep();}
+ else if(state.peek){e.preventDefault();closePeek();}
+ else if(state.xref){e.preventDefault();closeXref();}
+});
+$('#zIn').addEventListener('click',()=>zoom(1));
+$('#zOut').addEventListener('click',()=>zoom(-1));
+matchMedia('(max-width:700px)').addEventListener('change',()=>{applyLayout();});
+buildMap();
+const ro=new ResizeObserver(()=>{syncSize();drawEdges();});ro.observe(world);document.querySelectorAll('.grp').forEach(g=>ro.observe(g));
+applyLayout();applyDepth();renderPanel();
+if(document.fonts)document.fonts.ready.then(drawEdges);
+})();
+</script>
+</body>
+</html>

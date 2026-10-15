@@ -1,0 +1,11 @@
+--- v0/mixed-reading-study.html
++++ author-fix1/mixed-reading-study.html
+@@ -513,7 +513,7 @@
+  const ids=N[s.id].kids?[s.id,...N[s.id].kids]:[s.id];
+  const other=ids.includes(r.to)&&!ids.includes(r.from)?r.from:r.to;
+  const d=document.createElement('div');d.className='xpeek';d.id='xr-'+r.id;d.setAttribute('role','region');d.setAttribute('aria-label','관계 참고 · '+r.kind);
+- d.innerHTML=`<div class="pkh">참고 · 읽기 전용 — 지도 선택과 준비 대상은 ‹${nm(s.id)}› 그대로</div>
++ d.innerHTML=`<div class="pkh">참고 · 읽기 전용 — 지도 선택은 ‹${nm(s.id)}› 그대로 · 참고는 준비문을 바꾸지 않음</div>
+   <div class="xends">${endLine(r.from,'보내는 쪽')}<div class="arr">↓ ${r.kind}</div>${endLine(r.to,'받는 쪽')}</div>
+   <p>${r.cond}</p>
+   <p class="muted">원문 FLOW091-C ${f.l} · <a href="${SRC}${f.a}" target="_blank" rel="noopener">원문 줄 ↗</a> · 관계 ${r.id}</p>
