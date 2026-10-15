@@ -1,0 +1,27 @@
+2026-10-15T08:06:30.4474189Z test_01_direct_first_request_captures_visible_purpose (__main__.EntryReview.test_01_direct_first_request_captures_visible_purpose) ... ok
+2026-10-15T08:06:31.4581200Z test_02_area_path_and_later_plan_keep_old_background (__main__.EntryReview.test_02_area_path_and_later_plan_keep_old_background) ... ok
+2026-10-15T08:06:31.8600207Z test_03_blank_purpose_is_optional_and_double_submit_is_not_a_second_request (__main__.EntryReview.test_03_blank_purpose_is_optional_and_double_submit_is_not_a_second_request) ... ok
+2026-10-15T08:06:32.5278296Z test_04_invalid_purpose_preserves_both_inputs_then_retries_once (__main__.EntryReview.test_04_invalid_purpose_preserves_both_inputs_then_retries_once) ... ok
+2026-10-15T08:06:33.2158885Z test_05_quota_failure_keeps_existing_save_and_recoverable_input_without_duplicate (__main__.EntryReview.test_05_quota_failure_keeps_existing_save_and_recoverable_input_without_duplicate) ... ok
+2026-10-15T08:06:34.1194967Z test_06_report_guidance_is_read_only_and_does_not_offer_individual_deletion (__main__.EntryReview.test_06_report_guidance_is_read_only_and_does_not_offer_individual_deletion) ... ok
+2026-10-15T08:06:34.7806879Z test_07_review_hierarchy_keeps_full_export_and_narrow_layout (__main__.EntryReview.test_07_review_hierarchy_keeps_full_export_and_narrow_layout) ... FAIL
+2026-10-15T08:06:35.3923846Z test_08_unsubmitted_purpose_does_not_cross_project_boundary (__main__.EntryReview.test_08_unsubmitted_purpose_does_not_cross_project_boundary) ... ok
+2026-10-15T08:06:35.9538274Z test_09_review_uses_current_stage_and_actual_question (__main__.EntryReview.test_09_review_uses_current_stage_and_actual_question) ... ok
+2026-10-15T08:06:36.5558434Z test_10_review_labels_corrected_basis_as_current_value_not_original (__main__.EntryReview.test_10_review_labels_corrected_basis_as_current_value_not_original) ... ok
+2026-10-15T08:06:37.0472867Z test_11_saved_only_request_does_not_claim_ready_for_external_handoff (__main__.EntryReview.test_11_saved_only_request_does_not_claim_ready_for_external_handoff) ... ok
+2026-10-15T08:06:37.0885315Z 
+2026-10-15T08:06:37.0886138Z ======================================================================
+2026-10-15T08:06:37.0888010Z FAIL: test_07_review_hierarchy_keeps_full_export_and_narrow_layout (__main__.EntryReview.test_07_review_hierarchy_keeps_full_export_and_narrow_layout)
+2026-10-15T08:06:37.0889737Z ----------------------------------------------------------------------
+2026-10-15T08:06:37.0890387Z Traceback (most recent call last):
+2026-10-15T08:06:37.0893961Z   File "D:\a\agentflow-studio\agentflow-studio\app\continuity\tests\use106_browser.py", line 173, in test_07_review_hierarchy_keeps_full_export_and_narrow_layout
+2026-10-15T08:06:37.0895524Z     self.assertEqual(self.page.evaluate('navigator.clipboard.readText()'), full_after_download)
+2026-10-15T08:06:37.0896446Z     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-15T08:06:37.0899415Z AssertionError: '# 수업[34 chars]갈 작업\r\n\r\n프로젝트 P_4fbd399e-4f60-4eda-9492-d46[2992 chars]습니다.' != '# 수업[34 chars]갈 작업\n\n프로젝트 P_4fbd399e-4f60-4eda-9492-d46ec74[2812 chars]습니다.'
+2026-10-15T08:06:37.0900652Z Diff is 8820 characters long. Set self.maxDiff to None to see it.
+2026-10-15T08:06:37.0901099Z 
+2026-10-15T08:06:37.0901431Z ----------------------------------------------------------------------
+2026-10-15T08:06:37.0901988Z Ran 11 tests in 8.217s
+2026-10-15T08:06:37.0902203Z 
+2026-10-15T08:06:37.0902335Z FAILED (failures=1)
+2026-10-15T08:06:37.1101291Z ##[error]Process completed with exit code 1.

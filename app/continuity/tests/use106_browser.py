@@ -170,7 +170,10 @@ class EntryReview(unittest.TestCase):
         self.ctx.grant_permissions(['clipboard-read', 'clipboard-write'])
         full_after_download = self.page.locator('#handoff-text').input_value()
         self.page.locator('#copy-work').click()
-        self.assertEqual(self.page.evaluate('navigator.clipboard.readText()'), full_after_download)
+        # Windows' native clipboard returns CRLF for writeText's LF. Normalize only that OS representation;
+        # keep every content character, line break, ID and authority line in the full-text equality check.
+        clipboard = self.page.evaluate('navigator.clipboard.readText()')
+        self.assertEqual(clipboard.replace('\r\n', '\n'), full_after_download)
         self.assertEqual(self.state()['tasks'][0]['background'], before['tasks'][0]['background'])
         self.page.set_viewport_size({'width':1280,'height':900})
         review.scroll_into_view_if_needed(); self.shot('after-review-1280.png')
