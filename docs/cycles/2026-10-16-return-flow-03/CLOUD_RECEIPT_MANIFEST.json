@@ -1,0 +1,209 @@
+{
+  "repository": "tlsee0813-cmd/agentflow-studio",
+  "commit": "0201912a2e05ae920337bf25c9e2d116142c94d7",
+  "baseCommit": "afb5252d86ceb567fee889f28992d48ba89446a4",
+  "path": "docs/transfer/return-flow-03/fix1/",
+  "comparison": {
+    "aheadBy": 1,
+    "behindBy": 0,
+    "totalCommits": 1,
+    "filesAdded": 16,
+    "filesModified": 0,
+    "outsideAllowedPath": 0
+  },
+  "manifest": {
+    "listedPayloads": 15,
+    "bytesAndSHA256Matched": 15,
+    "payloadBytes": 581703,
+    "ownBytes": 2478,
+    "ownSHA256": "bcf3e3c4b43f9461005bf0fce6336c2625ba8a259bbb652b9567c71137a8aede",
+    "totalBytesIncludingManifest": 584181,
+    "selfListed": false
+  },
+  "files": [
+    {
+      "path": "1440x900-returned-map.png",
+      "bytes": 201262,
+      "sha256": "40ab8a32e07270c6e7a3d5dec67c7452bc16b8249ac7e449a2ebb7b85786e7e7",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "390-prep-lower-conditions.png",
+      "bytes": 83134,
+      "sha256": "3ee1973a09b676af69243779e0bd2e1daf5c729b313526a2d006d3956717d63c",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "390x844-returned-map.png",
+      "bytes": 70604,
+      "sha256": "b6ebf390a13d61d3a2d1b0e84f17985ef274c77e8c5499e731826f8b93ff0fb9",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 7189,
+      "sha256": "f1647aa4ae1b41df19c851f11627fa97ce85f478eb724e481cb162ca2065b59d",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "console.json",
+      "bytes": 155,
+      "sha256": "59afe065863bd1ea675949a45e808de05ee35d443fcd2165cfc0ac0482dde297",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "help-followup.json",
+      "bytes": 2981,
+      "sha256": "bf7b0874752d61e123a713fd7c59c0e3c16bacd777fd4e589e7fd8a2ec69d837",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "help-process-exit.json",
+      "bytes": 73,
+      "sha256": "b6f436e20a1baab7c14f7fed00098d362802249940757282f2e24f6d7bccc8cb",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "help-process.log",
+      "bytes": 1695,
+      "sha256": "743ca38ff9c04f94414cc74d39f2a37db9d8cf70b0056e0369e3b3eaa3224035",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "help_followup.py",
+      "bytes": 3348,
+      "sha256": "e696a54d33692109458b46f872c90cc242df509402469aee99540b7883c9f306",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "pageerrors.json",
+      "bytes": 64,
+      "sha256": "6bfbba4dcbfce3f8f4cad64af8fb260c940bbe1300e3afece0a85667734101c8",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "process-exit.json",
+      "bytes": 73,
+      "sha256": "b6f436e20a1baab7c14f7fed00098d362802249940757282f2e24f6d7bccc8cb",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "process.log",
+      "bytes": 129,
+      "sha256": "998d2dd4f7f642a64d4024648cb81641de736f6d7d090fc9df5c963a1fd4c401",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "result.json",
+      "bytes": 193573,
+      "sha256": "1be889122e018a4023645ea95f622d978f1118233f49f748232032ef03187076",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "server.log",
+      "bytes": 157,
+      "sha256": "b50588b06cd0614866f80d5c242da1bbd00b0a6498a5e03759929f9a3b3a4df8",
+      "bytesAndSHA256Match": true
+    },
+    {
+      "path": "verify.py",
+      "bytes": 17266,
+      "sha256": "bc336e7b569c5cf8e8553e586bb063a26bc292e1a2fdeaf2532251b08120d1dd",
+      "bytesAndSHA256Match": true
+    }
+  ],
+  "execution": {
+    "targetCommit": "34b4124098fe6242b34e16e23532ceb3e0fe91ad",
+    "htmlSHA256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+    "fileHashAfter": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+    "HTTP": [
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "status": 200,
+        "sha256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+        "stages": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "allPASS": true
+      },
+      {
+        "viewport": [
+          390,
+          844
+        ],
+        "status": 200,
+        "sha256": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+        "stages": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "allPASS": true
+      }
+    ],
+    "actualHTTPURL": "http://127.0.0.1:33687/return-flow-study.html",
+    "playwright": "1.57.0",
+    "chromium": "154.0.8037.57",
+    "browserPath": "/usr/bin/chromium",
+    "startedUTCRaw": "2026-10-15T17:18:04.859160+00:00",
+    "finishedUTCRaw": "2026-10-15T17:18:18.840667+00:00",
+    "expectedSteps": 16,
+    "executedSteps": 16,
+    "complete": true,
+    "counts": {
+      "PASS": 16,
+      "FAIL": 0
+    },
+    "fatal": null,
+    "pageerrors": [],
+    "cleanupErrors": [],
+    "actualProcessExit": 0,
+    "jsonExit": 0
+  },
+  "helpFollowup": {
+    "scope": "Only desktop selected purpose → open help → read existing line/node geometry, no reselection",
+    "status": "PASS",
+    "actualHTTPURL": "http://127.0.0.1:41235/return-flow-study.html",
+    "responseHash": "af748df1dfacb7ed6b4ae3709d5ced26ef43f96bc45a9e6c2c05cdc02e9cc77e",
+    "actualProcessExit": 0,
+    "jsonExit": 0,
+    "fatal": null,
+    "pageerrors": [],
+    "timestampRecorded": false
+  },
+  "PNGViewed": [
+    "1440x900-returned-map.png",
+    "390-prep-lower-conditions.png"
+  ],
+  "unrun": [
+    "author flow_check.py (reference only)",
+    "previous reading-study tests",
+    "actual touch swipe",
+    "human comprehension",
+    "external original roundtrip",
+    "real sending"
+  ],
+  "additionalLimits": [
+    "390x664",
+    "nonzero origin reading-position restoration",
+    "help followup actual timestamp not recorded"
+  ],
+  "auditMethod": "GitHub connector fixed-commit base64 bytes; local SHA256/size; raw timestamps via JavaScript JSON.parse strings; 2 PNG view_image; no rerun",
+  "independentRerun": false,
+  "remoteWrites": false
+}
