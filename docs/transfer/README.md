@@ -2,6 +2,7 @@
 
 이 브랜치는 세션 간 원본 파일을 전달하는 공간이다. 제품 배포나 현재 연구 상태의 별도 사본이 아니다.
 
+- [목적·역할 cycle06 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d17667c1c519492f6edf8ea064a9f87b5d51fc12/docs/cycles/2026-10-16-purpose-06/RESULT.md)
 - [구성 지도 cycle05 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9b4a422f4e46085acb0841e9d9201c7ff86d6b81/docs/cycles/2026-10-16-composition-05/RESULT.md)
 - [현재 상태와 다음 범위](https://github.com/tlsee0813-cmd/agentflow-studio/blob/checkpoint/2026-10-15/docs/cycles/ACTIVE.md)
 - [첫 진입 A/B cycle04 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/571e7a7030039b4d4354757949cdabc8533c70aa/docs/cycles/2026-10-16-orientation-04/RESULT.md)
@@ -10,6 +11,10 @@
 
 | 묶음 | 고정 원본 | 읽는 순서와 범위 |
 |---|---|---|
+| cycle06 목적·역할 작성자 v0 | [원본 45파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/d16e66742fd487ef11a776fedb5b76fd35e964ea/docs/transfer/purpose-06/author-v0) | 첫 검사 오류·실제 비초기 행높이 결함·수정 후 실행을 모두 보존. 원격45/45 바이트 일치 |
+| cycle06 목적·역할 작성자 fix1 | [HTML·기본문·PNG·검사 원본 13파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/fbea41f245c4020bc044c7e0c7502d106fc900ae/docs/transfer/purpose-06/author-fix1) | ‘정보 없음’을 ‘미결정’으로 단정한 네 문구만 수정. 원격13/13 바이트 일치. 배율/중심 측정의 한계는 통합 결과 참조 |
+| cycle06 fix1 독립 관측 | [원본 24파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1) | 최신 run02 단일 6장면·39단언, 실제 child/collector 0. computed 배율·세 대상 좌표·근거 닫힘·기본 준비문과 요청 칸 편집. 측정기 첫 실패·합성 해시 probe 보존. 원격 payload23/23 bytes/SHA 일치 |
+| cycle06 비초기 맥락 복귀 보완 | [별도 16파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/11016a2be174c4b6dd9543d14bc201207eabac73/docs/transfer/purpose-06/independent-fix1/context-return-addendum) | X2 위치 확인→읽기 복귀 2경로·16단언, 두 폭 reader100→100·행 좌표 변화0. 별도 실행이며 기존39에 합산하지 않음. 실제 child/wrapper0·payload15/15 bytes/SHA 일치 |
 | cycle05 구성 작성자 원본 | [HTML·코드·첫 실패·PNG5·manifest 24파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/10d1f03f6944a2787079cdb49cf009c6b1fbd302/docs/transfer/composition-05/author-v0) | 원격24/24 bytes대조. README의 모든묶음 준비불가 주장은 통합결과에서 미세분화기능 예외로 정정 |
 | cycle05 구성 독립 관측 | [원본34파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/2f80732664686669f623d3f32238c39807c1112d/docs/transfer/composition-05/independent-v0) | 390의8장면(run02 전체child1) +1440의6장면(run04 child0),14는오프라인집계. 최초검사오류3회와합성probe보존. aria상태 미측정·상위수집기exit0 경계는 통합결과 참조. 원격payload33/33 bytesSHA일치 |
 | cycle05 공식 참고 관측 접근 실패 | [접속실패 원본6파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/bb2bb37b106c0ec1cf4063b27fb1c666229f2f50/docs/transfer/composition-05/reference-folding) | ERR_TUNNEL_CONNECTION_FAILED·전장면NOT_RUN·PNG없음. 우리시안검증이나 총괄 IAB관측과 합산하지 않음. 버전기록불일치 주석은 연구SOURCE_AUDIT |
@@ -31,3 +36,6 @@ cycle04 대표 첫 화면: [A · 1440×900](https://github.com/tlsee0813-cmd/age
 
 
 cycle05 대표 첫 화면: [1440×900](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2f80732664686669f623d3f32238c39807c1112d/docs/transfer/composition-05/independent-v0/png/1440-initial.png) · [390×844](https://github.com/tlsee0813-cmd/agentflow-studio/blob/2f80732664686669f623d3f32238c39807c1112d/docs/transfer/composition-05/independent-v0/png/390-initial.png). 독립PNG 나머지3개는 검사기 오류 진단 화면이며 성공 대표 화면으로 바꾸어 부르지 않는다. 작성자 집중·준비 PNG5개와 구분한다. 입력은 과거 개발계약/MOCK보고이며 실제 사용자 원대화가 아니다. 위치 복원·국소관계 접근을 전체 프로그램 이해로 확대하지 않는다.
+
+
+cycle06 대표 화면: [첫 화면1440](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/initial-1440.png) · [첫 화면390](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/initial-390.png) · [390 역할·조건 읽기](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/role-condition-390.png) · [편집 전 준비문](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/prep-default-1440.png). N01은 개발자 합성 초기 구상이다. 외부 실제 작업 기록 후보는 통합 판단의 다음 입력으로 구별하며, 이 시안에서 실제 요구 변경이나 AI 수행을 검증했다고 쓰지 않는다.
