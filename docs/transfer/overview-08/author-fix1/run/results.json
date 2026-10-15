@@ -1,0 +1,456 @@
+{
+ "meta": {
+  "started": "2026-10-15T21:50:09.897068+00:00",
+  "html": "overview-study.html",
+  "file_sha256_before": "85f07ee4159a6db825be2fa3163142b70b27c4fb56f090c934b3b41f1fe0eb81",
+  "file_bytes": 42025,
+  "http": {
+   "1280x720": {
+    "status": 200,
+    "bytes": 42025,
+    "sha": "85f07ee4159a6db825be2fa3163142b70b27c4fb56f090c934b3b41f1fe0eb81"
+   },
+   "1440x900": {
+    "status": 200,
+    "bytes": 42025,
+    "sha": "85f07ee4159a6db825be2fa3163142b70b27c4fb56f090c934b3b41f1fe0eb81"
+   },
+   "390x844": {
+    "status": 200,
+    "bytes": 42025,
+    "sha": "85f07ee4159a6db825be2fa3163142b70b27c4fb56f090c934b3b41f1fe0eb81"
+   }
+  },
+  "errors": {
+   "1280x720": [],
+   "1440x900": [],
+   "390x844": []
+  },
+  "playwright_python": "1.56.0",
+  "browser": "chromium 141.0.7390.37 headless",
+  "http_server_exit": -15,
+  "file_sha256_after": "85f07ee4159a6db825be2fa3163142b70b27c4fb56f090c934b3b41f1fe0eb81",
+  "file_unchanged": true,
+  "sizes_completed": [
+   "1280x720",
+   "1440x900",
+   "390x844"
+  ],
+  "finished": "2026-10-15T21:50:17.549630+00:00",
+  "fatal": null,
+  "failed": 0
+ },
+ "checks": [
+  {
+   "size": "1280x720",
+   "check": "최초 HTTP status/body SHA = 원본",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 42025,
+    "sha": "85f07ee4159a6db825be2fa3163142b70b27c4fb56f090c934b3b41f1fe0eb81"
+   }
+  },
+  {
+   "size": "1280x720",
+   "check": "after: 카드 칩·짧은 설명이 ‘누락 확인’으로 일관, 모두 지도 영역 안·hit·카드 내부 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "texts": [
+     "표시 문구·분기",
+     "표시 문구·분기",
+     "남은 시간 추정",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "누락 확인·경과 계산은 공통 계산으로 옮김",
+     "누락 확인·경과 계산은 공통 계산으로 옮김"
+    ],
+    "notOk": [],
+    "faces": [
+     {
+      "id": "n-P1",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     },
+     {
+      "id": "n-P2",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     },
+     {
+      "id": "n-P3",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     }
+    ]
+   }
+  },
+  {
+   "size": "1280x720",
+   "check": "after: 위쪽 변화 설명에 ‘누락 확인’, 표시 조건·분기 유지 명시, 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "text": "1월 16일 변경 · 두 메뉴의 진행 정보 누락 확인·경과 시간 계산을 기존 공통 계산으로 옮겼습니다. 표시 조건·분기와 두 호출은 그대로입니다.",
+    "ok": true
+   }
+  },
+  {
+   "size": "1280x720",
+   "check": "before: 카드 칩·짧은 설명이 ‘누락 확인’으로 일관, 모두 지도 영역 안·hit·카드 내부 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "texts": [
+     "표시 문구·분기",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "표시 문구·분기",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "남은 시간 추정",
+     "누락 확인·경과 계산은 두 메뉴에서 함"
+    ],
+    "notOk": [],
+    "faces": [
+     {
+      "id": "n-P1",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     },
+     {
+      "id": "n-P2",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     },
+     {
+      "id": "n-P3",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     }
+    ]
+   }
+  },
+  {
+   "size": "1280x720",
+   "check": "before: 위쪽 변화 설명에 ‘누락 확인’, 표시 조건·분기 유지 명시, 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "text": "변경 전 · 두 메뉴가 각각 진행 정보 누락 확인과 경과 시간 계산을 하고 세 숫자를 넘겼습니다. 공통 계산과 두 호출은 이미 있었습니다.",
+    "ok": true
+   }
+  },
+  {
+   "size": "1280x720",
+   "check": "P1 선택 상세표: 첫 행 ‘진행 정보 누락 확인’, 표 칸 모두 패널 안·hit",
+   "status": "PASS",
+   "detail": {
+    "row1": [
+     "진행 정보 누락 확인",
+     "이 메뉴",
+     "공통 계산"
+    ],
+    "notOk": []
+   }
+  },
+  {
+   "size": "1280x720",
+   "check": "P3 선택 상세표: 첫 행 ‘진행 정보 누락 확인’, 표 칸 모두 패널 안·hit",
+   "status": "PASS",
+   "detail": {
+    "row1": [
+     "진행 정보 누락 확인",
+     "두 메뉴",
+     "여기 (옮겨 옴)"
+    ],
+    "notOk": []
+   }
+  },
+  {
+   "size": "1280x720",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  },
+  {
+   "size": "1440x900",
+   "check": "최초 HTTP status/body SHA = 원본",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 42025,
+    "sha": "85f07ee4159a6db825be2fa3163142b70b27c4fb56f090c934b3b41f1fe0eb81"
+   }
+  },
+  {
+   "size": "1440x900",
+   "check": "after: 카드 칩·짧은 설명이 ‘누락 확인’으로 일관, 모두 지도 영역 안·hit·카드 내부 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "texts": [
+     "표시 문구·분기",
+     "표시 문구·분기",
+     "남은 시간 추정",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "누락 확인·경과 계산은 공통 계산으로 옮김",
+     "누락 확인·경과 계산은 공통 계산으로 옮김"
+    ],
+    "notOk": [],
+    "faces": [
+     {
+      "id": "n-P1",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     },
+     {
+      "id": "n-P2",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     },
+     {
+      "id": "n-P3",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     }
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "check": "after: 위쪽 변화 설명에 ‘누락 확인’, 표시 조건·분기 유지 명시, 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "text": "1월 16일 변경 · 두 메뉴의 진행 정보 누락 확인·경과 시간 계산을 기존 공통 계산으로 옮겼습니다. 표시 조건·분기와 두 호출은 그대로입니다.",
+    "ok": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "check": "before: 카드 칩·짧은 설명이 ‘누락 확인’으로 일관, 모두 지도 영역 안·hit·카드 내부 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "texts": [
+     "표시 문구·분기",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "표시 문구·분기",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "남은 시간 추정",
+     "누락 확인·경과 계산은 두 메뉴에서 함"
+    ],
+    "notOk": [],
+    "faces": [
+     {
+      "id": "n-P1",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     },
+     {
+      "id": "n-P2",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     },
+     {
+      "id": "n-P3",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     }
+    ]
+   }
+  },
+  {
+   "size": "1440x900",
+   "check": "before: 위쪽 변화 설명에 ‘누락 확인’, 표시 조건·분기 유지 명시, 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "text": "변경 전 · 두 메뉴가 각각 진행 정보 누락 확인과 경과 시간 계산을 하고 세 숫자를 넘겼습니다. 공통 계산과 두 호출은 이미 있었습니다.",
+    "ok": true
+   }
+  },
+  {
+   "size": "1440x900",
+   "check": "P1 선택 상세표: 첫 행 ‘진행 정보 누락 확인’, 표 칸 모두 패널 안·hit",
+   "status": "PASS",
+   "detail": {
+    "row1": [
+     "진행 정보 누락 확인",
+     "이 메뉴",
+     "공통 계산"
+    ],
+    "notOk": []
+   }
+  },
+  {
+   "size": "1440x900",
+   "check": "P3 선택 상세표: 첫 행 ‘진행 정보 누락 확인’, 표 칸 모두 패널 안·hit",
+   "status": "PASS",
+   "detail": {
+    "row1": [
+     "진행 정보 누락 확인",
+     "두 메뉴",
+     "여기 (옮겨 옴)"
+    ],
+    "notOk": []
+   }
+  },
+  {
+   "size": "1440x900",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  },
+  {
+   "size": "390x844",
+   "check": "최초 HTTP status/body SHA = 원본",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "bytes": 42025,
+    "sha": "85f07ee4159a6db825be2fa3163142b70b27c4fb56f090c934b3b41f1fe0eb81"
+   }
+  },
+  {
+   "size": "390x844",
+   "check": "after: 카드 칩·짧은 설명이 ‘누락 확인’으로 일관, 모두 지도 영역 안·hit·카드 내부 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "texts": [
+     "표시 문구·분기",
+     "표시 문구·분기",
+     "남은 시간 추정",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "누락 확인·경과 계산은 공통 계산으로 옮김",
+     "누락 확인·경과 계산은 공통 계산으로 옮김"
+    ],
+    "notOk": [],
+    "faces": [
+     {
+      "id": "n-P1",
+      "sh": 212,
+      "ch": 212,
+      "clipped": false
+     },
+     {
+      "id": "n-P2",
+      "sh": 212,
+      "ch": 212,
+      "clipped": false
+     },
+     {
+      "id": "n-P3",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     }
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "check": "before: 카드 칩·짧은 설명이 ‘누락 확인’으로 일관, 모두 지도 영역 안·hit·카드 내부 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "texts": [
+     "표시 문구·분기",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "표시 문구·분기",
+     "진행 정보 누락 확인",
+     "경과 시간 계산",
+     "남은 시간 추정",
+     "누락 확인·경과 계산은 두 메뉴에서 함"
+    ],
+    "notOk": [],
+    "faces": [
+     {
+      "id": "n-P1",
+      "sh": 212,
+      "ch": 212,
+      "clipped": false
+     },
+     {
+      "id": "n-P2",
+      "sh": 212,
+      "ch": 212,
+      "clipped": false
+     },
+     {
+      "id": "n-P3",
+      "sh": 158,
+      "ch": 158,
+      "clipped": false
+     }
+    ]
+   }
+  },
+  {
+   "size": "390x844",
+   "check": "P1 선택 예약 줄: ‘누락 확인’ 문구 표시, 예약 줄 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "strip": {
+     "sh": 167,
+     "ch": 167
+    },
+    "line": "1월 16일 · 누락 확인·경과 계산은 공통 계산으로 옮김 · 표시 분기는 여기"
+   }
+  },
+  {
+   "size": "390x844",
+   "check": "P1 부분 읽기 상세표: 첫 행 ‘진행 정보 누락 확인’, 표 칸 모두 보임",
+   "status": "PASS",
+   "detail": {
+    "row1": [
+     "진행 정보 누락 확인",
+     "이 메뉴",
+     "공통 계산"
+    ],
+    "notOk": []
+   }
+  },
+  {
+   "size": "390x844",
+   "check": "P3 선택 예약 줄: ‘누락 확인’ 문구 표시, 예약 줄 잘림 없음",
+   "status": "PASS",
+   "detail": {
+    "strip": {
+     "sh": 167,
+     "ch": 167
+    },
+    "line": "1월 16일 · 누락 확인·경과 계산을 맡음 (두 메뉴에서 옮겨 옴)"
+   }
+  },
+  {
+   "size": "390x844",
+   "check": "P3 부분 읽기 상세표: 첫 행 ‘진행 정보 누락 확인’, 표 칸 모두 보임",
+   "status": "PASS",
+   "detail": {
+    "row1": [
+     "진행 정보 누락 확인",
+     "두 메뉴",
+     "여기 (옮겨 옴)"
+    ],
+    "notOk": []
+   }
+  },
+  {
+   "size": "390x844",
+   "check": "pageerror·console error 없음",
+   "status": "PASS",
+   "detail": []
+  }
+ ]
+}
