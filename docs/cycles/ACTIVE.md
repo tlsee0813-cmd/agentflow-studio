@@ -1,36 +1,31 @@
 # AgentFlow 활성 연구·검증 배정
 2026-10-16 갱신 · 단일 총괄: 현재 Codex 대화. 현재 상태는 여기만 갱신한다.
 
-## 현재: cycle07 통합 완료 · cycle08 fix1 독립 브라우저 검증 진행
-[cycle07 결과](2026-10-16-change-record-07/RESULT.md): 실제 공개 사람–Copilot 기록에서 세 역할과 두 기존 호출의 책임 변화를 표현했다. 준비문이 과거 요청을 지금의 수정 방향으로 선결정하던 문제는 fix1의3문구로 정정했다. 독립 최신 단일6장면·60 PASS, 실제 child/collector0. 원시 기록·PNG·원격 회수 감사까지 완료했다. 사람 이해나 원 프로젝트 성공을 뜻하지 않는다.
+## 현재: cycle08 통합 완료 · 다음 혼합 깊이 연결 범위 준비
+[cycle08 결과](2026-10-16-overview-08/RESULT.md): 기본의 긴 책임 설명을 줄이고, 세 역할·두 기존 호출·책임 이동을 먼저 본 뒤 선택 상세로 이어지게 했다. 축약에서 사라진 ‘누락 확인’은 문구10줄 fix1으로 복구했다. 독립 최신 단일3폭×2흐름6/6·73 PASS·실제 child/외부 collector0, 원시·PNG·원격 회수 감사 완료. 사람 이해·큰 지도 적합성은 미검증이다.
 
-[cycle08 범위](2026-10-16-overview-08/BRIEF.md)는 같은 입력의 **첫 전체 조망→한 부분 상세→전체 맥락 복귀**다. 1280에서 카드 일부가 잘리고 반복된 책임 설명이 기본을 무겁게 하는 문제를 다룬다. 기존 기능·증거를 다시 만드는 범위가 아니다.
-
-| 담당 | 현재 상태 |
+| 담당 | 완료 범위 |
 |---|---|
-| [Pro 정보량](https://chatgpt.com/c/6ad11f6e-f728-83e8-9d0a-55ba32028487) | 연구 완료. 명시 상세와 배율 자동 내용 변경을 비교, 명시 상세 추천. Bforartists PDF 그림·React Flow 코드 근거 |
-| [Pro 탐색](https://chatgpt.com/c/6ad11f92-7fd0-83ec-b658-da441d3df6b5) | 연구 완료. 전체맞춤은 공통, 위치 찾기/복귀는 문맥 배치 추천. 문서·원본 코드와 직접 조작 범위 구별 |
-| Astra High | 세 역할·두 기존 호출과 이동 사실이 축약에서 사라지는 반례 검토 완료 |
-| 6.1 Sol High | 원문 감사 완료. BFA5판 노드 표시 접기·React Flow 배율 조건/시야 API와 고정 코드 귀속을 구별. 총괄의 공식 복원 실제 조작·코드탭 관측을 별도 보강 |
-| 총괄 | [선택](2026-10-16-overview-08/DECISION.md)·[계약](2026-10-16-overview-08/IMPLEMENTATION.md) 고정. 간결한 기본 지도＋명시 상세·문맥별 위치/복귀 선택 |
-| [Opus](https://claude.ai/chat/c4b2aa44-1b79-4f2a-9a5a-1d412872b647) | v0 27파일·fix1 14파일 원격 보존 완료. 문구10줄 정정·별도 좁은24 PASS. ‘진행 정보 누락 확인’의 정확한 책임 범위 복구 수용. |
-| Cloud | 고정 fix1 167f86b…의 3폭×2흐름 독립 관측 배정·실행 시작. 원시 전후/실제 선택 전환/맞춤 뒤 내용 hit를 기존 흐름에서 보완. 결과 수령 전 |
+| Pro 정보량·탐색 두 세션 | 명시 상세/자동 의미 줌, 공통/문맥별 탐색 비교. 후속 Pro는 실제 PNG2장을 첨부로 열람해 정적 평가. 서비스 직접 조작과 구별 |
+| Opus | v0 27파일·fix1 14파일. 작성자 마지막78과 문구 좁은24는 별도 실행 |
+| Cloud | fix1 독립 최신6/6·73 PASS, 23파일 공유. 최초 run01의 관측 부족은 보존하고 run02에서 개별 문구 근거 보완 |
+| Astra High / 6.1 Sol High | 의미·실제 PNG·코드/원시값·원격 전달 감사. 중요 추가 불일치 없음 |
+| 총괄 | 실제 원문·이미지·조작과 보고 귀속을 대조하고 이번 표현을 다음 연구에 유지. 제품 확정 아님 |
 
-## cycle08 작성자 원본과 감사
-[고정 v0 27파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/bbdf2234c6523de86b64510843282ac1003124bd/docs/transfer/overview-08/author-v0) · [의미 감사](2026-10-16-overview-08/AUTHOR_SEMANTIC_AUDIT.md) · [코드·기록 감사](2026-10-16-overview-08/AUTHOR_CODE_AUDIT.md).
-HTML41,912B/SHA624a6e70…2154b. 작성자 마지막 한 실행78 PASS/0 FAIL·child/collector0; 최초 실패도 보존. 원시 전후 좌표의 저장 누락, 실제 상세 열기 전후 장면 누락, 맞춤 뒤 내용 hit 누락은 독립 흐름 안에서 보완한다. 초기1280/390 PNG에서 세 역할·두 호출이 보이나 사람 이해 결과는 아니다. ‘누락’이 상세에서도 사라진 의미 문제는 정정 후 검증한다.
+## 다음 한 질문
+기존 cycle05의 혼합 깊이 제안 구성에 cycle08의 간결한 조망·명시 상세를 연결할 범위를 고른다. **일부만 펼쳐도 역할·변경 소유·접힌 외부 상대와의 관계가 한 부분의 준비까지 이어지는가?**
+기존 펼침/복귀를 다시 만들지 않는다. 보기용 묶음·실제 관계 양끝·범위 경계를 유지하고 요약↔상세의 의미 연결을 본다. cycle05는 계약/MOCK 기반 AI 제안이라는 한계를 유지하며, VS Code와 한 프로그램으로 합치거나 근거 없는 부모·새 실제 사건을 만들지 않는다. 다음 구현 배정은 아직 하지 않았다.
 
-[고정 fix1 14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/167f86b8ac783a15bc1b2991b73017ee2f1e0d6a/docs/transfer/overview-08/author-fix1) · [문구 정정 감사](2026-10-16-overview-08/FIX1_SEMANTIC_AUDIT.md) · [좁은 실행 감사](2026-10-16-overview-08/FIX1_CODE_AUDIT.md). HTML42,025B/SHA85f07ee4…0eb81, 원격 HTML·manifest 원본 일치. 별도24 PASS를 v0의78과 합산하지 않는다. 390 선택 설명167/167은 after P1/P3에 한정한 작성자 관측이다.
+## 공유 결과
+[cycle08 fix1](https://github.com/tlsee0813-cmd/agentflow-studio/tree/167f86b8ac783a15bc1b2991b73017ee2f1e0d6a/docs/transfer/overview-08/author-fix1) · [독립23파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/09f612c5f49c639b2f49c3371e73fe6bf44361a3/docs/transfer/overview-08/independent-v0) · [공유 증거 목록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/delivery/ui02-fix3-evidence/docs/transfer/README.md).
+HTML42,025B/SHA85f07ee4…0eb81. 독립 payload22/22 bytesSHA·원격 tree/집합 대조 완료. 실제 child/collector와 launcher의 별도 외부 로그 미제공을 구별한다. 390 수동130% 넘침·더 긴 문구/모든 대상 편집·사람 이해·큰 지도는 성공으로 확대하지 않는다.
 
-## 공유 결과와 근거
-[cycle07 고정 작성자 fix1](https://github.com/tlsee0813-cmd/agentflow-studio/tree/0dfadba788e0f2f035bbe51b899b9c02e4260e45/docs/transfer/change-record-07/author-fix1) · [독립 원본 35파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0).
-HTML42,420B/SHA d10e7dca…이며 별도 환경 HTTP·파일 전후 해시가 일치했다. 원격 tree/manifest/payload34 전부 byte·SHA 대조 완료. PNG4장과 최초 실패도 다른 세션이 회수할 수 있다. 작성자75와 독립60을 합산하지 않는다. 정확한 종료·가시성 한계는 결과 문서에서 읽는다.
-
-[cycle06 통합 판단](https://github.com/tlsee0813-cmd/agentflow-studio/blob/d17667c1c519492f6edf8ea064a9f87b5d51fc12/docs/cycles/2026-10-16-purpose-06/RESULT.md) · [공유 증거 목록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/delivery/ui02-fix3-evidence/docs/transfer/README.md).
+[cycle07 결과](2026-10-16-change-record-07/RESULT.md): 실제 공개 사람–Copilot 기록의 책임 변화와 후속 요청. 준비문 선결정 정정·독립6장면60 PASS 완료.
+[cycle06 결과](2026-10-16-purpose-06/RESULT.md) · [cycle05 혼합 깊이 결과](2026-10-16-composition-05/RESULT.md). 이전 실행과 이번 수치를 합산하지 않는다.
 
 ## 운영 경계
 연구 checkpoint/2026-10-15 통합은 총괄만, Cloud는 지정 delivery 경로만 사용한다. 내부 보조는 Astra High/6.1 Sol High이며 브라우저 모델 일괄 변경 지시가 아니다. 사용자 예약을 중복 생성하거나 변경하지 않았다.
 
-GitHub가 공유 원본이다. 로컬은 수령·감사·미리보기용 임시 자료다. cycle06 작성자 임시 복사본 삭제는 자동 승인 심사가 실행 전에 차단해0건이며 구체적 이유는 제공되지 않았다. 우회 삭제하지 않았고 미리보기를 보존했다. 연구 결과 회수에는 영향이 없다.
+GitHub가 공유 원본이다. 로컬은 수령·감사·미리보기용 임시 자료다. cycle06 작성자 임시 복사본 삭제는 자동 승인 심사가 실행 전에 차단해0건이며 구체적 이유는 제공되지 않았다. 우회 삭제하지 않았다. 공유 연구 결과의 회수에는 영향이 없다.
 
-제품 소스618d9bd2b99ad433df35107d8902b15f45e30000, main896dcf3848fec70357d0f9bd4fd6c09cab70db37, 공개 배포63f5540d062861439f0932cd7311c6c5510e227c, GUIDE107 HOLD 유지. 사람 사용성·큰 지도 조망·실제 AI 송신/수락·전체 제품 완성은 미확인이다.
+제품 소스618d9bd2b99ad433df35107d8902b15f45e30000, main896dcf3848fec70357d0f9bd4fd6c09cab70db37, 공개 배포63f5540d062861439f0932cd7311c6c5510e227c, GUIDE107 HOLD 유지. 전체 제품 완성·실제 AI 송신/수락은 미확인이다.
