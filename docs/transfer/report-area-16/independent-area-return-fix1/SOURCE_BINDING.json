@@ -1,0 +1,27 @@
+{
+  "source": "a0f0ae786c580a8919cede07db48d4397b58b114",
+  "sourceUnchanged": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 198981,
+      "pinnedSHA256": "3b61c00af9552400f9059b72e7ceee73c50c529d0ef574b97da8305d95cff30b",
+      "diskAfterSHA256": "3b61c00af9552400f9059b72e7ceee73c50c529d0ef574b97da8305d95cff30b"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 63772,
+      "pinnedSHA256": "3c44527977c19635707d8661bb155060df6a67e4819ed2409a4a4838d38fbfc4",
+      "diskAfterSHA256": "3c44527977c19635707d8661bb155060df6a67e4819ed2409a4a4838d38fbfc4"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17792,
+      "pinnedSHA256": "2c3d4c08cec865194f8ce8e254ed8fa4832e0a601fd411090630244cf2c3f14f",
+      "diskAfterSHA256": "2c3d4c08cec865194f8ce8e254ed8fa4832e0a601fd411090630244cf2c3f14f"
+    }
+  ],
+  "fixtureSHA256": "b7f55bbd5fee739a148865606d3c00b302e46263654c1f4145ea4b320de5dac5",
+  "fixtureLink": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/a3435faa29993f71356b3c36e50051921614670d/docs/transfer/report-area-16/independent-fix1/fix1/independent/fixture-1280.json",
+  "fixtureMethod": "unmodified existing isolated synthetic project imported via normal file input + confirmation; long note changed through actual UI, no API fixture edits",
+  "previousSourceBinding": "a3435faa29993f71356b3c36e50051921614670d"
+}

@@ -1,0 +1,9 @@
+# Same-tab long area return addendum
+
+Exact product a0f0ae786c580a8919cede07db48d4397b58b114, PC1280×720 only. Existing official MOCK server/Node22/Playwright1.57/system Chromium154 reused. No source changes, install, external AI, existing user storage, other-tab or disappearance paths.
+
+Single independently executed path, six observations all pass; actual child0, external collector0, JSON0; no fatal/pageerror. Existing synthetic project was imported through normal product file UI and confirmation. Current long Area.note edited and saved normally → full idea opened → real wheel to lower request → read → nested R2 selected → full report opened and actual wheel reached tail (Range/clip/hit raw), closed and rendered body disappears → explicit new request draft entered/saved → origin area return.
+
+Immediately after return, before any helper scroll/focus: scrollY500→500, caller raw rect x283/y565.734375/w569.765625/h22.5 identical, viewport delta0, caller focus restored and representative hit/inViewport true. Long idea disclosure remains open; document height1437→1437. Saved new draft and whole stored current/manual project values retained. This path edits draft, not manual fields; manual preservation means existing values remained. Area view has no map plane, so computed matrix=null, not a fabricated zoom comparison. Long idea itself extends above viewport at the lower reading place, as expected; disclosure restoration is not a claim that every long line is simultaneously visible.
+
+This completes only the same-tab normal-return portion previously missing from case12. Cross-tab live refresh/disappearance fallback remains the separate known limit/NOT_RUN in prior evidence; no broadened acceptance claim. No historical regression reruns. One actual PNG captured after immediate measurements. The reused fixture is linked by fixed commit/hash rather than duplicated. Manifest is exact recursive payload excluding itself.
