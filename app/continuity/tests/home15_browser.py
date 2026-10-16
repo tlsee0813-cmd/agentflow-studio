@@ -285,6 +285,32 @@ class Home15(unittest.TestCase):
         expect(self.page.locator('#project-read-purpose')).to_have_text('다른 탭에서 바꾼 목적 · 마포 끝')
         self.page.keyboard.press('Escape');self.check('nothing written back by this tab',json.loads(self.envelope()),raw)
 
+    def test_10_no_background_key_scroll_from_any_focus_in_the_window(self):
+        """fix2: independent run found PageDown/End on '닫기' scrolling the list behind (1280 0->272, 1440 0->92)."""
+        self.install('read');a=self.read_card('강남 지점')
+        a.locator('.project-more-button').click();a.locator('.project-read-open').click();expect(self.page.locator('#project-read')).to_be_visible()
+        y_open=round(self.page.evaluate('scrollY'))
+        for start in [0,'end']: # the test itself moves the page (not a user path) to try both directions
+            self.page.evaluate('(t)=>scrollTo({top:t==="end"?document.documentElement.scrollHeight:0})',start);self.page.wait_for_timeout(100)
+            y=round(self.page.evaluate('scrollY'));self.page.locator('#project-read-close').focus();expect(self.page.locator('#project-read-close')).to_be_focused()
+            ys=[]
+            for key in ['PageDown','End','ArrowDown','PageUp','Home','ArrowUp']:self.page.keyboard.press(key);self.page.wait_for_timeout(120);ys.append(round(self.page.evaluate('scrollY')))
+            self.check(f'list behind does not move with keys on 닫기 (start {start}, Y {y})',ys,[y]*6)
+            self.page.locator('#project-read-title').click() # focus leaves the controls (dialog itself)
+            for key in ['PageDown','End','Home']:self.page.keyboard.press(key);self.page.wait_for_timeout(120);ys.append(round(self.page.evaluate('scrollY')))
+            self.check(f'nor with focus on the window itself (start {start})',ys[-3:],[y]*3)
+            self.check('window still open',self.dialog_geom()['open'],True)
+        y=round(self.page.evaluate('scrollY'))
+        # The text is still read to its end by keyboard, and Space on 닫기 still closes.
+        self.page.keyboard.press('Tab');self.page.keyboard.press('Tab')
+        if self.dialog_geom()['active']!='project-read-body':self.page.locator('#project-read-body').focus()
+        self.page.keyboard.press('End');self.page.wait_for_timeout(250);end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만')
+        self.check_true('End in the text still reaches the end',end['inside'] and end['hit'],end)
+        self.check('text keys do not move the list either',round(self.page.evaluate('scrollY')),y)
+        self.page.keyboard.press('Tab');expect(self.page.locator('#project-read-close')).to_be_focused();self.page.keyboard.press('Space')
+        expect(self.page.locator('#project-read')).not_to_be_visible();expect(a.locator('.project-more-button')).to_be_focused()
+        self.check('Space on 닫기 closes, list back where the window was opened',round(self.page.evaluate('scrollY')),y_open)
+
 class Home15Wide(Home15):
     WIDTH,HEIGHT=1440,900
 

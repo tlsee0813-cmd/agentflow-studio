@@ -1805,11 +1805,16 @@ for(const example of document.querySelectorAll<HTMLButtonElement>('[data-example
   // The list behind stays where it was: the wheel scrolls only the text (which does not hand its overscroll to the page).
   dialog.addEventListener('wheel',e=>{if(!$('project-read-body').contains(e.target as Node))e.preventDefault();},{passive:false});
   dialog.addEventListener('keydown',e=>{
-    // Keyboard scrolling is not stopped by overscroll-behavior: at the text's end (or top) the key would scroll the list behind.
+    // Keyboard scrolling is not stopped by overscroll-behavior: a scroll key would scroll the list behind. In the text it scrolls
+    // the text and is stopped only at its end (or top); anywhere else in the window (e.g. on '닫기') it scrolls nothing.
+    // Space/Enter on a button keep their own action (close).
     const body=$('project-read-body');
-    if(e.target===body&&['PageDown','PageUp','End','Home','ArrowDown','ArrowUp',' '].includes(e.key)){
-      const down=['PageDown','End','ArrowDown'].includes(e.key)||(e.key===' '&&!e.shiftKey);
-      if(down?body.scrollTop+body.clientHeight>=body.scrollHeight-1:body.scrollTop<=0)e.preventDefault();return;
+    if(['PageDown','PageUp','End','Home','ArrowDown','ArrowUp',' '].includes(e.key)){
+      if(e.target===body){
+        const down=['PageDown','End','ArrowDown'].includes(e.key)||(e.key===' '&&!e.shiftKey);
+        if(down?body.scrollTop+body.clientHeight>=body.scrollHeight-1:body.scrollTop<=0)e.preventDefault();
+      } else if(!(e.key===' '&&(e.target as HTMLElement).closest('button')))e.preventDefault();
+      return;
     }
     if(e.key!=='Tab')return;
     const stops=[$('project-read-close'),$('project-read-body')];const i=stops.indexOf(document.activeElement as HTMLElement);
