@@ -1,10 +1,10 @@
 # AgentFlow 현재 진행·배정
-2026-10-16 16:40 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 진행은 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이며 제품/공개 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)를 본다.
+2026-10-16 16:45 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 진행은 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이며 제품/공개 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)를 본다.
 
 ## 사용자 최신 우선순위 — 프로젝트 홈15
 사용자가 Dify 스튜디오 같은 좌측 프로젝트 탐색·중앙 프로젝트 카드·선택 후 공간 진입을 명시 요청했다. 세부 위치 보존 검사에 치우쳐 첫 화면 정보 위계와 비율을 충분히 개선하지 못한 점을 총괄이 수용한다. **[프로젝트 홈15 계약](2026-10-16-project-home-15/IMPLEMENTATION.md)에 따른 첫 통합을 마쳤다.** 실제 Dify1280 관측과 현재 제품1440 홈을 대조해 3열 카드·목적 우선·일관된 진입을 명시했다. Pro 홈 연구와 Opus 홈 구현은 각각 새 브라우저 세션으로 분리한다. 기존 보고 해석 세션은 같은 주제만 유지하고 구현으로 섞지 않는다.
 
-홈15는 [PR #5](https://github.com/tlsee0813-cmd/agentflow-studio/pull/5)로 checkpoint에 통합했다. 제품소스 `1e51f0f9b56ed51e9ec4c529ca518aa256ad1ecf`, 병합 `168d47ff6e4cca6596b6d3c7306921b8544c14f6`. 독립15개 재실행·추가10장면·별도이미지/코드판단과 Windows/Ubuntu CI를 마쳤다. [결과와 공유 증거](2026-10-16-project-home-15/RESULT.md). [새 PC 체험](http://127.0.0.1:8765/product15-preview/runtime/index.html)을 열어 실제 기존카드→전체공간→카드초점 복귀를 총괄이 확인했다. **현재 좁은범위를 수용하며 완성형 UI/전체제품 완료 선언은 아니다.** 다음 홈 보완은 긴 공통접두사의 전체이름·목적을 진입 전에 키보드/포인터로 읽고 같은카드로 닫는 경로다.
+홈15는 [PR #5](https://github.com/tlsee0813-cmd/agentflow-studio/pull/5)로 checkpoint에 통합했다. 제품소스 `1e51f0f9b56ed51e9ec4c529ca518aa256ad1ecf`, 병합 `168d47ff6e4cca6596b6d3c7306921b8544c14f6`. 독립15개 재실행·추가10장면·별도이미지/코드판단과 Windows/Ubuntu CI를 마쳤다. [결과와 공유 증거](2026-10-16-project-home-15/RESULT.md). [새 PC 체험](http://127.0.0.1:8765/product15-preview/runtime/index.html)을 열어 실제 기존카드→전체공간→카드초점 복귀를 총괄이 확인했다. **현재 좁은범위를 수용하며 완성형 UI/전체제품 완료 선언은 아니다.** 현재 후속 보완은 긴 공통 접두사의 전체 이름·목적을 진입 전에 키보드/포인터로 읽고 같은 카드로 닫는 경로다. 기존 홈 전용 Opus가 구현하고 같은 주제의 Pro가 조작 선택의 반례를 검토한다. 고정 범위는 [계약 후속 절](2026-10-16-project-home-15/IMPLEMENTATION.md#홈15-후속--진입-전-전체-문구-읽기-2026-10-16-1645-kst)이다.
 
 주제별 세션: [Pro 홈 연구](https://chatgpt.com/c/6ad1cae0-2da4-83e8-a0c3-8699e2a84be1), [Opus 홈 구현](https://claude.ai/chat/af32916c-7f77-418c-9955-fcdb2d2a1995), [별도 Cloud 홈 검토](https://chatgpt.com/c/6ad1cb08-d8b8-83e8-95f2-e2b1a1327fe8). 기존 보고 해석 세션에는 홈 설계를 섞지 않았다. 새 Cloud 환경의 브라우저 설치는 네트워크 정책으로 차단돼 설치를 반복하지 않고, 준비된 기존 환경에는 독립 **실행만** 맡겼다. 별도 새 검토 세션이 코드·이미지·실행 증거를 판단한다.
 
