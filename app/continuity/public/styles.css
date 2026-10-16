@@ -2419,3 +2419,52 @@ body[data-layer="space"] .space-crumb{margin-bottom:8px}
    top is (a notice above or an opened records list moves only the map's lower edge out of view). The off-screen chip stays
    top-left. Narrow screens keep the existing bottom placement. */
 @media(min-width:761px){.map-controls{top:10px;bottom:auto}}
+
+/* HOME15: the project list as the first screen. Scoped to the list route and its cards; project screens are unchanged. */
+body[data-route="projects"] .topbar{display:none}
+body[data-route="projects"] .sidebar-current,body[data-route="projects"] .sidebar-bottom,body[data-route="projects"] .nav-caption{display:none}
+body[data-route="projects"] .shell{max-width:none;margin:0;padding:32px 28px 20px}
+body[data-route="projects"] .projects-view,body[data-route="projects"] footer{max-width:1096px;margin-left:0}
+.home-heading{margin:0 0 32px;align-items:center;min-height:40px;flex-wrap:wrap}
+.home-heading h1{margin:0;font-size:20px;line-height:1.3;display:flex;align-items:center;gap:8px}
+.home-count{font-size:12px;font-weight:600;color:var(--muted);background:#eeedf3;border-radius:6px;padding:1px 7px;line-height:1.6}
+.home-count:empty{display:none}
+.home-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.home-actions .primary{padding:9px 16px;font-size:13px}
+.home-actions .connection-popover{top:38px}
+.projects-view .project-list{grid-template-columns:repeat(auto-fill,minmax(296px,1fr));gap:16px;margin:0 0 20px;align-items:stretch}
+.projects-view .project-card{position:relative;display:flex;flex-direction:column;gap:10px;min-height:176px;padding:18px;border-radius:12px;
+  transition:border-color .12s,box-shadow .12s}
+.projects-view .project-card.openable:hover{border-color:#c9c0f0;box-shadow:0 6px 22px #3023420f}
+.projects-view .project-card:has(.project-open:focus-visible){border-color:var(--accent);box-shadow:0 0 0 3px #6953d933}
+.project-card-head{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:start}
+.project-mark{width:36px;height:36px;border-radius:9px;background:var(--tint);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:15px;letter-spacing:0}
+.projects-view .project-card-name{font-size:16px;font-weight:650;line-height:1.4;color:var(--ink);margin:2px 0 0;overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.projects-view button.project-card-name{border:0;background:none;padding:0;text-align:left;cursor:pointer;border-radius:4px;box-shadow:none;min-height:0}
+.projects-view button.project-card-name:hover{background:none;color:var(--accent-dark)}
+.projects-view button.project-card-name:focus-visible{outline:none}
+.project-card-purpose{margin:0;font-size:13.5px;line-height:1.6;color:#4b4a5c;overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.project-card-purpose.missing{color:var(--muted)}
+.project-card-meta{margin:auto 0 0;display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12px;line-height:1.5;color:var(--muted)}
+.project-card-areas::before{content:"·";margin-right:8px;color:#a9a8b4}
+.project-card-note{margin:0;font-size:12px}
+.project-card-actions{margin-top:auto}
+.project-more{position:relative;margin:-4px -6px 0 0}
+.project-more-button{list-style:none;width:32px;height:32px;display:grid;place-items:center;border-radius:8px;color:#7b7a89;cursor:pointer;font-size:18px;line-height:1}
+.project-more-button::-webkit-details-marker{display:none}
+.project-more-button:hover,.project-more[open]>.project-more-button{background:#f1eff8;color:var(--ink)}
+.project-more-button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.project-more-menu{position:absolute;right:0;top:36px;z-index:4;min-width:168px;background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 12px 32px #3023421c;padding:6px}
+.project-more-menu button{width:100%;text-align:left;font-size:13px;padding:8px 10px;border-radius:7px}
+.projects-view .list-tools{margin:0 0 14px;align-items:center;gap:8px 10px;flex-wrap:wrap}
+.projects-view .list-tools button{font-size:12px}
+.projects-view .project-empty{grid-column:1/-1;margin:4px 0 8px;font-size:13px}
+.projects-view .trash-section .project-list{margin-top:8px}
+@media(min-width:1760px){body[data-route="projects"] .projects-view,body[data-route="projects"] footer{max-width:1480px}}
+@media(max-width:800px){
+  body[data-route="projects"] .shell{padding:18px 16px 16px}
+}
+@media(max-width:480px){.projects-view .project-list{grid-template-columns:minmax(0,1fr)}}

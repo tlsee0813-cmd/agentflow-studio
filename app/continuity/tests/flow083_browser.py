@@ -56,7 +56,9 @@ class Flow083(unittest.TestCase):
         self.send('예약 확정 문구를 바꿔줘.');self.page.reload();expect(self.page.locator('#current-work')).to_be_visible() # a reload keeps its place
         tab=self.new_tab();expect(tab.locator('#projects-view')).to_be_visible();expect(tab.locator('#current-work')).to_have_count(0)
         card=tab.locator('.project-card').first
-        expect(card).to_contain_text('예약 확정 문구를 바꿔줘.');expect(card).to_contain_text('최근 활동');expect(card).to_contain_text('요청 1개')
+        # HOME15: the card shows the purpose (none here) and the work-record time; the last request is not the purpose.
+        expect(card.locator('.project-card-name')).to_have_text('예약 확정 문구를 바꿔줘.') # the name the app derived from the first request
+        expect(card.locator('.project-card-purpose')).to_have_text('목적을 아직 적지 않았어요');expect(card.locator('.project-card-meta')).to_contain_text('작업 기록 · ')
         self.fit('project-list',tab)
         tab.locator('#new-project').click();expect(tab.locator('#welcome-title')).to_contain_text('새 프로젝트')
         tab.locator('#draft').fill('두 번째 프로젝트: 문의 접수 페이지');tab.locator('#send').click();expect(tab.locator('#working')).to_have_text('')
@@ -78,7 +80,7 @@ class Flow083(unittest.TestCase):
         self.assertEqual(self.raw(base.KEY,tab),raw,'the old key is never written');self.assertEqual(self.raw(LEGACY_BACKUP,tab),raw,'original bytes kept')
         tab.locator('.project-open').click();expect(tab.locator('#current-work')).to_be_visible();expect(tab.locator('#example-banner')).to_be_hidden()
         expect(tab.locator('#notice')).to_contain_text('project.1')
-        tab.locator('#nav-projects').click();tab.once('dialog',lambda d:d.accept());tab.locator('.project-trash').click()
+        tab.locator('#nav-projects').click();tab.once('dialog',lambda d:d.accept());tab.locator('.project-more-button').first.click();tab.locator('.project-trash').first.click()
         expect(tab.locator('#trash-count')).to_have_text('1');tab.close()
         again=self.new_tab();expect(again.locator('#projects-view')).to_be_visible()
         self.assertEqual(len(self.envelope(again)['entries']),1,'all trashed and nothing selected: still not migrated again')
@@ -90,11 +92,11 @@ class Flow083(unittest.TestCase):
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         backup=base.OUT/'flow083-backup.json';d.value.save_as(backup)
         self.page.locator('#nav-projects').click();self.page.once('dialog',lambda dlg:(self.assertIn('원문·기준·요청·돌아온 결과',dlg.message),self.assertIn('취소되지는 않아요',dlg.message),dlg.accept()))
-        self.page.locator(f'.project-card[data-entry-id="{key}"] .project-trash').click()
+        self.page.locator(f'.project-card[data-entry-id="{key}"] .project-more-button').click();self.page.locator(f'.project-card[data-entry-id="{key}"] .project-trash').click()
         expect(self.page.locator('#list-notice')).to_contain_text('휴지통으로 옮겼어요');expect(self.page.locator('#project-list .project-card')).to_have_count(0)
         expect(self.page.locator('#trash-count')).to_have_text('1');self.assertEqual(self.entry(key)['project'],saved,'trash changes the wrapper only')
         self.page.locator('#undo-trash').click();expect(self.page.locator('#project-list .project-card')).to_have_count(1)
-        self.page.once('dialog',lambda dlg:dlg.accept());self.page.locator('.project-trash').click()
+        self.page.once('dialog',lambda dlg:dlg.accept());self.page.locator('.project-more-button').first.click();self.page.locator('.project-trash').first.click()
         tab=self.new_tab();expect(tab.locator('#trash-section')).to_be_visible();self.fit('trash',tab)
         tab.locator('#trash-section').evaluate('(e)=>e.open=true');tab.locator('.project-restore').click()
         expect(tab.locator('#list-notice')).to_contain_text('되살렸어요');tab.locator(f'.project-card[data-entry-id="{key}"] .project-open').click()
@@ -109,7 +111,7 @@ class Flow083(unittest.TestCase):
 
     def test_05_an_older_tab_cannot_save_into_a_project_trashed_or_restored_elsewhere(self):
         self.send('문구 하나 바꿔줘.');key=self.current_entry();before=self.entry(key)['project']
-        tab=self.new_tab();tab.once('dialog',lambda dlg:dlg.accept());tab.locator('.project-trash').click();expect(tab.locator('#trash-count')).to_have_text('1')
+        tab=self.new_tab();tab.once('dialog',lambda dlg:dlg.accept());tab.locator('.project-more-button').first.click();tab.locator('.project-trash').first.click();expect(tab.locator('#trash-count')).to_have_text('1')
         self.compose();self.page.locator('#draft').fill('오래된 탭에서 쓴 입력')
         expect(self.page.locator('#storage-error')).to_contain_text('휴지통');self.assertEqual(self.entry(key)['project'],before)
         expect(self.page.locator('#draft')).to_have_value('오래된 탭에서 쓴 입력');self.assertEqual(self.entry(key)['state'],'trashed','not listed back')

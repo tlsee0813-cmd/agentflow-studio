@@ -176,6 +176,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/pc13_browser.py 2>&1 | tee test-results/pc13-browser.log
+      - name: HOME15 project cards, purpose, entry, return and menu isolation (native HTTP, synthetic fixtures, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/home15
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/home15_browser.py 2>&1 | tee test-results/home15-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:
