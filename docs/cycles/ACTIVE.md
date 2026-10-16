@@ -1,50 +1,31 @@
 # AgentFlow 활성 연구·검증 배정
 
-2026-10-16 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 각 사이클 문서는 당시 판단 기록이다.
+2026-10-16 00:54 UTC 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이다.
 
-## 현재: cycle10 통합 완료 · cycle11 같은 화면·두 입력 구현 준비
+## 현재: cycle11 같은 화면·두 입력, P2 수정본 수령 감사
 
-[cycle10 결과](2026-10-16-relation-reading-10/RESULT.md) · [작성자 감사](2026-10-16-relation-reading-10/AUTHOR_AUDIT.md) · [독립 감사](2026-10-16-relation-reading-10/INDEPENDENT_AUDIT.md).
+[cycle10 결과](2026-10-16-relation-reading-10/RESULT.md)는 통합 완료다. 현재는 [cycle11 범위](2026-10-16-two-change-record-11/BRIEF.md), [입력](2026-10-16-two-change-record-11/INPUT.md), [구현 선택](2026-10-16-two-change-record-11/DECISION.md)를 따른다.
 
-같은 출발점의 두 관계를 실제 받는 세부 머리로 구별하고, 큰 끝점 카드의 반복을 줄인 참고를 다음 연구의 기준 후보로 유지한다. 실제 양끝·접힌 대표·각 조건과 지도 선택·준비문은 보존했다. 두 버튼 이름 자체가 고유해지거나 사람 접근성이 검증된 것은 아니다. 면적 감소를 이해 부담 감소라고 말하지 않는다.
+최신 사용자 의견을 수용했다. 같은 index/engine/style에 FLOW091과 PowerToys JSON을 교체하며 새 사례마다 화면을 다시 만들지 않는다. PC1280×720·1440×900을 중심으로 확인하고390은 최소 확인만 한다. 거대한 범용 엔진·자동 수집기·모바일 재설계는 이번 범위가 아니다.
 
-정확 HTML 55,724B / SHA256 `96e791d25bcb8fadc41ba1e30351bddd4b0feb3d6ebe1e7ef70941bbd359ceae`로 독립 run03을 완료했다. 두 폭 A/B/C와 1440 초기 관측, 계획7/완료7이다. 152 PASS는 정적 묶음1과 브라우저151이며 실제 child·collector 종료는0이다. 중요한 추가 기능 결함은 발견하지 않았다. 작성자·이전 검사 수와 합산하지 않는다.
+작성자 v0 공통 코드와 두 입력, 실패 이력·원시 결과·대표 화면 [116파일을 GitHub에 공유했다](https://github.com/tlsee0813-cmd/agentflow-studio/tree/6643323316daefbe10625484bb1727a2c6a54716/docs/transfer/shared-map-11/author-v0). 원격 정확 집합·크기·Git blob·manifest 감사 일치. [작성자 감사](2026-10-16-two-change-record-11/AUTHOR_AUDIT.md)는 보조 코드 감사와 총괄 실제 조작을 구분한다.
 
-독립 증거35파일/4,062,235B와 manifest payload34개, 전체 Git blob·크기·정확 집합을 감사했다. 두 폭에서 편집 후 새 참고 닫힘 직후 초점·깊이와 준비 재진입 보존을 확인했다. 대상 간 편집 격리는1280만이다. 선 최대 차이는0.162 world/허용0.5이며 정확 동일은 아니다. 새 의도적 실패 probe·선 클릭·외부 원문 왕복은 미실행이다. favicon404 한 건과 일반 콘솔 오류의 종료 집계 부재, launcher 결과 전사본을 구분한다. 사람 이해·터치·큰 지도·실제 AI 송신과 수락은 미검증이다.
+**미리보기 후 문장을 고치면 이전 문장이 남고 복사는 새 문장을 쓰는 P2**를 발견했다. 총괄 Windows IAB에서 직접 재현했다. Cloud도 PC 두 폭×두 사례4경로 재현, 실제 child·collector1을 보고했다. Opus는 engine 한 줄 수정과 같은 검사 old-fail/new-pass를 담은 작은 fix1 overlay를 전달했다. 수령·diff 감사와 정확 소스 공유 후 Cloud 최종 독립 검증을 실행한다. 아직 최종 통과가 아니다.
 
-## cycle11
-
-[범위](2026-10-16-two-change-record-11/BRIEF.md) · [실제 입력](2026-10-16-two-change-record-11/INPUT.md) · [입력 감사](2026-10-16-two-change-record-11/INPUT_SCOPE_AUDIT.md).
-
-Pro가 찾은 PowerToys PR51150을 총괄과 Astra가 원문·고정 코드로 대조했다. **하나의 요구가 두 기능으로 전파된 사례가 아니라, 두 별도 동작 문제를 한 후속 커밋에서 수정한 사례**로 채택한다. 키 검색·선택과 녹화 종료 판정은 편집기 일부이며, ManagedCommon 공통 훅은 외부 지원부다. 두 기능 사이 인과나 공통부의 소유 편입을 발명하지 않는다. AI 공동작성·세션 메타데이터는 참여 표식이며 인계·수락·실행 성공의 증거가 아니다. PR 병합과 배포·실사용도 구분한다.
-
-| 담당 | 결과와 다음 범위 |
+| 담당 | 현재 범위 |
 |---|---|
-| Pro A | cycle11 공간·외부 공통부 연구 완료. draw.io/Cytoscape 원문 감사 완료 |
-| Pro B | cycle11 변경 읽기 연구 완료. Grafana 원문 감사 완료 |
-| 총괄 | 두 연구·원문 감사·Grafana/Cytoscape 직접 PC 관찰 통합. 최신 사용자 의견을 수용해 동일 renderer/두 입력과 PC 완료선 선택 |
-| Opus | cycle10 작성자 t04 완료. cycle11 DECISION 기준 구현 배정 준비 |
-| Cloud | cycle10 독립 run03과 공유 완료. 다음 실행 미배정 |
-| Astra High /6.1 Sol High | 의미·시각·실행·전달·입력 감사 완료. 브라우저 모델 일괄 변경 지시가 아님 |
+| Pro A/B | 공간·변경 읽기 연구 완료. draw.io/Cytoscape/Grafana 원문 감사 완료 |
+| 총괄 | 두 입력·PC 제품 흐름 판단, 실제 UI 확인, GitHub 통합 |
+| Opus | v0 및 P2 fix1 전달 완료. 새 시안 추가 배정 없음 |
+| Cloud | v0 결함 독립 재현 완료. fix1 정확 overlay 대기 |
+| Astra High /6.1 Sol High | 의미·정적 화면·실행 감사 완료, fix1 수령·좁은 회귀 감사 |
 
-[공간 연구 세션](https://chatgpt.com/c/6ad16941-329c-83e8-bf43-a62cbaf81cf8) · [변경 읽기 연구 세션](https://chatgpt.com/c/6ad1695a-1a24-83ee-a948-19a38c912a94). 연구 응답을 고정 원문과 대조했다. Grafana 대상 상세 열기/닫기와 Cytoscape 선택 영역 접기/펼치기를 실제 PC에서 관찰했다. 상세 닫기 초점과 펼침 뒤 지도 복귀는 라이브러리의 보장으로 가져오지 않는다.
+PowerToys는 두 별도 동작 문제와 외부 공통 훅의 지원 변경이다. 하나의 요구가 두 기능에 전파됐다는 인과를 만들지 않는다. FLOW091 계약/MOCK와 실제 개발 기록을 구별한다. 두 표본의 성공은 임의 기록 자동 지도화나 사람 이해 성공이 아니다.
 
-[제품 연결점 점검](2026-10-16-two-change-record-11/PRODUCT_BOUNDARY.md): 실제 제품은 평면 영역과 영역 간 관계, 작업별 수동 준비문을 사용한다. 보는 대상·이어갈 작업·작성 대상의 분리는 유지한다. 연구용 층위와 참고의 통과를 제품의 지원·적용 완료로 계산하지 않는다. 이 점검은 코드 읽기이며 제품 재실행 결과가 아니다.
+[제품 경계](2026-10-16-two-change-record-11/PRODUCT_BOUNDARY.md)에 따라 보는 대상·이어갈 작업·작성 대상과 Task.id별 manual4필드를 보존한다. 비교 종료 후 공통 흐름·보류/위험·기존 재사용·최소 연결 체험을 한 번 판정하며, 추가 연구 사이클을 자동 생성하지 않는다. 짧은 현재 설명→필요한 상세→명시적 조정/이어가기→원래 보기 복귀가 후보이며 근거 없는 ‘방문 이후 변화’를 발명하지 않는다.
 
-[구현 선택·완료 기준](2026-10-16-two-change-record-11/DECISION.md): 같은 index/engine/style에 FLOW091과 PowerToys 두 JSON을 교체한다. 사례 전용 코드 분기·가짜 변경/미결·상태 누수를 실패로 본다. PC1280/1440을 주 검증하며390은 최소 확인이다. 빈 자유문 한 칸의 미래 요청 초안을 연구하되 제품의 Task별 manual4필드는 대체하지 않는다. 이 비교 후 공통 흐름·보류·기존 제품 재사용·최소 체험 연결을 판정하며 시안 추가를 자동 다음 단계로 삼지 않는다.
+## 공유·운영 경계
 
-채택 흐름은 전체 부분 지도에서 변화 위치 파악 → 한 동작 이해 → 필요하면 그 부분의 확인·조정 준비 → 전체 복귀다. 원문에서 이미 성공한 인계나 완성된 제품 흐름으로 부르지 않는다. 연구 질문은 일괄 개발 목록이 아니며, 구현은 위 완료선으로 한정한다. 지도 상시 고정·방향선 수정·새 엔진·관계·미결을 자동 추가하지 않는다.
+연구 checkpoint/2026-10-15 통합은 총괄, Cloud 쓰기는 지정 delivery 하위 경로만 담당한다. GitHub가 공유 원본이고 로컬은 수령·감사·미리보기 임시 자료다. 사용자 예약을 중복 생성하거나 변경하지 않았다.
 
-## 공유 원본과 이전 판단
-
-[작성자62파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/76feae052f716bfe8d0bc09df5a6770048b1f687/docs/transfer/relation-reading-10/author-v0) · [독립35파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/dab9c965f6fa0eac72f6aab9d9d1f18ffd38ef94/docs/transfer/relation-reading-10/independent-v0) · [공유 증거 목록](https://github.com/tlsee0813-cmd/agentflow-studio/blob/delivery/ui02-fix3-evidence/docs/transfer/README.md). 다른 세션도 원본·첫 실패·원시 결과·PNG를 GitHub에서 회수할 수 있다.
-
-[cycle09 혼합 깊이](2026-10-16-mixed-reading-09/RESULT.md) · [cycle08 전체 조망](2026-10-16-overview-08/RESULT.md) · [cycle07 실제 후속 요청](2026-10-16-change-record-07/RESULT.md) · [cycle06 목적·역할](2026-10-16-purpose-06/RESULT.md) · [cycle05 혼합 깊이](2026-10-16-composition-05/RESULT.md). FLOW091 계약/MOCK, VSCode 실제 기록, PowerToys 실제 기록을 섞지 않는다.
-
-## 운영 경계
-
-연구 checkpoint/2026-10-15 통합은 총괄이 담당한다. Cloud는 지정 delivery 하위 경로만 사용한다. 사용자 예약은 중복 생성하거나 변경하지 않았다.
-
-GitHub가 공유 원본이며 로컬은 수령·감사·미리보기용 임시 자료다. cycle06 임시 복사본 삭제는 자동 승인 심사가 실행 전에 차단해0건이다. 구체적 이유는 제공되지 않았고 우회 삭제하지 않았다. 공유 결과 회수에는 영향이 없다.
-
-2026-10-15 23:41 UTC 원격 확인: main `896dcf3848fec70357d0f9bd4fd6c09cab70db37`, 공개 배포 `63f5540d062861439f0932cd7311c6c5510e227c` 유지. 이번 증거97파일은 지정 docs/transfer/ 경로에만 추가됐으며 연구 통합은 docs/cycles/ 안이다. 제품 기준 `618d9bd2b99ad433df35107d8902b15f45e30000`과 GUIDE107 HOLD를 유지한다. 전체 제품 완성·실제 AI 송신과 수락은 미확인이다.
+2026-10-16 00:50 UTC 원격 확인: main `896dcf3848fec70357d0f9bd4fd6c09cab70db37`, gh-pages `63f5540d062861439f0932cd7311c6c5510e227c` 유지. 제품 기준 `618d9bd2b99ad433df35107d8902b15f45e30000`, GUIDE107 HOLD 유지. 제품 반영·공개 배포·실제 AI 송신/수락은 이번 연구 결과가 아니다.
