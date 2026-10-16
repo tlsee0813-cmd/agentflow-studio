@@ -1,0 +1,244 @@
+{
+ "runId": "f01",
+ "started": "2026-10-16T00:47:47.312Z",
+ "before": {
+  "v0": {
+   "index.html": {
+    "bytes": 2769,
+    "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+   },
+   "engine.js": {
+    "bytes": 33828,
+    "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+   },
+   "style.css": {
+    "bytes": 11662,
+    "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+   },
+   "fixtures/flow091.json": {
+    "bytes": 19224,
+    "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+   },
+   "fixtures/powertoys.json": {
+    "bytes": 13494,
+    "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+   }
+  },
+  "fix1": {
+   "index.html": {
+    "bytes": 2769,
+    "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+   },
+   "engine.js": {
+    "bytes": 34004,
+    "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f"
+   },
+   "style.css": {
+    "bytes": 11662,
+    "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+   },
+   "fixtures/flow091.json": {
+    "bytes": 19224,
+    "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+   },
+   "fixtures/powertoys.json": {
+    "bytes": 13494,
+    "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+   }
+  },
+  "test": {
+   "bytes": 10950,
+   "sha256": "f991a155badc4c26983055496a5e82238fdd69f26d35901eb3862dd2a787b0f5"
+  },
+  "collector": {
+   "bytes": 3243,
+   "sha256": "37fac76dd91687f0f186b0dba573317f2f098e59938ab2c1af36c7312bcf3315"
+  }
+ },
+ "children": [
+  {
+   "app": "v0",
+   "viewport": "1280x720",
+   "childExitCode": 1,
+   "ms": 8988,
+   "assertions": 52,
+   "clickPreconditions": 30,
+   "failed": 6,
+   "failedNames": [
+    "1280-flow-preview-copy: 2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음",
+    "1280-flow-preview-copy: 2) 복사문 = 그 순간 보이는 미리보기(보이는 경우)",
+    "1280-flow-preview-copy: 6) 열린 미리보기와 복사문 일치(E3+E4)",
+    "1280-pt-preview-copy: 2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음",
+    "1280-pt-preview-copy: 2) 복사문 = 그 순간 보이는 미리보기(보이는 경우)",
+    "1280-pt-preview-copy: 6) 열린 미리보기와 복사문 일치(E3+E4)"
+   ],
+   "firstFailure": {
+    "scenario": "1280-flow-preview-copy",
+    "name": "2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음",
+    "data": {
+     "value": "배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지.",
+     "previewHidden": false,
+     "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다.",
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "",
+     "open": true
+    }
+   },
+   "incomplete": [],
+   "consoleErrors": 0,
+   "receivedMatchesDisk": true,
+   "engineServed": {
+    "path": "engine.js",
+    "status": 200,
+    "bytes": 33828,
+    "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+   },
+   "pngs": [
+    "1280-pt-after-edit.png"
+   ]
+  },
+  {
+   "app": "v0",
+   "viewport": "1440x900",
+   "childExitCode": 1,
+   "ms": 8116,
+   "assertions": 52,
+   "clickPreconditions": 30,
+   "failed": 6,
+   "failedNames": [
+    "1440-flow-preview-copy: 2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음",
+    "1440-flow-preview-copy: 2) 복사문 = 그 순간 보이는 미리보기(보이는 경우)",
+    "1440-flow-preview-copy: 6) 열린 미리보기와 복사문 일치(E3+E4)",
+    "1440-pt-preview-copy: 2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음",
+    "1440-pt-preview-copy: 2) 복사문 = 그 순간 보이는 미리보기(보이는 경우)",
+    "1440-pt-preview-copy: 6) 열린 미리보기와 복사문 일치(E3+E4)"
+   ],
+   "firstFailure": {
+    "scenario": "1440-flow-preview-copy",
+    "name": "2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음",
+    "data": {
+     "value": "배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지.",
+     "previewHidden": false,
+     "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다.",
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "",
+     "open": true
+    }
+   },
+   "incomplete": [],
+   "consoleErrors": 0,
+   "receivedMatchesDisk": true,
+   "engineServed": {
+    "path": "engine.js",
+    "status": 200,
+    "bytes": 33828,
+    "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+   },
+   "pngs": []
+  },
+  {
+   "app": "fix1",
+   "viewport": "1280x720",
+   "childExitCode": 0,
+   "ms": 8092,
+   "assertions": 52,
+   "clickPreconditions": 30,
+   "failed": 0,
+   "failedNames": [],
+   "firstFailure": null,
+   "incomplete": [],
+   "consoleErrors": 0,
+   "receivedMatchesDisk": true,
+   "engineServed": {
+    "path": "engine.js",
+    "status": 200,
+    "bytes": 34004,
+    "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f"
+   },
+   "pngs": [
+    "1280-pt-after-edit.png"
+   ]
+  },
+  {
+   "app": "fix1",
+   "viewport": "1440x900",
+   "childExitCode": 0,
+   "ms": 7998,
+   "assertions": 52,
+   "clickPreconditions": 30,
+   "failed": 0,
+   "failedNames": [],
+   "firstFailure": null,
+   "incomplete": [],
+   "consoleErrors": 0,
+   "receivedMatchesDisk": true,
+   "engineServed": {
+    "path": "engine.js",
+    "status": 200,
+    "bytes": 34004,
+    "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f"
+   },
+   "pngs": []
+  }
+ ],
+ "after": {
+  "v0": {
+   "index.html": {
+    "bytes": 2769,
+    "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+   },
+   "engine.js": {
+    "bytes": 33828,
+    "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+   },
+   "style.css": {
+    "bytes": 11662,
+    "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+   },
+   "fixtures/flow091.json": {
+    "bytes": 19224,
+    "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+   },
+   "fixtures/powertoys.json": {
+    "bytes": 13494,
+    "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+   }
+  },
+  "fix1": {
+   "index.html": {
+    "bytes": 2769,
+    "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+   },
+   "engine.js": {
+    "bytes": 34004,
+    "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f"
+   },
+   "style.css": {
+    "bytes": 11662,
+    "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+   },
+   "fixtures/flow091.json": {
+    "bytes": 19224,
+    "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+   },
+   "fixtures/powertoys.json": {
+    "bytes": 13494,
+    "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+   }
+  },
+  "test": {
+   "bytes": 10950,
+   "sha256": "f991a155badc4c26983055496a5e82238fdd69f26d35901eb3862dd2a787b0f5"
+  },
+  "collector": {
+   "bytes": 3243,
+   "sha256": "37fac76dd91687f0f186b0dba573317f2f098e59938ab2c1af36c7312bcf3315"
+  }
+ },
+ "sourceUnchangedDuringRun": true,
+ "v0Reproduced": true,
+ "fix1AllZero": true,
+ "finished": "2026-10-16T00:48:20.522Z"
+}

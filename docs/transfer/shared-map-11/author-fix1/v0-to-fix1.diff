@@ -1,0 +1,11 @@
+--- v0/app/engine.js
++++ fix1/app/engine.js
+@@ -351,7 +351,7 @@
+   draftEl.hidden = false; app.querySelector('#main').inert = true; $('#top').inert = true;
+   draftText.focus({ preventScroll: true });
+ }
+-function syncDraftBtns() { const empty = !draftText.value.trim(); $('#draftPreviewBtn').disabled = empty; $('#draftCopyBtn').disabled = empty; if (empty) { $('#draftPreview').hidden = true; } }
++function syncDraftBtns() { const empty = !draftText.value.trim(), p = $('#draftPreview'); $('#draftPreviewBtn').disabled = empty; $('#draftCopyBtn').disabled = empty; if (empty) { p.hidden = true; p.textContent = ''; } else if (!p.hidden) p.textContent = draftPreviewText(); /* 열린 미리보기는 입력과 함께 최신화: 보이는 내용 = 복사할 내용 */ }
+ function draftPreviewText() { const id = S.draft.id; return `대상: ${S.cases[S.cur].fx.title} › ${nm(id)} (${where(id)})\n\n${draftText.value.trim()}`; }
+ function closeDraft(restore = true) {
+   if (!S.draft) return;

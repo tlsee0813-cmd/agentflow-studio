@@ -1,0 +1,804 @@
+{
+ "viewport": [
+  1280,
+  720
+ ],
+ "appRoot": "/home/claude/c11fix/fix1/app",
+ "before": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 34004,
+   "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ },
+ "served": [
+  {
+   "path": "index.html",
+   "status": 200,
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  {
+   "path": "style.css",
+   "status": 200,
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  {
+   "path": "engine.js",
+   "status": 200,
+   "bytes": 34004,
+   "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f"
+  },
+  {
+   "path": "fixtures/flow091.json",
+   "status": 200,
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  {
+   "path": "fixtures/powertoys.json",
+   "status": 200,
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ ],
+ "received": [
+  {
+   "path": "index.html",
+   "status": 200,
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  {
+   "path": "style.css",
+   "status": 200,
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  {
+   "path": "engine.js",
+   "status": 200,
+   "bytes": 34004,
+   "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f"
+  },
+  {
+   "path": "fixtures/flow091.json",
+   "status": 200,
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  {
+   "path": "fixtures/powertoys.json",
+   "status": 200,
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ ],
+ "consoleErrors": [],
+ "scenarios": {
+  "1280-flow-preview-copy": {
+   "id": "1280-flow-preview-copy",
+   "assertions": [
+    {
+     "name": "클릭 지점 화면 안·대상 위: 변경 칩",
+     "pass": true,
+     "data": {
+      "x": 270.8671875,
+      "y": 139.125,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 내 다음 요청 준비",
+     "pass": true,
+     "data": {
+      "x": 1183.828125,
+      "y": 380,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력칸",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 370,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 미리보기",
+     "pass": true,
+     "data": {
+      "x": 394.765625,
+      "y": 461.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "1) 미리보기 = 현재 입력(E1)",
+     "pass": true,
+     "data": {
+      "value": "배경 블록 유무만 확인한다.",
+      "previewHidden": false,
+      "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다.",
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력칸",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 321.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음",
+     "pass": true,
+     "data": {
+      "value": "배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지.",
+      "previewHidden": false,
+      "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지.",
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 복사",
+     "pass": true,
+     "data": {
+      "x": 486.53125,
+      "y": 413,
+      "ok": true
+     }
+    },
+    {
+     "name": "2) 복사문 = 그 순간 보이는 미리보기(보이는 경우)",
+     "pass": true,
+     "data": {
+      "clip": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지.",
+      "preview": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지."
+     }
+    },
+    {
+     "name": "2) 복사문은 최신 입력으로 끝남",
+     "pass": true,
+     "data": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지."
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력칸",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 321.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "3) 빈 입력: 미리보기 숨김·미리보기/복사 비활성",
+     "pass": true,
+     "data": {
+      "value": "",
+      "previewHidden": true,
+      "previewVisibleText": null,
+      "prevDisabled": true,
+      "copyDisabled": true,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "4) 공백만: 미리보기 숨김·미리보기/복사 비활성",
+     "pass": true,
+     "data": {
+      "value": "   ",
+      "previewHidden": true,
+      "previewVisibleText": null,
+      "prevDisabled": true,
+      "copyDisabled": true,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "5) 다시 입력: 버튼 활성, 미리보기는 사용자가 다시 열 때까지 숨김",
+     "pass": true,
+     "data": {
+      "value": "빈칸 뒤 다시 쓴 요청.",
+      "previewHidden": true,
+      "previewVisibleText": null,
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 복사",
+     "pass": true,
+     "data": {
+      "x": 486.53125,
+      "y": 461.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "5) 다시 입력 뒤 복사문은 E3로 끝남",
+     "pass": true,
+     "data": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청."
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 미리보기(다시)",
+     "pass": true,
+     "data": {
+      "x": 394.765625,
+      "y": 461.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "5) 다시 연 미리보기 = 방금 복사문",
+     "pass": true,
+     "data": {
+      "clip": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청.",
+      "preview": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청."
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력칸",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 321.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 복사",
+     "pass": true,
+     "data": {
+      "x": 486.53125,
+      "y": 413,
+      "ok": true
+     }
+    },
+    {
+     "name": "6) 열린 미리보기와 복사문 일치(E3+E4)",
+     "pass": true,
+     "data": {
+      "clip": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "preview": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임."
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 초안 닫기",
+     "pass": true,
+     "data": {
+      "x": 915,
+      "y": 137,
+      "ok": true
+     }
+    }
+   ],
+   "raw": {
+    "s1": {
+     "value": "배경 블록 유무만 확인한다.",
+     "previewHidden": false,
+     "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다.",
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "",
+     "open": true
+    },
+    "s2": {
+     "value": "배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지.",
+     "previewHidden": false,
+     "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지.",
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "",
+     "open": true
+    },
+    "copy2": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n배경 블록 유무만 확인한다. 그리고 요청 당시 사본 유지까지.",
+    "s3": {
+     "value": "",
+     "previewHidden": true,
+     "previewVisibleText": null,
+     "prevDisabled": true,
+     "copyDisabled": true,
+     "status": "",
+     "open": true
+    },
+    "s4": {
+     "value": "   ",
+     "previewHidden": true,
+     "previewVisibleText": null,
+     "prevDisabled": true,
+     "copyDisabled": true,
+     "status": "",
+     "open": true
+    },
+    "s5a": {
+     "value": "빈칸 뒤 다시 쓴 요청.",
+     "previewHidden": true,
+     "previewVisibleText": null,
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "",
+     "open": true
+    },
+    "copy5": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청.",
+    "s5b": {
+     "value": "빈칸 뒤 다시 쓴 요청.",
+     "previewHidden": false,
+     "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청.",
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "복사했습니다 · 보내지는 않았습니다",
+     "open": true
+    },
+    "s6": {
+     "d": {
+      "value": "빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "previewHidden": false,
+      "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     },
+     "c6": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+     "d6": {
+      "value": "빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "previewHidden": false,
+      "previewVisibleText": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "복사했습니다 · 보내지는 않았습니다",
+      "open": true
+     }
+    }
+   },
+   "complete": true
+  },
+  "1280-pt-preview-copy": {
+   "id": "1280-pt-preview-copy",
+   "assertions": [
+    {
+     "name": "클릭 지점 화면 안·대상 위: 변경 칩",
+     "pass": true,
+     "data": {
+      "x": 246.8359375,
+      "y": 157.875,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 내 다음 요청 준비",
+     "pass": true,
+     "data": {
+      "x": 1183.828125,
+      "y": 398.75,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력칸",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 370,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 미리보기",
+     "pass": true,
+     "data": {
+      "x": 394.765625,
+      "y": 461.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "1) 미리보기 = 현재 입력(E1)",
+     "pass": true,
+     "data": {
+      "value": "검색 즉시 Enter만 다시 본다.",
+      "previewHidden": false,
+      "previewVisibleText": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n검색 즉시 Enter만 다시 본다.",
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력칸",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 311,
+      "ok": true
+     }
+    },
+    {
+     "name": "2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음",
+     "pass": true,
+     "data": {
+      "value": "검색 즉시 Enter만 다시 본다. 녹화 쪽은 건드리지 않는다.",
+      "previewHidden": false,
+      "previewVisibleText": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n검색 즉시 Enter만 다시 본다. 녹화 쪽은 건드리지 않는다.",
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 복사",
+     "pass": true,
+     "data": {
+      "x": 486.53125,
+      "y": 402.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "2) 복사문 = 그 순간 보이는 미리보기(보이는 경우)",
+     "pass": true,
+     "data": {
+      "clip": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n검색 즉시 Enter만 다시 본다. 녹화 쪽은 건드리지 않는다.",
+      "preview": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n검색 즉시 Enter만 다시 본다. 녹화 쪽은 건드리지 않는다."
+     }
+    },
+    {
+     "name": "2) 복사문은 최신 입력으로 끝남",
+     "pass": true,
+     "data": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n검색 즉시 Enter만 다시 본다. 녹화 쪽은 건드리지 않는다."
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력칸",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 311,
+      "ok": true
+     }
+    },
+    {
+     "name": "3) 빈 입력: 미리보기 숨김·미리보기/복사 비활성",
+     "pass": true,
+     "data": {
+      "value": "",
+      "previewHidden": true,
+      "previewVisibleText": null,
+      "prevDisabled": true,
+      "copyDisabled": true,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "4) 공백만: 미리보기 숨김·미리보기/복사 비활성",
+     "pass": true,
+     "data": {
+      "value": "   ",
+      "previewHidden": true,
+      "previewVisibleText": null,
+      "prevDisabled": true,
+      "copyDisabled": true,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "5) 다시 입력: 버튼 활성, 미리보기는 사용자가 다시 열 때까지 숨김",
+     "pass": true,
+     "data": {
+      "value": "빈칸 뒤 다시 쓴 요청.",
+      "previewHidden": true,
+      "previewVisibleText": null,
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 복사",
+     "pass": true,
+     "data": {
+      "x": 486.53125,
+      "y": 461.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "5) 다시 입력 뒤 복사문은 E3로 끝남",
+     "pass": true,
+     "data": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청."
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 미리보기(다시)",
+     "pass": true,
+     "data": {
+      "x": 394.765625,
+      "y": 461.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "5) 다시 연 미리보기 = 방금 복사문",
+     "pass": true,
+     "data": {
+      "clip": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청.",
+      "preview": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청."
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력칸",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 311,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 복사",
+     "pass": true,
+     "data": {
+      "x": 486.53125,
+      "y": 402.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "6) 열린 미리보기와 복사문 일치(E3+E4)",
+     "pass": true,
+     "data": {
+      "clip": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "preview": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임."
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 초안 닫기",
+     "pass": true,
+     "data": {
+      "x": 915,
+      "y": 126.5,
+      "ok": true
+     }
+    }
+   ],
+   "raw": {
+    "s1": {
+     "value": "검색 즉시 Enter만 다시 본다.",
+     "previewHidden": false,
+     "previewVisibleText": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n검색 즉시 Enter만 다시 본다.",
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "",
+     "open": true
+    },
+    "s2": {
+     "value": "검색 즉시 Enter만 다시 본다. 녹화 쪽은 건드리지 않는다.",
+     "previewHidden": false,
+     "previewVisibleText": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n검색 즉시 Enter만 다시 본다. 녹화 쪽은 건드리지 않는다.",
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "",
+     "open": true
+    },
+    "copy2": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n검색 즉시 Enter만 다시 본다. 녹화 쪽은 건드리지 않는다.",
+    "s3": {
+     "value": "",
+     "previewHidden": true,
+     "previewVisibleText": null,
+     "prevDisabled": true,
+     "copyDisabled": true,
+     "status": "",
+     "open": true
+    },
+    "s4": {
+     "value": "   ",
+     "previewHidden": true,
+     "previewVisibleText": null,
+     "prevDisabled": true,
+     "copyDisabled": true,
+     "status": "",
+     "open": true
+    },
+    "s5a": {
+     "value": "빈칸 뒤 다시 쓴 요청.",
+     "previewHidden": true,
+     "previewVisibleText": null,
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "",
+     "open": true
+    },
+    "copy5": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청.",
+    "s5b": {
+     "value": "빈칸 뒤 다시 쓴 요청.",
+     "previewHidden": false,
+     "previewVisibleText": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청.",
+     "prevDisabled": false,
+     "copyDisabled": false,
+     "status": "복사했습니다 · 보내지는 않았습니다",
+     "open": true
+    },
+    "s6": {
+     "d": {
+      "value": "빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "previewHidden": false,
+      "previewVisibleText": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     },
+     "c6": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+     "d6": {
+      "value": "빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "previewHidden": false,
+      "previewVisibleText": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\n빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "복사했습니다 · 보내지는 않았습니다",
+      "open": true
+     }
+    }
+   },
+   "complete": true
+  },
+  "1280-switch-preserve": {
+   "id": "1280-switch-preserve",
+   "assertions": [
+    {
+     "name": "클릭 지점 화면 안·대상 위: 변경 칩 flow",
+     "pass": true,
+     "data": {
+      "x": 270.8671875,
+      "y": 139.125,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 초안 재열기 flow",
+     "pass": true,
+     "data": {
+      "x": 1183.828125,
+      "y": 380,
+      "ok": true
+     }
+    },
+    {
+     "name": "7) flow: 전환 왕복 뒤 초안 보존·다른 사례와 섞이지 않음·미리보기 닫힌 채 재열림",
+     "pass": true,
+     "data": {
+      "value": "빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "previewHidden": true,
+      "previewVisibleText": null,
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 닫기",
+     "pass": true,
+     "data": {
+      "x": 915,
+      "y": 185.5,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 변경 칩 pt",
+     "pass": true,
+     "data": {
+      "x": 246.8359375,
+      "y": 157.875,
+      "ok": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 초안 재열기 pt",
+     "pass": true,
+     "data": {
+      "x": 1183.828125,
+      "y": 398.75,
+      "ok": true
+     }
+    },
+    {
+     "name": "7) pt: 전환 왕복 뒤 초안 보존·다른 사례와 섞이지 않음·미리보기 닫힌 채 재열림",
+     "pass": true,
+     "data": {
+      "value": "빈칸 뒤 다시 쓴 요청. 마지막 덧붙임.",
+      "previewHidden": true,
+      "previewVisibleText": null,
+      "prevDisabled": false,
+      "copyDisabled": false,
+      "status": "",
+      "open": true
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 닫기",
+     "pass": true,
+     "data": {
+      "x": 915,
+      "y": 185.5,
+      "ok": true
+     }
+    }
+   ],
+   "raw": {},
+   "complete": true
+  }
+ },
+ "pngs": [
+  "1280-pt-after-edit.png"
+ ],
+ "firstFailure": null,
+ "started": "2026-10-16T00:48:04.815Z",
+ "browser": "141.0.7390.37",
+ "after": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 34004,
+   "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ },
+ "sourceUnchanged": true,
+ "receivedMatchesDisk": true,
+ "assertions": 52,
+ "failed": 0,
+ "clickPreconditions": 30,
+ "incomplete": [],
+ "crash": null,
+ "finished": "2026-10-16T00:48:12.514Z",
+ "exitCode": 0
+}

@@ -1,0 +1,56 @@
+== 1280-flow-preview-copy
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 변경 칩 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 내 다음 요청 준비 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 입력칸 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 미리보기 
+PASS [1280-flow-preview-copy] 1) 미리보기 = 현재 입력(E1) 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 입력칸 
+PASS [1280-flow-preview-copy] 2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 복사 
+PASS [1280-flow-preview-copy] 2) 복사문 = 그 순간 보이는 미리보기(보이는 경우) 
+PASS [1280-flow-preview-copy] 2) 복사문은 최신 입력으로 끝남 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 입력칸 
+PASS [1280-flow-preview-copy] 3) 빈 입력: 미리보기 숨김·미리보기/복사 비활성 
+PASS [1280-flow-preview-copy] 4) 공백만: 미리보기 숨김·미리보기/복사 비활성 
+PASS [1280-flow-preview-copy] 5) 다시 입력: 버튼 활성, 미리보기는 사용자가 다시 열 때까지 숨김 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 복사 
+PASS [1280-flow-preview-copy] 5) 다시 입력 뒤 복사문은 E3로 끝남 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 미리보기(다시) 
+PASS [1280-flow-preview-copy] 5) 다시 연 미리보기 = 방금 복사문 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 입력칸 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 복사 
+PASS [1280-flow-preview-copy] 6) 열린 미리보기와 복사문 일치(E3+E4) 
+PASS [1280-flow-preview-copy] 클릭 지점 화면 안·대상 위: 초안 닫기 
+== 1280-pt-preview-copy
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 변경 칩 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 내 다음 요청 준비 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 입력칸 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 미리보기 
+PASS [1280-pt-preview-copy] 1) 미리보기 = 현재 입력(E1) 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 입력칸 
+PASS [1280-pt-preview-copy] 2) 열린 채 비공백→비공백 편집: 보이는 미리보기가 최신 입력(E1+E2)을 보이거나 닫혀 있음 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 복사 
+PASS [1280-pt-preview-copy] 2) 복사문 = 그 순간 보이는 미리보기(보이는 경우) 
+PASS [1280-pt-preview-copy] 2) 복사문은 최신 입력으로 끝남 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 입력칸 
+PASS [1280-pt-preview-copy] 3) 빈 입력: 미리보기 숨김·미리보기/복사 비활성 
+PASS [1280-pt-preview-copy] 4) 공백만: 미리보기 숨김·미리보기/복사 비활성 
+PASS [1280-pt-preview-copy] 5) 다시 입력: 버튼 활성, 미리보기는 사용자가 다시 열 때까지 숨김 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 복사 
+PASS [1280-pt-preview-copy] 5) 다시 입력 뒤 복사문은 E3로 끝남 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 미리보기(다시) 
+PASS [1280-pt-preview-copy] 5) 다시 연 미리보기 = 방금 복사문 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 입력칸 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 복사 
+PASS [1280-pt-preview-copy] 6) 열린 미리보기와 복사문 일치(E3+E4) 
+PASS [1280-pt-preview-copy] 클릭 지점 화면 안·대상 위: 초안 닫기 
+== 1280-switch-preserve
+PASS [1280-switch-preserve] 클릭 지점 화면 안·대상 위: 변경 칩 flow 
+PASS [1280-switch-preserve] 클릭 지점 화면 안·대상 위: 초안 재열기 flow 
+PASS [1280-switch-preserve] 7) flow: 전환 왕복 뒤 초안 보존·다른 사례와 섞이지 않음·미리보기 닫힌 채 재열림 
+PASS [1280-switch-preserve] 클릭 지점 화면 안·대상 위: 닫기 
+PASS [1280-switch-preserve] 클릭 지점 화면 안·대상 위: 변경 칩 pt 
+PASS [1280-switch-preserve] 클릭 지점 화면 안·대상 위: 초안 재열기 pt 
+PASS [1280-switch-preserve] 7) pt: 전환 왕복 뒤 초안 보존·다른 사례와 섞이지 않음·미리보기 닫힌 채 재열림 
+PASS [1280-switch-preserve] 클릭 지점 화면 안·대상 위: 닫기 
+assertions=52 (클릭 전제 30) failed=0 incomplete=[] consoleErrors=0 receivedMatchesDisk=true sourceUnchanged=true domScroll=0 exit=0
