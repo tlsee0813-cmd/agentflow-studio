@@ -183,7 +183,7 @@ class SpatialWorkspace(unittest.TestCase):
         stored=self.state()['space']['layout'];self.page.locator('#map-fit').click();self.assertEqual(self.state()['space']['layout'],stored)
         # Position undo: the last move first (button), then the one before (Ctrl+Z outside text fields).
         expect(self.page.locator('#map-undo')).to_contain_text('알림');self.page.locator('#map-undo').click()
-        self.assertEqual(self.pos(notify),n0);self.page.locator('#space-title').click();self.page.keyboard.press('Control+z')
+        self.assertEqual(self.pos(notify),n0);self.page.locator('#space-brief').click();self.page.keyboard.press('Control+z')  # PC13: the overview title is screen-reader only; click the purpose line (not a text field)
         self.assertEqual(self.pos(booking),before)
         # Ctrl+Z in a text field edits text, not positions.
         self.drag(notify,40,40);moved=self.pos(notify);self.page.locator(f'#node-info-{notify}').click()

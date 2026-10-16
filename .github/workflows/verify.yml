@@ -169,6 +169,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/pc12_browser.py 2>&1 | tee test-results/pc12-browser.log
+      - name: PC13 whole-space layout, records and area-add disclosures, product12 return from the new layout (native HTTP, MOCK; geometry and wiring, not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/pc13
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/pc13_browser.py 2>&1 | tee test-results/pc13-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:

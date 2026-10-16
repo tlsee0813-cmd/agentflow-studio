@@ -27,6 +27,11 @@ class EnterFirstSpace(unittest.TestCase):
         self.page.locator('#draft').fill(text);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         return self.state()['currentTaskId']
     def focused(self):return self.page.evaluate('document.activeElement && document.activeElement.id')
+    def records(self):
+        """PC13: the items are the same, folded into the '이어 볼 기록' disclosure; open it with a real click when closed."""
+        box=self.page.locator('#check-list')
+        if not box.evaluate('(e)=>e.open'):box.locator('summary').click()
+        return box
 
     def test_01_card_enters_info_selects_handle_drags(self):
         booking,notify=self.start(['예약','알림'])
@@ -83,18 +88,19 @@ class EnterFirstSpace(unittest.TestCase):
         self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('보고: 예약 화면을 만들었다고 주장');self.page.locator('#send').click()
         expect(self.page.locator('#working')).to_have_text('');current=self.state()['currentTaskId']
         self.page.locator('#nav-space').click();box=self.page.locator('#check-list')
-        expect(box.locator('h2')).to_have_text('확인할 일 2건');expect(box).to_contain_text('제품 선택 항목 있음');expect(box).to_contain_text('구현 보고 도착 · 앱 미검증')
-        expect(box).to_contain_text('개발 도구의 실행 상태는 아니에요')
+        expect(box.locator('summary')).to_have_text('이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1');self.records()
+        expect(box).to_contain_text('제품 선택 항목 있음');expect(box).to_contain_text('구현 보고 도착 · 앱 미검증')
+        expect(box).to_contain_text('개발 도구의 실행 상태나 완료 여부는 아니에요')
         self.page.screenshot(path=str(base.OUT/'spatial102-checks.png'),full_page=True)
         self.page.locator(f'#check-open-{Q}').click();expect(self.title()).to_contain_text('빈자리')
         self.assertEqual(self.state()['currentTaskId'],current,'opening an item does not continue it')
         # In an area: this area and the others are counted apart.
         self.page.locator('#space-crumb-root').click();self.page.locator(f'#node-enter-{booking}').click()
-        expect(self.page.locator('#area-checks')).to_contain_text('이 영역 1건 · 다른 영역 1건')
+        expect(self.page.locator('#area-checks')).to_contain_text('이 영역 1개 · 다른 영역 1개')
         # Acting on the report (a follow-up request from it) takes it off the list; the report itself stays recorded.
         self.page.locator('#nav-work').click();self.page.locator('#compose-panel').evaluate('(e)=>e.open=true');self.page.locator('#request-tab').click()
         self.page.locator('#draft').fill('확인 대기 문구 고치기');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
-        self.page.locator('#nav-space').click();expect(box.locator('h2')).to_have_text('확인할 일 1건');expect(box).not_to_contain_text('구현 보고 도착')
+        self.page.locator('#nav-space').click();expect(box.locator('summary')).to_have_text('이어 볼 기록 1개 · 답 기다림 1');expect(box).not_to_contain_text('구현 보고 도착')
         self.assertTrue(any(s['kind']=='report' for s in self.state()['sources']))
 
     def test_04_start_points_for_an_empty_project_and_an_empty_area(self):
@@ -103,13 +109,14 @@ class EnterFirstSpace(unittest.TestCase):
         self.page.locator('#start-add-area').click();self.assertEqual(self.focused(),'area-name')
         self.page.locator('#start-first-request').click();expect(self.page.locator('#draft')).to_be_focused()
         self.assertEqual(self.state()['space']['draftTarget'],{'area':None},'the first request goes without an area')
-        self.page.locator('#nav-space').click()
+        self.page.locator('#nav-space').click()  # PC13: no area yet, so '＋ 영역 추가' starts open
         self.page.locator('#area-name').fill('예약');self.page.locator('#area-add').click();booking=self.state()['space']['areas'][0]['id']
         self.page.locator(f'#node-enter-{booking}').click();expect(self.page.locator('#area-start')).to_be_visible()
         self.page.locator('#area-start-request').click();expect(self.page.locator('#draft')).to_be_focused()
         self.assertEqual(self.state()['space']['draftTarget'],{'area':booking},'the explicit button sets this area')
         # An unsent draft keeps its target: the same button elsewhere opens it instead of moving it.
         self.page.locator('#draft').fill('예약 화면 초안');self.page.locator('#nav-space').click()
+        self.page.locator('#area-add-panel > summary').click()  # PC13: adding an area is an explicit disclosure once areas exist
         self.page.locator('#area-name').fill('알림');self.page.locator('#area-add').click();notify=self.state()['space']['areas'][1]['id']
         self.page.locator(f'#node-enter-{notify}').click();self.page.locator('#area-start-request').click()
         self.assertEqual(self.state()['space']['draftTarget'],{'area':booking});expect(self.page.locator('#draft')).to_have_value('예약 화면 초안')
@@ -163,7 +170,7 @@ class EnterFirstSpace(unittest.TestCase):
     def test_08_check_item_opens_the_report_it_points_to(self):
         booking,A,R1,R2=self.chain()
         current=self.state()['currentTaskId'];target=self.state()['space']['draftTarget'];saved=self.state()
-        self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R2}').click()
+        self.page.locator('#nav-space').click();self.records();self.page.locator(f'#check-open-{R2}').click()
         expect(self.title()).to_contain_text('A: 예약 화면');pointed=self.page.locator('#task-pointed')
         expect(pointed).to_contain_text('ZZ-R2');expect(pointed).not_to_contain_text('ZZ-R1')
         # SPATIAL102-R2: the chain line states links only (it said '후속 확인 작업문 내보냄', which a link alone does not show).
@@ -177,7 +184,7 @@ class EnterFirstSpace(unittest.TestCase):
 
     def test_09_a_stale_or_foreign_report_id_is_not_replaced_by_another_report(self):
         booking,A,R1,R2=self.chain()
-        self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R2}').click();expect(self.page.locator('#task-pointed')).to_contain_text('ZZ-R2')
+        self.page.locator('#nav-space').click();self.records();self.page.locator(f'#check-open-{R2}').click();expect(self.page.locator('#task-pointed')).to_contain_text('ZZ-R2')
         place=json.loads(self.page.evaluate("sessionStorage.getItem('agentflow.workspace.place')"))
         for bad in ['T_missing',A]:  # gone, or not a report of this request
             place['ret']=bad;self.page.evaluate(f"sessionStorage.setItem('agentflow.workspace.place', {json.dumps(json.dumps(place))})")
@@ -191,7 +198,7 @@ class EnterFirstSpace(unittest.TestCase):
         with self.page.expect_download():self.page.locator('#download-work').click()
         self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('보고: 만들었다고 주장 ZZ-D1');self.page.locator('#send').click()
         expect(self.page.locator('#working')).to_have_text('');R=self.state()['tasks'][-1]['id']
-        self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R}').click()
+        self.page.locator('#nav-space').click();self.records();self.page.locator(f'#check-open-{R}').click()
         expect(self.page.locator('#task-pointed')).to_contain_text('ZZ-D1');expect(self.page.locator('#task-view')).to_contain_text('돌아온 결과 1개')
         self.page.locator('#space-crumb-area').click();expect(self.title()).to_have_text('예약')
         # Opening the task by its title (not from the list) shows no pointed report.
@@ -209,7 +216,7 @@ class EnterFirstSpace(unittest.TestCase):
         self.assertEqual([t['id'] for t in s['tasks']],[A,R1,R2]);self.assertEqual(s['tasks'][-1]['parentTaskId'],R1)
         self.assertEqual([len(t['handoffs']) for t in s['tasks']],[0,0,0],'nothing was exported')
         current=s['currentTaskId'];target=s['space']['draftTarget']
-        self.page.locator('#nav-space').click();self.page.locator(f'#check-open-{R2}').click()
+        self.page.locator('#nav-space').click();self.records();self.page.locator(f'#check-open-{R2}').click()
         pointed=self.page.locator('#task-pointed');expect(pointed).to_contain_text('ZZ-N2');expect(pointed).not_to_contain_text('ZZ-N1')
         expect(pointed).to_contain_text('이전 보고에 연결된 보고')
         for claim in ['내보냄','내보낸','작업문','전달','실행','완료','검증됨']:expect(pointed).not_to_contain_text(claim)

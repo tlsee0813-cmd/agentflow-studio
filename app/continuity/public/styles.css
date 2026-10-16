@@ -2391,3 +2391,31 @@ body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
 .field-origin.stale{color:var(--amber)}
 .task-view-target{margin:6px 0 0}
 .work-place .origin-return{margin-left:auto}
+/* PC13: the whole space reads purpose -> map first; adding an area and the records to look at again are one-line disclosures. */
+.space-head.overview-head{padding:8px 16px;margin-bottom:10px}
+.overview-head .space-head-line{flex-wrap:wrap;align-items:center;gap:4px 10px}
+.overview-head .brief-disclosure{margin:0;flex:none}
+.overview-head .brief-disclosure>summary{font-size:13px;margin:0;padding:4px 0}
+.overview-head .brief-disclosure[open]{flex-basis:100%}
+.map-toolbar{align-items:flex-start}
+.map-toolbar h2{line-height:36px}
+.map-toolbar .toolbar-disclosure{flex:none;margin:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:6px 12px}
+.map-toolbar .toolbar-disclosure>summary{margin:0;padding:0;line-height:22px;font-size:13px}
+.map-toolbar .toolbar-disclosure[open]{flex-basis:100%}
+.map-toolbar .toolbar-disclosure[open]>summary{margin-bottom:6px}
+/* An open '영역 추가' stays on the toolbar row (summary + fields side by side) instead of taking a row of its own. */
+.map-toolbar #area-add-panel[open]{flex:1 1 560px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.map-toolbar #area-add-panel[open]>summary{margin:0}
+.map-toolbar #area-add-panel .area-add{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1;min-width:300px}
+.map-toolbar #area-add-panel .area-add input{flex:1;min-width:140px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--paper);margin:0}
+.check-kind{color:#9a520f}
+body[data-layer="space"] .shell{padding-top:12px}
+body[data-layer="space"] .project-head{margin-bottom:8px}
+body[data-layer="space"] .space-crumb{margin-bottom:8px}
+/* The map keeps its rule (min(62vh,560px), at least 380px) but, on a PC-width whole space, also fits below the shortened top so
+   its own zoom/fit controls are in the first screen. Narrow screens keep their own rule. */
+@media(min-width:761px){body[data-layer="space"] .space-map{height:min(62vh,560px,calc(100vh - 290px))}}
+/* PC13-fix1: on PC widths the map's zoom/fit tools sit at the map's top-right, so they are in the first screen whenever the map
+   top is (a notice above or an opened records list moves only the map's lower edge out of view). The off-screen chip stays
+   top-left. Narrow screens keep the existing bottom placement. */
+@media(min-width:761px){.map-controls{top:10px;bottom:auto}}

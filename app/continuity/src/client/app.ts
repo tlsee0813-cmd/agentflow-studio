@@ -208,6 +208,8 @@ function displayView() {
   document.body.dataset.route=route;document.body.dataset.starting=String(starting);
   // FLOW091: inside a project (past the welcome) the head is one compact line so the map / next action come first.
   document.body.dataset.compact=String(inProject&&(view==='space'||view==='area'||view==='task'||!starting));
+  // PC13: which layer is shown, so the whole space alone can use tighter spacing (other screens, notices and errors unchanged).
+  document.body.dataset.layer=inProject?view:'';
   $('projects-view').hidden=inProject;$('breadcrumb-project').hidden=!inProject;$('breadcrumb-sep').hidden=!inProject;$('example-banner').hidden=route!=='example';
   for(const id of ['nav-work','nav-context','nav-history'])$(id).hidden=!inProject||starting;
   // With a plan space, the work view (and an unsent draft) stays reachable before the first task.
@@ -1048,14 +1050,17 @@ function drawRelations(svg:SVGSVGElement,labels:HTMLElement,plane:HTMLElement) {
     chip.style.left=`${(a.x+b.x)/2}px`;chip.style.top=`${(a.y+b.y)/2}px`;labels.append(chip);
   }
 }
-function renderMap(root:HTMLElement,active:Area[]) {
+function renderMap(root:HTMLElement,active:Area[],extra:HTMLElement[]=[]) {
   const section=node('section','','area-map');section.setAttribute('aria-label','영역 지도');
   const bar=node('div','','map-toolbar');bar.append(node('h2','영역'));
+  // PC13: adding an area is an explicit disclosure. It starts open when there is no area yet or an unsent name/idea is kept.
+  const addPanel=details('＋ 영역 추가','area-add-panel');addPanel.classList.add('toolbar-disclosure');
+  addPanel.open=!active.length||!!(spaceInputs[`${project.id}:area-name`]||spaceInputs[`${project.id}:area-note`]);
   const add=node('form','','area-add');add.id='area-add-form';add.setAttribute('aria-label','영역 추가');
   const name=spaceInput(node('input'),'area-name');name.maxLength=60;name.placeholder='영역 이름 (예: 예약)';name.setAttribute('aria-label','영역 이름');
   const note=spaceInput(node('input'),'area-note');note.maxLength=2000;note.placeholder='한 줄 구상 · 아이디어나 아직 못 정한 점 (선택)';note.setAttribute('aria-label','영역 설명');
   const submitArea=node('button','＋ 영역 추가','secondary');submitArea.type='submit';submitArea.id='area-add';add.append(name,note,submitArea);
-  bar.append(add);
+  addPanel.append(add);bar.append(addPanel,...extra);
   const unplaced=areaRequests(null);
   if(unplaced.length){const b=btn(`영역 미지정 작업 · 요청 ${unplaced.length}개`,()=>openArea('unassigned'),'quiet','open-unplaced');bar.append(b);}
   section.append(bar);
@@ -1197,12 +1202,17 @@ function checkRow(it:CheckItem):HTMLElement {
   li.append(btn('보기',()=>openTaskView(it.taskId,it.returnId,`check-open-${it.returnId??it.taskId}`),'quiet',`check-open-${it.returnId??it.taskId}`));return li;
 }
 /** Shown once the project has requests. Items with evidence only: an open question, a report nothing was done with yet. */
+const CHECK_KIND:Record<CheckItem['kind'],string>={decision:'답 기다림',report:'후속 작업문 없는 보고'};
+/** PC13: the same items as before, folded into one line that says how many there are and of which kinds. They are app records to
+ * look at again, not open problems of the program, external run states or completion. Opening shows the same rows and buttons. */
 function checkSection():HTMLElement|null {
   if(!project.tasks.length)return null;
-  const items=checkItems(project),box=node('section','','check-list');box.id='check-list';
-  box.append(node('h2',items.length?`확인할 일 ${items.length}건`:'확인할 일'));
-  if(!items.length){box.append(node('p','지금 앱 기록으로는 확인할 일이 없어요.','hint'));return box;}
-  box.append(node('p','답을 기다리는 질문과, 받은 뒤 아직 손대지 않은 보고예요. 앱 기록 기준이며 개발 도구의 실행 상태는 아니에요.','hint'));
+  const items=checkItems(project),box=details('','check-list');box.classList.add('check-list','toolbar-disclosure');
+  const kinds=(['decision','report'] as const).map(k=>[k,items.filter(i=>i.kind===k).length] as const).filter(([,n])=>n>0);
+  const summary=box.querySelector('summary')!;summary.id='check-summary';
+  summary.append(node('span',`이어 볼 기록 ${items.length}개`,'check-count'),...kinds.map(([k,n])=>node('span',` · ${CHECK_KIND[k]} ${n}`,'check-kind')));
+  if(!items.length){box.append(node('p','답을 기다리는 질문이나 다음 요청·확인 작업문이 없는 보고가 앱 기록에 지금은 없어요. 개발 도구의 실행 상태나 완료 여부는 아니에요.','hint'));return box;}
+  box.append(node('p','답을 기다리는 질문과, 받은 뒤 아직 다음 요청이나 확인 작업문이 없는 보고예요. 앱 기록 기준이며 개발 도구의 실행 상태나 완료 여부는 아니에요.','hint'));
   const list=node('ul','','check-items');for(const it of items.slice(0,CHECK_SHOWN))list.append(checkRow(it));box.append(list);
   if(items.length>CHECK_SHOWN){const more=details(`나머지 ${items.length-CHECK_SHOWN}건`,'check-more'),rest=node('ul','','check-items');
     for(const it of items.slice(CHECK_SHOWN))rest.append(checkRow(it));more.append(rest);box.append(more);}
@@ -1210,7 +1220,9 @@ function checkSection():HTMLElement|null {
 }
 function renderOverview(root:HTMLElement) {
   const active=project.space.areas.filter(a=>!a.archived),archived=project.space.areas.filter(a=>a.archived),brief=project.space.brief;
-  const head=node('div','','space-head compact'),title=node('h1','전체 공간');title.id='space-title';title.tabIndex=-1;
+  // PC13: the path above already names this layer, so the overview's own title is kept for focus and screen readers only;
+  // the program's purpose (one line) and its full text/edit stay on the first line.
+  const head=node('div','','space-head compact overview-head'),title=node('h1','전체 공간','sr-only');title.id='space-title';title.tabIndex=-1;
   const line=node('div','','space-head-line');line.append(title);
   const purpose=node('p',brief?brief.text:'무엇을 만드는지 한두 문장으로 적어 두면 영역을 나누기 쉬워요.',brief?'space-brief':'hint');purpose.id='space-brief';
   if(brief)line.append(node('span','프로젝트 목적','space-brief-label'));line.append(purpose);head.append(line);
@@ -1218,14 +1230,13 @@ function renderOverview(root:HTMLElement) {
   field.setAttribute('aria-label','프로젝트 목적');
   edit.append(field,btn('목적 저장',()=>{if(!field.value.trim())return;commit(setBrief(project,field.value.trim()));clearInputs('brief-edit-text');},'secondary','brief-save'));
   if(brief?.previous.length)edit.append(node('p',`이전에 적은 목적 ${brief.previous.length}개는 그대로 보관돼요.`,'hint'));
-  head.append(edit);root.append(head);
-  const checks=checkSection();if(checks)root.append(checks);
+  edit.classList.add('brief-disclosure');line.append(edit);root.append(head);
   if(!active.length&&route!=='example') {
     const start=node('div','','row space-start');start.id='space-start';
-    start.append(btn('영역 추가',()=>$('area-name').focus(),'secondary','start-add-area'),btn('바로 첫 요청 쓰기 · 영역 없이',()=>writeInArea(null),'quiet','start-first-request'));
+    start.append(btn('영역 추가',()=>{$<HTMLDetailsElement>('area-add-panel').open=true;$('area-name').focus();},'secondary','start-add-area'),btn('바로 첫 요청 쓰기 · 영역 없이',()=>writeInArea(null),'quiet','start-first-request'));
     root.append(start);
   }
-  renderMap(root,active);
+  const records=checkSection();renderMap(root,active,records?[records]:[]);
   if(active.length>1||project.space.relations.length) {
     const rel=node('section','','area-relations');rel.id='area-relations';rel.append(node('h2','영역 사이 관계'),node('p','실행 순서나 자동 연결이 아니라, 영역끼리 어떤 사이인지 적어 두는 메모예요.','hint'));
     const list=node('ul','','relation-list');
@@ -1417,8 +1428,8 @@ function renderArea(root:HTMLElement,a:Area) {
   head.append(edit);root.append(head);
   const checks=checkItems(project),here=checks.filter(c=>c.areaId===a.id).length,elsewhere=checks.length-here;
   if(here||elsewhere) {
-    const line=node('p',`확인할 일 · 이 영역 ${here}건${elsewhere?` · 다른 영역 ${elsewhere}건`:''} `,'hint area-checks');line.id='area-checks';
-    line.append(btn('전체 공간에서 보기',()=>{openSpace();$('check-list')?.scrollIntoView({block:'start'});},'crumb-link','area-checks-open'));root.append(line);
+    const line=node('p',`이어 볼 기록 · 이 영역 ${here}개${elsewhere?` · 다른 영역 ${elsewhere}개`:''} `,'hint area-checks');line.id='area-checks';
+    line.append(btn('전체 공간에서 보기',()=>{openSpace();const d=document.getElementById('check-list') as HTMLDetailsElement|null;if(d){d.open=true;d.scrollIntoView({block:'start'});}},'crumb-link','area-checks-open'));root.append(line);
   }
   const tasks=areaRequests(a.id),list=node('section','','area-tasks');list.id='area-tasks';
   if(!a.archived&&route!=='example')root.append(guidePanel(a,tasks.length>0));
