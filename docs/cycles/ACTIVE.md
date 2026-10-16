@@ -5,17 +5,17 @@
 홈15 카드 진입과 전체 이름·목적 읽기는 PR #5/#6으로 checkpoint에 통합했다. 다음은 **한 영역의 현재 구상 → 직접 고른 보고 읽기 → 명시적 새 요청 준비 → 출발 지도 복귀**다. 기존 요청 읽기에 현재 Area.note가 빠진 접점을 보완하며 별도 보고 관리 화면을 신설하지 않는다.
 
 [입력·선택 근거](2026-10-16-report-area-16/INPUT.md) · [제품 구현 계약](2026-10-16-report-area-16/IMPLEMENTATION.md) · [구현 전 독립 실패 기준](2026-10-16-report-area-16/ACCEPTANCE.md).
-총괄·Astra의 실제 코드 대조와 Sol의 실패 기준을 통합해 기존 읽기 화면 재사용 후보를 채택했다. Pro 새 세션의 정적 소스·공식 문서 비교를 받았다. 구상과 선택 보고의 실제 문장을 기본에서 함께 읽게 하는 의견을 수용했고, 미지정 영역 새 요청 확대는 보류했다. Opus 새 세션의 최초 구현 후보를 [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7)에 게시했다(제품 c7fa5b0740b8de562119fbcd4f90410815d6f7df). [작성자 원본·대표 화면](https://github.com/tlsee0813-cmd/agentflow-studio/tree/d207f8ce7faca4573a2c5f6c4cb9eddf399e29ed/docs/transfer/report-area-16/author-v0)은 다른 세션도 회수할 수 있다. Sol 정적 검토가 다른 보고 선택 시 연결 경로의 펼침 상태가 넘어가는 P2를 발견했다. Opus에 좁은 재현·수정을 맡겼고, 별도 Cloud가 최초 후보 재현과 독립 조작 검증을 진행한다. **아직 수정 후보의 독립 검증·통합은 끝나지 않았다.** Astra의 PNG 네 장·코드 검토에서는 추가 중대한 의미 결함을 확인하지 못했지만, 선택 목록 이동과 실제 키보드 초점은 독립 조작 확인 대상으로 남았다.
+총괄·Astra의 실제 코드 대조와 Sol의 실패 기준을 통합해 기존 읽기 화면 재사용 후보를 채택했다. Pro 새 세션의 정적 소스·공식 문서 비교를 받았다. 구상과 선택 보고의 실제 문장을 기본에서 함께 읽게 하는 의견을 수용했고, 미지정 영역 새 요청 확대는 보류했다. Opus 새 세션의 최초 구현 후보를 [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7)에 게시했다(제품 c7fa5b0740b8de562119fbcd4f90410815d6f7df). [작성자 원본·대표 화면](https://github.com/tlsee0813-cmd/agentflow-studio/tree/d207f8ce7faca4573a2c5f6c4cb9eddf399e29ed/docs/transfer/report-area-16/author-v0)은 다른 세션도 회수할 수 있다. Sol 정적 검토가 다른 보고 선택 시 연결 경로의 펼침 상태가 넘어가는 P2를 발견했다. Cloud가 양PC에서 해당 결함을 재현했고, 좁은 수정 후보 a0f0ae786c580a8919cede07db48d4397b58b114를 게시했다. **수정 후보의 독립 재실행·CI·통합은 진행 중이다.** [정적 리뷰](https://github.com/tlsee0813-cmd/agentflow-studio/blob/25302178f06db57d5aa19073f0bef99edaa309e5/docs/transfer/report-area-16/independent-static-v0/REVIEW.md). 다른 탭 변경의 실시간 반영은 기존 미지원으로 확인돼 [검증 기준의 범위 정정](2026-10-16-report-area-16/ACCEPTANCE.md#독립-관측-후-범위-정정)을 남겼다. 외부 변경 후 저장 충돌 보호는 독립 실행 관문에 포함한다. Astra의 PNG 네 장·코드 검토에서는 추가 중대한 의미 결함을 확인하지 못했지만, 선택 목록 이동과 실제 키보드 초점은 독립 조작 확인 대상으로 남았다.
 
 실제 PowerToys 검색 수정 보고 한 건을 한국어로 재서술하고 합성 상충 구상과 구분한다. 실제 요구 변경·인계 수락이나 성공 검증으로 확대하지 않는다. 자동 AI 차이 요약·구상 갱신은 구현하지 않으며 GUIDE107 실제 AI HOLD 유지. 읽기/보고선택은 구상·현재작업·미전송입력·대상을 바꾸지 않아야 한다. 같은 영역 새 요청을 특정 보고에 대한 답장 관계로 부르지 않는다.
 
 | 담당 | 현재 범위 |
 |---|---|
 | 새 Pro16 | [보고 읽기 접점 설계](https://chatgpt.com/c/6ad1e4f9-ed38-83e8-8085-3a356f13b536): 정보위계/예외/공식 메커니즘. 홈 주제와 분리 |
-| 새 Opus16 | [cycle16 구현](https://claude.ai/chat/2ee4ac0f-e9f5-4403-8695-9c5b9732e9d7): 최초 후보 제출 후 공유 펼침 상태 결함 fix1 재현·수정. GitHub 통합은 총괄 |
+| 새 Opus16 | [cycle16 구현](https://claude.ai/chat/2ee4ac0f-e9f5-4403-8695-9c5b9732e9d7): 공유 펼침 상태 결함 fix1 제출·작성자 검사 완료. GitHub 통합은 총괄 |
 | Astra High | 대표 PNG 4장·후보 코드 정적 검토 완료. 추가 중대한 의미 결함 미발견; 목록 이동은 조작 검증 대상 |
 | Sol High | 독립 정적 코드·검사 검토에서 공유 펼침 상태 P2 발견. 다른 Sol은 원본·증거 공유 게시 |
-| Cloud 준비환경 | 준비된 기존 환경에서 정확 c7fa5b0의 결함 재현·독립 검증 진행. 최초 실패와 수정 후보 재실행을 구분 |
+| Cloud 준비환경 | 정확 c7fa5b0에서 펼침 누출 재현. a0f0ae7 수정 후보의 독립 재실행·외부 저장 충돌 보호 확인 |
 | 총괄 | 계약·제품 목적·실제 소스 대조, 연구 판단 통합, PR·CI·증거·체험 연결 |
 
 ## 완료된 제품 기준과 남은 경계
