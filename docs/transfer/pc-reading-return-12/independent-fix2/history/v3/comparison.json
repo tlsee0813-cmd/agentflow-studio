@@ -1,0 +1,220 @@
+{
+  "contract": "48b6fed3790aacf5106352cd940990c55c991e6d",
+  "checker_sha256": "7bf48bcf6da764b80a493351e1cdfb9611bbd4f9d67711df06624451ee1b5077",
+  "runs": {
+    "v0": {
+      "complete": true,
+      "rows": [
+        {
+          "id": "1280-manual-tail",
+          "status": "FAIL",
+          "delta": null,
+          "contract": null,
+          "tail": {
+            "understanding_tail": false,
+            "scope_tail": false
+          }
+        },
+        {
+          "id": "1280-read-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -369,
+            "callerY": -13.0
+          },
+          "contract": {
+            "chosen_rule": "changed-content-viewport-anchor",
+            "pre_anchor_document_y": 1262.15625,
+            "post_anchor_document_y": 880.15625,
+            "position_ok": false,
+            "state_ok": true,
+            "body_preserved": false,
+            "content_change_preserved": true,
+            "anchor_tolerance_css_px": 2
+          },
+          "tail": null
+        },
+        {
+          "id": "1280-edit-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -436,
+            "callerY": -13.59375
+          },
+          "contract": {
+            "chosen_rule": "changed-content-viewport-anchor",
+            "pre_anchor_document_y": 1262.15625,
+            "post_anchor_document_y": 812.5625,
+            "position_ok": false,
+            "state_ok": true,
+            "body_preserved": false,
+            "content_change_preserved": true,
+            "anchor_tolerance_css_px": 2
+          },
+          "tail": null
+        },
+        {
+          "id": "1440-manual-tail",
+          "status": "FAIL",
+          "delta": null,
+          "contract": null,
+          "tail": {
+            "understanding_tail": false,
+            "scope_tail": false
+          }
+        },
+        {
+          "id": "1440-read-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -99,
+            "callerY": -283.0
+          },
+          "contract": {
+            "chosen_rule": "changed-content-viewport-anchor",
+            "pre_anchor_document_y": 1262.15625,
+            "post_anchor_document_y": 880.15625,
+            "position_ok": false,
+            "state_ok": true,
+            "body_preserved": false,
+            "content_change_preserved": true,
+            "anchor_tolerance_css_px": 2
+          },
+          "tail": null
+        },
+        {
+          "id": "1440-edit-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -166,
+            "callerY": -283.59375
+          },
+          "contract": {
+            "chosen_rule": "changed-content-viewport-anchor",
+            "pre_anchor_document_y": 1262.15625,
+            "post_anchor_document_y": 812.5625,
+            "position_ok": false,
+            "state_ok": true,
+            "body_preserved": false,
+            "content_change_preserved": true,
+            "anchor_tolerance_css_px": 2
+          },
+          "tail": null
+        }
+      ],
+      "child_exit": 1,
+      "collector_actual_tool_exit": 1,
+      "fatal": null,
+      "pageerrors": [],
+      "source_unchanged": true,
+      "http_disk_match": true
+    },
+    "fix1": {
+      "complete": true,
+      "rows": [
+        {
+          "id": "1280-manual-tail",
+          "status": "PASS",
+          "delta": null,
+          "contract": null,
+          "tail": {
+            "understanding_tail": true,
+            "scope_tail": true
+          }
+        },
+        {
+          "id": "1280-read-return",
+          "status": "PASS",
+          "delta": {
+            "windowY": 0,
+            "callerY": 0.0
+          },
+          "contract": {
+            "chosen_rule": "same-content-windowY",
+            "pre_anchor_document_y": 1262.15625,
+            "post_anchor_document_y": 1262.15625,
+            "position_ok": true,
+            "state_ok": true,
+            "body_preserved": true,
+            "content_change_preserved": true,
+            "anchor_tolerance_css_px": 2
+          },
+          "tail": null
+        },
+        {
+          "id": "1280-edit-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -54,
+            "callerY": -13.59375
+          },
+          "contract": {
+            "chosen_rule": "changed-content-viewport-anchor",
+            "pre_anchor_document_y": 1262.15625,
+            "post_anchor_document_y": 1194.5625,
+            "position_ok": false,
+            "state_ok": true,
+            "body_preserved": true,
+            "content_change_preserved": true,
+            "anchor_tolerance_css_px": 2
+          },
+          "tail": null
+        },
+        {
+          "id": "1440-manual-tail",
+          "status": "PASS",
+          "delta": null,
+          "contract": null,
+          "tail": {
+            "understanding_tail": true,
+            "scope_tail": true
+          }
+        },
+        {
+          "id": "1440-read-return",
+          "status": "PASS",
+          "delta": {
+            "windowY": 0,
+            "callerY": 0.0
+          },
+          "contract": {
+            "chosen_rule": "same-content-windowY",
+            "pre_anchor_document_y": 1262.15625,
+            "post_anchor_document_y": 1262.15625,
+            "position_ok": true,
+            "state_ok": true,
+            "body_preserved": true,
+            "content_change_preserved": true,
+            "anchor_tolerance_css_px": 2
+          },
+          "tail": null
+        },
+        {
+          "id": "1440-edit-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": 0,
+            "callerY": -67.59375
+          },
+          "contract": {
+            "chosen_rule": "changed-content-viewport-anchor",
+            "pre_anchor_document_y": 1262.15625,
+            "post_anchor_document_y": 1194.5625,
+            "position_ok": false,
+            "state_ok": true,
+            "body_preserved": true,
+            "content_change_preserved": true,
+            "anchor_tolerance_css_px": 2
+          },
+          "tail": null
+        }
+      ],
+      "child_exit": 1,
+      "collector_actual_tool_exit": 1,
+      "fatal": null,
+      "pageerrors": [],
+      "source_unchanged": true,
+      "http_disk_match": true
+    }
+  }
+}

@@ -1,0 +1,1258 @@
+{
+  "source_commit": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+  "code_sha256": "eb95eff7bc076602af4070fd1cb62ba63d4b716ceb8aa7475a0c179f08dd7445",
+  "start": "2026-10-16T04:18:46.109814+00:00",
+  "planned": [
+    "1280-READ",
+    "1280-DIRECT_REPORT",
+    "1280-OTHER_REPORT",
+    "1440-READ",
+    "1440-DIRECT_REPORT",
+    "1440-OTHER_REPORT",
+    "1280-boundary-group",
+    "390-minimal"
+  ],
+  "scenes": [
+    {
+      "id": "1280-READ",
+      "actions": [],
+      "fixture_setup": "Offline public domain APIs + validated backup, UI import. Operations below are native UI.",
+      "pan_hit": "map-fit",
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"/workspace/browser-env/product12-final/independent/ui.py\", line 64, in core\n    if hit not in ['space-map','space-plane','relation-layer']:raise AssertionError('pan empty background unavailable: '+str(hit))\n                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: pan empty background unavailable: map-fit\n"
+    },
+    {
+      "id": "1280-DIRECT_REPORT",
+      "actions": [],
+      "fixture_setup": "Offline public domain APIs + validated backup, UI import. Operations below are native UI.",
+      "pan_hit": "map-fit",
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"/workspace/browser-env/product12-final/independent/ui.py\", line 64, in core\n    if hit not in ['space-map','space-plane','relation-layer']:raise AssertionError('pan empty background unavailable: '+str(hit))\n                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: pan empty background unavailable: map-fit\n"
+    },
+    {
+      "id": "1280-OTHER_REPORT",
+      "actions": [],
+      "fixture_setup": "Offline public domain APIs + validated backup, UI import. Operations below are native UI.",
+      "pan_hit": "map-fit",
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"/workspace/browser-env/product12-final/independent/ui.py\", line 64, in core\n    if hit not in ['space-map','space-plane','relation-layer']:raise AssertionError('pan empty background unavailable: '+str(hit))\n                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: pan empty background unavailable: map-fit\n"
+    },
+    {
+      "id": "1440-READ",
+      "actions": [],
+      "fixture_setup": "Offline public domain APIs + validated backup, UI import. Operations below are native UI.",
+      "pan_hit": "map-fit",
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"/workspace/browser-env/product12-final/independent/ui.py\", line 64, in core\n    if hit not in ['space-map','space-plane','relation-layer']:raise AssertionError('pan empty background unavailable: '+str(hit))\n                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: pan empty background unavailable: map-fit\n"
+    },
+    {
+      "id": "1440-DIRECT_REPORT",
+      "actions": [],
+      "fixture_setup": "Offline public domain APIs + validated backup, UI import. Operations below are native UI.",
+      "pan_hit": "map-fit",
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"/workspace/browser-env/product12-final/independent/ui.py\", line 64, in core\n    if hit not in ['space-map','space-plane','relation-layer']:raise AssertionError('pan empty background unavailable: '+str(hit))\n                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: pan empty background unavailable: map-fit\n"
+    },
+    {
+      "id": "1440-OTHER_REPORT",
+      "actions": [],
+      "fixture_setup": "Offline public domain APIs + validated backup, UI import. Operations below are native UI.",
+      "pan_hit": "map-fit",
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"/workspace/browser-env/product12-final/independent/ui.py\", line 64, in core\n    if hit not in ['space-map','space-plane','relation-layer']:raise AssertionError('pan empty background unavailable: '+str(hit))\n                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: pan empty background unavailable: map-fit\n"
+    },
+    {
+      "id": "1280-boundary-group",
+      "checks": {
+        "empty_idea_no_tasks": false,
+        "empty_manual": true,
+        "null_stale": true,
+        "stale_closed": true,
+        "no_copy": true,
+        "different_copy": false,
+        "reload_persisted": true
+      },
+      "observations": {
+        "empty": "전체 공간\n›\n빈 구상 영역\n영역\n\nAREA\n\n빈 구상 영역\n구상 미기재\n＋ 이 영역에 새 요청\n영역 보관\n이름·설명 고치기\n\n확인할 일 · 이 영역 0건 · 다른 영역 2건\n전체 공간에서 보기\n\n무엇을 요청할지 같이 정하기 · 선택\n\n목적·이 영역의 구상·사용자 결정·이 영역의 요청을 읽고, 꼭 필요할 때만 질문 하나를 한 뒤 요청 초안을 보여줘요. 초안은 고치거나 버릴 수 있고, ‘이 초안으로 요청 쓰기’를 누르기 전에는 구상·작업·결정이 바뀌지 않아요. 지금은 MOCK 규칙이라 예약 확정 방식 한 가지만 묻고, 그 밖에는 중립적인 첫 단계를 만들어요.\n\n이번에 맡기거나 바꿀 일 (선택)\n\n영역 구상은 그대로 두고, 이번 요청이나 바뀐 조건만 적으세요. 비워 두면 목적과 구상으로 시작해요. 적은 내용은 이 탭에만 있고 새로고침하면 사라져요. 요청 입력칸에 쓴 내용은 가져오지 않아요.\n\n질문 또는 초안 받기 (MOCK)\n이 영역의 요청과 작업\n\n아직 이 영역의 요청이 없어요.\n\n이 영역에 새 요청\n무엇을 요청할지 같이 정하기\n기준 · 이 영역 0개 · 다른 영역·미분류 기준 3개",
+        "context": "요청 · 작업 01 · 영역 ‘소개글 영역’\n\n짧은 이해 · 사용자 직접 수정\n(직접 비워 둠)\n이번 범위와 유지할 것 · 이전 MOCK 문구 · 기준 변경 전이라 작업문에서 제외됨\n지금 작업문에는 들어가지 않아요.\n제외된 이전 문구 보기 (현재 작업문 아님)",
+        "stale_body_before": {
+          "rect": {
+            "x": 762,
+            "y": 631.234375,
+            "w": 476,
+            "h": 43.796875
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "intersection": {
+            "left": 762,
+            "top": 631.234375,
+            "right": 1238,
+            "bottom": 675.03125
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "block"
+        },
+        "stale_explicit": "제외된 이전 문구 보기 (현재 작업문 아님)\n요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "absent_snapshot": "작업문에 넣을 프로젝트 배경 · 이 작업에는 없음\n\n이 작업에는 저장된 배경 사본이 없어요(배경을 저장하기 전에 쓴 작업이거나, 사본 없이 내보낸 작업에 돌아온 결과). 지금 전체 공간의 구상을 소급해 넣지 않아요.",
+        "different_snapshot": "작업문에 넣을 프로젝트 배경·영역 구상 보기 · r13 사본 · 그 뒤 구상이 바뀜 (이 사본은 그대로)\n\n이 작업의 요청을 쓸 때 고정한 사본이에요. 작업문에 ‘이번 요청 범위와 구분’된 배경으로 들어가며, 지시나 확정 기준이 아니에요.\n\n프로젝트 목적 원문\n\n공개 전에 담당자가 판단하도록 소개글 한 편의 확인 작업만 정리한다. 실제 운영 배포는 하지 않는다.\n\n요청 대상 영역 · 별도 알림 영역\n\n알림은 이번 소개글 확인과 다른 범위이다.\n\n전체 공간의 목적이나 이 영역의 이름·구상이 그 뒤 바뀌었어요. 이미 준비된 이 작업의 사본은 그대로이고, 다음에 쓰는 새 요청부터 최신 구상이 들어가요.",
+        "reload": {
+          "title": "B: 다른 요청의 알림 제목만 정리한다.",
+          "state": {
+            "current": "T_c99d33b1-b8ae-4c3f-b00b-4342a4b3b0f6",
+            "kind": "report",
+            "draft": "아직 보내지 않은 보고 초안. 연결 대상은 B이다.",
+            "target": {
+              "area": "A_043aa6c5-e417-4d3c-abc0-861308e43fb4"
+            },
+            "manual": {
+              "T_c99d33b1-b8ae-4c3f-b00b-4342a4b3b0f6": {
+                "understanding": "",
+                "scope": null,
+                "next": "A 초기 next: 다른 대상에 섞지 않는다.",
+                "checks": "A 초기 checks: 다른 대상에 섞지 않는다."
+              },
+              "T_cfb24f74-0d47-4800-a3a8-b0538b486c07": {
+                "understanding": "R 초기 understanding: 다른 대상에 섞지 않는다.",
+                "scope": "R 초기 scope: 다른 대상에 섞지 않는다.",
+                "next": "R 초기 next: 다른 대상에 섞지 않는다.",
+                "checks": "R 초기 checks: 다른 대상에 섞지 않는다."
+              },
+              "T_9ddec29a-f0e9-47ec-a22a-eb2a7fe19e29": {
+                "understanding": "B 초기 understanding: 다른 대상에 섞지 않는다.",
+                "scope": "B 초기 scope: 다른 대상에 섞지 않는다.",
+                "next": "B 초기 next: 다른 대상에 섞지 않는다.",
+                "checks": "B 초기 checks: 다른 대상에 섞지 않는다."
+              },
+              "T_64f98ec1-11d7-4afe-8ba0-99543bf617cd": {
+                "understanding": "RB 초기 understanding: 다른 대상에 섞지 않는다.",
+                "scope": "RB 초기 scope: 다른 대상에 섞지 않는다.",
+                "next": "RB 초기 next: 다른 대상에 섞지 않는다.",
+                "checks": "RB 초기 checks: 다른 대상에 섞지 않는다."
+              }
+            }
+          }
+        },
+        "project_list": "MY PROJECTS\n\n내 프로젝트\n\n이 브라우저에 저장된 프로젝트예요. 다른 기기와는 백업 파일로 옮길 수 있어요.\n\n＋ 새 프로젝트\n나의 프로젝트\n\n마지막 요청 · B: 다른 요청의 알림 제목만 정리한다.\n\n최근 활동 · 10월 16일 04:17 · 영역 3개 · 요청 2개 · 가져온 결과 2개\n\n이어서 하기\n휴지통으로\n↑ 백업 파일 불러오기 (새 사본으로 추가)\n예제 둘러보기 · 저장 안 됨"
+      },
+      "status": "FAIL",
+      "error": "Traceback (most recent call last):\n  File \"/workspace/browser-env/product12-final/independent/ui.py\", line 95, in boundary\n    click(pg,'nav-projects');s['observations']['project_list']=pg.locator('#projects-view').inner_text();click(pg,'list-new-project');s['observations']['new_project']={'state':state_sem(state(pg)),'title':pg.locator('#space-title').inner_text()};s['checks']['actual_project_switch']=state(pg)['id']!=json.loads((R/'boundary.json').read_text())['id'];s['observations']['invalid_departure']='Archive/delete while reading: no in-view UI; static branch only, NOT_RUN; no hidden state mutation.';assert all(s['checks'].values()),str(s['checks']);s['status']='PASS'\n                                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/product12-final/independent/ui.py\", line 25, in click\n    movement=wheel_to(pg,id);g=geom(pg,id)\n             ^^^^^^^^^^^^^^^\n  File \"reused-native-geometry\", line 23, in wheel_to\n    def clip(pg,id):return geom(pg,id)\nRuntimeError: native wheel cannot reach list-new-project\n"
+    },
+    {
+      "id": "390-minimal",
+      "checks": {
+        "closed_body": true,
+        "no_horizontal_overflow": true,
+        "caller_focus": true
+      },
+      "original": "A: 소개글 한 편을 확인한다. 공개 여부는 담당자가 선택하며 운영 배포는 하지 않는다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. 요청 원문의 조건을 보존합니다. A_원문끝",
+      "overflow": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "focus": "task-open-T_c99d33b1-b8ae-4c3f-b00b-4342a4b3b0f6",
+      "status": "PASS"
+    }
+  ],
+  "http": [
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_path": "index.html",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_path": "styles.css",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_path": "client/app.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_path": "shared/types.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_path": "shared/domain.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_path": "shared/guidance.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_path": "shared/mock.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_path": "shared/storage.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_path": "shared/validation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_path": "client/runtime.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_path": "client/presentation.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_path": "shared/attention.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_path": "shared/outcome.js",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:33449/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_path": "shared/plan-facts.js",
+      "disk_match": true
+    }
+  ],
+  "pageerrors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "fatal": null,
+  "cleanup": [],
+  "source_before": {
+    "shared/attention.ts": "1dd7f306d8ef40c843093ac67586dc66905db1724bc5653b44b2906e3f0e5bed",
+    "shared/validation.ts": "5c117e0f898b484e2a680e6607ec0624b375cb4933dd2324bdb075a400c358ce",
+    "shared/domain.ts": "703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f",
+    "shared/outcome.ts": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+    "shared/storage.ts": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5",
+    "shared/plan-facts.ts": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+    "shared/guidance.ts": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18",
+    "shared/mock.ts": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+    "shared/types.ts": "9c4ebea8c66b9fda5547d2908125d9f899b019a9ac86c2617a009ecb568186e1",
+    "client/app.ts": "f67e12fb505b121ec4c4536eb40879e8409978516a1bb3835bb90cd0c6a01fd4",
+    "client/presentation.ts": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639",
+    "client/runtime-static.ts": "7164e02c145857a23fd40416a936b007649009ebc25615f361256c98178fe589",
+    "client/runtime.ts": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd"
+  },
+  "runtime_before": {
+    "index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "styles.css": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+    "shared/attention.js": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+    "shared/domain.js": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+    "shared/outcome.js": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "shared/mock.js": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "shared/storage.js": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "shared/plan-facts.js": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "shared/validation.js": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+    "shared/guidance.js": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "shared/types.js": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+    "client/runtime.js": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "client/presentation.js": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+    "client/app.js": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+    "client/runtime-static.js": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+  },
+  "url": "http://127.0.0.1:33449",
+  "versions": {
+    "node": "v22.16.0",
+    "playwright": "1.57.0",
+    "browser": "154.0.8037.57"
+  },
+  "server_exit": -15,
+  "server_stderr": "",
+  "source_after": {
+    "shared/attention.ts": "1dd7f306d8ef40c843093ac67586dc66905db1724bc5653b44b2906e3f0e5bed",
+    "shared/validation.ts": "5c117e0f898b484e2a680e6607ec0624b375cb4933dd2324bdb075a400c358ce",
+    "shared/domain.ts": "703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f",
+    "shared/outcome.ts": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+    "shared/storage.ts": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5",
+    "shared/plan-facts.ts": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+    "shared/guidance.ts": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18",
+    "shared/mock.ts": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+    "shared/types.ts": "9c4ebea8c66b9fda5547d2908125d9f899b019a9ac86c2617a009ecb568186e1",
+    "client/app.ts": "f67e12fb505b121ec4c4536eb40879e8409978516a1bb3835bb90cd0c6a01fd4",
+    "client/presentation.ts": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639",
+    "client/runtime-static.ts": "7164e02c145857a23fd40416a936b007649009ebc25615f361256c98178fe589",
+    "client/runtime.ts": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd"
+  },
+  "runtime_after": {
+    "index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "styles.css": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+    "shared/attention.js": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+    "shared/domain.js": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+    "shared/outcome.js": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "shared/mock.js": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "shared/storage.js": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "shared/plan-facts.js": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "shared/validation.js": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+    "shared/guidance.js": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "shared/types.js": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+    "client/runtime.js": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "client/presentation.js": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+    "client/app.js": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+    "client/runtime-static.js": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+  },
+  "hashes_unchanged": true,
+  "complete": true,
+  "end": "2026-10-16T04:19:00.756864+00:00",
+  "exit": 1
+}

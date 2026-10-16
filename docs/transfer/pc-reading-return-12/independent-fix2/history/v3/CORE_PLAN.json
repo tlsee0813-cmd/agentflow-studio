@@ -1,0 +1,16 @@
+{
+  "status": "PREPARED_NOT_RUN_WAITING_FIX2_SHA",
+  "contract": "48b6fed3790aacf5106352cd940990c55c991e6d",
+  "core": ["1280-READ", "1280-DIRECT_REPORT", "1280-OTHER_REPORT", "1440-READ", "1440-DIRECT_REPORT", "1440-OTHER_REPORT"],
+  "fixture_setup": "Separate exported domain API generator + parseProject + actual import-file UI; no application state injection",
+  "independent_manual4": {
+    "DIRECT_REPORT": {"understanding":"R 직접: 받은 소개글 한 편을 확인한다.", "scope":"R 범위: 공개 여부는 담당자가 선택하며 원문은 보존한다.", "next":"R 다음: 소개글 한 편의 확인 순서를 정리한다.", "checks":"R 확인: 수동값 네 필드와 A 불변을 확인한다."},
+    "OTHER_REPORT": {"understanding":"A 직접: 입력을 다시 옮기는 작업을 줄인다.", "scope":"A 범위: 작은 작업만 정리하고 운영 배포는 하지 않는다.", "next":"A 다음: 현재 요청의 선택지를 먼저 적는다.", "checks":"A 확인: RB와 R에는 이 값을 섞지 않는다."}
+  },
+  "raw": ["currentTaskId", "draftKind", "draftTarget", "draft", "allTasks.manual4", "activeElement", "selected area", "computed matrix", "raw card x/y/w/h", "map/main/window scroll and extent", "caller rect+all ancestor clips+hit", "notice/title/idea/check/task body rects+text", "disclosure open map"],
+  "return_rule": "same content/document anchor: windowY ±2; changed content: caller viewportY ±2 + focus/hit, preserved actual edits/new notice state, no fake padding/content rollback; map intrinsic transform/selection independently",
+  "boundary_group": ["empty idea and no tasks", "long original/report repeated normal open-close", "manual empty string vs null", "stale AI excluded; manual preserved", "background snapshot absent vs different", "unsaved area edits preserved", "report-kind and explicit target draft preserved", "actual project switch", "actual reload"],
+  "invalid_departure": "UI-inaccessible archive/delete during task view: static branch inspection and NOT_RUN, no hidden mutation",
+  "mobile": ["390 access", "original open-close", "horizontal overflow"],
+  "deferred": "full UI executable adaptation and execution waits for exact fix2 source; this plan is not execution evidence"
+}

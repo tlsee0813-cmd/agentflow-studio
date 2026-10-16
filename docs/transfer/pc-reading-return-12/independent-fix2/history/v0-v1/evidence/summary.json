@@ -1,0 +1,166 @@
+{
+  "scenes": [
+    {
+      "id": "1280-manual-tail",
+      "status": "FAIL",
+      "observed": {
+        "understanding_tail": false,
+        "scope_tail": false
+      },
+      "read_only_unchanged": true
+    },
+    {
+      "id": "1280-read-return",
+      "status": "FAIL",
+      "delta": {
+        "windowY": -369,
+        "callerY": -13.0
+      },
+      "details": [
+        true,
+        false
+      ],
+      "window": [
+        {
+          "x": 0,
+          "y": 900,
+          "maxY": 913
+        },
+        {
+          "x": 0,
+          "y": 531,
+          "maxY": 531
+        }
+      ],
+      "caller_hit": [
+        true,
+        true
+      ],
+      "state_audit": {
+        "current_R_preserved": true,
+        "draft_preserved": true,
+        "A_manual_unchanged": true,
+        "R_understanding_before": "R만의 이해",
+        "R_understanding_after": "R만의 이해"
+      }
+    },
+    {
+      "id": "1280-edit-return",
+      "status": "FAIL",
+      "delta": {
+        "windowY": -436,
+        "callerY": -13.59375
+      },
+      "details": [
+        true,
+        false
+      ],
+      "window": [
+        {
+          "x": 0,
+          "y": 900,
+          "maxY": 913
+        },
+        {
+          "x": 0,
+          "y": 464,
+          "maxY": 464
+        }
+      ],
+      "caller_hit": [
+        true,
+        true
+      ],
+      "state_audit": {
+        "current_R_preserved": true,
+        "draft_preserved": true,
+        "A_manual_unchanged": true,
+        "R_understanding_before": "R만의 이해",
+        "R_understanding_after": "R의 직접 수정: 게시 여부는 담당자가 선택합니다."
+      }
+    },
+    {
+      "id": "1440-manual-tail",
+      "status": "FAIL",
+      "observed": {
+        "understanding_tail": false,
+        "scope_tail": false
+      },
+      "read_only_unchanged": true
+    },
+    {
+      "id": "1440-read-return",
+      "status": "FAIL",
+      "delta": {
+        "windowY": -99,
+        "callerY": -283.0
+      },
+      "details": [
+        true,
+        false
+      ],
+      "window": [
+        {
+          "x": 0,
+          "y": 450,
+          "maxY": 733
+        },
+        {
+          "x": 0,
+          "y": 351,
+          "maxY": 351
+        }
+      ],
+      "caller_hit": [
+        true,
+        true
+      ],
+      "state_audit": {
+        "current_R_preserved": true,
+        "draft_preserved": true,
+        "A_manual_unchanged": true,
+        "R_understanding_before": "R만의 이해",
+        "R_understanding_after": "R만의 이해"
+      }
+    },
+    {
+      "id": "1440-edit-return",
+      "status": "FAIL",
+      "delta": {
+        "windowY": -166,
+        "callerY": -283.59375
+      },
+      "details": [
+        true,
+        false
+      ],
+      "window": [
+        {
+          "x": 0,
+          "y": 450,
+          "maxY": 733
+        },
+        {
+          "x": 0,
+          "y": 284,
+          "maxY": 284
+        }
+      ],
+      "caller_hit": [
+        true,
+        true
+      ],
+      "state_audit": {
+        "current_R_preserved": true,
+        "draft_preserved": true,
+        "A_manual_unchanged": true,
+        "R_understanding_before": "R만의 이해",
+        "R_understanding_after": "R의 직접 수정: 게시 여부는 담당자가 선택합니다."
+      }
+    }
+  ],
+  "complete": true,
+  "fatal": null,
+  "http_all_match": true,
+  "pageerrors": []
+}

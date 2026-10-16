@@ -1,0 +1,113 @@
+{
+  "start": "2026-10-16T04:20:55.362287+00:00",
+  "responses": [
+    {
+      "url": "http://127.0.0.1:42903/",
+      "status": 200,
+      "bytes": 17067,
+      "sha256": "b66b3fac3b445b9ac1b2ab187bceb8a492e8cc364d0efb531f20f7ec53bccee1",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/client/app.js",
+      "status": 200,
+      "bytes": 194307,
+      "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/client/runtime.js",
+      "status": 200,
+      "bytes": 1936,
+      "sha256": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:42903/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_match": true
+    }
+  ],
+  "pageerrors": [],
+  "api_calls": [],
+  "fatal": null,
+  "url": "http://127.0.0.1:42903",
+  "mode": "브라우저 MOCK · AI 아님",
+  "context": "요청 · 작업 01 · 영역 ‘소개글 영역’\n\n짧은 이해 · 사용자 직접 수정\nA 초기 understanding: 다른 대상에 섞지 않는다.\n이번 범위와 유지할 것 · 사용자 직접 수정\nA 초기 scope: 다른 대상에 섞지 않는다.",
+  "return_focus": "task-open-T_c99d33b1-b8ae-4c3f-b00b-4342a4b3b0f6",
+  "csp": "\" content=\"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'\"",
+  "browser": "154.0.8037.57",
+  "exit": 0
+}

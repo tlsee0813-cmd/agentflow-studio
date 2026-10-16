@@ -1,0 +1,1688 @@
+{
+  "runtime_before": {
+    "index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "styles.css": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+    "shared/attention.js": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+    "shared/domain.js": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+    "shared/outcome.js": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "shared/mock.js": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "shared/storage.js": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "shared/plan-facts.js": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "shared/validation.js": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+    "shared/guidance.js": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "shared/types.js": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+    "client/runtime.js": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "client/presentation.js": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+    "client/app.js": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+    "client/runtime-static.js": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+  },
+  "utc": "2026-10-16T03:50:28.770248+00:00",
+  "app_dir": "/workspace/browser-env/product12-candidate-fix1/app",
+  "code_sha256": "9c3bf13be9a41a12f014e15ccbc129af504570b6636dc0661ee6e63b36a0bc77",
+  "source_before": {
+    "continuity/src/shared/attention.ts": "1dd7f306d8ef40c843093ac67586dc66905db1724bc5653b44b2906e3f0e5bed",
+    "continuity/src/shared/validation.ts": "5c117e0f898b484e2a680e6607ec0624b375cb4933dd2324bdb075a400c358ce",
+    "continuity/src/shared/domain.ts": "703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f",
+    "continuity/src/shared/outcome.ts": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+    "continuity/src/shared/storage.ts": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5",
+    "continuity/src/shared/plan-facts.ts": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+    "continuity/src/shared/guidance.ts": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18",
+    "continuity/src/shared/mock.ts": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+    "continuity/src/shared/types.ts": "9c4ebea8c66b9fda5547d2908125d9f899b019a9ac86c2617a009ecb568186e1",
+    "continuity/src/client/app.ts": "99c263cf4a189cbbbd5e6cd9fe4261c3f9fbcdfae910014e03b351cd3f716737",
+    "continuity/src/client/presentation.ts": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639",
+    "continuity/src/client/runtime-static.ts": "7164e02c145857a23fd40416a936b007649009ebc25615f361256c98178fe589",
+    "continuity/src/client/runtime.ts": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd",
+    "continuity/public/index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "continuity/public/styles.css": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+    "continuity/server/provider.mjs": "39822016cd37ddb420917ecbb0be97de8b1fb95f009f26536225a1aee55b2535",
+    "continuity/server/app.mjs": "4c07bd2cb5b2c2478ab58a59da33a526fe3376df316cb46d8f2e72d83efb29d4",
+    "continuity/server/index.mjs": "3bc04a2df355d659c2a3be96612989ebb27958fa112d91624b205ed3a788f70c",
+    "continuity/server/prompt.mjs": "95f4c88e2877f22c574c0c7a442ff6ab0c2fffb7d1f84ea1f544c1265e90b7b2",
+    "continuity/server/mock.mjs": "bfea640512c13fcc4deb69cb779e378fa44b1f724c56ce0d4985aa95ffceefb5",
+    "server/limiter.mjs": "b0e9e96b7ad193f23e98ec8da5ee216aeea7d1380439884778127d5d83e0db42",
+    "server/app.mjs": "50a6eb541700d38bfaac02689e69e376588f47f9782103335dffeef0148577a8",
+    "server/index.mjs": "18bb2e200c828e15d646e502be7857dd859818735c39febf0b269f8309059265",
+    "server/prompt.mjs": "fea26eec8e80aa7145f584b5354a021bcab8587b2221deae144c8c9bb00135c0",
+    "server/static-files.mjs": "b0c5f48a9ab91d5bfada7dd099c815ec8d382ca0c6afa91eb9c67e46a73d6cf5",
+    "server/config.mjs": "48c65f729cb71208feaac3719866549bb948fd0149975b49b5818fbba47271c2",
+    "server/errors.mjs": "975f10b518897cabde44613cba896065f1d357b296ddbd292c4ccbccab831c96",
+    "server/providers/deepseek.mjs": "b5bd4da73d6b68264b3c84ea88b0c6bd91192922f26e9fde6386a11c0820e45d",
+    "server/providers/mock.mjs": "a682316877a55302a2cc40354cc4eac2c6ab97e9cad72bbca51302bb075f32c0"
+  },
+  "planned": [
+    "1280-manual-tail",
+    "1280-read-return",
+    "1280-edit-return",
+    "1440-manual-tail",
+    "1440-read-return",
+    "1440-edit-return"
+  ],
+  "scenes": [
+    {
+      "id": "1280-manual-tail",
+      "opened": [
+        "task-view-request",
+        "task-view-work",
+        "task-view-results",
+        "task-view-background",
+        "task-view-bases"
+      ],
+      "observed": {
+        "understanding_tail": false,
+        "scope_tail": false
+      },
+      "read_only_unchanged": true,
+      "before": {
+        "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+        "kind": "request",
+        "draft": "미전송 초안 보존",
+        "target": null,
+        "manual": [
+          {
+            "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+            "manual": {
+              "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+              "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+              "next": null,
+              "checks": null
+            }
+          },
+          {
+            "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "manual": {
+              "understanding": "R만의 이해",
+              "scope": "R만의 범위",
+              "next": null,
+              "checks": null
+            }
+          }
+        ]
+      },
+      "after": {
+        "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+        "kind": "request",
+        "draft": "미전송 초안 보존",
+        "target": null,
+        "manual": [
+          {
+            "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+            "manual": {
+              "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+              "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+              "next": null,
+              "checks": null
+            }
+          },
+          {
+            "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "manual": {
+              "understanding": "R만의 이해",
+              "scope": "R만의 범위",
+              "next": null,
+              "checks": null
+            }
+          }
+        ]
+      },
+      "status": "FAIL"
+    },
+    {
+      "id": "1280-read-return",
+      "wheel": [
+        {
+          "before": 0,
+          "after": 450
+        },
+        {
+          "before": 450,
+          "after": 900
+        }
+      ],
+      "pre": {
+        "window": {
+          "x": 0,
+          "y": 900,
+          "maxY": 913
+        },
+        "focus": "",
+        "caller": {
+          "rect": {
+            "x": 283,
+            "y": 362.15625,
+            "w": 313.546875,
+            "h": 22.5
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "intersection": {
+            "left": 283,
+            "top": 362.15625,
+            "right": 596.546875,
+            "bottom": 384.65625
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "inline"
+        },
+        "details": true,
+        "map": null,
+        "plane": null,
+        "map_measurement_boundary": "area view: map/card DOM absent, null is not transform or rect preservation proof",
+        "cards": [],
+        "state": {
+          "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+          "kind": "request",
+          "draft": "미전송 초안 보존",
+          "target": null,
+          "manual": [
+            {
+              "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+              "manual": {
+                "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                "next": null,
+                "checks": null
+              }
+            },
+            {
+              "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+              "manual": {
+                "understanding": "R만의 이해",
+                "scope": "R만의 범위",
+                "next": null,
+                "checks": null
+              }
+            }
+          ]
+        }
+      },
+      "post": {
+        "window": {
+          "x": 0,
+          "y": 900,
+          "maxY": 913
+        },
+        "focus": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+        "caller": {
+          "rect": {
+            "x": 283,
+            "y": 362.15625,
+            "w": 313.546875,
+            "h": 22.5
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "intersection": {
+            "left": 283,
+            "top": 362.15625,
+            "right": 596.546875,
+            "bottom": 384.65625
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "inline"
+        },
+        "details": true,
+        "map": null,
+        "plane": null,
+        "map_measurement_boundary": "area view: map/card DOM absent, null is not transform or rect preservation proof",
+        "cards": [],
+        "state": {
+          "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+          "kind": "request",
+          "draft": "미전송 초안 보존",
+          "target": null,
+          "manual": [
+            {
+              "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+              "manual": {
+                "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                "next": null,
+                "checks": null
+              }
+            },
+            {
+              "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+              "manual": {
+                "understanding": "R만의 이해",
+                "scope": "R만의 범위",
+                "next": null,
+                "checks": null
+              }
+            }
+          ]
+        }
+      },
+      "delta": {
+        "windowY": 0,
+        "callerY": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "1280-edit-return",
+      "wheel": [
+        {
+          "before": 0,
+          "after": 450
+        },
+        {
+          "before": 450,
+          "after": 900
+        }
+      ],
+      "pre": {
+        "window": {
+          "x": 0,
+          "y": 900,
+          "maxY": 913
+        },
+        "focus": "",
+        "caller": {
+          "rect": {
+            "x": 283,
+            "y": 362.15625,
+            "w": 313.546875,
+            "h": 22.5
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "intersection": {
+            "left": 283,
+            "top": 362.15625,
+            "right": 596.546875,
+            "bottom": 384.65625
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "inline"
+        },
+        "details": true,
+        "map": null,
+        "plane": null,
+        "map_measurement_boundary": "area view: map/card DOM absent, null is not transform or rect preservation proof",
+        "cards": [],
+        "state": {
+          "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+          "kind": "request",
+          "draft": "미전송 초안 보존",
+          "target": null,
+          "manual": [
+            {
+              "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+              "manual": {
+                "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                "next": null,
+                "checks": null
+              }
+            },
+            {
+              "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+              "manual": {
+                "understanding": "R만의 이해",
+                "scope": "R만의 범위",
+                "next": null,
+                "checks": null
+              }
+            }
+          ]
+        }
+      },
+      "post": {
+        "window": {
+          "x": 0,
+          "y": 846,
+          "maxY": 846
+        },
+        "focus": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+        "caller": {
+          "rect": {
+            "x": 283,
+            "y": 348.5625,
+            "w": 313.546875,
+            "h": 22.5
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "intersection": {
+            "left": 283,
+            "top": 348.5625,
+            "right": 596.546875,
+            "bottom": 371.0625
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "inline"
+        },
+        "details": true,
+        "map": null,
+        "plane": null,
+        "map_measurement_boundary": "area view: map/card DOM absent, null is not transform or rect preservation proof",
+        "cards": [],
+        "state": {
+          "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+          "kind": "request",
+          "draft": "미전송 초안 보존",
+          "target": null,
+          "manual": [
+            {
+              "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+              "manual": {
+                "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                "next": null,
+                "checks": null
+              }
+            },
+            {
+              "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+              "manual": {
+                "understanding": "R의 직접 수정: 게시 여부는 담당자가 선택합니다.",
+                "scope": "R만의 범위",
+                "next": null,
+                "checks": null
+              }
+            }
+          ]
+        }
+      },
+      "delta": {
+        "windowY": -54,
+        "callerY": -13.59375
+      },
+      "status": "FAIL"
+    },
+    {
+      "id": "1440-manual-tail",
+      "opened": [
+        "task-view-request",
+        "task-view-work",
+        "task-view-results",
+        "task-view-background",
+        "task-view-bases"
+      ],
+      "observed": {
+        "understanding_tail": false,
+        "scope_tail": false
+      },
+      "read_only_unchanged": true,
+      "before": {
+        "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+        "kind": "request",
+        "draft": "미전송 초안 보존",
+        "target": null,
+        "manual": [
+          {
+            "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+            "manual": {
+              "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+              "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+              "next": null,
+              "checks": null
+            }
+          },
+          {
+            "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "manual": {
+              "understanding": "R만의 이해",
+              "scope": "R만의 범위",
+              "next": null,
+              "checks": null
+            }
+          }
+        ]
+      },
+      "after": {
+        "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+        "kind": "request",
+        "draft": "미전송 초안 보존",
+        "target": null,
+        "manual": [
+          {
+            "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+            "manual": {
+              "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+              "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+              "next": null,
+              "checks": null
+            }
+          },
+          {
+            "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "manual": {
+              "understanding": "R만의 이해",
+              "scope": "R만의 범위",
+              "next": null,
+              "checks": null
+            }
+          }
+        ]
+      },
+      "status": "FAIL"
+    },
+    {
+      "id": "1440-read-return",
+      "wheel": [
+        {
+          "before": 0,
+          "after": 450
+        }
+      ],
+      "pre": {
+        "window": {
+          "x": 0,
+          "y": 450,
+          "maxY": 733
+        },
+        "focus": "",
+        "caller": {
+          "rect": {
+            "x": 283,
+            "y": 812.15625,
+            "w": 313.546875,
+            "h": 22.5
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "intersection": {
+            "left": 283,
+            "top": 812.15625,
+            "right": 596.546875,
+            "bottom": 834.65625
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "inline"
+        },
+        "details": true,
+        "map": null,
+        "plane": null,
+        "map_measurement_boundary": "area view: map/card DOM absent, null is not transform or rect preservation proof",
+        "cards": [],
+        "state": {
+          "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+          "kind": "request",
+          "draft": "미전송 초안 보존",
+          "target": null,
+          "manual": [
+            {
+              "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+              "manual": {
+                "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                "next": null,
+                "checks": null
+              }
+            },
+            {
+              "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+              "manual": {
+                "understanding": "R만의 이해",
+                "scope": "R만의 범위",
+                "next": null,
+                "checks": null
+              }
+            }
+          ]
+        }
+      },
+      "post": {
+        "window": {
+          "x": 0,
+          "y": 450,
+          "maxY": 733
+        },
+        "focus": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+        "caller": {
+          "rect": {
+            "x": 283,
+            "y": 812.15625,
+            "w": 313.546875,
+            "h": 22.5
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "intersection": {
+            "left": 283,
+            "top": 812.15625,
+            "right": 596.546875,
+            "bottom": 834.65625
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "inline"
+        },
+        "details": true,
+        "map": null,
+        "plane": null,
+        "map_measurement_boundary": "area view: map/card DOM absent, null is not transform or rect preservation proof",
+        "cards": [],
+        "state": {
+          "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+          "kind": "request",
+          "draft": "미전송 초안 보존",
+          "target": null,
+          "manual": [
+            {
+              "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+              "manual": {
+                "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                "next": null,
+                "checks": null
+              }
+            },
+            {
+              "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+              "manual": {
+                "understanding": "R만의 이해",
+                "scope": "R만의 범위",
+                "next": null,
+                "checks": null
+              }
+            }
+          ]
+        }
+      },
+      "delta": {
+        "windowY": 0,
+        "callerY": 0.0
+      },
+      "status": "PASS"
+    },
+    {
+      "id": "1440-edit-return",
+      "wheel": [
+        {
+          "before": 0,
+          "after": 450
+        }
+      ],
+      "pre": {
+        "window": {
+          "x": 0,
+          "y": 450,
+          "maxY": 733
+        },
+        "focus": "",
+        "caller": {
+          "rect": {
+            "x": 283,
+            "y": 812.15625,
+            "w": 313.546875,
+            "h": 22.5
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "intersection": {
+            "left": 283,
+            "top": 812.15625,
+            "right": 596.546875,
+            "bottom": 834.65625
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "inline"
+        },
+        "details": true,
+        "map": null,
+        "plane": null,
+        "map_measurement_boundary": "area view: map/card DOM absent, null is not transform or rect preservation proof",
+        "cards": [],
+        "state": {
+          "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+          "kind": "request",
+          "draft": "미전송 초안 보존",
+          "target": null,
+          "manual": [
+            {
+              "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+              "manual": {
+                "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                "next": null,
+                "checks": null
+              }
+            },
+            {
+              "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+              "manual": {
+                "understanding": "R만의 이해",
+                "scope": "R만의 범위",
+                "next": null,
+                "checks": null
+              }
+            }
+          ]
+        }
+      },
+      "post": {
+        "window": {
+          "x": 0,
+          "y": 450,
+          "maxY": 666
+        },
+        "focus": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+        "caller": {
+          "rect": {
+            "x": 283,
+            "y": 744.5625,
+            "w": 313.546875,
+            "h": 22.5
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "intersection": {
+            "left": 283,
+            "top": 744.5625,
+            "right": 596.546875,
+            "bottom": 767.0625
+          },
+          "hit": true,
+          "ancestors": [],
+          "transform": "none",
+          "display": "inline"
+        },
+        "details": true,
+        "map": null,
+        "plane": null,
+        "map_measurement_boundary": "area view: map/card DOM absent, null is not transform or rect preservation proof",
+        "cards": [],
+        "state": {
+          "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+          "kind": "request",
+          "draft": "미전송 초안 보존",
+          "target": null,
+          "manual": [
+            {
+              "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+              "manual": {
+                "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                "next": null,
+                "checks": null
+              }
+            },
+            {
+              "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+              "manual": {
+                "understanding": "R의 직접 수정: 게시 여부는 담당자가 선택합니다.",
+                "scope": "R만의 범위",
+                "next": null,
+                "checks": null
+              }
+            }
+          ]
+        }
+      },
+      "delta": {
+        "windowY": 0,
+        "callerY": -67.59375
+      },
+      "status": "FAIL"
+    }
+  ],
+  "http": [
+    {
+      "url": "http://127.0.0.1:43195/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_relative": "index.html",
+      "disk_before_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_after_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_relative": "styles.css",
+      "disk_before_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_after_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/app.js",
+      "status": 200,
+      "bytes": 193517,
+      "sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_relative": "client/app.js",
+      "disk_before_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_after_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_relative": "shared/types.js",
+      "disk_before_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_after_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_relative": "shared/domain.js",
+      "disk_before_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_after_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_relative": "shared/validation.js",
+      "disk_before_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_after_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_relative": "shared/guidance.js",
+      "disk_before_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_after_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_relative": "shared/storage.js",
+      "disk_before_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_after_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_relative": "client/runtime.js",
+      "disk_before_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_after_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_relative": "client/presentation.js",
+      "disk_before_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_after_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_relative": "shared/mock.js",
+      "disk_before_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_after_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_relative": "shared/outcome.js",
+      "disk_before_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_after_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_relative": "shared/attention.js",
+      "disk_before_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_after_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_relative": "shared/plan-facts.js",
+      "disk_before_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_after_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_relative": "index.html",
+      "disk_before_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_after_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_relative": "styles.css",
+      "disk_before_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_after_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/app.js",
+      "status": 200,
+      "bytes": 193517,
+      "sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_relative": "client/app.js",
+      "disk_before_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_after_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_relative": "shared/types.js",
+      "disk_before_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_after_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_relative": "shared/domain.js",
+      "disk_before_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_after_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_relative": "shared/validation.js",
+      "disk_before_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_after_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_relative": "shared/storage.js",
+      "disk_before_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_after_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_relative": "shared/guidance.js",
+      "disk_before_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_after_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_relative": "shared/mock.js",
+      "disk_before_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_after_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_relative": "client/presentation.js",
+      "disk_before_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_after_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_relative": "client/runtime.js",
+      "disk_before_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_after_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_relative": "shared/attention.js",
+      "disk_before_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_after_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_relative": "shared/outcome.js",
+      "disk_before_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_after_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_relative": "shared/plan-facts.js",
+      "disk_before_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_after_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_relative": "index.html",
+      "disk_before_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_after_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_relative": "styles.css",
+      "disk_before_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_after_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/app.js",
+      "status": 200,
+      "bytes": 193517,
+      "sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_relative": "client/app.js",
+      "disk_before_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_after_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_relative": "shared/types.js",
+      "disk_before_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_after_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_relative": "shared/guidance.js",
+      "disk_before_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_after_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_relative": "shared/validation.js",
+      "disk_before_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_after_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_relative": "shared/domain.js",
+      "disk_before_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_after_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_relative": "client/runtime.js",
+      "disk_before_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_after_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_relative": "shared/mock.js",
+      "disk_before_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_after_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_relative": "shared/storage.js",
+      "disk_before_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_after_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_relative": "client/presentation.js",
+      "disk_before_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_after_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_relative": "shared/attention.js",
+      "disk_before_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_after_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_relative": "shared/outcome.js",
+      "disk_before_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_after_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_relative": "shared/plan-facts.js",
+      "disk_before_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_after_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_relative": "index.html",
+      "disk_before_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_after_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_relative": "styles.css",
+      "disk_before_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_after_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/app.js",
+      "status": 200,
+      "bytes": 193517,
+      "sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_relative": "client/app.js",
+      "disk_before_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_after_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_relative": "shared/types.js",
+      "disk_before_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_after_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_relative": "shared/validation.js",
+      "disk_before_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_after_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_relative": "shared/guidance.js",
+      "disk_before_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_after_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_relative": "shared/domain.js",
+      "disk_before_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_after_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_relative": "client/runtime.js",
+      "disk_before_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_after_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_relative": "shared/outcome.js",
+      "disk_before_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_after_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_relative": "shared/attention.js",
+      "disk_before_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_after_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_relative": "shared/plan-facts.js",
+      "disk_before_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_after_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_relative": "shared/storage.js",
+      "disk_before_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_after_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_relative": "shared/mock.js",
+      "disk_before_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_after_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_relative": "client/presentation.js",
+      "disk_before_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_after_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_relative": "index.html",
+      "disk_before_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_after_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_relative": "styles.css",
+      "disk_before_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_after_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/app.js",
+      "status": 200,
+      "bytes": 193517,
+      "sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_relative": "client/app.js",
+      "disk_before_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_after_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_relative": "shared/types.js",
+      "disk_before_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_after_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_relative": "shared/guidance.js",
+      "disk_before_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_after_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_relative": "shared/domain.js",
+      "disk_before_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_after_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_relative": "shared/storage.js",
+      "disk_before_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_after_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_relative": "shared/mock.js",
+      "disk_before_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_after_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_relative": "shared/validation.js",
+      "disk_before_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_after_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_relative": "client/presentation.js",
+      "disk_before_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_after_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_relative": "client/runtime.js",
+      "disk_before_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_after_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_relative": "shared/attention.js",
+      "disk_before_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_after_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_relative": "shared/outcome.js",
+      "disk_before_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_after_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_relative": "shared/plan-facts.js",
+      "disk_before_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_after_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_relative": "index.html",
+      "disk_before_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_after_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_relative": "styles.css",
+      "disk_before_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_after_sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/app.js",
+      "status": 200,
+      "bytes": 193517,
+      "sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_relative": "client/app.js",
+      "disk_before_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "disk_after_sha256": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_relative": "shared/types.js",
+      "disk_before_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_after_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_relative": "shared/validation.js",
+      "disk_before_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_after_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_relative": "shared/guidance.js",
+      "disk_before_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_after_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_relative": "client/presentation.js",
+      "disk_before_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_after_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_relative": "client/runtime.js",
+      "disk_before_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_after_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_relative": "shared/storage.js",
+      "disk_before_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_after_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_relative": "shared/attention.js",
+      "disk_before_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_after_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_relative": "shared/outcome.js",
+      "disk_before_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_after_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_relative": "shared/mock.js",
+      "disk_before_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_after_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_relative": "shared/domain.js",
+      "disk_before_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_after_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "http_disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:43195/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_relative": "shared/plan-facts.js",
+      "disk_before_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_after_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "http_disk_match": true
+    }
+  ],
+  "pageerrors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "fatal": null,
+  "cleanup": [],
+  "url": "http://127.0.0.1:43195",
+  "server_start": "IDEA015 MOCK (rules only, no AI calls): http://127.0.0.1:43195",
+  "versions": {
+    "playwright": "1.57.0",
+    "browser": "154.0.8037.57",
+    "node": "v22.16.0"
+  },
+  "server_exit": -15,
+  "server_stderr": "",
+  "runtime_after": {
+    "index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "styles.css": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+    "shared/attention.js": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+    "shared/domain.js": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+    "shared/outcome.js": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "shared/mock.js": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "shared/storage.js": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "shared/plan-facts.js": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "shared/validation.js": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+    "shared/guidance.js": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "shared/types.js": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+    "client/runtime.js": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "client/presentation.js": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+    "client/app.js": "09b6e69d9f2291edd33bb69fbfb16fb1f6fa0c9063143d529ae7fe66baa1f07f",
+    "client/runtime-static.js": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+  },
+  "runtime_unchanged": true,
+  "http_disk_all_match": true,
+  "source_after": {
+    "continuity/src/shared/attention.ts": "1dd7f306d8ef40c843093ac67586dc66905db1724bc5653b44b2906e3f0e5bed",
+    "continuity/src/shared/validation.ts": "5c117e0f898b484e2a680e6607ec0624b375cb4933dd2324bdb075a400c358ce",
+    "continuity/src/shared/domain.ts": "703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f",
+    "continuity/src/shared/outcome.ts": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+    "continuity/src/shared/storage.ts": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5",
+    "continuity/src/shared/plan-facts.ts": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+    "continuity/src/shared/guidance.ts": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18",
+    "continuity/src/shared/mock.ts": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+    "continuity/src/shared/types.ts": "9c4ebea8c66b9fda5547d2908125d9f899b019a9ac86c2617a009ecb568186e1",
+    "continuity/src/client/app.ts": "99c263cf4a189cbbbd5e6cd9fe4261c3f9fbcdfae910014e03b351cd3f716737",
+    "continuity/src/client/presentation.ts": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639",
+    "continuity/src/client/runtime-static.ts": "7164e02c145857a23fd40416a936b007649009ebc25615f361256c98178fe589",
+    "continuity/src/client/runtime.ts": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd",
+    "continuity/public/index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "continuity/public/styles.css": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+    "continuity/server/provider.mjs": "39822016cd37ddb420917ecbb0be97de8b1fb95f009f26536225a1aee55b2535",
+    "continuity/server/app.mjs": "4c07bd2cb5b2c2478ab58a59da33a526fe3376df316cb46d8f2e72d83efb29d4",
+    "continuity/server/index.mjs": "3bc04a2df355d659c2a3be96612989ebb27958fa112d91624b205ed3a788f70c",
+    "continuity/server/prompt.mjs": "95f4c88e2877f22c574c0c7a442ff6ab0c2fffb7d1f84ea1f544c1265e90b7b2",
+    "continuity/server/mock.mjs": "bfea640512c13fcc4deb69cb779e378fa44b1f724c56ce0d4985aa95ffceefb5",
+    "server/limiter.mjs": "b0e9e96b7ad193f23e98ec8da5ee216aeea7d1380439884778127d5d83e0db42",
+    "server/app.mjs": "50a6eb541700d38bfaac02689e69e376588f47f9782103335dffeef0148577a8",
+    "server/index.mjs": "18bb2e200c828e15d646e502be7857dd859818735c39febf0b269f8309059265",
+    "server/prompt.mjs": "fea26eec8e80aa7145f584b5354a021bcab8587b2221deae144c8c9bb00135c0",
+    "server/static-files.mjs": "b0c5f48a9ab91d5bfada7dd099c815ec8d382ca0c6afa91eb9c67e46a73d6cf5",
+    "server/config.mjs": "48c65f729cb71208feaac3719866549bb948fd0149975b49b5818fbba47271c2",
+    "server/errors.mjs": "975f10b518897cabde44613cba896065f1d357b296ddbd292c4ccbccab831c96",
+    "server/providers/deepseek.mjs": "b5bd4da73d6b68264b3c84ea88b0c6bd91192922f26e9fde6386a11c0820e45d",
+    "server/providers/mock.mjs": "a682316877a55302a2cc40354cc4eac2c6ab97e9cad72bbca51302bb075f32c0"
+  },
+  "source_unchanged": true,
+  "completed": [
+    "1280-manual-tail",
+    "1280-read-return",
+    "1280-edit-return",
+    "1440-manual-tail",
+    "1440-read-return",
+    "1440-edit-return"
+  ],
+  "complete": true,
+  "child_exit": 1
+}

@@ -1,0 +1,184 @@
+{
+  "utc": "2026-10-16T03:39:45.777717+00:00",
+  "app_dir": "/workspace/browser-env/product12-candidate-v0/app",
+  "code_sha256": "38bf22be21dbb9516c3f694788abc46f42497675c831a4a2fd1552bdbe2ca331",
+  "source_before": {
+    "continuity/src/shared/attention.ts": "1dd7f306d8ef40c843093ac67586dc66905db1724bc5653b44b2906e3f0e5bed",
+    "continuity/src/shared/validation.ts": "5c117e0f898b484e2a680e6607ec0624b375cb4933dd2324bdb075a400c358ce",
+    "continuity/src/shared/domain.ts": "703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f",
+    "continuity/src/shared/outcome.ts": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+    "continuity/src/shared/storage.ts": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5",
+    "continuity/src/shared/plan-facts.ts": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+    "continuity/src/shared/guidance.ts": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18",
+    "continuity/src/shared/mock.ts": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+    "continuity/src/shared/types.ts": "9c4ebea8c66b9fda5547d2908125d9f899b019a9ac86c2617a009ecb568186e1",
+    "continuity/src/client/app.ts": "2ac9f825b8ea209d0872866d97bcff27ae575277756ee93a5683ca28d46019cb",
+    "continuity/src/client/presentation.ts": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639",
+    "continuity/src/client/runtime-static.ts": "7164e02c145857a23fd40416a936b007649009ebc25615f361256c98178fe589",
+    "continuity/src/client/runtime.ts": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd",
+    "continuity/public/index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "continuity/public/styles.css": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+    "continuity/server/provider.mjs": "39822016cd37ddb420917ecbb0be97de8b1fb95f009f26536225a1aee55b2535",
+    "continuity/server/app.mjs": "4c07bd2cb5b2c2478ab58a59da33a526fe3376df316cb46d8f2e72d83efb29d4",
+    "continuity/server/index.mjs": "3bc04a2df355d659c2a3be96612989ebb27958fa112d91624b205ed3a788f70c",
+    "continuity/server/prompt.mjs": "95f4c88e2877f22c574c0c7a442ff6ab0c2fffb7d1f84ea1f544c1265e90b7b2",
+    "continuity/server/mock.mjs": "bfea640512c13fcc4deb69cb779e378fa44b1f724c56ce0d4985aa95ffceefb5",
+    "server/limiter.mjs": "b0e9e96b7ad193f23e98ec8da5ee216aeea7d1380439884778127d5d83e0db42",
+    "server/app.mjs": "50a6eb541700d38bfaac02689e69e376588f47f9782103335dffeef0148577a8",
+    "server/index.mjs": "18bb2e200c828e15d646e502be7857dd859818735c39febf0b269f8309059265",
+    "server/prompt.mjs": "fea26eec8e80aa7145f584b5354a021bcab8587b2221deae144c8c9bb00135c0",
+    "server/static-files.mjs": "b0c5f48a9ab91d5bfada7dd099c815ec8d382ca0c6afa91eb9c67e46a73d6cf5",
+    "server/config.mjs": "48c65f729cb71208feaac3719866549bb948fd0149975b49b5818fbba47271c2",
+    "server/errors.mjs": "975f10b518897cabde44613cba896065f1d357b296ddbd292c4ccbccab831c96",
+    "server/providers/deepseek.mjs": "b5bd4da73d6b68264b3c84ea88b0c6bd91192922f26e9fde6386a11c0820e45d",
+    "server/providers/mock.mjs": "a682316877a55302a2cc40354cc4eac2c6ab97e9cad72bbca51302bb075f32c0"
+  },
+  "planned": [
+    "1280-manual-tail",
+    "1280-read-return",
+    "1280-edit-return",
+    "1440-manual-tail",
+    "1440-read-return",
+    "1440-edit-return"
+  ],
+  "scenes": [],
+  "http": [
+    {
+      "url": "http://127.0.0.1:44179/",
+      "status": 200,
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4"
+    },
+    {
+      "url": "http://127.0.0.1:44179/styles.css",
+      "status": 200,
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec"
+    },
+    {
+      "url": "http://127.0.0.1:44179/client/app.js",
+      "status": 200,
+      "bytes": 192633,
+      "sha256": "3e1f9a903ae1ec4adee188e9bf169035714a7cafa7a180181a44dc6970503042"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/types.js",
+      "status": 200,
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/domain.js",
+      "status": 200,
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/validation.js",
+      "status": 200,
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+    },
+    {
+      "url": "http://127.0.0.1:44179/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+    },
+    {
+      "url": "http://127.0.0.1:44179/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/attention.js",
+      "status": 200,
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+    },
+    {
+      "url": "http://127.0.0.1:44179/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+    }
+  ],
+  "pageerrors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/product12-boundaries/check.py\", line 30, in <module>\n    ctx,pg=fresh(browser,url,width);wheel_to(pg,'task-open-'+A);before=state(pg);pg.locator('#task-open-'+A).click();opened=[]\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/product12-boundaries/check.py\", line 24, in fresh\n    ctx=browser.new_context(viewport={'width':width,'height':720 if width==1280 else 900});pg=ctx.new_page();pg.set_default_timeout(5000);pg.on('pageerror',lambda e:result['pageerrors'].append(str(e)));pg.on('console',lambda m:result['console'].append({'type':m.type,'text':m.text}));pg.on('response',lambda r:result['http'].append({'url':r.url,'status':r.status,'bytes':len(r.body()),'sha256':sha(r.body())}) if r.url.startswith(url) and r.request.resource_type in ['document','script','stylesheet'] else None);pg.on('dialog',lambda d:d.accept());pg.goto(url);pg.locator('#import-file').set_input_files(str(ROOT/'fixture.json'));pg.locator('.project-open').first.click();pg.locator('#node-enter-'+area).click();return ctx,pg\n                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 15637, in click\n    self._sync(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 162, in click\n    return await self._frame._click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 566, in _click\n    await self._channel.send(\"click\", self._timeout, locals_to_params(locals()))\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\".project-open\").first\n\n",
+  "cleanup": [],
+  "url": "http://127.0.0.1:44179",
+  "server_start": "IDEA015 MOCK (rules only, no AI calls): http://127.0.0.1:44179",
+  "versions": {
+    "playwright": "1.57.0",
+    "browser": "154.0.8037.57",
+    "node": "v22.16.0"
+  },
+  "server_exit": -15,
+  "server_stderr": "",
+  "source_after": {
+    "continuity/src/shared/attention.ts": "1dd7f306d8ef40c843093ac67586dc66905db1724bc5653b44b2906e3f0e5bed",
+    "continuity/src/shared/validation.ts": "5c117e0f898b484e2a680e6607ec0624b375cb4933dd2324bdb075a400c358ce",
+    "continuity/src/shared/domain.ts": "703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f",
+    "continuity/src/shared/outcome.ts": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+    "continuity/src/shared/storage.ts": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5",
+    "continuity/src/shared/plan-facts.ts": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+    "continuity/src/shared/guidance.ts": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18",
+    "continuity/src/shared/mock.ts": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+    "continuity/src/shared/types.ts": "9c4ebea8c66b9fda5547d2908125d9f899b019a9ac86c2617a009ecb568186e1",
+    "continuity/src/client/app.ts": "2ac9f825b8ea209d0872866d97bcff27ae575277756ee93a5683ca28d46019cb",
+    "continuity/src/client/presentation.ts": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639",
+    "continuity/src/client/runtime-static.ts": "7164e02c145857a23fd40416a936b007649009ebc25615f361256c98178fe589",
+    "continuity/src/client/runtime.ts": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd",
+    "continuity/public/index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "continuity/public/styles.css": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+    "continuity/server/provider.mjs": "39822016cd37ddb420917ecbb0be97de8b1fb95f009f26536225a1aee55b2535",
+    "continuity/server/app.mjs": "4c07bd2cb5b2c2478ab58a59da33a526fe3376df316cb46d8f2e72d83efb29d4",
+    "continuity/server/index.mjs": "3bc04a2df355d659c2a3be96612989ebb27958fa112d91624b205ed3a788f70c",
+    "continuity/server/prompt.mjs": "95f4c88e2877f22c574c0c7a442ff6ab0c2fffb7d1f84ea1f544c1265e90b7b2",
+    "continuity/server/mock.mjs": "bfea640512c13fcc4deb69cb779e378fa44b1f724c56ce0d4985aa95ffceefb5",
+    "server/limiter.mjs": "b0e9e96b7ad193f23e98ec8da5ee216aeea7d1380439884778127d5d83e0db42",
+    "server/app.mjs": "50a6eb541700d38bfaac02689e69e376588f47f9782103335dffeef0148577a8",
+    "server/index.mjs": "18bb2e200c828e15d646e502be7857dd859818735c39febf0b269f8309059265",
+    "server/prompt.mjs": "fea26eec8e80aa7145f584b5354a021bcab8587b2221deae144c8c9bb00135c0",
+    "server/static-files.mjs": "b0c5f48a9ab91d5bfada7dd099c815ec8d382ca0c6afa91eb9c67e46a73d6cf5",
+    "server/config.mjs": "48c65f729cb71208feaac3719866549bb948fd0149975b49b5818fbba47271c2",
+    "server/errors.mjs": "975f10b518897cabde44613cba896065f1d357b296ddbd292c4ccbccab831c96",
+    "server/providers/deepseek.mjs": "b5bd4da73d6b68264b3c84ea88b0c6bd91192922f26e9fde6386a11c0820e45d",
+    "server/providers/mock.mjs": "a682316877a55302a2cc40354cc4eac2c6ab97e9cad72bbca51302bb075f32c0"
+  },
+  "source_unchanged": true,
+  "completed": [],
+  "complete": false,
+  "child_exit": 1
+}

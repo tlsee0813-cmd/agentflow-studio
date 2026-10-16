@@ -1,0 +1,2 @@
+IDEA015 built separately; existing app/dist and historic gates unchanged.
+PATH compiler (offline bootstrap, not npm ci evidence)

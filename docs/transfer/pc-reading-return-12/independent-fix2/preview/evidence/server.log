@@ -1,0 +1,16 @@
+"GET / HTTP/1.1" 200 -
+"GET /client/app.js HTTP/1.1" 200 -
+"GET /styles.css HTTP/1.1" 200 -
+"GET /shared/storage.js HTTP/1.1" 200 -
+"GET /shared/domain.js HTTP/1.1" 200 -
+"GET /shared/validation.js HTTP/1.1" 200 -
+"GET /shared/types.js HTTP/1.1" 200 -
+"GET /shared/mock.js HTTP/1.1" 200 -
+"GET /shared/guidance.js HTTP/1.1" 200 -
+"GET /client/presentation.js HTTP/1.1" 200 -
+"GET /client/runtime.js HTTP/1.1" 200 -
+"GET /shared/outcome.js HTTP/1.1" 200 -
+"GET /shared/attention.js HTTP/1.1" 200 -
+"GET /shared/plan-facts.js HTTP/1.1" 200 -
+code 404, message File not found
+"GET /favicon.ico HTTP/1.1" 404 -

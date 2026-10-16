@@ -1,0 +1,123 @@
+[
+  {
+    "argv": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "start": "2026-10-16T04:16:45.822584+00:00",
+    "end": "2026-10-16T04:16:48.377260+00:00",
+    "actual_child_returncode": 0,
+    "log": "1.log",
+    "log_sha256": "7c8d8c81cc4f4c29bccece1524f09b6070f60f64ec0a6302f1cf649e969934cf"
+  },
+  {
+    "argv": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "start": "2026-10-16T04:16:48.377585+00:00",
+    "end": "2026-10-16T04:16:49.855442+00:00",
+    "actual_child_returncode": 0,
+    "log": "2.log",
+    "log_sha256": "3336006047fb26f65b5e89c0048eac084c4b1d0ef082faa9f359a35939868e28"
+  },
+  {
+    "argv": [
+      "node",
+      "continuity/scripts/check.mjs"
+    ],
+    "start": "2026-10-16T04:16:49.855805+00:00",
+    "end": "2026-10-16T04:16:52.329607+00:00",
+    "actual_child_returncode": 0,
+    "log": "3.log",
+    "log_sha256": "47570359043e5a8977f213754a6d0c4d741078ec28b6cbc31009801c909fc89f"
+  },
+  {
+    "argv": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "start": "2026-10-16T04:16:52.329951+00:00",
+    "end": "2026-10-16T04:16:54.504541+00:00",
+    "actual_child_returncode": 0,
+    "log": "4.log",
+    "log_sha256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602"
+  },
+  {
+    "argv": [
+      "node",
+      "--test",
+      "continuity/tests/ai055.test.mjs",
+      "continuity/tests/connect039.test.mjs",
+      "continuity/tests/domain.test.mjs",
+      "continuity/tests/fix058.test.mjs",
+      "continuity/tests/fix066.test.mjs",
+      "continuity/tests/fix088.test.mjs",
+      "continuity/tests/flow049.test.mjs",
+      "continuity/tests/flow083.test.mjs",
+      "continuity/tests/flow090.test.mjs",
+      "continuity/tests/flow091c.test.mjs",
+      "continuity/tests/flow094.test.mjs",
+      "continuity/tests/flow095.test.mjs",
+      "continuity/tests/fresh033.test.mjs",
+      "continuity/tests/guide097.test.mjs",
+      "continuity/tests/http.test.mjs",
+      "continuity/tests/idea017.test.mjs",
+      "continuity/tests/idea022.test.mjs",
+      "continuity/tests/select035.test.mjs",
+      "continuity/tests/spatial102.test.mjs",
+      "continuity/tests/ui001.test.mjs"
+    ],
+    "start": "2026-10-16T04:16:54.504873+00:00",
+    "end": "2026-10-16T04:17:06.925850+00:00",
+    "actual_child_returncode": 0,
+    "log": "5.log",
+    "log_sha256": "2713d9b1c174db2e4c25769ed1780088700548889fc0e048908e81d31ff4dca0"
+  },
+  {
+    "argv": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/pc12_browser.py"
+    ],
+    "start": "2026-10-16T04:17:06.926439+00:00",
+    "end": "2026-10-16T04:17:43.891571+00:00",
+    "actual_child_returncode": 0,
+    "log": "6.log",
+    "log_sha256": "a140ee1195462e9fd55bfcdf37211fe75dd9cbd5fbccc45a94a3fb4b6a59020c"
+  },
+  {
+    "argv": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/spatial102_browser.py"
+    ],
+    "start": "2026-10-16T04:17:43.891945+00:00",
+    "end": "2026-10-16T04:18:01.939495+00:00",
+    "actual_child_returncode": 0,
+    "log": "7.log",
+    "log_sha256": "e2885b0f74215a88f77b4f29535c73f47ea9134c8fb710dd0731b4420f02f584"
+  },
+  {
+    "argv": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/flow090_browser.py"
+    ],
+    "start": "2026-10-16T04:18:01.940001+00:00",
+    "end": "2026-10-16T04:18:30.607585+00:00",
+    "actual_child_returncode": 0,
+    "log": "8.log",
+    "log_sha256": "ae694cafe13883a4ac945e871a5e01bbd182a6f7b1f771468ce454dbf312f463"
+  },
+  {
+    "argv": [
+      "node",
+      "continuity/scripts/build-static.mjs"
+    ],
+    "start": "2026-10-16T04:18:30.607992+00:00",
+    "end": "2026-10-16T04:18:32.717806+00:00",
+    "actual_child_returncode": 0,
+    "log": "9.log",
+    "log_sha256": "6b8718a4113088a0555063b2effc42289ab7ffd69d16cb7c3763386531ae7cc4"
+  }
+]

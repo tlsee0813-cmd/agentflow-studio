@@ -1,0 +1,2315 @@
+{
+  "checker_sha256": "f8a057b72d34ffc15dbc5d006d899cb2820f4c8dcd42073b67f9215290bd8d07",
+  "same_checker_both_sources": true,
+  "rules_unchanged": true,
+  "runs": {
+    "v0": {
+      "complete": true,
+      "scenes": [
+        {
+          "id": "1280-manual-tail",
+          "status": "FAIL",
+          "observed": {
+            "understanding_tail": false,
+            "scope_tail": false
+          },
+          "opened": [
+            "task-view-request",
+            "task-view-work",
+            "task-view-results",
+            "task-view-background",
+            "task-view-bases"
+          ],
+          "read_only_unchanged": true
+        },
+        {
+          "id": "1280-read-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -369,
+            "callerY": -13.0
+          },
+          "documentHeight": [
+            1633,
+            1251
+          ],
+          "window": [
+            {
+              "x": 0,
+              "y": 900,
+              "maxY": 913
+            },
+            {
+              "x": 0,
+              "y": 531,
+              "maxY": 531
+            }
+          ],
+          "details": [
+            true,
+            false
+          ],
+          "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+          "caller_hit": [
+            true,
+            true
+          ],
+          "layout_deltas": [
+            {
+              "id": "example-banner",
+              "cls": "alert example-banner",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -369
+            },
+            {
+              "id": "saved",
+              "cls": "saved",
+              "text_same": true,
+              "height": [
+                16.5,
+                16.5
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                49.59375,
+                49.59375
+              ],
+              "documentY_delta": -369
+            },
+            {
+              "id": "list-notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -369
+            },
+            {
+              "id": "space-crumb",
+              "cls": "space-crumb",
+              "text_same": true,
+              "height": [
+                23.09375,
+                23.09375
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "space-head",
+              "text_same": false,
+              "height": [
+                794.890625,
+                412.890625
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "eyebrow",
+              "text_same": true,
+              "height": [
+                14.84375,
+                14.84375
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "space-title",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                39,
+                39
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-idea",
+              "cls": "area-idea",
+              "text_same": false,
+              "height": [
+                586.25,
+                204.25
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "row",
+              "text_same": true,
+              "height": [
+                45,
+                45
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "area-edit",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                43.796875,
+                43.796875
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "area-checks",
+              "cls": "hint area-checks",
+              "text_same": true,
+              "height": [
+                22.1875,
+                22.1875
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "guide-A_d1513089-60bd-4522-8ffb-18a254156998",
+              "cls": "guide-panel",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "area-tasks",
+              "cls": "area-tasks",
+              "text_same": true,
+              "height": [
+                250.578125,
+                250.578125
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                24,
+                24
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "",
+              "cls": "area-task",
+              "text_same": true,
+              "height": [
+                200.578125,
+                200.578125
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "area-bases",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "working",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -369
+            },
+            {
+              "id": "result-file-message",
+              "cls": "hint",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -369
+            }
+          ],
+          "saved_state_pre": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          },
+          "saved_state_post": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1280-edit-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -436,
+            "callerY": -13.59375
+          },
+          "documentHeight": [
+            1633,
+            1184
+          ],
+          "window": [
+            {
+              "x": 0,
+              "y": 900,
+              "maxY": 913
+            },
+            {
+              "x": 0,
+              "y": 464,
+              "maxY": 464
+            }
+          ],
+          "details": [
+            true,
+            false
+          ],
+          "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+          "caller_hit": [
+            true,
+            true
+          ],
+          "layout_deltas": [
+            {
+              "id": "example-banner",
+              "cls": "alert example-banner",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -436
+            },
+            {
+              "id": "saved",
+              "cls": "saved",
+              "text_same": true,
+              "height": [
+                16.5,
+                16.5
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "notice",
+              "cls": "alert",
+              "text_same": false,
+              "height": [
+                49.59375,
+                0
+              ],
+              "documentY_delta": -446
+            },
+            {
+              "id": "list-notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -436
+            },
+            {
+              "id": "space-crumb",
+              "cls": "space-crumb",
+              "text_same": true,
+              "height": [
+                23.09375,
+                23.09375
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "space-head",
+              "text_same": false,
+              "height": [
+                794.890625,
+                412.890625
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "eyebrow",
+              "text_same": true,
+              "height": [
+                14.84375,
+                14.84375
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "space-title",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                39,
+                39
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-idea",
+              "cls": "area-idea",
+              "text_same": false,
+              "height": [
+                586.25,
+                204.25
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "row",
+              "text_same": true,
+              "height": [
+                45,
+                45
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "area-edit",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                43.796875,
+                43.796875
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "area-checks",
+              "cls": "hint area-checks",
+              "text_same": true,
+              "height": [
+                22.1875,
+                22.1875
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "guide-A_d1513089-60bd-4522-8ffb-18a254156998",
+              "cls": "guide-panel",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "area-tasks",
+              "cls": "area-tasks",
+              "text_same": true,
+              "height": [
+                250.578125,
+                250.578125
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                24,
+                24
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "",
+              "cls": "area-task",
+              "text_same": true,
+              "height": [
+                200.578125,
+                200.578125
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "area-bases",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "working",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -436
+            },
+            {
+              "id": "result-file-message",
+              "cls": "hint",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -436
+            }
+          ],
+          "saved_state_pre": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          },
+          "saved_state_post": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R의 직접 수정: 게시 여부는 담당자가 선택합니다.",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1440-manual-tail",
+          "status": "FAIL",
+          "observed": {
+            "understanding_tail": false,
+            "scope_tail": false
+          },
+          "opened": [
+            "task-view-request",
+            "task-view-work",
+            "task-view-results",
+            "task-view-background",
+            "task-view-bases"
+          ],
+          "read_only_unchanged": true
+        },
+        {
+          "id": "1440-read-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -99,
+            "callerY": -283.0
+          },
+          "documentHeight": [
+            1633,
+            1251
+          ],
+          "window": [
+            {
+              "x": 0,
+              "y": 450,
+              "maxY": 733
+            },
+            {
+              "x": 0,
+              "y": 351,
+              "maxY": 351
+            }
+          ],
+          "details": [
+            true,
+            false
+          ],
+          "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+          "caller_hit": [
+            true,
+            true
+          ],
+          "layout_deltas": [
+            {
+              "id": "example-banner",
+              "cls": "alert example-banner",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -99
+            },
+            {
+              "id": "saved",
+              "cls": "saved",
+              "text_same": true,
+              "height": [
+                16.5,
+                16.5
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                49.59375,
+                49.59375
+              ],
+              "documentY_delta": -99
+            },
+            {
+              "id": "list-notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -99
+            },
+            {
+              "id": "space-crumb",
+              "cls": "space-crumb",
+              "text_same": true,
+              "height": [
+                23.09375,
+                23.09375
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "space-head",
+              "text_same": false,
+              "height": [
+                794.890625,
+                412.890625
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "eyebrow",
+              "text_same": true,
+              "height": [
+                14.84375,
+                14.84375
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "space-title",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                39,
+                39
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-idea",
+              "cls": "area-idea",
+              "text_same": false,
+              "height": [
+                586.25,
+                204.25
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "row",
+              "text_same": true,
+              "height": [
+                45,
+                45
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "area-edit",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                43.796875,
+                43.796875
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "area-checks",
+              "cls": "hint area-checks",
+              "text_same": true,
+              "height": [
+                22.1875,
+                22.1875
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "guide-A_d1513089-60bd-4522-8ffb-18a254156998",
+              "cls": "guide-panel",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "area-tasks",
+              "cls": "area-tasks",
+              "text_same": true,
+              "height": [
+                250.578125,
+                250.578125
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                24,
+                24
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "",
+              "cls": "area-task",
+              "text_same": true,
+              "height": [
+                200.578125,
+                200.578125
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "area-bases",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -382.0
+            },
+            {
+              "id": "working",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -99
+            },
+            {
+              "id": "result-file-message",
+              "cls": "hint",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -99
+            }
+          ],
+          "saved_state_pre": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          },
+          "saved_state_post": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1440-edit-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -166,
+            "callerY": -283.59375
+          },
+          "documentHeight": [
+            1633,
+            1184
+          ],
+          "window": [
+            {
+              "x": 0,
+              "y": 450,
+              "maxY": 733
+            },
+            {
+              "x": 0,
+              "y": 284,
+              "maxY": 284
+            }
+          ],
+          "details": [
+            true,
+            false
+          ],
+          "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+          "caller_hit": [
+            true,
+            true
+          ],
+          "layout_deltas": [
+            {
+              "id": "example-banner",
+              "cls": "alert example-banner",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -166
+            },
+            {
+              "id": "saved",
+              "cls": "saved",
+              "text_same": true,
+              "height": [
+                16.5,
+                16.5
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "notice",
+              "cls": "alert",
+              "text_same": false,
+              "height": [
+                49.59375,
+                0
+              ],
+              "documentY_delta": -176
+            },
+            {
+              "id": "list-notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -166
+            },
+            {
+              "id": "space-crumb",
+              "cls": "space-crumb",
+              "text_same": true,
+              "height": [
+                23.09375,
+                23.09375
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "space-head",
+              "text_same": false,
+              "height": [
+                794.890625,
+                412.890625
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "eyebrow",
+              "text_same": true,
+              "height": [
+                14.84375,
+                14.84375
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "space-title",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                39,
+                39
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-idea",
+              "cls": "area-idea",
+              "text_same": false,
+              "height": [
+                586.25,
+                204.25
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "row",
+              "text_same": true,
+              "height": [
+                45,
+                45
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "area-edit",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                43.796875,
+                43.796875
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "area-checks",
+              "cls": "hint area-checks",
+              "text_same": true,
+              "height": [
+                22.1875,
+                22.1875
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "guide-A_d1513089-60bd-4522-8ffb-18a254156998",
+              "cls": "guide-panel",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "area-tasks",
+              "cls": "area-tasks",
+              "text_same": true,
+              "height": [
+                250.578125,
+                250.578125
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                24,
+                24
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "",
+              "cls": "area-task",
+              "text_same": true,
+              "height": [
+                200.578125,
+                200.578125
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "area-bases",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -449.59375
+            },
+            {
+              "id": "working",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -166
+            },
+            {
+              "id": "result-file-message",
+              "cls": "hint",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -166
+            }
+          ],
+          "saved_state_pre": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          },
+          "saved_state_post": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R의 직접 수정: 게시 여부는 담당자가 선택합니다.",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "child_exit": 1,
+      "collector_actual_exit_tool_observed": 1,
+      "fatal": null,
+      "pageerrors": [],
+      "cleanup": [],
+      "http_disk_match": true,
+      "source_unchanged": true
+    },
+    "fix1": {
+      "complete": true,
+      "scenes": [
+        {
+          "id": "1280-manual-tail",
+          "status": "PASS",
+          "observed": {
+            "understanding_tail": true,
+            "scope_tail": true
+          },
+          "opened": [
+            "task-view-full-understanding",
+            "task-view-full-scope",
+            "task-view-request",
+            "task-view-work",
+            "task-view-results",
+            "task-view-background",
+            "task-view-bases"
+          ],
+          "read_only_unchanged": true
+        },
+        {
+          "id": "1280-read-return",
+          "status": "PASS",
+          "delta": {
+            "windowY": 0,
+            "callerY": 0.0
+          },
+          "documentHeight": [
+            1633,
+            1633
+          ],
+          "window": [
+            {
+              "x": 0,
+              "y": 900,
+              "maxY": 913
+            },
+            {
+              "x": 0,
+              "y": 900,
+              "maxY": 913
+            }
+          ],
+          "details": [
+            true,
+            true
+          ],
+          "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+          "caller_hit": [
+            true,
+            true
+          ],
+          "layout_deltas": [
+            {
+              "id": "example-banner",
+              "cls": "alert example-banner",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "saved",
+              "cls": "saved",
+              "text_same": true,
+              "height": [
+                16.5,
+                16.5
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                49.59375,
+                49.59375
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "list-notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "space-crumb",
+              "cls": "space-crumb",
+              "text_same": true,
+              "height": [
+                23.09375,
+                23.09375
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "space-head",
+              "text_same": true,
+              "height": [
+                794.890625,
+                794.890625
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "eyebrow",
+              "text_same": true,
+              "height": [
+                14.84375,
+                14.84375
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "space-title",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                39,
+                39
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-idea",
+              "cls": "area-idea",
+              "text_same": true,
+              "height": [
+                586.25,
+                586.25
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "row",
+              "text_same": true,
+              "height": [
+                45,
+                45
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-edit",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                43.796875,
+                43.796875
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-checks",
+              "cls": "hint area-checks",
+              "text_same": true,
+              "height": [
+                22.1875,
+                22.1875
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "guide-A_d1513089-60bd-4522-8ffb-18a254156998",
+              "cls": "guide-panel",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-tasks",
+              "cls": "area-tasks",
+              "text_same": true,
+              "height": [
+                250.578125,
+                250.578125
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                24,
+                24
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "area-task",
+              "text_same": true,
+              "height": [
+                200.578125,
+                200.578125
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-bases",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "working",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "result-file-message",
+              "cls": "hint",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            }
+          ],
+          "saved_state_pre": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          },
+          "saved_state_post": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1280-edit-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": -54,
+            "callerY": -13.59375
+          },
+          "documentHeight": [
+            1633,
+            1566
+          ],
+          "window": [
+            {
+              "x": 0,
+              "y": 900,
+              "maxY": 913
+            },
+            {
+              "x": 0,
+              "y": 846,
+              "maxY": 846
+            }
+          ],
+          "details": [
+            true,
+            true
+          ],
+          "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+          "caller_hit": [
+            true,
+            true
+          ],
+          "layout_deltas": [
+            {
+              "id": "example-banner",
+              "cls": "alert example-banner",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -54
+            },
+            {
+              "id": "saved",
+              "cls": "saved",
+              "text_same": true,
+              "height": [
+                16.5,
+                16.5
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "notice",
+              "cls": "alert",
+              "text_same": false,
+              "height": [
+                49.59375,
+                0
+              ],
+              "documentY_delta": -64
+            },
+            {
+              "id": "list-notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -54
+            },
+            {
+              "id": "space-crumb",
+              "cls": "space-crumb",
+              "text_same": true,
+              "height": [
+                23.09375,
+                23.09375
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "space-head",
+              "text_same": true,
+              "height": [
+                794.890625,
+                794.890625
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "eyebrow",
+              "text_same": true,
+              "height": [
+                14.84375,
+                14.84375
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "space-title",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                39,
+                39
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-idea",
+              "cls": "area-idea",
+              "text_same": true,
+              "height": [
+                586.25,
+                586.25
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "row",
+              "text_same": true,
+              "height": [
+                45,
+                45
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-edit",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                43.796875,
+                43.796875
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-checks",
+              "cls": "hint area-checks",
+              "text_same": true,
+              "height": [
+                22.1875,
+                22.1875
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "guide-A_d1513089-60bd-4522-8ffb-18a254156998",
+              "cls": "guide-panel",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-tasks",
+              "cls": "area-tasks",
+              "text_same": true,
+              "height": [
+                250.578125,
+                250.578125
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                24,
+                24
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "area-task",
+              "text_same": true,
+              "height": [
+                200.578125,
+                200.578125
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-bases",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "working",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -54
+            },
+            {
+              "id": "result-file-message",
+              "cls": "hint",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": -54
+            }
+          ],
+          "saved_state_pre": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          },
+          "saved_state_post": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R의 직접 수정: 게시 여부는 담당자가 선택합니다.",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1440-manual-tail",
+          "status": "PASS",
+          "observed": {
+            "understanding_tail": true,
+            "scope_tail": true
+          },
+          "opened": [
+            "task-view-full-understanding",
+            "task-view-full-scope",
+            "task-view-request",
+            "task-view-work",
+            "task-view-results",
+            "task-view-background",
+            "task-view-bases"
+          ],
+          "read_only_unchanged": true
+        },
+        {
+          "id": "1440-read-return",
+          "status": "PASS",
+          "delta": {
+            "windowY": 0,
+            "callerY": 0.0
+          },
+          "documentHeight": [
+            1633,
+            1633
+          ],
+          "window": [
+            {
+              "x": 0,
+              "y": 450,
+              "maxY": 733
+            },
+            {
+              "x": 0,
+              "y": 450,
+              "maxY": 733
+            }
+          ],
+          "details": [
+            true,
+            true
+          ],
+          "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+          "caller_hit": [
+            true,
+            true
+          ],
+          "layout_deltas": [
+            {
+              "id": "example-banner",
+              "cls": "alert example-banner",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "saved",
+              "cls": "saved",
+              "text_same": true,
+              "height": [
+                16.5,
+                16.5
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                49.59375,
+                49.59375
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "list-notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "space-crumb",
+              "cls": "space-crumb",
+              "text_same": true,
+              "height": [
+                23.09375,
+                23.09375
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "space-head",
+              "text_same": true,
+              "height": [
+                794.890625,
+                794.890625
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "eyebrow",
+              "text_same": true,
+              "height": [
+                14.84375,
+                14.84375
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "space-title",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                39,
+                39
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-idea",
+              "cls": "area-idea",
+              "text_same": true,
+              "height": [
+                586.25,
+                586.25
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "row",
+              "text_same": true,
+              "height": [
+                45,
+                45
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-edit",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                43.796875,
+                43.796875
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-checks",
+              "cls": "hint area-checks",
+              "text_same": true,
+              "height": [
+                22.1875,
+                22.1875
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "guide-A_d1513089-60bd-4522-8ffb-18a254156998",
+              "cls": "guide-panel",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-tasks",
+              "cls": "area-tasks",
+              "text_same": true,
+              "height": [
+                250.578125,
+                250.578125
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                24,
+                24
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "",
+              "cls": "area-task",
+              "text_same": true,
+              "height": [
+                200.578125,
+                200.578125
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "area-bases",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "working",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "result-file-message",
+              "cls": "hint",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            }
+          ],
+          "saved_state_pre": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          },
+          "saved_state_post": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "1440-edit-return",
+          "status": "FAIL",
+          "delta": {
+            "windowY": 0,
+            "callerY": -67.59375
+          },
+          "documentHeight": [
+            1633,
+            1566
+          ],
+          "window": [
+            {
+              "x": 0,
+              "y": 450,
+              "maxY": 733
+            },
+            {
+              "x": 0,
+              "y": 450,
+              "maxY": 666
+            }
+          ],
+          "details": [
+            true,
+            true
+          ],
+          "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+          "caller_hit": [
+            true,
+            true
+          ],
+          "layout_deltas": [
+            {
+              "id": "example-banner",
+              "cls": "alert example-banner",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "saved",
+              "cls": "saved",
+              "text_same": true,
+              "height": [
+                16.5,
+                16.5
+              ],
+              "documentY_delta": 0.0
+            },
+            {
+              "id": "notice",
+              "cls": "alert",
+              "text_same": false,
+              "height": [
+                49.59375,
+                0
+              ],
+              "documentY_delta": -10
+            },
+            {
+              "id": "list-notice",
+              "cls": "alert",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "space-crumb",
+              "cls": "space-crumb",
+              "text_same": true,
+              "height": [
+                23.09375,
+                23.09375
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "space-head",
+              "text_same": true,
+              "height": [
+                794.890625,
+                794.890625
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "eyebrow",
+              "text_same": true,
+              "height": [
+                14.84375,
+                14.84375
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "space-title",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                39,
+                39
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-idea",
+              "cls": "area-idea",
+              "text_same": true,
+              "height": [
+                586.25,
+                586.25
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "row",
+              "text_same": true,
+              "height": [
+                45,
+                45
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-edit",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                43.796875,
+                43.796875
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-checks",
+              "cls": "hint area-checks",
+              "text_same": true,
+              "height": [
+                22.1875,
+                22.1875
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "guide-A_d1513089-60bd-4522-8ffb-18a254156998",
+              "cls": "guide-panel",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-tasks",
+              "cls": "area-tasks",
+              "text_same": true,
+              "height": [
+                250.578125,
+                250.578125
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                24,
+                24
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "",
+              "cls": "area-task",
+              "text_same": true,
+              "height": [
+                200.578125,
+                200.578125
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "area-bases",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                69.796875,
+                69.796875
+              ],
+              "documentY_delta": -67.59375
+            },
+            {
+              "id": "working",
+              "cls": "",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            },
+            {
+              "id": "result-file-message",
+              "cls": "hint",
+              "text_same": true,
+              "height": [
+                0,
+                0
+              ],
+              "documentY_delta": 0
+            }
+          ],
+          "saved_state_pre": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R만의 이해",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          },
+          "saved_state_post": {
+            "current": "T_82d5457c-b57e-4587-82bc-59060641104d",
+            "kind": "request",
+            "draft": "미전송 초안 보존",
+            "target": null,
+            "manual": [
+              {
+                "id": "T_720195ad-847c-4bdc-b139-4ae8d5123dfe",
+                "manual": {
+                  "understanding": "이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해 앞부분. 이해끝조건_U_END_보존",
+                  "scope": "범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위 앞부분. 범위끝조건_S_END_게시선택",
+                  "next": null,
+                  "checks": null
+                }
+              },
+              {
+                "id": "T_82d5457c-b57e-4587-82bc-59060641104d",
+                "manual": {
+                  "understanding": "R의 직접 수정: 게시 여부는 담당자가 선택합니다.",
+                  "scope": "R만의 범위",
+                  "next": null,
+                  "checks": null
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "child_exit": 1,
+      "collector_actual_exit_tool_observed": 1,
+      "fatal": null,
+      "pageerrors": [],
+      "cleanup": [],
+      "http_disk_match": true,
+      "source_unchanged": true
+    }
+  }
+}

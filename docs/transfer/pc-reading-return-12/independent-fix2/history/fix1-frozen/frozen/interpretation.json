@@ -1,0 +1,326 @@
+{
+  "scenes": [
+    {
+      "id": "1280-manual-tail",
+      "status": "FAIL",
+      "observed": {
+        "understanding_tail": false,
+        "scope_tail": false
+      },
+      "opened": [
+        "task-view-request",
+        "task-view-work",
+        "task-view-results",
+        "task-view-background",
+        "task-view-bases"
+      ],
+      "read_only_unchanged": true
+    },
+    {
+      "id": "1280-read-return",
+      "status": "PASS",
+      "delta": {
+        "windowY": 0,
+        "callerY": 0.0
+      },
+      "window_pre": {
+        "x": 0,
+        "y": 900,
+        "maxY": 913
+      },
+      "window_post": {
+        "x": 0,
+        "y": 900,
+        "maxY": 913
+      },
+      "details": [
+        true,
+        true
+      ],
+      "caller_pre": {
+        "rect": {
+          "x": 283,
+          "y": 362.15625,
+          "w": 313.546875,
+          "h": 22.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "intersection": {
+          "left": 283,
+          "top": 362.15625,
+          "right": 596.546875,
+          "bottom": 384.65625
+        },
+        "hit": true,
+        "ancestors": [],
+        "transform": "none",
+        "display": "inline"
+      },
+      "caller_post": {
+        "rect": {
+          "x": 283,
+          "y": 362.15625,
+          "w": 313.546875,
+          "h": 22.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "intersection": {
+          "left": 283,
+          "top": 362.15625,
+          "right": 596.546875,
+          "bottom": 384.65625
+        },
+        "hit": true,
+        "ancestors": [],
+        "transform": "none",
+        "display": "inline"
+      },
+      "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe"
+    },
+    {
+      "id": "1280-edit-return",
+      "status": "FAIL",
+      "delta": {
+        "windowY": -54,
+        "callerY": -13.59375
+      },
+      "window_pre": {
+        "x": 0,
+        "y": 900,
+        "maxY": 913
+      },
+      "window_post": {
+        "x": 0,
+        "y": 846,
+        "maxY": 846
+      },
+      "details": [
+        true,
+        true
+      ],
+      "caller_pre": {
+        "rect": {
+          "x": 283,
+          "y": 362.15625,
+          "w": 313.546875,
+          "h": 22.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "intersection": {
+          "left": 283,
+          "top": 362.15625,
+          "right": 596.546875,
+          "bottom": 384.65625
+        },
+        "hit": true,
+        "ancestors": [],
+        "transform": "none",
+        "display": "inline"
+      },
+      "caller_post": {
+        "rect": {
+          "x": 283,
+          "y": 348.5625,
+          "w": 313.546875,
+          "h": 22.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "intersection": {
+          "left": 283,
+          "top": 348.5625,
+          "right": 596.546875,
+          "bottom": 371.0625
+        },
+        "hit": true,
+        "ancestors": [],
+        "transform": "none",
+        "display": "inline"
+      },
+      "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe"
+    },
+    {
+      "id": "1440-manual-tail",
+      "status": "FAIL",
+      "observed": {
+        "understanding_tail": false,
+        "scope_tail": false
+      },
+      "opened": [
+        "task-view-request",
+        "task-view-work",
+        "task-view-results",
+        "task-view-background",
+        "task-view-bases"
+      ],
+      "read_only_unchanged": true
+    },
+    {
+      "id": "1440-read-return",
+      "status": "PASS",
+      "delta": {
+        "windowY": 0,
+        "callerY": 0.0
+      },
+      "window_pre": {
+        "x": 0,
+        "y": 450,
+        "maxY": 733
+      },
+      "window_post": {
+        "x": 0,
+        "y": 450,
+        "maxY": 733
+      },
+      "details": [
+        true,
+        true
+      ],
+      "caller_pre": {
+        "rect": {
+          "x": 283,
+          "y": 812.15625,
+          "w": 313.546875,
+          "h": 22.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "intersection": {
+          "left": 283,
+          "top": 812.15625,
+          "right": 596.546875,
+          "bottom": 834.65625
+        },
+        "hit": true,
+        "ancestors": [],
+        "transform": "none",
+        "display": "inline"
+      },
+      "caller_post": {
+        "rect": {
+          "x": 283,
+          "y": 812.15625,
+          "w": 313.546875,
+          "h": 22.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "intersection": {
+          "left": 283,
+          "top": 812.15625,
+          "right": 596.546875,
+          "bottom": 834.65625
+        },
+        "hit": true,
+        "ancestors": [],
+        "transform": "none",
+        "display": "inline"
+      },
+      "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe"
+    },
+    {
+      "id": "1440-edit-return",
+      "status": "FAIL",
+      "delta": {
+        "windowY": 0,
+        "callerY": -67.59375
+      },
+      "window_pre": {
+        "x": 0,
+        "y": 450,
+        "maxY": 733
+      },
+      "window_post": {
+        "x": 0,
+        "y": 450,
+        "maxY": 666
+      },
+      "details": [
+        true,
+        true
+      ],
+      "caller_pre": {
+        "rect": {
+          "x": 283,
+          "y": 812.15625,
+          "w": 313.546875,
+          "h": 22.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "intersection": {
+          "left": 283,
+          "top": 812.15625,
+          "right": 596.546875,
+          "bottom": 834.65625
+        },
+        "hit": true,
+        "ancestors": [],
+        "transform": "none",
+        "display": "inline"
+      },
+      "caller_post": {
+        "rect": {
+          "x": 283,
+          "y": 744.5625,
+          "w": 313.546875,
+          "h": 22.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "intersection": {
+          "left": 283,
+          "top": 744.5625,
+          "right": 596.546875,
+          "bottom": 767.0625
+        },
+        "hit": true,
+        "ancestors": [],
+        "transform": "none",
+        "display": "inline"
+      },
+      "focus_post": "task-open-T_720195ad-847c-4bdc-b139-4ae8d5123dfe"
+    }
+  ],
+  "http_disk_all_match": true,
+  "source_unchanged": true,
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "collector_exit_observed_from_tool_session_11840": 1
+}

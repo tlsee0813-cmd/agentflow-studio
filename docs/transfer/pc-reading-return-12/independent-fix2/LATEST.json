@@ -1,0 +1,30 @@
+{
+  "candidate": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+  "frozen_v3": {
+    "result": "fix2/frozen-v3/result.json",
+    "scenes": 6,
+    "complete": true,
+    "exit": 0
+  },
+  "independent": {
+    "result": "fix2/independent/run05/result.json",
+    "PC_core_scenes": 6,
+    "boundary_groups": 1,
+    "mobile_smoke": 1,
+    "complete": true,
+    "exit": 0
+  },
+  "regression_commands": 9,
+  "regression_all_child_zero": true,
+  "tool_exit_observations": {
+    "frozen_collector_session71229": 0,
+    "regression_collector_session89711": 0,
+    "UIcollector_run01_session91094": 1,
+    "UIcollector_run02_session93316": 1,
+    "UIcollector_run03_session91009": 0,
+    "UIcollector_run04_session34247": 0,
+    "UIcollector_run05_session43287": 0,
+    "preview_process_session51051": 0
+  },
+  "observation_kind": "tool output transcription, not full transcript"
+}

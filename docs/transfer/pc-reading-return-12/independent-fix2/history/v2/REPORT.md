@@ -1,0 +1,11 @@
+# Same checker-v2 narrow comparison
+Frozen check.py and all previous evidence untouched. v2 only adds normal-click handling for existing full-field disclosures and raw layout observations, no pass-rule relaxation. v0 missing controls remain missing/FAIL, not synthesized. Same code SHA both runs (comparison.json). First code-generation syntax error preserved under generation-error; no UI result from that preparation failure.
+
+v0:6/6 completed,0PASS/6FAIL. fix1:6/6 completed,4PASS/2FAIL. Both child actualreturncode1 and collector actual tool exit1 (sessions52734/64644). No fatal/pageerror/cleanup; HTTP runtime/disk before/after match, source unchanged. No aggregate with older runs.
+
+Fix1 manual full disclosures are actually clicked; understanding and scope unique tails present in expanded rendered reading text. Reading-only state unchanged. This is DOM/interaction evidence, not a claim of full text simultaneously on screen or human readability. Read-return in both widths preserves details/scroll/caller anchor.
+
+Edit-return remains FAIL under unchanged rule. Raw cause is cleared import notice, not lost area content or check row: pre notice block height49.59375+margin-bottom18=67.59375; post display:none/empty. Domain change() resets notice:null; actual edit uses editTask→change. Area head height794.890625, idea586.25, check line22.1875 and text, task section250.578125 and text all unchanged. Title/area body/check/task documentY each shift−67.59375. Document scrollHeight1633→1566 (integer rounding); actual currentR retained, R understanding edited, A/manual and draft preserved in raw states.
+1440 windowY450→450 so caller viewport y shifts−67.59375. 1280 windowY900→846 with new max846, so caller y shifts−13.59375 (=−67.59375+54). Both caller focus/hit remain. Thus known content-height change is the notice clearing. It does not establish anchor restoration success; absolute-position rule still FAIL. No rule relaxed, no automatic correction, no product code change.
+
+Map/card DOM absent in this area-view departure, so computed map matrix/rect preservation remains unobserved here, not inferred from null. Author may assess anchor-based restoration under coordinator's explicit amended contract. No full plan/suite/remote publication performed.

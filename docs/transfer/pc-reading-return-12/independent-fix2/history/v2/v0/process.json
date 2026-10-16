@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/product12-v2/check-v2.py"
+  ],
+  "start": "2026-10-16T03:54:07.715440+00:00",
+  "end": "2026-10-16T03:54:15.602547+00:00",
+  "actual_child_returncode": 1,
+  "collector_exit_planned": 1
+}

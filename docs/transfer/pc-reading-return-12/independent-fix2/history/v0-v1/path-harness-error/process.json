@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/product12-boundaries/check.py"
+  ],
+  "start": "2026-10-16T03:39:58.904220+00:00",
+  "end": "2026-10-16T03:40:01.803284+00:00",
+  "actual_child_returncode": 1,
+  "stdout": "/workspace/browser-env/product12-boundaries/evidence/child.stdout.log",
+  "stderr": "/workspace/browser-env/product12-boundaries/evidence/child.stderr.log",
+  "collector_exit_planned": 1
+}

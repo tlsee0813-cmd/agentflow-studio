@@ -1,0 +1,3 @@
+Fix1 preparation first exec used a not-yet-existing candidate cwd and was rejected before child startup; source extraction then succeeded. That frozen run and interpretation remain history/fix1-frozen.
+Fix2 first collector startup after successful builds failed before launching child: OUT_DIR parent /workspace/browser-env/product12-final did not exist (FileNotFoundError in collector.py mkdir). Parent created, unchanged frozen checker/collector rerun; child0/toolcollector0. This is setup failure, not product/UI result.
+These notes transcribe tool observations; they are not a full original tool transcript.
