@@ -52,7 +52,9 @@ type MapView={x:number;y:number;s:number};
 let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
 // PC12: the one map/area view this tab left to read a task (and maybe continue it). Only parts the view already has:
 // project, layer, area, viewport, selection, sheet, scroll and the control that was used. Never project data.
-type Origin={project:string;view:'space'|'area';area:string|null;map:MapView|null;selected:string|null;sheet:boolean;y:number;focus:string|null};
+// fix1: open = which disclosures (details with an id) of that view were open or closed, so a long text the user had opened
+// is open again and the page is as tall as it was before the scroll is restored. Tab memory only.
+type Origin={project:string;view:'space'|'area';area:string|null;map:MapView|null;selected:string|null;sheet:boolean;y:number;focus:string|null;open:Record<string,boolean>};
 let origin:Origin|null=null;
 /** GUIDE097: area guidance per project and area, in this tab's memory only (declared early: resets use it). */
 /** gen counts the user's edits of the draft; a reply that arrives after one is held in incoming, never applied over it. */
@@ -254,7 +256,8 @@ function openArea(id:string) {
 function markOrigin(focus:string|null=null) {
   if(view!=='space'&&view!=='area')return;
   const active=document.activeElement as HTMLElement|null,used=active?.id&&$('space-view').contains(active)?active.id:null;
-  origin={project:project.id,view,area:view==='area'?viewArea:null,map:mapView?{...mapView}:null,selected:mapSelected,sheet:sheetOpen,y:window.scrollY,focus:focus??used};
+  const open=Object.fromEntries([...$('space-view').querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]));
+  origin={project:project.id,view,area:view==='area'?viewArea:null,map:mapView?{...mapView}:null,selected:mapSelected,sheet:sheetOpen,y:window.scrollY,focus:focus??used,open};
 }
 function originLabel(o:Origin):string {
   if(o.view==='area')return o.area==='unassigned'?'영역 미지정 작업':areaById(o.area)?.name??'영역';
@@ -277,7 +280,10 @@ function returnToOrigin() {
   leaveLayer();
   view=areaGone?'space':o.view;viewArea=view==='area'?o.area:null;viewTask=null;viewReturn=null;
   if(o.map)mapView={...o.map};mapSelected=selGone?null:o.selected;sheetOpen=o.sheet&&!!mapSelected;
-  rememberMap();render();window.scrollTo({top:areaGone?0:o.y});
+  rememberMap();render();
+  // fix1: disclosures that still exist get the open state they had; ones that are gone are skipped. Then the scroll.
+  if(!areaGone)for(const [id,open] of Object.entries(o.open)){const d=document.getElementById(id);if(d instanceof HTMLDetailsElement&&$('space-view').contains(d))d.open=open;}
+  window.scrollTo({top:areaGone?0:o.y});
   if(areaGone||selGone){project={...project,notice:'출발한 영역이 보관되었거나 없어져 그 위의 보기로 돌아왔어요. 다른 영역이나 작업을 대신 고르지 않았어요.'};renderStatus();}
   if(areaGone||!(o.focus&&focusFirst(o.focus)))$('space-title')?.focus({preventScroll:true});
 }
@@ -1446,7 +1452,12 @@ function fieldRows(t:Task,w:Work,grid:HTMLElement,keys:[keyof Task['manual'],str
     const cell=node('div');cell.dataset.field=key;cell.dataset.origin=f.state;
     const dt=node('dt',`${label} · `);dt.append(node('span',f.label,`field-origin ${f.state}`));cell.append(dt);
     if(f.state==='stale'){const old=details('제외된 이전 문구 보기 (현재 작업문 아님)',`task-view-stale-${key}`);old.append(node('div',f.text,'source-raw'));cell.append(node('dd','지금 작업문에는 들어가지 않아요.'),old);}
-    else cell.append(node('dd',!f.text?'(직접 비워 둠)':limit!==null&&f.text.length>limit?`${shortText(f.text,limit)} · 앞부분`:f.text));
+    else if(limit!==null&&f.text.length>limit) {
+      // fix1: a long field shows its opening words, and its whole text (with the same origin) one explicit click away. Read-only.
+      const whole=details(`${label} 전문 보기 · ${f.text.length}자 · ${f.label}`,`task-view-full-${key}`);whole.append(node('div',f.text,'source-raw'));
+      cell.append(node('dd',`${shortText(f.text,limit)} · 앞부분`),whole);
+    }
+    else cell.append(node('dd',!f.text?'(직접 비워 둠)':f.text));
     grid.append(cell);
   }
   return shown;

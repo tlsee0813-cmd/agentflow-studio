@@ -19,6 +19,16 @@ LONG_A='A: 예약 접수 화면의 입력 항목을 정리해 주세요. 이름�
 REPORT_R='R 보고: 입력 항목을 정리했다고 주장. 실제 클릭 검사는 하지 않음. '+'긴 보고 내용이 이어집니다. '*40+'끝 문장 ZZ-END-R'
 LONG_IDEA='날짜와 시간을 고르는 예약 · 아직 못 정함: 결제 방식, 취소 규칙, 노쇼 처리. '*4+'구상 끝 ZZ-IDEA-END'
 WORK_KEYS=['understanding','scope','next','checks']
+# fix1: raw observations, one JSON line per record. kind='condition' = what the check requires (expected) next to the value
+# it saw; kind='actual' = a raw snapshot of the page; kind='step' = a labelled action. Written before each assertion.
+OBS=base.OUT/'pc12-observations.jsonl';OBS.write_text('',encoding='utf-8')
+SNAP_JS='''(area)=>{const p=document.getElementById('space-plane'),n=area&&document.querySelector(`.area-node[data-area-id="${area}"]`),a=document.activeElement;
+  const r=n?n.getBoundingClientRect():null,vis=id=>{const e=document.getElementById(id);return e?e.getClientRects().length>0:null};
+  return {windowY:window.scrollY,docHeight:document.documentElement.scrollHeight,viewport:[innerWidth,innerHeight],styleTransform:p?p.style.transform:null,
+    computedTransform:p?getComputedStyle(p).transform:null,cardRect:r&&{x:Math.round(r.x*10)/10,y:Math.round(r.y*10)/10,w:r.width,h:r.height},
+    selected:(document.querySelector('.area-node.selected')||{dataset:{}}).dataset.areaId||null,scaleLabel:(document.getElementById('map-scale')||{}).textContent||null,
+    focusId:a&&a.id,focusVisibleMatch:a?a.matches(':focus-visible'):null,panelVisible:vis('area-panel'),title:(document.getElementById('space-title')||{}).textContent||null,
+    openDetails:[...document.querySelectorAll('#space-view details[id]')].filter(d=>d.open).map(d=>d.id)}}'''
 
 
 class Pc12(unittest.TestCase):
@@ -31,7 +41,17 @@ class Pc12(unittest.TestCase):
         base.Browser.setUp(self);self.page.set_viewport_size({'width':self.WIDTH,'height':self.HEIGHT});self.steps=[]
 
     # ---------- helpers: real UI operations ----------
-    def log(self,text):self.steps.append(text)
+    def record(self,kind,name,value,expected=None):
+        rec={'test':self.id().split('.',1)[-1],'width':self.WIDTH,'kind':kind,'name':name,'value':value}
+        if kind=='condition':rec['expected']=expected
+        with open(OBS,'a',encoding='utf-8') as fh:fh.write(json.dumps(rec,ensure_ascii=False)+'\n')
+    def log(self,text):self.steps.append(text);self.record('step',text,None)
+    def snap(self,name,area=None):
+        v=self.page.evaluate(SNAP_JS,area);self.record('actual',name,v);return v
+    def check_equal(self,name,value,expected,delta=None):
+        self.record('condition',name,value,expected if delta is None else {'value':expected,'delta':delta})
+        if delta is None:self.assertEqual(value,expected,name)
+        else:self.assertAlmostEqual(value,expected,delta=delta,msg=name)
     def shot(self,name):self.page.screenshot(path=str(base.OUT/f'pc12-{self.WIDTH}-{name}.png'))
     def focused(self):return self.page.evaluate('document.activeElement && document.activeElement.id')
     def title(self):return self.page.locator('#space-title')
@@ -69,19 +89,28 @@ class Pc12(unittest.TestCase):
         self.move_map()
         self.page.mouse.move(self.WIDTH-20,self.HEIGHT//2);self.page.mouse.wheel(0,140);self.page.wait_for_timeout(150)
         pick=self.page.locator(f'#panel-task-{task}');expect(pick).to_be_in_viewport()
-        before={'transform':self.transform(),'scale':self.page.locator('#map-scale').inner_text(),'y':self.page.evaluate('window.scrollY'),
-                'selected':self.page.locator('.area-node.selected').get_attribute('data-area-id')}
-        self.assertGreater(before['y'],0,'the wheel moved the reading position');self.assertNotIn('scale(1)',before['transform'])
+        return self.leave(area,task)
+    def leave(self,area,task):
+        pick=self.page.locator(f'#panel-task-{task}')
+        before=self.snap('depart',area);before.update(transform=before['styleTransform'],scale=before['scaleLabel'],y=before['windowY'])
+        self.record('condition','depart: wheel moved the page',before['y'],'>0');self.assertGreater(before['y'],0,'the wheel moved the reading position')
+        self.record('condition','depart: map is zoomed',before['transform'],'not scale(1)');self.assertNotIn('scale(1)',before['transform'])
         pick.click();expect(self.page.locator('#task-view')).to_be_visible()
-        self.log(f"depart: {before}")
         return before
     def assert_back(self,before,area,task):
         expect(self.title()).to_have_text('전체 공간');expect(self.page.locator('#area-panel')).to_be_visible()
-        self.assertEqual(self.transform(),before['transform']);self.assertEqual(self.page.locator('#map-scale').inner_text(),before['scale'])
-        self.assertEqual(self.page.locator('.area-node.selected').get_attribute('data-area-id'),area)
-        self.assertAlmostEqual(self.page.evaluate('window.scrollY'),before['y'],delta=2)
-        self.assertEqual(self.focused(),f'panel-task-{task}')
-        self.log(f"back: transform={self.transform()} y={self.page.evaluate('window.scrollY')} focus={self.focused()}")
+        after=self.snap('back',area)
+        self.check_equal('back: style transform',after['styleTransform'],before['styleTransform'])
+        self.check_equal('back: computed matrix',after['computedTransform'],before['computedTransform'])
+        # The card's position and width come from the restored view; its height may grow with content an explicit continue adds
+        # (the '앱에서 이어갈 작업' tag), so it is recorded but not required to match.
+        pos=lambda r:r and {k:r[k] for k in ('x','y','w')}
+        self.check_equal('back: selected card rect x/y/w',pos(after['cardRect']),pos(before['cardRect']))
+        self.check_equal('back: scale label',after['scaleLabel'],before['scaleLabel'])
+        self.check_equal('back: selected area',after['selected'],area)
+        self.check_equal('back: open disclosures',after['openDetails'],before['openDetails'])
+        self.check_equal('back: windowY',after['windowY'],before['windowY'],delta=2)
+        self.check_equal('back: focus id',after['focusId'],f'panel-task-{task}')
     def edit_work(self,values):
         d=self.page.locator('#edit-work')
         if d.get_attribute('open') is None:d.locator('summary').first.click()
@@ -169,6 +198,60 @@ class Pc12(unittest.TestCase):
         expect(self.page.locator('#task-return-origin, #work-return-origin')).to_have_count(0)
 
 
+    # ---------- fix1 P2: long understanding/scope of the read task, opened in full on request ----------
+    def test_08_long_understanding_and_scope_open_in_full_read_only(self):
+        booking,notify=self.start([('예약','짧은 구상'),('알림','')]);A=self.request_in(booking,'A: 예약 접수 화면')
+        long={'understanding':'짧은 이해 앞부분 '+'가'*230+' ZZ-REQ-U 필수: 연락처는 반드시 받는다',
+              'scope':'범위 앞부분 '+'나'*230+' ZZ-REQ-S 유지: 결제 단계는 바꾸지 않는다'}
+        d=self.page.locator('#edit-work');d.locator('summary').first.click()
+        for k,v in long.items():self.page.locator(f'#work-{k}').fill(v)
+        base.saved(self.page);self.log('fixture via UI: A manual understanding/scope over 200 chars, marker after 200')
+        R=self.paste_report('R 보고: 접수 화면을 만들었다고 주장');self.unsent_draft(notify,'보내지 않은 알림 초안')
+        s0=self.state();self.check_equal('fixture: current is R',s0['currentTaskId'],R)
+        before=self.depart(booking,A)
+        for key,marker in [('understanding','ZZ-REQ-U'),('scope','ZZ-REQ-S')]:
+            row=self.page.locator(f'#task-view-context [data-field="{key}"]');dd=row.locator('dd').first.inner_text()
+            self.record('actual',f'{key}: excerpt',dd);self.check_equal(f'{key}: marker not in the excerpt',marker in dd,False)
+            full=self.page.locator(f'#task-view-full-{key}');n=full.count();self.check_equal(f'{key}: explicit full-text disclosure exists',n,1)
+            self.check_equal(f'{key}: disclosure starts closed',full.evaluate('(e)=>e.open'),False)
+            full.locator('summary').click();raw=full.locator('.source-raw')
+            seen=raw.inner_text() if raw.is_visible() else None;self.record('actual',f'{key}: full text visible',seen)
+            self.check_equal(f'{key}: full text equals the saved manual value',seen,long[key])
+            self.check_equal(f'{key}: origin shown next to it','사용자 직접 수정' in full.inner_text(),True)
+        self.shot('10-long-fields-open')
+        self.page.locator('#task-return-origin').click();self.assert_back(before,booking,A)
+        self.check_equal('reading only: saved project unchanged',self.state()==s0,True)
+
+    # ---------- fix1 counterexample: a long idea opened in full, then a round trip ----------
+    def depart_open_idea(self,area,task):
+        self.page.locator('#nav-space').click();expect(self.title()).to_have_text('전체 공간')
+        self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible();self.move_map()
+        full=self.page.locator('#panel-idea-full');self.record('actual','idea disclosure open on arrival',full.evaluate('(e)=>e.open'))
+        if not full.evaluate('(e)=>e.open'):full.locator('summary').click()
+        expect(full).to_have_attribute('open','')
+        pick=self.page.locator(f'#panel-task-{task}');self.page.mouse.move(self.WIDTH-40,self.HEIGHT//2);wheels=0
+        while wheels<40 and not (pick.bounding_box() and 0<=pick.bounding_box()['y']<=self.HEIGHT-60):
+            self.page.mouse.wheel(0,200);self.page.wait_for_timeout(60);wheels+=1
+        self.record('actual','wheel steps to the task button',wheels);expect(pick).to_be_in_viewport()
+        return self.leave(area,task)
+    def test_09_long_idea_open_state_survives_read_and_edit_round_trips(self):
+        idea=('긴 구상: 예약 화면과 취소 규칙 메모 · '*100)[:1988]+' ZZ-IDEA2000';idea=idea[:2000]
+        booking,notify=self.start([('예약',idea),('알림','')]);A=self.request_in(booking,'A: 예약 접수 화면')
+        self.check_equal('fixture: idea length',len(next(a for a in self.state()['space']['areas'] if a['id']==booking)['note']),2000)
+        s0=self.state()
+        before=self.depart_open_idea(booking,A)
+        self.page.locator('#task-view-request > summary').click();self.page.locator('#task-return-origin').click()
+        self.assert_back(before,booking,A);self.check_equal('read trip: saved project unchanged',self.state()==s0,True)
+        self.shot('11-idea-open-back')
+        before=self.depart_open_idea(booking,A)
+        self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+        d=self.page.locator('#edit-work')
+        if d.get_attribute('open') is None:d.locator('summary').first.click()
+        self.page.locator('#work-checks').fill('A 완료 조건 · fix1');base.saved(self.page)
+        self.page.locator('#work-return-origin').click();self.assert_back(before,booking,A)
+        s1=self.state();self.check_equal('edit trip: current task kept',s1['currentTaskId'],A)
+        self.check_equal('edit trip: manual edit kept',self.task(A,s1)['manual']['checks'],'A 완료 조건 · fix1')
+
 class Pc12Wide(Pc12):
     WIDTH,HEIGHT=1440,900
 
@@ -180,7 +263,7 @@ class Pc12Boundaries(unittest.TestCase):
     tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
     tearDown=base.Browser.tearDown;state=base.Browser.state
     setUp=Pc12.setUp;start=Pc12.start;request_in=Pc12.request_in;paste_report=Pc12.paste_report;task=Pc12.task;title=Pc12.title
-    shot=Pc12.shot;focused=Pc12.focused;log=Pc12.log
+    shot=Pc12.shot;focused=Pc12.focused;log=Pc12.log;record=Pc12.record;snap=Pc12.snap;check_equal=Pc12.check_equal
 
     def test_03_empty_area_and_empty_idea_make_nothing_up(self):
         (empty,)=self.start([('빈 영역','')])
