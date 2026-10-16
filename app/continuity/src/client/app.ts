@@ -1595,7 +1595,9 @@ function reportsOf(t:Task):Task[] {return project.tasks.filter(x=>isReturnTask(p
  * input or starting point changes. Disclosures of the previously picked report do not carry over to this one. */
 function pickReport(id:string) {
   if(view!=='task'||!viewTask)return;
-  const keep=readOpen&&readOpen.task===viewTask?Object.fromEntries(Object.entries(readOpen.open).filter(([k])=>!k.startsWith('task-report-'))):{};
+  // fix1: the same report picked again keeps all of its open parts; another report keeps only the request-wide ones.
+  const same=readOpen&&readOpen.task===viewTask&&readOpen.ret===id;
+  const keep=same?{...readOpen!.open}:readOpen&&readOpen.task===viewTask?Object.fromEntries(Object.entries(readOpen.open).filter(([k])=>!k.startsWith('task-report-'))):{};
   viewReturn=id;readOpen={task:viewTask,ret:id,open:keep};
   const y=window.scrollY;render();window.scrollTo({top:y});focusFirst(`task-report-pick-${id}`);
 }
@@ -1804,7 +1806,10 @@ function render() {
   $('compose-panel').classList.toggle('initial',!project.tasks.length);
   const t=project.currentTaskId?taskOf(project):null;
   renderOutcome(t);renderBases(t);renderHistory();renderWork(t);renderReturnPreview();renderResultFile();renderSpace();renderPlace(t);renderComposeArea(t,returned);renderStatus();displayView();
-  for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id))d.open=open.get(d.id)!;
+  // REPORT16-fix1: on the task screen, readOpen alone decides its disclosures (per request; a picked report's own parts per report).
+  // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
+  const taskScreen=view==='task'?$('space-view'):null;
+  for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&!taskScreen?.contains(d))d.open=open.get(d.id)!;
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
 function submitInput(withAI:boolean) {

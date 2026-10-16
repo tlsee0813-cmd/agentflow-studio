@@ -317,8 +317,11 @@ class Report16(unittest.TestCase):
         self.page.locator('#task-next-action').click();self.check('unassigned: input opened as it is',self.state(),s2)
         self.check('no area un-archived',[a['archived'] for a in self.state()['space']['areas']],[a['archived'] for a in s0['space']['areas']])
 
-    # ---------- 12: area screen with a long idea opened -> new request written -> back; area gone -> plain fallback ----------
-    def test_07_area_screen_round_trip_keeps_saved_input(self):
+    # ---------- 12 (part): area screen with a long idea opened -> new request written -> back ----------
+    # Checks the area round trip and that the saved input is kept. It does NOT check the fallback when the starting area is gone
+    # (fix1: the old conditional check never ran). Starting-area-loss fallback remains unverified here;
+    # cross-tab live refresh is outside this cycle. See the coordinator acceptance record for the supported scope and limitation.
+    def test_07_area_round_trip_keeps_saved_input(self):
         long='[합성 긴 구상] 후보만 좁히고 명시적으로 고른 뒤 확정한다. '+'세부 조건이 이어집니다. '*30+'구상 끝 ZZ-IDEA-END'
         ids=self.start([(AREA,long),(OTHER,'[합성]')]);A=self.request_in(ids[AREA],REQ_A);R=self.paste_report('[합성 보고] 짧은 보고 ZZ-R')
         for i in range(4):self.request_in(ids[AREA],f'[합성 요청] 채우기 {i}')
@@ -332,12 +335,49 @@ class Report16(unittest.TestCase):
         self.check('area back: focus on the request',self.page.evaluate('document.activeElement.id'),f'task-open-{A}')
         self.check('area back: windowY',self.page.evaluate('window.scrollY'),y,delta=2)
         s=self.state();self.check('area back: saved input kept',[s['draft'],s['space']['draftTarget']],[FOLLOW,{'area':ids[AREA]}])
-        # The starting area is archived while away: plain fallback, no other area chosen.
-        self.page.locator(f'#task-open-{A}').click();self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
-        self.page.locator('#place-area').click();self.page.locator('#area-archive').click();base.saved(self.page)
-        self.page.locator('#nav-work').click();back=self.page.locator('#work-return-origin')
-        if back.count():back.click();expect(self.title()).to_have_text('전체 공간');expect(self.page.locator('#area-panel')).to_have_count(0)
-        self.check('fallback: draft kept',self.state()['draft'],FOLLOW)
+
+    # ---------- fix1: a picked report's disclosures never carry over to another report; request-wide ones and redraws keep ----------
+    def open_d(self,sel):
+        d=self.page.locator(sel)
+        if d.get_attribute('open') is None:d.locator('> summary').click()
+        expect(d).to_have_attribute('open','')
+    def is_open(self,sel):return self.page.locator(sel).evaluate('(d)=>d.open')
+    def test_09_report_disclosures_do_not_leak_and_survive_redraws(self):
+        area,other,A,R1,R2,B,RBid=self.build()
+        # A redraw the reading does not cause: a MOCK reply held back (labelled fault injection) and released later.
+        parked=[];self.page.route('**/api/continuity',lambda route:parked.append((route,route.fetch())))
+        self.request_in_pending(other,'[합성 요청] 보류된 응답으로 다시 그리기 확인')
+        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();self.page.locator(f'#panel-task-{A}').click()
+        self.open_d('#task-view-request');self.open_d('#task-view-work')               # request-wide disclosures
+        self.pick(R1);self.open_d('#task-report-path')                                   # R1's own disclosure
+        self.pick(R2)
+        self.check('① R1 path open does not carry over to R2',self.is_open('#task-report-path'),False)
+        self.check('③ request original stays open across a report change',self.is_open('#task-view-request'),True)
+        self.check('③ work details stay open across a report change',self.is_open('#task-view-work'),True)
+        src=f'#task-pointed details[id^="task-report-src-"]';self.open_d('#task-report-path');self.open_d(src)
+        self.pick(R2)
+        self.check('② same report picked again: its path stays open',self.is_open('#task-report-path'),True)
+        self.check('② same report picked again: its full text stays open',self.is_open(src),True)
+        self.pick(R1);self.check('① back to R1: path closed (R2 open state not carried)',self.is_open('#task-report-path'),False)
+        self.pick(R2);self.check('① back to R2: starts closed again',[self.is_open('#task-report-path'),self.is_open(src)],[False,False])
+        self.open_d('#task-report-path');self.open_d(src)
+        self.check_true('the held reply is still pending',len(parked)==1 and self.state()['pending'] is not None,len(parked))
+        route,response=parked.pop();route.fulfill(response=response)
+        for _ in range(100):
+            if self.state()['pending'] is None:break
+            self.page.wait_for_timeout(50)
+        self.check('④ late reply landed (a redraw not caused by reading)',self.state()['pending'],None)
+        self.check('④ still the same request and report',[self.title().inner_text().startswith('[합성] 키 검색'),self.page.locator(f'#task-report-pick-{R2}').get_attribute('aria-pressed')],[True,'true'])
+        self.check('④ after the redraw: report disclosures kept',[self.is_open('#task-report-path'),self.is_open(src)],[True,True])
+        self.check('④ after the redraw: request-wide disclosures kept',[self.is_open('#task-view-request'),self.is_open('#task-view-work')],[True,True])
+        self.shot('09-redraw-kept')
+    def request_in_pending(self,area,text):
+        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#draft').fill(text);self.page.locator('#send').click()
+        for _ in range(100):
+            if self.state()['pending'] is not None:break
+            self.page.wait_for_timeout(50)
+        self.check('fixture: request pending while reading',self.state()['pending'] is not None,True)
 
 
 class Report16Wide(Report16):
@@ -345,7 +385,8 @@ class Report16Wide(Report16):
     # The data-boundary variants run once (at 1280); both PC widths run the reading, action and return paths.
     test_04_stale_or_foreign_report_is_not_replaced=None
     test_06_archived_and_unassigned_never_retarget=None
-    test_07_area_screen_round_trip_keeps_saved_input=None
+    test_09_report_disclosures_do_not_leak_and_survive_redraws=None
+    test_07_area_round_trip_keeps_saved_input=None
 
 
 class Report16Narrow(Report16):
