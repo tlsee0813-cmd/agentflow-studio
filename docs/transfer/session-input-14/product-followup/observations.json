@@ -1,0 +1,1163 @@
+{
+  "start_utc": "2026-10-16T06:35:47.658375+00:00",
+  "source_commit": "606120500eeea50a20f00fb4678bced7a7d93d98",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "runtime_before": {
+    "index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "styles.css": "44f1140b629c9f7379851110770da0bc90182a6d68cdb3c1220bb3d54bd69576",
+    "shared/attention.js": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+    "shared/domain.js": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+    "shared/outcome.js": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "shared/mock.js": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "shared/storage.js": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "shared/plan-facts.js": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "shared/validation.js": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+    "shared/guidance.js": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "shared/types.js": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+    "client/runtime.js": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "client/presentation.js": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+    "client/app.js": "c1f6b88b2b14a4cb661496b849180cb796dd60cb19de357ed7aaaccf559ec64c",
+    "client/runtime-static.js": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+  },
+  "report_provenance": {
+    "commit": "827f029e0dab79b48ebe8818fb15d32db7ed8d06",
+    "path": "docs/transfer/pc-map-space-13/author-fix1/REPORT.md",
+    "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/827f029e0dab79b48ebe8818fb15d32db7ed8d06/docs/transfer/pc-map-space-13/author-fix1/REPORT.md",
+    "file_bytes": 6386,
+    "file_sha256": "ab0c5fbed45d9a670074549148311df079e9e6e899fe2145999bee8d33446091",
+    "exact_paragraph": "auto-fit, 배율 축소, 선택 대상 찾기 기능은 추가하지 않았다. 안내와 오류는 그대로 보인다.",
+    "paragraph_sha256": "fa20f6e13b6ed6af5433cbd5c1ccb5961e85a8b8161bdd406bdd766d384e4b2c",
+    "stored_report_text": "작성자 보고의 원문 발췌 (작성자 주장 · 이 시험에서 재검증한 결과 아님)\n\nauto-fit, 배율 축소, 선택 대상 찾기 기능은 추가하지 않았다. 안내와 오류는 그대로 보인다.\n\n출처: https://github.com/tlsee0813-cmd/agentflow-studio/blob/827f029e0dab79b48ebe8818fb15d32db7ed8d06/docs/transfer/pc-map-space-13/author-fix1/REPORT.md"
+  },
+  "synthetic_test": {
+    "project": "隔離試験 / 후속 기록 추가",
+    "request_A": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+    "area_name": "검사용 지도 도구 확인",
+    "area_note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다.",
+    "manual_next": "지도 도구 위치를 확인한 뒤 후속 보고와 대조한다"
+  },
+  "actions": [],
+  "http": [
+    {
+      "url": "http://127.0.0.1:44055/",
+      "status": 200,
+      "path": "index.html",
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/styles.css",
+      "status": 200,
+      "path": "styles.css",
+      "bytes": 55354,
+      "sha256": "44f1140b629c9f7379851110770da0bc90182a6d68cdb3c1220bb3d54bd69576",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/client/app.js",
+      "status": 200,
+      "path": "client/app.js",
+      "bytes": 196150,
+      "sha256": "c1f6b88b2b14a4cb661496b849180cb796dd60cb19de357ed7aaaccf559ec64c",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/types.js",
+      "status": 200,
+      "path": "shared/types.js",
+      "bytes": 2284,
+      "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/guidance.js",
+      "status": 200,
+      "path": "shared/guidance.js",
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/domain.js",
+      "status": 200,
+      "path": "shared/domain.js",
+      "bytes": 53234,
+      "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/storage.js",
+      "status": 200,
+      "path": "shared/storage.js",
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/mock.js",
+      "status": 200,
+      "path": "shared/mock.js",
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/client/presentation.js",
+      "status": 200,
+      "path": "client/presentation.js",
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/validation.js",
+      "status": 200,
+      "path": "shared/validation.js",
+      "bytes": 34567,
+      "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/client/runtime.js",
+      "status": 200,
+      "path": "client/runtime.js",
+      "bytes": 2567,
+      "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/attention.js",
+      "status": 200,
+      "path": "shared/attention.js",
+      "bytes": 2940,
+      "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/outcome.js",
+      "status": 200,
+      "path": "shared/outcome.js",
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_match": true
+    },
+    {
+      "url": "http://127.0.0.1:44055/shared/plan-facts.js",
+      "status": 200,
+      "path": "shared/plan-facts.js",
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_match": true
+    }
+  ],
+  "post_requests": [],
+  "pageerrors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://127.0.0.1:44055/favicon.ico",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "checks": {
+    "content": {
+      "A_manual_next_preserved": true,
+      "exact_report_with_source": true,
+      "new_report_manual_next_null": true,
+      "A_manual_not_auto_copied_to_report": true,
+      "areas_unchanged": true,
+      "relations_unchanged": true
+    },
+    "link": {
+      "new_task_parent_A": true,
+      "source_task_matches_return": true,
+      "source_kind_report": true,
+      "return_preserved": true,
+      "current_preserved_as_return": true
+    },
+    "return": {
+      "selected_area_preserved": true,
+      "computed_matrix_preserved": true,
+      "intrinsic_card_xy_preserved": true,
+      "caller_focus": true,
+      "caller_hit": true,
+      "caller_viewport_anchor": true
+    }
+  },
+  "fatal": null,
+  "cleanup": [],
+  "actual_url": "http://127.0.0.1:44055",
+  "mode": "DeepSeek · 호출 꺼짐",
+  "versions": {
+    "browser": "154.0.8037.57",
+    "playwright": "1.57.0",
+    "node": "v22.16.0"
+  },
+  "area_id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+  "A_id": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+  "A_after_explicit_manual_save": {
+    "schemaVersion": "idea015.project.5",
+    "id": "P_e8e6f686-3f62-487b-94e3-2f893e6d619c",
+    "revision": 9,
+    "name": "격리 시험 / 후속 기록 추가",
+    "sources": [
+      {
+        "id": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+        "kind": "request",
+        "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+        "at": "2026-10-16T06:35:49.186Z",
+        "taskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+        "replyTo": null,
+        "disposition": "provided"
+      }
+    ],
+    "bases": [
+      {
+        "id": "D1",
+        "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+        "status": "requested",
+        "sourceId": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+        "revision": 8,
+        "history": []
+      }
+    ],
+    "tasks": [
+      {
+        "id": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+        "sourceIds": [
+          "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d"
+        ],
+        "parentTaskId": null,
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": "지도 도구 위치를 확인한 뒤 후속 보고와 대조한다",
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": null,
+        "background": {
+          "version": "background.1",
+          "revision": 7,
+          "brief": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+          "area": {
+            "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+            "name": "검사용 지도 도구 확인",
+            "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다."
+          }
+        },
+        "areaId": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e"
+      }
+    ],
+    "currentTaskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+    "draft": "",
+    "answerDraft": "",
+    "basisDraft": "",
+    "basisEdits": {},
+    "draftKind": "request",
+    "pending": null,
+    "notice": null,
+    "space": {
+      "brief": {
+        "text": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+        "at": "2026-10-16T06:35:48.784Z",
+        "previous": []
+      },
+      "areas": [
+        {
+          "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+          "name": "검사용 지도 도구 확인",
+          "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다.",
+          "archived": false,
+          "createdAt": "2026-10-16T06:35:48.882Z"
+        }
+      ],
+      "relations": [],
+      "draftTarget": null,
+      "layout": {
+        "version": "layout.1",
+        "positions": {
+          "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e": {
+            "x": 420,
+            "y": 180
+          }
+        }
+      }
+    }
+  },
+  "pan_start": {
+    "x": 346,
+    "y": 461.525,
+    "id": "space-map"
+  },
+  "approach_wheel": [],
+  "before_open": {
+    "state": {
+      "schemaVersion": "idea015.project.5",
+      "id": "P_e8e6f686-3f62-487b-94e3-2f893e6d619c",
+      "revision": 9,
+      "name": "격리 시험 / 후속 기록 추가",
+      "sources": [
+        {
+          "id": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+          "kind": "request",
+          "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+          "at": "2026-10-16T06:35:49.186Z",
+          "taskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+          "status": "requested",
+          "sourceId": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+          "revision": 8,
+          "history": []
+        }
+      ],
+      "tasks": [
+        {
+          "id": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "sourceIds": [
+            "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d"
+          ],
+          "parentTaskId": null,
+          "advice": null,
+          "adviceRevision": null,
+          "mode": null,
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": "지도 도구 위치를 확인한 뒤 후속 보고와 대조한다",
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+            "area": {
+              "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+              "name": "검사용 지도 도구 확인",
+              "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다."
+            }
+          },
+          "areaId": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e"
+        }
+      ],
+      "currentTaskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+      "draft": "",
+      "answerDraft": "",
+      "basisDraft": "",
+      "basisEdits": {},
+      "draftKind": "request",
+      "pending": null,
+      "notice": null,
+      "space": {
+        "brief": {
+          "text": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+          "at": "2026-10-16T06:35:48.784Z",
+          "previous": []
+        },
+        "areas": [
+          {
+            "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+            "name": "검사용 지도 도구 확인",
+            "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다.",
+            "archived": false,
+            "createdAt": "2026-10-16T06:35:48.882Z"
+          }
+        ],
+        "relations": [],
+        "draftTarget": null,
+        "layout": {
+          "version": "layout.1",
+          "positions": {
+            "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e": {
+              "x": 420,
+              "y": 180
+            }
+          }
+        }
+      }
+    },
+    "window": {
+      "x": 0,
+      "y": 0,
+      "maxY": 124
+    },
+    "focus": "main",
+    "caller": {
+      "rect": {
+        "x": 1115,
+        "y": 585.53125,
+        "w": 266,
+        "h": 54
+      },
+      "clip": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900
+      },
+      "intersection": {
+        "left": 1115,
+        "top": 585.53125,
+        "right": 1381,
+        "bottom": 639.53125
+      },
+      "hit": true,
+      "ancestors": [],
+      "transform": "none",
+      "display": "block"
+    },
+    "plane": {
+      "rect": {
+        "x": 156.75,
+        "y": 273.625,
+        "w": 1.25,
+        "h": 1.25
+      },
+      "clip": {
+        "left": 265,
+        "top": 295.125,
+        "right": 1083,
+        "bottom": 851.125
+      },
+      "intersection": {
+        "left": 265,
+        "top": 295.125,
+        "right": 158,
+        "bottom": 274.875
+      },
+      "hit": null,
+      "ancestors": [
+        {
+          "id": "space-map",
+          "x": true,
+          "y": true,
+          "rect": {
+            "x": 264,
+            "y": 294.125,
+            "w": 820,
+            "h": 558
+          },
+          "sx": 1,
+          "sy": 1
+        }
+      ],
+      "transform": "matrix(1.25, 0, 0, 1.25, -108.25, -21.5)",
+      "display": "block"
+    },
+    "map": {
+      "rect": {
+        "x": 264,
+        "y": 294.125,
+        "w": 820,
+        "h": 558
+      },
+      "clip": {
+        "left": 265,
+        "top": 295.125,
+        "right": 1083,
+        "bottom": 851.125
+      },
+      "intersection": {
+        "left": 265,
+        "top": 295.125,
+        "right": 1083,
+        "bottom": 851.125
+      },
+      "hit": true,
+      "ancestors": [
+        {
+          "id": "space-map",
+          "x": true,
+          "y": true,
+          "rect": {
+            "x": 264,
+            "y": 294.125,
+            "w": 820,
+            "h": 558
+          },
+          "sx": 1,
+          "sy": 1
+        }
+      ],
+      "transform": "none",
+      "display": "block"
+    },
+    "selected": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+    "cards": [
+      {
+        "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+        "offset": {
+          "x": 420,
+          "y": 180,
+          "w": 240,
+          "h": 179
+        },
+        "rect": {
+          "x": 681.75,
+          "y": 498.625,
+          "w": 300,
+          "h": 223.7109375
+        },
+        "text": "⠿\n검사용 지도 도구 확인 ↘\n검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다.\n요청 1개\n앱에서 이어갈 작업\n정보"
+      }
+    ]
+  },
+  "read_A": {
+    "title": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+    "state": {
+      "schemaVersion": "idea015.project.5",
+      "id": "P_e8e6f686-3f62-487b-94e3-2f893e6d619c",
+      "revision": 9,
+      "name": "격리 시험 / 후속 기록 추가",
+      "sources": [
+        {
+          "id": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+          "kind": "request",
+          "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+          "at": "2026-10-16T06:35:49.186Z",
+          "taskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+          "status": "requested",
+          "sourceId": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+          "revision": 8,
+          "history": []
+        }
+      ],
+      "tasks": [
+        {
+          "id": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "sourceIds": [
+            "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d"
+          ],
+          "parentTaskId": null,
+          "advice": null,
+          "adviceRevision": null,
+          "mode": null,
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": "지도 도구 위치를 확인한 뒤 후속 보고와 대조한다",
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+            "area": {
+              "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+              "name": "검사용 지도 도구 확인",
+              "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다."
+            }
+          },
+          "areaId": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e"
+        }
+      ],
+      "currentTaskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+      "draft": "",
+      "answerDraft": "",
+      "basisDraft": "",
+      "basisEdits": {},
+      "draftKind": "request",
+      "pending": null,
+      "notice": null,
+      "space": {
+        "brief": {
+          "text": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+          "at": "2026-10-16T06:35:48.784Z",
+          "previous": []
+        },
+        "areas": [
+          {
+            "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+            "name": "검사용 지도 도구 확인",
+            "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다.",
+            "archived": false,
+            "createdAt": "2026-10-16T06:35:48.882Z"
+          }
+        ],
+        "relations": [],
+        "draftTarget": null,
+        "layout": {
+          "version": "layout.1",
+          "positions": {
+            "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e": {
+              "x": 420,
+              "y": 180
+            }
+          }
+        }
+      }
+    },
+    "target_text": "지금 이어가는 작업이에요. 고치면 이 요청(작업 01)의 작업문이 바뀌어요."
+  },
+  "report_preview": {
+    "text": "연결 예정 · 검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.\n\n내보낸 기록 없음\n\n기준 기록 비교 불가",
+    "target_task_id": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+    "save_input_visible": true,
+    "send_disabled": true
+  },
+  "stored_return": {
+    "task": {
+      "id": "T_6c3f2758-0ab9-452c-bc39-c9fbb8459a76",
+      "sourceIds": [
+        "S_65c6e0dc-89a2-42e0-87d9-3abb66b22740"
+      ],
+      "parentTaskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 7,
+        "brief": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+        "area": {
+          "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+          "name": "검사용 지도 도구 확인",
+          "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다."
+        }
+      }
+    },
+    "source": {
+      "id": "S_65c6e0dc-89a2-42e0-87d9-3abb66b22740",
+      "kind": "report",
+      "text": "작성자 보고의 원문 발췌 (작성자 주장 · 이 시험에서 재검증한 결과 아님)\n\nauto-fit, 배율 축소, 선택 대상 찾기 기능은 추가하지 않았다. 안내와 오류는 그대로 보인다.\n\n출처: https://github.com/tlsee0813-cmd/agentflow-studio/blob/827f029e0dab79b48ebe8818fb15d32db7ed8d06/docs/transfer/pc-map-space-13/author-fix1/REPORT.md",
+      "at": "2026-10-16T06:35:49.896Z",
+      "taskId": "T_6c3f2758-0ab9-452c-bc39-c9fbb8459a76",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    "project": {
+      "schemaVersion": "idea015.project.5",
+      "id": "P_e8e6f686-3f62-487b-94e3-2f893e6d619c",
+      "revision": 18,
+      "name": "격리 시험 / 후속 기록 추가",
+      "sources": [
+        {
+          "id": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+          "kind": "request",
+          "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+          "at": "2026-10-16T06:35:49.186Z",
+          "taskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "replyTo": null,
+          "disposition": "provided"
+        },
+        {
+          "id": "S_65c6e0dc-89a2-42e0-87d9-3abb66b22740",
+          "kind": "report",
+          "text": "작성자 보고의 원문 발췌 (작성자 주장 · 이 시험에서 재검증한 결과 아님)\n\nauto-fit, 배율 축소, 선택 대상 찾기 기능은 추가하지 않았다. 안내와 오류는 그대로 보인다.\n\n출처: https://github.com/tlsee0813-cmd/agentflow-studio/blob/827f029e0dab79b48ebe8818fb15d32db7ed8d06/docs/transfer/pc-map-space-13/author-fix1/REPORT.md",
+          "at": "2026-10-16T06:35:49.896Z",
+          "taskId": "T_6c3f2758-0ab9-452c-bc39-c9fbb8459a76",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+          "status": "requested",
+          "sourceId": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+          "revision": 8,
+          "history": []
+        }
+      ],
+      "tasks": [
+        {
+          "id": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "sourceIds": [
+            "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d"
+          ],
+          "parentTaskId": null,
+          "advice": null,
+          "adviceRevision": null,
+          "mode": null,
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": "지도 도구 위치를 확인한 뒤 후속 보고와 대조한다",
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+            "area": {
+              "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+              "name": "검사용 지도 도구 확인",
+              "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다."
+            }
+          },
+          "areaId": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e"
+        },
+        {
+          "id": "T_6c3f2758-0ab9-452c-bc39-c9fbb8459a76",
+          "sourceIds": [
+            "S_65c6e0dc-89a2-42e0-87d9-3abb66b22740"
+          ],
+          "parentTaskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "advice": null,
+          "adviceRevision": null,
+          "mode": null,
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": null,
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+            "area": {
+              "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+              "name": "검사용 지도 도구 확인",
+              "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다."
+            }
+          }
+        }
+      ],
+      "currentTaskId": "T_6c3f2758-0ab9-452c-bc39-c9fbb8459a76",
+      "draft": "",
+      "answerDraft": "",
+      "basisDraft": "",
+      "basisEdits": {},
+      "draftKind": "report",
+      "pending": null,
+      "notice": null,
+      "space": {
+        "brief": {
+          "text": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+          "at": "2026-10-16T06:35:48.784Z",
+          "previous": []
+        },
+        "areas": [
+          {
+            "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+            "name": "검사용 지도 도구 확인",
+            "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다.",
+            "archived": false,
+            "createdAt": "2026-10-16T06:35:48.882Z"
+          }
+        ],
+        "relations": [],
+        "draftTarget": null,
+        "layout": {
+          "version": "layout.1",
+          "positions": {
+            "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e": {
+              "x": 420,
+              "y": 180
+            }
+          }
+        }
+      }
+    }
+  },
+  "return_click": {
+    "id": "work-return-origin",
+    "wheel": [
+      {
+        "before": 1915,
+        "after": 1465
+      },
+      {
+        "before": 1465,
+        "after": 1015
+      },
+      {
+        "before": 1015,
+        "after": 565
+      },
+      {
+        "before": 565,
+        "after": 115
+      }
+    ],
+    "geometry_before": {
+      "rect": {
+        "x": 993.625,
+        "y": 46.59375,
+        "w": 404.375,
+        "h": 43
+      },
+      "clip": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900
+      },
+      "intersection": {
+        "left": 993.625,
+        "top": 46.59375,
+        "right": 1398,
+        "bottom": 89.59375
+      },
+      "hit": true,
+      "ancestors": [],
+      "transform": "none",
+      "display": "block"
+    }
+  },
+  "after_return": {
+    "state": {
+      "schemaVersion": "idea015.project.5",
+      "id": "P_e8e6f686-3f62-487b-94e3-2f893e6d619c",
+      "revision": 18,
+      "name": "격리 시험 / 후속 기록 추가",
+      "sources": [
+        {
+          "id": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+          "kind": "request",
+          "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+          "at": "2026-10-16T06:35:49.186Z",
+          "taskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "replyTo": null,
+          "disposition": "provided"
+        },
+        {
+          "id": "S_65c6e0dc-89a2-42e0-87d9-3abb66b22740",
+          "kind": "report",
+          "text": "작성자 보고의 원문 발췌 (작성자 주장 · 이 시험에서 재검증한 결과 아님)\n\nauto-fit, 배율 축소, 선택 대상 찾기 기능은 추가하지 않았다. 안내와 오류는 그대로 보인다.\n\n출처: https://github.com/tlsee0813-cmd/agentflow-studio/blob/827f029e0dab79b48ebe8818fb15d32db7ed8d06/docs/transfer/pc-map-space-13/author-fix1/REPORT.md",
+          "at": "2026-10-16T06:35:49.896Z",
+          "taskId": "T_6c3f2758-0ab9-452c-bc39-c9fbb8459a76",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "검사용 요청 A: 지도 도구 위치와 후속 기록을 읽는다. 실제 실행이나 배포 요청이 아니다.",
+          "status": "requested",
+          "sourceId": "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d",
+          "revision": 8,
+          "history": []
+        }
+      ],
+      "tasks": [
+        {
+          "id": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "sourceIds": [
+            "S_26aeb616-85b1-4b2c-84e6-8c136eb8293d"
+          ],
+          "parentTaskId": null,
+          "advice": null,
+          "adviceRevision": null,
+          "mode": null,
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": "지도 도구 위치를 확인한 뒤 후속 보고와 대조한다",
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+            "area": {
+              "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+              "name": "검사용 지도 도구 확인",
+              "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다."
+            }
+          },
+          "areaId": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e"
+        },
+        {
+          "id": "T_6c3f2758-0ab9-452c-bc39-c9fbb8459a76",
+          "sourceIds": [
+            "S_65c6e0dc-89a2-42e0-87d9-3abb66b22740"
+          ],
+          "parentTaskId": "T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+          "advice": null,
+          "adviceRevision": null,
+          "mode": null,
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": null,
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+            "area": {
+              "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+              "name": "검사용 지도 도구 확인",
+              "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다."
+            }
+          }
+        }
+      ],
+      "currentTaskId": "T_6c3f2758-0ab9-452c-bc39-c9fbb8459a76",
+      "draft": "",
+      "answerDraft": "",
+      "basisDraft": "",
+      "basisEdits": {},
+      "draftKind": "report",
+      "pending": null,
+      "notice": null,
+      "space": {
+        "brief": {
+          "text": "검사용 프로젝트: 후속 기록 추가와 보기 보존만 확인한다.",
+          "at": "2026-10-16T06:35:48.784Z",
+          "previous": []
+        },
+        "areas": [
+          {
+            "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+            "name": "검사용 지도 도구 확인",
+            "note": "검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다.",
+            "archived": false,
+            "createdAt": "2026-10-16T06:35:48.882Z"
+          }
+        ],
+        "relations": [],
+        "draftTarget": null,
+        "layout": {
+          "version": "layout.1",
+          "positions": {
+            "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e": {
+              "x": 420,
+              "y": 180
+            }
+          }
+        }
+      }
+    },
+    "window": {
+      "x": 0,
+      "y": 0,
+      "maxY": 124
+    },
+    "focus": "panel-task-T_57b1935e-3e65-469c-8642-17ef34f6fb39",
+    "caller": {
+      "rect": {
+        "x": 1115,
+        "y": 585.53125,
+        "w": 266,
+        "h": 54
+      },
+      "clip": {
+        "left": 0,
+        "top": 0,
+        "right": 1440,
+        "bottom": 900
+      },
+      "intersection": {
+        "left": 1115,
+        "top": 585.53125,
+        "right": 1381,
+        "bottom": 639.53125
+      },
+      "hit": true,
+      "ancestors": [],
+      "transform": "none",
+      "display": "block"
+    },
+    "plane": {
+      "rect": {
+        "x": 156.75,
+        "y": 273.625,
+        "w": 1.25,
+        "h": 1.25
+      },
+      "clip": {
+        "left": 265,
+        "top": 295.125,
+        "right": 1083,
+        "bottom": 851.125
+      },
+      "intersection": {
+        "left": 265,
+        "top": 295.125,
+        "right": 158,
+        "bottom": 274.875
+      },
+      "hit": null,
+      "ancestors": [
+        {
+          "id": "space-map",
+          "x": true,
+          "y": true,
+          "rect": {
+            "x": 264,
+            "y": 294.125,
+            "w": 820,
+            "h": 558
+          },
+          "sx": 1,
+          "sy": 1
+        }
+      ],
+      "transform": "matrix(1.25, 0, 0, 1.25, -108.25, -21.5)",
+      "display": "block"
+    },
+    "map": {
+      "rect": {
+        "x": 264,
+        "y": 294.125,
+        "w": 820,
+        "h": 558
+      },
+      "clip": {
+        "left": 265,
+        "top": 295.125,
+        "right": 1083,
+        "bottom": 851.125
+      },
+      "intersection": {
+        "left": 265,
+        "top": 295.125,
+        "right": 1083,
+        "bottom": 851.125
+      },
+      "hit": true,
+      "ancestors": [
+        {
+          "id": "space-map",
+          "x": true,
+          "y": true,
+          "rect": {
+            "x": 264,
+            "y": 294.125,
+            "w": 820,
+            "h": 558
+          },
+          "sx": 1,
+          "sy": 1
+        }
+      ],
+      "transform": "none",
+      "display": "block"
+    },
+    "selected": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+    "cards": [
+      {
+        "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+        "offset": {
+          "x": 420,
+          "y": 180,
+          "w": 240,
+          "h": 201
+        },
+        "rect": {
+          "x": 681.75,
+          "y": 498.625,
+          "w": 300,
+          "h": 251.4453125
+        },
+        "text": "⠿\n검사용 지도 도구 확인 ↘\n검사용 영역이다. 실제 프로그램 전체의 구조나 사용자 원발화가 아니다.\n요청 1개 · 돌아온 결과 1개 · 앱 미검증\n앱에서 이어갈 작업\n정보"
+      }
+    ]
+  },
+  "return_delta": {
+    "caller_y": 0.0,
+    "window_y": 0,
+    "cards": [
+      {
+        "id": "A_f1e73b78-9a01-4ef9-a9e1-65a434420b2e",
+        "offset_pre": {
+          "x": 420,
+          "y": 180,
+          "w": 240,
+          "h": 179
+        },
+        "offset_post": {
+          "x": 420,
+          "y": 180,
+          "w": 240,
+          "h": 201
+        },
+        "rect_pre": {
+          "x": 681.75,
+          "y": 498.625,
+          "w": 300,
+          "h": 223.7109375
+        },
+        "rect_post": {
+          "x": 681.75,
+          "y": 498.625,
+          "w": 300,
+          "h": 251.4453125
+        }
+      }
+    ]
+  },
+  "server_shutdown": -15,
+  "server_stderr": "",
+  "runtime_after": {
+    "index.html": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "styles.css": "44f1140b629c9f7379851110770da0bc90182a6d68cdb3c1220bb3d54bd69576",
+    "shared/attention.js": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+    "shared/domain.js": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+    "shared/outcome.js": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "shared/mock.js": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "shared/storage.js": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "shared/plan-facts.js": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "shared/validation.js": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+    "shared/guidance.js": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "shared/types.js": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+    "client/runtime.js": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "client/presentation.js": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+    "client/app.js": "c1f6b88b2b14a4cb661496b849180cb796dd60cb19de357ed7aaaccf559ec64c",
+    "client/runtime-static.js": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+  },
+  "runtime_unchanged": true,
+  "complete": true,
+  "actual_ai_post_count": 0,
+  "exit": 0
+}

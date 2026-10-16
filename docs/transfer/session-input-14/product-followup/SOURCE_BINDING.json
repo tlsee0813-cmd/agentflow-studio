@@ -1,0 +1,23 @@
+{
+  "product_commit": "606120500eeea50a20f00fb4678bced7a7d93d98",
+  "report_provenance": {
+    "commit": "827f029e0dab79b48ebe8818fb15d32db7ed8d06",
+    "path": "docs/transfer/pc-map-space-13/author-fix1/REPORT.md",
+    "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/827f029e0dab79b48ebe8818fb15d32db7ed8d06/docs/transfer/pc-map-space-13/author-fix1/REPORT.md",
+    "file_bytes": 6386,
+    "file_sha256": "ab0c5fbed45d9a670074549148311df079e9e6e899fe2145999bee8d33446091",
+    "exact_paragraph": "auto-fit, 배율 축소, 선택 대상 찾기 기능은 추가하지 않았다. 안내와 오류는 그대로 보인다.",
+    "paragraph_sha256": "fa20f6e13b6ed6af5433cbd5c1ccb5961e85a8b8161bdd406bdd766d384e4b2c",
+    "stored_report_text": "작성자 보고의 원문 발췌 (작성자 주장 · 이 시험에서 재검증한 결과 아님)\n\nauto-fit, 배율 축소, 선택 대상 찾기 기능은 추가하지 않았다. 안내와 오류는 그대로 보인다.\n\n출처: https://github.com/tlsee0813-cmd/agentflow-studio/blob/827f029e0dab79b48ebe8818fb15d32db7ed8d06/docs/transfer/pc-map-space-13/author-fix1/REPORT.md"
+  },
+  "runner_sha256": "001c18f74c0cc56512c2af7d7b870aca82e57cb95417d32096bc29a06dbf5a19",
+  "collector_sha256": "30ef29656051d5ca03d8aec4590c4c81cf73ebebb57b8c9bdf6db37353b27f61",
+  "actual_child_exit": 0,
+  "external_collector_tool_exit": 0,
+  "tool_session": 23037,
+  "isolation": "fresh ephemeral server origin + new browser context; no existing user storage accessed",
+  "AI": "existing supported paid-disabled server mode, no key inheritance/read, ALLOW_PAID_AI=false, save-input visible, send disabled, actualPOST0",
+  "actual_project_name": "격리 시험 / 후속 기록 추가",
+  "planned_metadata_note": "observations.synthetic_test.project is a planned test label; actual saved project.name is authoritative (격리 시험 / 후속 기록 추가). Both are synthetic test data, not a user original utterance.",
+  "app_ts_sha256": "dd3980da30e2562fd393579fc51ad6ad13e630c3f3cd013c3cce691a047a8727"
+}
