@@ -2468,3 +2468,16 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
   body[data-route="projects"] .shell{padding:18px 16px 16px}
 }
 @media(max-width:480px){.projects-view .project-list{grid-template-columns:minmax(0,1fr)}}
+/* HOME15 follow-up: read the full name and purpose before entering (native modal dialog, text only). */
+.project-read{width:min(640px,calc(100vw - 32px));max-height:min(72vh,600px);padding:0;border:1px solid var(--line);border-radius:14px;
+  background:var(--paper);color:var(--ink);box-shadow:0 24px 60px #2a1f4a2e;flex-direction:column;overflow:hidden}
+.project-read[open]{display:flex}
+.project-read::backdrop{background:#1d18302e}
+.project-read-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 12px;border-bottom:1px solid var(--line)}
+.project-read-head h2{margin:0;font-size:16px}
+.project-read-head button{padding:6px 12px;font-size:13px}
+.project-read-body{overflow:auto;overscroll-behavior:contain;padding:14px 20px 6px;min-height:0;flex:1 1 auto;outline-offset:-3px}
+.project-read-label{margin:0 0 4px;font-size:12px;color:var(--muted);font-weight:600}
+.project-read-text{margin:0 0 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.project-read-text.missing{color:var(--muted)}
+.project-read-note{margin:0;padding:8px 20px 14px;font-size:12px}

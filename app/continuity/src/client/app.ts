@@ -897,9 +897,34 @@ function cardMenu(name:string,...items:HTMLButtonElement[]):HTMLDetailsElement {
   summary.append(node('span','⋯','project-more-dots'));summary.firstElementChild!.setAttribute('aria-hidden','true');
   const list=node('div','','project-more-menu');list.append(...items);menu.append(summary,list);
   // A chosen (or declined) action closes the menu and leaves the focus on its button, never on the card's open control.
-  for(const item of items)item.addEventListener('click',()=>{menu.open=false;if(summary.isConnected)summary.focus({preventScroll:true});});
+  for(const item of items)item.addEventListener('click',()=>{menu.open=false;if(summary.isConnected&&!$<HTMLDialogElement>('project-read').open)summary.focus({preventScroll:true});});
   menu.addEventListener('toggle',()=>{if(menu.open)for(const other of document.querySelectorAll<HTMLDetailsElement>('.project-more[open]'))if(other!==menu)other.open=false;});
   return menu;
+}
+/** HOME15 follow-up: the full name and purpose before entering, read-only. Text only (never parsed as HTML), never saved.
+ * It shows the saved project read fresh at the moment it opens; one that another tab trashed or removed is not shown. */
+let reading:{entryId:string;y:number}|null=null;
+function readProject(entryId:string) {
+  const fresh=workspace.read()?.entries.find(e=>e.entryId===entryId&&e.state==='active');
+  if(!fresh){listNotice='다른 탭에서 바뀌어 이 프로젝트를 보여주지 않았어요. 목록을 새로 읽었어요.';render();focusListCard(null);return;}
+  const brief=fresh.project.space.brief?.text.trim();
+  $('project-read-name').textContent=fresh.project.name;
+  const purpose=$('project-read-purpose');purpose.textContent=brief||'목적을 아직 적지 않았어요';purpose.classList.toggle('missing',!brief);
+  reading={entryId,y:window.scrollY};
+  // Order: close the card menu first, then open the window, so the menu neither keeps the first Escape nor takes the focus back.
+  for(const m of document.querySelectorAll<HTMLDetailsElement>('.project-more[open]'))m.open=false;
+  const dialog=$<HTMLDialogElement>('project-read');dialog.showModal();
+  const body=$('project-read-body');body.scrollTop=0; // after showModal: a closed dialog is not laid out, so its old scroll would survive
+  // Focus starts at the top of the text (the name), so PageDown/End/arrow keys scroll it at once; Tab reaches '닫기'.
+  body.focus({preventScroll:true});
+}
+/** Back to the same card's '더보기' button and the same list position; nothing in the dialog is kept. */
+function closeReading() {
+  const back=reading;reading=null;
+  $('project-read-name').textContent='';$('project-read-purpose').textContent='';
+  if(!back)return;window.scrollTo({top:back.y});
+  const more=document.querySelector<HTMLElement>(`#project-list .project-card[data-entry-id="${CSS.escape(back.entryId)}"] .project-more-button`);
+  if(more)more.focus({preventScroll:true});else $('projects-title').focus({preventScroll:true});
 }
 /** HOME15: where the list was when a project was opened from it, so coming back finds the same card. Tab memory only. */
 let listReturn:{entryId:string;y:number}|null=null;
@@ -916,7 +941,7 @@ function projectCard(entry:WorkspaceEntry):HTMLElement {
     openEntry(fresh,true);render();restoreDraftPanels();window.scrollTo({top:0});
     if(!(view==='space'&&focusFirst('space-title')))$('main').focus({preventScroll:true});};
   projectSummary(li,entry.project,open,hasSpace(entry.project)?'프로젝트 공간 열기':'프로젝트 열기');
-  li.querySelector('.project-card-head')!.append(cardMenu(entry.project.name,btn('휴지통으로 옮기기',()=>void trashProject(entry.entryId,entry.project.name),'quiet project-trash')));
+  li.querySelector('.project-card-head')!.append(cardMenu(entry.project.name,btn('이름·목적 전체 보기',()=>readProject(entry.entryId),'quiet project-read-open'),btn('휴지통으로 옮기기',()=>void trashProject(entry.entryId,entry.project.name),'quiet project-trash')));
   openOnClick(li,open);return li;
 }
 function legacyCard():HTMLElement {
@@ -1772,6 +1797,30 @@ $('close-context').addEventListener('click',closeContext);
 $('nav-history').addEventListener('click',()=>{view='history';displayView();$<HTMLDetailsElement>('history').open=true;$('history-title').focus();});
 $('back-to-work').addEventListener('click',()=>{showWork();$('nav-work').focus();});
 for(const example of document.querySelectorAll<HTMLButtonElement>('[data-example]'))example.addEventListener('click',()=>guard(()=>{commit(editDraft(project,example.dataset.example!));$('draft').focus();}));
+{
+  const dialog=$<HTMLDialogElement>('project-read');
+  $('project-read-close').addEventListener('click',()=>dialog.close());
+  dialog.addEventListener('close',closeReading);
+  dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close();}); // the backdrop
+  // The list behind stays where it was: the wheel scrolls only the text (which does not hand its overscroll to the page).
+  dialog.addEventListener('wheel',e=>{if(!$('project-read-body').contains(e.target as Node))e.preventDefault();},{passive:false});
+  dialog.addEventListener('keydown',e=>{
+    // Keyboard scrolling is not stopped by overscroll-behavior: a scroll key would scroll the list behind. In the text it scrolls
+    // the text and is stopped only at its end (or top); anywhere else in the window (e.g. on '닫기') it scrolls nothing.
+    // Space/Enter on a button keep their own action (close).
+    const body=$('project-read-body');
+    if(['PageDown','PageUp','End','Home','ArrowDown','ArrowUp',' '].includes(e.key)){
+      if(e.target===body){
+        const down=['PageDown','End','ArrowDown'].includes(e.key)||(e.key===' '&&!e.shiftKey);
+        if(down?body.scrollTop+body.clientHeight>=body.scrollHeight-1:body.scrollTop<=0)e.preventDefault();
+      } else if(!(e.key===' '&&(e.target as HTMLElement).closest('button')))e.preventDefault();
+      return;
+    }
+    if(e.key!=='Tab')return;
+    const stops=[$('project-read-close'),$('project-read-body')];const i=stops.indexOf(document.activeElement as HTMLElement);
+    e.preventDefault();stops[(i<0?0:i+(e.shiftKey?stops.length-1:1))%stops.length]!.focus();
+  });
+}
 // HOME15: a click elsewhere closes an open card menu. On a card that click only closes the menu; it does not open a project.
 document.addEventListener('click',e=>{
   const open=[...document.querySelectorAll<HTMLDetailsElement>('.project-more[open]')].filter(m=>!m.contains(e.target as Node));if(!open.length)return;
@@ -1779,7 +1828,7 @@ document.addEventListener('click',e=>{
   const t=e.target as HTMLElement;if(t.closest?.('.project-card')&&!t.closest('.project-more')){e.preventDefault();e.stopPropagation();}
 },true);
 // HOME15: Escape closes an open card menu wherever the focus is (e.g. after a click on the menu's own padding).
-document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const m=document.querySelector<HTMLDetailsElement>('.project-more[open]');if(!m)return;
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||$<HTMLDialogElement>('project-read').open)return;const m=document.querySelector<HTMLDetailsElement>('.project-more[open]');if(!m)return;
   e.stopImmediatePropagation();m.open=false;m.querySelector('summary')?.focus({preventScroll:true});},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($<HTMLDetailsElement>('connection-details').open){$<HTMLDetailsElement>('connection-details').open=false;$('connection-details').querySelector('summary')!.focus();}else if(contextOpen)closeContext();}});
 window.addEventListener('beforeunload',e=>{if(memoryDirty||pendingSave||draining){e.preventDefault();e.returnValue='';}});
