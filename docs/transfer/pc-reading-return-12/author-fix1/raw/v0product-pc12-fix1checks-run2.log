@@ -1,0 +1,87 @@
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12.test_01_read_only_round_trip_changes_nothing) ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+test_08_long_understanding_and_scope_open_in_full_read_only (__main__.Pc12.test_08_long_understanding_and_scope_open_in_full_read_only) ... FAIL
+test_09_long_idea_open_state_survives_read_and_edit_round_trips (__main__.Pc12.test_09_long_idea_open_state_survives_read_and_edit_round_trips) ... FAIL
+test_03_empty_area_and_empty_idea_make_nothing_up (__main__.Pc12Boundaries.test_03_empty_area_and_empty_idea_make_nothing_up) ... ok
+test_04_stale_ai_text_is_named_and_kept_out (__main__.Pc12Boundaries.test_04_stale_ai_text_is_named_and_kept_out) ... ok
+test_05_no_plan_copy_no_text_and_changed_plan (__main__.Pc12Boundaries.test_05_no_plan_copy_no_text_and_changed_plan)
+Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy. ... ok
+test_06_starting_point_dropped_on_project_switch_and_reload (__main__.Pc12Boundaries.test_06_starting_point_dropped_on_project_switch_and_reload) ... ok
+test_07_narrow_390_minimum (__main__.Pc12Boundaries.test_07_narrow_390_minimum) ... ok
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12Wide.test_01_read_only_round_trip_changes_nothing) ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+test_08_long_understanding_and_scope_open_in_full_read_only (__main__.Pc12Wide.test_08_long_understanding_and_scope_open_in_full_read_only) ... FAIL
+test_09_long_idea_open_state_survives_read_and_edit_round_trips (__main__.Pc12Wide.test_09_long_idea_open_state_survives_read_and_edit_round_trips) ... FAIL
+
+======================================================================
+FAIL: test_08_long_understanding_and_scope_open_in_full_read_only (__main__.Pc12.test_08_long_understanding_and_scope_open_in_full_read_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 215, in test_08_long_understanding_and_scope_open_in_full_read_only
+    full=self.page.locator(f'#task-view-full-{key}');n=full.count();self.check_equal(f'{key}: explicit full-text disclosure exists',n,1)
+                                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 53, in check_equal
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1 : understanding: explicit full-text disclosure exists
+
+======================================================================
+FAIL: test_09_long_idea_open_state_survives_read_and_edit_round_trips (__main__.Pc12.test_09_long_idea_open_state_survives_read_and_edit_round_trips)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 242, in test_09_long_idea_open_state_survives_read_and_edit_round_trips
+    self.assert_back(before,booking,A);self.check_equal('read trip: saved project unchanged',self.state()==s0,True)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 111, in assert_back
+    self.check_equal('back: open disclosures',after['openDetails'],before['openDetails'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 53, in check_equal
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['area-list'] != ['area-list', 'panel-idea-full']
+
+Second list contains 1 additional elements.
+First extra element 1:
+'panel-idea-full'
+
+- ['area-list']
++ ['area-list', 'panel-idea-full'] : back: open disclosures
+
+======================================================================
+FAIL: test_08_long_understanding_and_scope_open_in_full_read_only (__main__.Pc12Wide.test_08_long_understanding_and_scope_open_in_full_read_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 215, in test_08_long_understanding_and_scope_open_in_full_read_only
+    full=self.page.locator(f'#task-view-full-{key}');n=full.count();self.check_equal(f'{key}: explicit full-text disclosure exists',n,1)
+                                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 53, in check_equal
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1 : understanding: explicit full-text disclosure exists
+
+======================================================================
+FAIL: test_09_long_idea_open_state_survives_read_and_edit_round_trips (__main__.Pc12Wide.test_09_long_idea_open_state_survives_read_and_edit_round_trips)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 242, in test_09_long_idea_open_state_survives_read_and_edit_round_trips
+    self.assert_back(before,booking,A);self.check_equal('read trip: saved project unchanged',self.state()==s0,True)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 111, in assert_back
+    self.check_equal('back: open disclosures',after['openDetails'],before['openDetails'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 53, in check_equal
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['area-list'] != ['area-list', 'panel-idea-full']
+
+Second list contains 1 additional elements.
+First extra element 1:
+'panel-idea-full'
+
+- ['area-list']
++ ['area-list', 'panel-idea-full'] : back: open disclosures
+
+----------------------------------------------------------------------
+Ran 13 tests in 35.874s
+
+FAILED (failures=4)

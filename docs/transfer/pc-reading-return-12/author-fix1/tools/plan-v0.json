@@ -1,0 +1,1 @@
+[{"name":"v0product-pc12-fix1checks","cmd":["python3","continuity/tests/pc12_browser.py"],"cwd":"/root/work/repo/app","env":{"IDEA015_EVIDENCE_DIR":"/root/work/ev1/v0-results"}}]

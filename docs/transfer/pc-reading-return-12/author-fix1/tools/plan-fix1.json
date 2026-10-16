@@ -1,0 +1,6 @@
+[{"name":"fix1-npm-check","cmd":["npm","run","check"],"cwd":"/root/work/repo/app"},
+ {"name":"fix1-cont-check","cmd":["node","continuity/scripts/check.mjs"],"cwd":"/root/work/repo/app"},
+ {"name":"fix1-cont-build","cmd":["node","continuity/scripts/build.mjs"],"cwd":"/root/work/repo/app"},
+ {"name":"fix1-pc12","cmd":["python3","continuity/tests/pc12_browser.py"],"cwd":"/root/work/repo/app","env":{"IDEA015_EVIDENCE_DIR":"/root/work/ev1/fix1-results/pc12"}},
+ {"name":"fix1-spatial102","cmd":["python3","continuity/tests/spatial102_browser.py"],"cwd":"/root/work/repo/app","env":{"IDEA015_EVIDENCE_DIR":"/root/work/ev1/fix1-results/spatial102"}},
+ {"name":"fix1-flow090","cmd":["python3","continuity/tests/flow090_browser.py"],"cwd":"/root/work/repo/app","env":{"IDEA015_EVIDENCE_DIR":"/root/work/ev1/fix1-results/flow090"}}]
