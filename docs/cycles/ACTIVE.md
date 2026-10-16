@@ -1,8 +1,12 @@
 # AgentFlow 활성 연구·검증 배정
 
-2026-10-16 11:19 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이다.
+2026-10-16 11:56 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이다.
 
-## 현재: cycle11 비교·수정·독립 검증 정리 완료
+## 현재: 첫 제품 PC 연결12 구현 착수
+
+[구현 계약](2026-10-16-product-reading-return-12/IMPLEMENTATION.md). USE106 고정 소스에서 `product/pc-reading-return-12` 후보 브랜치를 만들었다. 영역 읽기→선택 작업 맥락→명시 이어가기/기존 편집→지도 복귀 한 흐름을 구현·검증한다. Opus 구현, Sol 코드 경계, Astra 읽기 경험, Cloud 환경 준비를 나눠 배정했다. 구현 완료·후보 수용·공개 배포는 아직 아니다.
+
+## 닫힌 이전 단계: cycle11 비교·수정·독립 검증
 
 [cycle11 결과](2026-10-16-two-change-record-11/RESULT.md) · [v0 감사](2026-10-16-two-change-record-11/AUTHOR_AUDIT.md) · [fix1 감사](2026-10-16-two-change-record-11/FIX1_AUDIT.md) · [독립 감사](2026-10-16-two-change-record-11/INDEPENDENT_AUDIT.md).
 
@@ -23,10 +27,10 @@
 | 담당 | 현재 상태 |
 |---|---|
 | Pro A/B | 공간·변경 읽기 연구, 고정 원문 대조 완료. 새 광범위 조사 미배정 |
-| Opus | 공통 화면·두 입력·P2 fix1 전달 완료 |
-| Cloud | 고정 source로 독립 실행·원본 실패 보존·GitHub 공유 완료 |
-| Astra High /6.1 Sol High | 의미/이미지·코드/실행·전달 감사 완료 |
-| 총괄 | 실제 PC 확인, 결과·제품 연결 범위 통합 완료 |
+| Opus | cycle11 완료, 제품 PC 연결12 구현 배정 준비 |
+| Cloud | cycle11 완료, 제품 후보 독립 검증 환경 확인 중 |
+| Astra High /6.1 Sol High | 제품 읽기 경험·코드 경계·환경 준비 병렬 검토 중 |
+| 총괄 | 제품 구현 계약·배정·독립 검증·결과 통합 담당 |
 
 ## 공유 원본과 운영 경계
 
