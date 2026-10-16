@@ -2,6 +2,7 @@
 
 이 브랜치는 세션 간 원본 파일을 전달하는 공간이다. 제품 배포나 현재 연구 상태의 별도 사본이 아니다.
 
+- [관계 목록·간결 참고 cycle10 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/99cc933b59a3446ece132da2fd79f5b460e991f0/docs/cycles/2026-10-16-relation-reading-10/RESULT.md)
 - [혼합 깊이 읽기·준비 cycle09 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/0f46935a297eb6698054f83aab243ac3a8c825cc/docs/cycles/2026-10-16-mixed-reading-09/RESULT.md)
 - [첫 전체 조망 cycle08 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/ce0f9eeec6b7ea55cb630e4b1b5df68e345c2e5f/docs/cycles/2026-10-16-overview-08/RESULT.md)
 - [책임 변화·후속 요청 cycle07 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/a738280b994b4872ada81574850747e291bc1418/docs/cycles/2026-10-16-change-record-07/RESULT.md)
@@ -51,6 +52,20 @@ cycle05 대표 첫 화면: [1440×900](https://github.com/tlsee0813-cmd/agentflo
 
 
 cycle06 대표 화면: [첫 화면1440](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/initial-1440.png) · [첫 화면390](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/initial-390.png) · [390 역할·조건 읽기](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/role-condition-390.png) · [편집 전 준비문](https://github.com/tlsee0813-cmd/agentflow-studio/blob/68d357d0805c8d27833ee49f5137c22fbc148c68/docs/transfer/purpose-06/independent-fix1/prep-default-1440.png). N01은 개발자 합성 초기 구상이다. 외부 실제 작업 기록 후보는 통합 판단의 다음 입력으로 구별하며, 이 시안에서 실제 요구 변경이나 AI 수행을 검증했다고 쓰지 않는다.
+
+
+## cycle10 관계 목록·간결 참고
+
+| 묶음 | 고정 원본 | 내용과 회수 검증 |
+|---|---|---|
+| 작성자 최종 t04 | [author-v0](https://github.com/tlsee0813-cmd/agentflow-studio/tree/76feae052f716bfe8d0bc09df5a6770048b1f687/docs/transfer/relation-reading-10/author-v0) | 62파일·1,349,321B. HTML55,724B/SHA96e791…ceae, diff·첫 검사 오류·역패치·원시·PNG4. Manifest payload61개 및 원격62/62 일치 |
+| 독립 최신 run03 | [independent-v0](https://github.com/tlsee0813-cmd/agentflow-studio/tree/dab9c965f6fa0eac72f6aab9d9d1f18ffd38ef94/docs/transfer/relation-reading-10/independent-v0) | 35파일·4,062,235B. 두 폭 A/B/C+1440초기7/7,152 PASS(정적1+브라우저151), 실제child/collector0. Manifest payload34개·전체Gitblob/size 일치 |
+
+[작성자 감사](https://github.com/tlsee0813-cmd/agentflow-studio/blob/99cc933b59a3446ece132da2fd79f5b460e991f0/docs/cycles/2026-10-16-relation-reading-10/AUTHOR_AUDIT.md) · [독립 감사](https://github.com/tlsee0813-cmd/agentflow-studio/blob/99cc933b59a3446ece132da2fd79f5b460e991f0/docs/cycles/2026-10-16-relation-reading-10/INDEPENDENT_AUDIT.md).
+같은 출발점의 두 관계를 수신부 머리로 구별하고 참고의 큰 끝점 카드 반복을 줄였다. 실제 양끝·조건·선택·준비문 경계를 유지한다. 검사 수는 사람 이해나 장면 수가 아니며 이전 실행과 합산하지 않는다. 대상 간 편집 격리는1280만, 선 복귀 최대0.162 world/허용0.5, 새 실패 probe·선 클릭·외부 원문 왕복은 미실행이다. 검사기 오류 두 번과 외부 종료 원시를 보존하고 launcher 도구 결과 전사본을 구분한다.
+
+[390 초기 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/dab9c965f6fa0eac72f6aab9d9d1f18ffd38ef94/docs/transfer/relation-reading-10/independent-v0/initial-390.png) · [390 관계 참고](https://github.com/tlsee0813-cmd/agentflow-studio/blob/dab9c965f6fa0eac72f6aab9d9d1f18ffd38ef94/docs/transfer/relation-reading-10/independent-v0/R3-reference-390.png) · [1280 편집 준비](https://github.com/tlsee0813-cmd/agentflow-studio/blob/dab9c965f6fa0eac72f6aab9d9d1f18ffd38ef94/docs/transfer/relation-reading-10/independent-v0/edited-preparation-1280.png).
+
 
 ## cycle07 바로 보는 화면
 [1440 초기 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/initial-1440.png) · [변경 전 비교](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/comparison-before-1440.png) · [390 후속 읽기](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/390-P3-follow.png) · [390 편집 전 준비문](https://github.com/tlsee0813-cmd/agentflow-studio/blob/72f923ef9da6ab222427792959d17a9a4a74510d/docs/transfer/change-record-07/independent-v0/prep-default-P1-390.png). 좁은 준비 이미지는 입력칸 내부를 스크롤한 끝부분이며 모든 문장이 동시에 보였다는 증거가 아니다.
