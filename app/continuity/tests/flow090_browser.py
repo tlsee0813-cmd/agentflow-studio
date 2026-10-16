@@ -301,9 +301,11 @@ class SpatialWorkspace(unittest.TestCase):
         # PC12: the panel no longer picks the latest report; the user picks the request and reads its report there (raw, unverified).
         self.page.locator(f'#node-info-{booking}').click();expect(self.page.locator('#panel-report')).to_have_count(0)
         expect(self.page.locator('#area-panel')).to_contain_text('외부 도구에서 지금 실행 중이라는 뜻이 아니에요')
-        self.page.locator(f'#panel-task-{task}').click();res=self.page.locator('#task-view-results')
-        expect(res.locator('summary')).to_contain_text('앱 미검증');expect(res).not_to_have_attribute('open','')
-        res.locator('summary').click();raw=res.locator('.source-raw').first;expect(raw).to_contain_text('ZZ-END')
+        # REPORT16: the report is read by the user's explicit pick on the task screen (not pre-picked); its full text opens on request.
+        self.page.locator(f'#panel-task-{task}').click();expect(self.page.locator('#task-pointed')).to_have_count(0)
+        self.page.locator(f"#task-report-pick-{rt['id']}").click();res=self.page.locator('#task-pointed')
+        expect(res).to_contain_text('앱 미검증');full=res.locator('details[id^="task-report-src-"]');expect(full).not_to_have_attribute('open','')
+        full.locator('summary').click();raw=full.locator('.source-raw').first;expect(raw).to_contain_text('ZZ-END')
         self.assertEqual(' '.join(raw.inner_text().split()),' '.join(report.split()),'raw text, not a summary')
         self.page.locator('#task-return-origin').click();expect(self.page.locator('#space-title')).to_have_text('전체 공간')
         self.page.locator(f'#panel-task-{task}').click()

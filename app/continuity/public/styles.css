@@ -2481,3 +2481,40 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .project-read-text{margin:0 0 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
 .project-read-text.missing{color:var(--muted)}
 .project-read-note{margin:0;padding:8px 20px 14px;font-size:12px}
+/* REPORT16: the task screen reads the area's current idea and the picked report side by side; the next action sits under the
+ * idea, and this request's details follow. Same type sizes as the PC12 reading screen (nothing shrunk to fit). */
+.task-view-head-line{display:flex;align-items:center;justify-content:space-between;gap:6px 12px;flex-wrap:wrap}
+.task-view-head-line .eyebrow{margin:0}
+.space-head.task-view-head{padding:12px 18px;margin-bottom:12px}
+.task-view-head h1{font-size:19px;line-height:1.35;margin:4px 0 2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.task-view-status{margin:0}
+.task-read{display:grid;gap:16px;align-items:start}
+@media(min-width:1000px){.task-read{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}}
+.task-read-side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.task-idea,.task-next,.task-reports,.task-more{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px 18px;min-width:0}
+.task-idea{margin:0}
+.task-next .row{gap:8px;align-items:center;flex-wrap:wrap}
+.task-next .hint{margin:6px 0 0}
+.task-edit{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.task-reports{display:flex;flex-direction:column;gap:10px}
+.task-reports .report-picker-head{font-size:14px;margin:0}
+.task-pointed+.report-picker{border-top:1px solid var(--line);padding-top:10px}
+.report-picker>.hint{margin:4px 0 0}
+.report-pick-list{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.report-pick{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;min-height:36px;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:7px 12px;cursor:pointer;color:var(--ink);font:inherit}
+.report-pick:hover,.report-pick:focus-visible{border-color:var(--accent)}
+.report-pick[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
+.report-pick-title{max-width:100%;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-weight:600}
+.report-pick-meta{font-size:12px;color:var(--muted)}
+.task-pointed{display:flex;flex-direction:column;gap:2px}
+.task-pointed>.source-meta{margin:2px 0}
+.task-pointed .alert{margin:4px 0 0}
+.task-pointed details{margin:2px 0 0}
+.task-pointed details>summary,#task-view-report-help>summary{padding:6px 0}
+.report-lead{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;margin:0}
+.report-source+.report-source{margin-top:8px}
+.report-lead:not(.whole){display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.report-lead-note{font-size:12px;color:var(--muted);margin:2px 0 4px}
+.report-source details>summary,.task-pointed details>summary,#task-view-report-help>summary{cursor:pointer;color:var(--accent);font-size:13px}
+.task-more{display:flex;flex-direction:column;gap:8px}
+.task-more h2{font-size:16px;margin:0}
