@@ -1,8 +1,8 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-16 제품12 수용 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-16 제품13 한정 수용·통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint에 PC 읽기·명시 편집·지도 복귀를 반영했다.** [PR #3](https://github.com/tlsee0813-cmd/agentflow-studio/pull/3) · [제품12 결과·검증·한계](cycles/2026-10-16-product-reading-return-12/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
+**제품 기준 checkpoint에 PC 읽기·명시 편집·지도 복귀와 첫 화면 지도 공간·도구 접근 개선을 반영했다.** [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
 
 ## 제품 목적과 현재 범위
 
@@ -14,7 +14,7 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합 ecf586c8](https://github.com/tlsee0813-cmd/agentflow-studio/commit/ecf586c8a2235e4f4c570cab13bf0dbdc4004003), 제품 소스 [9613208f](https://github.com/tlsee0813-cmd/agentflow-studio/commit/9613208f40f1f7f8506504ac6025f06e421edd4d) | USE106 위 제품12 UI·검사·CI5파일 반영. [결과](cycles/2026-10-16-product-reading-return-12/RESULT.md) |
+| 제품 기준 checkpoint | [병합 60c42c2c](https://github.com/tlsee0813-cmd/agentflow-studio/commit/60c42c2c2886ae7cd3f40c0cd895cadc937a2f57), 제품 소스 [60612050](https://github.com/tlsee0813-cmd/agentflow-studio/commit/606120500eeea50a20f00fb4678bced7a7d93d98) | 제품12 위 제품13 PC 지도 공간·상단 펼침·도구 접근 개선. [한정 수용 결과](cycles/2026-10-16-pc-map-space-13/RESULT.md) |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
@@ -23,6 +23,12 @@
 | [과거 Draft PR #2](https://github.com/tlsee0813-cmd/agentflow-studio/pull/2) | `flow049/outcome-home@f0fa5326` → `init-003/fix-review-regressions@61c3b2f0` | 과거 목적 홈 단계, closed·미병합. 본문·댓글 보존. 최신 제품 통합 PR 아님 |
 
 USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·gh-pages는 그대로 유지하고, 기존22개 브랜치는 [태그 보관·SHA 검증 후 정리](REPOSITORY_ARCHIVE.md)했다. PR #1·#2는 미병합으로 닫았다. 이전 인계 당시 사용자 개편안 대기 상태였으며, 이후 연구는 [ACTIVE](cycles/ACTIVE.md)에 기록한다.
+
+## 제품13 검증과 수용 경계
+
+최종60612050의 Windows·Ubuntu CI가 성공했다. 독립 고정8장면에서 같은 도구 검사가 v0 6실패, fix1 전부 통과했다. 안내·기록 펼침·선택상세·긴 내용 표본과 실제 확대/축소/맞춤을 확인했고 대표 복귀4경로를 재확인했다. 원래 ‘선택 카드 자체 접근’ strict 조건은 여전히 실패하며, 패널에서 읽고 닫아 복귀하는 통과와 섞지 않는다. 첫 화면 지도 공간·도구 접근 개선을 한정 수용했다. [결과와 공유 증거](cycles/2026-10-16-pc-map-space-13/RESULT.md).
+
+사용자의 현재 평가 기준은 Dify 실제 조작 비교다. 사람 사용 기록 제출을 추가 관문으로 두지 않는다. Dify의 실행 워크플로와 우리의 구성·변경·인계 지도 목적을 구분하며, 이 비교를 사람 대상 연구를 수행했다는 뜻으로 기록하지 않는다.
 
 ## 제품12 검증
 
@@ -58,7 +64,7 @@ C2는 해당 표본 통과, C1은 부분 개선이나 전체 흐름 미입증, C
 - 브라우저 로컬 저장·백업/복구는 있으나 계정 간 동기화는 없다. quota 오류 뒤 메모리에만 남은 변경을 영구 저장으로 약속하지 않는다.
 - MOCK의 의미 오해와 원문 조건·미정의 완전한 자동 추출은 해결됐다고 주장하지 않는다. 실제 AI 후보도 위 의미 품질 한계가 남았다.
 - 실제 고객의 시간 절감·효용, 일반 모델 정확도·운영 준비는 미검증이다. AI의 역할 수행 검사와 사람의 실제 개발 사용성 검사는 다르다.
-- PC 첫 화면의 지도 공간과 상세 읽기 부담은 다음 개선 범위다. 현재 배정·진행 여부는 [ACTIVE](cycles/ACTIVE.md)를 본다. 이전 정지 문구와 별개로 사용자가 연구·개발 재개를 지시했다.
+- PC 첫 화면 공간과 도구 접근은 제품13에서 한정 개선했다. 선택 카드의 화면 내 접근, 상세 읽기 부담, 새 외부 기록과 사용자 수정의 통합은 남아 있다. 현재 배정·진행 여부는 [ACTIVE](cycles/ACTIVE.md)를 본다. 이전 정지 문구와 별개로 사용자가 연구·개발 재개를 지시했다.
 
 ## 근거와 과거 기록
 
