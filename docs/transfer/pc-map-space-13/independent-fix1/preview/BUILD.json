@@ -1,0 +1,83 @@
+{
+  "source_commit": "606120500eeea50a20f00fb4678bced7a7d93d98",
+  "build_script": "app/continuity/scripts/build-static.mjs",
+  "build_command": "PATH=/workspace/browser-env/tools/node_modules/.bin:$PATH node continuity/scripts/build-static.mjs",
+  "working_directory": "app",
+  "actual_tool_process_exit": 0,
+  "tool_session": 81025,
+  "recorded_at_utc": "2026-10-16T06:19:39.413101+00:00",
+  "artifacts": [
+    {
+      "path": "client/app.js",
+      "bytes": 196150,
+      "sha256": "c1f6b88b2b14a4cb661496b849180cb796dd60cb19de357ed7aaaccf559ec64c",
+      "artifact_directory": "app/continuity/static-dist",
+      "native_dist_bytes_equal": true
+    },
+    {
+      "path": "styles.css",
+      "bytes": 55354,
+      "sha256": "44f1140b629c9f7379851110770da0bc90182a6d68cdb3c1220bb3d54bd69576",
+      "artifact_directory": "app/continuity/static-dist",
+      "native_dist_bytes_equal": true
+    }
+  ],
+  "runtime_context": "Static MOCK runtime adapter (client/runtime.js) and CSP/index/assets inherited from product12 static preview. Do not serve using native server runtime adapter. app.js bytes may equal native compile; adapter resolution decides mock versus HTTP behavior. These exact files were copied from static-dist after build-static, not native dist.",
+  "unchanged_other_static_files_checked_not_uploaded": [
+    {
+      "path": "index.html",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": ".nojekyll",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/attention.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/domain.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/outcome.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/mock.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/storage.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/plan-facts.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/validation.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/guidance.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "shared/types.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "client/runtime.js",
+      "same_as_existing_product12_static": true
+    },
+    {
+      "path": "client/presentation.js",
+      "same_as_existing_product12_static": true
+    }
+  ],
+  "usage": "Overlay client/app.js and styles.css onto existing product12 STATIC MOCK runtime at same relative paths. Keep existing client/runtime.js (browser MOCK), shared modules, index.html and CSP; serve by loopback static HTTP. These two files alone are not a standalone runtime.",
+  "new_install": false,
+  "browser_retest": "NOT_RUN for overlaid root preview; build and dependency-byte comparison only. Main independent validation completed earlier; no deployment."
+}
