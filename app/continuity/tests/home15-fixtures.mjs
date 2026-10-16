@@ -35,4 +35,13 @@ write('home15-six.json',[A(),B(),C(),D(),E(),F()].map(p=>entry(p)));
 write('home15-one.json',[entry(A())]);
 write('home15-zero.json',[entry(B(),'trashed')]);
 write('home15-ab.json',[entry(A()),entry(B())]);
+// HOME15 follow-up: two cards with the same long name/purpose prefix whose distinguishing ends are clamped away on the card,
+// one with HTML-like characters and a long unbroken string, one without a purpose. Older times, so they sit at the list end.
+const PREFIX='지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 시범 사업';
+const LONG='동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. '.repeat(14);
+const P1=()=>build({name:`${PREFIX} · 강남 지점`,brief:`${LONG}\n\n끝 문장: 강남 지점은 현장 결제만 받는다.`,areas:['주문'],when:'2026-10-02T01:00:00.000Z'});
+const P2=()=>build({name:`${PREFIX} · 마포 지점`,brief:`${LONG}\n\n끝 문장: 마포 지점은 선결제만 받는다.`,areas:['주문'],when:'2026-10-01T01:00:00.000Z'});
+const P3=()=>build({name:'<b>굵게</b> & "따옴표" <script>x</script> 표시 시험',brief:`<img src=x onerror="document.title='XSS'"> 태그처럼 보이는 글자    긴 공백 뒤 ${'가'.repeat(30)}${'W'.repeat(240)} 끝`,when:'2026-09-30T01:00:00.000Z'});
+const P4=()=>build({name:`${PREFIX} · 목적 없음`,request:'첨부 파일 칸을 추가해줘. 이 요청은 목적이 아니다.',when:'2026-09-29T01:00:00.000Z'});
+write('home15-read.json',[A(),B(),C(),D(),E(),F(),P1(),P2(),P3(),P4()].map(p=>entry(p)));
 console.log('home15 fixtures written');

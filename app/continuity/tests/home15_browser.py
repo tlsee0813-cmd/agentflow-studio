@@ -5,7 +5,8 @@ Checks: layout numbers of the contract, what each card says (name, purpose = spa
 named as the work-record time it is), card click / keyboard open -> that project's space (or the existing start path), back to
 the list with that card focused, the '더보기' menu never opening a card, and that opening/returning writes nothing.
 Every measured value is appended to home15-observations.jsonl before it is asserted. Screens: home15-<w>-<scene>.png.
-Run from app/: node continuity/tests/home15-fixtures.mjs continuity/test-results && python continuity/tests/home15_browser.py
+Follow-up: '이름·목적 전체 보기' in the card's '더보기' opens a read-only window (test_08/09, read-open PNG).
+Run from app/: python continuity/tests/home15_browser.py (writes the fixtures first)
 """
 import json, subprocess, unittest
 from playwright.sync_api import expect
@@ -186,6 +187,104 @@ class Home15(unittest.TestCase):
         self.check('unreadable list left as it was',self.page.evaluate('()=>localStorage.getItem("agentflow.idea015.workspace")'),'{broken')
 
 
+    # ---------- HOME15 follow-up: full name and purpose before entering ----------
+    def visible_text(self,el_id,needle):
+        """Real visibility of a text part: its rects lie inside the dialog body's visible box and hit-test to the element."""
+        return self.page.evaluate("""([id,needle])=>{const el=document.getElementById(id),t=el.firstChild;if(!t)return {found:false};
+          const i=t.textContent.indexOf(needle);if(i<0)return {found:false};const r=document.createRange();r.setStart(t,i);r.setEnd(t,i+needle.length);
+          const b=r.getBoundingClientRect(),v=document.getElementById('project-read-body').getBoundingClientRect(),x=b.left+Math.min(b.width/2,8),y=b.top+b.height/2;
+          const h=document.elementFromPoint(x,y);
+          return {found:true,inside:b.top>=v.top-1&&b.bottom<=v.bottom+1&&b.left>=v.left-1&&b.right<=v.right+1,hit:!!h&&(h===el||el.contains(h)),rect:[b.left,b.top,b.right,b.bottom],body:[v.left,v.top,v.right,v.bottom]}}""",[el_id,needle])
+    def dialog_geom(self):
+        return self.page.evaluate("""()=>{const d=document.getElementById('project-read'),b=document.getElementById('project-read-body'),r=d.getBoundingClientRect();
+          return {open:d.open,rect:[r.left,r.top,r.right,r.bottom],vw:innerWidth,vh:innerHeight,bodyScroll:b.scrollTop,bodyOverflowX:b.scrollWidth-b.clientWidth,
+            canScroll:b.scrollHeight>b.clientHeight,docWidth:document.documentElement.scrollWidth,active:document.activeElement&&(document.activeElement.id||document.activeElement.className),
+            inDialog:d.contains(document.activeElement),route:document.body.dataset.route,winY:scrollY}}""")
+    def read_card(self,name):return self.page.locator('#project-list .project-card').filter(has=self.page.locator('.project-card-name',has_text=name))
+    def envelope_project(self,name_part):
+        return next(e['project'] for e in json.loads(self.envelope())['entries'] if name_part in e['project']['name'])
+
+    def test_08_read_full_name_and_purpose_before_entering(self):
+        self.install('read');before=self.envelope();alerts=[];self.page.on('dialog',lambda d:(alerts.append(d.message),d.dismiss()))
+        a=self.read_card('강남 지점');b=self.read_card('마포 지점')
+        self.check('card keeps its 2-line clamp (suffix cut on the card)',a.locator('.project-card-name').evaluate('(e)=>e.scrollHeight>e.clientHeight+1'),True)
+        a.scroll_into_view_if_needed();self.page.mouse.wheel(0,120);self.page.wait_for_timeout(150);y0=self.page.evaluate('scrollY')
+        self.check_true('list scrolled before opening',y0>0,y0)
+        a.locator('.project-more-button').click();a.locator('.project-read-open').click()
+        g=self.dialog_geom();self.record('actual','A opened',g)
+        self.check('opened by click: dialog open, menu closed, still the list',[g['open'],a.locator('.project-more').evaluate('e=>e.open'),g['route']],[True,False,'projects'])
+        self.check('focus starts at the top of the text (name first)',[g['active'],g['bodyScroll']],['project-read-body',0])
+        full=self.envelope_project('강남 지점')
+        self.check('A full name',self.page.locator('#project-read-name').text_content(),full['name'])
+        self.check('A full purpose (plain text)',self.page.locator('#project-read-purpose').text_content(),full['space']['brief']['text'])
+        v=self.visible_text('project-read-name','· 강남 지점');self.check_true('A name suffix actually visible',v['inside'] and v['hit'],v)
+        self.check_true('long purpose scrolls inside the window, no sideways overflow',g['canScroll'] and g['bodyOverflowX']<=0 and g['docWidth']<=g['vw'],g)
+        self.check_true('window inside the viewport',g['rect'][0]>=0 and g['rect'][2]<=g['vw'] and g['rect'][1]>=0 and g['rect'][3]<=g['vh'],g['rect'])
+        self.shot('read-open')
+        end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만');self.check('purpose end not visible before scrolling',end['inside'],False)
+        # Keyboard only: PageDown steps through the text, End reaches the distinguishing end, Home goes back to the name.
+        tops=[]
+        for _ in range(2):self.page.keyboard.press('PageDown');self.page.wait_for_timeout(150);tops.append(self.dialog_geom()['bodyScroll'])
+        self.check_true('PageDown scrolls the text (it may already reach the end)',tops[0]>0 and tops[1]>=tops[0],tops)
+        self.page.keyboard.press('End');self.page.wait_for_timeout(250);end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만')
+        self.check_true('End: purpose end actually visible',end['inside'] and end['hit'],end)
+        self.page.keyboard.press('Home');self.page.wait_for_timeout(250);v=self.visible_text('project-read-name','· 강남 지점')
+        self.check_true('Home: back to the full name',v['inside'] and v['hit'],v)
+        box=self.page.locator('#project-read-body').bounding_box();self.page.mouse.move(box['x']+box['width']/2,box['y']+box['height']/2)
+        for _ in range(30):self.page.mouse.wheel(0,400)
+        self.page.wait_for_timeout(200);end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만')
+        self.check_true('wheel: purpose end visible after scrolling inside',end['inside'] and end['hit'],end)
+        self.check('background list did not scroll',round(self.page.evaluate('scrollY')),round(y0))
+        self.page.locator('#project-read-name').click(click_count=3)
+        self.check_true('name selectable as text','강남 지점' in self.page.evaluate('getSelection().toString()'))
+        trail=[]
+        for key in ['Tab','Tab','Tab','Shift+Tab','Shift+Tab','Shift+Tab']:self.page.keyboard.press(key);trail.append(self.dialog_geom()['inDialog'])
+        self.check('Tab/Shift+Tab never reach the background',trail,[True]*6)
+        self.page.keyboard.press('Escape');g=self.dialog_geom()
+        self.check('Escape closes, list stays at the same scroll',[g['open'],g['route'],round(g['winY'])],[False,'projects',round(y0)])
+        expect(a.locator('.project-more-button')).to_be_focused();self.check('reading wrote nothing',self.envelope(),before)
+        # B by keyboard only: Enter on its menu button, Tab to the item, Space.
+        b.locator('.project-more-button').focus();self.page.keyboard.press('Enter');self.page.keyboard.press('Tab')
+        expect(b.locator('.project-read-open')).to_be_focused();self.page.keyboard.press('Space')
+        g=self.dialog_geom();self.check('B opened by Space, body back at the top',[g['open'],g['bodyScroll']],[True,0])
+        expect(self.page.locator('#project-read')).not_to_contain_text('강남');expect(self.page.locator('#project-read-name')).to_contain_text('· 마포 지점')
+        self.page.keyboard.press('Tab');expect(self.page.locator('#project-read-close')).to_be_focused();self.page.keyboard.press('Enter')
+        expect(self.page.locator('#project-read')).not_to_be_visible();expect(b.locator('.project-more-button')).to_be_focused()
+        # HTML-like characters and a long unbroken string: text, not markup; no overflow.
+        c=self.read_card('표시 시험');c.locator('.project-more-button').click();c.locator('.project-read-open').click()
+        self.check('name shown literally',self.page.locator('#project-read-name').text_content(),'<b>굵게</b> & "따옴표" <script>x</script> 표시 시험')
+        self.check('no markup created',self.page.locator('#project-read img, #project-read b, #project-read script').count(),0)
+        g=self.dialog_geom();self.check_true('no horizontal overflow with a long unbroken string',g['bodyOverflowX']<=0 and g['docWidth']<=g['vw'],g)
+        self.page.locator('#project-read-close').click()
+        # No purpose: says so, never the request.
+        d=self.read_card('목적 없음');d.locator('.project-more-button').click();d.locator('.project-read-open').click()
+        expect(self.page.locator('#project-read-purpose')).to_have_text('목적을 아직 적지 않았어요');expect(self.page.locator('#project-read')).not_to_contain_text('첨부 파일')
+        self.page.mouse.click(5,5) # the backdrop
+        expect(self.page.locator('#project-read')).not_to_be_visible();expect(d.locator('.project-more-button')).to_be_focused()
+        self.check('no script ran, all reads wrote nothing',[alerts,self.page.title().startswith('XSS'),self.envelope()==before],[[],False,True])
+        # The usual entry still works from the same card.
+        a.locator('.project-card-purpose').click();expect(self.page.locator('#space-view')).to_be_visible()
+
+    def test_09_another_tab_changes_while_reading(self):
+        self.install('read');a=self.read_card('강남 지점')
+        a.locator('.project-more-button').click();a.locator('.project-read-open').click();expect(self.page.locator('#project-read')).to_be_visible()
+        other=self.ctx.new_page();other.goto(self.url);expect(other.locator('#projects-view')).to_be_visible()
+        oa=other.locator('#project-list .project-card').filter(has=other.locator('.project-card-name',has_text='강남 지점'))
+        other.once('dialog',lambda d:d.accept());oa.locator('.project-more-button').click();oa.locator('.project-trash').click()
+        expect(other.locator('#list-notice')).to_contain_text('휴지통으로 옮겼어요');base.saved(other);after_trash=self.envelope();other.close()
+        self.page.locator('#project-read-close').click();expect(a.locator('.project-more-button')).to_be_focused()
+        self.check('closing a stale window saves nothing',self.envelope(),after_trash)
+        # The stale card shows no reading, and nothing is attached to another card.
+        a.locator('.project-more-button').click();a.locator('.project-read-open').click()
+        expect(self.page.locator('#project-read')).not_to_be_visible();expect(self.page.locator('#list-notice')).to_contain_text('다른 탭에서 바뀌어')
+        expect(self.page.locator('#projects-title')).to_be_focused();self.check('still nothing saved',self.envelope(),after_trash)
+        # A purpose changed elsewhere is read fresh when the window opens (not the old list text).
+        raw=json.loads(self.envelope());e=next(x for x in raw['entries'] if '마포 지점' in x['project']['name'])
+        e['project']['space']['brief']['text']='다른 탭에서 바꾼 목적 · 마포 끝';self.page.evaluate('(r)=>localStorage.setItem("agentflow.idea015.workspace",r)',json.dumps(raw,ensure_ascii=False))
+        b=self.read_card('마포 지점');b.locator('.project-more-button').click();b.locator('.project-read-open').click()
+        expect(self.page.locator('#project-read-purpose')).to_have_text('다른 탭에서 바꾼 목적 · 마포 끝')
+        self.page.keyboard.press('Escape');self.check('nothing written back by this tab',json.loads(self.envelope()),raw)
+
 class Home15Wide(Home15):
     WIDTH,HEIGHT=1440,900
 
@@ -202,7 +301,10 @@ class Home15Narrow(unittest.TestCase):
         for b in ['#new-project','.project-more-button >> nth=0']:
             box=self.page.locator(b).bounding_box();self.assertGreaterEqual(min(box['width'],box['height']),32)
         self.page.screenshot(path=str(base.OUT/'home15-390-six.png'),full_page=True)
-        self.page.locator('.project-card').first.locator('.project-card-purpose').click();expect(self.page.locator('#space-view')).to_be_visible()
+        first=self.page.locator('.project-card').first;first.locator('.project-more-button').click();first.locator('.project-read-open').click()
+        r=self.page.locator('#project-read').bounding_box();self.assertGreaterEqual(r['x'],0);self.assertLessEqual(r['x']+r['width'],390)
+        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390);self.page.keyboard.press('Escape')
+        first.locator('.project-card-purpose').click();expect(self.page.locator('#space-view')).to_be_visible()
 
 
 if __name__=='__main__':unittest.main(verbosity=2)
