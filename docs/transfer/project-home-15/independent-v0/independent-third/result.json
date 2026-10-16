@@ -1,0 +1,392 @@
+{
+  "start": "2026-10-16T07:31:38.043195+00:00",
+  "fixture_installation": "isolated localStorage workspace installation, not a user UI action",
+  "scenes": [
+    {
+      "id": "1280-zero",
+      "raw": {
+        "y": 0,
+        "max": 0,
+        "active": "<body data-route=\"projects\" data-starting=\"false\" data-compact=\"false\" data-layer=\"\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <div class=\"space-label\"><span class=\"workspace-avatar\" aria-hidden=\"true\">W</span><span>내 작업 공간<small>이 브라우저의 프로젝트</small></span></div>\n      <p class=\"nav-caption\">프로젝트</p>\n      <nav class=\"navigation\" aria-label=\"프로젝트 화면\">\n        <button id=\"nav-projects\" class=\"nav-item active\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 6h7l2 2h9v11H3z\"></path></svg><span>내 프로젝트</span></button>\n        <button id=\"nav-space\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><rect x=\"14\" y=\"4\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><rect x=\"8.5\" y=\"14\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><path d=\"M6.5 10v2h11v-2M12 12v2\"></path></svg><span>전체 공간</span><span id=\"nav-area-count\" class=\"nav-count\">0</span></button>\n        <button id=\"nav-work\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg><span>현재 작업</span><span class=\"nav-arrow\" aria-hidden=\"true\">↗</span></button>\n        <button id=\"nav-context\" class=\"nav-item\" aria-expanded=\"false\" aria-controls=\"context-panel\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 3h11l3 3v15H5zM9 8h6M9 12h6M9 16h4\"></path></svg><span>기준 · 출처</span><span id=\"nav-basis-count\" class=\"nav-count\">0</span></button>\n        <button id=\"nav-history\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11a9 9 0 1 1 2 7M3 5v6h6M12 7v5l3 2\"></path></svg><span>지난 요청과 결과</span><span id=\"nav-history-count\" class=\"nav-count\">0</span></button>\n      </nav>\n      <div class=\"sidebar-current\"><span class=\"small-label\">지금 이어가는 프로젝트</span><strong id=\"sidebar-project\">나의 프로젝트</strong><p id=\"sidebar-task\">첫 작업을 기다리고 있어요.</p></div>\n      <div class=\"sidebar-bottom\"><div class=\"handoff-symbol\" aria-hidden=\"true\">↗</div><strong>쓰던 도구에서, 계속.</strong><p>여기서 준비한 작업문을<br>사용 중인 개발 도구에 전달하세요.</p><span class=\"local-badge\">복사 · 붙여넣기 방식</span></div>\n    </aside>\n    <div class=\"app-body\">\n      <header class=\"topbar\">\n        <div class=\"breadcrumb\"><button type=\"button\" id=\"to-projects\" class=\"crumb-link\">내 프로젝트</button><span id=\"breadcrumb-sep\" aria-hidden=\"true\" hidden=\"\">/</span><strong id=\"breadcrumb-project\" hidden=\"\">나의 프로젝트</strong></div>\n        <div id=\"topbar-actions\" class=\"topbar-actions\"></div>\n      </header>\n      <main id=\"main\" class=\"shell\" tabindex=\"-1\">\n        <div id=\"example-banner\" class=\"alert example-banner\" role=\"status\" hidden=\"\"><strong>예제 둘러보기</strong><span>내 프로젝트가 아닌 예제예요. 저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 내 프로젝트를 시작하면 빈 상태에서 시작해요.</span><div class=\"row\"><button type=\"button\" id=\"example-start\" class=\"primary\">내 프로젝트 시작하기</button><button type=\"button\" id=\"example-close\" class=\"quiet\">예제 닫기</button></div></div>\n        <section class=\"project-head\" aria-label=\"현재 프로젝트\" hidden=\"\">\n          <div class=\"project-heading\"><p class=\"eyebrow\">PROJECT WORKSPACE</p><label for=\"project-name\" class=\"sr-only\">프로젝트 이름</label><div class=\"project-title\"><input id=\"project-name\" value=\"나의 프로젝트\" maxlength=\"120\" class=\"project-name\" aria-describedby=\"name-hint\"><span aria-hidden=\"true\" class=\"pencil\">↙</span></div><span id=\"name-hint\" class=\"sr-only\">이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.</span><p class=\"subtitle\">앞에서 정한 것은 남기고, 지금 필요한 작업부터.</p></div>\n          <div class=\"project-tools\"><span id=\"saved\" class=\"saved\" role=\"status\" title=\"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\">이 브라우저에 자동 저장</span><div class=\"row\"><button id=\"new-project-top\" class=\"quiet\">＋ 새 프로젝트</button><button id=\"backup\" class=\"quiet\" title=\"이 프로젝트 전체를 JSON 파일로 저장\" hidden=\"\">↓ 백업 파일 저장</button><button id=\"import\" class=\"quiet\" title=\"백업 파일을 새 프로젝트 사본으로 추가합니다. 지금 프로젝트는 바뀌지 않습니다.\">↑ 백업 파일 불러오기</button><button id=\"trash-current\" class=\"quiet\" hidden=\"\">휴지통으로 옮기기</button></div><input id=\"import-file\" type=\"file\" accept=\"application/json,.json\" hidden=\"\"></div>\n        </section>\n        <div class=\"feedback-stack\" hidden=\"\"><div id=\"storage-error\" class=\"alert error\" role=\"alert\" hidden=\"\"></div><div id=\"notice\" class=\"alert\" role=\"status\" hidden=\"\"></div></div>\n        \n        <section id=\"projects-view\" class=\"projects-view\" aria-labelledby=\"projects-title\">\n          <div class=\"view-heading home-heading\"><h1 id=\"projects-title\" tabindex=\"-1\">내 프로젝트 <span id=\"projects-count\" class=\"home-count\" aria-hidden=\"true\"></span></h1><div id=\"home-actions\" class=\"home-actions\"><details id=\"connection-details\" class=\"connection-details\"><summary><span class=\"mode-dot\" aria-hidden=\"true\"></span><span id=\"mode\">MOCK · 체험 모드</span><span aria-hidden=\"true\">⌄</span></summary><div class=\"connection-popover\"><strong>작업문 정리 방식</strong><p id=\"mode-description\" class=\"hint\">규칙 기반 모의 정리입니다. 실제 AI 해석이나 외부 전송 없이 화면 흐름을 시험합니다.</p><label id=\"consent-area\" class=\"consent\" hidden=\"\"><input type=\"checkbox\" id=\"consent\"><span>현재 프로젝트 문맥을 DeepSeek에 전송하는 데 동의합니다. 서버에서 허용된 API 비용이 발생할 수 있습니다.</span></label><p class=\"hint\">외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.</p></div></details><button type=\"button\" id=\"new-project\" class=\"primary\">＋ 새 프로젝트</button></div></div>\n          <div id=\"list-notice\" class=\"alert\" role=\"status\" hidden=\"\"><span id=\"list-notice-text\"></span> <button type=\"button\" id=\"undo-trash\" class=\"quiet\" hidden=\"\">되돌리기</button></div>\n          <ul id=\"project-list\" class=\"project-list\"><li class=\"hint project-empty\">아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 아래에서 예제를 둘러보세요.</li></ul>\n          <div class=\"row list-tools\"><button type=\"button\" id=\"list-import\" class=\"quiet\">↑ 백업 파일 불러오기 (새 사본으로 추가)</button><button type=\"button\" id=\"list-example\" class=\"quiet\">예제 둘러보기 · 저장 안 됨</button></div>\n          <details id=\"trash-section\" class=\"trash-section\"><summary>휴지통 <span id=\"trash-count\" class=\"count\">1</span></summary><p class=\"hint\">휴지통의 프로젝트는 원문·기준·요청·돌아온 결과가 그대로 남아 있고, 되살리면 그대로 돌아와요. 휴지통에 있어도 이 브라우저의 저장 공간은 그대로 사용해요. 사이트 데이터를 지우면 휴지통도 함께 사라지니, 오래 보관하려면 백업 파일을 저장하세요. 이번 버전에는 영구 삭제가 없어요.</p><ul id=\"trash-list\" class=\"project-list\"><li class=\"project-card\" data-entry-id=\"E_home15-0008\"><div class=\"project-card-head\"><span class=\"project-mark\" aria-hidden=\"true\">독</span><strong class=\"project-card-name\" title=\"독서 모임 일정 도우미\">독서 모임 일정 도우미 <span class=\"tag \">휴지통</span></strong></div><p class=\"project-card-purpose\" title=\"매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱\">매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱</p><p class=\"project-card-meta\"><span class=\"project-card-time\" title=\"요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.\">작업 기록 · 10월 15일 09:05</span><span class=\"project-card-areas\">영역 1개</span></p><div class=\"row project-card-actions\"><button class=\"secondary project-restore\" type=\"button\">되살리기</button></div></li></ul></details>\n        </section>\n        <section id=\"space-view\" class=\"space-view\" aria-label=\"전체 공간\" hidden=\"\"></section>\n        <div id=\"work-view\" hidden=\"\">\n          <nav id=\"work-place\" class=\"work-place\" aria-label=\"공간 위치\" hidden=\"\"></nav>\n              <div id=\"pending-bar\" class=\"pending-bar\" hidden=\"\"><span class=\"spinner\" aria-hidden=\"true\"></span><span id=\"working\" role=\"status\"></span><button type=\"button\" id=\"cancel\" class=\"quiet\" hidden=\"\">정리 중단</button></div>\n          <section class=\"context-bar\" aria-label=\"지금 할 일\"><div class=\"context-top\"><div><span id=\"task-number\" class=\"eyebrow\">첫 작업</span><h1 id=\"context-title\">아이디어에서, 첫 작업으로.</h1><p id=\"context-sub\">만들고 싶은 것 또는 바꾸고 싶은 것을 적어 주세요.</p></div><span id=\"stage-label\" class=\"tag purple\" data-stage=\"empty\">시작하기</span></div><div id=\"next-actions\" class=\"next-actions\"></div><details id=\"last-result\" class=\"last-result\" hidden=\"\"><summary id=\"last-result-summary\">최근 가져온 결과</summary><div id=\"last-result-text\" class=\"source-raw\"></div></details></section>\n          <section id=\"outcome-home\" class=\"card outcome-home\" aria-label=\"목적 중심 프로젝트 홈\" tabindex=\"-1\" hidden=\"\"></section>\n          <div id=\"workspace\" class=\"workspace\">\n            <div class=\"main-column\">\n              <section id=\"empty\" class=\"empty welcome\" aria-labelledby=\"welcome-title\"><div><p class=\"eyebrow\">AGENTFLOW STUDIO</p><h2 id=\"welcome-title\">AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.</h2><p id=\"welcome-text\">만들고 싶은 것을 평소 말로 적으면, Claude Code·Cursor 같은 개발 도구에 붙여넣을 작업문을 만들어 드려요. 도구가 돌려준 결과를 가져오면 앞에서 정한 것을 이어서 다음 작업문을 준비해요.</p><form id=\"brief-form\" class=\"brief-form\"><label for=\"brief-input\">무엇을 만드나요? <small>프로젝트 목적 · 작업 요청과 따로 보관해요</small></label><textarea id=\"brief-input\" rows=\"2\" maxlength=\"12000\" placeholder=\"예: 동네 미용실 손님이 휴대폰으로 날짜와 시간을 골라 예약하는 서비스\"></textarea><div class=\"row\"><button type=\"submit\" id=\"brief-start\" class=\"primary\" disabled=\"\">영역 나누러 가기</button><span class=\"hint\">큰 영역(예: 예약, 알림)으로 나눈 뒤 영역마다 요청을 이어가요. 아래에서 바로 첫 요청을 준비해도 입력한 목적을 함께 저장해요. 목적은 선택이며, 요청의 배경으로만 보관해요.</span></div></form><div class=\"row\"><button type=\"button\" id=\"open-example\" class=\"quiet\">예제 둘러보기 · 저장 안 됨</button></div></div></section>\n\n              <section id=\"work\" aria-label=\"현재 작업\" aria-live=\"polite\" aria-busy=\"false\"></section>\n              <details id=\"compose-panel\" class=\"card compose-panel\" open=\"\"><summary id=\"compose-summary\"><span>＋ 새 요청 · 돌아온 결과 붙여넣기</span><small id=\"compose-draft-status\"></small></summary><section class=\"compose-card\"><div class=\"section-heading\"><div><p id=\"compose-eyebrow\" class=\"eyebrow\">LET'S START</p><h2 id=\"compose-title\">어떤 작업부터 시작할까요?</h2></div><span class=\"compose-icon\" aria-hidden=\"true\">✦</span></div>\n                <form id=\"compose\"><div class=\"tabs\" role=\"group\" aria-label=\"입력 종류\"><button type=\"button\" id=\"request-tab\" class=\"tab selected\" aria-pressed=\"true\">요청 / 다음 변경</button><button type=\"button\" id=\"report-tab\" class=\"tab\" aria-pressed=\"false\">돌아온 결과</button></div>\n                  <div id=\"compose-area-row\" class=\"compose-area\" hidden=\"\"><label for=\"compose-area\">이 요청의 영역</label><select id=\"compose-area\"></select></div>\n                  <p id=\"entry-limits\" class=\"entry-limits\">AI 연결 없음 · 규칙으로 흉내 내는 체험판이에요. 입력은 이 브라우저에만 저장되고 다른 곳으로 보내지 않아요. 작업문을 복사·저장해도 개발 도구가 실행되지는 않아요.</p>\n                  <label class=\"sr-only\" for=\"draft\">요청 또는 돌아온 결과 원문</label><textarea id=\"draft\" rows=\"5\" maxlength=\"12000\" placeholder=\"무엇을 만들고 싶나요? 이미 작업 중이라면, 지금 바꾸고 싶은 부분만 알려주세요.\"></textarea>\n                  <div id=\"return-preview\" hidden=\"\" aria-label=\"결과 연결 안내\"></div>\n                  <div id=\"starter-examples\" class=\"starter-examples\"><span>이렇게 시작해 보세요</span><div class=\"row\"><button type=\"button\" class=\"example\" data-example=\"예약 확정 문구를 ‘신청 완료’에서 ‘예약 완료’로 바꿔줘. 예약 방식은 그대로 유지해줘.\">문구 하나 바꾸기 <span aria-hidden=\"true\">↗</span></button><button type=\"button\" class=\"example\" data-example=\"빈자리가 생기면 대기자를 자동으로 예약해주는 기능을 만들고 싶어요.\">새 기능 구상하기 <span aria-hidden=\"true\">↗</span></button><button type=\"button\" class=\"example\" data-example=\"결제가 실패하는 오류가 있어요. 원인은 아직 모르겠어요.\">문제 해결 시작하기 <span aria-hidden=\"true\">↗</span></button></div></div>\n                  <div class=\"composer-bottom\"><p id=\"input-hint\" class=\"hint\">필요한 질문만 받고, 바로 전달할 작업문을 준비해요.</p><details id=\"source-options\" class=\"source-options\"><summary>출처 구분</summary><label for=\"source-kind\">이 입력은 무엇인가요?</label><select id=\"source-kind\"><option value=\"request\">실제 사용자 요청</option><option value=\"report\">가져온 구현·진행 보고</option><option value=\"evidence\">가져온 관찰·검사 자료</option><option value=\"test_answer\">합성 시험답변 (실제 요구 아님)</option></select></details></div>\n                  <div class=\"composer-actions\"><p class=\"privacy\">비밀번호나 API 키는 넣지 마세요.</p><div class=\"actions\"><button class=\"quiet\" id=\"save-input\" type=\"button\" disabled=\"\" hidden=\"\">원문만 보관</button><button class=\"primary\" id=\"send\" type=\"submit\" disabled=\"\">작업문 준비하기 <span aria-hidden=\"true\">↗</span></button></div></div>\n                </form>\n                <details id=\"result-file-panel\" class=\"file-return-options\"><summary>결과 파일로 가져오기 · 선택</summary>\n                  <p class=\"hint\">파일용 작업문을 전달한 같은 작업에서 받은 결과 JSON을 선택하세요. 프로젝트 전체를 바꾸는 JSON 복구와 다릅니다. 파일이 없으면 기존 붙여넣기를 이용하세요.</p>\n                  <button id=\"select-result-file\" type=\"button\" class=\"secondary\">결과 파일 선택</button><input id=\"result-file-input\" type=\"file\" accept=\"application/json,.json\" hidden=\"\">\n                  <p id=\"result-file-message\" class=\"hint\" role=\"status\"></p><div id=\"result-file-preview\" aria-live=\"polite\"></div>\n                </details>\n              </section></details>\n\n              \n\n            </div>\n            <aside id=\"context-panel\" class=\"context-panel\" aria-label=\"기준과 출처\" hidden=\"\"><div class=\"panel-heading\"><div><p class=\"eyebrow\">PROJECT CONTEXT</p><h2 id=\"panel-title\" tabindex=\"-1\">기준 · 출처</h2></div><button id=\"close-context\" class=\"icon-button\" aria-label=\"기준·출처 닫기\">×</button></div><p class=\"hint\">관련 기준부터 확인하세요. 나머지 원문도 보존됩니다.</p><div class=\"panel-section\"><h3>이어갈 기준 <span id=\"basis-count\" class=\"count\">0</span></h3><div id=\"related-bases\"></div><details id=\"all-bases\"><summary>나머지 기준 · 직접 수정</summary><div id=\"basis-list\"></div></details></div><details id=\"add-basis\"><summary>＋ 기억할 기준 직접 기록</summary><form id=\"basis-form\"><label for=\"basis-draft\">반복해서 지킬 결정이나 제약</label><textarea id=\"basis-draft\" rows=\"3\" maxlength=\"12000\" placeholder=\"예: 예약은 참여 의사를 확인한 뒤에만 확정한다.\"></textarea><p id=\"basis-draft-status\" class=\"manual-note\"></p><button type=\"submit\" class=\"secondary\" disabled=\"\">이 기준 기록</button></form></details><p class=\"panel-note\">사용자가 기록한 기준과 AI 제안은 구분됩니다. 자세한 원문과 이전 값은 각 항목에서 펼쳐 보세요.</p></aside>\n          </div>\n        </div>\n        <section id=\"history-view\" class=\"history-view\" aria-label=\"지난 요청과 결과\" hidden=\"\"><div class=\"view-heading\"><div><p class=\"eyebrow\">PROJECT HISTORY</p><h1 tabindex=\"-1\" id=\"history-title\">지난 요청과 결과</h1><p class=\"hint\">내가 남긴 요청과 가져온 결과, 그때 복사·저장한 작업문 기록이에요. 개발 도구에서 실제로 실행됐는지는 이 앱이 알 수 없어요.</p></div><button id=\"back-to-work\" class=\"secondary\">현재 작업으로</button></div><details id=\"history\" open=\"\"><summary>요청·결과 기록 <span id=\"history-count\" class=\"count\">0</span></summary><div id=\"history-list\"></div></details></section>\n        <footer><span>AgentFlow Studio</span><span>이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일</span></footer>\n      </main>\n    </div>\n  </div>\n\n\n</body>",
+        "selection": [
+          {
+            "id": "request-tab",
+            "text": "요청 / 다음 변경"
+          }
+        ],
+        "matrix": null,
+        "cards": [],
+        "projects": []
+      },
+      "envelope_unchanged": true
+    },
+    {
+      "id": "1280-one",
+      "raw": {
+        "y": 0,
+        "max": 0,
+        "active": "<body data-route=\"projects\" data-starting=\"false\" data-compact=\"false\" data-layer=\"\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <div class=\"space-label\"><span class=\"workspace-avatar\" aria-hidden=\"true\">W</span><span>내 작업 공간<small>이 브라우저의 프로젝트</small></span></div>\n      <p class=\"nav-caption\">프로젝트</p>\n      <nav class=\"navigation\" aria-label=\"프로젝트 화면\">\n        <button id=\"nav-projects\" class=\"nav-item active\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 6h7l2 2h9v11H3z\"></path></svg><span>내 프로젝트</span></button>\n        <button id=\"nav-space\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><rect x=\"14\" y=\"4\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><rect x=\"8.5\" y=\"14\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><path d=\"M6.5 10v2h11v-2M12 12v2\"></path></svg><span>전체 공간</span><span id=\"nav-area-count\" class=\"nav-count\">0</span></button>\n        <button id=\"nav-work\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg><span>현재 작업</span><span class=\"nav-arrow\" aria-hidden=\"true\">↗</span></button>\n        <button id=\"nav-context\" class=\"nav-item\" aria-expanded=\"false\" aria-controls=\"context-panel\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 3h11l3 3v15H5zM9 8h6M9 12h6M9 16h4\"></path></svg><span>기준 · 출처</span><span id=\"nav-basis-count\" class=\"nav-count\">0</span></button>\n        <button id=\"nav-history\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11a9 9 0 1 1 2 7M3 5v6h6M12 7v5l3 2\"></path></svg><span>지난 요청과 결과</span><span id=\"nav-history-count\" class=\"nav-count\">0</span></button>\n      </nav>\n      <div class=\"sidebar-current\"><span class=\"small-label\">지금 이어가는 프로젝트</span><strong id=\"sidebar-project\">나의 프로젝트</strong><p id=\"sidebar-task\">첫 작업을 기다리고 있어요.</p></div>\n      <div class=\"sidebar-bottom\"><div class=\"handoff-symbol\" aria-hidden=\"true\">↗</div><strong>쓰던 도구에서, 계속.</strong><p>여기서 준비한 작업문을<br>사용 중인 개발 도구에 전달하세요.</p><span class=\"local-badge\">복사 · 붙여넣기 방식</span></div>\n    </aside>\n    <div class=\"app-body\">\n      <header class=\"topbar\">\n        <div class=\"breadcrumb\"><button type=\"button\" id=\"to-projects\" class=\"crumb-link\">내 프로젝트</button><span id=\"breadcrumb-sep\" aria-hidden=\"true\" hidden=\"\">/</span><strong id=\"breadcrumb-project\" hidden=\"\">나의 프로젝트</strong></div>\n        <div id=\"topbar-actions\" class=\"topbar-actions\"></div>\n      </header>\n      <main id=\"main\" class=\"shell\" tabindex=\"-1\">\n        <div id=\"example-banner\" class=\"alert example-banner\" role=\"status\" hidden=\"\"><strong>예제 둘러보기</strong><span>내 프로젝트가 아닌 예제예요. 저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 내 프로젝트를 시작하면 빈 상태에서 시작해요.</span><div class=\"row\"><button type=\"button\" id=\"example-start\" class=\"primary\">내 프로젝트 시작하기</button><button type=\"button\" id=\"example-close\" class=\"quiet\">예제 닫기</button></div></div>\n        <section class=\"project-head\" aria-label=\"현재 프로젝트\" hidden=\"\">\n          <div class=\"project-heading\"><p class=\"eyebrow\">PROJECT WORKSPACE</p><label for=\"project-name\" class=\"sr-only\">프로젝트 이름</label><div class=\"project-title\"><input id=\"project-name\" value=\"나의 프로젝트\" maxlength=\"120\" class=\"project-name\" aria-describedby=\"name-hint\"><span aria-hidden=\"true\" class=\"pencil\">↙</span></div><span id=\"name-hint\" class=\"sr-only\">이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.</span><p class=\"subtitle\">앞에서 정한 것은 남기고, 지금 필요한 작업부터.</p></div>\n          <div class=\"project-tools\"><span id=\"saved\" class=\"saved\" role=\"status\" title=\"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\">이 브라우저에 자동 저장</span><div class=\"row\"><button id=\"new-project-top\" class=\"quiet\">＋ 새 프로젝트</button><button id=\"backup\" class=\"quiet\" title=\"이 프로젝트 전체를 JSON 파일로 저장\" hidden=\"\">↓ 백업 파일 저장</button><button id=\"import\" class=\"quiet\" title=\"백업 파일을 새 프로젝트 사본으로 추가합니다. 지금 프로젝트는 바뀌지 않습니다.\">↑ 백업 파일 불러오기</button><button id=\"trash-current\" class=\"quiet\" hidden=\"\">휴지통으로 옮기기</button></div><input id=\"import-file\" type=\"file\" accept=\"application/json,.json\" hidden=\"\"></div>\n        </section>\n        <div class=\"feedback-stack\" hidden=\"\"><div id=\"storage-error\" class=\"alert error\" role=\"alert\" hidden=\"\"></div><div id=\"notice\" class=\"alert\" role=\"status\" hidden=\"\"></div></div>\n        \n        <section id=\"projects-view\" class=\"projects-view\" aria-labelledby=\"projects-title\">\n          <div class=\"view-heading home-heading\"><h1 id=\"projects-title\" tabindex=\"-1\">내 프로젝트 <span id=\"projects-count\" class=\"home-count\" aria-hidden=\"true\">1</span></h1><div id=\"home-actions\" class=\"home-actions\"><details id=\"connection-details\" class=\"connection-details\"><summary><span class=\"mode-dot\" aria-hidden=\"true\"></span><span id=\"mode\">MOCK · 체험 모드</span><span aria-hidden=\"true\">⌄</span></summary><div class=\"connection-popover\"><strong>작업문 정리 방식</strong><p id=\"mode-description\" class=\"hint\">규칙 기반 모의 정리입니다. 실제 AI 해석이나 외부 전송 없이 화면 흐름을 시험합니다.</p><label id=\"consent-area\" class=\"consent\" hidden=\"\"><input type=\"checkbox\" id=\"consent\"><span>현재 프로젝트 문맥을 DeepSeek에 전송하는 데 동의합니다. 서버에서 허용된 API 비용이 발생할 수 있습니다.</span></label><p class=\"hint\">외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.</p></div></details><button type=\"button\" id=\"new-project\" class=\"primary\">＋ 새 프로젝트</button></div></div>\n          <div id=\"list-notice\" class=\"alert\" role=\"status\" hidden=\"\"><span id=\"list-notice-text\"></span> <button type=\"button\" id=\"undo-trash\" class=\"quiet\" hidden=\"\">되돌리기</button></div>\n          <ul id=\"project-list\" class=\"project-list\"><li class=\"project-card openable\" data-entry-id=\"E_home15-0007\"><div class=\"project-card-head\"><span class=\"project-mark\" aria-hidden=\"true\">동</span><button class=\"project-open project-card-name\" type=\"button\" title=\"동네 미용실 예약\" aria-label=\"동네 미용실 예약 · 프로젝트 공간 열기\">동네 미용실 예약</button><details class=\"project-more\" data-no-open=\"\"><summary class=\"project-more-button\" aria-label=\"‘동네 미용실 예약’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary><div class=\"project-more-menu\"><button class=\"quiet project-trash\" type=\"button\">휴지통으로 옮기기</button></div></details></div><p class=\"project-card-purpose\" title=\"손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스\">손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스</p><p class=\"project-card-meta\"><span class=\"project-card-time\" title=\"요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.\">작업 기록 · 10월 16일 05:20</span><span class=\"project-card-areas\">영역 2개</span></p></li></ul>\n          <div class=\"row list-tools\"><button type=\"button\" id=\"list-import\" class=\"quiet\">↑ 백업 파일 불러오기 (새 사본으로 추가)</button><button type=\"button\" id=\"list-example\" class=\"quiet\">예제 둘러보기 · 저장 안 됨</button></div>\n          <details id=\"trash-section\" class=\"trash-section\" hidden=\"\"><summary>휴지통 <span id=\"trash-count\" class=\"count\">0</span></summary><p class=\"hint\">휴지통의 프로젝트는 원문·기준·요청·돌아온 결과가 그대로 남아 있고, 되살리면 그대로 돌아와요. 휴지통에 있어도 이 브라우저의 저장 공간은 그대로 사용해요. 사이트 데이터를 지우면 휴지통도 함께 사라지니, 오래 보관하려면 백업 파일을 저장하세요. 이번 버전에는 영구 삭제가 없어요.</p><ul id=\"trash-list\" class=\"project-list\"></ul></details>\n        </section>\n        <section id=\"space-view\" class=\"space-view\" aria-label=\"전체 공간\" hidden=\"\"></section>\n        <div id=\"work-view\" hidden=\"\">\n          <nav id=\"work-place\" class=\"work-place\" aria-label=\"공간 위치\" hidden=\"\"></nav>\n              <div id=\"pending-bar\" class=\"pending-bar\" hidden=\"\"><span class=\"spinner\" aria-hidden=\"true\"></span><span id=\"working\" role=\"status\"></span><button type=\"button\" id=\"cancel\" class=\"quiet\" hidden=\"\">정리 중단</button></div>\n          <section class=\"context-bar\" aria-label=\"지금 할 일\"><div class=\"context-top\"><div><span id=\"task-number\" class=\"eyebrow\">첫 작업</span><h1 id=\"context-title\">아이디어에서, 첫 작업으로.</h1><p id=\"context-sub\">만들고 싶은 것 또는 바꾸고 싶은 것을 적어 주세요.</p></div><span id=\"stage-label\" class=\"tag purple\" data-stage=\"empty\">시작하기</span></div><div id=\"next-actions\" class=\"next-actions\"></div><details id=\"last-result\" class=\"last-result\" hidden=\"\"><summary id=\"last-result-summary\">최근 가져온 결과</summary><div id=\"last-result-text\" class=\"source-raw\"></div></details></section>\n          <section id=\"outcome-home\" class=\"card outcome-home\" aria-label=\"목적 중심 프로젝트 홈\" tabindex=\"-1\" hidden=\"\"></section>\n          <div id=\"workspace\" class=\"workspace\">\n            <div class=\"main-column\">\n              <section id=\"empty\" class=\"empty welcome\" aria-labelledby=\"welcome-title\"><div><p class=\"eyebrow\">AGENTFLOW STUDIO</p><h2 id=\"welcome-title\">AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.</h2><p id=\"welcome-text\">만들고 싶은 것을 평소 말로 적으면, Claude Code·Cursor 같은 개발 도구에 붙여넣을 작업문을 만들어 드려요. 도구가 돌려준 결과를 가져오면 앞에서 정한 것을 이어서 다음 작업문을 준비해요.</p><form id=\"brief-form\" class=\"brief-form\"><label for=\"brief-input\">무엇을 만드나요? <small>프로젝트 목적 · 작업 요청과 따로 보관해요</small></label><textarea id=\"brief-input\" rows=\"2\" maxlength=\"12000\" placeholder=\"예: 동네 미용실 손님이 휴대폰으로 날짜와 시간을 골라 예약하는 서비스\"></textarea><div class=\"row\"><button type=\"submit\" id=\"brief-start\" class=\"primary\" disabled=\"\">영역 나누러 가기</button><span class=\"hint\">큰 영역(예: 예약, 알림)으로 나눈 뒤 영역마다 요청을 이어가요. 아래에서 바로 첫 요청을 준비해도 입력한 목적을 함께 저장해요. 목적은 선택이며, 요청의 배경으로만 보관해요.</span></div></form><div class=\"row\"><button type=\"button\" id=\"open-example\" class=\"quiet\">예제 둘러보기 · 저장 안 됨</button></div></div></section>\n\n              <section id=\"work\" aria-label=\"현재 작업\" aria-live=\"polite\" aria-busy=\"false\"></section>\n              <details id=\"compose-panel\" class=\"card compose-panel\" open=\"\"><summary id=\"compose-summary\"><span>＋ 새 요청 · 돌아온 결과 붙여넣기</span><small id=\"compose-draft-status\"></small></summary><section class=\"compose-card\"><div class=\"section-heading\"><div><p id=\"compose-eyebrow\" class=\"eyebrow\">LET'S START</p><h2 id=\"compose-title\">어떤 작업부터 시작할까요?</h2></div><span class=\"compose-icon\" aria-hidden=\"true\">✦</span></div>\n                <form id=\"compose\"><div class=\"tabs\" role=\"group\" aria-label=\"입력 종류\"><button type=\"button\" id=\"request-tab\" class=\"tab selected\" aria-pressed=\"true\">요청 / 다음 변경</button><button type=\"button\" id=\"report-tab\" class=\"tab\" aria-pressed=\"false\">돌아온 결과</button></div>\n                  <div id=\"compose-area-row\" class=\"compose-area\" hidden=\"\"><label for=\"compose-area\">이 요청의 영역</label><select id=\"compose-area\"></select></div>\n                  <p id=\"entry-limits\" class=\"entry-limits\">AI 연결 없음 · 규칙으로 흉내 내는 체험판이에요. 입력은 이 브라우저에만 저장되고 다른 곳으로 보내지 않아요. 작업문을 복사·저장해도 개발 도구가 실행되지는 않아요.</p>\n                  <label class=\"sr-only\" for=\"draft\">요청 또는 돌아온 결과 원문</label><textarea id=\"draft\" rows=\"5\" maxlength=\"12000\" placeholder=\"무엇을 만들고 싶나요? 이미 작업 중이라면, 지금 바꾸고 싶은 부분만 알려주세요.\"></textarea>\n                  <div id=\"return-preview\" hidden=\"\" aria-label=\"결과 연결 안내\"></div>\n                  <div id=\"starter-examples\" class=\"starter-examples\"><span>이렇게 시작해 보세요</span><div class=\"row\"><button type=\"button\" class=\"example\" data-example=\"예약 확정 문구를 ‘신청 완료’에서 ‘예약 완료’로 바꿔줘. 예약 방식은 그대로 유지해줘.\">문구 하나 바꾸기 <span aria-hidden=\"true\">↗</span></button><button type=\"button\" class=\"example\" data-example=\"빈자리가 생기면 대기자를 자동으로 예약해주는 기능을 만들고 싶어요.\">새 기능 구상하기 <span aria-hidden=\"true\">↗</span></button><button type=\"button\" class=\"example\" data-example=\"결제가 실패하는 오류가 있어요. 원인은 아직 모르겠어요.\">문제 해결 시작하기 <span aria-hidden=\"true\">↗</span></button></div></div>\n                  <div class=\"composer-bottom\"><p id=\"input-hint\" class=\"hint\">필요한 질문만 받고, 바로 전달할 작업문을 준비해요.</p><details id=\"source-options\" class=\"source-options\"><summary>출처 구분</summary><label for=\"source-kind\">이 입력은 무엇인가요?</label><select id=\"source-kind\"><option value=\"request\">실제 사용자 요청</option><option value=\"report\">가져온 구현·진행 보고</option><option value=\"evidence\">가져온 관찰·검사 자료</option><option value=\"test_answer\">합성 시험답변 (실제 요구 아님)</option></select></details></div>\n                  <div class=\"composer-actions\"><p class=\"privacy\">비밀번호나 API 키는 넣지 마세요.</p><div class=\"actions\"><button class=\"quiet\" id=\"save-input\" type=\"button\" disabled=\"\" hidden=\"\">원문만 보관</button><button class=\"primary\" id=\"send\" type=\"submit\" disabled=\"\">작업문 준비하기 <span aria-hidden=\"true\">↗</span></button></div></div>\n                </form>\n                <details id=\"result-file-panel\" class=\"file-return-options\"><summary>결과 파일로 가져오기 · 선택</summary>\n                  <p class=\"hint\">파일용 작업문을 전달한 같은 작업에서 받은 결과 JSON을 선택하세요. 프로젝트 전체를 바꾸는 JSON 복구와 다릅니다. 파일이 없으면 기존 붙여넣기를 이용하세요.</p>\n                  <button id=\"select-result-file\" type=\"button\" class=\"secondary\">결과 파일 선택</button><input id=\"result-file-input\" type=\"file\" accept=\"application/json,.json\" hidden=\"\">\n                  <p id=\"result-file-message\" class=\"hint\" role=\"status\"></p><div id=\"result-file-preview\" aria-live=\"polite\"></div>\n                </details>\n              </section></details>\n\n              \n\n            </div>\n            <aside id=\"context-panel\" class=\"context-panel\" aria-label=\"기준과 출처\" hidden=\"\"><div class=\"panel-heading\"><div><p class=\"eyebrow\">PROJECT CONTEXT</p><h2 id=\"panel-title\" tabindex=\"-1\">기준 · 출처</h2></div><button id=\"close-context\" class=\"icon-button\" aria-label=\"기준·출처 닫기\">×</button></div><p class=\"hint\">관련 기준부터 확인하세요. 나머지 원문도 보존됩니다.</p><div class=\"panel-section\"><h3>이어갈 기준 <span id=\"basis-count\" class=\"count\">0</span></h3><div id=\"related-bases\"></div><details id=\"all-bases\"><summary>나머지 기준 · 직접 수정</summary><div id=\"basis-list\"></div></details></div><details id=\"add-basis\"><summary>＋ 기억할 기준 직접 기록</summary><form id=\"basis-form\"><label for=\"basis-draft\">반복해서 지킬 결정이나 제약</label><textarea id=\"basis-draft\" rows=\"3\" maxlength=\"12000\" placeholder=\"예: 예약은 참여 의사를 확인한 뒤에만 확정한다.\"></textarea><p id=\"basis-draft-status\" class=\"manual-note\"></p><button type=\"submit\" class=\"secondary\" disabled=\"\">이 기준 기록</button></form></details><p class=\"panel-note\">사용자가 기록한 기준과 AI 제안은 구분됩니다. 자세한 원문과 이전 값은 각 항목에서 펼쳐 보세요.</p></aside>\n          </div>\n        </div>\n        <section id=\"history-view\" class=\"history-view\" aria-label=\"지난 요청과 결과\" hidden=\"\"><div class=\"view-heading\"><div><p class=\"eyebrow\">PROJECT HISTORY</p><h1 tabindex=\"-1\" id=\"history-title\">지난 요청과 결과</h1><p class=\"hint\">내가 남긴 요청과 가져온 결과, 그때 복사·저장한 작업문 기록이에요. 개발 도구에서 실제로 실행됐는지는 이 앱이 알 수 없어요.</p></div><button id=\"back-to-work\" class=\"secondary\">현재 작업으로</button></div><details id=\"history\" open=\"\"><summary>요청·결과 기록 <span id=\"history-count\" class=\"count\">0</span></summary><div id=\"history-list\"></div></details></section>\n        <footer><span>AgentFlow Studio</span><span>이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일</span></footer>\n      </main>\n    </div>\n  </div>\n\n\n</body>",
+        "selection": [
+          {
+            "id": "request-tab",
+            "text": "요청 / 다음 변경"
+          }
+        ],
+        "matrix": null,
+        "cards": [],
+        "projects": [
+          {
+            "id": "E_home15-0007",
+            "rect": {
+              "x": 250,
+              "y": 104,
+              "w": 323.328125,
+              "h": 176
+            },
+            "name": "동네 미용실 예약",
+            "purpose": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스"
+          }
+        ]
+      },
+      "envelope_unchanged": true
+    },
+    {
+      "id": "1280-six",
+      "raw": {
+        "y": 0,
+        "max": 0,
+        "active": "<body data-route=\"projects\" data-starting=\"false\" data-compact=\"false\" data-layer=\"\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <div class=\"space-label\"><span class=\"workspace-avatar\" aria-hidden=\"true\">W</span><span>내 작업 공간<small>이 브라우저의 프로젝트</small></span></div>\n      <p class=\"nav-caption\">프로젝트</p>\n      <nav class=\"navigation\" aria-label=\"프로젝트 화면\">\n        <button id=\"nav-projects\" class=\"nav-item active\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 6h7l2 2h9v11H3z\"></path></svg><span>내 프로젝트</span></button>\n        <button id=\"nav-space\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"4\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><rect x=\"14\" y=\"4\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><rect x=\"8.5\" y=\"14\" width=\"7\" height=\"6\" rx=\"1.5\"></rect><path d=\"M6.5 10v2h11v-2M12 12v2\"></path></svg><span>전체 공간</span><span id=\"nav-area-count\" class=\"nav-count\">0</span></button>\n        <button id=\"nav-work\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg><span>현재 작업</span><span class=\"nav-arrow\" aria-hidden=\"true\">↗</span></button>\n        <button id=\"nav-context\" class=\"nav-item\" aria-expanded=\"false\" aria-controls=\"context-panel\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 3h11l3 3v15H5zM9 8h6M9 12h6M9 16h4\"></path></svg><span>기준 · 출처</span><span id=\"nav-basis-count\" class=\"nav-count\">0</span></button>\n        <button id=\"nav-history\" class=\"nav-item\" hidden=\"\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 11a9 9 0 1 1 2 7M3 5v6h6M12 7v5l3 2\"></path></svg><span>지난 요청과 결과</span><span id=\"nav-history-count\" class=\"nav-count\">0</span></button>\n      </nav>\n      <div class=\"sidebar-current\"><span class=\"small-label\">지금 이어가는 프로젝트</span><strong id=\"sidebar-project\">나의 프로젝트</strong><p id=\"sidebar-task\">첫 작업을 기다리고 있어요.</p></div>\n      <div class=\"sidebar-bottom\"><div class=\"handoff-symbol\" aria-hidden=\"true\">↗</div><strong>쓰던 도구에서, 계속.</strong><p>여기서 준비한 작업문을<br>사용 중인 개발 도구에 전달하세요.</p><span class=\"local-badge\">복사 · 붙여넣기 방식</span></div>\n    </aside>\n    <div class=\"app-body\">\n      <header class=\"topbar\">\n        <div class=\"breadcrumb\"><button type=\"button\" id=\"to-projects\" class=\"crumb-link\">내 프로젝트</button><span id=\"breadcrumb-sep\" aria-hidden=\"true\" hidden=\"\">/</span><strong id=\"breadcrumb-project\" hidden=\"\">나의 프로젝트</strong></div>\n        <div id=\"topbar-actions\" class=\"topbar-actions\"></div>\n      </header>\n      <main id=\"main\" class=\"shell\" tabindex=\"-1\">\n        <div id=\"example-banner\" class=\"alert example-banner\" role=\"status\" hidden=\"\"><strong>예제 둘러보기</strong><span>내 프로젝트가 아닌 예제예요. 저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 내 프로젝트를 시작하면 빈 상태에서 시작해요.</span><div class=\"row\"><button type=\"button\" id=\"example-start\" class=\"primary\">내 프로젝트 시작하기</button><button type=\"button\" id=\"example-close\" class=\"quiet\">예제 닫기</button></div></div>\n        <section class=\"project-head\" aria-label=\"현재 프로젝트\" hidden=\"\">\n          <div class=\"project-heading\"><p class=\"eyebrow\">PROJECT WORKSPACE</p><label for=\"project-name\" class=\"sr-only\">프로젝트 이름</label><div class=\"project-title\"><input id=\"project-name\" value=\"나의 프로젝트\" maxlength=\"120\" class=\"project-name\" aria-describedby=\"name-hint\"><span aria-hidden=\"true\" class=\"pencil\">↙</span></div><span id=\"name-hint\" class=\"sr-only\">이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.</span><p class=\"subtitle\">앞에서 정한 것은 남기고, 지금 필요한 작업부터.</p></div>\n          <div class=\"project-tools\"><span id=\"saved\" class=\"saved\" role=\"status\" title=\"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\">이 브라우저에 자동 저장</span><div class=\"row\"><button id=\"new-project-top\" class=\"quiet\">＋ 새 프로젝트</button><button id=\"backup\" class=\"quiet\" title=\"이 프로젝트 전체를 JSON 파일로 저장\" hidden=\"\">↓ 백업 파일 저장</button><button id=\"import\" class=\"quiet\" title=\"백업 파일을 새 프로젝트 사본으로 추가합니다. 지금 프로젝트는 바뀌지 않습니다.\">↑ 백업 파일 불러오기</button><button id=\"trash-current\" class=\"quiet\" hidden=\"\">휴지통으로 옮기기</button></div><input id=\"import-file\" type=\"file\" accept=\"application/json,.json\" hidden=\"\"></div>\n        </section>\n        <div class=\"feedback-stack\" hidden=\"\"><div id=\"storage-error\" class=\"alert error\" role=\"alert\" hidden=\"\"></div><div id=\"notice\" class=\"alert\" role=\"status\" hidden=\"\"></div></div>\n        \n        <section id=\"projects-view\" class=\"projects-view\" aria-labelledby=\"projects-title\">\n          <div class=\"view-heading home-heading\"><h1 id=\"projects-title\" tabindex=\"-1\">내 프로젝트 <span id=\"projects-count\" class=\"home-count\" aria-hidden=\"true\">6</span></h1><div id=\"home-actions\" class=\"home-actions\"><details id=\"connection-details\" class=\"connection-details\"><summary><span class=\"mode-dot\" aria-hidden=\"true\"></span><span id=\"mode\">MOCK · 체험 모드</span><span aria-hidden=\"true\">⌄</span></summary><div class=\"connection-popover\"><strong>작업문 정리 방식</strong><p id=\"mode-description\" class=\"hint\">규칙 기반 모의 정리입니다. 실제 AI 해석이나 외부 전송 없이 화면 흐름을 시험합니다.</p><label id=\"consent-area\" class=\"consent\" hidden=\"\"><input type=\"checkbox\" id=\"consent\"><span>현재 프로젝트 문맥을 DeepSeek에 전송하는 데 동의합니다. 서버에서 허용된 API 비용이 발생할 수 있습니다.</span></label><p class=\"hint\">외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.</p></div></details><button type=\"button\" id=\"new-project\" class=\"primary\">＋ 새 프로젝트</button></div></div>\n          <div id=\"list-notice\" class=\"alert\" role=\"status\" hidden=\"\"><span id=\"list-notice-text\"></span> <button type=\"button\" id=\"undo-trash\" class=\"quiet\" hidden=\"\">되돌리기</button></div>\n          <ul id=\"project-list\" class=\"project-list\"><li class=\"project-card openable\" data-entry-id=\"E_home15-0001\"><div class=\"project-card-head\"><span class=\"project-mark\" aria-hidden=\"true\">동</span><button class=\"project-open project-card-name\" type=\"button\" title=\"동네 미용실 예약\" aria-label=\"동네 미용실 예약 · 프로젝트 공간 열기\">동네 미용실 예약</button><details class=\"project-more\" data-no-open=\"\"><summary class=\"project-more-button\" aria-label=\"‘동네 미용실 예약’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary><div class=\"project-more-menu\"><button class=\"quiet project-trash\" type=\"button\">휴지통으로 옮기기</button></div></details></div><p class=\"project-card-purpose\" title=\"손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스\">손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스</p><p class=\"project-card-meta\"><span class=\"project-card-time\" title=\"요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.\">작업 기록 · 10월 16일 05:20</span><span class=\"project-card-areas\">영역 2개</span></p></li><li class=\"project-card openable\" data-entry-id=\"E_home15-0002\"><div class=\"project-card-head\"><span class=\"project-mark\" aria-hidden=\"true\">독</span><button class=\"project-open project-card-name\" type=\"button\" title=\"독서 모임 일정 도우미\" aria-label=\"독서 모임 일정 도우미 · 프로젝트 공간 열기\">독서 모임 일정 도우미</button><details class=\"project-more\" data-no-open=\"\"><summary class=\"project-more-button\" aria-label=\"‘독서 모임 일정 도우미’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary><div class=\"project-more-menu\"><button class=\"quiet project-trash\" type=\"button\">휴지통으로 옮기기</button></div></details></div><p class=\"project-card-purpose\" title=\"매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱\">매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱</p><p class=\"project-card-meta\"><span class=\"project-card-time\" title=\"요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.\">작업 기록 · 10월 15일 09:05</span><span class=\"project-card-areas\">영역 1개</span></p></li><li class=\"project-card openable\" data-entry-id=\"E_home15-0003\"><div class=\"project-card-head\"><span class=\"project-mark\" aria-hidden=\"true\">지</span><button class=\"project-open project-card-name\" type=\"button\" title=\"지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 구축 프로젝트\" aria-label=\"지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 구축 프로젝트 · 프로젝트 공간 열기\">지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 구축 프로젝트</button><details class=\"project-more\" data-no-open=\"\"><summary class=\"project-more-button\" aria-label=\"‘지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 구축 프로젝트’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary><div class=\"project-more-menu\"><button class=\"quiet project-trash\" type=\"button\">휴지통으로 옮기기</button></div></details></div><p class=\"project-card-purpose\" title=\"동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 가게 주인은 휴대폰으로도 주문 상태를 보고, 정산 담당자는 주말마다 가게별 금액을 확인해 내려받는다. 리뷰는 가게마다 답변 담당이 다르다.\">동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 가게 주인은 휴대폰으로도 주문 상태를 보고, 정산 담당자는 주말마다 가게별 금액을 확인해 내려받는다. 리뷰는 가게마다 답변 담당이 다르다.</p><p class=\"project-card-meta\"><span class=\"project-card-time\" title=\"요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.\">작업 기록 · 10월 14일 01:40</span><span class=\"project-card-areas\">영역 3개</span></p></li><li class=\"project-card openable\" data-entry-id=\"E_home15-0004\"><div class=\"project-card-head\"><span class=\"project-mark\" aria-hidden=\"true\">사</span><button class=\"project-open project-card-name\" type=\"button\" title=\"사내 문의 접수 페이지\" aria-label=\"사내 문의 접수 페이지 · 프로젝트 열기\">사내 문의 접수 페이지</button><details class=\"project-more\" data-no-open=\"\"><summary class=\"project-more-button\" aria-label=\"‘사내 문의 접수 페이지’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary><div class=\"project-more-menu\"><button class=\"quiet project-trash\" type=\"button\">휴지통으로 옮기기</button></div></details></div><p class=\"project-card-purpose missing\">목적을 아직 적지 않았어요</p><p class=\"project-card-meta\"><span class=\"project-card-time\" title=\"요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.\">작업 기록 · 10월 12일 07:30</span></p></li><li class=\"project-card openable\" data-entry-id=\"E_home15-0005\"><div class=\"project-card-head\"><span class=\"project-mark\" aria-hidden=\"true\">가</span><button class=\"project-open project-card-name\" type=\"button\" title=\"가계부 정리 도구\" aria-label=\"가계부 정리 도구 · 프로젝트 공간 열기\">가계부 정리 도구</button><details class=\"project-more\" data-no-open=\"\"><summary class=\"project-more-button\" aria-label=\"‘가계부 정리 도구’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary><div class=\"project-more-menu\"><button class=\"quiet project-trash\" type=\"button\">휴지통으로 옮기기</button></div></details></div><p class=\"project-card-purpose\" title=\"카드 내역 CSV를 올리면 월별 지출을 분류해서 보여주는 개인용 도구\">카드 내역 CSV를 올리면 월별 지출을 분류해서 보여주는 개인용 도구</p><p class=\"project-card-meta\"><span class=\"project-card-time\" title=\"요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.\">작업 기록 없음</span></p></li><li class=\"project-card openable\" data-entry-id=\"E_home15-0006\"><div class=\"project-card-head\"><span class=\"project-mark\" aria-hidden=\"true\">포</span><button class=\"project-open project-card-name\" type=\"button\" title=\"포트폴리오 사이트\" aria-label=\"포트폴리오 사이트 · 프로젝트 열기\">포트폴리오 사이트</button><details class=\"project-more\" data-no-open=\"\"><summary class=\"project-more-button\" aria-label=\"‘포트폴리오 사이트’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary><div class=\"project-more-menu\"><button class=\"quiet project-trash\" type=\"button\">휴지통으로 옮기기</button></div></details></div><p class=\"project-card-purpose missing\">목적을 아직 적지 않았어요</p><p class=\"project-card-meta\"><span class=\"project-card-time\" title=\"요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.\">작업 기록 없음</span></p></li></ul>\n          <div class=\"row list-tools\"><button type=\"button\" id=\"list-import\" class=\"quiet\">↑ 백업 파일 불러오기 (새 사본으로 추가)</button><button type=\"button\" id=\"list-example\" class=\"quiet\">예제 둘러보기 · 저장 안 됨</button></div>\n          <details id=\"trash-section\" class=\"trash-section\" hidden=\"\"><summary>휴지통 <span id=\"trash-count\" class=\"count\">0</span></summary><p class=\"hint\">휴지통의 프로젝트는 원문·기준·요청·돌아온 결과가 그대로 남아 있고, 되살리면 그대로 돌아와요. 휴지통에 있어도 이 브라우저의 저장 공간은 그대로 사용해요. 사이트 데이터를 지우면 휴지통도 함께 사라지니, 오래 보관하려면 백업 파일을 저장하세요. 이번 버전에는 영구 삭제가 없어요.</p><ul id=\"trash-list\" class=\"project-list\"></ul></details>\n        </section>\n        <section id=\"space-view\" class=\"space-view\" aria-label=\"전체 공간\" hidden=\"\"></section>\n        <div id=\"work-view\" hidden=\"\">\n          <nav id=\"work-place\" class=\"work-place\" aria-label=\"공간 위치\" hidden=\"\"></nav>\n              <div id=\"pending-bar\" class=\"pending-bar\" hidden=\"\"><span class=\"spinner\" aria-hidden=\"true\"></span><span id=\"working\" role=\"status\"></span><button type=\"button\" id=\"cancel\" class=\"quiet\" hidden=\"\">정리 중단</button></div>\n          <section class=\"context-bar\" aria-label=\"지금 할 일\"><div class=\"context-top\"><div><span id=\"task-number\" class=\"eyebrow\">첫 작업</span><h1 id=\"context-title\">아이디어에서, 첫 작업으로.</h1><p id=\"context-sub\">만들고 싶은 것 또는 바꾸고 싶은 것을 적어 주세요.</p></div><span id=\"stage-label\" class=\"tag purple\" data-stage=\"empty\">시작하기</span></div><div id=\"next-actions\" class=\"next-actions\"></div><details id=\"last-result\" class=\"last-result\" hidden=\"\"><summary id=\"last-result-summary\">최근 가져온 결과</summary><div id=\"last-result-text\" class=\"source-raw\"></div></details></section>\n          <section id=\"outcome-home\" class=\"card outcome-home\" aria-label=\"목적 중심 프로젝트 홈\" tabindex=\"-1\" hidden=\"\"></section>\n          <div id=\"workspace\" class=\"workspace\">\n            <div class=\"main-column\">\n              <section id=\"empty\" class=\"empty welcome\" aria-labelledby=\"welcome-title\"><div><p class=\"eyebrow\">AGENTFLOW STUDIO</p><h2 id=\"welcome-title\">AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.</h2><p id=\"welcome-text\">만들고 싶은 것을 평소 말로 적으면, Claude Code·Cursor 같은 개발 도구에 붙여넣을 작업문을 만들어 드려요. 도구가 돌려준 결과를 가져오면 앞에서 정한 것을 이어서 다음 작업문을 준비해요.</p><form id=\"brief-form\" class=\"brief-form\"><label for=\"brief-input\">무엇을 만드나요? <small>프로젝트 목적 · 작업 요청과 따로 보관해요</small></label><textarea id=\"brief-input\" rows=\"2\" maxlength=\"12000\" placeholder=\"예: 동네 미용실 손님이 휴대폰으로 날짜와 시간을 골라 예약하는 서비스\"></textarea><div class=\"row\"><button type=\"submit\" id=\"brief-start\" class=\"primary\" disabled=\"\">영역 나누러 가기</button><span class=\"hint\">큰 영역(예: 예약, 알림)으로 나눈 뒤 영역마다 요청을 이어가요. 아래에서 바로 첫 요청을 준비해도 입력한 목적을 함께 저장해요. 목적은 선택이며, 요청의 배경으로만 보관해요.</span></div></form><div class=\"row\"><button type=\"button\" id=\"open-example\" class=\"quiet\">예제 둘러보기 · 저장 안 됨</button></div></div></section>\n\n              <section id=\"work\" aria-label=\"현재 작업\" aria-live=\"polite\" aria-busy=\"false\"></section>\n              <details id=\"compose-panel\" class=\"card compose-panel\" open=\"\"><summary id=\"compose-summary\"><span>＋ 새 요청 · 돌아온 결과 붙여넣기</span><small id=\"compose-draft-status\"></small></summary><section class=\"compose-card\"><div class=\"section-heading\"><div><p id=\"compose-eyebrow\" class=\"eyebrow\">LET'S START</p><h2 id=\"compose-title\">어떤 작업부터 시작할까요?</h2></div><span class=\"compose-icon\" aria-hidden=\"true\">✦</span></div>\n                <form id=\"compose\"><div class=\"tabs\" role=\"group\" aria-label=\"입력 종류\"><button type=\"button\" id=\"request-tab\" class=\"tab selected\" aria-pressed=\"true\">요청 / 다음 변경</button><button type=\"button\" id=\"report-tab\" class=\"tab\" aria-pressed=\"false\">돌아온 결과</button></div>\n                  <div id=\"compose-area-row\" class=\"compose-area\" hidden=\"\"><label for=\"compose-area\">이 요청의 영역</label><select id=\"compose-area\"></select></div>\n                  <p id=\"entry-limits\" class=\"entry-limits\">AI 연결 없음 · 규칙으로 흉내 내는 체험판이에요. 입력은 이 브라우저에만 저장되고 다른 곳으로 보내지 않아요. 작업문을 복사·저장해도 개발 도구가 실행되지는 않아요.</p>\n                  <label class=\"sr-only\" for=\"draft\">요청 또는 돌아온 결과 원문</label><textarea id=\"draft\" rows=\"5\" maxlength=\"12000\" placeholder=\"무엇을 만들고 싶나요? 이미 작업 중이라면, 지금 바꾸고 싶은 부분만 알려주세요.\"></textarea>\n                  <div id=\"return-preview\" hidden=\"\" aria-label=\"결과 연결 안내\"></div>\n                  <div id=\"starter-examples\" class=\"starter-examples\"><span>이렇게 시작해 보세요</span><div class=\"row\"><button type=\"button\" class=\"example\" data-example=\"예약 확정 문구를 ‘신청 완료’에서 ‘예약 완료’로 바꿔줘. 예약 방식은 그대로 유지해줘.\">문구 하나 바꾸기 <span aria-hidden=\"true\">↗</span></button><button type=\"button\" class=\"example\" data-example=\"빈자리가 생기면 대기자를 자동으로 예약해주는 기능을 만들고 싶어요.\">새 기능 구상하기 <span aria-hidden=\"true\">↗</span></button><button type=\"button\" class=\"example\" data-example=\"결제가 실패하는 오류가 있어요. 원인은 아직 모르겠어요.\">문제 해결 시작하기 <span aria-hidden=\"true\">↗</span></button></div></div>\n                  <div class=\"composer-bottom\"><p id=\"input-hint\" class=\"hint\">필요한 질문만 받고, 바로 전달할 작업문을 준비해요.</p><details id=\"source-options\" class=\"source-options\"><summary>출처 구분</summary><label for=\"source-kind\">이 입력은 무엇인가요?</label><select id=\"source-kind\"><option value=\"request\">실제 사용자 요청</option><option value=\"report\">가져온 구현·진행 보고</option><option value=\"evidence\">가져온 관찰·검사 자료</option><option value=\"test_answer\">합성 시험답변 (실제 요구 아님)</option></select></details></div>\n                  <div class=\"composer-actions\"><p class=\"privacy\">비밀번호나 API 키는 넣지 마세요.</p><div class=\"actions\"><button class=\"quiet\" id=\"save-input\" type=\"button\" disabled=\"\" hidden=\"\">원문만 보관</button><button class=\"primary\" id=\"send\" type=\"submit\" disabled=\"\">작업문 준비하기 <span aria-hidden=\"true\">↗</span></button></div></div>\n                </form>\n                <details id=\"result-file-panel\" class=\"file-return-options\"><summary>결과 파일로 가져오기 · 선택</summary>\n                  <p class=\"hint\">파일용 작업문을 전달한 같은 작업에서 받은 결과 JSON을 선택하세요. 프로젝트 전체를 바꾸는 JSON 복구와 다릅니다. 파일이 없으면 기존 붙여넣기를 이용하세요.</p>\n                  <button id=\"select-result-file\" type=\"button\" class=\"secondary\">결과 파일 선택</button><input id=\"result-file-input\" type=\"file\" accept=\"application/json,.json\" hidden=\"\">\n                  <p id=\"result-file-message\" class=\"hint\" role=\"status\"></p><div id=\"result-file-preview\" aria-live=\"polite\"></div>\n                </details>\n              </section></details>\n\n              \n\n            </div>\n            <aside id=\"context-panel\" class=\"context-panel\" aria-label=\"기준과 출처\" hidden=\"\"><div class=\"panel-heading\"><div><p class=\"eyebrow\">PROJECT CONTEXT</p><h2 id=\"panel-title\" tabindex=\"-1\">기준 · 출처</h2></div><button id=\"close-context\" class=\"icon-button\" aria-label=\"기준·출처 닫기\">×</button></div><p class=\"hint\">관련 기준부터 확인하세요. 나머지 원문도 보존됩니다.</p><div class=\"panel-section\"><h3>이어갈 기준 <span id=\"basis-count\" class=\"count\">0</span></h3><div id=\"related-bases\"></div><details id=\"all-bases\"><summary>나머지 기준 · 직접 수정</summary><div id=\"basis-list\"></div></details></div><details id=\"add-basis\"><summary>＋ 기억할 기준 직접 기록</summary><form id=\"basis-form\"><label for=\"basis-draft\">반복해서 지킬 결정이나 제약</label><textarea id=\"basis-draft\" rows=\"3\" maxlength=\"12000\" placeholder=\"예: 예약은 참여 의사를 확인한 뒤에만 확정한다.\"></textarea><p id=\"basis-draft-status\" class=\"manual-note\"></p><button type=\"submit\" class=\"secondary\" disabled=\"\">이 기준 기록</button></form></details><p class=\"panel-note\">사용자가 기록한 기준과 AI 제안은 구분됩니다. 자세한 원문과 이전 값은 각 항목에서 펼쳐 보세요.</p></aside>\n          </div>\n        </div>\n        <section id=\"history-view\" class=\"history-view\" aria-label=\"지난 요청과 결과\" hidden=\"\"><div class=\"view-heading\"><div><p class=\"eyebrow\">PROJECT HISTORY</p><h1 tabindex=\"-1\" id=\"history-title\">지난 요청과 결과</h1><p class=\"hint\">내가 남긴 요청과 가져온 결과, 그때 복사·저장한 작업문 기록이에요. 개발 도구에서 실제로 실행됐는지는 이 앱이 알 수 없어요.</p></div><button id=\"back-to-work\" class=\"secondary\">현재 작업으로</button></div><details id=\"history\" open=\"\"><summary>요청·결과 기록 <span id=\"history-count\" class=\"count\">0</span></summary><div id=\"history-list\"></div></details></section>\n        <footer><span>AgentFlow Studio</span><span>이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일</span></footer>\n      </main>\n    </div>\n  </div>\n\n\n</body>",
+        "selection": [
+          {
+            "id": "request-tab",
+            "text": "요청 / 다음 변경"
+          }
+        ],
+        "matrix": null,
+        "cards": [],
+        "projects": [
+          {
+            "id": "E_home15-0001",
+            "rect": {
+              "x": 250,
+              "y": 104,
+              "w": 323.328125,
+              "h": 176
+            },
+            "name": "동네 미용실 예약",
+            "purpose": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스"
+          },
+          {
+            "id": "E_home15-0002",
+            "rect": {
+              "x": 589.328125,
+              "y": 104,
+              "w": 323.328125,
+              "h": 176
+            },
+            "name": "독서 모임 일정 도우미",
+            "purpose": "매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱"
+          },
+          {
+            "id": "E_home15-0003",
+            "rect": {
+              "x": 928.65625,
+              "y": 104,
+              "w": 323.34375,
+              "h": 176
+            },
+            "name": "지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 구축 프로젝트",
+            "purpose": "동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 가게 주인은 휴대폰으로도 주문 상태를 보고, 정산 담당자는 주말마다 가게별 금액을 확인해 내려받는다. 리뷰는 가게마다 답변 담당이 다르다."
+          },
+          {
+            "id": "E_home15-0004",
+            "rect": {
+              "x": 250,
+              "y": 296,
+              "w": 323.328125,
+              "h": 176
+            },
+            "name": "사내 문의 접수 페이지",
+            "purpose": "목적을 아직 적지 않았어요"
+          },
+          {
+            "id": "E_home15-0005",
+            "rect": {
+              "x": 589.328125,
+              "y": 296,
+              "w": 323.328125,
+              "h": 176
+            },
+            "name": "가계부 정리 도구",
+            "purpose": "카드 내역 CSV를 올리면 월별 지출을 분류해서 보여주는 개인용 도구"
+          },
+          {
+            "id": "E_home15-0006",
+            "rect": {
+              "x": 928.65625,
+              "y": 296,
+              "w": 323.34375,
+              "h": 176
+            },
+            "name": "포트폴리오 사이트",
+            "purpose": "목적을 아직 적지 않았어요"
+          }
+        ]
+      },
+      "envelope_unchanged": true
+    },
+    {
+      "id": "1280-AB-Space-menu-map",
+      "rounds": [
+        {
+          "name": "동네 미용실 예약",
+          "space": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스",
+          "snapshot": {
+            "y": 0,
+            "max": 282,
+            "active": "<h1 class=\"sr-only\" id=\"space-title\" tabindex=\"-1\">전체 공간</h1>",
+            "selection": [
+              {
+                "id": "request-tab",
+                "text": "요청 / 다음 변경"
+              }
+            ],
+            "matrix": "matrix(1.2, 0, 0, 1.2, 128, 94.8)",
+            "cards": [],
+            "projects": [
+              {
+                "id": "E_home15-0009",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0
+                },
+                "name": "동네 미용실 예약",
+                "purpose": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스"
+              },
+              {
+                "id": "E_home15-0010",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0
+                },
+                "name": "독서 모임 일정 도우미",
+                "purpose": "매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱"
+              }
+            ]
+          },
+          "unchanged": true
+        },
+        {
+          "name": "독서 모임 일정 도우미",
+          "space": "매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱",
+          "snapshot": {
+            "y": 0,
+            "max": 108,
+            "active": "<h1 class=\"sr-only\" id=\"space-title\" tabindex=\"-1\">전체 공간</h1>",
+            "selection": [
+              {
+                "id": "request-tab",
+                "text": "요청 / 다음 변경"
+              }
+            ],
+            "matrix": "matrix(1.2, 0, 0, 1.2, 308, 94.8)",
+            "cards": [],
+            "projects": [
+              {
+                "id": "E_home15-0009",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0
+                },
+                "name": "동네 미용실 예약",
+                "purpose": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스"
+              },
+              {
+                "id": "E_home15-0010",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0
+                },
+                "name": "독서 모임 일정 도우미",
+                "purpose": "매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱"
+              }
+            ]
+          },
+          "unchanged": true
+        },
+        {
+          "name": "동네 미용실 예약",
+          "space": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스",
+          "snapshot": {
+            "y": 0,
+            "max": 282,
+            "active": "<h1 class=\"sr-only\" id=\"space-title\" tabindex=\"-1\">전체 공간</h1>",
+            "selection": [
+              {
+                "id": "request-tab",
+                "text": "요청 / 다음 변경"
+              }
+            ],
+            "matrix": "matrix(1.2, 0, 0, 1.2, 128, 94.8)",
+            "cards": [],
+            "projects": [
+              {
+                "id": "E_home15-0009",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0
+                },
+                "name": "동네 미용실 예약",
+                "purpose": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스"
+              },
+              {
+                "id": "E_home15-0010",
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 0,
+                  "h": 0
+                },
+                "name": "독서 모임 일정 도우미",
+                "purpose": "매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱"
+              }
+            ]
+          },
+          "unchanged": true
+        }
+      ],
+      "pre": {
+        "y": 0,
+        "max": 499,
+        "active": "<button class=\"quiet node-info\" type=\"button\" id=\"node-info-A_63134bc7-0ae7-452c-b327-dd63be9b90af\" aria-pressed=\"true\" aria-label=\"예약 정보 (들어가지 않음)\">정보</button>",
+        "selection": [
+          {
+            "id": "",
+            "text": "예약 ↘구상 미기재앱에서 이어갈 작업정보"
+          },
+          {
+            "id": "",
+            "text": "⠿예약 ↘구상 미기재요청 1개앱에서 이어갈 작업정보"
+          },
+          {
+            "id": "request-tab",
+            "text": "요청 / 다음 변경"
+          }
+        ],
+        "matrix": "matrix(1.5, 0, 0, 1.5, 38.5, 65)",
+        "cards": [],
+        "projects": [
+          {
+            "id": "E_home15-0009",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0
+            },
+            "name": "동네 미용실 예약",
+            "purpose": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스"
+          },
+          {
+            "id": "E_home15-0010",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0
+            },
+            "name": "독서 모임 일정 도우미",
+            "purpose": "매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱"
+          }
+        ]
+      },
+      "post": {
+        "y": 0,
+        "max": 499,
+        "active": "<h1 class=\"sr-only\" id=\"space-title\" tabindex=\"-1\">전체 공간</h1>",
+        "selection": [
+          {
+            "id": "",
+            "text": "예약 ↘구상 미기재앱에서 이어갈 작업정보"
+          },
+          {
+            "id": "",
+            "text": "⠿예약 ↘구상 미기재요청 1개앱에서 이어갈 작업정보"
+          },
+          {
+            "id": "request-tab",
+            "text": "요청 / 다음 변경"
+          }
+        ],
+        "matrix": "matrix(1.5, 0, 0, 1.5, 38.5, 65)",
+        "cards": [],
+        "projects": [
+          {
+            "id": "E_home15-0009",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0
+            },
+            "name": "동네 미용실 예약",
+            "purpose": "손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약하면 문자로 확인을 받는 서비스"
+          },
+          {
+            "id": "E_home15-0010",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 0,
+              "h": 0
+            },
+            "name": "독서 모임 일정 도우미",
+            "purpose": "매달 모임 날짜를 투표로 정하고 참석자에게 알림을 보내는 웹앱"
+          }
+        ]
+      },
+      "envelope_unchanged": true,
+      "keyboard": "name Space; summary Space then Escape",
+      "selection_comparison": true
+    }
+  ],
+  "pageerrors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "http": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "status": 200,
+      "url": "http://127.0.0.1:37975/",
+      "bytes": 17048,
+      "sha256": "810cc78ec2798b9137da9b22abcb3ca4ca6c508f3327978cf1928e4ede40bad0"
+    }
+  ],
+  "url": "http://127.0.0.1:37975",
+  "environment": {
+    "browser": "154.0.8037.57",
+    "playwright": "1.57.0",
+    "node": "v22.16.0"
+  },
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/home15-final/independent.py\", line 43, in <module>\n    if pg.locator('.project-open').last.bounding_box()['y']<height-140:break\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 15485, in bounding_box\n    self._sync(self._impl_obj.bounding_box(timeout=timeout))\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 132, in bounding_box\n    return await self._with_element(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 113, in _with_element\n    handle = await self.element_handle(timeout=timeout)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 319, in element_handle\n    handle = await self._frame.wait_for_selector(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 369, in wait_for_selector\n    await self._channel.send(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.bounding_box: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator(\".project-open\").last\n\n",
+  "server_exit": -15,
+  "end": "2026-10-16T07:31:45.437830+00:00",
+  "exit": 1
+}

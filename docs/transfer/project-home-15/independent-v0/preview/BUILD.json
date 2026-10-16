@@ -1,0 +1,12 @@
+{
+  "source": "1e51f0f9b56ed51e9ec4c529ca518aa256ad1ecf",
+  "command": "node continuity/scripts/build-static.mjs",
+  "actualreturncode": 0,
+  "overlay_base": "product13 fix1 static-dist (606120500eeea50a20f00fb4678bced7a7d93d98)",
+  "changed_files": [
+    "index.html",
+    "styles.css",
+    "client/app.js"
+  ],
+  "usage": "Overlay onto existing product13 static MOCK runtime and serve index.html via localhost HTTP; not native server app.js alone. No public deployment."
+}

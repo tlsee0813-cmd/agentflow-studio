@@ -1,0 +1,14 @@
+# HOME15 execution evidence
+
+Source: 1e51f0f9b56ed51e9ec4c529ca518aa256ad1ecf; contract: 16f6b71fda204ce8b79a75e3af5460367704ed82. Separate scratch extraction; no product/main/public changes or AI calls.
+
+- npm check/build and continuity check/build: each actual exit 0. Existing home15_browser.py executed 15 tests (7 each PC + 390 minimum), all OK, actual exit 0. This is direct execution of repository tests, separate from independent observations.
+- Independent latest run: 10 scenes (0/1/6, AB keyboard/menu/map, 20-card return at each PC1280×720/1440×900), child and collector exit 0; no pageerrors. Raw snapshots include actual project purpose, stored full envelope equality, matrix, area-card rects and selection. Map selected-card coordinates and matrix preserved after A/B visits. Native wheel list return: 848→848 and 668→668; caller focus retained.
+- Name Space and more-summary Space/Escape executed. Six-card layout and actual purpose are measured separately from latest request. Existing suite covers no-purpose text and trash/read-error paths; independent checks do not claim a separate exhaustive error suite.
+- Long same-prefix title/purpose: full DOM values differ, but two-line clamp may hide identifying suffixes. Human distinguishability is NOT established; raw Range/box/line-clamp is provided. This is an observed limitation, not blanket UI acceptance.
+- Preserved initial harness errors: URL banner parsing, then invalid synthetic entry IDs containing extra underscores. Second retry shortened a valid-length name without resolving the ID error. Final fixture uses allowed IDs; no product code changed. Earlier partial snapshots are not combined into the latest 10 scenes. Preserved snapshots from before selector correction had empty card arrays; final run has two real .area-node rects.
+- Fixture installation uses isolated localStorage, clearly separated from normal UI actions. No DOM scroll injection, app internal state calls, force-click or return correction. Product’s own return routine may scroll to keep the card visible.
+- First browser HTML responses/status/body hashes are in independent/result.json. All served runtime file bytes also matched execution disk before/after in http-runtime.json (separate HTTP audit, not additional UI tests). SOURCE_BINDING checks exact pinned tracked source after builds.
+- Preview is only three changed static MOCK files over product13fix1 runtime; retain its static adapter/shared runtime. BUILD.json records source and command. Not deployment.
+
+Limits: no human usability/understanding claim, paid AI, real user data, Windows, large production workspace, or all keyboard interactions. Four representative PNGs only. MANIFEST.tsv lists the exact payload recursively excluding itself; preview manifest excludes itself within preview.
