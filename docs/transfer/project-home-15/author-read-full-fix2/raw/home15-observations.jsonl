@@ -1,0 +1,2 @@
+{"test": "Home15.test_10_no_background_key_scroll_from_any_focus_in_the_window", "width": 1280, "height": 720, "kind": "condition", "name": "list behind does not move with keys on 닫기 (start 0, Y 0)", "value": [247, 272, 272, 34, 0, 0], "expected": [0, 0, 0, 0, 0, 0]}
+{"test": "Home15Wide.test_10_no_background_key_scroll_from_any_focus_in_the_window", "width": 1440, "height": 900, "kind": "condition", "name": "list behind does not move with keys on 닫기 (start 0, Y 0)", "value": [82, 92, 92, 11, 0, 0], "expected": [0, 0, 0, 0, 0, 0]}

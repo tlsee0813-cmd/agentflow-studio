@@ -1,0 +1,51 @@
+home15 fixtures written
+test_10_no_background_key_scroll_from_any_focus_in_the_window (__main__.Home15.test_10_no_background_key_scroll_from_any_focus_in_the_window)
+fix2: independent run found PageDown/End on '닫기' scrolling the list behind (1280 0->272, 1440 0->92). ... FAIL
+test_10_no_background_key_scroll_from_any_focus_in_the_window (__main__.Home15Wide.test_10_no_background_key_scroll_from_any_focus_in_the_window)
+fix2: independent run found PageDown/End on '닫기' scrolling the list behind (1280 0->272, 1440 0->92). ... FAIL
+
+======================================================================
+FAIL: test_10_no_background_key_scroll_from_any_focus_in_the_window (__main__.Home15.test_10_no_background_key_scroll_from_any_focus_in_the_window)
+fix2: independent run found PageDown/End on '닫기' scrolling the list behind (1280 0->272, 1440 0->92).
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/af/app/continuity/tests/home15_browser.py", line 298, in test_10_no_background_key_scroll_from_any_focus_in_the_window
+    self.check(f'list behind does not move with keys on 닫기 (start {start}, Y {y})',ys,[y]*6)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/af/app/continuity/tests/home15_browser.py", line 49, in check
+    def check(self,name,value,expected):self.record('condition',name,value,expected);self.assertEqual(value,expected,name)
+                                                                                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [247, 272, 272, 34, 0, 0] != [0, 0, 0, 0, 0, 0]
+
+First differing element 0:
+247
+0
+
+- [247, 272, 272, 34, 0, 0]
++ [0, 0, 0, 0, 0, 0] : list behind does not move with keys on 닫기 (start 0, Y 0)
+
+======================================================================
+FAIL: test_10_no_background_key_scroll_from_any_focus_in_the_window (__main__.Home15Wide.test_10_no_background_key_scroll_from_any_focus_in_the_window)
+fix2: independent run found PageDown/End on '닫기' scrolling the list behind (1280 0->272, 1440 0->92).
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/af/app/continuity/tests/home15_browser.py", line 298, in test_10_no_background_key_scroll_from_any_focus_in_the_window
+    self.check(f'list behind does not move with keys on 닫기 (start {start}, Y {y})',ys,[y]*6)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/af/app/continuity/tests/home15_browser.py", line 49, in check
+    def check(self,name,value,expected):self.record('condition',name,value,expected);self.assertEqual(value,expected,name)
+                                                                                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [82, 92, 92, 11, 0, 0] != [0, 0, 0, 0, 0, 0]
+
+First differing element 0:
+82
+0
+
+- [82, 92, 92, 11, 0, 0]
++ [0, 0, 0, 0, 0, 0] : list behind does not move with keys on 닫기 (start 0, Y 0)
+
+----------------------------------------------------------------------
+Ran 2 tests in 4.254s
+
+FAILED (failures=2)
+unfixed exit=1

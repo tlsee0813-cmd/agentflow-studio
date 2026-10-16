@@ -1,0 +1,3 @@
+IDEA015 type, syntax and client/server boundary checks passed.
+app/node_modules (locked dependency)
+check exit=0
