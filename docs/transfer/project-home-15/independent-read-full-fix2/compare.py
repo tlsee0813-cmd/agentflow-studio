@@ -1,0 +1,4 @@
+from pathlib import Path
+import json,hashlib
+R=Path(__file__).parent;V=R.parent/'home15-read-final';a=(V/'check.py').read_bytes();b=(R/'check.py').read_bytes();assert a.replace(b'home15-read-candidate',b'home15-read-fix2-candidate')==b
+old=json.loads((V/'raw/result.json').read_text());new=json.loads((R/'raw/result.json').read_text());assert [x['id'] for x in old['scenes']]==[x['id'] for x in new['scenes']];out={'logic_equal_except_candidate_path':True,'v1_code_sha256':hashlib.sha256(a).hexdigest(),'fix2_code_sha256':hashlib.sha256(b).hexdigest(),'v1_immutable_commit':'66a5abf33bc9ae51f37b45bc8d9f56e81d0edde0','v1_exit':old['exit'],'fix2_exit':new['exit'],'rows':[{'id':x['id'],'v1_pass':x['pass'],'fix2_pass':y['pass'],'v1_raw':x['raw'] if not x['pass'] else None,'fix2_raw':y['raw'] if not x['pass'] else None} for x,y in zip(old['scenes'],new['scenes'])]};(R/'comparison.json').write_text(json.dumps(out,ensure_ascii=False,indent=2))

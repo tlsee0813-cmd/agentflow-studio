@@ -1,0 +1,568 @@
+{
+  "logic_equal_except_candidate_path": true,
+  "v1_code_sha256": "cb9fa9cb41646b6d6fa7a12cc650a2f9a08b1af9b9dd34256a45f1f1d0898560",
+  "fix2_code_sha256": "62d21e7a53444f2e34f9633764ef0d2df53f3894d2fe883ecb3c5a7de84a6e05",
+  "v1_immutable_commit": "66a5abf33bc9ae51f37b45bc8d9f56e81d0edde0",
+  "v1_exit": 1,
+  "fix2_exit": 0,
+  "rows": [
+    {
+      "id": "1280-A-name",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-A-tail",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-wheel-end-background",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-close-click",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-next-card-reset",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-B-name",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-close-Escape",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-close-focus-PageDown",
+      "v1_pass": false,
+      "fix2_pass": true,
+      "v1_raw": {
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 272,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "key": "PageDown"
+      },
+      "fix2_raw": {
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "key": "PageDown"
+      }
+    },
+    {
+      "id": "1280-close-Escape",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-close-focus-End",
+      "v1_pass": false,
+      "fix2_pass": true,
+      "v1_raw": {
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 272,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "key": "End"
+      },
+      "fix2_raw": {
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "key": "End"
+      }
+    },
+    {
+      "id": "1280-close-Escape",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-close-focus-Space",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-Space-focus-return",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-selected-text-PageDown",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-selected-text-End",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-selected-text-Home",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-selected-text-ArrowDown",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-close-Escape",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-selection-made",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-safe-text",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-close-click",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-reads-no-write",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-external-change-no-write",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-external-trash-no-write",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1280-external-remove-no-write",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-A-name",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-A-tail",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-wheel-end-background",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-close-click",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-next-card-reset",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-B-name",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-close-Escape",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-close-focus-PageDown",
+      "v1_pass": false,
+      "fix2_pass": true,
+      "v1_raw": {
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 92,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "key": "PageDown"
+      },
+      "fix2_raw": {
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "key": "PageDown"
+      }
+    },
+    {
+      "id": "1440-close-Escape",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-close-focus-End",
+      "v1_pass": false,
+      "fix2_pass": true,
+      "v1_raw": {
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 92,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "key": "End"
+      },
+      "fix2_raw": {
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "key": "End"
+      }
+    },
+    {
+      "id": "1440-close-Escape",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-close-focus-Space",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-Space-focus-return",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-selected-text-PageDown",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-selected-text-End",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-selected-text-Home",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-selected-text-ArrowDown",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-close-Escape",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-selection-made",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-safe-text",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-close-click",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-reads-no-write",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-external-change-no-write",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-external-trash-no-write",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    },
+    {
+      "id": "1440-external-remove-no-write",
+      "v1_pass": true,
+      "fix2_pass": true,
+      "v1_raw": null,
+      "fix2_raw": null
+    }
+  ]
+}

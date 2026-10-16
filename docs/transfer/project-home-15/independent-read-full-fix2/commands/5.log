@@ -1,0 +1,29 @@
+home15 fixtures written
+test_01_six_projects_three_columns_and_honest_cards (__main__.Home15.test_01_six_projects_three_columns_and_honest_cards) ... ok
+test_02_one_and_zero (__main__.Home15.test_02_one_and_zero) ... ok
+test_03_A_B_click_and_keyboard_enter_their_own_space_and_return (__main__.Home15.test_03_A_B_click_and_keyboard_enter_their_own_space_and_return) ... ok
+test_04_list_goes_to_the_space_not_the_last_task_screen_and_keeps_the_map_view (__main__.Home15.test_04_list_goes_to_the_space_not_the_last_task_screen_and_keeps_the_map_view) ... ok
+test_05_more_menu_never_opens_the_card_and_trash_keeps_its_protection (__main__.Home15.test_05_more_menu_never_opens_the_card_and_trash_keeps_its_protection) ... ok
+test_06_projects_without_a_space_use_the_existing_start_path (__main__.Home15.test_06_projects_without_a_space_use_the_existing_start_path) ... ok
+test_07_read_error_is_shown_not_hidden (__main__.Home15.test_07_read_error_is_shown_not_hidden) ... ok
+test_08_read_full_name_and_purpose_before_entering (__main__.Home15.test_08_read_full_name_and_purpose_before_entering) ... ok
+test_09_another_tab_changes_while_reading (__main__.Home15.test_09_another_tab_changes_while_reading) ... ok
+test_10_no_background_key_scroll_from_any_focus_in_the_window (__main__.Home15.test_10_no_background_key_scroll_from_any_focus_in_the_window)
+fix2: independent run found PageDown/End on '닫기' scrolling the list behind (1280 0->272, 1440 0->92). ... ok
+test_390_minimum (__main__.Home15Narrow.test_390_minimum) ... ok
+test_01_six_projects_three_columns_and_honest_cards (__main__.Home15Wide.test_01_six_projects_three_columns_and_honest_cards) ... ok
+test_02_one_and_zero (__main__.Home15Wide.test_02_one_and_zero) ... ok
+test_03_A_B_click_and_keyboard_enter_their_own_space_and_return (__main__.Home15Wide.test_03_A_B_click_and_keyboard_enter_their_own_space_and_return) ... ok
+test_04_list_goes_to_the_space_not_the_last_task_screen_and_keeps_the_map_view (__main__.Home15Wide.test_04_list_goes_to_the_space_not_the_last_task_screen_and_keeps_the_map_view) ... ok
+test_05_more_menu_never_opens_the_card_and_trash_keeps_its_protection (__main__.Home15Wide.test_05_more_menu_never_opens_the_card_and_trash_keeps_its_protection) ... ok
+test_06_projects_without_a_space_use_the_existing_start_path (__main__.Home15Wide.test_06_projects_without_a_space_use_the_existing_start_path) ... ok
+test_07_read_error_is_shown_not_hidden (__main__.Home15Wide.test_07_read_error_is_shown_not_hidden) ... ok
+test_08_read_full_name_and_purpose_before_entering (__main__.Home15Wide.test_08_read_full_name_and_purpose_before_entering) ... ok
+test_09_another_tab_changes_while_reading (__main__.Home15Wide.test_09_another_tab_changes_while_reading) ... ok
+test_10_no_background_key_scroll_from_any_focus_in_the_window (__main__.Home15Wide.test_10_no_background_key_scroll_from_any_focus_in_the_window)
+fix2: independent run found PageDown/End on '닫기' scrolling the list behind (1280 0->272, 1440 0->92). ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 31.714s
+
+OK
