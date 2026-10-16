@@ -1,0 +1,3 @@
+Cycle12 environment preparation only.
+
+Pinned USE106 baseline extracted independently. Existing Node22.16.0/npm10.9.2/TS5.8.3 used via local PATH, no installs. Type/boundary checks and both builds exit0. Domain initial missing fixture failure preserved, minimal pinned fixture added, full rerun210/210 exit0. Actual Chromium154.0.8037.57 and Python Playwright1.57.0 loaded MOCK via HTTP200 with no pageerror. Server intentionally terminated(-15) after smoke, stderr empty. Source preexisting bytes unchanged. No candidate tests, remote writes, environment publication or product edits. See PLAN.md and evidence/READINESS.json.

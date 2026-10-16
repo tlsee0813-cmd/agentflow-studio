@@ -1,0 +1,15 @@
+{
+  "server_start": "IDEA015 MOCK (rules only, no AI calls): http://127.0.0.1:35429",
+  "url": "http://127.0.0.1:35429",
+  "status": 200,
+  "body_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+  "bytes": 17055,
+  "mode": "MOCK \u00b7 \uccb4\ud5d8 \ubaa8\ub4dc",
+  "pageerrors": [],
+  "playwright": "1.57.0",
+  "browser": "154.0.8037.57",
+  "node": "v22.16.0",
+  "server_shutdown_exit": -15,
+  "stderr": "",
+  "child_exit": 0
+}

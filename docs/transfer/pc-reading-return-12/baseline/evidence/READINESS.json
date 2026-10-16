@@ -1,0 +1,91 @@
+{
+  "utc": "2026-10-16T03:04:42.288441+00:00",
+  "baseline_commit": "618d9bd2b99ad433df35107d8902b15f45e30000",
+  "source_unchanged": true,
+  "baseline_commands": [
+    {
+      "argv": [
+        "npm",
+        "run",
+        "check"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "node",
+        "continuity/scripts/check.mjs"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "node",
+        "continuity/scripts/build.mjs"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "node",
+        "--test",
+        "continuity/tests/ai055.test.mjs",
+        "continuity/tests/connect039.test.mjs",
+        "continuity/tests/domain.test.mjs",
+        "continuity/tests/fix058.test.mjs",
+        "continuity/tests/fix066.test.mjs",
+        "continuity/tests/fix088.test.mjs",
+        "continuity/tests/flow049.test.mjs",
+        "continuity/tests/flow083.test.mjs",
+        "continuity/tests/flow090.test.mjs",
+        "continuity/tests/flow091c.test.mjs",
+        "continuity/tests/flow094.test.mjs",
+        "continuity/tests/flow095.test.mjs",
+        "continuity/tests/fresh033.test.mjs",
+        "continuity/tests/guide097.test.mjs",
+        "continuity/tests/http.test.mjs",
+        "continuity/tests/idea017.test.mjs",
+        "continuity/tests/idea022.test.mjs",
+        "continuity/tests/select035.test.mjs",
+        "continuity/tests/spatial102.test.mjs",
+        "continuity/tests/ui001.test.mjs"
+      ],
+      "exit": 1
+    }
+  ],
+  "first_domain_failure": "177 pass, 2 missing-module failures caused by omitted experiments/idea016/cases.mjs; preserved evidence/5.log",
+  "complete_domain": {
+    "tests": 210,
+    "pass": 210,
+    "fail": 0,
+    "exit": 0,
+    "exit_evidence": "shell captured immediate $? = 0; tool session91478 output preserved in conversation, not a separate collector transcript"
+  },
+  "smoke": {
+    "server_start": "IDEA015 MOCK (rules only, no AI calls): http://127.0.0.1:35429",
+    "url": "http://127.0.0.1:35429",
+    "status": 200,
+    "body_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+    "bytes": 17055,
+    "mode": "MOCK · 체험 모드",
+    "pageerrors": [],
+    "playwright": "1.57.0",
+    "browser": "154.0.8037.57",
+    "node": "v22.16.0",
+    "server_shutdown_exit": -15,
+    "stderr": "",
+    "child_exit": 0
+  },
+  "candidate_tests": "NOT_RUN awaiting pinned candidate",
+  "remote_writes": false,
+  "compiler": "existing PATH TypeScript5.8.3 offline bootstrap, not npm ci",
+  "blockers": []
+}
