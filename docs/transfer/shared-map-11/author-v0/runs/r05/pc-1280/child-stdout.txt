@@ -1,0 +1,179 @@
+== 1280-0-load
+PASS [1280-0-load] HTTP 수령 = 디스크 파일(bytes/SHA) 
+== 1280-flow-1-overview
+PASS [1280-flow-1-overview] 사례 제목 
+PASS [1280-flow-1-overview] 범위·자료 성격·기준 시점(·묶음)이 입력 문자열 그대로 
+PASS [1280-flow-1-overview] ‘이 기록에서 달라진 부분’ 칩 = 입력의 change 노드(이름·라벨) 전부와만 
+PASS [1280-flow-1-overview] 지도에 입력의 모든 노드(루트+자식)가 있음 
+PASS [1280-flow-1-overview] 초기 깊이 = initialView.expanded 
+PASS [1280-flow-1-overview] 초기 무선택·배율 100% 
+PASS [1280-flow-1-overview] 100%에서 지도 창 안에 지도 전체(스크롤 없음) 
+PASS [1280-flow-1-overview] 카드 겹침 없음 
+PASS [1280-flow-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 G1 
+PASS [1280-flow-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 G2 
+PASS [1280-flow-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 G3 
+PASS [1280-flow-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 C31 
+PASS [1280-flow-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 C32 
+PASS [1280-flow-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 G4 
+PASS [1280-flow-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 G5 
+PASS [1280-flow-1-overview] 글자 관측(개별 글자·clip·hit) 변경 칩 C32 
+PASS [1280-flow-1-overview] 선에 담긴 관계 ID = 입력 relations 전부 
+  PNG 1280-flow-overview.png
+== 1280-flow-2-select-detail
+PASS [1280-flow-2-select-detail] 클릭 지점 화면 안·대상 위: 지도 카드 C32 
+PASS [1280-flow-2-select-detail] 첫 선택: 선택만 바뀜(카드 bounds·선 경로·깊이·배율 동일) 
+PASS [1280-flow-2-select-detail] 짧은 설명 먼저: 역할 = 입력 role, 변경 한 문장 = change.summary 
+PASS [1280-flow-2-select-detail] 기본 설명에는 원문·확인 한계·관계 전체 조건이 아직 없음 
+PASS [1280-flow-2-select-detail] 다음 행동: 근거 읽기(주) + 내 다음 요청 준비 
+PASS [1280-flow-2-select-detail] 글자 관측(개별 글자·clip·hit) 짧은 설명 #panel .role 
+PASS [1280-flow-2-select-detail] 글자 관측(개별 글자·clip·hit) 짧은 설명 #panel .chgnote 
+PASS [1280-flow-2-select-detail] 글자 관측(개별 글자·clip·hit) 짧은 설명 #panel [data-act="detail"] 
+PASS [1280-flow-2-select-detail] 클릭 지점 화면 안·대상 위: 근거·전체 조건 읽기 
+PASS [1280-flow-2-select-detail] 근거 상세: 전/후·비교 기준 = 입력 
+PASS [1280-flow-2-select-detail] 근거 상세: 관계 전체 조건 = 입력(해당 부분 관계 전부) 
+PASS [1280-flow-2-select-detail] 근거 상세: 근거 기록(종류·요약·정확 원문·확인 한계·고정 링크) = 입력 
+PASS [1280-flow-2-select-detail] 정확 원문은 접힌 채(필요할 때 펼침) 
+PASS [1280-flow-2-select-detail] 클릭 지점 화면 안·대상 위: 정확 원문 펼치기 
+PASS [1280-flow-2-select-detail] 정확 원문 펼침 
+PASS [1280-flow-2-select-detail] 글자 관측(개별 글자·clip·hit) 근거 머리·닫기 
+PASS [1280-flow-2-select-detail] 클릭 지점 화면 안·대상 위: 근거 닫기 버튼 
+PASS [1280-flow-2-select-detail] 근거 닫기: DOM 제거·글자 부재·초점 호출 버튼·선택 유지 
+PASS [1280-flow-2-select-detail] 클릭 지점 화면 안·대상 위: 근거 다시 열기 
+PASS [1280-flow-2-select-detail] Escape: 근거 DOM 제거·초점 호출 버튼 
+== 1280-flow-3-relation
+PASS [1280-flow-3-relation] 클릭 지점 화면 안·대상 위: 관계 참고 R3 
+PASS [1280-flow-3-relation] 관계 참고: 실제 양끝·방향·종류·전체 조건 = 입력 
+PASS [1280-flow-3-relation] 관계 참고: 근거 링크가 입력 근거 
+PASS [1280-flow-3-relation] 글자 관측(개별 글자·clip·hit) 관계 참고 조건 
+PASS [1280-flow-3-relation] 클릭 지점 화면 안·대상 위: 참고 닫기 
+PASS [1280-flow-3-relation] 참고 닫기: DOM 제거·초점 그 항목 
+PASS [1280-flow-3-relation] 클릭 지점 화면 안·대상 위: 관계 참고 다시 R3 
+PASS [1280-flow-3-relation] 클릭 지점 화면 안·대상 위: 명시 이동(다른 대상) 
+PASS [1280-flow-3-relation] 명시 이동: C21 선택(필요하면 부모만 펼침), 참고 닫힘 
+== 1280-flow-4-draft
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 깊이 바꾸기 G4 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 확대 
+PASS [1280-flow-4-draft] 비초기 보기: 확대(115% 또는 130%)·지도 실제 휠 이동(여지 있는 축만, 없으면 extent 기록) 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 머리의 변경 칩 C32 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 내 다음 요청 준비 
+PASS [1280-flow-4-draft] 초안 창: 대상 이름·빈 한 칸·미리보기/복사 비활성·참고 기록 접힘·입력에 초점 
+PASS [1280-flow-4-draft] 초안 창: 메모리 보존·미송신 안내 
+PASS [1280-flow-4-draft] 입력칸은 자유문 한 칸뿐(4칸 자동 채움 없음) 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 참고 기록 펼치기 
+PASS [1280-flow-4-draft] 참고 기록(읽기 전용): 대상·역할·달라진 부분 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 초안 입력칸 
+PASS [1280-flow-4-draft] 입력 뒤 미리보기·복사 활성 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 초안 미리보기 
+PASS [1280-flow-4-draft] 미리보기 = 대상 표시 + 입력 문장(다른 내용 자동 생성 없음) 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 복사 
+PASS [1280-flow-4-draft] 복사: 클립보드 = 미리보기, 상태 ‘보내지는 않았습니다’ 
+PASS [1280-flow-4-draft] 초안 입력칸: 화면 안·가려지지 않음·글자 크기(텍스트영역은 Range 관측 대상이 아님) 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 초안 닫기 
+PASS [1280-flow-4-draft] 초안 닫은 직후(보조 이동 전): 깊이·배율·지도/main·패널 스크롤·선택·카드·선 동일 
+PASS [1280-flow-4-draft] 초안 닫기: 초점 호출 버튼 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 다른 대상 C31 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 다른 대상 초안 C31 
+PASS [1280-flow-4-draft] 다른 대상 초안은 비어 있음(격리) 
+PASS [1280-flow-4-draft] Escape로 초안 닫힘·초점 호출 버튼 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 변경 칩 C32(재) 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 원래 대상 초안 재열기 
+PASS [1280-flow-4-draft] 원래 대상 초안 보존 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 초안 닫기(2) 
+PASS [1280-flow-4-draft] 클릭 지점 화면 안·대상 위: 근거 열어 둔 채 전환 준비 
+== 1280-5-switch
+  사례 전환 → PowerToys
+PASS [1280-5-switch] 전환: 열린 근거가 닫히고(DOM 없음) 새 사례 제목·무선택 
+PASS [1280-5-switch] 전환: 머리·지도·설명에 이전 사례 문구 없음 
+== 1280-pt-1-overview
+PASS [1280-pt-1-overview] 사례 제목 
+PASS [1280-pt-1-overview] 범위·자료 성격·기준 시점(·묶음)이 입력 문자열 그대로 
+PASS [1280-pt-1-overview] ‘이 기록에서 달라진 부분’ 칩 = 입력의 change 노드(이름·라벨) 전부와만 
+PASS [1280-pt-1-overview] 지도에 입력의 모든 노드(루트+자식)가 있음 
+PASS [1280-pt-1-overview] 초기 깊이 = initialView.expanded 
+PASS [1280-pt-1-overview] 초기 무선택·배율 100% 
+PASS [1280-pt-1-overview] 100%에서 지도 창 안에 지도 전체(스크롤 없음) 
+PASS [1280-pt-1-overview] 카드 겹침 없음 
+PASS [1280-pt-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 ED 
+PASS [1280-pt-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 SR 
+PASS [1280-pt-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 RC 
+PASS [1280-pt-1-overview] 글자 관측(개별 글자·clip·hit) 지도 이름 HK 
+PASS [1280-pt-1-overview] 글자 관측(개별 글자·clip·hit) 변경 칩 SR 
+PASS [1280-pt-1-overview] 글자 관측(개별 글자·clip·hit) 변경 칩 RC 
+PASS [1280-pt-1-overview] 글자 관측(개별 글자·clip·hit) 변경 칩 HK 
+PASS [1280-pt-1-overview] 선에 담긴 관계 ID = 입력 relations 전부 
+  PNG 1280-pt-overview.png
+== 1280-pt-2-select-detail
+PASS [1280-pt-2-select-detail] 클릭 지점 화면 안·대상 위: 지도 카드 SR 
+PASS [1280-pt-2-select-detail] 첫 선택: 선택만 바뀜(카드 bounds·선 경로·깊이·배율 동일) 
+PASS [1280-pt-2-select-detail] 짧은 설명 먼저: 역할 = 입력 role, 변경 한 문장 = change.summary 
+PASS [1280-pt-2-select-detail] 기본 설명에는 원문·확인 한계·관계 전체 조건이 아직 없음 
+PASS [1280-pt-2-select-detail] 다음 행동: 근거 읽기(주) + 내 다음 요청 준비 
+PASS [1280-pt-2-select-detail] 글자 관측(개별 글자·clip·hit) 짧은 설명 #panel .role 
+PASS [1280-pt-2-select-detail] 글자 관측(개별 글자·clip·hit) 짧은 설명 #panel .chgnote 
+PASS [1280-pt-2-select-detail] 글자 관측(개별 글자·clip·hit) 짧은 설명 #panel [data-act="detail"] 
+PASS [1280-pt-2-select-detail] 클릭 지점 화면 안·대상 위: 근거·전체 조건 읽기 
+PASS [1280-pt-2-select-detail] 근거 상세: 전/후·비교 기준 = 입력 
+PASS [1280-pt-2-select-detail] 근거 상세: 관계 전체 조건 = 입력(해당 부분 관계 전부) 
+PASS [1280-pt-2-select-detail] 근거 상세: 근거 기록(종류·요약·정확 원문·확인 한계·고정 링크) = 입력 
+PASS [1280-pt-2-select-detail] 정확 원문은 접힌 채(필요할 때 펼침) 
+PASS [1280-pt-2-select-detail] 클릭 지점 화면 안·대상 위: 정확 원문 펼치기 
+PASS [1280-pt-2-select-detail] 정확 원문 펼침 
+PASS [1280-pt-2-select-detail] 글자 관측(개별 글자·clip·hit) 근거 머리·닫기 
+PASS [1280-pt-2-select-detail] 클릭 지점 화면 안·대상 위: 근거 닫기 버튼 
+PASS [1280-pt-2-select-detail] 근거 닫기: DOM 제거·글자 부재·초점 호출 버튼·선택 유지 
+PASS [1280-pt-2-select-detail] 클릭 지점 화면 안·대상 위: 근거 다시 열기 
+PASS [1280-pt-2-select-detail] Escape: 근거 DOM 제거·초점 호출 버튼 
+== 1280-pt-3-relation
+PASS [1280-pt-3-relation] 클릭 지점 화면 안·대상 위: 지도 카드 RC 
+PASS [1280-pt-3-relation] 클릭 지점 화면 안·대상 위: 관계 참고 X1 
+PASS [1280-pt-3-relation] 관계 참고: 실제 양끝·방향·종류·전체 조건 = 입력 
+PASS [1280-pt-3-relation] 관계 참고: 근거 링크가 입력 근거 
+PASS [1280-pt-3-relation] 글자 관측(개별 글자·clip·hit) 관계 참고 조건 
+PASS [1280-pt-3-relation] 클릭 지점 화면 안·대상 위: 참고 닫기 
+PASS [1280-pt-3-relation] 참고 닫기: DOM 제거·초점 그 항목 
+PASS [1280-pt-3-relation] 클릭 지점 화면 안·대상 위: 관계 참고 다시 X1 
+PASS [1280-pt-3-relation] 클릭 지점 화면 안·대상 위: 명시 이동(다른 대상) 
+PASS [1280-pt-3-relation] 명시 이동: HK 선택(필요하면 부모만 펼침), 참고 닫힘 
+== 1280-pt-4-draft
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 확대 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 확대(2단계) 
+PASS [1280-pt-4-draft] 비초기 보기: 확대(115% 또는 130%)·지도 실제 휠 이동(여지 있는 축만, 없으면 extent 기록) 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 머리의 변경 칩 SR 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 내 다음 요청 준비 
+PASS [1280-pt-4-draft] 초안 창: 대상 이름·빈 한 칸·미리보기/복사 비활성·참고 기록 접힘·입력에 초점 
+PASS [1280-pt-4-draft] 초안 창: 메모리 보존·미송신 안내 
+PASS [1280-pt-4-draft] 입력칸은 자유문 한 칸뿐(4칸 자동 채움 없음) 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 참고 기록 펼치기 
+PASS [1280-pt-4-draft] 참고 기록(읽기 전용): 대상·역할·달라진 부분 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 초안 입력칸 
+PASS [1280-pt-4-draft] 입력 뒤 미리보기·복사 활성 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 초안 미리보기 
+PASS [1280-pt-4-draft] 미리보기 = 대상 표시 + 입력 문장(다른 내용 자동 생성 없음) 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 복사 
+PASS [1280-pt-4-draft] 복사: 클립보드 = 미리보기, 상태 ‘보내지는 않았습니다’ 
+PASS [1280-pt-4-draft] 초안 입력칸: 화면 안·가려지지 않음·글자 크기(텍스트영역은 Range 관측 대상이 아님) 
+  PNG 1280-pt-draft.png
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 초안 닫기 
+PASS [1280-pt-4-draft] 초안 닫은 직후(보조 이동 전): 깊이·배율·지도/main·패널 스크롤·선택·카드·선 동일 
+PASS [1280-pt-4-draft] 초안 닫기: 초점 호출 버튼 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 다른 대상 RC 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 다른 대상 초안 RC 
+PASS [1280-pt-4-draft] 다른 대상 초안은 비어 있음(격리) 
+PASS [1280-pt-4-draft] Escape로 초안 닫힘·초점 호출 버튼 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 변경 칩 SR(재) 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 원래 대상 초안 재열기 
+PASS [1280-pt-4-draft] 원래 대상 초안 보존 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 초안 닫기(2) 
+PASS [1280-pt-4-draft] 클릭 지점 화면 안·대상 위: 근거 열어 둔 채 전환 준비 
+== 1280-6-switch-back
+  사례 전환 → FLOW091
+PASS [1280-6-switch-back] 전환 왕복 뒤 FLOW091 보기 복원: 깊이·배율·지도/main 스크롤·선택·카드·선 동일 
+PASS [1280-6-switch-back] 되돌아와도 근거 상세는 닫혀 있음(열린 상세는 전환 때 닫음) 
+PASS [1280-6-switch-back] 클릭 지점 화면 안·대상 위: FLOW091 C32 초안 
+PASS [1280-6-switch-back] FLOW091 초안 보존·PowerToys 초안과 섞이지 않음 
+PASS [1280-6-switch-back] 클릭 지점 화면 안·대상 위: 초안 닫기 
+  사례 전환 → PowerToys
+PASS [1280-6-switch-back] 전환 왕복 뒤 PowerToys 보기 복원: 깊이·배율·지도/main 스크롤·선택·카드·선 동일 
+PASS [1280-6-switch-back] 클릭 지점 화면 안·대상 위: PowerToys SR 초안 
+PASS [1280-6-switch-back] PowerToys 초안 보존 
+PASS [1280-6-switch-back] 클릭 지점 화면 안·대상 위: 초안 닫기 

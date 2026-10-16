@@ -1,0 +1,501 @@
+{
+ "mode": "smoke-390",
+ "started": "2026-10-16T00:35:27.056Z",
+ "served": [
+  {
+   "path": "index.html",
+   "status": 200,
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  {
+   "path": "style.css",
+   "status": 200,
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  {
+   "path": "engine.js",
+   "status": 200,
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  {
+   "path": "fixtures/flow091.json",
+   "status": 200,
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  {
+   "path": "fixtures/powertoys.json",
+   "status": 200,
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  },
+  {
+   "path": "index.html",
+   "status": 200,
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  {
+   "path": "style.css",
+   "status": 200,
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  {
+   "path": "engine.js",
+   "status": 200,
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  {
+   "path": "fixtures/flow091.json",
+   "status": 200,
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  {
+   "path": "fixtures/powertoys.json",
+   "status": 200,
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ ],
+ "consoleErrors": [],
+ "scenarios": {
+  "390-flow-smoke": {
+   "id": "390-flow-smoke",
+   "assertions": [
+    {
+     "name": "가로 넘침 없음(문서·main)",
+     "pass": true,
+     "data": {
+      "sw": 390,
+      "iw": 390,
+      "mainSw": 390,
+      "mainCw": 390
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 제목",
+     "pass": true,
+     "data": {
+      "chars": 17,
+      "ok": 17,
+      "minFontPx": 17,
+      "fails": [],
+      "text": "AgentFlow 배경 사본 기능 일부"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 변경 칩",
+     "pass": true,
+     "data": {
+      "x": 128.3359375,
+      "y": 292.875,
+      "inView": true,
+      "hit": "button.chgchip[data-goto=C32]",
+      "hitInside": true,
+      "rect": {
+       "x": 12,
+       "y": 281.5,
+       "w": 232.7,
+       "h": 22.8
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 근거 열기",
+     "pass": true,
+     "data": {
+      "x": 88.765625,
+      "y": 809.890625,
+      "inView": true,
+      "hit": "button.btn.primary[data-act=detail]",
+      "hitInside": true,
+      "rect": {
+       "x": 14,
+       "y": 791.4,
+       "w": 149.5,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "근거 연 상태 가로 넘침 없음",
+     "pass": true,
+     "data": {
+      "sw": 390,
+      "iw": 390,
+      "mainSw": 390,
+      "mainCw": 390
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 근거 닫기",
+     "pass": true,
+     "data": {
+      "x": 329.484375,
+      "y": 558.390625,
+      "inView": true,
+      "hit": "button.btn.sm[data-act=ref-close]",
+      "hitInside": true,
+      "rect": {
+       "x": 294,
+       "y": 545.4,
+       "w": 71,
+       "h": 26
+      }
+     }
+    },
+    {
+     "name": "근거 닫힘(DOM 제거)·초점 호출 버튼",
+     "pass": true,
+     "data": "button.btn.primary[data-act=detail]"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 초안 열기",
+     "pass": true,
+     "data": {
+      "x": 238.828125,
+      "y": 644.890625,
+      "inView": true,
+      "hit": "button.btn[data-act=draft]",
+      "hitInside": true,
+      "rect": {
+       "x": 171.5,
+       "y": 626.4,
+       "w": 134.6,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "초안 창이 화면 안",
+     "pass": true,
+     "data": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 초안 닫기 버튼",
+     "pass": true,
+     "data": {
+      "chars": 2,
+      "ok": 2,
+      "minFontPx": 14,
+      "fails": [],
+      "text": "닫기"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 초안 닫기",
+     "pass": true,
+     "data": {
+      "x": 345,
+      "y": 32.5,
+      "inView": true,
+      "hit": "button#draftClose.btn",
+      "hitInside": true,
+      "rect": {
+       "x": 318,
+       "y": 14,
+       "w": 54,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "초안 닫힘·초점 호출 버튼",
+     "pass": true,
+     "data": "button.btn[data-act=draft]"
+    }
+   ],
+   "raw": {
+    "received": [
+     {
+      "path": "index.html",
+      "status": 200,
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+     },
+     {
+      "path": "style.css",
+      "status": 200,
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+     },
+     {
+      "path": "engine.js",
+      "status": 200,
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+     },
+     {
+      "path": "fixtures/flow091.json",
+      "status": 200,
+      "bytes": 19224,
+      "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+     },
+     {
+      "path": "fixtures/powertoys.json",
+      "status": 200,
+      "bytes": 13494,
+      "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+     }
+    ]
+   },
+   "complete": true
+  },
+  "390-pt-smoke": {
+   "id": "390-pt-smoke",
+   "assertions": [
+    {
+     "name": "가로 넘침 없음(문서·main)",
+     "pass": true,
+     "data": {
+      "sw": 390,
+      "iw": 390,
+      "mainSw": 390,
+      "mainCw": 390
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 제목",
+     "pass": true,
+     "data": {
+      "chars": 33,
+      "ok": 33,
+      "minFontPx": 17,
+      "fails": [],
+      "text": "PowerToys Keyboard Manager 편집기의 두 동작 수정"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 변경 칩",
+     "pass": true,
+     "data": {
+      "x": 238.8359375,
+      "y": 369.375,
+      "inView": true,
+      "hit": "span",
+      "hitInside": true,
+      "rect": {
+       "x": 146.5,
+       "y": 358,
+       "w": 184.6,
+       "h": 22.8
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 근거 열기",
+     "pass": true,
+     "data": {
+      "x": 88.765625,
+      "y": 775.75,
+      "inView": true,
+      "hit": "button.btn.primary[data-act=detail]",
+      "hitInside": true,
+      "rect": {
+       "x": 14,
+       "y": 757.3,
+       "w": 149.5,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "근거 연 상태 가로 넘침 없음",
+     "pass": true,
+     "data": {
+      "sw": 390,
+      "iw": 390,
+      "mainSw": 390,
+      "mainCw": 390
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 근거 닫기",
+     "pass": true,
+     "data": {
+      "x": 329.484375,
+      "y": 824.25,
+      "inView": true,
+      "hit": "button.btn.sm[data-act=ref-close]",
+      "hitInside": true,
+      "rect": {
+       "x": 294,
+       "y": 811.3,
+       "w": 71,
+       "h": 26
+      }
+     }
+    },
+    {
+     "name": "근거 닫힘(DOM 제거)·초점 호출 버튼",
+     "pass": true,
+     "data": "button.btn.primary[data-act=detail]"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 초안 열기",
+     "pass": true,
+     "data": {
+      "x": 238.828125,
+      "y": 775.75,
+      "inView": true,
+      "hit": "button.btn[data-act=draft]",
+      "hitInside": true,
+      "rect": {
+       "x": 171.5,
+       "y": 757.3,
+       "w": 134.6,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "초안 창이 화면 안",
+     "pass": true,
+     "data": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+     }
+    },
+    {
+     "name": "글자 관측(개별 글자·clip·hit) 초안 닫기 버튼",
+     "pass": true,
+     "data": {
+      "chars": 2,
+      "ok": 2,
+      "minFontPx": 14,
+      "fails": [],
+      "text": "닫기"
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 초안 닫기",
+     "pass": true,
+     "data": {
+      "x": 345,
+      "y": 32.5,
+      "inView": true,
+      "hit": "button#draftClose.btn",
+      "hitInside": true,
+      "rect": {
+       "x": 318,
+       "y": 14,
+       "w": 54,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "초안 닫힘·초점 호출 버튼",
+     "pass": true,
+     "data": "button.btn[data-act=draft]"
+    }
+   ],
+   "raw": {
+    "received": [
+     {
+      "path": "index.html",
+      "status": 200,
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+     },
+     {
+      "path": "style.css",
+      "status": 200,
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+     },
+     {
+      "path": "engine.js",
+      "status": 200,
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+     },
+     {
+      "path": "fixtures/flow091.json",
+      "status": 200,
+      "bytes": 19224,
+      "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+     },
+     {
+      "path": "fixtures/powertoys.json",
+      "status": 200,
+      "bytes": 13494,
+      "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+     }
+    ]
+   },
+   "complete": true
+  }
+ },
+ "wheels": 4,
+ "selectOptionCalls": 1,
+ "domScrollCalls": 0,
+ "pngs": [],
+ "firstFailure": null,
+ "sourceBefore": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ },
+ "browser": "141.0.7390.37",
+ "sourceAfter": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ },
+ "sourceUnchanged": true,
+ "finished": "2026-10-16T00:35:31.071Z",
+ "crash": null,
+ "assertions": 24,
+ "failed": 0,
+ "clickPreconditions": 10,
+ "incompleteScenarios": [],
+ "exitCode": 0
+}

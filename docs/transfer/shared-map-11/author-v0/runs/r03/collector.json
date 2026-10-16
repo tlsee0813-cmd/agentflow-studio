@@ -1,0 +1,244 @@
+{
+ "runId": "r03",
+ "png": true,
+ "started": "2026-10-16T00:35:39.447Z",
+ "node": "v22.22.0",
+ "before": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  },
+  "tests/check11.mjs": {
+   "bytes": 37081,
+   "sha256": "abaced80957d9eac983696d7a4ce47b30317b68c70a5dfba46bd23e8d7152b0e"
+  },
+  "tests/pagelib.js": {
+   "bytes": 5852,
+   "sha256": "3f67a779e62bed8251a8932378df841d7c68151876b626d0244c72184fea2787"
+  },
+  "tests/collect11.mjs": {
+   "bytes": 3355,
+   "sha256": "6fa2137044d166f934d79930afe26ab8744a7243dd8dcc5d3af71bad436e2a73"
+  },
+  "tests/make-temp-inputs.mjs": {
+   "bytes": 2737,
+   "sha256": "15285ff50fbf03bac0ad20f56d200b0d0a7b354d7756d959ef48617b9a52bf91"
+  }
+ },
+ "children": [
+  {
+   "mode": "static",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 460,
+   "scenarios": [
+    "static-no-case-branch"
+   ],
+   "incomplete": [],
+   "assertions": 1,
+   "clickWheelPreconditions": 0,
+   "failed": 0,
+   "firstFailure": null,
+   "consoleErrors": [],
+   "wheels": 0,
+   "selectOption": 0,
+   "pngs": []
+  },
+  {
+   "mode": "pc-1280",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 14956,
+   "scenarios": [
+    "1280-0-load",
+    "1280-flow-1-overview",
+    "1280-flow-2-select-detail",
+    "1280-flow-3-relation",
+    "1280-flow-4-draft",
+    "1280-5-switch",
+    "1280-pt-1-overview",
+    "1280-pt-2-select-detail",
+    "1280-pt-3-relation",
+    "1280-pt-4-draft",
+    "1280-6-switch-back"
+   ],
+   "incomplete": [],
+   "assertions": 161,
+   "clickWheelPreconditions": 52,
+   "failed": 0,
+   "firstFailure": null,
+   "consoleErrors": [],
+   "wheels": 13,
+   "selectOption": 3,
+   "pngs": [
+    "1280-flow-overview.png",
+    "1280-flow-detail.png",
+    "1280-pt-overview.png",
+    "1280-pt-detail.png",
+    "1280-pt-draft.png"
+   ]
+  },
+  {
+   "mode": "pc-1440",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 13752,
+   "scenarios": [
+    "1440-0-load",
+    "1440-flow-1-overview",
+    "1440-flow-2-select-detail",
+    "1440-flow-3-relation",
+    "1440-flow-4-draft",
+    "1440-5-switch",
+    "1440-pt-1-overview",
+    "1440-pt-2-select-detail",
+    "1440-pt-3-relation",
+    "1440-pt-4-draft",
+    "1440-6-switch-back"
+   ],
+   "incomplete": [],
+   "assertions": 161,
+   "clickWheelPreconditions": 52,
+   "failed": 0,
+   "firstFailure": null,
+   "consoleErrors": [],
+   "wheels": 7,
+   "selectOption": 4,
+   "pngs": [
+    "1440-flow-overview.png",
+    "1440-flow-detail.png",
+    "1440-pt-overview.png",
+    "1440-pt-detail.png"
+   ]
+  },
+  {
+   "mode": "temp-inputs",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 5914,
+   "scenarios": [
+    "tmp-renamed-leak",
+    "tmp-no-changes",
+    "tmp-schema-errors"
+   ],
+   "incomplete": [],
+   "assertions": 27,
+   "clickWheelPreconditions": 14,
+   "failed": 0,
+   "firstFailure": null,
+   "consoleErrors": [],
+   "wheels": 0,
+   "selectOption": 6,
+   "pngs": []
+  },
+  {
+   "mode": "smoke-390",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 4548,
+   "scenarios": [
+    "390-flow-smoke",
+    "390-pt-smoke"
+   ],
+   "incomplete": [],
+   "assertions": 24,
+   "clickWheelPreconditions": 10,
+   "failed": 0,
+   "firstFailure": null,
+   "consoleErrors": [],
+   "wheels": 4,
+   "selectOption": 1,
+   "pngs": [
+    "390-pt-smoke.png"
+   ]
+  }
+ ],
+ "tempInputs": {
+  "exit": 0,
+  "out": "ok err-cycle.json,err-depth.json,err-dup.json,err-endpoint.json,nochange.json,renamed.json\n",
+  "files": {
+   "err-cycle.json": {
+    "bytes": 13452,
+    "sha256": "1f2363392b8a55208eef133885ec8f95fa50a845395d5c00980c852c508ef048"
+   },
+   "err-depth.json": {
+    "bytes": 13591,
+    "sha256": "6eee3d88f20189bce94c78b788ad58befebc42a726a3cc1579d5dabcb25481a0"
+   },
+   "err-dup.json": {
+    "bytes": 14304,
+    "sha256": "808d0614b6f88ba6d68d24e0e25be1fe55c61d46a4c96da874453873fb9873b1"
+   },
+   "err-endpoint.json": {
+    "bytes": 13457,
+    "sha256": "253cea15d4e48642e1251ad00964b51a3311da67eaf5e7c9d9c6f200ac5c2093"
+   },
+   "nochange.json": {
+    "bytes": 18797,
+    "sha256": "e07cdf7de7039cc48424eb43ac27db6d3d5ce8a906b32eeaea6e6b6b34c04b0f"
+   },
+   "renamed.json": {
+    "bytes": 13680,
+    "sha256": "c594224ceb8f21cab28bee0ea2733c950a6b3580f19d2a9f1f09a2f97343dd27"
+   }
+  }
+ },
+ "after": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  },
+  "tests/check11.mjs": {
+   "bytes": 37081,
+   "sha256": "abaced80957d9eac983696d7a4ce47b30317b68c70a5dfba46bd23e8d7152b0e"
+  },
+  "tests/pagelib.js": {
+   "bytes": 5852,
+   "sha256": "3f67a779e62bed8251a8932378df841d7c68151876b626d0244c72184fea2787"
+  },
+  "tests/collect11.mjs": {
+   "bytes": 3355,
+   "sha256": "6fa2137044d166f934d79930afe26ab8744a7243dd8dcc5d3af71bad436e2a73"
+  },
+  "tests/make-temp-inputs.mjs": {
+   "bytes": 2737,
+   "sha256": "15285ff50fbf03bac0ad20f56d200b0d0a7b354d7756d959ef48617b9a52bf91"
+  }
+ },
+ "finished": "2026-10-16T00:36:19.131Z",
+ "sourceUnchangedDuringRun": true,
+ "firstFailingChild": null,
+ "allChildrenZero": true
+}

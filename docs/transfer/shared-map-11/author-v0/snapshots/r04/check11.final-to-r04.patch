@@ -1,0 +1,18 @@
+--- app/tests/check11.mjs	2026-10-16 09:37:50.116659236 +0900
++++ snapshots/r04/orig.mjs	2026-10-16 09:37:50.103528096 +0900
+@@ -186,13 +186,11 @@
+ 
+   begin(`${W}-${key}-4-draft`);
+   if (P.depthToggle) await click(`${sNode(P.depthToggle)} .gtog`, `깊이 바꾸기 ${P.depthToggle}`, '#mapScroll');
+-  // 확대: 지도가 움직일 여지가 생길 때까지(최대 2단계, 115%→130%) 실제 버튼을 누른다
+   await click('#zIn', '확대');
+   v = await V();
+-  if (v.map.sw <= v.map.cw && v.map.sh <= v.map.ch) { await click('#zIn', '확대(2단계)'); v = await V(); }
+-  const ext = { x: v.map.sw - v.map.cw, y: v.map.sh - v.map.ch }; cur.raw.mapExtent = ext; cur.raw.zoomLabel = v.scale.label;
++  const ext = { x: v.map.sw - v.map.cw, y: v.map.sh - v.map.ch }; cur.raw.mapExtent = ext;
+   if (ext.x > 0 || ext.y > 0) { const c = await PT('#mapScroll'); await page.mouse.move(c.x, c.y); await page.mouse.wheel(Math.min(70, Math.max(0, ext.x)), Math.min(50, Math.max(0, ext.y))); R.wheels++; await page.waitForTimeout(300); }
+-  v = await V(); await check('비초기 보기: 확대(115% 또는 130%)·지도 실제 휠 이동(여지 있는 축만, 없으면 extent 기록)', ['115%', '130%'].includes(v.scale.label) && (ext.x <= 0 || v.map.sl > 0) && (ext.y <= 0 || v.map.st > 0), { scale: v.scale.label, map: v.map, ext });
++  v = await V(); await check('비초기 보기: 115%·지도 실제 휠 이동(여지 있는 축)', v.scale.label === '115%' && (ext.x <= 0 || v.map.sl > 0) && (ext.y <= 0 || v.map.st > 0), { scale: v.scale.label, map: v.map, ext });
+   await click(`#caseHead .chgchip[data-goto="${P.changed}"]`, `머리의 변경 칩 ${P.changed}`);
+   await wheelTo('#panel [data-act="draft"]', scrollBox());
+   const before = await V(); cur.raw.beforeDraft = before;

@@ -1,0 +1,36 @@
+== tmp-renamed-leak
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: FLOW091 C32 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: FLOW091 C32 초안 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 입력 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 닫기 
+  사례 전환 → 재명명 임시 입력
+PASS [tmp-renamed-leak] 재명명 입력: 같은 화면으로 열림·제목은 임시 입력 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 재명명 입력의 C32(=PowerToys 키 검색·선택) 
+PASS [tmp-renamed-leak] 재명명 입력의 C32는 PowerToys 의미(이름·역할·변경)로만 표시 
+PASS [tmp-renamed-leak] 재명명 입력 화면에 FLOW091 문구 없음(ID가 같아도 하드코딩 없음) 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 재명명 C32 초안 
+PASS [tmp-renamed-leak] 같은 ID라도 다른 사례 초안은 비어 있음 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 입력 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 닫기 
+  사례 전환 → FLOW091
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: FLOW091 C32 초안(재) 
+PASS [tmp-renamed-leak] A→B(같은 ID)→A: 원래 사례 초안 그대로 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 닫기 
+  사례 전환 → 재명명
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 재명명 C32 초안(재) 
+PASS [tmp-renamed-leak] B로 돌아오면 B 초안 그대로 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 닫기 
+== tmp-no-changes
+PASS [tmp-no-changes] change 없음: 머리 띠·칩·강조·범례 항목·빈 행 없음 
+PASS [tmp-no-changes] 클릭 지점 화면 안·대상 위: C32 선택 
+PASS [tmp-no-changes] change 없음: 선택 설명에 변경 행·‘미확인’ 같은 대체 문구 없음 
+PASS [tmp-no-changes] 클릭 지점 화면 안·대상 위: 근거 열기 
+PASS [tmp-no-changes] change 없음: 상세에 전/후 행 없음, 역할·관계·근거는 그대로 
+== tmp-schema-errors
+PASS [tmp-schema-errors] 입력 오류 0: 오류 표시·지도 미표시·선택기에 ‘입력 오류’ 
+  사례 전환 → err1
+PASS [tmp-schema-errors] 입력 오류 1: 오류 표시·지도 미표시·선택기에 ‘입력 오류’ 
+  사례 전환 → err2
+PASS [tmp-schema-errors] 입력 오류 2: 오류 표시·지도 미표시·선택기에 ‘입력 오류’ 
+  사례 전환 → err3
+PASS [tmp-schema-errors] 입력 오류 3: 오류 표시·지도 미표시·선택기에 ‘입력 오류’ 

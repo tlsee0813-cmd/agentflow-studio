@@ -1,0 +1,156 @@
+{
+ "mode": "static",
+ "started": "2026-10-16T00:35:39.799Z",
+ "served": [],
+ "consoleErrors": [],
+ "scenarios": {
+  "static-no-case-branch": {
+   "id": "static-no-case-branch",
+   "assertions": [
+    {
+     "name": "engine.js·style.css에 사례 ID·노드/관계/근거 ID·이름·사업 문구 없음",
+     "pass": true,
+     "data": []
+    }
+   ],
+   "raw": {
+    "tokens": [
+     "flow091-background-copy",
+     "G1",
+     "구상과 목적",
+     "G2",
+     "요청 맥락",
+     "C21",
+     "새 요청의 배경 고정",
+     "C22",
+     "요청 범위 구분",
+     "G3",
+     "전달할 내용",
+     "C31",
+     "AI 입력",
+     "C32",
+     "작업문과 미리보기",
+     "G4",
+     "결과 연결",
+     "C41",
+     "일반 보고 연결",
+     "C42",
+     "파일 반환 연결",
+     "G5",
+     "저장·복구",
+     "R1",
+     "명시 새 요청 때만 사본 고정",
+     "R2",
+     "요청 사본",
+     "R3",
+     "R4",
+     "내보내기 기록의 사본",
+     "R5",
+     "일치하는 반환 식별자",
+     "R6",
+     "정확히 연결된 대상 작업의 사본",
+     "F1",
+     "F2",
+     "F3",
+     "F4",
+     "F5",
+     "F6",
+     "F7",
+     "F8",
+     "F9",
+     "F10",
+     "F11",
+     "이 기록의 정책 변경",
+     "powertoys-kbm-editor-pr51150",
+     "ED",
+     "Keyboard Manager 편집기",
+     "SR",
+     "키 검색·선택",
+     "RC",
+     "녹화 종료 판정",
+     "HK",
+     "공통 입력 훅",
+     "X1",
+     "이벤트 종류 전달",
+     "RVS",
+     "RVR",
+     "PS",
+     "PRC",
+     "PH",
+     "RPS",
+     "PRS",
+     "요청에 따른 수정",
+     "지원 변경 · 별도 요구 아님",
+     "FLOW091",
+     "PowerToys",
+     "ManagedCommon",
+     "flow091",
+     "powertoys",
+     "배경 사본",
+     "작업문",
+     "녹화",
+     "검색"
+    ]
+   },
+   "complete": true
+  }
+ },
+ "wheels": 0,
+ "selectOptionCalls": 0,
+ "domScrollCalls": 0,
+ "pngs": [],
+ "firstFailure": null,
+ "sourceBefore": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ },
+ "browser": "141.0.7390.37",
+ "sourceAfter": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ },
+ "sourceUnchanged": true,
+ "finished": "2026-10-16T00:35:39.952Z",
+ "crash": null,
+ "assertions": 1,
+ "failed": 0,
+ "clickPreconditions": 0,
+ "incompleteScenarios": [],
+ "exitCode": 0
+}

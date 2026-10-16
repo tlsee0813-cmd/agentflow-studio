@@ -1,0 +1,12 @@
+--- app/tests/check11.mjs	2026-10-16 09:34:52.213858196 +0900
++++ snapshots/r01/check11.mjs.orig	2026-10-16 09:34:52.199624432 +0900
+@@ -215,8 +215,7 @@
+   const clip = await page.evaluate(async () => { try { return await navigator.clipboard.readText(); } catch (e) { return 'ERR ' + e.message; } });
+   const st = await txt('#draftStatus');
+   await check('복사: 클립보드 = 미리보기, 상태 ‘보내지는 않았습니다’', clip === pv && /보내지는 않았습니다/.test(st), { clip: clip && clip.slice(0, 80), st });
+-  const ta = await page.evaluate(() => { const t = document.getElementById('draftText'), r = t.getBoundingClientRect(); const h = document.elementFromPoint(r.left + 20, r.top + 14); return { v: t.value, inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, hit: h === t, fpx: parseFloat(getComputedStyle(t).fontSize) }; });
+-  await check('초안 입력칸: 화면 안·가려지지 않음·글자 크기(텍스트영역은 Range 관측 대상이 아님)', ta.v === E[key] && ta.inView && ta.hit && ta.fpx >= 13, ta);
++  await seen('#draftText', '초안 입력 글자');
+   if (PNG && W === 1280 && key === 'pt') await shot(`${W}-${key}-draft`);
+   await click('#draftClose', '초안 닫기');
+   const after = await V(); cur.raw.afterDraft = after;

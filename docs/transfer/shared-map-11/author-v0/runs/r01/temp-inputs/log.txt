@@ -1,0 +1,37 @@
+== tmp-renamed-leak
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: FLOW091 C32 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: FLOW091 C32 초안 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 입력 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 닫기 
+  사례 전환 → 재명명 임시 입력
+PASS [tmp-renamed-leak] 재명명 입력: 같은 화면으로 열림·제목은 임시 입력 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 재명명 입력의 C32(=PowerToys 키 검색·선택) 
+PASS [tmp-renamed-leak] 재명명 입력의 C32는 PowerToys 의미(이름·역할·변경)로만 표시 
+PASS [tmp-renamed-leak] 재명명 입력 화면에 FLOW091 문구 없음(ID가 같아도 하드코딩 없음) 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 재명명 C32 초안 
+PASS [tmp-renamed-leak] 같은 ID라도 다른 사례 초안은 비어 있음 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 입력 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 닫기 
+  사례 전환 → FLOW091
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: FLOW091 C32 초안(재) 
+PASS [tmp-renamed-leak] A→B(같은 ID)→A: 원래 사례 초안 그대로 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 닫기 
+  사례 전환 → 재명명
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 재명명 C32 초안(재) 
+PASS [tmp-renamed-leak] B로 돌아오면 B 초안 그대로 
+PASS [tmp-renamed-leak] 클릭 지점 화면 안·대상 위: 닫기 
+== tmp-no-changes
+FAIL [tmp-no-changes] change 없음: 머리 띠·칩·강조·범례 항목·빈 행 없음 {"strip":false,"chips":0,"chgCls":0,"legend":"묶음 · 보기 구분\n기록에 적힌 관계 (순서 아님)\n접힌 묶음 안으로 모음 · 숫자는 관계 수","head":"임시 검사 입력 · 변경 필드 제거 (내용은 FLOW091 입력에서 change만 뺌)\n범위\nFLOW091-C 계약이 다루는 배경 사본 연결 부분만. 제품 전체 구성이 아님.\n자료 성격\n과거 개발 계약 문서와 그 안의 MOCK 검사 보고. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 없음.\n기준 시점\n고정 커밋 5416dec 시점의 계약 문서\n묶음\n점선 묶음은 이해를 돕기 위해 AI가 제안한 보기 구분이며 코드 소유·실행 순서가 아님.","panel":"선택 설명\n한 부분을 골라 보세요\n\n지도의 카드 하나를 고르면 그 부분의 역할과 이 기록에서 달라진 점을 먼저 보여 줍니다. 근거 원문과 관계 조건은 필요할 때 엽니다.","panelBtns":0}
+PASS [tmp-no-changes] 클릭 지점 화면 안·대상 위: C32 선택 
+PASS [tmp-no-changes] change 없음: 선택 설명에 변경 행·‘미확인’ 같은 대체 문구 없음 
+PASS [tmp-no-changes] 클릭 지점 화면 안·대상 위: 근거 열기 
+PASS [tmp-no-changes] change 없음: 상세에 전/후 행 없음, 역할·관계·근거는 그대로 
+== tmp-schema-errors
+PASS [tmp-schema-errors] 입력 오류 0: 오류 표시·지도 미표시·선택기에 ‘입력 오류’ 
+  사례 전환 → err1
+PASS [tmp-schema-errors] 입력 오류 1: 오류 표시·지도 미표시·선택기에 ‘입력 오류’ 
+  사례 전환 → err2
+PASS [tmp-schema-errors] 입력 오류 2: 오류 표시·지도 미표시·선택기에 ‘입력 오류’ 
+  사례 전환 → err3
+PASS [tmp-schema-errors] 입력 오류 3: 오류 표시·지도 미표시·선택기에 ‘입력 오류’ 
+scenarios=3 incomplete=[] assertions=27 (클릭·휠 전제 14) failed=1 wheels=0 selectOption=6 domScroll=0 consoleErrors=0 sourceUnchanged=true exit=1

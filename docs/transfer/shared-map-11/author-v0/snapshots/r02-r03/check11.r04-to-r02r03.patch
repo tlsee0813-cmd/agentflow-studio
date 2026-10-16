@@ -1,0 +1,20 @@
+--- app/tests/check11.mjs	2026-10-16 09:36:38.332469031 +0900
++++ snapshots/r02-r03/check11.mjs.orig	2026-10-16 09:36:38.321117383 +0900
+@@ -125,7 +125,7 @@
+   for (const n of changedOf(fx).filter(n => shown.includes(n))) await seen(`${sNode(n.id)} .kchg`, `변경 칩 ${n.id}`);
+   const relIds = v.edges.flatMap(e => e.rels.split(' ')).sort();
+   await check('선에 담긴 관계 ID = 입력 relations 전부', JSON.stringify(relIds) === JSON.stringify(fx.relations.map(r => r.id).sort()), relIds);
+-  if (W === 1280) await shot(`${W}-${key}-overview`);
++  await shot(`${W}-${key}-overview`);
+   cur.complete = true;
+ 
+   begin(`${W}-${key}-2-select-detail`);
+@@ -157,7 +157,7 @@
+     await check('정확 원문 펼침', await page.evaluate(i => !!document.querySelectorAll('#detail .evb')[i].querySelector('details[open]'), firstQ), null);
+   }
+   await seen('#detail .xhd', '근거 머리·닫기', scrollBox());
+-  if (PNG && W === 1440) { await wheelTo('#detail .ba', scrollBox()); await shot(`${W}-${key}-detail`); }
++  if (PNG) { await wheelTo('#detail .ba', scrollBox()); await shot(`${W}-${key}-detail`); }
+   await click('#detail [data-act="ref-close"]', '근거 닫기 버튼', scrollBox());
+   v = await V(); let gone = await page.evaluate(lim => ({ dom: !!document.getElementById('detail'), txt: !!lim && document.getElementById('panel').innerText.includes(lim) }), evs[0].limits);
+   await check('근거 닫기: DOM 제거·글자 부재·초점 호출 버튼·선택 유지', !gone.dom && !gone.txt && /\[data-act=detail\]/.test(v.active) && JSON.stringify(v.sel) === JSON.stringify([P.changed]), { gone, active: v.active, sel: v.sel });

@@ -1,0 +1,269 @@
+{
+ "runId": "r01",
+ "png": false,
+ "started": "2026-10-16T00:33:59.417Z",
+ "node": "v22.22.0",
+ "before": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33806,
+   "sha256": "955e4375e79b5319122cca7616ced34fdfdf8e8119a8d4b121d410a1fc7dd4f0"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  },
+  "tests/check11.mjs": {
+   "bytes": 36583,
+   "sha256": "ca938e46ac4c629bf98cdb94330a6264305deb2274ead14fee80c8ad6bf2c6f8"
+  },
+  "tests/pagelib.js": {
+   "bytes": 5852,
+   "sha256": "3f67a779e62bed8251a8932378df841d7c68151876b626d0244c72184fea2787"
+  },
+  "tests/collect11.mjs": {
+   "bytes": 3355,
+   "sha256": "6fa2137044d166f934d79930afe26ab8744a7243dd8dcc5d3af71bad436e2a73"
+  },
+  "tests/make-temp-inputs.mjs": {
+   "bytes": 2737,
+   "sha256": "15285ff50fbf03bac0ad20f56d200b0d0a7b354d7756d959ef48617b9a52bf91"
+  }
+ },
+ "children": [
+  {
+   "mode": "static",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 713,
+   "scenarios": [
+    "static-no-case-branch"
+   ],
+   "incomplete": [],
+   "assertions": 1,
+   "clickWheelPreconditions": 0,
+   "failed": 0,
+   "firstFailure": null,
+   "consoleErrors": [],
+   "wheels": 0,
+   "selectOption": 0,
+   "pngs": []
+  },
+  {
+   "mode": "pc-1280",
+   "childExitCode": 1,
+   "signal": null,
+   "ms": 15059,
+   "scenarios": [
+    "1280-0-load",
+    "1280-flow-1-overview",
+    "1280-flow-2-select-detail",
+    "1280-flow-3-relation",
+    "1280-flow-4-draft",
+    "1280-5-switch",
+    "1280-pt-1-overview",
+    "1280-pt-2-select-detail",
+    "1280-pt-3-relation",
+    "1280-pt-4-draft",
+    "1280-6-switch-back"
+   ],
+   "incomplete": [],
+   "assertions": 161,
+   "clickWheelPreconditions": 52,
+   "failed": 2,
+   "firstFailure": {
+    "scenario": "1280-flow-4-draft",
+    "name": "글자 관측(개별 글자·clip·hit) 초안 입력 글자",
+    "data": {
+     "chars": 0,
+     "ok": 0,
+     "minFontPx": null,
+     "fails": [],
+     "text": ""
+    }
+   },
+   "consoleErrors": [],
+   "wheels": 13,
+   "selectOption": 3,
+   "pngs": [
+    "FIRSTFAIL-1280-flow-4-draft.png"
+   ]
+  },
+  {
+   "mode": "pc-1440",
+   "childExitCode": 1,
+   "signal": null,
+   "ms": 13287,
+   "scenarios": [
+    "1440-0-load",
+    "1440-flow-1-overview",
+    "1440-flow-2-select-detail",
+    "1440-flow-3-relation",
+    "1440-flow-4-draft",
+    "1440-5-switch",
+    "1440-pt-1-overview",
+    "1440-pt-2-select-detail",
+    "1440-pt-3-relation",
+    "1440-pt-4-draft",
+    "1440-6-switch-back"
+   ],
+   "incomplete": [],
+   "assertions": 161,
+   "clickWheelPreconditions": 52,
+   "failed": 2,
+   "firstFailure": {
+    "scenario": "1440-flow-4-draft",
+    "name": "글자 관측(개별 글자·clip·hit) 초안 입력 글자",
+    "data": {
+     "chars": 0,
+     "ok": 0,
+     "minFontPx": null,
+     "fails": [],
+     "text": ""
+    }
+   },
+   "consoleErrors": [],
+   "wheels": 7,
+   "selectOption": 3,
+   "pngs": [
+    "FIRSTFAIL-1440-flow-4-draft.png"
+   ]
+  },
+  {
+   "mode": "temp-inputs",
+   "childExitCode": 1,
+   "signal": null,
+   "ms": 5918,
+   "scenarios": [
+    "tmp-renamed-leak",
+    "tmp-no-changes",
+    "tmp-schema-errors"
+   ],
+   "incomplete": [],
+   "assertions": 27,
+   "clickWheelPreconditions": 14,
+   "failed": 1,
+   "firstFailure": {
+    "scenario": "tmp-no-changes",
+    "name": "change 없음: 머리 띠·칩·강조·범례 항목·빈 행 없음",
+    "data": {
+     "strip": false,
+     "chips": 0,
+     "chgCls": 0,
+     "legend": "묶음 · 보기 구분\n기록에 적힌 관계 (순서 아님)\n접힌 묶음 안으로 모음 · 숫자는 관계 수",
+     "head": "임시 검사 입력 · 변경 필드 제거 (내용은 FLOW091 입력에서 change만 뺌)\n범위\nFLOW091-C 계약이 다루는 배경 사본 연결 부분만. 제품 전체 구성이 아님.\n자료 성격\n과거 개발 계약 문서와 그 안의 MOCK 검사 보고. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 없음.\n기준 시점\n고정 커밋 5416dec 시점의 계약 문서\n묶음\n점선 묶음은 이해를 돕기 위해 AI가 제안한 보기 구분이며 코드 소유·실행 순서가 아님.",
+     "panel": "선택 설명\n한 부분을 골라 보세요\n\n지도의 카드 하나를 고르면 그 부분의 역할과 이 기록에서 달라진 점을 먼저 보여 줍니다. 근거 원문과 관계 조건은 필요할 때 엽니다.",
+     "panelBtns": 0
+    }
+   },
+   "consoleErrors": [],
+   "wheels": 0,
+   "selectOption": 6,
+   "pngs": [
+    "FIRSTFAIL-tmp-no-changes.png"
+   ]
+  },
+  {
+   "mode": "smoke-390",
+   "childExitCode": 0,
+   "signal": null,
+   "ms": 4416,
+   "scenarios": [
+    "390-flow-smoke",
+    "390-pt-smoke"
+   ],
+   "incomplete": [],
+   "assertions": 24,
+   "clickWheelPreconditions": 10,
+   "failed": 0,
+   "firstFailure": null,
+   "consoleErrors": [],
+   "wheels": 4,
+   "selectOption": 1,
+   "pngs": []
+  }
+ ],
+ "tempInputs": {
+  "exit": 0,
+  "out": "ok err-cycle.json,err-depth.json,err-dup.json,err-endpoint.json,nochange.json,renamed.json\n",
+  "files": {
+   "err-cycle.json": {
+    "bytes": 13452,
+    "sha256": "1f2363392b8a55208eef133885ec8f95fa50a845395d5c00980c852c508ef048"
+   },
+   "err-depth.json": {
+    "bytes": 13591,
+    "sha256": "6eee3d88f20189bce94c78b788ad58befebc42a726a3cc1579d5dabcb25481a0"
+   },
+   "err-dup.json": {
+    "bytes": 14304,
+    "sha256": "808d0614b6f88ba6d68d24e0e25be1fe55c61d46a4c96da874453873fb9873b1"
+   },
+   "err-endpoint.json": {
+    "bytes": 13457,
+    "sha256": "253cea15d4e48642e1251ad00964b51a3311da67eaf5e7c9d9c6f200ac5c2093"
+   },
+   "nochange.json": {
+    "bytes": 18797,
+    "sha256": "e07cdf7de7039cc48424eb43ac27db6d3d5ce8a906b32eeaea6e6b6b34c04b0f"
+   },
+   "renamed.json": {
+    "bytes": 13680,
+    "sha256": "c594224ceb8f21cab28bee0ea2733c950a6b3580f19d2a9f1f09a2f97343dd27"
+   }
+  }
+ },
+ "after": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33806,
+   "sha256": "955e4375e79b5319122cca7616ced34fdfdf8e8119a8d4b121d410a1fc7dd4f0"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  },
+  "tests/check11.mjs": {
+   "bytes": 36583,
+   "sha256": "ca938e46ac4c629bf98cdb94330a6264305deb2274ead14fee80c8ad6bf2c6f8"
+  },
+  "tests/pagelib.js": {
+   "bytes": 5852,
+   "sha256": "3f67a779e62bed8251a8932378df841d7c68151876b626d0244c72184fea2787"
+  },
+  "tests/collect11.mjs": {
+   "bytes": 3355,
+   "sha256": "6fa2137044d166f934d79930afe26ab8744a7243dd8dcc5d3af71bad436e2a73"
+  },
+  "tests/make-temp-inputs.mjs": {
+   "bytes": 2737,
+   "sha256": "15285ff50fbf03bac0ad20f56d200b0d0a7b354d7756d959ef48617b9a52bf91"
+  }
+ },
+ "finished": "2026-10-16T00:34:38.891Z",
+ "sourceUnchangedDuringRun": true,
+ "firstFailingChild": "pc-1280",
+ "allChildrenZero": false
+}

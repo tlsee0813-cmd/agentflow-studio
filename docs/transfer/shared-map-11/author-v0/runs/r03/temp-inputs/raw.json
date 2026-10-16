@@ -1,0 +1,624 @@
+{
+ "mode": "temp-inputs",
+ "started": "2026-10-16T00:36:08.959Z",
+ "served": [
+  {
+   "path": "index.html",
+   "status": 200,
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  {
+   "path": "style.css",
+   "status": 200,
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  {
+   "path": "engine.js",
+   "status": 200,
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  {
+   "path": "fixtures/flow091.json",
+   "status": 200,
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  {
+   "path": "tests/fixtures-tmp/renamed.json",
+   "status": 200,
+   "bytes": 13680,
+   "sha256": "c594224ceb8f21cab28bee0ea2733c950a6b3580f19d2a9f1f09a2f97343dd27"
+  },
+  {
+   "path": "index.html",
+   "status": 200,
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  {
+   "path": "style.css",
+   "status": 200,
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  {
+   "path": "engine.js",
+   "status": 200,
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  {
+   "path": "tests/fixtures-tmp/nochange.json",
+   "status": 200,
+   "bytes": 18797,
+   "sha256": "e07cdf7de7039cc48424eb43ac27db6d3d5ce8a906b32eeaea6e6b6b34c04b0f"
+  },
+  {
+   "path": "index.html",
+   "status": 200,
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  {
+   "path": "style.css",
+   "status": 200,
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  {
+   "path": "engine.js",
+   "status": 200,
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  {
+   "path": "tests/fixtures-tmp/err-dup.json",
+   "status": 200,
+   "bytes": 14304,
+   "sha256": "808d0614b6f88ba6d68d24e0e25be1fe55c61d46a4c96da874453873fb9873b1"
+  },
+  {
+   "path": "tests/fixtures-tmp/err-endpoint.json",
+   "status": 200,
+   "bytes": 13457,
+   "sha256": "253cea15d4e48642e1251ad00964b51a3311da67eaf5e7c9d9c6f200ac5c2093"
+  },
+  {
+   "path": "tests/fixtures-tmp/err-cycle.json",
+   "status": 200,
+   "bytes": 13452,
+   "sha256": "1f2363392b8a55208eef133885ec8f95fa50a845395d5c00980c852c508ef048"
+  },
+  {
+   "path": "tests/fixtures-tmp/err-depth.json",
+   "status": 200,
+   "bytes": 13591,
+   "sha256": "6eee3d88f20189bce94c78b788ad58befebc42a726a3cc1579d5dabcb25481a0"
+  }
+ ],
+ "consoleErrors": [],
+ "scenarios": {
+  "tmp-renamed-leak": {
+   "id": "tmp-renamed-leak",
+   "assertions": [
+    {
+     "name": "클릭 지점 화면 안·대상 위: FLOW091 C32",
+     "pass": true,
+     "data": {
+      "x": 569,
+      "y": 401.625,
+      "inView": true,
+      "hit": "span.kchg",
+      "hitInside": true,
+      "rect": {
+       "x": 463,
+       "y": 363.3,
+       "w": 212,
+       "h": 76.8
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: FLOW091 C32 초안",
+     "pass": true,
+     "data": {
+      "x": 1183.828125,
+      "y": 380,
+      "inView": true,
+      "hit": "button.btn[data-act=draft]",
+      "hitInside": true,
+      "rect": {
+       "x": 1116.5,
+       "y": 361.5,
+       "w": 134.6,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 370,
+      "inView": true,
+      "hit": "textarea#draftText",
+      "hitInside": true,
+      "rect": {
+       "x": 338,
+       "y": 305,
+       "w": 604,
+       "h": 130
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 닫기",
+     "pass": true,
+     "data": {
+      "x": 915,
+      "y": 185.5,
+      "inView": true,
+      "hit": "button#draftClose.btn",
+      "hitInside": true,
+      "rect": {
+       "x": 888,
+       "y": 167,
+       "w": 54,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "재명명 입력: 같은 화면으로 열림·제목은 임시 입력",
+     "pass": true,
+     "data": "임시 검사 입력 · ID 재명명 (내용은 PowerToys 입력과 같음)"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 재명명 입력의 C32(=PowerToys 키 검색·선택)",
+     "pass": true,
+     "data": {
+      "x": 166,
+      "y": 341.375,
+      "inView": true,
+      "hit": "span.kchg",
+      "hitInside": true,
+      "rect": {
+       "x": 25,
+       "y": 313.5,
+       "w": 282,
+       "h": 55.8
+      }
+     }
+    },
+    {
+     "name": "재명명 입력의 C32는 PowerToys 의미(이름·역할·변경)로만 표시",
+     "pass": true,
+     "data": {
+      "h2": "키 검색·선택",
+      "role": "키 고르기 목록에서 검색어를 넣고 Enter로 첫 결과를 고르는 동작.",
+      "chg": "Enter로 제출한 검색어로 목록을 바로 다시 걸러 첫 결과를 고르도록 바뀜"
+     }
+    },
+    {
+     "name": "재명명 입력 화면에 FLOW091 문구 없음(ID가 같아도 하드코딩 없음)",
+     "pass": true,
+     "data": []
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 재명명 C32 초안",
+     "pass": true,
+     "data": {
+      "x": 1183.828125,
+      "y": 398.75,
+      "inView": true,
+      "hit": "button.btn[data-act=draft]",
+      "hitInside": true,
+      "rect": {
+       "x": 1116.5,
+       "y": 380.3,
+       "w": 134.6,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "같은 ID라도 다른 사례 초안은 비어 있음",
+     "pass": true,
+     "data": ""
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 입력",
+     "pass": true,
+     "data": {
+      "x": 640,
+      "y": 370,
+      "inView": true,
+      "hit": "textarea#draftText",
+      "hitInside": true,
+      "rect": {
+       "x": 338,
+       "y": 305,
+       "w": 604,
+       "h": 130
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 닫기",
+     "pass": true,
+     "data": {
+      "x": 915,
+      "y": 185.5,
+      "inView": true,
+      "hit": "button#draftClose.btn",
+      "hitInside": true,
+      "rect": {
+       "x": 888,
+       "y": 167,
+       "w": 54,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: FLOW091 C32 초안(재)",
+     "pass": true,
+     "data": {
+      "x": 1183.828125,
+      "y": 380,
+      "inView": true,
+      "hit": "button.btn[data-act=draft]",
+      "hitInside": true,
+      "rect": {
+       "x": 1116.5,
+       "y": 361.5,
+       "w": 134.6,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "A→B(같은 ID)→A: 원래 사례 초안 그대로",
+     "pass": true,
+     "data": "E1 원래 사례"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 닫기",
+     "pass": true,
+     "data": {
+      "x": 915,
+      "y": 185.5,
+      "inView": true,
+      "hit": "button#draftClose.btn",
+      "hitInside": true,
+      "rect": {
+       "x": 888,
+       "y": 167,
+       "w": 54,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 재명명 C32 초안(재)",
+     "pass": true,
+     "data": {
+      "x": 1183.828125,
+      "y": 398.75,
+      "inView": true,
+      "hit": "button.btn[data-act=draft]",
+      "hitInside": true,
+      "rect": {
+       "x": 1116.5,
+       "y": 380.3,
+       "w": 134.6,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "B로 돌아오면 B 초안 그대로",
+     "pass": true,
+     "data": "E2 임시 입력"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 닫기",
+     "pass": true,
+     "data": {
+      "x": 915,
+      "y": 185.5,
+      "inView": true,
+      "hit": "button#draftClose.btn",
+      "hitInside": true,
+      "rect": {
+       "x": 888,
+       "y": 167,
+       "w": 54,
+       "h": 37
+      }
+     }
+    }
+   ],
+   "raw": {
+    "received": [
+     {
+      "path": "index.html?fixtures=fixtures/flow091.json,tests/fixtures-tmp/renamed.json",
+      "status": 200,
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+     },
+     {
+      "path": "style.css",
+      "status": 200,
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+     },
+     {
+      "path": "engine.js",
+      "status": 200,
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+     },
+     {
+      "path": "fixtures/flow091.json",
+      "status": 200,
+      "bytes": 19224,
+      "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+     },
+     {
+      "path": "tests/fixtures-tmp/renamed.json",
+      "status": 200,
+      "bytes": 13680,
+      "sha256": "c594224ceb8f21cab28bee0ea2733c950a6b3580f19d2a9f1f09a2f97343dd27"
+     }
+    ]
+   },
+   "complete": true
+  },
+  "tmp-no-changes": {
+   "id": "tmp-no-changes",
+   "assertions": [
+    {
+     "name": "change 없음: 머리 띠·칩·강조·범례 항목·빈 행 없음",
+     "pass": true,
+     "data": {
+      "strip": false,
+      "chips": 0,
+      "chgCls": 0,
+      "legend": "묶음 · 보기 구분\n기록에 적힌 관계 (순서 아님)\n접힌 묶음 안으로 모음 · 숫자는 관계 수",
+      "head": "임시 검사 입력 · 변경 필드 제거 (내용은 FLOW091 입력에서 change만 뺌)\n범위\nFLOW091-C 계약이 다루는 배경 사본 연결 부분만. 제품 전체 구성이 아님.\n자료 성격\n과거 개발 계약 문서와 그 안의 MOCK 검사 보고. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 없음.\n기준 시점\n고정 커밋 5416dec 시점의 계약 문서\n묶음\n점선 묶음은 이해를 돕기 위해 AI가 제안한 보기 구분이며 코드 소유·실행 순서가 아님.",
+      "panel": "선택 설명\n한 부분을 골라 보세요\n\n지도의 카드 하나를 고르면 그 부분의 역할을 먼저 보여 줍니다. 근거 원문과 관계 조건은 필요할 때 엽니다.",
+      "panelBtns": 0
+     }
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: C32 선택",
+     "pass": true,
+     "data": {
+      "x": 569,
+      "y": 362.375,
+      "inView": true,
+      "hit": "button.kid[data-node=C32][data-sel=C32]",
+      "hitInside": true,
+      "rect": {
+       "x": 463,
+       "y": 334.5,
+       "w": 212,
+       "h": 55.8
+      }
+     }
+    },
+    {
+     "name": "change 없음: 선택 설명에 변경 행·‘미확인’ 같은 대체 문구 없음",
+     "pass": true,
+     "data": "‹전달할 내용› 안 세부\n작업문과 미리보기\n\n작업문·미리보기·Markdown에 배경을 별도 블록으로 넣는다.\n\n근거·전체 조건 읽기\n내 다음 요청 준비\n기록에 적힌 관계\n받음 ← 새 요청의 배경 고정\n요청 사본 · ‹요청 맥락› 안\n보냄 → 저장·복구\n내보내기 기록의 사본 · 최상위 부분"
+    },
+    {
+     "name": "클릭 지점 화면 안·대상 위: 근거 열기",
+     "pass": true,
+     "data": {
+      "x": 1033.765625,
+      "y": 269.5,
+      "inView": true,
+      "hit": "button.btn.primary[data-act=detail]",
+      "hitInside": true,
+      "rect": {
+       "x": 959,
+       "y": 251,
+       "w": 149.5,
+       "h": 37
+      }
+     }
+    },
+    {
+     "name": "change 없음: 상세에 전/후 행 없음, 역할·관계·근거는 그대로",
+     "pass": true,
+     "data": "근거·전체 조건 · 작업문과 미리보기\n근거 닫기\n역할\n\n작업문·미리보기·Markdown에 배경을 별도 블록으로 넣는다.\n\n관계 전체 조건\n\n새 요청의 배경 고정 → 작업문과 미리보기 · 요청 사본\n\n명시 새 요청 때 고정한 그 요청의 배경 사본을 작업문·미리보기의 별도 블록으로 넣습니다. 지금 지도에 보이는 최신 구상을 가져오는 것이 아닙니다. 사본이 없거"
+    }
+   ],
+   "raw": {
+    "received": [
+     {
+      "path": "index.html?fixtures=tests/fixtures-tmp/nochange.json",
+      "status": 200,
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+     },
+     {
+      "path": "style.css",
+      "status": 200,
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+     },
+     {
+      "path": "engine.js",
+      "status": 200,
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+     },
+     {
+      "path": "tests/fixtures-tmp/nochange.json",
+      "status": 200,
+      "bytes": 18797,
+      "sha256": "e07cdf7de7039cc48424eb43ac27db6d3d5ce8a906b32eeaea6e6b6b34c04b0f"
+     }
+    ]
+   },
+   "complete": true
+  },
+  "tmp-schema-errors": {
+   "id": "tmp-schema-errors",
+   "assertions": [
+    {
+     "name": "입력 오류 0: 오류 표시·지도 미표시·선택기에 ‘입력 오류’",
+     "pass": true,
+     "data": {
+      "shown": true,
+      "text": "이 입력을 표시할 수 없습니다\n\ntests/fixtures-tmp/err-dup.json · 자동으로 고치지 않습니다.\n\n중복 node ID: SR",
+      "grp": 0,
+      "opt": "임시 검사 입력 · 오류 · 입력 오류"
+     }
+    },
+    {
+     "name": "입력 오류 1: 오류 표시·지도 미표시·선택기에 ‘입력 오류’",
+     "pass": true,
+     "data": {
+      "shown": true,
+      "text": "이 입력을 표시할 수 없습니다\n\ntests/fixtures-tmp/err-endpoint.json · 자동으로 고치지 않습니다.\n\nrelation X1: 끝점 to NOPE가 없습니다.",
+      "grp": 0,
+      "opt": "임시 검사 입력 · 오류 · 입력 오류"
+     }
+    },
+    {
+     "name": "입력 오류 2: 오류 표시·지도 미표시·선택기에 ‘입력 오류’",
+     "pass": true,
+     "data": {
+      "shown": true,
+      "text": "이 입력을 표시할 수 없습니다\n\ntests/fixtures-tmp/err-cycle.json · 자동으로 고치지 않습니다.\n\nnode ED: parent 연결이 순환합니다.\nnode SR: parent 연결이 순환합니다.\nnode RC: parent 연결이 순환합니다.\ninitialView.layout.place: 루트가 아닌 node ED",
+      "grp": 0,
+      "opt": "임시 검사 입력 · 오류 · 입력 오류"
+     }
+    },
+    {
+     "name": "입력 오류 3: 오류 표시·지도 미표시·선택기에 ‘입력 오류’",
+     "pass": true,
+     "data": {
+      "shown": true,
+      "text": "이 입력을 표시할 수 없습니다\n\ntests/fixtures-tmp/err-depth.json · 자동으로 고치지 않습니다.\n\nnode DEEP: 지원하지 않는 깊이(3층 이상). 이 화면은 루트와 직접 자식 두 층만 지원합니다.",
+      "grp": 0,
+      "opt": "임시 검사 입력 · 오류 · 입력 오류"
+     }
+    }
+   ],
+   "raw": {
+    "received": [
+     {
+      "path": "index.html?fixtures=tests/fixtures-tmp/err-dup.json,tests/fixtures-tmp/err-endpoint.json,tests/fixtures-tmp/err-cycle.json,tests/fixtures-tmp/err-depth.json",
+      "status": 200,
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+     },
+     {
+      "path": "style.css",
+      "status": 200,
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+     },
+     {
+      "path": "engine.js",
+      "status": 200,
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+     },
+     {
+      "path": "tests/fixtures-tmp/err-dup.json",
+      "status": 200,
+      "bytes": 14304,
+      "sha256": "808d0614b6f88ba6d68d24e0e25be1fe55c61d46a4c96da874453873fb9873b1"
+     },
+     {
+      "path": "tests/fixtures-tmp/err-endpoint.json",
+      "status": 200,
+      "bytes": 13457,
+      "sha256": "253cea15d4e48642e1251ad00964b51a3311da67eaf5e7c9d9c6f200ac5c2093"
+     },
+     {
+      "path": "tests/fixtures-tmp/err-cycle.json",
+      "status": 200,
+      "bytes": 13452,
+      "sha256": "1f2363392b8a55208eef133885ec8f95fa50a845395d5c00980c852c508ef048"
+     },
+     {
+      "path": "tests/fixtures-tmp/err-depth.json",
+      "status": 200,
+      "bytes": 13591,
+      "sha256": "6eee3d88f20189bce94c78b788ad58befebc42a726a3cc1579d5dabcb25481a0"
+     }
+    ]
+   },
+   "complete": true
+  }
+ },
+ "wheels": 0,
+ "selectOptionCalls": 6,
+ "domScrollCalls": 0,
+ "pngs": [],
+ "firstFailure": null,
+ "sourceBefore": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ },
+ "browser": "141.0.7390.37",
+ "sourceAfter": {
+  "index.html": {
+   "bytes": 2769,
+   "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+  },
+  "engine.js": {
+   "bytes": 33828,
+   "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+  },
+  "style.css": {
+   "bytes": 11662,
+   "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+  },
+  "fixtures/flow091.json": {
+   "bytes": 19224,
+   "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+  },
+  "fixtures/powertoys.json": {
+   "bytes": 13494,
+   "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+  }
+ },
+ "sourceUnchanged": true,
+ "finished": "2026-10-16T00:36:14.575Z",
+ "crash": null,
+ "assertions": 27,
+ "failed": 0,
+ "clickPreconditions": 14,
+ "incompleteScenarios": [],
+ "exitCode": 0
+}

@@ -1,0 +1,27 @@
+== 390-flow-smoke
+PASS [390-flow-smoke] 가로 넘침 없음(문서·main) 
+PASS [390-flow-smoke] 글자 관측(개별 글자·clip·hit) 제목 
+PASS [390-flow-smoke] 클릭 지점 화면 안·대상 위: 변경 칩 
+PASS [390-flow-smoke] 클릭 지점 화면 안·대상 위: 근거 열기 
+PASS [390-flow-smoke] 근거 연 상태 가로 넘침 없음 
+PASS [390-flow-smoke] 클릭 지점 화면 안·대상 위: 근거 닫기 
+PASS [390-flow-smoke] 근거 닫힘(DOM 제거)·초점 호출 버튼 
+PASS [390-flow-smoke] 클릭 지점 화면 안·대상 위: 초안 열기 
+PASS [390-flow-smoke] 초안 창이 화면 안 
+PASS [390-flow-smoke] 글자 관측(개별 글자·clip·hit) 초안 닫기 버튼 
+PASS [390-flow-smoke] 클릭 지점 화면 안·대상 위: 초안 닫기 
+PASS [390-flow-smoke] 초안 닫힘·초점 호출 버튼 
+== 390-pt-smoke
+  사례 전환 → pt
+PASS [390-pt-smoke] 가로 넘침 없음(문서·main) 
+PASS [390-pt-smoke] 글자 관측(개별 글자·clip·hit) 제목 
+PASS [390-pt-smoke] 클릭 지점 화면 안·대상 위: 변경 칩 
+PASS [390-pt-smoke] 클릭 지점 화면 안·대상 위: 근거 열기 
+PASS [390-pt-smoke] 근거 연 상태 가로 넘침 없음 
+PASS [390-pt-smoke] 클릭 지점 화면 안·대상 위: 근거 닫기 
+PASS [390-pt-smoke] 근거 닫힘(DOM 제거)·초점 호출 버튼 
+PASS [390-pt-smoke] 클릭 지점 화면 안·대상 위: 초안 열기 
+PASS [390-pt-smoke] 초안 창이 화면 안 
+PASS [390-pt-smoke] 글자 관측(개별 글자·clip·hit) 초안 닫기 버튼 
+PASS [390-pt-smoke] 클릭 지점 화면 안·대상 위: 초안 닫기 
+PASS [390-pt-smoke] 초안 닫힘·초점 호출 버튼 

@@ -1,0 +1,3 @@
+== static-no-case-branch
+PASS [static-no-case-branch] engine.js·style.css에 사례 ID·노드/관계/근거 ID·이름·사업 문구 없음 
+scenarios=1 incomplete=[] assertions=1 (클릭·휠 전제 0) failed=0 wheels=0 selectOption=0 domScroll=0 consoleErrors=0 sourceUnchanged=true exit=0

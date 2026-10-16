@@ -1,0 +1,11 @@
+--- app/engine.js	2026-10-16 09:34:52.213096829 +0900
++++ snapshots/r01/engine.js.orig	2026-10-16 09:34:52.197931975 +0900
+@@ -250,7 +250,7 @@
+   if (!s) {
+     const ch = changed();
+     h = `<div class="pk">선택 설명</div><h2 tabindex="-1">한 부분을 골라 보세요</h2>
+-     <p>지도의 카드 하나를 고르면 그 부분의 역할${ch.length ? '과 이 기록에서 달라진 점' : ''}을 먼저 보여 줍니다. 근거 원문과 관계 조건은 필요할 때 엽니다.</p>
++     <p>지도의 카드 하나를 고르면 그 부분의 역할과 이 기록에서 달라진 점을 먼저 보여 줍니다. 근거 원문과 관계 조건은 필요할 때 엽니다.</p>
+      ${ch.length ? `<div class="act">${ch.map(n => `<button class="btn" data-goto="${esc(n.id)}">${esc(n.name)} 고르기</button>`).join('')}</div>` : ''}`;
+   } else if (s.t === 'node') {
+     const n = N(s.id), g = isGroup(s.id), rels = relsTouching(s.id), p = parentOf(s.id);

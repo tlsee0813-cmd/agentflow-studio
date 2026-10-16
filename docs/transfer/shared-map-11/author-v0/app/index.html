@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부분 지도 · 공통 화면 연구</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" data-fixtures="fixtures/flow091.json,fixtures/powertoys.json">
+  <header id="top">
+    <div class="caserow">
+      <label for="caseSel">연구 사례</label>
+      <select id="caseSel"></select>
+      <span class="research">연구용 시안 · 제품 화면 아님 · 같은 화면에 입력만 바꿔 넣음</span>
+    </div>
+    <div id="caseHead"></div>
+  </header>
+  <main id="main">
+    <section id="mapView" aria-label="부분 지도">
+      <div class="tools">
+        <div class="legend" id="legend"></div>
+        <div class="zoom" role="group" aria-label="배율">
+          <button id="zOut" aria-label="축소">−</button><output id="zVal" aria-live="polite"></output><button id="zIn" aria-label="확대">+</button>
+        </div>
+      </div>
+      <div id="mapScroll" tabindex="0" aria-label="지도 영역 (스크롤 가능)">
+        <div id="sizer"><div id="world"><svg id="edges" aria-hidden="true"></svg></div></div>
+      </div>
+      <div id="inputErrors" hidden role="alert"></div>
+    </section>
+    <aside id="panel" aria-label="선택 설명"></aside>
+  </main>
+  <div id="draft" class="modal" hidden>
+    <div class="modalbox" role="dialog" aria-modal="true" aria-labelledby="draftTitle">
+      <div class="modalhead">
+        <div><div class="kick">앞으로 보낼 수 있는 내 요청 · 초안 · 아직 보내지 않음</div><h2 id="draftTitle"></h2></div>
+        <button id="draftClose" class="btn">닫기</button>
+      </div>
+      <div class="modalbody" id="draftBody">
+        <details id="draftRef"><summary>대상과 참고 기록 (읽기 전용 · 과거 기록)</summary><div id="draftRefBody"></div></details>
+        <label for="draftText" class="flabel">내 다음 요청</label>
+        <textarea id="draftText" rows="7" placeholder="이 부분에 대해 다음에 요청하고 싶은 내용을 직접 적으세요."></textarea>
+        <div class="draftacts">
+          <button id="draftPreviewBtn" class="btn" disabled>초안 미리보기</button>
+          <button id="draftCopyBtn" class="btn" disabled>복사</button>
+          <span id="draftStatus" class="muted" aria-live="polite"></span>
+        </div>
+        <pre id="draftPreview" hidden></pre>
+        <p class="savenote">이 초안은 이 탭의 메모리에만 있습니다. 새로고침하거나 다른 세션에서는 남지 않습니다. 어디에도 보내지 않으며 작업을 만들지 않습니다.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="engine.js"></script>
+</body>
+</html>
