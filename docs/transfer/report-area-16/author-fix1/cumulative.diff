@@ -1,0 +1,789 @@
+diff --git a/app/continuity/public/styles.css b/app/continuity/public/styles.css
+index 6b65731..440c9e4 100644
+--- a/app/continuity/public/styles.css
++++ b/app/continuity/public/styles.css
+@@ -2481,3 +2481,40 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
+ .project-read-text{margin:0 0 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+ .project-read-text.missing{color:var(--muted)}
+ .project-read-note{margin:0;padding:8px 20px 14px;font-size:12px}
++/* REPORT16: the task screen reads the area's current idea and the picked report side by side; the next action sits under the
++ * idea, and this request's details follow. Same type sizes as the PC12 reading screen (nothing shrunk to fit). */
++.task-view-head-line{display:flex;align-items:center;justify-content:space-between;gap:6px 12px;flex-wrap:wrap}
++.task-view-head-line .eyebrow{margin:0}
++.space-head.task-view-head{padding:12px 18px;margin-bottom:12px}
++.task-view-head h1{font-size:19px;line-height:1.35;margin:4px 0 2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
++.task-view-status{margin:0}
++.task-read{display:grid;gap:16px;align-items:start}
++@media(min-width:1000px){.task-read{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}}
++.task-read-side{display:flex;flex-direction:column;gap:16px;min-width:0}
++.task-idea,.task-next,.task-reports,.task-more{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px 18px;min-width:0}
++.task-idea{margin:0}
++.task-next .row{gap:8px;align-items:center;flex-wrap:wrap}
++.task-next .hint{margin:6px 0 0}
++.task-edit{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
++.task-reports{display:flex;flex-direction:column;gap:10px}
++.task-reports .report-picker-head{font-size:14px;margin:0}
++.task-pointed+.report-picker{border-top:1px solid var(--line);padding-top:10px}
++.report-picker>.hint{margin:4px 0 0}
++.report-pick-list{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
++.report-pick{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;min-height:36px;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:7px 12px;cursor:pointer;color:var(--ink);font:inherit}
++.report-pick:hover,.report-pick:focus-visible{border-color:var(--accent)}
++.report-pick[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
++.report-pick-title{max-width:100%;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-weight:600}
++.report-pick-meta{font-size:12px;color:var(--muted)}
++.task-pointed{display:flex;flex-direction:column;gap:2px}
++.task-pointed>.source-meta{margin:2px 0}
++.task-pointed .alert{margin:4px 0 0}
++.task-pointed details{margin:2px 0 0}
++.task-pointed details>summary,#task-view-report-help>summary{padding:6px 0}
++.report-lead{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;margin:0}
++.report-source+.report-source{margin-top:8px}
++.report-lead:not(.whole){display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
++.report-lead-note{font-size:12px;color:var(--muted);margin:2px 0 4px}
++.report-source details>summary,.task-pointed details>summary,#task-view-report-help>summary{cursor:pointer;color:var(--accent);font-size:13px}
++.task-more{display:flex;flex-direction:column;gap:8px}
++.task-more h2{font-size:16px;margin:0}
+diff --git a/app/continuity/src/client/app.ts b/app/continuity/src/client/app.ts
+index d7e3300..b9b2470 100644
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -43,7 +43,11 @@ let viewArea:string|null=null;
+ // SPATIAL102: the request shown read-only (view 'task'). Looking at it never changes currentTaskId or the request target.
+ let viewTask:string|null=null;
+ // SPATIAL102-R1: the report a '확인할 일' item pointed to, shown on the task screen (may be a report to a follow-up handoff).
++// REPORT16: also the report the user picked on that screen. Never chosen for the user (no latest-report default).
+ let viewReturn:string|null=null;
++// REPORT16: which disclosures of the task screen are open, for that request and that picked report only (tab memory).
++// Ids starting with 'task-report-' belong to the picked report and are dropped when another report is picked.
++let readOpen:{task:string;ret:string|null;open:Record<string,boolean>}|null=null;
+ // SPATIAL102: this tab's memory of each layer of the open project (scroll, the card or request the user came back from).
+ type LayerMemo={space:number|null;from:string|null;areas:Record<string,{y:number;task:string|null}>};
+ let layerMemo:LayerMemo={space:null,from:null,areas:{}};
+@@ -128,7 +132,7 @@ function resetEphemeral() {
+   $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
+   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
+   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
+-  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];origin=null;
++  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
+   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
+ }
+ function openEntry(entry:WorkspaceEntry,fromList=false) {
+@@ -315,7 +319,7 @@ function returnToOrigin() {
+ function openTaskView(id:string,returnId:string|null=null,focus:string|null=null) {
+   const t=project.tasks.find(x=>x.id===id);if(!t)return;
+   const area=areaOf(project,t)??'unassigned';
+-  markOrigin(focus);leaveLayer();layerMemo.areas[area]={y:layerMemo.areas[area]?.y??0,task:id};
++  markOrigin(focus);leaveLayer();layerMemo.areas[area]={y:layerMemo.areas[area]?.y??0,task:id};readOpen=null;
+   view='task';viewArea=area;viewTask=id;viewReturn=returnId;render();window.scrollTo({top:0});$('space-title')?.focus({preventScroll:true});
+ }
+ /** Explicit: continue this task (or go back to it when its return is what is open). Viewing never does this. */
+@@ -334,8 +338,9 @@ function continueTask(id:string) {
+ function writeInArea(id:string|null) {
+   // An unsent report or request keeps its kind and target: open it instead of relabelling or moving it.
+   if(project.draft.trim()) {
+-    const where=project.space.draftTarget?.area?areaById(project.space.draftTarget.area)?.name:null;
+-    const message=project.draftKind==='request'?`작성 중인 요청이 있어 먼저 열었어요. 이 요청의 영역(${where??'지금 작업을 따라감'})은 그대로예요. 다른 영역에 쓰려면 이 요청을 보내거나 비운 뒤 다시 누르세요.`
++    // REPORT16: null = follows the current work; {area:null} = explicitly no area. Never the same words.
++    const where=draftTargetLabel();
++    const message=project.draftKind==='request'?`작성 중인 요청이 있어 먼저 열었어요. 이 요청의 대상(${where})은 그대로예요. 다른 영역에 쓰려면 이 요청을 보내거나 비운 뒤 다시 누르세요.`
+       :'작성 중인 결과가 있어 먼저 열었어요. 종류와 연결할 작업은 바꾸지 않았어요. 이 입력을 마친 뒤 새 요청을 쓰세요.';
+     view='work';render();project={...project,notice:message};renderStatus();
+   } else {
+@@ -343,6 +348,13 @@ function writeInArea(id:string|null) {
+   }
+   $<HTMLDetailsElement>('compose-panel').open=true;$('draft').focus();
+ }
++/** REPORT16: where the unsent request goes, in the composer's own words (renderComposeArea). */
++function draftTargetLabel():string {
++  const dt=project.space.draftTarget;
++  if(dt===null){const t=project.currentTaskId?taskOf(project):null,f=t?areaById(areaOf(project,t)):null;return `지금 작업을 따라감 · ${f?f.name:'영역 없음'}`;}
++  if(dt.area===null)return '영역 없이';
++  const a=areaById(dt.area);return a?`영역 ‘${a.name}’${a.archived?' · 보관됨':''}`:'없어진 영역';
++}
+ /** Explicit navigation to another task (a received result, or back to the latest request). */
+ function openTask(id:string) {
+   if(project.pending)return;
+@@ -1208,8 +1220,8 @@ function areaList(active:Area[]):HTMLElement {
+ /** PC12: a user's idea longer than this is shown as its opening words, with the whole text one click away. */
+ const NOTE_SHORT=160;
+ /** The user's own idea for an area, read first: an excerpt says so and links the whole text; an empty idea stays empty. */
+-function areaIdea(a:Area,id:string,limit=NOTE_SHORT):HTMLElement {
+-  const box=node('section','','area-idea');box.id=id;box.append(node('p','사용자 구상','source-meta'));
++function areaIdea(a:Area,id:string,limit=NOTE_SHORT,label='사용자 구상'):HTMLElement {
++  const box=node('section','','area-idea');box.id=id;box.append(node('p',label,'source-meta'));
+   if(!a.note){box.append(noNote(),node('p','비어 있어요. 아이디어도, 아직 못 정한 점도 직접 적을 수 있어요.','hint'));return box;}
+   if(a.note.length<=limit){box.append(node('p',a.note,'area-idea-text'));return box;}
+   const full=details(`구상 전체 보기 · 위는 앞부분 · ${a.note.length}자`,`${id}-full`);full.append(node('div',a.note,'source-raw'));
+@@ -1576,51 +1588,168 @@ function taskWorkDetails(t:Task):HTMLDetailsElement {
+   else box.append(node('p','작성된 작업문·완료 조건·유지할 조건 값이 없어요. 원문 속 조건이나 금지가 없다는 뜻은 아니니 요청 원문을 확인하세요.','hint'));
+   return box;
+ }
+-/** SPATIAL102: one request, read-only: its words, status, returned results and the bases that came from it. */
++/** REPORT16: the reports on this request's return path (direct, or through follow-up handoffs), in record order.
++ * Same membership rule as pointedReturn, so the list offers exactly the reports a pointed id may name. */
++function reportsOf(t:Task):Task[] {return project.tasks.filter(x=>isReturnTask(project,x)&&pointedReturn(project,t.id,x.id)!==null);}
++/** REPORT16: the user picks which report of this request to read. Looking only: no project data, current work, unsent
++ * input or starting point changes. Disclosures of the previously picked report do not carry over to this one. */
++function pickReport(id:string) {
++  if(view!=='task'||!viewTask)return;
++  // fix1: the same report picked again keeps all of its open parts; another report keeps only the request-wide ones.
++  const same=readOpen&&readOpen.task===viewTask&&readOpen.ret===id;
++  const keep=same?{...readOpen!.open}:readOpen&&readOpen.task===viewTask?Object.fromEntries(Object.entries(readOpen.open).filter(([k])=>!k.startsWith('task-report-'))):{};
++  viewReturn=id;readOpen={task:viewTask,ret:id,open:keep};
++  const y=window.scrollY;render();window.scrollTo({top:y});focusFirst(`task-report-pick-${id}`);
++}
++/** REPORT16: disclosures of the task screen keep their open state across redraws of the same request and the same picked
++ * report; a different request starts closed, and a different report starts with its own parts closed. Tab memory only. */
++function keepReadOpen(root:HTMLElement,t:Task) {
++  if(!readOpen||readOpen.task!==t.id||readOpen.ret!==viewReturn)
++    readOpen={task:t.id,ret:viewReturn,open:readOpen&&readOpen.task===t.id?Object.fromEntries(Object.entries(readOpen.open).filter(([k])=>!k.startsWith('task-report-'))):{}};
++  const memo=readOpen;
++  for(const d of root.querySelectorAll<HTMLDetailsElement>('details[id]')) {
++    const open=memo.open[d.id];if(open!==undefined)d.open=open;
++    d.addEventListener('toggle',()=>{if(readOpen===memo)memo.open[d.id]=d.open;});
++  }
++}
++/** REPORT16: the area's idea as it is now (Area.note, the user's words), not the copy saved with the request. */
++function currentIdea(t:Task,a:Area|null):HTMLElement {
++  if(!a){const box=node('section','','area-idea task-idea');box.id='task-view-idea';box.append(node('p','지금의 영역 구상','source-meta'),node('p','영역 미지정 요청이라 영역 구상이 없어요.','hint'));return box;}
++  const box=areaIdea(a,'task-view-idea',NOTE_SHORT,`지금의 영역 구상 · ${a.name}${a.archived?' (보관됨)':''}`);box.classList.add('task-idea');
++  const copy=t.background?.area;
++  if(copy&&copy.id===a.id&&(copy.note??'')!==a.note)box.append(node('p','이 요청을 쓸 때의 구상 사본과 달라요. 당시 사본은 아래 배경에 그대로 있어요.','hint task-idea-changed'));
++  return box;
++}
++const DRAFT_NAME:Record<Project['draftKind'],string>={request:'요청',report:'보고',evidence:'관찰',test_answer:'시험자료'};
++/** REPORT16: what the unsent input keeps, said before the click (the composer's own target/return rules). */
++function unsentTarget():string {
++  const kind=project.draftKind;
++  if(kind==='request')return `대상 그대로 · ${draftTargetLabel()}`;
++  if(kind==='report'||kind==='evidence') {
++    if(returnChoiceRequired())return '연결할 작업은 입력칸에서 아직 고르지 않았어요';
++    const p=returnPreview(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);
++    return p.targetTitle?`연결 예정 그대로 · ${p.targetTitle}`:'연결할 이전 작업 없음';
++  }
++  return '종류·내용 그대로';
++}
++/** REPORT16: open the unsent input exactly as it is (kind, text, target, chosen return task). Never relabels or retargets it. */
++function openUnsent() {
++  if(!project.draft.trim()){render();project={...project,notice:'작성 중인 입력이 없어져 아무것도 열지 않았어요. 다시 골라 주세요.'};renderStatus();return;}
++  writeInArea(null); // with an unsent input this only opens it; the id is not used
++}
++/** REPORT16: the one next action of this screen, named by what it really does, and the existing continue kept apart. */
++function nextAction(t:Task,a:Area|null):HTMLElement {
++  const box=node('section','','task-next');box.id='task-next';box.setAttribute('aria-label','다음 동작');
++  const draft=project.draft.trim(),row=node('div','','row'),what=node('p','','hint');what.id='task-next-target';
++  if(draft) {
++    row.append(btn(`작성 중인 ${DRAFT_NAME[project.draftKind]} 열기`,openUnsent,'primary','task-next-action'));
++    what.textContent=`‘${shortText(draft,48)}’ · ${unsentTarget()}`;box.append(row,what);
++    if(a&&!a.archived)box.append(node('p','이 영역의 새 요청은 이 입력을 보내거나 비운 뒤에 쓸 수 있어요.','hint'));
++  } else if(a&&!a.archived) {
++    row.append(btn('이 영역에 새 요청',()=>writeInArea(a.id),'primary','task-next-action'));
++    what.textContent=`영역 ‘${a.name}’에 쓸 빈 요청 입력칸을 열어요. 보내기 전에는 작업이 생기지 않아요.`;box.append(row,what);
++  } else {
++    const b=btn('이 영역에 새 요청',()=>{},'primary','task-next-action');b.disabled=true;b.setAttribute('aria-describedby','task-next-target');
++    what.textContent=a?'보관된 영역이라 여기서 새 요청을 쓰지 않아요. 영역을 되살리면 쓸 수 있어요.':'영역 미지정 요청이라 이 화면에서는 영역 새 요청을 쓰지 않아요.';
++    row.append(b);box.append(row,what);
++  }
++  // Editing this task is the existing explicit continue (PC12 policy), kept secondary and apart from a new request.
++  const target=continueTarget(t),edit=node('div','','task-edit'),er=node('div','','row');
++  if(currentGroup(t))er.append(appTag());
++  er.append(btn(target.button,()=>continueTask(t.id),'secondary','task-view-continue'));
++  const which=node('p',target.text,'hint task-view-target');which.id='task-view-target';edit.append(er,which);box.append(edit);
++  return box;
++}
++/** REPORT16: the picked report's own words first, level with the current idea beside it; then this request's reports as a
++ * short pick list (existing title, source kind, time). Nothing is picked for the user; no unpicked report's text is listed. */
++function reportsSection(t:Task,reports:Task[]):HTMLElement {
++  const box=node('section','','task-reports');box.id='task-reports';box.setAttribute('aria-label','돌아온 보고');
++  if(viewReturn!==null)box.append(pointedSection(t,viewReturn));
++  const picker=node('div','','report-picker');
++  picker.append(node('h2',`돌아온 결과 ${reports.length}개${reports.length?' · 외부 원문 · 앱 미검증':''}`,'report-picker-head'));
++  if(!reports.length)picker.append(node('p',t.handoffs.length?'작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.':'아직 돌아온 결과가 없어요.','hint'));
++  else {
++    if(viewReturn===null){const none=node('p',reports.length>1?'읽을 보고를 골라 주세요. 최신 보고를 대신 고르지 않아요.':'읽을 보고를 골라 주세요.','hint');none.id='task-report-none';picker.append(none);}
++    const list=node('ul','','report-pick-list');list.id='task-report-list';list.setAttribute('aria-label','읽을 보고 고르기');
++    for(const r of reports) {
++      const src=project.sources.find(s=>s.id===r.sourceIds[0]),path=returnPath(project,r),li=node('li');
++      const b=btn('',()=>pickReport(r.id),'report-pick',`task-report-pick-${r.id}`);b.setAttribute('aria-pressed',String(r.id===viewReturn));
++      b.append(node('span',taskTitle(project,r),'report-pick-title'),
++        node('span',`작업 ${pad(project.tasks.indexOf(r)+1)} · ${src?sourceName[src.kind]:'원문 없음'} · ${src?dateLabel(src.at):'시각 미확인'}${path.length>2?' · 이전 보고에 연결':''}`,'report-pick-meta'));
++      li.append(b);list.append(li);
++    }
++    picker.append(list);
++  }
++  box.append(picker);
++  if(viewReturn!==null&&pointedReturn(project,t.id,viewReturn)){const help=details('잘못 가져온 보고라면','task-view-report-help');help.append(reportCorrectionHelp());box.append(help);}
++  return box;
++}
++/** SPATIAL102 + REPORT16: one request, read-only. First: the area's current idea and the next action beside the report the user
++ * picks. Editing this task stays the separate continue. Short context, original, work text, background copy and bases follow. */
+ function renderTaskView(root:HTMLElement,t:Task) {
+-  const area=areaById(areaOf(project,t)),first=sourceOf(project,t),results=returnsOf(t);
+-  const head=node('div','','space-head'),title=node('h1',taskTitle(project,t));title.id='space-title';title.tabIndex=-1;
+-  head.append(node('p',`TASK · 작업 ${pad(project.tasks.indexOf(t)+1)}${area?.archived?' · 보관된 영역':''}`,'eyebrow'),title,node('p',taskStatus(project,t),'hint task-view-status'));
+-  const actions=node('div','','row'),target=continueTarget(t);
+-  if(currentGroup(t))actions.append(appTag());
+-  actions.append(btn(target.button,()=>continueTask(t.id),'primary','task-view-continue'));
+-  const back=originButton('task-return-origin');if(back)actions.append(back);
+-  const which=node('p',target.text,'hint task-view-target');which.id='task-view-target';
+-  head.append(actions,which);if(!currentGroup(t))head.append(node('p','이 화면을 보는 것만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.','hint'));
++  const area=areaById(areaOf(project,t)),first=sourceOf(project,t),reports=reportsOf(t);
++  const head=node('div','','space-head task-view-head'),title=node('h1',taskTitle(project,t));title.id='space-title';title.tabIndex=-1;
++  const top=node('div','','task-view-head-line');
++  top.append(node('p',`요청 · ${area?`영역 ‘${area.name}’${area.archived?' · 보관됨':''}`:'영역 미지정'}`,'eyebrow'));
++  // PC12: back to the view the reading started from; without one (e.g. after a reload) only a plain way to the whole space.
++  top.append(originButton('task-return-origin')??btn('전체 공간으로',openSpace,'secondary','task-to-space'));
++  head.append(top,title,node('p',`작업 ${pad(project.tasks.indexOf(t)+1)} · ${taskStatus(project,t)}`,'hint task-view-status'));
+   root.append(head);
+-  if(viewReturn!==null){root.append(pointedSection(t,viewReturn));if(pointedReturn(project,t.id,viewReturn))root.append(reportCorrectionHelp());}
+-  // PC12: short context first (each line says where it comes from); the original, reports and conditions open when needed.
+   const body=node('section','','area-tasks task-view');body.id='task-view';
+-  body.append(taskContext(t));
++  const read=node('div','','task-read'),side=node('div','','task-read-side');
++  side.append(currentIdea(t,area),nextAction(t,area));read.append(side,reportsSection(t,reports));body.append(read);
++  // PC12: this request's short context (each line says where it comes from); the original and conditions open when needed.
++  const more=node('section','','task-more');more.append(node('h2','이 요청 자세히'),taskContext(t));
+   const original=details(`요청 원문 보기 · 사용자 원문${first?` · ${first.text.length}자`:''}`,'task-view-request');
+   if(first)original.append(node('p',`${sourceName[first.kind]} · ${dateLabel(first.at)}`,'source-id'),node('div',first.text,'source-raw'));
+   else original.append(node('p','이 작업의 원문을 찾지 못했어요.','hint'));
+-  body.append(original,taskWorkDetails(t));
+-  if(!results.length)body.append(node('p',`돌아온 결과 0개 · ${t.handoffs.length?'작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.':'아직 돌아온 결과가 없어요.'}`,'hint'));
+-  else {
+-    const reports=details(`돌아온 결과 ${results.length}개 · 외부 원문 · 앱 미검증`,'task-view-results');
+-    for(const r of results)for(const id of r.sourceIds){const src=project.sources.find(s=>s.id===id);if(src)reports.append(node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 작업 ${pad(project.tasks.indexOf(r)+1)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));}
+-    reports.append(reportCorrectionHelp());body.append(reports);
+-  }
+-  body.append(backgroundPreview(t,'task-view-background'));
+-  root.append(body);
+-  const own=new Set([t.id,...results.map(r=>r.id)]),bases=project.bases.filter(b=>own.has(project.sources.find(s=>s.id===b.sourceId)?.taskId??''));
++  more.append(original,taskWorkDetails(t),backgroundPreview(t,'task-view-background'));
++  body.append(more);root.append(body);
++  const own=new Set([t.id,...returnsOf(t).map(r=>r.id)]),bases=project.bases.filter(b=>own.has(project.sources.find(s=>s.id===b.sourceId)?.taskId??''));
+   const box=details(`이 작업의 기준 ${bases.length}개`,'task-view-bases');
+   for(const b of bases)box.append(node('p',`${BASIS_LABEL[b.status]} · ${shortText(b.text,90)}`,'source-raw'));
+   if(!bases.length)box.append(node('p','이 작업에서 나온 기준이 없어요.','hint'));
+   box.append(btn('기준 · 출처 전체 보기',showContext,'quiet'));root.append(box);
+-}
+-/** SPATIAL102-R1: the report the check item pointed to, with where it belongs. A stale or foreign id is said so plainly. */
++  keepReadOpen(root,t);
++}
++/** REPORT16: the opening of a report as written: at most six lines and REPORT_LEAD characters, line breaks kept. */
++const REPORT_LEAD=300;
++const KIND_SHORT:Record<Source['kind'],string>={...sourceName,report:'구현자 보고',evidence:'관찰·검사 자료'};
++function leadOf(text:string):string {
++  const lines=text.split('\n');let lead=lines.slice(0,6).join('\n');
++  if(lead.length>REPORT_LEAD)lead=lead.slice(0,REPORT_LEAD);
++  return lead.length<text.length?`${lead.trimEnd()}…`:text;
++}
++/** SPATIAL102-R1 + REPORT16: the picked report (or the one a check item pointed to). Every source of that report task is reachable
++ * in full; a missing source is said, never replaced or skipped. A stale or foreign id is said plainly, never swapped. */
+ function pointedSection(t:Task,returnId:string):HTMLElement {
+-  const box=node('section','','area-tasks task-pointed');box.id='task-pointed';box.append(node('h2','확인할 일에서 연 보고'));
+-  const r=pointedReturn(project,t.id,returnId),src=r?project.sources.find(s=>s.id===r.sourceIds[0]):undefined;
+-  if(!r||!src){box.append(node('p','가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 작업의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래는 이 작업의 기록이에요.','alert warning'));return box;}
+-  const no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`,path=returnPath(project,r);
+-  // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run (a report can be pasted onto the
+-  // current work with nothing exported), so the wording never infers one.
++  const box=node('section','','task-pointed');box.id='task-pointed';
++  const r=pointedReturn(project,t.id,returnId);
++  if(!r){box.append(node('p','고른 보고','source-meta'),node('p','가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 요청의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래에서 직접 고를 수 있어요.','alert warning'));return box;}
++  const no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`,path=returnPath(project,r),first=project.sources.find(s=>s.id===r.sourceIds[0]);
++  // One low-emphasis line, level with the idea's own label: which report, whose words, unverified.
++  const one=r.sourceIds.length===1&&first?` · ${KIND_SHORT[first.kind]}`:'';
++  box.append(node('p',`고른 보고 · ${no(r)}${one} · ${first?dateLabel(first.at):'시각 미확인'} · 외부 원문 · 앱 미검증`,'source-meta'));
++  for(const id of r.sourceIds) {
++    const src=project.sources.find(s=>s.id===id);
++    if(!src){box.append(node('p',`이 보고의 원문 하나(${id})를 찾지 못했어요. 다른 원문으로 대신하지 않았어요.`,'alert warning'));continue;}
++    const text=reportBody(src),part=node('div','','report-source');part.dataset.sourceId=src.id;
++    if(r.sourceIds.length>1)part.append(node('p',KIND_SHORT[src.kind],'source-meta'));
++    // Read with the idea beside it: a short report is shown whole; a long one shows its opening lines as written (not a
++    // summary), says so, and the whole text is one explicit click away.
++    const lead=leadOf(text);
++    if(lead===text)part.append(node('div',text,'report-lead whole'));
++    else {
++      const full=details(`${src.kind==='evidence'?'관찰·검사 자료':'보고'} 전문 보기 · ${text.length}자`,`task-report-src-${src.id}`);
++      full.append(node('div',text,'source-raw'));
++      part.append(node('div',lead,'report-lead'),node('p','위는 앞부분이에요 · 요약이 아니에요','report-lead-note'),full);
++    }
++    box.append(part);
++  }
++  // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run, so the wording never infers one.
+   const hops=path.map((x,i)=>i===0?`${no(x)} 요청`:i===path.length-1?`${no(x)} 이 보고`:`${no(x)} 보고`);
+-  box.append(node('p',`연결: ${hops.join(' › ')} (${path.length>2?'이전 보고에 연결된 보고':'이 요청에 바로 연결된 보고'})`,'hint'),
+-    node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));
++  const link=details(`연결 경로 보기 · ${path.length>2?'이전 보고에 연결된 보고':'이 요청에 바로 연결된 보고'}`,'task-report-path');
++  link.append(node('p',`연결: ${hops.join(' › ')}`,'hint'));box.append(link);
+   return box;
+ }
+ function renderUnplaced(root:HTMLElement) {
+@@ -1677,7 +1806,10 @@ function render() {
+   $('compose-panel').classList.toggle('initial',!project.tasks.length);
+   const t=project.currentTaskId?taskOf(project):null;
+   renderOutcome(t);renderBases(t);renderHistory();renderWork(t);renderReturnPreview();renderResultFile();renderSpace();renderPlace(t);renderComposeArea(t,returned);renderStatus();displayView();
+-  for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id))d.open=open.get(d.id)!;
++  // REPORT16-fix1: on the task screen, readOpen alone decides its disclosures (per request; a picked report's own parts per report).
++  // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
++  const taskScreen=view==='task'?$('space-view'):null;
++  for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&!taskScreen?.contains(d))d.open=open.get(d.id)!;
+   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
+ }
+ function submitInput(withAI:boolean) {
+diff --git a/app/continuity/tests/flow090_browser.py b/app/continuity/tests/flow090_browser.py
+index 2f2cafc..3952148 100644
+--- a/app/continuity/tests/flow090_browser.py
++++ b/app/continuity/tests/flow090_browser.py
+@@ -301,9 +301,11 @@ class SpatialWorkspace(unittest.TestCase):
+         # PC12: the panel no longer picks the latest report; the user picks the request and reads its report there (raw, unverified).
+         self.page.locator(f'#node-info-{booking}').click();expect(self.page.locator('#panel-report')).to_have_count(0)
+         expect(self.page.locator('#area-panel')).to_contain_text('외부 도구에서 지금 실행 중이라는 뜻이 아니에요')
+-        self.page.locator(f'#panel-task-{task}').click();res=self.page.locator('#task-view-results')
+-        expect(res.locator('summary')).to_contain_text('앱 미검증');expect(res).not_to_have_attribute('open','')
+-        res.locator('summary').click();raw=res.locator('.source-raw').first;expect(raw).to_contain_text('ZZ-END')
++        # REPORT16: the report is read by the user's explicit pick on the task screen (not pre-picked); its full text opens on request.
++        self.page.locator(f'#panel-task-{task}').click();expect(self.page.locator('#task-pointed')).to_have_count(0)
++        self.page.locator(f"#task-report-pick-{rt['id']}").click();res=self.page.locator('#task-pointed')
++        expect(res).to_contain_text('앱 미검증');full=res.locator('details[id^="task-report-src-"]');expect(full).not_to_have_attribute('open','')
++        full.locator('summary').click();raw=full.locator('.source-raw').first;expect(raw).to_contain_text('ZZ-END')
+         self.assertEqual(' '.join(raw.inner_text().split()),' '.join(report.split()),'raw text, not a summary')
+         self.page.locator('#task-return-origin').click();expect(self.page.locator('#space-title')).to_have_text('전체 공간')
+         self.page.locator(f'#panel-task-{task}').click()
+diff --git a/app/continuity/tests/pc12_browser.py b/app/continuity/tests/pc12_browser.py
+index 117ffe7..8383c99 100644
+--- a/app/continuity/tests/pc12_browser.py
++++ b/app/continuity/tests/pc12_browser.py
+@@ -143,16 +143,20 @@ class Pc12(unittest.TestCase):
+         ctx=self.page.locator('#task-view-context');expect(ctx).to_contain_text('영역 ‘예약’')
+         expect(ctx.locator('[data-field="understanding"] .field-origin')).to_have_text('MOCK 제안 · 원문과 다를 수 있음')
+         expect(self.page.locator('#task-view-target')).to_contain_text('받은 현재 보고')
+-        for d in ['task-view-request','task-view-results','task-view-work']:expect(self.page.locator(f'#{d}')).not_to_have_attribute('open','')
+-        expect(self.page.locator('#task-view-request .source-raw')).to_be_hidden();expect(self.page.locator('#task-view-results .source-raw').first).to_be_hidden()
++        # REPORT16: no report is picked for the user (the old all-reports disclosure became an explicit pick list).
++        for d in ['task-view-request','task-view-work']:expect(self.page.locator(f'#{d}')).not_to_have_attribute('open','')
++        expect(self.page.locator('#task-view-request .source-raw')).to_be_hidden();expect(self.page.locator('#task-pointed')).to_have_count(0)
++        expect(self.page.locator('#task-view')).not_to_contain_text('ZZ-END-R')
+         self.shot('02-task-context')
+         # Open and close the long original (click), and the report (keyboard on its summary).
+         self.page.locator('#task-view-request > summary').click();expect(self.page.locator('#task-view-request')).to_contain_text('ZZ-END-A')
+         expect(self.page.locator('#task-view-request .source-raw')).to_be_visible();self.page.locator('#task-view-request > summary').click()
+         expect(self.page.locator('#task-view-request .source-raw')).to_be_hidden()
+-        self.page.locator('#task-view-results > summary').focus();self.page.keyboard.press('Enter')
+-        expect(self.page.locator('#task-view-results')).to_have_attribute('open','');expect(self.page.locator('#task-view-results')).to_contain_text('앱 미검증')
+-        self.page.keyboard.press('Enter');expect(self.page.locator('#task-view-results')).not_to_have_attribute('open','')
++        self.page.locator(f'#task-report-pick-{R}').focus();self.page.keyboard.press('Enter')
++        expect(self.page.locator('#task-pointed')).to_contain_text('앱 미검증');full=self.page.locator('#task-pointed details[id^="task-report-src-"]')
++        expect(full).not_to_have_attribute('open','');full.locator('summary').focus();self.page.keyboard.press('Enter')
++        expect(full).to_have_attribute('open','');expect(full).to_contain_text('ZZ-END-R')
++        self.page.keyboard.press('Enter');expect(full).not_to_have_attribute('open','')
+         self.page.locator('#task-return-origin').click();self.assert_back(before,booking,A)
+         after=self.state()
+         self.assertEqual(after,before_state,'reading changed no saved data (current task, draft kind/target/text, manual fields)')
+diff --git a/app/continuity/tests/report16_browser.py b/app/continuity/tests/report16_browser.py
+new file mode 100644
+index 0000000..facc7ac
+--- /dev/null
++++ b/app/continuity/tests/report16_browser.py
+@@ -0,0 +1,404 @@
++"""REPORT16: native Chromium -> real localhost HTTP -> explicit MOCK; no paid AI, no external tool.
++The existing read-only task screen (renderTaskView) now reads the area's CURRENT idea (Area.note, via areaIdea) beside the report
++the user explicitly picks from this request's return path (rootRequest/pointedReturn, nested follow-up reports included), with
++one next action named by what it really does: a new request in this area, or the unsent input opened as it is. The existing
++continue (edit this task) stays a separate, secondary action. Back to the starting map/area view via the existing origin.
++
++Fixture (isolated, installed through the product UI; labelled):
++- REAL_R1 is a Korean restatement (not a quote) of a public PowerToys PR #51150 review reply (GitHub comment 4257710120,
++  2026-10-13 10:51:30 UTC, in reply to 4255501266; it names commit a964f08cc6fbecb3b9f9d4fe6c1d7481330c7938). It is the author's
++  claim, not run or verified by the app or the coordinator; no person's name is copied. It arrives as a result file with a
++  SYNTHETIC evidence part (two sources on one report task).
++- OLD_IDEA / CUR_IDEA / REQ_* / LONG_R2 / RB / FOLLOW are synthetic. CUR_IDEA is not a PowerToys requirement.
++Operations under test are real click/key/wheel/pointer; nothing assigns app state. Each condition (expected vs value) and raw
++page snapshot is written to report16-observations.jsonl before its assertion. Wiring and geometry, not usability.
++Run from app/: python continuity/tests/report16_browser.py
++"""
++import json, unittest
++from playwright.sync_api import expect
++import browser as base
++
++AREA,OTHER='검색으로 키 선택','알림 설정'
++OLD_IDEA='[합성 · 당시 구상] 검색어로 키를 찾는다. Enter를 누를 때의 처리 방식은 아직 못 정함.'
++CUR_IDEA='[합성 구상] 검색어를 제출해도 키를 바로 확정하지 않는다. 후보만 좁히고 사용자가 목록에서 명시적으로 고른 뒤 확정한다.'
++REQ_A='[합성] 키 검색 상자에서 f10처럼 검색어를 입력하고 Enter를 눌렀을 때의 동작을 정리해 주세요.'
++REAL_R1=('[실제 보고 재서술 · 작성자 주장] a964f08cc6에서 수정했다. '
++         '제출된 검색어를 공통 필터 함수로 동기 처리하게 바꿔, f10 입력 직후 Enter를 누르면 F10이 선택된다.')
++EVID_R1='[합성 관찰 · 시험용] 이 앱은 PowerToys를 실행하지 않았어요. 원문 두 개 확인용 ZZ-EVID-R1'
++LONG_R2='\n'.join(['[합성 후속 보고 · 시험용] 후속 확인 결과를 적었다고 주장합니다. ZZ-HEAD-R2']+
++                  [f'{i}번째 줄: 검색 후보 목록과 Enter 처리 순서에 대한 긴 설명이 이어집니다. 실제로 확인한 것은 아닙니다.' for i in range(2,15)]+['끝 문장 ZZ-END-R2'])
++REQ_B='[합성 요청] 알림 문구에 예약 시간을 넣어 주세요.'
++RB='[합성 다른 요청의 보고] 알림 문구를 바꿨다고 주장 ZZ-RB'
++FOLLOW='[합성 후속 요청 · 미전송] 시험 조건을 유지하려면 Enter 확정 동작을 어떻게 조정할지 제안해 달라.'
++WORK_KEYS=['understanding','scope','next','checks']
++OBS=base.OUT/'report16-observations.jsonl';OBS.write_text('',encoding='utf-8')
++SNAP_JS='''(area)=>{const p=document.getElementById('space-plane'),n=area&&document.querySelector(`.area-node[data-area-id="${area}"]`),a=document.activeElement;
++  const r=n?n.getBoundingClientRect():null;
++  return {windowY:window.scrollY,styleTransform:p?p.style.transform:null,computedTransform:p?getComputedStyle(p).transform:null,
++    cardRect:r&&{x:Math.round(r.x*10)/10,y:Math.round(r.y*10)/10,w:r.width},selected:(document.querySelector('.area-node.selected')||{dataset:{}}).dataset.areaId||null,
++    scaleLabel:(document.getElementById('map-scale')||{}).textContent||null,focusId:a&&a.id,
++    openDetails:[...document.querySelectorAll('#space-view details[id]')].filter(d=>d.open).map(d=>d.id)}}'''
++# Where the current idea's text, the picked report's text and the next action are, in the viewport, measured as rendered.
++READ_JS='''()=>{const box=e=>{if(!e||!e.getClientRects().length)return null;const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right}};
++  const idea=document.querySelector('#task-view-idea .area-idea-text'),lead=document.querySelector('#task-pointed .report-lead'),act=document.getElementById('task-next-action');
++  const fs=e=>e?parseFloat(getComputedStyle(e).fontSize):null;
++  return {vh:innerHeight,vw:innerWidth,docWidth:document.documentElement.scrollWidth,idea:box(idea),lead:box(lead),action:box(act),
++    ideaText:idea&&idea.innerText,leadText:lead&&lead.innerText,ideaFont:fs(idea),leadFont:fs(lead),
++    openDetails:[...document.querySelectorAll('#space-view details[id]')].filter(d=>d.open).map(d=>d.id)}}'''
++# Is the given marker text actually painted inside its scroll box (not only present in the DOM)?
++SEEN_JS='''([sel,marker])=>{const root=document.querySelector(sel);if(!root)return null;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
++  while((n=w.nextNode())){const i=n.data.indexOf(marker);if(i<0)continue;const g=document.createRange();g.setStart(n,i);g.setEnd(n,i+marker.length);
++    const r=g.getBoundingClientRect(),c=n.parentElement.closest('.source-raw,.report-lead')||root,b=c.getBoundingClientRect();
++    const shown=n.parentElement.checkVisibility({contentVisibilityAuto:true,visibilityProperty:true});
++    return {h:r.height,shown,inBox:shown&&r.height>0&&r.top>=b.top-1&&r.bottom<=b.bottom+1,inView:r.top>=0&&r.bottom<=innerHeight,top:r.top,boxTop:b.top,boxBottom:b.bottom}}
++  return {h:0,shown:false,inBox:false,inView:false}}'''
++
++
++class Report16(unittest.TestCase):
++    WIDTH,HEIGHT=1280,720
++    setUpClass=classmethod(base.Browser.setUpClass.__func__)
++    tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
++    tearDown=base.Browser.tearDown;state=base.Browser.state
++
++    def setUp(self):
++        base.Browser.setUp(self);self.page.set_viewport_size({'width':self.WIDTH,'height':self.HEIGHT})
++        self.posts=[];self.page.on('request',lambda r:self.posts.append(r.url) if r.method=='POST' else None)
++
++    # ---------- raw observations ----------
++    def record(self,kind,name,value,expected=None):
++        rec={'test':self.id().split('.',1)[-1],'width':self.WIDTH,'kind':kind,'name':name,'value':value}
++        if kind=='condition':rec['expected']=expected
++        with open(OBS,'a',encoding='utf-8') as fh:fh.write(json.dumps(rec,ensure_ascii=False)+'\n')
++    def check(self,name,value,expected,delta=None):
++        self.record('condition',name,value,expected if delta is None else {'value':expected,'delta':delta})
++        if delta is None:self.assertEqual(value,expected,name)
++        else:self.assertAlmostEqual(value,expected,delta=delta,msg=name)
++    def check_true(self,name,value,detail=None):self.record('condition',name,detail if detail is not None else value,True);self.assertTrue(value,name)
++    def snap(self,name,area=None):v=self.page.evaluate(SNAP_JS,area);self.record('actual',name,v);return v
++    def read(self,name):v=self.page.evaluate(READ_JS);self.record('actual',name,v);return v
++    def seen(self,sel,marker,name):v=self.page.evaluate(SEEN_JS,[sel,marker]);self.record('actual',name,v);return v
++    def shot(self,name):self.page.mouse.move(1,1);self.page.screenshot(path=str(base.OUT/f'report16-{self.WIDTH}-{name}.png'))
++    def title(self):return self.page.locator('#space-title')
++    def task(self,tid,s=None):return next(t for t in (s or self.state())['tasks'] if t['id']==tid)
++
++    # ---------- fixture through the product UI ----------
++    def start(self,areas):
++        self.page.locator('#brief-input').fill('[합성] 단축키 앱의 키 검색');self.page.locator('#brief-start').click()
++        for name,note in areas:
++            self.page.locator('#area-name').fill(name);self.page.locator('#area-note').fill(note);self.page.locator('#area-add').click()
++            expect(self.page.locator('.area-node',has_text=name)).to_be_visible()
++        return {a['name']:a['id'] for a in self.state()['space']['areas']}
++    def to_work(self):
++        self.page.locator('#nav-work').click()
++        if not self.page.locator('#compose-panel').evaluate('(e)=>e.open'):self.page.locator('#compose-summary').click()
++    def request_in(self,area,text):
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click();self.page.locator('#area-new-request').click()
++        self.page.locator('#draft').fill(text);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
++        return self.state()['currentTaskId']
++    def export_current(self):
++        self.page.locator('#nav-work').click()
++        with self.page.expect_download():self.page.locator('#download-work').click()
++        base.saved(self.page)
++    def paste_report(self,text,target=None):
++        self.page.locator('#nav-work').click();self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill(text)
++        if target:self.page.locator('#return-task').select_option(target)
++        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
++        return self.state()['tasks'][-1]['id']
++    def file_report(self,task,report,evidence):
++        """The product's own file-return path: export a file handoff for the current task, then import a result file for it."""
++        self.page.locator('#nav-work').click();self.page.locator('#file-return-options').evaluate('(e)=>e.open=true')
++        with self.page.expect_download():self.page.locator('#download-file-work').click()
++        s=self.state();h=self.task(task,s)['handoffs'][-1]
++        f={'schemaVersion':'agentflow.return.1','projectId':s['id'],'taskId':task,'returnId':h['returnId'],'report':report,'evidence':evidence}
++        path=base.OUT/f'report16-{self.WIDTH}-result.json';path.write_text(json.dumps(f,ensure_ascii=False),encoding='utf-8')
++        self.to_work();self.page.locator('#result-file-panel').evaluate('(e)=>e.open=true')
++        self.page.locator('#result-file-input').set_input_files(str(path));self.page.locator('#accept-result-file').click()
++        expect(self.page.locator('#result-file-message')).to_contain_text('앱 미검증');base.saved(self.page)
++        return self.state()['tasks'][-1]['id']
++    def edit_idea(self,area,text):
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click()
++        self.page.locator('#panel-edit > summary').click();self.page.locator('#panel-note').fill(text);self.page.locator('#panel-save').click()
++        expect(self.page.locator('#panel-idea')).to_contain_text(text[:20]);base.saved(self.page)
++    def build(self):
++        ids=self.start([(AREA,OLD_IDEA),(OTHER,'[합성] 알림 설정')])
++        A=self.request_in(ids[AREA],REQ_A)
++        R1=self.file_report(A,REAL_R1,EVID_R1);self.check('fixture: R1 returns to A',self.task(R1)['parentTaskId'],A)
++        self.check('fixture: R1 has two sources (report + evidence)',len(self.task(R1)['sourceIds']),2)
++        self.export_current();R2=self.paste_report(LONG_R2,R1);self.check('fixture: R2 returns to R1 (nested)',self.task(R2)['parentTaskId'],R1)
++        B=self.request_in(ids[OTHER],REQ_B);self.export_current();RBid=self.paste_report(RB,B)
++        self.edit_idea(ids[AREA],CUR_IDEA)
++        s=self.state();self.check('fixture: current is RB',s['currentTaskId'],RBid)
++        self.check('fixture: A keeps the idea copy it was written with',self.task(A,s)['background']['area']['note'],OLD_IDEA)
++        self.record('step','fixture via UI: areas, A (MOCK), R1 (file: real restatement + synthetic evidence), R2 (synthetic, nested via R1), B + RB, idea edited after A',None)
++        return ids[AREA],ids[OTHER],A,R1,R2,B,RBid
++    def move_map(self):
++        self.page.locator('#map-zoom-in').click();self.page.locator('#map-zoom-in').click()
++        box=self.page.locator('#space-map').bounding_box();x,y=box['x']+box['width']*0.5,box['y']+box['height']-24
++        hit=self.page.evaluate('([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.id||e.className)}',[x,y])
++        self.assertIn(hit,['space-map','space-plane','relation-layer'],f'the pan starts on the empty map ({hit})')
++        self.page.mouse.move(x,y);self.page.mouse.down();self.page.mouse.move(x-70,y-35,steps=6);self.page.mouse.up()
++    def depart(self,area,task):
++        """Whole space: select the area ('정보'), open its idea in full, zoom + pan, scroll with the wheel, then pick the task."""
++        self.page.locator('#nav-space').click();expect(self.title()).to_have_text('전체 공간')
++        self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible()
++        self.move_map();self.page.mouse.move(self.WIDTH-20,self.HEIGHT//2);self.page.mouse.wheel(0,140);self.page.wait_for_timeout(150)
++        pick=self.page.locator(f'#panel-task-{task}');expect(pick).to_be_in_viewport()
++        before=self.snap('depart',area);self.check_true('depart: map zoomed',' scale(1)' not in before['styleTransform'] and 'scale(1)' not in before['styleTransform'],before['styleTransform'])
++        self.check_true('depart: page scrolled by the wheel',before['windowY']>0,before['windowY'])
++        pick.click();expect(self.page.locator('#task-view')).to_be_visible()
++        return before
++    def assert_back(self,before,area,task):
++        expect(self.title()).to_have_text('전체 공간');expect(self.page.locator('#area-panel')).to_be_visible()
++        after=self.snap('back',area);pos=lambda r:r and {k:r[k] for k in ('x','y','w')}
++        for k in ('styleTransform','computedTransform','scaleLabel','openDetails'):self.check(f'back: {k}',after[k],before[k])
++        self.check('back: selected card rect x/y/w',pos(after['cardRect']),pos(before['cardRect']))
++        self.check('back: selected area',after['selected'],area);self.check('back: windowY',after['windowY'],before['windowY'],delta=2)
++        self.check('back: focus id',after['focusId'],f'panel-task-{task}')
++    def unsent_request(self,area,text):
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click();self.page.locator('#area-new-request').click()
++        self.page.locator('#draft').fill(text);base.saved(self.page)
++    def pick(self,rid):
++        self.page.locator(f'#task-report-pick-{rid}').click();expect(self.page.locator(f'#task-report-pick-{rid}')).to_have_attribute('aria-pressed','true')
++    def no_writes(self,label,saved):
++        s=self.state();self.check(f'{label}: saved project unchanged (current/manual/draft/kind/target/notes)',s,saved)
++        self.check(f'{label}: no POST',self.posts,[])
++
++    # ---------- 1/2/3/5/11: the F10 reading screen, picking, full text, and back to the map ----------
++    def test_01_f10_current_idea_beside_the_picked_report_and_back(self):
++        area,other,A,R1,R2,B,RBid=self.build()
++        self.unsent_request(other,FOLLOW);saved=self.state();self.posts.clear()
++        before=self.depart(area,A)
++        # Nothing is picked for the user; the list is exactly A's return path (R1 direct, R2 via R1), never RB.
++        expect(self.page.locator('#task-pointed')).to_have_count(0);expect(self.page.locator('#task-report-none')).to_contain_text('대신 고르지 않아요')
++        picks=self.page.locator('#task-report-list .report-pick');ids=[e.get_attribute('id') for e in picks.all()]
++        self.check('pick list = return path of A, record order',ids,[f'task-report-pick-{R1}',f'task-report-pick-{R2}'])
++        self.check('nothing pre-selected',[e.get_attribute('aria-pressed') for e in picks.all()],['false','false'])
++        expect(self.page.locator('#task-report-list')).not_to_contain_text('ZZ-RB');expect(self.page.locator('#task-view')).not_to_contain_text('ZZ-END-R2')
++        idea=self.page.locator('#task-view-idea');expect(idea).to_contain_text('지금의 영역 구상');expect(idea).to_contain_text(CUR_IDEA)
++        expect(idea).not_to_contain_text('아직 못 정함');expect(idea.locator('.task-idea-changed')).to_be_visible()
++        self.shot('01-before-pick')
++        # Explicit pick of the real restatement: shown whole beside the current idea, both read at once on the first screen.
++        self.pick(R1);p=self.page.locator('#task-pointed')
++        expect(p).to_contain_text('a964f08cc6');expect(p).to_contain_text('ZZ-EVID-R1');expect(p).not_to_contain_text('ZZ-HEAD-R2')
++        expect(p.locator('.report-source')).to_have_count(2)
++        g=self.read('F10 first screen')
++        for k in ('idea','lead','action'):self.check_true(f'F10: {k} fully inside the first screen',g[k] is not None and g[k]['top']>=0 and g[k]['bottom']<=g['vh'],g[k])
++        self.check_true('F10: idea and report side by side (left and right columns of the same first screen)',g['idea']['right']<=g['lead']['left'],[g['idea'],g['lead']])
++        self.check_true('F10: real sentences on screen',CUR_IDEA[:20] in g['ideaText'] and 'F10이 선택된다' in g['leadText'],[g['ideaText'],g['leadText']])
++        self.check('F10: report text is not shrunk below the idea text',g['leadFont'],g['ideaFont'])
++        self.check('F10: no horizontal scroll',g['docWidth'],self.WIDTH)
++        expect(self.page.locator('#task-next-action')).to_have_text('작성 중인 요청 열기')
++        expect(self.page.locator('#task-next-target')).to_contain_text(f'대상 그대로 · 영역 ‘{OTHER}’')
++        self.shot('02-f10-picked')
++        # The nested long report: opening lines as written, said to be an opening, the whole text one click away.
++        self.pick(R2);p=self.page.locator('#task-pointed')
++        expect(p).to_contain_text('ZZ-HEAD-R2');expect(p).not_to_contain_text('a964f08cc6');expect(p.locator('.report-lead-note')).to_contain_text('위는 앞부분')
++        expect(p.locator('#task-report-path > summary')).to_contain_text('이전 보고에 연결된 보고')
++        full=self.page.locator(f'#task-pointed details[id^="task-report-src-"]');expect(full).not_to_have_attribute('open','');self.shot('03-r2-opening')
++        self.check_true('R2 closed: end sentence not rendered',not self.seen('#task-pointed','ZZ-END-R2','R2 closed')['shown'])
++        lines=p.locator('.report-lead').evaluate('(e)=>Math.round(e.getBoundingClientRect().height/parseFloat(getComputedStyle(e).lineHeight))')
++        self.check_true('R2 opening shows at most six lines',lines<=6,lines)
++        full.locator('summary').click();raw=full.locator('.source-raw');expect(raw).to_be_visible()
++        raw.evaluate('(e)=>{e.scrollTop=e.scrollHeight}');raw.scroll_into_view_if_needed()
++        v=self.seen('#task-pointed details[open]','ZZ-END-R2','R2 opened end');self.check_true('R2 opened: end sentence painted inside its box',v['inBox'] and v['h']>0,v)
++        self.check('R2 opened: whole text, not a summary',' '.join(raw.inner_text().split()),' '.join(LONG_R2.split()))
++        self.shot('04-r2-full')
++        # A redraw of the same request and report keeps it open; another report does not inherit it; coming back starts closed.
++        self.page.locator(f'#task-report-pick-{R2}').click();expect(full).to_have_attribute('open','')
++        self.pick(R1);self.pick(R2);expect(self.page.locator(f'#task-pointed details[id^="task-report-src-"]')).not_to_have_attribute('open','')
++        full.locator('summary').click();expect(raw).to_be_visible();full.locator('summary').click();expect(raw).to_be_hidden()
++        space=full.evaluate('(d)=>Math.round(d.getBoundingClientRect().height-d.querySelector("summary").getBoundingClientRect().height)')
++        self.check_true('closed: the full text takes no space (details height = its summary)',space<4,space)
++        self.check('closed: full text not rendered',raw.evaluate('(e)=>e.checkVisibility({contentVisibilityAuto:true})'),False)
++        self.no_writes('reading + picking + opening',saved)
++        self.page.locator('#task-return-origin').click();self.assert_back(before,area,A);self.no_writes('after return',saved)
++
++    # ---------- 6: an empty input + active area: a new request prepared in this area only ----------
++    def test_02_new_request_in_this_area_prepares_input_only(self):
++        area,other,A,R1,R2,B,RBid=self.build();s0=self.state();self.posts.clear()
++        before=self.depart(area,A);self.pick(R1)
++        expect(self.page.locator('#task-next-action')).to_have_text('이 영역에 새 요청');expect(self.page.locator('#task-next-target')).to_contain_text(f'영역 ‘{AREA}’')
++        self.page.locator('#task-next-action').click();expect(self.page.locator('#draft')).to_be_focused()
++        s=self.state();self.check('new: target is this area',s['space']['draftTarget'],{'area':area})
++        self.check('new: kind request, empty text',[s['draftKind'],s['draft']],['request',''])
++        self.check('new: no task created, current kept',[len(s['tasks']),s['currentTaskId']],[len(s0['tasks']),s0['currentTaskId']])
++        self.check('new: the report is not pasted into the input',self.page.locator('#draft').input_value(),'')
++        self.check('new: no POST (no send, no AI)',self.posts,[])
++        expect(self.page.locator('#compose-area')).to_have_value(area)
++        self.page.locator('#draft').fill(FOLLOW);base.saved(self.page)
++        expect(self.page.locator('#work-return-origin')).to_be_visible();self.page.locator('#work-return-origin').click()
++        self.assert_back(before,area,A)
++        s=self.state();self.check('back: the written input stays (no rollback)',[s['draft'],s['space']['draftTarget']],[FOLLOW,{'area':area}])
++
++    # ---------- 7/8: an unsent input keeps its kind, text and target; null vs {area:null} ----------
++    def test_03_unsent_inputs_open_as_they_are(self):
++        area,other,A,R1,R2,B,RBid=self.build()
++        self.unsent_request(other,FOLLOW);s0=self.state()
++        self.depart(area,A);self.pick(R1)
++        expect(self.page.locator('#task-next-action')).to_have_text('작성 중인 요청 열기')
++        expect(self.page.locator('#task-next-target')).to_contain_text(f'대상 그대로 · 영역 ‘{OTHER}’')
++        self.check('before click: saved unchanged',self.state(),s0)
++        self.page.locator('#task-next-action').click();expect(self.page.locator('#draft')).to_be_focused()
++        s=self.state();self.check('open: kind/text/target kept',[s['draftKind'],s['draft'],s['space']['draftTarget']],['request',FOLLOW,{'area':other}])
++        expect(self.page.locator('#compose-area')).to_have_value(other);expect(self.page.locator('#notice')).to_contain_text(f'영역 ‘{OTHER}’')
++        self.shot('05-unsent-opened')
++        # The composer's own choices: '영역 없이' ({area:null}) and '지금 작업을 따라감' (null) are told apart on the task screen.
++        for value,expected,label in [('@none','대상 그대로 · 영역 없이','영역 없이'),('@follow','대상 그대로 · 지금 작업을 따라감',None)]:
++            self.page.locator('#compose-area').select_option(value);base.saved(self.page)
++            dt=self.state()['space']['draftTarget'];self.record('actual',f'draftTarget after {value}',dt)
++            self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();self.page.locator(f'#panel-task-{A}').click()
++            t=self.page.locator('#task-next-target');expect(t).to_contain_text(expected)
++            if label:expect(t).not_to_contain_text('따라감')
++            else:expect(t).not_to_contain_text('영역 없이')
++            self.page.locator('#task-next-action').click();self.check(f'{value}: target kept by opening',self.state()['space']['draftTarget'],dt)
++        self.check('null and {area:null} are different saved values',[None,{'area':None}],[None,{'area':None}])
++        # An unsent report with an explicitly chosen return task (tab memory) keeps both.
++        self.page.locator('#draft').fill('');base.saved(self.page)
++        self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('[합성 미전송 보고] 아직 보내지 않음')
++        self.page.locator('#return-task').select_option(A);base.saved(self.page);s1=self.state()
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();self.page.locator(f'#panel-task-{A}').click();self.pick(R2)
++        expect(self.page.locator('#task-next-action')).to_have_text('작성 중인 보고 열기')
++        expect(self.page.locator('#task-next-target')).to_contain_text('연결 예정 그대로 · [합성] 키 검색')
++        self.page.locator('#task-next-action').click()
++        s=self.state();self.check('report: kind/text kept, saved unchanged',s,s1)
++        self.check('report: chosen return task kept (not the picked report)',self.page.locator('#return-task').input_value(),A)
++
++    # ---------- 4: stale / foreign / non-report ids are said, never swapped; then an explicit pick works ----------
++    def test_04_stale_or_foreign_report_is_not_replaced(self):
++        area,other,A,R1,R2,B,RBid=self.build();saved=self.state()
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();self.page.locator(f'#panel-task-{A}').click();self.pick(R1)
++        place=json.loads(self.page.evaluate("sessionStorage.getItem('agentflow.workspace.place')"));self.check('tab memory keeps the pick',place['ret'],R1)
++        for bad,label in [('T_missing','missing'),(RBid,'foreign RB (a real report of B)'),(B,'not a report')]:
++            place['ret']=bad;self.page.evaluate(f"sessionStorage.setItem('agentflow.workspace.place', {json.dumps(json.dumps(place))})")
++            self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');expect(self.title()).to_contain_text('[합성] 키 검색')
++            p=self.page.locator('#task-pointed');expect(p).to_contain_text('찾을 수 없어요')
++            for text in ['a964f08cc6','ZZ-HEAD-R2','ZZ-RB','ZZ-EVID-R1']:expect(p).not_to_contain_text(text)
++            self.check(f'{label}: nothing pressed',[e.get_attribute('aria-pressed') for e in self.page.locator('.report-pick').all()],['false','false'])
++            expect(self.page.locator('#task-to-space')).to_have_text('전체 공간으로');expect(self.page.locator('#task-return-origin')).to_have_count(0)
++        self.shot('06-stale')
++        self.pick(R2);expect(self.page.locator('#task-pointed')).to_contain_text('ZZ-HEAD-R2');self.check('reading never writes',self.state(),saved)
++        self.page.locator('#task-to-space').click();expect(self.title()).to_have_text('전체 공간')
++
++    # ---------- 9: the existing continue, kept apart from the new request ----------
++    def test_05_continue_policy_unchanged_and_apart(self):
++        area,other,A,R1,R2,B,RBid=self.build()
++        # current RB (report of B): reading B and continuing keeps RB.
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{other}').click();self.page.locator(f'#panel-task-{B}').click();self.pick(RBid)
++        expect(self.page.locator('#task-view-continue')).to_have_text('작업 화면으로');expect(self.page.locator('#task-view-target')).to_contain_text('받은 현재 보고')
++        self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible();self.check('RB kept',self.state()['currentTaskId'],RBid)
++        # Reading A with R2 picked: continue edits A (never the picked R2), the new-request button is a different button.
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();self.page.locator(f'#panel-task-{A}').click();self.pick(R2)
++        expect(self.page.locator('#task-view-continue')).to_have_text('이 작업 이어서 하기');expect(self.page.locator('#task-view-target')).to_contain_text('이 요청(작업 01)으로 바꾸고')
++        self.check_true('continue and next action are different controls',self.page.locator('#task-view-continue').evaluate('(e)=>e.id')!=self.page.locator('#task-next-action').evaluate('(e)=>e.id'))
++        self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
++        s=self.state();self.check('A becomes current, not R2',s['currentTaskId'],A);self.check('no draft written',[s['draft'],s['space']['draftTarget']],['',None])
++
++    # ---------- 10: archived area / unassigned request: no new request, no substitute area, no un-archive ----------
++    def test_06_archived_and_unassigned_never_retarget(self):
++        area,other,A,R1,R2,B,RBid=self.build()
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{other}').click();self.page.locator('#area-archive').click();base.saved(self.page)
++        s0=self.state();self.check('fixture: other archived',next(a['archived'] for a in s0['space']['areas'] if a['id']==other),True)
++        self.page.locator('#nav-space').click();self.page.locator('#archived-areas > summary').click()
++        self.page.locator('#archived-areas button',has_text='열어 보기').click();self.page.locator(f'#task-open-{B}').click()
++        n=self.page.locator('#task-next-action');expect(n).to_be_disabled();expect(self.page.locator('#task-next-target')).to_contain_text('보관된 영역')
++        expect(self.page.locator('#task-view-idea')).to_contain_text('(보관됨)');self.shot('07-archived')
++        self.check('archived: nothing changed',self.state(),s0)
++        # An unassigned request (written '영역 없이'): no area idea, no area new request; a later unsent input still opens as it is.
++        self.to_work();self.page.locator('#request-tab').click();self.page.locator('#compose-area').select_option('@none');self.page.locator('#draft').fill('[합성 요청] 영역 없이 쓴 요청')
++        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('');U=self.state()['currentTaskId']
++        self.check('fixture: unassigned',self.task(U).get('areaId'),None);s1=self.state()
++        self.page.locator('#nav-space').click();self.page.locator('#open-unplaced').click()
++        self.page.locator(f'#task-open-{U}').click();expect(self.page.locator('#task-next-action')).to_be_disabled()
++        expect(self.page.locator('#task-next-target')).to_contain_text('영역 미지정');expect(self.page.locator('#task-view-idea')).to_contain_text('영역 구상이 없어요')
++        self.check('unassigned: nothing changed',self.state(),s1)
++        self.to_work();self.page.locator('#draft').fill(FOLLOW);base.saved(self.page);s2=self.state()
++        self.page.locator('#nav-space').click();self.page.locator('#open-unplaced').click();self.page.locator(f'#task-open-{U}').click()
++        expect(self.page.locator('#task-next-action')).to_be_enabled();expect(self.page.locator('#task-next-action')).to_have_text('작성 중인 요청 열기')
++        self.page.locator('#task-next-action').click();self.check('unassigned: input opened as it is',self.state(),s2)
++        self.check('no area un-archived',[a['archived'] for a in self.state()['space']['areas']],[a['archived'] for a in s0['space']['areas']])
++
++    # ---------- 12 (part): area screen with a long idea opened -> new request written -> back ----------
++    # Checks the area round trip and that the saved input is kept. It does NOT check the fallback when the starting area is gone
++    # (fix1: the old conditional check never ran; that fallback is verified separately by the coordinator).
++    def test_07_area_round_trip_keeps_saved_input(self):
++        long='[합성 긴 구상] 후보만 좁히고 명시적으로 고른 뒤 확정한다. '+'세부 조건이 이어집니다. '*30+'구상 끝 ZZ-IDEA-END'
++        ids=self.start([(AREA,long),(OTHER,'[합성]')]);A=self.request_in(ids[AREA],REQ_A);R=self.paste_report('[합성 보고] 짧은 보고 ZZ-R')
++        for i in range(4):self.request_in(ids[AREA],f'[합성 요청] 채우기 {i}')
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{ids[AREA]}').click();self.page.locator('#area-idea-full > summary').click()
++        link=self.page.locator(f'#task-open-{A}');link.scroll_into_view_if_needed();y=self.page.evaluate('window.scrollY');self.check_true('area: scrolled down',y>0,y)
++        link.click();expect(self.page.locator('#task-view-idea')).to_contain_text('지금의 영역 구상')
++        self.page.locator('#task-view-idea-full > summary').click();expect(self.page.locator('#task-view-idea-full')).to_contain_text('ZZ-IDEA-END')
++        self.pick(R);self.page.locator('#task-next-action').click();self.page.locator('#draft').fill(FOLLOW);base.saved(self.page)
++        self.page.locator('#work-return-origin').click();expect(self.title()).to_have_text(AREA)
++        self.check('area back: long idea still open',self.page.locator('#area-idea-full').get_attribute('open'),'')
++        self.check('area back: focus on the request',self.page.evaluate('document.activeElement.id'),f'task-open-{A}')
++        self.check('area back: windowY',self.page.evaluate('window.scrollY'),y,delta=2)
++        s=self.state();self.check('area back: saved input kept',[s['draft'],s['space']['draftTarget']],[FOLLOW,{'area':ids[AREA]}])
++
++    # ---------- fix1: a picked report's disclosures never carry over to another report; request-wide ones and redraws keep ----------
++    def open_d(self,sel):
++        d=self.page.locator(sel)
++        if d.get_attribute('open') is None:d.locator('> summary').click()
++        expect(d).to_have_attribute('open','')
++    def is_open(self,sel):return self.page.locator(sel).evaluate('(d)=>d.open')
++    def test_09_report_disclosures_do_not_leak_and_survive_redraws(self):
++        area,other,A,R1,R2,B,RBid=self.build()
++        # A redraw the reading does not cause: a MOCK reply held back (labelled fault injection) and released later.
++        parked=[];self.page.route('**/api/continuity',lambda route:parked.append((route,route.fetch())))
++        self.request_in_pending(other,'[합성 요청] 보류된 응답으로 다시 그리기 확인')
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();self.page.locator(f'#panel-task-{A}').click()
++        self.open_d('#task-view-request');self.open_d('#task-view-work')               # request-wide disclosures
++        self.pick(R1);self.open_d('#task-report-path')                                   # R1's own disclosure
++        self.pick(R2)
++        self.check('① R1 path open does not carry over to R2',self.is_open('#task-report-path'),False)
++        self.check('③ request original stays open across a report change',self.is_open('#task-view-request'),True)
++        self.check('③ work details stay open across a report change',self.is_open('#task-view-work'),True)
++        src=f'#task-pointed details[id^="task-report-src-"]';self.open_d('#task-report-path');self.open_d(src)
++        self.pick(R2)
++        self.check('② same report picked again: its path stays open',self.is_open('#task-report-path'),True)
++        self.check('② same report picked again: its full text stays open',self.is_open(src),True)
++        self.pick(R1);self.check('① back to R1: path closed (R2 open state not carried)',self.is_open('#task-report-path'),False)
++        self.pick(R2);self.check('① back to R2: starts closed again',[self.is_open('#task-report-path'),self.is_open(src)],[False,False])
++        self.open_d('#task-report-path');self.open_d(src)
++        self.check_true('the held reply is still pending',len(parked)==1 and self.state()['pending'] is not None,len(parked))
++        route,response=parked.pop();route.fulfill(response=response)
++        for _ in range(100):
++            if self.state()['pending'] is None:break
++            self.page.wait_for_timeout(50)
++        self.check('④ late reply landed (a redraw not caused by reading)',self.state()['pending'],None)
++        self.check('④ still the same request and report',[self.title().inner_text().startswith('[합성] 키 검색'),self.page.locator(f'#task-report-pick-{R2}').get_attribute('aria-pressed')],[True,'true'])
++        self.check('④ after the redraw: report disclosures kept',[self.is_open('#task-report-path'),self.is_open(src)],[True,True])
++        self.check('④ after the redraw: request-wide disclosures kept',[self.is_open('#task-view-request'),self.is_open('#task-view-work')],[True,True])
++        self.shot('09-redraw-kept')
++    def request_in_pending(self,area,text):
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click();self.page.locator('#area-new-request').click()
++        self.page.locator('#draft').fill(text);self.page.locator('#send').click()
++        for _ in range(100):
++            if self.state()['pending'] is not None:break
++            self.page.wait_for_timeout(50)
++        self.check('fixture: request pending while reading',self.state()['pending'] is not None,True)
++
++
++class Report16Wide(Report16):
++    WIDTH,HEIGHT=1440,900
++    # The data-boundary variants run once (at 1280); both PC widths run the reading, action and return paths.
++    test_04_stale_or_foreign_report_is_not_replaced=None
++    test_06_archived_and_unassigned_never_retarget=None
++    test_09_report_disclosures_do_not_leak_and_survive_redraws=None
++    test_07_area_round_trip_keeps_saved_input=None
++
++
++class Report16Narrow(Report16):
++    WIDTH,HEIGHT=390,844
++    for _n in [n for n in dir(Report16) if n.startswith('test_')]:locals()[_n]=None
++    def setUp(self):
++        Report16.setUp(self);self.page.set_viewport_size({'width':1280,'height':720})  # the fixture uses the map
++    def test_08_narrow_390_reachable(self):
++        area,other,A,R1,R2,B,RBid=self.build();self.page.set_viewport_size({'width':self.WIDTH,'height':self.HEIGHT})
++        self.page.locator('#nav-space').click();self.page.locator(f'#list-info-{area}').click()
++        pick=self.page.locator(f'#panel-task-{A}');pick.scroll_into_view_if_needed();pick.click();self.pick(R1)
++        expect(self.page.locator('#task-pointed')).to_contain_text('F10');expect(self.page.locator('#task-next-action')).to_be_visible()
++        self.check('390: no horizontal scroll',self.page.evaluate('document.documentElement.scrollWidth'),390)
++
++
++if __name__=='__main__':unittest.main()

@@ -1,0 +1,35 @@
+F.Exception in callback Connection.dispatch.<locals>._done_callback() at /usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py:466
+handle: <Handle Connection.dispatch.<locals>._done_callback() at /usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py:466>
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/asyncio/events.py", line 89, in _run
+    self._context.run(self._callback, *self._args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 467, in _done_callback
+    exc = future.exception()
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_page.py", line 300, in _on_route
+    handled = await route_handler.handle(route)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_helper.py", line 424, in handle
+    return await self._handle_internal(route)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_helper.py", line 466, in _handle_internal
+    return await handled_future
+           ^^^^^^^^^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+======================================================================
+FAIL: test_09_report_disclosures_do_not_leak_and_survive_redraws (__main__.Report16.test_09_report_disclosures_do_not_leak_and_survive_redraws)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/afs/app/continuity/tests/report16_browser.py", line 353, in test_09_report_disclosures_do_not_leak_and_survive_redraws
+    self.check('① R1 path open does not carry over to R2',self.is_open('#task-report-path'),False)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/afs/app/continuity/tests/report16_browser.py", line 74, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True != False : ① R1 path open does not carry over to R2
+
+----------------------------------------------------------------------
+Ran 2 tests in 7.587s
+
+FAILED (failures=1)
