@@ -1,0 +1,342 @@
+{
+  "status": "PASS_REMOTE170_INTEGRITY_SOURCE_COHERENCE_PREVIEW_READY",
+  "evidenceCommit": "398a91adf918113bd77dfbd3454fc3c85b00cc3d",
+  "parent": "6f8b4fe4b75c387057d8e806a23c26ac3aa54d9f",
+  "rootTree": "ce3abe1f14ffc531a2259b069958233e18189834",
+  "subtree": "565a95fc3ffd4c711cdeb37ac11a12409bbc66ef",
+  "prefix": "docs/transfer/pc-reading-return-12/independent-fix2/",
+  "finalManifest": {
+    "bytes": 18325,
+    "sha256": "2d01fa5a0c6c55536f2b6f37ada0d70af014ea1ee5481fc7d5aa613fc9d98cec",
+    "gitBlobSha1": "cf8f72981bd4d6149eeb797fab124a5c045cb0d5",
+    "excludes": "FINAL_MANIFEST.tsv only"
+  },
+  "totalFiles": 170,
+  "totalBytes": 6575464,
+  "payloadFiles": 169,
+  "payloadBytes": 6557139,
+  "allPayloadByteSHA256GitBlobVerified": true,
+  "missing": 0,
+  "extra": 0,
+  "duplicates": 0,
+  "finalCommitAddsOnlyPrefixFiles": 16,
+  "priorReportAndEvidenceUnmodified": true,
+  "source": {
+    "commit": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+    "rootTree": "835114f6ec8d7cf67127486f355f34e058940bb6",
+    "knownAuthorByteBlobChangesFromUSE106": [
+      {
+        "path": ".github/workflows/verify.yml",
+        "status": "modified",
+        "sha": "9ff62c17ee35e4a6d52839e3014325f5de5a46a6",
+        "bytes": 8475
+      },
+      {
+        "path": "app/continuity/public/styles.css",
+        "status": "modified",
+        "sha": "d28b555ff47e7850c8499478d97cba403bc4a615",
+        "bytes": 52992
+      },
+      {
+        "path": "app/continuity/src/client/app.ts",
+        "status": "modified",
+        "sha": "d28d97bc7904d6b7259c161b29b34d3e70dbe701",
+        "bytes": 177106
+      },
+      {
+        "path": "app/continuity/tests/flow090_browser.py",
+        "status": "modified",
+        "sha": "5da4f06c5c179a9f937d8e72bd901bcb10442c50",
+        "bytes": 44708
+      },
+      {
+        "path": "app/continuity/tests/pc12_browser.py",
+        "status": "added",
+        "sha": "117ffe7be9a198fd454e94449beadd1915c62643",
+        "bytes": 37618
+      }
+    ],
+    "pinnedAuditRows175PathSizeMatch": true,
+    "sourceHashClaimBoundary": "175 Cloud disk-match records checked for path/size against fixed Git tree; no new full-source download or execution. Five changed Git blobs independently match prior exact author bytes.",
+    "observedTS13AndRuntime15PrePostUnchanged": true
+  },
+  "counts": {
+    "latestIndependent": {
+      "path": "target-selection-addendum/run01/result.json",
+      "corePC": 6,
+      "boundaryGroups": 1,
+      "mobileMinimal": 1,
+      "totalScenes": 8,
+      "complete": true,
+      "allScenePASS": true,
+      "actualChild": 0,
+      "externalCollector": "FINAL_RESULT tool-observation transcription0; not full transcript"
+    },
+    "frozenV3": {
+      "separate": true,
+      "planned": 6,
+      "completed": 6,
+      "actualChild": 0,
+      "codeSHA256": "7bf48bcf6da764b80a493351e1cdfb9611bbd4f9d67711df06624451ee1b5077"
+    },
+    "regressions": {
+      "separate": true,
+      "commands": 9,
+      "actualChildrenAll0": true,
+      "domainTests": 210,
+      "pc12BrowserTests": 15,
+      "spatial102BrowserTests": 11,
+      "flow090BrowserTests": 18,
+      "notGitHubCI": true
+    },
+    "preview": {
+      "separateStaticAdapter": true,
+      "notFullProductServer": true
+    }
+  },
+  "reportCorrections": {
+    "run05ExplicitBNotTested": true,
+    "latestAddendumBRequiredAndSelectedSix": true,
+    "initialREPORTUnchanged": true,
+    "latestConsoleFavicon404": 1,
+    "majorConsoleErrors": 0,
+    "pageerrors": 0,
+    "fatal": null,
+    "cleanup": [],
+    "serverTermination": -15,
+    "toolExitTranscriptionNotFullTranscript": true
+  },
+  "latestActualProcess": {
+    "command": [
+      "<cloud-browser-venv>/bin/python",
+      "<cloud-scratch>/target-supplement/ui.py"
+    ],
+    "start": "2026-10-16T04:24:58.253370+00:00",
+    "end": "2026-10-16T04:25:22.826929+00:00",
+    "actual_child_returncode": 0,
+    "stdout_sha256": "166ecc698bd35092b04af8ddf9cabafde61aa3884f6c9d735be53288a9bee082",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "preview": {
+    "status": "PASS_MINIMAL_LOCAL_PREVIEW_HASH_HTTP",
+    "sourceCommit": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+    "evidenceCommit": "398a91adf918113bd77dfbd3454fc3c85b00cc3d",
+    "url": "http://127.0.0.1:8765/product12-preview/runtime/index.html",
+    "files": [
+      {
+        "path": "START.md",
+        "bytes": 1432,
+        "sha256": "063d3abb9da5f67c974122d381099195acb97ab3d38bdcf13d6256007395025c"
+      },
+      {
+        "path": "runtime/.nojekyll",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "runtime/client/app.js",
+        "bytes": 194307,
+        "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17"
+      },
+      {
+        "path": "runtime/client/presentation.js",
+        "bytes": 7833,
+        "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+      },
+      {
+        "path": "runtime/client/runtime.js",
+        "bytes": 1936,
+        "sha256": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+      },
+      {
+        "path": "runtime/index.html",
+        "bytes": 17067,
+        "sha256": "b66b3fac3b445b9ac1b2ab187bceb8a492e8cc364d0efb531f20f7ec53bccee1"
+      },
+      {
+        "path": "runtime/shared/attention.js",
+        "bytes": 2940,
+        "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1"
+      },
+      {
+        "path": "runtime/shared/domain.js",
+        "bytes": 53234,
+        "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452"
+      },
+      {
+        "path": "runtime/shared/guidance.js",
+        "bytes": 6701,
+        "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+      },
+      {
+        "path": "runtime/shared/mock.js",
+        "bytes": 18360,
+        "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+      },
+      {
+        "path": "runtime/shared/outcome.js",
+        "bytes": 4887,
+        "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+      },
+      {
+        "path": "runtime/shared/plan-facts.js",
+        "bytes": 4655,
+        "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+      },
+      {
+        "path": "runtime/shared/storage.js",
+        "bytes": 12708,
+        "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+      },
+      {
+        "path": "runtime/shared/types.js",
+        "bytes": 2284,
+        "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d"
+      },
+      {
+        "path": "runtime/shared/validation.js",
+        "bytes": 34567,
+        "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385"
+      },
+      {
+        "path": "runtime/styles.css",
+        "bytes": 52992,
+        "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec"
+      },
+      {
+        "path": "safe-import.json",
+        "bytes": 18030,
+        "sha256": "f5bb680e0cb730609debd4e1f47b4228fcbe3d8c6b40ae75482ccff20eac08ba"
+      }
+    ],
+    "totalBytes": 433933,
+    "http": [
+      {
+        "path": "START.md",
+        "status": 200,
+        "bytes": 1432,
+        "sha256": "063d3abb9da5f67c974122d381099195acb97ab3d38bdcf13d6256007395025c"
+      },
+      {
+        "path": "runtime/.nojekyll",
+        "status": 200,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "runtime/client/app.js",
+        "status": 200,
+        "bytes": 194307,
+        "sha256": "f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17"
+      },
+      {
+        "path": "runtime/client/presentation.js",
+        "status": 200,
+        "bytes": 7833,
+        "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+      },
+      {
+        "path": "runtime/client/runtime.js",
+        "status": 200,
+        "bytes": 1936,
+        "sha256": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+      },
+      {
+        "path": "runtime/index.html",
+        "status": 200,
+        "bytes": 17067,
+        "sha256": "b66b3fac3b445b9ac1b2ab187bceb8a492e8cc364d0efb531f20f7ec53bccee1"
+      },
+      {
+        "path": "runtime/shared/attention.js",
+        "status": 200,
+        "bytes": 2940,
+        "sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1"
+      },
+      {
+        "path": "runtime/shared/domain.js",
+        "status": 200,
+        "bytes": 53234,
+        "sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452"
+      },
+      {
+        "path": "runtime/shared/guidance.js",
+        "status": 200,
+        "bytes": 6701,
+        "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+      },
+      {
+        "path": "runtime/shared/mock.js",
+        "status": 200,
+        "bytes": 18360,
+        "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+      },
+      {
+        "path": "runtime/shared/outcome.js",
+        "status": 200,
+        "bytes": 4887,
+        "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+      },
+      {
+        "path": "runtime/shared/plan-facts.js",
+        "status": 200,
+        "bytes": 4655,
+        "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+      },
+      {
+        "path": "runtime/shared/storage.js",
+        "status": 200,
+        "bytes": 12708,
+        "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+      },
+      {
+        "path": "runtime/shared/types.js",
+        "status": 200,
+        "bytes": 2284,
+        "sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d"
+      },
+      {
+        "path": "runtime/shared/validation.js",
+        "status": 200,
+        "bytes": 34567,
+        "sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385"
+      },
+      {
+        "path": "runtime/styles.css",
+        "status": 200,
+        "bytes": 52992,
+        "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec"
+      },
+      {
+        "path": "safe-import.json",
+        "status": 200,
+        "bytes": 18030,
+        "sha256": "f5bb680e0cb730609debd4e1f47b4228fcbe3d8c6b40ae75482ccff20eac08ba"
+      }
+    ],
+    "newServerOrProcess": false,
+    "localBrowserExecution": "NOT_RUN",
+    "type": "Static isolated browser MOCK; deterministic local adapter; not the product HTTP server or real AI",
+    "serverRootScratchPath": "work/cycle/docs/cycles/2026-10-15-mixed-depth-01",
+    "previewRootScratchPath": "work/cycle/docs/cycles/2026-10-15-mixed-depth-01/product12-preview",
+    "fixtureScratchPath": "work/cycle/docs/cycles/2026-10-15-mixed-depth-01/product12-preview/safe-import.json",
+    "startScratchPath": "work/cycle/docs/cycles/2026-10-15-mixed-depth-01/product12-preview/START.md"
+  },
+  "localOriginalEvidenceSavedOnlyPreview17": true,
+  "otherOriginalEvidenceSaved": 0,
+  "productMutation": false,
+  "testsExecutedHere": false,
+  "newServerProcess": false,
+  "sharedCopy": {
+    "personalAbsolutePathsRemoved": true,
+    "originalAuditUnchanged": true,
+    "latestActualProcessCommandPaths": "Cloud scratch placeholders; recorded exit and log hashes unchanged",
+    "scope": "Coordinator integrity audit, not a new product or browser test"
+  },
+  "operationsNote": {
+    "difyHelperObservation": "NOT_RUN",
+    "reason": "Official cua.getState returned apps:[], browsers:[] in helper session",
+    "noDifyUITouched": true,
+    "notDifyFailure": true
+  }
+}
