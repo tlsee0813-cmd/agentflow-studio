@@ -26,7 +26,7 @@
     <div class="app-body">
       <header class="topbar">
         <div class="breadcrumb"><button type="button" id="to-projects" class="crumb-link">내 프로젝트</button><span id="breadcrumb-sep" aria-hidden="true">/</span><strong id="breadcrumb-project">나의 프로젝트</strong></div>
-        <details id="connection-details" class="connection-details"><summary><span class="mode-dot" aria-hidden="true"></span><span id="mode">모드 확인 중</span><span aria-hidden="true">⌄</span></summary><div class="connection-popover"><strong>작업문 정리 방식</strong><p id="mode-description" class="hint">서버 설정을 확인하고 있습니다.</p><label id="consent-area" class="consent" hidden><input type="checkbox" id="consent"><span>현재 프로젝트 문맥을 DeepSeek에 전송하는 데 동의합니다. 서버에서 허용된 API 비용이 발생할 수 있습니다.</span></label><p class="hint">외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.</p></div></details>
+        <div id="topbar-actions" class="topbar-actions"><details id="connection-details" class="connection-details"><summary><span class="mode-dot" aria-hidden="true"></span><span id="mode">모드 확인 중</span><span aria-hidden="true">⌄</span></summary><div class="connection-popover"><strong>작업문 정리 방식</strong><p id="mode-description" class="hint">서버 설정을 확인하고 있습니다.</p><label id="consent-area" class="consent" hidden><input type="checkbox" id="consent"><span>현재 프로젝트 문맥을 DeepSeek에 전송하는 데 동의합니다. 서버에서 허용된 API 비용이 발생할 수 있습니다.</span></label><p class="hint">외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.</p></div></details></div>
       </header>
       <main id="main" class="shell" tabindex="-1">
         <div id="example-banner" class="alert example-banner" role="status" hidden><strong>예제 둘러보기</strong><span>내 프로젝트가 아닌 예제예요. 저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 내 프로젝트를 시작하면 빈 상태에서 시작해요.</span><div class="row"><button type="button" id="example-start" class="primary">내 프로젝트 시작하기</button><button type="button" id="example-close" class="quiet">예제 닫기</button></div></div>
@@ -37,7 +37,7 @@
         <div class="feedback-stack"><div id="storage-error" class="alert error" role="alert" hidden></div><div id="notice" class="alert" role="status" hidden></div></div>
         
         <section id="projects-view" class="projects-view" aria-labelledby="projects-title" hidden>
-          <div class="view-heading"><div><p class="eyebrow">MY PROJECTS</p><h1 id="projects-title" tabindex="-1">내 프로젝트</h1><p class="hint">이 브라우저에 저장된 프로젝트예요. 다른 기기와는 백업 파일로 옮길 수 있어요.</p></div><div class="row"><button type="button" id="new-project" class="primary">＋ 새 프로젝트</button></div></div>
+          <div class="view-heading home-heading"><h1 id="projects-title" tabindex="-1">내 프로젝트 <span id="projects-count" class="home-count" aria-hidden="true"></span></h1><div id="home-actions" class="home-actions"><button type="button" id="new-project" class="primary">＋ 새 프로젝트</button></div></div>
           <div id="list-notice" class="alert" role="status" hidden><span id="list-notice-text"></span> <button type="button" id="undo-trash" class="quiet" hidden>되돌리기</button></div>
           <ul id="project-list" class="project-list"></ul>
           <div class="row list-tools"><button type="button" id="list-import" class="quiet">↑ 백업 파일 불러오기 (새 사본으로 추가)</button><button type="button" id="list-example" class="quiet">예제 둘러보기 · 저장 안 됨</button></div>

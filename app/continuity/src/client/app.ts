@@ -73,10 +73,20 @@ let backgroundOpen:string|null=null;
 // One move = one command. Undo re-applies only that position, only while it is still where the move put it.
 let posUndo:{id:string;from:Point|null;to:Point;at:number;key:boolean}[]=[];
 const MAP_KEY='agentflow.workspace.map';
-function rememberMap(){try{session?.setItem(MAP_KEY,JSON.stringify({project:project.id,view:mapView,selected:mapSelected}));}catch{/* Per-tab convenience only. */}}
+// HOME15: the tab also keeps the last view of a few other projects, so opening one from the list again reuses its own
+// viewport and selection instead of a fresh fit. Per tab, never project data.
+type MapMemo={view?:MapView|null;selected?:unknown};
+function mapMemos():Record<string,MapMemo> {
+  try {const v=JSON.parse(session?.getItem(MAP_KEY)||'null') as {project?:unknown;view?:MapView|null;selected?:unknown;others?:unknown}|null;if(!v)return {};
+    const others=v.others&&typeof v.others==='object'?{...v.others as Record<string,MapMemo>}:{};
+    if(typeof v.project==='string')others[v.project]={view:v.view??null,selected:v.selected??null};return others;
+  } catch {return {};}
+}
+function rememberMap(){try{const others=Object.entries(mapMemos()).filter(([id])=>id!==project.id).slice(-11);
+  session?.setItem(MAP_KEY,JSON.stringify({project:project.id,view:mapView,selected:mapSelected,others:Object.fromEntries(others)}));}catch{/* Per-tab convenience only. */}}
 function recallMap() {
-  try {const v=JSON.parse(session?.getItem(MAP_KEY)||'null') as {project?:unknown;view?:MapView|null;selected?:unknown}|null;
-    if(!v||v.project!==project.id)return;const w=v.view;
+  try {const v=mapMemos()[project.id];
+    if(!v)return;const w=v.view;
     mapView=w&&[w.x,w.y,w.s].every(n=>typeof n==='number'&&Number.isFinite(n))&&w.s>=FIT_MIN&&w.s<=ZOOM_MAX?w:null;
     mapSelected=typeof v.selected==='string'&&project.space.areas.some(a=>a.id===v.selected&&!a.archived)?v.selected:null;
   } catch {/* none */}
@@ -121,14 +131,15 @@ function resetEphemeral() {
   mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];origin=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
-function openEntry(entry:WorkspaceEntry) {
+function openEntry(entry:WorkspaceEntry,fromList=false) {
   resetEphemeral();route='project';target={kind:'entry',ref:{entryId:entry.entryId,lifecycle:entry.lifecycle,seq:entry.seq}};
   // A just-migrated older value keeps its one-time conversion notice; otherwise the usual restore applies.
   project=entry.origin==='legacy'&&entry.seq===1?{...restore(entry.project),notice:entry.project.notice}:restore(entry.project);
   storageError=workspace.writable?'':storageMessages[workspace.readError??'LOCKS_UNAVAILABLE']!;memoryDirty=false;hasSaved=true;
   rememberOpen(entry.entryId);contextOpen=project.bases.some(b=>basisDraftChanged(project,b))||!!project.basisDraft.trim();
   // A reload keeps this tab's place; opening from the list starts at the space once the project has one.
-  const place=recallPlace(entry.entryId);
+  // HOME15: a card in the list is 'go to this project', not 'resume the last screen of this tab'. Only a reload keeps it.
+  const place=fromList?null:recallPlace(entry.entryId);
   recallMap();
   if(place){view=place.view;viewArea=place.area;viewTask=place.task;viewReturn=place.ret;} else view=hasSpace(project)?'space':'work';
 }
@@ -210,6 +221,7 @@ function displayView() {
   document.body.dataset.compact=String(inProject&&(view==='space'||view==='area'||view==='task'||!starting));
   // PC13: which layer is shown, so the whole space alone can use tighter spacing (other screens, notices and errors unchanged).
   document.body.dataset.layer=inProject?view:'';
+  const chip=$('connection-details'),host=$(inProject?'topbar-actions':'home-actions');if(chip.parentElement!==host)host.prepend(chip);
   $('projects-view').hidden=inProject;$('breadcrumb-project').hidden=!inProject;$('breadcrumb-sep').hidden=!inProject;$('example-banner').hidden=route!=='example';
   for(const id of ['nav-work','nav-context','nav-history'])$(id).hidden=!inProject||starting;
   // With a plan space, the work view (and an unsent draft) stays reachable before the first task.
@@ -855,38 +867,65 @@ function lastActivity(p:Project):string|null {
   const times=[...p.sources.map(s=>s.at),...p.tasks.flatMap(t=>t.handoffs.map(h=>h.at))].filter(at=>!Number.isNaN(new Date(at).getTime()));
   return times.sort().at(-1)??null;
 }
-function projectSummary(li:HTMLElement,info:Project) {
-  const requests=info.sources.filter(s=>s.kind==='request'),results=info.sources.filter(s=>s.kind==='report'||s.kind==='evidence');
-  const last=requests.at(-1),at=lastActivity(info);
-  li.append(node('strong',info.name,'project-card-name'),
-    node('p',last?`마지막 요청 · ${shortText(last.text,80)}`:info.draft.trim()?'아직 보낸 요청 없음 · 작성 중인 입력 있음':'아직 보낸 요청 없음','project-card-summary'),
-    node('p',`${at?`최근 활동 · ${dateLabel(at)}`:'활동 기록 없음'} · ${info.space.areas.some(a=>!a.archived)?`영역 ${info.space.areas.filter(a=>!a.archived).length}개 · `:''}요청 ${requests.length}개 · 가져온 결과 ${results.length}개`,'hint'));
+/** HOME15: what a card says. Name and the user's own purpose (space.brief) first; a request is never shown as the purpose.
+ * The time is lastActivity: request/result originals and work-text exports only, so it is not called 'last edit'. */
+const ACTIVITY_SCOPE='요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.';
+function projectSummary(li:HTMLElement,info:Project,open:(()=>void)|null,label:string) {
+  const head=node('div','','project-card-head'),mark=node('span',[...info.name.trim()][0]??'·','project-mark');mark.setAttribute('aria-hidden','true');
+  // The name is the card's one open control (Enter/Space); the rest of the card opens on click. No control inside another.
+  const name=open?btn(info.name,open,'project-open project-card-name'):node('strong',info.name,'project-card-name');
+  name.title=info.name;if(open)name.setAttribute('aria-label',`${info.name} · ${label}`);
+  head.append(mark,name);li.append(head);
+  const brief=info.space.brief?.text.trim();
+  const purpose=node('p',brief??'목적을 아직 적지 않았어요','project-card-purpose');purpose.classList.toggle('missing',!brief);if(brief)purpose.title=brief;
+  li.append(purpose);
+  const meta=node('p','','project-card-meta'),at=lastActivity(info),areas=info.space.areas.filter(a=>!a.archived).length;
+  const time=node('span',at?`작업 기록 · ${dateLabel(at)}`:'작업 기록 없음','project-card-time');time.title=ACTIVITY_SCOPE;meta.append(time);
+  if(areas)meta.append(node('span',`영역 ${areas}개`,'project-card-areas'));
+  li.append(meta);
 }
-/** SPATIAL102: a card opens when its body is clicked, like the space cards. Its own buttons (and selecting text) do not. */
+/** SPATIAL102: a card opens when its body is clicked, like the space cards. Its own buttons (and selecting text) do not.
+ * HOME15: neither does anything inside a part marked data-no-open (the card's '더보기' menu). */
 function openOnClick(card:HTMLElement,open:()=>void) {
   card.classList.add('openable');
-  card.addEventListener('click',e=>{if((e.target as HTMLElement).closest('button,a,input,select,textarea,summary'))return;if(window.getSelection()?.toString())return;guard(open);});
+  card.addEventListener('click',e=>{if((e.target as HTMLElement).closest('button,a,input,select,textarea,summary,[data-no-open]'))return;if(window.getSelection()?.toString())return;guard(open);});
 }
+/** HOME15: the card's secondary actions, apart from opening it. A disclosure, so the menu is never inside the open control. */
+function cardMenu(name:string,...items:HTMLButtonElement[]):HTMLDetailsElement {
+  const menu=node('details','','project-more');menu.dataset.noOpen='';
+  const summary=node('summary','','project-more-button');summary.setAttribute('aria-label',`‘${name}’ 더보기`);summary.title='더보기';
+  summary.append(node('span','⋯','project-more-dots'));summary.firstElementChild!.setAttribute('aria-hidden','true');
+  const list=node('div','','project-more-menu');list.append(...items);menu.append(summary,list);
+  // A chosen (or declined) action closes the menu and leaves the focus on its button, never on the card's open control.
+  for(const item of items)item.addEventListener('click',()=>{menu.open=false;if(summary.isConnected)summary.focus({preventScroll:true});});
+  menu.addEventListener('toggle',()=>{if(menu.open)for(const other of document.querySelectorAll<HTMLDetailsElement>('.project-more[open]'))if(other!==menu)other.open=false;});
+  return menu;
+}
+/** HOME15: where the list was when a project was opened from it, so coming back finds the same card. Tab memory only. */
+let listReturn:{entryId:string;y:number}|null=null;
 function projectCard(entry:WorkspaceEntry):HTMLElement {
-  const li=node('li','','project-card');li.dataset.entryId=entry.entryId;projectSummary(li,entry.project);
-  const row=node('div','','row');
-  if(entry.state==='trashed') {li.querySelector('strong')!.append(' ',tag('휴지통'));row.append(btn('되살리기',()=>void restoreProject(entry.entryId),'secondary project-restore'));}
-  else {
-    const open=()=>{const fresh=workspace.read()?.entries.find(e=>e.entryId===entry.entryId&&e.state==='active');
-      if(!fresh){listNotice='다른 탭에서 바뀌어 이 프로젝트를 열지 않았어요. 목록을 새로 읽었어요.';render();return;}
-      openEntry(fresh);render();restoreDraftPanels();$('main').focus({preventScroll:true});};
-    row.append(btn('이어서 하기',open,'primary project-open'),btn('휴지통으로',()=>void trashProject(entry.entryId,entry.project.name),'quiet project-trash'));
-    openOnClick(li,open);
+  const li=node('li','','project-card');li.dataset.entryId=entry.entryId;
+  if(entry.state==='trashed') {
+    projectSummary(li,entry.project,null,'');li.querySelector('.project-card-name')!.append(' ',tag('휴지통'));
+    const row=node('div','','row project-card-actions');row.append(btn('되살리기',()=>void restoreProject(entry.entryId),'secondary project-restore'));li.append(row);
+    return li;
   }
-  li.append(row);return li;
+  const open=()=>{const fresh=workspace.read()?.entries.find(e=>e.entryId===entry.entryId&&e.state==='active');
+    if(!fresh){listNotice='다른 탭에서 바뀌어 이 프로젝트를 열지 않았어요. 목록을 새로 읽었어요.';render();return;}
+    listReturn={entryId:entry.entryId,y:window.scrollY};
+    openEntry(fresh,true);render();restoreDraftPanels();window.scrollTo({top:0});
+    if(!(view==='space'&&focusFirst('space-title')))$('main').focus({preventScroll:true});};
+  projectSummary(li,entry.project,open,hasSpace(entry.project)?'프로젝트 공간 열기':'프로젝트 열기');
+  li.querySelector('.project-card-head')!.append(cardMenu(entry.project.name,btn('휴지통으로 옮기기',()=>void trashProject(entry.entryId,entry.project.name),'quiet project-trash')));
+  openOnClick(li,open);return li;
 }
 function legacyCard():HTMLElement {
-  const legacy=workspace.legacy!,li=node('li','','project-card');li.dataset.entryId='legacy';
-  if(legacy.project){projectSummary(li,legacy.project);li.querySelector('strong')!.append(' ',tag('이전 저장 · 읽기 전용'));}
-  else li.append(node('strong','읽지 못한 이전 저장 내용','project-card-name'));
-  li.append(node('p','이전 형식으로 이 브라우저에 남아 있는 내용이에요. 지우거나 덮어쓰지 않았고, 새 저장 형식으로 옮기지 않아 여기서는 저장되지 않아요.','hint'));
-  const open=()=>{openLegacy();render();restoreDraftPanels();};
-  const row=node('div','','row');row.append(btn('열어 보기',open,'secondary project-open'));li.append(row);openOnClick(li,open);return li;
+  const legacy=workspace.legacy!,li=node('li','','project-card legacy-card');li.dataset.entryId='legacy';
+  const open=()=>{listReturn={entryId:'legacy',y:window.scrollY};openLegacy();render();restoreDraftPanels();};
+  if(legacy.project){projectSummary(li,legacy.project,open,'읽기 전용으로 열기');li.querySelector('.project-card-head')!.append(tag('이전 저장 · 읽기 전용'));}
+  else {li.append(node('strong','읽지 못한 이전 저장 내용','project-card-name'));const row=node('div','','row project-card-actions');row.append(btn('열어 보기',open,'secondary project-open'));li.append(row);}
+  li.append(node('p','이전 형식으로 이 브라우저에 남아 있는 내용이에요. 지우거나 덮어쓰지 않았고, 새 저장 형식으로 옮기지 않아 여기서는 저장되지 않아요.','hint project-card-note'));
+  openOnClick(li,open);return li;
 }
 function renderProjects() {
   workspace.read();const list=$('project-list'),trash=$('trash-list');list.replaceChildren();trash.replaceChildren();
@@ -894,7 +933,8 @@ function renderProjects() {
   for(const e of [...active].sort((a,b)=>(lastActivity(b.project)??'').localeCompare(lastActivity(a.project)??'')))list.append(projectCard(e));
   if(workspace.legacy)list.append(legacyCard());
   // An empty list and a list that could not be read are different situations.
-  if(!active.length&&!workspace.legacy&&!workspace.readError)list.append(node('li','아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 예제를 둘러보세요.','hint'));
+  if(!active.length&&!workspace.legacy&&!workspace.readError)list.append(node('li','아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 아래에서 예제를 둘러보세요.','hint project-empty'));
+  $('projects-count').textContent=active.length?String(active.length):'';
   for(const e of trashed)trash.append(projectCard(e));
   $('trash-section').hidden=!trashed.length;$('trash-count').textContent=String(trashed.length);
   const problem=workspace.readError?'저장된 프로젝트 목록을 읽지 못해 덮어쓰지 않고 있어요. 기존 내용은 그대로이며, 새로 만들기·휴지통 이동은 멈췄어요. 백업 파일이 있다면 보관하세요.'
@@ -905,7 +945,17 @@ function renderProjects() {
 }
 async function showProjects(message='') {
   if(!await leaveProject('목록으로 가면'))return;
-  resetEphemeral();route='projects';listNotice=message;if(!message)undoEntry=null;rememberOpen(null);render();$('projects-title').focus();
+  // HOME15: the project being left (however it was reached) is the card to come back to.
+  const left=route==='project'?target.kind==='entry'?target.ref.entryId:target.kind==='legacy'?'legacy':null:null;
+  resetEphemeral();route='projects';listNotice=message;if(!message)undoEntry=null;rememberOpen(null);render();focusListCard(left);
+}
+function focusListCard(entryId:string|null) {
+  const back=listReturn&&listReturn.entryId===entryId?listReturn:null;listReturn=null;
+  const card=entryId?document.querySelector<HTMLElement>(`#project-list .project-card[data-entry-id="${CSS.escape(entryId)}"]`):null;
+  const control=card?.querySelector<HTMLElement>('.project-open')??null;
+  if(!control){window.scrollTo({top:0});$('projects-title').focus();return;}
+  window.scrollTo({top:back?.y??0});control.focus({preventScroll:true});
+  const r=card!.getBoundingClientRect();if(r.top<0||r.bottom>window.innerHeight)card!.scrollIntoView({block:'nearest'});
 }
 /** Completes only after the envelope is written; the open project's queued saves are flushed first. */
 async function trashProject(entryId:string,name:string) {
@@ -1722,6 +1772,15 @@ $('close-context').addEventListener('click',closeContext);
 $('nav-history').addEventListener('click',()=>{view='history';displayView();$<HTMLDetailsElement>('history').open=true;$('history-title').focus();});
 $('back-to-work').addEventListener('click',()=>{showWork();$('nav-work').focus();});
 for(const example of document.querySelectorAll<HTMLButtonElement>('[data-example]'))example.addEventListener('click',()=>guard(()=>{commit(editDraft(project,example.dataset.example!));$('draft').focus();}));
+// HOME15: a click elsewhere closes an open card menu. On a card that click only closes the menu; it does not open a project.
+document.addEventListener('click',e=>{
+  const open=[...document.querySelectorAll<HTMLDetailsElement>('.project-more[open]')].filter(m=>!m.contains(e.target as Node));if(!open.length)return;
+  for(const m of open)m.open=false;
+  const t=e.target as HTMLElement;if(t.closest?.('.project-card')&&!t.closest('.project-more')){e.preventDefault();e.stopPropagation();}
+},true);
+// HOME15: Escape closes an open card menu wherever the focus is (e.g. after a click on the menu's own padding).
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;const m=document.querySelector<HTMLDetailsElement>('.project-more[open]');if(!m)return;
+  e.stopImmediatePropagation();m.open=false;m.querySelector('summary')?.focus({preventScroll:true});},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($<HTMLDetailsElement>('connection-details').open){$<HTMLDetailsElement>('connection-details').open=false;$('connection-details').querySelector('summary')!.focus();}else if(contextOpen)closeContext();}});
 window.addEventListener('beforeunload',e=>{if(memoryDirty||pendingSave||draining){e.preventDefault();e.returnValue='';}});
 function restoreDraftPanels() {

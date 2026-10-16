@@ -136,12 +136,12 @@ class EnterFirstSpace(unittest.TestCase):
 
     def test_06_project_card_body_opens_its_buttons_stay_separate(self):
         self.start(['예약']);self.page.locator('#nav-projects').click()
-        card=self.page.locator('.project-card').first;card.locator('.project-card-summary').click()
+        card=self.page.locator('.project-card').first;card.locator('.project-card-purpose').click()
         expect(self.page.locator('#space-view')).to_be_visible()
         self.page.locator('#nav-projects').click();self.page.locator('#new-project').click()
         self.page.locator('#brief-input').fill('두 번째');self.page.locator('#brief-start').click();self.page.locator('#nav-projects').click()
         # The trash button asks first; declining it leaves the list as it is and does not open the card.
-        self.page.once('dialog',lambda d:d.dismiss());self.page.locator('.project-card').nth(1).locator('.project-trash').click()
+        self.page.once('dialog',lambda d:d.dismiss());self.page.locator('.project-card').nth(1).locator('.project-more-button').click();self.page.locator('.project-card').nth(1).locator('.project-trash').click()
         expect(self.page.locator('#projects-view')).to_be_visible();expect(self.page.locator('.project-card')).to_have_count(2)
 
     def test_07_narrow_list_enters_info_opens_sheet(self):
