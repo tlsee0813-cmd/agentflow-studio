@@ -1,0 +1,161 @@
+{
+  "candidate": "606120500eeea50a20f00fb4678bced7a7d93d98",
+  "same_control_checker_sha": "8e2cfb024439bce5afef9b1d335d8cab223261039a459ac71e9d5ee406c00612",
+  "v0_checker_equal": true,
+  "original_tool_audit": "same source executedv0 child1/fix1child0, original-audit-processes.json",
+  "first_screens": {
+    "complete": true,
+    "child_exit": 0,
+    "four_height_card_scenes": "PASS"
+  },
+  "controls": {
+    "v0_exit": 1,
+    "v0_complete": true,
+    "v0_statuses": [
+      [
+        "1280-notice",
+        "FAIL"
+      ],
+      [
+        "1280-no-notice",
+        "PASS"
+      ],
+      [
+        "1280-notice-records-panel",
+        "FAIL"
+      ],
+      [
+        "1280-long-notice-records-panel",
+        "FAIL"
+      ],
+      [
+        "1440-notice",
+        "FAIL"
+      ],
+      [
+        "1440-no-notice",
+        "PASS"
+      ],
+      [
+        "1440-notice-records-panel",
+        "FAIL"
+      ],
+      [
+        "1440-long-notice-records-panel",
+        "FAIL"
+      ],
+      [
+        "boundary760",
+        "OBSERVED"
+      ],
+      [
+        "boundary761",
+        "OBSERVED"
+      ]
+    ],
+    "fix1_exit": 0,
+    "fix1_complete": true,
+    "fix1_statuses": [
+      [
+        "1280-notice",
+        "PASS"
+      ],
+      [
+        "1280-no-notice",
+        "PASS"
+      ],
+      [
+        "1280-notice-records-panel",
+        "PASS"
+      ],
+      [
+        "1280-long-notice-records-panel",
+        "PASS"
+      ],
+      [
+        "1440-notice",
+        "PASS"
+      ],
+      [
+        "1440-no-notice",
+        "PASS"
+      ],
+      [
+        "1440-notice-records-panel",
+        "PASS"
+      ],
+      [
+        "1440-long-notice-records-panel",
+        "PASS"
+      ],
+      [
+        "boundary760",
+        "OBSERVED"
+      ],
+      [
+        "boundary761",
+        "OBSERVED"
+      ]
+    ]
+  },
+  "impact_returns": {
+    "complete": true,
+    "exit": 0,
+    "scenes": [
+      [
+        "1280-DIRECT_REPORT-closed",
+        "PASS"
+      ],
+      [
+        "1280-OTHER_REPORT-records-open",
+        "PASS"
+      ],
+      [
+        "1440-DIRECT_REPORT-closed",
+        "PASS"
+      ],
+      [
+        "1440-OTHER_REPORT-records-open",
+        "PASS"
+      ]
+    ]
+  },
+  "known_selected_strict": [
+    {
+      "id": "1280-notice-records-panel",
+      "status": "FAIL (known separate limit, not rescued by later explicit fit)"
+    },
+    {
+      "id": "1280-long-notice-records-panel",
+      "status": "FAIL (known separate limit, not rescued by later explicit fit)"
+    },
+    {
+      "id": "1440-notice-records-panel",
+      "status": "FAIL (known separate limit, not rescued by later explicit fit)"
+    },
+    {
+      "id": "1440-long-notice-records-panel",
+      "status": "FAIL (known separate limit, not rescued by later explicit fit)"
+    }
+  ],
+  "execution_errors": {
+    "fatal": [
+      null,
+      null,
+      null
+    ],
+    "pageerrors": [],
+    "cleanup": []
+  },
+  "tool_actual_exit_transcriptions": {
+    "commands63873": 0,
+    "firstscreens66194": 0,
+    "impactreturns82780": 0,
+    "controls_initial_v0_45853": 1,
+    "controls_initial_fix1_11426": 1,
+    "controls_final_v0_33506": 1,
+    "controls_final_fix1_51199": 0
+  },
+  "actual125zoom": "NOT_RUN/not newly required",
+  "mobile": "only CSS760/761 observed, not full390 rerun"
+}

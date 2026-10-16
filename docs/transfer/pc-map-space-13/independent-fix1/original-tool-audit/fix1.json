@@ -1,0 +1,168 @@
+{
+  "type": "independent postprocessing of actually executed original geometry; no browser rerun/no frozen verdict rewrite",
+  "raw_sha256": "27d12af1913bb8db3483bc0889acbd5d7393a38a8188c9d1470302be87ee1691",
+  "rows": [
+    {
+      "id": "1280-import-notice",
+      "map_40pct": true,
+      "tools": [
+        {
+          "id": "map-zoom-in",
+          "rect": {
+            "x": 1108.453125,
+            "y": 377.71875,
+            "w": 36.015625,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        },
+        {
+          "id": "map-zoom-out",
+          "rect": {
+            "x": 1022.4375,
+            "y": 377.71875,
+            "w": 36.015625,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        },
+        {
+          "id": "map-fit",
+          "rect": {
+            "x": 1148.46875,
+            "y": 377.71875,
+            "w": 71.53125,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        }
+      ],
+      "core_map_tool_sample_access": "PASS"
+    },
+    {
+      "id": "1280-no-notice",
+      "map_40pct": true,
+      "tools": [
+        {
+          "id": "map-zoom-in",
+          "rect": {
+            "x": 1108.453125,
+            "y": 310.125,
+            "w": 36.015625,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        },
+        {
+          "id": "map-zoom-out",
+          "rect": {
+            "x": 1022.4375,
+            "y": 310.125,
+            "w": 36.015625,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        },
+        {
+          "id": "map-fit",
+          "rect": {
+            "x": 1148.46875,
+            "y": 310.125,
+            "w": 71.53125,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        }
+      ],
+      "core_map_tool_sample_access": "PASS"
+    },
+    {
+      "id": "1440-import-notice",
+      "map_40pct": true,
+      "tools": [
+        {
+          "id": "map-zoom-in",
+          "rect": {
+            "x": 1268.453125,
+            "y": 377.71875,
+            "w": 36.015625,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        },
+        {
+          "id": "map-zoom-out",
+          "rect": {
+            "x": 1182.4375,
+            "y": 377.71875,
+            "w": 36.015625,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        },
+        {
+          "id": "map-fit",
+          "rect": {
+            "x": 1308.46875,
+            "y": 377.71875,
+            "w": 71.53125,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        }
+      ],
+      "core_map_tool_sample_access": "PASS"
+    },
+    {
+      "id": "1440-no-notice",
+      "map_40pct": true,
+      "tools": [
+        {
+          "id": "map-zoom-in",
+          "rect": {
+            "x": 1268.453125,
+            "y": 310.125,
+            "w": 36.015625,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        },
+        {
+          "id": "map-zoom-out",
+          "rect": {
+            "x": 1182.4375,
+            "y": 310.125,
+            "w": 36.015625,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        },
+        {
+          "id": "map-fit",
+          "rect": {
+            "x": 1308.46875,
+            "y": 310.125,
+            "w": 71.53125,
+            "h": 36
+          },
+          "sampleHit": true,
+          "viewport_bottom_clip_px": 0
+        }
+      ],
+      "core_map_tool_sample_access": "PASS"
+    }
+  ],
+  "exit": 0,
+  "partial_rect_is_not_human_ink_failure": true
+}

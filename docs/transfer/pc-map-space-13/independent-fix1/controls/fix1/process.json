@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/product13-fix1-final/controls/check.py"
+  ],
+  "start": "2026-10-16T06:11:57.863354+00:00",
+  "end": "2026-10-16T06:12:06.055228+00:00",
+  "actualchildreturncode": 1,
+  "log_sha256": {
+    "stdout.log": "1e7d70f23f55d3f9616c70d5b3e54171248f3f20dcdcbcb50731c56b432d9ecc",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

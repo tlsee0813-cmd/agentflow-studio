@@ -1,0 +1,27 @@
+{
+  "candidate": "606120500eeea50a20f00fb4678bced7a7d93d98",
+  "tree": "56c80e6d0a8d4ef72a4408347e938470424e078d",
+  "source_files": [
+    {
+      "path": "app/continuity/public/styles.css",
+      "sha256": "44f1140b629c9f7379851110770da0bc90182a6d68cdb3c1220bb3d54bd69576",
+      "bytes": 55354,
+      "candidate_disk_match": true
+    },
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha256": "dd3980da30e2562fd393579fc51ad6ad13e630c3f3cd013c3cce691a047a8727",
+      "bytes": 178939,
+      "candidate_disk_match": true
+    },
+    {
+      "path": "app/continuity/tests/pc13_browser.py",
+      "sha256": "275ffd936ce5d18a3288b9d1b65a579225e9616d68e994c4e8bd164830cc6e09",
+      "bytes": 33351,
+      "candidate_disk_match": true
+    }
+  ],
+  "frozen_observer_sha": "17c32085a64d013f46404937bfd8bbbb290f2533c5a93d93ce86e89de2019001",
+  "frozen_path_alias": "new sandbox product12-candidate-fix2 symlink resolves candidatefix1; originalproduct12/v0 paths untouched",
+  "legacy_raw_label": "unchanged observe.py raw baseline_commit literal9613208... is originalscript provenance, not actualnewcandidate. Actual HTTP/runtime body tied to resolved candidate disk."
+}
