@@ -32,6 +32,6 @@
 
 [v0 116파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/6643323316daefbe10625484bb1727a2c6a54716/docs/transfer/shared-map-11/author-v0) · [fix1 overlay22파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/c4354dccc6f693bf33d5157e7e8da566d152d9a1/docs/transfer/shared-map-11/author-fix1) · [독립60파일/대표PNG4](https://github.com/tlsee0813-cmd/agentflow-studio/tree/519a57c00062c142548b0a1d9a270949aacf3bd4/docs/transfer/shared-map-11/independent-v0). GitHub가 공유 원본이며 로컬 ZIP 경로가 없어도 회수 가능하다. 로컬은 수령·감사·미리보기 임시 자료다.
 
-[cycle10 결과](2026-10-16-relation-reading-10/RESULT.md)와 이전 판단을 다시 열지 않았다. 연구 통합은 checkpoint의 docs/cycles/, 증거 전달은 지정 delivery의 docs/transfer/에 한정했다. 사용자 예약은 중복 생성·변경하지 않았다.
+[cycle10 결과](2026-10-16-relation-reading-10/RESULT.md)와 이전 판단을 다시 열지 않았다. 연구 결과는 checkpoint의 docs/cycles/, 증거 전달은 지정 delivery의 docs/transfer/에 정리했다. 상위 안내3개는 제품 사실 기준과 현재 연구 진입점을 구분하도록 링크·시점 표현만 보완했다. 사용자 예약은 중복 생성·변경하지 않았다.
 
 2026-10-16 11:18 KST 원격 확인: main `896dcf3848fec70357d0f9bd4fd6c09cab70db37`, gh-pages `63f5540d062861439f0932cd7311c6c5510e227c` 유지. 제품 기준 USE106 `618d9bd2b99ad433df35107d8902b15f45e30000`, GUIDE107 HOLD 유지. 제품 소스·공개 체험판 적용은 아직 아니다.

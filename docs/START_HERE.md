@@ -2,7 +2,7 @@
 
 새 총괄의 시작점은 **[새 총괄 시작 안내](NEW_COORDINATOR_START_KO.md)**입니다. 개정 3의 방향·연구 질문과 역할 분담을 따르며, 아래는 기존 공개 체험판과 종료 시점의 안내입니다.
 
-최신 소스·공개 배포·병렬 후보·검증·미해결은 **[PROJECT_STATUS](PROJECT_STATUS.md)**를 기준으로 읽으세요. `main`과 과거 Draft PR #2는 최신 제품 기준이 아닙니다. PR #1·#2는 미병합 상태로 닫았으며, [22개 브랜치의 보관 태그·복원 방법](REPOSITORY_ARCHIVE.md)을 남겼습니다.
+제품 소스·공개 배포·병렬 후보의 사실 기준은 **[PROJECT_STATUS](PROJECT_STATUS.md)**, 현재 연구·배정·최신 결과의 진입점은 **[ACTIVE](cycles/ACTIVE.md)**입니다. `main`과 과거 Draft PR #2는 최신 제품 기준이 아닙니다. PR #1·#2는 미병합 상태로 닫았으며, [22개 브랜치의 보관 태그·복원 방법](REPOSITORY_ARCHIVE.md)을 남겼습니다.
 
 ## 설치 없이 첫 흐름
 
@@ -16,7 +16,7 @@
 
 ## 다음 세션이 이어받을 때
 
-- 이 checkpoint의 코드는 [USE106 `618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/618d9bd2b99ad433df35107d8902b15f45e30000) 기준입니다. 공개 화면도 이 소스의 정적 MOCK이며 이 checkpoint는 안내·보관 문서만 정리합니다.
+- 이 checkpoint의 코드는 [USE106 `618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/618d9bd2b99ad433df35107d8902b15f45e30000) 기준입니다. 공개 화면도 이 소스의 정적 MOCK이며 제품 소스는 유지하며 이후 연구 시안·판단·증거는 [ACTIVE](cycles/ACTIVE.md)에서 이어 읽습니다.
 - GUIDE107 실제 AI 평가는 별도 병렬 후보의 결과입니다. **HOLD·미통합**이며 공개 UI의 AI 품질 결과로 합치지 않습니다.
 - 소스 CI·정적 배포·공개 smoke·실제 AI 응답·사람 대상 사용성은 서로 다른 검증입니다. 정확한 SHA와 근거 링크는 PROJECT_STATUS에 있습니다.
-- 현재 개발 사이클은 종료·정지하고 예약은 PAUSED입니다. 사용자 결정 없이 새로운 조사·기능·실험·배포를 시작하지 않습니다.
+- 이전 개발 사이클의 ‘종료·정지·예약 PAUSED’는 인계 당시 기록입니다. 현재 연구와 다음 범위는 [ACTIVE](cycles/ACTIVE.md)를 먼저 확인하며, 이 안내를 새 중지 지시나 예약 설정 상태로 읽지 않습니다.
