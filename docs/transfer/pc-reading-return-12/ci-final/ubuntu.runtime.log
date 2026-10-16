@@ -1,0 +1,31 @@
+2026-10-16T04:15:57.4136498Z ##[group]Run mkdir -p test-results
+2026-10-16T04:15:57.4136828Z [36;1mmkdir -p test-results[0m
+2026-10-16T04:15:57.4137112Z [36;1mgit rev-parse HEAD | tee test-results/commit.txt[0m
+2026-10-16T04:15:57.4137429Z [36;1mnode --version | tee test-results/node.txt[0m
+2026-10-16T04:15:57.4137722Z [36;1mnpm --version | tee test-results/npm.txt[0m
+2026-10-16T04:15:57.4138056Z [36;1mnode -e "if(process.version !== 'v22.16.0') process.exit(1)"[0m
+2026-10-16T04:15:57.5029624Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-16T04:15:57.5029936Z env:
+2026-10-16T04:15:57.5030127Z   AI_MODE: mock
+2026-10-16T04:15:57.5030308Z   ALLOW_PAID_AI: false
+2026-10-16T04:15:57.5030499Z   DEEPSEEK_API_KEY: 
+2026-10-16T04:15:57.5030703Z   BROWSER_TRANSPORT: direct-http
+2026-10-16T04:15:57.5030928Z   EVIDENCE_DIR: test-results
+2026-10-16T04:15:57.5031143Z   PYTHONUTF8: 1
+2026-10-16T04:15:57.5031335Z   PYTHONIOENCODING: utf-8
+2026-10-16T04:15:57.5031659Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-16T04:15:57.5032017Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-16T04:15:57.5032360Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-16T04:15:57.5032671Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-16T04:15:57.5033094Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-16T04:15:57.5033396Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-16T04:15:57.5033664Z ##[endgroup]
+2026-10-16T04:15:57.5160103Z 9613208f40f1f7f8506504ac6025f06e421edd4d
+2026-10-16T04:15:57.5189878Z v22.16.0
+2026-10-16T04:15:57.5763285Z 10.9.2
+
+2026-10-16T04:15:57.3987615Z Successfully set up CPython (3.13.5)
+2026-10-16T04:18:22.9578967Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0
+2026-10-16T04:18:43.0230321Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200
+2026-10-16T04:18:45.5498040Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1200
+

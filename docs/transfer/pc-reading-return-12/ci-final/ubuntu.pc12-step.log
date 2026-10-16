@@ -1,0 +1,42 @@
+2026-10-16T04:21:29.2825421Z ##[group]Run set -o pipefail
+2026-10-16T04:21:29.2825676Z [36;1mset -o pipefail[0m
+2026-10-16T04:21:29.2826005Z [36;1mpython continuity/tests/pc12_browser.py 2>&1 | tee test-results/pc12-browser.log[0m
+2026-10-16T04:21:29.2883247Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-16T04:21:29.2883526Z env:
+2026-10-16T04:21:29.2883690Z   AI_MODE: mock
+2026-10-16T04:21:29.2883863Z   ALLOW_PAID_AI: false
+2026-10-16T04:21:29.2884046Z   DEEPSEEK_API_KEY: 
+2026-10-16T04:21:29.2884236Z   BROWSER_TRANSPORT: direct-http
+2026-10-16T04:21:29.2884456Z   EVIDENCE_DIR: test-results
+2026-10-16T04:21:29.2884648Z   PYTHONUTF8: 1
+2026-10-16T04:21:29.2884821Z   PYTHONIOENCODING: utf-8
+2026-10-16T04:21:29.2885059Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-16T04:21:29.2885391Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-16T04:21:29.2885921Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-16T04:21:29.2886247Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-16T04:21:29.2886542Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-16T04:21:29.2886841Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-16T04:21:29.2887122Z   IDEA015_EVIDENCE_DIR: test-results/pc12
+2026-10-16T04:21:29.2887340Z ##[endgroup]
+2026-10-16T04:21:31.8548505Z test_01_read_only_round_trip_changes_nothing (__main__.Pc12.test_01_read_only_round_trip_changes_nothing) ... ok
+2026-10-16T04:21:34.9781550Z test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+2026-10-16T04:21:36.8435715Z test_08_long_understanding_and_scope_open_in_full_read_only (__main__.Pc12.test_08_long_understanding_and_scope_open_in_full_read_only) ... ok
+2026-10-16T04:21:38.7579289Z test_09_long_idea_open_state_survives_read_and_edit_round_trips (__main__.Pc12.test_09_long_idea_open_state_survives_read_and_edit_round_trips) ... ok
+2026-10-16T04:21:42.1709747Z test_10_area_screen_departure_keeps_the_reading_place_after_edits (__main__.Pc12.test_10_area_screen_departure_keeps_the_reading_place_after_edits) ... ok
+2026-10-16T04:21:43.1829746Z test_03_empty_area_and_empty_idea_make_nothing_up (__main__.Pc12Boundaries.test_03_empty_area_and_empty_idea_make_nothing_up) ... ok
+2026-10-16T04:21:44.1153834Z test_04_stale_ai_text_is_named_and_kept_out (__main__.Pc12Boundaries.test_04_stale_ai_text_is_named_and_kept_out) ... ok
+2026-10-16T04:21:44.1155169Z test_05_no_plan_copy_no_text_and_changed_plan (__main__.Pc12Boundaries.test_05_no_plan_copy_no_text_and_changed_plan)
+2026-10-16T04:21:45.6153380Z Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy. ... ok
+2026-10-16T04:21:46.6394969Z test_06_starting_point_dropped_on_project_switch_and_reload (__main__.Pc12Boundaries.test_06_starting_point_dropped_on_project_switch_and_reload) ... ok
+2026-10-16T04:21:47.5341396Z test_07_narrow_390_minimum (__main__.Pc12Boundaries.test_07_narrow_390_minimum) ... ok
+2026-10-16T04:21:50.0611790Z test_01_read_only_round_trip_changes_nothing (__main__.Pc12Wide.test_01_read_only_round_trip_changes_nothing) ... ok
+2026-10-16T04:21:53.3749174Z test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+2026-10-16T04:21:55.1091948Z test_08_long_understanding_and_scope_open_in_full_read_only (__main__.Pc12Wide.test_08_long_understanding_and_scope_open_in_full_read_only) ... ok
+2026-10-16T04:21:56.9394631Z test_09_long_idea_open_state_survives_read_and_edit_round_trips (__main__.Pc12Wide.test_09_long_idea_open_state_survives_read_and_edit_round_trips) ... ok
+2026-10-16T04:21:59.9295380Z test_10_area_screen_departure_keeps_the_reading_place_after_edits (__main__.Pc12Wide.test_10_area_screen_departure_keeps_the_reading_place_after_edits) ... ok
+2026-10-16T04:21:59.9661670Z 
+2026-10-16T04:21:59.9662298Z ----------------------------------------------------------------------
+2026-10-16T04:21:59.9663170Z Ran 15 tests in 30.562s
+2026-10-16T04:21:59.9663346Z 
+2026-10-16T04:21:59.9663428Z OK
+

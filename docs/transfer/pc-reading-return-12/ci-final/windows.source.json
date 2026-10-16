@@ -1,0 +1,43 @@
+{
+  "observedAtUTC": "2026-10-16T04:23:44Z",
+  "headRevision": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+  "job": {
+    "id": 116807946571,
+    "head_sha": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+    "name": "verify (windows-2022)",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "pc12Step": {
+    "name": "PC12 area reading, chosen-task context, explicit continue and return to the starting map view (native HTTP, MOCK; wiring, not usability)",
+    "status": "completed",
+    "conclusion": "success",
+    "number": 26
+  },
+  "source": {
+    "jobURL": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38849696070/job/116807946571",
+    "jobAPI": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/actions/jobs/116807946571",
+    "logsAPI": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/actions/jobs/116807946571/logs"
+  },
+  "retrievedVia": {
+    "job": "Code Review pull_requests_checks with headRevision and jobId",
+    "step": "GitHub fetch_workflow_job_steps",
+    "log": "GitHub fetch_workflow_job_logs decoded text"
+  },
+  "codeReviewLogTruncated": true,
+  "fullDecodedLogCharacters": 318360,
+  "extraction": {
+    "pc12": {
+      "startLine": 3977,
+      "endLineExclusive": 4017,
+      "rule": "Contiguous span from preceding ##[group] through just before next ##[group]."
+    },
+    "runtime": {
+      "startLine": 348,
+      "endLineExclusive": 372,
+      "additionalFilter": "Successfully set up CPython|Successfully installed .*playwright|Chromium .*downloaded"
+    },
+    "newlines": "Decoded text split on LF and joined on LF; original per-line timestamp/text/ANSI preserved."
+  }
+}
+
