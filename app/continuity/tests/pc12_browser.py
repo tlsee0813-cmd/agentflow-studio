@@ -252,6 +252,72 @@ class Pc12(unittest.TestCase):
         s1=self.state();self.check_equal('edit trip: current task kept',s1['currentTaskId'],A)
         self.check_equal('edit trip: manual edit kept',self.task(A,s1)['manual']['checks'],'A 완료 조건 · fix1')
 
+    # ---------- fix2: departure from the AREA screen; an explicit continue + edit may change content above the button ----------
+    LAYOUT_JS="""()=>{const pick=(sel)=>[...document.querySelectorAll(sel)].map(e=>({id:e.id||null,cls:e.className||null,h:Math.round(e.getBoundingClientRect().height*10)/10,
+      top:Math.round((e.getBoundingClientRect().top+scrollY)*10)/10,shown:e.getClientRects().length>0}));
+      return {feedback:pick('.feedback-stack > *'),head:pick('.project-head, #space-crumb'),area:pick('#space-view > *'),rows:pick('#area-tasks > *')}}"""
+    def area_depart(self,area,task):
+        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click();expect(self.page.locator('#space-tasks, #area-tasks')).to_be_visible()
+        full=self.page.locator('#area-idea-full')
+        if not full.evaluate('(e)=>e.open'):full.locator('summary').click()
+        link=self.page.locator(f'#task-open-{task}');self.page.mouse.move(self.WIDTH-40,self.HEIGHT//2);wheels=0
+        while wheels<40 and not (link.bounding_box() and self.HEIGHT*0.35<=link.bounding_box()['y']<=self.HEIGHT-80):
+            self.page.mouse.wheel(0,120);self.page.wait_for_timeout(60);wheels+=1
+        before=self.snap('area-depart');before['anchorY']=link.bounding_box()['y'];before['layout']=self.page.evaluate(self.LAYOUT_JS)
+        self.record('actual','area-depart anchor viewport y',before['anchorY']);self.record('actual','area-depart layout',before['layout'])
+        self.record('condition','area-depart: wheel moved the page',before['windowY'],'>0');self.assertGreater(before['windowY'],0)
+        link.click();expect(self.page.locator('#task-view')).to_be_visible()
+        return before
+    def soft_equal(self,name,value,expected,delta=None):
+        """fix2: area-screen trips record every condition with its result and fail at the end, so each trip is observed."""
+        ok=value==expected if delta is None else (value is not None and abs(value-expected)<=delta)
+        rec={'test':self.id().split('.',1)[-1],'width':self.WIDTH,'kind':'condition','name':name,'value':value,'expected':expected if delta is None else {'value':expected,'delta':delta},'pass':ok}
+        with open(OBS,'a',encoding='utf-8') as fh:fh.write(json.dumps(rec,ensure_ascii=False)+'\n')
+        if not ok:self.soft.append(f'{name}: {value!r} != {expected!r}')
+    def area_back(self,before,area_name,task,label):
+        # Raw observation right after the named return: no Playwright scrolling, no extra focus call.
+        expect(self.title()).to_have_text(area_name)
+        after=self.snap(f'{label}: back');after['layout']=self.page.evaluate(self.LAYOUT_JS);self.record('actual',f'{label}: back layout',after['layout'])
+        raw=self.page.evaluate("""(id)=>{const e=document.getElementById(id);if(!e)return null;const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
+          return {y:r.top,bottom:r.bottom,inViewport:r.top>=0&&r.bottom<=innerHeight,hitIsControl:!!hit&&(hit===e||e.contains(hit)),focused:document.activeElement===e}}""",f'task-open-{task}')
+        self.record('actual',f'{label}: anchor after return',raw)
+        self.soft_equal(f'{label}: focus returned to the calling control',raw and raw['focused'],True)
+        self.soft_equal(f'{label}: open disclosures',after['openDetails'],before['openDetails'])
+        self.soft_equal(f'{label}: calling control at the same viewport y',raw and raw['y'],before['anchorY'],delta=1)
+        self.soft_equal(f'{label}: calling control is clickable there',raw and raw['inViewport'] and raw['hitIsControl'],True)
+        if after['docHeight']==before['docHeight']:self.soft_equal(f'{label}: same content height keeps windowY',after['windowY'],before['windowY'],delta=1)
+        else:self.record('actual',f'{label}: content height changed',{'before':before['docHeight'],'after':after['docHeight'],'windowYBefore':before['windowY'],'windowYAfter':after['windowY']})
+        return after
+    def test_10_area_screen_departure_keeps_the_reading_place_after_edits(self):
+        idea=('긴 구상: 예약 화면과 취소 규칙 메모 · '*100)[:1988]+' ZZ-IDEA2000';self.soft=[]
+        booking,notify=self.start([('예약',idea),('알림','')])
+        A=self.request_in(booking,'A: 예약 접수 화면');R=self.paste_report('R 보고: 접수 화면을 만들었다고 주장')
+        s0=self.state();self.check_equal('fixture: current is R (report of A)',s0['currentTaskId'],R)
+        # (0) current R: read A, continue (R stays; the product shows a notice above), return without editing.
+        before=self.area_depart(booking,A)
+        self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible();expect(self.page.locator('#notice')).to_be_visible()
+        self.page.locator('#work-return-origin').click();self.area_back(before,'예약',A,'R-continue-no-edit')
+        self.check_equal('R-continue-no-edit: saved project unchanged',self.state()==s0,True)
+        # (1) the notice is still shown when leaving again; continue, edit R's four fields (the edit's save clears the notice), return.
+        before=self.area_depart(booking,A);self.record('actual','R-edit: notice shown at departure',self.page.locator('#notice').is_visible())
+        self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+        vR={k:f'R 영역화면 {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vR)
+        self.page.locator('#work-return-origin').click();self.area_back(before,'예약',A,'R-edit')
+        s1=self.state();self.check_equal('R-edit: current kept',s1['currentTaskId'],R);self.check_equal('R-edit: R manual',self.task(R,s1)['manual'],vR)
+        self.check_equal('R-edit: A untouched',self.task(A,s1)['manual'],self.task(A,s0)['manual'])
+        self.shot('12-area-back-R')
+        # (2) current RB (another request's report): continue A switches to A; edit A; return.
+        B=self.request_in(notify,'B: 알림 문자');RB=self.paste_report('RB 보고: 알림 반영했다고 주장')
+        s2=self.state();self.check_equal('fixture: current is RB',s2['currentTaskId'],RB)
+        before=self.area_depart(booking,A)
+        self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+        vA={k:f'A 영역화면 {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vA)
+        self.page.locator('#work-return-origin').click();self.area_back(before,'예약',A,'RB-A-edit')
+        s3=self.state();self.check_equal('RB-A-edit: current is A',s3['currentTaskId'],A);self.check_equal('RB-A-edit: A manual',self.task(A,s3)['manual'],vA)
+        self.check_equal('RB-A-edit: R kept',self.task(R,s3)['manual'],vR);self.check_equal('RB-A-edit: RB untouched',self.task(RB,s3),self.task(RB,s2))
+        self.shot('13-area-back-A')
+        self.assertEqual(self.soft,[],'reading place after return')
+
 class Pc12Wide(Pc12):
     WIDTH,HEIGHT=1440,900
 

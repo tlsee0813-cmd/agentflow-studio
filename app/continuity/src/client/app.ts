@@ -54,7 +54,10 @@ let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaL
 // project, layer, area, viewport, selection, sheet, scroll and the control that was used. Never project data.
 // fix1: open = which disclosures (details with an id) of that view were open or closed, so a long text the user had opened
 // is open again and the page is as tall as it was before the scroll is restored. Tab memory only.
-type Origin={project:string;view:'space'|'area';area:string|null;map:MapView|null;selected:string|null;sheet:boolean;y:number;focus:string|null;open:Record<string,boolean>};
+// fix2: anchor = where the calling control was (its viewport top and page position), so a return can bring back the reading
+// place when content above it changed for a real reason (e.g. a notice from an explicit continue); it never rolls that back.
+type Origin={project:string;view:'space'|'area';area:string|null;map:MapView|null;selected:string|null;sheet:boolean;y:number;focus:string|null;open:Record<string,boolean>;
+  anchor:{id:string;top:number;page:number}|null};
 let origin:Origin|null=null;
 /** GUIDE097: area guidance per project and area, in this tab's memory only (declared early: resets use it). */
 /** gen counts the user's edits of the draft; a reply that arrives after one is held in incoming, never applied over it. */
@@ -257,7 +260,9 @@ function markOrigin(focus:string|null=null) {
   if(view!=='space'&&view!=='area')return;
   const active=document.activeElement as HTMLElement|null,used=active?.id&&$('space-view').contains(active)?active.id:null;
   const open=Object.fromEntries([...$('space-view').querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]));
-  origin={project:project.id,view,area:view==='area'?viewArea:null,map:mapView?{...mapView}:null,selected:mapSelected,sheet:sheetOpen,y:window.scrollY,focus:focus??used,open};
+  const id=focus??used,el=id?document.getElementById(id):null,r=el&&el.getClientRects().length?el.getBoundingClientRect():null;
+  origin={project:project.id,view,area:view==='area'?viewArea:null,map:mapView?{...mapView}:null,selected:mapSelected,sheet:sheetOpen,y:window.scrollY,focus:id,open,
+    anchor:id&&r?{id,top:r.top,page:r.top+window.scrollY}:null};
 }
 function originLabel(o:Origin):string {
   if(o.view==='area')return o.area==='unassigned'?'영역 미지정 작업':areaById(o.area)?.name??'영역';
@@ -284,6 +289,10 @@ function returnToOrigin() {
   // fix1: disclosures that still exist get the open state they had; ones that are gone are skipped. Then the scroll.
   if(!areaGone)for(const [id,open] of Object.entries(o.open)){const d=document.getElementById(id);if(d instanceof HTMLDetailsElement&&$('space-view').contains(d))d.open=open;}
   window.scrollTo({top:areaGone?0:o.y});
+  // fix2: same content above the control = the scroll above is already the reading place. If the control moved on the page,
+  // scroll so it is where it was in the viewport (the browser may clamp at the page end). Without the control: the plain scroll.
+  const a=!areaGone?o.anchor:null,el=a?document.getElementById(a.id):null;
+  if(a&&el&&el.getClientRects().length){const page=el.getBoundingClientRect().top+window.scrollY;if(Math.abs(page-a.page)>=1)window.scrollTo({top:page-a.top});}
   if(areaGone||selGone){project={...project,notice:'출발한 영역이 보관되었거나 없어져 그 위의 보기로 돌아왔어요. 다른 영역이나 작업을 대신 고르지 않았어요.'};renderStatus();}
   if(areaGone||!(o.focus&&focusFirst(o.focus)))$('space-title')?.focus({preventScroll:true});
 }
