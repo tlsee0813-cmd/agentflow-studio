@@ -1,12 +1,12 @@
 # AgentFlow 현재 진행·배정
-2026-10-16 17:32 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 진행은 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이며 제품/공개 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)를 본다.
+2026-10-16 17:38 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 진행은 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이며 제품/공개 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)를 본다.
 
 ## 사용자 최신 우선순위 — 프로젝트 홈15
 사용자가 Dify 스튜디오 같은 좌측 프로젝트 탐색·중앙 프로젝트 카드·선택 후 공간 진입을 명시 요청했다. 세부 위치 보존 검사에 치우쳐 첫 화면 정보 위계와 비율을 충분히 개선하지 못한 점을 총괄이 수용한다. **[프로젝트 홈15 계약](2026-10-16-project-home-15/IMPLEMENTATION.md)에 따른 첫 통합을 마쳤다.** 실제 Dify1280 관측과 현재 제품1440 홈을 대조해 3열 카드·목적 우선·일관된 진입을 명시했다. Pro 홈 연구와 Opus 홈 구현은 각각 새 브라우저 세션으로 분리한다. 기존 보고 해석 세션은 같은 주제만 유지하고 구현으로 섞지 않는다.
 
-홈15는 [PR #5](https://github.com/tlsee0813-cmd/agentflow-studio/pull/5)로 checkpoint에 통합했다. 제품소스 `1e51f0f9b56ed51e9ec4c529ca518aa256ad1ecf`, 병합 `168d47ff6e4cca6596b6d3c7306921b8544c14f6`. 독립15개 재실행·추가10장면·별도이미지/코드판단과 Windows/Ubuntu CI를 마쳤다. [결과와 공유 증거](2026-10-16-project-home-15/RESULT.md). [새 PC 체험](http://127.0.0.1:8765/product15-preview/runtime/index.html)을 열어 실제 기존카드→전체공간→카드초점 복귀를 총괄이 확인했다. **현재 좁은범위를 수용하며 완성형 UI/전체제품 완료 선언은 아니다.** 후속 전체 문구 읽기는 [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6), 후보 `53d1cb2f1906e6d575f08f4533ac1644a2904894`로 구현했다. 기존 더보기의 읽기 창이며 제품3·검사2 파일만 변경했다. [작성자 원본](https://github.com/tlsee0813-cmd/agentflow-studio/tree/a05b9511e302fab0eaff1c5c44a435fe88504808/docs/transfer/project-home-15/author-read-full-v1)의 무결성·기준 적용, 총괄/Sol 코드 검토와 대표PNG2·별도 세션 이미지 검토를 마쳤다. 독립 실행에서 닫기 버튼 초점 PageDown/End 배경 스크롤 결함을 양PC에서 확인해 첫 후보를 HOLD했다. Opus의 좁은 fix2 후보 `a5a48a715c41d1f8ea928af48a33d264c295a128`에서 같은 독립50관측이 4실패/exit1→전부통과/exit0이며 HOME15 21검사/check/build도0이다. [실행·비교](https://github.com/tlsee0813-cmd/agentflow-studio/tree/4d004ca9e7d999230262c6c0152f18f841417a04/docs/transfer/project-home-15/independent-read-full-fix2), [별도 최종검토](https://github.com/tlsee0813-cmd/agentflow-studio/blob/60db94126570ebbfbeee7f94f24f5e16d7ea0936/docs/transfer/project-home-15/independent-read-full-fix2/REVIEW.md)가 수용했다. 총괄도 검사코드동일성/178소스전후/원시종료/대표화면과 실제 기존프로젝트 PC1280 읽기→닫기초점복귀를 대조했다. **최종 양OS CI는 진행 중이며 아직 통합하지 않았다.** [후보 체험](http://127.0.0.1:8765/product15-read-full-preview/runtime/index.html)은15파일434,670B HTTP해시일치이며 기존저장소를사용한다. 큰목록독립fixture관측과 기존짧은한프로젝트 native 확인을 구분한다. 고정 범위는 [계약 후속 절](2026-10-16-project-home-15/IMPLEMENTATION.md#홈15-후속--진입-전-전체-문구-읽기-2026-10-16-1645-kst)이다.
+홈15는 [PR #5](https://github.com/tlsee0813-cmd/agentflow-studio/pull/5)로 checkpoint에 통합했다. 제품소스 `1e51f0f9b56ed51e9ec4c529ca518aa256ad1ecf`, 병합 `168d47ff6e4cca6596b6d3c7306921b8544c14f6`. 독립15개 재실행·추가10장면·별도이미지/코드판단과 Windows/Ubuntu CI를 마쳤다. [결과와 공유 증거](2026-10-16-project-home-15/RESULT.md). [새 PC 체험](http://127.0.0.1:8765/product15-preview/runtime/index.html)을 열어 실제 기존카드→전체공간→카드초점 복귀를 총괄이 확인했다. **현재 좁은범위를 수용하며 완성형 UI/전체제품 완료 선언은 아니다.** 후속 전체 문구 읽기는 [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6), 후보 `53d1cb2f1906e6d575f08f4533ac1644a2904894`로 구현했다. 기존 더보기의 읽기 창이며 제품3·검사2 파일만 변경했다. [작성자 원본](https://github.com/tlsee0813-cmd/agentflow-studio/tree/a05b9511e302fab0eaff1c5c44a435fe88504808/docs/transfer/project-home-15/author-read-full-v1)의 무결성·기준 적용, 총괄/Sol 코드 검토와 대표PNG2·별도 세션 이미지 검토를 마쳤다. 독립 실행에서 닫기 버튼 초점 PageDown/End 배경 스크롤 결함을 양PC에서 확인해 첫 후보를 HOLD했다. Opus의 좁은 fix2 후보 `a5a48a715c41d1f8ea928af48a33d264c295a128`에서 같은 독립50관측이 4실패/exit1→전부통과/exit0이며 HOME15 21검사/check/build도0이다. [실행·비교](https://github.com/tlsee0813-cmd/agentflow-studio/tree/4d004ca9e7d999230262c6c0152f18f841417a04/docs/transfer/project-home-15/independent-read-full-fix2), [별도 최종검토](https://github.com/tlsee0813-cmd/agentflow-studio/blob/60db94126570ebbfbeee7f94f24f5e16d7ea0936/docs/transfer/project-home-15/independent-read-full-fix2/REVIEW.md)가 수용했다. 총괄도 검사코드동일성/178소스전후/원시종료/대표화면과 실제 기존프로젝트 PC1280 읽기→닫기초점복귀를 대조했다. **최종 [Windows·Ubuntu CI](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38873552364)가 모두 성공해 PR #6을 병합했다.** 병합 `4393fcc77d71b9c51492e8dfd2701545caf17e5c`, 제품소스 `a5a48a715c41d1f8ea928af48a33d264c295a128`. [현재 PC 체험](http://127.0.0.1:8765/product15-read-full-preview/runtime/index.html)은15파일434,670B HTTP해시일치이며 기존저장소를사용한다. 큰목록독립fixture관측과 기존짧은한프로젝트 native 확인을 구분한다. 고정 범위는 [계약 후속 절](2026-10-16-project-home-15/IMPLEMENTATION.md#홈15-후속--진입-전-전체-문구-읽기-2026-10-16-1645-kst)이다.
 
-주제별 세션: [Pro 홈 연구](https://chatgpt.com/c/6ad1cae0-2da4-83e8-a0c3-8699e2a84be1), [Opus 홈 구현](https://claude.ai/chat/af32916c-7f77-418c-9955-fcdb2d2a1995), [별도 Cloud 홈 검토](https://chatgpt.com/c/6ad1cb08-d8b8-83e8-95f2-e2b1a1327fe8). 기존 보고 해석 세션에는 홈 설계를 섞지 않았다. 새 Cloud 환경의 브라우저 설치는 네트워크 정책으로 차단돼 설치를 반복하지 않고, 준비된 기존 환경에는 독립 **실행만** 맡겼다. 별도 새 검토 세션이 코드·이미지·실행 증거를 판단한다.
+주제별 세션(웹 Cloud 링크는 최초 준비만, 후속 독립 판단은 앱의 **AgentFlow 홈15 독립 검토** 작업 `01a14381-814b-73fa-8947-03a1fd41008c`와 위 고정 REVIEW): [Pro 홈 연구](https://chatgpt.com/c/6ad1cae0-2da4-83e8-a0c3-8699e2a84be1), [Opus 홈 구현](https://claude.ai/chat/af32916c-7f77-418c-9955-fcdb2d2a1995), [별도 Cloud 홈 검토](https://chatgpt.com/c/6ad1cb08-d8b8-83e8-95f2-e2b1a1327fe8). 기존 보고 해석 세션에는 홈 설계를 섞지 않았다. 새 Cloud 환경의 브라우저 설치는 네트워크 정책으로 차단돼 설치를 반복하지 않고, 준비된 기존 환경에는 독립 **실행만** 맡겼다. 별도 새 검토 세션이 코드·이미지·실행 증거를 판단한다.
 
 ## 기반 제품13·입력14 판단과 남은 경계
 **제품13의 PC 첫 화면 지도 공간·도구 접근 개선을 실제 제품에 통합했다. 입력14는 같은 화면에 실제 기록 대응 입력과 후속 판본을 적용했고, 기존 제품 보고 연결의 한PC장면에서 사용자 수정·보기 보존도 확인했다.** 제품13 단계 소스 `606120500eeea50a20f00fb4678bced7a7d93d98`, [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4), 병합 `60c42c2c2886ae7cd3f40c0cd895cadc937a2f57`. main/공개 체험판 배포와 구분한다.
@@ -24,12 +24,12 @@ URL 재열기에서 선택이 초기화됐다. C11은 메모리 내 보기·초�
 
 | 담당 | 현재 배정·결과 |
 |---|---|
-| 새 Opus 홈 세션 | 홈15 v0 통합 완료. 후속 전체문구 읽기도 홈 주제 안에서만 계속 |
-| Cloud | 새 홈 검토 세션 최종 수용. 기존 준비환경 독립15+10장면·공유 완료, Windows/Ubuntu CI 성공 |
+| Opus 홈 세션 | 홈15와 전체문구 읽기 fix2 통합 완료. 홈 주제의 구현만 담당 |
+| Cloud | 준비환경의 독립 실행과 별도 판단 분리. 후속 같은50관측4실패→전부통과, HOME15 21검사·양OS CI 성공, 고정 REVIEW 수용 |
 | Astra High | 14 대응과 기존 코드 대조 완료. 새 연구 엔진보다 실제 제품 보고 경로 재사용을 권고, 총괄 수용 |
 | 새 Pro 홈 세션 | 프로젝트 카드 정보 우선순위·Dify/공식 오픈소스 비교. 기존 Pro 보고 해석 연구와 분리 |
 | Sol High | 홈15의 기존 카드/진입/저장 경로·정확한 목적/활동 정보 대조 완료. 부가 환경 문제는 내부 처리 |
-| 총괄 | 홈15 수용·병합·체험 갱신 완료. 긴 전체 문구 확인을 후속 보완으로 기록하고 보고 해석 연구와 구분 |
+| 총괄 | 홈15와 전체문구 읽기 수용·병합·체험 갱신 완료. 다음은 한 영역의 실제보고 읽기→명시적 재요청→지도 복귀 접점. 아직 후속 구현 배정 전 |
 
 다음 후보는 현재 영역의 구상 곁에서 선택한 실제 보고를 읽고, 필요하면 같은 영역의 재요청을 작성한 뒤 복귀하는 접점이다. Pro의 ‘보고 한 줄’과 Astra의 실제 코드 대조를 통합하되, 기존 GUIDE는 반환보고를 읽지 않으므로 실제 생성 없이 ‘AI가 읽은 변화’를 제품에 표시하지 않는다. 구상 직접 수정과 AI에게 요청하는 행동을 구분한다. 아직 이 후속 제품 구현을 시작하지 않았다. 새 입력이 들어와도 사용자가 돌아와 변화 한 곳을 이해하고 수정·인계한 뒤 이어갈 수 있는지가 다음 질문이다. 시안을 늘리는 것과 새 저장 모델을 설계하는 것을 목표로 두지 않는다.
 
@@ -62,5 +62,5 @@ URL 재열기에서 선택이 초기화됐다. C11은 메모리 내 보기·초�
 ## 공유·운영
 GitHub가 공유 원본이다. 새 checkpoint 기록은 결정·결과·대표 화면 중심, raw는 delivery 한 곳에 보존한다. 검증 강도는 저장·대상·출처·복귀에 미치는 위험으로 정한다. 기존 실패 증거는 보존하되 동일 자료의 전체 재감사를 반복하지 않는다.
 
-현재 PC 체험은 기존 서버의 최소 실행물 `http://127.0.0.1:8765/product15-preview/runtime/index.html`이다. 제품13 경로도 비교용으로 보존했다. [고정 빌드 자산](https://github.com/tlsee0813-cmd/agentflow-studio/tree/fd7bb35125a483d9699508bb35528ca1f4305d85/docs/transfer/pc-map-space-13/independent-fix1/preview). 제품12와 같은 origin의 저장소를 공유하며 별도 자료 초기화·백업 가져오기를 하지 않았다. 공개 배포가 아니다.
+현재 PC 체험은 기존 서버의 최소 실행물 `http://127.0.0.1:8765/product15-read-full-preview/runtime/index.html`이다. 제품13 경로도 비교용으로 보존했다. [현재 고정 overlay](https://github.com/tlsee0813-cmd/agentflow-studio/tree/4d004ca9e7d999230262c6c0152f18f841417a04/docs/transfer/project-home-15/independent-read-full-fix2/preview). 제품12와 같은 origin의 저장소를 공유하며 별도 자료 초기화·백업 가져오기를 하지 않았다. 공개 배포가 아니다.
 main `896dcf3848fec70357d0f9bd4fd6c09cab70db37`·gh-pages `63f5540d062861439f0932cd7311c6c5510e227c` 유지. GUIDE107 HOLD 유지. 사용자 예약을 중복 생성·변경하지 않는다.
