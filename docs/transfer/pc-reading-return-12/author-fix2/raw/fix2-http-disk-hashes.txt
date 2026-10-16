@@ -1,0 +1,4 @@
+server http://127.0.0.1:3000 2026-10-16T04:02:29Z
+client/app.js disk=f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17 http=f3e8b545a9a44a40c7f10a51efffc058daf72c19a241ecf2c3e24b9ec4d25b17 status=200 match=yes
+styles.css disk=ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec http=ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec status=200 match=yes
+index.html disk=ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4 http=ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4 status=200 match=yes

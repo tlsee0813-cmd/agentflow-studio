@@ -1,0 +1,37 @@
+test_10_area_screen_departure_keeps_the_reading_place_after_edits (__main__.Pc12.test_10_area_screen_departure_keeps_the_reading_place_after_edits) ... FAIL
+test_10_area_screen_departure_keeps_the_reading_place_after_edits (__main__.Pc12Wide.test_10_area_screen_departure_keeps_the_reading_place_after_edits) ... FAIL
+
+======================================================================
+FAIL: test_10_area_screen_departure_keeps_the_reading_place_after_edits (__main__.Pc12.test_10_area_screen_departure_keeps_the_reading_place_after_edits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 293, in test_10_area_screen_departure_keeps_the_reading_place_after_edits
+    self.page.locator('#work-return-origin').click();self.area_back(before,'예약',A,'R-continue-no-edit')
+                                                     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 280, in area_back
+    self.check_equal(f'{label}: calling control at the same viewport y',raw and raw['y'],before['anchorY'],delta=1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 54, in check_equal
+    else:self.assertAlmostEqual(value,expected,delta=delta,msg=name)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 639.765625 != 572.171875 within 1 delta (67.59375 difference) : R-continue-no-edit: calling control at the same viewport y
+
+======================================================================
+FAIL: test_10_area_screen_departure_keeps_the_reading_place_after_edits (__main__.Pc12Wide.test_10_area_screen_departure_keeps_the_reading_place_after_edits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 293, in test_10_area_screen_departure_keeps_the_reading_place_after_edits
+    self.page.locator('#work-return-origin').click();self.area_back(before,'예약',A,'R-continue-no-edit')
+                                                     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 280, in area_back
+    self.check_equal(f'{label}: calling control at the same viewport y',raw and raw['y'],before['anchorY'],delta=1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 54, in check_equal
+    else:self.assertAlmostEqual(value,expected,delta=delta,msg=name)
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 879.765625 != 812.171875 within 1 delta (67.59375 difference) : R-continue-no-edit: calling control at the same viewport y
+
+----------------------------------------------------------------------
+Ran 2 tests in 6.646s
+
+FAILED (failures=2)

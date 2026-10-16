@@ -1,0 +1,1 @@
+[{"name":"fix1product-pc12-test10-run2","cmd":["python3","continuity/tests/pc12_browser.py","Pc12.test_10_area_screen_departure_keeps_the_reading_place_after_edits","Pc12Wide.test_10_area_screen_departure_keeps_the_reading_place_after_edits"],"cwd":"/root/work/repo/app","env":{"IDEA015_EVIDENCE_DIR":"/root/work/ev2/fix1-results-run2"}}]
