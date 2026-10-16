@@ -1,8 +1,8 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-16 홈15 전체문구 읽기 fix2 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-16 보고·현재 구상 연결16 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint에 PC 읽기·명시 편집·지도 복귀·지도 공간 개선과 프로젝트 카드 홈과 진입 전 전체 이름·목적 읽기를 반영했다.** [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
+**제품 기준 checkpoint에 프로젝트 카드 홈·공간 탐색·현재 영역 구상과 명시 선택한 보고 읽기·입력 보호·출발 복귀를 반영했다.** [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7) · [연결16 결과·수용 경계](cycles/2026-10-16-report-area-16/RESULT.md). [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
 
 ## 제품 목적과 현재 범위
 
@@ -14,7 +14,7 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합 4393fcc7](https://github.com/tlsee0813-cmd/agentflow-studio/commit/4393fcc77d71b9c51492e8dfd2701545caf17e5c), 제품소스 [a5a48a71](https://github.com/tlsee0813-cmd/agentflow-studio/commit/a5a48a715c41d1f8ea928af48a33d264c295a128) | 제품12·13 위 홈15 프로젝트카드·목적·공간진입/목록복귀·진입 전 전체문구 읽기. [결과·남은보완](cycles/2026-10-16-project-home-15/RESULT.md) |
+| 제품 기준 checkpoint | [병합42519b1d](https://github.com/tlsee0813-cmd/agentflow-studio/commit/42519b1d76e36f7aca22931502d299a09f42732e), 제품소스 [a0f0ae78](https://github.com/tlsee0813-cmd/agentflow-studio/commit/a0f0ae786c580a8919cede07db48d4397b58b114) | 홈15 위 현재 구상·선택 보고 대조, 입력 종류/대상 보호, 명시 다음 행동·복귀. [결과·한계](cycles/2026-10-16-report-area-16/RESULT.md) |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
@@ -24,9 +24,15 @@
 
 USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·gh-pages는 그대로 유지하고, 기존22개 브랜치는 [태그 보관·SHA 검증 후 정리](REPOSITORY_ARCHIVE.md)했다. PR #1·#2는 미병합으로 닫았다. 이전 인계 당시 사용자 개편안 대기 상태였으며, 이후 연구는 [ACTIVE](cycles/ACTIVE.md)에 기록한다.
 
+## 연결16 검증과 수용 경계
+
+현재 Area.note와 명시 선택한 보고를 함께 읽고 새 요청 또는 기존 입력으로 이어가는 범위를 통합했다. 독립 검토에서 발견한 보고 전환 펼침 누출을 수정하고 동일 독립검사, 별도 PC 대상·저장·복귀·긴영역 왕복과 최종 양OS CI를 확인했다. [결과와 공유 원본](cycles/2026-10-16-report-area-16/RESULT.md)에 작성자·독립·시각·총괄 직접 확인을 분리했다. [현재 PC 체험](http://127.0.0.1:8765/product16-report-area-preview/runtime/index.html)은 공개배포가 아닌 정적 MOCK이다.
+
+다른 탭 저장을 현재 탭 화면에 즉시 반영하지 않는 기존 반례는 남아 있고, 해당 검사와 전체 수집기는exit1이다. 외부 저장을 오래된 탭이 덮어쓰지 못하는 충돌 보호는 확인했다. 출발 영역 소실 fallback 등 미검증 경로를 모두 통과했다고 하지 않는다. 자동 전달·자동 지도 갱신과 GUIDE107 실제AI 품질은 이번 수용 범위가 아니다.
+
 ## 홈15 검증과 수용 경계
 
-PC 프로젝트 카드 홈을 제품13 위에 통합했다. Windows·Ubuntu CI와 독립 조작·이미지/코드 검토를 통과했다. [홈15 결과와 공유 증거](cycles/2026-10-16-project-home-15/RESULT.md)에 정확한 범위와 한계를 기록했다. 긴 공통 접두사의 전체 이름·목적은 기존 더보기의 읽기창에서 확인하고 같은 카드로 닫는다. 독립검사에서 발견한 닫기초점 키보드 배경스크롤 결함은 fix2에서 고쳤다. 같은50관측4실패→전부통과, HOME15 21검사·별도판단·최종양OS CI를 구분해 수용했다. 카드 자체만으로 같은접두사 구별이 끝났다는 뜻은 아니다. [현재 PC 체험](http://127.0.0.1:8765/product15-read-full-preview/runtime/index.html)은 로컬 정적 MOCK이며 공개 배포가 아니다.
+PC 프로젝트 카드 홈을 제품13 위에 통합했다. Windows·Ubuntu CI와 독립 조작·이미지/코드 검토를 통과했다. [홈15 결과와 공유 증거](cycles/2026-10-16-project-home-15/RESULT.md)에 정확한 범위와 한계를 기록했다. 긴 공통 접두사의 전체 이름·목적은 기존 더보기의 읽기창에서 확인하고 같은 카드로 닫는다. 독립검사에서 발견한 닫기초점 키보드 배경스크롤 결함은 fix2에서 고쳤다. 같은50관측4실패→전부통과, HOME15 21검사·별도판단·최종양OS CI를 구분해 수용했다. 카드 자체만으로 같은접두사 구별이 끝났다는 뜻은 아니다. [이전 홈15 PC 체험](http://127.0.0.1:8765/product15-read-full-preview/runtime/index.html)은 로컬 정적 MOCK이며 공개 배포가 아니다.
 
 ## 제품13 검증과 수용 경계
 
