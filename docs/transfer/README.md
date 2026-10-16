@@ -2,6 +2,7 @@
 
 이 브랜치는 세션 간 원본 파일을 전달하는 공간이다. 제품 배포나 현재 연구 상태의 별도 사본이 아니다.
 
+- [같은 화면·두 입력 cycle11 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/526a371627b4299db3d88f997348d11df7379990/docs/cycles/2026-10-16-two-change-record-11/RESULT.md)
 - [관계 목록·간결 참고 cycle10 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/99cc933b59a3446ece132da2fd79f5b460e991f0/docs/cycles/2026-10-16-relation-reading-10/RESULT.md)
 - [혼합 깊이 읽기·준비 cycle09 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/0f46935a297eb6698054f83aab243ac3a8c825cc/docs/cycles/2026-10-16-mixed-reading-09/RESULT.md)
 - [첫 전체 조망 cycle08 통합 판단 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/ce0f9eeec6b7ea55cb630e4b1b5df68e345c2e5f/docs/cycles/2026-10-16-overview-08/RESULT.md)
@@ -75,3 +76,16 @@ cycle08 대표 화면: [1280 첫 전체](https://github.com/tlsee0813-cmd/agentf
 
 
 cycle09 대표 화면: [1280 첫 공간 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/initial-1280.png) · [390 첫 공간 지도](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/initial-390.png) · [390 R3 참고](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/R3-reference-390.png) · [편집된 준비문1280](https://github.com/tlsee0813-cmd/agentflow-studio/blob/be2d6a2b1a28922138610d562da98a4375fef891/docs/transfer/mixed-reading-09/independent-v0/edited-preparation-1280.png). 기본 공간 지도와 열린 참고의 읽기 부담을 구분한다. 참고/준비의 전체 동시노출·사람 이해·터치·큰 지도·현재 AI 송신수락을 입증하지 않는다. FLOW091 과거 계약/MOCK 입력이며 실제 사람–Copilot 표본07과 섞지 않는다.
+
+
+## cycle11 같은 화면·두 입력, PC 검증
+
+[통합 결과 — 고정 연구판](https://github.com/tlsee0813-cmd/agentflow-studio/blob/526a371627b4299db3d88f997348d11df7379990/docs/cycles/2026-10-16-two-change-record-11/RESULT.md) · [정확 소스 구성과 증거 안내](shared-map-11/README.md) · [첫 제품 연결 범위](https://github.com/tlsee0813-cmd/agentflow-studio/blob/526a371627b4299db3d88f997348d11df7379990/docs/cycles/2026-10-16-two-change-record-11/PRODUCT_INTEGRATION.md).
+
+| 묶음 | 고정 원본 | 범위 |
+|---|---|---|
+| 작성자 v0 | [116파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/6643323316daefbe10625484bb1727a2c6a54716/docs/transfer/shared-map-11/author-v0) | 동일 index/engine/style과 두 JSON. 첫 실패·검사 오류·최종 r05 보존 |
+| 작성자 fix1 | [overlay22파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/c4354dccc6f693bf33d5157e7e8da566d152d9a1/docs/transfer/shared-map-11/author-fix1) | 열린 미리보기 재편집 한 줄 수정. 같은 검사 old-fail/new-pass, 원본 전체 중복 없음 |
+| 독립 검증 | [60파일·PNG4](https://github.com/tlsee0813-cmd/agentflow-studio/tree/519a57c00062c142548b0a1d9a270949aacf3bd4/docs/transfer/shared-map-11/independent-v0) | 계획20/20=main16+별도P2 4. PC1280/1440 두 사례,390 최소 확인. 원격60/60 실제바이트·manifest 일치 |
+
+초안 닫기 직후 지도 복귀와 실제 제품 work 화면 경유 복귀는 다르다. PowerToys는 양폭 이동 여지0이며 비초기 지도 스크롤 복귀를 검증한 것으로 세지 않는다. 작성자와 독립 수치·사람 이해·제품 통합을 합산하지 않는다. 초기 검사 선택자 오류와 휠 원점 선행조건 실패는 원본에 남아 있다.
