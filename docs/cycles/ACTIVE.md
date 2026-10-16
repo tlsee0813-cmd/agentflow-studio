@@ -1,10 +1,10 @@
 # AgentFlow 활성 연구·검증 배정
 
-2026-10-16 11:56 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이다.
+2026-10-16 12:10 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이다.
 
 ## 현재: 첫 제품 PC 연결12 구현 착수
 
-[구현 계약](2026-10-16-product-reading-return-12/IMPLEMENTATION.md). USE106 고정 소스에서 `product/pc-reading-return-12` 후보 브랜치를 만들었다. 영역 읽기→선택 작업 맥락→명시 이어가기/기존 편집→지도 복귀 한 흐름을 구현·검증한다. Opus 구현, Sol 코드 경계, Astra 읽기 경험, Cloud 환경 준비를 나눠 배정했다. 구현 완료·후보 수용·공개 배포는 아직 아니다.
+[구현 계약](2026-10-16-product-reading-return-12/IMPLEMENTATION.md). USE106 고정 소스에서 `product/pc-reading-return-12` 후보 브랜치를 만들었다. 영역 읽기→선택 작업 맥락→명시 이어가기/기존 편집→지도 복귀 한 흐름을 구현·검증한다. [사전 대조](2026-10-16-product-reading-return-12/REVIEW.md)를 정리했고, Opus가 새 세션에서 실제 제품 소스를 구현 중이다. Sol 코드 경계·Astra 읽기 경험·Pro 적용 경계 검토는 완료했다. 구현 완료·후보 수용·공개 배포는 아직 아니다.
 
 ## 닫힌 이전 단계: cycle11 비교·수정·독립 검증
 
@@ -26,11 +26,13 @@
 
 | 담당 | 현재 상태 |
 |---|---|
-| Pro A/B | 공간·변경 읽기 연구, 고정 원문 대조 완료. 새 광범위 조사 미배정 |
-| Opus | cycle11 완료, 제품 PC 연결12 구현 배정 준비 |
-| Cloud | cycle11 완료, 제품 후보 독립 검증 환경 확인 중 |
-| Astra High /6.1 Sol High | 제품 읽기 경험·코드 경계·환경 준비 병렬 검토 중 |
+| Pro | 기존 Inspect/Edit의 제품 적용 경계 검토 완료. 새 광범위 조사 미배정 |
+| Opus | 제품 PC 연결12 소스 구현·작성자 검사 진행 중 |
+| Cloud | 기준 환경·타입·빌드·도메인 준비 완료. 후보 고정 SHA 대기 |
+| Astra High /6.1 Sol High | 사전 코드·경험·환경 대조 완료. baseline 공유 무결성 감사 중 |
 | 총괄 | 제품 구현 계약·배정·독립 검증·결과 통합 담당 |
+
+제품12 [기준 환경 증거14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/b7dfa065168f65b1dcbc6af7db555694eda1a912/docs/transfer/pc-reading-return-12/baseline)도 공유했다. 기존 TypeScript 재사용이며 잠금 설치 실행을 주장하지 않는다. 최초 누락 fixture 실패와 보완 후 도메인210/210을 구별한다. **제품 후보 기능 검사는 아직 미실행이다.**
 
 ## 공유 원본과 운영 경계
 
