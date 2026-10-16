@@ -1,10 +1,10 @@
 # AgentFlow 활성 연구·검증 배정
 
-2026-10-16 12:42 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이다.
+2026-10-16 12:56 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이다.
 
-## 현재: 제품 PC 연결12 후보 검토·fix1 진행
+## 현재: 제품 PC 연결12 독립 검증·복귀 fix2 진행
 
-[구현 계약](2026-10-16-product-reading-return-12/IMPLEMENTATION.md). USE106 고정 소스에서 `product/pc-reading-return-12` 후보 브랜치를 만들었다. 영역 읽기→선택 작업 맥락→명시 이어가기/기존 편집→지도 복귀 한 흐름을 구현·검증한다. [사전 대조](2026-10-16-product-reading-return-12/REVIEW.md)를 정리했고, 실제 제품 후보 [ce546a0](https://github.com/tlsee0813-cmd/agentflow-studio/commit/ce546a01091e5ec00e04aac328082a7296f1fc48)를 고정했다. [v0 독립 검토](2026-10-16-product-reading-return-12/AUTHOR_AUDIT.md)에서 긴 이해·범위 전문 접근과 CI 연결 누락을 찾아 Opus에 fix1을 배정했다. 펼친 긴 구상의 복귀 경계는 Cloud가 수정 전 후보에서 독립 재현 중이다. 후보 수용·공개 배포는 아직 아니다.
+[구현 계약](2026-10-16-product-reading-return-12/IMPLEMENTATION.md). USE106 고정 소스에서 `product/pc-reading-return-12` 후보 브랜치를 만들었다. 영역 읽기→선택 작업 맥락→명시 이어가기/기존 편집→지도 복귀 한 흐름을 구현·검증한다. [사전 대조](2026-10-16-product-reading-return-12/REVIEW.md)를 정리했고, [v0 독립 검토](2026-10-16-product-reading-return-12/AUTHOR_AUDIT.md)의 전문 접근·CI 연결·펼침 소실을 보완한 [fix1 c5fd269](https://github.com/tlsee0813-cmd/agentflow-studio/commit/c5fd2697f43c5ae2fe7155e63533e8569a5b6aa6)을 [초안 PR #3](https://github.com/tlsee0813-cmd/agentflow-studio/pull/3)에 묶었다. 독립 검사는 읽기만 한 영역 복귀 회복을 확인했으나, 편집 후 내용 높이가 달라지면 호출 위치가 이동했다. [복귀 기준 보완](2026-10-16-product-reading-return-12/IMPLEMENTATION.md)에 판단을 먼저 명시하고 Opus에 fix2를 배정했다. 전문 검사기의 새 펼침 클릭 누락도 제품 결함과 구분해 보완 중이다. 후보 수용·공개 배포는 아직 아니다.
 
 ## 닫힌 이전 단계: cycle11 비교·수정·독립 검증
 
@@ -27,12 +27,12 @@
 | 담당 | 현재 상태 |
 |---|---|
 | Pro | 기존 Inspect/Edit의 제품 적용 경계 검토 완료. 새 광범위 조사 미배정 |
-| Opus | v0 완료. 전문 접근·펼친 구상 복귀·CI 연결·원시 관측 fix1 진행 중 |
-| Cloud | 고정 v0 두 경계 재현 중. 전체 독립 계획은 fix1 고정 후 |
-| Astra High /6.1 Sol High | v0 코드·PNG·공유 파일 검토 완료. fix1 수령 뒤 영향 부분 대조 |
+| Opus | fix1 완료. 내용 높이 변화 뒤 호출 위치를 복원하는 fix2 진행 |
+| Cloud | v0·fix1 경계 비교 완료. 검사 조작 보완과 편집 후 높이 변화 원인 대조 중 |
+| Astra High /6.1 Sol High | fix1 코드·PNG·원시·공유 검토 완료. Sol이 c5fd 두 OS CI 진단 중 |
 | 총괄 | 제품 구현 계약·배정·독립 검증·결과 통합 담당 |
 
-제품12 [기준 환경 증거14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/b7dfa065168f65b1dcbc6af7db555694eda1a912/docs/transfer/pc-reading-return-12/baseline)도 공유했다. 기존 TypeScript 재사용이며 잠금 설치 실행을 주장하지 않는다. 최초 누락 fixture 실패와 보완 후 도메인210/210을 구별한다. 제품 v0 작성자 검사는 완료했고 독립 기능 검사는 진행 중이다. [작성자 원본52파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/67663c4e9e8ff10906ab68646620b6a4885d3bdf/docs/transfer/pc-reading-return-12/author-v0)도 공유했다. 작성자 결과와 독립 결과는 합산하지 않는다.
+제품12 [기준 환경 증거14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/b7dfa065168f65b1dcbc6af7db555694eda1a912/docs/transfer/pc-reading-return-12/baseline)도 공유했다. 기존 TypeScript 재사용이며 잠금 설치 실행을 주장하지 않는다. 최초 누락 fixture 실패와 보완 후 도메인210/210을 구별한다. 제품 fix1 작성자 검사는 완료했고 독립 기능 검사는 진행 중이다. [fix1 원본32파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/5b95273aac50dd6d46db91b45983628389303319/docs/transfer/pc-reading-return-12/author-fix1)을 공유했다. [작성자 원본52파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/67663c4e9e8ff10906ab68646620b6a4885d3bdf/docs/transfer/pc-reading-return-12/author-v0)도 공유했다. 작성자 결과와 독립 결과는 합산하지 않는다.
 
 ## 공유 원본과 운영 경계
 
@@ -40,4 +40,4 @@
 
 [cycle10 결과](2026-10-16-relation-reading-10/RESULT.md)와 이전 판단을 다시 열지 않았다. 연구 결과는 checkpoint의 docs/cycles/, 증거 전달은 지정 delivery의 docs/transfer/에 정리했다. 상위 안내3개는 제품 사실 기준과 현재 연구 진입점을 구분하도록 링크·시점 표현만 보완했다. 사용자 예약은 중복 생성·변경하지 않았다.
 
-2026-10-16 11:18 KST 원격 확인: main `896dcf3848fec70357d0f9bd4fd6c09cab70db37`, gh-pages `63f5540d062861439f0932cd7311c6c5510e227c` 유지. 제품 기준 USE106 `618d9bd2b99ad433df35107d8902b15f45e30000`, GUIDE107 HOLD 유지. 제품 소스는 별도 후보 브랜치에 네 파일 반영했고 수용 전이다. 기존 기준 브랜치·공개 체험판 적용은 아직 아니다.
+2026-10-16 11:18 KST 원격 확인: main `896dcf3848fec70357d0f9bd4fd6c09cab70db37`, gh-pages `63f5540d062861439f0932cd7311c6c5510e227c` 유지. 제품 기준 USE106 `618d9bd2b99ad433df35107d8902b15f45e30000`, GUIDE107 HOLD 유지. 제품 소스는 별도 후보 브랜치에 다섯 파일 반영했고 수용 전이다. 기존 기준 브랜치·공개 체험판 적용은 아직 아니다.
