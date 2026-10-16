@@ -1,0 +1,17 @@
+{
+  "candidate": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+  "superseding_independent_result": "target-selection-addendum/run01/result.json",
+  "latest_complete": true,
+  "core6": "PASS",
+  "boundary_group": "PASS",
+  "390_minimal": "PASS",
+  "child_actual_exit": 0,
+  "collector_tool_actual_exit": 0,
+  "collector_tool_session": 52332,
+  "frozen_v3_result": "fix2/frozen-v3/result.json",
+  "frozen_v3_exit": 0,
+  "regressions": "fix2/regressions/processes.json",
+  "all_regression_child_exit": 0,
+  "correction": "Initial REPORT explicit return targetB claim overstated; see target-selection-addendum/ERRATA.md. Initial artifacts untouched. Latest actual selector and B rawpre/post now checked. No results summed.",
+  "manifest": "FINAL_MANIFEST.tsv (all current files, itself excluded); MANIFEST.tsv is initial publication snapshot only."
+}
