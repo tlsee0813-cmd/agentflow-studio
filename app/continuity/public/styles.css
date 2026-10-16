@@ -2375,3 +2375,19 @@ body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
 .report-correction-help { margin-top:14px; padding:14px; border-left:3px solid var(--accent); background:var(--paper); font-size:13px; line-height:1.65; }
 .report-correction-help p { margin:6px 0 0; }
 @media(max-width:720px) { .review-grid { grid-template-columns:1fr; } .handoff-review { padding:14px; } }
+/* PC12: read first, edit on request; the chosen task's short context; the way back to the starting view. */
+.area-idea{display:flex;flex-direction:column;gap:4px;margin:2px 0}
+.area-idea-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.space-head .area-idea{max-width:760px}
+.panel-edit>summary{cursor:pointer;font-size:13px;color:var(--accent)}
+.panel-edit[open]{display:flex;flex-direction:column;gap:6px}
+.panel-tasks{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:flex;flex-direction:column;gap:4px}
+.panel-task-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.panel-task-list li{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}
+.panel-task{text-align:left;white-space:normal;overflow-wrap:anywhere;max-width:100%}
+.task-context{display:flex;flex-direction:column;gap:4px}
+.task-context-grid{margin-top:6px}
+.field-origin{font-weight:600;color:var(--accent)}
+.field-origin.stale{color:var(--amber)}
+.task-view-target{margin:6px 0 0}
+.work-place .origin-return{margin-left:auto}

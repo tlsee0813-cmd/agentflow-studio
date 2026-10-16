@@ -187,6 +187,7 @@ class SpatialWorkspace(unittest.TestCase):
         self.assertEqual(self.pos(booking),before)
         # Ctrl+Z in a text field edits text, not positions.
         self.drag(notify,40,40);moved=self.pos(notify);self.page.locator(f'#node-info-{notify}').click()
+        self.page.locator('#panel-edit > summary').click()  # PC12: editing name/idea is opened explicitly
         self.page.locator('#panel-name').fill('알림 바꾸는 중');self.page.locator('#panel-name').press('Control+z');self.assertEqual(self.pos(notify),moved)
         self.page.locator('#panel-cancel').click();expect(self.page.locator('#panel-name')).to_have_value('알림')
         # A report that arrives between a move and its undo stays.
@@ -297,15 +298,16 @@ class SpatialWorkspace(unittest.TestCase):
         # Map and panel: what the app has open (not live execution), and a short raw excerpt of the latest report.
         self.page.locator('#nav-space').click();node=self.page.locator(f'.area-node[data-area-id="{booking}"]')
         expect(node).to_contain_text('앱에서 이어갈 작업');expect(self.page.locator('#space-view')).not_to_contain_text('지금 이어가는')
-        self.page.locator(f'#node-info-{booking}').click();panel=self.page.locator('#panel-report')
+        # PC12: the panel no longer picks the latest report; the user picks the request and reads its report there (raw, unverified).
+        self.page.locator(f'#node-info-{booking}').click();expect(self.page.locator('#panel-report')).to_have_count(0)
         expect(self.page.locator('#area-panel')).to_contain_text('외부 도구에서 지금 실행 중이라는 뜻이 아니에요')
-        expect(panel).to_contain_text('원문 앞부분');expect(panel).to_contain_text('미검증')
-        excerpt=self.page.locator('.panel-excerpt').inner_text().rstrip('…')
-        self.assertTrue(' '.join(report.split()).startswith(excerpt.strip()),'raw text, not a summary');self.assertNotIn('ZZ-END',panel.inner_text(),'the full report stays out of the panel')
-        self.page.locator('#panel-report-more').click();expect(self.page.locator('#space-title')).to_have_text('예약')
-        expect(self.page.locator(f'#raw-{task}')).to_have_attribute('open','');expect(self.page.locator(f'#raw-{task}')).to_contain_text('ZZ-END')
-        self.page.locator('#space-crumb-root').click();self.page.locator(f'#node-info-{booking}').click()
-        expect(self.page.locator('#panel-report-continue')).to_have_text('작업 화면으로');self.page.locator('#panel-report-continue').click()
+        self.page.locator(f'#panel-task-{task}').click();res=self.page.locator('#task-view-results')
+        expect(res.locator('summary')).to_contain_text('앱 미검증');expect(res).not_to_have_attribute('open','')
+        res.locator('summary').click();raw=res.locator('.source-raw').first;expect(raw).to_contain_text('ZZ-END')
+        self.assertEqual(' '.join(raw.inner_text().split()),' '.join(report.split()),'raw text, not a summary')
+        self.page.locator('#task-return-origin').click();expect(self.page.locator('#space-title')).to_have_text('전체 공간')
+        self.page.locator(f'#panel-task-{task}').click()
+        expect(self.page.locator('#task-view-continue')).to_have_text('작업 화면으로');self.page.locator('#task-view-continue').click()
         expect(self.page.locator('#current-work')).to_be_visible();self.assertEqual(self.state()['currentTaskId'],rt['id'])
 
     def test_13_bases_from_other_areas_are_not_called_common(self):
@@ -354,7 +356,7 @@ class SpatialWorkspace(unittest.TestCase):
         expect(self.page.locator(f'.area-node[data-area-id="{booking}"]')).to_have_class(re.compile('selected'))
         self.assertEqual(self.page.locator('#space-plane').evaluate('(e)=>e.style.transform'),view,'viewport kept')
         # An unsaved edit: the sheet still closes, the value stays and the sheet can be reopened.
-        self.page.locator(f'#node-info-{booking}').click();self.page.locator('#panel-note').fill('아직 못 정한 점: 취소 규칙')
+        self.page.locator(f'#node-info-{booking}').click();self.page.locator('#panel-edit > summary').click();self.page.locator('#panel-note').fill('아직 못 정한 점: 취소 규칙')
         self.page.locator('#panel-open').click();self.page.locator('#nav-space').click()
         expect(self.page.locator('#area-panel')).to_be_hidden();reopen=self.page.locator('#map-sheet-reopen');expect(reopen).to_be_visible()
         reopen.click();expect(self.page.locator('#area-panel')).to_be_visible();expect(self.page.locator('#panel-note')).to_have_value('아직 못 정한 점: 취소 규칙')
@@ -401,6 +403,7 @@ class SpatialWorkspace(unittest.TestCase):
         self.page.locator('#nav-space').click()
         size=lambda sel:self.page.locator(sel).bounding_box()['height']
         self.page.locator(f'#list-info-{booking}').click();panel=self.page.locator('#area-panel');expect(panel).to_be_visible()
+        self.page.locator('#panel-edit > summary').click()  # PC12: editing name/idea is opened explicitly
         self.assertGreater(panel.evaluate('(e)=>e.scrollHeight-e.clientHeight'),0,'the panel content is taller than the sheet')
         note0,name0=size('#panel-note'),size('#panel-name');self.assertGreaterEqual(note0,80);self.assertGreaterEqual(name0,36)
         long='날짜와 시간을 골라 예약 · 아직 못 정함: 결제 방식과 취소 규칙 '*12
