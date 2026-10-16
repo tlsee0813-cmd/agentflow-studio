@@ -1,0 +1,42 @@
+{
+  "utc": "2026-10-16T06:01:58.624634+00:00",
+  "actual_url": "http://127.0.0.1:32945/shared11/fix1/index.html?fixtures=/session14-screen/session14-product-map.json",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "sources": [
+    {
+      "commit": "6643323316daefbe10625484bb1727a2c6a54716",
+      "path": "docs/transfer/shared-map-11/author-v0/app/index.html",
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07",
+      "bytes": 2769
+    },
+    {
+      "commit": "6643323316daefbe10625484bb1727a2c6a54716",
+      "path": "docs/transfer/shared-map-11/author-v0/app/style.css",
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929",
+      "bytes": 11662
+    },
+    {
+      "commit": "c4354dccc6f693bf33d5157e7e8da566d152d9a1",
+      "path": "docs/transfer/shared-map-11/author-fix1/app/engine.js",
+      "sha256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f",
+      "bytes": 34004
+    },
+    {
+      "commit": "e8b28f5e85ae8319f4a4689678110c28e224bcfd",
+      "path": "docs/transfer/session-input-14/product-v0/session14-product-map.json",
+      "sha256": "af96a67ca249d85df037da3632810a352f1f8122d46654db03b1b8c9f79e56a2",
+      "bytes": 12776
+    }
+  ],
+  "actions": [
+    "normal click existing map node ADD (영역 추가); browser normal scroll-into-view if needed, no force/state/API injection"
+  ],
+  "pageerrors": [],
+  "browser": "154.0.8037.57",
+  "http_status": 200,
+  "selected_panel_heading": "영역 추가",
+  "visible_context": "전체 공간을 지도부터 읽기 — 제품13 변경 표본\n범위\nAgentFlow Studio의 전체 공간 화면 일부. 실제 외부 AI 배정·작성자 반환·고정 결과물에 대해 총괄과 보조 AI가 자료를 대응해 만든 연구 입력이며, 프로그램 전체 지도나 자동 추출 결과가 아니다.\n자료 성격\n총괄이 실제 전달했다고 확인한 구현 계약, 작성자 보고와 고정 diff/소스, 별도의 독립 검증 보고. 도구 전사 전체와 사람 원발화는 이 표본에 없다. 자기 프로젝트 표본이다.\n기준 시점\n2026-10-16. 코드 비교 9613208→9aeb4599; 독립 보고 709dab. 이 입력은 해당 후보의 수용·병합·공개 완료를 선언하지 않는다.\n묶음\n이름과 1+4 분할, parent는 계약과 화면 코드를 읽고 만든 AI의 보기 제안이다. 제품 Area.parent, 실제 모듈 소속, 실행 단계, 작업·세션 계층을 확정하지 않는다. 네 자식은 이 화면의 사용자 대면 역할이며 전체 제품 구성의 전부가 아니다.\n이 기록에서 달라진 부분\n프로그램 목적 읽기\n고정 코드 변경 · 수용 판정 아님\n영역 지도와 선택상세\n고정 코드 변경 · 독립 한계 남음\n질문·보고 기록 읽기\n고정 코드 변경 · 기존 집계 재사용\n영역 추가\n고정 코드 변경 · 입력 기능 유지"
+}
