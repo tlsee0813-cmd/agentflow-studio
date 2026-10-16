@@ -1,0 +1,37 @@
+{
+  "method": "Independent static JSON file derivatives, no app state injection, not third real-use cases",
+  "files": {
+    "test-inputs/id-renamed.json": {
+      "bytes": 14177,
+      "sha256": "6feb084cfd6ab85400280a4a60e2fc449b3b86a15a38e0ede84f13d4aee0c60c"
+    },
+    "test-inputs/changes-absent.json": {
+      "bytes": 19843,
+      "sha256": "e133bef644864daaa11c6c9bed77a7cf5842d05da4b2f745e9fa82d7eda94a69"
+    },
+    "test-inputs/same-node-id-across-cases.json": {
+      "bytes": 14121,
+      "sha256": "366319f25b649683d2403b814a23f5e1eb24696fdc9df896bb6835c51193a123"
+    },
+    "test-inputs/invalid-parent.json": {
+      "bytes": 14137,
+      "sha256": "1f696b3ed5f3453a78d64431b958c456084a91ebea913ad395d5037e3c470121"
+    },
+    "test-inputs/invalid-depth.json": {
+      "bytes": 14277,
+      "sha256": "03c5932528bd0eb81dde2dd256b0b27e22dd28a62d52e2b17f408067248f55ac"
+    },
+    "test-inputs/invalid-endpoint.json": {
+      "bytes": 14139,
+      "sha256": "f58d2bf254c0bfd975f9e33d6e3c1505da35e8c017e038a6ddae35f05411a627"
+    },
+    "test-inputs/invalid-duplicate.json": {
+      "bytes": 15057,
+      "sha256": "0843968d2d421b65dc66b341c3c18ad667445aa43a17ca75758a9dbf87f7a4a1"
+    },
+    "test-inputs/invalid-cycle.json": {
+      "bytes": 14125,
+      "sha256": "59febd1015f846e9ed6384e5abc4dd2b1bcf05332fe1a64be39f42406ca2a6aa"
+    }
+  }
+}

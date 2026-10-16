@@ -1,0 +1,18 @@
+{
+  "UTC": "2026-10-16T01:04:43.824499+00:00",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/shared11/snapshots/full-35c6bd4940f11b1caf641c28441f0bb03a26137a18b963081ada1331b1816831.py",
+    "--site",
+    "/workspace/browser-env/shared11/fix1",
+    "--manifest",
+    "/workspace/browser-env/shared11/fix1-runtime-manifest.json",
+    "--out",
+    "/workspace/browser-env/shared11/fix1-main-run01"
+  ],
+  "codeSHA256": "35c6bd4940f11b1caf641c28441f0bb03a26137a18b963081ada1331b1816831",
+  "actualChildExit": 1,
+  "jsonExit": 1,
+  "agreement": true,
+  "collectorIntendedExit": 1
+}

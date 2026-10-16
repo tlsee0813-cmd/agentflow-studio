@@ -1,0 +1,27 @@
+HTTP "GET /index.html HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /fixtures/powertoys.json HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1280/flow091/HTTP/index.html
+PASS 1280/flow091/HTTP/style.css
+PASS 1280/flow091/HTTP/engine.js
+PASS 1280/flow091/HTTP/fixtures/flow091.json
+PASS 1280/flow091/HTTP/fixtures/powertoys.json
+PASS 1280/flow091/all-runtime-responses
+1280/flow091/click/#caseSel
+Traceback (most recent call last):
+  File "/workspace/browser-env/shared11/snapshots/p2-238fc9dd7cd5d48ca74fa4e68be928da267c49a11e47c75e318141c6644848f5.py", line 44, in main
+    p.keyboard.press('Enter');p.wait_for_timeout(150);click('#n-'+node,'#mapScroll');click('#panel [data-act="draft"]','#panel');empty=snap('initial-empty');check(tag+'/initial-empty',empty['input']=='' and empty['copyDisabled'] and empty['previewDisabled'])
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/shared11/snapshots/p2-238fc9dd7cd5d48ca74fa4e68be928da267c49a11e47c75e318141c6644848f5.py", line 37, in click
+    g=ensure(s,container) if container else geom(s);record(tag+'/click/'+s,g)
+      ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/shared11/snapshots/p2-238fc9dd7cd5d48ca74fa4e68be928da267c49a11e47c75e318141c6644848f5.py", line 34, in ensure
+    v=geom(container)['visibleIntersection'];b=g['rect'];dy=min(130,b['bottom']-v['bottom']+10) if b['bottom']>v['bottom'] else -min(130,v['top']-b['top']+10);p.mouse.move(v['right']-10,v['bottom']-10);p.mouse.wheel(0,dy);p.wait_for_timeout(120)
+                                               ~^^^^^^^^
+KeyError: 'rect'
+
+CHILD_EXIT 1

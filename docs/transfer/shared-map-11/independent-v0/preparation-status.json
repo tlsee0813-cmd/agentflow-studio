@@ -1,0 +1,26 @@
+{
+  "phase": "prepared; pinned fix1 overlay pending",
+  "published": false,
+  "v0P2Run": "v0-p2-run02",
+  "v0P2Complete": true,
+  "v0P2ExpectedKnownFailures": [
+    "1280/flow091/P2-open-preview-current",
+    "1280/powertoys/P2-open-preview-current",
+    "1440/flow091/P2-open-preview-current",
+    "1440/powertoys/P2-open-preview-current"
+  ],
+  "externalCollectorObservations": {
+    "v0-p2-run01": {
+      "toolSession": 42908,
+      "actualToolProcessExit": 1,
+      "classification": "harness selector error before regression; preserved"
+    },
+    "v0-p2-run02": {
+      "toolSession": 73152,
+      "actualToolProcessExit": 1,
+      "classification": "four known UI P2 failures; actual copy/paste E2 confirmed"
+    }
+  },
+  "toolObservationBoundary": "Transcription of tool exit observations; not complete tool transcript. Child actual returncode separately recorded by run_p2.py subprocess.",
+  "next": "Only assemble exact pinned overlay into new folder, then same P2 checker and planned final scenarios; immutable v0 retained."
+}

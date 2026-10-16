@@ -1,0 +1,29 @@
+{
+  "boundary": "Transcription of external tool termination observations only, NOT full original tool transcript or signed independent log. Full main collector returncode also measured by launch_full subprocess in outer-exit.json.",
+  "observedExits": {
+    "v0-p2-run01": {
+      "toolSession": 42908,
+      "exit": 1,
+      "kind": "initial harness selector error"
+    },
+    "v0-p2-run02": {
+      "toolSession": 73152,
+      "exit": 1,
+      "kind": "known UI P2 reproduced four cases"
+    },
+    "fix1-p2-run01": {
+      "toolSession": 61338,
+      "exit": 0
+    },
+    "fix1-main-run01": {
+      "toolSession": 32881,
+      "exit": 1,
+      "kind": "wheel-origin scene precondition, not app defect"
+    },
+    "fix1-main-run02": {
+      "toolSession": 98335,
+      "exit": 0
+    }
+  },
+  "finalGateToolObservedExit": 0
+}

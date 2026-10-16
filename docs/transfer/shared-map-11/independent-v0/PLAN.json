@@ -1,0 +1,195 @@
+{
+  "contract": "02fa3115d701a364a848737ec14b49a19c194e97",
+  "phase": "Preparation only. No final acceptance/publishing before exact pinned fix1 overlay.",
+  "runtimeBaseCommit": "6643323316daefbe10625484bb1727a2c6a54716",
+  "plannedFinalScenarios": [
+    {
+      "id": "pc-1280/flow091/main-lifecycle",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Initial map/change -> changed node -> detail actual wheel/close -> explicit empty draft -> meaningful E -> close/whole return raw immediately -> same target E -> other target own E; exact xref href and source kinds.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "pc-1280/flow091/P2-regression",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Nonempty E1 -> open preview -> nonempty E2 replacement with no intermediate empty input -> whitespace -> empty -> retype; copy by actual click then keyboard paste. Same checker used for preserved v0 failing run and pinned fix1.",
+      "status": "V0_REPRODUCED_FAIL_FIX1_PENDING"
+    },
+    {
+      "id": "pc-1280/powertoys/main-lifecycle",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Initial map/change -> changed node -> detail actual wheel/close -> explicit empty draft -> meaningful E -> close/whole return raw immediately -> same target E -> other target own E; exact xref href and source kinds.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "pc-1280/powertoys/P2-regression",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Nonempty E1 -> open preview -> nonempty E2 replacement with no intermediate empty input -> whitespace -> empty -> retype; copy by actual click then keyboard paste. Same checker used for preserved v0 failing run and pinned fix1.",
+      "status": "V0_REPRODUCED_FAIL_FIX1_PENDING"
+    },
+    {
+      "id": "pc-1280/cross-case-isolation",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Case roundtrip preserves independent E/target/view; case switch with evidence/draft open if UI permits, otherwise UI block recorded; no hidden state.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "pc-1440/flow091/main-lifecycle",
+      "viewport": [
+        1440,
+        900
+      ],
+      "required": "Initial map/change -> changed node -> detail actual wheel/close -> explicit empty draft -> meaningful E -> close/whole return raw immediately -> same target E -> other target own E; exact xref href and source kinds.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "pc-1440/flow091/P2-regression",
+      "viewport": [
+        1440,
+        900
+      ],
+      "required": "Nonempty E1 -> open preview -> nonempty E2 replacement with no intermediate empty input -> whitespace -> empty -> retype; copy by actual click then keyboard paste. Same checker used for preserved v0 failing run and pinned fix1.",
+      "status": "V0_REPRODUCED_FAIL_FIX1_PENDING"
+    },
+    {
+      "id": "pc-1440/powertoys/main-lifecycle",
+      "viewport": [
+        1440,
+        900
+      ],
+      "required": "Initial map/change -> changed node -> detail actual wheel/close -> explicit empty draft -> meaningful E -> close/whole return raw immediately -> same target E -> other target own E; exact xref href and source kinds.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "pc-1440/powertoys/P2-regression",
+      "viewport": [
+        1440,
+        900
+      ],
+      "required": "Nonempty E1 -> open preview -> nonempty E2 replacement with no intermediate empty input -> whitespace -> empty -> retype; copy by actual click then keyboard paste. Same checker used for preserved v0 failing run and pinned fix1.",
+      "status": "V0_REPRODUCED_FAIL_FIX1_PENDING"
+    },
+    {
+      "id": "pc-1440/cross-case-isolation",
+      "viewport": [
+        1440,
+        900
+      ],
+      "required": "Case roundtrip preserves independent E/target/view; case switch with evidence/draft open if UI permits, otherwise UI block recorded; no hidden state.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "test-input/id-renamed",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Independent static JSON derivative; served through fixture query/UI, no runtime state injection. Intended invalid errors separate from unexpected page/console errors. Not third real case.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "test-input/changes-absent",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Independent static JSON derivative; served through fixture query/UI, no runtime state injection. Intended invalid errors separate from unexpected page/console errors. Not third real case.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "test-input/same-node-id-across-cases",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Independent static JSON derivative; served through fixture query/UI, no runtime state injection. Intended invalid errors separate from unexpected page/console errors. Not third real case.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "test-input/invalid-parent",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Independent static JSON derivative; served through fixture query/UI, no runtime state injection. Intended invalid errors separate from unexpected page/console errors. Not third real case.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "test-input/invalid-depth",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Independent static JSON derivative; served through fixture query/UI, no runtime state injection. Intended invalid errors separate from unexpected page/console errors. Not third real case.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "test-input/invalid-endpoint",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Independent static JSON derivative; served through fixture query/UI, no runtime state injection. Intended invalid errors separate from unexpected page/console errors. Not third real case.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "test-input/invalid-duplicate",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Independent static JSON derivative; served through fixture query/UI, no runtime state injection. Intended invalid errors separate from unexpected page/console errors. Not third real case.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "test-input/invalid-cycle",
+      "viewport": [
+        1280,
+        720
+      ],
+      "required": "Independent static JSON derivative; served through fixture query/UI, no runtime state injection. Intended invalid errors separate from unexpected page/console errors. Not third real case.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "smoke-390/flow091",
+      "viewport": [
+        390,
+        844
+      ],
+      "required": "Fixture access, document horizontal extent, evidence close/focus only; not mobile full acceptance.",
+      "status": "PLANNED_FIX1_ONLY"
+    },
+    {
+      "id": "smoke-390/powertoys",
+      "viewport": [
+        390,
+        844
+      ],
+      "required": "Fixture access, document horizontal extent, evidence close/focus only; not mobile full acceptance.",
+      "status": "PLANNED_FIX1_ONLY"
+    }
+  ],
+  "excluded": [
+    "original project/CI success",
+    "actual AI send/acceptance",
+    "human usability",
+    "full mobile regression",
+    "reload/session persistence unless separately tested"
+  ],
+  "finalRuntimeBinding": "Base v0 five-file set plus precisely pinned overlay in separate folder; verify every HTTP runtime response bytes/SHA and pre/post source hashes. No guessed fixes."
+}

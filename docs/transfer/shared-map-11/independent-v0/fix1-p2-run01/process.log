@@ -1,0 +1,159 @@
+HTTP "GET /index.html HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /fixtures/powertoys.json HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS 1280/flow091/HTTP/index.html
+PASS 1280/flow091/HTTP/style.css
+PASS 1280/flow091/HTTP/engine.js
+PASS 1280/flow091/HTTP/fixtures/flow091.json
+PASS 1280/flow091/HTTP/fixtures/powertoys.json
+PASS 1280/flow091/all-runtime-responses
+1280/flow091/click/#caseSel
+1280/flow091/click/[data-node="C32"]
+1280/flow091/click/#panel [data-act="draft"]
+1280/flow091/initial-empty
+PASS 1280/flow091/initial-empty
+1280/flow091/click/#draftText
+1280/flow091/click/#draftPreviewBtn
+1280/flow091/E1-preview
+PASS 1280/flow091/E1-preview
+1280/flow091/click/#draftText
+1280/flow091/E2-after-edit
+PASS 1280/flow091/P2-open-preview-current
+1280/flow091/click/#draftCopyBtn
+1280/flow091/click/#draftText
+1280/flow091/actual-copy-then-keyboard-paste
+PASS 1280/flow091/copy-actual-target-content
+1280/flow091/click/#draftText
+1280/flow091/whitespace
+PASS 1280/flow091/whitespace-disabled-hidden
+1280/flow091/click/#draftText
+1280/flow091/empty
+PASS 1280/flow091/empty-disabled-hidden
+1280/flow091/click/#draftText
+1280/flow091/retype-before-preview
+PASS 1280/flow091/retype-enabled
+1280/flow091/click/#draftPreviewBtn
+1280/flow091/retype-preview
+PASS 1280/flow091/retype-current
+HTTP "GET /index.html HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /fixtures/powertoys.json HTTP/1.1" 200 -
+PASS 1280/powertoys/HTTP/index.html
+PASS 1280/powertoys/HTTP/style.css
+PASS 1280/powertoys/HTTP/engine.js
+PASS 1280/powertoys/HTTP/fixtures/flow091.json
+PASS 1280/powertoys/HTTP/fixtures/powertoys.json
+PASS 1280/powertoys/all-runtime-responses
+1280/powertoys/click/#caseSel
+1280/powertoys/click/[data-node="SR"]
+1280/powertoys/click/#panel [data-act="draft"]
+1280/powertoys/initial-empty
+PASS 1280/powertoys/initial-empty
+1280/powertoys/click/#draftText
+1280/powertoys/click/#draftPreviewBtn
+1280/powertoys/E1-preview
+PASS 1280/powertoys/E1-preview
+1280/powertoys/click/#draftText
+1280/powertoys/E2-after-edit
+PASS 1280/powertoys/P2-open-preview-current
+1280/powertoys/click/#draftCopyBtn
+1280/powertoys/click/#draftText
+1280/powertoys/actual-copy-then-keyboard-paste
+PASS 1280/powertoys/copy-actual-target-content
+1280/powertoys/click/#draftText
+1280/powertoys/whitespace
+PASS 1280/powertoys/whitespace-disabled-hidden
+1280/powertoys/click/#draftText
+1280/powertoys/empty
+PASS 1280/powertoys/empty-disabled-hidden
+1280/powertoys/click/#draftText
+1280/powertoys/retype-before-preview
+PASS 1280/powertoys/retype-enabled
+1280/powertoys/click/#draftPreviewBtn
+1280/powertoys/retype-preview
+PASS 1280/powertoys/retype-current
+HTTP "GET /index.html HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /fixtures/powertoys.json HTTP/1.1" 200 -
+PASS 1440/flow091/HTTP/index.html
+PASS 1440/flow091/HTTP/style.css
+PASS 1440/flow091/HTTP/engine.js
+PASS 1440/flow091/HTTP/fixtures/flow091.json
+PASS 1440/flow091/HTTP/fixtures/powertoys.json
+PASS 1440/flow091/all-runtime-responses
+1440/flow091/click/#caseSel
+1440/flow091/click/[data-node="C32"]
+1440/flow091/click/#panel [data-act="draft"]
+1440/flow091/initial-empty
+PASS 1440/flow091/initial-empty
+1440/flow091/click/#draftText
+1440/flow091/click/#draftPreviewBtn
+1440/flow091/E1-preview
+PASS 1440/flow091/E1-preview
+1440/flow091/click/#draftText
+1440/flow091/E2-after-edit
+PASS 1440/flow091/P2-open-preview-current
+1440/flow091/click/#draftCopyBtn
+1440/flow091/click/#draftText
+1440/flow091/actual-copy-then-keyboard-paste
+PASS 1440/flow091/copy-actual-target-content
+1440/flow091/click/#draftText
+1440/flow091/whitespace
+PASS 1440/flow091/whitespace-disabled-hidden
+1440/flow091/click/#draftText
+1440/flow091/empty
+PASS 1440/flow091/empty-disabled-hidden
+1440/flow091/click/#draftText
+1440/flow091/retype-before-preview
+PASS 1440/flow091/retype-enabled
+1440/flow091/click/#draftPreviewBtn
+1440/flow091/retype-preview
+PASS 1440/flow091/retype-current
+HTTP "GET /index.html HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /fixtures/powertoys.json HTTP/1.1" 200 -
+PASS 1440/powertoys/HTTP/index.html
+PASS 1440/powertoys/HTTP/style.css
+PASS 1440/powertoys/HTTP/engine.js
+PASS 1440/powertoys/HTTP/fixtures/flow091.json
+PASS 1440/powertoys/HTTP/fixtures/powertoys.json
+PASS 1440/powertoys/all-runtime-responses
+1440/powertoys/click/#caseSel
+1440/powertoys/click/[data-node="SR"]
+1440/powertoys/click/#panel [data-act="draft"]
+1440/powertoys/initial-empty
+PASS 1440/powertoys/initial-empty
+1440/powertoys/click/#draftText
+1440/powertoys/click/#draftPreviewBtn
+1440/powertoys/E1-preview
+PASS 1440/powertoys/E1-preview
+1440/powertoys/click/#draftText
+1440/powertoys/E2-after-edit
+PASS 1440/powertoys/P2-open-preview-current
+1440/powertoys/click/#draftCopyBtn
+1440/powertoys/click/#draftText
+1440/powertoys/actual-copy-then-keyboard-paste
+PASS 1440/powertoys/copy-actual-target-content
+1440/powertoys/click/#draftText
+1440/powertoys/whitespace
+PASS 1440/powertoys/whitespace-disabled-hidden
+1440/powertoys/click/#draftText
+1440/powertoys/empty
+PASS 1440/powertoys/empty-disabled-hidden
+1440/powertoys/click/#draftText
+1440/powertoys/retype-before-preview
+PASS 1440/powertoys/retype-enabled
+1440/powertoys/click/#draftPreviewBtn
+1440/powertoys/retype-preview
+PASS 1440/powertoys/retype-current
+CHILD_EXIT 0

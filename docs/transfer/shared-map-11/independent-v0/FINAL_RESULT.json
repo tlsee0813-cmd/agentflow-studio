@@ -1,0 +1,174 @@
+{
+  "UTC": "2026-10-16T01:08:44.382664+00:00",
+  "method": "Read-only result gate, no browser rerun; independent static/postconditions distinct from browser check counts.",
+  "mainRun": "fix1-main-run02",
+  "P2FixRun": "fix1-p2-run01",
+  "v0RegressionRun": "v0-p2-run02",
+  "mainBrowserCompleted": [
+    "pc-1280/flow091/main-lifecycle",
+    "pc-1280/powertoys/main-lifecycle",
+    "pc-1280/cross-case-isolation",
+    "pc-1440/flow091/main-lifecycle",
+    "pc-1440/powertoys/main-lifecycle",
+    "pc-1440/cross-case-isolation",
+    "test-input/id-renamed",
+    "test-input/changes-absent",
+    "test-input/invalid-parent",
+    "test-input/invalid-depth",
+    "test-input/invalid-endpoint",
+    "test-input/invalid-duplicate",
+    "test-input/invalid-cycle",
+    "test-input/same-node-id-across-cases",
+    "smoke-390/flow091",
+    "smoke-390/powertoys"
+  ],
+  "P2FixCompleted": [
+    "1280/flow091/P2",
+    "1280/powertoys/P2",
+    "1440/flow091/P2",
+    "1440/powertoys/P2"
+  ],
+  "plannedScenarioCount": 20,
+  "completedScenarioCount": 20,
+  "scopeCounts": {
+    "PC-main-lifecycles": 4,
+    "PC-cross-case-isolation": 2,
+    "PC-P2-regression": 4,
+    "independent-test-input-probes": 8,
+    "390-minimum-smoke": 2
+  },
+  "checks": [
+    {
+      "id": "fixed-plan-complete",
+      "status": "PASS",
+      "details": {
+        "planned": [
+          "pc-1280/flow091/main-lifecycle",
+          "pc-1280/flow091/P2-regression",
+          "pc-1280/powertoys/main-lifecycle",
+          "pc-1280/powertoys/P2-regression",
+          "pc-1280/cross-case-isolation",
+          "pc-1440/flow091/main-lifecycle",
+          "pc-1440/flow091/P2-regression",
+          "pc-1440/powertoys/main-lifecycle",
+          "pc-1440/powertoys/P2-regression",
+          "pc-1440/cross-case-isolation",
+          "test-input/id-renamed",
+          "test-input/changes-absent",
+          "test-input/same-node-id-across-cases",
+          "test-input/invalid-parent",
+          "test-input/invalid-depth",
+          "test-input/invalid-endpoint",
+          "test-input/invalid-duplicate",
+          "test-input/invalid-cycle",
+          "smoke-390/flow091",
+          "smoke-390/powertoys"
+        ],
+        "completed": [
+          "pc-1280/flow091/main-lifecycle",
+          "pc-1280/powertoys/main-lifecycle",
+          "pc-1280/cross-case-isolation",
+          "pc-1440/flow091/main-lifecycle",
+          "pc-1440/powertoys/main-lifecycle",
+          "pc-1440/cross-case-isolation",
+          "test-input/id-renamed",
+          "test-input/changes-absent",
+          "test-input/invalid-parent",
+          "test-input/invalid-depth",
+          "test-input/invalid-endpoint",
+          "test-input/invalid-duplicate",
+          "test-input/invalid-cycle",
+          "test-input/same-node-id-across-cases",
+          "smoke-390/flow091",
+          "smoke-390/powertoys",
+          "pc-1280/flow091/P2-regression",
+          "pc-1280/powertoys/P2-regression",
+          "pc-1440/flow091/P2-regression",
+          "pc-1440/powertoys/P2-regression"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "id": "latest-main-complete-exit",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "fix1-P2-complete-exit",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "v0-known-failure-preserved",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "same-P2-checker-old-new",
+      "status": "PASS",
+      "details": {
+        "oldCodeSHA": "bc80e3f83e92b81347d0a56717c370e39ad47a466f18da643446c08fb8030894",
+        "fix1CodeSHA": "bc80e3f83e92b81347d0a56717c370e39ad47a466f18da643446c08fb8030894"
+      }
+    },
+    {
+      "id": "1280/flow091/exact-copy-target-case-content",
+      "status": "PASS",
+      "details": {
+        "expected": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\nE2 flow091 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요.",
+        "preview": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\nE2 flow091 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요.",
+        "actualKeyboardPaste": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\nE2 flow091 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요."
+      }
+    },
+    {
+      "id": "1280/flow091/whitespace-empty-cleared-not-just-hidden",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "1280/powertoys/exact-copy-target-case-content",
+      "status": "PASS",
+      "details": {
+        "expected": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\nE2 powertoys 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요.",
+        "preview": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\nE2 powertoys 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요.",
+        "actualKeyboardPaste": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\nE2 powertoys 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요."
+      }
+    },
+    {
+      "id": "1280/powertoys/whitespace-empty-cleared-not-just-hidden",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "1440/flow091/exact-copy-target-case-content",
+      "status": "PASS",
+      "details": {
+        "expected": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\nE2 flow091 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요.",
+        "preview": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\nE2 flow091 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요.",
+        "actualKeyboardPaste": "대상: AgentFlow 배경 사본 기능 일부 › 작업문과 미리보기 (‹전달할 내용› 안)\n\nE2 flow091 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요."
+      }
+    },
+    {
+      "id": "1440/flow091/whitespace-empty-cleared-not-just-hidden",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "1440/powertoys/exact-copy-target-case-content",
+      "status": "PASS",
+      "details": {
+        "expected": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\nE2 powertoys 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요.",
+        "preview": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\nE2 powertoys 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요.",
+        "actualKeyboardPaste": "대상: PowerToys Keyboard Manager 편집기의 두 동작 수정 › 키 검색·선택 (‹Keyboard Manager 편집기› 안)\n\nE2 powertoys 수정 선택지를 제안하고 다른 부분은 자동 변경하지 말아 주세요."
+      }
+    },
+    {
+      "id": "1440/powertoys/whitespace-empty-cleared-not-just-hidden",
+      "status": "PASS",
+      "details": null
+    }
+  ],
+  "passed": true,
+  "exitCode": 0
+}

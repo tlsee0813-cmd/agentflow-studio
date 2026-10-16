@@ -1,0 +1,667 @@
+PASS static-independent-literals
+HTTP "GET /index.html HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /fixtures/powertoys.json HTTP/1.1" 200 -
+HTTP code 404, message File not found
+HTTP "GET /favicon.ico HTTP/1.1" 404 -
+PASS pc-1280/HTTP/index.html
+PASS pc-1280/HTTP/style.css
+PASS pc-1280/HTTP/engine.js
+PASS pc-1280/HTTP/fixtures/flow091.json
+PASS pc-1280/HTTP/fixtures/powertoys.json
+PASS pc-1280/all-runtime-http
+pc-1280/flow091/click/#caseSel
+pc-1280/flow091/initial-map
+PASS pc-1280/flow091/initial-case-heading
+PASS pc-1280/flow091/case-switch-removed-detail
+pc-1280/flow091/click/[data-tog="G2"]
+pc-1280/flow091/click/[data-tog="G4"]
+pc-1280/flow091/click/#zIn
+pc-1280/flow091/click/#zIn
+pc-1280/flow091/native-map-before-wheel
+pc-1280/flow091/wheel/#mapScroll
+pc-1280/flow091/native-map-after-wheel
+FAIL pc-1280/flow091/FLOW-wheel-zero-to-nonzero
+pc-1280/flow091/click/[data-sel="C32"]
+pc-1280/flow091/selected-role
+PASS pc-1280/flow091/selected-role-glyph
+pc-1280/flow091/selected-change
+PASS pc-1280/flow091/selected-change-glyph
+PASS pc-1280/flow091/role-change-literal-DOM
+pc-1280/flow091/click/#panel [data-act="detail"]
+pc-1280/flow091/detail-open-before-wheel
+PASS pc-1280/flow091/detail-evidence-IDs
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F1-type
+PASS pc-1280/flow091/ev-F1-type-glyph
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F1-summary
+PASS pc-1280/flow091/ev-F1-summary-glyph
+pc-1280/flow091/wheel/#panel
+PASS pc-1280/flow091/ev-F1-exact-href
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F3-type
+PASS pc-1280/flow091/ev-F3-type-glyph
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F3-summary
+PASS pc-1280/flow091/ev-F3-summary-glyph
+pc-1280/flow091/wheel/#panel
+PASS pc-1280/flow091/ev-F3-exact-href
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F8-type
+PASS pc-1280/flow091/ev-F8-type-glyph
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F8-summary
+PASS pc-1280/flow091/ev-F8-summary-glyph
+pc-1280/flow091/wheel/#panel
+PASS pc-1280/flow091/ev-F8-exact-href
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F9-type
+PASS pc-1280/flow091/ev-F9-type-glyph
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F9-summary
+PASS pc-1280/flow091/ev-F9-summary-glyph
+pc-1280/flow091/wheel/#panel
+PASS pc-1280/flow091/ev-F9-exact-href
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F10-type
+PASS pc-1280/flow091/ev-F10-type-glyph
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F10-summary
+PASS pc-1280/flow091/ev-F10-summary-glyph
+pc-1280/flow091/wheel/#panel
+PASS pc-1280/flow091/ev-F10-exact-href
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F11-type
+PASS pc-1280/flow091/ev-F11-type-glyph
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/ev-F11-summary
+PASS pc-1280/flow091/ev-F11-summary-glyph
+pc-1280/flow091/wheel/#panel
+PASS pc-1280/flow091/ev-F11-exact-href
+pc-1280/flow091/detail-read-end
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/wheel/#panel
+pc-1280/flow091/click/#detail [data-act="ref-close"]
+pc-1280/flow091/detail-closed-immediate
+PASS pc-1280/flow091/detail-removal-focus
+pc-1280/flow091/click/#panel [data-xref="R3"]
+pc-1280/flow091/xref-R3-condition
+PASS pc-1280/flow091/xref-R3-condition-glyph
+pc-1280/flow091/xref-R3
+PASS pc-1280/flow091/xref-R3-exact-hrefs
+pc-1280/flow091/click/#xref [data-act="ref-close"]
+PASS pc-1280/flow091/xref-R3-removed
+pc-1280/flow091/draft-entry-map-before
+pc-1280/flow091/click/#panel [data-act="draft"]
+PASS pc-1280/flow091/explicit-initial-blank-draft
+pc-1280/flow091/click/#draftText
+pc-1280/flow091/click/#draftPreviewBtn
+pc-1280/flow091/draft-edited
+PASS pc-1280/flow091/draft-preview-target-content
+PASS pc-1280/flow091/draft-target-protected-by-modal
+pc-1280/flow091/click/#draftClose
+pc-1280/flow091/draft-close-immediate-map
+pc-1280/flow091/draft-map-return-raw-pair
+PASS pc-1280/flow091/draft-map-return
+PASS pc-1280/flow091/draft-close-source-focus
+pc-1280/flow091/click/#panel [data-act="draft"]
+PASS pc-1280/flow091/primary-E-reentry
+pc-1280/flow091/click/#draftClose
+pc-1280/flow091/draft-close-immediate-map
+pc-1280/flow091/click/[data-sel="C21"]
+pc-1280/flow091/click/#panel [data-act="draft"]
+PASS pc-1280/flow091/other-target-starts-blank
+pc-1280/flow091/click/#draftText
+pc-1280/flow091/click/#draftClose
+pc-1280/flow091/draft-close-immediate-map
+pc-1280/flow091/click/[data-sel="C32"]
+pc-1280/flow091/click/#panel [data-act="draft"]
+PASS pc-1280/flow091/primary-E-after-other
+pc-1280/flow091/click/#draftClose
+pc-1280/flow091/draft-close-immediate-map
+pc-1280/flow091/saved-case-view-before-switch
+pc-1280/flow091/click/#panel [data-act="detail"]
+pc-1280/flow091/case-switch-with-detail-open
+pc-1280/powertoys/click/#caseSel
+pc-1280/powertoys/initial-map
+PASS pc-1280/powertoys/initial-case-heading
+PASS pc-1280/powertoys/case-switch-removed-detail
+pc-1280/powertoys/click/#zIn
+pc-1280/powertoys/click/#zIn
+pc-1280/powertoys/native-map-before-wheel
+pc-1280/powertoys/wheel/#mapScroll
+pc-1280/powertoys/native-map-after-wheel
+pc-1280/powertoys/PT-native-extent-limit
+pc-1280/powertoys/click/[data-sel="SR"]
+pc-1280/powertoys/selected-role
+PASS pc-1280/powertoys/selected-role-glyph
+pc-1280/powertoys/selected-change
+PASS pc-1280/powertoys/selected-change-glyph
+PASS pc-1280/powertoys/role-change-literal-DOM
+pc-1280/powertoys/click/#panel [data-act="detail"]
+pc-1280/powertoys/detail-open-before-wheel
+PASS pc-1280/powertoys/detail-evidence-IDs
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/ev-RVS-type
+PASS pc-1280/powertoys/ev-RVS-type-glyph
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/ev-RVS-summary
+PASS pc-1280/powertoys/ev-RVS-summary-glyph
+pc-1280/powertoys/wheel/#panel
+PASS pc-1280/powertoys/ev-RVS-exact-href
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/ev-PS-type
+PASS pc-1280/powertoys/ev-PS-type-glyph
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/ev-PS-summary
+PASS pc-1280/powertoys/ev-PS-summary-glyph
+pc-1280/powertoys/wheel/#panel
+PASS pc-1280/powertoys/ev-PS-exact-href
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/ev-RPS-type
+PASS pc-1280/powertoys/ev-RPS-type-glyph
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/ev-RPS-summary
+PASS pc-1280/powertoys/ev-RPS-summary-glyph
+pc-1280/powertoys/wheel/#panel
+PASS pc-1280/powertoys/ev-RPS-exact-href
+pc-1280/powertoys/detail-read-end
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/click/#detail [data-act="ref-close"]
+pc-1280/powertoys/detail-closed-immediate
+PASS pc-1280/powertoys/detail-removal-focus
+pc-1280/powertoys/click/[data-sel="RC"]
+pc-1280/powertoys/click/#panel [data-xref="X1"]
+pc-1280/powertoys/wheel/#panel
+pc-1280/powertoys/xref-X1-condition
+PASS pc-1280/powertoys/xref-X1-condition-glyph
+pc-1280/powertoys/xref-X1
+PASS pc-1280/powertoys/xref-X1-exact-hrefs
+pc-1280/powertoys/click/#xref [data-act="ref-close"]
+PASS pc-1280/powertoys/xref-X1-removed
+pc-1280/powertoys/click/[data-sel="SR"]
+pc-1280/powertoys/draft-entry-map-before
+pc-1280/powertoys/click/#panel [data-act="draft"]
+PASS pc-1280/powertoys/explicit-initial-blank-draft
+pc-1280/powertoys/click/#draftText
+pc-1280/powertoys/click/#draftPreviewBtn
+pc-1280/powertoys/draft-edited
+PASS pc-1280/powertoys/draft-preview-target-content
+PASS pc-1280/powertoys/draft-target-protected-by-modal
+pc-1280/powertoys/click/#draftClose
+pc-1280/powertoys/draft-close-immediate-map
+pc-1280/powertoys/draft-map-return-raw-pair
+PASS pc-1280/powertoys/draft-map-return
+PASS pc-1280/powertoys/draft-close-source-focus
+pc-1280/powertoys/click/#panel [data-act="draft"]
+PASS pc-1280/powertoys/primary-E-reentry
+pc-1280/powertoys/click/#draftClose
+pc-1280/powertoys/draft-close-immediate-map
+pc-1280/powertoys/click/[data-sel="RC"]
+pc-1280/powertoys/click/#panel [data-act="draft"]
+PASS pc-1280/powertoys/other-target-starts-blank
+pc-1280/powertoys/click/#draftText
+pc-1280/powertoys/click/#draftClose
+pc-1280/powertoys/draft-close-immediate-map
+pc-1280/powertoys/click/[data-sel="SR"]
+pc-1280/powertoys/click/#panel [data-act="draft"]
+PASS pc-1280/powertoys/primary-E-after-other
+pc-1280/powertoys/click/#draftClose
+pc-1280/powertoys/draft-close-immediate-map
+pc-1280/powertoys/saved-case-view-before-switch
+pc-1280/powertoys/click/#panel [data-act="detail"]
+pc-1280/powertoys/case-switch-with-detail-open
+pc-1280/cross-case-isolation/click/#caseSel
+pc-1280/cross-case-isolation/case-0-immediate
+pc-1280/cross-case-isolation/case-0-map-restored-raw-pair
+PASS pc-1280/cross-case-isolation/case-0-map-restored
+PASS pc-1280/cross-case-isolation/case-0-detail-removed
+pc-1280/cross-case-isolation/click/[data-sel="C32"]
+pc-1280/cross-case-isolation/click/#panel [data-act="draft"]
+PASS pc-1280/cross-case-isolation/case-0-C32-E
+pc-1280/cross-case-isolation/click/#draftClose
+pc-1280/cross-case-isolation/draft-close-immediate-map
+pc-1280/cross-case-isolation/click/[data-sel="C21"]
+pc-1280/cross-case-isolation/click/#panel [data-act="draft"]
+PASS pc-1280/cross-case-isolation/case-0-C21-E
+pc-1280/cross-case-isolation/click/#draftClose
+pc-1280/cross-case-isolation/draft-close-immediate-map
+pc-1280/cross-case-isolation/click/#caseSel
+pc-1280/cross-case-isolation/case-1-immediate
+pc-1280/cross-case-isolation/case-1-map-restored-raw-pair
+PASS pc-1280/cross-case-isolation/case-1-map-restored
+PASS pc-1280/cross-case-isolation/case-1-detail-removed
+pc-1280/cross-case-isolation/click/[data-sel="SR"]
+pc-1280/cross-case-isolation/click/#panel [data-act="draft"]
+PASS pc-1280/cross-case-isolation/case-1-SR-E
+pc-1280/cross-case-isolation/click/#draftClose
+pc-1280/cross-case-isolation/draft-close-immediate-map
+pc-1280/cross-case-isolation/click/[data-sel="RC"]
+pc-1280/cross-case-isolation/click/#panel [data-act="draft"]
+PASS pc-1280/cross-case-isolation/case-1-RC-E
+pc-1280/cross-case-isolation/click/#draftClose
+pc-1280/cross-case-isolation/draft-close-immediate-map
+HTTP "GET /index.html HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /fixtures/powertoys.json HTTP/1.1" 200 -
+PASS pc-1440/HTTP/index.html
+PASS pc-1440/HTTP/style.css
+PASS pc-1440/HTTP/engine.js
+PASS pc-1440/HTTP/fixtures/flow091.json
+PASS pc-1440/HTTP/fixtures/powertoys.json
+PASS pc-1440/all-runtime-http
+pc-1440/flow091/click/#caseSel
+pc-1440/flow091/initial-map
+PASS pc-1440/flow091/initial-case-heading
+PASS pc-1440/flow091/case-switch-removed-detail
+pc-1440/flow091/click/[data-tog="G2"]
+pc-1440/flow091/click/[data-tog="G4"]
+pc-1440/flow091/click/#zIn
+pc-1440/flow091/click/#zIn
+pc-1440/flow091/native-map-before-wheel
+pc-1440/flow091/wheel/#mapScroll
+pc-1440/flow091/native-map-after-wheel
+FAIL pc-1440/flow091/FLOW-wheel-zero-to-nonzero
+pc-1440/flow091/click/[data-sel="C32"]
+pc-1440/flow091/selected-role
+PASS pc-1440/flow091/selected-role-glyph
+pc-1440/flow091/selected-change
+PASS pc-1440/flow091/selected-change-glyph
+PASS pc-1440/flow091/role-change-literal-DOM
+pc-1440/flow091/click/#panel [data-act="detail"]
+pc-1440/flow091/detail-open-before-wheel
+PASS pc-1440/flow091/detail-evidence-IDs
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F1-type
+PASS pc-1440/flow091/ev-F1-type-glyph
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F1-summary
+PASS pc-1440/flow091/ev-F1-summary-glyph
+pc-1440/flow091/wheel/#panel
+PASS pc-1440/flow091/ev-F1-exact-href
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F3-type
+PASS pc-1440/flow091/ev-F3-type-glyph
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F3-summary
+PASS pc-1440/flow091/ev-F3-summary-glyph
+pc-1440/flow091/wheel/#panel
+PASS pc-1440/flow091/ev-F3-exact-href
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F8-type
+PASS pc-1440/flow091/ev-F8-type-glyph
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F8-summary
+PASS pc-1440/flow091/ev-F8-summary-glyph
+pc-1440/flow091/wheel/#panel
+PASS pc-1440/flow091/ev-F8-exact-href
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F9-type
+PASS pc-1440/flow091/ev-F9-type-glyph
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F9-summary
+PASS pc-1440/flow091/ev-F9-summary-glyph
+pc-1440/flow091/wheel/#panel
+PASS pc-1440/flow091/ev-F9-exact-href
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F10-type
+PASS pc-1440/flow091/ev-F10-type-glyph
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F10-summary
+PASS pc-1440/flow091/ev-F10-summary-glyph
+pc-1440/flow091/wheel/#panel
+PASS pc-1440/flow091/ev-F10-exact-href
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F11-type
+PASS pc-1440/flow091/ev-F11-type-glyph
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/ev-F11-summary
+PASS pc-1440/flow091/ev-F11-summary-glyph
+pc-1440/flow091/wheel/#panel
+PASS pc-1440/flow091/ev-F11-exact-href
+pc-1440/flow091/detail-read-end
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/wheel/#panel
+pc-1440/flow091/click/#detail [data-act="ref-close"]
+pc-1440/flow091/detail-closed-immediate
+PASS pc-1440/flow091/detail-removal-focus
+pc-1440/flow091/click/#panel [data-xref="R3"]
+pc-1440/flow091/xref-R3-condition
+PASS pc-1440/flow091/xref-R3-condition-glyph
+pc-1440/flow091/xref-R3
+PASS pc-1440/flow091/xref-R3-exact-hrefs
+pc-1440/flow091/click/#xref [data-act="ref-close"]
+PASS pc-1440/flow091/xref-R3-removed
+pc-1440/flow091/draft-entry-map-before
+pc-1440/flow091/click/#panel [data-act="draft"]
+PASS pc-1440/flow091/explicit-initial-blank-draft
+pc-1440/flow091/click/#draftText
+pc-1440/flow091/click/#draftPreviewBtn
+pc-1440/flow091/draft-edited
+PASS pc-1440/flow091/draft-preview-target-content
+PASS pc-1440/flow091/draft-target-protected-by-modal
+pc-1440/flow091/click/#draftClose
+pc-1440/flow091/draft-close-immediate-map
+pc-1440/flow091/draft-map-return-raw-pair
+PASS pc-1440/flow091/draft-map-return
+PASS pc-1440/flow091/draft-close-source-focus
+pc-1440/flow091/click/#panel [data-act="draft"]
+PASS pc-1440/flow091/primary-E-reentry
+pc-1440/flow091/click/#draftClose
+pc-1440/flow091/draft-close-immediate-map
+pc-1440/flow091/click/[data-sel="C21"]
+pc-1440/flow091/click/#panel [data-act="draft"]
+PASS pc-1440/flow091/other-target-starts-blank
+pc-1440/flow091/click/#draftText
+pc-1440/flow091/click/#draftClose
+pc-1440/flow091/draft-close-immediate-map
+pc-1440/flow091/click/[data-sel="C32"]
+pc-1440/flow091/click/#panel [data-act="draft"]
+PASS pc-1440/flow091/primary-E-after-other
+pc-1440/flow091/click/#draftClose
+pc-1440/flow091/draft-close-immediate-map
+pc-1440/flow091/saved-case-view-before-switch
+pc-1440/flow091/click/#panel [data-act="detail"]
+pc-1440/flow091/case-switch-with-detail-open
+pc-1440/powertoys/click/#caseSel
+pc-1440/powertoys/initial-map
+PASS pc-1440/powertoys/initial-case-heading
+PASS pc-1440/powertoys/case-switch-removed-detail
+pc-1440/powertoys/click/#zIn
+pc-1440/powertoys/click/#zIn
+pc-1440/powertoys/native-map-before-wheel
+pc-1440/powertoys/wheel/#mapScroll
+pc-1440/powertoys/native-map-after-wheel
+pc-1440/powertoys/PT-native-extent-limit
+pc-1440/powertoys/click/[data-sel="SR"]
+pc-1440/powertoys/selected-role
+PASS pc-1440/powertoys/selected-role-glyph
+pc-1440/powertoys/selected-change
+PASS pc-1440/powertoys/selected-change-glyph
+PASS pc-1440/powertoys/role-change-literal-DOM
+pc-1440/powertoys/click/#panel [data-act="detail"]
+pc-1440/powertoys/detail-open-before-wheel
+PASS pc-1440/powertoys/detail-evidence-IDs
+pc-1440/powertoys/ev-RVS-type
+PASS pc-1440/powertoys/ev-RVS-type-glyph
+pc-1440/powertoys/ev-RVS-summary
+PASS pc-1440/powertoys/ev-RVS-summary-glyph
+pc-1440/powertoys/wheel/#panel
+PASS pc-1440/powertoys/ev-RVS-exact-href
+pc-1440/powertoys/wheel/#panel
+pc-1440/powertoys/ev-PS-type
+PASS pc-1440/powertoys/ev-PS-type-glyph
+pc-1440/powertoys/wheel/#panel
+pc-1440/powertoys/ev-PS-summary
+PASS pc-1440/powertoys/ev-PS-summary-glyph
+pc-1440/powertoys/wheel/#panel
+PASS pc-1440/powertoys/ev-PS-exact-href
+pc-1440/powertoys/wheel/#panel
+pc-1440/powertoys/ev-RPS-type
+PASS pc-1440/powertoys/ev-RPS-type-glyph
+pc-1440/powertoys/wheel/#panel
+pc-1440/powertoys/ev-RPS-summary
+PASS pc-1440/powertoys/ev-RPS-summary-glyph
+pc-1440/powertoys/wheel/#panel
+PASS pc-1440/powertoys/ev-RPS-exact-href
+pc-1440/powertoys/detail-read-end
+pc-1440/powertoys/wheel/#panel
+pc-1440/powertoys/wheel/#panel
+pc-1440/powertoys/wheel/#panel
+pc-1440/powertoys/click/#detail [data-act="ref-close"]
+pc-1440/powertoys/detail-closed-immediate
+PASS pc-1440/powertoys/detail-removal-focus
+pc-1440/powertoys/click/[data-sel="RC"]
+pc-1440/powertoys/click/#panel [data-xref="X1"]
+pc-1440/powertoys/xref-X1-condition
+PASS pc-1440/powertoys/xref-X1-condition-glyph
+pc-1440/powertoys/xref-X1
+PASS pc-1440/powertoys/xref-X1-exact-hrefs
+pc-1440/powertoys/click/#xref [data-act="ref-close"]
+PASS pc-1440/powertoys/xref-X1-removed
+pc-1440/powertoys/click/[data-sel="SR"]
+pc-1440/powertoys/draft-entry-map-before
+pc-1440/powertoys/click/#panel [data-act="draft"]
+PASS pc-1440/powertoys/explicit-initial-blank-draft
+pc-1440/powertoys/click/#draftText
+pc-1440/powertoys/click/#draftPreviewBtn
+pc-1440/powertoys/draft-edited
+PASS pc-1440/powertoys/draft-preview-target-content
+PASS pc-1440/powertoys/draft-target-protected-by-modal
+pc-1440/powertoys/click/#draftClose
+pc-1440/powertoys/draft-close-immediate-map
+pc-1440/powertoys/draft-map-return-raw-pair
+PASS pc-1440/powertoys/draft-map-return
+PASS pc-1440/powertoys/draft-close-source-focus
+pc-1440/powertoys/click/#panel [data-act="draft"]
+PASS pc-1440/powertoys/primary-E-reentry
+pc-1440/powertoys/click/#draftClose
+pc-1440/powertoys/draft-close-immediate-map
+pc-1440/powertoys/click/[data-sel="RC"]
+pc-1440/powertoys/click/#panel [data-act="draft"]
+PASS pc-1440/powertoys/other-target-starts-blank
+pc-1440/powertoys/click/#draftText
+pc-1440/powertoys/click/#draftClose
+pc-1440/powertoys/draft-close-immediate-map
+pc-1440/powertoys/click/[data-sel="SR"]
+pc-1440/powertoys/click/#panel [data-act="draft"]
+PASS pc-1440/powertoys/primary-E-after-other
+pc-1440/powertoys/click/#draftClose
+pc-1440/powertoys/draft-close-immediate-map
+pc-1440/powertoys/saved-case-view-before-switch
+pc-1440/powertoys/click/#panel [data-act="detail"]
+pc-1440/powertoys/case-switch-with-detail-open
+pc-1440/cross-case-isolation/click/#caseSel
+pc-1440/cross-case-isolation/case-0-immediate
+pc-1440/cross-case-isolation/case-0-map-restored-raw-pair
+PASS pc-1440/cross-case-isolation/case-0-map-restored
+PASS pc-1440/cross-case-isolation/case-0-detail-removed
+pc-1440/cross-case-isolation/click/[data-sel="C32"]
+pc-1440/cross-case-isolation/click/#panel [data-act="draft"]
+PASS pc-1440/cross-case-isolation/case-0-C32-E
+pc-1440/cross-case-isolation/click/#draftClose
+pc-1440/cross-case-isolation/draft-close-immediate-map
+pc-1440/cross-case-isolation/click/[data-sel="C21"]
+pc-1440/cross-case-isolation/click/#panel [data-act="draft"]
+PASS pc-1440/cross-case-isolation/case-0-C21-E
+pc-1440/cross-case-isolation/click/#draftClose
+pc-1440/cross-case-isolation/draft-close-immediate-map
+pc-1440/cross-case-isolation/click/#caseSel
+pc-1440/cross-case-isolation/case-1-immediate
+pc-1440/cross-case-isolation/case-1-map-restored-raw-pair
+PASS pc-1440/cross-case-isolation/case-1-map-restored
+PASS pc-1440/cross-case-isolation/case-1-detail-removed
+pc-1440/cross-case-isolation/click/[data-sel="SR"]
+pc-1440/cross-case-isolation/click/#panel [data-act="draft"]
+PASS pc-1440/cross-case-isolation/case-1-SR-E
+pc-1440/cross-case-isolation/click/#draftClose
+pc-1440/cross-case-isolation/draft-close-immediate-map
+pc-1440/cross-case-isolation/click/[data-sel="RC"]
+pc-1440/cross-case-isolation/click/#panel [data-act="draft"]
+PASS pc-1440/cross-case-isolation/case-1-RC-E
+pc-1440/cross-case-isolation/click/#draftClose
+pc-1440/cross-case-isolation/draft-close-immediate-map
+HTTP "GET /index.html?fixtures=test-inputs/id-renamed.json HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /test-inputs/id-renamed.json HTTP/1.1" 200 -
+PASS test-input/id-renamed/HTTP/index.html
+PASS test-input/id-renamed/HTTP/style.css
+PASS test-input/id-renamed/HTTP/engine.js
+PASS test-input/id-renamed/HTTP/test-inputs/id-renamed.json
+PASS test-input/id-renamed/all-runtime-http
+PASS test-input/id-renamed/valid-input-rendered
+test-input/id-renamed/click/[data-sel="probe_1"]
+test-input/id-renamed/selected
+PASS test-input/id-renamed/role-works-without-case-branch
+HTTP "GET /index.html?fixtures=test-inputs/changes-absent.json HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /test-inputs/changes-absent.json HTTP/1.1" 200 -
+PASS test-input/changes-absent/HTTP/index.html
+PASS test-input/changes-absent/HTTP/style.css
+PASS test-input/changes-absent/HTTP/engine.js
+PASS test-input/changes-absent/HTTP/test-inputs/changes-absent.json
+PASS test-input/changes-absent/all-runtime-http
+PASS test-input/changes-absent/valid-input-rendered
+test-input/changes-absent/click/[data-sel="C32"]
+test-input/changes-absent/selected
+PASS test-input/changes-absent/role-works-without-case-branch
+PASS test-input/changes-absent/no-fake-change-row
+test-input/changes-absent/click/#panel [data-act="draft"]
+PASS test-input/changes-absent/empty-draft-still-explicit
+test-input/changes-absent/click/#draftClose
+test-input/changes-absent/draft-close-immediate-map
+HTTP "GET /index.html?fixtures=test-inputs/invalid-parent.json HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /test-inputs/invalid-parent.json HTTP/1.1" 200 -
+PASS test-input/invalid-parent/HTTP/index.html
+PASS test-input/invalid-parent/HTTP/style.css
+PASS test-input/invalid-parent/HTTP/engine.js
+PASS test-input/invalid-parent/HTTP/test-inputs/invalid-parent.json
+PASS test-input/invalid-parent/all-runtime-http
+test-input/invalid-parent/expected-error
+PASS test-input/invalid-parent/explicit-no-silent-correction
+HTTP "GET /index.html?fixtures=test-inputs/invalid-depth.json HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /test-inputs/invalid-depth.json HTTP/1.1" 200 -
+PASS test-input/invalid-depth/HTTP/index.html
+PASS test-input/invalid-depth/HTTP/style.css
+PASS test-input/invalid-depth/HTTP/engine.js
+PASS test-input/invalid-depth/HTTP/test-inputs/invalid-depth.json
+PASS test-input/invalid-depth/all-runtime-http
+test-input/invalid-depth/expected-error
+PASS test-input/invalid-depth/explicit-no-silent-correction
+HTTP "GET /index.html?fixtures=test-inputs/invalid-endpoint.json HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /test-inputs/invalid-endpoint.json HTTP/1.1" 200 -
+PASS test-input/invalid-endpoint/HTTP/index.html
+PASS test-input/invalid-endpoint/HTTP/style.css
+PASS test-input/invalid-endpoint/HTTP/engine.js
+PASS test-input/invalid-endpoint/HTTP/test-inputs/invalid-endpoint.json
+PASS test-input/invalid-endpoint/all-runtime-http
+test-input/invalid-endpoint/expected-error
+PASS test-input/invalid-endpoint/explicit-no-silent-correction
+HTTP "GET /index.html?fixtures=test-inputs/invalid-duplicate.json HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /test-inputs/invalid-duplicate.json HTTP/1.1" 200 -
+PASS test-input/invalid-duplicate/HTTP/index.html
+PASS test-input/invalid-duplicate/HTTP/style.css
+PASS test-input/invalid-duplicate/HTTP/engine.js
+PASS test-input/invalid-duplicate/HTTP/test-inputs/invalid-duplicate.json
+PASS test-input/invalid-duplicate/all-runtime-http
+test-input/invalid-duplicate/expected-error
+PASS test-input/invalid-duplicate/explicit-no-silent-correction
+HTTP "GET /index.html?fixtures=test-inputs/invalid-cycle.json HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /test-inputs/invalid-cycle.json HTTP/1.1" 200 -
+PASS test-input/invalid-cycle/HTTP/index.html
+PASS test-input/invalid-cycle/HTTP/style.css
+PASS test-input/invalid-cycle/HTTP/engine.js
+PASS test-input/invalid-cycle/HTTP/test-inputs/invalid-cycle.json
+PASS test-input/invalid-cycle/all-runtime-http
+test-input/invalid-cycle/expected-error
+PASS test-input/invalid-cycle/explicit-no-silent-correction
+HTTP "GET /index.html?fixtures=fixtures/flow091.json,test-inputs/same-node-id-across-cases.json HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /test-inputs/same-node-id-across-cases.json HTTP/1.1" 200 -
+PASS test-input/same-node-id-across-cases/HTTP/index.html
+PASS test-input/same-node-id-across-cases/HTTP/style.css
+PASS test-input/same-node-id-across-cases/HTTP/engine.js
+PASS test-input/same-node-id-across-cases/HTTP/fixtures/flow091.json
+PASS test-input/same-node-id-across-cases/HTTP/test-inputs/same-node-id-across-cases.json
+PASS test-input/same-node-id-across-cases/all-runtime-http
+test-input/same-node-id-across-cases/click/#caseSel
+test-input/same-node-id-across-cases/click/[data-sel="C32"]
+test-input/same-node-id-across-cases/click/#panel [data-act="draft"]
+PASS test-input/same-node-id-across-cases/initial-0
+test-input/same-node-id-across-cases/click/#draftText
+test-input/same-node-id-across-cases/click/#draftClose
+test-input/same-node-id-across-cases/draft-close-immediate-map
+test-input/same-node-id-across-cases/click/#caseSel
+test-input/same-node-id-across-cases/click/[data-sel="C32"]
+test-input/same-node-id-across-cases/click/#panel [data-act="draft"]
+PASS test-input/same-node-id-across-cases/initial-1
+test-input/same-node-id-across-cases/click/#draftText
+test-input/same-node-id-across-cases/click/#draftClose
+test-input/same-node-id-across-cases/draft-close-immediate-map
+test-input/same-node-id-across-cases/click/#caseSel
+test-input/same-node-id-across-cases/click/[data-sel="C32"]
+test-input/same-node-id-across-cases/click/#panel [data-act="draft"]
+test-input/same-node-id-across-cases/actual-0
+PASS test-input/same-node-id-across-cases/isolated-0
+test-input/same-node-id-across-cases/click/#draftClose
+test-input/same-node-id-across-cases/draft-close-immediate-map
+test-input/same-node-id-across-cases/click/#caseSel
+test-input/same-node-id-across-cases/click/[data-sel="C32"]
+test-input/same-node-id-across-cases/click/#panel [data-act="draft"]
+test-input/same-node-id-across-cases/actual-1
+PASS test-input/same-node-id-across-cases/isolated-1
+test-input/same-node-id-across-cases/click/#draftClose
+test-input/same-node-id-across-cases/draft-close-immediate-map
+HTTP "GET /index.html HTTP/1.1" 200 -
+HTTP "GET /style.css HTTP/1.1" 200 -
+HTTP "GET /engine.js HTTP/1.1" 200 -
+HTTP "GET /fixtures/flow091.json HTTP/1.1" 200 -
+HTTP "GET /fixtures/powertoys.json HTTP/1.1" 200 -
+PASS smoke-390/HTTP/index.html
+PASS smoke-390/HTTP/style.css
+PASS smoke-390/HTTP/engine.js
+PASS smoke-390/HTTP/fixtures/flow091.json
+PASS smoke-390/HTTP/fixtures/powertoys.json
+PASS smoke-390/all-runtime-http
+smoke-390/flow091/click/#caseSel
+smoke-390/flow091/click/[data-sel="C32"]
+smoke-390/flow091/document-overflow
+PASS smoke-390/flow091/no-document-horizontal-overflow
+smoke-390/flow091/wheel/#main
+smoke-390/flow091/wheel/#main
+smoke-390/flow091/wheel/#main
+smoke-390/flow091/click/#panel [data-act="detail"]
+smoke-390/flow091/wheel/#main
+smoke-390/flow091/click/#detail [data-act="ref-close"]
+PASS smoke-390/flow091/detail-close-smoke
+smoke-390/powertoys/click/#caseSel
+smoke-390/powertoys/click/[data-sel="SR"]
+smoke-390/powertoys/document-overflow
+PASS smoke-390/powertoys/no-document-horizontal-overflow
+smoke-390/powertoys/wheel/#main
+smoke-390/powertoys/wheel/#main
+smoke-390/powertoys/click/#panel [data-act="detail"]
+smoke-390/powertoys/wheel/#main
+smoke-390/powertoys/click/#detail [data-act="ref-close"]
+PASS smoke-390/powertoys/detail-close-smoke
+CHILD_EXIT 1

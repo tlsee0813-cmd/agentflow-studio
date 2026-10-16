@@ -1,0 +1,365 @@
+{
+  "schemaVersion": 1,
+  "caseId": "flow091-background-copy",
+  "title": "AgentFlow 배경 사본 기능 일부",
+  "scope": "FLOW091-C 계약이 다루는 배경 사본 연결 부분만. 제품 전체 구성이 아님.",
+  "nature": "과거 개발 계약 문서와 그 안의 MOCK 검사 보고. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 없음.",
+  "basisTime": "고정 커밋 5416dec 시점의 계약 문서",
+  "groupingNote": "점선 묶음은 이해를 돕기 위해 AI가 제안한 보기 구분이며 코드 소유·실행 순서가 아님.",
+  "nodes": [
+    {
+      "id": "G1",
+      "parent": null,
+      "name": "구상과 목적",
+      "short": "목적과 영역 구상, 지금 상태",
+      "role": "프로젝트 목적과 영역 구상을 다듬는 곳. 지금 구상은 계속 바뀔 수 있다.",
+      "evidence": [
+        "F3",
+        "F10"
+      ]
+    },
+    {
+      "id": "G2",
+      "parent": null,
+      "name": "요청 맥락",
+      "short": "새 요청의 배경과 범위",
+      "role": "새 요청이 어떤 배경과 범위로 나가는지 다루는 부분.",
+      "evidence": []
+    },
+    {
+      "id": "C21",
+      "parent": "G2",
+      "name": "새 요청의 배경 고정",
+      "short": "명시 새 요청 때만 사본",
+      "role": "명시적인 새 요청을 보낼 때만 목적과 대상 영역 하나를 사본으로 고정한다.",
+      "evidence": [
+        "F2",
+        "F3"
+      ]
+    },
+    {
+      "id": "C22",
+      "parent": "G2",
+      "name": "요청 범위 구분",
+      "short": "실행 범위는 이번 요청",
+      "role": "실행 범위는 이번 요청이 정하고 배경은 자료로만 둔다.",
+      "evidence": [
+        "F7",
+        "F9"
+      ]
+    },
+    {
+      "id": "G3",
+      "parent": null,
+      "name": "전달할 내용",
+      "short": "AI 입력과 사람이 읽는 작업문",
+      "role": "AI에게 보내는 입력과 사람이 읽는 작업문, 두 형태.",
+      "evidence": []
+    },
+    {
+      "id": "C31",
+      "parent": "G3",
+      "name": "AI 입력",
+      "short": "배경은 전용 필드",
+      "role": "배경을 출처·기준과 분리된 전용 필드로 싣는다.",
+      "evidence": [
+        "F7",
+        "F9"
+      ]
+    },
+    {
+      "id": "C32",
+      "parent": "G3",
+      "name": "작업문과 미리보기",
+      "short": "배경을 별도 블록으로",
+      "role": "작업문·미리보기·Markdown에 배경을 별도 블록으로 넣는다.",
+      "evidence": [
+        "F3",
+        "F8",
+        "F9",
+        "F10",
+        "F11"
+      ]
+    },
+    {
+      "id": "G4",
+      "parent": null,
+      "name": "결과 연결",
+      "short": "돌아온 결과를 어느 사본에 잇나",
+      "role": "돌아온 결과를 어느 작업의 사본에 잇는지 다루는 부분.",
+      "evidence": []
+    },
+    {
+      "id": "C41",
+      "parent": "G4",
+      "name": "일반 보고 연결",
+      "short": "연결된 대상 작업의 사본",
+      "role": "정확히 연결된 대상 작업의 사본을 그대로 잇는다.",
+      "evidence": [
+        "F4"
+      ]
+    },
+    {
+      "id": "C42",
+      "parent": "G4",
+      "name": "파일 반환 연결",
+      "short": "일치하는 반환 식별자",
+      "role": "반환 식별자가 일치하는 내보내기 기록의 사본을 쓴다.",
+      "evidence": [
+        "F5"
+      ]
+    },
+    {
+      "id": "G5",
+      "parent": null,
+      "name": "저장·복구",
+      "short": "내보내기 기록·저장 형식",
+      "role": "내보내기 기록과 저장 형식. 당시 작업문에 넣은 사본을 보존한다.",
+      "evidence": [
+        "F6",
+        "F10"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "id": "R1",
+      "from": "G1",
+      "to": "C21",
+      "kind": "명시 새 요청 때만 사본 고정",
+      "short": "목적과 대상 영역 하나를 사본으로",
+      "condition": "명시적인 새 요청을 보낼 때만 그때의 목적과 그 요청의 대상 영역 하나를 사본으로 고정합니다. 지도에서 고르거나 둘러보는 것은 새 요청이 아닙니다.",
+      "evidence": [
+        "F2"
+      ]
+    },
+    {
+      "id": "R2",
+      "from": "C21",
+      "to": "C31",
+      "kind": "요청 사본",
+      "short": "AI 입력의 전용 필드로",
+      "condition": "명시 새 요청 때 고정한 그 요청의 배경 사본을 AI 입력의 전용 필드로 싣습니다. 출처·기준과 분리되고 실행 범위는 이번 요청이 정합니다.",
+      "evidence": [
+        "F7"
+      ]
+    },
+    {
+      "id": "R3",
+      "from": "C21",
+      "to": "C32",
+      "kind": "요청 사본",
+      "short": "작업문의 별도 블록으로",
+      "condition": "명시 새 요청 때 고정한 그 요청의 배경 사본을 작업문·미리보기의 별도 블록으로 넣습니다. 지금 지도에 보이는 최신 구상을 가져오는 것이 아닙니다. 사본이 없거나 비면 블록을 넣지 않습니다.",
+      "evidence": [
+        "F8"
+      ]
+    },
+    {
+      "id": "R4",
+      "from": "C32",
+      "to": "G5",
+      "kind": "내보내기 기록의 사본",
+      "short": "작업문에 넣은 사본을 기록",
+      "condition": "작업문에 실제로 넣은 사본을 내보내기 기록에 남깁니다. 작업문 전문 저장이나 외부에서 받거나 수락했다는 증거가 아닙니다.",
+      "evidence": [
+        "F6"
+      ]
+    },
+    {
+      "id": "R5",
+      "from": "G5",
+      "to": "C42",
+      "kind": "일치하는 반환 식별자",
+      "short": "일치하는 기록의 사본",
+      "condition": "반환 식별자가 일치하는 내보내기 기록의 사본을 씁니다. 옛 기록에 사본이 없으면 빈 값 그대로이며 최신 구상으로 메우지 않습니다.",
+      "evidence": [
+        "F5"
+      ]
+    },
+    {
+      "id": "R6",
+      "from": "C21",
+      "to": "C41",
+      "kind": "정확히 연결된 대상 작업의 사본",
+      "short": "연결된 작업의 사본",
+      "condition": "일반 보고는 정확히 연결된 대상 작업의 사본을 그대로 잇습니다. 대상이 없으면 빈 값 그대로입니다.",
+      "evidence": [
+        "F4"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "F1",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L52",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L52",
+        "pin": "commit 5416dec"
+      },
+      "summary": "목적은 ‘작업문에서 제외’에서 ‘분리된 배경 블록 안에만 포함’으로 바뀌었다. 목적을 요청·출처·기준·지시로 쓰지 않는 성질은 그대로다.",
+      "quote": "| `flow090.test` F090-5, `flow090_browser` test_01 | ‘목적이 작업문에 없음’ → ‘목적은 분리된 배경 블록 안에만 있고, 요청·출처·기준·지시에는 없음’ | 이번 계약이 바꾼 정책. 목적이 요청이나 작업 지시가 아니라는 성질은 그대로 검사한다 |",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F2",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L10",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L10",
+        "pin": "commit 5416dec"
+      },
+      "summary": "명시적인 새 요청을 보낼 때만 목적과 그 요청의 대상 영역 하나를 사본으로 고정한다. 지도에서 고른 영역이 아니며 빈 값은 null이다.",
+      "quote": "| 배경 사본 | `Task.background` `{version:'background.1', revision, brief, area:{id,name,note}\\|null}` | 명시적인 새 사용자 요청(`request`)을 보낼 때만 고정한다. `revision`은 사본을 만든 기준 시점, `brief`는 `space.brief.text`, `area`는 submit이 정한 그 요청의 대상 영역이다(지도 선택 아님). 다른 영역, 관계, 좌표, 목적 이력은 넣지 않는다. 빈 값은 `null`이고 ‘미정’ 같은 표현을 내용으로 만들지 않는다 |",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F3",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L11",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L11",
+        "pin": "commit 5416dec"
+      },
+      "summary": "구상 수정·보관·재배치·반복 내보내기·탐색은 기존 사본을 바꾸지 않는다. 다음 명시 새 요청만 최신 구상을 쓴다.",
+      "quote": "| 고정 | — | 이후 목적·영역 이름·구상 수정, 보관, 재배치, 작업 영역 옮기기, AI 재정리, 반복 내보내기, 탐색은 기존 사본을 바꾸지 않는다. 다음 명시 새 요청만 최신 구상을 캡처한다. 합성 시험답변(`test_answer`)은 사용자 요청이 아니므로 `null`이다 |",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F4",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L12",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L12",
+        "pin": "commit 5416dec"
+      },
+      "summary": "일반 보고는 정확히 연결된 반환 대상 작업의 사본을 그대로 잇는다. 대상이 없으면 null.",
+      "quote": "| 일반 보고 | 반환 작업의 `background` | 정확히 연결된 반환 대상 작업의 사본을 그대로 잇는다. 대상이 없으면 `null`이다 |",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F5",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L13",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L13",
+        "pin": "commit 5416dec"
+      },
+      "summary": "파일 반환은 일치하는 반환 식별자의 내보내기 기록 사본을 쓴다. 옛 기록에 없으면 null이며 최신 구상으로 메우지 않는다.",
+      "quote": "| 파일 반환 | 반환 작업의 `background` | 일치하는 `returnId`의 `ExportRecord.background`(실제로 함께 전달한 사본)를 쓴다. 옛 기록에 없으면 `null`이며, 최신 구상으로 메우지 않는다 |",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F6",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L14 · L55",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L14",
+        "pin": "commit 5416dec"
+      },
+      "summary": "내보내기 기록은 그때 작업문에 실제로 넣은 사본을 보존한다. 작업문 전문은 보존하지 않는다(L55).",
+      "quote": "| 내보내기 | `ExportRecord.background` | `markHandoff`가 그때 작업문에 실제로 넣은 사본(작업의 사본)을 기록과 함께 보존한다 |",
+      "limits": "과거 개발 계약 문서다. 내보내기 기록은 작업문 전문을 저장하지 않으며(L55) 외부 수신·수락의 증거가 아니다."
+    },
+    {
+      "id": "F7",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L15",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L15",
+        "pin": "commit 5416dec"
+      },
+      "summary": "AI 입력의 배경은 출처·기준과 분리된 전용 필드다. 실행 범위는 이번 요청이 정한다.",
+      "quote": "| AI 입력 | `ContextRequest.background` (`idea022.context.7`) | `sources`·`bases`와 분리된 전용 필드다. 서버 검증기, 공급자 프롬프트, MOCK 서버 경로가 같은 형식을 받는다. 프롬프트에는 배경은 자료이고 실행 범위는 이번 요청이 정하며, 아이디어나 미정 사항을 확정하지 않고, `bases`만 인용한다고 적었다 |",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F8",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L16",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L16",
+        "pin": "commit 5416dec"
+      },
+      "summary": "작업문·미리보기·Markdown은 배경을 별도 블록으로 구분한다. 사본이 없거나 둘 다 빈 값이면 블록을 넣지 않는다.",
+      "quote": "| 작업문·미리보기·Markdown | `handoffText` | ‘## 프로젝트 배경·영역 구상 — 이번 요청 범위와 구분’ 블록을 둔다. 이번 요청이 실행 범위를 정하고, 배경 전체를 구현하거나 아이디어·아직 정하지 않은 점을 임의로 확정하지 말라고 명시한다. 사본이 없거나 둘 다 빈 값이면 블록을 넣지 않는다 |",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F9",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L17",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L17",
+        "pin": "commit 5416dec"
+      },
+      "summary": "배경을 출처·기준·새 사용자 결정으로 자동 승격하지 않는다. 직접 수정 우선권은 그대로다.",
+      "quote": "| 승격 금지 | — | 배경은 `sources`, `bases`, 새 사용자 결정으로 자동 승격하지 않는다. `manual.scope/next/checks` 등 직접 수정 우선권은 그대로다 |",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F10",
+      "type": "개발 계약 문서 · 고정 커밋",
+      "source": {
+        "label": "FLOW091-C 계약 L18–22",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L18-L22",
+        "pin": "commit 5416dec"
+      },
+      "summary": "구상이 뒤에 바뀌면 ‘이 사본은 그대로’로 안내한다. 옛 저장 형식은 현재 구상을 소급하지 않고 null로 옮긴다.",
+      "quote": "| 화면 | 작업 카드 ‘작업문에 넣을 프로젝트 배경… 보기’ | 전달되는 사본(목적 원문, 대상 영역, 구상 원문, 기준 시점)을 열어 볼 수 있다. 구상이 그 뒤 바뀌었으면 접힌 제목에도 ‘그 뒤 구상이 바뀜 (이 사본은 그대로)’을 보이고, 펼치면 ‘이미 준비된 이 작업의 사본은 그대로이고 다음 새 요청부터 최신 구상’이라고 말한다. 자동 반영됐다고 표시하지 않는다. 펼친 상태는 다시 그려도(자동 저장 등) 유지된다 |\n\n## 형식 이관과 한도\n- **저장 형식** `idea015.project.5`.\n  - project.1~4는 읽을 때 모든 작업과 내보내기에 `background:null`을 넣는다. 현재 구상을 소급해 넣지 않는다.",
+      "limits": "과거 개발 계약 문서다. 실제 사용자 대화·실제 AI 호출·실제 인계 수락은 이 자료에 없다(원문 L4)."
+    },
+    {
+      "id": "F11",
+      "type": "MOCK 검사 보고 · 계약 문서 안",
+      "source": {
+        "label": "FLOW091-C 계약 L33–41",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/5416decfbe9f38a45323de0badc4fc58ec6e4bcd/docs/flow091-background-contract.md#L33-L41",
+        "pin": "commit 5416dec"
+      },
+      "summary": "‘A 내보내기 → 변경 → B → 늦은 A 보고’에서 A의 사본과 B의 요청·사본을 보존했다는 검사 보고.",
+      "quote": "  - b: A 뒤 목적·영역 수정, 보관, 재배치, 작업 옮기기, 재정리, 반복 내보내기, 새로고침을 거쳐도 A의 사본과 작업문은 같다. B만 최신이다.\n  - c: A 내보내기(returnId) → B → 늦은 A 보고. 붙여넣기와 정확한 파일 반환 모두 A의 사본을 쓰고, B의 포커스·요청·사본은 그대로다. 보고를 다시 정리해도 A 사본이 간다. 다음 명시 요청은 최신 구상이다. project.4에서 이관한 옛 내보내기의 파일·붙여넣기 반환은 `null`이다.\n  - d: 배경의 ‘추가 아이디어’와 ‘아직 못 정함’은 bases, sources, MOCK intent로 승격되지 않는다. 직접 수정한 next/scope는 목적이 바뀐 뒤에도 그대로다. 프롬프트 계약도 확인한다.\n  - e: 옛 형식은 null이고 키 유무를 엄격히 따진다. 새로고침·백업 왕복이 같고, 빈 값은 null이며 ‘미정/미기재’ 문구를 만들지 않는다. 최대 길이 다중 바이트·이모지가 정확히 오간다. 위조·추가 키·누락 요청과 저장 길이 초과는 거절한다. 128 KiB 초과는 거절하고 저장 내용이 그대로이며, 8MB 초과는 저장 관문에서 거절한다.\n  - server: MOCK HTTP와 가짜 fetch 공급자(키는 가짜, 실제 호출 없음) 모두 `background`를 전용 필드로 받는다. context.6 형식이나 키 누락 요청은 공급자 호출 전에 400으로 거절된다.\n- **브라우저** `flow090_browser` test_16(실제 HTTP, MOCK).\n  - 목적과 예약 구상 입력 → 예약 요청. 실제 POST 본문의 `background`가 저장된 사본과 같고 sources에는 목적이 없다.\n  - 배경 보기, Markdown, 전체 작업문에 예약 구상만 있고 알림은 없다. 내보내기 기록에 사본이 남고 기준은 1개 그대로다.\n  - 목적을 고치면 A는 그대로이고 ‘그 뒤 바뀌었어요’가 뜬다. A 보고는 A 사본을 쓰고, 알림 B 요청은 최신 목적과 구상 미기재(null)다.",
+      "limits": "가짜 호출을 쓴 MOCK 검사 보고다. 실제 사용자 사건이나 실제 AI 처리 성공이 아니다(L4, L58)."
+    }
+  ],
+  "initialView": {
+    "expanded": [
+      "G3"
+    ],
+    "layout": {
+      "columns": [
+        "170px",
+        "200px",
+        "230px",
+        "170px"
+      ],
+      "areas": [
+        "a b c e",
+        "a b d e"
+      ],
+      "place": {
+        "G1": {
+          "area": "a",
+          "align": "center"
+        },
+        "G2": {
+          "area": "b",
+          "align": "center"
+        },
+        "G3": {
+          "area": "c",
+          "align": "end"
+        },
+        "G4": {
+          "area": "d",
+          "align": "start"
+        },
+        "G5": {
+          "area": "e",
+          "align": "center"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,296 @@
+{
+  "label": "v0-p2-run01",
+  "scope": "Known P2 preview regression only; NOT final independent acceptance",
+  "startedUTC": "2026-10-16T00:49:34.772972+00:00",
+  "plannedIDs": [
+    "1280/flow091/P2",
+    "1280/powertoys/P2",
+    "1440/flow091/P2",
+    "1440/powertoys/P2"
+  ],
+  "completedIDs": [],
+  "checks": [
+    {
+      "id": "1280/flow091/HTTP/index.html",
+      "status": "PASS",
+      "details": {
+        "scenario": "1280/flow091",
+        "url": "http://127.0.0.1:44227/index.html",
+        "path": "index.html",
+        "status": 200,
+        "bytes": 2769,
+        "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+      }
+    },
+    {
+      "id": "1280/flow091/HTTP/style.css",
+      "status": "PASS",
+      "details": {
+        "scenario": "1280/flow091",
+        "url": "http://127.0.0.1:44227/style.css",
+        "path": "style.css",
+        "status": 200,
+        "bytes": 11662,
+        "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+      }
+    },
+    {
+      "id": "1280/flow091/HTTP/engine.js",
+      "status": "PASS",
+      "details": {
+        "scenario": "1280/flow091",
+        "url": "http://127.0.0.1:44227/engine.js",
+        "path": "engine.js",
+        "status": 200,
+        "bytes": 33828,
+        "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+      }
+    },
+    {
+      "id": "1280/flow091/HTTP/fixtures/flow091.json",
+      "status": "PASS",
+      "details": {
+        "scenario": "1280/flow091",
+        "url": "http://127.0.0.1:44227/fixtures/flow091.json",
+        "path": "fixtures/flow091.json",
+        "status": 200,
+        "bytes": 19224,
+        "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+      }
+    },
+    {
+      "id": "1280/flow091/HTTP/fixtures/powertoys.json",
+      "status": "PASS",
+      "details": {
+        "scenario": "1280/flow091",
+        "url": "http://127.0.0.1:44227/fixtures/powertoys.json",
+        "path": "fixtures/powertoys.json",
+        "status": 200,
+        "bytes": 13494,
+        "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+      }
+    },
+    {
+      "id": "1280/flow091/all-runtime-responses",
+      "status": "PASS",
+      "details": {
+        "seen": [
+          "engine.js",
+          "fixtures/flow091.json",
+          "fixtures/powertoys.json",
+          "index.html",
+          "style.css"
+        ],
+        "expected": [
+          "engine.js",
+          "fixtures/flow091.json",
+          "fixtures/powertoys.json",
+          "index.html",
+          "style.css"
+        ]
+      }
+    }
+  ],
+  "observations": [
+    {
+      "id": "1280/flow091/click/#caseSel",
+      "data": {
+        "exists": true,
+        "text": "AgentFlow 배경 사본 기능 일부\nPowerToys Keyboard Manager 편집기의 두 동작 수정",
+        "value": "0",
+        "rect": {
+          "x": 77.265625,
+          "y": 8,
+          "width": 329,
+          "height": 25,
+          "top": 8,
+          "bottom": 33,
+          "left": 77.265625,
+          "right": 406.265625
+        },
+        "selfContentClip": {
+          "left": 78.265625,
+          "top": 9,
+          "right": 405.265625,
+          "bottom": 32
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "visibleIntersection": {
+          "left": 77.265625,
+          "right": 406.265625,
+          "top": 8,
+          "bottom": 33
+        },
+        "clips": [
+          {
+            "id": "caseSel",
+            "tag": "SELECT",
+            "self": true,
+            "x": true,
+            "y": true,
+            "box": {
+              "left": 78.265625,
+              "top": 9,
+              "right": 405.265625,
+              "bottom": 32
+            }
+          }
+        ],
+        "samples": [
+          {
+            "x": 159.515625,
+            "y": 20.5,
+            "hit": true,
+            "cover": {
+              "id": "caseSel",
+              "tag": "SELECT",
+              "cls": ""
+            }
+          },
+          {
+            "x": 241.765625,
+            "y": 20.5,
+            "hit": true,
+            "cover": {
+              "id": "caseSel",
+              "tag": "SELECT",
+              "cls": ""
+            }
+          },
+          {
+            "x": 324.015625,
+            "y": 20.5,
+            "hit": true,
+            "cover": {
+              "id": "caseSel",
+              "tag": "SELECT",
+              "cls": ""
+            }
+          }
+        ],
+        "rangeRects": [],
+        "display": "block",
+        "visibility": "visible",
+        "hidden": false,
+        "full": true,
+        "hit": true
+      }
+    }
+  ],
+  "http": [
+    {
+      "scenario": "1280/flow091",
+      "url": "http://127.0.0.1:44227/index.html",
+      "path": "index.html",
+      "status": 200,
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+    },
+    {
+      "scenario": "1280/flow091",
+      "url": "http://127.0.0.1:44227/style.css",
+      "path": "style.css",
+      "status": 200,
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+    },
+    {
+      "scenario": "1280/flow091",
+      "url": "http://127.0.0.1:44227/engine.js",
+      "path": "engine.js",
+      "status": 200,
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+    },
+    {
+      "scenario": "1280/flow091",
+      "url": "http://127.0.0.1:44227/fixtures/flow091.json",
+      "path": "fixtures/flow091.json",
+      "status": 200,
+      "bytes": 19224,
+      "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+    },
+    {
+      "scenario": "1280/flow091",
+      "url": "http://127.0.0.1:44227/fixtures/powertoys.json",
+      "path": "fixtures/powertoys.json",
+      "status": 200,
+      "bytes": 13494,
+      "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+    }
+  ],
+  "console": [
+    {
+      "scenario": "1280/flow091",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (File not found)"
+    }
+  ],
+  "pageerrors": [],
+  "fatal": {
+    "type": "KeyError",
+    "message": "'rect'",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/shared11/snapshots/p2-238fc9dd7cd5d48ca74fa4e68be928da267c49a11e47c75e318141c6644848f5.py\", line 44, in main\n    p.keyboard.press('Enter');p.wait_for_timeout(150);click('#n-'+node,'#mapScroll');click('#panel [data-act=\"draft\"]','#panel');empty=snap('initial-empty');check(tag+'/initial-empty',empty['input']=='' and empty['copyDisabled'] and empty['previewDisabled'])\n                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/shared11/snapshots/p2-238fc9dd7cd5d48ca74fa4e68be928da267c49a11e47c75e318141c6644848f5.py\", line 37, in click\n    g=ensure(s,container) if container else geom(s);record(tag+'/click/'+s,g)\n      ^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/shared11/snapshots/p2-238fc9dd7cd5d48ca74fa4e68be928da267c49a11e47c75e318141c6644848f5.py\", line 34, in ensure\n    v=geom(container)['visibleIntersection'];b=g['rect'];dy=min(130,b['bottom']-v['bottom']+10) if b['bottom']>v['bottom'] else -min(130,v['top']-b['top']+10);p.mouse.move(v['right']-10,v['bottom']-10);p.mouse.wheel(0,dy);p.wait_for_timeout(120)\n                                               ~^^^^^^^^\nKeyError: 'rect'\n"
+  },
+  "cleanupErrors": [],
+  "environment": {
+    "python": "/workspace/browser-env/venv/bin/python",
+    "playwrightPackage": "1.57.0",
+    "chromiumExecutable": "/usr/bin/chromium",
+    "browserVersion": "154.0.8037.57"
+  },
+  "beforeFiles": {
+    "engine.js": {
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+    },
+    "fixtures/flow091.json": {
+      "bytes": 19224,
+      "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+    },
+    "fixtures/powertoys.json": {
+      "bytes": 13494,
+      "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+    },
+    "index.html": {
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+    },
+    "style.css": {
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+    }
+  },
+  "actualHTTPURL": "http://127.0.0.1:44227/index.html",
+  "afterFiles": {
+    "engine.js": {
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14"
+    },
+    "fixtures/flow091.json": {
+      "bytes": 19224,
+      "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b"
+    },
+    "fixtures/powertoys.json": {
+      "bytes": 13494,
+      "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff"
+    },
+    "index.html": {
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07"
+    },
+    "style.css": {
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929"
+    }
+  },
+  "complete": false,
+  "finishedUTC": "2026-10-16T00:49:36.488880+00:00",
+  "majorConsoleErrors": [],
+  "exitCode": 1
+}

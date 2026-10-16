@@ -1,0 +1,41 @@
+{
+  "commit": "6643323316daefbe10625484bb1727a2c6a54716",
+  "checks": [
+    {
+      "path": "engine.js",
+      "bytes": 33828,
+      "sha256": "d945331c64afe1fd3feff3be4367161870ccd6621d402665e7c9e7ef75160d14",
+      "match": true
+    },
+    {
+      "path": "fixtures/flow091.json",
+      "bytes": 19224,
+      "sha256": "5b4269c6b4956ef00856a08a2eadf3149a6ed1d9c582eee204b7bc0691d43c4b",
+      "match": true
+    },
+    {
+      "path": "fixtures/powertoys.json",
+      "bytes": 13494,
+      "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff",
+      "match": true
+    },
+    {
+      "path": "index.html",
+      "bytes": 2769,
+      "sha256": "a6c9d0a0ee764ea1435f989b02b414d61129fb75e6ea56663d83a275b153cb07",
+      "match": true
+    },
+    {
+      "path": "schema.md",
+      "bytes": 3981,
+      "sha256": "5a6fc4d9b0b1d71dd337679499913eb3a04a83033d396bfca3af90f53d9ffd71",
+      "match": true
+    },
+    {
+      "path": "style.css",
+      "bytes": 11662,
+      "sha256": "704369c9524bd2b66be07f150c18f14881d205c8f92c65a98e68356080dac929",
+      "match": true
+    }
+  ]
+}

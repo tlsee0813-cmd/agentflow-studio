@@ -1,0 +1,20 @@
+{
+  "UTC": "2026-10-16T00:50:20.693007+00:00",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/shared11/snapshots/p2-bc80e3f83e92b81347d0a56717c370e39ad47a466f18da643446c08fb8030894.py",
+    "--site",
+    "/workspace/browser-env/shared11/v0",
+    "--manifest",
+    "/workspace/browser-env/shared11/v0-runtime-manifest.json",
+    "--out",
+    "/workspace/browser-env/shared11/v0-p2-run02",
+    "--label",
+    "v0-p2-run02"
+  ],
+  "codeSHA256": "bc80e3f83e92b81347d0a56717c370e39ad47a466f18da643446c08fb8030894",
+  "actualChildExit": 1,
+  "jsonExit": 1,
+  "agreement": true,
+  "collectorIntendedExit": 1
+}

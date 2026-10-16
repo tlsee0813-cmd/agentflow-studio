@@ -1,0 +1,71 @@
+{
+  "kind": "Static literal checks separate from real browser paths",
+  "checks": [
+    {
+      "id": "flow-roots",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "flow-change-owner",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "flow-relations-exact",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "flow-all-F-exact-href",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "pt-node-boundary",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "pt-only-support-relation",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "pt-changes-evidence",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "pt-human-request-hrefs",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "pt-author-merge-boundary",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "pt-X1-exact-hrefs",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "pt-actual-change-directions",
+      "status": "PASS",
+      "details": null
+    },
+    {
+      "id": "generic-engine-css-no-case-literals",
+      "status": "PASS",
+      "details": []
+    },
+    {
+      "id": "shared-entry-asset-references",
+      "status": "PASS",
+      "details": null
+    }
+  ],
+  "passed": true
+}

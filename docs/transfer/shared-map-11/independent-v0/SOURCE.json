@@ -1,0 +1,20 @@
+{
+  "baseCommit": "6643323316daefbe10625484bb1727a2c6a54716",
+  "basePath": "docs/transfer/shared-map-11/author-v0/app/",
+  "overlayCommit": "c4354dccc6f693bf33d5157e7e8da566d152d9a1",
+  "overlayPath": "docs/transfer/shared-map-11/author-fix1/app/engine.js",
+  "overlayBytes": 34004,
+  "overlaySHA256": "d3699ac75671b000cb4561ae137073aa73a18c74fefe6fbaa0bd3489c438ff8f",
+  "overlayManifestPath": "docs/transfer/shared-map-11/author-fix1/MANIFEST.tsv",
+  "overlayManifestSHA256": "f3d9a0deb20a0d7b715300224c1f0bfa6ab8aad04e3fd4bcf0c4e4bad7789644",
+  "contractCommit": "02fa3115d701a364a848737ec14b49a19c194e97",
+  "contractFiles": [
+    "DECISION.md",
+    "INPUT.md",
+    "PRODUCT_BOUNDARY.md",
+    "CROSS_CASE_MEANING_GATE.md"
+  ],
+  "assembly": "Exact base five runtime files in NEW fix1 directory, replace engine only. Other four runtime byte-identical to v0. Original v0 retained. No runtime source copies duplicated in payload; reproduce via assemble_runtime.py and pinned Git blobs.",
+  "testedAssemblyHelper": "/tmp/cycle11-independent-assembly-check assembled and hash-verified without browser rerun",
+  "sourceUnchangedAfterTests": true
+}
