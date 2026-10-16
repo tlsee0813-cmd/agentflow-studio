@@ -1,0 +1,23 @@
+test_01_empty_start_areas_area_work_report_and_reload (__main__.SpatialWorkspace.test_01_empty_start_areas_area_work_report_and_reload) ... ok
+test_02_an_older_project_without_areas_opens_whole_and_can_be_placed (__main__.SpatialWorkspace.test_02_an_older_project_without_areas_opens_whole_and_can_be_placed) ... ok
+test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report (__main__.SpatialWorkspace.test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report) ... ok
+test_04_an_unsent_report_or_request_keeps_its_kind_and_target (__main__.SpatialWorkspace.test_04_an_unsent_report_or_request_keeps_its_kind_and_target) ... ok
+test_05_area_edit_drafts_stay_with_their_area (__main__.SpatialWorkspace.test_05_area_edit_drafts_stay_with_their_area) ... ok
+test_06_a_backup_copy_keeps_the_unsent_requests_area (__main__.SpatialWorkspace.test_06_a_backup_copy_keeps_the_unsent_requests_area) ... ok
+test_07_map_select_move_open_zoom_fit_undo_and_restore (__main__.SpatialWorkspace.test_07_map_select_move_open_zoom_fit_undo_and_restore) ... ok
+test_08_narrow_screen_sheet_and_direct_open (__main__.SpatialWorkspace.test_08_narrow_screen_sheet_and_direct_open) ... ok
+test_09_fit_brings_every_card_into_view_at_any_spread (__main__.SpatialWorkspace.test_09_fit_brings_every_card_into_view_at_any_spread) ... ok
+test_10_a_saved_target_in_the_last_archived_area_stays_visible (__main__.SpatialWorkspace.test_10_a_saved_target_in_the_last_archived_area_stays_visible) ... ok
+test_11_task_goal_is_not_repeated_and_one_entry_each (__main__.SpatialWorkspace.test_11_task_goal_is_not_repeated_and_one_entry_each) ... ok
+test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft (__main__.SpatialWorkspace.test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft) ... ok
+test_13_bases_from_other_areas_are_not_called_common (__main__.SpatialWorkspace.test_13_bases_from_other_areas_are_not_called_common) ... ok
+test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming (__main__.SpatialWorkspace.test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming) ... ok
+test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft (__main__.SpatialWorkspace.test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft) ... ok
+test_16_background_copy_walkthrough (__main__.SpatialWorkspace.test_16_background_copy_walkthrough) ... ok
+test_17_narrow_sheet_fields_keep_their_height (__main__.SpatialWorkspace.test_17_narrow_sheet_fields_keep_their_height) ... ok
+test_18_repeated_request_shown_once_and_copy_markdown_preview_match (__main__.SpatialWorkspace.test_18_repeated_request_shown_once_and_copy_markdown_preview_match) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 38.512s
+
+OK

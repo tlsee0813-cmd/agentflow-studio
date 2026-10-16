@@ -1,0 +1,129 @@
+test_01_empty_start_areas_area_work_report_and_reload (__main__.SpatialWorkspace.test_01_empty_start_areas_area_work_report_and_reload) ... ok
+test_02_an_older_project_without_areas_opens_whole_and_can_be_placed (__main__.SpatialWorkspace.test_02_an_older_project_without_areas_opens_whole_and_can_be_placed) ... ok
+test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report (__main__.SpatialWorkspace.test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report) ... ok
+test_04_an_unsent_report_or_request_keeps_its_kind_and_target (__main__.SpatialWorkspace.test_04_an_unsent_report_or_request_keeps_its_kind_and_target) ... ok
+test_05_area_edit_drafts_stay_with_their_area (__main__.SpatialWorkspace.test_05_area_edit_drafts_stay_with_their_area) ... ok
+test_06_a_backup_copy_keeps_the_unsent_requests_area (__main__.SpatialWorkspace.test_06_a_backup_copy_keeps_the_unsent_requests_area) ... ok
+test_07_map_select_move_open_zoom_fit_undo_and_restore (__main__.SpatialWorkspace.test_07_map_select_move_open_zoom_fit_undo_and_restore) ... ERROR
+test_08_narrow_screen_sheet_and_direct_open (__main__.SpatialWorkspace.test_08_narrow_screen_sheet_and_direct_open) ... ok
+test_09_fit_brings_every_card_into_view_at_any_spread (__main__.SpatialWorkspace.test_09_fit_brings_every_card_into_view_at_any_spread) ... ok
+test_10_a_saved_target_in_the_last_archived_area_stays_visible (__main__.SpatialWorkspace.test_10_a_saved_target_in_the_last_archived_area_stays_visible) ... ok
+test_11_task_goal_is_not_repeated_and_one_entry_each (__main__.SpatialWorkspace.test_11_task_goal_is_not_repeated_and_one_entry_each) ... FAIL
+test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft (__main__.SpatialWorkspace.test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft) ... ok
+test_13_bases_from_other_areas_are_not_called_common (__main__.SpatialWorkspace.test_13_bases_from_other_areas_are_not_called_common) ... ok
+test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming (__main__.SpatialWorkspace.test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming) ... ok
+test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft (__main__.SpatialWorkspace.test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft) ... ok
+test_16_background_copy_walkthrough (__main__.SpatialWorkspace.test_16_background_copy_walkthrough) ... ok
+test_17_narrow_sheet_fields_keep_their_height (__main__.SpatialWorkspace.test_17_narrow_sheet_fields_keep_their_height) ... ok
+test_18_repeated_request_shown_once_and_copy_markdown_preview_match (__main__.SpatialWorkspace.test_18_repeated_request_shown_once_and_copy_markdown_preview_match) ... ok
+
+======================================================================
+ERROR: test_07_map_select_move_open_zoom_fit_undo_and_restore (__main__.SpatialWorkspace.test_07_map_select_move_open_zoom_fit_undo_and_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/flow090_browser.py", line 186, in test_07_map_select_move_open_zoom_fit_undo_and_restore
+    self.assertEqual(self.pos(notify),n0);self.page.locator('#space-title').click();self.page.keyboard.press('Control+z')
+                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15573, in click
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.click(
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 160, in click
+    return await self._frame.click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 549, in click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#space-title")
+    - locator resolved to <h1 tabindex="-1" class="sr-only" id="space-title">전체 공간</h1>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <span class="space-brief-label">프로젝트 목적</span> intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <span class="space-brief-label">프로젝트 목적</span> intercepts pointer events
+  2 × retrying click action
+      - waiting 100ms
+      - waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div id="notice" class="alert" role="status">‘알림’의 위치를 되돌렸어요. 다른 내용은 바뀌지 않았어요.</div> from <div class="feedback-stack">…</div> subtree intercepts pointer events
+  2 × retrying click action
+      - waiting 500ms
+      - waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <span class="space-brief-label">프로젝트 목적</span> intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+      - waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <span class="space-brief-label">프로젝트 목적</span> intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+      - waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div id="notice" class="alert" role="status">‘알림’의 위치를 되돌렸어요. 다른 내용은 바뀌지 않았어요.</div> from <div class="feedback-stack">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+      - waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div id="notice" class="alert" role="status">‘알림’의 위치를 되돌렸어요. 다른 내용은 바뀌지 않았어요.</div> from <div class="feedback-stack">…</div> subtree intercepts pointer events
+  2 × retrying click action
+      - waiting 500ms
+      - waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <span class="space-brief-label">프로젝트 목적</span> intercepts pointer events
+  - retrying click action
+    - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+
+
+======================================================================
+FAIL: test_11_task_goal_is_not_repeated_and_one_entry_each (__main__.SpatialWorkspace.test_11_task_goal_is_not_repeated_and_one_entry_each)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/flow090_browser.py", line 267, in test_11_task_goal_is_not_repeated_and_one_entry_each
+    self.assertLess(self.page.locator('#space-map').bounding_box()['y'],380,'the map starts in the first screen')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 389.125 not less than 380 : the map starts in the first screen
+
+----------------------------------------------------------------------
+Ran 18 tests in 39.681s
+
+FAILED (failures=1, errors=1)

@@ -1,0 +1,194 @@
+name: Verify app and continuity (no paid AI)
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    env:
+      AI_MODE: mock
+      ALLOW_PAID_AI: 'false'
+      DEEPSEEK_API_KEY: ''
+      BROWSER_TRANSPORT: direct-http
+      EVIDENCE_DIR: test-results
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
+    steps:
+      # Pinned actions; checkout explicitly targets the reported PR head SHA.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22.16.0'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13.5'
+      - name: Record exact runtime and checked-out commit
+        shell: bash
+        run: |
+          mkdir -p test-results
+          git rev-parse HEAD | tee test-results/commit.txt
+          node --version | tee test-results/node.txt
+          npm --version | tee test-results/npm.txt
+          node -e "if(process.version !== 'v22.16.0') process.exit(1)"
+      - name: Clean locked install
+        shell: bash
+        run: |
+          mkdir -p test-results
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee test-results/install.log
+      - name: Type and boundary checks
+        shell: bash
+        run: npm run check 2>&1 | tee test-results/check.log
+      - name: Build and domain / HTTP / simulated provider tests
+        shell: bash
+        run: npm test 2>&1 | tee test-results/node-tests.tap
+      - name: Continuity type, syntax and credential boundary checks
+        shell: bash
+        run: node continuity/scripts/check.mjs 2>&1 | tee test-results/continuity-check.log
+      - name: Build and test continuity with simulated providers
+        shell: bash
+        run: |
+          node continuity/scripts/build.mjs 2>&1 | tee test-results/continuity-build.log
+          node --test continuity/tests/*.test.mjs 2>&1 | tee test-results/continuity-node-tests.tap
+      - name: Build isolated static browser MOCK (no provider or prompt)
+        shell: bash
+        run: node continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log
+      - name: Install pinned browser verification tools
+        run: |
+          python -m pip install -r tests/browser-requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Direct browser-to-server verification (AI is still mocked)
+        shell: bash
+        run: python tests/browser.py 2>&1 | tee test-results/browser-direct.log
+      - name: Direct continuity browser-to-server and storage verification (AI is mocked)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/continuity
+        shell: bash
+        run: python continuity/tests/browser.py 2>&1 | tee test-results/continuity-browser-direct.log
+      # UI02/05/06 inject delay/storage/config faults; UI08 injects clipboard delay.
+      # These cases are regression checks, not pure native end-to-end evidence.
+      - name: Continuity UI and injected-fault regressions (AI is mocked)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/continuity-ui
+          UI001_SCREENSHOTS: test-results/continuity-ui/screenshots
+        shell: bash
+        run: python continuity/tests/ui001_browser.py 2>&1 | tee test-results/continuity-ui.log
+      - name: Question freshness and imported-history recovery (native HTTP, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/fresh033
+          FRESH033_EVIDENCE: test-results/fresh033
+        shell: bash
+        run: python continuity/tests/fresh033_browser.py 2>&1 | tee test-results/fresh033-browser.log
+      - name: Exported-task selection (native HTTP, synthetic fixture, mock AI)
+        env:
+          SELECT035_MATERIALS: continuity/tests/fixtures/select035
+          SELECT035_MATERIALS_SOURCE: synthetic CI fixture created with public domain APIs; no coordinator reports
+          IDEA015_EVIDENCE_DIR: test-results/select035
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p test-results
+          python continuity/tests/select035_browser.py 2>&1 | tee test-results/select035-browser.log
+      - name: Optional result files (native files/storage; labelled fault injections; mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/connect039
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/connect039_browser.py 2>&1 | tee test-results/connect039-browser.log
+      - name: Outcome home roundtrip (native HTTP, synthetic reports, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/flow049
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/flow049_browser.py 2>&1 | tee test-results/flow049-browser.log
+      - name: Natural-language intent wiring (native HTTP, hand-authored MOCK, not AI quality)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/ai055
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/ai055_browser.py 2>&1 | tee test-results/ai055-browser.log
+      - name: Project entry, list, trash and backup copies (native HTTP, MOCK; wiring, not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/flow083
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/flow083_browser.py 2>&1 | tee test-results/flow083-browser.log
+      - name: Plan space, areas, area work and older-project placement (native HTTP, MOCK; wiring, not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/flow090
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/flow090_browser.py 2>&1 | tee test-results/flow090-browser.log
+      - name: Area guidance question, draft and adoption into the area's request (native HTTP, MOCK rules; not AI quality)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/guide097
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/guide097_browser.py 2>&1 | tee test-results/guide097-browser.log
+      - name: Enter-first space, read-only task screen, return place and '확인할 일' (native HTTP, MOCK; not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/spatial102
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/spatial102_browser.py 2>&1 | tee test-results/spatial102-browser.log
+      - name: USE106 first-request background, validation, storage and review guidance (native HTTP, MOCK)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/use106
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/use106_browser.py 2>&1 | tee test-results/use106-browser.log
+      - name: PC12 area reading, chosen-task context, explicit continue and return to the starting map view (native HTTP, MOCK; wiring, not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/pc12
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/pc12_browser.py 2>&1 | tee test-results/pc12-browser.log
+      - name: PC13 whole-space layout, records and area-add disclosures, product12 return from the new layout (native HTTP, MOCK; geometry and wiring, not usability)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/pc13
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/pc13_browser.py 2>&1 | tee test-results/pc13-browser.log
+      # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
+      - name: Static subpath exchange and storage isolation (browser MOCK, no API)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/static-web
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/static_browser.py 2>&1 | tee test-results/static-browser.log
+      - name: Upload only this run's results, not historic snapshot evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: agentflow-${{ matrix.os }}-${{ github.run_id }}
+          path: app/test-results/
+          if-no-files-found: warn
+          retention-days: 7

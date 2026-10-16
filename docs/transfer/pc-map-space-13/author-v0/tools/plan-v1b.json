@@ -1,0 +1,2 @@
+[{"name":"v1b-spatial102","cmd":["python3","continuity/tests/spatial102_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13/v1b/spatial102"}},
+ {"name":"v1b-flow090","cmd":["python3","continuity/tests/flow090_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13/v1b/flow090"}}]

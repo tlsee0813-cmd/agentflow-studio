@@ -1,0 +1,8 @@
+[{"name":"v1-npm-check","cmd":["npm","run","check"],"cwd":"$WORK/repo/app"},
+ {"name":"v1-cont-check","cmd":["node","continuity/scripts/check.mjs"],"cwd":"$WORK/repo/app"},
+ {"name":"v1-cont-build","cmd":["node","continuity/scripts/build.mjs"],"cwd":"$WORK/repo/app"},
+ {"name":"v1-node-tests","cmd":["bash","-c","node --test continuity/tests/*.test.mjs"],"cwd":"$WORK/repo/app"},
+ {"name":"v1-pc13","cmd":["python3","continuity/tests/pc13_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13/v1full/pc13"}},
+ {"name":"v1-pc12","cmd":["python3","continuity/tests/pc12_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13/v1full/pc12"}},
+ {"name":"v1-spatial102","cmd":["python3","continuity/tests/spatial102_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13/v1full/spatial102"}},
+ {"name":"v1-flow090","cmd":["python3","continuity/tests/flow090_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13/v1full/flow090"}}]

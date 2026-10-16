@@ -1,0 +1,351 @@
+test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen) ... FAIL
+test_02_one_normal_notice_stays_visible (__main__.Pc13.test_02_one_normal_notice_stays_visible) ... FAIL
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... FAIL
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13.test_04_records_counts_zero_each_both_and_opening) ... ERROR
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ERROR
+test_06_long_purpose_idea_and_title (__main__.Pc13Boundaries.test_06_long_purpose_idea_and_title) ... ok
+test_07_css_width_1024_and_narrow_390 (__main__.Pc13Boundaries.test_07_css_width_1024_and_narrow_390) ... ERROR
+test_01_default_and_selected_first_screen (__main__.Pc13Wide.test_01_default_and_selected_first_screen) ... FAIL
+test_02_one_normal_notice_stays_visible (__main__.Pc13Wide.test_02_one_normal_notice_stays_visible) ... FAIL
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13Wide.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... FAIL
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13Wide.test_04_records_counts_zero_each_both_and_opening) ... ERROR
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ERROR
+
+======================================================================
+ERROR: test_04_records_counts_zero_each_both_and_opening (__main__.Pc13.test_04_records_counts_zero_each_both_and_opening)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 146, in test_04_records_counts_zero_each_both_and_opening
+    self.check('decision only',summary.inner_text(),'이어 볼 기록 1개 · 답 기다림 1')
+                               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 17018, in inner_text
+    self._sync(self._impl_obj.inner_text(timeout=timeout))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 458, in inner_text
+    return await self._frame.inner_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 695, in inner_text
+    return await self._channel.send(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+        "innerText", self._timeout, locals_to_params(locals())
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.inner_text: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#check-summary")
+
+
+======================================================================
+ERROR: test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13.test_05_R_edit_and_RB_to_A_from_the_new_layout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 224, in test_05_R_edit_and_RB_to_A_from_the_new_layout
+    b=self.depart(ids['예약'],A,True);self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+      ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 171, in depart
+    if not rec.evaluate('(e)=>e.open'):rec.locator('summary').click()
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15573, in click
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.click(
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 160, in click
+    return await self._frame.click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 549, in click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#check-list").locator("summary")
+
+
+======================================================================
+ERROR: test_07_css_width_1024_and_narrow_390 (__main__.Pc13Boundaries.test_07_css_width_1024_and_narrow_390)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 264, in test_07_css_width_1024_and_narrow_390
+    self.page.locator('#check-list > summary').click();expect(self.page.locator('#check-list')).to_have_attribute('open','')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15573, in click
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.click(
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 160, in click
+    return await self._frame.click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 549, in click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#check-list > summary")
+
+
+======================================================================
+ERROR: test_04_records_counts_zero_each_both_and_opening (__main__.Pc13Wide.test_04_records_counts_zero_each_both_and_opening)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 146, in test_04_records_counts_zero_each_both_and_opening
+    self.check('decision only',summary.inner_text(),'이어 볼 기록 1개 · 답 기다림 1')
+                               ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 17018, in inner_text
+    self._sync(self._impl_obj.inner_text(timeout=timeout))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 458, in inner_text
+    return await self._frame.inner_text(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 695, in inner_text
+    return await self._channel.send(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+        "innerText", self._timeout, locals_to_params(locals())
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.inner_text: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#check-summary")
+
+
+======================================================================
+ERROR: test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 224, in test_05_R_edit_and_RB_to_A_from_the_new_layout
+    b=self.depart(ids['예약'],A,True);self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+      ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 171, in depart
+    if not rec.evaluate('(e)=>e.open'):rec.locator('summary').click()
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15573, in click
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.click(
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 160, in click
+    return await self._frame.click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 549, in click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#check-list").locator("summary")
+
+
+======================================================================
+FAIL: test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 101, in test_01_default_and_selected_first_screen
+    self.check('default: records summary',g['records'],'이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1')
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 52, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: None != '이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1' : default: records summary
+
+======================================================================
+FAIL: test_02_one_normal_notice_stays_visible (__main__.Pc13.test_02_one_normal_notice_stays_visible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 127, in test_02_one_normal_notice_stays_visible
+    self.assert_first_screen(g,'notice');self.shot('03-notice')
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 91, in assert_first_screen
+    self.check(f'{label}: page not scrolled',g['windowY'],0)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 52, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 114 != 0 : notice: page not scrolled
+
+======================================================================
+FAIL: test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 131, in test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft
+    panel=self.page.locator('#area-add-panel');expect(panel).not_to_have_attribute('open','');expect(self.page.locator('#area-name')).to_be_hidden()
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 19367, in not_to_have_attribute
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.not_to_have_attribute(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            name=name, value=value, ignoreCase=ignore_case, timeout=timeout
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 284, in not_to_have_attribute
+    await self._not.to_have_attribute(
+        name, value, ignoreCase=ignoreCase, timeout=timeout
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 266, in to_have_attribute
+    await self._expect_impl(
+    ...<7 lines>...
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected not to have attribute ''
+Actual value: None
+Error: element(s) not found 
+Call log:
+  - Expect "to_have_attribute" with timeout 5000ms
+  - waiting for locator("#area-add-panel")
+
+
+======================================================================
+FAIL: test_01_default_and_selected_first_screen (__main__.Pc13Wide.test_01_default_and_selected_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 101, in test_01_default_and_selected_first_screen
+    self.check('default: records summary',g['records'],'이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1')
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 52, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: None != '이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1' : default: records summary
+
+======================================================================
+FAIL: test_02_one_normal_notice_stays_visible (__main__.Pc13Wide.test_02_one_normal_notice_stays_visible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 127, in test_02_one_normal_notice_stays_visible
+    self.assert_first_screen(g,'notice');self.shot('03-notice')
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 91, in assert_first_screen
+    self.check(f'{label}: page not scrolled',g['windowY'],0)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 52, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 114 != 0 : notice: page not scrolled
+
+======================================================================
+FAIL: test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13Wide.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 131, in test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft
+    panel=self.page.locator('#area-add-panel');expect(panel).not_to_have_attribute('open','');expect(self.page.locator('#area-name')).to_be_hidden()
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 19367, in not_to_have_attribute
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.not_to_have_attribute(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            name=name, value=value, ignoreCase=ignore_case, timeout=timeout
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 284, in not_to_have_attribute
+    await self._not.to_have_attribute(
+        name, value, ignoreCase=ignoreCase, timeout=timeout
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 266, in to_have_attribute
+    await self._expect_impl(
+    ...<7 lines>...
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected not to have attribute ''
+Actual value: None
+Error: element(s) not found 
+Call log:
+  - Expect "to_have_attribute" with timeout 5000ms
+  - waiting for locator("#area-add-panel")
+
+
+----------------------------------------------------------------------
+Ran 12 tests in 75.215s
+
+FAILED (failures=6, errors=5)

@@ -1,0 +1,47 @@
+test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen) ... FAIL
+test_02_one_normal_notice_stays_visible (__main__.Pc13.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+test_06_long_purpose_idea_and_title (__main__.Pc13Boundaries.test_06_long_purpose_idea_and_title) ... ok
+test_07_css_width_1024_and_narrow_390 (__main__.Pc13Boundaries.test_07_css_width_1024_and_narrow_390) ... ok
+test_01_default_and_selected_first_screen (__main__.Pc13Wide.test_01_default_and_selected_first_screen) ... FAIL
+test_02_one_normal_notice_stays_visible (__main__.Pc13Wide.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13Wide.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13Wide.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+
+======================================================================
+FAIL: test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 109, in test_01_default_and_selected_first_screen
+    s=self.geom('selected');self.assert_first_screen(s,'selected')
+                            ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 93, in assert_first_screen
+    self.check(f'{label}: first card title reachable',g['firstTitleHit'],True);self.check(f'{label}: first card info reachable',g['firstInfoHit'],True)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 52, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True : selected: first card title reachable
+
+======================================================================
+FAIL: test_01_default_and_selected_first_screen (__main__.Pc13Wide.test_01_default_and_selected_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 109, in test_01_default_and_selected_first_screen
+    s=self.geom('selected');self.assert_first_screen(s,'selected')
+                            ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 93, in assert_first_screen
+    self.check(f'{label}: first card title reachable',g['firstTitleHit'],True);self.check(f'{label}: first card info reachable',g['firstInfoHit'],True)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 52, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True : selected: first card title reachable
+
+----------------------------------------------------------------------
+Ran 12 tests in 43.783s
+
+FAILED (failures=2)

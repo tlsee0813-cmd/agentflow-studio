@@ -1,0 +1,1270 @@
+TAP version 13
+# Subtest: AI055 hand-authored four-turn interpretation reaches next HTTP input, home projection and handoff; raw user history untouched
+ok 1 - AI055 hand-authored four-turn interpretation reaches next HTTP input, home projection and handoff; raw user history untouched
+  ---
+  duration_ms: 27.247205
+  type: 'test'
+  ...
+# Subtest: AI055 invalid version/source/revision/current-input omission is rejected atomically; stored legacy eight-key advice still readable
+ok 2 - AI055 invalid version/source/revision/current-input omission is rejected atomically; stored legacy eight-key advice still readable
+  ---
+  duration_ms: 5.404566
+  type: 'test'
+  ...
+# Subtest: AI055 separate purpose and uncertain interpretation do not turn parent linkage into a purpose or a decision
+ok 3 - AI055 separate purpose and uncertain interpretation do not turn parent linkage into a purpose or a decision
+  ---
+  duration_ms: 5.748689
+  type: 'test'
+  ...
+# Subtest: AI055 manual correction/undo values survive regeneration; stale response and changed source cannot replace them
+ok 4 - AI055 manual correction/undo values survive regeneration; stale response and changed source cannot replace them
+  ---
+  duration_ms: 8.811814
+  type: 'test'
+  ...
+# Subtest: AI055 exact late return preserves manual purpose, raw file and independent branch; no semantic promotion from report
+ok 5 - AI055 exact late return preserves manual purpose, raw file and independent branch; no semantic promotion from report
+  ---
+  duration_ms: 7.400656
+  type: 'test'
+  ...
+# Subtest: C039 exact A/H1 return while current B; atomic source pair, drafts, provenance, recovery and B isolation
+ok 6 - C039 exact A/H1 return while current B; atomic source pair, drafts, provenance, recovery and B isolation
+  ---
+  duration_ms: 31.737456
+  type: 'test'
+  ...
+# Subtest: C039 dedup by decoded fields; partial reports append and external instructions never gain authority
+ok 7 - C039 dedup by decoded fields; partial reports append and external instructions never gain authority
+  ---
+  duration_ms: 4.270939
+  type: 'test'
+  ...
+# Subtest: C039 invalid file/reference/oversize rejects without mutation; restore checks generated prefix but permits real later decisions and answers
+ok 8 - C039 invalid file/reference/oversize rejects without mutation; restore checks generated prefix but permits real later decisions and answers
+  ---
+  duration_ms: 475.337781
+  type: 'test'
+  ...
+# Subtest: C039 v1/v2 migration preserves exact original bytes and null IDs; backup failure blocks save and replacement
+ok 9 - C039 v1/v2 migration preserves exact original bytes and null IDs; backup failure blocks save and replacement
+  ---
+  duration_ms: 8.794115
+  type: 'test'
+  ...
+# Subtest: C039 pending response cannot apply after import; quota/conflict preserve persisted project and in-memory raw result
+ok 10 - C039 pending response cannot apply after import; quota/conflict preserve persisted project and in-memory raw result
+  ---
+  duration_ms: 3.796352
+  type: 'test'
+  ...
+# Subtest: C039 file footer stays optional; export freshness pins returnId and manual routes stay unchanged
+ok 11 - C039 file footer stays optional; export freshness pins returnId and manual routes stay unchanged
+  ---
+  duration_ms: 2.303994
+  type: 'test'
+  ...
+# Subtest: C039 rev1 external v1/v2 recovery fits a v3-only quota and remains writable; stored legacy backup rules stay intact
+ok 12 - C039 rev1 external v1/v2 recovery fits a v3-only quota and remains writable; stored legacy backup rules stay intact
+  ---
+  duration_ms: 7.063177
+  type: 'test'
+  ...
+# Subtest: I15-D01 exact free input preserved; immutable requested origin, not confirmed; small wording change no question
+ok 13 - I15-D01 exact free input preserved; immutable requested origin, not confirmed; small wording change no question
+  ---
+  duration_ms: 10.825439
+  type: 'test'
+  ...
+# Subtest: I15-D02 meaningful choice and unknown technical fact use separate paths, no compulsory alternatives
+ok 14 - I15-D02 meaningful choice and unknown technical fact use separate paths, no compulsory alternatives
+  ---
+  duration_ms: 2.79975
+  type: 'test'
+  ...
+# Subtest: I15-D03 actual answer attached to real question and no new forced confirmation
+ok 15 - I15-D03 actual answer attached to real question and no new forced confirmation
+  ---
+  duration_ms: 5.549841
+  type: 'test'
+  ...
+# Subtest: I15-D04 unknown/defer applies only to answer; untouched old bases survive, no repeat question
+ok 16 - I15-D04 unknown/defer applies only to answer; untouched old bases survive, no repeat question
+  ---
+  duration_ms: 2.978258
+  type: 'test'
+  ...
+# Subtest: I15-D05 AI cannot set source kind/status or write a basis; whole malformed result refused
+ok 17 - I15-D05 AI cannot set source kind/status or write a basis; whole malformed result refused
+  ---
+  duration_ms: 1.108897
+  type: 'test'
+  ...
+# Subtest: I15-D06 report claim and supplied evidence never become verified/customer requested bases
+ok 18 - I15-D06 report claim and supplied evidence never become verified/customer requested bases
+  ---
+  duration_ms: 5.032736
+  type: 'test'
+  ...
+# Subtest: I15-D07 synthetic test answers stay test-only on initial and followup, including explicit looking changes
+ok 19 - I15-D07 synthetic test answers stay test-only on initial and followup, including explicit looking changes
+  ---
+  duration_ms: 1.685324
+  type: 'test'
+  ...
+# Subtest: I15-D08 explicit unique scalar change updates only intended span, stable ID/history and no extra approval
+ok 20 - I15-D08 explicit unique scalar change updates only intended span, stable ID/history and no extra approval
+  ---
+  duration_ms: 2.362899
+  type: 'test'
+  ...
+# Subtest: I15-D09 exact quoted change preserved; ambiguous multi-value or quoted report cannot rewrite basis
+ok 21 - I15-D09 exact quoted change preserved; ambiguous multi-value or quoted report cannot rewrite basis
+  ---
+  duration_ms: 0.981972
+  type: 'test'
+  ...
+# Subtest: I15-D10 relevant set has no 2-item cap and omitted important bases remain in handoff/context
+ok 22 - I15-D10 relevant set has no 2-item cap and omitted important bases remain in handoff/context
+  ---
+  duration_ms: 5.213329
+  type: 'test'
+  ...
+# Subtest: I15-D11 input edits arriving before response invalidate only that response, preserve draft/old advice
+ok 23 - I15-D11 input edits arriving before response invalidate only that response, preserve draft/old advice
+  ---
+  duration_ms: 0.820671
+  type: 'test'
+  ...
+# Subtest: I15-D12 manual edits & suggestion edits survive stale response and a subsequent successful retry
+ok 24 - I15-D12 manual edits & suggestion edits survive stale response and a subsequent successful retry
+  ---
+  duration_ms: 1.732734
+  type: 'test'
+  ...
+# Subtest: I15-D13 retry reuses sources; duplicate/stale ticket cannot overwrite new ticket
+ok 25 - I15-D13 retry reuses sources; duplicate/stale ticket cannot overwrite new ticket
+  ---
+  duration_ms: 0.74061
+  type: 'test'
+  ...
+# Subtest: I15-D14 cancellation and reload preserve inputs, do not automatically dispatch
+ok 26 - I15-D14 cancellation and reload preserve inputs, do not automatically dispatch
+  ---
+  duration_ms: 0.87088
+  type: 'test'
+  ...
+# Subtest: I15-D15 lossless JSON roundtrip includes history, manual fields, source kinds and export records
+ok 27 - I15-D15 lossless JSON roundtrip includes history, manual fields, source kinds and export records
+  ---
+  duration_ms: 1.537655
+  type: 'test'
+  ...
+# Subtest: I15-D16 malformed/version/foreign refs/cycle/authority promotion import rejected without mutating old project
+ok 28 - I15-D16 malformed/version/foreign refs/cycle/authority promotion import rejected without mutating old project
+  ---
+  duration_ms: 2.020649
+  type: 'test'
+  ...
+# Subtest: I15-D17 storage failure and cross-tab conflict leave memory and previous valid persisted data intact
+ok 29 - I15-D17 storage failure and cross-tab conflict leave memory and previous valid persisted data intact
+  ---
+  duration_ms: 1.549946
+  type: 'test'
+  ...
+# Subtest: I15-D18 corrupted stored file is not overwritten automatically; explicit replacement can recover
+ok 30 - I15-D18 corrupted stored file is not overwritten automatically; explicit replacement can recover
+  ---
+  duration_ms: 0.770743
+  type: 'test'
+  ...
+# Subtest: I15-D19 full unrelated chat is not sent; known bases and adjacent return group are retained
+ok 31 - I15-D19 full unrelated chat is not sent; known bases and adjacent return group are retained
+  ---
+  duration_ms: 4.161858
+  type: 'test'
+  ...
+# Subtest: I15-D20 invalid reference, authority key or control character in AI text rejected
+ok 32 - I15-D20 invalid reference, authority key or control character in AI text rejected
+  ---
+  duration_ms: 0.683126
+  type: 'test'
+  ...
+# Subtest: I15-D21 real choice/unknown answers remain available after several later changes without another confirmation
+ok 33 - I15-D21 real choice/unknown answers remain available after several later changes without another confirmation
+  ---
+  duration_ms: 4.565463
+  type: 'test'
+  ...
+# Subtest: I15-D22 after a pasted report, the next change still carries the handed-off work and its user-edited scope
+ok 34 - I15-D22 after a pasted report, the next change still carries the handed-off work and its user-edited scope
+  ---
+  duration_ms: 1.956855
+  type: 'test'
+  ...
+# Subtest: I15-D23 explicit quoted change inserts the typed text literally ($$, $& are not replacement patterns)
+ok 35 - I15-D23 explicit quoted change inserts the typed text literally ($$, $& are not replacement patterns)
+  ---
+  duration_ms: 0.46051
+  type: 'test'
+  ...
+# Subtest: I15-D24 AI text written before a basis change is withheld from the current handoff, also after reload; user text stays
+ok 36 - I15-D24 AI text written before a basis change is withheld from the current handoff, also after reload; user text stays
+  ---
+  duration_ms: 1.810684
+  type: 'test'
+  ...
+# Subtest: I15-D25 previous work AI text is withheld after its basis changed; user-edited previous scope is still carried
+ok 37 - I15-D25 previous work AI text is withheld after its basis changed; user-edited previous scope is still carried
+  ---
+  duration_ms: 1.555924
+  type: 'test'
+  ...
+# Subtest: I15-D26 project.1 files migrate without losing records; old AI text is treated as unknown-revision
+ok 38 - I15-D26 project.1 files migrate without losing records; old AI text is treated as unknown-revision
+  ---
+  duration_ms: 8.194394
+  type: 'test'
+  ...
+# Subtest: I15-D27 68 report/export cycles and 54 long requests keep editing, export, AI context and backup->import working
+ok 39 - I15-D27 68 report/export cycles and 54 long requests keep editing, export, AI context and backup->import working
+  ---
+  duration_ms: 2821.316251
+  type: 'test'
+  ...
+# Subtest: I15-D28 important confirmed/answered/edited bases are never shortened; within-budget old requests also stay full (IDEA017)
+ok 40 - I15-D28 important confirmed/answered/edited bases are never shortened; within-budget old requests also stay full (IDEA017)
+  ---
+  duration_ms: 3.425044
+  type: 'test'
+  ...
+# Subtest: I15-D29 a reply is recorded once even when re-organisation fails and is retried
+ok 41 - I15-D29 a reply is recorded once even when re-organisation fails and is retried
+  ---
+  duration_ms: 1.270418
+  type: 'test'
+  ...
+# Subtest: I15-D30 storage reports why it did not save; legacy browser data is kept before the first project.3 write
+ok 42 - I15-D30 storage reports why it did not save; legacy browser data is kept before the first project.3 write
+  ---
+  duration_ms: 5.076298
+  type: 'test'
+  ...
+# Subtest: I15-D31 1001 short requests saved through the app reopen after save and after backup->import
+ok 43 - I15-D31 1001 short requests saved through the app reopen after save and after backup->import
+  ---
+  duration_ms: 15347.321506
+  type: 'test'
+  ...
+# Subtest: I15-D32 byte boundary: largest project under 8MB saves, reopens and imports; one step over is refused without touching storage
+ok 44 - I15-D32 byte boundary: largest project under 8MB saves, reopens and imports; one step over is refused without touching storage
+  ---
+  duration_ms: 2742.378459
+  type: 'test'
+  ...
+# Subtest: I15-D33 item boundary: ITEM_LIMIT elements in one array are accepted, one more is refused by save and import alike
+ok 45 - I15-D33 item boundary: ITEM_LIMIT elements in one array are accepted, one more is refused by save and import alike
+  ---
+  duration_ms: 1188.4393
+  type: 'test'
+  ...
+# Subtest: I15-D34 app-made elements stay above FILE_LIMIT/ITEM_LIMIT bytes, so the byte limit binds before the item cap
+ok 46 - I15-D34 app-made elements stay above FILE_LIMIT/ITEM_LIMIT bytes, so the byte limit binds before the item cap
+  ---
+  duration_ms: 5.597972
+  type: 'test'
+  ...
+# Subtest: F058-B1 editing this task's understanding/scope stays a work instruction; it never becomes the next turn's purpose
+ok 47 - F058-B1 editing this task's understanding/scope stays a work instruction; it never becomes the next turn's purpose
+  ---
+  duration_ms: 19.365272
+  type: 'test'
+  ...
+# Subtest: F058-B2 purpose correction on a small task keeps that task narrow; stale AI action/question excluded; next turn carries the correction
+ok 48 - F058-B2 purpose correction on a small task keeps that task narrow; stale AI action/question excluded; next turn carries the correction
+  ---
+  duration_ms: 6.050741
+  type: 'test'
+  ...
+# Subtest: F058-B2 a correction stays visible after the AI interpretation goes stale; regeneration cannot overwrite it
+ok 49 - F058-B2 a correction stays visible after the AI interpretation goes stale; regeneration cannot overwrite it
+  ---
+  duration_ms: 3.329708
+  type: 'test'
+  ...
+# Subtest: F058-N1 AI retired wording cannot cancel a confirmed decision; precedence is consistent and requests-only flows are unchanged
+ok 50 - F058-N1 AI retired wording cannot cancel a confirmed decision; precedence is consistent and requests-only flows are unchanged
+  ---
+  duration_ms: 2.663487
+  type: 'test'
+  ...
+# Subtest: F058-N2 new responses reject separate+retired and the same sentence kept and retired; stored advice still loads
+ok 51 - F058-N2 new responses reject separate+retired and the same sentence kept and retired; stored advice still loads
+  ---
+  duration_ms: 1.406609
+  type: 'test'
+  ...
+# Subtest: F058-N5 explicit MOCK handoff is not labelled as an AI interpretation
+ok 52 - F058-N5 explicit MOCK handoff is not labelled as an AI interpretation
+  ---
+  duration_ms: 0.625356
+  type: 'test'
+  ...
+# Subtest: F058 intent-edit.1 from the earlier candidate stays readable with its original meaning
+ok 53 - F058 intent-edit.1 from the earlier candidate stays readable with its original meaning
+  ---
+  duration_ms: 4.201493
+  type: 'test'
+  ...
+# Subtest: F059 first task: correction plus a new confirmed basis both reach the next request without a made-up AI intent
+ok 54 - F059 first task: correction plus a new confirmed basis both reach the next request without a made-up AI intent
+  ---
+  duration_ms: 1.45225
+  type: 'test'
+  ...
+# Subtest: F059 intent-edit.1 restore -> ordinary work edit leaves the converted correction, handoff and next request unchanged
+ok 55 - F059 intent-edit.1 restore -> ordinary work edit leaves the converted correction, handoff and next request unchanged
+  ---
+  duration_ms: 4.56971
+  type: 'test'
+  ...
+# Subtest: F061 legacy intent-edit.1 without a non-blank goal keeps withholding old AI text, is never a purpose, and round-trips
+ok 56 - F061 legacy intent-edit.1 without a non-blank goal keeps withholding old AI text, is never a purpose, and round-trips
+  ---
+  duration_ms: 7.959668
+  type: 'test'
+  ...
+# Subtest: F066-P1 a separate detail task no longer erases the earlier maintained/replaced reading from the next request
+ok 57 - F066-P1 a separate detail task no longer erases the earlier maintained/replaced reading from the next request
+  ---
+  duration_ms: 20.781347
+  type: 'test'
+  ...
+# Subtest: F066-P1 the purpose chain never jumps over a stale interpretation; the contract rejects inconsistent purposeIntent
+ok 58 - F066-P1 the purpose chain never jumps over a stale interpretation; the contract rejects inconsistent purposeIntent
+  ---
+  duration_ms: 6.567734
+  type: 'test'
+  ...
+# Subtest: F066-P2 a purpose correction is attributed to this task; its pre-correction request is not printed as a current value
+ok 59 - F066-P2 a purpose correction is attributed to this task; its pre-correction request is not printed as a current value
+  ---
+  duration_ms: 3.663171
+  type: 'test'
+  ...
+# Subtest: F066-P2 regenerating a corrected follow-up task names this task even when the AI value comes from its predecessor
+ok 60 - F066-P2 regenerating a corrected follow-up task names this task even when the AI value comes from its predecessor
+  ---
+  duration_ms: 1.030288
+  type: 'test'
+  ...
+# Subtest: F066 prompt states the correction, preserve, continuing-purpose and no-invention rules
+ok 61 - F066 prompt states the correction, preserve, continuing-purpose and no-invention rules
+  ---
+  duration_ms: 0.296146
+  type: 'test'
+  ...
+# Subtest: F069/F071 a separate small edit is printed next to the earlier purpose as a sourced reference; nothing is retired or invented
+ok 62 - F069/F071 a separate small edit is printed next to the earlier purpose as a sourced reference; nothing is retired or invented
+  ---
+  duration_ms: 3.924107
+  type: 'test'
+  ...
+# Subtest: F069 no earlier-purpose line for continue, for a user correction, or across a stale interpretation
+ok 63 - F069 no earlier-purpose line for continue, for a user correction, or across a stale interpretation
+  ---
+  duration_ms: 7.5991
+  type: 'test'
+  ...
+# Subtest: F069 prompt separates the purpose relation from the size of this edit
+ok 64 - F069 prompt separates the purpose relation from the size of this edit
+  ---
+  duration_ms: 0.315457
+  type: 'test'
+  ...
+# Subtest: F071 an explicit discard with a separate reading and a fresh old interpretation: the old purpose is a sourced reference, never "still valid"
+ok 65 - F071 an explicit discard with a separate reading and a fresh old interpretation: the old purpose is a sourced reference, never "still valid"
+  ---
+  duration_ms: 1.721215
+  type: 'test'
+  ...
+# Subtest: F088-1 MOCK keeps the request as the goal of a returned report; the report text never becomes the purpose
+ok 66 - F088-1 MOCK keeps the request as the goal of a returned report; the report text never becomes the purpose
+  ---
+  duration_ms: 20.365975
+  type: 'test'
+  ...
+# Subtest: F088-2 a late A report stays with A; the current B request, its scope and its export are unchanged
+ok 67 - F088-2 a late A report stays with A; the current B request, its scope and its export are unchanged
+  ---
+  duration_ms: 16.303362
+  type: 'test'
+  ...
+# Subtest: F088-3 the same holds for an exact result file; duplicates still add nothing
+ok 68 - F088-3 the same holds for an exact result file; duplicates still add nothing
+  ---
+  duration_ms: 7.32784
+  type: 'test'
+  ...
+# Subtest: F088-4 a report for the current work still continues it (normal flow), with sibling evidence
+ok 69 - F088-4 a report for the current work still continues it (normal flow), with sibling evidence
+  ---
+  duration_ms: 2.245976
+  type: 'test'
+  ...
+# Subtest: F088-5 opening A explicitly continues A; B stays visible as the latest request and can be resumed
+ok 70 - F088-5 opening A explicitly continues A; B stays visible as the latest request and can be resumed
+  ---
+  duration_ms: 4.128486
+  type: 'test'
+  ...
+# Subtest: F088-6 a basis recorded on the opened report task is cited, with earlier refs kept by basis ID
+ok 71 - F088-6 a basis recorded on the opened report task is cited, with earlier refs kept by basis ID
+  ---
+  duration_ms: 3.345783
+  type: 'test'
+  ...
+# Subtest: F088-7 a corrected condition list fits the response limits without loss or blank items
+ok 72 - F088-7 a corrected condition list fits the response limits without loss or blank items
+  ---
+  duration_ms: 11.069726
+  type: 'test'
+  ...
+# Subtest: F088-8 a long continued goal is shortened visibly within the limit; the correction stays whole
+ok 73 - F088-8 a long continued goal is shortened visibly within the limit; the correction stays whole
+  ---
+  duration_ms: 2.25468
+  type: 'test'
+  ...
+# Subtest: F049 purpose identity survives handoff, exact return, changed direction and storage without a second state store
+ok 74 - F049 purpose identity survives handoff, exact return, changed direction and storage without a second state store
+  ---
+  duration_ms: 20.360776
+  type: 'test'
+  ...
+# Subtest: F049 revised origin basis is current, immutable origin stays attributed; home projection never mutates data
+ok 75 - F049 revised origin basis is current, immutable origin stays attributed; home projection never mutates data
+  ---
+  duration_ms: 2.111491
+  type: 'test'
+  ...
+# Subtest: F049 late A return is scoped; latest B request is flagged and A report never leaks into B handoff
+ok 76 - F049 late A return is scoped; latest B request is flagged and A report never leaks into B handoff
+  ---
+  duration_ms: 5.279543
+  type: 'test'
+  ...
+# Subtest: F049 empty/report-only/legacy projects do not acquire an invented goal; existing IDs survive migration
+ok 77 - F049 empty/report-only/legacy projects do not acquire an invented goal; existing IDs survive migration
+  ---
+  duration_ms: 3.771639
+  type: 'test'
+  ...
+# Subtest: F049 sibling report and evidence match the existing adjacent return group, without unrelated B reports
+ok 78 - F049 sibling report and evidence match the existing adjacent return group, without unrelated B reports
+  ---
+  duration_ms: 3.200407
+  type: 'test'
+  ...
+# Subtest: F049 long chain retains old requests as bases, not duplicate sources; stale question rejection remains atomic
+ok 79 - F049 long chain retains old requests as bases, not duplicate sources; stale question rejection remains atomic
+  ---
+  duration_ms: 4.725285
+  type: 'test'
+  ...
+# Subtest: FIX051 direction remains visible through a small request; correction uses one basis and retains original history
+ok 80 - FIX051 direction remains visible through a small request; correction uses one basis and retains original history
+  ---
+  duration_ms: 1.321637
+  type: 'test'
+  ...
+# Subtest: FIX051 two 11000-character requests fit; no root duplication or invented global purpose for unrelated scope
+ok 81 - FIX051 two 11000-character requests fit; no root duplication or invented global purpose for unrelated scope
+  ---
+  duration_ms: 4.089927
+  type: 'test'
+  ...
+# Subtest: FIX051 off-path B remains visible after late A return and next request, without report mixing
+ok 82 - FIX051 off-path B remains visible after late A return and next request, without report mixing
+  ---
+  duration_ms: 3.185843
+  type: 'test'
+  ...
+# Subtest: FIX053 return work keeps its effective request and exclusion in current bases, not past-only references
+ok 83 - FIX053 return work keeps its effective request and exclusion in current bases, not past-only references
+  ---
+  duration_ms: 2.372784
+  type: 'test'
+  ...
+# Subtest: F083-S1 the old key is migrated once, never written; a valid workspace never re-imports it
+ok 84 - F083-S1 the old key is migrated once, never written; a valid workspace never re-imports it
+  ---
+  duration_ms: 13.080172
+  type: 'test'
+  ...
+# Subtest: F083-S2 an unreadable old value, or a migration that does not fit, stays as is: readable where possible, nothing written
+ok 85 - F083-S2 an unreadable old value, or a migration that does not fit, stays as is: readable where possible, nothing written
+  ---
+  duration_ms: 1.469878
+  type: 'test'
+  ...
+# Subtest: F083-S3 a damaged workspace is never overwritten with an empty one
+ok 86 - F083-S3 a damaged workspace is never overwritten with an empty one
+  ---
+  duration_ms: 1.170961
+  type: 'test'
+  ...
+# Subtest: F083-S4 without Web Locks nothing is written (no unprotected fallback); reading still works
+ok 87 - F083-S4 without Web Locks nothing is written (no unprotected fallback); reading still works
+  ---
+  duration_ms: 0.90215
+  type: 'test'
+  ...
+# Subtest: F083-S5 an imported copy gets only a new entryId; an exact result file matches inside that entry
+ok 88 - F083-S5 an imported copy gets only a new entryId; an exact result file matches inside that entry
+  ---
+  duration_ms: 4.292856
+  type: 'test'
+  ...
+# Subtest: F083-S6 autosave edits only its active entry in the lifecycle it opened; trash+restore elsewhere blocks a late save
+ok 89 - F083-S6 autosave edits only its active entry in the lifecycle it opened; trash+restore elsewhere blocks a late save
+  ---
+  duration_ms: 1.968571
+  type: 'test'
+  ...
+# Subtest: F083-S7 another tab's newer save of the same entry is not overwritten; concurrent trash and autosave serialise
+ok 90 - F083-S7 another tab's newer save of the same entry is not overwritten; concurrent trash and autosave serialise
+  ---
+  duration_ms: 2.672792
+  type: 'test'
+  ...
+# Subtest: F083-S8 a quota failure keeps the stored workspace and reports it; nothing is half-written
+ok 91 - F083-S8 a quota failure keeps the stored workspace and reports it; nothing is half-written
+  ---
+  duration_ms: 1.110099
+  type: 'test'
+  ...
+# Subtest: F083-S9 a refused storage read is not an empty workspace: no migration, no create, nothing written
+ok 92 - F083-S9 a refused storage read is not an empty workspace: no migration, no create, nothing written
+  ---
+  duration_ms: 0.84969
+  type: 'test'
+  ...
+# Subtest: F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import
+ok 93 - F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import
+  ---
+  duration_ms: 18.651948
+  type: 'test'
+  ...
+# Subtest: F090-2 areas: add (blank note = undecided), rename, archive/restore; typed relations, no self/duplicate links
+ok 94 - F090-2 areas: add (blank note = undecided), rename, archive/restore; typed relations, no self/duplicate links
+  ---
+  duration_ms: 2.058542
+  type: 'test'
+  ...
+# Subtest: F090-3 a request written for an area is placed there and continues that area, not the open work of another
+ok 95 - F090-3 a request written for an area is placed there and continues that area, not the open work of another
+  ---
+  duration_ms: 5.729092
+  type: 'test'
+  ...
+# Subtest: F090-4 reports follow their task; validation refuses areas on returns, unknown areas and broken relations
+ok 96 - F090-4 reports follow their task; validation refuses areas on returns, unknown areas and broken relations
+  ---
+  duration_ms: 2.688877
+  type: 'test'
+  ...
+# Subtest: F090-5 the purpose text is kept (with earlier wording) and is not sent as a request or work instruction
+ok 97 - F090-5 the purpose text is kept (with earlier wording) and is not sent as a request or work instruction
+  ---
+  duration_ms: 1.14125
+  type: 'test'
+  ...
+# Subtest: F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space
+ok 98 - F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space
+  ---
+  duration_ms: 2.825906
+  type: 'test'
+  ...
+# Subtest: F090-7 returning to an area continues its latest request (and that request's returns), not a late old report
+ok 99 - F090-7 returning to an area continues its latest request (and that request's returns), not a late old report
+  ---
+  duration_ms: 7.921683
+  type: 'test'
+  ...
+# Subtest: F090-8 the unsent request's area is saved with the draft; old formats default to following the current work
+ok 100 - F090-8 the unsent request's area is saved with the draft; old formats default to following the current work
+  ---
+  duration_ms: 4.209929
+  type: 'test'
+  ...
+# Subtest: F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo
+ok 101 - F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo
+  ---
+  duration_ms: 3.900699
+  type: 'test'
+  ...
+# Subtest: F090-10 automatic slots never land on an archived area or on another area at the coordinate limit
+ok 102 - F090-10 automatic slots never land on an archived area or on another area at the coordinate limit
+  ---
+  duration_ms: 1.225473
+  type: 'test'
+  ...
+# Subtest: F090-11 fit shows every measured card inside the map, however far apart (no 0.4 floor)
+ok 103 - F090-11 fit shows every measured card inside the map, however far apart (no 0.4 floor)
+  ---
+  duration_ms: 1.964849
+  type: 'test'
+  ...
+# Subtest: F091C-a the request's own area goes out the same way in the AI input, preview/Markdown and export record; other areas never
+ok 104 - F091C-a the request's own area goes out the same way in the AI input, preview/Markdown and export record; other areas never
+  ---
+  duration_ms: 14.813837
+  type: 'test'
+  ...
+# Subtest: F091C-b later plan edits, moves, re-organising and repeated exports never change A; only the next explicit request (B) is current
+ok 105 - F091C-b later plan edits, moves, re-organising and repeated exports never change A; only the next explicit request (B) is current
+  ---
+  duration_ms: 9.72146
+  type: 'test'
+  ...
+# Subtest: F091C-c A export -> B -> late A report (paste and exact file returnId): A's copy, B's focus/request/copy unchanged
+ok 106 - F091C-c A export -> B -> late A report (paste and exact file returnId): A's copy, B's focus/request/copy unchanged
+  ---
+  duration_ms: 10.232245
+  type: 'test'
+  ...
+# Subtest: F091C-d ideas and undecided points in the background never become bases, sources, intent or decisions; manual edits keep priority
+ok 107 - F091C-d ideas and undecided points in the background never become bases, sources, intent or decisions; manual edits keep priority
+  ---
+  duration_ms: 3.406031
+  type: 'test'
+  ...
+# Subtest: F091C-e old formats, reload, backup, empty values, maximum Unicode and byte limits: null, exact, refused (never cut)
+ok 108 - F091C-e old formats, reload, backup, empty values, maximum Unicode and byte limits: null, exact, refused (never cut)
+  ---
+  duration_ms: 4487.205752
+  type: 'test'
+  ...
+# Subtest: F091C-server MOCK and simulated provider receive background as its own field; old request shapes are refused
+ok 109 - F091C-server MOCK and simulated provider receive background as its own field; old request shapes are refused
+  ---
+  duration_ms: 54.504542
+  type: 'test'
+  ...
+# Subtest: F094-1 REUSE093 A/B and the four counterexamples: nothing added, no assumed incident, request and copies untouched
+ok 110 - F094-1 REUSE093 A/B and the four counterexamples: nothing added, no assumed incident, request and copies untouched
+  ---
+  duration_ms: 21.679756
+  type: 'test'
+  ...
+# Subtest: F094-2 explicit implementation, explicit reproduction and a partial ban are not cancelled or widened
+ok 111 - F094-2 explicit implementation, explicit reproduction and a partial ban are not cancelled or widened
+  ---
+  duration_ms: 2.106671
+  type: 'test'
+  ...
+# Subtest: F094-3 a stated unknown cause still gets the fact question (question features); no reproduction is added
+ok 112 - F094-3 a stated unknown cause still gets the fact question (question features); no reproduction is added
+  ---
+  duration_ms: 1.261033
+  type: 'test'
+  ...
+# Subtest: F094-4 a returned report is compared and sorted; no fixes or test runs are added
+ok 113 - F094-4 a returned report is compared and sorted; no fixes or test runs are added
+  ---
+  duration_ms: 3.32572
+  type: 'test'
+  ...
+# Subtest: F095-1 the same request sent twice (REUSE093 shape): one full copy, every entry keeps its ID, role and order
+ok 114 - F095-1 the same request sent twice (REUSE093 shape): one full copy, every entry keeps its ID, role and order
+  ---
+  duration_ms: 16.245713
+  type: 'test'
+  ...
+# Subtest: F095-2 no normalisation: a different space or line break is a different text and prints in full
+ok 115 - F095-2 no normalisation: a different space or line break is a different text and prints in full
+  ---
+  duration_ms: 5.700304
+  type: 'test'
+  ...
+# Subtest: F095-3 edits, corrections, reports and decisions are never folded into the request
+ok 116 - F095-3 edits, corrections, reports and decisions are never folded into the request
+  ---
+  duration_ms: 5.014031
+  type: 'test'
+  ...
+# Subtest: F033-1 relay exact stale choice cannot create a source/basis or enter the next request
+ok 117 - F033-1 relay exact stale choice cannot create a source/basis or enter the next request
+  ---
+  duration_ms: 15.759227
+  type: 'test'
+  ...
+# Subtest: F033-2 fresh replies and existing duplicate precedence survive bookkeeping
+ok 118 - F033-2 fresh replies and existing duplicate precedence survive bookkeeping
+  ---
+  duration_ms: 3.138803
+  type: 'test'
+  ...
+# Subtest: F033-3 all dispositions and synthetic paths reject stale without input mutation; refreshed questions work
+ok 119 - F033-3 all dispositions and synthetic paths reject stale without input mutation; refreshed questions work
+  ---
+  duration_ms: 4.86337
+  type: 'test'
+  ...
+# Subtest: F033-4 unknown advice revision and imported legacy remain read-only; current recovery preserves the boundary
+ok 120 - F033-4 unknown advice revision and imported legacy remain read-only; current recovery preserves the boundary
+  ---
+  duration_ms: 11.109294
+  type: 'test'
+  ...
+# Subtest: F033-5 rev1 history boundaries recover without repairs, while new same-task bases still reject old replies
+ok 121 - F033-5 rev1 history boundaries recover without repairs, while new same-task bases still reject old replies
+  ---
+  duration_ms: 4.71077
+  type: 'test'
+  ...
+# Subtest: G097-1 the same idea: one question, two answers give different scope and completion; unknown/deferred keep the choice open
+ok 122 - G097-1 the same idea: one question, two answers give different scope and completion; unknown/deferred keep the choice open
+  ---
+  duration_ms: 6.80268
+  type: 'test'
+  ...
+# Subtest: G097-2 enough existing information: note, a user decision or an earlier area request already answers it, so no question
+ok 123 - G097-2 enough existing information: note, a user decision or an earlier area request already answers it, so no question
+  ---
+  duration_ms: 2.807452
+  type: 'test'
+  ...
+# Subtest: G097-3 one question at most: after an answer only a proposal is accepted; exactly one of question/proposal
+ok 124 - G097-3 one question at most: after an answer only a proposal is accepted; exactly one of question/proposal
+  ---
+  duration_ms: 0.931963
+  type: 'test'
+  ...
+# Subtest: G097-4 nothing is written before adoption; adoption fills only the request draft and never replaces an unsent one
+ok 125 - G097-4 nothing is written before adoption; adoption fills only the request draft and never replaces an unsent one
+  ---
+  duration_ms: 10.257911
+  type: 'test'
+  ...
+# Subtest: G097-5 a reply is bound to its material and area: purpose/area/decision/answer changes invalidate it, typing a request does not
+ok 126 - G097-5 a reply is bound to its material and area: purpose/area/decision/answer changes invalidate it, typing a request does not
+  ---
+  duration_ms: 2.062868
+  type: 'test'
+  ...
+# Subtest: G097-6 HTTP: MOCK route, same origin checks; fake DeepSeek upstream gets the guidance prompt and the material only
+ok 127 - G097-6 HTTP: MOCK route, same origin checks; fake DeepSeek upstream gets the guidance prompt and the material only
+  ---
+  duration_ms: 47.035677
+  type: 'test'
+  ...
+# Subtest: G097-7 fake upstream failures map to fixed codes; a second question, extra keys or an echoed key are refused; paid off sends nothing
+ok 128 - G097-7 fake upstream failures map to fixed codes; a second question, extra keys or an echoed key are refused; paid off sends nothing
+  ---
+  duration_ms: 127.80056
+  type: 'test'
+  ...
+# Subtest: G097-8 (R2) MOCK never turns a ban, a deferral, a quote or a free answer into a positive choice; status and wording are kept
+ok 129 - G097-8 (R2) MOCK never turns a ban, a deferral, a quote or a free answer into a positive choice; status and wording are kept
+  ---
+  duration_ms: 2.1621
+  type: 'test'
+  ...
+# Subtest: G097-9 (R3) blank manual scope/checks are valid as in task edits; length and character checks stay
+ok 130 - G097-9 (R3) blank manual scope/checks are valid as in task edits; length and character checks stay
+  ---
+  duration_ms: 7.598603
+  type: 'test'
+  ...
+# Subtest: G097-10 (R2-1) many deferred confirmation decisions stay inside the reply contract (max 6 open) and all are named
+ok 131 - G097-10 (R2-1) many deferred confirmation decisions stay inside the reply contract (max 6 open) and all are named
+  ---
+  duration_ms: 8.107519
+  type: 'test'
+  ...
+# Subtest: G097-11 (R2-2) a long free answer is kept whole through draft, adoption, request and handoff; its closing ban is never cut
+ok 132 - G097-11 (R2-2) a long free answer is kept whole through draft, adoption, request and handoff; its closing ban is never cut
+  ---
+  duration_ms: 3.277805
+  type: 'test'
+  ...
+# Subtest: G098-1 strict reply contract: fact never has options (actual C2 content), defaults required and bounded, open/defaults never overlap
+ok 133 - G098-1 strict reply contract: fact never has options (actual C2 content), defaults required and bounded, open/defaults never overlap
+  ---
+  duration_ms: 1.09329
+  type: 'test'
+  ...
+# Subtest: G098-2 the draft shows AI defaults apart from user decisions (hidden when empty) and explains a changed basis without a re-approval step
+ok 134 - G098-2 the draft shows AI defaults apart from user decisions (hidden when empty) and explains a changed basis without a re-approval step
+  ---
+  duration_ms: 0.669951
+  type: 'test'
+  ...
+# Subtest: G098-3 the guidance prompt separates fact and choice examples and states the general rules (no case answers)
+ok 135 - G098-3 the guidance prompt separates fact and choice examples and states the general rules (no case answers)
+  ---
+  duration_ms: 0.255686
+  type: 'test'
+  ...
+# Subtest: G098-4 a stale guidance.1 request is refused plainly (400) instead of yielding a reply the old client cannot read
+ok 136 - G098-4 a stale guidance.1 request is refused plainly (400) instead of yielding a reply the old client cannot read
+  ---
+  duration_ms: 6.377471
+  type: 'test'
+  ...
+# Subtest: G098-5 free answers asking only for design or reading: original kept, MOCK checks add no implementation or run; option branches unchanged
+ok 137 - G098-5 free answers asking only for design or reading: original kept, MOCK checks add no implementation or run; option branches unchanged
+  ---
+  duration_ms: 1.348535
+  type: 'test'
+  ...
+# Subtest: G099-1 contract: currentInstruction is required and nullable, verbatim, same text limit, never cut; blank means none
+ok 138 - G099-1 contract: currentInstruction is required and nullable, verbatim, same text limit, never cut; blank means none
+  ---
+  duration_ms: 11.839253
+  type: 'test'
+  ...
+# Subtest: G099-2 empty input keeps the earlier path; a typed instruction gets a neutral MOCK draft with no question and no design of its own
+ok 139 - G099-2 empty input keeps the earlier path; a typed instruction gets a neutral MOCK draft with no question and no design of its own
+  ---
+  duration_ms: 0.648935
+  type: 'test'
+  ...
+# Subtest: G099-3 the draft carries the instruction whole in its own section; adoption makes it the request, never a decision
+ok 140 - G099-3 the draft carries the instruction whole in its own section; adoption makes it the request, never a decision
+  ---
+  duration_ms: 1.770543
+  type: 'test'
+  ...
+# Subtest: G099-4 a reply is bound to the instruction it was asked with; the prompt and the fake upstream carry it as its own field
+ok 141 - G099-4 a reply is bound to the instruction it was asked with; the prompt and the fake upstream carry it as its own field
+  ---
+  duration_ms: 8.846633
+  type: 'test'
+  ...
+# Subtest: I15-H01 real local HTTP -> mock -> typed envelope, safe config and static entry, no external fetch
+ok 142 - I15-H01 real local HTTP -> mock -> typed envelope, safe config and static entry, no external fetch
+  ---
+  duration_ms: 62.980313
+  type: 'test'
+  ...
+# Subtest: I15-H02 invalid origin/host/content-type/body rejected without mock or provider invocation
+ok 143 - I15-H02 invalid origin/host/content-type/body rejected without mock or provider invocation
+  ---
+  duration_ms: 17.477064
+  type: 'test'
+  ...
+# Subtest: I15-H03 oversized input is rejected without truncating or invoking provider; static traversal denied
+ok 144 - I15-H03 oversized input is rejected without truncating or invoking provider; static traversal denied
+  ---
+  duration_ms: 9.972595
+  type: 'test'
+  ...
+# Subtest: I15-H04 missing key and paid opt-out prevent all outbound calls
+ok 145 - I15-H04 missing key and paid opt-out prevent all outbound calls
+  ---
+  duration_ms: 5.833467
+  type: 'test'
+  ...
+# Subtest: I15-H05 request IDs and process cap cannot be silently retried through old interview endpoint
+ok 146 - I15-H05 request IDs and process cap cannot be silently retried through old interview endpoint
+  ---
+  duration_ms: 8.175544
+  type: 'test'
+  ...
+# Subtest: I15-H06 malformed response over HTTP cannot patch a basis; response includes only fixed error code
+ok 147 - I15-H06 malformed response over HTTP cannot patch a basis; response includes only fixed error code
+  ---
+  duration_ms: 3.563672
+  type: 'test'
+  ...
+# Subtest: I15-P01 exact DeepSeek adapter request uses server endpoint, disabled thinking, JSON and no retry
+ok 148 - I15-P01 exact DeepSeek adapter request uses server endpoint, disabled thinking, JSON and no retry
+  ---
+  duration_ms: 7.998107
+  type: 'test'
+  ...
+# Subtest: I15-P02 empty/non-JSON/truncated/authority-injection responses fail once, preserve model errors as codes
+ok 149 - I15-P02 empty/non-JSON/truncated/authority-injection responses fail once, preserve model errors as codes
+  ---
+  duration_ms: 4.506751
+  type: 'test'
+  ...
+# Subtest: I15-P03 provider errors never expose raw body or credentials and never retry
+ok 150 - I15-P03 provider errors never expose raw body or credentials and never retry
+  ---
+  duration_ms: 3.376479
+  type: 'test'
+  ...
+# Subtest: I15-P04 timeout and cancelled requests work even with a transport that ignores AbortSignal
+ok 151 - I15-P04 timeout and cancelled requests work even with a transport that ignores AbortSignal
+  ---
+  duration_ms: 32.403464
+  type: 'test'
+  ...
+# Subtest: I15-P05 real local HTTP -> DeepSeek adapter -> injected fake upstream uses the same route as live mode
+ok 152 - I15-P05 real local HTTP -> DeepSeek adapter -> injected fake upstream uses the same route as live mode
+  ---
+  duration_ms: 7.022575
+  type: 'test'
+  ...
+# Subtest: I17-C03 lossy AI summary cannot remove original manual conditions from current handoff references
+ok 153 - I17-C03 lossy AI summary cannot remove original manual conditions from current handoff references
+  ---
+  duration_ms: 23.428042
+  type: 'test'
+  ...
+# Subtest: I17-C03 unrelated next work does not inherit manual values or recursively carry an older task
+ok 154 - I17-C03 unrelated next work does not inherit manual values or recursively carry an older task
+  ---
+  duration_ms: 5.683249
+  type: 'test'
+  ...
+# Subtest: I17-C03 explicit condition changes and current manual overrides take precedence without an approval path
+ok 155 - I17-C03 explicit condition changes and current manual overrides take precedence without an approval path
+  ---
+  duration_ms: 2.388416
+  type: 'test'
+  ...
+# Subtest: I17-C03 report wrapping uses the handed-off task but does not become a reuse request
+ok 156 - I17-C03 report wrapping uses the handed-off task but does not become a reuse request
+  ---
+  duration_ms: 3.417037
+  type: 'test'
+  ...
+# Subtest: I17-R5 stale previous AI stays excluded while manual provenance and legacy originals survive
+ok 157 - I17-R5 stale previous AI stays excluded while manual provenance and legacy originals survive
+  ---
+  duration_ms: 10.017132
+  type: 'test'
+  ...
+# Subtest: I17-C06 within-budget full original reaches the actual provider body on the third request
+ok 158 - I17-C06 within-budget full original reaches the actual provider body on the third request
+  ---
+  duration_ms: 1.792611
+  type: 'test'
+  ...
+# Subtest: I17-context only over-budget old untouched requests are excerpted; all IDs/local originals remain
+ok 159 - I17-context only over-budget old untouched requests are excerpted; all IDs/local originals remain
+  ---
+  duration_ms: 323.664393
+  type: 'test'
+  ...
+# Subtest: I17-context confirmed/answered/deferred/edited bases never take the excerpt fallback
+ok 160 - I17-context confirmed/answered/deferred/edited bases never take the excerpt fallback
+  ---
+  duration_ms: 220.598288
+  type: 'test'
+  ...
+# Subtest: I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8MB recovery/export independent
+ok 161 - I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8MB recovery/export independent
+  ---
+  duration_ms: 91.216858
+  type: 'test'
+  ...
+# Subtest: I17-contract manual provenance is input-only, narrow, versioned; advice parser is not relaxed
+ok 162 - I17-contract manual provenance is input-only, narrow, versioned; advice parser is not relaxed
+  ---
+  duration_ms: 3.1632
+  type: 'test'
+  ...
+# Subtest: I17-C05 supplied invalid array still fails once through real provider; raw never repaired
+ok 163 - I17-C05 supplied invalid array still fails once through real provider; raw never repaired
+  ---
+  duration_ms: 1.793137
+  type: 'test'
+  ...
+# Subtest: I17-C05 prompt example matches strict string schema; valid multi-line strings pass unchanged
+ok 164 - I17-C05 prompt example matches strict string schema; valid multi-line strings pass unchanged
+  ---
+  duration_ms: 1.52568
+  type: 'test'
+  ...
+# Subtest: I17-C02 prompt constrains shared comparison axis/timing without encoding case answers or new policies
+ok 165 - I17-C02 prompt constrains shared comparison axis/timing without encoding case answers or new policies
+  ---
+  duration_ms: 0.401979
+  type: 'test'
+  ...
+# Subtest: I22-C05 real narrow submit records 60 days before AI; status, history and manual checks survive
+ok 166 - I22-C05 real narrow submit records 60 days before AI; status, history and manual checks survive
+  ---
+  duration_ms: 14.013543
+  type: 'test'
+  ...
+# Subtest: I22-B05 supplied exact prose and domain assembly retain confirmed D1 r6 / requested D2 r9
+ok 167 - I22-B05 supplied exact prose and domain assembly retain confirmed D1 r6 / requested D2 r9
+  ---
+  duration_ms: 4.498947
+  type: 'test'
+  ...
+# Subtest: I22-B05 no-work next AND D1 review coexist; receive never promotes or replaces bases
+ok 168 - I22-B05 no-work next AND D1 review coexist; receive never promotes or replaces bases
+  ---
+  duration_ms: 1.935173
+  type: 'test'
+  ...
+# Subtest: I22-B03 matching current goal plus requested record is not an automatic incomplete/complete decision
+ok 169 - I22-B03 matching current goal plus requested record is not an automatic incomplete/complete decision
+  ---
+  duration_ms: 1.237047
+  type: 'test'
+  ...
+# Subtest: I22-partial composite request preserves other bases, full request and manual checks while only D1 is recorded
+ok 170 - I22-partial composite request preserves other bases, full request and manual checks while only D1 is recorded
+  ---
+  duration_ms: 2.355561
+  type: 'test'
+  ...
+# Subtest: I22-same-values/status-only recordings report actual fields, not semantic completion
+ok 171 - I22-same-values/status-only recordings report actual fields, not semantic completion
+  ---
+  duration_ms: 1.642159
+  type: 'test'
+  ...
+# Subtest: I22-new manual basis records a value without pretending there was a replaced predecessor
+ok 172 - I22-new manual basis records a value without pretending there was a replaced predecessor
+  ---
+  duration_ms: 1.265683
+  type: 'test'
+  ...
+# Subtest: I22-narrow modification of an answered record keeps the existing answered-to-requested rule
+ok 173 - I22-narrow modification of an answered record keeps the existing answered-to-requested rule
+  ---
+  duration_ms: 2.172697
+  type: 'test'
+  ...
+# Subtest: I22-old-task facts reference historical versions and cannot replace current bases
+ok 174 - I22-old-task facts reference historical versions and cannot replace current bases
+  ---
+  duration_ms: 1.47894
+  type: 'test'
+  ...
+# Subtest: I22-quoted wording change on requested basis keeps requested status, no inference of confirmation
+ok 175 - I22-quoted wording change on requested basis keeps requested status, no inference of confirmation
+  ---
+  duration_ms: 0.785348
+  type: 'test'
+  ...
+# Subtest: I22-missing or unordered history stays reference-only; absent provenance is not silently reconstructed
+ok 176 - I22-missing or unordered history stays reference-only; absent provenance is not silently reconstructed
+  ---
+  duration_ms: 3.578892
+  type: 'test'
+  ...
+# Subtest: I22-answer and test_answer retain their existing provenance; synthetic answers never become basis facts
+ok 177 - I22-answer and test_answer retain their existing provenance; synthetic answers never become basis facts
+  ---
+  duration_ms: 1.341256
+  type: 'test'
+  ...
+# Subtest: I22-report/evidence-only input is visible as input, never a record of external execution or a new basis
+ok 178 - I22-report/evidence-only input is visible as input, never a record of external execution or a new basis
+  ---
+  duration_ms: 4.175174
+  type: 'test'
+  ...
+# Subtest: I22-pure projection, handoff and request neither mutate nor share writable objects with project
+ok 179 - I22-pure projection, handoff and request neither mutate nor share writable objects with project
+  ---
+  duration_ms: 2.166497
+  type: 'test'
+  ...
+# Subtest: I22-write failure leaves current-memory facts separate from last persisted snapshot and recovery bytes
+ok 180 - I22-write failure leaves current-memory facts separate from last persisted snapshot and recovery bytes
+  ---
+  duration_ms: 1.5949
+  type: 'test'
+  ...
+# Subtest: I22-input API is strict, cross-linked, copy-safe and rejects old/missing/forged shape without repairing it
+ok 181 - I22-input API is strict, cross-linked, copy-safe and rejects old/missing/forged shape without repairing it
+  ---
+  duration_ms: 4.81592
+  type: 'test'
+  ...
+# Subtest: I22-reference validation is not authentication of imported history or semantic completion
+ok 182 - I22-reference validation is not authentication of imported history or semantic completion
+  ---
+  duration_ms: 0.913888
+  type: 'test'
+  ...
+# Subtest: I22-all facts count toward exact 128KiB; +1 fails, while marked excerpts and local 8MB boundary remain separate
+ok 183 - I22-all facts count toward exact 128KiB; +1 fails, while marked excerpts and local 8MB boundary remain separate
+  ---
+  duration_ms: 264.779677
+  type: 'test'
+  ...
+# Subtest: I22-projection works after legacy migration and never adds fields to stored projects
+ok 184 - I22-projection works after legacy migration and never adds fields to stored projects
+  ---
+  duration_ms: 7.244016
+  type: 'test'
+  ...
+# Subtest: I22-actual localhost HTTP -> provider body -> validation -> receive -> handoff shares identical app facts
+ok 185 - I22-actual localhost HTTP -> provider body -> validation -> receive -> handoff shares identical app facts
+  ---
+  duration_ms: 52.162649
+  type: 'test'
+  ...
+# Subtest: S035-1 explicit report/evidence parent equals preview; sources, bases, history and manual values survive JSON recovery
+ok 186 - S035-1 explicit report/evidence parent equals preview; sources, bases, history and manual values survive JSON recovery
+  ---
+  duration_ms: 20.208974
+  type: 'test'
+  ...
+# Subtest: S035-2 invalid, unexported and other-project IDs fail atomically in submit and preview
+ok 187 - S035-2 invalid, unexported and other-project IDs fail atomically in submit and preview
+  ---
+  duration_ms: 5.175751
+  type: 'test'
+  ...
+# Subtest: S035-3 omitted target preserves zero/single/multiple fallback and reverse task order, not export date
+ok 188 - S035-3 omitted target preserves zero/single/multiple fallback and reverse task order, not export date
+  ---
+  duration_ms: 2.205522
+  type: 'test'
+  ...
+# Subtest: S035-4 next B request context contains B return and excludes A return without removing global A request basis
+ok 189 - S035-4 next B request context contains B return and excludes A return without removing global A request basis
+  ---
+  duration_ms: 2.473901
+  type: 'test'
+  ...
+# Subtest: S102-1 nothing to check without evidence: no tasks, a kept input, a prepared or exported request
+ok 190 - S102-1 nothing to check without evidence: no tasks, a kept input, a prepared or exported request
+  ---
+  duration_ms: 14.560606
+  type: 'test'
+  ...
+# Subtest: S102-2 an open product choice waits for the user until answered, or until the user continues from that request
+ok 191 - S102-2 an open product choice waits for the user until answered, or until the user continues from that request
+  ---
+  duration_ms: 3.165961
+  type: 'test'
+  ...
+# Subtest: S102-3 a returned report is listed until the user acts on it (a follow-up request or a follow-up handoff)
+ok 192 - S102-3 a returned report is listed until the user acts on it (a follow-up request or a follow-up handoff)
+  ---
+  duration_ms: 5.922446
+  type: 'test'
+  ...
+# Subtest: S102-4 only the latest return of a task counts; an older report is never counted again
+ok 193 - S102-4 only the latest return of a task counts; an older report is never counted again
+  ---
+  duration_ms: 2.558678
+  type: 'test'
+  ...
+# Subtest: S102-5 a report returning to a follow-up handoff opens the original request; items keep their area; pure and unsaved
+ok 194 - S102-5 a report returning to a follow-up handoff opens the original request; items keep their area; pure and unsaved
+  ---
+  duration_ms: 3.685997
+  type: 'test'
+  ...
+# Subtest: S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report
+ok 195 - S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report
+  ---
+  duration_ms: 4.180594
+  type: 'test'
+  ...
+# Subtest: UI001-P1 stage labels distinguish source preservation, API response waiting and prepared work; none claims execution
+ok 196 - UI001-P1 stage labels distinguish source preservation, API response waiting and prepared work; none claims execution
+  ---
+  duration_ms: 16.037577
+  type: 'test'
+  ...
+# Subtest: UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy
+ok 197 - UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy
+  ---
+  duration_ms: 2.888635
+  type: 'test'
+  ...
+# Subtest: UI001-P3 real export metadata changes next action; editing a work field asks for recopy, typing a separate draft does not
+ok 198 - UI001-P3 real export metadata changes next action; editing a work field asks for recopy, typing a separate draft does not
+  ---
+  duration_ms: 8.949664
+  type: 'test'
+  ...
+# Subtest: UI001-P4 stale state remains explicit even with a saved handoff and a preserved manual instruction
+ok 199 - UI001-P4 stale state remains explicit even with a saved handoff and a preserved manual instruction
+  ---
+  duration_ms: 1.311478
+  type: 'test'
+  ...
+# Subtest: UI001-P5 report/source labels stay attributed and titles derive from actual source rather than invented task names
+ok 200 - UI001-P5 report/source labels stay attributed and titles derive from actual source rather than invented task names
+  ---
+  duration_ms: 1.987552
+  type: 'test'
+  ...
+# Subtest: UI001-P6 editing-draft indicators do not change confirmed values or mutate any project data
+ok 201 - UI001-P6 editing-draft indicators do not change confirmed values or mutate any project data
+  ---
+  duration_ms: 0.86054
+  type: 'test'
+  ...
+# Subtest: UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path
+ok 202 - UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path
+  ---
+  duration_ms: 116.308331
+  type: 'test'
+  ...
+# Subtest: UI001-P8 rev1 full handoff detects suggestion text/why and inclusion changes, clears on re-export, ignores equal content
+ok 203 - UI001-P8 rev1 full handoff detects suggestion text/why and inclusion changes, clears on re-export, ignores equal content
+  ---
+  duration_ms: 12.045638
+  type: 'test'
+  ...
+# Subtest: UI001-P9 rev1 compares other delivered context as well, keeps legacy conservative, uses the selected task without writes
+ok 204 - UI001-P9 rev1 compares other delivered context as well, keeps legacy conservative, uses the selected task without writes
+  ---
+  duration_ms: 4.463192
+  type: 'test'
+  ...
+# Subtest: RETURN032-R1 array order remains the parent contract, including a later re-export of an older task
+ok 205 - RETURN032-R1 array order remains the parent contract, including a later re-export of an older task
+  ---
+  duration_ms: 5.018949
+  type: 'test'
+  ...
+# Subtest: RETURN032-R2 no prior task and no export stay distinct without blocking returned sources
+ok 206 - RETURN032-R2 no prior task and no export stay distinct without blocking returned sources
+  ---
+  duration_ms: 0.877781
+  type: 'test'
+  ...
+# Subtest: RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries
+ok 207 - RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries
+  ---
+  duration_ms: 2.27332
+  type: 'test'
+  ...
+# Subtest: RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap
+ok 208 - RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap
+  ---
+  duration_ms: 2.476868
+  type: 'test'
+  ...
+# Subtest: RETURN032-R5 legacy, missing work, invalid export revisions and unordered basis histories are unknown, never zero
+ok 209 - RETURN032-R5 legacy, missing work, invalid export revisions and unordered basis histories are unknown, never zero
+  ---
+  duration_ms: 4.362011
+  type: 'test'
+  ...
+# Subtest: RETURN032-R6 projection leaves handoff text, manual values, source bytes and recovery data untouched
+ok 210 - RETURN032-R6 projection leaves handoff text, manual values, source bytes and recovery data untouched
+  ---
+  duration_ms: 2.91506
+  type: 'test'
+  ...
+1..210
+# tests 210
+# suites 0
+# pass 210
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 32165.272312
