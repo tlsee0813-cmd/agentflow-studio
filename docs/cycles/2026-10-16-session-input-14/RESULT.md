@@ -29,3 +29,11 @@ Pro 조사 후 Astra가 공식 원문과 고정 코드를 대조했다. 두 환�
 
 ### 실제 제품에 연결하는 다음 시험
 Astra의 고정 코드 대조 결과 C11의 `index+caseId`는 메모리 내 보기·초안 구분이며 URL 재열기는 실시간 갱신 경로가 아니다. 따라서 이 관측을 이미 구현된 갱신 기능의 회귀 결함으로 일반화하지 않는다. 실제 제품606의 기존 경로를 재사용한다: 기존 영역·요청 A의 수동 next 한 문장을 저장하고 지도 선택·좌표·배율을 정한 뒤, fix1 실제 보고 발췌를 A에 명시 연결해 입력만 저장한다. 영역 정체성·관계와 A 문장은 유지되고 보고는 별도 반환 Task로 남아야 한다. 출발 보기 복귀가 새 보고·업무 상태를 취소하면 실패다. 새 보고의 수동 필드에 A 문장이 자동 복사되는 것은 기대하지 않는다. 이는 기록 추가와 편집·보기 보존 시험이며 자동 동일성 판별·영역 설명 갱신·충돌 병합 완료가 아니다. [기존 보고 경로](https://github.com/tlsee0813-cmd/agentflow-studio/blob/606120500eeea50a20f00fb4678bced7a7d93d98/app/continuity/src/shared/domain.ts#L86).
+
+## 실제 제품 후속 보고 연결 — 완료
+[고정 독립 결과](https://github.com/tlsee0813-cmd/agentflow-studio/blob/7ae327651c0acc7f60b83c49cd513f3f78485949/docs/transfer/session-input-14/product-followup/REPORT.md). 제품606,1440×900의 새 격리 프로젝트에서 실제 작성자 보고 한 단락만 발췌했고 나머지 영역·요청·수동 문장은 검사용이다. A의 manual.next와 원문·출처 보존, 반환Task.parent=A 및 Source.taskId=반환, 새 반환manual.next=null을 확인했다. 복귀 뒤 새 반환/currentTaskId를 유지하면서 선택·matrix(1.25,0,0,1.25,-108.25,-21.5)·영역좌표·호출초점이 같았다. 지도배율1.25는 브라우저125%확대가 아니다. 관계는 빈0→0, 비어있지 않은 관계 보존은 미시험이다. 실제 child/collector0, AI POST0. 총괄은 원시checks/source binding/process를 대조해 이 좁은 결론을 수용했다.
+
+## 갱신 메커니즘 조사 수용과 교정
+Pro→Astra 공식 대조 결과 필요한 data 갱신과 선택/viewport·fit은 분리한다. [React Flow 고정 updateNodeData](https://github.com/xyflow/xyflow/blob/3d35b573/packages/react/src/hooks/useReactFlow.ts#L255)의 얕은 병합은 같은 키의 사용자 문장 보호 규칙이 아니다. [Cytoscape cy.json](https://js.cytoscape.org/#cy.json)은 동일ID 요소를 갱신하지만 입력에서 빠진 요소를 삭제하므로 부분 후속 기록을 전체 elements로 전달하는 근거로 쓰지 않는다. 이 중요 경계를 Pro 원답에 보완했다. 새 객체 생성 자체와 인스턴스 재초기화도 구분한다. 라이브러리 교체는 하지 않는다.
+
+실제품 GUIDE는 현재구상·요청에서 다음 요청 초안을 돕지만 반환 보고를 읽는 구상갱신 경로는 아니다. 보고 해석을 사용자 요청으로 몰래 넣거나 기존 GUIDE107 HOLD를 통과로 바꾸지 않는다. 같은 영역의 현재구상/보고주장을 어떻게 짧게 보일지는 별도 조사 주제로 유지한다. 사용자 최신 지시에 따라 우선 실제 제품 홈15의 프로젝트 선택·진입을 구현하며 이 결과를 폐기하지 않는다.
