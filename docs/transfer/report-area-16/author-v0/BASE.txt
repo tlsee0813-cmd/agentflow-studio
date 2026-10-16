@@ -1,0 +1,4 @@
+product_base=a5a48a715c41d1f8ea928af48a33d264c295a128
+contract=b818e45ded8f7fc73ddd3ac497c94b42d11f1273
+candidate_commit_local=71a72298bc1b23279ab4ac03f778b87eb18d145e
+remote_published=no (GitHub push/PR/merge left to the coordinator)

@@ -1,0 +1,13 @@
+test_01_question_answer_edit_switch_adopt_and_send (__main__.AreaGuidance.test_01_question_answer_edit_switch_adopt_and_send) ... ok
+test_02_unknown_then_change_answer (__main__.AreaGuidance.test_02_unknown_then_change_answer) ... ok
+test_03_failure_cancel_late_reply_and_unsent_draft (__main__.AreaGuidance.test_03_failure_cancel_late_reply_and_unsent_draft) ... ok
+test_04_edit_while_waiting_is_never_overwritten (__main__.AreaGuidance.test_04_edit_while_waiting_is_never_overwritten) ... ok
+test_05_long_free_answer_kept_whole_after_adoption (__main__.AreaGuidance.test_05_long_free_answer_kept_whole_after_adoption) ... ok
+test_06_instruction_visible_neutral_draft_and_composer_untouched (__main__.AreaGuidance.test_06_instruction_visible_neutral_draft_and_composer_untouched) ... ok
+test_07_changed_instruction_is_not_reused_edits_kept_and_late_reply_dropped (__main__.AreaGuidance.test_07_changed_instruction_is_not_reused_edits_kept_and_late_reply_dropped) ... ok
+test_08_stale_draft_and_held_reply_follow_the_current_instruction (__main__.AreaGuidance.test_08_stale_draft_and_held_reply_follow_the_current_instruction) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 13.902s
+
+OK
