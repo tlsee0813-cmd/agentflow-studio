@@ -183,6 +183,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/home15_browser.py 2>&1 | tee test-results/home15-browser.log
+      - name: REPORT16 current area idea, explicit report reading, draft protection and origin return (native HTTP, labelled fixtures, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/report16
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/report16_browser.py 2>&1 | tee test-results/report16-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:

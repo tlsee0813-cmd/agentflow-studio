@@ -43,7 +43,11 @@ let viewArea:string|null=null;
 // SPATIAL102: the request shown read-only (view 'task'). Looking at it never changes currentTaskId or the request target.
 let viewTask:string|null=null;
 // SPATIAL102-R1: the report a '확인할 일' item pointed to, shown on the task screen (may be a report to a follow-up handoff).
+// REPORT16: also the report the user picked on that screen. Never chosen for the user (no latest-report default).
 let viewReturn:string|null=null;
+// REPORT16: which disclosures of the task screen are open, for that request and that picked report only (tab memory).
+// Ids starting with 'task-report-' belong to the picked report and are dropped when another report is picked.
+let readOpen:{task:string;ret:string|null;open:Record<string,boolean>}|null=null;
 // SPATIAL102: this tab's memory of each layer of the open project (scroll, the card or request the user came back from).
 type LayerMemo={space:number|null;from:string|null;areas:Record<string,{y:number;task:string|null}>};
 let layerMemo:LayerMemo={space:null,from:null,areas:{}};
@@ -128,7 +132,7 @@ function resetEphemeral() {
   $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
-  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];origin=null;
+  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
 function openEntry(entry:WorkspaceEntry,fromList=false) {
@@ -315,7 +319,7 @@ function returnToOrigin() {
 function openTaskView(id:string,returnId:string|null=null,focus:string|null=null) {
   const t=project.tasks.find(x=>x.id===id);if(!t)return;
   const area=areaOf(project,t)??'unassigned';
-  markOrigin(focus);leaveLayer();layerMemo.areas[area]={y:layerMemo.areas[area]?.y??0,task:id};
+  markOrigin(focus);leaveLayer();layerMemo.areas[area]={y:layerMemo.areas[area]?.y??0,task:id};readOpen=null;
   view='task';viewArea=area;viewTask=id;viewReturn=returnId;render();window.scrollTo({top:0});$('space-title')?.focus({preventScroll:true});
 }
 /** Explicit: continue this task (or go back to it when its return is what is open). Viewing never does this. */
@@ -334,14 +338,22 @@ function continueTask(id:string) {
 function writeInArea(id:string|null) {
   // An unsent report or request keeps its kind and target: open it instead of relabelling or moving it.
   if(project.draft.trim()) {
-    const where=project.space.draftTarget?.area?areaById(project.space.draftTarget.area)?.name:null;
-    const message=project.draftKind==='request'?`작성 중인 요청이 있어 먼저 열었어요. 이 요청의 영역(${where??'지금 작업을 따라감'})은 그대로예요. 다른 영역에 쓰려면 이 요청을 보내거나 비운 뒤 다시 누르세요.`
+    // REPORT16: null = follows the current work; {area:null} = explicitly no area. Never the same words.
+    const where=draftTargetLabel();
+    const message=project.draftKind==='request'?`작성 중인 요청이 있어 먼저 열었어요. 이 요청의 대상(${where})은 그대로예요. 다른 영역에 쓰려면 이 요청을 보내거나 비운 뒤 다시 누르세요.`
       :'작성 중인 결과가 있어 먼저 열었어요. 종류와 연결할 작업은 바꾸지 않았어요. 이 입력을 마친 뒤 새 요청을 쓰세요.';
     view='work';render();project={...project,notice:message};renderStatus();
   } else {
     let n=project;if(n.draftKind!=='request')n=setKind(n,'request');selectedReturnTaskId=undefined;commit(setDraftTarget(n,id));view='work';render();
   }
   $<HTMLDetailsElement>('compose-panel').open=true;$('draft').focus();
+}
+/** REPORT16: where the unsent request goes, in the composer's own words (renderComposeArea). */
+function draftTargetLabel():string {
+  const dt=project.space.draftTarget;
+  if(dt===null){const t=project.currentTaskId?taskOf(project):null,f=t?areaById(areaOf(project,t)):null;return `지금 작업을 따라감 · ${f?f.name:'영역 없음'}`;}
+  if(dt.area===null)return '영역 없이';
+  const a=areaById(dt.area);return a?`영역 ‘${a.name}’${a.archived?' · 보관됨':''}`:'없어진 영역';
 }
 /** Explicit navigation to another task (a received result, or back to the latest request). */
 function openTask(id:string) {
@@ -1208,8 +1220,8 @@ function areaList(active:Area[]):HTMLElement {
 /** PC12: a user's idea longer than this is shown as its opening words, with the whole text one click away. */
 const NOTE_SHORT=160;
 /** The user's own idea for an area, read first: an excerpt says so and links the whole text; an empty idea stays empty. */
-function areaIdea(a:Area,id:string,limit=NOTE_SHORT):HTMLElement {
-  const box=node('section','','area-idea');box.id=id;box.append(node('p','사용자 구상','source-meta'));
+function areaIdea(a:Area,id:string,limit=NOTE_SHORT,label='사용자 구상'):HTMLElement {
+  const box=node('section','','area-idea');box.id=id;box.append(node('p',label,'source-meta'));
   if(!a.note){box.append(noNote(),node('p','비어 있어요. 아이디어도, 아직 못 정한 점도 직접 적을 수 있어요.','hint'));return box;}
   if(a.note.length<=limit){box.append(node('p',a.note,'area-idea-text'));return box;}
   const full=details(`구상 전체 보기 · 위는 앞부분 · ${a.note.length}자`,`${id}-full`);full.append(node('div',a.note,'source-raw'));
@@ -1576,51 +1588,166 @@ function taskWorkDetails(t:Task):HTMLDetailsElement {
   else box.append(node('p','작성된 작업문·완료 조건·유지할 조건 값이 없어요. 원문 속 조건이나 금지가 없다는 뜻은 아니니 요청 원문을 확인하세요.','hint'));
   return box;
 }
-/** SPATIAL102: one request, read-only: its words, status, returned results and the bases that came from it. */
+/** REPORT16: the reports on this request's return path (direct, or through follow-up handoffs), in record order.
+ * Same membership rule as pointedReturn, so the list offers exactly the reports a pointed id may name. */
+function reportsOf(t:Task):Task[] {return project.tasks.filter(x=>isReturnTask(project,x)&&pointedReturn(project,t.id,x.id)!==null);}
+/** REPORT16: the user picks which report of this request to read. Looking only: no project data, current work, unsent
+ * input or starting point changes. Disclosures of the previously picked report do not carry over to this one. */
+function pickReport(id:string) {
+  if(view!=='task'||!viewTask)return;
+  const keep=readOpen&&readOpen.task===viewTask?Object.fromEntries(Object.entries(readOpen.open).filter(([k])=>!k.startsWith('task-report-'))):{};
+  viewReturn=id;readOpen={task:viewTask,ret:id,open:keep};
+  const y=window.scrollY;render();window.scrollTo({top:y});focusFirst(`task-report-pick-${id}`);
+}
+/** REPORT16: disclosures of the task screen keep their open state across redraws of the same request and the same picked
+ * report; a different request starts closed, and a different report starts with its own parts closed. Tab memory only. */
+function keepReadOpen(root:HTMLElement,t:Task) {
+  if(!readOpen||readOpen.task!==t.id||readOpen.ret!==viewReturn)
+    readOpen={task:t.id,ret:viewReturn,open:readOpen&&readOpen.task===t.id?Object.fromEntries(Object.entries(readOpen.open).filter(([k])=>!k.startsWith('task-report-'))):{}};
+  const memo=readOpen;
+  for(const d of root.querySelectorAll<HTMLDetailsElement>('details[id]')) {
+    const open=memo.open[d.id];if(open!==undefined)d.open=open;
+    d.addEventListener('toggle',()=>{if(readOpen===memo)memo.open[d.id]=d.open;});
+  }
+}
+/** REPORT16: the area's idea as it is now (Area.note, the user's words), not the copy saved with the request. */
+function currentIdea(t:Task,a:Area|null):HTMLElement {
+  if(!a){const box=node('section','','area-idea task-idea');box.id='task-view-idea';box.append(node('p','지금의 영역 구상','source-meta'),node('p','영역 미지정 요청이라 영역 구상이 없어요.','hint'));return box;}
+  const box=areaIdea(a,'task-view-idea',NOTE_SHORT,`지금의 영역 구상 · ${a.name}${a.archived?' (보관됨)':''}`);box.classList.add('task-idea');
+  const copy=t.background?.area;
+  if(copy&&copy.id===a.id&&(copy.note??'')!==a.note)box.append(node('p','이 요청을 쓸 때의 구상 사본과 달라요. 당시 사본은 아래 배경에 그대로 있어요.','hint task-idea-changed'));
+  return box;
+}
+const DRAFT_NAME:Record<Project['draftKind'],string>={request:'요청',report:'보고',evidence:'관찰',test_answer:'시험자료'};
+/** REPORT16: what the unsent input keeps, said before the click (the composer's own target/return rules). */
+function unsentTarget():string {
+  const kind=project.draftKind;
+  if(kind==='request')return `대상 그대로 · ${draftTargetLabel()}`;
+  if(kind==='report'||kind==='evidence') {
+    if(returnChoiceRequired())return '연결할 작업은 입력칸에서 아직 고르지 않았어요';
+    const p=returnPreview(project,returnTargets(project).length>1?selectedReturnTaskId:undefined);
+    return p.targetTitle?`연결 예정 그대로 · ${p.targetTitle}`:'연결할 이전 작업 없음';
+  }
+  return '종류·내용 그대로';
+}
+/** REPORT16: open the unsent input exactly as it is (kind, text, target, chosen return task). Never relabels or retargets it. */
+function openUnsent() {
+  if(!project.draft.trim()){render();project={...project,notice:'작성 중인 입력이 없어져 아무것도 열지 않았어요. 다시 골라 주세요.'};renderStatus();return;}
+  writeInArea(null); // with an unsent input this only opens it; the id is not used
+}
+/** REPORT16: the one next action of this screen, named by what it really does, and the existing continue kept apart. */
+function nextAction(t:Task,a:Area|null):HTMLElement {
+  const box=node('section','','task-next');box.id='task-next';box.setAttribute('aria-label','다음 동작');
+  const draft=project.draft.trim(),row=node('div','','row'),what=node('p','','hint');what.id='task-next-target';
+  if(draft) {
+    row.append(btn(`작성 중인 ${DRAFT_NAME[project.draftKind]} 열기`,openUnsent,'primary','task-next-action'));
+    what.textContent=`‘${shortText(draft,48)}’ · ${unsentTarget()}`;box.append(row,what);
+    if(a&&!a.archived)box.append(node('p','이 영역의 새 요청은 이 입력을 보내거나 비운 뒤에 쓸 수 있어요.','hint'));
+  } else if(a&&!a.archived) {
+    row.append(btn('이 영역에 새 요청',()=>writeInArea(a.id),'primary','task-next-action'));
+    what.textContent=`영역 ‘${a.name}’에 쓸 빈 요청 입력칸을 열어요. 보내기 전에는 작업이 생기지 않아요.`;box.append(row,what);
+  } else {
+    const b=btn('이 영역에 새 요청',()=>{},'primary','task-next-action');b.disabled=true;b.setAttribute('aria-describedby','task-next-target');
+    what.textContent=a?'보관된 영역이라 여기서 새 요청을 쓰지 않아요. 영역을 되살리면 쓸 수 있어요.':'영역 미지정 요청이라 이 화면에서는 영역 새 요청을 쓰지 않아요.';
+    row.append(b);box.append(row,what);
+  }
+  // Editing this task is the existing explicit continue (PC12 policy), kept secondary and apart from a new request.
+  const target=continueTarget(t),edit=node('div','','task-edit'),er=node('div','','row');
+  if(currentGroup(t))er.append(appTag());
+  er.append(btn(target.button,()=>continueTask(t.id),'secondary','task-view-continue'));
+  const which=node('p',target.text,'hint task-view-target');which.id='task-view-target';edit.append(er,which);box.append(edit);
+  return box;
+}
+/** REPORT16: the picked report's own words first, level with the current idea beside it; then this request's reports as a
+ * short pick list (existing title, source kind, time). Nothing is picked for the user; no unpicked report's text is listed. */
+function reportsSection(t:Task,reports:Task[]):HTMLElement {
+  const box=node('section','','task-reports');box.id='task-reports';box.setAttribute('aria-label','돌아온 보고');
+  if(viewReturn!==null)box.append(pointedSection(t,viewReturn));
+  const picker=node('div','','report-picker');
+  picker.append(node('h2',`돌아온 결과 ${reports.length}개${reports.length?' · 외부 원문 · 앱 미검증':''}`,'report-picker-head'));
+  if(!reports.length)picker.append(node('p',t.handoffs.length?'작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.':'아직 돌아온 결과가 없어요.','hint'));
+  else {
+    if(viewReturn===null){const none=node('p',reports.length>1?'읽을 보고를 골라 주세요. 최신 보고를 대신 고르지 않아요.':'읽을 보고를 골라 주세요.','hint');none.id='task-report-none';picker.append(none);}
+    const list=node('ul','','report-pick-list');list.id='task-report-list';list.setAttribute('aria-label','읽을 보고 고르기');
+    for(const r of reports) {
+      const src=project.sources.find(s=>s.id===r.sourceIds[0]),path=returnPath(project,r),li=node('li');
+      const b=btn('',()=>pickReport(r.id),'report-pick',`task-report-pick-${r.id}`);b.setAttribute('aria-pressed',String(r.id===viewReturn));
+      b.append(node('span',taskTitle(project,r),'report-pick-title'),
+        node('span',`작업 ${pad(project.tasks.indexOf(r)+1)} · ${src?sourceName[src.kind]:'원문 없음'} · ${src?dateLabel(src.at):'시각 미확인'}${path.length>2?' · 이전 보고에 연결':''}`,'report-pick-meta'));
+      li.append(b);list.append(li);
+    }
+    picker.append(list);
+  }
+  box.append(picker);
+  if(viewReturn!==null&&pointedReturn(project,t.id,viewReturn)){const help=details('잘못 가져온 보고라면','task-view-report-help');help.append(reportCorrectionHelp());box.append(help);}
+  return box;
+}
+/** SPATIAL102 + REPORT16: one request, read-only. First: the area's current idea and the next action beside the report the user
+ * picks. Editing this task stays the separate continue. Short context, original, work text, background copy and bases follow. */
 function renderTaskView(root:HTMLElement,t:Task) {
-  const area=areaById(areaOf(project,t)),first=sourceOf(project,t),results=returnsOf(t);
-  const head=node('div','','space-head'),title=node('h1',taskTitle(project,t));title.id='space-title';title.tabIndex=-1;
-  head.append(node('p',`TASK · 작업 ${pad(project.tasks.indexOf(t)+1)}${area?.archived?' · 보관된 영역':''}`,'eyebrow'),title,node('p',taskStatus(project,t),'hint task-view-status'));
-  const actions=node('div','','row'),target=continueTarget(t);
-  if(currentGroup(t))actions.append(appTag());
-  actions.append(btn(target.button,()=>continueTask(t.id),'primary','task-view-continue'));
-  const back=originButton('task-return-origin');if(back)actions.append(back);
-  const which=node('p',target.text,'hint task-view-target');which.id='task-view-target';
-  head.append(actions,which);if(!currentGroup(t))head.append(node('p','이 화면을 보는 것만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.','hint'));
+  const area=areaById(areaOf(project,t)),first=sourceOf(project,t),reports=reportsOf(t);
+  const head=node('div','','space-head task-view-head'),title=node('h1',taskTitle(project,t));title.id='space-title';title.tabIndex=-1;
+  const top=node('div','','task-view-head-line');
+  top.append(node('p',`요청 · ${area?`영역 ‘${area.name}’${area.archived?' · 보관됨':''}`:'영역 미지정'}`,'eyebrow'));
+  // PC12: back to the view the reading started from; without one (e.g. after a reload) only a plain way to the whole space.
+  top.append(originButton('task-return-origin')??btn('전체 공간으로',openSpace,'secondary','task-to-space'));
+  head.append(top,title,node('p',`작업 ${pad(project.tasks.indexOf(t)+1)} · ${taskStatus(project,t)}`,'hint task-view-status'));
   root.append(head);
-  if(viewReturn!==null){root.append(pointedSection(t,viewReturn));if(pointedReturn(project,t.id,viewReturn))root.append(reportCorrectionHelp());}
-  // PC12: short context first (each line says where it comes from); the original, reports and conditions open when needed.
   const body=node('section','','area-tasks task-view');body.id='task-view';
-  body.append(taskContext(t));
+  const read=node('div','','task-read'),side=node('div','','task-read-side');
+  side.append(currentIdea(t,area),nextAction(t,area));read.append(side,reportsSection(t,reports));body.append(read);
+  // PC12: this request's short context (each line says where it comes from); the original and conditions open when needed.
+  const more=node('section','','task-more');more.append(node('h2','이 요청 자세히'),taskContext(t));
   const original=details(`요청 원문 보기 · 사용자 원문${first?` · ${first.text.length}자`:''}`,'task-view-request');
   if(first)original.append(node('p',`${sourceName[first.kind]} · ${dateLabel(first.at)}`,'source-id'),node('div',first.text,'source-raw'));
   else original.append(node('p','이 작업의 원문을 찾지 못했어요.','hint'));
-  body.append(original,taskWorkDetails(t));
-  if(!results.length)body.append(node('p',`돌아온 결과 0개 · ${t.handoffs.length?'작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.':'아직 돌아온 결과가 없어요.'}`,'hint'));
-  else {
-    const reports=details(`돌아온 결과 ${results.length}개 · 외부 원문 · 앱 미검증`,'task-view-results');
-    for(const r of results)for(const id of r.sourceIds){const src=project.sources.find(s=>s.id===id);if(src)reports.append(node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 작업 ${pad(project.tasks.indexOf(r)+1)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));}
-    reports.append(reportCorrectionHelp());body.append(reports);
-  }
-  body.append(backgroundPreview(t,'task-view-background'));
-  root.append(body);
-  const own=new Set([t.id,...results.map(r=>r.id)]),bases=project.bases.filter(b=>own.has(project.sources.find(s=>s.id===b.sourceId)?.taskId??''));
+  more.append(original,taskWorkDetails(t),backgroundPreview(t,'task-view-background'));
+  body.append(more);root.append(body);
+  const own=new Set([t.id,...returnsOf(t).map(r=>r.id)]),bases=project.bases.filter(b=>own.has(project.sources.find(s=>s.id===b.sourceId)?.taskId??''));
   const box=details(`이 작업의 기준 ${bases.length}개`,'task-view-bases');
   for(const b of bases)box.append(node('p',`${BASIS_LABEL[b.status]} · ${shortText(b.text,90)}`,'source-raw'));
   if(!bases.length)box.append(node('p','이 작업에서 나온 기준이 없어요.','hint'));
   box.append(btn('기준 · 출처 전체 보기',showContext,'quiet'));root.append(box);
+  keepReadOpen(root,t);
 }
-/** SPATIAL102-R1: the report the check item pointed to, with where it belongs. A stale or foreign id is said so plainly. */
+/** REPORT16: the opening of a report as written: at most six lines and REPORT_LEAD characters, line breaks kept. */
+const REPORT_LEAD=300;
+const KIND_SHORT:Record<Source['kind'],string>={...sourceName,report:'구현자 보고',evidence:'관찰·검사 자료'};
+function leadOf(text:string):string {
+  const lines=text.split('\n');let lead=lines.slice(0,6).join('\n');
+  if(lead.length>REPORT_LEAD)lead=lead.slice(0,REPORT_LEAD);
+  return lead.length<text.length?`${lead.trimEnd()}…`:text;
+}
+/** SPATIAL102-R1 + REPORT16: the picked report (or the one a check item pointed to). Every source of that report task is reachable
+ * in full; a missing source is said, never replaced or skipped. A stale or foreign id is said plainly, never swapped. */
 function pointedSection(t:Task,returnId:string):HTMLElement {
-  const box=node('section','','area-tasks task-pointed');box.id='task-pointed';box.append(node('h2','확인할 일에서 연 보고'));
-  const r=pointedReturn(project,t.id,returnId),src=r?project.sources.find(s=>s.id===r.sourceIds[0]):undefined;
-  if(!r||!src){box.append(node('p','가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 작업의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래는 이 작업의 기록이에요.','alert warning'));return box;}
-  const no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`,path=returnPath(project,r);
-  // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run (a report can be pasted onto the
-  // current work with nothing exported), so the wording never infers one.
+  const box=node('section','','task-pointed');box.id='task-pointed';
+  const r=pointedReturn(project,t.id,returnId);
+  if(!r){box.append(node('p','고른 보고','source-meta'),node('p','가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 요청의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래에서 직접 고를 수 있어요.','alert warning'));return box;}
+  const no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`,path=returnPath(project,r),first=project.sources.find(s=>s.id===r.sourceIds[0]);
+  // One low-emphasis line, level with the idea's own label: which report, whose words, unverified.
+  const one=r.sourceIds.length===1&&first?` · ${KIND_SHORT[first.kind]}`:'';
+  box.append(node('p',`고른 보고 · ${no(r)}${one} · ${first?dateLabel(first.at):'시각 미확인'} · 외부 원문 · 앱 미검증`,'source-meta'));
+  for(const id of r.sourceIds) {
+    const src=project.sources.find(s=>s.id===id);
+    if(!src){box.append(node('p',`이 보고의 원문 하나(${id})를 찾지 못했어요. 다른 원문으로 대신하지 않았어요.`,'alert warning'));continue;}
+    const text=reportBody(src),part=node('div','','report-source');part.dataset.sourceId=src.id;
+    if(r.sourceIds.length>1)part.append(node('p',KIND_SHORT[src.kind],'source-meta'));
+    // Read with the idea beside it: a short report is shown whole; a long one shows its opening lines as written (not a
+    // summary), says so, and the whole text is one explicit click away.
+    const lead=leadOf(text);
+    if(lead===text)part.append(node('div',text,'report-lead whole'));
+    else {
+      const full=details(`${src.kind==='evidence'?'관찰·검사 자료':'보고'} 전문 보기 · ${text.length}자`,`task-report-src-${src.id}`);
+      full.append(node('div',text,'source-raw'));
+      part.append(node('div',lead,'report-lead'),node('p','위는 앞부분이에요 · 요약이 아니에요','report-lead-note'),full);
+    }
+    box.append(part);
+  }
+  // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run, so the wording never infers one.
   const hops=path.map((x,i)=>i===0?`${no(x)} 요청`:i===path.length-1?`${no(x)} 이 보고`:`${no(x)} 보고`);
-  box.append(node('p',`연결: ${hops.join(' › ')} (${path.length>2?'이전 보고에 연결된 보고':'이 요청에 바로 연결된 보고'})`,'hint'),
-    node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));
+  const link=details(`연결 경로 보기 · ${path.length>2?'이전 보고에 연결된 보고':'이 요청에 바로 연결된 보고'}`,'task-report-path');
+  link.append(node('p',`연결: ${hops.join(' › ')}`,'hint'));box.append(link);
   return box;
 }
 function renderUnplaced(root:HTMLElement) {
