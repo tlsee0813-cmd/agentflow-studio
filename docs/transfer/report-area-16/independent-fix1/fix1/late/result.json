@@ -1,0 +1,75 @@
+{
+  "rows": [
+    {
+      "id": "delayed-real-local-MOCK-response-render",
+      "pass": true,
+      "before": {
+        "details": [
+          {
+            "id": "task-report-src-S_506f8d13-5c01-4c98-82d9-8d6d6636f280",
+            "open": true
+          },
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": true
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_e56d4ea6-3c65-4023-b493-1063013c063b"
+        ],
+        "focus": ""
+      },
+      "after": {
+        "details": [
+          {
+            "id": "task-report-src-S_506f8d13-5c01-4c98-82d9-8d6d6636f280",
+            "open": true
+          },
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": true
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_e56d4ea6-3c65-4023-b493-1063013c063b"
+        ],
+        "focus": ""
+      },
+      "scope": "real localhost MOCK response fetched then deliberately held and released by test route; no external/paid AI; timing injection separated from ordinary UI"
+    }
+  ],
+  "fatal": null,
+  "exit": 0
+}

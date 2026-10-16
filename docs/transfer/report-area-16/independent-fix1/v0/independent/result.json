@@ -1,0 +1,323 @@
+{
+  "rows": [
+    {
+      "id": "1280-R1-expanded",
+      "expected_path_open": true,
+      "actual_path_open": true,
+      "pass": true,
+      "raw": {
+        "open": [
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": false
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_f4544b28-8eef-422e-974d-7cf71b844431"
+        ],
+        "y": 0,
+        "focus": ""
+      }
+    },
+    {
+      "id": "1280-same-R1-preserves",
+      "expected_path_open": true,
+      "actual_path_open": true,
+      "pass": true,
+      "raw": {
+        "open": [
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": false
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_f4544b28-8eef-422e-974d-7cf71b844431"
+        ],
+        "y": 27,
+        "focus": "task-report-pick-T_f4544b28-8eef-422e-974d-7cf71b844431"
+      }
+    },
+    {
+      "id": "1280-different-R2-resets",
+      "expected_path_open": false,
+      "actual_path_open": true,
+      "pass": false,
+      "raw": {
+        "open": [
+          {
+            "id": "task-report-src-S_e6d7a253-b268-46dd-b54e-4822b2de7207",
+            "open": false
+          },
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": true
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_3d3dcdc4-5cd7-4b20-b9d7-652987f06545"
+        ],
+        "y": 668,
+        "focus": "task-report-pick-T_3d3dcdc4-5cd7-4b20-b9d7-652987f06545"
+      }
+    },
+    {
+      "id": "1280-common-request-preserves",
+      "pass": true
+    },
+    {
+      "id": "1280-same-report-storage-refresh-preserves",
+      "expected_path_open": true,
+      "actual_path_open": true,
+      "pass": true,
+      "raw": {
+        "open": [
+          {
+            "id": "task-report-src-S_e6d7a253-b268-46dd-b54e-4822b2de7207",
+            "open": false
+          },
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": true
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_3d3dcdc4-5cd7-4b20-b9d7-652987f06545"
+        ],
+        "y": 668,
+        "focus": "task-report-pick-T_3d3dcdc4-5cd7-4b20-b9d7-652987f06545"
+      }
+    },
+    {
+      "id": "1280-read-project-unchanged",
+      "pass": true,
+      "beforeSHA": "5f98b1cca47688a54cbc61d1b316d07c5800453cdb58af8952ce740e3c842485",
+      "afterSHA": "5f98b1cca47688a54cbc61d1b316d07c5800453cdb58af8952ce740e3c842485"
+    },
+    {
+      "id": "1440-R1-expanded",
+      "expected_path_open": true,
+      "actual_path_open": true,
+      "pass": true,
+      "raw": {
+        "open": [
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": false
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_ffe8a5b8-52ed-4c31-81a8-dea9bdc7a43f"
+        ],
+        "y": 0,
+        "focus": ""
+      }
+    },
+    {
+      "id": "1440-same-R1-preserves",
+      "expected_path_open": true,
+      "actual_path_open": true,
+      "pass": true,
+      "raw": {
+        "open": [
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": false
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_ffe8a5b8-52ed-4c31-81a8-dea9bdc7a43f"
+        ],
+        "y": 0,
+        "focus": "task-report-pick-T_ffe8a5b8-52ed-4c31-81a8-dea9bdc7a43f"
+      }
+    },
+    {
+      "id": "1440-different-R2-resets",
+      "expected_path_open": false,
+      "actual_path_open": true,
+      "pass": false,
+      "raw": {
+        "open": [
+          {
+            "id": "task-report-src-S_357306da-df38-4025-889c-7d3694785f16",
+            "open": false
+          },
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": true
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_cdbfcc19-fdba-411f-97e1-deaf433e7bcc"
+        ],
+        "y": 465,
+        "focus": "task-report-pick-T_cdbfcc19-fdba-411f-97e1-deaf433e7bcc"
+      }
+    },
+    {
+      "id": "1440-common-request-preserves",
+      "pass": true
+    },
+    {
+      "id": "1440-same-report-storage-refresh-preserves",
+      "expected_path_open": true,
+      "actual_path_open": true,
+      "pass": true,
+      "raw": {
+        "open": [
+          {
+            "id": "task-report-src-S_357306da-df38-4025-889c-7d3694785f16",
+            "open": false
+          },
+          {
+            "id": "task-report-path",
+            "open": true
+          },
+          {
+            "id": "task-view-report-help",
+            "open": false
+          },
+          {
+            "id": "task-view-request",
+            "open": true
+          },
+          {
+            "id": "task-view-work",
+            "open": false
+          },
+          {
+            "id": "task-view-background",
+            "open": false
+          }
+        ],
+        "selected": [
+          "task-report-pick-T_cdbfcc19-fdba-411f-97e1-deaf433e7bcc"
+        ],
+        "y": 465,
+        "focus": "task-report-pick-T_cdbfcc19-fdba-411f-97e1-deaf433e7bcc"
+      }
+    },
+    {
+      "id": "1440-read-project-unchanged",
+      "pass": true,
+      "beforeSHA": "d0ada62fad8a9c137918dcf644dd340c26d12b4f4f3dcdd2a6a868fd3cdeb109",
+      "afterSHA": "d0ada62fad8a9c137918dcf644dd340c26d12b4f4f3dcdd2a6a868fd3cdeb109"
+    }
+  ],
+  "fatal": null,
+  "exit": 1,
+  "fixture_reuse": "author UI fixture builder only; independent expectations and actions above"
+}

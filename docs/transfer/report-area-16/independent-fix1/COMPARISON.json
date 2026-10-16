@@ -1,0 +1,651 @@
+{
+  "checker_logic_equal_except_candidate_path": true,
+  "v0_codeSHA": "a575419ba2109bef3cb5d77360ffc35af100734090a9ff45f0a5acfbe4994f0b",
+  "fix1_codeSHA": "6190a8215854fdffe246694571eb3c26fd4121d94acd87ff948bb53b43bc86b8",
+  "v0": {
+    "rows": [
+      {
+        "id": "1280-R1-expanded",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": false
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_f4544b28-8eef-422e-974d-7cf71b844431"
+          ],
+          "y": 0,
+          "focus": ""
+        }
+      },
+      {
+        "id": "1280-same-R1-preserves",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": false
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_f4544b28-8eef-422e-974d-7cf71b844431"
+          ],
+          "y": 27,
+          "focus": "task-report-pick-T_f4544b28-8eef-422e-974d-7cf71b844431"
+        }
+      },
+      {
+        "id": "1280-different-R2-resets",
+        "expected_path_open": false,
+        "actual_path_open": true,
+        "pass": false,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-src-S_e6d7a253-b268-46dd-b54e-4822b2de7207",
+              "open": false
+            },
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": true
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_3d3dcdc4-5cd7-4b20-b9d7-652987f06545"
+          ],
+          "y": 668,
+          "focus": "task-report-pick-T_3d3dcdc4-5cd7-4b20-b9d7-652987f06545"
+        }
+      },
+      {
+        "id": "1280-common-request-preserves",
+        "pass": true
+      },
+      {
+        "id": "1280-same-report-storage-refresh-preserves",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-src-S_e6d7a253-b268-46dd-b54e-4822b2de7207",
+              "open": false
+            },
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": true
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_3d3dcdc4-5cd7-4b20-b9d7-652987f06545"
+          ],
+          "y": 668,
+          "focus": "task-report-pick-T_3d3dcdc4-5cd7-4b20-b9d7-652987f06545"
+        }
+      },
+      {
+        "id": "1280-read-project-unchanged",
+        "pass": true,
+        "beforeSHA": "5f98b1cca47688a54cbc61d1b316d07c5800453cdb58af8952ce740e3c842485",
+        "afterSHA": "5f98b1cca47688a54cbc61d1b316d07c5800453cdb58af8952ce740e3c842485"
+      },
+      {
+        "id": "1440-R1-expanded",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": false
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_ffe8a5b8-52ed-4c31-81a8-dea9bdc7a43f"
+          ],
+          "y": 0,
+          "focus": ""
+        }
+      },
+      {
+        "id": "1440-same-R1-preserves",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": false
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_ffe8a5b8-52ed-4c31-81a8-dea9bdc7a43f"
+          ],
+          "y": 0,
+          "focus": "task-report-pick-T_ffe8a5b8-52ed-4c31-81a8-dea9bdc7a43f"
+        }
+      },
+      {
+        "id": "1440-different-R2-resets",
+        "expected_path_open": false,
+        "actual_path_open": true,
+        "pass": false,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-src-S_357306da-df38-4025-889c-7d3694785f16",
+              "open": false
+            },
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": true
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_cdbfcc19-fdba-411f-97e1-deaf433e7bcc"
+          ],
+          "y": 465,
+          "focus": "task-report-pick-T_cdbfcc19-fdba-411f-97e1-deaf433e7bcc"
+        }
+      },
+      {
+        "id": "1440-common-request-preserves",
+        "pass": true
+      },
+      {
+        "id": "1440-same-report-storage-refresh-preserves",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-src-S_357306da-df38-4025-889c-7d3694785f16",
+              "open": false
+            },
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": true
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_cdbfcc19-fdba-411f-97e1-deaf433e7bcc"
+          ],
+          "y": 465,
+          "focus": "task-report-pick-T_cdbfcc19-fdba-411f-97e1-deaf433e7bcc"
+        }
+      },
+      {
+        "id": "1440-read-project-unchanged",
+        "pass": true,
+        "beforeSHA": "d0ada62fad8a9c137918dcf644dd340c26d12b4f4f3dcdd2a6a868fd3cdeb109",
+        "afterSHA": "d0ada62fad8a9c137918dcf644dd340c26d12b4f4f3dcdd2a6a868fd3cdeb109"
+      }
+    ],
+    "fatal": null,
+    "exit": 1,
+    "fixture_reuse": "author UI fixture builder only; independent expectations and actions above"
+  },
+  "fix1": {
+    "rows": [
+      {
+        "id": "1280-R1-expanded",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": false
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_3b5fd34b-6866-4934-9975-6f46eeec57a8"
+          ],
+          "y": 0,
+          "focus": ""
+        }
+      },
+      {
+        "id": "1280-same-R1-preserves",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": false
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_3b5fd34b-6866-4934-9975-6f46eeec57a8"
+          ],
+          "y": 27,
+          "focus": "task-report-pick-T_3b5fd34b-6866-4934-9975-6f46eeec57a8"
+        }
+      },
+      {
+        "id": "1280-different-R2-resets",
+        "expected_path_open": false,
+        "actual_path_open": false,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-src-S_506f8d13-5c01-4c98-82d9-8d6d6636f280",
+              "open": false
+            },
+            {
+              "id": "task-report-path",
+              "open": false
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": true
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_e56d4ea6-3c65-4023-b493-1063013c063b"
+          ],
+          "y": 668,
+          "focus": "task-report-pick-T_e56d4ea6-3c65-4023-b493-1063013c063b"
+        }
+      },
+      {
+        "id": "1280-common-request-preserves",
+        "pass": true
+      },
+      {
+        "id": "1280-same-report-storage-refresh-preserves",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-src-S_506f8d13-5c01-4c98-82d9-8d6d6636f280",
+              "open": false
+            },
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": true
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_e56d4ea6-3c65-4023-b493-1063013c063b"
+          ],
+          "y": 227,
+          "focus": ""
+        }
+      },
+      {
+        "id": "1280-read-project-unchanged",
+        "pass": true,
+        "beforeSHA": "85c324c4b6e5ca6f0ba8ae97faf8cbe9f7bc2931d4379edf793522531511a51f",
+        "afterSHA": "85c324c4b6e5ca6f0ba8ae97faf8cbe9f7bc2931d4379edf793522531511a51f"
+      },
+      {
+        "id": "1440-R1-expanded",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": false
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_2103356b-aee7-4210-8fff-d83b7d890a2b"
+          ],
+          "y": 0,
+          "focus": ""
+        }
+      },
+      {
+        "id": "1440-same-R1-preserves",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": false
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_2103356b-aee7-4210-8fff-d83b7d890a2b"
+          ],
+          "y": 0,
+          "focus": "task-report-pick-T_2103356b-aee7-4210-8fff-d83b7d890a2b"
+        }
+      },
+      {
+        "id": "1440-different-R2-resets",
+        "expected_path_open": false,
+        "actual_path_open": false,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-src-S_216ba263-3abc-4237-8b9b-bc3673e1ce7e",
+              "open": false
+            },
+            {
+              "id": "task-report-path",
+              "open": false
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": true
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_7f46f9a0-182b-48b4-9093-dc077c58e539"
+          ],
+          "y": 465,
+          "focus": "task-report-pick-T_7f46f9a0-182b-48b4-9093-dc077c58e539"
+        }
+      },
+      {
+        "id": "1440-common-request-preserves",
+        "pass": true
+      },
+      {
+        "id": "1440-same-report-storage-refresh-preserves",
+        "expected_path_open": true,
+        "actual_path_open": true,
+        "pass": true,
+        "raw": {
+          "open": [
+            {
+              "id": "task-report-src-S_216ba263-3abc-4237-8b9b-bc3673e1ce7e",
+              "open": false
+            },
+            {
+              "id": "task-report-path",
+              "open": true
+            },
+            {
+              "id": "task-view-report-help",
+              "open": false
+            },
+            {
+              "id": "task-view-request",
+              "open": true
+            },
+            {
+              "id": "task-view-work",
+              "open": false
+            },
+            {
+              "id": "task-view-background",
+              "open": false
+            }
+          ],
+          "selected": [
+            "task-report-pick-T_7f46f9a0-182b-48b4-9093-dc077c58e539"
+          ],
+          "y": 465,
+          "focus": ""
+        }
+      },
+      {
+        "id": "1440-read-project-unchanged",
+        "pass": true,
+        "beforeSHA": "4292728427696b278d4e0b37b163a146efb12517f8181fa181deafa06a172bb9",
+        "afterSHA": "4292728427696b278d4e0b37b163a146efb12517f8181fa181deafa06a172bb9"
+      }
+    ],
+    "fatal": null,
+    "exit": 0,
+    "fixture_reuse": "author UI fixture builder only; independent expectations and actions above"
+  }
+}

@@ -1,0 +1,5 @@
+
+> agentflow-studio@0.0.3 build
+> node scripts/build.mjs
+
+Built TypeScript client/shared modules + static assets. Server remains native Node ESM.

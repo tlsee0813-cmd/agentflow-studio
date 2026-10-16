@@ -1,0 +1,3 @@
+from pathlib import Path
+import subprocess,os,json,datetime,sys
+r=Path(__file__).parent;e=os.environ.copy();e['PATH']='/workspace/browser-env/tools/node_modules/.bin:'+e['PATH'];start=datetime.datetime.now(datetime.timezone.utc).isoformat();p=subprocess.run(['/workspace/browser-env/venv/bin/python',str(r/'late.py')],env=e,capture_output=True);(r/'late.stdout.log').write_bytes(p.stdout);(r/'late.stderr.log').write_bytes(p.stderr);(r/'late-process.json').write_text(json.dumps({'start':start,'end':datetime.datetime.now(datetime.timezone.utc).isoformat(),'child_exit':p.returncode,'collector_exit':p.returncode,'json_exit':json.loads((r/'late/result.json').read_text())['exit']},indent=2));sys.exit(p.returncode)

@@ -1,0 +1,7 @@
+{
+  "source": "a0f0ae786c580a8919cede07db48d4397b58b114",
+  "command": "node continuity/scripts/build-static.mjs",
+  "actual_child_exit": 0,
+  "overlay": "client/app.js + styles.css over HOME15 fix2 static MOCK runtime; unchanged index/shared/runtime adapter retained",
+  "no_deployment": true
+}

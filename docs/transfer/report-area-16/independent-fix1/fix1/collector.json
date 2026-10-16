@@ -1,0 +1,29 @@
+[
+  {
+    "script": "repro.py",
+    "start": "2026-10-16T09:48:35.576617+00:00",
+    "end": "2026-10-16T09:48:45.850818+00:00",
+    "actual_child_returncode": 0,
+    "json_exit": 0,
+    "matches": true,
+    "stdoutSHA": "47954ad77d227d2f1a0181c93aa049d86febab83f381ae895c33fdbf59a36c52"
+  },
+  {
+    "script": "boundaries.py",
+    "start": "2026-10-16T09:48:45.851079+00:00",
+    "end": "2026-10-16T09:49:04.237238+00:00",
+    "actual_child_returncode": 0,
+    "json_exit": 0,
+    "matches": true,
+    "stdoutSHA": "47954ad77d227d2f1a0181c93aa049d86febab83f381ae895c33fdbf59a36c52"
+  },
+  {
+    "script": "visual-fallback.py",
+    "start": "2026-10-16T09:49:04.237456+00:00",
+    "end": "2026-10-16T09:49:18.297217+00:00",
+    "actual_child_returncode": 1,
+    "json_exit": 1,
+    "matches": true,
+    "stdoutSHA": "b7d6647d8ae07d82fb93096677f0a6a6356027206b5f106f4072e1fdafe41f52"
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "scope": "offline invalid fixture rejection; not injected into browser/runtime",
+  "rejected": true,
+  "error": "INVALID_DATA"
+}

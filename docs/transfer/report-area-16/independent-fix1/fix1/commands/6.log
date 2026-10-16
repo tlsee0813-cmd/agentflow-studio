@@ -1,0 +1,2 @@
+Explicit browser MOCK build: continuity/static-dist; no server adapter or provider files.
+PATH compiler (offline bootstrap, not npm ci evidence)
