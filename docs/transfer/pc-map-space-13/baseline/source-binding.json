@@ -1,0 +1,42 @@
+{
+  "commit": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+  "source_reference_only": true,
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 177106,
+      "sha256": "f67e12fb505b121ec4c4536eb40879e8409978516a1bb3835bb90cd0c6a01fd4",
+      "disk_match": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_match": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 52992,
+      "sha256": "ca5a7c0f9c47d5832196ef5a63c3e3823f9e028ca8b7fc0ebb39bff7d91e7eec",
+      "disk_match": true
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 51585,
+      "sha256": "703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f",
+      "disk_match": true
+    },
+    {
+      "path": "app/continuity/src/shared/attention.ts",
+      "bytes": 3470,
+      "sha256": "1dd7f306d8ef40c843093ac67586dc66905db1724bc5653b44b2906e3f0e5bed",
+      "disk_match": true
+    },
+    {
+      "path": "app/continuity/src/shared/mock.ts",
+      "bytes": 17369,
+      "sha256": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+      "disk_match": true
+    }
+  ]
+}

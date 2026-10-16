@@ -1,0 +1,9 @@
+{
+  "node": "v22.16.0",
+  "npm": "10.9.2",
+  "typescript": "Version 5.8.3",
+  "python": "/workspace/browser-env/venv/bin/python",
+  "browser_executable": "/usr/bin/chromium",
+  "no_install": true,
+  "candidate_tests": "PENDING"
+}

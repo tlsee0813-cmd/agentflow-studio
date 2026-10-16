@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_335b48c5-2692-4a50-b6e0-3d5684b6de39",
+  "revision": 5,
+  "name": "나의 프로젝트",
+  "sources": [],
+  "bases": [],
+  "tasks": [],
+  "currentTaskId": null,
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "작은 공방의 소개와 예약 안내를 정리한다.",
+      "at": "2026-10-16T04:47:11.121Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_7de1feb5-22df-4f95-a48d-9b8d06e8cd2b",
+        "name": "소개",
+        "note": "소개글 한 편을 읽고 게시 여부는 담당자가 선택한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.121Z"
+      },
+      {
+        "id": "A_a8fa59f9-2188-45b3-b0b8-003bfe6f0657",
+        "name": "예약",
+        "note": "대기자 안내의 선택을 확인한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.121Z"
+      },
+      {
+        "id": "A_1ce06a29-6d5f-4220-ad53-ed7d5264ba44",
+        "name": "알림",
+        "note": "운영시간 안내만 정리한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.121Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_7de1feb5-22df-4f95-a48d-9b8d06e8cd2b": {
+          "x": 40,
+          "y": 40
+        },
+        "A_a8fa59f9-2188-45b3-b0b8-003bfe6f0657": {
+          "x": 340,
+          "y": 40
+        },
+        "A_1ce06a29-6d5f-4220-ad53-ed7d5264ba44": {
+          "x": -260,
+          "y": 40
+        }
+      }
+    }
+  }
+}

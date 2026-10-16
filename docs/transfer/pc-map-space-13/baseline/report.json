@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_7bd6e8d7-01e1-41c6-82b9-9320afff4ed2",
+  "revision": 11,
+  "name": "나의 프로젝트",
+  "sources": [
+    {
+      "id": "S_44c9130a-1899-4b8c-b925-e5bb4d9f2f04",
+      "kind": "request",
+      "text": "소개글 한 편의 문장을 확인해 주세요.",
+      "at": "2026-10-16T04:47:11.121Z",
+      "taskId": "T_9a01fdba-27a4-45d5-9fa6-fe95724dea8c",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_2db4cab2-eda1-4707-926b-e6c265ba2759",
+      "kind": "report",
+      "text": "문장을 정리했다고 보고받았다. 실제 공개나 실행은 확인하지 않았다.",
+      "at": "2026-10-16T04:47:11.121Z",
+      "taskId": "T_a47c65b9-1aa5-4c1f-9c89-74a6437ceeee",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "소개글 한 편의 문장을 확인해 주세요.",
+      "status": "requested",
+      "sourceId": "S_44c9130a-1899-4b8c-b925-e5bb4d9f2f04",
+      "revision": 8,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_9a01fdba-27a4-45d5-9fa6-fe95724dea8c",
+      "sourceIds": [
+        "S_44c9130a-1899-4b8c-b925-e5bb4d9f2f04"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 7,
+        "brief": "작은 공방의 소개와 예약 안내를 정리한다.",
+        "area": {
+          "id": "A_29ae7343-a3e5-4d45-a3ec-bb9ea22d6d5c",
+          "name": "소개",
+          "note": "소개글 한 편을 읽고 게시 여부는 담당자가 선택한다."
+        }
+      },
+      "areaId": "A_29ae7343-a3e5-4d45-a3ec-bb9ea22d6d5c"
+    },
+    {
+      "id": "T_a47c65b9-1aa5-4c1f-9c89-74a6437ceeee",
+      "sourceIds": [
+        "S_2db4cab2-eda1-4707-926b-e6c265ba2759"
+      ],
+      "parentTaskId": "T_9a01fdba-27a4-45d5-9fa6-fe95724dea8c",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 7,
+        "brief": "작은 공방의 소개와 예약 안내를 정리한다.",
+        "area": {
+          "id": "A_29ae7343-a3e5-4d45-a3ec-bb9ea22d6d5c",
+          "name": "소개",
+          "note": "소개글 한 편을 읽고 게시 여부는 담당자가 선택한다."
+        }
+      }
+    }
+  ],
+  "currentTaskId": "T_a47c65b9-1aa5-4c1f-9c89-74a6437ceeee",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "report",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "작은 공방의 소개와 예약 안내를 정리한다.",
+      "at": "2026-10-16T04:47:11.120Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_29ae7343-a3e5-4d45-a3ec-bb9ea22d6d5c",
+        "name": "소개",
+        "note": "소개글 한 편을 읽고 게시 여부는 담당자가 선택한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.120Z"
+      },
+      {
+        "id": "A_92b26045-50ce-4910-ad4d-98793df804ae",
+        "name": "예약",
+        "note": "대기자 안내의 선택을 확인한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.121Z"
+      },
+      {
+        "id": "A_8c8dad63-4967-4a7d-b3d8-04dba6e3aa22",
+        "name": "알림",
+        "note": "운영시간 안내만 정리한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.121Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_29ae7343-a3e5-4d45-a3ec-bb9ea22d6d5c": {
+          "x": 40,
+          "y": 40
+        },
+        "A_92b26045-50ce-4910-ad4d-98793df804ae": {
+          "x": 340,
+          "y": 40
+        },
+        "A_8c8dad63-4967-4a7d-b3d8-04dba6e3aa22": {
+          "x": -260,
+          "y": 40
+        }
+      }
+    }
+  }
+}

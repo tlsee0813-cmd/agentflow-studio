@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/product13-baseline/observe.py"
+  ],
+  "start": "2026-10-16T04:48:33.095138+00:00",
+  "end": "2026-10-16T04:49:04.705085+00:00",
+  "actual_child_returncode": 1,
+  "stdout_sha256": "d81d6c21345317bd3e14cc3d20d769026aac77fdce50a434acc62e26a5b5531d",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

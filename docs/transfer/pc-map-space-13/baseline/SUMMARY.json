@@ -1,0 +1,102 @@
+{
+  "baseline": "9613208f40f1f7f8506504ac6025f06e421edd4d",
+  "script_sha256": "17c32085a64d013f46404937bfd8bbbb290f2533c5a93d93ce86e89de2019001",
+  "complete": true,
+  "child_exit": 1,
+  "collector_tool_actual_exit": 1,
+  "collector_tool_session": 45359,
+  "first_error_tool_session36269": 1,
+  "second_error_tool_session19623": 1,
+  "not_a_full_tool_transcript": true,
+  "scenes": [
+    {
+      "id": "1280-import-notice",
+      "map_top": 637.765625,
+      "map_visible_height": 81.23349915919277,
+      "visible_ratio": 0.11282430438776775,
+      "status": "FAIL",
+      "criteria": {
+        "map_height_40pct": false,
+        "first_card_title_has_visible_range": false,
+        "first_card_title_sample_hit": false,
+        "first_card_enter_hit": false,
+        "first_card_info_hit": false,
+        "no_first_screen_scroll": true,
+        "expected_notice": true
+      }
+    },
+    {
+      "id": "1280-no-notice",
+      "map_top": 570.171875,
+      "map_visible_height": 148.82724915919277,
+      "visible_ratio": 0.20670451272110107,
+      "status": "FAIL",
+      "criteria": {
+        "map_height_40pct": false,
+        "first_card_title_has_visible_range": true,
+        "first_card_title_sample_hit": true,
+        "first_card_enter_hit": true,
+        "first_card_info_hit": true,
+        "no_first_screen_scroll": true,
+        "expected_notice": true
+      }
+    },
+    {
+      "id": "1440-import-notice",
+      "map_top": 637.765625,
+      "map_visible_height": 261.234375,
+      "visible_ratio": 0.2902604166666667,
+      "status": "FAIL",
+      "criteria": {
+        "map_height_40pct": false,
+        "first_card_title_has_visible_range": true,
+        "first_card_title_sample_hit": true,
+        "first_card_enter_hit": true,
+        "first_card_info_hit": true,
+        "no_first_screen_scroll": true,
+        "expected_notice": true
+      }
+    },
+    {
+      "id": "1440-no-notice",
+      "map_top": 570.171875,
+      "map_visible_height": 328.828125,
+      "visible_ratio": 0.3653645833333333,
+      "status": "FAIL",
+      "criteria": {
+        "map_height_40pct": false,
+        "first_card_title_has_visible_range": true,
+        "first_card_title_sample_hit": true,
+        "first_card_enter_hit": true,
+        "first_card_info_hit": true,
+        "no_first_screen_scroll": true,
+        "expected_notice": true
+      }
+    }
+  ],
+  "pageerrors": [],
+  "fatal": null,
+  "candidate": "PENDING_FIXED_SHA",
+  "125pct": {
+    "method": "actual Control+Equal twice, no CDP/CSS/device emulation",
+    "before": {
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "outerWidth": 1440,
+      "outerHeight": 900,
+      "dpr": 1,
+      "visualScale": 1
+    },
+    "after": {
+      "innerWidth": 1440,
+      "innerHeight": 900,
+      "outerWidth": 1440,
+      "outerHeight": 900,
+      "dpr": 1,
+      "visualScale": 1
+    },
+    "result": "NOT_RUN",
+    "reason": "headless native browser shortcut produced no observable zoom"
+  },
+  "CSS1024": "PENDING"
+}
