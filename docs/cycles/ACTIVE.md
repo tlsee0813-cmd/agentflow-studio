@@ -1,43 +1,36 @@
-# AgentFlow 활성 연구·검증 배정
+# AgentFlow 현재 진행·배정
 
-2026-10-16 12:56 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 상태는 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이다.
+2026-10-16 13:35 KST 갱신 · 단일 총괄: 현재 Codex 대화. **현재 진행은 이 파일에서만 갱신한다.** 사이클 문서는 당시 판단 기록이며 제품/공개 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)를 본다.
 
-## 현재: 제품 PC 연결12 독립 검증·복귀 fix2 진행
+## 현재: 제품12 수용·통합 완료, PC 지도 공간13 착수 준비
 
-[구현 계약](2026-10-16-product-reading-return-12/IMPLEMENTATION.md). USE106 고정 소스에서 `product/pc-reading-return-12` 후보 브랜치를 만들었다. 영역 읽기→선택 작업 맥락→명시 이어가기/기존 편집→지도 복귀 한 흐름을 구현·검증한다. [사전 대조](2026-10-16-product-reading-return-12/REVIEW.md)를 정리했고, [v0 독립 검토](2026-10-16-product-reading-return-12/AUTHOR_AUDIT.md)의 전문 접근·CI 연결·펼침 소실을 보완한 [fix1 c5fd269](https://github.com/tlsee0813-cmd/agentflow-studio/commit/c5fd2697f43c5ae2fe7155e63533e8569a5b6aa6)을 [초안 PR #3](https://github.com/tlsee0813-cmd/agentflow-studio/pull/3)에 묶었다. 독립 검사는 읽기만 한 영역 복귀 회복을 확인했으나, 편집 후 내용 높이가 달라지면 호출 위치가 이동했다. [복귀 기준 보완](2026-10-16-product-reading-return-12/IMPLEMENTATION.md)에 판단을 먼저 명시하고 Opus에 fix2를 배정했다. 전문 검사기의 새 펼침 클릭 누락도 제품 결함과 구분해 보완 중이다. 후보 수용·공개 배포는 아직 아니다.
+PC 영역 구상 → 선택한 요청 읽기 → 명시 이어가기·기존 수동 편집 → 출발 지도 복귀를 실제 제품에 반영했다. [PR #3](https://github.com/tlsee0813-cmd/agentflow-studio/pull/3)은 [ecf586c8](https://github.com/tlsee0813-cmd/agentflow-studio/commit/ecf586c8a2235e4f4c570cab13bf0dbdc4004003)로 checkpoint에 병합했다. 최종 제품 소스는 `9613208f40f1f7f8506504ac6025f06e421edd4d`이며 기존 연구 문서와 최종5파일을 모두 보존했다.
 
-## 닫힌 이전 단계: cycle11 비교·수정·독립 검증
+[제품12 결과·정정·공유 증거](2026-10-16-product-reading-return-12/RESULT.md) · [구현 계약](2026-10-16-product-reading-return-12/IMPLEMENTATION.md).
 
-[cycle11 결과](2026-10-16-two-change-record-11/RESULT.md) · [v0 감사](2026-10-16-two-change-record-11/AUTHOR_AUDIT.md) · [fix1 감사](2026-10-16-two-change-record-11/FIX1_AUDIT.md) · [독립 감사](2026-10-16-two-change-record-11/INDEPENDENT_AUDIT.md).
+긴 수동 전문 접근·펼침 소실·편집 후 호출 위치 이동을 수정했고 고정 구버전 실패→수정본 통과를 확인했다. 독립 PC6장면과 별도 경계·390최소 확인, 두 OS CI(각 PC12 15개)가 통과했다. 작성자·독립·CI 수치는 합산하지 않는다. 총괄도 같은 정적 제품에서 직접 읽기·편집·왕복을 확인했다. 삭제/보관 중 복귀·사람 이해도·큰 지도·실제 AI는 수용 범위가 아니다.
 
-같은 index/engine/style에 FLOW091과 PowerToys 두 JSON을 넣어 비교했다. PC1280×720·1440×900이 주 환경이며390은 최소 확인이다. 새 사례마다 화면을 다시 만드는 방식에서 작은 공통 입력 구조로 옮겼다. 수동 구조화한 두 표본의 성공이며 범용 자동 지도화가 아니다.
+## 다음 범위: PC에서 지도와 한 부분의 이해에 집중
 
-미리보기 후 문장을 고치면 이전 문장이 남던 P2를 코드 감사·총괄 실제 PC·독립 실행에서 재현하고 한 줄 수정했다. 같은 독립 검사로 v0 네 실패/child1→fix1 네 경로/child0을 확인했다. 전체 고정 계획20/20은 main16(PC본4/사례왕복2/별도시험8/390최소2)+별도 P2회귀4다. main223과P2 56의 수치는 별개이며 사람 성공률로 합산하지 않는다. 중요한 추가 기능 결함은 확인하지 못했다.
+[PC 지도 공간13 범위](2026-10-16-pc-map-space-13/BRIEF.md). 현 제품은 지도 위 설명·상태·보고 영역이 커서 첫 화면에서 지도가 아래로 밀린다. 공간 배분과 기본 읽기량을 두 관점으로 나눠 기존 기제를 비교한 뒤 하나의 제품 개선으로 좁힌다.
 
-독립은 실제 관계 href, 서로 다른 사례·대상 초안, 근거 닫힘, 초안 닫기 직후 지도 복귀를 확인했다. FLOW 비초기 지도 휠 이동을 관측했고 PowerToys는 이동 여지0이라는 한계를 유지했다. 이번 복귀는 모달 아래 지도이며 제품 work 화면을 거친 복귀를 검증한 것은 아니다. 연구용 상단 설명과 긴 상세의 부담, 사람 이해·큰 지도·실제 AI 송신/수락·세션 간 보존은 남는다.
+층위·관계·변경이라는 최종 목적을 유지한다. Dify의 목적/업무 모델을 복제하지 않고 지도/선택 상세 배치 기제를 참고한다. 기록에 없는 미결/변화를 만들지 않는다. 현재 평면 저장 구조를 최종 확정으로 보지 않는다. 모바일보다 PC1280×720·1440×900에 집중한다.
 
-## 다음 범위: 첫 제품 연결 한 흐름
-
-[PRODUCT_INTEGRATION](2026-10-16-two-change-record-11/PRODUCT_INTEGRATION.md)에 공통 흐름·보류 표현/위험·기존 재사용·최소 체험 연결과 완료선을 구체화했다.
-
-영역의 짧은 현재 구상 → 사용자가 고른 관련 작업의 맥락/필요한 원문 → 기존 명시 이어가기·수동 편집 → 출발 지도 보기 복귀다. 원문을 기본 나열하거나 작업 선택을 강요하지 않는다. 읽는 요청 A와 실제 이어갈 직접 보고 R이 다를 수 있으므로 둘을 표시·검증한다. 복귀는 시야를 돌려주되 명시적으로 이어갈 기록과 해당 manual4필드 수정값을 되돌리지 않는다.
-
-연구 엔진/자유문 저장형식을 제품에 통째로 이식하지 않는다. 현재 평면 데이터는 첫 연결의 저장 경계이며 층위 있는 지도의 최종 포기가 아니다. 근거 없는 기능 변경/지난방문 변화/미결을 만들지 않는다. 유사 시안을 계속 추가하는 것을 자동 다음 단계로 삼지 않는다. **범위 결정 완료와 제품 구현·반영 완료는 다르다.**
-
-| 담당 | 현재 상태 |
+| 담당 | 상태 |
 |---|---|
-| Pro | 기존 Inspect/Edit의 제품 적용 경계 검토 완료. 새 광범위 조사 미배정 |
-| Opus | fix1 완료. 내용 높이 변화 뒤 호출 위치를 복원하는 fix2 진행 |
-| Cloud | v0·fix1 경계 비교 완료. 검사 조작 보완과 편집 후 높이 변화 원인 대조 중 |
-| Astra High /6.1 Sol High | fix1 코드·PNG·원시·공유 검토 완료. Sol이 c5fd 두 OS CI 진단 중 |
-| 총괄 | 제품 구현 계약·배정·독립 검증·결과 통합 담당 |
+| Pro A | 지도·선택 상세·전역 조작의 공간 배분 비교 배정 준비 |
+| Pro B | 기본 읽기·필요한 상세 공개·실제 편집 대상 표현 비교 배정 준비 |
+| Opus | 제품12 fix2 완료. 다음 구현은 총괄이 한 범위로 통합한 뒤 배정 |
+| Cloud | 제품12 독립 실행·부정 증거·B선택 보완·공유 게시 완료 |
+| Astra High /6.1 Sol High | 최종 코드·원시·CI·170파일 공유 무결성 감사 완료 |
+| 총괄 | 제품12 수용·checkpoint 통합·문서 정리 완료. 다음 제품 범위 통합 담당 |
 
-제품12 [기준 환경 증거14파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/b7dfa065168f65b1dcbc6af7db555694eda1a912/docs/transfer/pc-reading-return-12/baseline)도 공유했다. 기존 TypeScript 재사용이며 잠금 설치 실행을 주장하지 않는다. 최초 누락 fixture 실패와 보완 후 도메인210/210을 구별한다. 제품 fix1 작성자 검사는 완료했고 독립 기능 검사는 진행 중이다. [fix1 원본32파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/5b95273aac50dd6d46db91b45983628389303319/docs/transfer/pc-reading-return-12/author-fix1)을 공유했다. [작성자 원본52파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/67663c4e9e8ff10906ab68646620b6a4885d3bdf/docs/transfer/pc-reading-return-12/author-v0)도 공유했다. 작성자 결과와 독립 결과는 합산하지 않는다.
+## 증거 회수와 운영 경계
 
-## 공유 원본과 운영 경계
+[제품12 최종 독립170파일/PNG4](https://github.com/tlsee0813-cmd/agentflow-studio/tree/398a91adf918113bd77dfbd3454fc3c85b00cc3d/docs/transfer/pc-reading-return-12/independent-fix2) · [두 OS CI 작은 발췌8파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/15299701c7e5079242c6146908459a256a29ffc3/docs/transfer/pc-reading-return-12/ci-final) · [작성자 fix2 38파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/0d6061c511ea42057c329d5a216bb7fa30b49076/docs/transfer/pc-reading-return-12/author-fix2).
 
-[v0 116파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/6643323316daefbe10625484bb1727a2c6a54716/docs/transfer/shared-map-11/author-v0) · [fix1 overlay22파일](https://github.com/tlsee0813-cmd/agentflow-studio/tree/c4354dccc6f693bf33d5157e7e8da566d152d9a1/docs/transfer/shared-map-11/author-fix1) · [독립60파일/대표PNG4](https://github.com/tlsee0813-cmd/agentflow-studio/tree/519a57c00062c142548b0a1d9a270949aacf3bd4/docs/transfer/shared-map-11/independent-v0). GitHub가 공유 원본이며 로컬 ZIP 경로가 없어도 회수 가능하다. 로컬은 수령·감사·미리보기 임시 자료다.
+GitHub가 공유 원본이며 로컬 ZIP 경로 없이 회수 가능하다. 현재 PC 체험은 기존 로컬 서버에 최소17파일433,933B만 두고 원격 해시와 대조했다. 공개 배포를 뜻하지 않는다. [실행 안내](https://github.com/tlsee0813-cmd/agentflow-studio/blob/398a91adf918113bd77dfbd3454fc3c85b00cc3d/docs/transfer/pc-reading-return-12/independent-fix2/preview/START.md).
 
-[cycle10 결과](2026-10-16-relation-reading-10/RESULT.md)와 이전 판단을 다시 열지 않았다. 연구 결과는 checkpoint의 docs/cycles/, 증거 전달은 지정 delivery의 docs/transfer/에 정리했다. 상위 안내3개는 제품 사실 기준과 현재 연구 진입점을 구분하도록 링크·시점 표현만 보완했다. 사용자 예약은 중복 생성·변경하지 않았다.
+main `896dcf3848fec70357d0f9bd4fd6c09cab70db37`·gh-pages `63f5540d062861439f0932cd7311c6c5510e227c` 유지. GUIDE107 HOLD 유지. 사용자 예약을 중복 생성·변경하지 않는다.
 
-2026-10-16 11:18 KST 원격 확인: main `896dcf3848fec70357d0f9bd4fd6c09cab70db37`, gh-pages `63f5540d062861439f0932cd7311c6c5510e227c` 유지. 제품 기준 USE106 `618d9bd2b99ad433df35107d8902b15f45e30000`, GUIDE107 HOLD 유지. 제품 소스는 별도 후보 브랜치에 다섯 파일 반영했고 수용 전이다. 기존 기준 브랜치·공개 체험판 적용은 아직 아니다.
+직전 [cycle11 결과](2026-10-16-two-change-record-11/RESULT.md)와 [제품 반영 판단](2026-10-16-two-change-record-11/PRODUCT_INTEGRATION.md)은 그대로 보존한다. 같은 화면에 두 수동 구조화 사례를 넣은 검증이며 범용 자동 지도화로 확대하지 않는다.
