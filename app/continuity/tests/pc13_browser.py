@@ -31,6 +31,18 @@ GEOM_JS='''()=>{const box=e=>{if(!e)return null;const r=e.getBoundingClientRect(
     selected:(document.querySelector('.area-node.selected')||{dataset:{}}).dataset.areaId||null,focusId:a&&a.id,
     openDetails:[...document.querySelectorAll('#space-view details[id]')].filter(d=>d.open).map(d=>d.id)}}'''
 
+# fix1: the map's zoom/fit tools in the first screen. Full box (not only a centre sample), centre hit for each control, and no
+# overlap with the off-screen chip, the selection panel, or any card title / '정보' button.
+TOOLS_JS='''()=>{const box=e=>{if(!e||!e.getClientRects().length)return null;const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right}};
+  const hit=e=>{if(!e)return null;const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;if(y<0||y>innerHeight||x<0||x>innerWidth)return false;const h=document.elementFromPoint(x,y);return !!h&&(h===e||e.contains(h))};
+  const ids=['map-zoom-out','map-zoom-in','map-fit'];
+  return {vh:innerHeight,vw:innerWidth,windowY:scrollY,controls:box(document.querySelector('.map-controls')),map:box(document.getElementById('space-map')),
+    chip:box(document.getElementById('map-offscreen')),panel:box(document.getElementById('area-panel')),
+    tools:Object.fromEntries(ids.map(id=>[id,{box:box(document.getElementById(id)),hit:hit(document.getElementById(id))}])),
+    cards:[...document.querySelectorAll('.area-node')].map(n=>({id:n.dataset.areaId,title:box(n.querySelector('.area-card-name')),info:box(n.querySelector('.node-info'))})),
+    scale:(document.getElementById('map-scale')||{}).textContent||null}}'''
+def overlap(a,b):return bool(a and b and a['left']<b['right'] and b['left']<a['right'] and a['top']<b['bottom'] and b['top']<a['bottom'])
+
 
 class Pc13(unittest.TestCase):
     WIDTH,HEIGHT=1280,720
@@ -184,8 +196,13 @@ class Pc13(unittest.TestCase):
             if not rec.evaluate('(e)=>e.open'):rec.locator('summary').click()
             expect(rec).to_have_attribute('open','')
         self.page.locator('#map-zoom-in').click();self.page.locator('#map-zoom-in').click()
-        box=self.page.locator('#space-map').bounding_box();x,y=box['x']+box['width']*0.5,box['y']+box['height']-30
-        self.check('pan starts on the empty map',self.page.evaluate('([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.id||e.className)}',[x,y]) in ['space-map','space-plane','relation-layer'],True)
+        # fix1: the zoom clicks no longer scroll the page (tools are at the map's top), so the pan starts on the map's visible part;
+        # the first of a few points that is empty map background is used (cards move with the view), and recorded.
+        box=self.page.locator('#space-map').bounding_box();bottom=min(box['y']+box['height'],self.HEIGHT)
+        pts=[(box['x']+box['width']*fx,bottom-dy) for dy in (30,60,90) for fx in (0.5,0.15,0.85,0.3,0.7)]
+        hits=self.page.evaluate('(ps)=>ps.map(([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.id||e.className)})',pts)
+        empty=[p for p,h in zip(pts,hits) if h in ['space-map','space-plane','relation-layer']];self.record('actual','pan start candidates',{'points':pts,'hits':hits})
+        self.check('pan starts on the empty map',bool(empty),True);x,y=empty[0]
         self.page.mouse.move(x,y);self.page.mouse.down();self.page.mouse.move(x-60,y-30,steps=6);self.page.mouse.up()
         pick=self.page.locator(f'#panel-task-{task}');self.page.mouse.move(self.WIDTH-30,self.HEIGHT//2);self.page.mouse.wheel(0,80);self.page.wait_for_timeout(120)
         expect(pick).to_be_in_viewport()
@@ -241,6 +258,50 @@ class Pc13(unittest.TestCase):
         self.shot('05-back-A-records-open');self.check_unsent('RB-A-edit','아직 보내지 않은 보고 2',A)
 
 
+    # ---------- fix1: zoom/fit usable in the first screen ----------
+    def soft(self,name,value,expected):
+        """fix1: tool conditions are recorded with their result and judged at the end, so every scene is observed."""
+        ok=value==expected;rec={'test':self.id().split('.',1)[-1],'width':self.WIDTH,'height':self.HEIGHT,'kind':'condition','name':name,'value':value,'expected':expected,'pass':ok}
+        with open(OBS,'a',encoding='utf-8') as fh:fh.write(json.dumps(rec,ensure_ascii=False)+'\n')
+        if not ok:self.tool_fail=getattr(self,'tool_fail',[])+[name]
+        return ok
+    def assert_tools(self,label):
+        t=self.page.evaluate(TOOLS_JS);self.record('actual',f'{label}: tools',t)
+        c=t['controls'];inside=bool(c) and c['top']>=0 and c['left']>=0 and c['bottom']<=t['vh'] and c['right']<=t['vw']
+        Pc13.soft(self,f'{label}: page not scrolled',t['windowY'],0)
+        Pc13.soft(self,f'{label}: whole zoom/fit box inside the first screen',{'inside':inside,'controls':c,'vh':t['vh']},{'inside':True,'controls':c,'vh':t['vh']})
+        Pc13.soft(self,f'{label}: zoom/fit box inside the map',bool(c and t['map']) and c['top']>=t['map']['top'] and c['bottom']<=t['map']['bottom'] and c['right']<=t['map']['right'],True)
+        for tid,v in t['tools'].items():Pc13.soft(self,f'{label}: {tid} clickable at its centre',v['hit'],True)
+        Pc13.soft(self,f'{label}: tools do not cover the off-screen chip',overlap(c,t['chip']),False)
+        Pc13.soft(self,f'{label}: tools do not cover the selection panel',overlap(c,t['panel']),False)
+        Pc13.soft(self,f'{label}: tools cover no card title or info button',[x['id'] for x in t['cards'] if overlap(c,x['title']) or overlap(c,x['info'])],[])
+        return t
+    def use_tools(self,label):
+        """Real mouse clicks at the controls' own position (no scroll-into-view): zoom in, then fit. Skipped (recorded) when off-screen."""
+        t=self.page.evaluate(TOOLS_JS);b=t['tools']['map-zoom-in']['box'];s0=t['scale']
+        if not t['tools']['map-zoom-in']['hit']:Pc13.soft(self,f'{label}: zoom-in reachable for a real click',False,True);return
+        self.page.mouse.click((b['left']+b['right'])/2,(b['top']+b['bottom'])/2);self.page.wait_for_timeout(50)
+        t1=self.page.evaluate(TOOLS_JS);self.record('actual',f'{label}: after zoom-in click',{'scale':t1['scale'],'windowY':t1['windowY']})
+        Pc13.soft(self,f'{label}: zoom-in changed the scale',t1['scale']!=s0,True);Pc13.soft(self,f'{label}: no scroll by the click',t1['windowY'],0)
+        f=t1['tools']['map-fit']['box'];self.page.mouse.click((f['left']+f['right'])/2,(f['top']+f['bottom'])/2);self.page.wait_for_timeout(50)
+        Pc13.soft(self,f'{label}: no scroll by the fit click',self.page.evaluate('window.scrollY'),0)
+    def tool_scenes(self,area,prefix):
+        self.assert_tools(f'{prefix}default')
+        self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible();self.assert_tools(f'{prefix}selected')
+        self.page.locator('#check-list > summary').click();expect(self.page.locator('#check-list')).to_have_attribute('open','');self.assert_tools(f'{prefix}selected+records open')
+        self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0);self.assert_tools(f'{prefix}closed+records open')
+        self.page.locator('#check-list > summary').click();self.assert_tools(f'{prefix}closed');self.use_tools(f'{prefix}closed')
+
+    def test_08_map_tools_usable_in_the_first_screen(self):
+        ids,Q,A,R=self.short_project();self.fresh_tab();self.tool_scenes(ids['예약'],'no notice: ');self.shot('07-tools')
+        with self.page.expect_download() as d:self.page.locator('#backup').click()
+        path=base.OUT/f'pc13-{self.WIDTH}-backup-tools.json';d.value.save_as(path);self.fresh_tab();self.page.locator('#nav-projects').click()
+        self.page.once('dialog',lambda dl:dl.accept());self.page.locator('#import-file').set_input_files(str(path))
+        expect(self.page.locator('#notice')).to_contain_text('사본으로 불러왔어요');self.check('notice: shown',self.page.locator('#notice').is_visible(),True)
+        self.page.mouse.move(self.WIDTH-30,self.HEIGHT//2);self.page.mouse.wheel(0,-3000);self.page.wait_for_timeout(150)
+        self.tool_scenes(ids['예약'],'notice: ');self.check('notice: still shown',self.page.locator('#notice').is_visible(),True);self.shot('08-tools-notice')
+        self.assertEqual(getattr(self,'tool_fail',[]),[],'map tools in the first screen')
+
 class Pc13Wide(Pc13):
     WIDTH,HEIGHT=1440,900
 
@@ -264,6 +325,8 @@ class Pc13Boundaries(unittest.TestCase):
         brief=self.page.locator('#brief-edit');brief.locator('summary').click();expect(self.page.locator('#brief-edit-text')).to_have_value(purpose)
         self.page.locator(f'#node-info-{ids["예약"]}').click();full=self.page.locator('#panel-idea-full');full.locator('summary').click()
         expect(full.locator('.source-raw')).to_have_text(idea.strip());self.shot('06-long')
+        self.page.mouse.move(self.WIDTH-30,self.HEIGHT//2);self.page.mouse.wheel(0,-3000);self.page.wait_for_timeout(150)
+        Pc13.assert_tools(self,'long: selected, full idea open');self.assertEqual(getattr(self,'tool_fail',[]),[],'map tools in the first screen')
 
     def test_07_css_width_1024_and_narrow_390(self):
         ids,Q,A,R=self.short_project()

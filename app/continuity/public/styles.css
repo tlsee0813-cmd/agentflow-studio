@@ -2415,3 +2415,7 @@ body[data-layer="space"] .space-crumb{margin-bottom:8px}
 /* The map keeps its rule (min(62vh,560px), at least 380px) but, on a PC-width whole space, also fits below the shortened top so
    its own zoom/fit controls are in the first screen. Narrow screens keep their own rule. */
 @media(min-width:761px){body[data-layer="space"] .space-map{height:min(62vh,560px,calc(100vh - 290px))}}
+/* PC13-fix1: on PC widths the map's zoom/fit tools sit at the map's top-right, so they are in the first screen whenever the map
+   top is (a notice above or an opened records list moves only the map's lower edge out of view). The off-screen chip stays
+   top-left. Narrow screens keep the existing bottom placement. */
+@media(min-width:761px){.map-controls{top:10px;bottom:auto}}
