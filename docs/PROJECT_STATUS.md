@@ -1,8 +1,8 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-16 제품13 한정 수용·통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-16 홈15 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint에 PC 읽기·명시 편집·지도 복귀와 첫 화면 지도 공간·도구 접근 개선을 반영했다.** [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
+**제품 기준 checkpoint에 PC 읽기·명시 편집·지도 복귀·지도 공간 개선과 프로젝트 카드 홈을 반영했다.** [PR #5](https://github.com/tlsee0813-cmd/agentflow-studio/pull/5) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
 
 ## 제품 목적과 현재 범위
 
@@ -14,7 +14,7 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합 60c42c2c](https://github.com/tlsee0813-cmd/agentflow-studio/commit/60c42c2c2886ae7cd3f40c0cd895cadc937a2f57), 제품 소스 [60612050](https://github.com/tlsee0813-cmd/agentflow-studio/commit/606120500eeea50a20f00fb4678bced7a7d93d98) | 제품12 위 제품13 PC 지도 공간·상단 펼침·도구 접근 개선. [한정 수용 결과](cycles/2026-10-16-pc-map-space-13/RESULT.md) |
+| 제품 기준 checkpoint | [병합 168d47ff](https://github.com/tlsee0813-cmd/agentflow-studio/commit/168d47ff6e4cca6596b6d3c7306921b8544c14f6), 제품소스 [1e51f0f9](https://github.com/tlsee0813-cmd/agentflow-studio/commit/1e51f0f9b56ed51e9ec4c529ca518aa256ad1ecf) | 제품12·13 위 홈15 프로젝트카드·목적·공간진입/목록복귀. [결과·남은보완](cycles/2026-10-16-project-home-15/RESULT.md) |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
@@ -23,6 +23,10 @@
 | [과거 Draft PR #2](https://github.com/tlsee0813-cmd/agentflow-studio/pull/2) | `flow049/outcome-home@f0fa5326` → `init-003/fix-review-regressions@61c3b2f0` | 과거 목적 홈 단계, closed·미병합. 본문·댓글 보존. 최신 제품 통합 PR 아님 |
 
 USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·gh-pages는 그대로 유지하고, 기존22개 브랜치는 [태그 보관·SHA 검증 후 정리](REPOSITORY_ARCHIVE.md)했다. PR #1·#2는 미병합으로 닫았다. 이전 인계 당시 사용자 개편안 대기 상태였으며, 이후 연구는 [ACTIVE](cycles/ACTIVE.md)에 기록한다.
+
+## 홈15 검증과 수용 경계
+
+PC 프로젝트 카드 홈을 제품13 위에 통합했다. Windows·Ubuntu CI와 독립 조작·이미지/코드 검토를 통과했다. [홈15 결과와 공유 증거](cycles/2026-10-16-project-home-15/RESULT.md)에 정확한 범위와 한계를 기록했다. 긴 공통 접두사의 전체 이름·목적을 진입 전에 펼쳐 읽는 보완은 남아 있다. [현재 PC 체험](http://127.0.0.1:8765/product15-preview/runtime/index.html)은 로컬 정적 MOCK이며 공개 배포가 아니다.
 
 ## 제품13 검증과 수용 경계
 
