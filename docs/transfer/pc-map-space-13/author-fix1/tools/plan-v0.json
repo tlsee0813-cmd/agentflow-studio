@@ -1,0 +1,1 @@
+[{"name":"v0product-pc13-fix1checks-run2","cmd":["python3","continuity/tests/pc13_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13f/v0-results-run2"}}]

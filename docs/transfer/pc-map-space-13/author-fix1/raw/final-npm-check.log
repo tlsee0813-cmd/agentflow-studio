@@ -1,0 +1,5 @@
+
+> agentflow-studio@0.0.3 check
+> tsc --noEmit && node scripts/check.mjs
+
+Syntax, lock alignment and client credential boundary checks passed. Not a full security audit.

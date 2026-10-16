@@ -1,0 +1,68 @@
+test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen) ... ok
+test_02_one_normal_notice_stays_visible (__main__.Pc13.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+test_08_map_tools_usable_in_the_first_screen (__main__.Pc13.test_08_map_tools_usable_in_the_first_screen) ... FAIL
+test_06_long_purpose_idea_and_title (__main__.Pc13Boundaries.test_06_long_purpose_idea_and_title) ... FAIL
+test_07_css_width_1024_and_narrow_390 (__main__.Pc13Boundaries.test_07_css_width_1024_and_narrow_390) ... ok
+test_01_default_and_selected_first_screen (__main__.Pc13Wide.test_01_default_and_selected_first_screen) ... ok
+test_02_one_normal_notice_stays_visible (__main__.Pc13Wide.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13Wide.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13Wide.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+test_08_map_tools_usable_in_the_first_screen (__main__.Pc13Wide.test_08_map_tools_usable_in_the_first_screen) ... FAIL
+
+======================================================================
+FAIL: test_08_map_tools_usable_in_the_first_screen (__main__.Pc13.test_08_map_tools_usable_in_the_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 298, in test_08_map_tools_usable_in_the_first_screen
+    self.assertEqual(getattr(self,'tool_fail',[]),[],'map tools in the first screen')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['no notice: selected+records open: whole [1835 chars]ick'] != []
+
+First list contains 29 additional elements.
+First extra element 0:
+'no notice: selected+records open: whole zoom/fit box inside the first screen'
+
+Diff is 1974 characters long. Set self.maxDiff to None to see it. : map tools in the first screen
+
+======================================================================
+FAIL: test_06_long_purpose_idea_and_title (__main__.Pc13Boundaries.test_06_long_purpose_idea_and_title)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 324, in test_06_long_purpose_idea_and_title
+    Pc13.assert_tools(self,'long: selected, full idea open');self.assertEqual(getattr(self,'tool_fail',[]),[],'map tools in the first screen')
+                                                             ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['long: selected, full idea open: whole zo[241 chars]tre'] != []
+
+First list contains 4 additional elements.
+First extra element 0:
+'long: selected, full idea open: whole zoom/fit box inside the first screen'
+
++ []
+- ['long: selected, full idea open: whole zoom/fit box inside the first screen',
+-  'long: selected, full idea open: map-zoom-out clickable at its centre',
+-  'long: selected, full idea open: map-zoom-in clickable at its centre',
+-  'long: selected, full idea open: map-fit clickable at its centre'] : map tools in the first screen
+
+======================================================================
+FAIL: test_08_map_tools_usable_in_the_first_screen (__main__.Pc13Wide.test_08_map_tools_usable_in_the_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 298, in test_08_map_tools_usable_in_the_first_screen
+    self.assertEqual(getattr(self,'tool_fail',[]),[],'map tools in the first screen')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['no notice: selected+records open: whole [1286 chars]een'] != []
+
+First list contains 19 additional elements.
+First extra element 0:
+'no notice: selected+records open: whole zoom/fit box inside the first screen'
+
+Diff is 1395 characters long. Set self.maxDiff to None to see it. : map tools in the first screen
+
+----------------------------------------------------------------------
+Ran 14 tests in 56.677s
+
+FAILED (failures=3)

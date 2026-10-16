@@ -1,0 +1,6 @@
+[{"name":"final2-npm-check","cmd":["npm","run","check"],"cwd":"$WORK/repo/app"},
+ {"name":"final2-cont-check","cmd":["node","continuity/scripts/check.mjs"],"cwd":"$WORK/repo/app"},
+ {"name":"final2-cont-build","cmd":["node","continuity/scripts/build.mjs"],"cwd":"$WORK/repo/app"},
+ {"name":"final2-pc13","cmd":["python3","continuity/tests/pc13_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13f/final2/pc13"}},
+ {"name":"final2-pc12","cmd":["python3","continuity/tests/pc12_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13f/final2/pc12"}},
+ {"name":"final2-flow090","cmd":["python3","continuity/tests/flow090_browser.py"],"cwd":"$WORK/repo/app","env":{"IDEA015_EVIDENCE_DIR":"$WORK/ev13f/final2/flow090"}}]

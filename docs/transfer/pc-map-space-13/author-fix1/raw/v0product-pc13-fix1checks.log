@@ -1,0 +1,70 @@
+test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen) ... ok
+test_02_one_normal_notice_stays_visible (__main__.Pc13.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+test_08_map_tools_usable_in_the_first_screen (__main__.Pc13.test_08_map_tools_usable_in_the_first_screen) ... FAIL
+test_06_long_purpose_idea_and_title (__main__.Pc13Boundaries.test_06_long_purpose_idea_and_title) ... FAIL
+test_07_css_width_1024_and_narrow_390 (__main__.Pc13Boundaries.test_07_css_width_1024_and_narrow_390) ... ok
+test_01_default_and_selected_first_screen (__main__.Pc13Wide.test_01_default_and_selected_first_screen) ... ok
+test_02_one_normal_notice_stays_visible (__main__.Pc13Wide.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13Wide.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13Wide.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+test_08_map_tools_usable_in_the_first_screen (__main__.Pc13Wide.test_08_map_tools_usable_in_the_first_screen) ... FAIL
+
+======================================================================
+FAIL: test_08_map_tools_usable_in_the_first_screen (__main__.Pc13.test_08_map_tools_usable_in_the_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 285, in test_08_map_tools_usable_in_the_first_screen
+    ids,Q,A,R=self.short_project();self.fresh_tab();self.tool_scenes(ids['예약'],'no notice: ');self.shot('07-tools')
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 280, in tool_scenes
+    self.page.locator('#check-list > summary').click();expect(self.page.locator('#check-list')).to_have_attribute('open','');self.assert_tools(f'{prefix}selected+records open')
+                                                                                                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 261, in assert_tools
+    self.check_true(f'{label}: whole zoom/fit box inside the first screen',inside,{'controls':c,'vh':t['vh']})
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 66, in check_true
+    def check_true(self,name,value,detail=None):self.record('condition',name,detail if detail is not None else value,True);self.assertTrue(value,name)
+                                                                                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: False is not true : no notice: selected+records open: whole zoom/fit box inside the first screen
+
+======================================================================
+FAIL: test_06_long_purpose_idea_and_title (__main__.Pc13Boundaries.test_06_long_purpose_idea_and_title)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 317, in test_06_long_purpose_idea_and_title
+    Pc13.assert_tools(self,'long: selected, full idea open')
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 261, in assert_tools
+    self.check_true(f'{label}: whole zoom/fit box inside the first screen',inside,{'controls':c,'vh':t['vh']})
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 66, in check_true
+    def check_true(self,name,value,detail=None):self.record('condition',name,detail if detail is not None else value,True);self.assertTrue(value,name)
+                                                                                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: False is not true : long: selected, full idea open: whole zoom/fit box inside the first screen
+
+======================================================================
+FAIL: test_08_map_tools_usable_in_the_first_screen (__main__.Pc13Wide.test_08_map_tools_usable_in_the_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 285, in test_08_map_tools_usable_in_the_first_screen
+    ids,Q,A,R=self.short_project();self.fresh_tab();self.tool_scenes(ids['예약'],'no notice: ');self.shot('07-tools')
+                                                    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 280, in tool_scenes
+    self.page.locator('#check-list > summary').click();expect(self.page.locator('#check-list')).to_have_attribute('open','');self.assert_tools(f'{prefix}selected+records open')
+                                                                                                                             ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 261, in assert_tools
+    self.check_true(f'{label}: whole zoom/fit box inside the first screen',inside,{'controls':c,'vh':t['vh']})
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$WORK/repo/app/continuity/tests/pc13_browser.py", line 66, in check_true
+    def check_true(self,name,value,detail=None):self.record('condition',name,detail if detail is not None else value,True);self.assertTrue(value,name)
+                                                                                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^
+AssertionError: False is not true : no notice: selected+records open: whole zoom/fit box inside the first screen
+
+----------------------------------------------------------------------
+Ran 14 tests in 53.103s
+
+FAILED (failures=3)
