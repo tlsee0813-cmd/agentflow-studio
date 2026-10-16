@@ -1,0 +1,653 @@
+diff --git a/app/continuity/public/styles.css b/app/continuity/public/styles.css
+index 12a13de..d28b555 100644
+--- a/app/continuity/public/styles.css
++++ b/app/continuity/public/styles.css
+@@ -2375,3 +2375,19 @@ body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
+ .report-correction-help { margin-top:14px; padding:14px; border-left:3px solid var(--accent); background:var(--paper); font-size:13px; line-height:1.65; }
+ .report-correction-help p { margin:6px 0 0; }
+ @media(max-width:720px) { .review-grid { grid-template-columns:1fr; } .handoff-review { padding:14px; } }
++/* PC12: read first, edit on request; the chosen task's short context; the way back to the starting view. */
++.area-idea{display:flex;flex-direction:column;gap:4px;margin:2px 0}
++.area-idea-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
++.space-head .area-idea{max-width:760px}
++.panel-edit>summary{cursor:pointer;font-size:13px;color:var(--accent)}
++.panel-edit[open]{display:flex;flex-direction:column;gap:6px}
++.panel-tasks{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:flex;flex-direction:column;gap:4px}
++.panel-task-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
++.panel-task-list li{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}
++.panel-task{text-align:left;white-space:normal;overflow-wrap:anywhere;max-width:100%}
++.task-context{display:flex;flex-direction:column;gap:4px}
++.task-context-grid{margin-top:6px}
++.field-origin{font-weight:600;color:var(--accent)}
++.field-origin.stale{color:var(--amber)}
++.task-view-target{margin:6px 0 0}
++.work-place .origin-return{margin-left:auto}
+diff --git a/app/continuity/src/client/app.ts b/app/continuity/src/client/app.ts
+index 4ab7ffd..cf59e50 100644
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -50,6 +50,10 @@ let layerMemo:LayerMemo={space:null,from:null,areas:{}};
+ // FLOW090-B1: map viewport and selection are this tab's view of one project; positions are project data.
+ type MapView={x:number;y:number;s:number};
+ let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
++// PC12: the one map/area view this tab left to read a task (and maybe continue it). Only parts the view already has:
++// project, layer, area, viewport, selection, sheet, scroll and the control that was used. Never project data.
++type Origin={project:string;view:'space'|'area';area:string|null;map:MapView|null;selected:string|null;sheet:boolean;y:number;focus:string|null};
++let origin:Origin|null=null;
+ /** GUIDE097: area guidance per project and area, in this tab's memory only (declared early: resets use it). */
+ /** gen counts the user's edits of the draft; a reply that arrives after one is held in incoming, never applied over it. */
+ /** digest = the material the reply was made from; a held reply is applied only while the current material still matches it. */
+@@ -109,7 +113,7 @@ function resetEphemeral() {
+   $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
+   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
+   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
+-  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];
++  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];origin=null;
+   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
+ }
+ function openEntry(entry:WorkspaceEntry) {
+@@ -235,29 +239,67 @@ function focusFirst(...ids:string[]):boolean {
+ }
+ /** Coming back restores this layer's scroll and the card the user entered; an ID that no longer exists is just skipped. */
+ function openSpace() {
+-  leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;render();
++  // PC12: arriving at the map by any other way makes it the new starting point; the earlier one is dropped.
++  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;render();
+   const from=layerMemo.from;window.scrollTo({top:layerMemo.space??0});
+   if(!(from&&focusFirst(`node-enter-${from}`,`list-enter-${from}`)))$('space-title')?.focus({preventScroll:true});
+ }
+ function openArea(id:string) {
+   if(view==='space')layerMemo.from=id;
+-  leaveLayer();view='area';viewArea=id;viewTask=null;viewReturn=null;render();
++  origin=null;leaveLayer();view='area';viewArea=id;viewTask=null;viewReturn=null;render();
+   const memo=layerMemo.areas[id];window.scrollTo({top:memo?.y??0});
+   if(!(memo?.task&&focusFirst(`task-open-${memo.task}`)))$('space-title')?.focus({preventScroll:true});
+ }
++/** PC12: leaving the map or an area screen to read (or continue) a task records where the user was. Tab memory only. */
++function markOrigin(focus:string|null=null) {
++  if(view!=='space'&&view!=='area')return;
++  const active=document.activeElement as HTMLElement|null,used=active?.id&&$('space-view').contains(active)?active.id:null;
++  origin={project:project.id,view,area:view==='area'?viewArea:null,map:mapView?{...mapView}:null,selected:mapSelected,sheet:sheetOpen,y:window.scrollY,focus:focus??used};
++}
++function originLabel(o:Origin):string {
++  if(o.view==='area')return o.area==='unassigned'?'영역 미지정 작업':areaById(o.area)?.name??'영역';
++  const sel=o.selected?areaById(o.selected):null;return sel?`전체 공간 · ${sel.name} 정보`:'전체 공간';
++}
++function originButton(id:string):HTMLButtonElement|null {
++  const o=origin;if(!o||o.project!==project.id)return null;
++  const b=btn(`← 출발한 지도 보기로 · ${originLabel(o)}`,returnToOrigin,'secondary origin-return',id);
++  b.title='읽기를 시작한 보기·선택·위치로 돌아가요. 이어가는 작업과 저장한 수정은 그대로예요.';return b;
++}
++/** PC12: back to the view this reading started from. It restores only the view (layer, area, viewport, selection, scroll,
++ * the control used); the continued work and saved edits stay as they are now. A starting point that no longer exists
++ * (area archived/removed, another project) falls back to the whole space without choosing anything else. */
++function returnToOrigin() {
++  const o=origin;origin=null;
++  if(!o||o.project!==project.id){openSpace();return;}
++  const area=o.area&&o.area!=='unassigned'?areaById(o.area):null;
++  const areaGone=o.view==='area'&&o.area!=='unassigned'&&(!area||area.archived);
++  const sel=o.selected?areaById(o.selected):null,selGone=!!o.selected&&(!sel||sel.archived);
++  leaveLayer();
++  view=areaGone?'space':o.view;viewArea=view==='area'?o.area:null;viewTask=null;viewReturn=null;
++  if(o.map)mapView={...o.map};mapSelected=selGone?null:o.selected;sheetOpen=o.sheet&&!!mapSelected;
++  rememberMap();render();window.scrollTo({top:areaGone?0:o.y});
++  if(areaGone||selGone){project={...project,notice:'출발한 영역이 보관되었거나 없어져 그 위의 보기로 돌아왔어요. 다른 영역이나 작업을 대신 고르지 않았어요.'};renderStatus();}
++  if(areaGone||!(o.focus&&focusFirst(o.focus)))$('space-title')?.focus({preventScroll:true});
++}
+ /** SPATIAL102: the read-only task screen. Opening it never changes the continued work or the request target.
+  * returnId (SPATIAL102-R1): the report a check item points to, shown on that screen. */
+-function openTaskView(id:string,returnId:string|null=null) {
++function openTaskView(id:string,returnId:string|null=null,focus:string|null=null) {
+   const t=project.tasks.find(x=>x.id===id);if(!t)return;
+   const area=areaOf(project,t)??'unassigned';
+-  leaveLayer();layerMemo.areas[area]={y:layerMemo.areas[area]?.y??0,task:id};
++  markOrigin(focus);leaveLayer();layerMemo.areas[area]={y:layerMemo.areas[area]?.y??0,task:id};
+   view='task';viewArea=area;viewTask=id;viewReturn=returnId;render();window.scrollTo({top:0});$('space-title')?.focus({preventScroll:true});
+ }
+ /** Explicit: continue this task (or go back to it when its return is what is open). Viewing never does this. */
+ function continueTask(id:string) {
+   if(project.pending)return;
++  markOrigin();
+   const current=project.currentTaskId?taskOf(project):null,same=current&&(current.id===id||isReturnTask(project,current)&&current.parentTaskId===id);
+-  if(!same)commit(focusTask(project,id));view='work';render();$('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});
++  if(!same)commit(focusTask(project,id));view='work';render();
++  // PC12: say which record is now edited when it is not the request that was read.
++  const read=project.tasks.find(x=>x.id===id),no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`;
++  if(read&&current&&same&&current.id!==id){project={...project,notice:`${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.`};renderStatus();}
++  else if(read&&current&&!same){project={...project,notice:`${no(read)}로 이어가기 · 고치는 작업문은 ${no(read)}의 것이에요. 전에 이어가던 ${no(current)}은 그대로 남아요.`};renderStatus();}
++  $('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});
+ }
+ /** Explicit: write the next request for this area (null = no area). The only way, besides the composer's own choice, to set the target. */
+ function writeInArea(id:string|null) {
+@@ -709,9 +751,11 @@ function renderWork(t:Task|null) {
+   preview.append(node('p','관련 입력 + 직전 작업 + 모든 보존 기준. AI가 관련으로 고르지 않은 기준도 뒤에 남습니다.','hint'),txt);card.append(preview);area.append(card);
+ }
+ /** FLOW091-C: which plan copy goes out with this task. Fixed at the request; later plan edits are not applied to it. */
+-function backgroundPreview(t:Task):HTMLElement {
+-  const b=t.background,own=!isReturnTask(project,t),box=details('','background-preview');box.className='background-preview';
+-  const summary=box.querySelector('summary')!;box.open=backgroundOpen===t.id;box.addEventListener('toggle',()=>{backgroundOpen=box.open?t.id:null;});
++/** PC12: the task reading screen shows the same copy under its own id (id); only the work card keeps its open state across views. */
++function backgroundPreview(t:Task,id='background-preview'):HTMLElement {
++  const b=t.background,own=!isReturnTask(project,t),box=details('',id);box.className='background-preview';
++  const summary=box.querySelector('summary')!;
++  if(id==='background-preview'){box.open=backgroundOpen===t.id;box.addEventListener('toggle',()=>{backgroundOpen=box.open?t.id:null;});}
+   if(!b){summary.textContent='작업문에 넣을 프로젝트 배경 · 이 작업에는 없음';
+     box.append(node('p','이 작업에는 저장된 배경 사본이 없어요(배경을 저장하기 전에 쓴 작업이거나, 사본 없이 내보낸 작업에 돌아온 결과). 지금 전체 공간의 구상을 소급해 넣지 않아요.','hint'));return box;}
+   if(b.brief===null&&b.area===null){summary.textContent='작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음';
+@@ -723,7 +767,7 @@ function backgroundPreview(t:Task):HTMLElement {
+   const area=b.area?project.space.areas.find(a=>a.id===b.area!.id):undefined;
+   const changed=(project.space.brief?.text??null)!==b.brief||(!!b.area&&(!area||area.name!==b.area.name||(area.note||null)!==b.area.note));
+   if(changed)summary.append(node('span',' · 그 뒤 구상이 바뀜 (이 사본은 그대로)','background-changed-tag'));
+-  if(changed){const line=node('p','전체 공간의 목적이나 이 영역의 이름·구상이 그 뒤 바뀌었어요. 이미 준비된 이 작업의 사본은 그대로이고, 다음에 쓰는 새 요청부터 최신 구상이 들어가요.','hint');line.id='background-changed';box.append(line);}
++  if(changed){const line=node('p','전체 공간의 목적이나 이 영역의 이름·구상이 그 뒤 바뀌었어요. 이미 준비된 이 작업의 사본은 그대로이고, 다음에 쓰는 새 요청부터 최신 구상이 들어가요.','hint');line.id=id==='background-preview'?'background-changed':`${id}-changed`;box.append(line);}
+   return box;
+ }
+ type Work=ReturnType<typeof currentWork>;
+@@ -1066,32 +1110,47 @@ function areaList(active:Area[]):HTMLElement {
+   }
+   return box;
+ }
+-/** Short properties of the selected area: name and one-line idea. Long work and reports live in the area screen. */
++/** PC12: a user's idea longer than this is shown as its opening words, with the whole text one click away. */
++const NOTE_SHORT=160;
++/** The user's own idea for an area, read first: an excerpt says so and links the whole text; an empty idea stays empty. */
++function areaIdea(a:Area,id:string,limit=NOTE_SHORT):HTMLElement {
++  const box=node('section','','area-idea');box.id=id;box.append(node('p','사용자 구상','source-meta'));
++  if(!a.note){box.append(noNote(),node('p','비어 있어요. 아이디어도, 아직 못 정한 점도 직접 적을 수 있어요.','hint'));return box;}
++  if(a.note.length<=limit){box.append(node('p',a.note,'area-idea-text'));return box;}
++  const full=details(`구상 전체 보기 · 위는 앞부분 · ${a.note.length}자`,`${id}-full`);full.append(node('div',a.note,'source-raw'));
++  box.append(node('p',shortText(a.note,limit),'area-idea-text'),full);return box;
++}
++const PANEL_TASKS=5;
++/** Short properties of the selected area, read first: name, the user's idea, and this area's requests for the user to pick.
++ * Editing opens explicitly. No report is picked for the user; reports are read inside the task the user chose. */
+ function areaPanel(a:Area):HTMLElement {
+   const panel=node('aside','','area-panel');panel.id='area-panel';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
+   const head=node('div','','panel-top');head.append(node('strong',a.name),btn('닫기',()=>{mapSelected=null;sheetOpen=false;rememberMap();render();},'quiet','area-panel-close'));
+   const nameKey=`area-edit-name:${a.id}`,noteKey=`area-edit-note:${a.id}`;
++  const edit=details('이름·구상 고치기','panel-edit');edit.classList.add('panel-edit');edit.open=panelDirty(a);
+   const name=spaceInput(node('input'),'panel-name',a.name,nameKey);name.maxLength=60;name.setAttribute('aria-label','영역 이름');
+   const note=spaceInput(node('textarea'),'panel-note',a.note,noteKey);note.rows=3;note.maxLength=2000;note.setAttribute('aria-label','한 줄 구상');
+   const row=node('div','','row');
+-  row.append(btn('반영',()=>{if(!name.value.trim())return;commit(editArea(project,a.id,name.value,note.value));clearInputs(nameKey,noteKey);},'secondary','panel-save'),
++  row.append(btn('반영',()=>{if(!name.value.trim())return;edit.open=false;commit(editArea(project,a.id,name.value,note.value));clearInputs(nameKey,noteKey);},'secondary','panel-save'),
+     btn('취소',()=>{clearInputs(nameKey,noteKey);render();},'quiet','panel-cancel'));
++  edit.append(node('label','이름'),name,node('label','한 줄 구상'),note,node('p','아이디어도, 아직 못 정한 점도 적을 수 있어요.','hint'),row);
+   const go=node('div','','row');go.append(btn('영역 열기 ↗',()=>openArea(a.id),'primary','panel-open'),btn('이 영역에 새 요청',()=>writeInArea(a.id),'quiet','panel-new-request'),
+     btn('무엇을 요청할지 같이 정하기',()=>{guideOf(a.id);openArea(a.id);document.getElementById(`guide-${a.id}`)?.scrollIntoView({block:'start'});},'quiet','panel-guide'));
+-  panel.append(head,node('label','이름'),name,node('label','한 줄 구상'),note,node('p','아이디어도, 아직 못 정한 점도 적을 수 있어요.','hint'),row,node('p',areaSummary(a),'hint'));
+-  const requests=areaRequests(a.id);
++  panel.append(head,areaIdea(a,'panel-idea'),edit,node('p',areaSummary(a),'hint'));
++  const requests=areaRequests(a.id),list=node('section','','panel-tasks');list.id='panel-tasks';
++  if(requests.length) {
++    list.append(node('p',`이 영역의 요청 ${requests.length}개 · 골라서 읽기`,'source-meta'));
++    const ul=node('ul','','panel-task-list');
++    for(const t of requests.slice(0,PANEL_TASKS)) {
++      const li=node('li'),open=btn(`${taskTitle(project,t)} ↘`,()=>openTaskView(t.id,null,`panel-task-${t.id}`),'quiet panel-task',`panel-task-${t.id}`);
++      li.append(open,node('span',`작업 ${pad(project.tasks.indexOf(t)+1)} · ${taskStatus(project,t)}`,'hint'));if(currentGroup(t))li.append(appTag());ul.append(li);
++    }
++    list.append(ul);
++    if(requests.length>PANEL_TASKS)list.append(node('p',`나머지 ${requests.length-PANEL_TASKS}개는 ‘영역 열기’에서 볼 수 있어요.`,'hint'));
++    list.append(node('p','읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.','hint'));
++  } else list.append(node('p','아직 이 영역의 요청이 없어요.','hint'));
++  panel.append(list);
+   if(requests.some(currentGroup))panel.append(node('p','‘앱에서 이어갈 작업’은 이 앱에서 열어 둔 작업이에요. 외부 도구에서 지금 실행 중이라는 뜻이 아니에요.','hint'));
+-  const rt=requests.flatMap(returnsOf).sort((x,y)=>project.tasks.indexOf(y)-project.tasks.indexOf(x))[0],src=rt?project.sources.find(s=>s.id===rt.sourceIds[0]):undefined;
+-  if(rt&&src) {
+-    // Raw text only: no summary, no classification of what the report says; the full report stays in the area screen.
+-    const box=node('section','','panel-report'),parent=rt.parentTaskId!;box.id='panel-report';
+-    box.append(node('p',`최근 돌아온 ${sourceName[src.kind]} · 원문 앞부분 · ${dateLabel(src.at)} · 작업 ${project.tasks.findIndex(x=>x.id===parent)+1}에 연결${sourceName[src.kind].includes('미검증')?'':' · 앱 미검증'}`,'hint'),
+-      node('p',shortText(reportBody(src),140),'source-raw panel-excerpt'));
+-    const links=node('div','','row');
+-    links.append(btn('자세히 보기',()=>{openArea(a.id);const d=document.getElementById(`raw-${parent}`) as HTMLDetailsElement|null;if(d){d.open=true;d.scrollIntoView({block:'start'});}},'quiet','panel-report-more'),
+-      btn(project.currentTaskId===rt.id?'작업 화면으로':'이 보고에서 이어가기',()=>continueTask(rt.id),'quiet','panel-report-continue'));
+-    box.append(links);panel.append(box);
+-  }
+   panel.append(go);
+   return panel;
+ }
+@@ -1120,7 +1179,7 @@ const CHECK_SHOWN=4;
+ function checkRow(it:CheckItem):HTMLElement {
+   const li=node('li','','check-item');li.dataset.kind=it.kind;const t=project.tasks.find(x=>x.id===it.taskId),a=areaById(it.areaId);
+   li.append(node('span',`${a?a.name:'영역 미지정'}${a?.archived?' · 보관됨':''}`,'check-area'),node('strong',t?taskTitle(project,t):''),node('span',it.kind==='decision'?`${it.status} · 답을 기다려요`:`${it.status} · 아직 다음 요청이나 확인 작업문 없음`,'hint'));
+-  li.append(btn('보기',()=>openTaskView(it.taskId,it.returnId),'quiet',`check-open-${it.returnId??it.taskId}`));return li;
++  li.append(btn('보기',()=>openTaskView(it.taskId,it.returnId,`check-open-${it.returnId??it.taskId}`),'quiet',`check-open-${it.returnId??it.taskId}`));return li;
+ }
+ /** Shown once the project has requests. Items with evidence only: an open question, a report nothing was done with yet. */
+ function checkSection():HTMLElement|null {
+@@ -1176,7 +1235,7 @@ function renderOverview(root:HTMLElement) {
+ function taskEntry(t:Task,placing:boolean):HTMLElement {
+   const item=node('article','','area-task');item.dataset.taskId=t.id;const first=sourceOf(project,t),results=returnsOf(t);
+   // SPATIAL102: the title enters the read-only task screen; continuing stays the explicit button below.
+-  const title=node('h3');title.append(btn(`${taskTitle(project,t)} ↘`,()=>openTaskView(t.id),'task-open-link',`task-open-${t.id}`));
++  const title=node('h3');title.append(btn(`${taskTitle(project,t)} ↘`,()=>openTaskView(t.id,null,`task-open-${t.id}`),'task-open-link',`task-open-${t.id}`));
+   item.append(title,node('p',`${first?dateLabel(first.at):''} · ${taskStatus(project,t)}`,'hint'));
+   if(results.length){const last=results.at(-1)!,src=project.sources.find(s=>s.id===last.sourceIds[0]);
+     item.append(node('p',`돌아온 결과 ${results.length}개 · 앱 미검증${src?` · 최근: ${shortText(reportBody(src),60)}`:''}`,'area-task-result'));}
+@@ -1329,7 +1388,8 @@ function guidePanel(a:Area,hasRequests:boolean):HTMLElement {
+ }
+ function renderArea(root:HTMLElement,a:Area) {
+   const head=node('div','','space-head'),title=node('h1',a.name);title.id='space-title';title.tabIndex=-1;
+-  head.append(node('p',a.archived?'AREA · 보관됨':'AREA','eyebrow'),title,a.note?node('p',a.note,'space-brief'):noNote());
++  // PC12: the user's idea is read first; a long one shows its opening words and says where the whole text is.
++  head.append(node('p',a.archived?'AREA · 보관됨':'AREA','eyebrow'),title,!a.note?noNote():a.note.length<=NOTE_SHORT*2?node('p',a.note,'space-brief'):areaIdea(a,'area-idea',NOTE_SHORT*2));
+   const actions=node('div','','row');
+   if(!a.archived)actions.append(btn('＋ 이 영역에 새 요청',()=>writeInArea(a.id),'primary','area-new-request'));
+   actions.append(btn(a.archived?'영역 되살리기':'영역 보관',()=>{commit(setAreaArchived(project,a.id,!a.archived));if(!a.archived){project={...project,notice:`‘${a.name}’ 영역을 보관했어요. 연결된 요청과 결과는 그대로이며 ‘보관한 영역’에서 되살릴 수 있어요.`};openSpace();}},'quiet','area-archive'));
+@@ -1363,23 +1423,80 @@ function renderArea(root:HTMLElement,a:Area) {
+   box.append(node('p','다른 영역·미분류 기준은 다른 영역의 요청에서 나왔거나 어느 영역에서 나왔는지 기록이 없는 기준이에요. 모두가 합의한 공통 기준이라는 뜻은 아니에요. 이 영역에 복사하지 않고, 기준 전체가 지금처럼 모든 작업문에 함께 들어가요.','hint'),btn('기준 · 출처 전체 보기',showContext,'quiet'));
+   root.append(box);
+ }
++/** PC12: which record an explicit continue would edit. Mirrors continueTask: a current report of this request stays current;
++ * otherwise the request itself becomes current (never one of its older reports). */
++function continueTarget(t:Task):{button:string;text:string} {
++  const cur=project.currentTaskId?project.tasks.find(x=>x.id===project.currentTaskId)??null:null,no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`;
++  if(cur?.id===t.id)return {button:'작업 화면으로',text:`지금 이어가는 작업이에요. 고치면 이 요청(${no(t)})의 작업문이 바뀌어요.`};
++  if(cur&&isReturnTask(project,cur)&&cur.parentTaskId===t.id)return {button:'작업 화면으로',text:`이어가면 이 요청에 받은 현재 보고(${no(cur)})에서 계속해요. 고치는 대상은 ${no(cur)}의 후속 확인 작업문이고, 읽고 있는 ${no(t)}의 작업문은 바뀌지 않아요.`};
++  return {button:'이 작업 이어서 하기',text:`이어가면 이 요청(${no(t)})으로 바꾸고 ${no(t)}의 작업문을 고쳐요.${cur?` 지금 이어가는 ${no(cur)}은 그대로 남아요.`:''}${returnsOf(t).length?' 이 요청에 돌아온 이전 보고를 대신 고르지 않아요.':''}`};
++}
++/** PC12: one field of the task being read (never the current task), with where it comes from. Stale AI text is named, not shown as current. */
++function fieldOf(t:Task,w:Work,key:keyof Task['manual']):{text:string;label:string;state:'manual'|'ai'|'stale'|'empty'} {
++  const manual=t.manual[key],ai=t.advice?.[key]??'',who=t.mode==='mock'?'MOCK':'AI';
++  if(manual!==null)return {text:manual,label:'사용자 직접 수정',state:'manual'};
++  if(ai&&!w.aiStale)return {text:ai,label:`${who} 제안 · 원문과 다를 수 있음`,state:'ai'};
++  if(ai)return {text:ai,label:`이전 ${who} 문구 · ${staleCause(w)}이라 작업문에서 제외됨`,state:'stale'};
++  return {text:'',label:'',state:'empty'};
++}
++function fieldRows(t:Task,w:Work,grid:HTMLElement,keys:[keyof Task['manual'],string][],limit:number|null):number {
++  let shown=0;
++  for(const [key,label] of keys) {
++    const f=fieldOf(t,w,key);if(f.state==='empty')continue;shown++;
++    const cell=node('div');cell.dataset.field=key;cell.dataset.origin=f.state;
++    const dt=node('dt',`${label} · `);dt.append(node('span',f.label,`field-origin ${f.state}`));cell.append(dt);
++    if(f.state==='stale'){const old=details('제외된 이전 문구 보기 (현재 작업문 아님)',`task-view-stale-${key}`);old.append(node('div',f.text,'source-raw'));cell.append(node('dd','지금 작업문에는 들어가지 않아요.'),old);}
++    else cell.append(node('dd',!f.text?'(직접 비워 둠)':limit!==null&&f.text.length>limit?`${shortText(f.text,limit)} · 앞부분`:f.text));
++    grid.append(cell);
++  }
++  return shown;
++}
++/** PC12: what this request is and its existing short understanding/scope. Nothing is generated when they are empty. */
++function taskContext(t:Task):HTMLElement {
++  const w=currentWork(project,t),area=areaById(areaOf(project,t)),box=node('section','','task-context');box.id='task-view-context';
++  box.append(node('p',`요청 · 작업 ${pad(project.tasks.indexOf(t)+1)} · ${area?`영역 ‘${area.name}’${area.archived?' (보관됨)':''}`:'영역 미지정'}`,'source-meta'));
++  const grid=node('dl','','review-grid task-context-grid');
++  if(fieldRows(t,w,grid,[['understanding','짧은 이해'],['scope','이번 범위와 유지할 것']],200))box.append(grid);
++  else box.append(node('p','이 작업에는 아직 짧은 이해·범위 기록이 없어요. 만들어 넣지 않았어요. 필요하면 아래 요청 원문을 열어 보세요.','hint'));
++  return box;
++}
++/** PC12: the work text, completion conditions and kept conditions, opened when needed. Labels say whose words they are. */
++function taskWorkDetails(t:Task):HTMLDetailsElement {
++  const w=currentWork(project,t),box=details('작업문 · 완료 조건 · 유지할 조건 보기','task-view-work'),grid=node('dl','','review-grid task-context-grid');
++  let shown=fieldRows(t,w,grid,[['next','실행 도구에 전달할 작업문'],['checks','확인할 동작 / 완료 조건']],null);
++  const correction=intentCorrection(t),intent=currentIntent(project,t),conditions=correction?.conditions??intent?.value.conditions.join(' / ')??'';
++  if(conditions){shown++;const cell=node('div');const dt=node('dt','유지할 조건 · ');dt.append(node('span',correction?'사용자 직접 정정':`${t.mode==='mock'?'MOCK':'AI'} 정리 · 원문과 다를 수 있음`,`field-origin ${correction?'manual':'ai'}`));cell.append(dt,node('dd',conditions));grid.append(cell);}
++  if(shown)box.append(grid);
++  else box.append(node('p','작성된 작업문·완료 조건·유지할 조건 값이 없어요. 원문 속 조건이나 금지가 없다는 뜻은 아니니 요청 원문을 확인하세요.','hint'));
++  return box;
++}
+ /** SPATIAL102: one request, read-only: its words, status, returned results and the bases that came from it. */
+ function renderTaskView(root:HTMLElement,t:Task) {
+   const area=areaById(areaOf(project,t)),first=sourceOf(project,t),results=returnsOf(t);
+   const head=node('div','','space-head'),title=node('h1',taskTitle(project,t));title.id='space-title';title.tabIndex=-1;
+   head.append(node('p',`TASK · 작업 ${pad(project.tasks.indexOf(t)+1)}${area?.archived?' · 보관된 영역':''}`,'eyebrow'),title,node('p',taskStatus(project,t),'hint task-view-status'));
+-  const actions=node('div','','row');
+-  if(currentGroup(t))actions.append(appTag(),btn('작업 화면으로',()=>continueTask(t.id),'primary','task-view-continue'));
+-  else actions.append(btn('이 작업 이어서 하기',()=>continueTask(t.id),'primary','task-view-continue'));
+-  head.append(actions);if(!currentGroup(t))head.append(node('p','이 화면을 보는 것만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.','hint'));
++  const actions=node('div','','row'),target=continueTarget(t);
++  if(currentGroup(t))actions.append(appTag());
++  actions.append(btn(target.button,()=>continueTask(t.id),'primary','task-view-continue'));
++  const back=originButton('task-return-origin');if(back)actions.append(back);
++  const which=node('p',target.text,'hint task-view-target');which.id='task-view-target';
++  head.append(actions,which);if(!currentGroup(t))head.append(node('p','이 화면을 보는 것만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.','hint'));
+   root.append(head);
+   if(viewReturn!==null){root.append(pointedSection(t,viewReturn));if(pointedReturn(project,t.id,viewReturn))root.append(reportCorrectionHelp());}
++  // PC12: short context first (each line says where it comes from); the original, reports and conditions open when needed.
+   const body=node('section','','area-tasks task-view');body.id='task-view';
+-  body.append(node('h2','요청 원문'));if(first)body.append(node('p',`${sourceName[first.kind]} · ${dateLabel(first.at)}`,'source-id'),node('div',first.text,'source-raw'));
+-  body.append(node('h2',`돌아온 결과 ${results.length}개`));
+-  if(!results.length)body.append(node('p',t.handoffs.length?'작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.':'아직 돌아온 결과가 없어요.','hint'));
+-  for(const r of results)for(const id of r.sourceIds){const src=project.sources.find(s=>s.id===id);if(src)body.append(node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));}
+-  if(results.length)body.append(reportCorrectionHelp());
++  body.append(taskContext(t));
++  const original=details(`요청 원문 보기 · 사용자 원문${first?` · ${first.text.length}자`:''}`,'task-view-request');
++  if(first)original.append(node('p',`${sourceName[first.kind]} · ${dateLabel(first.at)}`,'source-id'),node('div',first.text,'source-raw'));
++  else original.append(node('p','이 작업의 원문을 찾지 못했어요.','hint'));
++  body.append(original,taskWorkDetails(t));
++  if(!results.length)body.append(node('p',`돌아온 결과 0개 · ${t.handoffs.length?'작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.':'아직 돌아온 결과가 없어요.'}`,'hint'));
++  else {
++    const reports=details(`돌아온 결과 ${results.length}개 · 외부 원문 · 앱 미검증`,'task-view-results');
++    for(const r of results)for(const id of r.sourceIds){const src=project.sources.find(s=>s.id===id);if(src)reports.append(node('p',`${sourceName[src.kind]} · ${dateLabel(src.at)} · 작업 ${pad(project.tasks.indexOf(r)+1)} · 앱 미검증`,'source-id'),node('div',reportBody(src),'source-raw'));}
++    reports.append(reportCorrectionHelp());body.append(reports);
++  }
++  body.append(backgroundPreview(t,'task-view-background'));
+   root.append(body);
+   const own=new Set([t.id,...results.map(r=>r.id)]),bases=project.bases.filter(b=>own.has(project.sources.find(s=>s.id===b.sourceId)?.taskId??''));
+   const box=details(`이 작업의 기준 ${bases.length}개`,'task-view-bases');
+@@ -1417,6 +1534,8 @@ function renderPlace(t:Task|null) {
+   if(area)bar.append(node('span','›','crumb-sep'),btn(area.name,()=>openArea(area.id),'crumb-link','place-area'));
+   const receipt=t?receiptOf(t):null;
+   bar.append(node('span','›','crumb-sep'),node('strong',!t?'새 요청':receipt!==null?`${receipt>=0?`작업 ${pad(receipt+1)}의 보고 · `:''}후속 확인 작업문 초안`:'앱에서 이어갈 작업'),node('span','이어가는 작업','layer-chip'));
++  // PC12: after reading a task from the map, the way back to that view (the edits made here stay).
++  const back=originButton('work-return-origin');if(back)bar.append(back);
+ }
+ /** The area the next request goes to: explicit, visible and changeable. Shown once areas exist. */
+ function renderComposeArea(t:Task|null,returned:boolean) {
+diff --git a/app/continuity/tests/flow090_browser.py b/app/continuity/tests/flow090_browser.py
+index ac58be4..5da4f06 100644
+--- a/app/continuity/tests/flow090_browser.py
++++ b/app/continuity/tests/flow090_browser.py
+@@ -187,6 +187,7 @@ class SpatialWorkspace(unittest.TestCase):
+         self.assertEqual(self.pos(booking),before)
+         # Ctrl+Z in a text field edits text, not positions.
+         self.drag(notify,40,40);moved=self.pos(notify);self.page.locator(f'#node-info-{notify}').click()
++        self.page.locator('#panel-edit > summary').click()  # PC12: editing name/idea is opened explicitly
+         self.page.locator('#panel-name').fill('알림 바꾸는 중');self.page.locator('#panel-name').press('Control+z');self.assertEqual(self.pos(notify),moved)
+         self.page.locator('#panel-cancel').click();expect(self.page.locator('#panel-name')).to_have_value('알림')
+         # A report that arrives between a move and its undo stays.
+@@ -297,15 +298,16 @@ class SpatialWorkspace(unittest.TestCase):
+         # Map and panel: what the app has open (not live execution), and a short raw excerpt of the latest report.
+         self.page.locator('#nav-space').click();node=self.page.locator(f'.area-node[data-area-id="{booking}"]')
+         expect(node).to_contain_text('앱에서 이어갈 작업');expect(self.page.locator('#space-view')).not_to_contain_text('지금 이어가는')
+-        self.page.locator(f'#node-info-{booking}').click();panel=self.page.locator('#panel-report')
++        # PC12: the panel no longer picks the latest report; the user picks the request and reads its report there (raw, unverified).
++        self.page.locator(f'#node-info-{booking}').click();expect(self.page.locator('#panel-report')).to_have_count(0)
+         expect(self.page.locator('#area-panel')).to_contain_text('외부 도구에서 지금 실행 중이라는 뜻이 아니에요')
+-        expect(panel).to_contain_text('원문 앞부분');expect(panel).to_contain_text('미검증')
+-        excerpt=self.page.locator('.panel-excerpt').inner_text().rstrip('…')
+-        self.assertTrue(' '.join(report.split()).startswith(excerpt.strip()),'raw text, not a summary');self.assertNotIn('ZZ-END',panel.inner_text(),'the full report stays out of the panel')
+-        self.page.locator('#panel-report-more').click();expect(self.page.locator('#space-title')).to_have_text('예약')
+-        expect(self.page.locator(f'#raw-{task}')).to_have_attribute('open','');expect(self.page.locator(f'#raw-{task}')).to_contain_text('ZZ-END')
+-        self.page.locator('#space-crumb-root').click();self.page.locator(f'#node-info-{booking}').click()
+-        expect(self.page.locator('#panel-report-continue')).to_have_text('작업 화면으로');self.page.locator('#panel-report-continue').click()
++        self.page.locator(f'#panel-task-{task}').click();res=self.page.locator('#task-view-results')
++        expect(res.locator('summary')).to_contain_text('앱 미검증');expect(res).not_to_have_attribute('open','')
++        res.locator('summary').click();raw=res.locator('.source-raw').first;expect(raw).to_contain_text('ZZ-END')
++        self.assertEqual(' '.join(raw.inner_text().split()),' '.join(report.split()),'raw text, not a summary')
++        self.page.locator('#task-return-origin').click();expect(self.page.locator('#space-title')).to_have_text('전체 공간')
++        self.page.locator(f'#panel-task-{task}').click()
++        expect(self.page.locator('#task-view-continue')).to_have_text('작업 화면으로');self.page.locator('#task-view-continue').click()
+         expect(self.page.locator('#current-work')).to_be_visible();self.assertEqual(self.state()['currentTaskId'],rt['id'])
+ 
+     def test_13_bases_from_other_areas_are_not_called_common(self):
+@@ -354,7 +356,7 @@ class SpatialWorkspace(unittest.TestCase):
+         expect(self.page.locator(f'.area-node[data-area-id="{booking}"]')).to_have_class(re.compile('selected'))
+         self.assertEqual(self.page.locator('#space-plane').evaluate('(e)=>e.style.transform'),view,'viewport kept')
+         # An unsaved edit: the sheet still closes, the value stays and the sheet can be reopened.
+-        self.page.locator(f'#node-info-{booking}').click();self.page.locator('#panel-note').fill('아직 못 정한 점: 취소 규칙')
++        self.page.locator(f'#node-info-{booking}').click();self.page.locator('#panel-edit > summary').click();self.page.locator('#panel-note').fill('아직 못 정한 점: 취소 규칙')
+         self.page.locator('#panel-open').click();self.page.locator('#nav-space').click()
+         expect(self.page.locator('#area-panel')).to_be_hidden();reopen=self.page.locator('#map-sheet-reopen');expect(reopen).to_be_visible()
+         reopen.click();expect(self.page.locator('#area-panel')).to_be_visible();expect(self.page.locator('#panel-note')).to_have_value('아직 못 정한 점: 취소 규칙')
+@@ -401,6 +403,7 @@ class SpatialWorkspace(unittest.TestCase):
+         self.page.locator('#nav-space').click()
+         size=lambda sel:self.page.locator(sel).bounding_box()['height']
+         self.page.locator(f'#list-info-{booking}').click();panel=self.page.locator('#area-panel');expect(panel).to_be_visible()
++        self.page.locator('#panel-edit > summary').click()  # PC12: editing name/idea is opened explicitly
+         self.assertGreater(panel.evaluate('(e)=>e.scrollHeight-e.clientHeight'),0,'the panel content is taller than the sheet')
+         note0,name0=size('#panel-note'),size('#panel-name');self.assertGreaterEqual(note0,80);self.assertGreaterEqual(name0,36)
+         long='날짜와 시간을 골라 예약 · 아직 못 정함: 결제 방식과 취소 규칙 '*12
+diff --git a/app/continuity/tests/pc12_browser.py b/app/continuity/tests/pc12_browser.py
+new file mode 100644
+index 0000000..330a51b
+--- /dev/null
++++ b/app/continuity/tests/pc12_browser.py
+@@ -0,0 +1,258 @@
++"""PC12: native Chromium -> real localhost HTTP -> explicit MOCK; no paid AI.
++One reading flow in the existing product: the selected area's name and the user's idea read first (editing is opened on
++purpose) -> a task the user picks, short context first, originals/reports/conditions opened when needed -> optional
++explicit continue + the existing manual 4-field edit of the real current task -> back to the map view the reading started
++from (viewport, scale, selection, scroll, focus), without rolling back the continued task or saved edits.
++
++Data is installed through the product UI (labelled 'fixture' steps). Two boundary cases need data the UI cannot make
++(a task with no saved plan copy, a task with no AI/manual text); they are installed by editing an exported backup and
++importing it with the product's own import button, and are labelled as synthetic fixtures. Operations under test are
++real click / key / wheel; nothing assigns app state directly. Wiring, not usability.
++Run from app/: python continuity/tests/pc12_browser.py
++"""
++import json, unittest
++from pathlib import Path
++from playwright.sync_api import expect
++import browser as base
++
++LONG_A='A: 예약 접수 화면의 입력 항목을 정리해 주세요. 이름·연락처·인원은 필수, 메모는 선택. '+'세부 조건을 이어서 적습니다. '*45+'끝 문장 ZZ-END-A'
++REPORT_R='R 보고: 입력 항목을 정리했다고 주장. 실제 클릭 검사는 하지 않음. '+'긴 보고 내용이 이어집니다. '*40+'끝 문장 ZZ-END-R'
++LONG_IDEA='날짜와 시간을 고르는 예약 · 아직 못 정함: 결제 방식, 취소 규칙, 노쇼 처리. '*4+'구상 끝 ZZ-IDEA-END'
++WORK_KEYS=['understanding','scope','next','checks']
++
++
++class Pc12(unittest.TestCase):
++    WIDTH,HEIGHT=1280,720
++    setUpClass=classmethod(base.Browser.setUpClass.__func__)
++    tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
++    tearDown=base.Browser.tearDown;state=base.Browser.state
++
++    def setUp(self):
++        base.Browser.setUp(self);self.page.set_viewport_size({'width':self.WIDTH,'height':self.HEIGHT});self.steps=[]
++
++    # ---------- helpers: real UI operations ----------
++    def log(self,text):self.steps.append(text)
++    def shot(self,name):self.page.screenshot(path=str(base.OUT/f'pc12-{self.WIDTH}-{name}.png'))
++    def focused(self):return self.page.evaluate('document.activeElement && document.activeElement.id')
++    def title(self):return self.page.locator('#space-title')
++    def transform(self):return self.page.locator('#space-plane').evaluate('(e)=>e.style.transform')
++    def task(self,tid,s=None):return next(t for t in (s or self.state())['tasks'] if t['id']==tid)
++    def start(self,areas):
++        self.page.locator('#brief-input').fill('공방 원데이 클래스 예약');self.page.locator('#brief-start').click()
++        for name,note in areas:
++            self.page.locator('#area-name').fill(name);self.page.locator('#area-note').fill(note);self.page.locator('#area-add').click()
++            expect(self.page.locator('.area-node',has_text=name)).to_be_visible()
++        return [next(a['id'] for a in self.state()['space']['areas'] if a['name']==n) for n,_ in areas]
++    def request_in(self,area,text):
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click();self.page.locator('#area-new-request').click()
++        self.page.locator('#draft').fill(text);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
++        return self.state()['currentTaskId']
++    def paste_report(self,text):
++        self.page.locator('#nav-work').click();self.page.locator('#home-paste-result').click()
++        self.page.locator('#draft').fill(text);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
++        return self.state()['tasks'][-1]['id']
++    def unsent_draft(self,area,text):
++        """An unsent request written for another area: reading must keep its kind, target and text."""
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click();self.page.locator('#area-new-request').click()
++        self.page.locator('#draft').fill(text);base.saved(self.page)
++    def move_map(self):
++        """Zoom twice with the buttons and pan by dragging the empty map background (real pointer)."""
++        self.page.locator('#map-zoom-in').click();self.page.locator('#map-zoom-in').click()
++        box=self.page.locator('#space-map').bounding_box();x,y=box['x']+box['width']*0.5,box['y']+box['height']-24
++        hit=self.page.evaluate('([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.id||e.className)}',[x,y])
++        self.assertIn(hit,['space-map','space-plane','relation-layer'],f'the pan starts on the empty map ({hit})')
++        self.page.mouse.move(x,y);self.page.mouse.down();self.page.mouse.move(x-70,y-35,steps=6);self.page.mouse.up()
++    def depart(self,area,task):
++        """From the whole space: select the area with '정보', move the map, scroll the page with the wheel, then pick the task."""
++        self.page.locator('#nav-space').click();expect(self.title()).to_have_text('전체 공간')
++        self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible()
++        self.move_map()
++        self.page.mouse.move(self.WIDTH-20,self.HEIGHT//2);self.page.mouse.wheel(0,140);self.page.wait_for_timeout(150)
++        pick=self.page.locator(f'#panel-task-{task}');expect(pick).to_be_in_viewport()
++        before={'transform':self.transform(),'scale':self.page.locator('#map-scale').inner_text(),'y':self.page.evaluate('window.scrollY'),
++                'selected':self.page.locator('.area-node.selected').get_attribute('data-area-id')}
++        self.assertGreater(before['y'],0,'the wheel moved the reading position');self.assertNotIn('scale(1)',before['transform'])
++        pick.click();expect(self.page.locator('#task-view')).to_be_visible()
++        self.log(f"depart: {before}")
++        return before
++    def assert_back(self,before,area,task):
++        expect(self.title()).to_have_text('전체 공간');expect(self.page.locator('#area-panel')).to_be_visible()
++        self.assertEqual(self.transform(),before['transform']);self.assertEqual(self.page.locator('#map-scale').inner_text(),before['scale'])
++        self.assertEqual(self.page.locator('.area-node.selected').get_attribute('data-area-id'),area)
++        self.assertAlmostEqual(self.page.evaluate('window.scrollY'),before['y'],delta=2)
++        self.assertEqual(self.focused(),f'panel-task-{task}')
++        self.log(f"back: transform={self.transform()} y={self.page.evaluate('window.scrollY')} focus={self.focused()}")
++    def edit_work(self,values):
++        d=self.page.locator('#edit-work')
++        if d.get_attribute('open') is None:d.locator('summary').first.click()
++        for k in WORK_KEYS:self.page.locator(f'#work-{k}').fill(values[k])
++        for k in WORK_KEYS:expect(self.page.locator(f'#manual-{k}')).to_have_text('직접 수정 · AI가 덮어쓰지 않음')
++        base.saved(self.page)
++
++    def build(self):
++        """Fixture via the product UI: two areas (one with a long idea), request A + its report R, an unsent draft."""
++        booking,notify=self.start([('예약',LONG_IDEA),('알림','')])
++        A=self.request_in(booking,LONG_A);R=self.paste_report(REPORT_R)
++        s=self.state();self.assertEqual(s['currentTaskId'],R);self.assertEqual(self.task(R,s)['parentTaskId'],A)
++        self.unsent_draft(notify,'아직 보내지 않은 알림 요청 초안')
++        return booking,notify,A,R
++
++    # ---------- core path 1: reading only ----------
++    def test_01_read_only_round_trip_changes_nothing(self):
++        booking,notify,A,R=self.build();self.log('fixture via UI: areas, A(MOCK), R(report of A), unsent draft for 알림')
++        before_state=self.state()
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();panel=self.page.locator('#area-panel')
++        # The area is read first: name and the user's idea (an excerpt that says so), editing closed until asked.
++        expect(panel.locator('.panel-top strong')).to_have_text('예약');expect(panel.locator('#panel-idea')).to_contain_text('사용자 구상')
++        expect(self.page.locator('#panel-edit')).not_to_have_attribute('open','');expect(self.page.locator('#panel-name')).to_be_hidden()
++        expect(self.page.locator('#panel-idea-full > summary')).to_contain_text('위는 앞부분');expect(panel.get_by_text('ZZ-IDEA-END')).to_be_hidden()
++        self.assertNotIn('panel-report',self.page.content(),'no report is picked for the user')
++        expect(self.page.locator(f'#panel-task-{A}')).to_be_visible();expect(self.page.locator('.panel-task')).to_have_count(1)
++        self.shot('01-area-read')
++        before=self.depart(booking,A)
++        # Short context of the chosen task, with where each line comes from; long parts closed.
++        ctx=self.page.locator('#task-view-context');expect(ctx).to_contain_text('영역 ‘예약’')
++        expect(ctx.locator('[data-field="understanding"] .field-origin')).to_have_text('MOCK 제안 · 원문과 다를 수 있음')
++        expect(self.page.locator('#task-view-target')).to_contain_text('받은 현재 보고')
++        for d in ['task-view-request','task-view-results','task-view-work']:expect(self.page.locator(f'#{d}')).not_to_have_attribute('open','')
++        expect(self.page.locator('#task-view-request .source-raw')).to_be_hidden();expect(self.page.locator('#task-view-results .source-raw').first).to_be_hidden()
++        self.shot('02-task-context')
++        # Open and close the long original (click), and the report (keyboard on its summary).
++        self.page.locator('#task-view-request > summary').click();expect(self.page.locator('#task-view-request')).to_contain_text('ZZ-END-A')
++        expect(self.page.locator('#task-view-request .source-raw')).to_be_visible();self.page.locator('#task-view-request > summary').click()
++        expect(self.page.locator('#task-view-request .source-raw')).to_be_hidden()
++        self.page.locator('#task-view-results > summary').focus();self.page.keyboard.press('Enter')
++        expect(self.page.locator('#task-view-results')).to_have_attribute('open','');expect(self.page.locator('#task-view-results')).to_contain_text('앱 미검증')
++        self.page.keyboard.press('Enter');expect(self.page.locator('#task-view-results')).not_to_have_attribute('open','')
++        self.page.locator('#task-return-origin').click();self.assert_back(before,booking,A)
++        after=self.state()
++        self.assertEqual(after,before_state,'reading changed no saved data (current task, draft kind/target/text, manual fields)')
++        self.assertEqual(after['currentTaskId'],R);self.assertEqual(after['draftKind'],'request');self.assertEqual(after['space']['draftTarget'],{'area':notify})
++        # The restored focus is usable: Enter opens the same task again.
++        self.page.keyboard.press('Enter');expect(self.title()).to_contain_text('A: 예약 접수')
++        self.shot('03-back-read')
++
++    # ---------- core path 2: explicit continue + manual edit, A/R and RB->A ----------
++    def test_02_continue_keeps_R_then_switches_from_RB_to_A(self):
++        booking,notify,A,R=self.build()
++        s0=self.state();A0,R0=self.task(A,s0),self.task(R,s0)
++        # (1) current = R (report of A): continuing A keeps R and edits R only.
++        before=self.depart(booking,A)
++        expect(self.page.locator('#task-view-target')).to_contain_text(f'작업 02의 후속 확인 작업문');expect(self.page.locator('#task-view-continue')).to_have_text('작업 화면으로')
++        self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
++        expect(self.page.locator('#notice')).to_contain_text('받은 현재 보고 작업 02에서 계속');expect(self.page.locator('#work-place')).to_contain_text('작업 01의 보고 · 후속 확인 작업문 초안')
++        self.assertEqual(self.state()['currentTaskId'],R)
++        vR={k:f'R만 고친 {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vR);self.shot('04-edit-R')
++        self.page.locator('#work-return-origin').click();self.assert_back(before,booking,A)
++        s1=self.state();self.assertEqual(s1['currentTaskId'],R,'return does not roll back the continued task')
++        self.assertEqual(self.task(R,s1)['manual'],vR);self.assertEqual(self.task(A,s1)['manual'],A0['manual'],'A untouched')
++        self.assertEqual(s1['draft'],s0['draft']);self.assertEqual(s1['space']['draftTarget'],s0['space']['draftTarget']);self.assertEqual(s1['draftKind'],'request')
++        # Fixture via UI: request B in 알림 + its report RB (the unsent 알림 draft is sent as B first, as the product does).
++        self.page.locator('#nav-work').click()
++        if not self.page.locator('#compose-panel').evaluate('(e)=>e.open'):self.page.locator('#compose-summary').click()
++        self.page.locator('#draft').fill('B: 알림 문자에 예약 시간 넣기')
++        self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('');B=self.state()['currentTaskId']
++        self.assertEqual(self.task(B)['areaId'],notify);RB=self.paste_report('RB 보고: 알림 문구 반영했다고 주장')
++        s2=self.state();self.assertEqual(s2['currentTaskId'],RB);B2,RB2,R2=self.task(B,s2),self.task(RB,s2),self.task(R,s2)
++        # (2) current = RB (report of another request B): continuing A switches to A (not its older report R) and edits A only.
++        before=self.depart(booking,A)
++        expect(self.page.locator('#task-view-target')).to_contain_text('이 요청(작업 01)으로 바꾸고');expect(self.page.locator('#task-view-target')).to_contain_text('이전 보고를 대신 고르지 않아요')
++        expect(self.page.locator('#task-view-continue')).to_have_text('이 작업 이어서 하기')
++        self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
++        self.assertEqual(self.state()['currentTaskId'],A);expect(self.page.locator('#current-work h2')).to_have_text('이어갈 작업')
++        vA={k:f'A만 고친 {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vA);self.shot('05-edit-A')
++        self.page.locator('#work-return-origin').click();self.assert_back(before,booking,A);self.shot('06-back-after-edit')
++        s3=self.state();self.assertEqual(s3['currentTaskId'],A)
++        self.assertEqual(self.task(A,s3)['manual'],vA);self.assertEqual(self.task(R,s3)['manual'],R2['manual']);self.assertEqual(self.task(R,s3)['manual'],vR)
++        self.assertEqual(self.task(RB,s3),RB2);self.assertEqual(self.task(B,s3),B2)
++        self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');self.assertEqual(self.state(),s3,'edits survive a reload')
++        expect(self.page.locator('#task-return-origin, #work-return-origin')).to_have_count(0)
++
++
++class Pc12Wide(Pc12):
++    WIDTH,HEIGHT=1440,900
++
++
++class Pc12Boundaries(unittest.TestCase):
++    """Failure boundaries of the same flow at 1280x720 (and the 390 minimum)."""
++    WIDTH,HEIGHT=1280,720
++    setUpClass=classmethod(base.Browser.setUpClass.__func__)
++    tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
++    tearDown=base.Browser.tearDown;state=base.Browser.state
++    setUp=Pc12.setUp;start=Pc12.start;request_in=Pc12.request_in;paste_report=Pc12.paste_report;task=Pc12.task;title=Pc12.title
++    shot=Pc12.shot;focused=Pc12.focused;log=Pc12.log
++
++    def test_03_empty_area_and_empty_idea_make_nothing_up(self):
++        (empty,)=self.start([('빈 영역','')])
++        self.page.locator(f'#node-info-{empty}').click();panel=self.page.locator('#area-panel')
++        expect(panel).to_contain_text('구상 미기재');expect(self.page.locator('#panel-tasks')).to_have_text('아직 이 영역의 요청이 없어요.')
++        expect(self.page.locator('.panel-task')).to_have_count(0);expect(self.page.locator('#check-list')).to_have_count(0)
++        expect(self.page.locator('#task-return-origin, #work-return-origin')).to_have_count(0)
++        # Editing is an explicit step; saving closes it and the read view shows the saved text.
++        self.page.locator('#panel-edit > summary').click();self.page.locator('#panel-note').fill('짧은 구상');self.page.locator('#panel-save').click()
++        expect(self.page.locator('#panel-edit')).not_to_have_attribute('open','');expect(self.page.locator('#panel-idea')).to_contain_text('짧은 구상')
++        self.assertEqual(self.state()['tasks'],[]);self.shot('07-empty')
++
++    def test_04_stale_ai_text_is_named_and_kept_out(self):
++        (booking,)=self.start([('예약','')]);A=self.request_in(booking,'예약 확인 문구를 바꿔 주세요.')
++        # Change the basis this AI text was written from (existing context panel path): the MOCK text becomes stale.
++        self.page.locator('#nav-context').click();self.page.locator('#related-bases details summary').first.click()
++        self.page.locator('#related-bases textarea').first.fill('예약 확인 문구를 “예약 완료”로 바꿔 주세요.');self.page.locator('#related-bases button',has_text='수정 기록').first.click()
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator(f'#panel-task-{A}').click()
++        row=self.page.locator('#task-view-context [data-field="understanding"]');expect(row).to_have_attribute('data-origin','stale')
++        expect(row).to_contain_text('작업문에서 제외됨');expect(row.locator('dd')).to_have_text('지금 작업문에는 들어가지 않아요.')
++        expect(self.page.locator('#task-view-stale-understanding')).not_to_have_attribute('open','')
++        self.shot('08-stale')
++
++    def test_05_no_plan_copy_no_text_and_changed_plan(self):
++        """Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy."""
++        booking,notify=self.start([('예약','첫 구상'),('알림','')]);A=self.request_in(booking,'A: 예약 화면');B=self.request_in(notify,'B: 알림 문자')
++        with self.page.expect_download() as d:self.page.locator('#backup').click()
++        raw=json.loads(Path(d.value.path()).read_text(encoding='utf-8'))
++        for t in raw['tasks']:
++            if t['id']==B:t.update(background=None,advice=None,adviceRevision=None,mode=None)
++        path=base.OUT/'pc12-fixture-import.json';path.write_text(json.dumps(raw,ensure_ascii=False),encoding='utf-8')
++        self.page.once('dialog',lambda dl:dl.accept());self.page.locator('#import-file').set_input_files(str(path))
++        expect(self.page.locator('#notice')).to_contain_text('사본으로 불러왔어요');self.log('synthetic fixture imported')
++        # Plan edited after A was written (UI): A's copy says the plan changed since, not that code changed.
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator('#panel-edit > summary').click()
++        self.page.locator('#panel-note').fill('바뀐 구상');self.page.locator('#panel-save').click()
++        self.page.locator(f'#panel-task-{A}').click();bg=self.page.locator('#task-view-background')
++        expect(bg.locator('summary')).to_contain_text('그 뒤 구상이 바뀜');bg.locator('summary').click();expect(bg).to_contain_text('첫 구상')
++        expect(bg).not_to_contain_text('코드');expect(bg).not_to_contain_text('지난 방문')
++        self.page.locator('#task-return-origin').click();self.page.locator(f'#node-info-{notify}').click();self.page.locator(f'#panel-task-{B}').click()
++        expect(self.page.locator('#task-view-context')).to_contain_text('아직 짧은 이해·범위 기록이 없어요');expect(self.page.locator('#task-view-context dl')).to_have_count(0)
++        expect(self.page.locator('#task-view-work')).to_contain_text('원문 속 조건이나 금지가 없다는 뜻은 아니');expect(self.page.locator('#task-view-background > summary')).to_contain_text('이 작업에는 없음')
++        self.page.locator('#task-view-request > summary').click();expect(self.page.locator('#task-view-request')).to_contain_text('B: 알림 문자')
++        self.shot('09-no-copy')
++
++    def test_06_starting_point_dropped_on_project_switch_and_reload(self):
++        (booking,)=self.start([('예약','')]);A=self.request_in(booking,'A: 예약 화면')
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator(f'#panel-task-{A}').click()
++        expect(self.page.locator('#task-return-origin')).to_be_visible()
++        # Reload: the per-tab starting point is not kept; no button, no selection made up, the task view itself stays.
++        self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');expect(self.title()).to_contain_text('A: 예약')
++        expect(self.page.locator('#task-return-origin')).to_have_count(0)
++        # Another project: nothing of this starting point comes along.
++        self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator(f'#panel-task-{A}').click()
++        self.page.locator('#task-view-continue').click();expect(self.page.locator('#work-return-origin')).to_be_visible()
++        self.page.locator('#new-project-top').click();expect(self.page.locator('#work-return-origin')).to_have_count(0)
++        self.page.locator('#nav-projects').click();self.page.locator('.project-card').filter(has_text='공방').locator('.project-open').click()
++        expect(self.page.locator('#task-return-origin, #work-return-origin')).to_have_count(0)
++        self.assertEqual(self.state()['currentTaskId'],A)
++
++    def test_07_narrow_390_minimum(self):
++        self.page.set_viewport_size({'width':390,'height':844})
++        (booking,)=self.start([('예약',LONG_IDEA)]);A=self.request_in(booking,LONG_A)
++        self.page.locator('#nav-space').click();self.page.locator(f'#list-info-{booking}').click();expect(self.page.locator('#area-panel')).to_be_visible()
++        pick=self.page.locator(f'#panel-task-{A}');pick.scroll_into_view_if_needed();pick.click();expect(self.page.locator('#task-view')).to_be_visible()
++        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390)
++        self.page.locator('#task-view-request > summary').click();self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390)
++        self.page.screenshot(path=str(base.OUT/'pc12-390-task.png'))
++        self.page.locator('#task-return-origin').click();expect(self.title()).to_have_text('전체 공간')
++        expect(self.page.locator('#area-panel')).to_be_visible();self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0)
++        self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth'),390)
++
++
++if __name__=='__main__':
++    unittest.main(verbosity=2)

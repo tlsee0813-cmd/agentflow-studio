@@ -1,0 +1,180 @@
+test_01_empty_start_areas_area_work_report_and_reload (__main__.SpatialWorkspace.test_01_empty_start_areas_area_work_report_and_reload) ... ok
+test_02_an_older_project_without_areas_opens_whole_and_can_be_placed (__main__.SpatialWorkspace.test_02_an_older_project_without_areas_opens_whole_and_can_be_placed) ... ok
+test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report (__main__.SpatialWorkspace.test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report) ... ok
+test_04_an_unsent_report_or_request_keeps_its_kind_and_target (__main__.SpatialWorkspace.test_04_an_unsent_report_or_request_keeps_its_kind_and_target) ... ok
+test_05_area_edit_drafts_stay_with_their_area (__main__.SpatialWorkspace.test_05_area_edit_drafts_stay_with_their_area) ... ok
+test_06_a_backup_copy_keeps_the_unsent_requests_area (__main__.SpatialWorkspace.test_06_a_backup_copy_keeps_the_unsent_requests_area) ... ok
+test_07_map_select_move_open_zoom_fit_undo_and_restore (__main__.SpatialWorkspace.test_07_map_select_move_open_zoom_fit_undo_and_restore) ... ERROR
+test_08_narrow_screen_sheet_and_direct_open (__main__.SpatialWorkspace.test_08_narrow_screen_sheet_and_direct_open) ... ok
+test_09_fit_brings_every_card_into_view_at_any_spread (__main__.SpatialWorkspace.test_09_fit_brings_every_card_into_view_at_any_spread) ... ok
+test_10_a_saved_target_in_the_last_archived_area_stays_visible (__main__.SpatialWorkspace.test_10_a_saved_target_in_the_last_archived_area_stays_visible) ... ok
+test_11_task_goal_is_not_repeated_and_one_entry_each (__main__.SpatialWorkspace.test_11_task_goal_is_not_repeated_and_one_entry_each) ... ok
+test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft (__main__.SpatialWorkspace.test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft) ... FAIL
+test_13_bases_from_other_areas_are_not_called_common (__main__.SpatialWorkspace.test_13_bases_from_other_areas_are_not_called_common) ... ok
+test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming (__main__.SpatialWorkspace.test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming) ... ok
+test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft (__main__.SpatialWorkspace.test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft) ... ERROR
+test_16_background_copy_walkthrough (__main__.SpatialWorkspace.test_16_background_copy_walkthrough) ... ok
+test_17_narrow_sheet_fields_keep_their_height (__main__.SpatialWorkspace.test_17_narrow_sheet_fields_keep_their_height) ... FAIL
+test_18_repeated_request_shown_once_and_copy_markdown_preview_match (__main__.SpatialWorkspace.test_18_repeated_request_shown_once_and_copy_markdown_preview_match) ... ok
+
+======================================================================
+ERROR: test_07_map_select_move_open_zoom_fit_undo_and_restore (__main__.SpatialWorkspace.test_07_map_select_move_open_zoom_fit_undo_and_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/flow090_browser.py", line 190, in test_07_map_select_move_open_zoom_fit_undo_and_restore
+    self.page.locator('#panel-name').fill('알림 바꾸는 중');self.page.locator('#panel-name').press('Control+z');self.assertEqual(self.pos(notify),moved)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15919, in fill
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.fill(
+        ^^^^^^^^^^^^^^^^^^^^
+            value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 212, in fill
+    return await self._frame.fill(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 590, in fill
+    await self._fill(**locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 602, in _fill
+    await self._channel.send("fill", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.fill: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#panel-name")
+    - locator resolved to <input maxlength="60" id="panel-name" aria-label="영역 이름"/>
+    - fill("알림 바꾸는 중")
+  - attempting fill action
+    2 × waiting for element to be visible, enabled and editable
+      - element is not visible
+    - retrying fill action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and editable
+      - element is not visible
+    - retrying fill action
+      - waiting 100ms
+    12 × waiting for element to be visible, enabled and editable
+       - element is not visible
+     - retrying fill action
+       - waiting 500ms
+
+
+======================================================================
+ERROR: test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft (__main__.SpatialWorkspace.test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/flow090_browser.py", line 357, in test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft
+    self.page.locator(f'#node-info-{booking}').click();self.page.locator('#panel-note').fill('아직 못 정한 점: 취소 규칙')
+                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15919, in fill
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.fill(
+        ^^^^^^^^^^^^^^^^^^^^
+            value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 212, in fill
+    return await self._frame.fill(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 590, in fill
+    await self._fill(**locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 602, in _fill
+    await self._channel.send("fill", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.fill: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#panel-note")
+    - locator resolved to <textarea rows="3" id="panel-note" maxlength="2000" aria-label="한 줄 구상"></textarea>
+    - fill("아직 못 정한 점: 취소 규칙")
+  - attempting fill action
+    2 × waiting for element to be visible, enabled and editable
+      - element is not visible
+    - retrying fill action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and editable
+      - element is not visible
+    - retrying fill action
+      - waiting 100ms
+    12 × waiting for element to be visible, enabled and editable
+       - element is not visible
+     - retrying fill action
+       - waiting 500ms
+
+
+======================================================================
+FAIL: test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft (__main__.SpatialWorkspace.test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/flow090_browser.py", line 302, in test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft
+    expect(panel).to_contain_text('원문 앞부분');expect(panel).to_contain_text('미검증')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 19244, in to_contain_text
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.to_contain_text(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+    ...<9 lines>...
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected to contain text '원문 앞부분'
+Actual value: None
+Error: element(s) not found 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#panel-report")
+
+
+======================================================================
+FAIL: test_17_narrow_sheet_fields_keep_their_height (__main__.SpatialWorkspace.test_17_narrow_sheet_fields_keep_their_height)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/flow090_browser.py", line 405, in test_17_narrow_sheet_fields_keep_their_height
+    note0,name0=size('#panel-note'),size('#panel-name');self.assertGreaterEqual(note0,80);self.assertGreaterEqual(name0,36)
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+AssertionError: 0 not greater than or equal to 80
+
+----------------------------------------------------------------------
+Ran 18 tests in 50.217s
+
+FAILED (failures=2, errors=2)

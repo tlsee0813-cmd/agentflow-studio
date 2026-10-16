@@ -1,0 +1,10 @@
+base-tsc-root exit=0
+base-cont-check exit=0
+base-cont-build exit=0
+base-node-tests exit=1
+base-node-tests(glob) exit=1
+base-parent-build exit=0
+base-cont-build2 exit=0
+base-node-tests2 exit=0
+base-browser-spatial102 exit=0
+base-browser-flow090 exit=0

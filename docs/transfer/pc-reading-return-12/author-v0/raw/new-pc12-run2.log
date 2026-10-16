@@ -1,0 +1,18 @@
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12.test_01_read_only_round_trip_changes_nothing) ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+test_03_empty_area_and_empty_idea_make_nothing_up (__main__.Pc12Boundaries.test_03_empty_area_and_empty_idea_make_nothing_up) ... ok
+test_04_stale_ai_text_is_named_and_kept_out (__main__.Pc12Boundaries.test_04_stale_ai_text_is_named_and_kept_out) ... ok
+test_05_no_plan_copy_no_text_and_changed_plan (__main__.Pc12Boundaries.test_05_no_plan_copy_no_text_and_changed_plan)
+Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy. ... /root/work/repo/app/continuity/tests/pc12_browser.py:211: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/playwright-artifacts-LkI56l/b7c48553-fc8c-49c4-a70b-98627514dc80' mode='r' encoding='utf-8'>
+  raw=json.loads(open(d.value.path(),encoding='utf-8').read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_06_starting_point_dropped_on_project_switch_and_reload (__main__.Pc12Boundaries.test_06_starting_point_dropped_on_project_switch_and_reload) ... ok
+test_07_narrow_390_minimum (__main__.Pc12Boundaries.test_07_narrow_390_minimum) ... ok
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12Wide.test_01_read_only_round_trip_changes_nothing) ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 26.609s
+
+OK

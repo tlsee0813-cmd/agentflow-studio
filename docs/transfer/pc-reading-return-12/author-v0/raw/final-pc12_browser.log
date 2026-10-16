@@ -1,0 +1,15 @@
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12.test_01_read_only_round_trip_changes_nothing) ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+test_03_empty_area_and_empty_idea_make_nothing_up (__main__.Pc12Boundaries.test_03_empty_area_and_empty_idea_make_nothing_up) ... ok
+test_04_stale_ai_text_is_named_and_kept_out (__main__.Pc12Boundaries.test_04_stale_ai_text_is_named_and_kept_out) ... ok
+test_05_no_plan_copy_no_text_and_changed_plan (__main__.Pc12Boundaries.test_05_no_plan_copy_no_text_and_changed_plan)
+Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy. ... ok
+test_06_starting_point_dropped_on_project_switch_and_reload (__main__.Pc12Boundaries.test_06_starting_point_dropped_on_project_switch_and_reload) ... ok
+test_07_narrow_390_minimum (__main__.Pc12Boundaries.test_07_narrow_390_minimum) ... ok
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12Wide.test_01_read_only_round_trip_changes_nothing) ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 28.874s
+
+OK

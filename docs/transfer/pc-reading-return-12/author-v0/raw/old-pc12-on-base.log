@@ -1,0 +1,350 @@
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12.test_01_read_only_round_trip_changes_nothing) ... FAIL
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... FAIL
+test_03_empty_area_and_empty_idea_make_nothing_up (__main__.Pc12Boundaries.test_03_empty_area_and_empty_idea_make_nothing_up) ... FAIL
+test_04_stale_ai_text_is_named_and_kept_out (__main__.Pc12Boundaries.test_04_stale_ai_text_is_named_and_kept_out) ... ERROR
+test_05_no_plan_copy_no_text_and_changed_plan (__main__.Pc12Boundaries.test_05_no_plan_copy_no_text_and_changed_plan)
+Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy. ... /root/work/repo/app/continuity/tests/pc12_browser.py:209: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/playwright-artifacts-M80ZeP/e0e53ef7-d830-46b8-b6a2-c46c280b335a' mode='r' encoding='utf-8'>
+  raw=json.loads(open(d.value.path(),encoding='utf-8').read())
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ERROR
+test_06_starting_point_dropped_on_project_switch_and_reload (__main__.Pc12Boundaries.test_06_starting_point_dropped_on_project_switch_and_reload) ... ERROR
+test_07_narrow_390_minimum (__main__.Pc12Boundaries.test_07_narrow_390_minimum) ... ERROR
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12Wide.test_01_read_only_round_trip_changes_nothing) ... FAIL
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... FAIL
+
+======================================================================
+ERROR: test_04_stale_ai_text_is_named_and_kept_out (__main__.Pc12Boundaries.test_04_stale_ai_text_is_named_and_kept_out)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 199, in test_04_stale_ai_text_is_named_and_kept_out
+    self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator(f'#panel-task-{A}').click()
+                                                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15573, in click
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.click(
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 160, in click
+    return await self._frame.click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 549, in click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#panel-task-T_9ba21b06-c656-4a84-9ba8-ef79521daa01")
+
+
+======================================================================
+ERROR: test_05_no_plan_copy_no_text_and_changed_plan (__main__.Pc12Boundaries.test_05_no_plan_copy_no_text_and_changed_plan)
+Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 216, in test_05_no_plan_copy_no_text_and_changed_plan
+    self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator('#panel-edit > summary').click()
+                                                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15573, in click
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.click(
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 160, in click
+    return await self._frame.click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 549, in click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#panel-edit > summary")
+
+
+======================================================================
+ERROR: test_06_starting_point_dropped_on_project_switch_and_reload (__main__.Pc12Boundaries.test_06_starting_point_dropped_on_project_switch_and_reload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 229, in test_06_starting_point_dropped_on_project_switch_and_reload
+    self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator(f'#panel-task-{A}').click()
+                                                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 15573, in click
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.click(
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 160, in click
+    return await self._frame.click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 549, in click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#panel-task-T_b69f411d-ffa7-45e7-8202-d5386b797aa2")
+
+
+======================================================================
+ERROR: test_07_narrow_390_minimum (__main__.Pc12Boundaries.test_07_narrow_390_minimum)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 246, in test_07_narrow_390_minimum
+    pick=self.page.locator(f'#panel-task-{A}');pick.scroll_into_view_if_needed();pick.click();expect(self.page.locator('#task-view')).to_be_visible()
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 17481, in scroll_into_view_if_needed
+    self._sync(self._impl_obj.scroll_into_view_if_needed(timeout=timeout))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 563, in scroll_into_view_if_needed
+    return await self._with_element(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 112, in _with_element
+    handle = await self.element_handle(timeout=timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_locator.py", line 316, in element_handle
+    handle = await self._frame.wait_for_selector(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self._selector, strict=True, state="attached", **params
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_frame.py", line 369, in wait_for_selector
+    await self._channel.send(
+        "waitForSelector", self._timeout, locals_to_params(locals())
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.scroll_into_view_if_needed: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#panel-task-T_ebab55a6-1ef5-495d-a264-f6eead0d159c")
+
+
+======================================================================
+FAIL: test_01_read_only_round_trip_changes_nothing (__main__.Pc12.test_01_read_only_round_trip_changes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 105, in test_01_read_only_round_trip_changes_nothing
+    expect(panel.locator('.panel-top strong')).to_have_text('예약');expect(panel.locator('#panel-idea')).to_contain_text('사용자 구상')
+                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 19244, in to_contain_text
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.to_contain_text(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+    ...<9 lines>...
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected to contain text '사용자 구상'
+Actual value: None
+Error: element(s) not found 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#area-panel").locator("#panel-idea")
+
+
+======================================================================
+FAIL: test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 139, in test_02_continue_keeps_R_then_switches_from_RB_to_A
+    before=self.depart(booking,A)
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 70, in depart
+    pick=self.page.locator(f'#panel-task-{task}');expect(pick).to_be_in_viewport()
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 20558, in to_be_in_viewport
+    self._sync(self._impl_obj.to_be_in_viewport(ratio=ratio, timeout=timeout))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 807, in to_be_in_viewport
+    await self._expect_impl(
+    ...<5 lines>...
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected to be in viewport
+Actual value: None
+Error: element(s) not found 
+Call log:
+  - Expect "to_be_in_viewport" with timeout 5000ms
+  - waiting for locator("#panel-task-T_a72b74e4-5e84-4269-9de9-25f1e57b3eae")
+
+
+======================================================================
+FAIL: test_03_empty_area_and_empty_idea_make_nothing_up (__main__.Pc12Boundaries.test_03_empty_area_and_empty_idea_make_nothing_up)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 186, in test_03_empty_area_and_empty_idea_make_nothing_up
+    expect(panel).to_contain_text('구상 미기재');expect(self.page.locator('#panel-tasks')).to_have_text('아직 이 영역의 요청이 없어요.')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 19244, in to_contain_text
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.to_contain_text(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+    ...<9 lines>...
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected to contain text '구상 미기재'
+Actual value: 빈 영역닫기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소아직 요청 없음영역 열기 ↗이 영역에 새 요청무엇을 요청할지 같이 정하기 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#area-panel")
+    9 × locator resolved to <aside id="area-panel" aria-label="빈 영역 속성" class="area-panel sheet-open">…</aside>
+      - unexpected value "빈 영역닫기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소아직 요청 없음영역 열기 ↗이 영역에 새 요청무엇을 요청할지 같이 정하기"
+
+
+======================================================================
+FAIL: test_01_read_only_round_trip_changes_nothing (__main__.Pc12Wide.test_01_read_only_round_trip_changes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 105, in test_01_read_only_round_trip_changes_nothing
+    expect(panel.locator('.panel-top strong')).to_have_text('예약');expect(panel.locator('#panel-idea')).to_contain_text('사용자 구상')
+                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 19244, in to_contain_text
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.to_contain_text(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+    ...<9 lines>...
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected to contain text '사용자 구상'
+Actual value: None
+Error: element(s) not found 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#area-panel").locator("#panel-idea")
+
+
+======================================================================
+FAIL: test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 139, in test_02_continue_keeps_R_then_switches_from_RB_to_A
+    before=self.depart(booking,A)
+  File "/root/work/repo/app/continuity/tests/pc12_browser.py", line 70, in depart
+    pick=self.page.locator(f'#panel-task-{task}');expect(pick).to_be_in_viewport()
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/sync_api/_generated.py", line 20558, in to_be_in_viewport
+    self._sync(self._impl_obj.to_be_in_viewport(ratio=ratio, timeout=timeout))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 807, in to_be_in_viewport
+    await self._expect_impl(
+    ...<5 lines>...
+    )
+  File "/usr/local/lib/python3.13/dist-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected to be in viewport
+Actual value: None
+Error: element(s) not found 
+Call log:
+  - Expect "to_be_in_viewport" with timeout 5000ms
+  - waiting for locator("#panel-task-T_c5082c64-6375-448a-8793-291e7cb2696d")
+
+
+----------------------------------------------------------------------
+Ran 9 tests in 65.179s
+
+FAILED (failures=5, errors=4)

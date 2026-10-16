@@ -1,0 +1,12 @@
+npm-check exit=0
+cont-check exit=0
+cont-build exit=0
+node-tests exit=0
+pc12_browser exit=0
+spatial102_browser exit=0
+flow090_browser exit=0
+use106_browser exit=0
+guide097_browser exit=0
+browser exit=0
+flow083_browser exit=0
+pc12_browser(rerun after shot move) exit=0
