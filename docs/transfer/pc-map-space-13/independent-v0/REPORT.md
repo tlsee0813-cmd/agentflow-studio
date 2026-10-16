@@ -1,0 +1,33 @@
+# PC map space13 — independent candidate observations
+Source9aeb4599aa0060e2d43143c4f1150884d7bcc7b3; tree4a3db4c5c958e859960b5e7e9b268601657dbdfa; PR4. Contractdbd034e05e9679f588a7170eed230299ea216dd8. Product12 base9613208..., independent baseline3e13c734ab5d5127141042ba3805a83970b1ae06. No product/source/PR/deployment changes.
+
+## First overview minimum map/card criterion — PASS; tool boundary retained
+Frozen observe.py SHA17c32085a64d013f46404937bfd8bbbb290f2533c5a93d93ce86e89de2019001 unchanged, same short3-area+question/report fixture. Source resolved in new sandbox alias to candidate, original baseline path unchanged. Frozen raw retains original baseline_commit literal9613208; SOURCE_BINDING.json explicitly binds actual candidate source/tree/runtime instead. No rewritten raw/code or false baseline-source attribution.
+
+|viewport|notice|baseline map fraction|candidate map fraction|
+|---|---|---:|---:|
+|1280x720|import notice|11.2824%|49.6224%|
+|1280x720|none|20.6705%|59.0104%|
+|1440x900|import notice|29.0260%|59.6979%|
+|1440x900|none|36.5365%|61.7778%|
+
+**Additional tool-access boundary:** the frozen observer only records mapzoom/fit geometry; its PASS does not assert those controls. Preserved raw shows1280x720+importnotice mapzoom/fit y739.71875,h36, entirely belowviewport720; allsampleHitfalse. Separate postprocessing tool_audit.py exits1 for that first-screen tool-access condition. At1440+notice y867.71875,h36 extends3.71875px below900; representativehittrue (partialbox, not fullbox visibility). No-notice scenes have positive toolhits. No scroll/fit is used to hide this residual boundary. first-screen-tool-audit.json contains exact raw-derived results, distinct from40%criterion. This is not silently described as all first-screen conditions passed.
+
+Four scenes complete/PASS; actualchild0/collector0. Each window scrollY0, normal import notice retained, no layout-matching helper scroll. First card title/enter/info positive representative samples. Ancestor+selfclip/textRange/rawtools unchanged measurement definition; not ink or human-quality proof. Real125% remainsNOT_RUN: actual shortcuts had unchanged viewport/DPR;CSS1024 not executed or called zoom.
+
+## Strict selected-card condition — UNMET, not absorbed by successful suites
+features/run02 completes8 planned groups, FAIL at1280-selected-strict and1440-selected-strict; actualchild1/collector1. After choosing right reservation card, its enter/info samples arefalse under mapclip. Existing map transform stays, selected detail name/idea/request exists; the extra actual text-access run records full textRange/self+ancestorclip and positivehit for those three selected-panel text samples. Related request normally clicks/reads/returns callerfocus.
+
+Close by click and Tab→Enter restores original transform/cardaccess withoutfit. Offscreen/closecontrols havepositivehit. Existing '화면 밖 영역 … 모두 보기' is explicitly clicked **only after** the no-fit close tests; it intentionally invokes existing fit and is not counted as preservation. No arbitrary fit/rearrangement/shrink helper. The selected-card limitation was already reported for baseline; this candidate measurement independently reproduces it. It remains FAIL under original selected-card requirement, despite authorpc13 allOK. Acceptance of that known boundary is coordinator's decision, not hidden rule relaxation.
+
+## Reading/edit returns — PASS separately
+returns/run01 is one complete independent execution: two PCwidths × READ/DIRECT_REPORT/OTHER_REPORT × defaultclosed/recordsopen. These12 scene variants are not the repository's12 tests and are not summed with them. Boundary group and390 minimal also complete. actualchild0/collector0, no fatal/pageerror/majorHTTP/console.
+Reuses final synthetic exportedA/B fixture and normal return-task B selection from product12, not old handoffs0 safeimport. Explicit B is required to exist and rawpre/post equalsB. Read A leaves current/manual/draft; directR staysR/onlyR manual4 edits; currentRB(parentB) switchesA/onlyA edits. Distinct fields, draftreport kind/text/area, unsaved area input, new check-list disclosure, callerfocus/hit, computedtransform/intrinsiccardpositions and native scroll rawpairs recorded immediately before helper movement. Height/currenttag differences remain separate from map intrinsic positions; changedcontent uses anchor±2. No hidden state/API mutation, forceclick or DOMscroll injection.
+
+## Other product13 functions and errors
+Four recordvariants have exact literal kind/count summaries and row IDs; actual target title/reportbody are independently recomputed against fixtures in recomputed-raw-checks.json (postprocessing, not newUI scenes). Zero fixture contains a plainrequest so actual0 summary exists, unlike an empty no-task project. Disclosure click/Enter and target-return focus/open state work.
+Area-add at bothwidths keeps name/note through close/reopen/viewchange, Enter submits, inputs clear. Real invalidbackup UI imports test errornotice at overview/work/task/newproject: notice text and viewport/hit plus nonhiddenprojectheader observed. Storagefault injectionNOT_RUN; no storage error cleared to gain space. Initial feature run retained a timeout after newarea autopan put an oldcard outside view; error-task navigation was corrected to existing record '보기', withoutfit or forceclick. That initial raw/code remains; not presented as all productfailures or as final completion.
+
+## Execution/provenance
+Required type/build/boundary commands all0; repository pc13 **12tests**,pc12 **15tests** allOK, independent from ourgroups. CI's other prior fullsuite not repeated. Exact subprocess command/start/end/return/logSHA:commands/processes.json. Domain/schema/server/deps targeted diff unchanged, relevant sourcebytes pinned; no repeated170-filehistoricalaudit. Runtime HTTP200/bodybytesSHA matches executed disk pre/post for frozen/main scripts; versions dynamicallyNode22.16.0/PythonPlaywright1.57.0/Chromium154.0.8037.57. Compiler existingTS5.8.3PATH, no installs.
+Source/HTTP and allactualexits listed in SUMMARY.json; fatal/pageerror/cleanup0, expected strictcriterion failure remainsnonzero. Tool-exit entries are transcriptions, not full tooltranscripts. Four original PNGs (two firstscreens/two selectedlimit), no processing. Code versions stored once perhash with pathindex; sourceworkingcopy/node_modules/cache/oldproduct12evidence omitted. Dify live comparison was coordinator's prior observation; this agent did not operate Dify or treat sourceinspection as live use. No new human-usability gate; no peopleunderstanding/large-map/realAI/Windows/publicacceptance claims.

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/product13-final/features/ui.py"
+  ],
+  "start": "2026-10-16T05:25:14.415948+00:00",
+  "end": "2026-10-16T05:25:22.963982+00:00",
+  "actual_child_returncode": 1,
+  "stdout_sha256": "3f1548f6046993d9c96e0ad1d33283d530d1398c0936ed80b2dbdf0495efa648",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

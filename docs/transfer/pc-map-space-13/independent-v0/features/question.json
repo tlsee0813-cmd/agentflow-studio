@@ -1,0 +1,155 @@
+{
+  "schemaVersion": "idea015.project.5",
+  "id": "P_6c628d26-5110-45bc-a918-f45f0a525714",
+  "revision": 8,
+  "name": "나의 프로젝트",
+  "sources": [
+    {
+      "id": "S_7ee666c4-e550-4e18-abcb-2b2e2e0d9130",
+      "kind": "request",
+      "text": "빈자리가 나면 대기자에게 자동으로 예약을 이어 주세요",
+      "at": "2026-10-16T04:47:11.119Z",
+      "taskId": "T_9e87f3d5-ac6a-40df-b3f3-e0386617ff00",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "빈자리가 나면 대기자에게 자동으로 예약을 이어 주세요",
+      "status": "requested",
+      "sourceId": "S_7ee666c4-e550-4e18-abcb-2b2e2e0d9130",
+      "revision": 7,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_9e87f3d5-ac6a-40df-b3f3-e0386617ff00",
+      "sourceIds": [
+        "S_7ee666c4-e550-4e18-abcb-2b2e2e0d9130"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "빈자리가 나면 대기자에게 자동으로 예약을 이어 주세요",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_7ee666c4-e550-4e18-abcb-2b2e2e0d9130",
+              "revision": 7
+            }
+          ]
+        },
+        "understanding": "빈자리가 생겼을 때 대기자를 이어주는 기능으로 이해했습니다.",
+        "scope": "예약 성립 방식만 정합니다. 대기 순서·응답 시간·미응답 처리는 임의로 추가하지 않습니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "choice",
+          "text": "자리가 생기면 예약을 바로 확정할까요, 참여 의사를 확인한 뒤 확정할까요?",
+          "why": "고객에게 확정 예약이 생기는 시점이 달라집니다.",
+          "options": [
+            {
+              "label": "바로 예약 확정",
+              "consequence": "추가 응답 없이 예약이 성립합니다. 참여 의사를 별도로 확인하지 않습니다."
+            },
+            {
+              "label": "참여 확인 뒤 확정",
+              "consequence": "참여 의사를 받은 뒤 예약이 성립합니다. 응답을 기다리는 과정이 필요합니다."
+            }
+          ]
+        },
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 7,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 6,
+        "brief": "작은 공방의 소개와 예약 안내를 정리한다.",
+        "area": {
+          "id": "A_de5772d1-793b-488b-8238-41fb501b1450",
+          "name": "예약",
+          "note": "대기자 안내의 선택을 확인한다."
+        }
+      },
+      "areaId": "A_de5772d1-793b-488b-8238-41fb501b1450"
+    }
+  ],
+  "currentTaskId": "T_9e87f3d5-ac6a-40df-b3f3-e0386617ff00",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "작은 공방의 소개와 예약 안내를 정리한다.",
+      "at": "2026-10-16T04:47:11.119Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_12895655-5152-4535-a247-5ee3ea70fed9",
+        "name": "소개",
+        "note": "소개글 한 편을 읽고 게시 여부는 담당자가 선택한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.119Z"
+      },
+      {
+        "id": "A_de5772d1-793b-488b-8238-41fb501b1450",
+        "name": "예약",
+        "note": "대기자 안내의 선택을 확인한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.119Z"
+      },
+      {
+        "id": "A_92ffdc52-3dfb-4774-9578-7e41f977042f",
+        "name": "알림",
+        "note": "운영시간 안내만 정리한다.",
+        "archived": false,
+        "createdAt": "2026-10-16T04:47:11.119Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_12895655-5152-4535-a247-5ee3ea70fed9": {
+          "x": 40,
+          "y": 40
+        },
+        "A_de5772d1-793b-488b-8238-41fb501b1450": {
+          "x": 340,
+          "y": 40
+        },
+        "A_92ffdc52-3dfb-4774-9578-7e41f977042f": {
+          "x": -260,
+          "y": 40
+        }
+      }
+    }
+  }
+}

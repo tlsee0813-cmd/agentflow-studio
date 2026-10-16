@@ -1,0 +1,103 @@
+{
+  "both": {
+    "ids": {
+      "areas": [
+        "A_40a332c8-50ca-4493-b565-5e2a3f73164e",
+        "A_c0e93753-af67-4c92-af11-2cff359726b2",
+        "A_145d8490-5c16-4aae-a70b-98d3a99eb930"
+      ],
+      "question": "T_ec397166-1107-4dd9-8b78-6108acdffd26",
+      "request": "T_a7f6f392-5867-4228-beaf-5001d90b36d4",
+      "report": "T_396adf32-a4cb-48a4-940e-9fb5ce18361e"
+    },
+    "expected": {
+      "decision": 1,
+      "report": 1
+    },
+    "actualItems": [
+      {
+        "kind": "report",
+        "taskId": "T_a7f6f392-5867-4228-beaf-5001d90b36d4",
+        "returnId": "T_396adf32-a4cb-48a4-940e-9fb5ce18361e",
+        "areaId": "A_40a332c8-50ca-4493-b565-5e2a3f73164e",
+        "status": "구현 보고 도착 · 앱 미검증"
+      },
+      {
+        "kind": "decision",
+        "taskId": "T_ec397166-1107-4dd9-8b78-6108acdffd26",
+        "returnId": null,
+        "areaId": "A_c0e93753-af67-4c92-af11-2cff359726b2",
+        "status": "제품 선택 항목 있음"
+      }
+    ],
+    "synthetic_handoffs": 0,
+    "fixture_setup": "public domain APIs + deterministic mockAdvice, not AI or real delivery"
+  },
+  "question": {
+    "ids": {
+      "areas": [
+        "A_12895655-5152-4535-a247-5ee3ea70fed9",
+        "A_de5772d1-793b-488b-8238-41fb501b1450",
+        "A_92ffdc52-3dfb-4774-9578-7e41f977042f"
+      ],
+      "question": "T_9e87f3d5-ac6a-40df-b3f3-e0386617ff00"
+    },
+    "expected": {
+      "decision": 1,
+      "report": 0
+    },
+    "actualItems": [
+      {
+        "kind": "decision",
+        "taskId": "T_9e87f3d5-ac6a-40df-b3f3-e0386617ff00",
+        "returnId": null,
+        "areaId": "A_de5772d1-793b-488b-8238-41fb501b1450",
+        "status": "제품 선택 항목 있음"
+      }
+    ],
+    "synthetic_handoffs": 0,
+    "fixture_setup": "public domain APIs + deterministic mockAdvice, not AI or real delivery"
+  },
+  "report": {
+    "ids": {
+      "areas": [
+        "A_29ae7343-a3e5-4d45-a3ec-bb9ea22d6d5c",
+        "A_92b26045-50ce-4910-ad4d-98793df804ae",
+        "A_8c8dad63-4967-4a7d-b3d8-04dba6e3aa22"
+      ],
+      "request": "T_9a01fdba-27a4-45d5-9fa6-fe95724dea8c",
+      "report": "T_a47c65b9-1aa5-4c1f-9c89-74a6437ceeee"
+    },
+    "expected": {
+      "decision": 0,
+      "report": 1
+    },
+    "actualItems": [
+      {
+        "kind": "report",
+        "taskId": "T_9a01fdba-27a4-45d5-9fa6-fe95724dea8c",
+        "returnId": "T_a47c65b9-1aa5-4c1f-9c89-74a6437ceeee",
+        "areaId": "A_29ae7343-a3e5-4d45-a3ec-bb9ea22d6d5c",
+        "status": "구현 보고 도착 · 앱 미검증"
+      }
+    ],
+    "synthetic_handoffs": 0,
+    "fixture_setup": "public domain APIs + deterministic mockAdvice, not AI or real delivery"
+  },
+  "zero": {
+    "ids": {
+      "areas": [
+        "A_7de1feb5-22df-4f95-a48d-9b8d06e8cd2b",
+        "A_a8fa59f9-2188-45b3-b0b8-003bfe6f0657",
+        "A_1ce06a29-6d5f-4220-ad53-ed7d5264ba44"
+      ]
+    },
+    "expected": {
+      "decision": 0,
+      "report": 0
+    },
+    "actualItems": [],
+    "synthetic_handoffs": 0,
+    "fixture_setup": "public domain APIs + deterministic mockAdvice, not AI or real delivery"
+  }
+}

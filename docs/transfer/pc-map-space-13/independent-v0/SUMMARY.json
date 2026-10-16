@@ -1,0 +1,156 @@
+{
+  "candidate": "9aeb4599aa0060e2d43143c4f1150884d7bcc7b3",
+  "first_screens": {
+    "complete": true,
+    "exit": 0,
+    "comparison": [
+      {
+        "id": "1280-import-notice",
+        "baseline_ratio": 0.11282430438776775,
+        "candidate_ratio": 0.4962239583333333,
+        "candidate_criteria": {
+          "map_height_40pct": true,
+          "first_card_title_has_visible_range": true,
+          "first_card_title_sample_hit": true,
+          "first_card_enter_hit": true,
+          "first_card_info_hit": true,
+          "no_first_screen_scroll": true,
+          "expected_notice": true
+        }
+      },
+      {
+        "id": "1280-no-notice",
+        "baseline_ratio": 0.20670451272110107,
+        "candidate_ratio": 0.5901041666666667,
+        "candidate_criteria": {
+          "map_height_40pct": true,
+          "first_card_title_has_visible_range": true,
+          "first_card_title_sample_hit": true,
+          "first_card_enter_hit": true,
+          "first_card_info_hit": true,
+          "no_first_screen_scroll": true,
+          "expected_notice": true
+        }
+      },
+      {
+        "id": "1440-import-notice",
+        "baseline_ratio": 0.2902604166666667,
+        "candidate_ratio": 0.5969791666666666,
+        "candidate_criteria": {
+          "map_height_40pct": true,
+          "first_card_title_has_visible_range": true,
+          "first_card_title_sample_hit": true,
+          "first_card_enter_hit": true,
+          "first_card_info_hit": true,
+          "no_first_screen_scroll": true,
+          "expected_notice": true
+        }
+      },
+      {
+        "id": "1440-no-notice",
+        "baseline_ratio": 0.3653645833333333,
+        "candidate_ratio": 0.6177777777777778,
+        "candidate_criteria": {
+          "map_height_40pct": true,
+          "first_card_title_has_visible_range": true,
+          "first_card_title_sample_hit": true,
+          "first_card_enter_hit": true,
+          "first_card_info_hit": true,
+          "no_first_screen_scroll": true,
+          "expected_notice": true
+        }
+      }
+    ]
+  },
+  "returns": {
+    "complete": true,
+    "exit": 0,
+    "scene_ids": [
+      "1280-READ-closed",
+      "1280-READ-records-open",
+      "1280-DIRECT_REPORT-closed",
+      "1280-DIRECT_REPORT-records-open",
+      "1280-OTHER_REPORT-closed",
+      "1280-OTHER_REPORT-records-open",
+      "1440-READ-closed",
+      "1440-READ-records-open",
+      "1440-DIRECT_REPORT-closed",
+      "1440-DIRECT_REPORT-records-open",
+      "1440-OTHER_REPORT-closed",
+      "1440-OTHER_REPORT-records-open",
+      "1280-boundary-group",
+      "390-minimal"
+    ]
+  },
+  "features": {
+    "complete": true,
+    "exit": 1,
+    "statuses": [
+      {
+        "id": "1280-selected-strict",
+        "status": "FAIL",
+        "error": null
+      },
+      {
+        "id": "1440-selected-strict",
+        "status": "FAIL",
+        "error": null
+      },
+      {
+        "id": "records-both",
+        "status": "PASS",
+        "error": null
+      },
+      {
+        "id": "records-question",
+        "status": "PASS",
+        "error": null
+      },
+      {
+        "id": "records-report",
+        "status": "PASS",
+        "error": null
+      },
+      {
+        "id": "records-zero",
+        "status": "PASS",
+        "error": null
+      },
+      {
+        "id": "1280-area-add-and-global-error",
+        "status": "PASS",
+        "error": null
+      },
+      {
+        "id": "1440-area-add-and-global-error",
+        "status": "PASS",
+        "error": null
+      }
+    ]
+  },
+  "execution_errors": {
+    "frozen_fatal": null,
+    "returns_fatal": null,
+    "features_fatal": null,
+    "pageerrors": []
+  },
+  "known_limit": "strict selected-card condition remains FAIL, no all-PASS acceptance",
+  "tool_actual_exit_observations": {
+    "first_screens43041": 0,
+    "commands66787": 0,
+    "returns31993": 0,
+    "features_first79917": 1,
+    "features_latest5602": 1,
+    "selected_text_access13266": 0
+  },
+  "actual125zoom": "NOT_RUN",
+  "CSS1024": "NOT_RUN",
+  "Dify_agent_live": "NOT_RUN",
+  "first_screen_tool_boundary": {
+    "result": "first-screen-tool-audit.json",
+    "actual_postprocess_exit": 1,
+    "1280_import_notice": "zoom/fit below viewport, sampleHitfalse",
+    "1440_import_notice": "lower3.71875px clipped, sampleHittrue",
+    "frozen_observer_does_not_assert_tools": true
+  }
+}

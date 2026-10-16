@@ -1,0 +1,1 @@
+{"complete": true, "scenes": [["1280-selected-strict", "FAIL"], ["1440-selected-strict", "FAIL"], ["records-both", "PASS"], ["records-question", "PASS"], ["records-report", "PASS"], ["records-zero", "PASS"], ["1280-area-add-and-global-error", "FAIL"], ["1440-area-add-and-global-error", "PASS"]], "fatal": null, "exit": 1}

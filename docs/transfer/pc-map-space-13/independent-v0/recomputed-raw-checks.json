@@ -1,0 +1,50 @@
+{
+  "source_raw": "features/run02/result.json",
+  "raw_sha256": "0bc1e445f2b090407d7157627969d08d4dcc62d919de54febef23a91e3d3c4c5",
+  "kind": "postprocessing exact expectations against preserved executed DOM observations, no browser rerun",
+  "records": [
+    {
+      "fixture": "both",
+      "expected_button_ids": [
+        "check-open-T_396adf32-a4cb-48a4-940e-9fb5ce18361e",
+        "check-open-T_ec397166-1107-4dd9-8b78-6108acdffd26"
+      ],
+      "actual_button_ids": [
+        "check-open-T_396adf32-a4cb-48a4-940e-9fb5ce18361e",
+        "check-open-T_ec397166-1107-4dd9-8b78-6108acdffd26"
+      ],
+      "expected_target_title_matches": true,
+      "status": "PASS"
+    },
+    {
+      "fixture": "question",
+      "expected_button_ids": [
+        "check-open-T_9e87f3d5-ac6a-40df-b3f3-e0386617ff00"
+      ],
+      "actual_button_ids": [
+        "check-open-T_9e87f3d5-ac6a-40df-b3f3-e0386617ff00"
+      ],
+      "expected_target_title_matches": true,
+      "status": "PASS"
+    },
+    {
+      "fixture": "report",
+      "expected_button_ids": [
+        "check-open-T_a47c65b9-1aa5-4c1f-9c89-74a6437ceeee"
+      ],
+      "actual_button_ids": [
+        "check-open-T_a47c65b9-1aa5-4c1f-9c89-74a6437ceeee"
+      ],
+      "expected_target_title_matches": true,
+      "status": "PASS"
+    },
+    {
+      "fixture": "zero",
+      "expected_button_ids": [],
+      "actual_button_ids": [],
+      "expected_target_title_matches": null,
+      "status": "PASS"
+    }
+  ],
+  "error_notice_all_viewport_hit": true
+}

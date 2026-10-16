@@ -1,0 +1,53 @@
+{
+  "source_commit": "9aeb4599aa0060e2d43143c4f1150884d7bcc7b3",
+  "source_tree": "4a3db4c5c958e859960b5e7e9b268601657dbdfa",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 178939,
+      "sha256": "dd3980da30e2562fd393579fc51ad6ad13e630c3f3cd013c3cce691a047a8727",
+      "candidate_disk_equal": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 54973,
+      "sha256": "e94ef89ff2266f83c87137b6577d12d9f62cbf53e47d9e551eb6cb78eee6b7fa",
+      "candidate_disk_equal": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17055,
+      "sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "candidate_disk_equal": true
+    },
+    {
+      "path": "app/package.json",
+      "bytes": 559,
+      "sha256": "4016406d4f008c3bd9275df082ec17cdda667149c032ab378ad2e19da9c8a0d3",
+      "candidate_disk_equal": true
+    },
+    {
+      "path": "app/package-lock.json",
+      "bytes": 775,
+      "sha256": "581964856607e459ce86b525c63bd9f0991d2625d1ec7f280d48926500ce2483",
+      "candidate_disk_equal": true
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 51585,
+      "sha256": "703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f",
+      "candidate_disk_equal": true
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 11982,
+      "sha256": "9c4ebea8c66b9fda5547d2908125d9f899b019a9ac86c2617a009ecb568186e1",
+      "candidate_disk_equal": true
+    }
+  ],
+  "domain_schema_server_dependencies_diff_exit": 0,
+  "frozen_observer": "/workspace/browser-env/product13-run/first-screens/observe.py",
+  "frozen_sha256": "17c32085a64d013f46404937bfd8bbbb290f2533c5a93d93ce86e89de2019001",
+  "frozen_resolution": "script R.parent/product12-candidate-fix2 is a new symlink to /workspace/browser-env/product13-candidate; original product12 path untouched",
+  "raw_baseline_commit_label": "Frozen script retains original baseline_commit9613208... literal. This binding supersedes that legacy label for candidate execution without modifying raw/script. Actual executed HTTP bodies bind to candidate disk before/after."
+}

@@ -1,0 +1,174 @@
+{
+  "type": "postexecution comparison of actualresponsehash with unchanged candidate runtime disk",
+  "all_match": true,
+  "rows": [
+    {
+      "url": "http://127.0.0.1:41135/",
+      "http_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/styles.css",
+      "http_sha256": "e94ef89ff2266f83c87137b6577d12d9f62cbf53e47d9e551eb6cb78eee6b7fa",
+      "disk_sha256": "e94ef89ff2266f83c87137b6577d12d9f62cbf53e47d9e551eb6cb78eee6b7fa",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/client/app.js",
+      "http_sha256": "c1f6b88b2b14a4cb661496b849180cb796dd60cb19de357ed7aaaccf559ec64c",
+      "disk_sha256": "c1f6b88b2b14a4cb661496b849180cb796dd60cb19de357ed7aaaccf559ec64c",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/types.js",
+      "http_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/validation.js",
+      "http_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/guidance.js",
+      "http_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/storage.js",
+      "http_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/client/runtime.js",
+      "http_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/domain.js",
+      "http_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/outcome.js",
+      "http_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/attention.js",
+      "http_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/mock.js",
+      "http_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/client/presentation.js",
+      "http_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/plan-facts.js",
+      "http_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/",
+      "http_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "disk_sha256": "ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/styles.css",
+      "http_sha256": "e94ef89ff2266f83c87137b6577d12d9f62cbf53e47d9e551eb6cb78eee6b7fa",
+      "disk_sha256": "e94ef89ff2266f83c87137b6577d12d9f62cbf53e47d9e551eb6cb78eee6b7fa",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/client/app.js",
+      "http_sha256": "c1f6b88b2b14a4cb661496b849180cb796dd60cb19de357ed7aaaccf559ec64c",
+      "disk_sha256": "c1f6b88b2b14a4cb661496b849180cb796dd60cb19de357ed7aaaccf559ec64c",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/types.js",
+      "http_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "disk_sha256": "ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/guidance.js",
+      "http_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "disk_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/domain.js",
+      "http_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "disk_sha256": "42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/storage.js",
+      "http_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "disk_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/mock.js",
+      "http_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "disk_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/client/presentation.js",
+      "http_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "disk_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/validation.js",
+      "http_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "disk_sha256": "b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/client/runtime.js",
+      "http_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "disk_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/outcome.js",
+      "http_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "disk_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/attention.js",
+      "http_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "disk_sha256": "5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:41135/shared/plan-facts.js",
+      "http_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "disk_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "match": true
+    }
+  ]
+}
