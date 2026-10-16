@@ -1,0 +1,13 @@
+{
+  "source": "53d1cb2f1906e6d575f08f4533ac1644a2904894",
+  "command": "node continuity/scripts/build-static.mjs",
+  "actual_child_returncode": 0,
+  "overlay": [
+    "index.html",
+    "client/app.js",
+    "styles.css"
+  ],
+  "base": "existing product13 static MOCK runtime with unchanged static adapter/shared files",
+  "not_native_runtime": "Use static runtime adapter; these files are not a standalone native server build or complete runtime.",
+  "not_deployed": true
+}

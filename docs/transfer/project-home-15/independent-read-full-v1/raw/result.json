@@ -1,0 +1,1542 @@
+{
+  "start": "2026-10-16T08:13:42.607802+00:00",
+  "scenes": [
+    {
+      "id": "1280-A-name",
+      "pass": true,
+      "raw": {
+        "start": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        },
+        "text": {
+          "text": "· 강남 지점",
+          "rects": [
+            {
+              "x": 907.171875,
+              "y": 203.09375,
+              "w": 22.84375,
+              "h": 20
+            },
+            {
+              "x": 341,
+              "y": 226.890625,
+              "w": 41.171875,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 321,
+            "t": 164.296875,
+            "r": 959,
+            "b": 574
+          },
+          "full": true,
+          "hits": [
+            true,
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "P",
+              "id": "project-read-name",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "project-read-body",
+              "overflowX": "auto",
+              "overflowY": "auto"
+            },
+            {
+              "tag": "DIALOG",
+              "id": "project-read",
+              "overflowX": "hidden",
+              "overflowY": "hidden"
+            },
+            {
+              "tag": "SECTION",
+              "id": "projects-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1280-A-tail",
+      "pass": true,
+      "raw": {
+        "geom": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 166,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        },
+        "text": {
+          "text": "강남 지점은 현장 결제만 받는다.",
+          "rects": [
+            {
+              "x": 389.28125,
+              "y": 529.03125,
+              "w": 180.734375,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 321,
+            "t": 164.296875,
+            "r": 959,
+            "b": 574
+          },
+          "full": true,
+          "hits": [
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "P",
+              "id": "project-read-purpose",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "project-read-body",
+              "overflowX": "auto",
+              "overflowY": "auto"
+            },
+            {
+              "tag": "DIALOG",
+              "id": "project-read",
+              "overflowX": "hidden",
+              "overflowY": "hidden"
+            },
+            {
+              "tag": "SECTION",
+              "id": "projects-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1280-wheel-end-background",
+      "pass": true,
+      "raw": {
+        "beforeY": 0,
+        "after": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 166,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1280-close-click",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 272,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1280
+      }
+    },
+    {
+      "id": "1280-next-card-reset",
+      "pass": true,
+      "raw": {
+        "geom": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        },
+        "text": "이름·목적 전체 보기\n닫기\n\n이름\n\n지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 시범 사업 · 마포 지점\n\n목적\n\n동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. \n\n끝 문장: 마포 지점은 선결제만 받는다.\n\n읽기만 해요. 프로젝트를 열거나 바꾸지 않아요."
+      }
+    },
+    {
+      "id": "1280-B-name",
+      "pass": true,
+      "raw": {
+        "text": "· 마포 지점",
+        "rects": [
+          {
+            "x": 907.171875,
+            "y": 203.09375,
+            "w": 22.84375,
+            "h": 20
+          },
+          {
+            "x": 341,
+            "y": 226.890625,
+            "w": 41.171875,
+            "h": 20
+          }
+        ],
+        "clip": {
+          "l": 321,
+          "t": 164.296875,
+          "r": 959,
+          "b": 574
+        },
+        "full": true,
+        "hits": [
+          true,
+          true
+        ],
+        "ancestors": [
+          {
+            "tag": "P",
+            "id": "project-read-name",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "DIV",
+            "id": "project-read-body",
+            "overflowX": "auto",
+            "overflowY": "auto"
+          },
+          {
+            "tag": "DIALOG",
+            "id": "project-read",
+            "overflowX": "hidden",
+            "overflowY": "hidden"
+          },
+          {
+            "tag": "SECTION",
+            "id": "projects-view",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "MAIN",
+            "id": "main",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1280-close-Escape",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 272,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1280
+      }
+    },
+    {
+      "id": "1280-close-focus-PageDown",
+      "pass": false,
+      "raw": {
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 272,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "key": "PageDown"
+      }
+    },
+    {
+      "id": "1280-close-Escape",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 272,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1280
+      }
+    },
+    {
+      "id": "1280-close-focus-End",
+      "pass": false,
+      "raw": {
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 272,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "key": "End"
+      }
+    },
+    {
+      "id": "1280-close-Escape",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 272,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1280
+      }
+    },
+    {
+      "id": "1280-close-focus-Space",
+      "pass": true,
+      "raw": {
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 0,
+          "scrollWidth": 0,
+          "open": false,
+          "active": "",
+          "route": null,
+          "docWidth": 1280
+        },
+        "key": "Space"
+      }
+    },
+    {
+      "id": "1280-Space-focus-return",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 272,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1280
+      }
+    },
+    {
+      "id": "1280-selected-text-PageDown",
+      "pass": true,
+      "raw": {
+        "key": "PageDown",
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 166,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1280-selected-text-End",
+      "pass": true,
+      "raw": {
+        "key": "End",
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 166,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 166,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1280-selected-text-Home",
+      "pass": true,
+      "raw": {
+        "key": "Home",
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 166,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1280-selected-text-ArrowDown",
+      "pass": true,
+      "raw": {
+        "key": "ArrowDown",
+        "before": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        },
+        "after": {
+          "y": 0,
+          "docMax": 272,
+          "bodyTop": 40,
+          "bodyMax": 166,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1280-close-Escape",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 272,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1280
+      }
+    },
+    {
+      "id": "1280-selection-made",
+      "pass": true,
+      "raw": {
+        "selection": "지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 시범 사업 · 강남 지점\n\n"
+      }
+    },
+    {
+      "id": "1280-safe-text",
+      "pass": true,
+      "raw": {
+        "name": "<b>굵게</b> & \"따옴표\" <script>x</script> 표시 시험",
+        "geom": {
+          "y": 150,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1280-close-click",
+      "pass": true,
+      "raw": {
+        "y": 150,
+        "docMax": 272,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1280
+      }
+    },
+    {
+      "id": "1280-reads-no-write",
+      "pass": true,
+      "raw": {
+        "beforeSHA": "a84ea939968697c310e369cf8474169d80ab3e92d448e5f2561a43c331b476c7",
+        "afterSHA": "a84ea939968697c310e369cf8474169d80ab3e92d448e5f2561a43c331b476c7"
+      }
+    },
+    {
+      "id": "1280-external-change-no-write",
+      "pass": true,
+      "raw": {
+        "afterExternalSHA": "12adcff676b140c514c634ee4e98d9bbdb4759740c66b87bddd8a8d10f2c1c2b",
+        "afterCloseSHA": "12adcff676b140c514c634ee4e98d9bbdb4759740c66b87bddd8a8d10f2c1c2b",
+        "geom": {
+          "y": 150,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 0,
+          "scrollWidth": 0,
+          "open": false,
+          "active": "",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1280-external-trash-no-write",
+      "pass": true,
+      "raw": {
+        "afterExternalSHA": "87303841cdc99d68e6515654e64f58ab5fe87f17645391e8927c78f4222f7d17",
+        "afterCloseSHA": "87303841cdc99d68e6515654e64f58ab5fe87f17645391e8927c78f4222f7d17",
+        "geom": {
+          "y": 150,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 0,
+          "scrollWidth": 0,
+          "open": false,
+          "active": "",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1280-external-remove-no-write",
+      "pass": true,
+      "raw": {
+        "afterExternalSHA": "1c3695042cb9935f8ba240e2d9e9d3295e90a08e3c754172c6411f9e18a37242",
+        "afterCloseSHA": "1c3695042cb9935f8ba240e2d9e9d3295e90a08e3c754172c6411f9e18a37242",
+        "geom": {
+          "y": 150,
+          "docMax": 272,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 0,
+          "scrollWidth": 0,
+          "open": false,
+          "active": "",
+          "route": null,
+          "docWidth": 1280
+        }
+      }
+    },
+    {
+      "id": "1440-A-name",
+      "pass": true,
+      "raw": {
+        "start": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        },
+        "text": {
+          "text": "· 강남 지점",
+          "rects": [
+            {
+              "x": 987.171875,
+              "y": 252.296875,
+              "w": 22.84375,
+              "h": 20
+            },
+            {
+              "x": 421,
+              "y": 276.09375,
+              "w": 41.171875,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 401,
+            "t": 213.5,
+            "r": 1039,
+            "b": 704.8125
+          },
+          "full": true,
+          "hits": [
+            true,
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "P",
+              "id": "project-read-name",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "project-read-body",
+              "overflowX": "auto",
+              "overflowY": "auto"
+            },
+            {
+              "tag": "DIALOG",
+              "id": "project-read",
+              "overflowX": "hidden",
+              "overflowY": "hidden"
+            },
+            {
+              "tag": "SECTION",
+              "id": "projects-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1440-A-tail",
+      "pass": true,
+      "raw": {
+        "geom": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 85,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        },
+        "text": {
+          "text": "강남 지점은 현장 결제만 받는다.",
+          "rects": [
+            {
+              "x": 469.28125,
+              "y": 659.234375,
+              "w": 180.734375,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 401,
+            "t": 213.5,
+            "r": 1039,
+            "b": 704.8125
+          },
+          "full": true,
+          "hits": [
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "P",
+              "id": "project-read-purpose",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "project-read-body",
+              "overflowX": "auto",
+              "overflowY": "auto"
+            },
+            {
+              "tag": "DIALOG",
+              "id": "project-read",
+              "overflowX": "hidden",
+              "overflowY": "hidden"
+            },
+            {
+              "tag": "SECTION",
+              "id": "projects-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1440-wheel-end-background",
+      "pass": true,
+      "raw": {
+        "beforeY": 0,
+        "after": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 84,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    },
+    {
+      "id": "1440-close-click",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 92,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1440
+      }
+    },
+    {
+      "id": "1440-next-card-reset",
+      "pass": true,
+      "raw": {
+        "geom": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        },
+        "text": "이름·목적 전체 보기\n닫기\n\n이름\n\n지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 시범 사업 · 마포 지점\n\n목적\n\n동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. 동네 가게 여러 곳이 함께 쓰는 배달 주문 접수, 기사 배정, 주간 정산, 손님 리뷰 답변을 한 곳에서 처리하려고 한다. \n\n끝 문장: 마포 지점은 선결제만 받는다.\n\n읽기만 해요. 프로젝트를 열거나 바꾸지 않아요."
+      }
+    },
+    {
+      "id": "1440-B-name",
+      "pass": true,
+      "raw": {
+        "text": "· 마포 지점",
+        "rects": [
+          {
+            "x": 987.171875,
+            "y": 252.296875,
+            "w": 22.84375,
+            "h": 20
+          },
+          {
+            "x": 421,
+            "y": 276.09375,
+            "w": 41.171875,
+            "h": 20
+          }
+        ],
+        "clip": {
+          "l": 401,
+          "t": 213.5,
+          "r": 1039,
+          "b": 704.8125
+        },
+        "full": true,
+        "hits": [
+          true,
+          true
+        ],
+        "ancestors": [
+          {
+            "tag": "P",
+            "id": "project-read-name",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "DIV",
+            "id": "project-read-body",
+            "overflowX": "auto",
+            "overflowY": "auto"
+          },
+          {
+            "tag": "DIALOG",
+            "id": "project-read",
+            "overflowX": "hidden",
+            "overflowY": "hidden"
+          },
+          {
+            "tag": "SECTION",
+            "id": "projects-view",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "MAIN",
+            "id": "main",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "DIV",
+            "id": "",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "BODY",
+            "id": "",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          },
+          {
+            "tag": "HTML",
+            "id": "",
+            "overflowX": "visible",
+            "overflowY": "visible"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1440-close-Escape",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 92,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1440
+      }
+    },
+    {
+      "id": "1440-close-focus-PageDown",
+      "pass": false,
+      "raw": {
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 92,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "key": "PageDown"
+      }
+    },
+    {
+      "id": "1440-close-Escape",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 92,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1440
+      }
+    },
+    {
+      "id": "1440-close-focus-End",
+      "pass": false,
+      "raw": {
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 92,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "key": "End"
+      }
+    },
+    {
+      "id": "1440-close-Escape",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 92,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1440
+      }
+    },
+    {
+      "id": "1440-close-focus-Space",
+      "pass": true,
+      "raw": {
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-close",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 0,
+          "scrollWidth": 0,
+          "open": false,
+          "active": "",
+          "route": null,
+          "docWidth": 1440
+        },
+        "key": "Space"
+      }
+    },
+    {
+      "id": "1440-Space-focus-return",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 92,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1440
+      }
+    },
+    {
+      "id": "1440-selected-text-PageDown",
+      "pass": true,
+      "raw": {
+        "key": "PageDown",
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 85,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    },
+    {
+      "id": "1440-selected-text-End",
+      "pass": true,
+      "raw": {
+        "key": "End",
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 85,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 85,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    },
+    {
+      "id": "1440-selected-text-Home",
+      "pass": true,
+      "raw": {
+        "key": "Home",
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 85,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    },
+    {
+      "id": "1440-selected-text-ArrowDown",
+      "pass": true,
+      "raw": {
+        "key": "ArrowDown",
+        "before": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        },
+        "after": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 40,
+          "bodyMax": 85,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    },
+    {
+      "id": "1440-close-Escape",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 92,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1440
+      }
+    },
+    {
+      "id": "1440-selection-made",
+      "pass": true,
+      "raw": {
+        "selection": "지역 소상공인 공동 배달 주문·정산·리뷰 관리를 한 화면에서 처리하는 통합 운영 대시보드 시범 사업 · 강남 지점\n\n"
+      }
+    },
+    {
+      "id": "1440-safe-text",
+      "pass": true,
+      "raw": {
+        "name": "<b>굵게</b> & \"따옴표\" <script>x</script> 표시 시험",
+        "geom": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 638,
+          "scrollWidth": 638,
+          "open": true,
+          "active": "project-read-body",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    },
+    {
+      "id": "1440-close-click",
+      "pass": true,
+      "raw": {
+        "y": 0,
+        "docMax": 92,
+        "bodyTop": 0,
+        "bodyMax": 0,
+        "bodyWidth": 0,
+        "scrollWidth": 0,
+        "open": false,
+        "active": "",
+        "route": null,
+        "docWidth": 1440
+      }
+    },
+    {
+      "id": "1440-reads-no-write",
+      "pass": true,
+      "raw": {
+        "beforeSHA": "a84ea939968697c310e369cf8474169d80ab3e92d448e5f2561a43c331b476c7",
+        "afterSHA": "a84ea939968697c310e369cf8474169d80ab3e92d448e5f2561a43c331b476c7"
+      }
+    },
+    {
+      "id": "1440-external-change-no-write",
+      "pass": true,
+      "raw": {
+        "afterExternalSHA": "12adcff676b140c514c634ee4e98d9bbdb4759740c66b87bddd8a8d10f2c1c2b",
+        "afterCloseSHA": "12adcff676b140c514c634ee4e98d9bbdb4759740c66b87bddd8a8d10f2c1c2b",
+        "geom": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 0,
+          "scrollWidth": 0,
+          "open": false,
+          "active": "",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    },
+    {
+      "id": "1440-external-trash-no-write",
+      "pass": true,
+      "raw": {
+        "afterExternalSHA": "4a860417ddae83680daa4e9cf39290d4bdfdd753336046fe4b4d4a2757dcf1ba",
+        "afterCloseSHA": "4a860417ddae83680daa4e9cf39290d4bdfdd753336046fe4b4d4a2757dcf1ba",
+        "geom": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 0,
+          "scrollWidth": 0,
+          "open": false,
+          "active": "",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    },
+    {
+      "id": "1440-external-remove-no-write",
+      "pass": true,
+      "raw": {
+        "afterExternalSHA": "1c3695042cb9935f8ba240e2d9e9d3295e90a08e3c754172c6411f9e18a37242",
+        "afterCloseSHA": "1c3695042cb9935f8ba240e2d9e9d3295e90a08e3c754172c6411f9e18a37242",
+        "geom": {
+          "y": 0,
+          "docMax": 92,
+          "bodyTop": 0,
+          "bodyMax": 0,
+          "bodyWidth": 0,
+          "scrollWidth": 0,
+          "open": false,
+          "active": "",
+          "route": null,
+          "docWidth": 1440
+        }
+      }
+    }
+  ],
+  "failures": [
+    "1280-close-focus-PageDown",
+    "1280-close-focus-End",
+    "1440-close-focus-PageDown",
+    "1440-close-focus-End"
+  ],
+  "pageerrors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "http": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "status": 200,
+      "url": "http://127.0.0.1:46775/",
+      "bytes": 17792,
+      "sha256": "2c3d4c08cec865194f8ce8e254ed8fa4832e0a601fd411090630244cf2c3f14f"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "status": 200,
+      "url": "http://127.0.0.1:46775/",
+      "bytes": 17792,
+      "sha256": "2c3d4c08cec865194f8ce8e254ed8fa4832e0a601fd411090630244cf2c3f14f"
+    }
+  ],
+  "fixture": "author home15-read.json in isolated context; external mutation test writes only isolated storage in second tab",
+  "actualURL": "http://127.0.0.1:46775",
+  "environment": {
+    "node": "v22.16.0",
+    "playwright": "1.57.0",
+    "browser": "154.0.8037.57"
+  },
+  "server_exit": -15,
+  "end": "2026-10-16T08:13:55.583452+00:00",
+  "exit": 1
+}
