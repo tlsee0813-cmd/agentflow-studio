@@ -1,0 +1,26 @@
+# Cycle17 e173 fix2 — narrow final independent execution
+
+Exact source e17370e83edccaf954b419054ee4748233752922. Previous d56 failures unchanged at f6dde37baf44469b6b2a6a2ec2c1bd2d9bcbe4ea. No product edits/install/paid AI/user data/main/checkpoint/deployment. Existing Node22.16/TS5.8.3/PW1.57/system Chromium154, real localhost official MOCK. This is a narrowed final execution, not all historic UI tests on this source.
+
+## Latest result
+Latest same old locate-new-request path at both PC widths passes after selecting the new actual #work-locate-return. The original meaning remains: NEW Task count+1, new currentId, first source=request with exact submitted body, real clipboard contains current explanation, explicit restoration of original map state. The selector addition is recorded in code; no product source change.
+
+Then whole.py executes eight independent complete routes: PowerToys/p13 restatement samples x1280x720/1440x900 x direct panel-new-request / panel-open→area-new-request. Every route actually submits a new request, copies it, and returns with new currentTask and handoff digest retained. Eight routes/four checks each, latest child/collector0, no fatal/pageerrors. Counts are not combined with old d56 runs. CLIPBOARD_RECORD independently verifies actual copied UTF16 length/FNV against all8 completed export records; concurrent clipboard-edit injection NOT_RUN.
+
+Restoration uses the SAME received-area caller, not whichever card happens to line up. ANCHOR_POLICY.json includes before/after caller rect/pageY, map pageY, native window scroll, maxScroll, matrix, world positions/selection, disclosures and focus/hit. New-task top content changes page height: caller pageY increases67.59375, requested clamped scroll=67.59375, actual=68; caller viewport delta=-0.40625 in all8. Policy requires actual scroll≈clamp(afterCallerPageY - beforeCallerViewportY), actual caller viewport±2px, restored caller focus/hit, exact matrix/world positions/selection/disclosures. There is NO “old scroll OR cardY” shortcut. Raw full card rects remain available even when content geometry changes. New draft/current/handoff are not rolled back.
+
+Narrow1280 boundaries: A locate with existing B draft opens B type/target/body unchanged, no incorrect A return control; other-area request is new start without A return; real new project clears locate. All3 pass, child/collector0. The empty-input core routes and protected existing-draft route are separate fixtures/actions.
+
+Frozen original4 unchanged SHA ab65a98de50e1e0277322cddcf4db7975e6e737a92483dbf06fbb4a7c58e6c02 all0. Extra new-request/correction-recovery domain probes and state8(return1, duplicate, changed-plan stale/report preservation, v1-v5 migration/restore) all0. npm check/build, continuity check/build/static build each actual0. No author counts used.
+
+## Preserved failed runs / checker adjustments
+First same-checker execution on e173 retained old absolute scroll/card-rect equality, produced exit1 despite original matrix/selection restored. Raw/code/process/stdout are preserved in locate-new-request-first-absolute/ and whole-first-absolute/. After new top content, source policy is anchor restoration, so updated instrumentation and assertion use the actual received-area button and clamped page offset as specified above; failure was not deleted or silently called pass.
+
+Normal short summary/changes are used in final representative screenshots; no repeated-condition or tail scaffold in base explanation. A subsequent whole-route fixture retry accidentally imported an exact duplicate (same report/summary), so no received CTA appeared: setup fatal exit1 retained under whole-duplicate-setup/. Fixture repair adds clearly synthetic evidence to make a genuine new receipt, without changing the sample’s normal short summary. Latest eight-route run is complete and distinct; partial runs not combined into it.
+
+## Reuse and limits
+Shared domain and CSS are byte-unchanged from d56 (REUSE_SCOPE). d56 long role/disclosure/wheel tests are historical supporting evidence, NOT rerun or counted as e173 passes. Current e173 actual products are shown in3 PNGs: normal short PowerToys map/detail, p13 submitted-request work-return button, and new current work still present after original-map restoration (then deliberate navigation back to work for that screenshot). No test-list image. Header/purpose/tool height and following-action folding remain observed reading burden, not redesigned here.
+
+No automatic meaning/target extraction, human research, external execution acceptance, live cross-tab sync, Windows or unrestricted zoom claim. Cross-tab stale save was not rerun on e173; prior independent d56 support remains separate. Source binding compares all pinned source bytes after execution, http-runtime.json verifies real compiled HTTP responses against disk before/after (separate HTTP audit, not initial goto-status instrumentation). Logs/actual child and collector exits are separate, including first failed runs. Preview is two-file static MOCK overlay over d56 static shared runtime, no public deployment. Manifest exact recursive payload excludes itself; preview manifest likewise.
+
+Conclusion: this narrow explicit-new-request return fix passes latest requested routes and influence checks; root integrates with CI and prior bounded evidence.

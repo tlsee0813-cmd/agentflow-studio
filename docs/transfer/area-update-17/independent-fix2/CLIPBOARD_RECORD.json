@@ -1,0 +1,181 @@
+{
+  "rows": [
+    {
+      "id": "powertoys-panel-1280-new-request-clipboard-carries-current-description",
+      "actualUTF16Chars": 7323,
+      "recordChars": 7323,
+      "actualFNV": "78019c54",
+      "recordDigest": "78019c54",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_e56fe2cb-3ea2-43ba-87c1-9145dc49b4d8",
+        "understanding": 2,
+        "stamp": {
+          "name": "\ud0a4 \uac80\uc0c9\uacfc \ub179\ud654",
+          "note": "Enter\ub85c \uc81c\ucd9c\ud55c \uac80\uc0c9\uc5b4\ub97c \uc120\ud0dd\ud558\uace0, \ub179\ud654 \uc885\ub8cc\ub294 Tab \ub204\ub984\ub9cc \uc0ac\uc6a9\ud55c\ub2e4. \uc815\uc0c1 key-up\uc740 \uc720\uc9c0\ud55c\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_84d64bf5-e909-4f40-b8f0-b0ce9f35b38c:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "powertoys-panel-1440-new-request-clipboard-carries-current-description",
+      "actualUTF16Chars": 7323,
+      "recordChars": 7323,
+      "actualFNV": "c0d1fcef",
+      "recordDigest": "c0d1fcef",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_e56fe2cb-3ea2-43ba-87c1-9145dc49b4d8",
+        "understanding": 2,
+        "stamp": {
+          "name": "\ud0a4 \uac80\uc0c9\uacfc \ub179\ud654",
+          "note": "Enter\ub85c \uc81c\ucd9c\ud55c \uac80\uc0c9\uc5b4\ub97c \uc120\ud0dd\ud558\uace0, \ub179\ud654 \uc885\ub8cc\ub294 Tab \ub204\ub984\ub9cc \uc0ac\uc6a9\ud55c\ub2e4. \uc815\uc0c1 key-up\uc740 \uc720\uc9c0\ud55c\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_84d64bf5-e909-4f40-b8f0-b0ce9f35b38c:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "powertoys-area-1280-new-request-clipboard-carries-current-description",
+      "actualUTF16Chars": 7323,
+      "recordChars": 7323,
+      "actualFNV": "843f4d91",
+      "recordDigest": "843f4d91",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_e56fe2cb-3ea2-43ba-87c1-9145dc49b4d8",
+        "understanding": 2,
+        "stamp": {
+          "name": "\ud0a4 \uac80\uc0c9\uacfc \ub179\ud654",
+          "note": "Enter\ub85c \uc81c\ucd9c\ud55c \uac80\uc0c9\uc5b4\ub97c \uc120\ud0dd\ud558\uace0, \ub179\ud654 \uc885\ub8cc\ub294 Tab \ub204\ub984\ub9cc \uc0ac\uc6a9\ud55c\ub2e4. \uc815\uc0c1 key-up\uc740 \uc720\uc9c0\ud55c\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_84d64bf5-e909-4f40-b8f0-b0ce9f35b38c:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "powertoys-area-1440-new-request-clipboard-carries-current-description",
+      "actualUTF16Chars": 7323,
+      "recordChars": 7323,
+      "actualFNV": "83cd61a8",
+      "recordDigest": "83cd61a8",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_e56fe2cb-3ea2-43ba-87c1-9145dc49b4d8",
+        "understanding": 2,
+        "stamp": {
+          "name": "\ud0a4 \uac80\uc0c9\uacfc \ub179\ud654",
+          "note": "Enter\ub85c \uc81c\ucd9c\ud55c \uac80\uc0c9\uc5b4\ub97c \uc120\ud0dd\ud558\uace0, \ub179\ud654 \uc885\ub8cc\ub294 Tab \ub204\ub984\ub9cc \uc0ac\uc6a9\ud55c\ub2e4. \uc815\uc0c1 key-up\uc740 \uc720\uc9c0\ud55c\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_84d64bf5-e909-4f40-b8f0-b0ce9f35b38c:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "p13-panel-1280-new-request-clipboard-carries-current-description",
+      "actualUTF16Chars": 7219,
+      "recordChars": 7219,
+      "actualFNV": "a84e0d9e",
+      "recordDigest": "a84e0d9e",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_86268cb8-703e-4e6f-9975-58706c7ea99d",
+        "understanding": 2,
+        "stamp": {
+          "name": "PC \uc9c0\ub3c4 \uc870\uc791\ubd80",
+          "note": "\ubaa9\uc801\uacfc \uad6c\uc0c1\u00b7\uc548\ub0b4\u00b7\uc624\ub958\ub97c \ubcf4\uc874\ud55c\ub2e4. \uc0c1\uc138 \uac1c\ud3d0\ub85c \uc790\ub3d9 \ub9de\ucda4\uc774\ub098 \uc7ac\ubc30\uce58\ub97c \ud558\uc9c0 \uc54a\ub294\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_483f5a05-ea9d-4af4-992e-13f6d17f4376:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "p13-panel-1440-new-request-clipboard-carries-current-description",
+      "actualUTF16Chars": 7219,
+      "recordChars": 7219,
+      "actualFNV": "d5a5b019",
+      "recordDigest": "d5a5b019",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_86268cb8-703e-4e6f-9975-58706c7ea99d",
+        "understanding": 2,
+        "stamp": {
+          "name": "PC \uc9c0\ub3c4 \uc870\uc791\ubd80",
+          "note": "\ubaa9\uc801\uacfc \uad6c\uc0c1\u00b7\uc548\ub0b4\u00b7\uc624\ub958\ub97c \ubcf4\uc874\ud55c\ub2e4. \uc0c1\uc138 \uac1c\ud3d0\ub85c \uc790\ub3d9 \ub9de\ucda4\uc774\ub098 \uc7ac\ubc30\uce58\ub97c \ud558\uc9c0 \uc54a\ub294\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_483f5a05-ea9d-4af4-992e-13f6d17f4376:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "p13-area-1280-new-request-clipboard-carries-current-description",
+      "actualUTF16Chars": 7219,
+      "recordChars": 7219,
+      "actualFNV": "eaf24033",
+      "recordDigest": "eaf24033",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_86268cb8-703e-4e6f-9975-58706c7ea99d",
+        "understanding": 2,
+        "stamp": {
+          "name": "PC \uc9c0\ub3c4 \uc870\uc791\ubd80",
+          "note": "\ubaa9\uc801\uacfc \uad6c\uc0c1\u00b7\uc548\ub0b4\u00b7\uc624\ub958\ub97c \ubcf4\uc874\ud55c\ub2e4. \uc0c1\uc138 \uac1c\ud3d0\ub85c \uc790\ub3d9 \ub9de\ucda4\uc774\ub098 \uc7ac\ubc30\uce58\ub97c \ud558\uc9c0 \uc54a\ub294\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_483f5a05-ea9d-4af4-992e-13f6d17f4376:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "id": "p13-area-1440-new-request-clipboard-carries-current-description",
+      "actualUTF16Chars": 7219,
+      "recordChars": 7219,
+      "actualFNV": "c07ded89",
+      "recordDigest": "c07ded89",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_86268cb8-703e-4e6f-9975-58706c7ea99d",
+        "understanding": 2,
+        "stamp": {
+          "name": "PC \uc9c0\ub3c4 \uc870\uc791\ubd80",
+          "note": "\ubaa9\uc801\uacfc \uad6c\uc0c1\u00b7\uc548\ub0b4\u00b7\uc624\ub958\ub97c \ubcf4\uc874\ud55c\ub2e4. \uc0c1\uc138 \uac1c\ud3d0\ub85c \uc790\ub3d9 \ub9de\ucda4\uc774\ub098 \uc7ac\ubc30\uce58\ub97c \ud558\uc9c0 \uc54a\ub294\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_483f5a05-ea9d-4af4-992e-13f6d17f4376:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    }
+  ],
+  "concurrentEditInjection": "NOT_RUN"
+}

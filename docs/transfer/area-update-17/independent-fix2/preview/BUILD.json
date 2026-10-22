@@ -1,0 +1,7 @@
+{
+  "source": "e17370e83edccaf954b419054ee4748233752922",
+  "command": "node continuity/scripts/build-static.mjs",
+  "exit": 0,
+  "overlay": "client/app.js and styles.css over exact d56 cycle17 static MOCK runtime including its shared modules; shared/CSS source unchanged, no deployment",
+  "priorSharedRuntime": "f6dde37baf44469b6b2a6a2ec2c1bd2d9bcbe4ea docs/transfer/area-update-17/independent-fix1/preview/"
+}

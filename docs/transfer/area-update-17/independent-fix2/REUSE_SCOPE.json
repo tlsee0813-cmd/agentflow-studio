@@ -1,0 +1,7 @@
+{
+  "priorSource": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+  "priorEvidence": "f6dde37baf44469b6b2a6a2ec2c1bd2d9bcbe4ea",
+  "unchangedSharedCSSPathsDiff": [],
+  "priorLongRoleTestsAreNotNewE173Executions": true,
+  "thisExecution": "only frozen4/state8/build, actual new-request/location routes and narrow influence boundaries; no whole historical reruns"
+}

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "idea015.project.6",
+  "id": "P_1f0f0e9b-3a5d-432e-ae14-b2e1c6bd1c06",
+  "revision": 14,
+  "name": "나의 프로젝트",
+  "sources": [
+    {
+      "id": "S_0e301104-315b-40b1-8f47-b25825734e27",
+      "kind": "request",
+      "text": "[분석자 재서술·합성 요청] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+      "at": "2026-10-22T09:54:52.544Z",
+      "taskId": "T_84d64bf5-e909-4f40-b8f0-b0ce9f35b38c",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "[분석자 재서술·합성 요청] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+      "status": "requested",
+      "sourceId": "S_0e301104-315b-40b1-8f47-b25825734e27",
+      "revision": 6,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_84d64bf5-e909-4f40-b8f0-b0ce9f35b38c",
+      "sourceIds": [
+        "S_0e301104-315b-40b1-8f47-b25825734e27"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": "[독립 합성 understanding] 서로 다른 수동값 보존",
+        "scope": "[독립 합성 scope] 서로 다른 수동값 보존",
+        "next": "[독립 합성 next] 서로 다른 수동값 보존",
+        "checks": "[독립 합성 checks] 서로 다른 수동값 보존"
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+        "area": {
+          "id": "A_e56fe2cb-3ea2-43ba-87c1-9145dc49b4d8",
+          "name": "키 검색과 녹화",
+          "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+        }
+      },
+      "areaId": "A_e56fe2cb-3ea2-43ba-87c1-9145dc49b4d8"
+    }
+  ],
+  "currentTaskId": "T_84d64bf5-e909-4f40-b8f0-b0ce9f35b38c",
+  "draft": "[독립 합성 미전송 B] 대상과 내용을 유지한다.",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "[합성 현재 목적] 키 검색과 녹화",
+      "at": "2026-10-22T09:54:52.545Z",
+      "previous": [
+        {
+          "text": "[합성 요청당시 목적] 키 검색과 녹화",
+          "at": "2026-10-22T09:54:52.542Z"
+        }
+      ]
+    },
+    "areas": [
+      {
+        "id": "A_e56fe2cb-3ea2-43ba-87c1-9145dc49b4d8",
+        "name": "키 검색과 녹화",
+        "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+        "archived": false,
+        "createdAt": "2026-10-22T09:54:52.543Z"
+      },
+      {
+        "id": "A_1568fc27-d2c2-432f-a76b-d75c513cbbae",
+        "name": "다른 영역 B",
+        "note": "B 구상 불변",
+        "archived": false,
+        "createdAt": "2026-10-22T09:54:52.544Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": {
+      "area": "A_1568fc27-d2c2-432f-a76b-d75c513cbbae"
+    },
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_e56fe2cb-3ea2-43ba-87c1-9145dc49b4d8": {
+          "x": 40,
+          "y": 40
+        },
+        "A_1568fc27-d2c2-432f-a76b-d75c513cbbae": {
+          "x": 340,
+          "y": 40
+        }
+      }
+    },
+    "understanding": {}
+  }
+}

@@ -1,0 +1,2 @@
+IDEA015 type, syntax and client/server boundary checks passed.
+PATH compiler (offline bootstrap, not npm ci evidence)
