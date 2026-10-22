@@ -1,21 +1,19 @@
 # AgentFlow 현재 상태
-2026-10-22 · 단일 총괄: 현재 Codex 대화. **사용자의 연속 진행 지시에 따라 사이클19를 진행한다.** 현재 상태는 이 파일에서만 갱신한다.
+2026-10-22 · 단일 총괄: 현재 Codex 대화. **사용자의 연속 진행 지시에 따라 사이클20을 이어 진행한다.** 현재 상태는 이 파일에서만 갱신한다.
 
-## 진행 중 — PC 지도와 기록 읽기19
-시작 checkpoint54eb53a07fed415cb0cc730a9616e251f2b78f93. [계약](2026-10-22-workspace-records-19/INPUT.md) · [착수 조사/판단](2026-10-22-workspace-records-19/RESEARCH.md).
-지도 전용 상단을 줄이고, 기존 우측 패널에서 부분·연결·기록을 전환해 기록을 읽는 동안 지도 높이를 유지한다. 전체 목적 읽기는 기존 bounded 창을 재사용한다. Sol High UI/검사 작성, Astra High 독립 정적 비판, 별도 Cloud 실제검증을 나눴고 총괄은 Dify 직접 관측과 Pro/공식 원문을 대조했다.
+## 진행 중 — 정확한 수신 결과 이어가기20
+[계약](2026-10-22-received-result-20/INPUT.md) · [조사와 선택](2026-10-22-received-result-20/RESEARCH.md). 출발제품은 아래19 병합본이다. 현재 작업B를 유지한 채 받은 A의 정확한 보고→당시 인계 조건/현재 구상→필요한 다음 요청→원래 보기의 흐름을 연결한다. 일반 return.1과 exactduplicate도 같은 입구를 사용한다. 과거 ExportRecord.work와 현재작업문을 구분한다. 새 inbox·자동판정·스키마/일반엔진은 범위밖이다.
 
-현재 후보는 [acfafd2d](https://github.com/tlsee0813-cmd/agentflow-studio/commit/acfafd2dd6426e3fa6fa5443bd2e67d8461608c9), [Draft PR10](https://github.com/tlsee0813-cmd/agentflow-studio/pull/10)이다. [정확 후보 CI39792449163](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39792449163) 및 Cloud 재실행 중이며 **미수용·미병합**이다. app SHA C3A8E77A96E58758D62EC6819CB902E9F9762362C48A9D60E22CEE00AF15773D, W19검사 E1FCE56C2509DAC4CB9667F411E78E8B63D5F2F8973110631087AFF5D2682328.
+19 종료 후 범위와 코드 영향을 나누어 검토했다. Sol High 구현/검사, Astra High 판단·독립 정적 검토, 기존 Cloud 독립 실행을 분리한다. Web Pro 조사를 공식 원문과 대조했다. 아직20 구현 후보·브라우저 수용은 없다.
 
-처음 정적 검토에서 옛 기록 출발점이 새 탐색에 남는 경계와 사라진 행 안내가 숨거나 다음 render에서 소실되는 문제를 보완했다. [중간 원문·회수 한계](https://github.com/tlsee0813-cmd/agentflow-studio/tree/355be72f83177acec4572fba83b241f5af57936a/docs/transfer/workspace-records-19/static-initial) · [C9DF 최종 정적 검토](https://github.com/tlsee0813-cmd/agentflow-studio/blob/687943a4e237a264de1eda55caff27e84d22d638/docs/transfer/workspace-records-19/static-final/REVIEW.md). 그 검토가 전체 브라우저 수용은 아니다.
+## 마지막 완료 — PC 지도와 기록 읽기19
+[결과·한계·공유 화면](2026-10-22-workspace-records-19/RESULT.md) · [PR10](https://github.com/tlsee0813-cmd/agentflow-studio/pull/10). 최종 acfafd2dd6426e3fa6fa5443bd2e67d8461608c9, checkpoint 병합41b6854e877d8cc4054dcf6af47b597602b7cf11. 지도 상단과 기록 패널의 공간 점유를 줄이고 정확한 기록→부분→요청/인계→복귀를 제한 통합했다.
 
-9fb83 및81d50 검사 후보는 Cloud W19에서 각각6실행4실패/exit1이었다. [실패 원본·실제 화면·native 이벤트 관측](https://github.com/tlsee0813-cmd/agentflow-studio/tree/430f6aa3c3b47f06a640af63da171cd6247c1ec3/docs/transfer/workspace-records-19/independent-v0/failure-first)을 보존했다. 이름 입력으로 안내가 사라져도 지도 높이가 남는 실제 제품 결함을 고쳤다. 별도로 목적 편집을 닫은 직후 native toggle 처리 전 기하를 읽던 검사에는 실제 이벤트 완료 대기를 추가했다. 단언은 유지했다. [fix1 원본·정적 재검토·분리 근거](https://github.com/tlsee0813-cmd/agentflow-studio/tree/9a9b28dd20a4a67ba05935f65cebbb55524aff1f/docs/transfer/workspace-records-19/author-fix1).
+exact CI39792449163은 Ubuntu·Windows 모두 성공했다. [독립 Cloud 보고서](https://github.com/tlsee0813-cmd/agentflow-studio/blob/6ea576f291f360ac758fe0fbfb59c9583a48f510/docs/transfer/workspace-records-19/independent-fix1/REPORT.md)에서 같은 v2검사의 구제품 높이반례 양PC 실패·수정제품6/6 통과와 실제 새 요청/인계/복귀를 확인했다. 최초 목적창 초점 즉시측정 실패/이벤트 완료 뒤 별도검사는 구분했다. 총괄은 공유 PNG를 직접 대조했다.
 
-81d Ubuntu CI의 HOME15 test08은 목록 배경 y272 vs120으로 실패했다. 기존 Cloud HOME15 통과와 다르므로 재현과 열기클릭/본문key·wheel 시점 분할을 진행한다. 단순 재실행 통과나 검사 기준 변경으로 해소하지 않는다. [반환된 CI 로그(잘림 명시)](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9a9b28dd20a4a67ba05935f65cebbb55524aff1f/docs/transfer/workspace-records-19/ci-v1/ubuntu-provider-response.json).
+**잔여 위험:** 이전81d Ubuntu HOME15의 배경 y272≠120은 원인 미상이다. Cloud원본2회/phase 관측과 최신 양OS의 통과로 해결됐다고 쓰지 않는다. 읽기·복귀 위치 위험으로 명시해 제한 수용했으며, 재발시 실패환경 시점을 좁힌다. body End의 배경중간 검사와 phase기록은20 회귀보완 후보다. [총괄 수용·CI응답](https://github.com/tlsee0813-cmd/agentflow-studio/tree/ab6b7dd79cfc608aeeb905c3d20af85f8a3457d6/docs/transfer/workspace-records-19/coordinator-final).
 
-작성자 검사 자체의 공백도 보완했다. 살아 있는 R1 출발점에서 일반B 정보로 이동하는 경계, 실제 스크롤된 기록 상태에서 목적 읽기 복귀, 사라진 행 안내의 후속render를 직접 검사한다. [작성 원본](https://github.com/tlsee0813-cmd/agentflow-studio/tree/687943a4e237a264de1eda55caff27e84d22d638/docs/transfer/workspace-records-19/author-static) · [검사 v1 독립 검토](https://github.com/tlsee0813-cmd/agentflow-studio/blob/cb3bbd4083925c030fd8677b57607291f560b5d5/docs/transfer/workspace-records-19/author-static-v1/REVIEW.md). W19의 map-fit 뒤 측정을 미조작 첫 화면 검증으로 확대하지 않으며 PC13 최초 화면 검사를 별도로 유지한다.
-
-## 마지막 완료 — 실제 포함 구조와 PC 작업 공간18
+## 이전 완료 — 실제 포함 구조와 PC 작업 공간18
 [결과·수용 범위·공유 대표 화면](2026-10-22-mixed-depth-18/RESULT.md) · [PR9](https://github.com/tlsee0813-cmd/agentflow-studio/pull/9).
 최종 후보 73fd6ff82ca035dd9b2e74385ce9194db0b57791, tree a029049fdee6b060bd5d0a90ea1f9ff7f62fc37e, checkpoint 병합 ca162c0cef05e18dcc0931b216a516083406b092. 2026-10-22 제한된 제품 통합을 완료했다.
 

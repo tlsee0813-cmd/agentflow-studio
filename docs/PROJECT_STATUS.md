@@ -1,8 +1,10 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-22 실제 포함 구조와 PC 작업공간18 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-22 PC 지도와 기록 읽기19 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint에 같은 지도 안의 실제 포함·부분별 접기, 하위 질문/설명과 실제 관계 끝점 탐색, 정확한 자식 요청·인계와 출발 복귀를 반영했다.** [PR #9](https://github.com/tlsee0813-cmd/agentflow-studio/pull/9) · [포함18 결과·수용 범위](cycles/2026-10-22-mixed-depth-18/RESULT.md). 기존 프로젝트 카드 홈·보고 읽기·같은 영역 설명 갱신을 이어 확장했다. [PR #8](https://github.com/tlsee0813-cmd/agentflow-studio/pull/8) · [갱신17 결과·수용 범위](cycles/2026-10-22-area-update-17/RESULT.md). [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7) · [연결16 결과·수용 경계](cycles/2026-10-16-report-area-16/RESULT.md). [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
+**제품 기준 checkpoint에 지도 공간을 유지하는 우측 기록 읽기·전체 목적 창·정확한 출발 복귀를 반영했다.** [PR10](https://github.com/tlsee0813-cmd/agentflow-studio/pull/10) · [19 결과와 잔여 위험](cycles/2026-10-22-workspace-records-19/RESULT.md).
+
+**이전18에서는 같은 지도 안의 실제 포함·부분별 접기, 하위 질문/설명과 실제 관계 끝점 탐색, 정확한 자식 요청·인계와 출발 복귀를 반영했다.** [PR #9](https://github.com/tlsee0813-cmd/agentflow-studio/pull/9) · [포함18 결과·수용 범위](cycles/2026-10-22-mixed-depth-18/RESULT.md). 기존 프로젝트 카드 홈·보고 읽기·같은 영역 설명 갱신을 이어 확장했다. [PR #8](https://github.com/tlsee0813-cmd/agentflow-studio/pull/8) · [갱신17 결과·수용 범위](cycles/2026-10-22-area-update-17/RESULT.md). [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7) · [연결16 결과·수용 경계](cycles/2026-10-16-report-area-16/RESULT.md). [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
 
 ## 제품 목적과 현재 범위
 
@@ -14,7 +16,7 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합 ca162c0c](https://github.com/tlsee0813-cmd/agentflow-studio/commit/ca162c0cef05e18dcc0931b216a516083406b092), 최종 후보 [73fd6ff8](https://github.com/tlsee0813-cmd/agentflow-studio/commit/73fd6ff82ca035dd9b2e74385ce9194db0b57791) | 실제 포함·부분별 접기·하위 신호·관계 끝점과 정확한 부분의 새 요청/인계/읽기 복귀. [결과·한계](cycles/2026-10-22-mixed-depth-18/RESULT.md) |
+| 제품 기준 checkpoint | [병합41b6854e](https://github.com/tlsee0813-cmd/agentflow-studio/commit/41b6854e877d8cc4054dcf6af47b597602b7cf11), 최종후보 [acfafd2d](https://github.com/tlsee0813-cmd/agentflow-studio/commit/acfafd2dd6426e3fa6fa5443bd2e67d8461608c9) | 기존 포함 구조 위 지도높이를 유지하는 기록 읽기·목적 창·정확한 출발 복귀. [결과·한계](cycles/2026-10-22-workspace-records-19/RESULT.md) |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
@@ -24,13 +26,19 @@
 
 USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·gh-pages는 그대로 유지하고, 기존22개 브랜치는 [태그 보관·SHA 검증 후 정리](REPOSITORY_ARCHIVE.md)했다. PR #1·#2는 미병합으로 닫았다. 이전 인계 당시 사용자 개편안 대기 상태였으며, 이후 연구는 [ACTIVE](cycles/ACTIVE.md)에 기록한다.
 
-## 포함18 검증과 수용 경계
+## 지도와 기록19 검증과 수용 경계
+
+지도 상단을 줄이고 우측 패널에서 기록·부분·연결을 전환한다. 목적 전문과 기록의 실제 요청/인계/출발 복귀를 연결했다. exact acf 양OS CI와 별도 Cloud 실제 조작을 통과했고 구제품 높이 결함은 같은검사의 실패→통과로 구분했다. [결과와 증거](cycles/2026-10-22-workspace-records-19/RESULT.md).
+
+이전81d HOME15 한 번의 배경스크롤 불일치는 원인 미상 잔여 위험이다. 현재통과로 해결이라고 하지 않는다. 무한지도·전체미적완성·실제AI품질·사람사용성 수용은 아니다. 공개MOCK은 그대로다.
+
+## 포함18 당시 검증과 수용 경계
 
 프로그램 포함을 작업의 이어짐과 별도로 저장하고 부분별 펼침·접기를 지원한다. 기록된 질문·현재/보류 설명은 실제 소유 영역으로 연결하고 숨은 관계는 원래 ID·방향·끝점을 유지한다. 부모 참고가 자식의 실행 조건을 자동으로 바꾸지 않으며 조상 변경 뒤 늦은 설명은 보류한다. 기존 원문·과거 anchor를 보존하는 project.7 migration을 포함한다.
 
 두 원자료 재서술 입력을 같은 제품 renderer에서 적용했다. PC 지도와 고정 제목/행동·스크롤 본문에서 정확한 자식 요청·인계 후 읽기 위치로 돌아오는 범위를 검증했다. [결과](cycles/2026-10-22-mixed-depth-18/RESULT.md)에 작성자·독립·양OS CI·총괄 이미지 대조와 실패→수정을 분리했다. 자동 의미 추출, 무제한 큰 지도, 전체 UI 완성, 실제 OS IME·AI 품질을 수용한 것이 아니다.
 
-작은 PC의 중복 상단 맥락과 펼친 기록의 공간 점유는 여전히 후속 개선 대상이다. 공개 MOCK은 USE106 그대로다.
+18 당시 작은 PC의 중복 상단 맥락과 펼친 기록의 공간 점유는 후속 개선 대상으로 남겼고, 위19에서 좁혀 개선했다. 공개 MOCK은 USE106 그대로다.
 
 ## 갱신17 당시 검증과 수용 경계
 
