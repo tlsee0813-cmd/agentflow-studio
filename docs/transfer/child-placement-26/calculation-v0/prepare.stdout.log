@@ -1,0 +1,88 @@
+{
+  "sources": 11,
+  "change": "Only default addChildArea x offset: parent.x instead of parent.x+300; supplied near retains +300/+200",
+  "geometry": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "mapKeys": [
+        "rect",
+        "clip",
+        "textClip",
+        "accessScope",
+        "ancestors",
+        "hit",
+        "hitNode",
+        "full",
+        "visible",
+        "text",
+        "rangeRects",
+        "scrollY",
+        "focus"
+      ],
+      "mapRect": {
+        "x": 264,
+        "y": 224.890625,
+        "width": 660,
+        "height": 479.109375,
+        "top": 224.890625,
+        "right": 924,
+        "bottom": 704,
+        "left": 264
+      },
+      "controlsRect": {
+        "x": 701.4375,
+        "y": 235.890625,
+        "width": 211.5625,
+        "height": 46,
+        "top": 235.890625,
+        "right": 913,
+        "bottom": 281.890625,
+        "left": 701.4375
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mapKeys": [
+        "rect",
+        "clip",
+        "textClip",
+        "accessScope",
+        "ancestors",
+        "hit",
+        "hitNode",
+        "full",
+        "visible",
+        "text",
+        "rangeRects",
+        "scrollY",
+        "focus"
+      ],
+      "mapRect": {
+        "x": 264,
+        "y": 224.890625,
+        "width": 820,
+        "height": 659.109375,
+        "top": 224.890625,
+        "right": 1084,
+        "bottom": 884,
+        "left": 264
+      },
+      "controlsRect": {
+        "x": 861.4375,
+        "y": 235.890625,
+        "width": 211.5625,
+        "height": 46,
+        "top": 235.890625,
+        "right": 1073,
+        "bottom": 281.890625,
+        "left": 861.4375
+      }
+    }
+  ]
+}

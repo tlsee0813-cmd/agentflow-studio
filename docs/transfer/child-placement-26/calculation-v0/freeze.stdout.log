@@ -1,0 +1,13 @@
+{
+  "files": 26,
+  "totalBytes": 198676,
+  "sourceAndOtherProduct23FilesUnmodified": true,
+  "exactOneExpressionCandidate": true,
+  "cases": 12,
+  "classification": {
+    "bothPCImproved": 4,
+    "bothPCEqual": 5,
+    "only1440Improved": 2,
+    "bothPCWorse": 1
+  }
+}

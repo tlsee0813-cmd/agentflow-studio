@@ -1,0 +1,2408 @@
+{
+  "basis": "689c47888fb7ab5040d184c2d36f2adff8f2a575 (source blobs verified against unchanged merged checkpoint)",
+  "candidate": "Only missing-near addChildArea x offset changed; explicit near path unchanged",
+  "node": "v24.19.0",
+  "cardAssumption": {
+    "width": 240,
+    "height": 180,
+    "source": "unchanged styles.css fixed border-box240x180"
+  },
+  "viewports": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "mapBorderBox": {
+        "x": 264,
+        "y": 224.890625,
+        "width": 660,
+        "height": 479.109375,
+        "top": 224.890625,
+        "right": 924,
+        "bottom": 704,
+        "left": 264
+      },
+      "clientWidth": 658,
+      "clientHeight": 477,
+      "controlOffsetTop": 10,
+      "controlOffsetHeight": 46,
+      "top": 40,
+      "fitWidth": 610,
+      "fitHeight": 389,
+      "derivation": "Saved actual24 border boxes; unchanged1px border and integer DOM sizing. No new browser measurement."
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mapBorderBox": {
+        "x": 264,
+        "y": 224.890625,
+        "width": 820,
+        "height": 659.109375,
+        "top": 224.890625,
+        "right": 1084,
+        "bottom": 884,
+        "left": 264
+      },
+      "clientWidth": 818,
+      "clientHeight": 657,
+      "controlOffsetTop": 10,
+      "controlOffsetHeight": 46,
+      "top": 40,
+      "fitWidth": 770,
+      "fitHeight": 569,
+      "derivation": "Saved actual24 border boxes; unchanged1px border and integer DOM sizing. No new browser measurement."
+    }
+  ],
+  "cases": [
+    {
+      "label": "24 saved root coordinates 1280",
+      "synthetic": true,
+      "source": "b1f291 fixed baseline root coordinates, rebuilt with public APIs; existing original child/task removed by reconstruction, not by mutating source fixture",
+      "originalSavedChild": {
+        "x": 640,
+        "y": 280
+      },
+      "parent": "예약",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "예약",
+          "id": "A_1ada7086-c947-460c-8cfe-51452703b4f7",
+          "x": 340,
+          "y": 80,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "알림",
+          "id": "A_f3adac9d-db79-4d9a-bbe6-3b49e71ac68a",
+          "x": -120,
+          "y": 100,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "기록",
+          "id": "A_36b00aa7-49be-4948-b431-4aeea5f09a73",
+          "x": -420,
+          "y": 100,
+          "archived": false,
+          "parent": null
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 640,
+          "y": 280
+        },
+        "newName": "새 child",
+        "areaCount": 4,
+        "activeCount": 4,
+        "bbox": {
+          "minX": -420,
+          "minY": 80,
+          "maxX": 880,
+          "maxY": 460,
+          "width": 1300,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.46923076923076923,
+            "x": 221.07692307692307,
+            "y": 131.8076923076923,
+            "effectiveTitle15px": 7.038461538461538,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.5923076923076923,
+            "x": 272.7692307692308,
+            "y": 188.57692307692307,
+            "effectiveTitle15px": 8.884615384615385,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "예약",
+            "frame": {
+              "x": 326,
+              "y": 66,
+              "width": 568,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 340,
+          "y": 280
+        },
+        "newName": "새 child",
+        "areaCount": 4,
+        "activeCount": 4,
+        "bbox": {
+          "minX": -420,
+          "minY": 80,
+          "maxX": 580,
+          "maxY": 460,
+          "width": 1000,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.61,
+            "x": 280.2,
+            "y": 93.80000000000001,
+            "effectiveTitle15px": 9.15,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.77,
+            "x": 347.40000000000003,
+            "y": 140.6,
+            "effectiveTitle15px": 11.55,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "예약",
+            "frame": {
+              "x": 326,
+              "y": 66,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.46923076923076923,
+          "after": 0.61,
+          "ratio": 1.3,
+          "judgment": "larger"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.5923076923076923,
+          "after": 0.77,
+          "ratio": 1.3,
+          "judgment": "larger"
+        }
+      ]
+    },
+    {
+      "label": "24 saved root coordinates 1440",
+      "synthetic": true,
+      "source": "b1f291 fixed baseline root coordinates, rebuilt with public APIs; existing original child/task removed by reconstruction, not by mutating source fixture",
+      "originalSavedChild": {
+        "x": 720,
+        "y": 360
+      },
+      "parent": "예약",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "예약",
+          "id": "A_b8eaf05b-e97b-4ebc-8c76-da5cb48de351",
+          "x": 420,
+          "y": 160,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "알림",
+          "id": "A_a0d888cc-b409-4aa0-a81d-80bc7233dc48",
+          "x": -40,
+          "y": 180,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "기록",
+          "id": "A_bb11f75a-5ce8-4c39-9e01-10f52b0e1e4e",
+          "x": -340,
+          "y": 180,
+          "archived": false,
+          "parent": null
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 720,
+          "y": 360
+        },
+        "newName": "새 child",
+        "areaCount": 4,
+        "activeCount": 4,
+        "bbox": {
+          "minX": -340,
+          "minY": 160,
+          "maxX": 960,
+          "maxY": 540,
+          "width": 1300,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.46923076923076923,
+            "x": 183.53846153846155,
+            "y": 94.26923076923076,
+            "effectiveTitle15px": 7.038461538461538,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.5923076923076923,
+            "x": 225.3846153846154,
+            "y": 141.19230769230768,
+            "effectiveTitle15px": 8.884615384615385,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "예약",
+            "frame": {
+              "x": 406,
+              "y": 146,
+              "width": 568,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 420,
+          "y": 360
+        },
+        "newName": "새 child",
+        "areaCount": 4,
+        "activeCount": 4,
+        "bbox": {
+          "minX": -340,
+          "minY": 160,
+          "maxX": 660,
+          "maxY": 540,
+          "width": 1000,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.61,
+            "x": 231.4,
+            "y": 45.000000000000014,
+            "effectiveTitle15px": 9.15,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.77,
+            "x": 285.8,
+            "y": 78.99999999999999,
+            "effectiveTitle15px": 11.55,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "예약",
+            "frame": {
+              "x": 406,
+              "y": 146,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.46923076923076923,
+          "after": 0.61,
+          "ratio": 1.3,
+          "judgment": "larger"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.5923076923076923,
+          "after": 0.77,
+          "ratio": 1.3,
+          "judgment": "larger"
+        }
+      ]
+    },
+    {
+      "label": "fixed short structure total4",
+      "synthetic": true,
+      "parent": "부모0",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "부모0",
+          "id": "A_2d365883-3dd5-4729-8b23-2f3648c66f6c",
+          "x": 40,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "부모1",
+          "id": "A_247d8b70-6b1c-4abe-9160-202a658fa8bb",
+          "x": 340,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "기존자식1",
+          "id": "A_d9488bad-d57a-4c0a-bb9c-dfc29f6c0a65",
+          "x": 340,
+          "y": 240,
+          "archived": false,
+          "parent": "A_247d8b70-6b1c-4abe-9160-202a658fa8bb"
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 640,
+          "y": 240
+        },
+        "newName": "새 child",
+        "areaCount": 4,
+        "activeCount": 4,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 880,
+          "maxY": 420,
+          "width": 840,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.7261904761904762,
+            "x": -5.0476190476190474,
+            "y": 91.47619047619047,
+            "effectiveTitle15px": 10.892857142857142,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.9166666666666666,
+            "x": -12.666666666666664,
+            "y": 137.66666666666669,
+            "effectiveTitle15px": 13.75,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 868,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [
+              "부모1",
+              "기존자식1"
+            ],
+            "omitted": true,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모1",
+            "frame": {
+              "x": 326,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 40,
+          "y": 240
+        },
+        "newName": "새 child",
+        "areaCount": 4,
+        "activeCount": 4,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 580,
+          "maxY": 420,
+          "width": 540,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 1.0236842105263158,
+            "x": 11.65789473684211,
+            "y": 23.05263157894737,
+            "effectiveTitle15px": 15.355263157894736,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 1.2,
+            "x": 37,
+            "y": 72.5,
+            "effectiveTitle15px": 18,
+            "limitingAxis": "cap"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모1",
+            "frame": {
+              "x": 326,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.7261904761904762,
+          "after": 1.0236842105263158,
+          "ratio": 1.4096635030198448,
+          "judgment": "larger"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.9166666666666666,
+          "after": 1.2,
+          "ratio": 1.309090909090909,
+          "judgment": "larger"
+        }
+      ]
+    },
+    {
+      "label": "fixed short structure total6",
+      "synthetic": true,
+      "parent": "부모0",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "부모0",
+          "id": "A_a242bbdf-420f-474f-8d2e-85a1eda41a66",
+          "x": 40,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "부모1",
+          "id": "A_f10cbc17-deb6-4a55-a8ec-84079a0a8572",
+          "x": 340,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "부모2",
+          "id": "A_504b0710-7aee-4db8-b619-49179ab7a5d9",
+          "x": 640,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "기존자식1",
+          "id": "A_1dae0984-b5c8-49e8-8b0f-71d90d119279",
+          "x": 340,
+          "y": 240,
+          "archived": false,
+          "parent": "A_f10cbc17-deb6-4a55-a8ec-84079a0a8572"
+        },
+        {
+          "name": "기존자식2",
+          "id": "A_7ddc6b84-e1d6-4ae5-bfaf-7e744479c876",
+          "x": 640,
+          "y": 240,
+          "archived": false,
+          "parent": "A_504b0710-7aee-4db8-b619-49179ab7a5d9"
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 40,
+          "y": 240
+        },
+        "newName": "새 child",
+        "areaCount": 6,
+        "activeCount": 6,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 880,
+          "maxY": 420,
+          "width": 840,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.7261904761904762,
+            "x": -5.0476190476190474,
+            "y": 91.47619047619047,
+            "effectiveTitle15px": 10.892857142857142,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.9166666666666666,
+            "x": -12.666666666666664,
+            "y": 137.66666666666669,
+            "effectiveTitle15px": 13.75,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모1",
+            "frame": {
+              "x": 326,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모2",
+            "frame": {
+              "x": 626,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 40,
+          "y": 240
+        },
+        "newName": "새 child",
+        "areaCount": 6,
+        "activeCount": 6,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 880,
+          "maxY": 420,
+          "width": 840,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.7261904761904762,
+            "x": -5.0476190476190474,
+            "y": 91.47619047619047,
+            "effectiveTitle15px": 10.892857142857142,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.9166666666666666,
+            "x": -12.666666666666664,
+            "y": 137.66666666666669,
+            "effectiveTitle15px": 13.75,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모1",
+            "frame": {
+              "x": 326,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모2",
+            "frame": {
+              "x": 626,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.7261904761904762,
+          "after": 0.7261904761904762,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.9166666666666666,
+          "after": 0.9166666666666666,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ]
+    },
+    {
+      "label": "fixed short structure total8",
+      "synthetic": true,
+      "parent": "부모0",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "부모0",
+          "id": "A_52d60403-b32d-4af4-8e26-e9e5cde4af50",
+          "x": 40,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "부모1",
+          "id": "A_c95b2514-9406-4015-9762-895bc1c7629f",
+          "x": 340,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "부모2",
+          "id": "A_20a381fb-b196-4942-8d66-08873fb7e0a2",
+          "x": 640,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "부모3",
+          "id": "A_0f415b76-c486-43ff-a80d-3c21e71c5cc9",
+          "x": 940,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "기존자식1",
+          "id": "A_3d49cb9a-59ef-4e0b-8c14-e9112855c266",
+          "x": 340,
+          "y": 240,
+          "archived": false,
+          "parent": "A_c95b2514-9406-4015-9762-895bc1c7629f"
+        },
+        {
+          "name": "기존자식2",
+          "id": "A_053a8bdc-b252-4ebd-b137-2b7f62737a57",
+          "x": 640,
+          "y": 240,
+          "archived": false,
+          "parent": "A_20a381fb-b196-4942-8d66-08873fb7e0a2"
+        },
+        {
+          "name": "기존자식3",
+          "id": "A_8c1e6b59-cd33-4670-9f9a-399e03e2c539",
+          "x": 940,
+          "y": 240,
+          "archived": false,
+          "parent": "A_0f415b76-c486-43ff-a80d-3c21e71c5cc9"
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 40,
+          "y": 240
+        },
+        "newName": "새 child",
+        "areaCount": 8,
+        "activeCount": 8,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 1180,
+          "maxY": 420,
+          "width": 1140,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.5350877192982456,
+            "x": 2.5964912280701746,
+            "y": 135.4298245614035,
+            "effectiveTitle15px": 8.026315789473685,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.6754385964912281,
+            "x": -3.0175438596491233,
+            "y": 193.14912280701753,
+            "effectiveTitle15px": 10.131578947368421,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모1",
+            "frame": {
+              "x": 326,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모2",
+            "frame": {
+              "x": 626,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모3",
+            "frame": {
+              "x": 926,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 40,
+          "y": 240
+        },
+        "newName": "새 child",
+        "areaCount": 8,
+        "activeCount": 8,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 1180,
+          "maxY": 420,
+          "width": 1140,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.5350877192982456,
+            "x": 2.5964912280701746,
+            "y": 135.4298245614035,
+            "effectiveTitle15px": 8.026315789473685,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.6754385964912281,
+            "x": -3.0175438596491233,
+            "y": 193.14912280701753,
+            "effectiveTitle15px": 10.131578947368421,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모1",
+            "frame": {
+              "x": 326,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모2",
+            "frame": {
+              "x": 626,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "부모3",
+            "frame": {
+              "x": 926,
+              "y": 26,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.5350877192982456,
+          "after": 0.5350877192982456,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.6754385964912281,
+          "after": 0.6754385964912281,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ]
+    },
+    {
+      "label": "fixed chain depth3",
+      "synthetic": true,
+      "baseline": {
+        "newPosition": {
+          "x": 940,
+          "y": 640
+        },
+        "newName": "깊이3",
+        "areaCount": 4,
+        "activeCount": 4,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 1180,
+          "maxY": 820,
+          "width": 1140,
+          "height": 780
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.4987179487179487,
+            "x": 24.782051282051277,
+            "y": 44.05128205128205,
+            "effectiveTitle15px": 7.480769230769231,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.6754385964912281,
+            "x": -3.0175438596491233,
+            "y": 58.06140350877192,
+            "effectiveTitle15px": 10.131578947368421,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "깊이0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 1168,
+              "height": 808
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이1",
+            "frame": {
+              "x": 326,
+              "y": 226,
+              "width": 868,
+              "height": 608
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이2",
+            "frame": {
+              "x": 626,
+              "y": 426,
+              "width": 568,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 40,
+          "y": 640
+        },
+        "newName": "깊이3",
+        "areaCount": 4,
+        "activeCount": 4,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 280,
+          "maxY": 820,
+          "width": 240,
+          "height": 780
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.4987179487179487,
+            "x": 249.20512820512818,
+            "y": 44.05128205128205,
+            "effectiveTitle15px": 7.480769230769231,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.7294871794871794,
+            "x": 292.28205128205127,
+            "y": 34.82051282051282,
+            "effectiveTitle15px": 10.942307692307692,
+            "limitingAxis": "height"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "깊이0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 268,
+              "height": 808
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이1",
+            "frame": {
+              "x": 26,
+              "y": 226,
+              "width": 268,
+              "height": 608
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이2",
+            "frame": {
+              "x": 26,
+              "y": 426,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.4987179487179487,
+          "after": 0.4987179487179487,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.6754385964912281,
+          "after": 0.7294871794871794,
+          "ratio": 1.08001998001998,
+          "judgment": "larger"
+        }
+      ]
+    },
+    {
+      "label": "fixed chain depth4",
+      "synthetic": true,
+      "baseline": {
+        "newPosition": {
+          "x": 1240,
+          "y": 840
+        },
+        "newName": "깊이4",
+        "areaCount": 5,
+        "activeCount": 5,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 1480,
+          "maxY": 1020,
+          "width": 1440,
+          "height": 980
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.39693877551020407,
+            "x": 27.32653061224491,
+            "y": 48.12244897959184,
+            "effectiveTitle15px": 5.954081632653061,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.5347222222222222,
+            "x": 2.6111111111111107,
+            "y": 65.09722222222226,
+            "effectiveTitle15px": 8.020833333333334,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "깊이0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 1468,
+              "height": 1008
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이1",
+            "frame": {
+              "x": 326,
+              "y": 226,
+              "width": 1168,
+              "height": 808
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이2",
+            "frame": {
+              "x": 626,
+              "y": 426,
+              "width": 868,
+              "height": 608
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이3",
+            "frame": {
+              "x": 926,
+              "y": 626,
+              "width": 568,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 40,
+          "y": 840
+        },
+        "newName": "깊이4",
+        "areaCount": 5,
+        "activeCount": 5,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 280,
+          "maxY": 1020,
+          "width": 240,
+          "height": 980
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.39693877551020407,
+            "x": 265.48979591836735,
+            "y": 48.12244897959184,
+            "effectiveTitle15px": 5.954081632653061,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.5806122448979592,
+            "x": 316.10204081632656,
+            "y": 40.775510204081634,
+            "effectiveTitle15px": 8.709183673469386,
+            "limitingAxis": "height"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "깊이0",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 268,
+              "height": 1008
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이1",
+            "frame": {
+              "x": 26,
+              "y": 226,
+              "width": 268,
+              "height": 808
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이2",
+            "frame": {
+              "x": 26,
+              "y": 426,
+              "width": 268,
+              "height": 608
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          },
+          {
+            "parent": "깊이3",
+            "frame": {
+              "x": 26,
+              "y": 626,
+              "width": 268,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.39693877551020407,
+          "after": 0.39693877551020407,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.5347222222222222,
+          "after": 0.5806122448979592,
+          "ratio": 1.0858203021468327,
+          "judgment": "larger"
+        }
+      ]
+    },
+    {
+      "label": "archived card directly below parent",
+      "synthetic": true,
+      "parent": "부모",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "부모",
+          "id": "A_0a6e40b4-1a17-4af0-83cd-f6b578a0607d",
+          "x": 40,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "보관카드",
+          "id": "A_e0dff970-192e-4171-9d8f-8cc12bff6a5f",
+          "x": 40,
+          "y": 240,
+          "archived": true,
+          "parent": null
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 340,
+          "y": 240
+        },
+        "newName": "새 child",
+        "areaCount": 3,
+        "activeCount": 2,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 580,
+          "maxY": 420,
+          "width": 540,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 1.0236842105263158,
+            "x": 11.65789473684211,
+            "y": 23.05263157894737,
+            "effectiveTitle15px": 15.355263157894736,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 1.2,
+            "x": 37,
+            "y": 72.5,
+            "effectiveTitle15px": 18,
+            "limitingAxis": "cap"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 568,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 340,
+          "y": 240
+        },
+        "newName": "새 child",
+        "areaCount": 3,
+        "activeCount": 2,
+        "bbox": {
+          "minX": 40,
+          "minY": 40,
+          "maxX": 580,
+          "maxY": 420,
+          "width": 540,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 1.0236842105263158,
+            "x": 11.65789473684211,
+            "y": 23.05263157894737,
+            "effectiveTitle15px": 15.355263157894736,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 1.2,
+            "x": 37,
+            "y": 72.5,
+            "effectiveTitle15px": 18,
+            "limitingAxis": "cap"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모",
+            "frame": {
+              "x": 26,
+              "y": 26,
+              "width": 568,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 1.0236842105263158,
+          "after": 1.0236842105263158,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 1.2,
+          "after": 1.2,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ]
+    },
+    {
+      "label": "nearby other parent and reserved child; unfavorable left spill",
+      "synthetic": true,
+      "parent": "부모A",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "부모A",
+          "id": "A_7d2b961f-df6a-4cc5-80f6-e2014668aba8",
+          "x": 0,
+          "y": 0,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "기존A자식",
+          "id": "A_cc19514e-838c-401d-893e-3047d2ded930",
+          "x": 0,
+          "y": 200,
+          "archived": false,
+          "parent": "A_7d2b961f-df6a-4cc5-80f6-e2014668aba8"
+        },
+        {
+          "name": "다른부모B",
+          "id": "A_e23b2721-ecf1-4f54-a9de-dd247e9835b0",
+          "x": 300,
+          "y": 200,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "외곽foreign",
+          "id": "A_c9f40d5e-e09f-4ebb-9e4b-5bbd5cba63e8",
+          "x": 600,
+          "y": 0,
+          "archived": false,
+          "parent": null
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 600,
+          "y": 200
+        },
+        "newName": "새 child",
+        "areaCount": 5,
+        "activeCount": 5,
+        "bbox": {
+          "minX": 0,
+          "minY": 0,
+          "maxX": 840,
+          "maxY": 380,
+          "width": 840,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.7261904761904762,
+            "x": 24,
+            "y": 120.52380952380952,
+            "effectiveTitle15px": 10.892857142857142,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.9166666666666666,
+            "x": 24,
+            "y": 174.33333333333334,
+            "effectiveTitle15px": 13.75,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모A",
+            "frame": {
+              "x": -14,
+              "y": -14,
+              "width": 868,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [
+              "다른부모B",
+              "외곽foreign"
+            ],
+            "omitted": true,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": -300,
+          "y": 200
+        },
+        "newName": "새 child",
+        "areaCount": 5,
+        "activeCount": 5,
+        "bbox": {
+          "minX": -300,
+          "minY": 0,
+          "maxX": 840,
+          "maxY": 380,
+          "width": 1140,
+          "height": 380
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.5350877192982456,
+            "x": 184.52631578947367,
+            "y": 156.83333333333331,
+            "effectiveTitle15px": 8.026315789473685,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.6754385964912281,
+            "x": 226.6315789473684,
+            "y": 220.16666666666666,
+            "effectiveTitle15px": 10.131578947368421,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모A",
+            "frame": {
+              "x": -314,
+              "y": -14,
+              "width": 568,
+              "height": 408
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.7261904761904762,
+          "after": 0.5350877192982456,
+          "ratio": 0.736842105263158,
+          "judgment": "smaller"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.9166666666666666,
+          "after": 0.6754385964912281,
+          "ratio": 0.736842105263158,
+          "judgment": "smaller"
+        }
+      ]
+    },
+    {
+      "label": "POSITION_LIMIT upper corner",
+      "synthetic": true,
+      "parent": "부모",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "부모",
+          "id": "A_5e957340-789a-4751-b489-e6a2218048b6",
+          "x": 199900,
+          "y": 199900,
+          "archived": false,
+          "parent": null
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 199400,
+          "y": 200000
+        },
+        "newName": "새 child",
+        "areaCount": 2,
+        "activeCount": 2,
+        "bbox": {
+          "minX": 199400,
+          "minY": 199900,
+          "maxX": 200140,
+          "maxY": 200180,
+          "width": 740,
+          "height": 280
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.8243243243243243,
+            "x": -164346.27027027027,
+            "y": -164639.33783783784,
+            "effectiveTitle15px": 12.364864864864865,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 1.0405405405405406,
+            "x": -207459.7837837838,
+            "y": -207801.22972972973,
+            "effectiveTitle15px": 15.608108108108109,
+            "limitingAxis": "width"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모",
+            "frame": {
+              "x": 199386,
+              "y": 199886,
+              "width": 768,
+              "height": 308
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 199600,
+          "y": 200000
+        },
+        "newName": "새 child",
+        "areaCount": 2,
+        "activeCount": 2,
+        "bbox": {
+          "minX": 199600,
+          "minY": 199900,
+          "maxX": 200140,
+          "maxY": 200180,
+          "width": 540,
+          "height": 280
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 1.1296296296296295,
+            "x": -225450.07407407404,
+            "y": -225712.6111111111,
+            "effectiveTitle15px": 16.944444444444443,
+            "limitingAxis": "width"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 1.2,
+            "x": -239435,
+            "y": -239699.5,
+            "effectiveTitle15px": 18,
+            "limitingAxis": "cap"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모",
+            "frame": {
+              "x": 199586,
+              "y": 199886,
+              "width": 568,
+              "height": 308
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.8243243243243243,
+          "after": 1.1296296296296295,
+          "ratio": 1.3703703703703702,
+          "judgment": "larger"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 1.0405405405405406,
+          "after": 1.2,
+          "ratio": 1.1532467532467532,
+          "judgment": "larger"
+        }
+      ]
+    },
+    {
+      "label": "explicit near far away remains legacy offset",
+      "synthetic": true,
+      "parent": "부모",
+      "explicitNear": {
+        "x": 12000,
+        "y": -16000
+      },
+      "input": [
+        {
+          "name": "부모",
+          "id": "A_14f611b5-6fbd-4d34-9349-0b2eea59fb6a",
+          "x": 40,
+          "y": 40,
+          "archived": false,
+          "parent": null
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": 12300,
+          "y": -15800
+        },
+        "newName": "새 child",
+        "areaCount": 2,
+        "activeCount": 2,
+        "bbox": {
+          "minX": 40,
+          "minY": -15800,
+          "maxX": 12540,
+          "maxY": 220,
+          "width": 12500,
+          "height": 16020
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.024282147315855183,
+            "x": 176.26529338327092,
+            "y": 447.65792759051186,
+            "effectiveTitle15px": 0.3642322097378277,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.035518102372034954,
+            "x": 185.59113607990014,
+            "y": 625.1860174781523,
+            "effectiveTitle15px": 0.5327715355805243,
+            "limitingAxis": "height"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모",
+            "frame": {
+              "x": 26,
+              "y": -15814,
+              "width": 12528,
+              "height": 16048
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": 12300,
+          "y": -15800
+        },
+        "newName": "새 child",
+        "areaCount": 2,
+        "activeCount": 2,
+        "bbox": {
+          "minX": 40,
+          "minY": -15800,
+          "maxX": 12540,
+          "maxY": 220,
+          "width": 12500,
+          "height": 16020
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.024282147315855183,
+            "x": 176.26529338327092,
+            "y": 447.65792759051186,
+            "effectiveTitle15px": 0.3642322097378277,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.035518102372034954,
+            "x": 185.59113607990014,
+            "y": 625.1860174781523,
+            "effectiveTitle15px": 0.5327715355805243,
+            "limitingAxis": "height"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "부모",
+            "frame": {
+              "x": 26,
+              "y": -15814,
+              "width": 12528,
+              "height": 16048
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.024282147315855183,
+          "after": 0.024282147315855183,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.035518102372034954,
+          "after": 0.035518102372034954,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ]
+    },
+    {
+      "label": "previous manual coordinates preserved",
+      "synthetic": true,
+      "parent": "수동부모",
+      "explicitNear": null,
+      "input": [
+        {
+          "name": "수동부모",
+          "id": "A_22339b09-544a-43b5-a4f0-d81fbb5928c0",
+          "x": -730,
+          "y": 410,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "수동다른부분",
+          "id": "A_1518274b-7917-4f99-a110-1cd0a7c5000e",
+          "x": 1143,
+          "y": -857,
+          "archived": false,
+          "parent": null
+        },
+        {
+          "name": "보관수동",
+          "id": "A_2d7cdb64-9944-457e-a6ce-fccaf84eb218",
+          "x": -730,
+          "y": 610,
+          "archived": true,
+          "parent": null
+        }
+      ],
+      "baseline": {
+        "newPosition": {
+          "x": -420,
+          "y": 620
+        },
+        "newName": "새 child",
+        "areaCount": 4,
+        "activeCount": 3,
+        "bbox": {
+          "minX": -730,
+          "minY": -857,
+          "maxX": 1383,
+          "maxY": 800,
+          "width": 2113,
+          "height": 1657
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.2347616173808087,
+            "x": 252.35033192516596,
+            "y": 265.19070609535305,
+            "effectiveTitle15px": 3.5214242607121307,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.34339167169583584,
+            "x": 296.88261919130963,
+            "y": 358.28666264333134,
+            "effectiveTitle15px": 5.150875075437538,
+            "limitingAxis": "height"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "수동부모",
+            "frame": {
+              "x": -744,
+              "y": 396,
+              "width": 578,
+              "height": 418
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "candidate": {
+        "newPosition": {
+          "x": -420,
+          "y": 620
+        },
+        "newName": "새 child",
+        "areaCount": 4,
+        "activeCount": 3,
+        "bbox": {
+          "minX": -730,
+          "minY": -857,
+          "maxX": 1383,
+          "maxY": 800,
+          "width": 2113,
+          "height": 1657
+        },
+        "fits": [
+          {
+            "viewport": [
+              1280,
+              720
+            ],
+            "scale": 0.2347616173808087,
+            "x": 252.35033192516596,
+            "y": 265.19070609535305,
+            "effectiveTitle15px": 3.5214242607121307,
+            "limitingAxis": "height"
+          },
+          {
+            "viewport": [
+              1440,
+              900
+            ],
+            "scale": 0.34339167169583584,
+            "x": 296.88261919130963,
+            "y": 358.28666264333134,
+            "effectiveTitle15px": 5.150875075437538,
+            "limitingAxis": "height"
+          }
+        ],
+        "collisions": [],
+        "reserveClashes": [],
+        "pointInsideLimit": true,
+        "allOtherProjectFieldsUnchanged": true,
+        "priorStoredCoordinatesUnchanged": true,
+        "frames": [
+          {
+            "parent": "수동부모",
+            "frame": {
+              "x": -744,
+              "y": 396,
+              "width": 578,
+              "height": 418
+            },
+            "foreignCardsIntersecting": [],
+            "omitted": false,
+            "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+          }
+        ]
+      },
+      "scaleChange": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.2347616173808087,
+          "after": 0.2347616173808087,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.34339167169583584,
+          "after": 0.34339167169583584,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ]
+    }
+  ],
+  "safety": {
+    "originalProjectsMutated": false,
+    "existingCoordinatesChanged": false,
+    "otherFieldsChanged": false,
+    "allRoundtripsValid": true,
+    "totalNewCollisions": 0,
+    "newPositionOutsideLimit": false
+  },
+  "limitations": [
+    "Pure geometry and actual isolated domain calculation; no browser/server, actual label legibility, native actions or user study.",
+    "Root-coordinate24 comparison reconstructs only the three saved roots via public APIs, plus explicitly synthetic existing manual work/draft/basis sentinel. It is not the original full saved project.",
+    "Frame projections mirror the current omitted-on-foreign-overlap rule using fixed card boxes. Group title collision lifting and actual DOM/text/line rendering are not simulated. Frames do not enter fit bounds.",
+    "Same observed24 map/control geometry reused for every scenario; different real UI header/content could change available space. No fitted minimum zoom or all-fit semantic change.",
+    "Candidate comparison is not product adoption. Unfavorable/equal cases remain evidence."
+  ]
+}

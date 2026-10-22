@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmitOnError": true,
+    "rootDir": "baseline-src",
+    "outDir": "baseline-dist",
+    "sourceMap": false,
+    "declaration": false,
+    "types": []
+  },
+  "include": [
+    "baseline-src/**/*.ts"
+  ]
+}

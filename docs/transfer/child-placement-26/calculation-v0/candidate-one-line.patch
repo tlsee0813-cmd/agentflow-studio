@@ -1,0 +1,5 @@
+--- baseline-src/shared/domain.ts
++++ candidate-src/shared/domain.ts
+@@ -646 +646 @@
+-  const at=near??areaPosition(p,parent),n=addArea(p,name,note,{x:at.x+GRID_X,y:at.y+GRID_Y});
++  const at=near??areaPosition(p,parent),n=addArea(p,name,note,{x:at.x+(near?GRID_X:0),y:at.y+GRID_Y});
