@@ -1,0 +1,27 @@
+{
+  "originalCheckerSHA256": "212163b1f4b7b6e328bc194676656eaed570a65179c6670dc6274e74d10a3117",
+  "system154": {
+    "instrumentation": false,
+    "expectedMethods": 2,
+    "executedMethods": 2,
+    "failures": 2,
+    "childExit": 1,
+    "actualCollectorExit": 1,
+    "failure": "both line111 Shift+Tab focus passes then toggle→reach→visible→to_be_in_viewport ratio0 before Enter",
+    "browserVersion": "154.0.8037.57",
+    "playwright": "1.57.0"
+  },
+  "bundled143": {
+    "build": 1200,
+    "expectedVersion": "143.0.7499.4",
+    "actualBrowserVersion": null,
+    "execution": "NOT_RUN",
+    "reason": "cache absent; one official CLI download blocked403"
+  },
+  "comparison": {
+    "previousObserverCommit": "e5ea1fb0af2f6b9c38e9114f30bbee38b743bef0",
+    "previousObserved154": "2PASS exit0",
+    "thisUninstrumented154": "2FAIL exit1",
+    "conclusion": "failure is not confined to143; instrumentation/timing influence possible but exact root cause remains unresolved; no stability fix or product-bug classification"
+  }
+}

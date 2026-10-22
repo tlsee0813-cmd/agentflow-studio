@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "-m",
+    "playwright",
+    "install",
+    "--only-shell",
+    "chromium"
+  ],
+  "isolatedBrowserCache": "/workspace/browser-env/cycle21-version-match/bundled-cache",
+  "startUTC": "2026-10-22T17:11:35.219605+00:00",
+  "endUTC": "2026-10-22T17:11:36.495372+00:00",
+  "actualChildExit": 1,
+  "attempts": "one official CLI invocation; tool-internal fallback hosts retained",
+  "systemAndVenvUnchanged": true
+}

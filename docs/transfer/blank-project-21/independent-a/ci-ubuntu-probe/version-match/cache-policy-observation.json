@@ -1,0 +1,23 @@
+{
+  "defaultExpectedExecutable": "/home/agent/.cache/ms-playwright/chromium-1200/chrome-linux64/chrome",
+  "existsBefore": false,
+  "PLAYWRIGHT_BROWSERS_PATH_before": null,
+  "installList": "ENOENT scandir /home/agent/.cache/ms-playwright/.links",
+  "priorDownloadDenialRecordSearch": "No matching record found in retained browser-env .log/.md/.json outside app/node_modules/venv; no claim that historical denial never happened",
+  "newCache": "/workspace/browser-env/cycle21-version-match/bundled-cache",
+  "networkPolicy": {
+    "observations_current": true,
+    "state": "enforced",
+    "mode": "restricted",
+    "vpn_configured": false
+  },
+  "blockedHosts": [
+    "cdn.playwright.dev",
+    "playwright.download.prss.microsoft.com"
+  ],
+  "error": "HTTP403 Domain forbidden",
+  "officialCLIInvocations": 1,
+  "internalAttempts": 5,
+  "retryOrBypass": false,
+  "bundled143Execution": "NOT_RUN_DOWNLOAD_BLOCKED"
+}
