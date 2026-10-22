@@ -1,0 +1,42 @@
+{
+  "sourceCommit": "2a7d078124e96243e949244bec945cc8da2c47ec",
+  "expectedPC": 2,
+  "completedPC": 0,
+  "rows": [],
+  "checks": [
+    {
+      "label": "B edit while A reader visited is B only",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK B edit while A reader visited is B only"
+    },
+    {
+      "label": "B edit with A compose target is B only",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK B edit with A compose target is B only"
+    },
+    {
+      "label": "task switch closes prior B reference",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK task switch closes prior B reference"
+    },
+    {
+      "label": "explicit A selects exact user revision2",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK explicit A selects exact user revision2"
+    }
+  ],
+  "failedChecks": [],
+  "harnessErrors": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle29-ui/check.py\", line 80, in <module>\n    try:u.run(w,h)\n        ^^^^^^^^^^\n  File \"/workspace/browser-env/cycle29-ui/check.py\", line 53, in run\n    self.readA();self.click(self.p.locator('#task-view-continue'),'A 작업으로 명시 이어가기');assert self.state()['currentTaskId']==self.Atask;self.check(not self.ref().evaluate('e=>e.open'),'task switch closes prior B reference',self.refSnap());self.openRef();self.check(self.summary().inner_text()==LONG,'explicit A selects exact user revision2',self.refSnap());self.naturalMiddle()\n                                                                                                                                                                                                                                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle29-ui/check.py\", line 35, in naturalMiddle\n    self.wheel(max(-350,min(350,target-top)),body)\n  File \"/workspace/browser-env/cycle29-ui/support.py\", line 40, in wheel\n    try:self.p.mouse.move(x,y);self.p.mouse.wheel(0,dy);v=self.p.evaluate('async()=>await window.__ind23Wheel.promise');self.log('native wheel',v);assert v['ok'],v\n                                                                                                                                                          ~^^^^^^\nAssertionError: {'ok': False, 'reason': 'native-scroll-deadline', 'events': [], 'y': 2194}\n"
+    }
+  ],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 1
+}

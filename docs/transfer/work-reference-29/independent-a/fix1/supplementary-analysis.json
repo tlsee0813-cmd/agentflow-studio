@@ -1,0 +1,320 @@
+[
+  {
+    "viewport": [
+      1280,
+      720
+    ],
+    "arrivalScroll": {
+      "before": 69,
+      "after": 69,
+      "maxBefore": 138,
+      "maxAfter": 138,
+      "bodyTextSame": true,
+      "openBefore": true,
+      "openAfter": true
+    },
+    "mapReturn": {
+      "pre": {
+        "y": 0,
+        "extent": 262,
+        "focus": "<button class=\"quiet node-info\" type=\"button\" id=\"node-info-A_e59941d4-3d78-4932-94c4-c8c6230c9e4d\" aria-pressed=\"true\" aria-label=\"보관 안내 정보 (들어가지 않음)\">정보</button>",
+        "open": [
+          "area-list",
+          "file-return-options",
+          "edit-work",
+          "work-reference-P_b229e16f-0a0f-4cc2-a0be-197bc4b3fc30-T_798aae2f-64b0-4781-a313-f5e380c0bb5f-A_e59941d4-3d78-4932-94c4-c8c6230c9e4d-3",
+          "compose-panel",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [
+          "node-info-A_e59941d4-3d78-4932-94c4-c8c6230c9e4d"
+        ],
+        "plane": [
+          {
+            "transform": "matrix(0.871429, 0, 0, 0.871429, 128.571, 91.1429)",
+            "rect": {
+              "x": 393.5714111328125,
+              "y": 428.6272277832031,
+              "width": 0.8714599609375,
+              "height": 0.871429443359375,
+              "top": 428.6272277832031,
+              "right": 394.44287109375,
+              "bottom": 429.4986572265625,
+              "left": 393.5714111328125
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "A_e59941d4-3d78-4932-94c4-c8c6230c9e4d",
+            "rect": {
+              "x": 689.8571166992188,
+              "y": 498.3415222167969,
+              "width": 209.14288330078125,
+              "height": 156.85714721679688,
+              "top": 498.3415222167969,
+              "right": 899,
+              "bottom": 655.1986694335938,
+              "left": 689.8571166992188
+            }
+          },
+          {
+            "id": "A_2b9ef194-837a-408a-9c41-429bbe7dc14e",
+            "rect": {
+              "x": 289,
+              "y": 515.7700805664062,
+              "width": 209.14285278320312,
+              "height": 156.85711669921875,
+              "top": 515.7700805664062,
+              "right": 498.1428527832031,
+              "bottom": 672.627197265625,
+              "left": 289
+            }
+          }
+        ]
+      },
+      "post": {
+        "y": 0,
+        "extent": 262,
+        "focus": "<button class=\"quiet panel-task\" type=\"button\" id=\"panel-task-T_798aae2f-64b0-4781-a313-f5e380c0bb5f\">[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요. ↘</button>",
+        "open": [
+          "area-list",
+          "file-return-options",
+          "edit-work",
+          "work-reference-P_b229e16f-0a0f-4cc2-a0be-197bc4b3fc30-T_798aae2f-64b0-4781-a313-f5e380c0bb5f-A_e59941d4-3d78-4932-94c4-c8c6230c9e4d-3",
+          "compose-panel",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [
+          "node-info-A_e59941d4-3d78-4932-94c4-c8c6230c9e4d"
+        ],
+        "plane": [
+          {
+            "transform": "matrix(0.871429, 0, 0, 0.871429, 128.571, 91.1429)",
+            "rect": {
+              "x": 393.5714111328125,
+              "y": 428.6272277832031,
+              "width": 0.8714599609375,
+              "height": 0.871429443359375,
+              "top": 428.6272277832031,
+              "right": 394.44287109375,
+              "bottom": 429.4986572265625,
+              "left": 393.5714111328125
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "A_e59941d4-3d78-4932-94c4-c8c6230c9e4d",
+            "rect": {
+              "x": 689.8571166992188,
+              "y": 498.3415222167969,
+              "width": 209.14288330078125,
+              "height": 156.85714721679688,
+              "top": 498.3415222167969,
+              "right": 899,
+              "bottom": 655.1986694335938,
+              "left": 689.8571166992188
+            }
+          },
+          {
+            "id": "A_2b9ef194-837a-408a-9c41-429bbe7dc14e",
+            "rect": {
+              "x": 289,
+              "y": 515.7700805664062,
+              "width": 209.14285278320312,
+              "height": 156.85711669921875,
+              "top": 515.7700805664062,
+              "right": 498.1428527832031,
+              "bottom": 672.627197265625,
+              "left": 289
+            }
+          }
+        ]
+      },
+      "cardRectDeltas": [
+        {
+          "id": "A_e59941d4-3d78-4932-94c4-c8c6230c9e4d",
+          "delta": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 0.0,
+            "height": 0.0
+          }
+        },
+        {
+          "id": "A_2b9ef194-837a-408a-9c41-429bbe7dc14e",
+          "delta": {
+            "x": 0,
+            "y": 0.0,
+            "width": 0.0,
+            "height": 0.0
+          }
+        }
+      ],
+      "matrixEqual": true,
+      "selectedEqual": true
+    }
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "arrivalScroll": {
+      "before": 0,
+      "after": 0,
+      "maxBefore": 64,
+      "maxAfter": 64,
+      "bodyTextSame": true,
+      "openBefore": true,
+      "openAfter": true
+    },
+    "mapReturn": {
+      "pre": {
+        "y": 0,
+        "extent": 262,
+        "focus": "<button class=\"quiet node-info\" type=\"button\" id=\"node-info-A_8c3a0041-338a-4c96-8268-1f4a4cf87554\" aria-pressed=\"true\" aria-label=\"보관 안내 정보 (들어가지 않음)\">정보</button>",
+        "open": [
+          "area-list",
+          "file-return-options",
+          "edit-work",
+          "work-reference-P_3637a9aa-fc74-4142-a1e8-2e946a968ad3-T_f6c38607-6081-4860-9f52-4a1c879518b3-A_8c3a0041-338a-4c96-8268-1f4a4cf87554-3",
+          "compose-panel",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [
+          "node-info-A_8c3a0041-338a-4c96-8268-1f4a4cf87554"
+        ],
+        "plane": [
+          {
+            "transform": "matrix(1.1, 0, 0, 1.1, 68, 52)",
+            "rect": {
+              "x": 333,
+              "y": 389.484375,
+              "width": 1.100006103515625,
+              "height": 1.100006103515625,
+              "top": 389.484375,
+              "right": 334.1000061035156,
+              "bottom": 390.5843811035156,
+              "left": 333
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "A_8c3a0041-338a-4c96-8268-1f4a4cf87554",
+            "rect": {
+              "x": 795,
+              "y": 565.484375,
+              "width": 264,
+              "height": 198,
+              "top": 565.484375,
+              "right": 1059,
+              "bottom": 763.484375,
+              "left": 795
+            }
+          },
+          {
+            "id": "A_1e29b4a1-d552-4b1c-a421-9118e16e9e39",
+            "rect": {
+              "x": 289,
+              "y": 587.484375,
+              "width": 264,
+              "height": 198,
+              "top": 587.484375,
+              "right": 553,
+              "bottom": 785.484375,
+              "left": 289
+            }
+          }
+        ]
+      },
+      "post": {
+        "y": 0,
+        "extent": 262,
+        "focus": "<button class=\"quiet panel-task\" type=\"button\" id=\"panel-task-T_f6c38607-6081-4860-9f52-4a1c879518b3\">[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요. ↘</button>",
+        "open": [
+          "area-list",
+          "file-return-options",
+          "edit-work",
+          "work-reference-P_3637a9aa-fc74-4142-a1e8-2e946a968ad3-T_f6c38607-6081-4860-9f52-4a1c879518b3-A_8c3a0041-338a-4c96-8268-1f4a4cf87554-3",
+          "compose-panel",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [
+          "node-info-A_8c3a0041-338a-4c96-8268-1f4a4cf87554"
+        ],
+        "plane": [
+          {
+            "transform": "matrix(1.1, 0, 0, 1.1, 68, 52)",
+            "rect": {
+              "x": 333,
+              "y": 389.484375,
+              "width": 1.100006103515625,
+              "height": 1.100006103515625,
+              "top": 389.484375,
+              "right": 334.1000061035156,
+              "bottom": 390.5843811035156,
+              "left": 333
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "A_8c3a0041-338a-4c96-8268-1f4a4cf87554",
+            "rect": {
+              "x": 795,
+              "y": 565.484375,
+              "width": 264,
+              "height": 198,
+              "top": 565.484375,
+              "right": 1059,
+              "bottom": 763.484375,
+              "left": 795
+            }
+          },
+          {
+            "id": "A_1e29b4a1-d552-4b1c-a421-9118e16e9e39",
+            "rect": {
+              "x": 289,
+              "y": 587.484375,
+              "width": 264,
+              "height": 198,
+              "top": 587.484375,
+              "right": 553,
+              "bottom": 785.484375,
+              "left": 289
+            }
+          }
+        ]
+      },
+      "cardRectDeltas": [
+        {
+          "id": "A_8c3a0041-338a-4c96-8268-1f4a4cf87554",
+          "delta": {
+            "x": 0,
+            "y": 0.0,
+            "width": 0,
+            "height": 0
+          }
+        },
+        {
+          "id": "A_1e29b4a1-d552-4b1c-a421-9118e16e9e39",
+          "delta": {
+            "x": 0,
+            "y": 0.0,
+            "width": 0,
+            "height": 0
+          }
+        }
+      ],
+      "matrixEqual": true,
+      "selectedEqual": true
+    }
+  }
+]

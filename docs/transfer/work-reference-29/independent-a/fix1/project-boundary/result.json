@@ -1,0 +1,35 @@
+{
+  "sourceCommit": "2a7d078124e96243e949244bec945cc8da2c47ec",
+  "scope": "project switching only / 1440x900 supplementary run, not core2PC rerun",
+  "checks": [
+    {
+      "label": "new project starts reference closed",
+      "pass": true,
+      "raw": "ui.jsonl CHECK new project starts reference closed"
+    },
+    {
+      "label": "no old selected A body in another project",
+      "pass": true,
+      "raw": "ui.jsonl CHECK no old selected A body in another project"
+    },
+    {
+      "label": "same project reentry reference closed after epoch switch",
+      "pass": true,
+      "raw": "ui.jsonl CHECK same project reentry reference closed after epoch switch"
+    },
+    {
+      "label": "explicit reopen selects original project description",
+      "pass": true,
+      "raw": "ui.jsonl CHECK explicit reopen selects original project description"
+    },
+    {
+      "label": "original project material preserved",
+      "pass": true,
+      "raw": "ui.jsonl CHECK original project material preserved"
+    }
+  ],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 0
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "path": "normal-ui/ui.jsonl.gz",
+    "originalBytes": 1466938,
+    "originalSHA256": "ef42ecb851760916f0c6933e052c133269ff911ae48dac4d8ec25eedd265dfc2",
+    "compressedBytes": 136902,
+    "compressedSHA256": "26bbd70d77780c346546a5db66d2def15f38a0574f056fd580e5f69556638b08",
+    "roundTripEqual": true
+  },
+  {
+    "path": "project-boundary/ui.jsonl.gz",
+    "originalBytes": 271081,
+    "originalSHA256": "3718defb41d9b3437b279588d2bcb306b9cadaaf704da8fe546c1453ebc9f549",
+    "compressedBytes": 28605,
+    "compressedSHA256": "6b498e9408b4c2ad3576619a0a91ec5c8f87f3c39918d317ff6e79da8a9f3b99",
+    "roundTripEqual": true
+  },
+  {
+    "path": "nested-scroll/ui.jsonl.gz",
+    "originalBytes": 991216,
+    "originalSHA256": "ce1169a7b934867ba5885901ca949d103af24fc7a8019fbeb676766232416f20",
+    "compressedBytes": 92697,
+    "compressedSHA256": "d654ab49a10a04b4e69bb3d4b63f3c19dffc3d23e1a6e320b31bdc213cc87c53",
+    "roundTripEqual": true
+  },
+  {
+    "path": "first-wheel-target-preparation-error/ui.jsonl.gz",
+    "originalBytes": 347395,
+    "originalSHA256": "381fe7bf6419e8f310ad5e0d0a5fc7afe84a12f79a1b1686b5dceaed109a3d07",
+    "compressedBytes": 34600,
+    "compressedSHA256": "18c60cc509868bf0a20c3289e1b5dadf5a392ed540cfe9701feb841e3df235ef",
+    "roundTripEqual": true
+  },
+  {
+    "path": "first-wide-fail-narrow-reach-error/ui.jsonl.gz",
+    "originalBytes": 693412,
+    "originalSHA256": "162985dc6405d5acf1ec387b0725fe6b640742c3bd2502c8256c8c4b4b600ac5",
+    "compressedBytes": 66304,
+    "compressedSHA256": "b0c5a8cbcc0a264fcda25d5e824d8fb2b71a6eeb3eaddd6f64c393af2c123a4c",
+    "roundTripEqual": true
+  },
+  {
+    "path": "author709/raw/work-description29-observations.jsonl.gz",
+    "originalBytes": 550361,
+    "originalSHA256": "42865961047354e0cc0501bf8bff47afbc823eb0c2d729e0231a240231002888",
+    "compressedBytes": 32058,
+    "compressedSHA256": "ee5334f2c7d96a6b6c3b132450f2914091dfc27065bfbb30bc4162749bc790c7",
+    "roundTripEqual": true
+  },
+  {
+    "path": "author709/raw/received20-observations.jsonl.gz",
+    "originalBytes": 0,
+    "originalSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compressedBytes": 20,
+    "compressedSHA256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+    "roundTripEqual": true
+  }
+]

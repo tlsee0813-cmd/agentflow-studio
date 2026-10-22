@@ -1,0 +1,36 @@
+{
+  "provenance": "external exec_command/write_stdin completions, not self-report/full transcript",
+  "mainFirstError": {
+    "session": 27775,
+    "exit": 1
+  },
+  "mainFinal": {
+    "session": 19583,
+    "exit": 0
+  },
+  "projectBoundary": {
+    "session": 99791,
+    "exit": 0
+  },
+  "nestedFirstWideFailNarrowPreparationError": {
+    "session": 48408,
+    "exit": 1
+  },
+  "nestedFinalProductFail": {
+    "session": 64431,
+    "exit": 1
+  },
+  "author709Exact": {
+    "session": 94697,
+    "exit": 1
+  },
+  "buildShell": {
+    "session": 88466,
+    "exit": 0
+  },
+  "typecheck": {
+    "session": 52596,
+    "exit": 0
+  },
+  "servers": "independent runtime.json records explicit termination -15; author server exit not separately captured"
+}

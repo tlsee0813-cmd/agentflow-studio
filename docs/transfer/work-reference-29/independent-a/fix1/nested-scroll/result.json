@@ -1,0 +1,59 @@
+{
+  "scope": "nested reader scroll gap only, not full core rerun",
+  "sourceCommit": "2a7d078124e96243e949244bec945cc8da2c47ec",
+  "rows": [
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "complete": true,
+      "firstKey": true,
+      "arrivalBothScrolls": false,
+      "preInner": 275,
+      "postInner": 0,
+      "preOuter": 0,
+      "postOuter": 0
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "complete": true,
+      "firstKey": true,
+      "arrivalBothScrolls": false,
+      "preInner": 275,
+      "postInner": 0,
+      "preOuter": 0,
+      "postOuter": 0
+    }
+  ],
+  "checks": [
+    {
+      "label": "first key BOTH actual scroll hosts and DOM preserved",
+      "pass": true,
+      "raw": "ui.jsonl CHECK first key BOTH actual scroll hosts and DOM preserved"
+    },
+    {
+      "label": "new description arrival preserves BOTH nested reading positions",
+      "pass": false,
+      "raw": "ui.jsonl CHECK new description arrival preserves BOTH nested reading positions"
+    },
+    {
+      "label": "first key BOTH actual scroll hosts and DOM preserved",
+      "pass": true,
+      "raw": "ui.jsonl CHECK first key BOTH actual scroll hosts and DOM preserved"
+    },
+    {
+      "label": "new description arrival preserves BOTH nested reading positions",
+      "pass": false,
+      "raw": "ui.jsonl CHECK new description arrival preserves BOTH nested reading positions"
+    }
+  ],
+  "fatal": null,
+  "harnessErrors": [],
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 1
+}

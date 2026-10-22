@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_b229e16f-0a0f-4cc2-a0be-197bc4b3fc30",
+  "taskId": "T_1c47e73f-66cc-404a-8452-29a0018c4c57",
+  "returnId": "H_acbcf4ce-e0c9-434d-9886-40ad8ecf8d59",
+  "report": "[명시 합성29 별도 A 작업 보고] 실제 실행이나 검증 기록이 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_e59941d4-3d78-4932-94c4-c8c6230c9e4d",
+    "basedOn": 2,
+    "summary": "[새 설명29 · 별도 A 작업의 실제 H 기반 합성] 안내 표시는30일, 실제 보관7/배포금지다. 이것은 새 외부 정리 참고이며 기존 직접값을 고치는 지시가 아니다.",
+    "changes": [
+      "기존 직접 작업문과 구별되는 새 외부 설명 기록이다."
+    ],
+    "proposal": null,
+    "origin": "관측자가 별도 작업의 실제 H/template에 작성한 합성29. AI 실행 없음."
+  }
+}

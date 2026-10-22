@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle29-ui/check.py", line 80, in <module>
+    try:u.run(w,h)
+        ^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-ui/check.py", line 53, in run
+    self.readA();self.click(self.p.locator('#task-view-continue'),'A 작업으로 명시 이어가기');assert self.state()['currentTaskId']==self.Atask;self.check(not self.ref().evaluate('e=>e.open'),'task switch closes prior B reference',self.refSnap());self.openRef();self.check(self.summary().inner_text()==LONG,'explicit A selects exact user revision2',self.refSnap());self.naturalMiddle()
+                                                                                                                                                                                                                                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-ui/check.py", line 35, in naturalMiddle
+    self.wheel(max(-350,min(350,target-top)),body)
+  File "/workspace/browser-env/cycle29-ui/support.py", line 40, in wheel
+    try:self.p.mouse.move(x,y);self.p.mouse.wheel(0,dy);v=self.p.evaluate('async()=>await window.__ind23Wheel.promise');self.log('native wheel',v);assert v['ok'],v
+                                                                                                                                                          ~^^^^^^
+AssertionError: {'ok': False, 'reason': 'native-scroll-deadline', 'events': [], 'y': 2194}
+

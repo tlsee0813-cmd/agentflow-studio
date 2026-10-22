@@ -1,0 +1,2064 @@
+[
+  {
+    "viewport": 1440,
+    "pre": {
+      "revision": "2",
+      "selectedTextSHA256": "b36f60139fde9aa65ee532f5cdd0286dc07834effc0b3093b0d94f3babe7e3ad",
+      "body": {
+        "scrollTop": 0,
+        "client": 520,
+        "total": 584,
+        "max": 64,
+        "rect": {
+          "x": 920.4375,
+          "y": 375.078125,
+          "width": 350.546875,
+          "height": 520,
+          "top": 375.078125,
+          "right": 1270.984375,
+          "bottom": 895.078125,
+          "left": 920.4375
+        }
+      },
+      "summary": {
+        "scrollTop": 275,
+        "scrollHeight": 907,
+        "clientHeight": 358,
+        "rect": {
+          "x": 923.4375,
+          "y": 492.859375,
+          "width": 329.546875,
+          "height": 360,
+          "top": 492.859375,
+          "right": 1252.984375,
+          "bottom": 852.859375,
+          "left": 923.4375
+        },
+        "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.\n\n검토 맥락 1: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 2: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 3: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 4: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n[중간29] 안내 표시30과 실제 보관7은 다른 역할이다. 직접 입력한 범위와 완료 조건을 그대로 읽고, 필요한 안내 표시만 고친다.\n\n대조 메모 5: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 6: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 7: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 8: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다."
+      },
+      "caption": "이전 기준의 설명 · 현재 인계 참고에는 포함되지 않아요. 구상·조건·직접 쓴 작업문 또는 포함 맥락의 기준이 바뀌었어요.",
+      "sample": {
+        "token": "[중간29] 안내 표시30과 실제 보관7은 다른 역할이다.",
+        "rects": [
+          {
+            "raw": {
+              "x": 936.4375,
+              "y": 692.359375,
+              "width": 252.453125,
+              "height": 17,
+              "top": 692.359375,
+              "right": 1188.890625,
+              "bottom": 709.359375,
+              "left": 936.4375
+            },
+            "clip": {
+              "left": 936.4375,
+              "top": 692.359375,
+              "right": 1188.890625,
+              "bottom": 709.359375
+            },
+            "positive": true,
+            "hit": true,
+            "hitNode": "<div class=\"source-raw work-reference-summary\">[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.\n\n검토 맥락 1: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지"
+          }
+        ],
+        "allAncestorsClip": {
+          "left": 924.4361268939394,
+          "top": 493.859375,
+          "right": 1251.9857481060606,
+          "bottom": 851.859375
+        },
+        "ancestors": [
+          {
+            "id": "",
+            "class": "source-raw work-reference-summary",
+            "rect": {
+              "x": 923.4375,
+              "y": 492.859375,
+              "width": 329.546875,
+              "height": 360,
+              "top": 492.859375,
+              "right": 1252.984375,
+              "bottom": 852.859375,
+              "left": 923.4375
+            },
+            "client": {
+              "left": 924.4361268939394,
+              "top": 493.859375,
+              "right": 1251.9857481060606,
+              "bottom": 851.859375
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-reference-P_70388cc6-3011-43ad-b8b8-817b5a34d187-T_1d6619d3-23c0-4859-a9bd-353b55798826-A_131df6d4-c8a8-4f01-97d0-640197cae31c-3-body",
+            "class": "work-reference-body",
+            "rect": {
+              "x": 920.4375,
+              "y": 375.078125,
+              "width": 350.546875,
+              "height": 520,
+              "top": 375.078125,
+              "right": 1270.984375,
+              "bottom": 895.078125,
+              "left": 920.4375
+            },
+            "client": {
+              "left": 920.4375,
+              "top": 375.078125,
+              "right": 1256.0037393162393,
+              "bottom": 895.078125
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-reference-P_70388cc6-3011-43ad-b8b8-817b5a34d187-T_1d6619d3-23c0-4859-a9bd-353b55798826-A_131df6d4-c8a8-4f01-97d0-640197cae31c-3",
+            "class": "work-reference",
+            "rect": {
+              "x": 909.4375,
+              "y": 280.28125,
+              "width": 372.546875,
+              "height": 623.796875,
+              "top": 280.28125,
+              "right": 1281.984375,
+              "bottom": 904.078125,
+              "left": 909.4375
+            },
+            "client": {
+              "left": 910.4362851876675,
+              "top": 281.2809244791667,
+              "right": 1280.9855898123324,
+              "bottom": 903.0784505208333
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "work-edit-layout",
+            "rect": {
+              "x": 380,
+              "y": 280.28125,
+              "width": 902,
+              "height": 646.84375,
+              "top": 280.28125,
+              "right": 1282,
+              "bottom": 927.125,
+              "left": 380
+            },
+            "client": {
+              "left": 380,
+              "top": 280.28125,
+              "right": 1282,
+              "bottom": 927.125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "edit-work",
+            "class": "edit-area work-reference-editor",
+            "rect": {
+              "x": 380,
+              "y": 224.484375,
+              "width": 902,
+              "height": 702.640625,
+              "top": 224.484375,
+              "right": 1282,
+              "bottom": 927.125,
+              "left": 380
+            },
+            "client": {
+              "left": 380,
+              "top": 225.48386379800854,
+              "right": 1282,
+              "bottom": 927.125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "current-work",
+            "class": "card work-card",
+            "rect": {
+              "x": 351,
+              "y": -305.65625,
+              "width": 960,
+              "height": 1302.578125,
+              "top": -305.65625,
+              "right": 1311,
+              "bottom": 996.921875,
+              "left": 351
+            },
+            "client": {
+              "left": 352,
+              "top": -304.65657377206446,
+              "right": 1310,
+              "bottom": 995.9221987720643
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work",
+            "class": "",
+            "rect": {
+              "x": 351,
+              "y": -305.65625,
+              "width": 960,
+              "height": 1302.578125,
+              "top": -305.65625,
+              "right": 1311,
+              "bottom": 996.921875,
+              "left": 351
+            },
+            "client": {
+              "left": 351,
+              "top": -305.65625,
+              "right": 1311,
+              "bottom": 996.921875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "main-column",
+            "rect": {
+              "x": 351,
+              "y": -305.65625,
+              "width": 960,
+              "height": 1396.375,
+              "top": -305.65625,
+              "right": 1311,
+              "bottom": 1090.71875,
+              "left": 351
+            },
+            "client": {
+              "left": 351,
+              "top": -305.65625,
+              "right": 1311,
+              "bottom": 1090.71875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "workspace",
+            "class": "workspace",
+            "rect": {
+              "x": 351,
+              "y": -305.65625,
+              "width": 960,
+              "height": 1396.375,
+              "top": -305.65625,
+              "right": 1311,
+              "bottom": 1090.71875,
+              "left": 351
+            },
+            "client": {
+              "left": 351,
+              "top": -305.65625,
+              "right": 1311,
+              "bottom": 1090.71875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-view",
+            "class": "",
+            "rect": {
+              "x": 264,
+              "y": -2233.8125,
+              "width": 1134,
+              "height": 3324.53125,
+              "top": -2233.8125,
+              "right": 1398,
+              "bottom": 1090.71875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": -2233.8125,
+              "right": 1398,
+              "bottom": 1090.71875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "main",
+            "class": "shell",
+            "rect": {
+              "x": 222,
+              "y": -2391,
+              "width": 1218,
+              "height": 3561.5625,
+              "top": -2391,
+              "right": 1440,
+              "bottom": 1170.5625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -2391,
+              "right": 1440,
+              "bottom": 1170.5625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "app-body",
+            "rect": {
+              "x": 222,
+              "y": -2463,
+              "width": 1218,
+              "height": 3633.5625,
+              "top": -2463,
+              "right": 1440,
+              "bottom": 1170.5625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -2463,
+              "right": 1440,
+              "bottom": 1170.5625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "app-shell",
+            "rect": {
+              "x": 0,
+              "y": -2463,
+              "width": 1440,
+              "height": 3633.5625,
+              "top": -2463,
+              "right": 1440,
+              "bottom": 1170.5625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -2463,
+              "right": 1440,
+              "bottom": 1170.5625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "",
+            "rect": {
+              "x": 0,
+              "y": -2463,
+              "width": 1440,
+              "height": 3633.5625,
+              "top": -2463,
+              "right": 1440,
+              "bottom": 1170.5625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -2463,
+              "right": 1440,
+              "bottom": 1170.5625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "",
+            "rect": {
+              "x": 0,
+              "y": -2463,
+              "width": 1440,
+              "height": 3633.5625,
+              "top": -2463,
+              "right": 1440,
+              "bottom": 1170.5625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -2463,
+              "right": 1440,
+              "bottom": -1563.1083516785911
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          }
+        ],
+        "elementRect": {
+          "x": 923.4375,
+          "y": 492.859375,
+          "width": 329.546875,
+          "height": 360,
+          "top": 492.859375,
+          "right": 1252.984375,
+          "bottom": 852.859375,
+          "left": 923.4375
+        },
+        "textOffset": 568,
+        "textLength": 1182,
+        "visibleSample": true
+      }
+    },
+    "post": {
+      "revision": "2",
+      "selectedTextSHA256": "b36f60139fde9aa65ee532f5cdd0286dc07834effc0b3093b0d94f3babe7e3ad",
+      "body": {
+        "scrollTop": 0,
+        "client": 520,
+        "total": 584,
+        "max": 64,
+        "rect": {
+          "x": 920.4375,
+          "y": -593.984375,
+          "width": 350.546875,
+          "height": 520,
+          "top": -593.984375,
+          "right": 1270.984375,
+          "bottom": -73.984375,
+          "left": 920.4375
+        }
+      },
+      "summary": {
+        "scrollTop": 0,
+        "scrollHeight": 907,
+        "clientHeight": 358,
+        "rect": {
+          "x": 923.4375,
+          "y": -476.203125,
+          "width": 329.546875,
+          "height": 360,
+          "top": -476.203125,
+          "right": 1252.984375,
+          "bottom": -116.203125,
+          "left": 923.4375
+        },
+        "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.\n\n검토 맥락 1: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 2: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 3: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 4: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n[중간29] 안내 표시30과 실제 보관7은 다른 역할이다. 직접 입력한 범위와 완료 조건을 그대로 읽고, 필요한 안내 표시만 고친다.\n\n대조 메모 5: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 6: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 7: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 8: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다."
+      },
+      "caption": "이후 새 설명이 있어 이전 기록을 읽고 있어요. 현재 인계 참고에는 포함되지 않아요.",
+      "newer": {
+        "hidden": false,
+        "text": "새 설명이 있어요. 읽던 본문은 그대로예요. 닫고 다시 열면 새 설명을 읽을 수 있어요."
+      },
+      "sample": {
+        "token": "[중간29] 안내 표시30과 실제 보관7은 다른 역할이다.",
+        "rects": [
+          {
+            "raw": {
+              "x": 936.4375,
+              "y": -1.703125,
+              "width": 252.453125,
+              "height": 17,
+              "top": -1.703125,
+              "right": 1188.890625,
+              "bottom": 15.296875,
+              "left": 936.4375
+            },
+            "clip": {
+              "left": 936.4375,
+              "top": 0,
+              "right": 1188.890625,
+              "bottom": -117.203125
+            },
+            "positive": false,
+            "hit": false,
+            "hitNode": null
+          }
+        ],
+        "allAncestorsClip": {
+          "left": 924.4361268939394,
+          "top": 0,
+          "right": 1251.9857481060606,
+          "bottom": -117.203125
+        },
+        "ancestors": [
+          {
+            "id": "",
+            "class": "source-raw work-reference-summary",
+            "rect": {
+              "x": 923.4375,
+              "y": -476.203125,
+              "width": 329.546875,
+              "height": 360,
+              "top": -476.203125,
+              "right": 1252.984375,
+              "bottom": -116.203125,
+              "left": 923.4375
+            },
+            "client": {
+              "left": 924.4361268939394,
+              "top": -475.203125,
+              "right": 1251.9857481060606,
+              "bottom": -117.203125
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-reference-P_70388cc6-3011-43ad-b8b8-817b5a34d187-T_1d6619d3-23c0-4859-a9bd-353b55798826-A_131df6d4-c8a8-4f01-97d0-640197cae31c-3-body",
+            "class": "work-reference-body",
+            "rect": {
+              "x": 920.4375,
+              "y": -593.984375,
+              "width": 350.546875,
+              "height": 520,
+              "top": -593.984375,
+              "right": 1270.984375,
+              "bottom": -73.984375,
+              "left": 920.4375
+            },
+            "client": {
+              "left": 920.4375,
+              "top": -593.984375,
+              "right": 1256.0037393162393,
+              "bottom": -73.984375
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-reference-P_70388cc6-3011-43ad-b8b8-817b5a34d187-T_1d6619d3-23c0-4859-a9bd-353b55798826-A_131df6d4-c8a8-4f01-97d0-640197cae31c-3",
+            "class": "work-reference",
+            "rect": {
+              "x": 909.4375,
+              "y": -725.78125,
+              "width": 372.546875,
+              "height": 660.796875,
+              "top": -725.78125,
+              "right": 1281.984375,
+              "bottom": -64.984375,
+              "left": 909.4375
+            },
+            "client": {
+              "left": 910.4362851876675,
+              "top": -724.7815572995462,
+              "right": 1280.9855898123324,
+              "bottom": -65.9840677004538
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "work-edit-layout",
+            "rect": {
+              "x": 380,
+              "y": -725.78125,
+              "width": 902,
+              "height": 660.796875,
+              "top": -725.78125,
+              "right": 1282,
+              "bottom": -64.984375,
+              "left": 380
+            },
+            "client": {
+              "left": 380,
+              "top": -725.78125,
+              "right": 1282,
+              "bottom": -64.984375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "edit-work",
+            "class": "edit-area work-reference-editor",
+            "rect": {
+              "x": 380,
+              "y": -781.578125,
+              "width": 902,
+              "height": 716.59375,
+              "top": -781.578125,
+              "right": 1282,
+              "bottom": -64.984375,
+              "left": 380
+            },
+            "client": {
+              "left": 380,
+              "top": -780.5786915969317,
+              "right": 1282,
+              "bottom": -64.984375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "current-work",
+            "class": "card work-card",
+            "rect": {
+              "x": 351,
+              "y": -1311.71875,
+              "width": 960,
+              "height": 1316.53125,
+              "top": -1311.71875,
+              "right": 1311,
+              "bottom": 4.8125,
+              "left": 351
+            },
+            "client": {
+              "left": 352,
+              "top": -1310.7191059225513,
+              "right": 1310,
+              "bottom": 3.8128559225513072
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work",
+            "class": "",
+            "rect": {
+              "x": 351,
+              "y": -1311.71875,
+              "width": 960,
+              "height": 1316.53125,
+              "top": -1311.71875,
+              "right": 1311,
+              "bottom": 4.8125,
+              "left": 351
+            },
+            "client": {
+              "left": 351,
+              "top": -1311.71875,
+              "right": 1311,
+              "bottom": 4.8125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "main-column",
+            "rect": {
+              "x": 351,
+              "y": -1311.71875,
+              "width": 960,
+              "height": 2267.09375,
+              "top": -1311.71875,
+              "right": 1311,
+              "bottom": 955.375,
+              "left": 351
+            },
+            "client": {
+              "left": 351,
+              "top": -1311.71875,
+              "right": 1311,
+              "bottom": 955.375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "workspace",
+            "class": "workspace",
+            "rect": {
+              "x": 351,
+              "y": -1311.71875,
+              "width": 960,
+              "height": 2267.09375,
+              "top": -1311.71875,
+              "right": 1311,
+              "bottom": 955.375,
+              "left": 351
+            },
+            "client": {
+              "left": 351,
+              "top": -1311.71875,
+              "right": 1311,
+              "bottom": 955.375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-view",
+            "class": "",
+            "rect": {
+              "x": 264,
+              "y": -3424.8125,
+              "width": 1134,
+              "height": 4380.1875,
+              "top": -3424.8125,
+              "right": 1398,
+              "bottom": 955.375,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": -3424.8125,
+              "right": 1398,
+              "bottom": 955.375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "main",
+            "class": "shell",
+            "rect": {
+              "x": 222,
+              "y": -3582,
+              "width": 1218,
+              "height": 4617.21875,
+              "top": -3582,
+              "right": 1440,
+              "bottom": 1035.21875,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -3582,
+              "right": 1440,
+              "bottom": 1035.218750000001
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "app-body",
+            "rect": {
+              "x": 222,
+              "y": -3654,
+              "width": 1218,
+              "height": 4689.21875,
+              "top": -3654,
+              "right": 1440,
+              "bottom": 1035.21875,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -3654,
+              "right": 1440,
+              "bottom": 1035.218750000001
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "app-shell",
+            "rect": {
+              "x": 0,
+              "y": -3654,
+              "width": 1440,
+              "height": 4689.21875,
+              "top": -3654,
+              "right": 1440,
+              "bottom": 1035.21875,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -3654,
+              "right": 1440,
+              "bottom": 1035.218750000001
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "",
+            "rect": {
+              "x": 0,
+              "y": -3654,
+              "width": 1440,
+              "height": 4689.21875,
+              "top": -3654,
+              "right": 1440,
+              "bottom": 1035.21875,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -3654,
+              "right": 1440,
+              "bottom": 1035.218750000001
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "",
+            "rect": {
+              "x": 0,
+              "y": -3654,
+              "width": 1440,
+              "height": 4689.21875,
+              "top": -3654,
+              "right": 1440,
+              "bottom": 1035.21875,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -3654,
+              "right": 1440,
+              "bottom": -2753.9580134357
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          }
+        ],
+        "elementRect": {
+          "x": 923.4375,
+          "y": -476.203125,
+          "width": 329.546875,
+          "height": 360,
+          "top": -476.203125,
+          "right": 1252.984375,
+          "bottom": -116.203125,
+          "left": 923.4375
+        },
+        "textOffset": 568,
+        "textLength": 1182,
+        "visibleSample": false
+      }
+    },
+    "A1": "T_1d6619d3-23c0-4859-a9bd-353b55798826",
+    "current": "T_1d6619d3-23c0-4859-a9bd-353b55798826",
+    "A2": "T_ffc85976-55da-4b4b-9642-a81b6c65b0d5",
+    "H": {
+      "at": "2026-10-22T19:55:01.969Z",
+      "method": "clipboard",
+      "revision": 28,
+      "chars": 7342,
+      "digest": "4175eb1c",
+      "work": {
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+      },
+      "aiExcluded": false,
+      "legacyText": null,
+      "returnId": "H_4c20b080-148b-4fe7-b603-ae800fcde3ae",
+      "background": {
+        "version": "background.1",
+        "revision": 26,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_131df6d4-c8a8-4f01-97d0-640197cae31c",
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+        }
+      },
+      "anchor": {
+        "version": "anchor.2",
+        "areaId": "A_131df6d4-c8a8-4f01-97d0-640197cae31c",
+        "understanding": 2,
+        "stamp": {
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [
+            "T_1d6619d3-23c0-4859-a9bd-353b55798826:1a2ad72d831bc4523887eedf4846f2708232a3ab6bd6251f1d62d596fd53aa8c"
+          ],
+          "version": "plan.2",
+          "revision": 0,
+          "ancestors": []
+        }
+      }
+    }
+  },
+  {
+    "viewport": 1280,
+    "pre": {
+      "revision": "2",
+      "selectedTextSHA256": "b36f60139fde9aa65ee532f5cdd0286dc07834effc0b3093b0d94f3babe7e3ad",
+      "body": {
+        "scrollTop": 0,
+        "client": 446,
+        "total": 584,
+        "max": 138,
+        "rect": {
+          "x": 840.4375,
+          "y": 269.078125,
+          "width": 350.546875,
+          "height": 446.390625,
+          "top": 269.078125,
+          "right": 1190.984375,
+          "bottom": 715.46875,
+          "left": 840.4375
+        }
+      },
+      "summary": {
+        "scrollTop": 275,
+        "scrollHeight": 907,
+        "clientHeight": 358,
+        "rect": {
+          "x": 843.4375,
+          "y": 386.859375,
+          "width": 329.546875,
+          "height": 360,
+          "top": 386.859375,
+          "right": 1172.984375,
+          "bottom": 746.859375,
+          "left": 843.4375
+        },
+        "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.\n\n검토 맥락 1: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 2: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 3: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 4: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n[중간29] 안내 표시30과 실제 보관7은 다른 역할이다. 직접 입력한 범위와 완료 조건을 그대로 읽고, 필요한 안내 표시만 고친다.\n\n대조 메모 5: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 6: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 7: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 8: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다."
+      },
+      "caption": "이전 기준의 설명 · 현재 인계 참고에는 포함되지 않아요. 구상·조건·직접 쓴 작업문 또는 포함 맥락의 기준이 바뀌었어요.",
+      "sample": {
+        "token": "[중간29] 안내 표시30과 실제 보관7은 다른 역할이다.",
+        "rects": [
+          {
+            "raw": {
+              "x": 856.4375,
+              "y": 586.359375,
+              "width": 252.453125,
+              "height": 17,
+              "top": 586.359375,
+              "right": 1108.890625,
+              "bottom": 603.359375,
+              "left": 856.4375
+            },
+            "clip": {
+              "left": 856.4375,
+              "top": 586.359375,
+              "right": 1108.890625,
+              "bottom": 603.359375
+            },
+            "positive": true,
+            "hit": true,
+            "hitNode": "<div class=\"source-raw work-reference-summary\">[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.\n\n검토 맥락 1: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지"
+          }
+        ],
+        "allAncestorsClip": {
+          "left": 844.4361268939394,
+          "top": 387.859375,
+          "right": 1171.9857481060606,
+          "bottom": 715.46875
+        },
+        "ancestors": [
+          {
+            "id": "",
+            "class": "source-raw work-reference-summary",
+            "rect": {
+              "x": 843.4375,
+              "y": 386.859375,
+              "width": 329.546875,
+              "height": 360,
+              "top": 386.859375,
+              "right": 1172.984375,
+              "bottom": 746.859375,
+              "left": 843.4375
+            },
+            "client": {
+              "left": 844.4361268939394,
+              "top": 387.859375,
+              "right": 1171.9857481060606,
+              "bottom": 745.859375
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-reference-P_bc0e15b1-c278-4427-978f-ac2bdeee8adf-T_93ceef12-b624-490b-ab29-ae8d0e0f9ba6-A_76110357-8878-4bee-87b1-48f94dd52b2c-3-body",
+            "class": "work-reference-body",
+            "rect": {
+              "x": 840.4375,
+              "y": 269.078125,
+              "width": 350.546875,
+              "height": 446.390625,
+              "top": 269.078125,
+              "right": 1190.984375,
+              "bottom": 715.46875,
+              "left": 840.4375
+            },
+            "client": {
+              "left": 840.4375,
+              "top": 269.078125,
+              "right": 1176.0037393162393,
+              "bottom": 715.46875
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-reference-P_bc0e15b1-c278-4427-978f-ac2bdeee8adf-T_93ceef12-b624-490b-ab29-ae8d0e0f9ba6-A_76110357-8878-4bee-87b1-48f94dd52b2c-3",
+            "class": "work-reference",
+            "rect": {
+              "x": 829.4375,
+              "y": 174.28125,
+              "width": 372.546875,
+              "height": 550.1875,
+              "top": 174.28125,
+              "right": 1201.984375,
+              "bottom": 724.46875,
+              "left": 829.4375
+            },
+            "client": {
+              "left": 830.4362851876675,
+              "top": 175.2815909090909,
+              "right": 1200.9855898123324,
+              "bottom": 723.4684090909091
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "work-edit-layout",
+            "rect": {
+              "x": 300,
+              "y": 174.28125,
+              "width": 902,
+              "height": 646.84375,
+              "top": 174.28125,
+              "right": 1202,
+              "bottom": 821.125,
+              "left": 300
+            },
+            "client": {
+              "left": 300,
+              "top": 174.28125,
+              "right": 1202,
+              "bottom": 821.125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "edit-work",
+            "class": "edit-area work-reference-editor",
+            "rect": {
+              "x": 300,
+              "y": 118.484375,
+              "width": 902,
+              "height": 702.640625,
+              "top": 118.484375,
+              "right": 1202,
+              "bottom": 821.125,
+              "left": 300
+            },
+            "client": {
+              "left": 300,
+              "top": 119.48386379800853,
+              "right": 1202,
+              "bottom": 821.125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "current-work",
+            "class": "card work-card",
+            "rect": {
+              "x": 271,
+              "y": -411.65625,
+              "width": 960,
+              "height": 1302.578125,
+              "top": -411.65625,
+              "right": 1231,
+              "bottom": 890.921875,
+              "left": 271
+            },
+            "client": {
+              "left": 272,
+              "top": -410.65657377206446,
+              "right": 1230,
+              "bottom": 889.9221987720643
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work",
+            "class": "",
+            "rect": {
+              "x": 271,
+              "y": -411.65625,
+              "width": 960,
+              "height": 1302.578125,
+              "top": -411.65625,
+              "right": 1231,
+              "bottom": 890.921875,
+              "left": 271
+            },
+            "client": {
+              "left": 271,
+              "top": -411.65625,
+              "right": 1231,
+              "bottom": 890.921875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "main-column",
+            "rect": {
+              "x": 271,
+              "y": -411.65625,
+              "width": 960,
+              "height": 1396.375,
+              "top": -411.65625,
+              "right": 1231,
+              "bottom": 984.71875,
+              "left": 271
+            },
+            "client": {
+              "left": 271,
+              "top": -411.65625,
+              "right": 1231,
+              "bottom": 984.71875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "workspace",
+            "class": "workspace",
+            "rect": {
+              "x": 271,
+              "y": -411.65625,
+              "width": 960,
+              "height": 1396.375,
+              "top": -411.65625,
+              "right": 1231,
+              "bottom": 984.71875,
+              "left": 271
+            },
+            "client": {
+              "left": 271,
+              "top": -411.65625,
+              "right": 1231,
+              "bottom": 984.71875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-view",
+            "class": "",
+            "rect": {
+              "x": 264,
+              "y": -2339.8125,
+              "width": 974,
+              "height": 3324.53125,
+              "top": -2339.8125,
+              "right": 1238,
+              "bottom": 984.71875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": -2339.8125,
+              "right": 1238,
+              "bottom": 984.71875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "main",
+            "class": "shell",
+            "rect": {
+              "x": 222,
+              "y": -2497,
+              "width": 1058,
+              "height": 3561.5625,
+              "top": -2497,
+              "right": 1280,
+              "bottom": 1064.5625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -2497,
+              "right": 1280,
+              "bottom": 1064.5625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "app-body",
+            "rect": {
+              "x": 222,
+              "y": -2569,
+              "width": 1058,
+              "height": 3633.5625,
+              "top": -2569,
+              "right": 1280,
+              "bottom": 1064.5625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -2569,
+              "right": 1280,
+              "bottom": 1064.5625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "app-shell",
+            "rect": {
+              "x": 0,
+              "y": -2569,
+              "width": 1280,
+              "height": 3633.5625,
+              "top": -2569,
+              "right": 1280,
+              "bottom": 1064.5625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -2569,
+              "right": 1280,
+              "bottom": 1064.5625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "",
+            "rect": {
+              "x": 0,
+              "y": -2569,
+              "width": 1280,
+              "height": 3633.5625,
+              "top": -2569,
+              "right": 1280,
+              "bottom": 1064.5625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -2569,
+              "right": 1280,
+              "bottom": 1064.5625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "",
+            "rect": {
+              "x": 0,
+              "y": -2569,
+              "width": 1280,
+              "height": 3633.5625,
+              "top": -2569,
+              "right": 1280,
+              "bottom": 1064.5625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -2569,
+              "right": 1280,
+              "bottom": -1849.086681342873
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          }
+        ],
+        "elementRect": {
+          "x": 843.4375,
+          "y": 386.859375,
+          "width": 329.546875,
+          "height": 360,
+          "top": 386.859375,
+          "right": 1172.984375,
+          "bottom": 746.859375,
+          "left": 843.4375
+        },
+        "textOffset": 568,
+        "textLength": 1182,
+        "visibleSample": true
+      }
+    },
+    "post": {
+      "revision": "2",
+      "selectedTextSHA256": "b36f60139fde9aa65ee532f5cdd0286dc07834effc0b3093b0d94f3babe7e3ad",
+      "body": {
+        "scrollTop": 0,
+        "client": 446,
+        "total": 584,
+        "max": 138,
+        "rect": {
+          "x": 840.4375,
+          "y": -714.328125,
+          "width": 350.546875,
+          "height": 446.390625,
+          "top": -714.328125,
+          "right": 1190.984375,
+          "bottom": -267.9375,
+          "left": 840.4375
+        }
+      },
+      "summary": {
+        "scrollTop": 0,
+        "scrollHeight": 907,
+        "clientHeight": 358,
+        "rect": {
+          "x": 843.4375,
+          "y": -596.546875,
+          "width": 329.546875,
+          "height": 360,
+          "top": -596.546875,
+          "right": 1172.984375,
+          "bottom": -236.546875,
+          "left": 843.4375
+        },
+        "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.\n\n검토 맥락 1: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 2: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 3: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n검토 맥락 4: 안내 화면의 표시는 30일로 읽는다. 실제 보관 동작은 7일 유지이며 배포나 정책 변경을 요청하지 않는다. 이 설명은 합성 자료의 표현을 정정한 사용자 참고이고 실행 결과나 검증된 사실이 아니다.\n\n[중간29] 안내 표시30과 실제 보관7은 다른 역할이다. 직접 입력한 범위와 완료 조건을 그대로 읽고, 필요한 안내 표시만 고친다.\n\n대조 메모 5: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 6: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 7: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다.\n\n대조 메모 8: 자료 찾기 B의 구상과 보고 원문은 이 설명으로 바뀌지 않는다. 이전 인계의 네 값은 당시 사본으로 보존하며, 설명의 현재성은 작업문을 실제 고친 뒤 다시 확인한다. 앱의 의미 검증이나 자동 정책 변경으로 해석하지 않는다."
+      },
+      "caption": "이후 새 설명이 있어 이전 기록을 읽고 있어요. 현재 인계 참고에는 포함되지 않아요.",
+      "newer": {
+        "hidden": false,
+        "text": "새 설명이 있어요. 읽던 본문은 그대로예요. 닫고 다시 열면 새 설명을 읽을 수 있어요."
+      },
+      "sample": {
+        "token": "[중간29] 안내 표시30과 실제 보관7은 다른 역할이다.",
+        "rects": [
+          {
+            "raw": {
+              "x": 856.4375,
+              "y": -122.046875,
+              "width": 252.453125,
+              "height": 17,
+              "top": -122.046875,
+              "right": 1108.890625,
+              "bottom": -105.046875,
+              "left": 856.4375
+            },
+            "clip": {
+              "left": 856.4375,
+              "top": 0,
+              "right": 1108.890625,
+              "bottom": -267.93749999999994
+            },
+            "positive": false,
+            "hit": false,
+            "hitNode": null
+          }
+        ],
+        "allAncestorsClip": {
+          "left": 844.4361268939394,
+          "top": 0,
+          "right": 1171.9857481060606,
+          "bottom": -267.93749999999994
+        },
+        "ancestors": [
+          {
+            "id": "",
+            "class": "source-raw work-reference-summary",
+            "rect": {
+              "x": 843.4375,
+              "y": -596.546875,
+              "width": 329.546875,
+              "height": 360,
+              "top": -596.546875,
+              "right": 1172.984375,
+              "bottom": -236.546875,
+              "left": 843.4375
+            },
+            "client": {
+              "left": 844.4361268939394,
+              "top": -595.546875,
+              "right": 1171.9857481060606,
+              "bottom": -237.546875
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-reference-P_bc0e15b1-c278-4427-978f-ac2bdeee8adf-T_93ceef12-b624-490b-ab29-ae8d0e0f9ba6-A_76110357-8878-4bee-87b1-48f94dd52b2c-3-body",
+            "class": "work-reference-body",
+            "rect": {
+              "x": 840.4375,
+              "y": -714.328125,
+              "width": 350.546875,
+              "height": 446.390625,
+              "top": -714.328125,
+              "right": 1190.984375,
+              "bottom": -267.9375,
+              "left": 840.4375
+            },
+            "client": {
+              "left": 840.4375,
+              "top": -714.328125,
+              "right": 1176.0037393162393,
+              "bottom": -267.93749999999994
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-reference-P_bc0e15b1-c278-4427-978f-ac2bdeee8adf-T_93ceef12-b624-490b-ab29-ae8d0e0f9ba6-A_76110357-8878-4bee-87b1-48f94dd52b2c-3",
+            "class": "work-reference",
+            "rect": {
+              "x": 829.4375,
+              "y": -846.125,
+              "width": 372.546875,
+              "height": 587.1875,
+              "top": -846.125,
+              "right": 1201.984375,
+              "bottom": -258.9375,
+              "left": 829.4375
+            },
+            "client": {
+              "left": 830.4362851876675,
+              "top": -845.1246805792164,
+              "right": 1200.9855898123324,
+              "bottom": -259.9378194207836
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "work-edit-layout",
+            "rect": {
+              "x": 300,
+              "y": -905.78125,
+              "width": 902,
+              "height": 646.84375,
+              "top": -905.78125,
+              "right": 1202,
+              "bottom": -258.9375,
+              "left": 300
+            },
+            "client": {
+              "left": 300,
+              "top": -905.78125,
+              "right": 1202,
+              "bottom": -258.9375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "edit-work",
+            "class": "edit-area work-reference-editor",
+            "rect": {
+              "x": 300,
+              "y": -961.578125,
+              "width": 902,
+              "height": 702.640625,
+              "top": -961.578125,
+              "right": 1202,
+              "bottom": -258.9375,
+              "left": 300
+            },
+            "client": {
+              "left": 300,
+              "top": -960.5786362019915,
+              "right": 1202,
+              "bottom": -258.9375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "current-work",
+            "class": "card work-card",
+            "rect": {
+              "x": 271,
+              "y": -1491.71875,
+              "width": 960,
+              "height": 1302.578125,
+              "top": -1491.71875,
+              "right": 1231,
+              "bottom": -189.140625,
+              "left": 271
+            },
+            "client": {
+              "left": 272,
+              "top": -1490.7190737720646,
+              "right": 1230,
+              "bottom": -190.14030122793565
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "work",
+            "class": "",
+            "rect": {
+              "x": 271,
+              "y": -1491.71875,
+              "width": 960,
+              "height": 1302.578125,
+              "top": -1491.71875,
+              "right": 1231,
+              "bottom": -189.140625,
+              "left": 271
+            },
+            "client": {
+              "left": 271,
+              "top": -1491.71875,
+              "right": 1231,
+              "bottom": -189.140625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "main-column",
+            "rect": {
+              "x": 271,
+              "y": -1491.71875,
+              "width": 960,
+              "height": 2253.140625,
+              "top": -1491.71875,
+              "right": 1231,
+              "bottom": 761.421875,
+              "left": 271
+            },
+            "client": {
+              "left": 271,
+              "top": -1491.71875,
+              "right": 1231,
+              "bottom": 761.421875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "workspace",
+            "class": "workspace",
+            "rect": {
+              "x": 271,
+              "y": -1491.71875,
+              "width": 960,
+              "height": 2253.140625,
+              "top": -1491.71875,
+              "right": 1231,
+              "bottom": 761.421875,
+              "left": 271
+            },
+            "client": {
+              "left": 271,
+              "top": -1491.71875,
+              "right": 1231,
+              "bottom": 761.421875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "work-view",
+            "class": "",
+            "rect": {
+              "x": 264,
+              "y": -3604.8125,
+              "width": 974,
+              "height": 4366.234375,
+              "top": -3604.8125,
+              "right": 1238,
+              "bottom": 761.421875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": -3604.8125,
+              "right": 1238,
+              "bottom": 761.421875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "main",
+            "class": "shell",
+            "rect": {
+              "x": 222,
+              "y": -3762,
+              "width": 1058,
+              "height": 4603.265625,
+              "top": -3762,
+              "right": 1280,
+              "bottom": 841.265625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -3762,
+              "right": 1280,
+              "bottom": 841.265625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "app-body",
+            "rect": {
+              "x": 222,
+              "y": -3834,
+              "width": 1058,
+              "height": 4675.265625,
+              "top": -3834,
+              "right": 1280,
+              "bottom": 841.265625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -3834,
+              "right": 1280,
+              "bottom": 841.265625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "app-shell",
+            "rect": {
+              "x": 0,
+              "y": -3834,
+              "width": 1280,
+              "height": 4675.265625,
+              "top": -3834,
+              "right": 1280,
+              "bottom": 841.265625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -3834,
+              "right": 1280,
+              "bottom": 841.265625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "",
+            "rect": {
+              "x": 0,
+              "y": -3834,
+              "width": 1280,
+              "height": 4675.265625,
+              "top": -3834,
+              "right": 1280,
+              "bottom": 841.265625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -3834,
+              "right": 1280,
+              "bottom": 841.265625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "id": "",
+            "class": "",
+            "rect": {
+              "x": 0,
+              "y": -3834,
+              "width": 1280,
+              "height": 4675.265625,
+              "top": -3834,
+              "right": 1280,
+              "bottom": 841.265625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -3834,
+              "right": 1280,
+              "bottom": -3113.959090909091
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "display": "block",
+            "visibility": "visible"
+          }
+        ],
+        "elementRect": {
+          "x": 843.4375,
+          "y": -596.546875,
+          "width": 329.546875,
+          "height": 360,
+          "top": -596.546875,
+          "right": 1172.984375,
+          "bottom": -236.546875,
+          "left": 843.4375
+        },
+        "textOffset": 568,
+        "textLength": 1182,
+        "visibleSample": false
+      }
+    },
+    "A1": "T_93ceef12-b624-490b-ab29-ae8d0e0f9ba6",
+    "current": "T_93ceef12-b624-490b-ab29-ae8d0e0f9ba6",
+    "A2": "T_2a001e9b-0aa8-401b-8076-12bc919e9e19",
+    "H": {
+      "at": "2026-10-22T19:55:11.901Z",
+      "method": "clipboard",
+      "revision": 28,
+      "chars": 7342,
+      "digest": "f7d2767c",
+      "work": {
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+      },
+      "aiExcluded": false,
+      "legacyText": null,
+      "returnId": "H_6c359549-d2dd-47b3-9ff2-747b686c31f0",
+      "background": {
+        "version": "background.1",
+        "revision": 26,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_76110357-8878-4bee-87b1-48f94dd52b2c",
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+        }
+      },
+      "anchor": {
+        "version": "anchor.2",
+        "areaId": "A_76110357-8878-4bee-87b1-48f94dd52b2c",
+        "understanding": 2,
+        "stamp": {
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [
+            "T_93ceef12-b624-490b-ab29-ae8d0e0f9ba6:1a2ad72d831bc4523887eedf4846f2708232a3ab6bd6251f1d62d596fd53aa8c"
+          ],
+          "version": "plan.2",
+          "revision": 0,
+          "ancestors": []
+        }
+      }
+    }
+  }
+]

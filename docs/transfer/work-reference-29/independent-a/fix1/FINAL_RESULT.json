@@ -1,0 +1,42 @@
+{
+  "overall": "FAIL / product reading-position loss, candidate acceptance pending root",
+  "runtimeBase": "2a7d078124e96243e949244bec945cc8da2c47ec",
+  "testsOnlyFinal": "709e402b2e44a4864139eda03201e186f5761c6f",
+  "coreNormalUI": {
+    "PC": 2,
+    "complete": 2,
+    "childExit": 0,
+    "reference": "normal-ui/result.json",
+    "limitation": "initial outer-body-only observation omitted nested scroll; not overall PASS"
+  },
+  "nestedProbe": {
+    "PC": 2,
+    "complete": 2,
+    "firstKeyDOMFocusBothScrollsPreserved": true,
+    "arrivalSummaryScrollBefore": 275,
+    "arrivalSummaryScrollAfter": 0,
+    "selectedRevisionUnchanged": 2,
+    "selectedTextUnchanged": true,
+    "currentA1Unchanged": true,
+    "childExit": 1,
+    "outerExit": 1,
+    "fatal": null,
+    "reference": "nested-scroll/result.json"
+  },
+  "projectBoundary1440": {
+    "childExit": 0,
+    "outerExit": 0,
+    "reference": "project-boundary/result.json"
+  },
+  "author709": {
+    "scope": "exact synthetic public-domain fixture suite, not independent normal UI",
+    "methods": 8,
+    "ok": 6,
+    "failed": 2,
+    "failure": "both test02 reach(BODY), native scroll -4 at host0 timeout before first key",
+    "childExit": 1,
+    "outerExit": 1,
+    "reference": "author709/stderr.log"
+  },
+  "firstPreparationErrorsPreserved": true
+}

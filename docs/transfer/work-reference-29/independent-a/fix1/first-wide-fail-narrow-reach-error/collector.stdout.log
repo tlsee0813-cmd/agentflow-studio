@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle29-nested-scroll/check.py", line 22, in <module>
+    try:u.runProbe(w,h)
+        ^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-nested-scroll/check.py", line 13, in runProbe
+    self.prepare(w,h);self.map();self.visibleInfo('보관 안내');self.text('설명 오류 고치기');self.fill(self.p.get_by_role('textbox',name='영역 설명 정정',exact=True),LONG);self.button('정정 저장');self.readA();self.click(self.p.locator('#task-view-continue'),'A current');self.openRef();self.moveSummary()
+                                                                                                                                                                                                                                                                                               ^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-nested-scroll/check.py", line 6, in moveSummary
+    q=self.summary();self.reach(q);m=q.evaluate('e=>e.scrollHeight-e.clientHeight');assert m>0
+                     ^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-nested-scroll/support.py", line 46, in reach
+    r=g['rect'];c=g['clip'];dy=r['top']-c['top']-5 if r['top']<c['top'] else r['bottom']-c['bottom']+5;panel=q.locator('xpath=ancestor::*[@id="area-panel-body"]');self.wheel(max(-400,min(400,dy)),panel if panel.count() else None)
+                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-nested-scroll/support.py", line 40, in wheel
+    try:self.p.mouse.move(x,y);self.p.mouse.wheel(0,dy);v=self.p.evaluate('async()=>await window.__ind23Wheel.promise');self.log('native wheel',v);assert v['ok'],v
+                                                                                                                                                          ~^^^^^^
+AssertionError: {'ok': False, 'reason': 'native-scroll-deadline', 'events': [{'type': 'wheel', 'delta': 36.78125, 'target': 'main'}], 'y': 2890}
+
+

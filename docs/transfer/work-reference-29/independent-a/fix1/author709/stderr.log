@@ -1,0 +1,47 @@
+test_01_actual_editor_B_not_compose_or_map_A (__main__.WorkDescription29.test_01_actual_editor_B_not_compose_or_map_A) ... ok
+test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference (__main__.WorkDescription29.test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference) ... FAIL
+test_03_new_applied_revision_requires_explicit_reopen (__main__.WorkDescription29.test_03_new_applied_revision_requires_explicit_reopen) ... ok
+test_04_task_project_lifecycle_and_held_only (__main__.WorkDescription29.test_04_task_project_lifecycle_and_held_only) ... ok
+test_01_actual_editor_B_not_compose_or_map_A (__main__.WorkDescription29Wide.test_01_actual_editor_B_not_compose_or_map_A) ... ok
+test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference (__main__.WorkDescription29Wide.test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference) ... FAIL
+test_03_new_applied_revision_requires_explicit_reopen (__main__.WorkDescription29Wide.test_03_new_applied_revision_requires_explicit_reopen) ... ok
+test_04_task_project_lifecycle_and_held_only (__main__.WorkDescription29Wide.test_04_task_project_lifecycle_and_held_only) ... ok
+
+======================================================================
+FAIL: test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference (__main__.WorkDescription29.test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle29-candidate/app/continuity/tests/work-description29_browser.py", line 142, in test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference
+    self.reach(BODY);self.wheel(BODY,150)
+    ^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-candidate/app/continuity/tests/received20_browser.py", line 71, in reach
+    self.wheel(sel,max(-220,min(220,delta)),marker)
+  File "/workspace/browser-env/cycle29-candidate/app/continuity/tests/received20_browser.py", line 59, in wheel
+    result=self.page.evaluate('async()=>await window.__received20Wheel.promise');self.yes('native scroll event completion',result['ok'],result)
+                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-candidate/app/continuity/tests/work-description29_browser.py", line 75, in yes
+    self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : native scroll event completion
+
+======================================================================
+FAIL: test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference (__main__.WorkDescription29Wide.test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle29-candidate/app/continuity/tests/work-description29_browser.py", line 142, in test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference
+    self.reach(BODY);self.wheel(BODY,150)
+    ^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-candidate/app/continuity/tests/received20_browser.py", line 71, in reach
+    self.wheel(sel,max(-220,min(220,delta)),marker)
+  File "/workspace/browser-env/cycle29-candidate/app/continuity/tests/received20_browser.py", line 59, in wheel
+    result=self.page.evaluate('async()=>await window.__received20Wheel.promise');self.yes('native scroll event completion',result['ok'],result)
+                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-candidate/app/continuity/tests/work-description29_browser.py", line 75, in yes
+    self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : native scroll event completion
+
+----------------------------------------------------------------------
+Ran 8 tests in 33.562s
+
+FAILED (failures=2)

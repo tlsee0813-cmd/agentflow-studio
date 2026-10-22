@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle29-nested-scroll/check.py"
+  ],
+  "startUTC": "2026-10-22T19:53:51.486615+00:00",
+  "endUTC": "2026-10-22T19:54:14.142644+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "11acac96b4e53a21c4f421cd20987ca12803ee5f5668180f1c9d69662dfcf2b9",
+  "collectorPlannedExit": 1
+}
