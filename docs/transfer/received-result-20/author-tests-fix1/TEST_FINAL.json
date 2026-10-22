@@ -1,0 +1,366 @@
+{
+  "overlayRoot": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+  "baseline": "da3b0171c807dc7241f5fff0ce4f19ba3f2ef463",
+  "contractAddendum": "e8ba6fee4fc6121b79858ad2d4408eebd881b02d/docs/cycles/2026-10-22-received-result-20/INPUT.md",
+  "ownedPublicationFiles": [
+    {
+      "path": "app/continuity/tests/received20_browser.py",
+      "bytes": 32567,
+      "sha256": "F489370D8A945908EB0F0506570831C515EDB353BC55DA9396D2CA51527C853E"
+    },
+    {
+      "path": "app/continuity/tests/received20-fixtures.mjs",
+      "bytes": 4781,
+      "sha256": "C42ED4261CA5000DAC016CD17DFF1BEB202BCA24FE9C19082E1200EC02B58338"
+    },
+    {
+      "path": "app/continuity/tests/home15_browser.py",
+      "bytes": 36020,
+      "sha256": "CA9CFB65F7F7B45274FDF236F0E83477862A0D3A78006D4DB6EC3B3FB7FAB992"
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "bytes": 11267,
+      "sha256": "D1F5A36DF849E4457B8DF2DFCB5CB0394566A924F5690FE18BF4593F0B564177"
+    },
+    {
+      "path": "app/continuity/tests/understanding17_browser.py",
+      "bytes": 42855,
+      "sha256": "7F5B7AC1386480C1D0D72E3380B8AA1ABC5083E6EAD2E4B9780E9210E99265B2"
+    }
+  ],
+  "patch": "evidence/received20-tests.patch",
+  "snapshot": "evidence/frozen-test-sources",
+  "productReadOnly": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha256": "3431CB1344E22C291EFD28334C76257B522325B61B037270AC9EF76CEEBA0151"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0"
+    }
+  ],
+  "compiledFixtureRuntimeReadOnly": [
+    {
+      "path": "app/continuity/dist/public/shared/domain.js",
+      "sha256": "A9E6E19775BB35BAD214BF9A59486731958874116607E2EA5EC3CCA1766F619E"
+    },
+    {
+      "path": "app/continuity/dist/public/shared/types.js",
+      "sha256": "D1DD2C914E0332A57BB6875E4CBD660D95EC529E2038E04A2E69C585C4DEAF53"
+    },
+    {
+      "path": "app/continuity/dist/public/shared/validation.js",
+      "sha256": "4B7B584C30A3607CEBD93B3ECB4B7E98472A0963CA8DCD1E5F35F4B4C62F075A"
+    }
+  ],
+  "scope": "Tests/fixture/workflow overlay only. No product source changes, git index writes, commit or push. Generated dist junction is read-only use of author build and is excluded from publication.",
+  "coverage": [
+    "Both PCs1280x720/1440x900: two bounded source-linked reconstructions, return1/no-understanding and return2/held; Bcurrent/draft/target/aux drafts, prior task/source bytes, area ideas/layout and unsaved B note/camera retained. Explicit receipt matches actual reportT, root request, export task and H. Product13 export-task differs from root request.",
+    "Exact H1 four-value export snapshot vs newer H2 and current root work all differ. Folded snapshot and full report are explicitly read; report tail Range/clip/hit uses native wheel. Raw JSON textarea plus actual downloaded UTF8 bytes stay exact. Reading/return restores actual work caller focus/Y/disclosures without saved writes or AI calls.",
+    "Same H different report creates a distinct actual T; whitespace-different exact duplicate links original first T rather than latest second T and preserves entire persisted project. Wrong task with existing H is rejected after preview readiness. New B input and project switch cannot relink old receipt.",
+    "Named faults: actual Web Lock holds save; duplicate receipt while save pending; Storage.setItem quota injection then lock release. Actual pending report identity must persist into visible memory-only status and exact backup. Archived owner stays archived, no active locate substitute; its action opens existing B draft rather than relabelling it as a new A request. Held description and exact snapshot; legal pasted report has no guessed snapshot. A second actual backup after both reads compares the entire in-memory project, independently of unchanged stored bytes.",
+    "Actual pending save -> user History navigation -> release cannot auto-open work/reader. Separate no-draft fixture for recordsR -> B work -> A reader -> real owner locate -> native newC -> work return keeps C and actual stable title focus -> receipt reopen -> exact parent recordsR caller. Existing records reader owner locate roundtrip checked before compound path.",
+    "Independent located-only case starts without a draft; user explicitly opens an A request input (current B remains, target A, no new task). Capture this post-action work baseline. Original origin=null/located=S slots remain separate after receipt roundtrip; only one locate-back, no synthetic work origin or ghost self-return. S exact caller/camera and baseline saved data retained.",
+    "390 minimum only: exact receipt/read/close, no horizontal overflow, B/draft retained. Existing WORKSPACE19/AREA18 and all earlier CI steps preserved."
+  ],
+  "nativePreparation": "Wheel is native input, observed trusted activation and matching actual scrollend with bounded failure-only timeout and cleanup/raw diagnostics. No fixed sleep, CSS formula, DOM scrolling/resize or product hook in RECEIVED20. Explicit return assertions observe immediately without scrolling to repair the caller.",
+  "home15Followup": "Cycle20 regression-strengthening candidate from separate19 followup: phase pageY/max/focus facts in test08 and actual middle background before body End in test10. All138 prior expectation calls/native key calls remain; no added fixed waits. Not a claimed fix for prior19 CI272!=120; extra observations may influence timing.",
+  "checks": [
+    {
+      "file": "received20-afc-followup-static.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T15:25:11.090Z",
+        "end": "2026-10-22T15:25:11.594Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-ci-prepare.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/add-ci.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:50:25.529Z",
+        "end": "2026-10-22T14:50:25.624Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-final-freeze.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/freeze.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T15:05:27.373Z",
+        "end": "2026-10-22T15:05:27.496Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-final-source-check.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T15:05:26.921Z",
+        "end": "2026-10-22T15:05:27.296Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-fixture-smoke-ready.exit.json",
+      "raw": {
+        "command": "node",
+        "args": [
+          "--input-type=module",
+          "-e",
+          "import {received20Fixture} from \"./app/continuity/tests/received20-fixtures.mjs\";import * as D from \"./app/continuity/dist/public/shared/domain.js\";import {parseProject} from \"./app/continuity/dist/public/shared/validation.js\";for(const cid of [\"powertoys\",\"product13\"]){for(const archived of [false,true]){const s=received20Fixture(cid,{archived}),b=s.p,n=D.importResultFile(b,s.raw),v=D.inspectResultFile(n,s.raw),second=D.importResultFile(n,JSON.stringify(s.variant));if(n.currentTaskId!==s.B||n.draft!==b.draft||v.duplicate.id!==n.tasks.at(-1).id||D.importResultFile(n,s.raw)!==n||second.tasks.length!==n.tasks.length+1)throw Error(\"receipt/data invariant\");if(JSON.stringify(parseProject(JSON.stringify(n)))!==JSON.stringify(n))throw Error(\"roundtrip\");console.log(JSON.stringify({cid,archived,root:s.A,exported:s.exported,distinct: s.A!==s.exported,H:s.H1,duplicate:v.duplicate.id,currentB:n.currentTaskId===s.B,reportLength:s.file.report.length,held:n.space.understanding[s.area]?.entries?.at(-1)?.held??null}));}}"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:49:45.482Z",
+        "end": "2026-10-22T14:49:45.605Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-fixture-smoke.exit.json",
+      "raw": {
+        "command": "node",
+        "args": [
+          "--input-type=module",
+          "-e",
+          "import {received20Fixture} from \"./app/continuity/tests/received20-fixtures.mjs\";import * as D from \"./app/continuity/dist/public/shared/domain.js\";import {parseProject} from \"./app/continuity/dist/public/shared/validation.js\";for(const cid of [\"powertoys\",\"product13\"]){for(const archived of [false,true]){const s=received20Fixture(cid,{archived}),b=s.p,n=D.importResultFile(b,s.raw),v=D.inspectResultFile(n,s.raw),second=D.importResultFile(n,JSON.stringify(s.variant));if(n.currentTaskId!==s.B||n.draft!==b.draft||v.duplicate.id!==n.tasks.at(-1).id||D.importResultFile(n,s.raw)!==n||second.tasks.length!==n.tasks.length+1)throw Error(\"receipt/data invariant\");if(JSON.stringify(parseProject(JSON.stringify(n)))!==JSON.stringify(n))throw Error(\"roundtrip\");console.log(JSON.stringify({cid,archived,root:s.A,exported:s.exported,distinct: s.A!==s.exported,H:s.H1,duplicate:v.duplicate.id,currentB:n.currentTaskId===s.B,reportLength:s.file.report.length,held:n.space.understanding[s.area]?.entries?.at(-1)?.held??null}));}}"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:49:23.111Z",
+        "end": "2026-10-22T14:49:23.186Z",
+        "status": 1,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-fixture-syntax-final.exit.json",
+      "raw": {
+        "command": "node",
+        "args": [
+          "--check",
+          "app/continuity/tests/received20-fixtures.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:58:02.015Z",
+        "end": "2026-10-22T14:58:02.080Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-fixture-syntax.exit.json",
+      "raw": {
+        "command": "node",
+        "args": [
+          "--check",
+          "work/product20-tests/app/continuity/tests/received20-fixtures.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:37:58.144Z",
+        "end": "2026-10-22T14:37:58.212Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-freeze-receipt.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/freeze.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:59:51.169Z",
+        "end": "2026-10-22T14:59:51.330Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-freeze.exit.json",
+      "raw": {
+        "command": "node",
+        "args": [
+          "--version"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:59:51.040Z",
+        "end": "2026-10-22T14:59:51.087Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-review-source-check.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T15:04:09.454Z",
+        "end": "2026-10-22T15:04:09.823Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-source-check-final.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:58:01.575Z",
+        "end": "2026-10-22T14:58:01.937Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-source-check.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:54:24.546Z",
+        "end": "2026-10-22T14:54:25.736Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-v2-afc-static.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-afc-followup.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T15:27:10.315Z",
+        "end": "2026-10-22T15:27:10.690Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-v2-fixture-smoke.exit.json",
+      "raw": {
+        "command": "node",
+        "args": [
+          "evidence/fixture-final-smoke.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T15:27:10.768Z",
+        "end": "2026-10-22T15:27:10.891Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "received20-v2-source-check.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T15:27:10.966Z",
+        "end": "2026-10-22T15:27:11.456Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    }
+  ],
+  "runtime": "Node v24.19.0 supplementary. Actual Cloud/CI Node22 + browser execution remains separate.",
+  "failureHistory": "Initial fixture smoke exit1 was missing dist after an incorrect cwd-relative junction preparation command; Node raw stderr/stdout/exit retained as received20-fixture-smoke.*. PowerShell path errors remain in tool transcript. Correct relative target linked only inside test overlay; subsequent four-combination smoke exit0. No product failure/pass inferred.",
+  "staticReviewAmendments": {
+    "originalFreeze": "evidence/v0-pre-review-857724",
+    "independentFinal": "Astra re-read browser3DDE1649…EF90F4 and unchanged fixture/HOME/workflow; no additional actionable static finding. No browser/server execution claimed.",
+    "observationsNotBrowserFailures": [
+      "Astra found located-only test05 draft/target precondition conflict; corrected to explicit no-draft A input and a post-action baseline.",
+      "Astra found new-input receipt branch skipped after invalid-file selection cleared receipt; moved live-receipt input/read check before invalid selection and removed conditional skip.",
+      "Astra found memory-read protection only observing stored project; second actual backup now compares full in-memory state.",
+      "Author found archived owner with existing B draft must offer existing-input action, not a disabled A-new-request action; assertion follows the existing draft-protection policy."
+    ]
+  },
+  "afcActualFailureFollowup": {
+    "originalFailureEvidence": "2309aec1b2caafb67e7842a6ca925342dd5064fa/docs/transfer/received-result-20/independent-v0/failure-first/NOTE.md",
+    "priorFreeze": "evidence/v1-3DDE-before-no-export",
+    "proof": "evidence/AFC_FOLLOWUP_PROOF.json",
+    "incrementalPatch": "evidence/received20-afc-followup.patch",
+    "initialReadingLimitation": "Meaningful report/idea openings remain, but some next-action controls are below the first fold. New tests record that initial geometry and verify ordinary native access with full clip/hit; do not claim initial visibility. Existing REPORT16 and SPATIAL102 guards are exact unchanged.",
+    "staticReview": "Astra directly re-reviewed F489370D…C853E/7F5B7AC…9265B2 and accepted narrow changes; root approved. No future browser pass claimed."
+  },
+  "notRun": [
+    "local server",
+    "browser tests",
+    "paid AI",
+    "provider/external execution",
+    "product type/build by this test author (separate UI author owns those checks)"
+  ],
+  "limits": "Source and static checks establish reviewable wiring only, not browser pass, usability, semantic conflict detection or solved HOME15 discrepancy. Faults and synthetic input boundaries are labelled. Independent reviewer may request narrow amendments after this freeze."
+}

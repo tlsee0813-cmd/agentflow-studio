@@ -1,0 +1,30 @@
+{
+  "priorCandidate": "afc3fbe0dd444d92560aacdd4292f20627826d79",
+  "originalFailure": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/2309aec1b2caafb67e7842a6ca925342dd5064fa/docs/transfer/received-result-20/independent-v0/failure-first/NOTE.md",
+  "priorSnapshot": "evidence/v1-3DDE-before-no-export",
+  "changedFiles": [
+    "app/continuity/tests/received20_browser.py",
+    "app/continuity/tests/understanding17_browser.py"
+  ],
+  "protectedOriginalRegressions": [
+    {
+      "file": "app/continuity/tests/spatial102_browser.py",
+      "sha256": "FA72084B885160C74AB996644A1CB4A930C0463B92B892CB613B6EA2F17E0DE8",
+      "exactHEADBytes": true
+    },
+    {
+      "file": "app/continuity/tests/report16_browser.py",
+      "sha256": "C224110C97AF99676D2FBA5E61D07626F66F552A52223C1B1CC385BB24D74276",
+      "exactHEADBytes": true
+    }
+  ],
+  "patchApplyCheck": 0,
+  "changes": [
+    "Initial reader action geometry is recorded without scrolling; ordinary native reach then retains full clipping/hit assertions. This does not establish every action is initially visible.",
+    "After changed-C return, current/focus checks happen first; normal compose/result-file summary opening prepares the next receipt read. Same-B caller/open/position assertions are unchanged.",
+    "No-file report has no export block/H/four-value/raw-file fallback, even if that pasted report itself later exported H1/H2. Actual neutral missing-context line is read under its existing recorded path.",
+    "AREA17 duplicate wording matches the new concise message while exact raw report identity, prior record count, entire saved state and T/A/H/duplicate metadata are checked."
+  ],
+  "independentStaticReview": "Astra directly verified final hashes F489370D…C853E and7F5B7AC…9265B2; no actionable issue in this narrow change. No browser/AST execution by that reviewer claimed.",
+  "limits": "Initial action can fall below the first fold for these long/busy inputs, an observed product reading-space limitation. Original6-failure run remains a failure; future11-method success not claimed. Server/browser not run locally."
+}
