@@ -1,0 +1,553 @@
+{
+  "basis": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "node": "v24.19.0",
+  "typescript": "5.8.3",
+  "provenance": [
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "gitBlob": "3a413f1da04eff073449534000cc4b0d3a567ba5",
+      "sourceSHA256": "B7218594345F34C4D9343B5CB75100DA50ACB0C650AC7370E8263984DB5C3A43",
+      "distSHA256": "A9E6E19775BB35BAD214BF9A59486731958874116607E2EA5EC3CCA1766F619E",
+      "inMemoryTranspileEqualsDist": true,
+      "newLine": "LF"
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "gitBlob": "62a75bf2cd80bd1ae31ca1eb1ccbeccd4ed77dec",
+      "sourceSHA256": "6B5865AB6E85EE19187BFE62748CD073CC90E3E7E96595DA0423C46869180316",
+      "distSHA256": "D1DD2C914E0332A57BB6875E4CBD660D95EC529E2038E04A2E69C585C4DEAF53",
+      "inMemoryTranspileEqualsDist": true,
+      "newLine": "LF"
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "gitBlob": "bc757a30e23878e6a4352ef6aa11dd44a3d7b0fa",
+      "sourceSHA256": "A6FA118A7AC14F286DDAC9FAD34CF8AF7C65EB3BEAD451B7E2ACD876BA242AA8",
+      "distSHA256": "4B7B584C30A3607CEBD93B3ECB4B7E98472A0963CA8DCD1E5F35F4B4C62F075A",
+      "inMemoryTranspileEqualsDist": true,
+      "newLine": "LF"
+    },
+    {
+      "path": "app/continuity/src/shared/plan-facts.ts",
+      "gitBlob": "6766c24cae83a8b68417c06e61c3df95fb373f18",
+      "sourceSHA256": "6BA83E873FC795C8E1ECD8E6AC82F334849E4C108EBF4149A870A0A554FD7C44",
+      "distSHA256": "33F23F4EF8ED4009D6F2B64E30E26E367B83302146CEDBC85AE910B5CA889C45",
+      "inMemoryTranspileEqualsDist": true,
+      "newLine": "LF"
+    },
+    {
+      "path": "app/continuity/src/shared/hierarchy.ts",
+      "gitBlob": "3548ad1f1b6ab44742daad2ca0f5ea4a0354d6cd",
+      "sourceSHA256": "C9E5A4D9679E6720BC5CD3B86E624904D17A5A7D22B8806D574640DDAD605FFA",
+      "distSHA256": "5D09D7C3EAC8E75B012EB69C086DFDD84DB645C9318140B5E82B883B9D919624",
+      "inMemoryTranspileEqualsDist": true,
+      "newLine": "LF"
+    },
+    {
+      "path": "app/continuity/src/shared/outcome.ts",
+      "gitBlob": "4d64d4ad7213b7aaff2adc9dfd9859835a961574",
+      "sourceSHA256": "F206DF59FF9697368820CE99F74995E9B2E2467A523A7A0217E07DC2DE29D5DD",
+      "distSHA256": "C230973C7021A31FFD27D0A0A389CF978E3DF501BA6F98817A14BD27F8C100E8",
+      "inMemoryTranspileEqualsDist": true,
+      "newLine": "LF"
+    },
+    {
+      "path": "app/continuity/src/shared/mock.ts",
+      "gitBlob": "fede7bb924608c1a73eb5c97db63001b0ff12906",
+      "sourceSHA256": "1EBC9A9B593B10AF04A4C113282F2D509B926131F6BE930C3A946CBDB052B0F2",
+      "distSHA256": "C1504250A298A86EFCBAB8DE932218CD38E2772D79A0759403DC497F829BC9EF",
+      "inMemoryTranspileEqualsDist": true,
+      "newLine": "LF"
+    }
+  ],
+  "scenario": "Fully synthetic one-part in-memory API probe; return.2 pattern matches existing understanding17-fixtures sample. Old model-like work explicitly injected through validated receive(mode:mock), not actual AI output.",
+  "inputs": {
+    "brief": "[합성] 문서 보관 안내를 정리하는 한 부분. 보관기간 자체를 여기서 새 정책으로 결정하지 않는다.",
+    "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다.",
+    "firstRequest": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+    "report": "[합성 외부 보고 · 검증 아님] SYNTH_REPORT_7_DAYS: 안내문에 보관기간이 7일로 적혀 있다고 보고했다.",
+    "externalDescription": "[합성 외부 설명] SYNTH_EXTERNAL_7_DAYS: 현재 안내문 표시는 보관기간 7일이다.",
+    "oldAIWork": {
+      "understanding": "[합성 응답 주입] 보고된 안내문 표시는 7일이라는 이해다.",
+      "scope": "[합성 응답 주입] 문서 보관 안내문만 다룬다.",
+      "next": "[합성 응답 주입] SYNTH_OLD_NEXT_7_DAYS: 안내문의 보관기간 7일 표기를 유지해 문구를 정리하라.",
+      "checks": "[합성 응답 주입] 보관기간이 7일로 표시되는지 확인하라."
+    },
+    "correction": "[합성 사용자 설명 정정] SYNTH_CORRECTED_30_DAYS: 현재 안내문 표시는 보관기간 30일이다. 앞선 설명의 7일은 잘못 적혔다.",
+    "nextRequest": "[합성 새 요청] 같은 부분의 현재 자료에 맞춰 안내 문구를 확인해줘."
+  },
+  "ids": {
+    "project": "P_5650eb17-e608-473a-935b-7324fb25e67e",
+    "area": "A_ec130125-b665-499b-8131-f3359c3e5042",
+    "A": "T_35b78e50-8512-4d68-a34b-c9beff822d67",
+    "R": "T_2f3acec0-968c-4740-bbe1-5743f44309dd",
+    "C": "T_33c2baed-e99b-4357-9f18-8e0e8dfba620",
+    "H": "H_SYNTH_DESCRIPTION_CORRECTION_PROBE"
+  },
+  "observed": {
+    "byUserRevision": 2,
+    "currentDescriptionValid": true,
+    "correctionChangesTasksSourcesBasesOrAreaIdea": false,
+    "oldFourValuesUnchanged": true,
+    "oldAIStaleAfterCorrection": false,
+    "sameTaskRegenerationPayloadEqualExceptTicket": true,
+    "correctionMarkerInSameTaskRequest": false,
+    "newRequestParentTaskId": "T_2f3acec0-968c-4740-bbe1-5743f44309dd",
+    "newRequestPreviousWorkStillOld7DayInstruction": true,
+    "correctionMarkerInNewRequest": false,
+    "correctionMarkerInExistingTaskHandoff": true,
+    "old7DayInstructionInCurrentWorkSection": true,
+    "correctionAttributedAsUserEditedReference": true,
+    "correctionMarkerInNewTaskHandoff": true,
+    "originalReportRetained": true,
+    "originalReturnRawRetained": true,
+    "roundtripPreservesCurrentDescriptionAndOldWork": true
+  },
+  "factualConflict": "A valid user-edited current description says30days while the same existing task handoff still contains the explicit synthetic7day instruction in its current-work section. The old report itself remaining is not counted as an error.",
+  "contractLimit": "Description is attributed reference, not an automatically adopted user decision/instruction. This reproduces simultaneous incompatible text and a transport/freshness boundary, not a settled policy violation. No automatic meaning/conflict detection claimed.",
+  "aiQuality": "No provider or real semantic regeneration was run. Whether an AI would produce/follow/correct the synthetic7day instruction is unverified. New request body carries only what the public domain buildRequest actually constructs.",
+  "sourceFacts": {
+    "beforeTicket": {
+      "projectId": "P_5650eb17-e608-473a-935b-7324fb25e67e",
+      "revision": 9,
+      "requestId": "R_2fb8b1fa-4d7c-4799-974f-e7745c74dfa6",
+      "taskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67"
+    },
+    "afterTicket": {
+      "projectId": "P_5650eb17-e608-473a-935b-7324fb25e67e",
+      "revision": 10,
+      "requestId": "R_47d2d8db-4066-4d6a-aeec-3792711aa1d1",
+      "taskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67"
+    },
+    "sameTaskRequestAfterCorrection": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_5650eb17-e608-473a-935b-7324fb25e67e",
+        "revision": 10,
+        "requestId": "R_47d2d8db-4066-4d6a-aeec-3792711aa1d1",
+        "taskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67"
+      },
+      "projectName": "나의 프로젝트",
+      "sources": [
+        {
+          "id": "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d",
+          "kind": "request",
+          "text": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+          "at": "2026-10-22T17:09:00.685Z",
+          "taskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+          "status": "requested",
+          "sourceId": "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d",
+          "revision": 5,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67",
+        "inputs": [
+          {
+            "sourceId": "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D1",
+            "sourceId": "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d",
+            "revision": 5,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 4,
+        "brief": "[합성] 문서 보관 안내를 정리하는 한 부분. 보관기간 자체를 여기서 새 정책으로 결정하지 않는다.",
+        "area": {
+          "id": "A_ec130125-b665-499b-8131-f3359c3e5042",
+          "name": "문서 보관 안내 · 합성",
+          "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다."
+        }
+      }
+    },
+    "newRequest": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_5650eb17-e608-473a-935b-7324fb25e67e",
+        "revision": 13,
+        "requestId": "R_0cd62af6-d35c-4c81-a807-721c0d98ff63",
+        "taskId": "T_33c2baed-e99b-4357-9f18-8e0e8dfba620"
+      },
+      "projectName": "나의 프로젝트",
+      "sources": [
+        {
+          "id": "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d",
+          "kind": "request",
+          "text": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+          "at": "2026-10-22T17:09:00.685Z",
+          "taskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67",
+          "replyTo": null,
+          "disposition": "provided"
+        },
+        {
+          "id": "S_bc803b09-3956-4ae5-9fec-96b5a7cceb4c",
+          "kind": "report",
+          "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_35b78e50-8512-4d68-a34b-c9beff822d67의 인계 H_SYNTH_DESCRIPTION_CORRECTION_PROBE / r6에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[합성 외부 보고 · 검증 아님] SYNTH_REPORT_7_DAYS: 안내문에 보관기간이 7일로 적혀 있다고 보고했다.",
+          "at": "2026-10-22T17:09:00.691Z",
+          "taskId": "T_2f3acec0-968c-4740-bbe1-5743f44309dd",
+          "replyTo": null,
+          "disposition": "provided"
+        },
+        {
+          "id": "S_dc9dd826-eb7a-451d-b498-c1dc344bfb33",
+          "kind": "request",
+          "text": "[합성 새 요청] 같은 부분의 현재 자료에 맞춰 안내 문구를 확인해줘.",
+          "at": "2026-10-22T17:09:00.695Z",
+          "taskId": "T_33c2baed-e99b-4357-9f18-8e0e8dfba620",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+          "status": "requested",
+          "sourceId": "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d",
+          "revision": 5,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D2",
+          "text": "[합성 새 요청] 같은 부분의 현재 자료에 맞춰 안내 문구를 확인해줘.",
+          "status": "requested",
+          "sourceId": "S_dc9dd826-eb7a-451d-b498-c1dc344bfb33",
+          "revision": 13,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_33c2baed-e99b-4357-9f18-8e0e8dfba620",
+        "inputs": [
+          {
+            "sourceId": "S_dc9dd826-eb7a-451d-b498-c1dc344bfb33",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D2",
+            "sourceId": "S_dc9dd826-eb7a-451d-b498-c1dc344bfb33",
+            "revision": 13,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": {
+        "taskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67",
+        "understanding": "[합성 응답 주입] 보고된 안내문 표시는 7일이라는 이해다.",
+        "scope": "[합성 응답 주입] 문서 보관 안내문만 다룬다.",
+        "next": "[합성 응답 주입] SYNTH_OLD_NEXT_7_DAYS: 안내문의 보관기간 7일 표기를 유지해 문구를 정리하라.",
+        "checks": "[합성 응답 주입] 보관기간이 7일로 표시되는지 확인하라.",
+        "aiTextExcluded": false,
+        "manualConditionFields": []
+      },
+      "previousIntent": {
+        "taskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67",
+        "value": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d",
+              "revision": 5
+            }
+          ]
+        },
+        "manualGoal": null,
+        "manualConditions": null
+      },
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 12,
+        "brief": "[합성] 문서 보관 안내를 정리하는 한 부분. 보관기간 자체를 여기서 새 정책으로 결정하지 않는다.",
+        "area": {
+          "id": "A_ec130125-b665-499b-8131-f3359c3e5042",
+          "name": "문서 보관 안내 · 합성",
+          "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다."
+        }
+      }
+    },
+    "beforeWork": {
+      "values": {
+        "understanding": "[합성 응답 주입] 보고된 안내문 표시는 7일이라는 이해다.",
+        "scope": "[합성 응답 주입] 문서 보관 안내문만 다룬다.",
+        "next": "[합성 응답 주입] SYNTH_OLD_NEXT_7_DAYS: 안내문의 보관기간 7일 표기를 유지해 문구를 정리하라.",
+        "checks": "[합성 응답 주입] 보관기간이 7일로 표시되는지 확인하라."
+      },
+      "changed": [],
+      "aiStale": false,
+      "aiExcluded": false,
+      "intentCorrected": false,
+      "manualFields": [],
+      "suggestions": [],
+      "reviewBasisIds": []
+    },
+    "afterWork": {
+      "values": {
+        "understanding": "[합성 응답 주입] 보고된 안내문 표시는 7일이라는 이해다.",
+        "scope": "[합성 응답 주입] 문서 보관 안내문만 다룬다.",
+        "next": "[합성 응답 주입] SYNTH_OLD_NEXT_7_DAYS: 안내문의 보관기간 7일 표기를 유지해 문구를 정리하라.",
+        "checks": "[합성 응답 주입] 보관기간이 7일로 표시되는지 확인하라."
+      },
+      "changed": [],
+      "aiStale": false,
+      "aiExcluded": false,
+      "intentCorrected": false,
+      "manualFields": [],
+      "suggestions": [],
+      "reviewBasisIds": []
+    },
+    "currentDescription": {
+      "entry": {
+        "by": "user",
+        "at": "2026-10-22T17:09:00.694Z",
+        "revision": 2,
+        "taskId": null,
+        "returnId": null,
+        "text": "[합성 사용자 설명 정정] SYNTH_CORRECTED_30_DAYS: 현재 안내문 표시는 보관기간 30일이다. 앞선 설명의 7일은 잘못 적혔다.",
+        "corrects": 1,
+        "stamp": {
+          "name": "문서 보관 안내 · 합성",
+          "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [],
+          "version": "plan.2",
+          "revision": 0,
+          "ancestors": []
+        },
+        "held": null
+      },
+      "summary": "[합성 사용자 설명 정정] SYNTH_CORRECTED_30_DAYS: 현재 안내문 표시는 보관기간 30일이다. 앞선 설명의 7일은 잘못 적혔다.",
+      "changes": [],
+      "proposal": null,
+      "origin": "사용자 정정",
+      "returnTask": null,
+      "requestTask": null,
+      "valid": true
+    },
+    "oldExternalDescription": {
+      "entry": {
+        "by": "external",
+        "at": "2026-10-22T17:09:00.691Z",
+        "revision": 1,
+        "taskId": "T_2f3acec0-968c-4740-bbe1-5743f44309dd",
+        "returnId": "H_SYNTH_DESCRIPTION_CORRECTION_PROBE",
+        "text": null,
+        "corrects": null,
+        "stamp": {
+          "name": "문서 보관 안내 · 합성",
+          "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [],
+          "version": "plan.2",
+          "revision": 0,
+          "ancestors": []
+        },
+        "held": null
+      },
+      "summary": "[합성 외부 설명] SYNTH_EXTERNAL_7_DAYS: 현재 안내문 표시는 보관기간 7일이다.",
+      "changes": [],
+      "proposal": null,
+      "origin": "합성 API 경계 probe. 실제 자료/외부 AI/실행 증거 아님.",
+      "returnTask": {
+        "id": "T_2f3acec0-968c-4740-bbe1-5743f44309dd",
+        "sourceIds": [
+          "S_bc803b09-3956-4ae5-9fec-96b5a7cceb4c"
+        ],
+        "parentTaskId": "T_35b78e50-8512-4d68-a34b-c9beff822d67",
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": {
+          "returnId": "H_SYNTH_DESCRIPTION_CORRECTION_PROBE",
+          "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_5650eb17-e608-473a-935b-7324fb25e67e\",\"taskId\":\"T_35b78e50-8512-4d68-a34b-c9beff822d67\",\"returnId\":\"H_SYNTH_DESCRIPTION_CORRECTION_PROBE\",\"report\":\"[합성 외부 보고 · 검증 아님] SYNTH_REPORT_7_DAYS: 안내문에 보관기간이 7일로 적혀 있다고 보고했다.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_ec130125-b665-499b-8131-f3359c3e5042\",\"basedOn\":0,\"summary\":\"[합성 외부 설명] SYNTH_EXTERNAL_7_DAYS: 현재 안내문 표시는 보관기간 7일이다.\",\"changes\":[],\"proposal\":null,\"origin\":\"합성 API 경계 probe. 실제 자료/외부 AI/실행 증거 아님.\"}}"
+        },
+        "background": {
+          "version": "background.1",
+          "revision": 4,
+          "brief": "[합성] 문서 보관 안내를 정리하는 한 부분. 보관기간 자체를 여기서 새 정책으로 결정하지 않는다.",
+          "area": {
+            "id": "A_ec130125-b665-499b-8131-f3359c3e5042",
+            "name": "문서 보관 안내 · 합성",
+            "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다."
+          }
+        }
+      },
+      "requestTask": {
+        "id": "T_35b78e50-8512-4d68-a34b-c9beff822d67",
+        "sourceIds": [
+          "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d"
+        ],
+        "parentTaskId": null,
+        "advice": {
+          "intent": {
+            "version": "intent.1",
+            "relation": "start",
+            "goal": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+            "conditions": [],
+            "retired": [],
+            "basisRefs": [
+              {
+                "basisId": "D1",
+                "sourceId": "S_f0dd2029-6c45-417e-abd2-d30bb6b65a4d",
+                "revision": 5
+              }
+            ]
+          },
+          "understanding": "[합성 응답 주입] 보고된 안내문 표시는 7일이라는 이해다.",
+          "scope": "[합성 응답 주입] 문서 보관 안내문만 다룬다.",
+          "next": "[합성 응답 주입] SYNTH_OLD_NEXT_7_DAYS: 안내문의 보관기간 7일 표기를 유지해 문구를 정리하라.",
+          "checks": "[합성 응답 주입] 보관기간이 7일로 표시되는지 확인하라.",
+          "question": null,
+          "relatedBasisIds": [
+            "D1"
+          ],
+          "reviewBasisIds": [],
+          "suggestions": []
+        },
+        "adviceRevision": 8,
+        "mode": "mock",
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [
+          {
+            "at": "2026-10-22T17:09:00.690Z",
+            "method": "clipboard",
+            "revision": 6,
+            "chars": 4804,
+            "digest": "5e8b85e9",
+            "work": {
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+            },
+            "aiExcluded": false,
+            "legacyText": null,
+            "returnId": "H_SYNTH_DESCRIPTION_CORRECTION_PROBE",
+            "background": {
+              "version": "background.1",
+              "revision": 4,
+              "brief": "[합성] 문서 보관 안내를 정리하는 한 부분. 보관기간 자체를 여기서 새 정책으로 결정하지 않는다.",
+              "area": {
+                "id": "A_ec130125-b665-499b-8131-f3359c3e5042",
+                "name": "문서 보관 안내 · 합성",
+                "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다."
+              }
+            },
+            "anchor": {
+              "version": "anchor.2",
+              "areaId": "A_ec130125-b665-499b-8131-f3359c3e5042",
+              "understanding": 0,
+              "stamp": {
+                "name": "문서 보관 안내 · 합성",
+                "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다.",
+                "brief": 1,
+                "decisions": [],
+                "work": [],
+                "version": "plan.2",
+                "revision": 0,
+                "ancestors": []
+              }
+            }
+          }
+        ],
+        "resultFile": null,
+        "background": {
+          "version": "background.1",
+          "revision": 4,
+          "brief": "[합성] 문서 보관 안내를 정리하는 한 부분. 보관기간 자체를 여기서 새 정책으로 결정하지 않는다.",
+          "area": {
+            "id": "A_ec130125-b665-499b-8131-f3359c3e5042",
+            "name": "문서 보관 안내 · 합성",
+            "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다."
+          }
+        },
+        "areaId": "A_ec130125-b665-499b-8131-f3359c3e5042"
+      },
+      "valid": false
+    },
+    "simulatedCopyRecord": {
+      "at": "2026-10-22T17:09:00.695Z",
+      "method": "clipboard",
+      "revision": 10,
+      "chars": 3545,
+      "digest": "b9c86d72",
+      "work": {
+        "understanding": "[합성 응답 주입] 보고된 안내문 표시는 7일이라는 이해다.",
+        "scope": "[합성 응답 주입] 문서 보관 안내문만 다룬다.",
+        "next": "[합성 응답 주입] SYNTH_OLD_NEXT_7_DAYS: 안내문의 보관기간 7일 표기를 유지해 문구를 정리하라.",
+        "checks": "[합성 응답 주입] 보관기간이 7일로 표시되는지 확인하라."
+      },
+      "aiExcluded": false,
+      "legacyText": null,
+      "returnId": null,
+      "background": {
+        "version": "background.1",
+        "revision": 4,
+        "brief": "[합성] 문서 보관 안내를 정리하는 한 부분. 보관기간 자체를 여기서 새 정책으로 결정하지 않는다.",
+        "area": {
+          "id": "A_ec130125-b665-499b-8131-f3359c3e5042",
+          "name": "문서 보관 안내 · 합성",
+          "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다."
+        }
+      },
+      "anchor": null
+    }
+  },
+  "scope": "No source/test/dist edits, server/browser, external execution, clipboard call, remote writes or adopted follow-up-cycle contract."
+}

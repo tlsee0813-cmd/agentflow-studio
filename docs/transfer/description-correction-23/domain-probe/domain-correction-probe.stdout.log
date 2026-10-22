@@ -1,0 +1,29 @@
+{
+  "basis": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "node": "v24.19.0",
+  "typescript": "5.8.3",
+  "observed": {
+    "byUserRevision": 2,
+    "currentDescriptionValid": true,
+    "correctionChangesTasksSourcesBasesOrAreaIdea": false,
+    "oldFourValuesUnchanged": true,
+    "oldAIStaleAfterCorrection": false,
+    "sameTaskRegenerationPayloadEqualExceptTicket": true,
+    "correctionMarkerInSameTaskRequest": false,
+    "newRequestParentTaskId": "T_2f3acec0-968c-4740-bbe1-5743f44309dd",
+    "newRequestPreviousWorkStillOld7DayInstruction": true,
+    "correctionMarkerInNewRequest": false,
+    "correctionMarkerInExistingTaskHandoff": true,
+    "old7DayInstructionInCurrentWorkSection": true,
+    "correctionAttributedAsUserEditedReference": true,
+    "correctionMarkerInNewTaskHandoff": true,
+    "originalReportRetained": true,
+    "originalReturnRawRetained": true,
+    "roundtripPreservesCurrentDescriptionAndOldWork": true
+  },
+  "scenario": "Fully synthetic one-part in-memory API probe; return.2 pattern matches existing understanding17-fixtures sample. Old model-like work explicitly injected through validated receive(mode:mock), not actual AI output.",
+  "limits": [
+    "Description is attributed reference, not an automatically adopted user decision/instruction. This reproduces simultaneous incompatible text and a transport/freshness boundary, not a settled policy violation. No automatic meaning/conflict detection claimed.",
+    "No provider or real semantic regeneration was run. Whether an AI would produce/follow/correct the synthetic7day instruction is unverified. New request body carries only what the public domain buildRequest actually constructs."
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "scope": "Small synthetic in-memory domain-only probe. Product/tests/remote/server/browser unchanged.",
+  "basis": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "runtime": "Node24.19.0 supplementary; TS5.8.3",
+  "files": [
+    {
+      "path": "domain-correction-probe.exit.json",
+      "bytes": 447,
+      "sha256": "5DF8DCE79707FD98FA0E111CBF3221956418434D01F787A4BC65923A4F37D1A1"
+    },
+    {
+      "path": "domain-correction-probe.stderr.log",
+      "bytes": 0,
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "path": "domain-correction-probe.stdout.log",
+      "bytes": 1686,
+      "sha256": "0C041F5D5DAEC7A8B4BDF2F378564E9057B045AF989904BFBDE46B49295A1C28"
+    },
+    {
+      "path": "existing-A-handoff.txt",
+      "bytes": 7157,
+      "sha256": "0DF0616389B2144DDD2AF3235ECE68C7F8B7B6F2E66F478767E33BD26B5A3ABA"
+    },
+    {
+      "path": "new-C-handoff.txt",
+      "bytes": 8068,
+      "sha256": "C68844CE18A096DA665DFB7D924D5BA8AC795D78DD57857D6226999F288A6120"
+    },
+    {
+      "path": "probe-evidence.json",
+      "bytes": 25470,
+      "sha256": "9BDE85715DC2BF7C33AF1E135586944FD2BBB31517EF6FDA5E14E63EA1CE8714"
+    },
+    {
+      "path": "probe.mjs",
+      "bytes": 10420,
+      "sha256": "62B92F7AAD2AD6759E9FBF9451FCFD15CFBFF3F15E2FB0DE4D1C2062A60E52C0"
+    },
+    {
+      "path": "run.mjs",
+      "bytes": 905,
+      "sha256": "0B15591AFCAAC2481ECD7D750A4C4C08150A2E41C1DC5ADEE0406B56002B175E"
+    }
+  ],
+  "totalBytes": 54153,
+  "rootDecision": "Evidence for scope choice only. No follow-up23 contract adopted."
+}
