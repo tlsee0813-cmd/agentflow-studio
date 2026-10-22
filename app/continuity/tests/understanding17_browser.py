@@ -262,7 +262,7 @@ class Area17(unittest.TestCase):
         self.import_file(p2);self.check('revised same returnId: applied as r2',self.state()['space']['understanding'][area]['revision'],2)
         self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click()
         expect(self.page.locator(f'#area-understanding-{area}-stale')).to_be_visible();expect(field).to_have_value(DRAFT)
-        before=self.state();self.page.locator(f'#area-understanding-{area}-save').click();expect(self.page.locator('#notice')).to_contain_text('저장하지 않았어요')
+        before=self.state();self.page.locator(f'#area-understanding-{area}-save').click();stale=self.page.locator(f'#area-understanding-{area}-stale');expect(stale).to_be_visible();expect(stale).to_contain_text('저장하지 않아요')
         self.check('stale draft: save refused (no new revision)',self.state()['space']['understanding'],before['space']['understanding']);expect(field).to_have_value(DRAFT)
         self.shot('03-stale-correction-draft')
         self.page.locator(f'#area-understanding-{area}-cancel').click();ed=self.page.locator(f'#area-understanding-{area}-edit')

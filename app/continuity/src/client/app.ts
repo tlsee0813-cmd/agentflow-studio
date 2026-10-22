@@ -1680,14 +1680,20 @@ function understandingPanel(a:Area,id:string,compact=false):HTMLElement|null {
       });
       edit.append(field,node('p','이전 설명은 남습니다. 작업문과 조건은 바뀌지 않으며, 앱이 사실을 검증한 것은 아닙니다.','hint'));
       if(!d.valid)edit.append(understandingReviewContext(a,`${id}-review`));
+      const endEdit=()=>{
+        edit.open=false;
+        // Native toggle is asynchronous; the task reader must not restore the just-ended editor as still open.
+        if(view==='task'&&readOpen?.task===viewTask&&readOpen.ret===viewReturn)readOpen.open[edit.id]=false;
+        clearInputs(key);understandingEdits.delete(sessionKey);
+      };
       edit.append(warning,btn(d.valid?'정정 저장':'현재 설명으로 기록',()=>{
         if(owner!==project.id||epoch!==projectEpoch||!edit.isConnected)return;
         if(!matches()){spaceInputs[sessionKey]=field.value;warning.hidden=false;return;}
         const n=recordUnderstandingReview(project,a.id,field.value,understandingEdits.get(sessionKey)!.token);
-        edit.open=false;clearInputs(key);understandingEdits.delete(sessionKey);commit(n);
+        endEdit();commit(n);
       },'secondary',`${id}-save`),btn('취소',()=>{
         if(owner!==project.id||epoch!==projectEpoch||!edit.isConnected)return;
-        edit.open=false;clearInputs(key);understandingEdits.delete(sessionKey);render();
+        endEdit();render();
       },'quiet',`${id}-cancel`));more.append(edit);
     }
   }
