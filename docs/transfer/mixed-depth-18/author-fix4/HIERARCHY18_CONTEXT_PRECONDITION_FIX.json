@@ -1,0 +1,16 @@
+{
+  "file": "app/continuity/tests/hierarchy18_browser.py",
+  "sha256": "1b7890adc9dc1b7c7c674398bdc6f5c1679c191e37505c716ac7380c13d31d2f",
+  "scope": "Only test05 context preconditions/assertions; all other AST nodes unchanged; product untouched",
+  "correction": "Assert context actual visibility immediately after nav-context on work view, then work-view hidden + map visible and retained hidden-property false/aria-expanded true in map. No nav-work probe.",
+  "regressionGuards": "Original immediate name/body focus assertions after native/composing/consumed Escape preserved. Exact unsaved name/note values and saved Area array unchanged checked after each protected Escape. Area panel then connection close retain context flags; last Escape checks hidden-property true and aria false.",
+  "checks": {
+    "AST": 0,
+    "diffCheck": 0,
+    "outsideTest05ASTIdentical": true,
+    "browser": "NOT RUN",
+    "server": "NOT STARTED",
+    "commitPush": "NOT RUN"
+  },
+  "classification": "Corrects impossible computed-visibility precondition under hidden work-view. Still detects original closeContext global-Escape regression through both changed open flag and immediate focus theft."
+}

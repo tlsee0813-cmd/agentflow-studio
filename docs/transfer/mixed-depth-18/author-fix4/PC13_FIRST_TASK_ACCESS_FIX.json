@@ -1,0 +1,14 @@
+{
+  "file": "app/continuity/tests/pc13_browser.py",
+  "sha256": "c61b6c09132930d581e27fd8e178bd518cd7119dceb75a2484ba9c6243c25ccc",
+  "change": "One call self.wheel_to_panel_task(A) immediately before original viewport assertion; every other byte unchanged",
+  "preserved": "default firstCard/title/info/fit/map-height; selected no-auto-fit/panel alignment and idea order; original task viewport; RB-A-edit clickable and all other return assertions/fixtures",
+  "contract": "Cycle13 had page-flow/no independent panel scroll. INPUT18 explicitly supersedes panel layout with pinned title/actions and scroll-only body; it does not require all body requests in first screen. First-screen map geometry assertions still happen before scrolling.",
+  "checks": {
+    "AST": 0,
+    "exactOneLineOnly": true,
+    "browser": "NOT RUN",
+    "server": "NOT STARTED",
+    "commitPush": "NOT RUN"
+  }
+}

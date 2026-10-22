@@ -1,0 +1,73 @@
+{
+  "kind": "PC13 original caller restoration after final disclosure height",
+  "source": "app/continuity/src/client/app.ts",
+  "beforeSha256": "2309F23A52A522BD96D5DA9F2280FA3E333908E611448A6FCE9BE8C66579DB4C",
+  "sha256": "B5A6FDE628584D85097840B61EBF918F2E609FF08B060BC540F72A4EF2695C4A",
+  "evidence": {
+    "class": "Parent-corrected exact Cloud raw for the same RB-A call; author local browser NOT_RUN",
+    "commit": "ebcd3947032000bdce086469f695ec884a71db06",
+    "path": "pc13-return-diagnostic/raw.json (relative to report bundle)",
+    "candidate": "9fb311b93910000f7a1e9ac096a2303d3dc1c445",
+    "scene": "PC13Wide test05 RB-A-edit same-caller departure and return",
+    "before": {
+      "body": {
+        "scroll": 128,
+        "top": 601.703125,
+        "maxScroll": 218,
+        "height": 228.296875,
+        "bottom": 830
+      },
+      "caller": {
+        "top": 789.3125,
+        "hit": true,
+        "bottom": 825.3125
+      }
+    },
+    "after": {
+      "body": {
+        "scroll": 70,
+        "top": 601.703125,
+        "maxScroll": 300,
+        "height": 228.296875,
+        "bottom": 830
+      },
+      "caller": {
+        "top": 847.3125,
+        "topElement": "panel-open",
+        "focusRestored": true,
+        "bottom": 883.3125,
+        "hit": false,
+        "centerY": 865.3125
+      }
+    },
+    "confirmed": "Same final body geometry; scroll loses 58px while caller moves down by the same 58px. Matrix/focus/card geometry remain unchanged.",
+    "staticHypothesis": "Premature restore while records are temporarily closed clamps the original scroll128 to intermediate max70; later restored disclosures recover the final body geometry without recovering scroll. The intermediate max70 is a source-order explanation, not a before/after body-height measurement."
+  },
+  "changes": [
+    "Clone original panel memo before rendering.",
+    "Skip premature panel-reading restore only inside restoreOrigin.",
+    "Restore disclosures and page position first, then measure final workspace height, reinstall the original memo, restore its anchor, and save tab memo."
+  ],
+  "eventReview": [
+    "No ResizeObserver or MutationObserver exists in app.ts.",
+    "Queued outside-panel toggle measures the same already-final disclosure/page state.",
+    "Body scroll/toggle capture runs after the synchronous restoration and sees final DOM/scroll, rather than the intermediate clamp."
+  ],
+  "preserved": [
+    "caller viewport/focus/clickability assertions",
+    "camera and card coordinates",
+    "all PC13 fixtures/hit conditions",
+    "other render reading restore defaults"
+  ],
+  "checks": {
+    "diffCheck": 0,
+    "server": "NOT_RUN",
+    "typeSyntaxBoundary": 0,
+    "browser": "NOT_RUN",
+    "build": 0,
+    "runtime": "Node24 author auxiliary"
+  },
+  "review": "Frozen source sent to Astra for independent static review; actual Cloud rerun required",
+  "commitPush": "not performed by this author",
+  "correction": "The earlier comparison used R-edit body top371.5156/height458.4844 and RB-A body top601.7031/height228.2969 from different stages. They are not the same-call before/after pair. This correction changes only the receipt interpretation; the B5A6 product patch is unchanged."
+}
