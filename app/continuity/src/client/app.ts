@@ -50,6 +50,9 @@ let viewReturn:string|null=null;
 // Received in this open project only; this is not tracking changes since a previous visit.
 const receivedAreas=new Set<string>();
 const understandingEdits=new Map<string,{token:UnderstandingReviewToken;epoch:number}>();
+// Display-only reading choice. It never changes a description's validity or what goes into an export.
+type WorkReference={project:string;epoch:number;task:string;area:string|null;revision:number|null;openedAt:string;reading:{y:number;open:Record<string,boolean>};restore:boolean};
+let workReference:WorkReference|null=null;
 // AREA17: the last result file with an organised description imported in this tab (work view line with the location action).
 type ResultReceipt={project:string;epoch:number;taskId:string;requestId:string;exportTaskId:string;handoffId:string;duplicate:boolean;save:'pending'|'saved'|'memory'};
 let lastReceipt:ResultReceipt|null=null;
@@ -189,7 +192,7 @@ function resetEphemeral() {
   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
   receivedAreas.clear();
-  understandingEdits.clear();lastReceipt=null;located=null;
+  understandingEdits.clear();workReference=null;lastReceipt=null;located=null;
   mapView=null;mapSelected=null;initialMapFitPending=false;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};panelMode='area';recordsReturnNotice='';backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
@@ -314,7 +317,7 @@ function syncProjectHeader() {
   if(compact!==compactMapHeader){menu.open=!compact;compactMapHeader=compact;}
   document.body.dataset.mapHeader=String(compact);
 }
-function showWork() {view='work';displayView();}
+function showWork() {view='work';displayView();refreshWorkReference();restoreWorkReferenceReading();}
 /** SPATIAL102: remember the layer being left (scroll; in an area also which request was opened). Tab memory only. */
 function leaveLayer() {
   if(view==='space')layerMemo.space=window.scrollY;
@@ -886,7 +889,78 @@ function handoffReview(t:Task):HTMLElement {
   item(`다음 행동 · ${stage.label}`,stage.kind==='ready'?'요청과 조건을 확인한 뒤 ‘작업문 복사’ 또는 ‘Markdown 저장’으로 가져가 쓰던 개발 도구에 붙여넣으세요. 복사·저장은 자동 실행이 아니에요.':stage.kind==='question'?'아래 질문에 답하거나 ‘잘 모르겠음’·‘이 질문은 보류’를 선택해 이어가세요.':stage.next);
   box.append(grid);return box;
 }
+function referenceMatches(t:Task,pin:WorkReference):boolean {
+  return pin.project===project.id&&pin.epoch===projectEpoch&&pin.task===t.id&&pin.area===areaOf(project,t);
+}
+function pickedWorkDescription(pin:WorkReference):DescriptionView|null {
+  if(pin.area===null||pin.revision===null||!areaById(pin.area))return null;
+  const state=areaDescription(project,pin.area);
+  return [state.current,...state.previous].find((d):d is DescriptionView=>!!d&&d.entry.revision===pin.revision)??null;
+}
+function workReferenceState(pin:WorkReference):{kind:string;text:string;newer:boolean} {
+  if(pin.area===null)return {kind:'unassigned',text:'이 작업은 소유 부분이 미지정이에요. 다른 부분의 설명을 대신 보여 주지 않아요.',newer:false};
+  if(!areaById(pin.area))return {kind:'missing',text:'이 작업의 소유 부분을 찾을 수 없어요.',newer:false};
+  const state=areaDescription(project,pin.area),selected=pickedWorkDescription(pin),newer=!!state.current&&(pin.revision===null||state.current.entry.revision!>pin.revision);
+  if(pin.revision===null)return {kind:'none',text:'읽기 시작할 때 적용된 설명은 없었어요.'+(state.held.length?' 반영하지 않은 정리는 아래에서 따로 읽을 수 있어요.':''),newer};
+  if(!selected)return {kind:'missing',text:'읽던 설명이 지금 기록에 없어요. 다른 설명으로 바꾸지 않았어요. 닫고 다시 열어 확인하세요.',newer};
+  if(selected.valid)return {kind:'current',text:'현재 인계에 참고하는 설명이에요. 앱이 검증한 사실은 아니에요.',newer};
+  return {kind:newer?'previous':'stale',text:newer?'이후 새 설명이 있어 이전 기록을 읽고 있어요. 현재 인계 참고에는 포함되지 않아요.':'이전 기준의 설명 · 현재 인계 참고에는 포함되지 않아요. 구상·조건·직접 쓴 작업문 또는 포함 맥락의 기준이 바뀌었어요.',newer};
+}
+function captureWorkReferenceReading() {
+  const body=document.querySelector<HTMLElement>('.work-reference-body'),pin=workReference;
+  if(!pin||!body||body.dataset.taskId!==pin.task||body.dataset.projectId!==pin.project||!body.getClientRects().length)return;
+  pin.reading={y:body.scrollTop,open:Object.fromEntries([...body.querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]))};
+}
+function restoreWorkReferenceReading() {
+  const body=document.querySelector<HTMLElement>('.work-reference-body'),pin=workReference;
+  if(!pin?.restore||!body||body.dataset.taskId!==pin.task||body.dataset.projectId!==pin.project||!body.getClientRects().length)return;
+  for(const d of body.querySelectorAll<HTMLDetailsElement>('details[id]'))if(d.id in pin.reading.open)d.open=pin.reading.open[d.id]!;
+  body.scrollTop=pin.reading.y;pin.restore=false;
+}
+function fillWorkReference(body:HTMLElement,pin:WorkReference) {
+  const id=body.id,a=areaById(pin.area),selected=pickedWorkDescription(pin);body.replaceChildren();
+  body.dataset.selectedRevision=pin.revision===null?'':String(pin.revision);body.dataset.entryPresent=String(!!selected);
+  if(a){body.append(areaIdea(a,`${id}-idea`,120,`현재 사용자 구상 · ${a.name}${a.archived?' (보관된 부분)':''}`));}
+  if(selected){body.append(node('p',`읽기 시작할 때의 설명 · ${dateLabel(pin.openedAt)} · ${selected.entry.by==='user'?'사용자 정정':'외부 정리'} · 앱 미검증`,'source-meta'),node('div',selected.summary,'source-raw work-reference-summary'));
+    if(selected.changes.length||selected.proposal){const more=details('함께 남긴 변화·미채택 제안 읽기',`${id}-changes-${pin.revision}`);
+      for(const change of selected.changes)more.append(node('p',change,'source-raw'));
+      if(selected.proposal)more.append(node('p','구상 변경 제안 · 미채택 · 실행 지시 아님','source-meta'),node('div',selected.proposal,'source-raw'));body.append(more);}
+    body.append(descriptionEvidence(selected,`${id}-evidence-${pin.revision}`));
+  }
+  if(a){const state=areaDescription(project,a.id),older=pin.revision===null?[]:state.previous.filter(d=>d.entry.revision!<pin.revision!);
+    if(older.length){const history=details('이전 설명 기록 읽기',`${id}-history`);for(const d of older)history.append(node('div',d.summary,'source-raw'),descriptionEvidence(d,`${id}-old-${d.entry.revision}`));body.append(history);}
+    if(state.held.length){const held=details(`반영하지 않은 정리 ${state.held.length}개 읽기`,`${id}-held`);for(const [i,d] of state.held.entries())held.append(node('p',heldMessage[d.entry.held!]??'현재 설명으로 반영하지 않은 기록이에요.','hint'),node('div',d.summary,'source-raw'),descriptionEvidence(d,`${id}-held-${i}`));body.append(held);}
+  }
+  const live=workReferenceState(pin),ref=body.closest('.work-reference')!;
+  ref.querySelector<HTMLElement>('[data-reference-status]')!.textContent=live.text;ref.querySelector<HTMLElement>('[data-reference-new]')!.hidden=!live.newer;body.dataset.referenceState=live.kind;
+}
+/** Manual typing updates only the live caption. The chosen body, disclosures, reading scroll and all inputs stay in place. */
+function refreshWorkReference() {
+  const body=document.querySelector<HTMLElement>('.work-reference-body'),pin=workReference,t=project.currentTaskId?taskOf(project):null;
+  if(!body||!pin||!t||!referenceMatches(t,pin)||body.dataset.taskId!==t.id)return;
+  if(body.dataset.entryPresent!==String(!!pickedWorkDescription(pin)))fillWorkReference(body,pin);
+  const live=workReferenceState(pin),ref=body.closest('.work-reference')!,status=ref.querySelector<HTMLElement>('[data-reference-status]'),newer=ref.querySelector<HTMLElement>('[data-reference-new]');
+  if(status&&status.textContent!==live.text)status.textContent=live.text;
+  if(newer&&newer.hidden===live.newer)newer.hidden=!live.newer;
+  if(body.dataset.referenceState!==live.kind)body.dataset.referenceState=live.kind;
+}
+function workReferenceReader(t:Task):HTMLDetailsElement {
+  const area=areaOf(project,t),owner=project.id,epoch=projectEpoch,id=`work-reference-${owner}-${t.id}-${area??'unassigned'}-${epoch}`;
+  const ref=details('이 작업의 부분 구상·설명 읽기',id);ref.className='work-reference';ref.dataset.projectId=owner;ref.dataset.taskId=t.id;ref.dataset.areaId=area??'';
+  const caption=node('div','','work-reference-caption'),status=node('p','참고를 닫고 다시 열어 읽을 설명을 선택하세요.','hint'),newer=node('p','새 설명이 있어요. 읽던 본문은 그대로예요. 닫고 다시 열면 새 설명을 읽을 수 있어요.','hint');status.dataset.referenceStatus='';status.setAttribute('role','status');newer.dataset.referenceNew='';newer.hidden=true;caption.append(status,newer);ref.append(caption);
+  const body=node('div','','work-reference-body');body.id=`${id}-body`;body.tabIndex=0;body.setAttribute('role','region');body.setAttribute('aria-label','이 작업의 부분 구상과 선택한 설명 읽기');body.dataset.projectId=owner;body.dataset.taskId=t.id;body.dataset.areaId=area??'';ref.append(body);
+  if(workReference&&referenceMatches(t,workReference)){ref.open=true;fillWorkReference(body,workReference);workReference.restore=true;}
+  ref.querySelector('summary')!.addEventListener('click',()=>{
+    if(!ref.isConnected||!ref.getClientRects().length||owner!==project.id||epoch!==projectEpoch||project.currentTaskId!==t.id||areaOf(project,taskOf(project))!==area)return;
+    if(ref.open){workReference=null;return;}
+    const revision=area&&areaById(area)?areaDescription(project,area).current?.entry.revision??null:null;
+    workReference={project:owner,epoch,task:t.id,area,revision,openedAt:new Date().toISOString(),reading:{y:0,open:{}},restore:false};fillWorkReference(body,workReference);
+  });
+  body.addEventListener('scroll',captureWorkReferenceReading,{passive:true});body.addEventListener('toggle',captureWorkReferenceReading,true);
+  return ref;
+}
 function renderWork(t:Task|null) {
+  captureWorkReferenceReading();if(!t||workReference&&!referenceMatches(t,workReference))workReference=null;
   // FLOW083: the stage's actions live in the '지금 할 일' card; this card is the output and its editing.
   const area=$('work'),actions=$('next-actions');area.replaceChildren();actions.replaceChildren();$('empty').hidden=!!t;if(!t)return;
   const w=currentWork(project,t),v=w.values,card=node('div','','card work-card');card.id='current-work';card.tabIndex=-1;
@@ -927,21 +1001,23 @@ function renderWork(t:Task|null) {
   const instruction=node('p',v.next||'원문과 현재 기준이 전체 인계 문맥에 포함됩니다. 구체적인 작업은 아래에서 직접 작성할 수 있어요.','work-instruction');instruction.id='instruction-preview';
   const checks=details('완료 조건 · 확인할 동작','checks-preview');checks.className='checks-preview';const checksText=node('p',v.checks||'아직 작성된 완료 조건이 없습니다.');checksText.id='checks-text';checks.append(checksText);
   letter.append(letterHead,instruction,checks);card.append(letter,backgroundPreview(t));
-  const edit=details('범위 · 제안 · 작업문 직접 다듬기','edit-work');edit.className='edit-area';
+  const edit=details('범위 · 제안 · 작업문 직접 다듬기','edit-work');edit.className='edit-area work-reference-editor';
+  const layout=node('div','','work-edit-layout'),fields=node('div','','work-edit-fields');fields.id='work-edit-fields';fields.dataset.taskId=t.id;
+  layout.append(workReferenceReader(t),fields);edit.append(layout);
   for(const [key,label] of [['understanding','짧은 이해'],['scope','이번 범위와 유지할 것'],['next','실행 도구에 전달할 작업문'],['checks','확인할 동작 / 완료 조건']] as const) {
     const l=node('label',label);l.htmlFor=`work-${key}`;const field=node('textarea');field.id=`work-${key}`;field.rows=key==='next'?4:2;field.maxLength=6000;field.value=v[key];
     field.addEventListener('input',()=>guard(()=>{commit(editTask(project,t.id,key,field.value),false);const marker=$(`manual-${key}`);marker.textContent='직접 수정 · AI가 덮어쓰지 않음';refreshPreview();}));
     const old=t.manual[key]===null&&w.aiStale?t.advice?.[key]??'':'';
-    const marker=node('p',t.manual[key]!==null?'직접 수정 · AI가 덮어쓰지 않음':old?'이전 AI 문구는 작업문에서 제외됨 · 직접 쓰면 그대로 들어갑니다':'제안 · 실제 실행 결과 아님','manual-note');marker.id=`manual-${key}`;edit.append(l,field,marker);
-    if(old){const d=details('제외된 이전 AI 문구 보기 (현재 작업문 아님)',`stale-${key}`);d.append(node('div',old,'source-raw'),btn('이 문구로 시작해 직접 고치기',()=>commit(editTask(project,t.id,key,old)),'quiet',`stale-use-${key}`));edit.append(d);}
+    const marker=node('p',t.manual[key]!==null?'직접 수정 · AI가 덮어쓰지 않음':old?'이전 AI 문구는 작업문에서 제외됨 · 직접 쓰면 그대로 들어갑니다':'제안 · 실제 실행 결과 아님','manual-note');marker.id=`manual-${key}`;fields.append(l,field,marker);
+    if(old){const d=details('제외된 이전 AI 문구 보기 (현재 작업문 아님)',`stale-${key}`);d.append(node('div',old,'source-raw'),btn('이 문구로 시작해 직접 고치기',()=>commit(editTask(project,t.id,key,old)),'quiet',`stale-use-${key}`));fields.append(d);}
   }
   const suggestions=taskSuggestions(t);
   for(const [index,s] of suggestions.entries()) {
     const box=node('div','','suggestion');box.append(tag(w.aiStale&&t.suggestions===null?'이전 제안 · 작업문 제외 · 고치면 포함':'추가 제안 · 미확정'));
     for(const key of ['text','why'] as const){const l=node('label',key==='text'?'제안 문구':'이유와 대가');const f=node('textarea');f.rows=2;f.maxLength=2000;f.id=`suggestion-${index}-${key}`;l.htmlFor=f.id;f.value=s[key];f.addEventListener('input',()=>guard(()=>{commit(editSuggestion(project,t.id,index,key,f.value),false);refreshPreview();}));box.append(l,f);}
-    box.append(btn('이 제안을 내 기준으로 기록',()=>{const value=taskSuggestions(taskOf(project,t.id))[index];if(value)commit(recordBasis(project,value.text));},'secondary'));edit.append(box);
+    box.append(btn('이 제안을 내 기준으로 기록',()=>{const value=taskSuggestions(taskOf(project,t.id))[index];if(value)commit(recordBasis(project,value.text));},'secondary'));fields.append(box);
   }
-  edit.append(node('p','이 영역을 고쳐도 다른 기준·원문은 변하지 않습니다. AI 재정리 후에도 직접 쓴 값은 유지됩니다.','hint'));
+  fields.append(node('p','이 영역을 고쳐도 다른 기준·원문은 변하지 않습니다. AI 재정리 후에도 직접 쓴 값은 유지됩니다.','hint'));
   const foot=node('div','','work-footer'),row=node('div','','actions');
   const retry=btn('이 입력 다시 정리',()=>{void generate(t.id);},'quiet','retry-work');retry.dataset.aiAction='true';
   row.append(btn('작업문 복사',()=>{void exportWork(t.id,'clipboard');},'primary','copy-work'),btn('Markdown 저장',()=>{void exportWork(t.id,'download');},'secondary','download-work'),retry,
@@ -1002,6 +1078,7 @@ function refreshPreview(){
   $('work-authorship').textContent=workOrigin(t);
   $('instruction-author').textContent=workAuthor(t,v.next);
   if($('stale-advice'))showStaleNotice($('stale-advice'),t,w);
+  refreshWorkReference();
 }
 function renderReturnPreview() {
   const area=$('return-preview');
@@ -2373,7 +2450,7 @@ function render(capturePanel=true,restoreReading=true) {
   // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
   const taskScreen=view==='task'?$('space-view'):null;
   for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&d.id!=='project-management'&&!taskScreen?.contains(d)&&!d.closest('#area-panel'))d.open=open.get(d.id)!;
-  sizeWorkspace();finishInitialMapFit();if(restoreReading)restorePanelReading();
+  sizeWorkspace();finishInitialMapFit();if(restoreReading)restorePanelReading();restoreWorkReferenceReading();
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
 function submitInput(withAI:boolean) {

@@ -1146,6 +1146,23 @@ details[open]>summary {
   color:#8c6b9a;
   font-size:12px;
 }
+/* 실제 편집 작업의 읽기 참고. 닫혀 있으면 옆 열을 사용하지 않는다. */
+.work-reference-editor{container-type:inline-size}
+.work-edit-layout{display:flex;flex-direction:column;gap:12px;min-width:0}
+.work-edit-fields,.work-reference{min-width:0;max-width:100%}
+.work-reference{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper)}
+.work-reference>summary{font-size:12px;color:var(--accent-dark);cursor:pointer;overflow-wrap:anywhere}
+.work-reference-caption>.hint{font-size:11px;line-height:1.5;margin:4px 0}
+.work-reference-body{max-height:min(62vh,520px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;overflow-wrap:anywhere;padding:4px 3px;min-width:0}
+.work-reference-body>.area-idea{margin-top:0}
+.work-reference-body .source-raw{font-size:12px;line-height:1.6}
+.work-reference-body details>summary{font-size:12px;cursor:pointer;color:var(--accent-dark)}
+.work-reference-body .hint,.work-reference-body .source-meta{font-size:11px;line-height:1.5}
+@container (min-width:760px){
+  .work-edit-layout:has(>.work-reference[open]){display:grid;grid-template-columns:minmax(360px,1fr) minmax(260px,.72fr);align-items:start}
+  .work-edit-layout:has(>.work-reference[open])>.work-edit-fields{grid-column:1;grid-row:1}
+  .work-edit-layout:has(>.work-reference[open])>.work-reference{grid-column:2;grid-row:1;position:sticky;top:12px}
+}
 .manual-note {
   color:#9a7aa8;
   font-size:10px;
