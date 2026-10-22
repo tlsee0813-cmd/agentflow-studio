@@ -1,0 +1,88 @@
+{
+  "status": "PASS - source identity only",
+  "finalProductCommit": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+  "finalProductTree": "4be9b2c91e11e88587b84b1cc4cf4461e1433493",
+  "priorBindingEvidenceCommit": "27dee9b05ef4a034b2df1f98b3484d2a21acca09",
+  "priorBindingEvidencePath": "docs/transfer/reentry-judgment-32/integration-binding-v0/SOURCE_MATCH.json",
+  "priorProductCommit": "7c7bdfa8d244d83c2c776b91b6a3a669127ba2e9",
+  "publicInputCommit": "24baf91fa2d519fd8cd33bb5ece28ec5b32323df",
+  "sourceMatches": [
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 75793,
+      "sha256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf",
+      "gitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e",
+      "unchangedFromPriorBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "bytes": 46546,
+      "sha256": "cc958cf61b54aa9d552aab07ddaa8c7e6d60ec5e61f7218cf597dd608e9b94df",
+      "gitBlob": "1d784d254588c268fca4a4780b095ec78be7f3fc",
+      "unchangedFromPriorBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/attention.ts",
+      "bytes": 6051,
+      "sha256": "affaa930475942a73535ee4c995931ae5853ef308423175cfbd3835489ff770d",
+      "gitBlob": "fffa5cafc552cbd765794d9ce654d1d1d0d2024a",
+      "unchangedFromPriorBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/hierarchy.ts",
+      "bytes": 2591,
+      "sha256": "c9e5a4d9679e6720bc5cd3b86e624904d17a5a7d22b8806d574640ddad605ffa",
+      "gitBlob": "3548ad1f1b6ab44742daad2ca0f5ea4a0354d6cd",
+      "unchangedFromPriorBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/mock.ts",
+      "bytes": 17369,
+      "sha256": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+      "gitBlob": "fede7bb924608c1a73eb5c97db63001b0ff12906",
+      "unchangedFromPriorBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 16360,
+      "sha256": "16202db1c238e917c548950543686046977c21c61de56b30d6f4140aad607d47",
+      "gitBlob": "8ca513f5be7749d4962eaf80582f6c8273f0aad9",
+      "unchangedFromPriorBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/plan-facts.ts",
+      "bytes": 4322,
+      "sha256": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+      "gitBlob": "6766c24cae83a8b68417c06e61c3df95fb373f18",
+      "unchangedFromPriorBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/outcome.ts",
+      "bytes": 4625,
+      "sha256": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+      "gitBlob": "4d64d4ad7213b7aaff2adc9dfd9859835a961574",
+      "unchangedFromPriorBinding": true
+    }
+  ],
+  "publicInputsUnchanged": [
+    {
+      "publicPath": "docs/transfer/reentry-judgment-32/input-v0/generated-v0/observer-input/T0.json",
+      "bytes": 28977,
+      "sha256": "93bb9ad11ee21ffc2a27c8949e7465bc9a16e7beaa0b2b4275a4c4d14c009cbf",
+      "gitBlob": "78929a6370da8c8299b9e02a7ba6a756e18337cf"
+    },
+    {
+      "publicPath": "docs/transfer/reentry-judgment-32/input-v0/generated-v0/observer-input/T2.json",
+      "bytes": 41069,
+      "sha256": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7",
+      "gitBlob": "9d449c0e8468cb300c827664a5527f9bcb772d21"
+    }
+  ],
+  "qualification": [
+    "Five public API modules plus types/schema and plan-facts/outcome are exact Git blob/size matches to the prior source binding.",
+    "SHA256 values are inherited from the previously byte-verified source binding; the exact remote Git blobs at final source match that binding.",
+    "No new fixture, data or observer brief was generated or changed.",
+    "This step performs source metadata comparison only. Prior Node24 auxiliary reparse is separate; Node22 Cloud reparse remains NOT_RUN.",
+    "No product, source, input, browser, server or remote mutation."
+  ]
+}
