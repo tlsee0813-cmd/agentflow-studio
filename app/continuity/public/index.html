@@ -48,7 +48,7 @@
         <div id="work-view">
           <nav id="work-place" class="work-place" aria-label="공간 위치" hidden></nav>
               <div id="pending-bar" class="pending-bar" hidden><span class="spinner" aria-hidden="true"></span><span id="working" role="status"></span><button type="button" id="cancel" class="quiet" hidden>정리 중단</button></div>
-          <section class="context-bar" aria-label="지금 할 일"><div class="context-top"><div><span id="task-number" class="eyebrow">첫 작업</span><h1 id="context-title">아이디어에서, 첫 작업으로.</h1><p id="context-sub">만들고 싶은 것 또는 바꾸고 싶은 것을 적어 주세요.</p></div><span id="stage-label" class="tag purple">시작하기</span></div><div id="next-actions" class="next-actions"></div><details id="last-result" class="last-result" hidden><summary id="last-result-summary">최근 가져온 결과</summary><div id="last-result-text" class="source-raw"></div></details></section>
+          <section class="context-bar" aria-label="지금 할 일"><div class="context-top"><div><span id="task-number" class="eyebrow">첫 작업</span><h1 id="context-title" tabindex="-1">아이디어에서, 첫 작업으로.</h1><p id="context-sub">만들고 싶은 것 또는 바꾸고 싶은 것을 적어 주세요.</p></div><span id="stage-label" class="tag purple">시작하기</span></div><div id="next-actions" class="next-actions"></div><details id="last-result" class="last-result" hidden><summary id="last-result-summary">최근 가져온 결과</summary><div id="last-result-text" class="source-raw"></div></details></section>
           <section id="outcome-home" class="card outcome-home" aria-label="목적 중심 프로젝트 홈" tabindex="-1" hidden></section>
           <div id="workspace" class="workspace">
             <div class="main-column">
@@ -68,7 +68,7 @@
                 <details id="result-file-panel" class="file-return-options"><summary>결과 파일로 가져오기 · 선택</summary>
                   <p class="hint">파일용 작업문을 전달한 같은 작업에서 받은 결과 JSON을 선택하세요. 프로젝트 전체를 바꾸는 JSON 복구와 다릅니다. 파일이 없으면 기존 붙여넣기를 이용하세요.</p>
                   <button id="select-result-file" type="button" class="secondary">결과 파일 선택</button><input id="result-file-input" type="file" accept="application/json,.json" hidden>
-                  <p id="result-file-message" class="hint" role="status"></p><div id="result-file-preview" aria-live="polite"></div>
+                  <p id="result-file-message" class="hint" role="status"></p><div id="received-result-host"></div><div id="result-file-preview" aria-live="polite"></div>
                 </details>
               </section></details>
 
