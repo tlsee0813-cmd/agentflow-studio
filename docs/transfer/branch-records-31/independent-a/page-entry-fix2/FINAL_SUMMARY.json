@@ -1,0 +1,96 @@
+[
+  {
+    "execution": "frozen",
+    "source": "6f264cbef15485a120614a8004f48ef05a59065d",
+    "actualChildExit": 0,
+    "complete": [
+      {
+        "viewport": [
+          1280,
+          720
+        ],
+        "complete": true,
+        "panelBefore": "closed, same P memo from earlier general entry; close returned normal info",
+        "P": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+        "signal": "branch-records-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+        "beforeXY": [
+          0,
+          120
+        ],
+        "firstXY": [
+          0,
+          120
+        ],
+        "afterXY": [
+          0,
+          120
+        ]
+      },
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "complete": true,
+        "panelBefore": "closed, same P memo from earlier general entry; close returned normal info",
+        "P": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+        "signal": "branch-records-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+        "beforeXY": [
+          0,
+          120
+        ],
+        "firstXY": [
+          0,
+          120
+        ],
+        "afterXY": [
+          0,
+          120
+        ]
+      }
+    ],
+    "failures": [],
+    "pageerrors": [],
+    "HTTPCount": 30,
+    "allHTTPDiskBeforeAfterEqual": true,
+    "browser": "154.0.8037.57",
+    "serverExit": -15
+  },
+  {
+    "execution": "cross-flows",
+    "source": "6f264cbef15485a120614a8004f48ef05a59065d",
+    "actualChildExit": 0,
+    "complete": [
+      {
+        "viewport": [
+          1280,
+          720
+        ],
+        "flows": 2,
+        "complete": true,
+        "P": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+        "Q": "A_e254f0c1-0100-462f-bb0a-e9864d0bb537",
+        "differentSameNameParent": "A_a00d9478-d810-4a27-84e5-d4f74a57b6c5",
+        "currentB": "T_15fa619a-4887-4b92-b28f-3703d32d9b32"
+      },
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "flows": 2,
+        "complete": true,
+        "P": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+        "Q": "A_e254f0c1-0100-462f-bb0a-e9864d0bb537",
+        "differentSameNameParent": "A_a00d9478-d810-4a27-84e5-d4f74a57b6c5",
+        "currentB": "T_703d8045-e5d2-4510-b4f2-f099a7b5108f"
+      }
+    ],
+    "failures": [],
+    "pageerrors": [],
+    "HTTPCount": 30,
+    "allHTTPDiskBeforeAfterEqual": true,
+    "browser": "154.0.8037.57",
+    "serverExit": -15
+  }
+]

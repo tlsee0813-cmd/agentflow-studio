@@ -1,0 +1,177 @@
+{
+  "source": "6f264cbef15485a120614a8004f48ef05a59065d",
+  "expectedPC": 2,
+  "completed": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "complete": true,
+      "panelBefore": "closed, same P memo from earlier general entry; close returned normal info",
+      "P": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "signal": "branch-records-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "beforeXY": [
+        0,
+        120
+      ],
+      "firstXY": [
+        0,
+        120
+      ],
+      "afterXY": [
+        0,
+        120
+      ]
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "complete": true,
+      "panelBefore": "closed, same P memo from earlier general entry; close returned normal info",
+      "P": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "signal": "branch-records-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "beforeXY": [
+        0,
+        120
+      ],
+      "firstXY": [
+        0,
+        120
+      ],
+      "afterXY": [
+        0,
+        120
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "pass": true,
+      "label": "exact P report, not other same-name branch prepare prior general entry",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK exact P report, not other same-name branch prepare prior general entry"
+    },
+    {
+      "pass": true,
+      "label": "prepared same owner memo, panel closed with normal info focus",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK prepared same owner memo, panel closed with normal info focus"
+    },
+    {
+      "pass": true,
+      "label": "actual native wheel page120",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK actual native wheel page120"
+    },
+    {
+      "pass": true,
+      "label": "FIRST synchronous pageXY unchanged",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK FIRST synchronous pageXY unchanged"
+    },
+    {
+      "pass": true,
+      "label": "later frames and scrollend pageXY unchanged",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK later frames and scrollend pageXY unchanged"
+    },
+    {
+      "pass": true,
+      "label": "records open exact P and first owner glyph actually visible",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK records open exact P and first owner glyph actually visible"
+    },
+    {
+      "pass": true,
+      "label": "click preserves transform",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK click preserves transform"
+    },
+    {
+      "pass": true,
+      "label": "click preserves fold",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK click preserves fold"
+    },
+    {
+      "pass": true,
+      "label": "signal intentionally selects exact P",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK signal intentionally selects exact P"
+    },
+    {
+      "pass": true,
+      "label": "click preserves full project current B/draft Q",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK click preserves full project current B/draft Q"
+    },
+    {
+      "pass": true,
+      "label": "exact P report, not other same-name branch prepare prior general entry",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK exact P report, not other same-name branch prepare prior general entry"
+    },
+    {
+      "pass": true,
+      "label": "prepared same owner memo, panel closed with normal info focus",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK prepared same owner memo, panel closed with normal info focus"
+    },
+    {
+      "pass": true,
+      "label": "actual native wheel page120",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK actual native wheel page120"
+    },
+    {
+      "pass": true,
+      "label": "FIRST synchronous pageXY unchanged",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK FIRST synchronous pageXY unchanged"
+    },
+    {
+      "pass": true,
+      "label": "later frames and scrollend pageXY unchanged",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK later frames and scrollend pageXY unchanged"
+    },
+    {
+      "pass": true,
+      "label": "records open exact P and first owner glyph actually visible",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK records open exact P and first owner glyph actually visible"
+    },
+    {
+      "pass": true,
+      "label": "click preserves transform",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK click preserves transform"
+    },
+    {
+      "pass": true,
+      "label": "click preserves fold",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK click preserves fold"
+    },
+    {
+      "pass": true,
+      "label": "signal intentionally selects exact P",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK signal intentionally selects exact P"
+    },
+    {
+      "pass": true,
+      "label": "click preserves full project current B/draft Q",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK click preserves full project current B/draft Q"
+    }
+  ],
+  "failedChecks": [],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "childExitDecision": 0
+}

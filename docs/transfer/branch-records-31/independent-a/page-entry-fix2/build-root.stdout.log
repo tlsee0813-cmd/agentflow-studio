@@ -1,0 +1,1 @@
+Built TypeScript client/shared modules + static assets. Server remains native Node ESM.

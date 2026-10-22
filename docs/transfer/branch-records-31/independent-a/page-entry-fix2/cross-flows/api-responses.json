@@ -1,0 +1,192 @@
+[
+  {
+    "UTC": "2026-10-22T22:01:09.609169+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:36049/api/continuity",
+    "status": 200,
+    "bytes": 1406,
+    "bodySHA256": "96353c08a261f95cb73159cae6b562a3222cd18318d018225f9815602692925b",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+        "revision": 43,
+        "requestId": "R_8f8eb6c7-344f-410a-9c2b-91b1f8c16df6",
+        "taskId": "T_2821a06d-c963-404f-8427-e5075f15b399"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성31] 다른 가지의 안내 표현만 정리해 주세요. 정책·배포 변경은 하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D5",
+              "sourceId": "S_9a0e3e22-65df-466c-98d3-0435b5387688",
+              "revision": 43
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T22:01:11.209300+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:36049/api/continuity",
+    "status": 200,
+    "bytes": 1421,
+    "bodySHA256": "40e375311ccef0dca8e4448b49181c2941af09580f9942570e8b20ebba854c0b",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+        "revision": 49,
+        "requestId": "R_8059cc5e-aae5-4fea-9da0-33ffb9eed0b6",
+        "taskId": "T_15fa619a-4887-4b92-b28f-3703d32d9b32"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성31 B] 다른 자료 안내의 표현을 준비해 주세요. 기록 읽기의 작업 대상과 구별합니다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D6",
+              "sourceId": "S_aadde61e-9db5-401b-a0c2-b833a56c2d1b",
+              "revision": 49
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T22:01:19.211241+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:36049/api/continuity",
+    "status": 200,
+    "bytes": 1406,
+    "bodySHA256": "251668cab3210b6e156f6af02e6a7aeeb83186c962a3d364f2b5454d05294b65",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+        "revision": 43,
+        "requestId": "R_51f17968-be01-4a7e-bbf4-43c19bfbbfdc",
+        "taskId": "T_fb4b0b7f-be21-4569-bb69-1bd250cdb772"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성31] 다른 가지의 안내 표현만 정리해 주세요. 정책·배포 변경은 하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D5",
+              "sourceId": "S_98a3f2f4-679b-429b-ab74-294a31da1be2",
+              "revision": 43
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T22:01:21.086239+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:36049/api/continuity",
+    "status": 200,
+    "bytes": 1421,
+    "bodySHA256": "0ea3a6a194f102836b7f4e1b57cac944fb728fb796fd1022d1737006044b330b",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+        "revision": 49,
+        "requestId": "R_20fd97b6-2926-4b11-9359-cc795d6e7528",
+        "taskId": "T_703d8045-e5d2-4510-b4f2-f099a7b5108f"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성31 B] 다른 자료 안내의 표현을 준비해 주세요. 기록 읽기의 작업 대상과 구별합니다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D6",
+              "sourceId": "S_cf11975c-a706-4395-a2a5-22c4bdb65002",
+              "revision": 49
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  }
+]
