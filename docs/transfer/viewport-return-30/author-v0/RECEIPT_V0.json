@@ -1,0 +1,43 @@
+{
+  "baseline": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "contract": "a177461049bf6a40a016cf3d915f54be46833a6d/docs/cycles/2026-10-23-viewport-return-30/INPUT.md",
+  "status": "v0 frozen; static source/type/build only, Cloud candidate verification pending",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273508,
+      "sha256": "78fca7ceaa8ca9834a33ba146287a9f3317cbee1f94a56f6c76eb43aac961f89",
+      "gitBlob": "d899bd814bfabeaa6bf01f8778e454d9a2b09b56",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "unchanged": [
+    "public/styles.css",
+    "public/index.html",
+    "shared/domain/schema",
+    "31 source"
+  ],
+  "commands": {
+    "type-v0": 1,
+    "build-v0": 1,
+    "diff-v0": 0,
+    "type-final": 0,
+    "build-final": 0,
+    "diff-final": 0
+  },
+  "delta": "openSpace passes a synchronous optional beforeWorkspaceSizing callback to render. Only this caller restores layer page scroll after displayView/disclosures but before final size→finishInitialMapFit(if missing only)→panel reading. All other render/default and explicit restoreOrigin sequencing unchanged.",
+  "phaseA": "REPORT + CAUSE_TABLE/EVENT_ORDER gzip blob validated; selected fields in PHASE_A_SELECTED_FIELDS.json are derived, not original raw",
+  "limits": [
+    "PhaseA proves existing camera return height defect; not first-camera creation failure",
+    "first-entry missing-camera path and actual input/focus/panel reading preservation remain Cloud scope",
+    "no global scroll listener/auto fit/card relocation added",
+    "initial type/build TS5058 preparation failures kept; final both0 after exact baseline configs"
+  ],
+  "notRun": [
+    "browser",
+    "server",
+    "unit",
+    "installation",
+    "remote writes"
+  ]
+}

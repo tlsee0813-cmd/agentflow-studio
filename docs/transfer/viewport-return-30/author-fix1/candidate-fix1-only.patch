@@ -1,0 +1,10 @@
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -336,6 +336,7 @@
+   if(!(located&&(view==='space'||(view==='area'||view==='task')&&viewArea===located.area)))located=null;
+   origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;
+   render(true,true,()=>window.scrollTo({top:layerMemo.space??0}));
++  const plane=document.getElementById('space-plane');if(plane)markOffscreen(plane);
+   const from=layerMemo.from;
+   if(!(from&&focusFirst(`node-enter-${from}`,`list-enter-${from}`)))$('space-title')?.focus({preventScroll:true});
+ }

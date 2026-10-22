@@ -1,0 +1,31 @@
+{
+  "commit": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "files": [
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "gitBlob": "bfa5b1d2172f682e7d5c167ce2df2fd52eea7a8d"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74233,
+      "sha256": "d32e770b0b8208d48b050250512a94b68d4f2342b7841a51e0280d1387a5fefc",
+      "gitBlob": "6654a134054f2ffadb9b282595ba6c029b853dbc"
+    },
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273307,
+      "sha256": "774075e819ad2421a56765cbc6dc648d6c983e098bf71d166bb2453e25ee8156",
+      "gitBlob": "82180891d5f9c63818b4bec0f53c1cdc3c1dafbc"
+    }
+  ],
+  "sourceFileCount": 20,
+  "dependencies": "product18 app/node_modules junction; no installation",
+  "method": "new no-checkout worktree, local read-tree, exact src/public/scripts blobs with lazy-fetch disabled",
+  "notRun": [
+    "server",
+    "browser",
+    "remote writes"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "exit": 1,
+  "command": [
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "-p",
+    "continuity/tsconfig.json"
+  ],
+  "runtime": "Node24.19.0 author auxiliary",
+  "at": "2026-10-22T20:55:00.285345+00:00"
+}

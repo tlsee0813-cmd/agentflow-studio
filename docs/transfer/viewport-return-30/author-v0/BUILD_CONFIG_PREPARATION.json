@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "app/tsconfig.json",
+      "bytes": 443,
+      "sha256": "3be26a30cfda09591a2caa51efea7f5c9d189904f3ad95e7de1bbab5916fe657"
+    },
+    {
+      "path": "app/continuity/tsconfig.json",
+      "bytes": 134,
+      "sha256": "1f5fe5a159c7d25421ee783ad375583bdc1a6c063ead8d0e055e0db983e167b3"
+    },
+    {
+      "path": "app/package.json",
+      "bytes": 559,
+      "sha256": "4016406d4f008c3bd9275df082ec17cdda667149c032ab378ad2e19da9c8a0d3"
+    }
+  ],
+  "firstAttempt": "type-v0/build-v0 exit1 TS5058 missing configs; raw logs preserved",
+  "configLookup": "app/continuity/package.json lookup exit128: absent in baseline; not created. Actual app/package.json and both tsconfig copied exact from baseline.",
+  "installation": false
+}

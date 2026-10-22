@@ -1,0 +1,25 @@
+{
+  "baseline": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "prior": "RECEIPT_V0.json",
+  "status": "fix1 source frozen; UI NOT_RUN",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273592,
+      "sha256": "e52eb74e531302905d6e2c86e6be164425ea13d354f8db98007dfc45516748e8",
+      "gitBlob": "e045f45219fe38d4194dce7e9b076976c92c9410",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "commands": {
+    "type-fix1": 0,
+    "build-fix1": 0,
+    "diff-fix1": 0
+  },
+  "delta": "After openSpace render has finalized height/camera/reading, existing plane gets markOffscreen only. No applyView/refit/global size/scroll listener.",
+  "limits": [
+    "nonzero remembered page scroll and subsequent document clamp interaction remains Cloud check; no repeat measurement loop added",
+    "first-camera creation and panel reading actual geometry remain Cloud scope",
+    "31 source remains frozen; local browser/server/unit/remote writes NOT_RUN"
+  ]
+}

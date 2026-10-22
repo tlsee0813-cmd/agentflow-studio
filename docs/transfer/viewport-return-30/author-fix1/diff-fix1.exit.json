@@ -1,0 +1,12 @@
+{
+  "exit": 0,
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "--",
+    "app/continuity/src/client/app.ts"
+  ],
+  "runtime": null,
+  "at": "2026-10-22T20:59:09.847091+00:00"
+}

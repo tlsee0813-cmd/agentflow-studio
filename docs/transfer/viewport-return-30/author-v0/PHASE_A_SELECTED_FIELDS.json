@@ -1,0 +1,390 @@
+{
+  "CAUSE_TABLE": {
+    "gitBlob": "07447efa4a9ff6eb41439f3c17b3e0c3e2b92956",
+    "gzipBytes": 1189,
+    "gzipSHA256": "fa1efa47776ead25982901857f497f94b7959ae429ecaf7dd04624acd7c019ee",
+    "rawSHA256": "b1a9ba5d91f00666aae3f25ff425ba62357333e80e186759cc9ab2b2c5ff8b65",
+    "scope": "derived selected fields, not original raw copy",
+    "summary": [
+      {
+        "run": "original",
+        "id": "6-1280-zero-observe",
+        "workY": 0,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 435.109375,
+        "mapBottom": 704,
+        "listOpen": false,
+        "savingAtEntry": null,
+        "laterMapBottom": 704,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "original",
+        "id": "6-1280-deep-observe",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 704,
+        "mapBottom": 972.890625,
+        "listOpen": false,
+        "savingAtEntry": null,
+        "laterMapBottom": 972.890625,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "original",
+        "id": "6-1440-zero-observe",
+        "workY": 0,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 615.109375,
+        "mapBottom": 884,
+        "listOpen": false,
+        "savingAtEntry": null,
+        "laterMapBottom": 884,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "original",
+        "id": "6-1440-deep-observe",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 884,
+        "mapBottom": 1152.890625,
+        "listOpen": false,
+        "savingAtEntry": null,
+        "laterMapBottom": 1152.890625,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "original",
+        "id": "6-1280-deep-fit-only",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 704,
+        "mapBottom": 972.890625,
+        "listOpen": false,
+        "savingAtEntry": null,
+        "laterMapBottom": 972.890625,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "continuation",
+        "id": "6-1280-deep-real-resize",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 704,
+        "mapBottom": 972.890625,
+        "listOpen": false,
+        "savingAtEntry": null,
+        "laterMapBottom": 972.890625,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "continuation",
+        "id": "4-1280-deep-observe",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 435.109375,
+        "mapBottom": 704,
+        "listOpen": true,
+        "savingAtEntry": null,
+        "laterMapBottom": 704,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "continuation",
+        "id": "4-1280-deep-observe-remember-True",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 435.109375,
+        "mapBottom": 704,
+        "listOpen": true,
+        "savingAtEntry": null,
+        "laterMapBottom": 704,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "continuation",
+        "id": "6-1280-deep-observe-remember-True",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 435.109375,
+        "mapBottom": 704,
+        "listOpen": true,
+        "savingAtEntry": null,
+        "laterMapBottom": 704,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "continuation",
+        "id": "6-1280-deep-observe-trace",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 704,
+        "mapBottom": 972.890625,
+        "listOpen": false,
+        "savingAtEntry": null,
+        "laterMapBottom": 972.890625,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "continuation",
+        "id": "6-1280-deep-uninstrumented-recheck",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 704,
+        "mapBottom": 972.890625,
+        "listOpen": false,
+        "savingAtEntry": null,
+        "laterMapBottom": 972.890625,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      },
+      {
+        "run": "trace-four",
+        "id": "4-1280-deep-observe-trace",
+        "workY": 1200,
+        "entryY": 0,
+        "mapTop": 268.890625,
+        "mapHeight": 435.109375,
+        "mapBottom": 704,
+        "listOpen": true,
+        "savingAtEntry": null,
+        "laterMapBottom": 704,
+        "cameraMemoUnchangedOnEntry": true,
+        "dataUnchangedAtEnd": true
+      }
+    ]
+  },
+  "EVENT_ORDER": {
+    "gitBlob": "ac6098b3401b2dcf9a459c6f0c74ab9bab0f45de",
+    "gzipBytes": 978,
+    "gzipSHA256": "b00af5cce9a17ae362c6431c0b15ffde244b43464e0acf54c222180add92b8b3",
+    "rawSHA256": "dc7f5a5a8d1270d9a1859d12b80a1884bc3035a65d372e37a89f415f42a32875",
+    "scope": "derived selected fields, not original raw copy",
+    "summary": [
+      {
+        "id": "6-1280-deep-observe-trace",
+        "keys": [
+          "run",
+          "id",
+          "events",
+          "rawReference"
+        ],
+        "events": [
+          {
+            "kind": "trace-installed",
+            "target": null,
+            "time": 1604.699999988079,
+            "y": 1200,
+            "saving": null,
+            "height": null,
+            "mapBottom": null,
+            "listOpen": null
+          },
+          {
+            "kind": "document-capture-pointerdown",
+            "target": "nav-space",
+            "time": 1643.2999999523163,
+            "y": 1200,
+            "saving": null,
+            "height": null,
+            "mapBottom": null,
+            "listOpen": null
+          },
+          {
+            "kind": "document-capture-click",
+            "target": "nav-space",
+            "time": 1643.7999999523163,
+            "y": 1200,
+            "saving": null,
+            "height": null,
+            "mapBottom": null,
+            "listOpen": null
+          },
+          {
+            "kind": "DOM-mutation",
+            "target": null,
+            "time": 1664.2999999523163,
+            "y": 0,
+            "saving": null,
+            "height": "704px",
+            "mapBottom": 972.890625,
+            "listOpen": false
+          },
+          {
+            "kind": "document-capture-scrollend",
+            "target": null,
+            "time": 1665.5,
+            "y": 0,
+            "saving": null,
+            "height": "704px",
+            "mapBottom": 972.890625,
+            "listOpen": false
+          },
+          {
+            "kind": "document-capture-toggle",
+            "target": "project-management",
+            "time": 1667.8999999761581,
+            "y": 0,
+            "saving": null,
+            "height": "704px",
+            "mapBottom": 972.890625,
+            "listOpen": false
+          }
+        ]
+      },
+      {
+        "id": "4-1280-deep-observe-trace",
+        "keys": [
+          "run",
+          "id",
+          "events",
+          "rawReference"
+        ],
+        "events": [
+          {
+            "kind": "trace-installed",
+            "target": null,
+            "time": 1665,
+            "y": 1200,
+            "saving": null,
+            "height": null,
+            "mapBottom": null,
+            "listOpen": null
+          },
+          {
+            "kind": "document-capture-pointerdown",
+            "target": "nav-space",
+            "time": 1703,
+            "y": 1200,
+            "saving": null,
+            "height": null,
+            "mapBottom": null,
+            "listOpen": null
+          },
+          {
+            "kind": "document-capture-click",
+            "target": "nav-space",
+            "time": 1703.5,
+            "y": 1200,
+            "saving": null,
+            "height": null,
+            "mapBottom": null,
+            "listOpen": null
+          },
+          {
+            "kind": "DOM-mutation",
+            "target": null,
+            "time": 1721.199999988079,
+            "y": 0,
+            "saving": null,
+            "height": "704px",
+            "mapBottom": 972.890625,
+            "listOpen": true
+          },
+          {
+            "kind": "document-capture-scrollend",
+            "target": null,
+            "time": 1722.3999999761581,
+            "y": 0,
+            "saving": null,
+            "height": "704px",
+            "mapBottom": 972.890625,
+            "listOpen": true
+          },
+          {
+            "kind": "DOM-mutation",
+            "target": null,
+            "time": 1724.0999999642372,
+            "y": 0,
+            "saving": null,
+            "height": "435.109px",
+            "mapBottom": 704,
+            "listOpen": true
+          },
+          {
+            "kind": "document-capture-toggle",
+            "target": "area-list",
+            "time": 1724.2999999523163,
+            "y": 0,
+            "saving": null,
+            "height": "435.109px",
+            "mapBottom": 704,
+            "listOpen": true
+          },
+          {
+            "kind": "document-capture-toggle",
+            "target": "project-management",
+            "time": 1724.5999999642372,
+            "y": 0,
+            "saving": null,
+            "height": "435.109px",
+            "mapBottom": 704,
+            "listOpen": true
+          },
+          {
+            "kind": "document-capture-pointerdown",
+            "target": "node-info-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+            "time": 2003.3999999761581,
+            "y": 0,
+            "saving": null,
+            "height": "435.109px",
+            "mapBottom": 704,
+            "listOpen": true
+          },
+          {
+            "kind": "document-capture-click",
+            "target": "node-info-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+            "time": 2004.0999999642372,
+            "y": 0,
+            "saving": null,
+            "height": "435.109px",
+            "mapBottom": 704,
+            "listOpen": true
+          },
+          {
+            "kind": "DOM-mutation",
+            "target": null,
+            "time": 2024.2999999523163,
+            "y": 0,
+            "saving": null,
+            "height": "435.109px",
+            "mapBottom": 704,
+            "listOpen": true
+          },
+          {
+            "kind": "document-capture-toggle",
+            "target": "area-list",
+            "time": 2029.5,
+            "y": 0,
+            "saving": null,
+            "height": "435.109px",
+            "mapBottom": 704,
+            "listOpen": true
+          }
+        ]
+      }
+    ]
+  }
+}
