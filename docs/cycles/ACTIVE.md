@@ -7,13 +7,14 @@
 
 독립 정적 검토의 보고 전환 펼침 누출을 실제 양PC에서 재현하고 수정했다. 같은 독립 검사 최초 실패→fix1통과, 별도 대상·저장·복귀/실제 휠/늦은MOCK재그림/긴영역복귀 확인과 최종 Windows·Ubuntu CI를 구분해 수용했다. 다른 탭 자동 갱신 반례2건은 그대로 남아 전체 수집exit1이며, 이를 전부통과로 바꾸지 않았다. 외부 변경 후 오래된 탭의 저장거절·외부자료 보존은 별도로 통과했다. [구현 전 기준과 명시 범위 정정](2026-10-16-report-area-16/ACCEPTANCE.md#독립-관측-후-범위-정정).
 
-[기존 PC 체험 경로](http://127.0.0.1:8765/product16-report-area-preview/runtime/index.html)의 runtime15파일449,280B는 10월22일 receipt 해시와 일치했다. 현재 서버는 종료돼 HTTP 연결 불가다. 로컬 서버 복구는 자동 승인 검토에서 실행 전 차단되어 재시도하지 않았다. 기존 Cloud 환경의 생존 여부를 별도로 확인 중이며, 미리보기가 현재 열린 상태라고 취급하지 않는다. 공개배포는 아니다. [고정 overlay·독립 증거](https://github.com/tlsee0813-cmd/agentflow-studio/tree/a3435faa29993f71356b3c36e50051921614670d/docs/transfer/report-area-16/independent-fix1/preview).
+[기존 PC 체험 경로](http://127.0.0.1:8765/product16-report-area-preview/runtime/index.html)의 runtime15파일449,280B는 10월22일 receipt 해시와 일치했다. 현재 서버는 종료돼 HTTP 연결 불가다. 로컬 서버 복구는 자동 승인 검토에서 실행 전 차단되어 재시도하지 않았다. 기존 Cloud 환경과 Node·Playwright·system Chromium 실행 가능 여부를 확인했으며, 미리보기가 현재 열린 상태라고 취급하지 않는다. 공개배포는 아니다. [고정 overlay·독립 증거](https://github.com/tlsee0813-cmd/agentflow-studio/tree/a3435faa29993f71356b3c36e50051921614670d/docs/transfer/report-area-16/independent-fix1/preview).
 
 ## 재개 연구와 다음 범위
+[최신 조사·총괄 선택·표본 경계](2026-10-22-area-update-17/RESEARCH.md).
 - 웹 Pro A: 새 정보가 동일 구성부분의 현재 구상에 반영되는 방식, 사용자 의도·외부 주장·해석·출처의 분리. 새 세션에서 최신 원문 비교 중.
 - 웹 Pro B: 실제 구성의 혼합 깊이와 전체 변화 이해, PC에서 부분 선택·조정·인계·복귀의 연결. 별도 새 세션에서 Dify와 다른 분야 메커니즘 조사 중.
 - Sol High 코드 감사 완료: 제품 Area는 평면 배열이며 현재 note 갱신은 수동 편집뿐이다. 공간→영역→요청은 탐색 단계이고 Task.parentTaskId는 작업 연속성이므로, 이를 실제 프로그램의 포함 계층으로 세지 않는다.
-- Astra High는 두 공백을 전체 제품 경험에 연결하는 순서를 독립 비판 중이다. 연구 결과를 통합하기 전 새 개발 계약을 확정하지 않는다.
+- 두 Pro 조사와 Astra High 독립 비판을 통합해 같은 부분 갱신을 전체 흐름에 연결하는 범위를 우선 선택했다. 혼합 깊이는 후속 판단으로 유지한다. Opus 새 세션에서 최소 구현 경로를 설계 중이며, 새 구현은 아직 시작하지 않았다.
 - 기존 cycle16의 읽기·입력 보호·복귀를 재사용한다. 수동 note 편집이나 보고 저장을 자동 정리 달성으로 취급하지 않는다.
 - 이전 중단된 Pro 계획은 미완료 과거 자료다. 이번에 새로 조사하며 기존 예약 agentflow의 PAUSED 설정은 그대로 둔다. 사용자 재개 요청이 현재 작업의 근거다.
 
