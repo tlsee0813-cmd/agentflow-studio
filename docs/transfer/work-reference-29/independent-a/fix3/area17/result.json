@@ -1,0 +1,7 @@
+{
+  "scope": "exact AREA17 test06 only, read-only post-click observations",
+  "testsRun": 2,
+  "failures": [],
+  "errors": [],
+  "plannedExit": 0
+}

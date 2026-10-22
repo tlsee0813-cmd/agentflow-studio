@@ -1,0 +1,39 @@
+{
+  "scope": "offline evaluation only; no extra browser actions",
+  "sourceCommit": "24fb19e61b8d8ce425931a4543a5eaef5d790312",
+  "AREA17": {
+    "executed": 2,
+    "failures": 0,
+    "errors": 0,
+    "actualUIChildExit": 0
+  },
+  "readerCore": {
+    "expectedPC": 2,
+    "completePC": 2,
+    "failedChecks": [],
+    "actualUIChildExit": 0
+  },
+  "knownExplicitReopenFailures": [
+    {
+      "viewport": 1280,
+      "bodyBeforeClose": 344,
+      "bodyImmediatelyAfterReopen": 300,
+      "summaryImmediatelyAfterReopen": 0,
+      "expectedBodyAfterExplicitReopen": 0,
+      "knownProductDefect": true,
+      "raw": "ui.jsonl KNOWN reopen reset defect separate from fix3 CSS acceptance"
+    },
+    {
+      "viewport": 1440,
+      "bodyBeforeClose": 307,
+      "bodyImmediatelyAfterReopen": 226,
+      "summaryImmediatelyAfterReopen": 0,
+      "expectedBodyAfterExplicitReopen": 0,
+      "knownProductDefect": true,
+      "raw": "ui.jsonl KNOWN reopen reset defect separate from fix3 CSS acceptance"
+    }
+  ],
+  "aggregateDecisionExit": 1,
+  "newAuthorEight": "NOT_RUN as instructed",
+  "cycle30": "NOT_RUN"
+}

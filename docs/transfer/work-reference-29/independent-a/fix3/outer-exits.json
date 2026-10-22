@@ -1,0 +1,27 @@
+{
+  "build": {
+    "toolSession": 98903,
+    "completion": "491b01",
+    "actualCollectorExit": 0
+  },
+  "AREA17": {
+    "toolSession": 96080,
+    "completion": "b191ab",
+    "actualCollectorExit": 0,
+    "childExit": 0,
+    "serverExit": "NOT_CAPTURED separately by original author harness"
+  },
+  "reader": {
+    "toolSession": 81136,
+    "completion": "1117e0",
+    "actualCollectorExit": 0,
+    "childExit": 0,
+    "serverExit": -15
+  },
+  "offlineAggregateIncludingKnownDefect": {
+    "completion": "a03006",
+    "actualCollectorExit": 1,
+    "childExit": 1,
+    "notAnotherUIRun": true
+  }
+}

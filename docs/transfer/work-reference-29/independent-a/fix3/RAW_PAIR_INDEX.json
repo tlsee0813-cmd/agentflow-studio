@@ -1,0 +1,62 @@
+[
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:30:23.603430+00:00",
+    "label": "KNOWN reopen reset defect separate from fix3 CSS acceptance",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:30:24.093720+00:00",
+    "label": "CHECK first native U key preserves DOM focus selection selected text revision scroll and N/S/C",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:30:24.207951+00:00",
+    "label": "CHECK actual selected-description sentence and N same viewport",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:30:28.531659+00:00",
+    "label": "CHECK new separate-task description arrival keeps old selected body and announces new",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:30:29.812817+00:00",
+    "label": "origin return after reference workflow",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:30:41.313092+00:00",
+    "label": "KNOWN reopen reset defect separate from fix3 CSS acceptance",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:30:41.787436+00:00",
+    "label": "CHECK first native U key preserves DOM focus selection selected text revision scroll and N/S/C",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:30:41.914542+00:00",
+    "label": "CHECK actual selected-description sentence and N same viewport",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:30:46.532195+00:00",
+    "label": "CHECK new separate-task description arrival keeps old selected body and announces new",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:30:47.782939+00:00",
+    "label": "origin return after reference workflow",
+    "rawReference": "reader/ui.jsonl.gz"
+  }
+]
