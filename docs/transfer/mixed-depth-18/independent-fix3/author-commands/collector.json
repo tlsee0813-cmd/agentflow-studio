@@ -1,0 +1,9 @@
+{
+  "source": "9fb311b93910000f7a1e9ac096a2303d3dc1c445",
+  "expected": 13,
+  "executed": 13,
+  "complete": true,
+  "failFast": false,
+  "collectorPlannedExit": 1,
+  "boundary": "actual collector exit is recorded from its external launcher after process completion"
+}

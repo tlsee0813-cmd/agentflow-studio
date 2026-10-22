@@ -1,0 +1,70 @@
+{
+  "source": "9fb311b93910000f7a1e9ac096a2303d3dc1c445",
+  "tree": "f2dcfc5c101f22465f123a86efce9365f80629fe",
+  "appTsSHA256": "2309f23a52a522bd96d5da9f2280fa3e333908e611448a6fce9be8c66579db4c",
+  "authorSuites": [
+    {
+      "name": "H18",
+      "tests": 12,
+      "failures": 2,
+      "exit": 1
+    },
+    {
+      "name": "AREA17",
+      "tests": 12,
+      "failures": 0,
+      "exit": 0
+    },
+    {
+      "name": "PC12",
+      "tests": 15,
+      "failures": 0,
+      "exit": 0
+    },
+    {
+      "name": "PC13",
+      "tests": 14,
+      "failures": 2,
+      "exit": 1
+    },
+    {
+      "name": "HOME15",
+      "tests": 21,
+      "failures": 0,
+      "exit": 0
+    },
+    {
+      "name": "REPORT16",
+      "tests": 13,
+      "failures": 0,
+      "exit": 0
+    },
+    {
+      "name": "static",
+      "tests": 1,
+      "failures": 0,
+      "exit": 0
+    }
+  ],
+  "typeBuildDomain": "all exit0; Node261/261",
+  "independent": {
+    "core4": 0,
+    "longUI": 0,
+    "listAndKeyboard": 0,
+    "normalEscape": 0,
+    "originalQuestionTrialReply": 0,
+    "statePublicAPI": 0,
+    "freshCamera": 0,
+    "viewProtection": 0
+  },
+  "unchangedOriginalCounterexampleDiagnostic": "8 selected original PC13 tests, one later viewport failure; all8 first info centres positive",
+  "remaining": "PC13 RB-A-edit caller scroll128->70 causes footer occlusion; original tests preserved nonzero. H18 hidden ancestor visibility and PC13 initial no-scroll viewport expectation separately classified. No product acceptance declared.",
+  "actualOuterToolExit": {
+    "authorLauncher": 1,
+    "independentLauncher": 1,
+    "remainingDiagnostic": 1,
+    "pc13ReturnDiagnostic": 1,
+    "viewProtection": 0
+  },
+  "provenance": "Actual completed exec sessions 93649/30348/39814/22867/82463; this file recorded after completion, distinct from scripts pre-exit planned statuses. Raw tool service transcript itself is not included."
+}

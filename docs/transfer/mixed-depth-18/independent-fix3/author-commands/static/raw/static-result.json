@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "agentflow.return.1",
+  "projectId": "P_a4b39d12-7109-4771-b8c4-f4be9f67ce61",
+  "taskId": "T_8b1b6ef5-7ee7-4867-ba03-afbd6dcdbb67",
+  "returnId": "H_3ea2b385-cc96-4a70-9e81-890ff12deff7",
+  "report": "  합성 A 보고\n수정은 주장일 뿐. 못 한 일: 실기기 검사.  ",
+  "evidence": "합성 검사 출력\n실제 CLI 증거 아님"
+}

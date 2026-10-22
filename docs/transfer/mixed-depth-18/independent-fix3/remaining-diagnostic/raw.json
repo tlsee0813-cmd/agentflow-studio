@@ -1,0 +1,517 @@
+[
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "nav-space",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "nav-space"
+    }
+  },
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "nav-context",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "nav-context"
+    }
+  },
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "nav-space",
+      "contextHidden": false,
+      "aria": "true",
+      "layer": "work",
+      "focus": "nav-space"
+    }
+  },
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": false,
+      "aria": "true",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape",
+    "phase": "after original failure, before teardown",
+    "context": {
+      "hidden": false,
+      "display": "block",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "aria": "true",
+      "layer": "space",
+      "focus": "node-info-A_07d596e6-9e68-4377-9abd-e3d110354e08"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "nav-space",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "nav-space"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "nav-context",
+      "contextHidden": true,
+      "aria": "false",
+      "layer": "space",
+      "focus": "nav-context"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "nav-space",
+      "contextHidden": false,
+      "aria": "true",
+      "layer": "work",
+      "focus": "nav-space"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "event": {
+      "clicked": "map-fit",
+      "contextHidden": false,
+      "aria": "true",
+      "layer": "space",
+      "focus": "map-fit"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape",
+    "phase": "after original failure, before teardown",
+    "context": {
+      "hidden": false,
+      "display": "block",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "aria": "true",
+      "layer": "space",
+      "focus": "node-info-A_791f2661-bd7a-4cc6-8ce3-3ae7be228831"
+    }
+  },
+  {
+    "test": "author13.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout",
+    "phase": "immediate return before unchanged assert_back",
+    "label": "R-edit",
+    "raw": {
+      "target": "panel-task-T_00b2cc3d-c3bc-45b3-bd2b-3b705a4baf45",
+      "rect": {
+        "x": 1111,
+        "y": 617.125,
+        "width": 127.296875,
+        "height": 36,
+        "top": 617.125,
+        "right": 1238.296875,
+        "bottom": 653.125,
+        "left": 1111
+      },
+      "body": {
+        "x": 1099,
+        "y": 371.515625,
+        "width": 298,
+        "height": 458.484375,
+        "top": 371.515625,
+        "right": 1397,
+        "bottom": 830,
+        "left": 1099
+      },
+      "scroll": 70,
+      "max": 70,
+      "head": {
+        "x": 1099,
+        "y": 295.125,
+        "width": 298,
+        "height": 76.390625,
+        "top": 295.125,
+        "right": 1397,
+        "bottom": 371.515625,
+        "left": 1099
+      },
+      "footer": {
+        "x": 1099,
+        "y": 830,
+        "width": 298,
+        "height": 53,
+        "top": 830,
+        "right": 1397,
+        "bottom": 883,
+        "left": 1099
+      },
+      "pageY": 0,
+      "focus": "panel-task-T_00b2cc3d-c3bc-45b3-bd2b-3b705a4baf45",
+      "matrix": "matrix(1.5625, 0, 0, 1.5625, 692.75, -105.531)",
+      "points": [
+        {
+          "x": 1123.7296875,
+          "y": 635.125,
+          "hit": true,
+          "top": {
+            "id": "panel-task-T_00b2cc3d-c3bc-45b3-bd2b-3b705a4baf45",
+            "tag": "BUTTON",
+            "text": "A: 예약 접수 화면 ↘"
+          }
+        },
+        {
+          "x": 1174.6484375,
+          "y": 635.125,
+          "hit": true,
+          "top": {
+            "id": "panel-task-T_00b2cc3d-c3bc-45b3-bd2b-3b705a4baf45",
+            "tag": "BUTTON",
+            "text": "A: 예약 접수 화면 ↘"
+          }
+        },
+        {
+          "x": 1225.5671875,
+          "y": 635.125,
+          "hit": true,
+          "top": {
+            "id": "panel-task-T_00b2cc3d-c3bc-45b3-bd2b-3b705a4baf45",
+            "tag": "BUTTON",
+            "text": "A: 예약 접수 화면 ↘"
+          }
+        }
+      ],
+      "text": "A: 예약 접수 화면 ↘"
+    },
+    "originalDeparture": {
+      "vh": 900,
+      "vw": 1440,
+      "windowY": 0,
+      "docHeight": 1162,
+      "docWidth": 1440,
+      "map": {
+        "top": 294.125,
+        "bottom": 884,
+        "left": 264,
+        "right": 1084,
+        "h": 589.875,
+        "w": 820
+      },
+      "mapVisible": 589.875,
+      "panel": {
+        "top": 294.125,
+        "bottom": 884,
+        "left": 1098,
+        "right": 1398,
+        "h": 589.875,
+        "w": 300
+      },
+      "notice": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "h": 0,
+        "w": 0
+      },
+      "noticeShown": false,
+      "storageError": false,
+      "purpose": {
+        "top": 200.859375,
+        "bottom": 223.953125,
+        "left": 352.359375,
+        "right": 1232.921875,
+        "h": 23.09375,
+        "w": 880.5625
+      },
+      "purposeText": "동네 공방 원데이 클래스 예약 사이트",
+      "toolbar": {
+        "top": 248.125,
+        "bottom": 284.125,
+        "left": 264,
+        "right": 1398,
+        "h": 36,
+        "w": 1134
+      },
+      "records": "이어 볼 기록 1개 · 후속 작업문 없는 보고 1",
+      "firstCard": "A_bb70cef7-3038-462f-be1e-295b7f3bc4b3",
+      "firstTitleHit": false,
+      "firstInfoHit": false,
+      "fitHit": true,
+      "styleTransform": "translate(692.75px, -105.531px) scale(1.5625)",
+      "computedTransform": "matrix(1.5625, 0, 0, 1.5625, 692.75, -105.531)",
+      "selected": "A_bb70cef7-3038-462f-be1e-295b7f3bc4b3",
+      "focusId": "main",
+      "openDetails": [
+        "area-list"
+      ],
+      "anchorY": 617.125,
+      "cardRect": {
+        "x": 1614,
+        "y": 377.09375,
+        "width": 375,
+        "height": 281.25
+      }
+    }
+  },
+  {
+    "test": "author13.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout",
+    "phase": "immediate return before unchanged assert_back",
+    "label": "RB-A-edit",
+    "raw": {
+      "target": "panel-task-T_00b2cc3d-c3bc-45b3-bd2b-3b705a4baf45",
+      "rect": {
+        "x": 1111,
+        "y": 847.3125,
+        "width": 127.296875,
+        "height": 36,
+        "top": 847.3125,
+        "right": 1238.296875,
+        "bottom": 883.3125,
+        "left": 1111
+      },
+      "body": {
+        "x": 1099,
+        "y": 601.703125,
+        "width": 298,
+        "height": 228.296875,
+        "top": 601.703125,
+        "right": 1397,
+        "bottom": 830,
+        "left": 1099
+      },
+      "scroll": 70,
+      "max": 300,
+      "head": {
+        "x": 1099,
+        "y": 525.3125,
+        "width": 298,
+        "height": 76.390625,
+        "top": 525.3125,
+        "right": 1397,
+        "bottom": 601.703125,
+        "left": 1099
+      },
+      "footer": {
+        "x": 1099,
+        "y": 830,
+        "width": 298,
+        "height": 53,
+        "top": 830,
+        "right": 1397,
+        "bottom": 883,
+        "left": 1099
+      },
+      "pageY": 0,
+      "focus": "panel-task-T_00b2cc3d-c3bc-45b3-bd2b-3b705a4baf45",
+      "matrix": "matrix(1.6, 0, 0, 1.6, 639.56, -142.36)",
+      "points": [
+        {
+          "x": 1123.7296875,
+          "y": 865.3125,
+          "hit": false,
+          "top": {
+            "id": "panel-open",
+            "tag": "BUTTON",
+            "text": "영역 열기 ↗"
+          }
+        },
+        {
+          "x": 1174.6484375,
+          "y": 865.3125,
+          "hit": false,
+          "top": {
+            "id": "panel-open",
+            "tag": "BUTTON",
+            "text": "영역 열기 ↗"
+          }
+        },
+        {
+          "x": 1225.5671875,
+          "y": 865.3125,
+          "hit": false,
+          "top": {
+            "id": "panel-open",
+            "tag": "BUTTON",
+            "text": "영역 열기 ↗"
+          }
+        }
+      ],
+      "text": "A: 예약 접수 화면 ↘"
+    },
+    "originalDeparture": {
+      "vh": 900,
+      "vw": 1440,
+      "windowY": 0,
+      "docHeight": 1162,
+      "docWidth": 1440,
+      "map": {
+        "top": 524.3125,
+        "bottom": 884,
+        "left": 264,
+        "right": 1084,
+        "h": 359.6875,
+        "w": 820
+      },
+      "mapVisible": 359.6875,
+      "panel": {
+        "top": 524.3125,
+        "bottom": 884,
+        "left": 1098,
+        "right": 1398,
+        "h": 359.6875,
+        "w": 300
+      },
+      "notice": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "h": 0,
+        "w": 0
+      },
+      "noticeShown": false,
+      "storageError": false,
+      "purpose": {
+        "top": 200.859375,
+        "bottom": 223.953125,
+        "left": 352.359375,
+        "right": 1232.921875,
+        "h": 23.09375,
+        "w": 880.5625
+      },
+      "purposeText": "동네 공방 원데이 클래스 예약 사이트",
+      "toolbar": {
+        "top": 248.125,
+        "bottom": 514.3125,
+        "left": 264,
+        "right": 1398,
+        "h": 266.1875,
+        "w": 1134
+      },
+      "records": "이어 볼 기록 2개 · 후속 작업문 없는 보고 2",
+      "firstCard": "A_bb70cef7-3038-462f-be1e-295b7f3bc4b3",
+      "firstTitleHit": false,
+      "firstInfoHit": false,
+      "fitHit": true,
+      "styleTransform": "translate(639.56px, -142.36px) scale(1.6)",
+      "computedTransform": "matrix(1.6, 0, 0, 1.6, 639.56, -142.36)",
+      "selected": "A_bb70cef7-3038-462f-be1e-295b7f3bc4b3",
+      "focusId": "main",
+      "openDetails": [
+        "check-list",
+        "area-list"
+      ],
+      "anchorY": 789.3125,
+      "cardRect": {
+        "x": 1576.56005859375,
+        "y": 574.9525146484375,
+        "width": 384,
+        "height": 288
+      }
+    }
+  }
+]

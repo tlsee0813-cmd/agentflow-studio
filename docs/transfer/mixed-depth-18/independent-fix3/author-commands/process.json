@@ -1,0 +1,161 @@
+[
+  {
+    "name": "type",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "startUTC": "2026-10-22T12:06:55.812364+00:00",
+    "endUTC": "2026-10-22T12:06:58.725528+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "7c8d8c81cc4f4c29bccece1524f09b6070f60f64ec0a6302f1cf649e969934cf",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "build",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "startUTC": "2026-10-22T12:06:58.725792+00:00",
+    "endUTC": "2026-10-22T12:07:00.306963+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "3336006047fb26f65b5e89c0048eac084c4b1d0ef082faa9f359a35939868e28",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "continuity-type",
+    "command": [
+      "node",
+      "continuity/scripts/check.mjs"
+    ],
+    "startUTC": "2026-10-22T12:07:00.307234+00:00",
+    "endUTC": "2026-10-22T12:07:03.406520+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "47570359043e5a8977f213754a6d0c4d741078ec28b6cbc31009801c909fc89f",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "continuity-build",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T12:07:03.406786+00:00",
+    "endUTC": "2026-10-22T12:07:06.090541+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "domain",
+    "command": [
+      "bash",
+      "-c",
+      "node --test continuity/tests/*.test.mjs"
+    ],
+    "startUTC": "2026-10-22T12:07:06.090806+00:00",
+    "endUTC": "2026-10-22T12:07:19.157743+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e1d5b5afae1abb3b406f60ab4a9b10a7e261c3c0fde984bfbb39dea0690c96f0",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "static-build",
+    "command": [
+      "node",
+      "continuity/scripts/build-static.mjs"
+    ],
+    "startUTC": "2026-10-22T12:07:19.158484+00:00",
+    "endUTC": "2026-10-22T12:07:21.907066+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "6b8718a4113088a0555063b2effc42289ab7ffd69d16cb7c3763386531ae7cc4",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "hierarchy18",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/hierarchy18_browser.py"
+    ],
+    "startUTC": "2026-10-22T12:07:21.912581+00:00",
+    "endUTC": "2026-10-22T12:08:05.841640+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "0663fac428a0a20b06e489cc20216639ff9401b181a9cc7e9e03a1e5c4e7b36c"
+  },
+  {
+    "name": "understanding17",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/understanding17_browser.py"
+    ],
+    "startUTC": "2026-10-22T12:07:21.912893+00:00",
+    "endUTC": "2026-10-22T12:08:11.186894+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "b2db0b2a15ef531aa0a8c2fb912d7da84c1d0901e990194746a73ad724c27be8"
+  },
+  {
+    "name": "pc12",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/pc12_browser.py"
+    ],
+    "startUTC": "2026-10-22T12:08:05.846987+00:00",
+    "endUTC": "2026-10-22T12:08:59.880796+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "9e371eb0ae3d3404ea94f2d465404c64864a5218319de68f0dfab75f6db8e1d9"
+  },
+  {
+    "name": "pc13",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/pc13_browser.py"
+    ],
+    "startUTC": "2026-10-22T12:08:11.187259+00:00",
+    "endUTC": "2026-10-22T12:09:13.825005+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "a1a69333a6c04cb8fb97d830bdb354ee7fe24d2c9b4243492cb5ee08aadc5689"
+  },
+  {
+    "name": "home15",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/home15_browser.py"
+    ],
+    "startUTC": "2026-10-22T12:08:59.881155+00:00",
+    "endUTC": "2026-10-22T12:09:49.331131+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "173aa2c7b138e13ed755989dbaac3baa1c1efce6d11172fd3ca30d72bc3edb3b",
+    "stderrSHA256": "6aa805b4ad1d4d0519bbc2e2e838aad78516d6a5e8d0230693421a8ac162f750"
+  },
+  {
+    "name": "static",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/static_browser.py"
+    ],
+    "startUTC": "2026-10-22T12:09:49.331785+00:00",
+    "endUTC": "2026-10-22T12:09:52.967906+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "5ada270822d0d25d86b1740891425a43a48c58ac4bab314787b3010aad0f127b"
+  },
+  {
+    "name": "report16",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/report16_browser.py"
+    ],
+    "startUTC": "2026-10-22T12:09:13.825556+00:00",
+    "endUTC": "2026-10-22T12:10:25.753005+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e1ac7194937fb0ae3f106bbbc3993b69e4c1497601970a1e24a3958e949d9722"
+  }
+]

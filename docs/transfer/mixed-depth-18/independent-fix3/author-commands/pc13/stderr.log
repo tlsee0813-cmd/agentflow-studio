@@ -1,0 +1,59 @@
+test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen) ... FAIL
+test_02_one_normal_notice_stays_visible (__main__.Pc13.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+test_08_map_tools_usable_in_the_first_screen (__main__.Pc13.test_08_map_tools_usable_in_the_first_screen) ... ok
+test_06_long_purpose_idea_and_title (__main__.Pc13Boundaries.test_06_long_purpose_idea_and_title) ... ok
+test_07_css_width_1024_and_narrow_390 (__main__.Pc13Boundaries.test_07_css_width_1024_and_narrow_390) ... ok
+test_01_default_and_selected_first_screen (__main__.Pc13Wide.test_01_default_and_selected_first_screen) ... ok
+test_02_one_normal_notice_stays_visible (__main__.Pc13Wide.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13Wide.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13Wide.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... FAIL
+test_08_map_tools_usable_in_the_first_screen (__main__.Pc13Wide.test_08_map_tools_usable_in_the_first_screen) ... ok
+
+======================================================================
+FAIL: test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix3-candidate/app/continuity/tests/pc13_browser.py", line 136, in test_01_default_and_selected_first_screen
+    expect(self.page.locator(f'#panel-task-{A}')).to_be_in_viewport();self.shot('02-selected')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py", line 20633, in to_be_in_viewport
+    self._sync(self._impl_obj.to_be_in_viewport(ratio=ratio, timeout=timeout))
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 807, in to_be_in_viewport
+    await self._expect_impl(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+AssertionError: Locator expected to be in viewport
+Actual value: viewport ratio 0 
+Call log:
+  - Expect "to_be_in_viewport" with timeout 5000ms
+  - waiting for locator("#panel-task-T_af2ca52f-afba-4701-bd01-2558975d523b")
+    9 × locator resolved to <button type="button" class="quiet panel-task" id="panel-task-T_af2ca52f-afba-4701-bd01-2558975d523b">A: 예약 접수 화면 ↘</button>
+      - unexpected value "viewport ratio 0"
+
+
+======================================================================
+FAIL: test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix3-candidate/app/continuity/tests/pc13_browser.py", line 285, in test_05_R_edit_and_RB_to_A_from_the_new_layout
+    vA={k:f'A {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vA);self.page.locator('#work-return-origin').click();self.assert_back(b,ids['예약'],A,'RB-A-edit')
+                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix3-candidate/app/continuity/tests/pc13_browser.py", line 250, in assert_back
+    self.check(f'{label}: focus on the calling control',raw['focused'],True);self.check(f'{label}: calling control clickable',raw['hit'],True)
+                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix3-candidate/app/continuity/tests/pc13_browser.py", line 64, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True : RB-A-edit: calling control clickable
+
+----------------------------------------------------------------------
+Ran 14 tests in 62.438s
+
+FAILED (failures=2)

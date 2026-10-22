@@ -1,0 +1,86 @@
+[
+  {
+    "name": "ui",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix3-independent/ui-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:08:58.236939+00:00",
+    "endUTC": "2026-10-22T12:09:13.379466+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "long-ui",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix3-independent/long-ui-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:09:13.379660+00:00",
+    "endUTC": "2026-10-22T12:09:23.017841+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "extra-ui-key-observation",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix3-independent/extra-ui-key-observation-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:09:23.018262+00:00",
+    "endUTC": "2026-10-22T12:09:29.597026+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "normal-escape",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix3-independent/normal-escape-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:09:29.597252+00:00",
+    "endUTC": "2026-10-22T12:09:33.992262+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "question-ui",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix3-independent/question-ui-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:09:33.992650+00:00",
+    "endUTC": "2026-10-22T12:09:38.555174+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "initial-camera",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix3-independent/initial-camera-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:09:38.555499+00:00",
+    "endUTC": "2026-10-22T12:09:44.367006+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "pc13-hit-diagnostic",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix3-independent/pc13-hit-diagnostic-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:09:44.367285+00:00",
+    "endUTC": "2026-10-22T12:10:21.896332+00:00",
+    "actualCollectorExit": 1,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

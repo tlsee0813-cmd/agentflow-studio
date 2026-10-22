@@ -1,0 +1,6 @@
+from pathlib import Path
+import os,sys,subprocess,json,datetime,hashlib
+R=Path(__file__).parent;env=os.environ.copy();env['PATH']='/workspace/browser-env/tools/node_modules/.bin:'+env['PATH'];rows=[];names=['ui','long-ui','extra-ui-key-observation','normal-escape','question-ui','initial-camera','pc13-hit-diagnostic'];now=lambda:datetime.datetime.now(datetime.timezone.utc).isoformat()
+for name in names:
+ cmd=['/workspace/browser-env/venv/bin/python',str(R/(name+'-collector.py'))];start=now();p=subprocess.run(cmd,env=env,capture_output=True);(R/(name+'.launcher.stdout.log')).write_bytes(p.stdout);(R/(name+'.launcher.stderr.log')).write_bytes(p.stderr);rows.append({'name':name,'command':cmd,'startUTC':start,'endUTC':now(),'actualCollectorExit':p.returncode,'stdoutSHA256':hashlib.sha256(p.stdout).hexdigest(),'stderrSHA256':hashlib.sha256(p.stderr).hexdigest()});(R/'independent-external-process.json').write_text(json.dumps(rows,indent=2));print(name,p.returncode,flush=True)
+code=int(len(rows)!=len(names) or any(r['actualCollectorExit'] for r in rows));(R/'independent-launcher-summary.json').write_text(json.dumps({'expected':names,'executed':[r['name'] for r in rows],'complete':len(rows)==len(names),'launcherPlannedExit':code},indent=2));sys.exit(code)
