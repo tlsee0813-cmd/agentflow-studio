@@ -1,0 +1,137 @@
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -178,6 +178,9 @@
+ let selectedReturnTaskId:string|undefined;
+ // Local file reads/clipboard are not tickets or durable project data. Replacement invalidates both.
+ let projectEpoch=0,resultRead=0,recoveryRead=0,resultMessage='';
++// Only the pending file read's automatic reveal is cancelled by leaving its work view.
++// The selected bytes and the existing read/import guards keep their separate lifetime.
++let resultRevealToken:{context:boolean}|null=null;
+ let resultSelection:{rawText:string;projectId:string;revision:number;epoch:number}|null=null;
+ let lastFileExport:{taskId:string;text:string}|null=null;
+ function returnChoiceRequired():boolean {
+@@ -282,6 +285,7 @@
+ }
+ function readyForAI():boolean {return !!config&&(route==='example'?config.mode==='mock':config.mode==='mock'||(config.configured&&config.paidEnabled&&$<HTMLInputElement>('consent').checked));}
+ function displayView() {
++  if(view!=='work'||route==='projects'||resultRevealToken&&resultRevealToken.context!==contextOpen)resultRevealToken=null;
+   const inProject=route!=='projects',starting=inProject&&!project.tasks.length;
+   document.body.dataset.route=route;document.body.dataset.starting=String(starting);
+   // FLOW091: inside a project (past the welcome) the head is one compact line so the map / next action come first.
+@@ -2568,8 +2572,9 @@
+   const input=$<HTMLInputElement>('result-file-input'),file=input.files?.[0];input.value='';if(!file)return;
+   const read=++resultRead,epoch=projectEpoch,projectId=project.id,revision=project.revision,current=project.currentTaskId,from=view;
+   const entry=target.kind==='entry'?target.ref.entryId:null;
++  const revealToken={context:contextOpen};resultRevealToken=revealToken;
+   const reveal=()=>{
+-    if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId||entry!==(target.kind==='entry'?target.ref.entryId:null)||from!=='work'||view!=='work'||route==='projects'||revision!==project.revision||current!==project.currentTaskId)return;
++    if(resultRevealToken!==revealToken||read!==resultRead||epoch!==projectEpoch||project.id!==projectId||entry!==(target.kind==='entry'?target.ref.entryId:null)||from!=='work'||view!=='work'||route==='projects'||revision!==project.revision||current!==project.currentTaskId)return;
+     const focus=document.getElementById('result-file-review-heading')??document.getElementById('result-file-error')??document.getElementById('result-file-message');if(!focus)return;
+     $<HTMLDetailsElement>('compose-panel').open=true;$<HTMLDetailsElement>('result-file-panel').open=true;
+     focus.tabIndex=-1;focus.scrollIntoView({block:'center'});focus.focus({preventScroll:true});
+@@ -2583,6 +2588,7 @@
+     resultSelection={rawText,projectId,revision:project.revision,epoch};resultMessage='원문과 연결 대상을 확인한 뒤 가져오세요.';renderResultFile();
+     reveal();
+   }catch(e){if(read!==resultRead||epoch!==projectEpoch)return;resultMessage=resultError(e)+' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';renderResultFile();reveal();}
++  finally{if(resultRevealToken===revealToken)resultRevealToken=null;}
+ });
+ $('import-file').addEventListener('change',async()=>{
+   const input=$<HTMLInputElement>('import-file'),file=input.files?.[0];input.value='';if(!file)return;
+--- a/app/continuity/tests/pc12_browser.py
++++ b/app/continuity/tests/pc12_browser.py
+@@ -463,6 +463,95 @@
+         expect(self.page.locator('#result-file-preview')).to_have_attribute('data-return-id',H)
+         self.assertEqual(self.state(),received,'duplicate selection creates no extra report and does not change current/draft')
+ 
++    def test_12_delayed_file_reveal_respects_view_departure(self):
++        """Controlled file-API delay only; actual selected bytes and every navigation use the native UI.
++        Same-work completion may reveal. Leaving work cancels only automatic reveal, not the selected result.
++        A different entry keeps its current input/focus; this is not an AI or file-system timing benchmark.
++        """
++        self.ctx.grant_permissions(['clipboard-read','clipboard-write'],origin=self.url)
++        (area,)=self.start([('지연 확인 부분','실제 파일의 원문과 인계 연결을 보존한다.')])
++        A=self.request_in(area,'33 지연 반례: 이 요청의 파일 결과를 명시 확인한다.')
++        self.unsent_draft(area,'33 별도 미전송 입력 · 수신 선택으로 바꾸지 않는다.')
++        self.page.locator('#work-file-handoff').click();self.page.locator('#copy-file-work').click()
++        expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사');base.saved(self.page)
++        import re
++        clipboard=self.page.evaluate('navigator.clipboard.readText()')
++        file=next(json.loads(x) for x in re.findall(r'```json\n([\s\S]*?)\n```',clipboard.replace('\r\n','\n')) if json.loads(x).get('schemaVersion')=='agentflow.return.2')
++        before=self.state();H=self.task(A,before)['handoffs'][-1]['returnId']
++        self.assertEqual(file['taskId'],A);self.assertEqual(file['returnId'],H)
++        file.update(report='[합성33 지연] 실제 실행 증거가 아닌 파일 선택 회귀용 보고.',evidence=None,understanding=None)
++        path=base.OUT/f'flow33-delay-{self.WIDTH}.json';path.write_text(json.dumps(file,ensure_ascii=False),encoding='utf-8')
++        raw=path.read_bytes().decode('utf-8')
++        # Fault injection delays the native File.arrayBuffer result without replacing its bytes or touching app state.
++        self.page.evaluate(r'''()=>{const original=File.prototype.arrayBuffer;
++          window.__armReveal33=name=>{let ready;const gate={name,started:false,released:false,raw:null,release:null,ready:new Promise(r=>ready=r),notify:()=>ready()};window.__reveal33=gate;};
++          File.prototype.arrayBuffer=function(){const gate=window.__reveal33,p=original.call(this);
++            if(!gate||gate.started||this.name!==gate.name)return p;gate.started=true;
++            return p.then(bytes=>new Promise(resolve=>{gate.raw=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
++              gate.release=()=>{gate.released=true;resolve(bytes)};gate.notify();}));};}''')
++        def choose_delayed():
++            self.page.evaluate('(name)=>window.__armReveal33(name)',path.name)
++            with self.page.expect_file_chooser() as chooser:self.page.locator('#select-result-file').click()
++            chooser.value.set_files(str(path))
++            self.page.evaluate(r'''async()=>{let timer;try{await Promise.race([window.__reveal33.ready,new Promise((_,reject)=>timer=setTimeout(()=>reject(Error('controlled file read did not reach gate')),5000))]);}finally{clearTimeout(timer)}}''')
++            self.assertEqual(self.page.evaluate('window.__reveal33.raw'),raw,'delay returns the exact selected UTF-8 file, including its newlines')
++            expect(self.page.locator('#result-file-message')).to_contain_text('읽는 중')
++        def release_read():
++            # The animation-frame event follows the released promise's app continuation; it is not a fixed sleep.
++            self.page.evaluate('async()=>{window.__reveal33.release();await new Promise(requestAnimationFrame)}')
++        def position():
++            return self.page.evaluate('''()=>({focus:document.activeElement?.id,y:scrollY,entry:document.documentElement.dataset.entryId,
++              open:Object.fromEntries([...document.querySelectorAll('#compose-panel,#result-file-panel,#edit-work,#file-return-options')].map(e=>[e.id,e.open]))})''')
++        # A fresh selection in the same work view remains eligible, including the ordinary work display path.
++        # Open the existing file section with its native summary, then use its real chooser.
++        if not self.page.locator('#compose-panel').evaluate('(e)=>e.open'):self.page.locator('#compose-summary').click()
++        if not self.page.locator('#result-file-panel').evaluate('(e)=>e.open'):self.page.locator('#result-file-panel > summary').click()
++        choose_delayed();self.page.locator('#nav-work').click();release_read()
++        expect(self.page.locator('#result-file-review-heading')).to_be_focused()
++        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-target-task-id',A)
++        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-return-id',H)
++        self.assertEqual(self.state(),before,'normal delayed selection is still not acceptance')
++        # The same IDs/revision/DOM return after native history -> work, so completion-only guards are insufficient.
++        choose_delayed();self.page.locator('#nav-history').click();expect(self.page.locator('#history-view')).to_be_visible()
++        self.page.locator('#nav-work').click();expect(self.page.locator('#work-view')).to_be_visible()
++        departure=position();self.assertEqual(departure['focus'],'nav-work')
++        self.record('actual','33 delayed read after native away/back before completion',departure)
++        release_read();expect(self.page.locator('#result-file-preview')).to_have_attribute('data-selection-state','review')
++        after=position();self.record('actual','33 delayed read after native away/back completion',after)
++        self.assertEqual(after['focus'],departure['focus'],'a completed old read must not take focus after the user left work')
++        self.assertAlmostEqual(after['y'],departure['y'],delta=1)
++        self.assertEqual(after['open'],departure['open']);self.assertEqual(after['entry'],departure['entry'])
++        self.assertEqual(self.state(),before,'cancelled reveal preserves current/draft/manuals/H and all stored values')
++        # The fixed sidebar's context reader is a different explicit intent, although its technical view is still work.
++        choose_delayed();self.page.locator('#nav-context').click()
++        expect(self.page.locator('#context-panel')).to_be_visible();expect(self.page.locator('#panel-title')).to_be_focused()
++        context_position=position();release_read()
++        self.assertEqual(position(),context_position,'an old read must not pull focus from the explicitly opened context reader')
++        expect(self.page.locator('#context-panel')).to_be_visible();self.assertEqual(self.state(),before)
++        # A later fresh file selection gets a new reveal token rather than reviving the cancelled one.
++        expect(self.page.locator('#nav-context')).to_have_attribute('aria-expanded','true')
++        choose_delayed();release_read()
++        expect(self.page.locator('#result-file-review-heading')).to_be_focused()
++        expect(self.page.locator('#context-panel')).to_be_visible();expect(self.page.locator('#nav-context')).to_have_attribute('aria-expanded','true')
++        # Selection is retained for the user's own explicit confirmation; rawText must remain byte-for-byte exact.
++        self.page.locator('#result-file-raw > summary').click()
++        self.assertEqual(self.page.locator('#result-file-raw textarea').input_value(),raw.replace('\r\n','\n').replace('\r','\n'),'textarea API newline representation only')
++        self.page.locator('#accept-result-file').click();base.saved(self.page)
++        received=self.state();added=[t for t in received['tasks'] if t['id'] not in {x['id'] for x in before['tasks']}]
++        self.assertEqual(len(added),1);self.assertEqual(added[0]['resultFile']['rawText'],raw)
++        self.assertEqual(added[0]['parentTaskId'],A);self.assertEqual(added[0]['resultFile']['returnId'],H)
++        for old in before['tasks']:self.assertEqual(self.task(old['id'],received),old)
++        self.assertEqual(received['draft'],before['draft']);self.assertEqual(received['space'],before['space'])
++        # An explicit new entry invalidates the old read under the existing epoch/entry policy.
++        choose_delayed();old_entry=position()['entry']
++        self.page.locator('#nav-projects').click();expect(self.page.locator('#projects-view')).to_be_visible()
++        self.page.locator('#new-project').click();expect(self.page.locator('#work-view')).to_be_visible()
++        self.page.locator('#draft').fill('새 프로젝트33 · 이 입력과 초점을 유지한다.');base.saved(self.page)
++        fresh=self.state();fresh_position=position();self.assertNotEqual(fresh_position['entry'],old_entry)
++        release_read();self.assertEqual(position(),fresh_position,'old file completion must not move or open the new entry')
++        self.assertEqual(self.state(),fresh);expect(self.page.locator('#result-file-review-heading')).to_have_count(0)
++        self.shot('33-delay-reveal-scope')
++
+ class Pc12Wide(Pc12):
+     WIDTH,HEIGHT=1440,900
+ 

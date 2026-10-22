@@ -1,0 +1,61 @@
+{
+  "status": "작성자 guard 후보 동결 · 실제 브라우저 미실행",
+  "base": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+  "source": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 280692,
+      "sha256": "83979bd309a84905a9afae2ead112aef734946bf024b837ea3c4ca8a84449dd5",
+      "gitBlob": "339b2ea349565a5d6e75422df1c4a4a7027abfcc"
+    },
+    {
+      "path": "app/continuity/tests/pc12_browser.py",
+      "bytes": 60650,
+      "sha256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580",
+      "gitBlob": "7c7599571ca47bef4bc7249590ecac97beb0a89e"
+    }
+  ],
+  "implementation": [
+    "자동 reveal 자격만 토큰으로 관리하며 displayView에서 work/route 이탈 또는 기준·출처 상태 변화 때 취소한다.",
+    "같은 work 재진입으로 되살리지 않으며 실제 새 파일 선택만 새 토큰을 만든다.",
+    "finally는 자기 토큰만 정리한다. resultRead/epoch/entry/current/revision 및 명시 수신 정책은 유지한다."
+  ],
+  "checks": {
+    "runtime": "Node24.19.0 보조 확인 · 지원 Node22 수용 증거 아님",
+    "type": 0,
+    "build": 0,
+    "pythonAST": "통과",
+    "JSExpressionCount": 9,
+    "JSExits": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "existingMethodsUnchanged": true,
+    "exportWorkAndAcceptResultFileUnchanged": true,
+    "actualBrowser": "미실행",
+    "server": "미실행",
+    "Node22": "미실행",
+    "remoteWrites": 0,
+    "CIWorkflowChange": false,
+    "expectedNotExecutedPc12Count": 19
+  },
+  "separateHold": "root가 기준673의 REPORT16 첫 화면 회귀를 별도로 조사 중이다. 이 후보는 그 문제를 해결하거나 전체 제품 수용을 주장하지 않는다.",
+  "scopeLimits": [
+    "같은 view의 전체 render 및 이전/새 읽기의 중첩 finally는 정적으로만 확인했다.",
+    "일반 초점·스크롤을 추적하지 않으며 내부 details만 바뀌면 취소하지 않는다.",
+    "제어된 읽기 해제 뒤의 frame event는 앱 promise 처리 이후를 확인하며 고정 sleep은 추가하지 않았다."
+  ],
+  "independentReview": {
+    "reviewer": "Astra",
+    "sourceSHA256": "83979bd309a84905a9afae2ead112aef734946bf024b837ea3c4ca8a84449dd5",
+    "testSHA256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580",
+    "result": "최종 delta 실바이트/해시 대조 완료 · 추가 정적 차단 없음 · 실제 UI 미실행"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "parentProvidedCandidate": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+  "frozenPayloadSHA256": "df015e72fcfea2e1962d4fb9b4cd3241d1ab30eb108243806beed0235e69562f",
+  "sourceFiles": {
+    "fileCount": 2,
+    "files": [
+      {
+        "path": "app/continuity/src/client/app.ts",
+        "bytes": 280166,
+        "sha256": "9267f4b8de7079f5630a99abc28a63396c3b42a3960084ad1b3856eeb0f18374",
+        "gitBlob": "b2960456de9a42e4ab28733750c2e19f1125202a"
+      },
+      {
+        "path": "app/continuity/tests/pc12_browser.py",
+        "bytes": 51746,
+        "sha256": "f3a77141907fdda15d1a51d55520b0d1ac5fce8d76020d460c53a9d25cf8e804",
+        "gitBlob": "dc0cb74a9b30d63a0db18edf9542a381f100bc9d"
+      }
+    ],
+    "bytes": 331912
+  },
+  "productSourceCopiedBytes": 485879,
+  "untouchedAuthor": "work\\product33-task-context-author",
+  "uiExecuted": false
+}

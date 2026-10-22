@@ -1,0 +1,41 @@
+{
+  "pythonAST": "pass",
+  "unchangedExistingMethods": true,
+  "addedMethods": [
+    "Pc12.test_12_delayed_file_reveal_respects_view_departure"
+  ],
+  "JSExpressions": 9,
+  "JSExit": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "unchangedFunctions": {
+    "exportWork": true,
+    "acceptResultFile": true
+  },
+  "source": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 280692,
+      "sha256": "83979bd309a84905a9afae2ead112aef734946bf024b837ea3c4ca8a84449dd5",
+      "gitBlob": "339b2ea349565a5d6e75422df1c4a4a7027abfcc"
+    },
+    {
+      "path": "app/continuity/tests/pc12_browser.py",
+      "bytes": 60650,
+      "sha256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580",
+      "gitBlob": "7c7599571ca47bef4bc7249590ecac97beb0a89e"
+    }
+  ],
+  "actualBrowser": "NOT_RUN; server prohibited",
+  "supportedNode22": "NOT_RUN; Cloud/CI separate",
+  "CIChange": false,
+  "expectedNotExecutedPc12Count": 19
+}
