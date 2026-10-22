@@ -1,0 +1,525 @@
+{
+  "schemaVersion": "idea015.project.7",
+  "id": "P_d41f47e4-36ab-42cc-bf25-8148e773b286",
+  "revision": 32,
+  "name": "나의 프로젝트",
+  "sources": [
+    {
+      "id": "S_adfe1e3d-7d92-4b6a-9206-0d6e3c1ab26c",
+      "kind": "request",
+      "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+      "at": "2026-10-22T11:17:25.700Z",
+      "taskId": "T_02735db4-976d-408d-ad74-24c5aa98ab65",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_c0eba765-b3d0-4c41-8027-db117c1c1481",
+      "kind": "test_answer",
+      "text": "[독립 합성 답변 기록] 자동 해결 판정은 아니다.",
+      "at": "2026-10-22T11:17:25.701Z",
+      "taskId": "T_02735db4-976d-408d-ad74-24c5aa98ab65",
+      "replyTo": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+      "disposition": "provided"
+    },
+    {
+      "id": "S_4619c2ea-8b21-45b0-a52e-fd395a1a6c21",
+      "kind": "report",
+      "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_02735db4-976d-408d-ad74-24c5aa98ab65의 인계 H_independent18_product13 / r23에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] PC 지도 조작부는 fix1에서 위 오른쪽으로 옮겼다. v0의 선택 카드 가림 관측과 fix1 작성자의 잔여 제한은 따로 남는다.",
+      "at": "2026-10-22T11:17:25.702Z",
+      "taskId": "T_4fab3eb6-7c22-4885-98d5-ca48561519d9",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_a23a2655-4eab-4286-a36a-38be87387d18",
+      "kind": "report",
+      "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_02735db4-976d-408d-ad74-24c5aa98ab65의 인계 H_hierarchy_product13 / r20에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] PC 지도 조작부는 fix1에서 위 오른쪽으로 옮겼다. v0의 선택 카드 가림 관측과 fix1 작성자의 잔여 제한은 따로 남는다. [합성 늦은 반환]",
+      "at": "2026-10-22T11:17:25.703Z",
+      "taskId": "T_2f6f72fe-9e87-4af1-b830-12dff16b4441",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+      "status": "requested",
+      "sourceId": "S_adfe1e3d-7d92-4b6a-9206-0d6e3c1ab26c",
+      "revision": 20,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_02735db4-976d-408d-ad74-24c5aa98ab65",
+      "sourceIds": [
+        "S_adfe1e3d-7d92-4b6a-9206-0d6e3c1ab26c",
+        "S_c0eba765-b3d0-4c41-8027-db117c1c1481"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_adfe1e3d-7d92-4b6a-9206-0d6e3c1ab26c",
+              "revision": 20
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+          "why": "실제 미결이 아님",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 21,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-22T11:17:25.700Z",
+          "method": "clipboard",
+          "revision": 20,
+          "chars": 4569,
+          "digest": "448cb411",
+          "work": {
+            "understanding": "",
+            "scope": "",
+            "next": "",
+            "checks": ""
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_hierarchy_product13",
+          "background": {
+            "version": "background.1",
+            "revision": 19,
+            "brief": "제품13 전체 공간의 포함 구성 재서술",
+            "area": {
+              "id": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+            "understanding": 0,
+            "stamp": {
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_8535435a-b5ee-4259-b6b2-277271c9ec1c",
+                  "name": "전체 공간 읽기",
+                  "note": "목적과 영역 구상을 기본에서 읽는다.",
+                  "revision": 0
+                },
+                {
+                  "id": "A_42f029e6-f092-402d-95f1-0bb810deb51c",
+                  "name": "영역 지도와 선택상세",
+                  "note": "현재 영역과 관계를 읽고 선택한다.",
+                  "revision": 1
+                }
+              ]
+            }
+          }
+        },
+        {
+          "at": "2026-10-22T11:17:25.701Z",
+          "method": "download",
+          "revision": 23,
+          "chars": 5259,
+          "digest": "3075d215",
+          "work": {
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_independent18_product13",
+          "background": {
+            "version": "background.1",
+            "revision": 19,
+            "brief": "제품13 전체 공간의 포함 구성 재서술",
+            "area": {
+              "id": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+            "understanding": 0,
+            "stamp": {
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_8535435a-b5ee-4259-b6b2-277271c9ec1c",
+                  "name": "전체 공간 읽기",
+                  "note": "목적과 영역 구상을 기본에서 읽는다.",
+                  "revision": 0
+                },
+                {
+                  "id": "A_42f029e6-f092-402d-95f1-0bb810deb51c",
+                  "name": "영역 지도와 선택상세",
+                  "note": "현재 영역과 관계를 읽고 선택한다.",
+                  "revision": 1
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 19,
+        "brief": "제품13 전체 공간의 포함 구성 재서술",
+        "area": {
+          "id": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+          "name": "지도 조작",
+          "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+        }
+      },
+      "areaId": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7"
+    },
+    {
+      "id": "T_4fab3eb6-7c22-4885-98d5-ca48561519d9",
+      "sourceIds": [
+        "S_4619c2ea-8b21-45b0-a52e-fd395a1a6c21"
+      ],
+      "parentTaskId": "T_02735db4-976d-408d-ad74-24c5aa98ab65",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": {
+        "returnId": "H_independent18_product13",
+        "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_d41f47e4-36ab-42cc-bf25-8148e773b286\",\"taskId\":\"T_02735db4-976d-408d-ad74-24c5aa98ab65\",\"returnId\":\"H_independent18_product13\",\"report\":\"[고정자료 재서술] PC 지도 조작부는 fix1에서 위 오른쪽으로 옮겼다. v0의 선택 카드 가림 관측과 fix1 작성자의 잔여 제한은 따로 남는다.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_3c0777b2-6764-4593-a217-a6e80bfa7cc7\",\"basedOn\":0,\"summary\":\"PC 지도 조작부는 fix1에서 위 오른쪽으로 옮겼다. v0의 선택 카드 가림 관측과 fix1 작성자의 잔여 제한은 따로 남는다.\",\"changes\":[\"조작부 위치 수정은 선택 카드 clipping 해결을 뜻하지 않는다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"제품13 총괄 AI 배정·고정 반환의 분석자 한국어 재서술\"}}"
+      },
+      "background": {
+        "version": "background.1",
+        "revision": 19,
+        "brief": "제품13 전체 공간의 포함 구성 재서술",
+        "area": {
+          "id": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+          "name": "지도 조작",
+          "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+        }
+      }
+    },
+    {
+      "id": "T_2f6f72fe-9e87-4af1-b830-12dff16b4441",
+      "sourceIds": [
+        "S_a23a2655-4eab-4286-a36a-38be87387d18"
+      ],
+      "parentTaskId": "T_02735db4-976d-408d-ad74-24c5aa98ab65",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": {
+        "returnId": "H_hierarchy_product13",
+        "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_d41f47e4-36ab-42cc-bf25-8148e773b286\",\"taskId\":\"T_02735db4-976d-408d-ad74-24c5aa98ab65\",\"returnId\":\"H_hierarchy_product13\",\"report\":\"[고정자료 재서술] PC 지도 조작부는 fix1에서 위 오른쪽으로 옮겼다. v0의 선택 카드 가림 관측과 fix1 작성자의 잔여 제한은 따로 남는다. [합성 늦은 반환]\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_3c0777b2-6764-4593-a217-a6e80bfa7cc7\",\"basedOn\":999,\"summary\":\"PC 지도 조작부는 fix1에서 위 오른쪽으로 옮겼다. v0의 선택 카드 가림 관측과 fix1 작성자의 잔여 제한은 따로 남는다.\",\"changes\":[\"조작부 위치 수정은 선택 카드 clipping 해결을 뜻하지 않는다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"제품13 총괄 AI 배정·고정 반환의 분석자 한국어 재서술\"}}"
+      },
+      "background": {
+        "version": "background.1",
+        "revision": 19,
+        "brief": "제품13 전체 공간의 포함 구성 재서술",
+        "area": {
+          "id": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+          "name": "지도 조작",
+          "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+        }
+      }
+    }
+  ],
+  "currentTaskId": "T_2f6f72fe-9e87-4af1-b830-12dff16b4441",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "제품13 전체 공간의 포함 구성 재서술",
+      "at": "2026-10-22T11:17:25.699Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_8535435a-b5ee-4259-b6b2-277271c9ec1c",
+        "name": "전체 공간 읽기",
+        "note": "목적과 영역 구상을 기본에서 읽는다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.699Z"
+      },
+      {
+        "id": "A_ae097a2b-2013-4cd3-be24-3f6a13c920a9",
+        "name": "프로그램 목적 읽기",
+        "note": "짧게 읽고 원문에 접근한다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.699Z"
+      },
+      {
+        "id": "A_42f029e6-f092-402d-95f1-0bb810deb51c",
+        "name": "영역 지도와 선택상세",
+        "note": "현재 영역과 관계를 읽고 선택한다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.699Z"
+      },
+      {
+        "id": "A_2fd35132-3a6d-46b1-bc4f-feb54d8957aa",
+        "name": "질문·보고 기록 읽기",
+        "note": "기록 종류를 구별하며 개발 미완료로 합산하지 않는다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.699Z"
+      },
+      {
+        "id": "A_05b13801-be59-4314-9ca7-119609140b9e",
+        "name": "영역 추가",
+        "note": "사용자 명시 입력으로 추가한다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.699Z"
+      },
+      {
+        "id": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+        "name": "지도 조작",
+        "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.699Z"
+      },
+      {
+        "id": "A_12268279-fb8a-4f2b-b6a1-46f219b661c9",
+        "name": "영역 카드",
+        "note": "영역 ID를 유지하는 선택·진입 대상이다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.699Z"
+      },
+      {
+        "id": "A_08f64f31-e0fc-47c8-9d52-df802411f594",
+        "name": "선택 상세",
+        "note": "선택한 영역의 구상·요청을 읽는다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.699Z"
+      }
+    ],
+    "relations": [
+      {
+        "id": "L_3d21db54-671c-4fcf-af73-76724506baa2",
+        "from": "A_05b13801-be59-4314-9ca7-119609140b9e",
+        "to": "A_12268279-fb8a-4f2b-b6a1-46f219b661c9",
+        "kind": "flow",
+        "note": "추가 후 표시되는 카드와의 정밀 대응은 분석자 판단"
+      },
+      {
+        "id": "L_a8075fa0-e586-4306-bc36-a70ff14deb63",
+        "from": "A_42f029e6-f092-402d-95f1-0bb810deb51c",
+        "to": "A_05b13801-be59-4314-9ca7-119609140b9e",
+        "kind": "flow",
+        "note": "[독립 합성 직접]"
+      },
+      {
+        "id": "L_e0e1e01f-0b16-4400-8dce-ce1966c664c5",
+        "from": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+        "to": "A_05b13801-be59-4314-9ca7-119609140b9e",
+        "kind": "flow",
+        "note": "[독립 합성 숨은1]"
+      },
+      {
+        "id": "L_d7329d87-149a-4963-bc31-f6f5e91e422e",
+        "from": "A_12268279-fb8a-4f2b-b6a1-46f219b661c9",
+        "to": "A_05b13801-be59-4314-9ca7-119609140b9e",
+        "kind": "flow",
+        "note": "[독립 합성 숨은2]"
+      },
+      {
+        "id": "L_d07ab1fb-b64a-4281-89dc-c811b6034dde",
+        "from": "A_05b13801-be59-4314-9ca7-119609140b9e",
+        "to": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+        "kind": "flow",
+        "note": "[독립 합성 반대]"
+      },
+      {
+        "id": "L_413d3016-b0c8-4e23-a91b-4e3e7720ab5d",
+        "from": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+        "to": "A_05b13801-be59-4314-9ca7-119609140b9e",
+        "kind": "needs",
+        "note": "[독립 합성 다른종류]"
+      },
+      {
+        "id": "L_2c8ce046-0014-4e84-aeb0-8f172db83039",
+        "from": "A_42f029e6-f092-402d-95f1-0bb810deb51c",
+        "to": "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7",
+        "kind": "related",
+        "note": "[독립 합성 내부]"
+      }
+    ],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_8535435a-b5ee-4259-b6b2-277271c9ec1c": {
+          "x": 40,
+          "y": 40
+        },
+        "A_ae097a2b-2013-4cd3-be24-3f6a13c920a9": {
+          "x": 340,
+          "y": 40
+        },
+        "A_42f029e6-f092-402d-95f1-0bb810deb51c": {
+          "x": -260,
+          "y": 40
+        },
+        "A_2fd35132-3a6d-46b1-bc4f-feb54d8957aa": {
+          "x": 40,
+          "y": 240
+        },
+        "A_05b13801-be59-4314-9ca7-119609140b9e": {
+          "x": 340,
+          "y": 240
+        },
+        "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7": {
+          "x": -260,
+          "y": 240
+        },
+        "A_12268279-fb8a-4f2b-b6a1-46f219b661c9": {
+          "x": 40,
+          "y": -160
+        },
+        "A_08f64f31-e0fc-47c8-9d52-df802411f594": {
+          "x": 340,
+          "y": -160
+        }
+      }
+    },
+    "understanding": {
+      "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7": {
+        "revision": 1,
+        "entries": [
+          {
+            "by": "external",
+            "at": "2026-10-22T11:17:25.702Z",
+            "revision": 1,
+            "taskId": "T_4fab3eb6-7c22-4885-98d5-ca48561519d9",
+            "returnId": "H_independent18_product13",
+            "text": null,
+            "corrects": null,
+            "stamp": {
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_8535435a-b5ee-4259-b6b2-277271c9ec1c",
+                  "name": "전체 공간 읽기",
+                  "note": "목적과 영역 구상을 기본에서 읽는다.",
+                  "revision": 0
+                },
+                {
+                  "id": "A_42f029e6-f092-402d-95f1-0bb810deb51c",
+                  "name": "영역 지도와 선택상세",
+                  "note": "현재 영역과 관계를 읽고 선택한다.",
+                  "revision": 1
+                }
+              ]
+            },
+            "held": null
+          },
+          {
+            "by": "external",
+            "at": "2026-10-22T11:17:25.703Z",
+            "revision": null,
+            "taskId": "T_2f6f72fe-9e87-4af1-b830-12dff16b4441",
+            "returnId": "H_hierarchy_product13",
+            "text": null,
+            "corrects": null,
+            "stamp": null,
+            "held": "file-basis"
+          }
+        ]
+      }
+    },
+    "containment": {
+      "version": "containment.1",
+      "parents": {
+        "A_ae097a2b-2013-4cd3-be24-3f6a13c920a9": "A_8535435a-b5ee-4259-b6b2-277271c9ec1c",
+        "A_42f029e6-f092-402d-95f1-0bb810deb51c": "A_8535435a-b5ee-4259-b6b2-277271c9ec1c",
+        "A_2fd35132-3a6d-46b1-bc4f-feb54d8957aa": "A_8535435a-b5ee-4259-b6b2-277271c9ec1c",
+        "A_05b13801-be59-4314-9ca7-119609140b9e": "A_8535435a-b5ee-4259-b6b2-277271c9ec1c",
+        "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7": "A_42f029e6-f092-402d-95f1-0bb810deb51c",
+        "A_12268279-fb8a-4f2b-b6a1-46f219b661c9": "A_42f029e6-f092-402d-95f1-0bb810deb51c",
+        "A_08f64f31-e0fc-47c8-9d52-df802411f594": "A_42f029e6-f092-402d-95f1-0bb810deb51c"
+      },
+      "revisions": {
+        "A_8535435a-b5ee-4259-b6b2-277271c9ec1c": 0,
+        "A_ae097a2b-2013-4cd3-be24-3f6a13c920a9": 1,
+        "A_42f029e6-f092-402d-95f1-0bb810deb51c": 1,
+        "A_2fd35132-3a6d-46b1-bc4f-feb54d8957aa": 1,
+        "A_05b13801-be59-4314-9ca7-119609140b9e": 1,
+        "A_3c0777b2-6764-4593-a217-a6e80bfa7cc7": 1,
+        "A_12268279-fb8a-4f2b-b6a1-46f219b661c9": 1,
+        "A_08f64f31-e0fc-47c8-9d52-df802411f594": 1
+      }
+    }
+  }
+}

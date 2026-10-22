@@ -1,0 +1,32 @@
+{
+  "rows": [
+    {
+      "command": [
+        "node",
+        "/workspace/browser-env/cycle18-fix1-independent/state.mjs"
+      ],
+      "start": "2026-10-22T11:34:45.807071+00:00",
+      "end": "2026-10-22T11:34:45.878802+00:00",
+      "actualChildExit": 0
+    },
+    {
+      "command": [
+        "node",
+        "/workspace/browser-env/cycle18-fix1-independent/test-answer-probe.mjs"
+      ],
+      "start": "2026-10-22T11:34:45.878833+00:00",
+      "end": "2026-10-22T11:34:45.925673+00:00",
+      "actualChildExit": 0
+    },
+    {
+      "command": [
+        "node",
+        "/workspace/browser-env/cycle18-fix1-independent/test-answer-transition.mjs"
+      ],
+      "start": "2026-10-22T11:34:45.925814+00:00",
+      "end": "2026-10-22T11:34:45.974285+00:00",
+      "actualChildExit": 0
+    }
+  ],
+  "collectorExit": 0
+}

@@ -1,0 +1,914 @@
+[
+  {
+    "test": "author18.Area18.test_02_product13_complete",
+    "name": "before descendant-description locate",
+    "raw": {
+      "scroll": 463,
+      "max": 604,
+      "body": {
+        "x": 939,
+        "y": 483.109375,
+        "width": 298,
+        "height": 166.890625,
+        "top": 483.109375,
+        "right": 1237,
+        "bottom": 650,
+        "left": 939
+      },
+      "anchor": {
+        "id": "subtree-owner-T_c2bc43e9-6e14-4d8f-bba7-b9107ea74810",
+        "text": "소유 부분 찾기",
+        "top": 16.4375
+      },
+      "items": [
+        {
+          "id": "panel-idea",
+          "text": "사용자 구상현재 영역과 관계를 읽고 선택한다.",
+          "top": -451,
+          "height": 58.890625
+        },
+        {
+          "id": "subtree-records-A_253eb5b7-e6f5-41de-ba46-607e27700ace",
+          "text": "이 부분과 하위 기록 · 질문 1 · 설명 1앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.지도 조작 · 기록된 질문[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.답변 기록 없음 · 사실 확인 항목 있음소유 부분 찾기지도 조작 · 후속 작업문 없는 보고[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.소유 부분 찾기지도 조작 · 현재 설명 있음설명 읽을 부분 찾기",
+          "top": -384.109375,
+          "height": 491.546875
+        },
+        {
+          "id": "subtree-task-T_5ac46eb5-112e-4957-84bb-31d6d3dbdbcd",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": -227.25,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_5ac46eb5-112e-4957-84bb-31d6d3dbdbcd",
+          "text": "소유 부분 찾기",
+          "top": -127.0625,
+          "height": 36
+        },
+        {
+          "id": "subtree-task-T_c2bc43e9-6e14-4d8f-bba7-b9107ea74810",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": -55.5625,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_c2bc43e9-6e14-4d8f-bba7-b9107ea74810",
+          "text": "소유 부분 찾기",
+          "top": 16.4375,
+          "height": 36
+        },
+        {
+          "id": "subtree-description-A_22272df7-4f9a-4331-b1c8-3b2c3aa544ec",
+          "text": "설명 읽을 부분 찾기",
+          "top": 65.4375,
+          "height": 36
+        },
+        {
+          "id": "panel-edit",
+          "text": "이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소",
+          "top": 149.625,
+          "height": 45.4375
+        },
+        {
+          "id": "panel-name",
+          "text": "",
+          "top": 225.859375,
+          "height": 39.09375
+        },
+        {
+          "id": "panel-note",
+          "text": "",
+          "top": 295.75,
+          "height": 85.28125
+        },
+        {
+          "id": "panel-save",
+          "text": "반영",
+          "top": 415.21875,
+          "height": 43
+        },
+        {
+          "id": "panel-cancel",
+          "text": "취소",
+          "top": 418.71875,
+          "height": 36
+        },
+        {
+          "id": "panel-more",
+          "text": "더보기 · 하위 부분과 소속하위 부분과 소속하위 부분 추가이 영역의 상위 부분독립 영역전체 공간 읽기전체 공간 읽기 › 프로그램 목적 읽기전체 공간 읽기 › 질문·보고 기록 읽기전체 공간 읽기 › 영역 추가소속 반영카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.무엇을 요청할지 같이 정하기",
+          "top": 203.0625,
+          "height": 43.796875
+        },
+        {
+          "id": "child-add-form",
+          "text": "하위 부분 추가",
+          "top": 282.359375,
+          "height": 156.28125
+        },
+        {
+          "id": "child-name",
+          "text": "",
+          "top": 282.359375,
+          "height": 39.09375
+        },
+        {
+          "id": "child-note",
+          "text": "",
+          "top": 327.453125,
+          "height": 62.1875
+        },
+        {
+          "id": "child-add",
+          "text": "하위 부분 추가",
+          "top": 395.640625,
+          "height": 43
+        },
+        {
+          "id": "area-parent",
+          "text": "독립 영역전체 공간 읽기전체 공간 읽기 › 프로그램 목적 읽기전체 공간 읽기 › 질문·보고 기록 읽기전체 공간 읽기 › 영역 추가",
+          "top": 475.4375,
+          "height": 48
+        },
+        {
+          "id": "area-parent-save",
+          "text": "소속 반영",
+          "top": 523.4375,
+          "height": 43
+        },
+        {
+          "id": "area-parent-message",
+          "text": "",
+          "top": 566.4375,
+          "height": 0
+        },
+        {
+          "id": "panel-guide",
+          "text": "무엇을 요청할지 같이 정하기",
+          "top": 634.8125,
+          "height": 36
+        },
+        {
+          "id": "panel-tasks",
+          "text": "아직 이 영역의 요청이 없어요.",
+          "top": 254.859375,
+          "height": 43.1875
+        }
+      ],
+      "focus": "subtree-description-A_22272df7-4f9a-4331-b1c8-3b2c3aa544ec"
+    }
+  },
+  {
+    "test": "author18.Area18.test_02_product13_complete",
+    "name": "explicit return after new task and handoff",
+    "raw": {
+      "scroll": 461,
+      "max": 461,
+      "body": {
+        "x": 939,
+        "y": 483.109375,
+        "width": 298,
+        "height": 166.890625,
+        "top": 483.109375,
+        "right": 1237,
+        "bottom": 650,
+        "left": 939
+      },
+      "anchor": {
+        "id": "panel-edit",
+        "text": "이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소",
+        "top": 8.125
+      },
+      "items": [
+        {
+          "id": "panel-idea",
+          "text": "사용자 구상현재 영역과 관계를 읽고 선택한다.",
+          "top": -449,
+          "height": 58.890625
+        },
+        {
+          "id": "subtree-records-A_253eb5b7-e6f5-41de-ba46-607e27700ace",
+          "text": "이 부분과 하위 기록 · 질문 1 · 설명 1앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.지도 조작 · 기록된 질문[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.답변 기록 없음 · 사실 확인 항목 있음소유 부분 찾기지도 조작 · 현재 설명 있음설명 읽을 부분 찾기",
+          "top": -382.109375,
+          "height": 348.046875
+        },
+        {
+          "id": "subtree-task-T_5ac46eb5-112e-4957-84bb-31d6d3dbdbcd",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": -225.25,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_5ac46eb5-112e-4957-84bb-31d6d3dbdbcd",
+          "text": "소유 부분 찾기",
+          "top": -125.0625,
+          "height": 36
+        },
+        {
+          "id": "subtree-description-A_22272df7-4f9a-4331-b1c8-3b2c3aa544ec",
+          "text": "설명 읽을 부분 찾기",
+          "top": -76.0625,
+          "height": 36
+        },
+        {
+          "id": "panel-edit",
+          "text": "이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소",
+          "top": 8.125,
+          "height": 45.4375
+        },
+        {
+          "id": "panel-name",
+          "text": "",
+          "top": 84.359375,
+          "height": 39.09375
+        },
+        {
+          "id": "panel-note",
+          "text": "",
+          "top": 154.25,
+          "height": 85.28125
+        },
+        {
+          "id": "panel-save",
+          "text": "반영",
+          "top": 273.71875,
+          "height": 43
+        },
+        {
+          "id": "panel-cancel",
+          "text": "취소",
+          "top": 277.21875,
+          "height": 36
+        },
+        {
+          "id": "panel-more",
+          "text": "더보기 · 하위 부분과 소속하위 부분과 소속하위 부분 추가이 영역의 상위 부분독립 영역전체 공간 읽기전체 공간 읽기 › 프로그램 목적 읽기전체 공간 읽기 › 질문·보고 기록 읽기전체 공간 읽기 › 영역 추가소속 반영카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.무엇을 요청할지 같이 정하기",
+          "top": 61.5625,
+          "height": 43.796875
+        },
+        {
+          "id": "child-add-form",
+          "text": "하위 부분 추가",
+          "top": 140.859375,
+          "height": 156.28125
+        },
+        {
+          "id": "child-name",
+          "text": "",
+          "top": 140.859375,
+          "height": 39.09375
+        },
+        {
+          "id": "child-note",
+          "text": "",
+          "top": 185.953125,
+          "height": 62.1875
+        },
+        {
+          "id": "child-add",
+          "text": "하위 부분 추가",
+          "top": 254.140625,
+          "height": 43
+        },
+        {
+          "id": "area-parent",
+          "text": "독립 영역전체 공간 읽기전체 공간 읽기 › 프로그램 목적 읽기전체 공간 읽기 › 질문·보고 기록 읽기전체 공간 읽기 › 영역 추가",
+          "top": 333.9375,
+          "height": 48
+        },
+        {
+          "id": "area-parent-save",
+          "text": "소속 반영",
+          "top": 381.9375,
+          "height": 43
+        },
+        {
+          "id": "area-parent-message",
+          "text": "",
+          "top": 424.9375,
+          "height": 0
+        },
+        {
+          "id": "panel-guide",
+          "text": "무엇을 요청할지 같이 정하기",
+          "top": 493.3125,
+          "height": 36
+        },
+        {
+          "id": "panel-tasks",
+          "text": "아직 이 영역의 요청이 없어요.",
+          "top": 113.359375,
+          "height": 43.1875
+        }
+      ],
+      "focus": "subtree-description-A_22272df7-4f9a-4331-b1c8-3b2c3aa544ec"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_01_powertoys_complete",
+    "name": "before descendant-description locate",
+    "raw": {
+      "scroll": 415,
+      "max": 466,
+      "body": {
+        "x": 1099,
+        "y": 483.109375,
+        "width": 298,
+        "height": 346.890625,
+        "top": 483.109375,
+        "right": 1397,
+        "bottom": 830,
+        "left": 1099
+      },
+      "anchor": {
+        "id": "subtree-task-T_2ea7bbc0-d305-4c28-8adb-942d01a35cad",
+        "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+        "top": 14.828125
+      },
+      "items": [
+        {
+          "id": "panel-idea",
+          "text": "사용자 구상검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+          "top": -403,
+          "height": 81.28125
+        },
+        {
+          "id": "subtree-records-A_1adcbd24-36e6-40c1-b41e-9259f623a4e5",
+          "text": "이 부분과 하위 기록 · 질문 1 · 설명 1앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.검색 입력과 결과 · 기록된 질문[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.답변 기록 없음 · 사실 확인 항목 있음소유 부분 찾기검색 입력과 결과 · 후속 작업문 없는 보고[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.소유 부분 찾기검색 입력과 결과 · 현재 설명 있음설명 읽을 부분 찾기",
+          "top": -313.71875,
+          "height": 511.34375
+        },
+        {
+          "id": "subtree-task-T_e83d316b-2597-4521-acb2-25d01259c0a5",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": -156.859375,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_e83d316b-2597-4521-acb2-25d01259c0a5",
+          "text": "소유 부분 찾기",
+          "top": -56.671875,
+          "height": 36
+        },
+        {
+          "id": "subtree-task-T_2ea7bbc0-d305-4c28-8adb-942d01a35cad",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": 14.828125,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_2ea7bbc0-d305-4c28-8adb-942d01a35cad",
+          "text": "소유 부분 찾기",
+          "top": 86.828125,
+          "height": 36
+        },
+        {
+          "id": "subtree-description-A_96191f24-839b-473c-af43-62619aaef1b5",
+          "text": "설명 읽을 부분 찾기",
+          "top": 155.625,
+          "height": 36
+        },
+        {
+          "id": "panel-edit",
+          "text": "이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소",
+          "top": 239.8125,
+          "height": 45.4375
+        },
+        {
+          "id": "panel-name",
+          "text": "",
+          "top": 316.046875,
+          "height": 39.09375
+        },
+        {
+          "id": "panel-note",
+          "text": "",
+          "top": 385.9375,
+          "height": 85.28125
+        },
+        {
+          "id": "panel-save",
+          "text": "반영",
+          "top": 505.40625,
+          "height": 43
+        },
+        {
+          "id": "panel-cancel",
+          "text": "취소",
+          "top": 508.90625,
+          "height": 36
+        },
+        {
+          "id": "panel-more",
+          "text": "더보기 · 하위 부분과 소속하위 부분과 소속하위 부분 추가이 영역의 상위 부분독립 영역공통 입력 훅소속 반영카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.무엇을 요청할지 같이 정하기",
+          "top": 293.25,
+          "height": 43.796875
+        },
+        {
+          "id": "child-add-form",
+          "text": "하위 부분 추가",
+          "top": 372.546875,
+          "height": 156.28125
+        },
+        {
+          "id": "child-name",
+          "text": "",
+          "top": 372.546875,
+          "height": 39.09375
+        },
+        {
+          "id": "child-note",
+          "text": "",
+          "top": 417.640625,
+          "height": 62.1875
+        },
+        {
+          "id": "child-add",
+          "text": "하위 부분 추가",
+          "top": 485.828125,
+          "height": 43
+        },
+        {
+          "id": "area-parent",
+          "text": "독립 영역공통 입력 훅",
+          "top": 565.625,
+          "height": 48
+        },
+        {
+          "id": "area-parent-save",
+          "text": "소속 반영",
+          "top": 613.625,
+          "height": 43
+        },
+        {
+          "id": "area-parent-message",
+          "text": "",
+          "top": 656.625,
+          "height": 0
+        },
+        {
+          "id": "panel-guide",
+          "text": "무엇을 요청할지 같이 정하기",
+          "top": 725,
+          "height": 36
+        },
+        {
+          "id": "panel-tasks",
+          "text": "아직 이 영역의 요청이 없어요.",
+          "top": 345.046875,
+          "height": 43.1875
+        }
+      ],
+      "focus": "subtree-description-A_96191f24-839b-473c-af43-62619aaef1b5"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_01_powertoys_complete",
+    "name": "explicit return after new task and handoff",
+    "raw": {
+      "scroll": 323,
+      "max": 323,
+      "body": {
+        "x": 1099,
+        "y": 483.109375,
+        "width": 298,
+        "height": 346.890625,
+        "top": 483.109375,
+        "right": 1397,
+        "bottom": 830,
+        "left": 1099
+      },
+      "anchor": {
+        "id": "subtree-owner-T_e83d316b-2597-4521-acb2-25d01259c0a5",
+        "text": "소유 부분 찾기",
+        "top": 35.328125
+      },
+      "items": [
+        {
+          "id": "panel-idea",
+          "text": "사용자 구상검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+          "top": -311,
+          "height": 81.28125
+        },
+        {
+          "id": "subtree-records-A_1adcbd24-36e6-40c1-b41e-9259f623a4e5",
+          "text": "이 부분과 하위 기록 · 질문 1 · 설명 1앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.검색 입력과 결과 · 기록된 질문[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.답변 기록 없음 · 사실 확인 항목 있음소유 부분 찾기검색 입력과 결과 · 현재 설명 있음설명 읽을 부분 찾기",
+          "top": -221.71875,
+          "height": 367.84375
+        },
+        {
+          "id": "subtree-task-T_e83d316b-2597-4521-acb2-25d01259c0a5",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": -64.859375,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_e83d316b-2597-4521-acb2-25d01259c0a5",
+          "text": "소유 부분 찾기",
+          "top": 35.328125,
+          "height": 36
+        },
+        {
+          "id": "subtree-description-A_96191f24-839b-473c-af43-62619aaef1b5",
+          "text": "설명 읽을 부분 찾기",
+          "top": 104.125,
+          "height": 36
+        },
+        {
+          "id": "panel-edit",
+          "text": "이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소",
+          "top": 188.3125,
+          "height": 45.4375
+        },
+        {
+          "id": "panel-name",
+          "text": "",
+          "top": 264.546875,
+          "height": 39.09375
+        },
+        {
+          "id": "panel-note",
+          "text": "",
+          "top": 334.4375,
+          "height": 85.28125
+        },
+        {
+          "id": "panel-save",
+          "text": "반영",
+          "top": 453.90625,
+          "height": 43
+        },
+        {
+          "id": "panel-cancel",
+          "text": "취소",
+          "top": 457.40625,
+          "height": 36
+        },
+        {
+          "id": "panel-more",
+          "text": "더보기 · 하위 부분과 소속하위 부분과 소속하위 부분 추가이 영역의 상위 부분독립 영역공통 입력 훅소속 반영카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.무엇을 요청할지 같이 정하기",
+          "top": 241.75,
+          "height": 43.796875
+        },
+        {
+          "id": "child-add-form",
+          "text": "하위 부분 추가",
+          "top": 321.046875,
+          "height": 156.28125
+        },
+        {
+          "id": "child-name",
+          "text": "",
+          "top": 321.046875,
+          "height": 39.09375
+        },
+        {
+          "id": "child-note",
+          "text": "",
+          "top": 366.140625,
+          "height": 62.1875
+        },
+        {
+          "id": "child-add",
+          "text": "하위 부분 추가",
+          "top": 434.328125,
+          "height": 43
+        },
+        {
+          "id": "area-parent",
+          "text": "독립 영역공통 입력 훅",
+          "top": 514.125,
+          "height": 48
+        },
+        {
+          "id": "area-parent-save",
+          "text": "소속 반영",
+          "top": 562.125,
+          "height": 43
+        },
+        {
+          "id": "area-parent-message",
+          "text": "",
+          "top": 605.125,
+          "height": 0
+        },
+        {
+          "id": "panel-guide",
+          "text": "무엇을 요청할지 같이 정하기",
+          "top": 673.5,
+          "height": 36
+        },
+        {
+          "id": "panel-tasks",
+          "text": "아직 이 영역의 요청이 없어요.",
+          "top": 293.546875,
+          "height": 43.1875
+        }
+      ],
+      "focus": "subtree-description-A_96191f24-839b-473c-af43-62619aaef1b5"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_02_product13_complete",
+    "name": "before descendant-description locate",
+    "raw": {
+      "scroll": 373,
+      "max": 424,
+      "body": {
+        "x": 1099,
+        "y": 483.109375,
+        "width": 298,
+        "height": 346.890625,
+        "top": 483.109375,
+        "right": 1397,
+        "bottom": 830,
+        "left": 1099
+      },
+      "anchor": {
+        "id": "subtree-task-T_594dd96e-9e91-4d53-8eb9-bd0009cda127",
+        "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+        "top": 34.4375
+      },
+      "items": [
+        {
+          "id": "panel-idea",
+          "text": "사용자 구상현재 영역과 관계를 읽고 선택한다.",
+          "top": -361,
+          "height": 58.890625
+        },
+        {
+          "id": "subtree-records-A_fb0357df-20c1-41aa-b1fa-0389d65feb7d",
+          "text": "이 부분과 하위 기록 · 질문 1 · 설명 1앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.지도 조작 · 기록된 질문[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.답변 기록 없음 · 사실 확인 항목 있음소유 부분 찾기지도 조작 · 후속 작업문 없는 보고[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.소유 부분 찾기지도 조작 · 현재 설명 있음설명 읽을 부분 찾기",
+          "top": -294.109375,
+          "height": 491.546875
+        },
+        {
+          "id": "subtree-task-T_0331c90a-3c6d-4783-953e-eec60e6202a7",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": -137.25,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_0331c90a-3c6d-4783-953e-eec60e6202a7",
+          "text": "소유 부분 찾기",
+          "top": -37.0625,
+          "height": 36
+        },
+        {
+          "id": "subtree-task-T_594dd96e-9e91-4d53-8eb9-bd0009cda127",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": 34.4375,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_594dd96e-9e91-4d53-8eb9-bd0009cda127",
+          "text": "소유 부분 찾기",
+          "top": 106.4375,
+          "height": 36
+        },
+        {
+          "id": "subtree-description-A_da3ce1c9-ae5c-4677-a923-a1b2e997ec17",
+          "text": "설명 읽을 부분 찾기",
+          "top": 155.4375,
+          "height": 36
+        },
+        {
+          "id": "panel-edit",
+          "text": "이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소",
+          "top": 239.625,
+          "height": 45.4375
+        },
+        {
+          "id": "panel-name",
+          "text": "",
+          "top": 315.859375,
+          "height": 39.09375
+        },
+        {
+          "id": "panel-note",
+          "text": "",
+          "top": 385.75,
+          "height": 85.28125
+        },
+        {
+          "id": "panel-save",
+          "text": "반영",
+          "top": 505.21875,
+          "height": 43
+        },
+        {
+          "id": "panel-cancel",
+          "text": "취소",
+          "top": 508.71875,
+          "height": 36
+        },
+        {
+          "id": "panel-more",
+          "text": "더보기 · 하위 부분과 소속하위 부분과 소속하위 부분 추가이 영역의 상위 부분독립 영역전체 공간 읽기전체 공간 읽기 › 프로그램 목적 읽기전체 공간 읽기 › 질문·보고 기록 읽기전체 공간 읽기 › 영역 추가소속 반영카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.무엇을 요청할지 같이 정하기",
+          "top": 293.0625,
+          "height": 43.796875
+        },
+        {
+          "id": "child-add-form",
+          "text": "하위 부분 추가",
+          "top": 372.359375,
+          "height": 156.28125
+        },
+        {
+          "id": "child-name",
+          "text": "",
+          "top": 372.359375,
+          "height": 39.09375
+        },
+        {
+          "id": "child-note",
+          "text": "",
+          "top": 417.453125,
+          "height": 62.1875
+        },
+        {
+          "id": "child-add",
+          "text": "하위 부분 추가",
+          "top": 485.640625,
+          "height": 43
+        },
+        {
+          "id": "area-parent",
+          "text": "독립 영역전체 공간 읽기전체 공간 읽기 › 프로그램 목적 읽기전체 공간 읽기 › 질문·보고 기록 읽기전체 공간 읽기 › 영역 추가",
+          "top": 565.4375,
+          "height": 48
+        },
+        {
+          "id": "area-parent-save",
+          "text": "소속 반영",
+          "top": 613.4375,
+          "height": 43
+        },
+        {
+          "id": "area-parent-message",
+          "text": "",
+          "top": 656.4375,
+          "height": 0
+        },
+        {
+          "id": "panel-guide",
+          "text": "무엇을 요청할지 같이 정하기",
+          "top": 724.8125,
+          "height": 36
+        },
+        {
+          "id": "panel-tasks",
+          "text": "아직 이 영역의 요청이 없어요.",
+          "top": 344.859375,
+          "height": 43.1875
+        }
+      ],
+      "focus": "subtree-description-A_da3ce1c9-ae5c-4677-a923-a1b2e997ec17"
+    }
+  },
+  {
+    "test": "author18.Area18Wide.test_02_product13_complete",
+    "name": "explicit return after new task and handoff",
+    "raw": {
+      "scroll": 281,
+      "max": 281,
+      "body": {
+        "x": 1099,
+        "y": 483.109375,
+        "width": 298,
+        "height": 346.890625,
+        "top": 483.109375,
+        "right": 1397,
+        "bottom": 830,
+        "left": 1099
+      },
+      "anchor": {
+        "id": "subtree-owner-T_0331c90a-3c6d-4783-953e-eec60e6202a7",
+        "text": "소유 부분 찾기",
+        "top": 54.9375
+      },
+      "items": [
+        {
+          "id": "panel-idea",
+          "text": "사용자 구상현재 영역과 관계를 읽고 선택한다.",
+          "top": -269,
+          "height": 58.890625
+        },
+        {
+          "id": "subtree-records-A_fb0357df-20c1-41aa-b1fa-0389d65feb7d",
+          "text": "이 부분과 하위 기록 · 질문 1 · 설명 1앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.지도 조작 · 기록된 질문[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.답변 기록 없음 · 사실 확인 항목 있음소유 부분 찾기지도 조작 · 현재 설명 있음설명 읽을 부분 찾기",
+          "top": -202.109375,
+          "height": 348.046875
+        },
+        {
+          "id": "subtree-task-T_0331c90a-3c6d-4783-953e-eec60e6202a7",
+          "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "top": -45.25,
+          "height": 72
+        },
+        {
+          "id": "subtree-owner-T_0331c90a-3c6d-4783-953e-eec60e6202a7",
+          "text": "소유 부분 찾기",
+          "top": 54.9375,
+          "height": 36
+        },
+        {
+          "id": "subtree-description-A_da3ce1c9-ae5c-4677-a923-a1b2e997ec17",
+          "text": "설명 읽을 부분 찾기",
+          "top": 103.9375,
+          "height": 36
+        },
+        {
+          "id": "panel-edit",
+          "text": "이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소",
+          "top": 188.125,
+          "height": 45.4375
+        },
+        {
+          "id": "panel-name",
+          "text": "",
+          "top": 264.359375,
+          "height": 39.09375
+        },
+        {
+          "id": "panel-note",
+          "text": "",
+          "top": 334.25,
+          "height": 85.28125
+        },
+        {
+          "id": "panel-save",
+          "text": "반영",
+          "top": 453.71875,
+          "height": 43
+        },
+        {
+          "id": "panel-cancel",
+          "text": "취소",
+          "top": 457.21875,
+          "height": 36
+        },
+        {
+          "id": "panel-more",
+          "text": "더보기 · 하위 부분과 소속하위 부분과 소속하위 부분 추가이 영역의 상위 부분독립 영역전체 공간 읽기전체 공간 읽기 › 프로그램 목적 읽기전체 공간 읽기 › 질문·보고 기록 읽기전체 공간 읽기 › 영역 추가소속 반영카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.무엇을 요청할지 같이 정하기",
+          "top": 241.5625,
+          "height": 43.796875
+        },
+        {
+          "id": "child-add-form",
+          "text": "하위 부분 추가",
+          "top": 320.859375,
+          "height": 156.28125
+        },
+        {
+          "id": "child-name",
+          "text": "",
+          "top": 320.859375,
+          "height": 39.09375
+        },
+        {
+          "id": "child-note",
+          "text": "",
+          "top": 365.953125,
+          "height": 62.1875
+        },
+        {
+          "id": "child-add",
+          "text": "하위 부분 추가",
+          "top": 434.140625,
+          "height": 43
+        },
+        {
+          "id": "area-parent",
+          "text": "독립 영역전체 공간 읽기전체 공간 읽기 › 프로그램 목적 읽기전체 공간 읽기 › 질문·보고 기록 읽기전체 공간 읽기 › 영역 추가",
+          "top": 513.9375,
+          "height": 48
+        },
+        {
+          "id": "area-parent-save",
+          "text": "소속 반영",
+          "top": 561.9375,
+          "height": 43
+        },
+        {
+          "id": "area-parent-message",
+          "text": "",
+          "top": 604.9375,
+          "height": 0
+        },
+        {
+          "id": "panel-guide",
+          "text": "무엇을 요청할지 같이 정하기",
+          "top": 673.3125,
+          "height": 36
+        },
+        {
+          "id": "panel-tasks",
+          "text": "아직 이 영역의 요청이 없어요.",
+          "top": 293.359375,
+          "height": 43.1875
+        }
+      ],
+      "focus": "subtree-description-A_da3ce1c9-ae5c-4677-a923-a1b2e997ec17"
+    }
+  }
+]

@@ -1,0 +1,9 @@
+from pathlib import Path
+import sys,os,importlib.util,unittest,json
+R=Path(__file__).parent;A=R.parent/'cycle18-fix1-candidate/app/continuity/tests';sys.path.insert(0,str(A));os.environ.update(IDEA015_EVIDENCE_DIR=str(R/'anchor-diagnostic-state'),BROWSER_EXECUTABLE='/usr/bin/chromium',BROWSER_TRANSPORT='direct-http');spec=importlib.util.spec_from_file_location('author18',A/'hierarchy18_browser.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);original=m.Area18.snap;observations=[]
+def snap(self,name):
+ value=original(self,name)
+ if name in ['before descendant-description locate','explicit return after new task and handoff']:
+  raw=self.page.locator('#area-panel-body').evaluate('''b=>{const r=b.getBoundingClientRect(),items=[...b.querySelectorAll('[id]')],visible=items.filter(e=>e.getClientRects().length&&e.getBoundingClientRect().bottom>r.top+1&&e.getBoundingClientRect().top<r.bottom),anchor=visible.find(e=>e.getBoundingClientRect().top>=r.top)??visible.at(-1);return {scroll:b.scrollTop,max:b.scrollHeight-b.clientHeight,body:r.toJSON(),anchor:anchor?{id:anchor.id,text:anchor.textContent,top:anchor.getBoundingClientRect().top-r.top}:null,items:items.filter(e=>e.getClientRects().length).map(e=>({id:e.id,text:e.textContent,top:e.getBoundingClientRect().top-r.top,height:e.getBoundingClientRect().height})),focus:document.activeElement.id}}''');observations.append({'test':self.id(),'name':name,'raw':raw,'persistedProject':self.state()});(R/'anchor-diagnostic-state-raw.json').write_text(json.dumps(observations,ensure_ascii=False,indent=2))
+ return value
+m.Area18.snap=snap;suite=unittest.TestSuite([m.Area18('test_02_product13_complete')]);r=unittest.TextTestRunner(verbosity=2).run(suite);sys.exit(0 if r.wasSuccessful() else 1)
