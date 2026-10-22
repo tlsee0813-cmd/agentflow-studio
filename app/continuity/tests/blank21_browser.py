@@ -36,6 +36,35 @@ class Blank21(unittest.TestCase):
         with OBS.open('a',encoding='utf-8') as file:file.write(json.dumps({'test':self.id(),'pc':[self.WIDTH,self.HEIGHT],'kind':kind,'label':label,'actual':actual,'expected':expected},ensure_ascii=False)+'\n')
     def shot(self,label):
         self.page.mouse.move(1,1);self.page.screenshot(path=str(base.OUT/f'blank21-{self.WIDTH}-{label}.png'))
+    def key_scroll(self,key,selector,tail=False):
+        """Serialize native key scrolling; observe events/geometry without scrolling or repairing focus.
+        Native scrollend is required for every observed moving target, plus the textarea when End must move it.
+        Stable rendering is recorded separately; the original viewport/IO assertions still decide visibility.
+        """
+        armed=self.page.evaluate(r'''([key,sel,tail])=>{const target=document.querySelector(sel),expected=key.split('+').at(-1),pending=new Set(),ended=new Set(),events=[];
+          const mustScroll=tail&&target.scrollTop+target.clientHeight<target.scrollHeight-2,p={promise:null,cancel:null,result:null};let resolve,timer,frame,activated=false,released=false,prior=null,stable=0,frames=0;
+          const name=t=>t===document?'document':t.id||t.tagName;
+          const state=()=>{const r=target.getBoundingClientRect();return {focus:document.activeElement===target,page:[scrollX,scrollY],position:[target.scrollLeft,target.scrollTop],rect:[r.x,r.y,r.width,r.height],
+            tail:!tail||target.scrollHeight>target.clientHeight&&target.scrollTop>0&&target.scrollTop+target.clientHeight>=target.scrollHeight-2&&target.selectionStart===target.value.length}};
+          p.promise=new Promise(r=>resolve=r);const finish=(ok,reason)=>{if(p.result)return;clearTimeout(timer);cancelAnimationFrame(frame);
+            for(const [type,listener] of listeners)document.removeEventListener(type,listener,true);
+            p.result={ok,reason,key,sel,mustScroll,textareaScrollend:ended.has(target),pending:[...pending].map(name),events,render:{frames,matchingFrames:stable+1,state:state()}};resolve(p.result)};
+          const down=e=>{if(e.isTrusted&&e.key===expected){activated=true;events.push({kind:'keydown',target:name(e.target),time:performance.now()})}};
+          const up=e=>{if(activated&&e.isTrusted&&e.key===expected){released=true;events.push({kind:'keyup',target:name(e.target),time:performance.now()})}};
+          const scroll=e=>{if(activated){pending.add(e.target);events.push({kind:'scroll',target:name(e.target),time:performance.now()})}};
+          const end=e=>{if(activated){pending.delete(e.target);ended.add(e.target);events.push({kind:'scrollend',target:name(e.target),time:performance.now()})}};
+          const listeners=[['keydown',down],['keyup',up],['scroll',scroll],['scrollend',end]];for(const [type,listener] of listeners)document.addEventListener(type,listener,true);
+          const scan=()=>{frames++;if(released){const s=state(),now=JSON.stringify(s);stable=now===prior?stable+1:0;prior=now;
+            if(s.focus&&s.tail&&!pending.size&&(!mustScroll||ended.has(target))&&stable>=1){finish(true,events.some(e=>e.kind==='scroll')?'native-scrollend-then-render-stable':'trusted-key-no-scroll-render-stable');return}}
+            frame=requestAnimationFrame(scan)};
+          p.cancel=()=>finish(false,'cleanup');window.__blank21KeyScroll=p;timer=setTimeout(()=>finish(false,'native-key-scroll-timeout'),5000);frame=requestAnimationFrame(scan);
+          return {key,selector:sel,mustScroll,initial:state()}}''',[key,selector,tail])
+        self.record('actual','native keyboard observer armed before input',armed)
+        try:
+            self.page.keyboard.press(key)
+            result=self.page.evaluate('async()=>await window.__blank21KeyScroll.promise');self.yes('native keyboard scroll completed '+key,result['ok'],result)
+        finally:
+            raw=self.page.evaluate('()=>{const p=window.__blank21KeyScroll;if(!p)return null;p.cancel();delete window.__blank21KeyScroll;return p.result}');self.record('actual','keyboard scroll cleanup diagnostics',raw)
     def tearDown(self):
         try:
             self.shot('final-scene-including-failure');self.record('actual','final page/focus/errors',{'view':self.snap('final view'),'pageErrors':self.errors,'external':self.external})
@@ -106,9 +135,9 @@ class Blank21(unittest.TestCase):
         self.details('compose-panel');self.page.locator('#draft').fill(DRAFT);base.saved(self.page);before_read=self.state()
         self.equal('last file-mode full text starts folded',self.page.locator('#file-handoff-preview').evaluate('(e)=>e.open'),False)
         self.toggle('file-handoff-preview',True);field=self.page.locator('#file-handoff-preview textarea');self.equal('full file preview equals actual clipboard handoff',field.input_value(),file_text);self.equal('full preview contains exact original request',REQUEST in field.input_value(),True)
-        expect(self.page.locator('#file-handoff-preview > summary')).to_be_focused();self.page.keyboard.press('Tab');expect(field).to_be_focused();self.visible('#file-handoff-preview textarea');self.page.keyboard.press('Control+End')
+        expect(self.page.locator('#file-handoff-preview > summary')).to_be_focused();self.page.keyboard.press('Tab');expect(field).to_be_focused();self.visible('#file-handoff-preview textarea');self.key_scroll('Control+End','#file-handoff-preview textarea',True)
         end=field.evaluate('(e)=>({top:e.scrollTop,height:e.clientHeight,total:e.scrollHeight,selection:e.selectionStart,length:e.value.length,tail:e.value.slice(-80)})');self.yes('native End reaches long original preview tail',end['total']>end['height'] and end['top']>0 and end['top']+end['height']>=end['total']-2 and end['selection']==end['length'],end)
-        self.page.keyboard.press('Shift+Tab');expect(self.page.locator('#file-handoff-preview > summary')).to_be_focused();self.toggle('file-handoff-preview',False,'Enter');expect(field).to_be_hidden();self.equal('read and fold do not change current/draft/exports',self.state(),before_read)
+        self.key_scroll('Shift+Tab','#file-handoff-preview > summary');expect(self.page.locator('#file-handoff-preview > summary')).to_be_focused();self.toggle('file-handoff-preview',False,'Enter');expect(field).to_be_hidden();self.equal('read and fold do not change current/draft/exports',self.state(),before_read)
         # Existing RECEIVED20 mechanics are reused once, to protect this moved disclosure's same-work return state.
         file={**file,'report':'[합성21] 문구 변경을 설명하는 시험 보고. 실제 구현·실행·검증한 자료가 아니다.','understanding':None}
         s={'file':file,'A':task,'B':task,'exported':task,'H1':H['returnId']};raw=self.select(s);before_receive=self.state();self.accept();base.saved(self.page);after=self.state();T=self.added(before_receive,after,raw);self.receipt(s,T['id'])
