@@ -89,6 +89,7 @@ class Flow083(unittest.TestCase):
     def test_04_trash_restore_and_backup_copy_keep_the_whole_project(self):
         self.send('예약 취소 기능을 만들어줘.');self.clipboard();self.page.locator('#copy-work').click()
         self.send('취소 버튼을 추가했다고 보고받음. 실제 클릭 검사는 아직.','report');saved=self.state();key=self.current_entry()
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         backup=base.OUT/'flow083-backup.json';d.value.save_as(backup)
         self.page.locator('#nav-projects').click();self.page.once('dialog',lambda dlg:(self.assertIn('원문·기준·요청·돌아온 결과',dlg.message),self.assertIn('취소되지는 않아요',dlg.message),dlg.accept()))
@@ -150,6 +151,7 @@ class Flow083(unittest.TestCase):
 
     def test_07_a_late_answer_after_switching_to_a_same_id_copy_changes_neither(self):
         self.send('예약 문구를 바꿔줘.');first=self.current_entry()
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=base.OUT/'flow083-same-id.json';d.value.save_as(path)
         parked=[];self.page.route('**/api/continuity',lambda route:parked.append((route,route.fetch())))
@@ -170,6 +172,7 @@ class Flow083(unittest.TestCase):
         expect(tab.locator('#storage-error')).to_contain_text('Web Locks')
         tab.locator('#draft').fill('잠금 없이 쓴 입력');expect(tab.locator('#saved')).to_have_text('저장되지 않은 변경 있음')
         expect(tab.locator('#draft')).to_have_value('잠금 없이 쓴 입력');self.assertEqual(self.keys(tab),[])
+        base.reveal_management(tab,'#backup')
         with tab.expect_download() as d:tab.locator('#backup').click()
         self.assertEqual(json.loads(Path(d.value.path()).read_text(encoding='utf-8'))['draft'],'잠금 없이 쓴 입력');tab.close()
 
@@ -185,6 +188,7 @@ class Flow083(unittest.TestCase):
 
     def test_09_import_never_switches_over_input_that_failed_or_changed_while_saving(self):
         self.send('공유 프로젝트 요청');key=self.current_entry()
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=base.OUT/'fix084-import.json';d.value.save_as(path)
         other=self.new_tab();base.open_listed(other,key);base.Browser.compose(self,other);other.locator('#draft').fill('다른 탭의 최신 입력');base.saved(other)
@@ -219,6 +223,7 @@ class Flow083(unittest.TestCase):
         expect(self.page.locator('#working')).to_have_text('');self.assertIsNotNone(self.state()['tasks'][0]['advice'],'the same project\'s answer is applied')
         self.assertIsNone(self.state()['pending'])
         # Choosing a backup and then cancelling must not drop a normal pending answer.
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=base.OUT/'fix084-cancel.json';d.value.save_as(path)
         self.page.locator('#retry-work').click();self.page.wait_for_timeout(200);self.assertEqual(len(parked),1)
@@ -233,6 +238,7 @@ class Flow083(unittest.TestCase):
         # FIX084-R2: already unsaved (conflict) -> another save waits on the lock -> agree to leave that input ->
         # type new text while the flush waits -> release (still conflicting). The new text was never agreed to.
         self.send('동의 범위 확인 요청');key=self.current_entry()
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=base.OUT/'fix084-r2-import.json';d.value.save_as(path)
         other=self.new_tab();base.open_listed(other,key);base.Browser.compose(self,other);other.locator('#draft').fill('다른 탭의 최신 입력');base.saved(other)
@@ -260,6 +266,7 @@ class Flow083(unittest.TestCase):
                 expect(tab.locator('#mode')).to_contain_text('MOCK');self.assertEqual(errors,[])
                 expect(tab.locator('#storage-error')).to_contain_text('저장소');expect(tab.locator('#projects-view')).to_be_hidden()
                 tab.locator('#draft').fill('저장소가 막힌 탭의 입력');expect(tab.locator('#saved')).to_have_text('저장되지 않은 변경 있음')
+                base.reveal_management(tab,'#backup')
                 with tab.expect_download() as d:tab.locator('#backup').click()
                 self.assertEqual(json.loads(Path(d.value.path()).read_text(encoding='utf-8'))['draft'],'저장소가 막힌 탭의 입력')
                 tab.close()

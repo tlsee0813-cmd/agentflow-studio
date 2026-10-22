@@ -23,6 +23,7 @@ class SpatialWorkspace(unittest.TestCase):
         expect(self.page.locator('#space-title')).to_contain_text(name.split()[0])
     def area_id(self,name):return next(a['id'] for a in self.state()['space']['areas'] if a['name']==name)
     def download(self,button,name):
+        if button=='#backup':base.reveal_management(self.page,button)
         with self.page.expect_download() as event:self.page.locator(button).click()
         path=base.OUT/name;event.value.save_as(path);return path
 

@@ -526,6 +526,8 @@ small {
   justify-content:flex-end;
   margin-top:6px;
 }
+#project-management{margin:0;padding:0;border:0}
+#project-management>summary{display:none}
 .saved {
   font-size:10px;
   color:#868592;
@@ -2595,3 +2597,27 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 @media(max-width:760px){
   .area-panel{height:55dvh;max-height:55dvh;overflow:hidden}
 }
+/* The map keeps one project heading and an explicit menu. Other layers retain their existing header. */
+@media(min-width:761px){
+  body[data-map-header="true"] .topbar{height:44px;padding:0 42px}
+  body[data-map-header="true"] #breadcrumb-project,body[data-map-header="true"] #breadcrumb-sep,
+  body[data-map-header="true"] #sidebar-project,body[data-map-header="true"] .sidebar-current>.small-label{display:none}
+  body[data-map-header="true"] .shell{padding-top:10px}
+  body[data-map-header="true"] .project-head{margin-bottom:6px;gap:12px}
+  body[data-map-header="true"] .project-name{font-size:17px;line-height:1.5;max-width:none}
+  body[data-map-header="true"] .project-tools{display:flex;align-items:center;gap:10px;min-width:0}
+  body[data-map-header="true"] #saved{max-width:190px;overflow-wrap:anywhere;text-align:left}
+  body[data-map-header="true"] #project-management{position:relative;flex:none}
+  body[data-map-header="true"] #project-management>summary{display:list-item;margin:0;padding:5px 8px;font-size:12px;white-space:nowrap;cursor:pointer}
+  body[data-map-header="true"] #project-management>.row{position:absolute;right:0;top:100%;z-index:20;display:flex;flex-direction:column;align-items:stretch;gap:5px;width:220px;max-width:calc(100vw - 30px);margin:5px 0 0;padding:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px #24203820}
+  body[data-map-header="true"] #project-management>.row button{width:100%;min-height:36px;text-align:left;white-space:normal}
+  body[data-map-header="true"] .space-crumb{margin-bottom:6px}
+  body[data-map-header="true"] .space-crumb>.layer-chip{display:none}
+  body[data-map-header="true"] .space-head.overview-head{padding:6px 10px;margin-bottom:6px}
+}
+.map-toolbar [aria-pressed="true"]{background:var(--tint);border-color:var(--accent);color:var(--accent)}
+.records-panel .check-items{display:flex;flex-direction:column;gap:10px;margin:8px 0;padding:0;list-style:none}
+.records-panel .check-item{display:flex;flex-wrap:wrap;gap:5px;padding:10px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.records-panel .check-item>.check-area,.records-panel .check-item>strong,.records-panel .check-item>.hint{flex:1 0 100%;min-width:0;max-width:100%}
+.records-panel .check-item button{font-size:12px;min-height:32px}
+#records-return-notice{grid-column:1/-1;border-left:3px solid var(--accent);padding-left:8px;margin:3px 0 0;font-size:11px;line-height:1.4}

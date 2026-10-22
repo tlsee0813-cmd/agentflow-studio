@@ -32,6 +32,7 @@ class ResultFiles(unittest.TestCase):
         f=json.loads((self.materials/'A-H1.result.json').read_text());f.update(changes)
         (self.materials/name).write_text(json.dumps(f,ensure_ascii=False,indent=2),encoding='utf-8');return f
     def download(self,button,name):
+        if button=='#backup':base.reveal_management(self.page,button)
         with self.page.expect_download() as d:self.page.locator(button).click()
         path=OUT/name;d.value.save_as(path);return path
     def shot(self,name):
