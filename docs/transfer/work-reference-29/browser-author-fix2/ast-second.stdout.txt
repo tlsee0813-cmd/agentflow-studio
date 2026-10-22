@@ -1,0 +1,21 @@
+{
+  "bytes": 25074,
+  "sha256": "4485e3428d0d4cc4065f2bc24d645feb4edf31dafff414b3ea1d7bdb4c32b9fa",
+  "gitBlob": "d7967065020a8e5aa21e84e62a14480be91b028a",
+  "ast": "통과",
+  "old56CBUnchanged": true,
+  "fixtureUnchanged": true,
+  "test01and04Unchanged": true,
+  "cases": "4장면×양PC 유지",
+  "scope": "단일 body 스크롤의 실제 owner·원문 Range/hit·같은 pin 수신 뒤 위치/anchor 보존·명시 재열기 초기화 검사",
+  "notRun": [
+    "브라우저",
+    "서버",
+    "Node22 실행",
+    "fix2 fixture 재실행"
+  ],
+  "workflowChanged": false,
+  "productWritten": false,
+  "oldMetricLimit": "기존56CB는 body만 관측해 source-raw 내부 scroll 소실을 놓칠 수 있었다. 기존 CI 성공 여부로 이 새 경계를 통과했다고 하지 않는다.",
+  "draftLimit": "summary 내부 scroll>0을 요구하던 초기 fix2 초안은 실행하지 않고 draft-nested-scroll-unrun.py로 보존. 최종 단일 body 계약에 맞춰 대체했다."
+}

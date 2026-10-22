@@ -1,0 +1,119 @@
+--- a/app/continuity/tests/work-description29_browser.py
++++ b/app/continuity/tests/work-description29_browser.py
+@@ -96,7 +96,7 @@
+         expect(self.page.locator(BODY)).to_be_visible()
+     def reference(self):
+         return self.page.locator(BODY).evaluate('''e=>({project:e.dataset.projectId,task:e.dataset.taskId,area:e.dataset.areaId,revision:e.dataset.selectedRevision,state:e.dataset.referenceState,
+- text:e.querySelector('.work-reference-summary')?.textContent??null,y:e.scrollTop,open:e.closest('details').open})''')
++ text:e.querySelector('.work-reference-summary')?.textContent??null,y:e.scrollTop,summaryY:e.querySelector('.work-reference-summary')?.scrollTop??null,open:e.closest('details').open})''')
+     def owner(self,s,task,area,revision,text):
+         r=self.reference()
+         for key,value in [('project',s['p']['id']),('task',task),('area',area),('revision',str(revision)),('text',text)]:self.equal('참고의 정확한 '+key,r[key],value)
+@@ -123,6 +123,45 @@
+         heading='## 영역 현재 설명 — '
+         self.yes('전체 전달문에 설명 역할 구역이 있음',heading in text)
+         return text.split(heading,1)[1].split('\n## ',1)[0]
++    def summary_anchor(self,expected=None):
++        self.reach(REF+' > summary')
++        line=self.page.evaluate('''([body,sel,expected])=>{const b=document.querySelector(body),s=document.querySelector(sel),br=b.getBoundingClientRect(),w=document.createTreeWalker(s,NodeFilter.SHOW_TEXT);let n;
++          while(n=w.nextNode()){if(!n.data.trim()||expected&&n.data!==expected.text)continue;const g=document.createRange();g.selectNodeContents(n);const rects=[...g.getClientRects()];
++            for(let i=0;i<rects.length;i++){if(expected&&i!==expected.lineIndex)continue;const r=rects[i],inside=r.width>0&&r.height>0&&r.top>=Math.max(0,br.top)&&r.bottom<=Math.min(innerHeight,br.bottom)&&r.left>=Math.max(0,br.left)&&r.right<=Math.min(innerWidth,br.right),
++              h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2),value={lineIndex:i,text:n.data,rect:r.toJSON(),inside,hit:!!h&&s.contains(h),cover:h&&(h.id||h.className)};
++              if(expected||inside&&value.hit)return value}}return null}''',[BODY,SUMMARY,expected])
++        self.yes('저장한 선택 설명의 정확한 글줄이 clip 안에서 읽힘' if expected else '선택 설명의 실제 원문 글줄이 clip 안에서 읽힘',bool(line and line['inside'] and line['hit']),line)
++        return line
++    def scroll_reference(self):
++        self.reach(SUMMARY,'B_SELECTED_29')
++        layout=self.page.locator(SUMMARY).evaluate('''e=>({top:e.scrollTop,height:e.scrollHeight,client:e.clientHeight,overflow:getComputedStyle(e).overflowY})''')
++        self.record('actual','선택 설명 자체의 별도 스크롤 여부',layout)
++        self.yes('설명 자체에 독립 스크롤을 만들지 않음',layout['height']<=layout['client']+1 and layout['overflow'] not in ['auto','scroll'] and layout['top']==0,layout)
++        point=self.page.evaluate('''([body,sel])=>{const b=document.querySelector(body),s=document.querySelector(sel),r=b.getBoundingClientRect(),q=s.getBoundingClientRect(),
++          l=Math.max(0,r.left,q.left)+4,h=Math.min(innerWidth,r.right,q.right)-4,t=Math.max(0,r.top,q.top)+4,z=Math.min(innerHeight,r.bottom,q.bottom)-4,
++          x=(l+h)/2,y=(t+z)/2,hit=document.elementFromPoint(x,y);let owner=hit;
++          while(owner&&!(owner.scrollHeight>owner.clientHeight+1&&/auto|scroll/.test(getComputedStyle(owner).overflowY)))owner=owner.parentElement;
++          return {x,y,width:h-l,height:z-t,hit:!!hit&&s.contains(hit),owner:owner?.id??'window',expected:b.id,before:b.scrollTop,max:b.scrollHeight-b.clientHeight,
++            delta:Math.min(150,b.scrollHeight-b.clientHeight-b.scrollTop)}}''',[BODY,SUMMARY])
++        self.yes('실제 읽기 교집합과 양수 스크롤 여유가 있음',point['width']>0 and point['height']>0 and point['hit'] and point['owner']==point['expected'] and point['delta']>0,point)
++        self.page.evaluate('''([body,point])=>{const b=document.querySelector(body),events=[],p={promise:null,cancel:null,result:null};let resolve,timer,raf=0,activated=false,generation=0;
++          p.promise=new Promise(r=>resolve=r);const finish=(ok,reason)=>{if(p.result)return;clearTimeout(timer);cancelAnimationFrame(raf);document.removeEventListener('wheel',wheel,true);b.removeEventListener('scroll',scroll);
++            p.result={ok,reason,point,events,after:b.scrollTop};resolve(p.result)};
++          const wheel=e=>{if(e.isTrusted){activated=true;events.push({kind:'trusted-wheel',delta:e.deltaY})}};
++          const scroll=()=>{if(!activated)return;events.push({kind:'actual-scroll',y:b.scrollTop});const current=++generation;let last=b.scrollTop,stable=0;
++            const frame=()=>{if(current!==generation)return;const y=b.scrollTop;stable=y===last?stable+1:0;last=y;
++              if(stable>=2){finish(y>point.before,'actual-scroll-and-stable-frames');return}raf=requestAnimationFrame(frame)};raf=requestAnimationFrame(frame)};
++          p.cancel=()=>finish(false,'cleanup');window.__work29ReferenceWheel=p;document.addEventListener('wheel',wheel,true);b.addEventListener('scroll',scroll);timer=setTimeout(()=>finish(false,'movement-timeout'),4000)}''',[BODY,point])
++        try:
++            self.page.mouse.move(point['x'],point['y']);self.page.mouse.wheel(0,point['delta'])
++            moved=self.page.evaluate('async()=>await window.__work29ReferenceWheel.promise')
++            self.yes('읽기 body의 실제 scroll 이벤트와 위치 안정화',moved['ok'],moved)
++        finally:
++            raw=self.page.evaluate('()=>{const p=window.__work29ReferenceWheel;if(!p)return null;p.cancel();delete window.__work29ReferenceWheel;return p.result}')
++            self.record('actual','읽기 wheel listener·timer 정리',raw)
++        reading=self.reference()
++        self.yes('실제 움직이는 읽기 소유자는 바깥 body',reading['y']>0 and reading['summaryY']==0,reading)
++        return self.summary_anchor()
+ 
+     def test_01_actual_editor_B_not_compose_or_map_A(self):
+         s=self.load();self.click('#nav-space');self.click('#map-fit');self.click('#node-info-'+s['a'])
+@@ -139,8 +178,7 @@
+ 
+     def test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference(self):
+         s=self.load();self.open_reference();self.owner(s,s['B'],s['b'],s['revision'],s['textB'])
+-        self.reach(BODY);self.wheel(BODY,150)
+-        self.yes('실제 native wheel로 본문을 읽은 위치가 있음',self.reference()['y']>0,self.reference())
++        self.scroll_reference()
+         self.pair_geometry('#work-next')
+         handles=[self.page.locator('#work-'+key).element_handle() for key in KEYS]
+         body=self.page.locator(BODY).element_handle();selected=self.page.locator(SUMMARY).element_handle()
+@@ -151,7 +189,7 @@
+         self.page.keyboard.type('X')
+         # 이 측정 앞에 click/reach/focus/재렌더 보정 호출을 넣지 않는다.
+         after_key=self.page.evaluate('''([fields,body,summary])=>({same:fields.map(e=>e===document.getElementById(e.id)),bodySame:body===document.querySelector('.work-reference-body'),
+-          summarySame:summary===document.querySelector('.work-reference-summary'),focus:document.activeElement.id,start:fields[0].selectionStart,end:fields[0].selectionEnd,values:fields.map(e=>e.value),bodyY:body.scrollTop,
++          summarySame:summary===document.querySelector('.work-reference-summary'),focus:document.activeElement.id,start:fields[0].selectionStart,end:fields[0].selectionEnd,values:fields.map(e=>e.value),bodyY:body.scrollTop,summaryY:summary.scrollTop,
+           selectedRevision:body.dataset.selectedRevision,state:body.dataset.referenceState,text:summary.textContent,open:body.closest('details').open})''',[handles,body,selected])
+         self.record('actual','첫 키 직후 보정 전 DOM·초점·선택·본문',after_key)
+         self.equal('manual4 DOM 동일',after_key['same'],[True]*4)
+@@ -161,7 +199,7 @@
+         expected=caret['value'][:caret['start']]+'X'+caret['value'][caret['end']:]
+         old=next(t for t in before['tasks'] if t['id']==s['B'])['manual']
+         self.equal('U만 실제 편집되고 S/N/C 그대로',after_key['values'],[expected,old['scope'],old['next'],old['checks']])
+-        self.equal('캡처 본문·판본·읽기 위치·펼침 보존',[after_key['text'],after_key['selectedRevision'],after_key['bodyY'],after_key['open']],[s['textB'],str(s['revision']),reading['y'],True])
++        self.equal('캡처 본문·판본·바깥과 내부 읽기 위치·펼침 보존',[after_key['text'],after_key['selectedRevision'],after_key['bodyY'],after_key['summaryY'],after_key['open']],[s['textB'],str(s['revision']),reading['y'],reading['summaryY'],True])
+         self.equal('현재성만 stale로 변경',after_key['state'],'stale')
+         self.reach(REF+' [data-reference-status]');expect(self.page.locator(REF+' [data-reference-status]')).to_contain_text('현재 인계 참고에는 포함되지 않아요')
+         after=self.state();restored=json.loads(json.dumps(after));restored['revision']=before['revision'];restored['notice']=before['notice']
+@@ -172,7 +210,13 @@
+         self.equal('전달문 읽기 자체는 추가 데이터 변경 없음',self.state(),after);self.equal('직접 입력·읽기에 AI 호출 없음',self.posts,[])
+ 
+     def test_03_new_applied_revision_requires_explicit_reopen(self):
+-        s=self.load();self.open_reference();self.owner(s,s['B'],s['b'],s['revision'],s['textB']);before=self.state()
++        s=self.load();self.open_reference();self.owner(s,s['B'],s['b'],s['revision'],s['textB'])
++        self.scroll_reference()
++        self.click(REF+' > summary');self.click(REF+' > summary')
++        reopened=self.owner(s,s['B'],s['b'],s['revision'],s['textB'])
++        self.equal('동일한 긴 r2도 명시 재열기는 처음부터 읽음',[reopened['y'],reopened['summaryY']],[0,0])
++        anchor=self.scroll_reference()
++        pinned=self.reference();self.yes('다시 읽은 r2의 실제 body 위치가 0보다 큼',pinned['y']>0 and pinned['summaryY']==0,pinned);before=self.state()
+         self.details('compose-panel');self.details('result-file-panel')
+         path=base.OUT/f'work29-{self.WIDTH}-new-revision.json';path.write_text(json.dumps(s['late'],ensure_ascii=False),encoding='utf-8')
+         self.page.locator('#result-file-input').set_input_files(str(path))
+@@ -180,12 +224,16 @@
+         self.click('#accept-result-file');base.saved(self.page)
+         self.equal('다른 B0 반환이 실제 편집 B를 고르지 않음',self.state()['currentTaskId'],s['B'])
+         after=self.state();self.equal('새 설명이 실제 적용됨',after['space']['understanding'][s['b']]['entries'][-1]['held'],None)
+-        self.owner(s,s['B'],s['b'],s['revision'],s['textB'])
++        retained=self.owner(s,s['B'],s['b'],s['revision'],s['textB'])
++        self.equal('새 보고 수신 뒤 읽던 r2의 바깥·내부 스크롤 위치 보존',[retained['y'],retained['summaryY']],[pinned['y'],pinned['summaryY']])
++        actual_anchor=self.summary_anchor(anchor)
++        self.equal('같은 판본의 실제 원문 읽기 anchor 보존',[actual_anchor['lineIndex'],actual_anchor['text']],[anchor['lineIndex'],anchor['text']])
+         expect(self.page.locator(REF+' [data-reference-new]')).to_be_visible();self.equal('읽던 것은 이전 판본',self.reference()['state'],'previous')
+         self.equal('새 판본 수신은 기존 작업·네 값·H를 바꾸지 않음',after['tasks'][:len(before['tasks'])],before['tasks'])
+         for key in ['draft','bases','currentTaskId']:self.equal('새 판본 수신 보호 '+key,after[key],before[key])
+         self.click(REF+' > summary');self.click(REF+' > summary')
+-        self.owner(s,s['B'],s['b'],s['revision']+1,s['textNew']);self.equal('명시 재열기 후 current',self.reference()['state'],'current')
++        selected_new=self.owner(s,s['B'],s['b'],s['revision']+1,s['textNew']);self.equal('명시 재열기 후 current',selected_new['state'],'current')
++        self.equal('새 판본도 명시 선택 때 처음부터 읽음',[selected_new['y'],selected_new['summaryY']],[0,0])
+         expect(self.page.locator(REF+' [data-reference-new]')).to_be_hidden()
+         self.equal('명시 재열기도 저장 데이터 불변',self.state(),after);self.equal('새 판본 읽기에 AI 호출 없음',self.posts,[])
+ 

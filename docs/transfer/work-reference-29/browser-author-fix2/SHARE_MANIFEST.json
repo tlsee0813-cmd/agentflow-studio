@@ -1,0 +1,126 @@
+{
+  "prefix": "docs/transfer/work-reference-29/browser-author-fix2/",
+  "files": [
+    {
+      "path": "REPORT.md",
+      "bytes": 3039,
+      "sha256": "ea077290f06465d871e258f35dbdd5e04de754cd35cd550dcecc7ac4899f238d",
+      "gitBlob": "523043d7a17c10decc1a17f4f173fb948af43950"
+    },
+    {
+      "path": "RECEIPT.json",
+      "bytes": 1378,
+      "sha256": "fb0c7bbc94d3b09271730e1e93b11242fc7af514c4f04bf1a69568bcadb78b4d",
+      "gitBlob": "f1bdd0634718cebdcac75949e920d3e5574a38d0"
+    },
+    {
+      "path": "fix2-test.patch",
+      "bytes": 12646,
+      "sha256": "6c1308aa7001554f22b27e01f5f5c39ba86584116ae33ea1fa7372c942986c55",
+      "gitBlob": "89e21f6c504646734a815c47e02abb354cd2db21"
+    },
+    {
+      "path": "check_and_freeze.py",
+      "bytes": 3335,
+      "sha256": "3a82523f89434a6f03f75f70b7244ba41a09ef09b5871ecd90628f6c5ac8c520",
+      "gitBlob": "e524a6ee77c944d516d4f4f15c364c44ff22d0fb"
+    },
+    {
+      "path": "REVIEW_NOTE.md",
+      "bytes": 1443,
+      "sha256": "d950541069bf00b515082d5baf40fa42b2b0064aeaf2dc3bd1816b29eb9bcd1c",
+      "gitBlob": "3fddf060f7b247732ef9ce2a5613441c71de7574"
+    },
+    {
+      "path": "TRANSFER_NOTE.md",
+      "bytes": 1478,
+      "sha256": "feeac5dc7f3dc1803a02b81cb76cbf4f0ff97082e8b01bd8a3f96465fd468887",
+      "gitBlob": "38208ec9db4fcd9622baf0969fe94e6a56ca6d82"
+    },
+    {
+      "path": "ast-final.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "ast-final.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "ast-final.stdout.txt",
+      "bytes": 1378,
+      "sha256": "fb0c7bbc94d3b09271730e1e93b11242fc7af514c4f04bf1a69568bcadb78b4d",
+      "gitBlob": "f1bdd0634718cebdcac75949e920d3e5574a38d0"
+    },
+    {
+      "path": "ast-first.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "ast-first.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "ast-first.stdout.txt",
+      "bytes": 1011,
+      "sha256": "b294bb703b571f8c7569427ebbe5b8744a5e03519f8e2459d6fa6d49947ad832",
+      "gitBlob": "b42675124d9c7f101f436f48bb59096a667dfa40"
+    },
+    {
+      "path": "ast-review.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "ast-review.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "ast-review.stdout.txt",
+      "bytes": 1011,
+      "sha256": "bc21193d32bf143d56107cb16bc9ef89db1720bd2277e48c2b9ed6ac56d6af8e",
+      "gitBlob": "650185a07cd6da99a52047525b8d01478beed2be"
+    },
+    {
+      "path": "ast-second.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "ast-second.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "ast-second.stdout.txt",
+      "bytes": 1011,
+      "sha256": "99c22a52c3696c9a7f6e2164fb83d21dde1f6b5524451a3a70382b3e8ea08251",
+      "gitBlob": "e52a6cf0e91bae70b23ea0a49f53e7a97f3e999a"
+    }
+  ],
+  "excluded": "원56CB/중간 미실행 초안/후보 fullsource 중복 사본과 제품·기존workflow는 원격 또는 별도 source payload에서 회수하므로 증거에 중복 업로드하지 않음.",
+  "productReadBinding": {
+    "app.ts": {
+      "bytes": 273253,
+      "sha256": "34f3610faae32b01d22f8a3fc52467b4e0b5d0d9c30059c6b4d201e22edc9477",
+      "gitBlob": "27098b83d48cef4289da076c46f0e93011dbe4e0"
+    },
+    "styles.css": {
+      "bytes": 74227,
+      "sha256": "c7ff244982397a42fb3f0bb5133c9631892fc4efa96566d86718b10dd94bc8f2",
+      "gitBlob": "f125211146dcab15f3a86826ad4c2271194790ba"
+    }
+  }
+}

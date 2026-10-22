@@ -1,0 +1,26 @@
+{
+  "bytes": 25397,
+  "sha256": "9713415a8acb0b6b700ab460119d6b8dbd666bad0dc6c4106a99d3164be4f4bf",
+  "gitBlob": "6a0a55c7091a3760f1f0c0ea6fbc1b2f5707b4c4",
+  "ast": "통과",
+  "old56CBUnchanged": true,
+  "fixtureUnchanged": true,
+  "test01and04Unchanged": true,
+  "cases": "4장면×양PC 유지",
+  "scope": "단일 body 스크롤의 실제 owner·원문 Range/hit·같은 pin 수신 뒤 위치/anchor 보존·명시 재열기 초기화 검사",
+  "notRun": [
+    "브라우저",
+    "서버",
+    "Node22 실행",
+    "fix2 fixture 재실행"
+  ],
+  "workflowChanged": false,
+  "productWritten": false,
+  "oldMetricLimit": "기존56CB는 body만 관측해 source-raw 내부 scroll 소실을 놓칠 수 있었다. 기존 CI 성공 여부로 이 새 경계를 통과했다고 하지 않는다.",
+  "independentReview": {
+    "reviewer": "resume_product_judgment_astra",
+    "sourceSha256": "9713415a8acb0b6b700ab460119d6b8dbd666bad0dc6c4106a99d3164be4f4bf",
+    "result": "최종 파일의 실제 해시와 4485 보존본의 delta를 대조해 동일 Range 검사 보완을 수용. 추가 수정 사항 없음. 브라우저와 AREA17 판단은 별개."
+  },
+  "draftLimit": "summary 내부 scroll>0을 요구하던 초기 fix2 초안은 실행하지 않고 draft-nested-scroll-unrun.py로 보존. 최종 단일 body 계약에 맞춰 대체했다."
+}
