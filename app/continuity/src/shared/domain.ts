@@ -756,6 +756,36 @@ export function correctUnderstanding(p:Project,areaId:string,value:string):Proje
   next.entries.push({by:'user',at:now(),revision:next.revision,taskId:null,returnId:null,text:v,corrects:st.revision,stamp:planStamp(p,areaId),held:null});
   n.space.understanding[areaId]=next;return n;
 }
+/** Ephemeral review context, captured when the user opens the editor. Never persisted or an export anchor. */
+export interface UnderstandingReviewToken { projectId:string;areaId:string;revision:number;stamp:ContextPlanStamp }
+export function beginUnderstandingReview(p:Project,areaId:string):UnderstandingReviewToken {
+  const a=p.space.areas.find(x=>x.id===areaId);ensure(a&&!a.archived,'AREA_MISSING');
+  const current=areaDescription(p,areaId).current;ensure(current&&current.entry.revision!==null,'NOTHING_TO_REVIEW');
+  return {projectId:p.id,areaId,revision:current.entry.revision,stamp:copy(planStamp(p,areaId))};
+}
+export function understandingReviewMatches(p:Project,areaId:string,token:UnderstandingReviewToken):boolean {
+  const a=p.space.areas.find(x=>x.id===areaId);
+  return !!a&&!a.archived&&token.projectId===p.id&&token.areaId===areaId
+    &&areaDescription(p,areaId).current?.entry.revision===token.revision&&sameStamp(token.stamp,planStamp(p,areaId));
+}
+/** Explicitly records a new user version after comparison with the current context. A stale entry is never altered or
+ * automatically made valid; even unchanged text becomes a new user-attributed version with the reviewed live stamp. */
+export function recordUnderstandingReview(p:Project,areaId:string,value:string,token:UnderstandingReviewToken):Project {
+  ensure(understandingReviewMatches(p,areaId,token),'UNDERSTANDING_REVIEW_CHANGED');
+  const v=value.trim();text(v,SUMMARY_LIMIT);
+  const n=change(p),next=copy(areaState(p,areaId));next.revision++;
+  next.entries.push({by:'user',at:now(),revision:next.revision,taskId:null,returnId:null,text:v,corrects:token.revision,stamp:copy(token.stamp),held:null});
+  n.space.understanding[areaId]=next;return n;
+}
+/** The work actually participating in the old or live broad stamp, independent of currentTaskId. Changed fingerprints
+ * come first; this identifies records to compare, not a semantic explanation of why a description is stale. */
+export function understandingReviewWork(p:Project,areaId:string):{task:Task;changed:boolean}[] {
+  const entries=(items:string[])=>new Map(items.map(s=>{const i=s.indexOf(':');return [s.slice(0,i),s.slice(i+1)] as const;}));
+  const previous=entries(areaDescription(p,areaId).current?.entry.stamp?.work??[]),current=entries(planStamp(p,areaId).work);
+  return [...new Set([...previous.keys(),...current.keys()])].flatMap(id=>{
+    const task=p.tasks.find(t=>t.id===id);return task?[{task,changed:previous.get(id)!==current.get(id)}]:[];
+  }).sort((a,b)=>Number(b.changed)-Number(a.changed));
+}
 export interface DescriptionView {
   entry:UnderstandingEntry; summary:string; changes:string[]; proposal:string|null; origin:string;
   /** The received return task (external) and the request it returned to. */
@@ -788,7 +818,7 @@ function understandingLines(p:Project,t:Task):string[] {
   const areaId=areaOf(p,t),a=areaId?p.space.areas.find(x=>x.id===areaId):undefined;if(!a)return [];
   const d=areaDescription(p,a.id).current;if(!d)return [];
   if(!d.valid)return ['\n## 영역 현재 설명 — 이번 작업문에 넣지 않음',
-    `영역 ‘${a.name}’의 정리 설명 r${d.entry.revision}은 그 뒤 사용자 구상·기준이 바뀌어 현재 설명으로 쓰지 않습니다. 그 설명을 이번 작업의 근거로 삼지 마세요.`];
+    `영역 ‘${a.name}’의 정리 설명 r${d.entry.revision}은 그 뒤 구상·조건·직접 쓴 작업문 또는 포함 맥락의 참고 기준이 바뀌어 현재 설명으로 쓰지 않습니다. 그 설명을 이번 작업의 근거로 삼지 마세요.`];
   const from=d.entry.by==='user'?`사용자가 설명 r${d.entry.corrects}을 직접 고친 값 (사용자 정정도 앱이 검증한 사실은 아님)`
     :`작업 ${String(p.tasks.indexOf(d.returnTask!)+1).padStart(2,'0')}에 돌아온 결과에 붙은 외부 정리 · ${d.origin}`;
   return ['\n## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증',
