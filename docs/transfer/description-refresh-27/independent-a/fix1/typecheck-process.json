@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/browser-env/tools/node_modules/.bin/tsc",
+    "--noEmit",
+    "-p",
+    "continuity/tsconfig.json"
+  ],
+  "startUTC": "2026-10-22T19:01:55.987108+00:00",
+  "endUTC": "2026-10-22T19:01:57.952954+00:00",
+  "actualChildReturncode": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

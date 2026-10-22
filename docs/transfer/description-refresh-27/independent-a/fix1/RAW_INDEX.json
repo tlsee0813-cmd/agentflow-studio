@@ -1,0 +1,23 @@
+[
+  {
+    "path": "ui.jsonl.gz",
+    "uncompressedBytes": 1115709,
+    "uncompressedSHA256": "b74f35e710a3e3a165ab06204351e71cc74e735e5a3470cd287904dfba224e80",
+    "compressedBytes": 96172,
+    "compressedSHA256": "988feec6cc265d4d758871179dfddeb9f355beaa531850ec45a1164c5e7aceeb"
+  },
+  {
+    "path": "first-transport-field-name-error/ui.jsonl.gz",
+    "uncompressedBytes": 555642,
+    "uncompressedSHA256": "641794506510b712191ce4c25cc71c641b40143862f97712f8f81667abfa0a99",
+    "compressedBytes": 49875,
+    "compressedSHA256": "5d71430900fe638e9346047c3ba17eef425c4a93ec6696f0a883fcb6c886d7bb"
+  },
+  {
+    "path": "same-cancel-probe/ui.jsonl.gz",
+    "uncompressedBytes": 319433,
+    "uncompressedSHA256": "ff905c1bef0324f9dcf48fd344ffa8f27388fbac8da698ec770408f3f0a8f5eb",
+    "compressedBytes": 30580,
+    "compressedSHA256": "f4b4e2d96c91dd420e7abf5af958b53445a8878377ff0c14fd9522f529e76c1c"
+  }
+]

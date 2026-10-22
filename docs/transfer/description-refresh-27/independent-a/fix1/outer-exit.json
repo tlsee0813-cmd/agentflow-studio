@@ -1,0 +1,20 @@
+{
+  "provenance": "exec_command/write_stdin external tool completion, not collector self-report",
+  "sameProbeFix1": {
+    "sessionId": 45631,
+    "actualOuterExit": 0
+  },
+  "normalUIFirstFieldNameError": {
+    "sessionId": 82081,
+    "actualOuterExit": 1
+  },
+  "normalUILatest": {
+    "sessionId": 65333,
+    "actualOuterExit": 0
+  },
+  "v0Final": {
+    "sessionId": 74116,
+    "actualOuterExit": 1
+  },
+  "expectedProductFailureSeparateFromHarnessError": true
+}

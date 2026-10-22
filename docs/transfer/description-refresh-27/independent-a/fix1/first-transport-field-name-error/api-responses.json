@@ -1,0 +1,133 @@
+[
+  {
+    "UTC": "2026-10-22T18:59:50.941203+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:33493/api/continuity",
+    "status": 200,
+    "bytes": 1404,
+    "bodySHA256": "1b0be70844dff73a3da57d88ec282953eeb66ed0ca21506b01444078fd9debd8",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_d3f21421-a08b-41bc-ba7f-166f7bb45fe0",
+        "revision": 8,
+        "requestId": "R_9c89491a-3442-4e21-8ff5-0a7b29b9ccb0",
+        "taskId": "T_e8982e75-ac73-4f8d-99e7-de82dbdeb5d9"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_32ebf452-d62d-4237-8437-a7cb983966da",
+              "revision": 8
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T18:59:53.563099+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:33493/api/continuity",
+    "status": 200,
+    "bytes": 1385,
+    "bodySHA256": "b69b40e1df32fba3a5b8300f23cf968ba72b853236edc55a02bef055ec2188a7",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_d3f21421-a08b-41bc-ba7f-166f7bb45fe0",
+        "revision": 18,
+        "requestId": "R_38ce64be-50d5-4970-9236-6e6e170424aa",
+        "taskId": "T_4d940d53-944b-4b51-a620-cd58e3a37b6f"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D2",
+              "sourceId": "S_4f9d61d9-b0c2-40a8-97fb-5caf8c2f5937",
+              "revision": 18
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T19:00:01.875855+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:33493/api/continuity",
+    "status": 200,
+    "bytes": 1410,
+    "bodySHA256": "2a9237d77405092c73c0c1bb34546b8bf90e20ef9ba27f6ea6141f6b91cd4f73",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_d3f21421-a08b-41bc-ba7f-166f7bb45fe0",
+        "revision": 34,
+        "requestId": "R_686263f9-8cc0-45af-85fa-10885cb01423",
+        "taskId": "T_e8982e75-ac73-4f8d-99e7-de82dbdeb5d9"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_32ebf452-d62d-4237-8437-a7cb983966da",
+              "revision": 8
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  }
+]

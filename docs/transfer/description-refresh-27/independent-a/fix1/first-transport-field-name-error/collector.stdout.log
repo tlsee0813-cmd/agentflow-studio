@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle27-normal-ui/check.py", line 63, in <module>
+    try:u.run(w,h)
+        ^^^^^^^^^^
+  File "/workspace/browser-env/cycle27-normal-ui/check.py", line 52, in run
+    payload=self.posts[-1]['payload'];ref=payload.get('currentAreaDescription');assert ref and ref['summary']==originalText and ref['by']=='user';self.log('actual A ContextRequest reference',{'payload':payload,'expectedA':self.ids['보관 안내'],'reference':ref});assert next(t for t in self.state()['tasks'] if t['id']==self.Atask)['manual']==changed
+                                                                                               ~~~^^^^^^^^^^^
+KeyError: 'summary'
+
+

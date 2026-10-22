@@ -1,0 +1,478 @@
+{
+  "schemaVersion": "idea015.project.7",
+  "id": "P_cd8964c1-0fd5-4286-b44d-f33ccd2b39b7",
+  "revision": 36,
+  "name": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 …",
+  "sources": [
+    {
+      "id": "S_468bbb23-8d52-44ab-8450-6e1f1a19bf14",
+      "kind": "request",
+      "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+      "at": "2026-10-22T19:00:26.556Z",
+      "taskId": "T_9d3a9cb9-681e-4478-917a-713d4a98c887",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_42f6241c-3eaa-4a55-8129-db43d724ec87",
+      "kind": "report",
+      "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_9d3a9cb9-681e-4478-917a-713d4a98c887의 인계 H_55e5e0fd-a924-42e7-aa0b-b87554ae6e9c / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.",
+      "at": "2026-10-22T19:00:28.606Z",
+      "taskId": "T_91b8e6db-155c-41c8-93f9-98746d88967d",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_76246fda-0833-4c17-becf-0878dc879e06",
+      "kind": "request",
+      "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+      "at": "2026-10-22T19:00:29.071Z",
+      "taskId": "T_c4f6d7ef-a4eb-4f63-a8cb-1d15bf7a95a1",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+      "status": "requested",
+      "sourceId": "S_468bbb23-8d52-44ab-8450-6e1f1a19bf14",
+      "revision": 8,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+      "status": "requested",
+      "sourceId": "S_76246fda-0833-4c17-becf-0878dc879e06",
+      "revision": 18,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_9d3a9cb9-681e-4478-917a-713d4a98c887",
+      "sourceIds": [
+        "S_468bbb23-8d52-44ab-8450-6e1f1a19bf14"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_468bbb23-8d52-44ab-8450-6e1f1a19bf14",
+              "revision": 8
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 34,
+      "mode": "mock",
+      "manual": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다. [27 관련 작업 변경 확인]",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-22T19:00:27.633Z",
+          "method": "clipboard",
+          "revision": 13,
+          "chars": 4721,
+          "digest": "0910d53b",
+          "work": {
+            "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+            "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+            "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+            "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_55e5e0fd-a924-42e7-aa0b-b87554ae6e9c",
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+            "area": {
+              "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+            "understanding": 0,
+            "stamp": {
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_9d3a9cb9-681e-4478-917a-713d4a98c887:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            }
+          }
+        },
+        {
+          "at": "2026-10-22T19:00:29.916Z",
+          "method": "clipboard",
+          "revision": 20,
+          "chars": 5604,
+          "digest": "4d3817c0",
+          "work": {
+            "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+            "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+            "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+            "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_b8286b42-455c-4550-8229-35461526abeb",
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+            "area": {
+              "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+            "understanding": 1,
+            "stamp": {
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_9d3a9cb9-681e-4478-917a-713d4a98c887:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            }
+          }
+        },
+        {
+          "at": "2026-10-22T19:00:37.016Z",
+          "method": "clipboard",
+          "revision": 35,
+          "chars": 5589,
+          "digest": "7a256df5",
+          "work": {
+            "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+            "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+            "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다. [27 관련 작업 변경 확인]",
+            "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_743bb5ac-0479-4f8e-acb6-8ce8e62c6cda",
+          "background": {
+            "version": "background.1",
+            "revision": 7,
+            "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+            "area": {
+              "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+            "understanding": 4,
+            "stamp": {
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_9d3a9cb9-681e-4478-917a-713d4a98c887:112d816870689cdb8510a52aefd34f3a57ba46a36c68035cbcbfcd3ef565b321"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 7,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+        }
+      },
+      "areaId": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd"
+    },
+    {
+      "id": "T_91b8e6db-155c-41c8-93f9-98746d88967d",
+      "sourceIds": [
+        "S_42f6241c-3eaa-4a55-8129-db43d724ec87"
+      ],
+      "parentTaskId": "T_9d3a9cb9-681e-4478-917a-713d4a98c887",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": {
+        "returnId": "H_55e5e0fd-a924-42e7-aa0b-b87554ae6e9c",
+        "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_cd8964c1-0fd5-4286-b44d-f33ccd2b39b7\",\n  \"taskId\": \"T_9d3a9cb9-681e-4478-917a-713d4a98c887\",\n  \"returnId\": \"H_55e5e0fd-a924-42e7-aa0b-b87554ae6e9c\",\n  \"report\": \"[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_c3e239ff-8f2f-4978-a874-ccc4260572fd\",\n    \"basedOn\": 0,\n    \"summary\": \"[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.\",\n    \"changes\": [\n      \"[합성25] 안내 표시를 7일로 읽었다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"관측자가 실제 UI 내보내기 템플릿에 작성한 합성 설명. 실제 AI·구현·검사 없음.\"\n  }\n}"
+      },
+      "background": {
+        "version": "background.1",
+        "revision": 7,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+        }
+      }
+    },
+    {
+      "id": "T_c4f6d7ef-a4eb-4f63-a8cb-1d15bf7a95a1",
+      "sourceIds": [
+        "S_76246fda-0833-4c17-becf-0878dc879e06"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D2",
+              "sourceId": "S_76246fda-0833-4c17-becf-0878dc879e06",
+              "revision": 18
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 18,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 17,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6",
+          "name": "자료 찾기",
+          "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다."
+        }
+      },
+      "areaId": "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6"
+    }
+  ],
+  "currentTaskId": "T_9d3a9cb9-681e-4478-917a-713d4a98c887",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+      "at": "2026-10-22T19:00:25.939Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+        "name": "보관 안내",
+        "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+        "archived": false,
+        "createdAt": "2026-10-22T19:00:26.072Z"
+      },
+      {
+        "id": "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6",
+        "name": "자료 찾기",
+        "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다.",
+        "archived": false,
+        "createdAt": "2026-10-22T19:00:26.208Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_c3e239ff-8f2f-4978-a874-ccc4260572fd": {
+          "x": 340,
+          "y": 80
+        },
+        "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6": {
+          "x": -120,
+          "y": 100
+        }
+      }
+    },
+    "understanding": {
+      "A_c3e239ff-8f2f-4978-a874-ccc4260572fd": {
+        "revision": 4,
+        "entries": [
+          {
+            "by": "external",
+            "at": "2026-10-22T19:00:28.607Z",
+            "revision": 1,
+            "taskId": "T_91b8e6db-155c-41c8-93f9-98746d88967d",
+            "returnId": "H_55e5e0fd-a924-42e7-aa0b-b87554ae6e9c",
+            "text": null,
+            "corrects": null,
+            "stamp": {
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_9d3a9cb9-681e-4478-917a-713d4a98c887:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            },
+            "held": null
+          },
+          {
+            "by": "user",
+            "at": "2026-10-22T19:00:30.537Z",
+            "revision": 2,
+            "taskId": null,
+            "returnId": null,
+            "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.",
+            "corrects": 1,
+            "stamp": {
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_9d3a9cb9-681e-4478-917a-713d4a98c887:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            },
+            "held": null
+          },
+          {
+            "by": "user",
+            "at": "2026-10-22T19:00:35.491Z",
+            "revision": 3,
+            "taskId": null,
+            "returnId": null,
+            "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.",
+            "corrects": 2,
+            "stamp": {
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_9d3a9cb9-681e-4478-917a-713d4a98c887:112d816870689cdb8510a52aefd34f3a57ba46a36c68035cbcbfcd3ef565b321"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            },
+            "held": null
+          },
+          {
+            "by": "user",
+            "at": "2026-10-22T19:00:36.253Z",
+            "revision": 4,
+            "taskId": null,
+            "returnId": null,
+            "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.",
+            "corrects": 3,
+            "stamp": {
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_9d3a9cb9-681e-4478-917a-713d4a98c887:112d816870689cdb8510a52aefd34f3a57ba46a36c68035cbcbfcd3ef565b321"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            },
+            "held": null
+          }
+        ]
+      }
+    },
+    "containment": {
+      "version": "containment.1",
+      "parents": {},
+      "revisions": {
+        "A_c3e239ff-8f2f-4978-a874-ccc4260572fd": 0,
+        "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6": 0
+      }
+    }
+  }
+}

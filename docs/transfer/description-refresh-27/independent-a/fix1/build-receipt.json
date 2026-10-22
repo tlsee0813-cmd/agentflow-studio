@@ -1,0 +1,8 @@
+{
+  "provenance": "exec_command tool result; shell sequence, not separately collected subprocess statuses",
+  "cwd": "/workspace/browser-env/cycle27-fix1-candidate/app",
+  "command": "PATH=/workspace/browser-env/tools/node_modules/.bin:$PATH node scripts/build.mjs; node continuity/scripts/build.mjs; node continuity/scripts/check.mjs (PATH pinned for each command)",
+  "actualShellExit": 0,
+  "output": "Built TypeScript client/shared modules + static assets. Server remains native Node ESM.\nIDEA015 built separately; existing app/dist and historic gates unchanged.\nPATH compiler (offline bootstrap, not npm ci evidence)\nIDEA015 type, syntax and client/server boundary checks passed.\nPATH compiler (offline bootstrap, not npm ci evidence)\n",
+  "newInstall": false
+}

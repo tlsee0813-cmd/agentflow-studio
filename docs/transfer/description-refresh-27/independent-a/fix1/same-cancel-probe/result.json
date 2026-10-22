@@ -1,0 +1,5507 @@
+{
+  "sourceCommit": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "expectedScenario": 1,
+  "executed": true,
+  "complete": true,
+  "productExpectedCloseFailure": false,
+  "rows": [
+    {
+      "label": "before open",
+      "open": false,
+      "summary": "설명 오류 고치기",
+      "summaryGeometry": {
+        "rect": {
+          "x": 468.515625,
+          "y": 627.765625,
+          "width": 101.625,
+          "height": 31.4375,
+          "top": 627.765625,
+          "right": 570.140625,
+          "bottom": 659.203125,
+          "left": 468.515625
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "textClip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "accessScope": "control border against ancestor client clips; own text clip separate",
+        "ancestors": [
+          {
+            "id": "",
+            "tag": "SUMMARY",
+            "rect": {
+              "x": 468.515625,
+              "y": 627.765625,
+              "width": 101.625,
+              "height": 31.4375,
+              "top": 627.765625,
+              "right": 570.140625,
+              "bottom": 659.203125,
+              "left": 468.515625
+            },
+            "client": {
+              "left": 468.515625,
+              "top": 627.765625,
+              "right": 570.515625,
+              "bottom": 658.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "list-item",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+            "tag": "DETAILS",
+            "rect": {
+              "x": 468.515625,
+              "y": 627.765625,
+              "width": 101.625,
+              "height": 31.4375,
+              "top": 627.765625,
+              "right": 570.140625,
+              "bottom": 659.203125,
+              "left": 468.515625
+            },
+            "client": {
+              "left": 468.515625,
+              "top": 627.765625,
+              "right": 570.515625,
+              "bottom": 658.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 627.765625,
+              "width": 361.15625,
+              "height": 31.4375,
+              "top": 627.765625,
+              "right": 644.15625,
+              "bottom": 659.203125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 627.765625,
+              "right": 644,
+              "bottom": 658.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+            "tag": "SECTION",
+            "rect": {
+              "x": 283,
+              "y": 515.390625,
+              "width": 361.15625,
+              "height": 155.8125,
+              "top": 515.390625,
+              "right": 644.15625,
+              "bottom": 671.203125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 516.390625,
+              "right": 644,
+              "bottom": 671.390625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view-idea",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 399.15625,
+              "height": 331.09375,
+              "top": 405.109375,
+              "right": 663.15625,
+              "bottom": 736.203125,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 406.109375,
+              "right": 662,
+              "bottom": 735.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 399.15625,
+              "height": 562.65625,
+              "top": 405.109375,
+              "right": 663.15625,
+              "bottom": 967.765625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 663,
+              "bottom": 968.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 974,
+              "height": 562.65625,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 967.765625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 968.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 974,
+              "height": 876.78125,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1281.890625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1282.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 229.1875,
+              "width": 974,
+              "height": 1132.5,
+              "top": 229.1875,
+              "right": 1238,
+              "bottom": 1361.6875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 229.1875,
+              "right": 1238,
+              "bottom": 1362.1875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1369.53125,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1442
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1441.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1442
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1442
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1442
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 720
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          }
+        ],
+        "hit": true,
+        "hitNode": "<summary>설명 오류 고치기</summary>",
+        "full": true,
+        "visible": true,
+        "text": "설명 오류 고치기",
+        "rangeRects": [
+          {
+            "x": 482.28125,
+            "y": 633.765625,
+            "width": 87.859375,
+            "height": 19,
+            "top": 633.765625,
+            "right": 570.140625,
+            "bottom": 652.765625,
+            "left": 482.28125
+          }
+        ],
+        "scrollY": 0,
+        "focus": "space-title"
+      },
+      "textareaVisible": false,
+      "textareaGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "textClip": {
+          "left": 469.515625,
+          "top": 660.203125,
+          "right": 569.515625,
+          "bottom": 720
+        },
+        "accessScope": "control border against ancestor client clips; own text clip separate",
+        "ancestors": [
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-text",
+            "tag": "TEXTAREA",
+            "rect": {
+              "x": 468.515625,
+              "y": 659.203125,
+              "width": 101.625,
+              "height": 103.671875,
+              "top": 659.203125,
+              "right": 570.140625,
+              "bottom": 762.875,
+              "left": 468.515625
+            },
+            "client": {
+              "left": 469.515625,
+              "top": 660.203125,
+              "right": 569.515625,
+              "bottom": 762.203125
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+            "tag": "DETAILS",
+            "rect": {
+              "x": 468.515625,
+              "y": 627.765625,
+              "width": 101.625,
+              "height": 31.4375,
+              "top": 627.765625,
+              "right": 570.140625,
+              "bottom": 659.203125,
+              "left": 468.515625
+            },
+            "client": {
+              "left": 468.515625,
+              "top": 627.765625,
+              "right": 570.515625,
+              "bottom": 658.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 627.765625,
+              "width": 361.15625,
+              "height": 31.4375,
+              "top": 627.765625,
+              "right": 644.15625,
+              "bottom": 659.203125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 627.765625,
+              "right": 644,
+              "bottom": 658.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+            "tag": "SECTION",
+            "rect": {
+              "x": 283,
+              "y": 515.390625,
+              "width": 361.15625,
+              "height": 155.8125,
+              "top": 515.390625,
+              "right": 644.15625,
+              "bottom": 671.203125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 516.390625,
+              "right": 644,
+              "bottom": 671.390625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view-idea",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 399.15625,
+              "height": 331.09375,
+              "top": 405.109375,
+              "right": 663.15625,
+              "bottom": 736.203125,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 406.109375,
+              "right": 662,
+              "bottom": 735.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 399.15625,
+              "height": 562.65625,
+              "top": 405.109375,
+              "right": 663.15625,
+              "bottom": 967.765625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 663,
+              "bottom": 968.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 974,
+              "height": 562.65625,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 967.765625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 968.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 974,
+              "height": 876.78125,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1281.890625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1282.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 229.1875,
+              "width": 974,
+              "height": 1132.5,
+              "top": 229.1875,
+              "right": 1238,
+              "bottom": 1361.6875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 229.1875,
+              "right": 1238,
+              "bottom": 1362.1875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1369.53125,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1442
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1441.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1442
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1442
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1442
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1441.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 720
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          }
+        ],
+        "hit": false,
+        "hitNode": "<aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\">",
+        "full": false,
+        "visible": false,
+        "text": "",
+        "rangeRects": [],
+        "scrollY": 0,
+        "focus": "space-title"
+      },
+      "textareaValue": "[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.",
+      "warning": [
+        {
+          "text": "",
+          "visible": false
+        }
+      ],
+      "snapshot": {
+        "y": 0,
+        "extent": 722,
+        "focus": "<h1 id=\"space-title\" tabindex=\"-1\">[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.</h1>",
+        "open": [
+          "project-management",
+          "file-return-options",
+          "edit-work",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [],
+        "plane": [],
+        "cards": []
+      },
+      "project": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_7de68eae-02dd-4825-acd8-8c24ed98eacb",
+        "revision": 21,
+        "name": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 …",
+        "sources": [
+          {
+            "id": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+            "kind": "request",
+            "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+            "at": "2026-10-22T18:58:34.678Z",
+            "taskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_1255bc5f-6289-49fc-aee0-cb59271788e8",
+            "kind": "report",
+            "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_8d8a07d2-7b28-4c08-8786-0514c3922479의 인계 H_7de443ab-f209-4eb9-ab89-daed114ade34 / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.",
+            "at": "2026-10-22T18:58:36.760Z",
+            "taskId": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+            "kind": "request",
+            "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+            "at": "2026-10-22T18:58:37.225Z",
+            "taskId": "T_e0467a16-1bd9-47a0-b956-e7fa41202759",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+            "status": "requested",
+            "sourceId": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+            "revision": 8,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+            "status": "requested",
+            "sourceId": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+            "revision": 18,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "sourceIds": [
+              "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D1",
+                    "sourceId": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+                    "revision": 8
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": null,
+              "relatedBasisIds": [
+                "D1"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 8,
+            "mode": "mock",
+            "manual": {
+              "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+              "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+              "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+              "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T18:58:35.807Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4721,
+                "digest": "35f8b1b7",
+                "work": {
+                  "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+                  "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+                  "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+                  "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+                "background": {
+                  "version": "background.1",
+                  "revision": 7,
+                  "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+                  "area": {
+                    "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  }
+                }
+              },
+              {
+                "at": "2026-10-22T18:58:38.104Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 5604,
+                "digest": "7596cac7",
+                "work": {
+                  "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+                  "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+                  "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+                  "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_b484fad1-cddf-4ab6-9a59-a49e0d8386fc",
+                "background": {
+                  "version": "background.1",
+                  "revision": 7,
+                  "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+                  "area": {
+                    "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                  "understanding": 1,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 7,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                "name": "보관 안내",
+                "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+              }
+            },
+            "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36"
+          },
+          {
+            "id": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+            "sourceIds": [
+              "S_1255bc5f-6289-49fc-aee0-cb59271788e8"
+            ],
+            "parentTaskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": {
+              "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+              "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_7de68eae-02dd-4825-acd8-8c24ed98eacb\",\n  \"taskId\": \"T_8d8a07d2-7b28-4c08-8786-0514c3922479\",\n  \"returnId\": \"H_7de443ab-f209-4eb9-ab89-daed114ade34\",\n  \"report\": \"[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_192a0468-d437-46a1-b87c-9ffa2bb0ae36\",\n    \"basedOn\": 0,\n    \"summary\": \"[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.\",\n    \"changes\": [\n      \"[합성25] 안내 표시를 7일로 읽었다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"관측자가 실제 UI 내보내기 템플릿에 작성한 합성 설명. 실제 AI·구현·검사 없음.\"\n  }\n}"
+            },
+            "background": {
+              "version": "background.1",
+              "revision": 7,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                "name": "보관 안내",
+                "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+              }
+            }
+          },
+          {
+            "id": "T_e0467a16-1bd9-47a0-b956-e7fa41202759",
+            "sourceIds": [
+              "S_ef927cdb-4545-49a5-b25d-8c151537b039"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+                    "revision": 18
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": null,
+              "relatedBasisIds": [
+                "D1",
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 18,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 17,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698",
+                "name": "자료 찾기",
+                "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다."
+              }
+            },
+            "areaId": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698"
+          }
+        ],
+        "currentTaskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+            "at": "2026-10-22T18:58:34.045Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T18:58:34.177Z"
+            },
+            {
+              "id": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698",
+              "name": "자료 찾기",
+              "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다.",
+              "archived": false,
+              "createdAt": "2026-10-22T18:58:34.325Z"
+            }
+          ],
+          "relations": [],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": {
+                "x": 340,
+                "y": 80
+              },
+              "A_227d0c16-6dab-4ca4-8a51-32145ffb4698": {
+                "x": -120,
+                "y": 100
+              }
+            }
+          },
+          "understanding": {
+            "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": {
+              "revision": 1,
+              "entries": [
+                {
+                  "by": "external",
+                  "at": "2026-10-22T18:58:36.760Z",
+                  "revision": 1,
+                  "taskId": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+                  "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+                  "text": null,
+                  "corrects": null,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  },
+                  "held": null
+                }
+              ]
+            }
+          },
+          "containment": {
+            "version": "containment.1",
+            "parents": {},
+            "revisions": {
+              "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": 0,
+              "A_227d0c16-6dab-4ca4-8a51-32145ffb4698": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "opened",
+      "open": true,
+      "summary": "설명 오류 고치기",
+      "summaryGeometry": {
+        "rect": {
+          "x": 283,
+          "y": 659.203125,
+          "width": 361.15625,
+          "height": 31.4375,
+          "top": 659.203125,
+          "right": 644.15625,
+          "bottom": 690.640625,
+          "left": 283
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "textClip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "accessScope": "control border against ancestor client clips; own text clip separate",
+        "ancestors": [
+          {
+            "id": "",
+            "tag": "SUMMARY",
+            "rect": {
+              "x": 283,
+              "y": 659.203125,
+              "width": 361.15625,
+              "height": 31.4375,
+              "top": 659.203125,
+              "right": 644.15625,
+              "bottom": 690.640625,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 659.203125,
+              "right": 644,
+              "bottom": 690.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "list-item",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+            "tag": "DETAILS",
+            "rect": {
+              "x": 283,
+              "y": 659.203125,
+              "width": 361.15625,
+              "height": 239.484375,
+              "top": 659.203125,
+              "right": 644.15625,
+              "bottom": 898.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 659.203125,
+              "right": 644,
+              "bottom": 898.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 627.765625,
+              "width": 361.15625,
+              "height": 270.921875,
+              "top": 627.765625,
+              "right": 644.15625,
+              "bottom": 898.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 627.765625,
+              "right": 644,
+              "bottom": 898.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+            "tag": "SECTION",
+            "rect": {
+              "x": 283,
+              "y": 515.390625,
+              "width": 361.15625,
+              "height": 395.296875,
+              "top": 515.390625,
+              "right": 644.15625,
+              "bottom": 910.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 516.390625,
+              "right": 644,
+              "bottom": 910.390625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view-idea",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 399.15625,
+              "height": 570.578125,
+              "top": 405.109375,
+              "right": 663.15625,
+              "bottom": 975.6875,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 406.109375,
+              "right": 662,
+              "bottom": 975.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 399.15625,
+              "height": 802.140625,
+              "top": 405.109375,
+              "right": 663.15625,
+              "bottom": 1207.25,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 663,
+              "bottom": 1207.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 974,
+              "height": 802.140625,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1207.25,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1207.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 974,
+              "height": 1116.265625,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1521.375,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1521.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 229.1875,
+              "width": 974,
+              "height": 1371.984375,
+              "top": 229.1875,
+              "right": 1238,
+              "bottom": 1601.171875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 229.1875,
+              "right": 1238,
+              "bottom": 1601.1875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1609.015625,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1681
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1681.015625,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 720
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          }
+        ],
+        "hit": true,
+        "hitNode": "<summary>설명 오류 고치기</summary>",
+        "full": true,
+        "visible": true,
+        "text": "설명 오류 고치기",
+        "rangeRects": [
+          {
+            "x": 296.765625,
+            "y": 665.203125,
+            "width": 87.859375,
+            "height": 19,
+            "top": 665.203125,
+            "right": 384.625,
+            "bottom": 684.203125,
+            "left": 296.765625
+          }
+        ],
+        "scrollY": 0,
+        "focus": ""
+      },
+      "textareaVisible": true,
+      "textareaGeometry": {
+        "rect": {
+          "x": 283,
+          "y": 695.640625,
+          "width": 361.15625,
+          "height": 103.671875,
+          "top": 695.640625,
+          "right": 644.15625,
+          "bottom": 799.3125,
+          "left": 283
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "textClip": {
+          "left": 284,
+          "top": 696.640625,
+          "right": 643,
+          "bottom": 720
+        },
+        "accessScope": "control border against ancestor client clips; own text clip separate",
+        "ancestors": [
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-text",
+            "tag": "TEXTAREA",
+            "rect": {
+              "x": 283,
+              "y": 695.640625,
+              "width": 361.15625,
+              "height": 103.671875,
+              "top": 695.640625,
+              "right": 644.15625,
+              "bottom": 799.3125,
+              "left": 283
+            },
+            "client": {
+              "left": 284,
+              "top": 696.640625,
+              "right": 643,
+              "bottom": 798.640625
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+            "tag": "DETAILS",
+            "rect": {
+              "x": 283,
+              "y": 659.203125,
+              "width": 361.15625,
+              "height": 239.484375,
+              "top": 659.203125,
+              "right": 644.15625,
+              "bottom": 898.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 659.203125,
+              "right": 644,
+              "bottom": 898.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 627.765625,
+              "width": 361.15625,
+              "height": 270.921875,
+              "top": 627.765625,
+              "right": 644.15625,
+              "bottom": 898.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 627.765625,
+              "right": 644,
+              "bottom": 898.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+            "tag": "SECTION",
+            "rect": {
+              "x": 283,
+              "y": 515.390625,
+              "width": 361.15625,
+              "height": 395.296875,
+              "top": 515.390625,
+              "right": 644.15625,
+              "bottom": 910.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 516.390625,
+              "right": 644,
+              "bottom": 910.390625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view-idea",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 399.15625,
+              "height": 570.578125,
+              "top": 405.109375,
+              "right": 663.15625,
+              "bottom": 975.6875,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 406.109375,
+              "right": 662,
+              "bottom": 975.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 399.15625,
+              "height": 802.140625,
+              "top": 405.109375,
+              "right": 663.15625,
+              "bottom": 1207.25,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 663,
+              "bottom": 1207.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 974,
+              "height": 802.140625,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1207.25,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1207.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 405.109375,
+              "width": 974,
+              "height": 1116.265625,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1521.375,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 405.109375,
+              "right": 1238,
+              "bottom": 1521.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 229.1875,
+              "width": 974,
+              "height": 1371.984375,
+              "top": 229.1875,
+              "right": 1238,
+              "bottom": 1601.171875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 229.1875,
+              "right": 1238,
+              "bottom": 1601.1875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1609.015625,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1681
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1681.015625,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1681.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 720
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          }
+        ],
+        "hit": false,
+        "hitNode": null,
+        "full": false,
+        "visible": true,
+        "text": "",
+        "rangeRects": [],
+        "scrollY": 0,
+        "focus": ""
+      },
+      "textareaValue": "[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.",
+      "warning": [
+        {
+          "text": "편집을 연 뒤 설명이나 구상·조건·작업문 등의 기준이 바뀌었어요. 초안은 남겼지만 저장하지 않아요. 취소한 뒤 최신 내용을 읽고 다시 열어 주세요.",
+          "visible": false
+        }
+      ],
+      "snapshot": {
+        "y": 0,
+        "extent": 961,
+        "focus": "<summary>설명 오류 고치기</summary>",
+        "open": [
+          "project-management",
+          "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+          "file-return-options",
+          "edit-work",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [],
+        "plane": [],
+        "cards": []
+      },
+      "project": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_7de68eae-02dd-4825-acd8-8c24ed98eacb",
+        "revision": 21,
+        "name": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 …",
+        "sources": [
+          {
+            "id": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+            "kind": "request",
+            "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+            "at": "2026-10-22T18:58:34.678Z",
+            "taskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_1255bc5f-6289-49fc-aee0-cb59271788e8",
+            "kind": "report",
+            "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_8d8a07d2-7b28-4c08-8786-0514c3922479의 인계 H_7de443ab-f209-4eb9-ab89-daed114ade34 / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.",
+            "at": "2026-10-22T18:58:36.760Z",
+            "taskId": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+            "kind": "request",
+            "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+            "at": "2026-10-22T18:58:37.225Z",
+            "taskId": "T_e0467a16-1bd9-47a0-b956-e7fa41202759",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+            "status": "requested",
+            "sourceId": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+            "revision": 8,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+            "status": "requested",
+            "sourceId": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+            "revision": 18,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "sourceIds": [
+              "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D1",
+                    "sourceId": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+                    "revision": 8
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": null,
+              "relatedBasisIds": [
+                "D1"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 8,
+            "mode": "mock",
+            "manual": {
+              "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+              "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+              "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+              "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T18:58:35.807Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4721,
+                "digest": "35f8b1b7",
+                "work": {
+                  "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+                  "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+                  "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+                  "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+                "background": {
+                  "version": "background.1",
+                  "revision": 7,
+                  "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+                  "area": {
+                    "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  }
+                }
+              },
+              {
+                "at": "2026-10-22T18:58:38.104Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 5604,
+                "digest": "7596cac7",
+                "work": {
+                  "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+                  "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+                  "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+                  "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_b484fad1-cddf-4ab6-9a59-a49e0d8386fc",
+                "background": {
+                  "version": "background.1",
+                  "revision": 7,
+                  "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+                  "area": {
+                    "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                  "understanding": 1,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 7,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                "name": "보관 안내",
+                "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+              }
+            },
+            "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36"
+          },
+          {
+            "id": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+            "sourceIds": [
+              "S_1255bc5f-6289-49fc-aee0-cb59271788e8"
+            ],
+            "parentTaskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": {
+              "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+              "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_7de68eae-02dd-4825-acd8-8c24ed98eacb\",\n  \"taskId\": \"T_8d8a07d2-7b28-4c08-8786-0514c3922479\",\n  \"returnId\": \"H_7de443ab-f209-4eb9-ab89-daed114ade34\",\n  \"report\": \"[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_192a0468-d437-46a1-b87c-9ffa2bb0ae36\",\n    \"basedOn\": 0,\n    \"summary\": \"[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.\",\n    \"changes\": [\n      \"[합성25] 안내 표시를 7일로 읽었다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"관측자가 실제 UI 내보내기 템플릿에 작성한 합성 설명. 실제 AI·구현·검사 없음.\"\n  }\n}"
+            },
+            "background": {
+              "version": "background.1",
+              "revision": 7,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                "name": "보관 안내",
+                "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+              }
+            }
+          },
+          {
+            "id": "T_e0467a16-1bd9-47a0-b956-e7fa41202759",
+            "sourceIds": [
+              "S_ef927cdb-4545-49a5-b25d-8c151537b039"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+                    "revision": 18
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": null,
+              "relatedBasisIds": [
+                "D1",
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 18,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 17,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698",
+                "name": "자료 찾기",
+                "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다."
+              }
+            },
+            "areaId": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698"
+          }
+        ],
+        "currentTaskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+            "at": "2026-10-22T18:58:34.045Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T18:58:34.177Z"
+            },
+            {
+              "id": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698",
+              "name": "자료 찾기",
+              "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다.",
+              "archived": false,
+              "createdAt": "2026-10-22T18:58:34.325Z"
+            }
+          ],
+          "relations": [],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": {
+                "x": 340,
+                "y": 80
+              },
+              "A_227d0c16-6dab-4ca4-8a51-32145ffb4698": {
+                "x": -120,
+                "y": 100
+              }
+            }
+          },
+          "understanding": {
+            "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": {
+              "revision": 1,
+              "entries": [
+                {
+                  "by": "external",
+                  "at": "2026-10-22T18:58:36.760Z",
+                  "revision": 1,
+                  "taskId": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+                  "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+                  "text": null,
+                  "corrects": null,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  },
+                  "held": null
+                }
+              ]
+            }
+          },
+          "containment": {
+            "version": "containment.1",
+            "parents": {},
+            "revisions": {
+              "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": 0,
+              "A_227d0c16-6dab-4ca4-8a51-32145ffb4698": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "after cancel immediate normal render",
+      "open": false,
+      "summary": "설명 오류 고치기",
+      "summaryGeometry": {
+        "rect": {
+          "x": 468.515625,
+          "y": 446.765625,
+          "width": 101.625,
+          "height": 31.4375,
+          "top": 446.765625,
+          "right": 570.140625,
+          "bottom": 478.203125,
+          "left": 468.515625
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "textClip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "accessScope": "control border against ancestor client clips; own text clip separate",
+        "ancestors": [
+          {
+            "id": "",
+            "tag": "SUMMARY",
+            "rect": {
+              "x": 468.515625,
+              "y": 446.765625,
+              "width": 101.625,
+              "height": 31.4375,
+              "top": 446.765625,
+              "right": 570.140625,
+              "bottom": 478.203125,
+              "left": 468.515625
+            },
+            "client": {
+              "left": 468.515625,
+              "top": 446.765625,
+              "right": 570.515625,
+              "bottom": 477.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "list-item",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+            "tag": "DETAILS",
+            "rect": {
+              "x": 468.515625,
+              "y": 446.765625,
+              "width": 101.625,
+              "height": 31.4375,
+              "top": 446.765625,
+              "right": 570.140625,
+              "bottom": 478.203125,
+              "left": 468.515625
+            },
+            "client": {
+              "left": 468.515625,
+              "top": 446.765625,
+              "right": 570.515625,
+              "bottom": 477.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 446.765625,
+              "width": 361.15625,
+              "height": 31.4375,
+              "top": 446.765625,
+              "right": 644.15625,
+              "bottom": 478.203125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 446.765625,
+              "right": 644,
+              "bottom": 477.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+            "tag": "SECTION",
+            "rect": {
+              "x": 283,
+              "y": 334.390625,
+              "width": 361.15625,
+              "height": 155.8125,
+              "top": 334.390625,
+              "right": 644.15625,
+              "bottom": 490.203125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 335.390625,
+              "right": 644,
+              "bottom": 490.390625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view-idea",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 399.15625,
+              "height": 331.09375,
+              "top": 224.109375,
+              "right": 663.15625,
+              "bottom": 555.203125,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 225.109375,
+              "right": 662,
+              "bottom": 554.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 399.15625,
+              "height": 562.65625,
+              "top": 224.109375,
+              "right": 663.15625,
+              "bottom": 786.765625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 663,
+              "bottom": 787.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 974,
+              "height": 562.65625,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 786.765625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 787.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 974,
+              "height": 876.78125,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1100.890625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1101.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 48.1875,
+              "width": 974,
+              "height": 1132.5,
+              "top": 48.1875,
+              "right": 1238,
+              "bottom": 1180.6875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 48.1875,
+              "right": 1238,
+              "bottom": 1181.1875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": -109,
+              "width": 1058,
+              "height": 1369.53125,
+              "top": -109,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -109,
+              "right": 1280,
+              "bottom": 1261
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": -181,
+              "width": 1058,
+              "height": 1441.53125,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1261
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1261
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1261
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 539
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              181
+            ]
+          }
+        ],
+        "hit": true,
+        "hitNode": "<summary>설명 오류 고치기</summary>",
+        "full": true,
+        "visible": true,
+        "text": "설명 오류 고치기",
+        "rangeRects": [
+          {
+            "x": 482.28125,
+            "y": 452.765625,
+            "width": 87.859375,
+            "height": 19,
+            "top": 452.765625,
+            "right": 570.140625,
+            "bottom": 471.765625,
+            "left": 482.28125
+          }
+        ],
+        "scrollY": 181,
+        "focus": ""
+      },
+      "textareaVisible": false,
+      "textareaGeometry": {
+        "rect": {
+          "x": 468.515625,
+          "y": 478.203125,
+          "width": 101.625,
+          "height": 103.671875,
+          "top": 478.203125,
+          "right": 570.140625,
+          "bottom": 581.875,
+          "left": 468.515625
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "textClip": {
+          "left": 469.515625,
+          "top": 479.203125,
+          "right": 569.515625,
+          "bottom": 581.203125
+        },
+        "accessScope": "control border against ancestor client clips; own text clip separate",
+        "ancestors": [
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-text",
+            "tag": "TEXTAREA",
+            "rect": {
+              "x": 468.515625,
+              "y": 478.203125,
+              "width": 101.625,
+              "height": 103.671875,
+              "top": 478.203125,
+              "right": 570.140625,
+              "bottom": 581.875,
+              "left": 468.515625
+            },
+            "client": {
+              "left": 469.515625,
+              "top": 479.203125,
+              "right": 569.515625,
+              "bottom": 581.203125
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+            "tag": "DETAILS",
+            "rect": {
+              "x": 468.515625,
+              "y": 446.765625,
+              "width": 101.625,
+              "height": 31.4375,
+              "top": 446.765625,
+              "right": 570.140625,
+              "bottom": 478.203125,
+              "left": 468.515625
+            },
+            "client": {
+              "left": 468.515625,
+              "top": 446.765625,
+              "right": 570.515625,
+              "bottom": 477.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 446.765625,
+              "width": 361.15625,
+              "height": 31.4375,
+              "top": 446.765625,
+              "right": 644.15625,
+              "bottom": 478.203125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 446.765625,
+              "right": 644,
+              "bottom": 477.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+            "tag": "SECTION",
+            "rect": {
+              "x": 283,
+              "y": 334.390625,
+              "width": 361.15625,
+              "height": 155.8125,
+              "top": 334.390625,
+              "right": 644.15625,
+              "bottom": 490.203125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 335.390625,
+              "right": 644,
+              "bottom": 490.390625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view-idea",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 399.15625,
+              "height": 331.09375,
+              "top": 224.109375,
+              "right": 663.15625,
+              "bottom": 555.203125,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 225.109375,
+              "right": 662,
+              "bottom": 554.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 399.15625,
+              "height": 562.65625,
+              "top": 224.109375,
+              "right": 663.15625,
+              "bottom": 786.765625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 663,
+              "bottom": 787.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 974,
+              "height": 562.65625,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 786.765625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 787.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 974,
+              "height": 876.78125,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1100.890625,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1101.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 48.1875,
+              "width": 974,
+              "height": 1132.5,
+              "top": 48.1875,
+              "right": 1238,
+              "bottom": 1180.6875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 48.1875,
+              "right": 1238,
+              "bottom": 1181.1875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": -109,
+              "width": 1058,
+              "height": 1369.53125,
+              "top": -109,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -109,
+              "right": 1280,
+              "bottom": 1261
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": -181,
+              "width": 1058,
+              "height": 1441.53125,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1261
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1261
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1261
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1441.53125,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1260.53125,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 539
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              181
+            ]
+          }
+        ],
+        "hit": false,
+        "hitNode": "<button class=\"quiet\" type=\"button\" id=\"task-view-find-area\">지도에서 소유 부분 보기</button>",
+        "full": true,
+        "visible": false,
+        "text": "",
+        "rangeRects": [],
+        "scrollY": 181,
+        "focus": ""
+      },
+      "textareaValue": "[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.",
+      "warning": [
+        {
+          "text": "",
+          "visible": false
+        }
+      ],
+      "snapshot": {
+        "y": 181,
+        "extent": 722,
+        "focus": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"task\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+        "open": [
+          "project-management",
+          "file-return-options",
+          "edit-work",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [],
+        "plane": [],
+        "cards": []
+      },
+      "project": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_7de68eae-02dd-4825-acd8-8c24ed98eacb",
+        "revision": 21,
+        "name": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 …",
+        "sources": [
+          {
+            "id": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+            "kind": "request",
+            "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+            "at": "2026-10-22T18:58:34.678Z",
+            "taskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_1255bc5f-6289-49fc-aee0-cb59271788e8",
+            "kind": "report",
+            "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_8d8a07d2-7b28-4c08-8786-0514c3922479의 인계 H_7de443ab-f209-4eb9-ab89-daed114ade34 / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.",
+            "at": "2026-10-22T18:58:36.760Z",
+            "taskId": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+            "kind": "request",
+            "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+            "at": "2026-10-22T18:58:37.225Z",
+            "taskId": "T_e0467a16-1bd9-47a0-b956-e7fa41202759",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+            "status": "requested",
+            "sourceId": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+            "revision": 8,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+            "status": "requested",
+            "sourceId": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+            "revision": 18,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "sourceIds": [
+              "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D1",
+                    "sourceId": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+                    "revision": 8
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": null,
+              "relatedBasisIds": [
+                "D1"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 8,
+            "mode": "mock",
+            "manual": {
+              "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+              "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+              "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+              "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T18:58:35.807Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4721,
+                "digest": "35f8b1b7",
+                "work": {
+                  "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+                  "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+                  "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+                  "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+                "background": {
+                  "version": "background.1",
+                  "revision": 7,
+                  "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+                  "area": {
+                    "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  }
+                }
+              },
+              {
+                "at": "2026-10-22T18:58:38.104Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 5604,
+                "digest": "7596cac7",
+                "work": {
+                  "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+                  "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+                  "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+                  "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_b484fad1-cddf-4ab6-9a59-a49e0d8386fc",
+                "background": {
+                  "version": "background.1",
+                  "revision": 7,
+                  "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+                  "area": {
+                    "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                  "understanding": 1,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 7,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                "name": "보관 안내",
+                "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+              }
+            },
+            "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36"
+          },
+          {
+            "id": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+            "sourceIds": [
+              "S_1255bc5f-6289-49fc-aee0-cb59271788e8"
+            ],
+            "parentTaskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": {
+              "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+              "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_7de68eae-02dd-4825-acd8-8c24ed98eacb\",\n  \"taskId\": \"T_8d8a07d2-7b28-4c08-8786-0514c3922479\",\n  \"returnId\": \"H_7de443ab-f209-4eb9-ab89-daed114ade34\",\n  \"report\": \"[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_192a0468-d437-46a1-b87c-9ffa2bb0ae36\",\n    \"basedOn\": 0,\n    \"summary\": \"[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.\",\n    \"changes\": [\n      \"[합성25] 안내 표시를 7일로 읽었다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"관측자가 실제 UI 내보내기 템플릿에 작성한 합성 설명. 실제 AI·구현·검사 없음.\"\n  }\n}"
+            },
+            "background": {
+              "version": "background.1",
+              "revision": 7,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                "name": "보관 안내",
+                "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+              }
+            }
+          },
+          {
+            "id": "T_e0467a16-1bd9-47a0-b956-e7fa41202759",
+            "sourceIds": [
+              "S_ef927cdb-4545-49a5-b25d-8c151537b039"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+                    "revision": 18
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": null,
+              "relatedBasisIds": [
+                "D1",
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 18,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 17,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698",
+                "name": "자료 찾기",
+                "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다."
+              }
+            },
+            "areaId": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698"
+          }
+        ],
+        "currentTaskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+            "at": "2026-10-22T18:58:34.045Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T18:58:34.177Z"
+            },
+            {
+              "id": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698",
+              "name": "자료 찾기",
+              "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다.",
+              "archived": false,
+              "createdAt": "2026-10-22T18:58:34.325Z"
+            }
+          ],
+          "relations": [],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": {
+                "x": 340,
+                "y": 80
+              },
+              "A_227d0c16-6dab-4ca4-8a51-32145ffb4698": {
+                "x": -120,
+                "y": 100
+              }
+            }
+          },
+          "understanding": {
+            "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": {
+              "revision": 1,
+              "entries": [
+                {
+                  "by": "external",
+                  "at": "2026-10-22T18:58:36.760Z",
+                  "revision": 1,
+                  "taskId": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+                  "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+                  "text": null,
+                  "corrects": null,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  },
+                  "held": null
+                }
+              ]
+            }
+          },
+          "containment": {
+            "version": "containment.1",
+            "parents": {},
+            "revisions": {
+              "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": 0,
+              "A_227d0c16-6dab-4ca4-8a51-32145ffb4698": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "explicit reopen",
+      "open": true,
+      "summary": "설명 오류 고치기",
+      "summaryGeometry": {
+        "rect": {
+          "x": 283,
+          "y": 478.203125,
+          "width": 361.15625,
+          "height": 31.4375,
+          "top": 478.203125,
+          "right": 644.15625,
+          "bottom": 509.640625,
+          "left": 283
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "textClip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "accessScope": "control border against ancestor client clips; own text clip separate",
+        "ancestors": [
+          {
+            "id": "",
+            "tag": "SUMMARY",
+            "rect": {
+              "x": 283,
+              "y": 478.203125,
+              "width": 361.15625,
+              "height": 31.4375,
+              "top": 478.203125,
+              "right": 644.15625,
+              "bottom": 509.640625,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 478.203125,
+              "right": 644,
+              "bottom": 509.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "list-item",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+            "tag": "DETAILS",
+            "rect": {
+              "x": 283,
+              "y": 478.203125,
+              "width": 361.15625,
+              "height": 239.484375,
+              "top": 478.203125,
+              "right": 644.15625,
+              "bottom": 717.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 478.203125,
+              "right": 644,
+              "bottom": 717.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 446.765625,
+              "width": 361.15625,
+              "height": 270.921875,
+              "top": 446.765625,
+              "right": 644.15625,
+              "bottom": 717.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 446.765625,
+              "right": 644,
+              "bottom": 717.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+            "tag": "SECTION",
+            "rect": {
+              "x": 283,
+              "y": 334.390625,
+              "width": 361.15625,
+              "height": 395.296875,
+              "top": 334.390625,
+              "right": 644.15625,
+              "bottom": 729.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 335.390625,
+              "right": 644,
+              "bottom": 729.390625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view-idea",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 399.15625,
+              "height": 570.578125,
+              "top": 224.109375,
+              "right": 663.15625,
+              "bottom": 794.6875,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 225.109375,
+              "right": 662,
+              "bottom": 794.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 399.15625,
+              "height": 802.140625,
+              "top": 224.109375,
+              "right": 663.15625,
+              "bottom": 1026.25,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 663,
+              "bottom": 1026.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 974,
+              "height": 802.140625,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1026.25,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1026.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 974,
+              "height": 1116.265625,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1340.375,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1340.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 48.1875,
+              "width": 974,
+              "height": 1371.984375,
+              "top": 48.1875,
+              "right": 1238,
+              "bottom": 1420.171875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 48.1875,
+              "right": 1238,
+              "bottom": 1420.1875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": -109,
+              "width": 1058,
+              "height": 1609.015625,
+              "top": -109,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -109,
+              "right": 1280,
+              "bottom": 1500
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": -181,
+              "width": 1058,
+              "height": 1681.015625,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 539
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              181
+            ]
+          }
+        ],
+        "hit": true,
+        "hitNode": "<summary>설명 오류 고치기</summary>",
+        "full": true,
+        "visible": true,
+        "text": "설명 오류 고치기",
+        "rangeRects": [
+          {
+            "x": 296.765625,
+            "y": 484.203125,
+            "width": 87.859375,
+            "height": 19,
+            "top": 484.203125,
+            "right": 384.625,
+            "bottom": 503.203125,
+            "left": 296.765625
+          }
+        ],
+        "scrollY": 181,
+        "focus": ""
+      },
+      "textareaVisible": true,
+      "textareaGeometry": {
+        "rect": {
+          "x": 283,
+          "y": 514.640625,
+          "width": 361.15625,
+          "height": 103.671875,
+          "top": 514.640625,
+          "right": 644.15625,
+          "bottom": 618.3125,
+          "left": 283
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "textClip": {
+          "left": 284,
+          "top": 515.640625,
+          "right": 643,
+          "bottom": 617.640625
+        },
+        "accessScope": "control border against ancestor client clips; own text clip separate",
+        "ancestors": [
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-text",
+            "tag": "TEXTAREA",
+            "rect": {
+              "x": 283,
+              "y": 514.640625,
+              "width": 361.15625,
+              "height": 103.671875,
+              "top": 514.640625,
+              "right": 644.15625,
+              "bottom": 618.3125,
+              "left": 283
+            },
+            "client": {
+              "left": 284,
+              "top": 515.640625,
+              "right": 643,
+              "bottom": 617.640625
+            },
+            "overflow": [
+              "auto",
+              "auto"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+            "tag": "DETAILS",
+            "rect": {
+              "x": 283,
+              "y": 478.203125,
+              "width": 361.15625,
+              "height": 239.484375,
+              "top": 478.203125,
+              "right": 644.15625,
+              "bottom": 717.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 478.203125,
+              "right": 644,
+              "bottom": 717.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 446.765625,
+              "width": 361.15625,
+              "height": 270.921875,
+              "top": 446.765625,
+              "right": 644.15625,
+              "bottom": 717.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 446.765625,
+              "right": 644,
+              "bottom": 717.765625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+            "tag": "SECTION",
+            "rect": {
+              "x": 283,
+              "y": 334.390625,
+              "width": 361.15625,
+              "height": 395.296875,
+              "top": 334.390625,
+              "right": 644.15625,
+              "bottom": 729.6875,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 335.390625,
+              "right": 644,
+              "bottom": 729.390625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view-idea",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 399.15625,
+              "height": 570.578125,
+              "top": 224.109375,
+              "right": 663.15625,
+              "bottom": 794.6875,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 225.109375,
+              "right": 662,
+              "bottom": 794.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 399.15625,
+              "height": 802.140625,
+              "top": 224.109375,
+              "right": 663.15625,
+              "bottom": 1026.25,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 663,
+              "bottom": 1026.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "flex",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 974,
+              "height": 802.140625,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1026.25,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1026.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 224.109375,
+              "width": 974,
+              "height": 1116.265625,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1340.375,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 224.109375,
+              "right": 1238,
+              "bottom": 1340.109375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 48.1875,
+              "width": 974,
+              "height": 1371.984375,
+              "top": 48.1875,
+              "right": 1238,
+              "bottom": 1420.171875,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 48.1875,
+              "right": 1238,
+              "bottom": 1420.1875
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": -109,
+              "width": 1058,
+              "height": 1609.015625,
+              "top": -109,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -109,
+              "right": 1280,
+              "bottom": 1500
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": -181,
+              "width": 1058,
+              "height": 1681.015625,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "grid",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": -181,
+              "width": 1280,
+              "height": 1681.015625,
+              "top": -181,
+              "right": 1280,
+              "bottom": 1500.015625,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": -181,
+              "right": 1280,
+              "bottom": 539
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "transform": "none",
+            "clipPath": "none",
+            "display": "block",
+            "visibility": "visible",
+            "scroll": [
+              0,
+              181
+            ]
+          }
+        ],
+        "hit": true,
+        "hitNode": "<textarea id=\"task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-text\" rows=\"3\" maxlength=\"2000\" aria-label=\"영역 설명 정정\" style=\"\"></textarea>",
+        "full": true,
+        "visible": true,
+        "text": "",
+        "rangeRects": [],
+        "scrollY": 181,
+        "focus": ""
+      },
+      "textareaValue": "[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.",
+      "warning": [
+        {
+          "text": "편집을 연 뒤 설명이나 구상·조건·작업문 등의 기준이 바뀌었어요. 초안은 남겼지만 저장하지 않아요. 취소한 뒤 최신 내용을 읽고 다시 열어 주세요.",
+          "visible": false
+        }
+      ],
+      "snapshot": {
+        "y": 181,
+        "extent": 961,
+        "focus": "<summary>설명 오류 고치기</summary>",
+        "open": [
+          "project-management",
+          "task-understanding-A_192a0468-d437-46a1-b87c-9ffa2bb0ae36-edit",
+          "file-return-options",
+          "edit-work",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [],
+        "plane": [],
+        "cards": []
+      },
+      "project": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_7de68eae-02dd-4825-acd8-8c24ed98eacb",
+        "revision": 21,
+        "name": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 …",
+        "sources": [
+          {
+            "id": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+            "kind": "request",
+            "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+            "at": "2026-10-22T18:58:34.678Z",
+            "taskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_1255bc5f-6289-49fc-aee0-cb59271788e8",
+            "kind": "report",
+            "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_8d8a07d2-7b28-4c08-8786-0514c3922479의 인계 H_7de443ab-f209-4eb9-ab89-daed114ade34 / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.",
+            "at": "2026-10-22T18:58:36.760Z",
+            "taskId": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+            "kind": "request",
+            "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+            "at": "2026-10-22T18:58:37.225Z",
+            "taskId": "T_e0467a16-1bd9-47a0-b956-e7fa41202759",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+            "status": "requested",
+            "sourceId": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+            "revision": 8,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+            "status": "requested",
+            "sourceId": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+            "revision": 18,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "sourceIds": [
+              "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D1",
+                    "sourceId": "S_ee9e7878-b414-4b44-898c-1dfecbd6e6d3",
+                    "revision": 8
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": null,
+              "relatedBasisIds": [
+                "D1"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 8,
+            "mode": "mock",
+            "manual": {
+              "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+              "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+              "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+              "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T18:58:35.807Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4721,
+                "digest": "35f8b1b7",
+                "work": {
+                  "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+                  "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+                  "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+                  "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+                "background": {
+                  "version": "background.1",
+                  "revision": 7,
+                  "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+                  "area": {
+                    "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  }
+                }
+              },
+              {
+                "at": "2026-10-22T18:58:38.104Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 5604,
+                "digest": "7596cac7",
+                "work": {
+                  "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+                  "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+                  "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+                  "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_b484fad1-cddf-4ab6-9a59-a49e0d8386fc",
+                "background": {
+                  "version": "background.1",
+                  "revision": 7,
+                  "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+                  "area": {
+                    "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                  "understanding": 1,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 7,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                "name": "보관 안내",
+                "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+              }
+            },
+            "areaId": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36"
+          },
+          {
+            "id": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+            "sourceIds": [
+              "S_1255bc5f-6289-49fc-aee0-cb59271788e8"
+            ],
+            "parentTaskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": {
+              "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+              "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_7de68eae-02dd-4825-acd8-8c24ed98eacb\",\n  \"taskId\": \"T_8d8a07d2-7b28-4c08-8786-0514c3922479\",\n  \"returnId\": \"H_7de443ab-f209-4eb9-ab89-daed114ade34\",\n  \"report\": \"[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_192a0468-d437-46a1-b87c-9ffa2bb0ae36\",\n    \"basedOn\": 0,\n    \"summary\": \"[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.\",\n    \"changes\": [\n      \"[합성25] 안내 표시를 7일로 읽었다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"관측자가 실제 UI 내보내기 템플릿에 작성한 합성 설명. 실제 AI·구현·검사 없음.\"\n  }\n}"
+            },
+            "background": {
+              "version": "background.1",
+              "revision": 7,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+                "name": "보관 안내",
+                "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+              }
+            }
+          },
+          {
+            "id": "T_e0467a16-1bd9-47a0-b956-e7fa41202759",
+            "sourceIds": [
+              "S_ef927cdb-4545-49a5-b25d-8c151537b039"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_ef927cdb-4545-49a5-b25d-8c151537b039",
+                    "revision": 18
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": null,
+              "relatedBasisIds": [
+                "D1",
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 18,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 17,
+              "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+              "area": {
+                "id": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698",
+                "name": "자료 찾기",
+                "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다."
+              }
+            },
+            "areaId": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698"
+          }
+        ],
+        "currentTaskId": "T_8d8a07d2-7b28-4c08-8786-0514c3922479",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+            "at": "2026-10-22T18:58:34.045Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36",
+              "name": "보관 안내",
+              "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T18:58:34.177Z"
+            },
+            {
+              "id": "A_227d0c16-6dab-4ca4-8a51-32145ffb4698",
+              "name": "자료 찾기",
+              "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다.",
+              "archived": false,
+              "createdAt": "2026-10-22T18:58:34.325Z"
+            }
+          ],
+          "relations": [],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": {
+                "x": 340,
+                "y": 80
+              },
+              "A_227d0c16-6dab-4ca4-8a51-32145ffb4698": {
+                "x": -120,
+                "y": 100
+              }
+            }
+          },
+          "understanding": {
+            "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": {
+              "revision": 1,
+              "entries": [
+                {
+                  "by": "external",
+                  "at": "2026-10-22T18:58:36.760Z",
+                  "revision": 1,
+                  "taskId": "T_e59893f9-27c3-4f05-9985-516518efb0cf",
+                  "returnId": "H_7de443ab-f209-4eb9-ab89-daed114ade34",
+                  "text": null,
+                  "corrects": null,
+                  "stamp": {
+                    "name": "보관 안내",
+                    "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [
+                      "T_8d8a07d2-7b28-4c08-8786-0514c3922479:c674fc9b03e464937da7a7ad94e4e3b7cabe01465c592ea6111337ca3fd96078"
+                    ],
+                    "version": "plan.2",
+                    "revision": 0,
+                    "ancestors": []
+                  },
+                  "held": null
+                }
+              ]
+            }
+          },
+          "containment": {
+            "version": "containment.1",
+            "parents": {},
+            "revisions": {
+              "A_192a0468-d437-46a1-b87c-9ffa2bb0ae36": 0,
+              "A_227d0c16-6dab-4ca4-8a51-32145ffb4698": 0
+            }
+          }
+        }
+      }
+    }
+  ],
+  "fatal": null,
+  "cleanup": [],
+  "pageerrors": [],
+  "plannedChildExit": 0
+}

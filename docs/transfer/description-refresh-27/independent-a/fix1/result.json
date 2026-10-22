@@ -1,0 +1,298 @@
+{
+  "sourceCommit": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "expectedPC": 2,
+  "completedPC": 2,
+  "rows": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "complete": true,
+      "A": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+      "Atask": "T_9d3a9cb9-681e-4478-917a-713d4a98c887",
+      "Btask": "T_c4f6d7ef-a4eb-4f63-a8cb-1d15bf7a95a1",
+      "noTypingConflictRejected": true,
+      "sameTextNewRevision": {
+        "by": "user",
+        "at": "2026-10-22T19:00:35.491Z",
+        "revision": 3,
+        "taskId": null,
+        "returnId": null,
+        "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.",
+        "corrects": 2,
+        "stamp": {
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [
+            "T_9d3a9cb9-681e-4478-917a-713d4a98c887:112d816870689cdb8510a52aefd34f3a57ba46a36c68035cbcbfcd3ef565b321"
+          ],
+          "version": "plan.2",
+          "revision": 0,
+          "ancestors": []
+        },
+        "held": null
+      },
+      "actualPOSTReference": {
+        "taskId": "T_9d3a9cb9-681e-4478-917a-713d4a98c887",
+        "areaId": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+        "revision": 4,
+        "by": "user",
+        "corrects": 3,
+        "source": null,
+        "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다."
+      },
+      "H": {
+        "at": "2026-10-22T19:00:37.016Z",
+        "method": "clipboard",
+        "revision": 35,
+        "chars": 5589,
+        "digest": "7a256df5",
+        "work": {
+          "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+          "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+          "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다. [27 관련 작업 변경 확인]",
+          "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+        },
+        "aiExcluded": false,
+        "legacyText": null,
+        "returnId": "H_743bb5ac-0479-4f8e-acb6-8ce8e62c6cda",
+        "background": {
+          "version": "background.1",
+          "revision": 7,
+          "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+          "area": {
+            "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+            "name": "보관 안내",
+            "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+          }
+        },
+        "anchor": {
+          "version": "anchor.2",
+          "areaId": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+          "understanding": 4,
+          "stamp": {
+            "name": "보관 안내",
+            "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+            "brief": 1,
+            "decisions": [],
+            "work": [
+              "T_9d3a9cb9-681e-4478-917a-713d4a98c887:112d816870689cdb8510a52aefd34f3a57ba46a36c68035cbcbfcd3ef565b321"
+            ],
+            "version": "plan.2",
+            "revision": 0,
+            "ancestors": []
+          }
+        }
+      },
+      "finalSnapshot": {
+        "y": 0,
+        "extent": 262,
+        "focus": "<h1 class=\"sr-only\" id=\"space-title\" tabindex=\"-1\">전체 공간</h1>",
+        "open": [
+          "area-list",
+          "file-return-options",
+          "edit-work",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [
+          "node-info-A_c3e239ff-8f2f-4978-a874-ccc4260572fd"
+        ],
+        "plane": [
+          {
+            "transform": "matrix(0.871429, 0, 0, 0.871429, 128.571, 91.1429)",
+            "rect": {
+              "x": 393.5714111328125,
+              "y": 428.6272277832031,
+              "width": 0.8714599609375,
+              "height": 0.871429443359375,
+              "top": 428.6272277832031,
+              "right": 394.44287109375,
+              "bottom": 429.4986572265625,
+              "left": 393.5714111328125
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+            "rect": {
+              "x": 689.8571166992188,
+              "y": 498.3415222167969,
+              "width": 209.14288330078125,
+              "height": 156.85714721679688,
+              "top": 498.3415222167969,
+              "right": 899,
+              "bottom": 655.1986694335938,
+              "left": 689.8571166992188
+            }
+          },
+          {
+            "id": "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6",
+            "rect": {
+              "x": 289,
+              "y": 515.7700805664062,
+              "width": 209.14285278320312,
+              "height": 156.85711669921875,
+              "top": 515.7700805664062,
+              "right": 498.1428527832031,
+              "bottom": 672.627197265625,
+              "left": 289
+            }
+          }
+        ]
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "complete": true,
+      "A": "A_1b231159-0ae1-4d23-80ac-bf7b38544c10",
+      "Atask": "T_27294019-6116-4b26-a4e1-b8a856bc04cf",
+      "Btask": "T_b323ccba-00f5-45bd-b395-aa0c968942c6",
+      "noTypingConflictRejected": true,
+      "sameTextNewRevision": {
+        "by": "user",
+        "at": "2026-10-22T19:00:46.535Z",
+        "revision": 3,
+        "taskId": null,
+        "returnId": null,
+        "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다.",
+        "corrects": 2,
+        "stamp": {
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [
+            "T_27294019-6116-4b26-a4e1-b8a856bc04cf:112d816870689cdb8510a52aefd34f3a57ba46a36c68035cbcbfcd3ef565b321"
+          ],
+          "version": "plan.2",
+          "revision": 0,
+          "ancestors": []
+        },
+        "held": null
+      },
+      "actualPOSTReference": {
+        "taskId": "T_27294019-6116-4b26-a4e1-b8a856bc04cf",
+        "areaId": "A_1b231159-0ae1-4d23-80ac-bf7b38544c10",
+        "revision": 4,
+        "by": "user",
+        "corrects": 3,
+        "source": null,
+        "text": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다."
+      },
+      "H": {
+        "at": "2026-10-22T19:00:47.682Z",
+        "method": "clipboard",
+        "revision": 35,
+        "chars": 5589,
+        "digest": "0ad7be6f",
+        "work": {
+          "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+          "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+          "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다. [27 관련 작업 변경 확인]",
+          "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+        },
+        "aiExcluded": false,
+        "legacyText": null,
+        "returnId": "H_c0b82391-5d9d-44c3-bd4b-e6165192fefa",
+        "background": {
+          "version": "background.1",
+          "revision": 7,
+          "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+          "area": {
+            "id": "A_1b231159-0ae1-4d23-80ac-bf7b38544c10",
+            "name": "보관 안내",
+            "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+          }
+        },
+        "anchor": {
+          "version": "anchor.2",
+          "areaId": "A_1b231159-0ae1-4d23-80ac-bf7b38544c10",
+          "understanding": 4,
+          "stamp": {
+            "name": "보관 안내",
+            "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+            "brief": 1,
+            "decisions": [],
+            "work": [
+              "T_27294019-6116-4b26-a4e1-b8a856bc04cf:112d816870689cdb8510a52aefd34f3a57ba46a36c68035cbcbfcd3ef565b321"
+            ],
+            "version": "plan.2",
+            "revision": 0,
+            "ancestors": []
+          }
+        }
+      },
+      "finalSnapshot": {
+        "y": 0,
+        "extent": 262,
+        "focus": "<h1 class=\"sr-only\" id=\"space-title\" tabindex=\"-1\">전체 공간</h1>",
+        "open": [
+          "area-list",
+          "file-return-options",
+          "edit-work",
+          "result-file-panel",
+          "history"
+        ],
+        "selected": [
+          "node-info-A_1b231159-0ae1-4d23-80ac-bf7b38544c10"
+        ],
+        "plane": [
+          {
+            "transform": "matrix(1.1, 0, 0, 1.1, 68, 52)",
+            "rect": {
+              "x": 333,
+              "y": 389.484375,
+              "width": 1.100006103515625,
+              "height": 1.100006103515625,
+              "top": 389.484375,
+              "right": 334.1000061035156,
+              "bottom": 390.5843811035156,
+              "left": 333
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "A_1b231159-0ae1-4d23-80ac-bf7b38544c10",
+            "rect": {
+              "x": 795,
+              "y": 565.484375,
+              "width": 264,
+              "height": 198,
+              "top": 565.484375,
+              "right": 1059,
+              "bottom": 763.484375,
+              "left": 795
+            }
+          },
+          {
+            "id": "A_cce89a0f-100e-4ed0-99fd-2c40bc15ad77",
+            "rect": {
+              "x": 289,
+              "y": 587.484375,
+              "width": 264,
+              "height": 198,
+              "top": 587.484375,
+              "right": 553,
+              "bottom": 785.484375,
+              "left": 289
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "failures": [],
+  "fatal": null,
+  "cleanup": [],
+  "pageerrors": [],
+  "plannedChildExit": 0
+}

@@ -1,0 +1,290 @@
+[
+  {
+    "viewport": 1280,
+    "preUTC": "2026-10-22T19:00:34.835129+00:00",
+    "postUTC": "2026-10-22T19:00:35.903038+00:00",
+    "pre": {
+      "y": 0,
+      "extent": 262,
+      "focus": "<button class=\"quiet node-info\" type=\"button\" id=\"node-info-A_c3e239ff-8f2f-4978-a874-ccc4260572fd\" aria-pressed=\"true\" aria-label=\"보관 안내 정보 (들어가지 않음)\">정보</button>",
+      "open": [
+        "area-list",
+        "file-return-options",
+        "edit-work",
+        "result-file-panel",
+        "history"
+      ],
+      "selected": [
+        "node-info-A_c3e239ff-8f2f-4978-a874-ccc4260572fd"
+      ],
+      "plane": [
+        {
+          "transform": "matrix(0.871429, 0, 0, 0.871429, 128.571, 91.1429)",
+          "rect": {
+            "x": 393.5714111328125,
+            "y": 361.0334777832031,
+            "width": 0.8714599609375,
+            "height": 0.871429443359375,
+            "top": 361.0334777832031,
+            "right": 394.44287109375,
+            "bottom": 361.9049072265625,
+            "left": 393.5714111328125
+          }
+        }
+      ],
+      "cards": [
+        {
+          "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+          "rect": {
+            "x": 689.8571166992188,
+            "y": 430.7477722167969,
+            "width": 209.14288330078125,
+            "height": 156.85714721679688,
+            "top": 430.7477722167969,
+            "right": 899,
+            "bottom": 587.6049194335938,
+            "left": 689.8571166992188
+          }
+        },
+        {
+          "id": "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6",
+          "rect": {
+            "x": 289,
+            "y": 448.17633056640625,
+            "width": 209.14285278320312,
+            "height": 156.85711669921875,
+            "top": 448.17633056640625,
+            "right": 498.1428527832031,
+            "bottom": 605.033447265625,
+            "left": 289
+          }
+        }
+      ]
+    },
+    "post": {
+      "y": 0,
+      "extent": 262,
+      "focus": "<button class=\"quiet panel-task\" type=\"button\" id=\"panel-task-T_9d3a9cb9-681e-4478-917a-713d4a98c887\">[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요. ↘</button>",
+      "open": [
+        "area-list",
+        "file-return-options",
+        "edit-work",
+        "result-file-panel",
+        "history"
+      ],
+      "selected": [
+        "node-info-A_c3e239ff-8f2f-4978-a874-ccc4260572fd"
+      ],
+      "plane": [
+        {
+          "transform": "matrix(0.871429, 0, 0, 0.871429, 128.571, 91.1429)",
+          "rect": {
+            "x": 393.5714111328125,
+            "y": 361.0334777832031,
+            "width": 0.8714599609375,
+            "height": 0.871429443359375,
+            "top": 361.0334777832031,
+            "right": 394.44287109375,
+            "bottom": 361.9049072265625,
+            "left": 393.5714111328125
+          }
+        }
+      ],
+      "cards": [
+        {
+          "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+          "rect": {
+            "x": 689.8571166992188,
+            "y": 430.7477722167969,
+            "width": 209.14288330078125,
+            "height": 156.85714721679688,
+            "top": 430.7477722167969,
+            "right": 899,
+            "bottom": 587.6049194335938,
+            "left": 689.8571166992188
+          }
+        },
+        {
+          "id": "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6",
+          "rect": {
+            "x": 289,
+            "y": 448.17633056640625,
+            "width": 209.14285278320312,
+            "height": 156.85711669921875,
+            "top": 448.17633056640625,
+            "right": 498.1428527832031,
+            "bottom": 605.033447265625,
+            "left": 289
+          }
+        }
+      ]
+    },
+    "cardRectDeltas": [
+      {
+        "id": "A_c3e239ff-8f2f-4978-a874-ccc4260572fd",
+        "delta": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        }
+      },
+      {
+        "id": "A_4cc78a88-c51a-487d-b3c1-c0aa5382c2a6",
+        "delta": {
+          "x": 0,
+          "y": 0.0,
+          "width": 0.0,
+          "height": 0.0
+        }
+      }
+    ],
+    "computedMatrixEqual": true,
+    "selectedEqual": true,
+    "scope": "task reader explicit origin return after description-only records; raw values, no scroll/focus correction"
+  },
+  {
+    "viewport": 1440,
+    "preUTC": "2026-10-22T19:00:45.883102+00:00",
+    "postUTC": "2026-10-22T19:00:46.804874+00:00",
+    "pre": {
+      "y": 0,
+      "extent": 262,
+      "focus": "<button class=\"quiet node-info\" type=\"button\" id=\"node-info-A_1b231159-0ae1-4d23-80ac-bf7b38544c10\" aria-pressed=\"true\" aria-label=\"보관 안내 정보 (들어가지 않음)\">정보</button>",
+      "open": [
+        "area-list",
+        "file-return-options",
+        "edit-work",
+        "result-file-panel",
+        "history"
+      ],
+      "selected": [
+        "node-info-A_1b231159-0ae1-4d23-80ac-bf7b38544c10"
+      ],
+      "plane": [
+        {
+          "transform": "matrix(1.1, 0, 0, 1.1, 68, 52)",
+          "rect": {
+            "x": 333,
+            "y": 321.890625,
+            "width": 1.100006103515625,
+            "height": 1.100006103515625,
+            "top": 321.890625,
+            "right": 334.1000061035156,
+            "bottom": 322.9906311035156,
+            "left": 333
+          }
+        }
+      ],
+      "cards": [
+        {
+          "id": "A_1b231159-0ae1-4d23-80ac-bf7b38544c10",
+          "rect": {
+            "x": 795,
+            "y": 497.890625,
+            "width": 264,
+            "height": 198,
+            "top": 497.890625,
+            "right": 1059,
+            "bottom": 695.890625,
+            "left": 795
+          }
+        },
+        {
+          "id": "A_cce89a0f-100e-4ed0-99fd-2c40bc15ad77",
+          "rect": {
+            "x": 289,
+            "y": 519.890625,
+            "width": 264,
+            "height": 198,
+            "top": 519.890625,
+            "right": 553,
+            "bottom": 717.890625,
+            "left": 289
+          }
+        }
+      ]
+    },
+    "post": {
+      "y": 0,
+      "extent": 262,
+      "focus": "<button class=\"quiet panel-task\" type=\"button\" id=\"panel-task-T_27294019-6116-4b26-a4e1-b8a856bc04cf\">[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요. ↘</button>",
+      "open": [
+        "area-list",
+        "file-return-options",
+        "edit-work",
+        "result-file-panel",
+        "history"
+      ],
+      "selected": [
+        "node-info-A_1b231159-0ae1-4d23-80ac-bf7b38544c10"
+      ],
+      "plane": [
+        {
+          "transform": "matrix(1.1, 0, 0, 1.1, 68, 52)",
+          "rect": {
+            "x": 333,
+            "y": 321.890625,
+            "width": 1.100006103515625,
+            "height": 1.100006103515625,
+            "top": 321.890625,
+            "right": 334.1000061035156,
+            "bottom": 322.9906311035156,
+            "left": 333
+          }
+        }
+      ],
+      "cards": [
+        {
+          "id": "A_1b231159-0ae1-4d23-80ac-bf7b38544c10",
+          "rect": {
+            "x": 795,
+            "y": 497.890625,
+            "width": 264,
+            "height": 198,
+            "top": 497.890625,
+            "right": 1059,
+            "bottom": 695.890625,
+            "left": 795
+          }
+        },
+        {
+          "id": "A_cce89a0f-100e-4ed0-99fd-2c40bc15ad77",
+          "rect": {
+            "x": 289,
+            "y": 519.890625,
+            "width": 264,
+            "height": 198,
+            "top": 519.890625,
+            "right": 553,
+            "bottom": 717.890625,
+            "left": 289
+          }
+        }
+      ]
+    },
+    "cardRectDeltas": [
+      {
+        "id": "A_1b231159-0ae1-4d23-80ac-bf7b38544c10",
+        "delta": {
+          "x": 0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "id": "A_cce89a0f-100e-4ed0-99fd-2c40bc15ad77",
+        "delta": {
+          "x": 0,
+          "y": 0.0,
+          "width": 0,
+          "height": 0
+        }
+      }
+    ],
+    "computedMatrixEqual": true,
+    "selectedEqual": true,
+    "scope": "task reader explicit origin return after description-only records; raw values, no scroll/focus correction"
+  }
+]
