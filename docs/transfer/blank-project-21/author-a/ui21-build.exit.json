@@ -1,0 +1,9 @@
+{
+  "startedUtc": "2026-10-22T15:58:06.5601817Z",
+  "name": "build",
+  "runtime": "Node v24.19.0 author auxiliary; TypeScript5.8.3 locked dependency",
+  "cwd": "product21-author",
+  "finishedUtc": "2026-10-22T15:58:09.3158869Z",
+  "exitCode": 0,
+  "command": "node app/continuity/scripts/build.mjs"
+}

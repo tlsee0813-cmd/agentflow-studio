@@ -1,0 +1,7 @@
+{
+  "exitCode": 0,
+  "startedUtc": "2026-10-22T15:58:09.3214767Z",
+  "finishedUtc": "2026-10-22T15:58:09.4343927Z",
+  "command": "git diff --check",
+  "name": "diff-check"
+}

@@ -1,0 +1,9 @@
+{
+  "startedUtc": "2026-10-22T15:58:02.0498906Z",
+  "name": "check",
+  "runtime": "Node v24.19.0 author auxiliary; TypeScript5.8.3 locked dependency",
+  "cwd": "product21-author",
+  "finishedUtc": "2026-10-22T15:58:06.5327293Z",
+  "exitCode": 0,
+  "command": "node app/continuity/scripts/check.mjs"
+}
