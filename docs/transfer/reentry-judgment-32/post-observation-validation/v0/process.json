@@ -1,0 +1,37 @@
+{
+  "commands": [
+    {
+      "label": "verify-domain",
+      "command": [
+        "/workspace/browser-env/tools/node_modules/.bin/node",
+        "/workspace/browser-env/reentry32-post-validation/validation-copy/verify.mjs",
+        "--module-root",
+        "/workspace/browser-env/branch31-author-fix2/candidate/app/continuity/dist/public/shared",
+        "--receipt",
+        "/workspace/browser-env/reentry32-post-validation/results/domain-receipt.json"
+      ],
+      "cwd": "/workspace/browser-env/reentry32-post-validation/validation-copy",
+      "startUTC": "2026-10-22T22:29:19.845678+00:00",
+      "endUTC": "2026-10-22T22:29:19.911827+00:00",
+      "actualChildReturnCode": 0,
+      "stdoutSHA256": "efb24110df1344a36499a78c54a1a612b61a873908dd9785a8f990be349e767c",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "verify-signals",
+      "command": [
+        "/workspace/browser-env/tools/node_modules/.bin/node",
+        "/workspace/browser-env/reentry32-post-validation/validation-copy/verify-signals.mjs",
+        "--module-root",
+        "/workspace/browser-env/branch31-author-fix2/candidate/app/continuity/dist/public/shared"
+      ],
+      "cwd": "/workspace/browser-env/reentry32-post-validation/validation-copy",
+      "startUTC": "2026-10-22T22:29:19.911881+00:00",
+      "endUTC": "2026-10-22T22:29:19.971913+00:00",
+      "actualChildReturnCode": 0,
+      "stdoutSHA256": "89cc43483a9d13fa4338eb24cd2af4e28d28e18fc695d99d46c2dcc6e232555c",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "actualCollectorExitDecision": 0
+}

@@ -1,0 +1,9 @@
+{
+  "inputCommit": "24baf91fa2d519fd8cd33bb5ece28ec5b32323df",
+  "inputPrefix": "docs/transfer/reentry-judgment-32/input-v0",
+  "bindingCommit": "27dee9b05ef4a034b2df1f98b3484d2a21acca09",
+  "bindingPrefix": "docs/transfer/reentry-judgment-32/integration-binding-v0",
+  "originalFullGeneratedInputNotDuplicated": true,
+  "toolAndInputHashes": "EXECUTION_BINDING.before.json originalInputFilesBefore",
+  "firstObservationCommitImmutable": "57896a27266c20b21ac1c3b2a94ba27ca7294eec"
+}

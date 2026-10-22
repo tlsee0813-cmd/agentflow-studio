@@ -1,0 +1,9 @@
+{
+  "UTC": "2026-10-22T22:29:19.976348+00:00",
+  "originalInputUnchanged": true,
+  "validationCopyChanged": [
+    "generated-v0/sealed-answer/QUESTION_SIGNAL_PROOF.json"
+  ],
+  "compiledModulesBeforeAfterEqual": true,
+  "receiptOutsideInput": "/workspace/browser-env/reentry32-post-validation/results/domain-receipt.json"
+}

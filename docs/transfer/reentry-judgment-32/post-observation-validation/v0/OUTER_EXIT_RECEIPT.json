@@ -1,0 +1,13 @@
+{
+  "scope": "tool completion metadata transcribed, not full tool transcript",
+  "validationCollector": {
+    "chunk": "42acdc",
+    "actualOuterExit": 0,
+    "bothActualChildExit": "process.json commands[].actualChildReturnCode"
+  },
+  "postComparison": {
+    "chunk": "8f50b0",
+    "actualExit": 0
+  },
+  "browserOrServer": "NOT_RUN in this post-validation assignment"
+}
