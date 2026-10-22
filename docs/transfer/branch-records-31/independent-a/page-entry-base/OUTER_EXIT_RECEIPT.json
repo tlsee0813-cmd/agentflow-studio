@@ -1,0 +1,13 @@
+{
+  "scope": "tool completion metadata transcribed, not full transcript",
+  "firstMeasurement": {
+    "session": 64310,
+    "outerExit": 1
+  },
+  "finalFrozenMeasurement": {
+    "session": 60886,
+    "outerExit": 1
+  },
+  "child": "process.json subprocess.run returncode; collector sys.exit(childcode)",
+  "server": "runtime.json separate terminate exit -15"
+}

@@ -1,0 +1,456 @@
+[
+  {
+    "UTC": "2026-10-22T21:57:23.915015+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:40171/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+        "revision": 43,
+        "requestId": "R_4337db01-510e-4548-8b4a-81ca5b8edf55",
+        "taskId": "T_655da4d1-6473-44d7-a5db-8f61ff7d06d2"
+      },
+      "projectName": "[합성28] 자료 보관 안내를 함께 정리한다. 실제 동…",
+      "sources": [
+        {
+          "id": "S_93bdbd60-10d3-4ad4-a7e8-ac7029c62a9f",
+          "kind": "request",
+          "text": "[명시 합성31] 다른 가지의 안내 표현만 정리해 주세요. 정책·배포 변경은 하지 마세요.",
+          "at": "2026-10-22T21:57:23.881Z",
+          "taskId": "T_655da4d1-6473-44d7-a5db-8f61ff7d06d2",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성28 Q] 안내 오류 원인은 아직 모르겠어요. 실제 원인을 정하지 말고 확인할 질문을 남겨 주세요.",
+          "status": "requested",
+          "sourceId": "S_ca2fc4e7-3274-46d7-884e-f493db795a96",
+          "revision": 13,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D2",
+          "text": "[합성28 S] 안내 표시 문구만 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_e2311ee0-32d2-4505-a9c8-b3cd5dcbd134",
+          "revision": 17,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D3",
+          "text": "[합성28 H] 요청 접수 안내만 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_5d12688b-7c20-4cf6-8354-eefdfe3febf3",
+          "revision": 24,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D4",
+          "text": "[합성28 P] 전체 안내를 정리하되 자식의 실제 역할을 구분해 주세요.",
+          "status": "requested",
+          "sourceId": "S_e5d7c70f-cb4b-494f-8e4b-7fbd4558b710",
+          "revision": 31,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D5",
+          "text": "[명시 합성31] 다른 가지의 안내 표현만 정리해 주세요. 정책·배포 변경은 하지 마세요.",
+          "status": "requested",
+          "sourceId": "S_93bdbd60-10d3-4ad4-a7e8-ac7029c62a9f",
+          "revision": 43,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_655da4d1-6473-44d7-a5db-8f61ff7d06d2",
+        "inputs": [
+          {
+            "sourceId": "S_93bdbd60-10d3-4ad4-a7e8-ac7029c62a9f",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D5",
+            "sourceId": "S_93bdbd60-10d3-4ad4-a7e8-ac7029c62a9f",
+            "revision": 43,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 42,
+        "brief": "[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.",
+        "area": {
+          "id": "A_1f049413-1418-4ebf-951a-e0660dcbae58",
+          "name": "다른 가지의 설명 소유 부분",
+          "note": "[명시 합성31] 같은 이름인 다른 부모 아래의 보고를 구별한다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  },
+  {
+    "UTC": "2026-10-22T21:57:25.759162+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:40171/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+        "revision": 49,
+        "requestId": "R_ce60fb3a-2903-41c7-a25d-d2b7a6290d2a",
+        "taskId": "T_f9b1c7b4-4685-46e9-a750-85c65759c7a3"
+      },
+      "projectName": "[합성28] 자료 보관 안내를 함께 정리한다. 실제 동…",
+      "sources": [
+        {
+          "id": "S_f76e07f0-95e5-4d44-8175-c080b340c2e8",
+          "kind": "request",
+          "text": "[명시 합성31 B] 다른 자료 안내의 표현을 준비해 주세요. 기록 읽기의 작업 대상과 구별합니다.",
+          "at": "2026-10-22T21:57:25.730Z",
+          "taskId": "T_f9b1c7b4-4685-46e9-a750-85c65759c7a3",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성28 Q] 안내 오류 원인은 아직 모르겠어요. 실제 원인을 정하지 말고 확인할 질문을 남겨 주세요.",
+          "status": "requested",
+          "sourceId": "S_ca2fc4e7-3274-46d7-884e-f493db795a96",
+          "revision": 13,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D2",
+          "text": "[합성28 S] 안내 표시 문구만 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_e2311ee0-32d2-4505-a9c8-b3cd5dcbd134",
+          "revision": 17,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D3",
+          "text": "[합성28 H] 요청 접수 안내만 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_5d12688b-7c20-4cf6-8354-eefdfe3febf3",
+          "revision": 24,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D4",
+          "text": "[합성28 P] 전체 안내를 정리하되 자식의 실제 역할을 구분해 주세요.",
+          "status": "requested",
+          "sourceId": "S_e5d7c70f-cb4b-494f-8e4b-7fbd4558b710",
+          "revision": 31,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D5",
+          "text": "[명시 합성31] 다른 가지의 안내 표현만 정리해 주세요. 정책·배포 변경은 하지 마세요.",
+          "status": "requested",
+          "sourceId": "S_93bdbd60-10d3-4ad4-a7e8-ac7029c62a9f",
+          "revision": 43,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D6",
+          "text": "[명시 합성31 B] 다른 자료 안내의 표현을 준비해 주세요. 기록 읽기의 작업 대상과 구별합니다.",
+          "status": "requested",
+          "sourceId": "S_f76e07f0-95e5-4d44-8175-c080b340c2e8",
+          "revision": 49,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_f9b1c7b4-4685-46e9-a750-85c65759c7a3",
+        "inputs": [
+          {
+            "sourceId": "S_f76e07f0-95e5-4d44-8175-c080b340c2e8",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D6",
+            "sourceId": "S_f76e07f0-95e5-4d44-8175-c080b340c2e8",
+            "revision": 49,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 48,
+        "brief": "[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.",
+        "area": {
+          "id": "A_8274295e-c28d-45f9-b43d-ba091d154d87",
+          "name": "다른 자료 안내의 독립 흐름",
+          "note": "[합성28 추가] 다른 가지의 실제 소속을 읽는다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  },
+  {
+    "UTC": "2026-10-22T21:57:37.326726+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:40171/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+        "revision": 43,
+        "requestId": "R_50eb7115-7221-4e5c-8f53-08821cdd0ba9",
+        "taskId": "T_b62d2987-2c43-4989-b829-8bc463f905f2"
+      },
+      "projectName": "[합성28] 자료 보관 안내를 함께 정리한다. 실제 동…",
+      "sources": [
+        {
+          "id": "S_99469f17-2a3f-46ac-8a56-e3b83ab41da1",
+          "kind": "request",
+          "text": "[명시 합성31] 다른 가지의 안내 표현만 정리해 주세요. 정책·배포 변경은 하지 마세요.",
+          "at": "2026-10-22T21:57:37.297Z",
+          "taskId": "T_b62d2987-2c43-4989-b829-8bc463f905f2",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성28 Q] 안내 오류 원인은 아직 모르겠어요. 실제 원인을 정하지 말고 확인할 질문을 남겨 주세요.",
+          "status": "requested",
+          "sourceId": "S_ca2fc4e7-3274-46d7-884e-f493db795a96",
+          "revision": 13,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D2",
+          "text": "[합성28 S] 안내 표시 문구만 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_e2311ee0-32d2-4505-a9c8-b3cd5dcbd134",
+          "revision": 17,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D3",
+          "text": "[합성28 H] 요청 접수 안내만 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_5d12688b-7c20-4cf6-8354-eefdfe3febf3",
+          "revision": 24,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D4",
+          "text": "[합성28 P] 전체 안내를 정리하되 자식의 실제 역할을 구분해 주세요.",
+          "status": "requested",
+          "sourceId": "S_e5d7c70f-cb4b-494f-8e4b-7fbd4558b710",
+          "revision": 31,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D5",
+          "text": "[명시 합성31] 다른 가지의 안내 표현만 정리해 주세요. 정책·배포 변경은 하지 마세요.",
+          "status": "requested",
+          "sourceId": "S_99469f17-2a3f-46ac-8a56-e3b83ab41da1",
+          "revision": 43,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_b62d2987-2c43-4989-b829-8bc463f905f2",
+        "inputs": [
+          {
+            "sourceId": "S_99469f17-2a3f-46ac-8a56-e3b83ab41da1",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D5",
+            "sourceId": "S_99469f17-2a3f-46ac-8a56-e3b83ab41da1",
+            "revision": 43,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 42,
+        "brief": "[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.",
+        "area": {
+          "id": "A_84553efa-e16f-4c61-afc1-8204dd6c7556",
+          "name": "다른 가지의 설명 소유 부분",
+          "note": "[명시 합성31] 같은 이름인 다른 부모 아래의 보고를 구별한다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  },
+  {
+    "UTC": "2026-10-22T21:57:39.059692+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:40171/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+        "revision": 49,
+        "requestId": "R_c191e8b1-b9cf-4b69-8aa2-7def14be0311",
+        "taskId": "T_3af59031-3ad3-466c-9326-af358e5d596d"
+      },
+      "projectName": "[합성28] 자료 보관 안내를 함께 정리한다. 실제 동…",
+      "sources": [
+        {
+          "id": "S_141b9075-9163-4ce1-b461-9a01825802e2",
+          "kind": "request",
+          "text": "[명시 합성31 B] 다른 자료 안내의 표현을 준비해 주세요. 기록 읽기의 작업 대상과 구별합니다.",
+          "at": "2026-10-22T21:57:39.033Z",
+          "taskId": "T_3af59031-3ad3-466c-9326-af358e5d596d",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성28 Q] 안내 오류 원인은 아직 모르겠어요. 실제 원인을 정하지 말고 확인할 질문을 남겨 주세요.",
+          "status": "requested",
+          "sourceId": "S_ca2fc4e7-3274-46d7-884e-f493db795a96",
+          "revision": 13,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D2",
+          "text": "[합성28 S] 안내 표시 문구만 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_e2311ee0-32d2-4505-a9c8-b3cd5dcbd134",
+          "revision": 17,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D3",
+          "text": "[합성28 H] 요청 접수 안내만 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_5d12688b-7c20-4cf6-8354-eefdfe3febf3",
+          "revision": 24,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D4",
+          "text": "[합성28 P] 전체 안내를 정리하되 자식의 실제 역할을 구분해 주세요.",
+          "status": "requested",
+          "sourceId": "S_e5d7c70f-cb4b-494f-8e4b-7fbd4558b710",
+          "revision": 31,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D5",
+          "text": "[명시 합성31] 다른 가지의 안내 표현만 정리해 주세요. 정책·배포 변경은 하지 마세요.",
+          "status": "requested",
+          "sourceId": "S_99469f17-2a3f-46ac-8a56-e3b83ab41da1",
+          "revision": 43,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D6",
+          "text": "[명시 합성31 B] 다른 자료 안내의 표현을 준비해 주세요. 기록 읽기의 작업 대상과 구별합니다.",
+          "status": "requested",
+          "sourceId": "S_141b9075-9163-4ce1-b461-9a01825802e2",
+          "revision": 49,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_3af59031-3ad3-466c-9326-af358e5d596d",
+        "inputs": [
+          {
+            "sourceId": "S_141b9075-9163-4ce1-b461-9a01825802e2",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D6",
+            "sourceId": "S_141b9075-9163-4ce1-b461-9a01825802e2",
+            "revision": 49,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 48,
+        "brief": "[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.",
+        "area": {
+          "id": "A_8274295e-c28d-45f9-b43d-ba091d154d87",
+          "name": "다른 자료 안내의 독립 흐름",
+          "note": "[합성28 추가] 다른 가지의 실제 소속을 읽는다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  }
+]

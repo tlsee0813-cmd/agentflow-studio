@@ -1,0 +1,74 @@
+[
+  {
+    "original": "1280-prepared.json",
+    "bytes": 49816,
+    "sha256": "1e00d9fdf4f93631f3e27c8706b9b950f18efafe0729a1ed2d2d60fc0b657ba5",
+    "gzip": "1280-prepared.json.gz",
+    "gzipSHA256": "a89207b4777a44458005524f958d4bba23cfc816fafc200d40b9f6d15cf4b610",
+    "roundTripEqual": true
+  },
+  {
+    "original": "1280-project-final.json",
+    "bytes": 49816,
+    "sha256": "1e00d9fdf4f93631f3e27c8706b9b950f18efafe0729a1ed2d2d60fc0b657ba5",
+    "gzip": "1280-project-final.json.gz",
+    "gzipSHA256": "a89207b4777a44458005524f958d4bba23cfc816fafc200d40b9f6d15cf4b610",
+    "roundTripEqual": true
+  },
+  {
+    "original": "1440-prepared.json",
+    "bytes": 49816,
+    "sha256": "54a6fb3506b2b440b099aa51c99eecec393ad0c1cf6f544f31d59194c83f3ad5",
+    "gzip": "1440-prepared.json.gz",
+    "gzipSHA256": "06a18abf8c8fc970ff0ec19a4f62f948b472ec21aa3505622d98e2bda2602fae",
+    "roundTripEqual": true
+  },
+  {
+    "original": "1440-project-final.json",
+    "bytes": 49816,
+    "sha256": "54a6fb3506b2b440b099aa51c99eecec393ad0c1cf6f544f31d59194c83f3ad5",
+    "gzip": "1440-project-final.json.gz",
+    "gzipSHA256": "06a18abf8c8fc970ff0ec19a4f62f948b472ec21aa3505622d98e2bda2602fae",
+    "roundTripEqual": true
+  },
+  {
+    "original": "first-measurement-boundary/ui-original.jsonl",
+    "bytes": 1097480,
+    "sha256": "c733926a4e58edbac90c6dd32cb2d28886f403f44ea9d95645d8e7891e8cffd3",
+    "gzip": "first-measurement-boundary/ui-original.jsonl.gz",
+    "gzipSHA256": "18f89d4c750f59b046371f47ca97adb3ea60a9905cbb6108a4a0fe1742af6416",
+    "roundTripEqual": true
+  },
+  {
+    "original": "first-measurement-boundary/ui.jsonl",
+    "bytes": 1097480,
+    "sha256": "c733926a4e58edbac90c6dd32cb2d28886f403f44ea9d95645d8e7891e8cffd3",
+    "gzip": "first-measurement-boundary/ui.jsonl.gz",
+    "gzipSHA256": "18f89d4c750f59b046371f47ca97adb3ea60a9905cbb6108a4a0fe1742af6416",
+    "roundTripEqual": true
+  },
+  {
+    "original": "normal-ui-6-card-backup.json",
+    "bytes": 25031,
+    "sha256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+    "gzip": "normal-ui-6-card-backup.json.gz",
+    "gzipSHA256": "705c69c140d396c27505eeb67d417c2f1c3cd6e2469d64bb8d884a5d9db32340",
+    "roundTripEqual": true
+  },
+  {
+    "original": "normal-ui-four-card-backup.json",
+    "bytes": 24373,
+    "sha256": "a62d6bcece8866c6e2a02da5fd16ad500ab810c33fcf0ddc7f5e74de484f22a9",
+    "gzip": "normal-ui-four-card-backup.json.gz",
+    "gzipSHA256": "8d7e6376bc410a00a6fefe1bd587211d1e55031aaffeca9caf78185f7f0797f7",
+    "roundTripEqual": true
+  },
+  {
+    "original": "ui.jsonl",
+    "bytes": 1111652,
+    "sha256": "4b89231235da354b24e739681167a73de8ec0af42ed7455a848ea458fb6d9c46",
+    "gzip": "ui.jsonl.gz",
+    "gzipSHA256": "66d55ca9300bdcfd8f37addffee627024f7596635aaaf97c0a0d1da8dee20fbc",
+    "roundTripEqual": true
+  }
+]

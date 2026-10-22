@@ -1,0 +1,118 @@
+[
+  {
+    "pc": 1280,
+    "beforeXY": [
+      0,
+      120
+    ],
+    "firstXY": [
+      0,
+      116
+    ],
+    "frameXY": [
+      [
+        0,
+        116
+      ],
+      [
+        0,
+        116
+      ]
+    ],
+    "finalXY": [
+      0,
+      116
+    ],
+    "beforeMax": [
+      0,
+      262
+    ],
+    "firstMax": [
+      0,
+      378
+    ],
+    "beforeDocument": [
+      1280,
+      982
+    ],
+    "firstDocument": [
+      1280,
+      1098
+    ],
+    "documentScrollend": null,
+    "observedScrollendTargets": [
+      "area-panel-body"
+    ],
+    "completion": "observation-deadline",
+    "firstOwnerGlyphs": [
+      {
+        "full": true,
+        "hit": true,
+        "positive": true
+      },
+      {
+        "full": true,
+        "hit": true,
+        "positive": true
+      }
+    ]
+  },
+  {
+    "pc": 1440,
+    "beforeXY": [
+      0,
+      120
+    ],
+    "firstXY": [
+      0,
+      0
+    ],
+    "frameXY": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "finalXY": [
+      0,
+      0
+    ],
+    "beforeMax": [
+      0,
+      262
+    ],
+    "firstMax": [
+      0,
+      262
+    ],
+    "beforeDocument": [
+      1440,
+      1162
+    ],
+    "firstDocument": [
+      1440,
+      1162
+    ],
+    "documentScrollend": null,
+    "observedScrollendTargets": [
+      "area-panel-body"
+    ],
+    "completion": "observation-deadline",
+    "firstOwnerGlyphs": [
+      {
+        "full": true,
+        "hit": true,
+        "positive": true
+      },
+      {
+        "full": true,
+        "hit": true,
+        "positive": true
+      }
+    ]
+  }
+]

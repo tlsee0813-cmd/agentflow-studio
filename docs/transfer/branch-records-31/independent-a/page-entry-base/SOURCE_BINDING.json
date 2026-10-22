@@ -1,0 +1,13 @@
+{
+  "commit": "7c7bdfa8d244d83c2c776b91b6a3a669127ba2e9",
+  "tree": "a0d2671bd3b17b814c6e828814bb00c08cad7f43",
+  "readOnlyExistingBuiltApp": "/workspace/browser-env/integration30-31/candidate/app",
+  "allExtractedSourceFilesBeforeAfterEqual": 198,
+  "changed": [],
+  "appSHA256": "da2502c6a011578c77931a10f41a7fcd09f182ae3b8b186b26f640966b747c2b",
+  "cssSHA256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+  "checkerSHA256": "c282c96dd420ca542037e256f9b6015945b74423201c254882f5149445b6f67a",
+  "collectorSHA256": "4b40956ef38f96840f0ffec1ef82f27b0685b44d10766364cd9825205d0be5f4",
+  "fixtureSHA256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+  "fullOriginalSourceIndex": "integration-30-31/independent-a/v0/SOURCE.before.json.gz"
+}

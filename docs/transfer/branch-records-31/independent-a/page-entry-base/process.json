@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/branch31-page-entry-base/check.py"
+  ],
+  "sourceCommit": "7c7bdfa8d244d83c2c776b91b6a3a669127ba2e9",
+  "startUTC": "2026-10-22T21:57:19.578061+00:00",
+  "endUTC": "2026-10-22T21:57:47.087989+00:00",
+  "checkerSHA256": "c282c96dd420ca542037e256f9b6015945b74423201c254882f5149445b6f67a",
+  "checkerAfterSHA256": "c282c96dd420ca542037e256f9b6015945b74423201c254882f5149445b6f67a",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
