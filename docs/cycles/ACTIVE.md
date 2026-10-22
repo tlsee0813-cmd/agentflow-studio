@@ -18,9 +18,9 @@
 
 실행은 기존 [agentflow-studio 설정](codex://threads/01a13fcb-e7e5-73b9-b4a3-cf9a2b95b0bb) Cloud(durable), 독립 판단은 Astra High, 보조 구현·검사는6.1 Sol High다. 인계 권위 [Web Pro](https://chatgpt.com/c/6ad9e4e7-e8b4-83e8-b1f4-aebabc8d27b4)와 공간 탐색 [Web Pro](https://chatgpt.com/c/6ad9e588-d3e0-83e8-bdd6-660ab76650a7)를 나눠 쓴다. 총괄이 원문·화면과 대조하고 통합한다.
 
-**32 재진입 뒤 변화와 판단 — 고정 후보72940a 화면 관측 시작.** [계약](2026-10-23-reentry-judgment-32/INPUT.md) · [별도 Pro·원문·Dify 실제 비교](2026-10-23-reentry-judgment-32/RESEARCH.md). 기존22를 반복하지 않고10→20→20 세 판본, 답한/미답 질문, 늦은 보류를 같은 흐름에서 구별하는지 관측한다. 아직 사용자 열람 기준은 없고, 준비자 정답표를 먼저 주지 않는 AI 관측을 준비한다.30수용·31fix2 독립/작성자 통과 뒤 최종CI와 병렬로 시작했고31도 동일 제품으로 통합됐다. 관측은72940a를 그대로 유지하며 새 요약/알림함을 먼저 만들지 않는다. [공개 입력](https://github.com/tlsee0813-cmd/agentflow-studio/tree/24baf91fa2d519fd8cd33bb5ece28ec5b32323df/docs/transfer/reentry-judgment-32/input-v0)은41파일의 원격 바이트·blob을 확인했고 개인 로컬 경로만 공개 사본에서 제외했다. 관측자에게는 observer-input만 전달하고 정답표를 읽은 이후의 판단을 최초 발견으로 세지 않는다. C의 기존 설명은 두 단계 모두 오래된 상태이며 T2에서 늦은 보류가 추가된다. 복구 사본의 동일 project ID·지도 메모와 두 번째 PC의 학습 전이를 기록한다.
+**32 재진입 뒤 변화와 판단 — 관측 종료, 제품 무변경.** [결과와 경계](2026-10-23-reentry-judgment-32/RESULT.md). 최초 두PC의 한 작업 완주와 정답을 안 뒤1280 이력 읽기를 구분했다. N만 편집하고 정확H/별개draft/과거자료를 보존했지만 이어가기·편집·수신 확인을 찾는 부담이 남았다. 기존 이력으로10→20과20→20을 비교할 수 있으며 최초 발견성 성공이나 새last-read 필요로 확대하지 않는다.
 
-작은 지도 글자의 후속 [별도 Pro 조사와 총괄 대조](2026-10-23-reentry-judgment-32/READABILITY_RESEARCH.md)는 병렬로 마쳤다. 기존 패널과 겹치는 요약 추가를 바로 채택하지 않고32에서 실제 장애를 확인한 뒤 비교 범위를 고른다.
+**33 작업 대상과 행동 연결 — 구현·독립 검증 중.** [범위](2026-10-23-task-context-33/INPUT.md). 읽는 작업 옆의 명시 이어가기, 현재 작업의 기존N/파일인계 구역 이동, 파일 선택 뒤 기존 검토 도착을 좁게 개선한다. 읽는/현재/별개draft와 선택/수신확정 구분은 유지한다. 별도 실제 ‘이전 작업00’ 표시 오류는 ID 기준 번호 조회로 수정 후보를 만들고 Cloud 원본/후보 비교 중이다. [새 Web Pro 비교](https://chatgpt.com/c/6ada8e89-5b6c-83ee-91a5-1e4bfd328c20)를 기존 코드·원자료와 대조했으며 전면wizard·전역확정막대·지도새요약은 도입하지 않는다. 최종 source·실제화면·정확CI 수용 전까지 제품 통합으로 세지 않는다.
 
 ## 마지막 제품 통합
 - **31 접힌 부분의 기록 진입 — 한정 수용.** [결과](2026-10-23-branch-records-31/RESULT.md), [PR16](https://github.com/tlsee0813-cmd/agentflow-studio/pull/16). 최종72940a, 병합75ed2ed7. 정확한 하위 기록·원호출 복귀와 신호 진입 페이지 위치를 보존한다.
