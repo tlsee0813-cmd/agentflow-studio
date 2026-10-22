@@ -1,0 +1,622 @@
+{
+  "scope": "Only five geometry scenes/PC. No repeated audit of all five Origin pairs; no new browser run. Downloaded normalizer not executed.",
+  "geometryObjectsChecked": 220,
+  "ancestorRowsWithInheritedScaleCorrection": 480,
+  "arithmeticMatchesStoredNormalization": true,
+  "axisAlignedPositiveScaleAssumptionVerifiedForCheckedMatrices": true,
+  "rows": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenes": {
+        "initial": {
+          "matrix": "matrix(0.710769, 0, 0, 0.710769, 322.523, 66.5923)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_f2e761b3-4e1a-4116-b503-59d9784db454",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 10.661535,
+                ".area-card-note": 8.529228,
+                ".area-card-path": 7.818459
+              }
+            },
+            {
+              "areaId": "A_94ad60c0-98a5-42d7-8ed3-8ab5bf380083",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 10.661535,
+                ".area-card-note": 8.529228,
+                ".area-card-path": 7.818459
+              }
+            },
+            {
+              "areaId": "A_33088197-e3f6-4f1f-824a-9cecabdef9db",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 10.661535,
+                ".area-card-note": 8.529228,
+                ".area-card-path": 7.818459
+              }
+            },
+            {
+              "areaId": "A_a24b220e-b338-4726-b4ca-109043143ab8",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 10.661535,
+                ".area-card-note": 8.529228,
+                ".area-card-path": 7.818459
+              }
+            }
+          ]
+        },
+        "selected": {
+          "matrix": "matrix(0.710769, 0, 0, 0.710769, 322.523, 66.5923)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_f2e761b3-4e1a-4116-b503-59d9784db454",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 10.661535,
+                ".area-card-note": 8.529228,
+                ".area-card-path": 7.818459
+              }
+            },
+            {
+              "areaId": "A_94ad60c0-98a5-42d7-8ed3-8ab5bf380083",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 10.661535,
+                ".area-card-note": 8.529228,
+                ".area-card-path": 7.818459
+              }
+            },
+            {
+              "areaId": "A_33088197-e3f6-4f1f-824a-9cecabdef9db",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 10.661535,
+                ".area-card-note": 8.529228,
+                ".area-card-path": 7.818459
+              }
+            },
+            {
+              "areaId": "A_a24b220e-b338-4726-b4ca-109043143ab8",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 10.661535,
+                ".area-card-note": 8.529228,
+                ".area-card-path": 7.818459
+              }
+            }
+          ]
+        },
+        "panned": {
+          "matrix": "matrix(0.586538, 0, 0, 0.586538, -270.904, 105.135)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_f2e761b3-4e1a-4116-b503-59d9784db454",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.79807,
+                ".area-card-note": 7.038456,
+                ".area-card-path": 6.451918
+              }
+            },
+            {
+              "areaId": "A_94ad60c0-98a5-42d7-8ed3-8ab5bf380083",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.79807,
+                ".area-card-note": 7.038456,
+                ".area-card-path": 6.451918
+              }
+            },
+            {
+              "areaId": "A_33088197-e3f6-4f1f-824a-9cecabdef9db",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.79807,
+                ".area-card-note": 7.038456,
+                ".area-card-path": 6.451918
+              }
+            },
+            {
+              "areaId": "A_a24b220e-b338-4726-b4ca-109043143ab8",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.79807,
+                ".area-card-note": 7.038456,
+                ".area-card-path": 6.451918
+              }
+            }
+          ]
+        },
+        "fitted": {
+          "matrix": "matrix(0.469231, 0, 0, 0.469231, 221.077, 131.808)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_f2e761b3-4e1a-4116-b503-59d9784db454",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 7.038465,
+                ".area-card-note": 5.630772,
+                ".area-card-path": 5.161541
+              }
+            },
+            {
+              "areaId": "A_94ad60c0-98a5-42d7-8ed3-8ab5bf380083",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 7.038465,
+                ".area-card-note": 5.630772,
+                ".area-card-path": 5.161541
+              }
+            },
+            {
+              "areaId": "A_33088197-e3f6-4f1f-824a-9cecabdef9db",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 7.038465,
+                ".area-card-note": 5.630772,
+                ".area-card-path": 5.161541
+              }
+            },
+            {
+              "areaId": "A_a24b220e-b338-4726-b4ca-109043143ab8",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 7.038465,
+                ".area-card-note": 5.630772,
+                ".area-card-path": 5.161541
+              }
+            }
+          ]
+        },
+        "offscreenLocate": {
+          "matrix": "matrix(0.586538, 0, 0, 0.586538, 86.3846, 105.135)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_f2e761b3-4e1a-4116-b503-59d9784db454",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.79807,
+                ".area-card-note": 7.038456,
+                ".area-card-path": 6.451918
+              }
+            },
+            {
+              "areaId": "A_94ad60c0-98a5-42d7-8ed3-8ab5bf380083",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.79807,
+                ".area-card-note": 7.038456,
+                ".area-card-path": 6.451918
+              }
+            },
+            {
+              "areaId": "A_33088197-e3f6-4f1f-824a-9cecabdef9db",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.79807,
+                ".area-card-note": 7.038456,
+                ".area-card-path": 6.451918
+              }
+            },
+            {
+              "areaId": "A_a24b220e-b338-4726-b4ca-109043143ab8",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.79807,
+                ".area-card-note": 7.038456,
+                ".area-card-path": 6.451918
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenes": {
+        "initial": {
+          "matrix": "matrix(0.833846, 0, 0, 0.833846, 307.508, 56.6538)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_e924d11d-60f3-44fa-9912-6bbe9555ba9f",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 12.50769,
+                ".area-card-note": 10.006152,
+                ".area-card-path": 9.172305999999999
+              }
+            },
+            {
+              "areaId": "A_d82ccace-388e-43ed-90cb-eb986399809a",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 12.50769,
+                ".area-card-note": 10.006152,
+                ".area-card-path": 9.172305999999999
+              }
+            },
+            {
+              "areaId": "A_1eb616f5-4d23-4162-8564-027e1a4a70d9",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 12.50769,
+                ".area-card-note": 10.006152,
+                ".area-card-path": 9.172305999999999
+              }
+            },
+            {
+              "areaId": "A_63877c34-cd3a-4eda-85aa-25e97966ee87",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 12.50769,
+                ".area-card-note": 10.006152,
+                ".area-card-path": 9.172305999999999
+              }
+            }
+          ]
+        },
+        "selected": {
+          "matrix": "matrix(0.833846, 0, 0, 0.833846, 307.508, 56.6538)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_e924d11d-60f3-44fa-9912-6bbe9555ba9f",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 12.50769,
+                ".area-card-note": 10.006152,
+                ".area-card-path": 9.172305999999999
+              }
+            },
+            {
+              "areaId": "A_d82ccace-388e-43ed-90cb-eb986399809a",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 12.50769,
+                ".area-card-note": 10.006152,
+                ".area-card-path": 9.172305999999999
+              }
+            },
+            {
+              "areaId": "A_1eb616f5-4d23-4162-8564-027e1a4a70d9",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 12.50769,
+                ".area-card-note": 10.006152,
+                ".area-card-path": 9.172305999999999
+              }
+            },
+            {
+              "areaId": "A_63877c34-cd3a-4eda-85aa-25e97966ee87",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 12.50769,
+                ".area-card-note": 10.006152,
+                ".area-card-path": 9.172305999999999
+              }
+            }
+          ]
+        },
+        "panned": {
+          "matrix": "matrix(0.740385, 0, 0, 0.740385, -370.519, 94.3654)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_e924d11d-60f3-44fa-9912-6bbe9555ba9f",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 11.105775,
+                ".area-card-note": 8.88462,
+                ".area-card-path": 8.144235
+              }
+            },
+            {
+              "areaId": "A_d82ccace-388e-43ed-90cb-eb986399809a",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 11.105775,
+                ".area-card-note": 8.88462,
+                ".area-card-path": 8.144235
+              }
+            },
+            {
+              "areaId": "A_1eb616f5-4d23-4162-8564-027e1a4a70d9",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 11.105775,
+                ".area-card-note": 8.88462,
+                ".area-card-path": 8.144235
+              }
+            },
+            {
+              "areaId": "A_63877c34-cd3a-4eda-85aa-25e97966ee87",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 11.105775,
+                ".area-card-note": 8.88462,
+                ".area-card-path": 8.144235
+              }
+            }
+          ]
+        },
+        "fitted": {
+          "matrix": "matrix(0.592308, 0, 0, 0.592308, 225.385, 141.192)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_e924d11d-60f3-44fa-9912-6bbe9555ba9f",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.88462,
+                ".area-card-note": 7.107695999999999,
+                ".area-card-path": 6.515388
+              }
+            },
+            {
+              "areaId": "A_d82ccace-388e-43ed-90cb-eb986399809a",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.88462,
+                ".area-card-note": 7.107695999999999,
+                ".area-card-path": 6.515388
+              }
+            },
+            {
+              "areaId": "A_1eb616f5-4d23-4162-8564-027e1a4a70d9",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.88462,
+                ".area-card-note": 7.107695999999999,
+                ".area-card-path": 6.515388
+              }
+            },
+            {
+              "areaId": "A_63877c34-cd3a-4eda-85aa-25e97966ee87",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 8.88462,
+                ".area-card-note": 7.107695999999999,
+                ".area-card-path": 6.515388
+              }
+            }
+          ]
+        },
+        "offscreenLocate": {
+          "matrix": "matrix(0.740385, 0, 0, 0.740385, 45.6154, 94.3654)",
+          "controlsInsideAndHit": true,
+          "fitInsideAndHit": true,
+          "cards": [
+            {
+              "areaId": "A_e924d11d-60f3-44fa-9912-6bbe9555ba9f",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 11.105775,
+                ".area-card-note": 8.88462,
+                ".area-card-path": 8.144235
+              }
+            },
+            {
+              "areaId": "A_d82ccace-388e-43ed-90cb-eb986399809a",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 11.105775,
+                ".area-card-note": 8.88462,
+                ".area-card-path": 8.144235
+              }
+            },
+            {
+              "areaId": "A_1eb616f5-4d23-4162-8564-027e1a4a70d9",
+              "rawCardFull": false,
+              "correctedCardInside": false,
+              "rawInfoFull": false,
+              "correctedInfoInside": false,
+              "rawCenterHit": false,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 11.105775,
+                ".area-card-note": 8.88462,
+                ".area-card-path": 8.144235
+              }
+            },
+            {
+              "areaId": "A_63877c34-cd3a-4eda-85aa-25e97966ee87",
+              "rawCardFull": true,
+              "correctedCardInside": true,
+              "rawInfoFull": true,
+              "correctedInfoInside": true,
+              "rawCenterHit": true,
+              "effectiveFontPxApprox": {
+                ".area-card-name": 11.105775,
+                ".area-card-note": 8.88462,
+                ".area-card-path": 8.144235
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Offline client-clip derivation cannot establish actual glyph ink readability",
+    "Range rectangles may extend beyond CSS line boxes; false is not by itself visible ink clipping",
+    "Raw center hit is a one-point observed sample, not all-pixel accessibility",
+    "Title font conversion is CSS computed px times plane scale, not a measured human readability threshold"
+  ]
+}
+

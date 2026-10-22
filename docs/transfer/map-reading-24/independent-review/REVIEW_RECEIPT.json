@@ -1,0 +1,44 @@
+{
+  "sourceCommit": "b1f291c630708a89fe0db08f23008ff1262b7604",
+  "reviewScope": "Root narrowed after download: geometry normalization and clip conclusion only; no duplicate full audit of5 Origin comparisons.",
+  "downloadedFiles": 14,
+  "downloadedBytes": 542541,
+  "integrity": "All selected files match fixed Git blob; all13 non-manifest files match manifest SHA256/bytes. Both gzip decoded byte counts/SHA256 match RAW_INDEX; decoded data kept only in memory.",
+  "geometryObjectsChecked": 220,
+  "axisAlignedPositiveScaleAssumptionVerified": true,
+  "clipPathsObservedInCardInfoAncestors": [
+    "none"
+  ],
+  "cardAndInfoControlInsideUnchangedPairs": 80,
+  "cardAndInfoControlPairsChecked": 80,
+  "rangeInsideFlagChangesAfterCorrection": 4,
+  "rangeFlagChangeDetail": "1280 fitted scene, four .area-card-note labels: rawRangeInside true -> correctedRangeInside false. This is a Range-box clip result, not a glyph-ink/readability verdict.",
+  "finding": "Inherited scale correction is arithmetically justified for these saved positive axis-aligned matrices. Five scenes/PC match stored normalized client clips. Card/info clip outcomes unchanged; hit fields remain the original browser observations.",
+  "fittedTitleApproxPx": [
+    7.038465,
+    8.88462
+  ],
+  "limits": [
+    "Not a new browser or pixel observation",
+    "Does not certify glyph ink readability or all-pixel accessibility",
+    "Own transformed-ancestor client boxes remain as-run values; offsetWidth/clientWidth were not independently reobserved",
+    "No generalized rotation/skew/negative-scale/CSS zoom claim",
+    "Full5 return pairs already audited by Astra, not repeated here"
+  ],
+  "files": [
+    "download-receipt.json",
+    "geometry-review.json",
+    "remote/RAW_INDEX.json",
+    "remote/MANIFEST.tsv",
+    "remote/result.json.gz",
+    "remote/normalized-client-clips.json.gz"
+  ],
+  "notPerformed": [
+    "PNG downloads",
+    "UI JSONL/first-pass raw downloads",
+    "running downloaded scripts",
+    "server/browser/install",
+    "remote writes"
+  ]
+}
+

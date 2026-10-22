@@ -1,0 +1,133 @@
+{
+  "fixedCommit": "b1f291c630708a89fe0db08f23008ff1262b7604",
+  "prefix": "docs/transfer/map-reading-24/independent-a/normal-ui-v0",
+  "files": [
+    {
+      "path": "1280-baseline-project.json",
+      "bytes": 6067,
+      "sha256": "97dbe238ca00d92766b22c3e52c8e134876c3a183e21697180339861a114851f",
+      "gitBlob": "67f12097225e057e6850d91bce667479a00894b3",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "1280-final-project.json",
+      "bytes": 6067,
+      "sha256": "97dbe238ca00d92766b22c3e52c8e134876c3a183e21697180339861a114851f",
+      "gitBlob": "67f12097225e057e6850d91bce667479a00894b3",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "1440-baseline-project.json",
+      "bytes": 6067,
+      "sha256": "99a909e77b498d06788ddc78d14f1c362eb8bc24fe9b5a94d003f183159d9d50",
+      "gitBlob": "95188c691a475c693c6a2740ee54b9d51a83e7ab",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "1440-final-project.json",
+      "bytes": 6067,
+      "sha256": "99a909e77b498d06788ddc78d14f1c362eb8bc24fe9b5a94d003f183159d9d50",
+      "gitBlob": "95188c691a475c693c6a2740ee54b9d51a83e7ab",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "MANIFEST.tsv",
+      "bytes": 5661,
+      "sha256": "0205427ccbbcb79ebfb4eb4fc33fa442c5c56d6e777a20b425daec808ca209ce",
+      "gitBlob": "e0fb11e331362f943f9cdaa0755b2194c7813635",
+      "fixedCommitGitBlobEqual": true
+    },
+    {
+      "path": "RAW_INDEX.json",
+      "bytes": 1558,
+      "sha256": "4373576756a221144cb42ea11678168133484e90b2b224901eef55fdcf34f9a7",
+      "gitBlob": "4424cdffe44709eb13467619d4275a057ef9d95d",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "REPORT.md",
+      "bytes": 6533,
+      "sha256": "effe717a70fe81fa5bafd0d0a6e7ac58888c4c65390c9325cae5143bd9e432e3",
+      "gitBlob": "f389ffce4ee86e2e04e4c48bc15b1b344bbdb879",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "RESULT_SUMMARY.json",
+      "bytes": 953,
+      "sha256": "b4d06cb61836cdb2206da43c7d751b07e685bbf66fb6d4b000502d7e023b8677",
+      "gitBlob": "f425ace155e74d0111afe82eab0d62bc481b61fa",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "normalize_geometry.py",
+      "bytes": 2945,
+      "sha256": "75244dfc089948916abaa09017a693e9a16271084cb45cc9301de257fccba8e6",
+      "gitBlob": "a96d29d173baf7bd2ee8c534edc7b4fecd37b05b",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "normalized-client-clips.json.gz",
+      "bytes": 73095,
+      "sha256": "ba0ab9a3a617617cce402ed94f4861b3c8d0d5d8f7378de9e3f38d28aea71932",
+      "gitBlob": "c78fbeab7543301e5150e801ce43f145b4ac35a6",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true,
+      "decoded": {
+        "originalPath": "normalized-client-clips.json",
+        "bytes": 2613162,
+        "sha256": "1d261af98101bbb1b70ada2f0114b380f1103f91c5d48503e69bb1db70076b0e",
+        "rawIndexEqual": true,
+        "savedUncompressedCopy": false
+      }
+    },
+    {
+      "path": "observe.py",
+      "bytes": 13459,
+      "sha256": "e91c2979f0750c28802e8e235474d24e973601f9b913586d169522b6ee218f12",
+      "gitBlob": "39f01018cbeb769e207b4fcd746f8112fc4b2c7d",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "result.json.gz",
+      "bytes": 401824,
+      "sha256": "378a837dd0cead35feb79afe6e4b815c35b68ae66e507c7ce5d98e8f0dadccf2",
+      "gitBlob": "f228452223783d962e43f47caa184f6fa9530991",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true,
+      "decoded": {
+        "originalPath": "result.json",
+        "bytes": 7854348,
+        "sha256": "aea794cdb0d24bd730274baf3507e03887980c2e17f6cdef5631111ecc8eaf58",
+        "rawIndexEqual": true,
+        "savedUncompressedCopy": false
+      }
+    },
+    {
+      "path": "support.py",
+      "bytes": 11794,
+      "sha256": "9e3bf36d6c1d917f4118323abfe6612e7c7ae70aca9055e016de5de91b62ac4f",
+      "gitBlob": "e0ab0bb304658e8e9d3ab649616f69d06ab5ce7f",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    },
+    {
+      "path": "ui-process.json",
+      "bytes": 451,
+      "sha256": "24e24a462abd7a1b4e5c0ffe284339dbf022dbfa99b00001038a7798dbd265a0",
+      "gitBlob": "c8c2942295b038058fa59a39be864d308098bfc5",
+      "fixedCommitGitBlobEqual": true,
+      "manifestBytesAndSHA256Equal": true
+    }
+  ],
+  "scope": "Selected public raw bytes only; PNG/full folder/UI JSONL/first-pass raw not downloaded. Large JSON decoded only in memory. Downloaded Python files are read as data, not executed."
+}
+
