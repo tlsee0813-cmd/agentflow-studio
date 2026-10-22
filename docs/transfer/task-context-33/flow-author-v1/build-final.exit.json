@@ -1,0 +1,12 @@
+{
+  "exit": 0,
+  "command": [
+    "<runtime>\\node\\bin\\node.exe",
+    "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+    "-p",
+    "continuity/tsconfig.json"
+  ],
+  "runtime": "Node24 author auxiliary/TS5.8.3",
+  "startUTC": "2026-10-22T22:56:49.503377+00:00",
+  "endUTC": "2026-10-22T22:56:51.486036+00:00"
+}

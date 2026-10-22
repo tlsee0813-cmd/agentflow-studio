@@ -1,0 +1,131 @@
+{
+  "status": "frozen author candidate; actual UI NOT_RUN",
+  "base": "4ffa06dc28c51f20db9f93887747d353911ccdc9",
+  "sourceBinding": "SOURCE_BINDING_FINAL.json",
+  "checks": {
+    "type-v1": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+        "--noEmit",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "existing Node24 author auxiliary/TS5.8.3; actual browser NOT_RUN",
+      "startUTC": "2026-10-22T22:54:56.008837+00:00",
+      "endUTC": "2026-10-22T22:54:57.723772+00:00"
+    },
+    "build-v1": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "existing Node24 author auxiliary/TS5.8.3; actual browser NOT_RUN",
+      "startUTC": "2026-10-22T22:54:57.725158+00:00",
+      "endUTC": "2026-10-22T22:54:59.737139+00:00"
+    },
+    "js-syntax-v1": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "--check",
+        "--input-type=module"
+      ],
+      "runtime": "existing Node24 author auxiliary/TS5.8.3; actual browser NOT_RUN",
+      "startUTC": "2026-10-22T22:54:59.863496+00:00",
+      "endUTC": "2026-10-22T22:54:59.932228+00:00"
+    },
+    "diff-v1": {
+      "exit": 0,
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "--unsafe-paths",
+        "<workspace>\\work\\product33-task-context-author\\evidence-flow-v1\\candidate-flow-v1.patch"
+      ],
+      "runtime": "existing Node24 author auxiliary/TS5.8.3; actual browser NOT_RUN",
+      "startUTC": "2026-10-22T22:54:59.943421+00:00",
+      "endUTC": "2026-10-22T22:55:00.017468+00:00"
+    },
+    "type-final": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+        "--noEmit",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "Node24 author auxiliary/TS5.8.3",
+      "startUTC": "2026-10-22T22:56:47.770823+00:00",
+      "endUTC": "2026-10-22T22:56:49.501161+00:00"
+    },
+    "build-final": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "Node24 author auxiliary/TS5.8.3",
+      "startUTC": "2026-10-22T22:56:49.503377+00:00",
+      "endUTC": "2026-10-22T22:56:51.486036+00:00"
+    },
+    "js-final": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "--check",
+        "--input-type=module"
+      ],
+      "runtime": "Node24 author auxiliary/TS5.8.3",
+      "startUTC": "2026-10-22T22:56:51.550553+00:00",
+      "endUTC": "2026-10-22T22:56:51.617807+00:00"
+    },
+    "diff-final": {
+      "exit": 0,
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "--unsafe-paths",
+        "<workspace>\\work\\product33-task-context-author\\evidence-flow-v1\\candidate-flow-final.patch"
+      ],
+      "runtime": "Node24 author auxiliary/TS5.8.3",
+      "startUTC": "2026-10-22T22:56:51.628168+00:00",
+      "endUTC": "2026-10-22T22:56:51.696261+00:00"
+    }
+  },
+  "ast": {
+    "exit": 0,
+    "existingMethodChange": "test02 adds one exact-current-report target assertion; all old assertions retained",
+    "newMethod": "test11 same UI4tasks/current04/read02/draftA -> header continue -> keyboard N -> no-side-effect file jump -> exact copied H -> valid preview noimport -> wrongH controlled focus -> explicit accept -> duplicate accurate state",
+    "scope": "Pc12/Pc12Wide each one added case, existing boundary class unchanged; expected PC12 suite17 rather than15",
+    "exportWorkAndAcceptResultFileByteIdentical": true,
+    "actualUI": "NOT_RUN"
+  },
+  "corrections": [
+    "Root prepublication review found duplicate could not say not-yet-imported; final status branches by actual duplicate identity. Intermediate source remains in upload-source-flow-v1.json, final source is upload-source-flow-final.json.",
+    "Fixed status can occlude a start-aligned title; explicit continue uses local measured feedback height scroll margin, not global CSS. Actual clipping pending.",
+    "Invalid H/decode errors use controlled existing error/message fallback; accept/export functions remain byte-identical."
+  ],
+  "unchanged": [
+    "notice00 original evidence",
+    "domain/schema",
+    "CSS/HTML",
+    "exportWork function",
+    "acceptResultFile function"
+  ],
+  "limits": [
+    "Node24 auxiliary only; final Cloud/Node22 and CI separate",
+    "No browser/server/paidAI execution, no GitHub mutation",
+    "New normal UI fixture geometry, keyboard order and no-retargeting need actual execution"
+  ],
+  "runtimeReuse": "Existing Node24 and TypeScript direct paths; no new deps or junction"
+}

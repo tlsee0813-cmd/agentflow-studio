@@ -1,0 +1,241 @@
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -450,7 +450,8 @@
+   const read=project.tasks.find(x=>x.id===id),no=(x:Task)=>`작업 ${pad(project.tasks.findIndex(t=>t.id===x.id)+1)}`;
+   if(read&&current&&same&&current.id!==id){project={...project,notice:`${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.`};renderStatus();}
+   else if(read&&current&&!same){project={...project,notice:`${no(read)}로 이어가기 · 고치는 작업문은 ${no(read)}의 것이에요. 전에 이어가던 ${no(current)}은 그대로 남아요.`};renderStatus();}
+-  $('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});
++  const title=$('context-title');title.style.scrollMarginTop=`${(document.querySelector('.feedback-stack')?.getBoundingClientRect().height??0)+24}px`;
++  title.focus({preventScroll:true});title.scrollIntoView({block:'start'});
+ }
+ /** Explicit: write the next request for this area (null = no area). The only way, besides the composer's own choice, to set the target. */
+ function writeInArea(id:string|null) {
+@@ -767,11 +768,14 @@
+ function renderResultFile() {
+   renderResultReceipt();
+   $('result-file-message').textContent=resultMessage;
+-  const area=$('result-file-preview');area.replaceChildren();if(!resultSelection)return;
++  const area=$('result-file-preview');area.replaceChildren();area.dataset.selectionState='none';if(!resultSelection)return;
+   try {
+     const {file,task,record,duplicate}=inspectResultFile(project,resultSelection.rawText),preview=exportPreview(project,task,record);
+     resultSelection.revision=project.revision;
++    area.dataset.selectionState='review';
+     area.dataset.targetTaskId=task.id;area.dataset.returnId=record.returnId!;
++    const heading=node('h3','선택한 결과 확인');heading.id='result-file-review-heading';heading.tabIndex=-1;
++    area.append(heading,node('p',duplicate?'이미 가져온 결과입니다. 기존 기록을 확인할 수 있습니다.':'아직 가져오지 않았습니다.','hint'));
+     area.append(node('h3',`연결할 작업 · ${taskTitle(project,task)}`),node('p',`내보낸 시점 · ${dateLabel(record.at)} · 원래 버전 r${record.revision}`,'hint'));
+     if(task.handoffs.at(-1)!==record)area.append(node('p','이전 내보내기에 대한 보고입니다. 더 최근 내보내기로 옮기지 않습니다.','alert warning'));
+     const bases=details(preview.recordedBases===null?'기준 기록 비교 불가':`이후 기록된 기준 ${preview.recordedBases.length}개`,'file-return-bases');
+@@ -786,7 +790,8 @@
+     area.append(btn(duplicate?'기존 기록 확인':'이 결과 가져오기',()=>void acceptResultFile(),'primary','accept-result-file'));
+     area.append(rawFileDetails(resultSelection.rawText,file.returnId,'result-file-raw'));
+   } catch(e) {
+-    area.dataset.targetTaskId='';area.dataset.returnId='';area.append(node('p',resultError(e),'alert warning'));
++    area.dataset.selectionState='invalid';area.dataset.targetTaskId='';area.dataset.returnId='';
++    const error=node('p',resultError(e),'alert warning');error.id='result-file-error';error.tabIndex=-1;area.append(error);
+     const raw=details('선택 파일 원문 보기','result-file-raw'),field=node('textarea');field.readOnly=true;field.rows=5;field.value=resultSelection.rawText;field.setAttribute('aria-label','선택 파일 원문');raw.append(field);area.append(raw);
+   }
+   area.append(btn('닫고 기존 붙여넣기 이용',()=>{resultRead++;resultSelection=null;resultMessage='작성 중인 입력은 그대로입니다. 기존 입력란에 필요한 보고를 붙여넣으세요.';renderResultFile();$('draft').focus();},'quiet','cancel-result-file'));
+@@ -966,11 +971,23 @@
+   body.addEventListener('scroll',captureWorkReferenceReading,{passive:true});body.addEventListener('toggle',captureWorkReferenceReading,true);
+   return ref;
+ }
++function jumpWorkControl(id:string,part:'next'|'file') {
++  if(view!=='work'||project.currentTaskId!==id||$('work-edit-fields')?.dataset.taskId!==id)return;
++  const box=$<HTMLDetailsElement>(part==='next'?'edit-work':'file-return-options');box.open=true;
++  const control=part==='next'?$('work-next'):box.querySelector('summary');
++  control?.scrollIntoView({block:'center'});control?.focus({preventScroll:true});
++}
+ function renderWork(t:Task|null) {
+   captureWorkReferenceReading();if(!t||workReference&&!referenceMatches(t,workReference))workReference=null;
+   // FLOW083: the stage's actions live in the '지금 할 일' card; this card is the output and its editing.
+   const area=$('work'),actions=$('next-actions');area.replaceChildren();actions.replaceChildren();$('empty').hidden=!!t;if(!t)return;
+   const w=currentWork(project,t),v=w.values,card=node('div','','card work-card');card.id='current-work';card.tabIndex=-1;
++  const jumps=node('div','','actions');jumps.id='work-context-jumps';jumps.dataset.taskId=t.id;
++  const owner=areaById(areaOf(project,t));
++  jumps.append(node('span',`작업 ${pad(project.tasks.findIndex(x=>x.id===t.id)+1)} · ${owner?.name??'영역 미지정'}`,'hint'),
++    btn('다음 행동 고치기',()=>jumpWorkControl(t.id,'next'),'secondary','work-edit-next'),
++    btn('파일 결과용 작업문으로',()=>jumpWorkControl(t.id,'file'),'quiet','work-file-handoff'));
++  actions.append(jumps);
+   const local=project.sources.filter(s=>t.sourceIds.includes(s.id));
+   const heading=node('div','','work-heading'),h=node('div');const receipt=receiptOf(t);
+   h.append(node('p',`TASK ${pad(project.tasks.indexOf(t)+1)}${receipt!==null&&receipt>=0?` · 작업 ${pad(receipt+1)}에 받은 보고`:''}`,'eyebrow'),node('h2',receipt!==null?'후속 확인 작업문 초안':'이어갈 작업'));
+@@ -2307,12 +2324,22 @@
+     what.textContent=a?'보관된 영역이라 여기서 새 요청을 쓰지 않아요. 영역을 되살리면 쓸 수 있어요.':'영역 미지정 요청이라 이 화면에서는 영역 새 요청을 쓰지 않아요.';
+     row.append(b);box.append(row,what);
+   }
+-  // Editing this task is the existing explicit continue (PC12 policy), kept secondary and apart from a new request.
++  return box;
++}
++/** The existing explicit continue stays separate from the unsent draft and names the record actually edited. */
++function taskContinueAction(t:Task):HTMLElement {
+   const target=continueTarget(t),edit=node('div','','task-edit'),er=node('div','','row');
++  const cur=project.currentTaskId?project.tasks.find(x=>x.id===project.currentTaskId):null;
++  const edited=cur&&isReturnTask(project,cur)&&cur.parentTaskId===t.id?cur:t,owner=areaById(areaOf(project,edited));
++  edit.id='task-continue-context';edit.dataset.taskId=edited.id;
++  const current=cur&&cur.id!==edited.id?`현재 작업 ${pad(project.tasks.findIndex(x=>x.id===cur.id)+1)}에서 바꿀 대상 · `:'고칠 대상 · ';
++  const label=node('span',`${current}작업 ${pad(project.tasks.findIndex(x=>x.id===edited.id)+1)} · ${owner?.name??'영역 미지정'}${edited.id!==t.id?' · 현재 보고의 후속 작업문':''}`,'hint');label.id='task-continue-label';er.append(label);
+   if(currentGroup(t))er.append(appTag());
+   er.append(btn(target.button,()=>continueTask(t.id),'secondary','task-view-continue'));
+-  const which=node('p',target.text,'hint task-view-target');which.id='task-view-target';edit.append(er,which);box.append(edit);
+-  return box;
++  const detail=details('이어갈 대상 확인','task-continue-details'),which=node('p',target.text,'hint task-view-target');which.id='task-view-target';detail.append(which);edit.append(er);
++  if(project.draft.trim())edit.append(node('p',`별도로 작성 중인 ${DRAFT_NAME[project.draftKind]} · ${unsentTarget()} · 그대로 둬요.`,'hint'));
++  edit.append(detail);
++  return edit;
+ }
+ /** REPORT16: the picked report's own words first, level with the current idea beside it; then this request's reports as a
+  * short pick list (existing title, source kind, time). Nothing is picked for the user; no unpicked report's text is listed. */
+@@ -2348,6 +2375,7 @@
+   // PC12: back to the view the reading started from; without one (e.g. after a reload) only a plain way to the whole space.
+   top.append(originButton('task-return-origin')??btn('전체 공간으로',openSpace,'secondary','task-to-space'));
+   head.append(top,title,node('p',`작업 ${pad(project.tasks.indexOf(t)+1)} · ${taskStatus(project,t)}`,'hint task-view-status'));
++  head.append(taskContinueAction(t));
+   root.append(head);
+   const body=node('section','','area-tasks task-view');body.id='task-view';
+   const read=node('div','','task-read'),side=node('div','','task-read-side');
+@@ -2538,15 +2566,23 @@
+ $('select-result-file').addEventListener('click',()=>$<HTMLInputElement>('result-file-input').click());
+ $('result-file-input').addEventListener('change',async()=>{
+   const input=$<HTMLInputElement>('result-file-input'),file=input.files?.[0];input.value='';if(!file)return;
+-  const read=++resultRead,epoch=projectEpoch,projectId=project.id;
++  const read=++resultRead,epoch=projectEpoch,projectId=project.id,revision=project.revision,current=project.currentTaskId,from=view;
++  const entry=target.kind==='entry'?target.ref.entryId:null;
++  const reveal=()=>{
++    if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId||entry!==(target.kind==='entry'?target.ref.entryId:null)||from!=='work'||view!=='work'||route==='projects'||revision!==project.revision||current!==project.currentTaskId)return;
++    const focus=document.getElementById('result-file-review-heading')??document.getElementById('result-file-error')??document.getElementById('result-file-message');if(!focus)return;
++    $<HTMLDetailsElement>('compose-panel').open=true;$<HTMLDetailsElement>('result-file-panel').open=true;
++    focus.tabIndex=-1;focus.scrollIntoView({block:'center'});focus.focus({preventScroll:true});
++  };
+   lastReceipt=null;resultSelection=null;resultMessage='선택한 파일을 읽는 중입니다. 아직 가져오지 않았습니다.';renderResultFile();
+   try {
+     if(file.size>RESULT_BYTES)throw new Error('RESULT_TOO_LARGE');
+     const bytes=await file.arrayBuffer();
+-    if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId)return;
++    if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId||entry!==(target.kind==='entry'?target.ref.entryId:null))return;
+     const rawText=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
+     resultSelection={rawText,projectId,revision:project.revision,epoch};resultMessage='원문과 연결 대상을 확인한 뒤 가져오세요.';renderResultFile();
+-  }catch(e){if(read!==resultRead||epoch!==projectEpoch)return;resultMessage=resultError(e)+' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';renderResultFile();}
++    reveal();
++  }catch(e){if(read!==resultRead||epoch!==projectEpoch)return;resultMessage=resultError(e)+' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';renderResultFile();reveal();}
+ });
+ $('import-file').addEventListener('change',async()=>{
+   const input=$<HTMLInputElement>('import-file'),file=input.files?.[0];input.value='';if(!file)return;
+--- a/app/continuity/tests/pc12_browser.py
++++ b/app/continuity/tests/pc12_browser.py
+@@ -211,6 +211,7 @@
+         # (1) current = R (report of A): continuing A keeps R and edits R only.
+         before=self.depart(booking,A)
+         expect(self.page.locator('#task-view-target')).to_contain_text(f'작업 02의 후속 확인 작업문');expect(self.page.locator('#task-view-continue')).to_have_text('작업 화면으로')
++        expect(self.page.locator('#task-continue-context')).to_have_attribute('data-task-id',R)
+         self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+         expect(self.page.locator('#notice')).to_contain_text('받은 현재 보고 작업 02에서 계속');expect(self.page.locator('#work-place')).to_contain_text('작업 01의 보고 · 후속 확인 작업문 초안')
+         self.assertEqual(self.state()['currentTaskId'],R)
+@@ -361,6 +362,107 @@
+         self.shot('13-area-back-A')
+         self.assertEqual(self.soft,[],'reading place after return')
+ 
++    def test_11_target_jumps_and_selected_file_review(self):
++        # Author-role normal UI/MOCK fixture, not a human discovery observation.
++        self.ctx.grant_permissions(['clipboard-read','clipboard-write'],origin=self.url)
++        a,b,c=self.start([('작성 중인 요청의 부분','초안은 보내지 않는다.'),('고칠 부분','작업02 소유'),('다른 현재 부분','작업04 소유')])
++        self.request_in(a,'01: 첫 요청을 보존해 주세요.')
++        read=self.request_in(b,'02: 이 부분의 다음 행동을 고치려 해요.')
++        self.request_in(a,'03: 앞선 내용도 그대로 보존해 주세요.')
++        current=self.request_in(c,'04: 지금 이어가는 별개 작업이에요.')
++        self.unsent_draft(a,'별도 미전송 요청33 · 보내지 않고 그대로 둔다.')
++        before=self.state();self.assertEqual([t['id'] for t in before['tasks']].index(read)+1,2)
++        self.assertEqual(before['currentTaskId'],current);self.assertEqual(len(before['tasks']),4)
++        self.page.locator('#nav-space').click();self.page.locator('#node-enter-'+b).click();self.page.locator('#task-open-'+read).click()
++        self.assertEqual(self.state(),before,'reading02 leaves current04/draft and every stored value unchanged')
++        expect(self.page.locator('.task-view-head #task-view-continue')).to_have_count(1)
++        expect(self.page.locator('#task-continue-context')).to_have_attribute('data-task-id',read)
++        expect(self.page.locator('#task-continue-label')).to_contain_text('현재 작업 04')
++        expect(self.page.locator('#task-continue-label')).to_contain_text('작업 02')
++        expect(self.page.locator('#task-continue-label')).to_contain_text('고칠 부분')
++        expect(self.page.locator('#task-next-action')).to_have_text('작성 중인 요청 열기')
++        expect(self.page.locator('#task-next-target')).to_contain_text('작성 중인 요청의 부분')
++        probe=r'''sel=>{const e=document.querySelector(sel);if(!e)return null;const r=e.getBoundingClientRect();let l=0,t=0,rr=innerWidth,bb=innerHeight;
++          for(let p=e.parentElement;p;p=p.parentElement){const s=getComputedStyle(p),q=p.getBoundingClientRect(),sx=q.width/(p.offsetWidth||1),sy=q.height/(p.offsetHeight||1);
++           if(/auto|scroll|hidden|clip/.test(s.overflowX)){l=Math.max(l,q.left+p.clientLeft*sx);rr=Math.min(rr,q.left+(p.clientLeft+p.clientWidth)*sx)}
++           if(/auto|scroll|hidden|clip/.test(s.overflowY)){t=Math.max(t,q.top+p.clientTop*sy);bb=Math.min(bb,q.top+(p.clientTop+p.clientHeight)*sy)}}
++          const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return {rect:r.toJSON(),clip:{l,t,r:rr,b:bb},inside:r.width>0&&r.height>0&&r.left>=l-.5&&r.right<=rr+.5&&r.top>=t-.5&&r.bottom<=bb+.5,hit:!!h&&e.contains(h)}}'''
++        def visible(sel):
++            g=self.page.evaluate(probe,sel);self.record('actual','33 product navigation actual clipping/hit '+sel,g)
++            self.assertTrue(g and g['inside'] and g['hit'],sel+' visible without test scroll/focus repair')
++        visible('#task-view-continue')
++        self.page.locator('#task-view-continue').click()
++        expect(self.page.locator('#context-title')).to_be_focused();visible('#context-title')
++        self.assertEqual(self.state()['currentTaskId'],read)
++        expect(self.page.locator('#work-context-jumps')).to_have_attribute('data-task-id',read)
++        expect(self.page.locator('#work-context-jumps')).to_contain_text('작업 02')
++        # Native Tab from the product's landing focus, then native Enter on the jump.
++        self.page.keyboard.press('Tab');expect(self.page.locator('#work-edit-next')).to_be_focused();visible('#work-edit-next')
++        before_jump=self.state();self.page.keyboard.press('Enter')
++        expect(self.page.locator('#work-next')).to_be_focused();visible('#work-next')
++        self.assertEqual(self.state(),before_jump,'jump opens the existing editor without changing any value')
++        expect(self.page.locator('#edit-work')).to_have_js_property('open',True)
++        expect(self.page.locator('#work-edit-fields')).to_have_attribute('data-task-id',read)
++        self.page.locator('#work-next').fill('33 N만 명시 수정 · 외부 실행은 하지 않는다.');base.saved(self.page)
++        edited=self.state()
++        for old in before['tasks']:
++            got=self.task(old['id'],edited)
++            if old['id']==read:
++                expected={**old,'manual':{**old['manual'],'next':'33 N만 명시 수정 · 외부 실행은 하지 않는다.'}}
++                self.assertEqual(got,expected)
++            else:self.assertEqual(got,old)
++        self.assertEqual(edited['sources'],before['sources']);self.assertEqual(edited['space'],before['space'])
++        for key in ['draft','draftKind','answerDraft','bases']:self.assertEqual(edited[key],before[key])
++        self.page.locator('#work-file-handoff').click()
++        expect(self.page.locator('#file-return-options')).to_have_js_property('open',True)
++        expect(self.page.locator('#file-return-options > summary')).to_be_focused();visible('#file-return-options > summary')
++        self.assertEqual(self.state(),edited,'file handoff navigation creates no H or copied content')
++        self.page.keyboard.press('Tab');expect(self.page.locator('#copy-file-work')).to_be_focused();visible('#copy-file-work')
++        self.page.keyboard.press('Enter');expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
++        base.saved(self.page)
++        raw=self.page.evaluate('navigator.clipboard.readText()');self.record('actual','33 actual clipboard raw',raw)
++        import re
++        blocks=[json.loads(x) for x in re.findall(r'```json\n([\s\S]*?)\n```',raw.replace('\r\n','\n'))]
++        file=next(x for x in blocks if x.get('schemaVersion')=='agentflow.return.2')
++        handed=self.state();H=self.task(read,handed)['handoffs'][-1]['returnId']
++        self.assertTrue(H);self.assertEqual(file['taskId'],read);self.assertEqual(file['returnId'],H)
++        file.update(report='[합성33] 파일 선택 확인만 검사한다. 실제 실행 결과가 아니다.',evidence=None,understanding=None)
++        path=base.OUT/f'flow33-{self.WIDTH}-actual-H-return.json';path.write_text(json.dumps(file,ensure_ascii=False),encoding='utf-8')
++        with self.page.expect_file_chooser() as chooser:self.page.locator('#home-file-result').click()
++        chooser.value.set_files(str(path))
++        expect(self.page.locator('#result-file-review-heading')).to_be_focused();visible('#result-file-review-heading')
++        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-selection-state','review')
++        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-target-task-id',read)
++        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-return-id',H)
++        expect(self.page.locator('#result-file-preview')).to_contain_text('아직 가져오지 않았습니다.')
++        expect(self.page.locator('#accept-result-file')).to_have_text('이 결과 가져오기')
++        self.assertEqual(self.state(),handed,'validated selection is not acceptance; current/draft/T/H/manual data unchanged')
++        self.shot('33-selected-not-imported')
++        bad={**file,'returnId':'H33_NOT_EXPORTED'};bad_path=base.OUT/f'flow33-{self.WIDTH}-wrong-H.json'
++        bad_path.write_text(json.dumps(bad,ensure_ascii=False),encoding='utf-8')
++        with self.page.expect_file_chooser() as chooser:self.page.locator('#select-result-file').click()
++        chooser.value.set_files(str(bad_path))
++        expect(self.page.locator('#result-file-error')).to_be_focused();visible('#result-file-error')
++        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-selection-state','invalid')
++        expect(self.page.locator('#accept-result-file')).to_have_count(0)
++        self.assertEqual(self.state(),handed,'wrong H stays a controlled error; no import or retargeting')
++        # Return to the same valid file, explicitly accept once, then select that same H again.
++        with self.page.expect_file_chooser() as chooser:self.page.locator('#select-result-file').click()
++        chooser.value.set_files(str(path));expect(self.page.locator('#result-file-review-heading')).to_be_focused()
++        self.page.locator('#accept-result-file').click();expect(self.page.locator('#received-result-open')).to_be_visible();base.saved(self.page)
++        received=self.state();self.assertEqual(len(received['tasks']),len(handed['tasks'])+1)
++        reports=[t for t in received['tasks'] if t['id'] not in {x['id'] for x in handed['tasks']}]
++        self.assertEqual(len(reports),1);self.assertEqual(reports[0]['resultFile']['returnId'],H)
++        self.assertEqual(received['currentTaskId'],reports[0]['id'],'existing same-current reception policy retained')
++        self.assertEqual(received['draft'],handed['draft']);self.assertEqual(received['space']['draftTarget'],handed['space']['draftTarget'])
++        with self.page.expect_file_chooser() as chooser:self.page.locator('#select-result-file').click()
++        chooser.value.set_files(str(path));expect(self.page.locator('#result-file-review-heading')).to_be_focused();visible('#result-file-review-heading')
++        expect(self.page.locator('#result-file-preview')).to_contain_text('이미 가져온 결과입니다. 기존 기록을 확인할 수 있습니다.')
++        expect(self.page.locator('#result-file-preview')).not_to_contain_text('아직 가져오지 않았습니다.')
++        expect(self.page.locator('#accept-result-file')).to_have_text('기존 기록 확인')
++        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-return-id',H)
++        self.assertEqual(self.state(),received,'duplicate selection creates no extra report and does not change current/draft')
++
+ class Pc12Wide(Pc12):
+     WIDTH,HEIGHT=1440,900
+ 

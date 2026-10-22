@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "existingMethodChange": "test02 adds one exact-current-report target assertion; all old assertions retained",
+  "newMethod": "test11 same UI4tasks/current04/read02/draftA -> header continue -> keyboard N -> no-side-effect file jump -> exact copied H -> valid preview noimport -> wrongH controlled focus -> explicit accept -> duplicate accurate state",
+  "scope": "Pc12/Pc12Wide each one added case, existing boundary class unchanged; expected PC12 suite17 rather than15",
+  "exportWorkAndAcceptResultFileByteIdentical": true,
+  "actualUI": "NOT_RUN"
+}

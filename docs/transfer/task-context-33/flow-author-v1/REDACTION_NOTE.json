@@ -1,0 +1,80 @@
+{
+  "rule": "Only absolute workspace/runtime path display changed to <workspace>/<runtime>; original local evidence unchanged. Exit values, messages and warnings preserved.",
+  "files": [
+    {
+      "file": "RECEIPT_FINAL.json",
+      "original": {
+        "path": "RECEIPT_FINAL.json",
+        "bytes": 6139,
+        "sha256": "7474a471ddb1b8bfd06b846202e2a90ec49777b65cb3fdd57e739998b40a3421",
+        "gitBlob": "c4c15aa87fb005e277cc6c414a7f326f73642349"
+      },
+      "public": {
+        "path": "RECEIPT_FINAL.json",
+        "bytes": 5197,
+        "sha256": "a142a097059372c0dda6a3cdf22c57e6850811e0f9f6f09bd8f72e5f3a7613fd",
+        "gitBlob": "c957898d620962710e37640cd8ce6a66c0accf3d"
+      }
+    },
+    {
+      "file": "type-final.exit.json",
+      "original": {
+        "path": "type-final.exit.json",
+        "bytes": 531,
+        "sha256": "9c110e89017ba13225e1fc9d01a97bade69fd125ea20e9454ee3d2b9e1e5728c",
+        "gitBlob": "63dc04075fdd552ab4ca2862b0e2bdd7f7e8f097"
+      },
+      "public": {
+        "path": "type-final.exit.json",
+        "bytes": 374,
+        "sha256": "dbd96a0bca462a2011f631b259ad397fc2fbb0ea0d8086c4241bde92fb0b4aa9",
+        "gitBlob": "89b78085801a1e7cf6fb99bf0e160d07209348a3"
+      }
+    },
+    {
+      "file": "build-final.exit.json",
+      "original": {
+        "path": "build-final.exit.json",
+        "bytes": 514,
+        "sha256": "c0addcfc999cb418e18220c19415d33f6df50dd22d549da9827a9af595d6c41a",
+        "gitBlob": "a83317b4ec26b92b940f184d9008b10ebc706149"
+      },
+      "public": {
+        "path": "build-final.exit.json",
+        "bytes": 357,
+        "sha256": "16f924f0800f2aaad512410d490e1c961c095a9892dfcb86b203050a230183c9",
+        "gitBlob": "0f21f7221ca40b501c33f88ff255afc4adf66b65"
+      }
+    },
+    {
+      "file": "js-final.exit.json",
+      "original": {
+        "path": "js-final.exit.json",
+        "bytes": 344,
+        "sha256": "8a5e0f28b5ba1e0c86bdb41be70e06622939174a333c18f2d2f143128eba16a1",
+        "gitBlob": "b1767babf6c5ea7d67f74efc3a1ec1f5eaefc3ce"
+      },
+      "public": {
+        "path": "js-final.exit.json",
+        "bytes": 272,
+        "sha256": "ed00154970fccdcf60803f52a49a21d3cb594c07faed9edc85113c8563d5dba9",
+        "gitBlob": "0d1d892fa27c141edef4f37e0e170705f1c35069"
+      }
+    },
+    {
+      "file": "diff-final.exit.json",
+      "original": {
+        "path": "diff-final.exit.json",
+        "bytes": 442,
+        "sha256": "6d1129a5ec9049849984efd50768339d87fc5d4f679953ec102c25ffd62d55c9",
+        "gitBlob": "6f52134ab477a7c168e70d7e5f28b9f38a390ceb"
+      },
+      "public": {
+        "path": "diff-final.exit.json",
+        "bytes": 357,
+        "sha256": "0debe7f1171f2691618e83fba8d987b99e783892556fee469ad9677b1b868a08",
+        "gitBlob": "98911dae47a6ed37a20d2670026bbde6514eef60"
+      }
+    }
+  ]
+}
