@@ -67,7 +67,10 @@ let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaL
 let initialMapFitPending=false;
 const MAP_CARD_HEIGHT=180; // Matches the bounded card footprint in styles.css and new-slot collision checks.
 let collapsed=new Set<string>();
-let relationReading=false,relationCaller='map-relations-open';
+type SidePanel='area'|'relations'|'records';
+let panelMode:SidePanel='area',relationCaller='map-relations-open';
+let compactMapHeader=false;
+let recordsReturnNotice='';
 type PanelReading={y:number;anchor:{id:string;top:number}|null;open:Record<string,boolean>};
 let panelReadings:Record<string,PanelReading>={};
 function safePanelReadings(raw:unknown):Record<string,PanelReading> {
@@ -107,7 +110,7 @@ function restorePanelReading() {
 // fix2: anchor = where the calling control was (its viewport top and page position), so a return can bring back the reading
 // place when content above it changed for a real reason (e.g. a notice from an explicit continue); it never rolls that back.
 type Origin={project:string;view:'space'|'area';area:string|null;map:MapView|null;selected:string|null;sheet:boolean;y:number;focus:string|null;open:Record<string,boolean>;
-  anchor:{id:string;top:number;page:number}|null;collapsed:string[];panels:Record<string,PanelReading>;relations:boolean};
+  anchor:{id:string;top:number;page:number}|null;collapsed:string[];panels:Record<string,PanelReading>;panel:SidePanel};
 let origin:Origin|null=null;
 /** GUIDE097: area guidance per project and area, in this tab's memory only (declared early: resets use it). */
 /** gen counts the user's edits of the draft; a reply that arrives after one is held in incoming, never applied over it. */
@@ -125,22 +128,22 @@ let posUndo:{id:string;from:Point|null;to:Point;at:number;key:boolean}[]=[];
 const MAP_KEY='agentflow.workspace.map';
 // HOME15: the tab also keeps the last view of a few other projects, so opening one from the list again reuses its own
 // viewport and selection instead of a fresh fit. Per tab, never project data.
-type MapMemo={view?:MapView|null;selected?:unknown;collapsed?:unknown;panels?:Record<string,PanelReading>|undefined;relations?:boolean|undefined};
+type MapMemo={view?:MapView|null;selected?:unknown;collapsed?:unknown;panels?:Record<string,PanelReading>|undefined;panel?:unknown;relations?:boolean|undefined};
 function mapMemos():Record<string,MapMemo> {
   try {const v=JSON.parse(session?.getItem(MAP_KEY)||'null') as {project?:unknown;view?:MapView|null;selected?:unknown;others?:unknown}|null;if(!v)return {};
     const others=v.others&&typeof v.others==='object'?{...v.others as Record<string,MapMemo>}:{};
-    if(typeof v.project==='string')others[v.project]={view:v.view??null,selected:v.selected??null,collapsed:(v as MapMemo).collapsed,panels:(v as MapMemo).panels,relations:(v as MapMemo).relations};return others;
+    if(typeof v.project==='string')others[v.project]={view:v.view??null,selected:v.selected??null,collapsed:(v as MapMemo).collapsed,panels:(v as MapMemo).panels,panel:(v as MapMemo).panel,relations:(v as MapMemo).relations};return others;
   } catch {return {};}
 }
 function rememberMap(){try{const others=Object.entries(mapMemos()).filter(([id])=>id!==project.id).slice(-11);
-  session?.setItem(MAP_KEY,JSON.stringify({project:project.id,view:mapView,selected:mapSelected,collapsed:[...collapsed],panels:panelReadings,relations:relationReading,others:Object.fromEntries(others)}));}catch{/* Per-tab convenience only. */}}
+  session?.setItem(MAP_KEY,JSON.stringify({project:project.id,view:mapView,selected:mapSelected,collapsed:[...collapsed],panels:panelReadings,panel:panelMode,others:Object.fromEntries(others)}));}catch{/* Per-tab convenience only. */}}
 function recallMap() {
   try {const v=mapMemos()[project.id];
     if(!v)return;const w=v.view;
     mapView=w&&[w.x,w.y,w.s].every(n=>typeof n==='number'&&Number.isFinite(n))&&w.s>=FIT_MIN&&w.s<=ZOOM_MAX?w:null;
     mapSelected=typeof v.selected==='string'&&project.space.areas.some(a=>a.id===v.selected&&!a.archived)?v.selected:null;
     collapsed=new Set(Array.isArray(v.collapsed)?v.collapsed.filter((id):id is string=>typeof id==='string'&&project.space.areas.some(a=>a.id===id&&!a.archived)):[]);
-    panelReadings=safePanelReadings(v.panels);relationReading=v.relations===true;
+    panelReadings=safePanelReadings(v.panels);panelMode=v.panel==='records'||v.panel==='relations'?v.panel:v.relations===true?'relations':'area';
   } catch {/* none */}
 }
 const spaceInputs:Record<string,string>={};
@@ -182,7 +185,7 @@ function resetEphemeral() {
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
   receivedAreas.clear();
   understandingEditRevisions.clear();lastReceipt=null;located=null;
-  mapView=null;mapSelected=null;initialMapFitPending=false;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};relationReading=false;backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
+  mapView=null;mapSelected=null;initialMapFitPending=false;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};panelMode='area';recordsReturnNotice='';backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
 function openEntry(entry:WorkspaceEntry,fromList=false) {
@@ -275,6 +278,7 @@ function displayView() {
   document.body.dataset.compact=String(inProject&&(view==='space'||view==='area'||view==='task'||!starting));
   // PC13: which layer is shown, so the whole space alone can use tighter spacing (other screens, notices and errors unchanged).
   document.body.dataset.layer=inProject?view:'';
+  syncProjectHeader();
   const chip=$('connection-details'),host=$(inProject?'topbar-actions':'home-actions');if(chip.parentElement!==host)host.prepend(chip);
   $('projects-view').hidden=inProject;$('breadcrumb-project').hidden=!inProject;$('breadcrumb-sep').hidden=!inProject;$('example-banner').hidden=route!=='example';
   for(const id of ['nav-work','nav-context','nav-history'])$(id).hidden=!inProject||starting;
@@ -298,6 +302,12 @@ function displayView() {
   for(const [id,active] of [['nav-work',inProject&&view==='work'&&!contextOpen],['nav-context',inProject&&view==='work'&&contextOpen],['nav-history',inProject&&view==='history']] as const){
     $(id).classList.toggle('active',active);if(active)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current');
   }
+}
+/** Only the PC whole-map header uses the explicit management menu; other layers keep their existing controls. */
+function syncProjectHeader() {
+  const compact=route!=='projects'&&view==='space'&&innerWidth>760,menu=$<HTMLDetailsElement>('project-management');
+  if(compact!==compactMapHeader){menu.open=!compact;compactMapHeader=compact;}
+  document.body.dataset.mapHeader=String(compact);
 }
 function showWork() {view='work';displayView();}
 /** SPATIAL102: remember the layer being left (scroll; in an area also which request was opened). Tab memory only. */
@@ -331,14 +341,17 @@ function openArea(id:string) {
 /** PC12: leaving the map or an area screen to read (or continue) a task records where the user was. Tab memory only. */
 function markOrigin(focus:string|null=null) {
   if(view!=='space'&&view!=='area')return;
+  if(located?.origin.panel==='records'){origin=located.origin;return;}
   const active=document.activeElement as HTMLElement|null,used=active?.id&&$('space-view').contains(active)?active.id:null;
   const id=focus??used;capturePanelReading(id);
   const open=Object.fromEntries([...$('space-view').querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]));
   const el=id?document.getElementById(id):null,r=el&&el.getClientRects().length?el.getBoundingClientRect():null;
   origin={project:project.id,view,area:view==='area'?viewArea:null,map:mapView?{...mapView}:null,selected:mapSelected,sheet:sheetOpen,y:window.scrollY,focus:id,open,
-    anchor:id&&r&&!el?.closest('#area-panel-body')?{id,top:r.top,page:r.top+window.scrollY}:null,collapsed:[...collapsed],panels:structuredClone(panelReadings),relations:relationReading};
+    anchor:id&&r&&!el?.closest('#area-panel-body')?{id,top:r.top,page:r.top+window.scrollY}:null,collapsed:[...collapsed],panels:structuredClone(panelReadings),panel:view==='space'?panelMode:'area'};
 }
 function originLabel(o:Origin):string {
+  if(o.view==='space'&&o.panel==='records')return '전체 공간 · 이어 볼 기록';
+  if(o.view==='space'&&o.panel==='relations')return '전체 공간 · 연결';
   if(o.view==='area')return o.area==='unassigned'?'영역 미지정 작업':areaById(o.area)?.name??'영역';
   const sel=o.selected?areaById(o.selected):null;return sel?`전체 공간 · ${sel.name} 정보`:'전체 공간';
 }
@@ -350,7 +363,7 @@ function originButton(id:string):HTMLButtonElement|null {
 /** PC12: back to the view this reading started from. It restores only the view (layer, area, viewport, selection, scroll,
  * the control used); the continued work and saved edits stay as they are now. A starting point that no longer exists
  * (area archived/removed, another project) falls back to the whole space without choosing anything else. */
-function returnToOrigin() {const o=origin;origin=null;restoreOrigin(o);}
+function returnToOrigin() {const o=origin;origin=null;if(o?.panel==='records')located=null;restoreOrigin(o);}
 /** AREA17: back to the view before an explicit 'where is it' moved the map (also after reading a task from there). */
 function returnFromLocate() {const o=located?.origin??null;located=null;origin=null;restoreOrigin(o);}
 function restoreOrigin(o:Origin|null) {
@@ -362,7 +375,7 @@ function restoreOrigin(o:Origin|null) {
   leaveLayer();
   view=areaGone?'space':o.view;viewArea=view==='area'?o.area:null;viewTask=null;viewReturn=null;
   if(o.map)mapView={...o.map};mapSelected=selGone?null:o.selected;sheetOpen=o.sheet&&!!mapSelected;
-  collapsed=new Set(o.collapsed);panelReadings=structuredClone(panels);relationReading=o.relations;
+  collapsed=new Set(o.collapsed);panelReadings=structuredClone(panels);panelMode=o.panel;recordsReturnNotice='';
   render(false,false); // Reading waits until the original disclosures and final workspace height are restored.
   // fix1: disclosures that still exist get the open state they had; ones that are gone are skipped. Then the scroll.
   if(!areaGone)for(const [id,open] of Object.entries(o.open)){const d=document.getElementById(id);if(d instanceof HTMLDetailsElement&&$('space-view').contains(d))d.open=open;}
@@ -371,9 +384,12 @@ function restoreOrigin(o:Origin|null) {
   // scroll so it is where it was in the viewport (the browser may clamp at the page end). Without the control: the plain scroll.
   const a=!areaGone?o.anchor:null,el=a?document.getElementById(a.id):null;
   if(a&&el&&el.getClientRects().length){const page=el.getBoundingClientRect().top+window.scrollY;if(Math.abs(page-a.page)>=1)window.scrollTo({top:page-a.top});}
+  const recordGone=o.view==='space'&&o.panel==='records'&&!!o.focus&&!document.getElementById(o.focus);
+  if(recordGone){recordsReturnNotice='출발한 버튼이 현재 목록에 없어 기록 머리로 돌아왔어요. 후속 요청 등으로 목록이 달라져도 원 기록은 지난 요청과 결과에 남아 있어요.';const note=$('records-return-notice');note.textContent=recordsReturnNotice;note.hidden=false;}
   sizeWorkspace();panelReadings=panels;restorePanelReading();rememberMap();
   if(areaGone||selGone){project={...project,notice:'출발한 영역이 보관되었거나 없어져 그 위의 보기로 돌아왔어요. 다른 영역이나 작업을 대신 고르지 않았어요.'};renderStatus();}
-  if(areaGone||!(o.focus&&focusFirst(o.focus)))$('space-title')?.focus({preventScroll:true});
+  if(recordGone)$('records-heading')?.focus({preventScroll:true});
+  else if(areaGone||!(o.focus&&focusFirst(o.focus)))$('space-title')?.focus({preventScroll:true});
 }
 /** SPATIAL102: the read-only task screen. Opening it never changes the continued work or the request target.
  * returnId (SPATIAL102-R1): the report a check item points to, shown on that screen. */
@@ -987,14 +1003,15 @@ function cardMenu(name:string,...items:HTMLButtonElement[]):HTMLDetailsElement {
 }
 /** HOME15 follow-up: the full name and purpose before entering, read-only. Text only (never parsed as HTML), never saved.
  * It shows the saved project read fresh at the moment it opens; one that another tab trashed or removed is not shown. */
-let reading:{entryId:string;y:number}|null=null;
+let reading:{kind:'home';entryId:string;y:number}|{kind:'map';caller:string;y:number}|null=null;
 function readProject(entryId:string) {
   const fresh=workspace.read()?.entries.find(e=>e.entryId===entryId&&e.state==='active');
   if(!fresh){listNotice='다른 탭에서 바뀌어 이 프로젝트를 보여주지 않았어요. 목록을 새로 읽었어요.';render();focusListCard(null);return;}
   const brief=fresh.project.space.brief?.text.trim();
   $('project-read-name').textContent=fresh.project.name;
   const purpose=$('project-read-purpose');purpose.textContent=brief||'목적을 아직 적지 않았어요';purpose.classList.toggle('missing',!brief);
-  reading={entryId,y:window.scrollY};
+  reading={kind:'home',entryId,y:window.scrollY};
+  $('project-read-note').textContent='읽기만 해요. 프로젝트를 열거나 바꾸지 않아요.';
   // Order: close the card menu first, then open the window, so the menu neither keeps the first Escape nor takes the focus back.
   for(const m of document.querySelectorAll<HTMLDetailsElement>('.project-more[open]'))m.open=false;
   const dialog=$<HTMLDialogElement>('project-read');dialog.showModal();
@@ -1002,11 +1019,20 @@ function readProject(entryId:string) {
   // Focus starts at the top of the text (the name), so PageDown/End/arrow keys scroll it at once; Tab reaches '닫기'.
   body.focus({preventScroll:true});
 }
+/** A bounded read of the current project's text; an unsubmitted purpose editor remains a separate draft. */
+function readMapPurpose() {
+  $('project-read-name').textContent=project.name;
+  const purpose=$('project-read-purpose'),brief=project.space.brief?.text??'';purpose.textContent=brief||'목적을 아직 적지 않았어요';purpose.classList.toggle('missing',!brief);
+  $('project-read-note').textContent='현재 프로젝트의 이름과 목적을 읽어요. ‘목적 고치기’에 작성 중인 초안은 바꾸지 않아요.';
+  reading={kind:'map',caller:'brief-read',y:window.scrollY};
+  $<HTMLDialogElement>('project-read').showModal();const body=$('project-read-body');body.scrollTop=0;body.focus({preventScroll:true});
+}
 /** Back to the same card's '더보기' button and the same list position; nothing in the dialog is kept. */
 function closeReading() {
   const back=reading;reading=null;
   $('project-read-name').textContent='';$('project-read-purpose').textContent='';
   if(!back)return;window.scrollTo({top:back.y});
+  if(back.kind==='map'){document.getElementById(back.caller)?.focus({preventScroll:true});return;}
   const more=document.querySelector<HTMLElement>(`#project-list .project-card[data-entry-id="${CSS.escape(back.entryId)}"] .project-more-button`);
   if(more)more.focus({preventScroll:true});else $('projects-title').focus({preventScroll:true});
 }
@@ -1192,7 +1218,7 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   // Information shows the short properties; it never opens the area or changes the open work.
   const info=node('button','정보','quiet node-info');info.type='button';info.id=`node-info-${a.id}`;info.setAttribute('aria-pressed',String(mapSelected===a.id));
   info.setAttribute('aria-label',`${a.name} 정보 (들어가지 않음)`);
-  info.addEventListener('click',()=>{mapSelected=a.id;sheetOpen=true;relationReading=false;rememberMap();render();$(`node-info-${a.id}`)?.focus({preventScroll:true});});
+  info.addEventListener('click',()=>{capturePanelReading();if(located?.origin.panel==='records'&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();$(`node-info-${a.id}`)?.focus({preventScroll:true});});
   el.append(handle,enter,info);
   const children=childrenOf(project,a.id).filter(x=>!x.archived);
   if(children.length){const folded=collapsed.has(a.id),toggle=btn(folded?`하위 ${descendantAreas(project,a.id).filter(x=>!x.archived).length}개 펼치기`:'하위 접기',()=>toggleBranch(a.id),'quiet branch-toggle',`branch-toggle-${a.id}`);
@@ -1258,12 +1284,12 @@ function sizeWorkspace() {
   if(innerWidth>760){const top=layout.getBoundingClientRect().top;layout.style.height=`${Math.max(240,innerHeight-Math.max(0,top)-16)}px`;if(map){map.style.height='100%';map.style.minHeight='0';}}
   else {layout.style.removeProperty('height');map?.style.removeProperty('height');map?.style.removeProperty('min-height');}
 }
-window.addEventListener('resize',()=>{capturePanelReading();sizeWorkspace();restorePanelReading();});
+window.addEventListener('resize',()=>{capturePanelReading();syncProjectHeader();sizeWorkspace();restorePanelReading();});
 document.addEventListener('toggle',e=>{if(e.target instanceof HTMLDetailsElement&&e.target.closest('#space-view')&&!e.target.closest('#area-panel'))sizeWorkspace();},true);
-function openRelations(from='map-relations-open') {capturePanelReading();relationCaller=from;relationReading=true;rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});}
+function openRelations(from='map-relations-open') {capturePanelReading();relationCaller=from;panelMode='relations';rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});}
 function relationBrowser():HTMLElement {
-  const panel=node('aside','','area-panel relation-panel sheet-open');panel.id='area-panel';panel.setAttribute('aria-label','연결의 실제 부분과 기록 읽기');
-  const close=()=>{capturePanelReading();relationReading=false;rememberMap();render();(document.getElementById(relationCaller)??$('map-relations-open'))?.focus({preventScroll:true});};
+  const panel=node('aside','','area-panel relation-panel sheet-open');panel.id='area-panel';panel.dataset.panelMode='relations';panel.setAttribute('aria-label','연결의 실제 부분과 기록 읽기');
+  const close=()=>{capturePanelReading();panelMode='area';rememberMap();render();(document.getElementById(relationCaller)??$('map-relations-open'))?.focus({preventScroll:true});};
   const head=node('div','','panel-top');head.append(node('strong',`연결 ${project.space.relations.length}건`),btn('닫기',close,'quiet','area-panel-close'));
   const body=node('div','','panel-body');body.id='area-panel-body';body.dataset.areaId='@relations';body.dataset.projectId=project.id;body.tabIndex=0;body.setAttribute('role','region');body.setAttribute('aria-label','연결과 소유 기록 읽기');
   body.addEventListener('scroll',()=>{capturePanelReading();rememberMap();},{passive:true});body.addEventListener('toggle',()=>{capturePanelReading();rememberMap();},true);
@@ -1325,6 +1351,7 @@ function drawRelations(svg:SVGSVGElement,labels:HTMLElement,plane:HTMLElement) {
   }
 }
 function renderMap(root:HTMLElement,active:Area[],extra:HTMLElement[]=[]) {
+  if(panelMode!=='records')recordsReturnNotice='';
   const shown=visibleAreas(project,collapsed);
   const section=node('section','','area-map');section.setAttribute('aria-label','영역 지도');
   const bar=node('div','','map-toolbar');bar.append(node('h2','영역'));
@@ -1337,6 +1364,9 @@ function renderMap(root:HTMLElement,active:Area[],extra:HTMLElement[]=[]) {
   const submitArea=node('button','＋ 영역 추가','secondary');submitArea.type='submit';submitArea.id='area-add';add.append(name,note,submitArea);
   addPanel.append(add);bar.append(addPanel,...extra);
   bar.append(btn(`연결 ${project.space.relations.length}건`,()=>openRelations(),'quiet','map-relations-open'));
+  const areaTab=btn('선택 부분',()=>{capturePanelReading();panelMode='area';sheetOpen=true;rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});},'quiet','map-area-open');
+  areaTab.disabled=!mapSelected;bar.append(areaTab);
+  for(const [id,mode] of [['check-summary','records'],['map-relations-open','relations'],['map-area-open','area']] as const)bar.querySelector(`#${id}`)?.setAttribute('aria-pressed',String(panelMode===mode));
   const unplaced=areaRequests(null);
   if(unplaced.length){const b=btn(`영역 미지정 작업 · 요청 ${unplaced.length}개`,()=>openArea('unassigned'),'quiet','open-unplaced');bar.append(b);}
   section.append(bar);
@@ -1373,7 +1403,7 @@ function renderMap(root:HTMLElement,active:Area[],extra:HTMLElement[]=[]) {
     map.addEventListener('pointermove',move);map.addEventListener('pointerup',up);map.addEventListener('pointercancel',up);
   });
   const sel=mapSelected?areaById(mapSelected):null;
-  if(relationReading)layout.append(relationBrowser());else if(sel&&!sel.archived)layout.append(areaPanel(sel));
+  if(panelMode==='records')layout.append(recordsBrowser());else if(panelMode==='relations')layout.append(relationBrowser());else if(sel&&!sel.archived)layout.append(areaPanel(sel));
   section.append(layout);root.append(section);sizeWorkspace();
   if(!mapView)initialMapFitPending=true;
   applyView(plane);scale.textContent=scaleLabel(mapView?.s??1);redraw();
@@ -1401,7 +1431,7 @@ function areaList(active:Area[]):HTMLElement {
     const enter=btn('',()=>openArea(a.id),'quiet area-list-enter',`list-enter-${a.id}`);
     enter.append(node('strong',`${a.name} ↘`),node('span',a.note?shortText(a.note,40):'구상 미기재','hint'));
     if(areaRequests(a.id).some(currentGroup))enter.append(appTag());
-    const info=btn('정보',()=>{mapSelected=a.id;sheetOpen=true;relationReading=false;rememberMap();render();},'secondary area-list-info',`list-info-${a.id}`);
+    const info=btn('정보',()=>{capturePanelReading();if(located?.origin.panel==='records'&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();},'secondary area-list-info',`list-info-${a.id}`);
     info.setAttribute('aria-pressed',String(mapSelected===a.id));info.setAttribute('aria-label',`${a.name} 정보 (들어가지 않음)`);
     row.append(enter,info);box.append(row);
   }
@@ -1443,7 +1473,7 @@ function showReceivedArea(id:string,from:string|null=null,keepScale=false) {
     located={area:id,origin:origin!};
   } else located.area=id;
   for(const a of areaPath(project,id).slice(0,-1))collapsed.delete(a.id);
-  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;mapSelected=id;sheetOpen=true;relationReading=false;render();
+  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;mapSelected=id;sheetOpen=true;panelMode='area';render();
   revealCard(id,keepScale);rememberMap();const line=locatedLine();if(line)document.getElementById('located-note')?.replaceWith(line);
   const card=document.querySelector<HTMLElement>(`.area-node[data-area-id="${id}"]`);
   if(card){const r=card.getBoundingClientRect(),note=document.getElementById('located-note'),top=(note??$('space-map')).getBoundingClientRect().top;
@@ -1549,7 +1579,7 @@ function understandingPanel(a:Area,id:string,compact=false):HTMLElement|null {
 /** Short properties of the selected area, read first: name, the user's idea, and this area's requests for the user to pick.
  * Editing opens explicitly. No report is picked for the user; reports are read inside the task the user chose. */
 function areaPanel(a:Area):HTMLElement {
-  const panel=node('aside','','area-panel');panel.id='area-panel';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
+  const panel=node('aside','','area-panel');panel.id='area-panel';panel.dataset.panelMode='area';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
   const close=()=>{capturePanelReading();mapSelected=null;sheetOpen=false;rememberMap();render();$(`node-info-${visibleRepresentative(project,a.id,collapsed)??a.id}`)?.focus({preventScroll:true});};
   const head=node('div','','panel-top'),heading=node('strong',a.name);heading.id='area-panel-title';
   heading.title=a.name;
@@ -1647,28 +1677,39 @@ function renderSpace() {
   if(view==='space')renderOverview(root);else if(view==='task')renderTaskView(root,t!);else if(area)renderArea(root,area);else renderUnplaced(root);
 }
 /* ---------- SPATIAL102: '확인할 일' (read-only, from existing records) ---------- */
-const CHECK_SHOWN=4;
 function checkRow(it:CheckItem):HTMLElement {
   const li=node('li','','check-item');li.dataset.kind=it.kind;const t=project.tasks.find(x=>x.id===it.taskId),a=areaById(it.areaId);
   li.append(node('span',`${a?a.name:'영역 미지정'}${a?.archived?' · 보관됨':''}`,'check-area'),node('strong',t?taskTitle(project,t):''),node('span',it.kind==='decision'?`${it.status} · 답을 기다려요`:`${it.status} · 아직 다음 요청이나 확인 작업문 없음`,'hint'));
-  li.append(btn('보기',()=>openTaskView(it.taskId,it.returnId,`check-open-${it.returnId??it.taskId}`),'quiet',`check-open-${it.returnId??it.taskId}`));return li;
+  li.append(btn('보기',()=>openTaskView(it.taskId,it.returnId,`check-open-${it.returnId??it.taskId}`),'quiet',`check-open-${it.returnId??it.taskId}`));
+  if(a&&!a.archived)li.append(btn('소유 부분 보기',()=>showReceivedArea(a.id,`check-area-${it.returnId??it.taskId}`,true),'quiet',`check-area-${it.returnId??it.taskId}`));return li;
 }
 /** Shown once the project has requests. Items with evidence only: an open question, a report nothing was done with yet. */
 const CHECK_KIND:Record<CheckItem['kind'],string>={decision:'답 기다림',report:'후속 작업문 없는 보고'};
-/** PC13: the same items as before, folded into one line that says how many there are and of which kinds. They are app records to
- * look at again, not open problems of the program, external run states or completion. Opening shows the same rows and buttons. */
+/** Records reuse the existing task/report identities; only their reading container is different. */
 function checkSection():HTMLElement|null {
   if(!project.tasks.length)return null;
-  const items=checkItems(project),box=details('','check-list');box.classList.add('check-list','toolbar-disclosure');
+  const items=checkItems(project),box=btn('',openRecords,'quiet records-open','check-summary');
   const kinds=(['decision','report'] as const).map(k=>[k,items.filter(i=>i.kind===k).length] as const).filter(([,n])=>n>0);
-  const summary=box.querySelector('summary')!;summary.id='check-summary';
-  summary.append(node('span',`이어 볼 기록 ${items.length}개`,'check-count'),...kinds.map(([k,n])=>node('span',` · ${CHECK_KIND[k]} ${n}`,'check-kind')));
-  if(!items.length){box.append(node('p','답을 기다리는 질문이나 다음 요청·확인 작업문이 없는 보고가 앱 기록에 지금은 없어요. 개발 도구의 실행 상태나 완료 여부는 아니에요.','hint'));return box;}
-  box.append(node('p','답을 기다리는 질문과, 받은 뒤 아직 다음 요청이나 확인 작업문이 없는 보고예요. 앱 기록 기준이며 개발 도구의 실행 상태나 완료 여부는 아니에요.','hint'));
-  const list=node('ul','','check-items');for(const it of items.slice(0,CHECK_SHOWN))list.append(checkRow(it));box.append(list);
-  if(items.length>CHECK_SHOWN){const more=details(`나머지 ${items.length-CHECK_SHOWN}건`,'check-more'),rest=node('ul','','check-items');
-    for(const it of items.slice(CHECK_SHOWN))rest.append(checkRow(it));more.append(rest);box.append(more);}
+  box.append(node('span',`이어 볼 기록 ${items.length}개`,'check-count'),...kinds.map(([k,n])=>node('span',` · ${CHECK_KIND[k]} ${n}`,'check-kind')));
+  box.setAttribute('aria-controls','area-panel');box.setAttribute('aria-pressed',String(panelMode==='records'));
   return box;
+}
+function openRecords() {capturePanelReading();located=null;origin=null;panelMode='records';recordsReturnNotice='';rememberMap();render();$('records-heading')?.focus({preventScroll:true});}
+function recordsBrowser():HTMLElement {
+  const panel=node('aside','','area-panel records-panel sheet-open');panel.id='area-panel';panel.dataset.panelMode='records';panel.setAttribute('aria-label','이어 볼 기록 읽기');
+  const close=()=>{capturePanelReading();panelMode='area';rememberMap();render();$('check-summary')?.focus({preventScroll:true});};
+  const items=checkItems(project),head=node('div','','panel-top'),heading=node('strong',`이어 볼 기록 ${items.length}개`);heading.id='records-heading';heading.tabIndex=-1;
+  head.append(heading,btn('닫기',close,'quiet','area-panel-close'));
+  const notice=node('p',recordsReturnNotice,'hint records-return-notice');notice.id='records-return-notice';notice.hidden=!recordsReturnNotice;notice.setAttribute('role','status');head.append(notice);
+  const body=node('div','','panel-body');body.id='area-panel-body';body.dataset.areaId='@records';body.dataset.projectId=project.id;body.tabIndex=0;body.setAttribute('role','region');body.setAttribute('aria-label','이어 볼 기록 목록');
+  body.append(node('p',items.length?'답을 기다리는 질문과, 받은 뒤 아직 다음 요청이나 확인 작업문이 없는 보고예요. 앱 기록 기준이며 개발 도구의 실행 상태나 완료 여부는 아니에요.':'이어 볼 질문이나 보고가 지금은 없어요. 원래 요청과 보고는 지난 요청과 결과에서 볼 수 있어요.','hint'));
+  const list=node('ul','','check-items');list.id='check-list';for(const it of items)list.append(checkRow(it));body.append(list);
+  body.addEventListener('scroll',()=>{capturePanelReading();rememberMap();},{passive:true});body.addEventListener('toggle',()=>{capturePanelReading();rememberMap();},true);
+  body.addEventListener('wheel',e=>{e.stopPropagation();if(e.deltaY<0&&body.scrollTop<=0||e.deltaY>0&&body.scrollTop+body.clientHeight>=body.scrollHeight-1)e.preventDefault();},{passive:false});
+  body.addEventListener('keydown',e=>{if(e.defaultPrevented||e.isComposing||e.keyCode===229||(e.target as HTMLElement).closest('input,textarea,select,[contenteditable="true"]')||e.key===' '&&e.target!==body)return;if(['ArrowDown','ArrowUp','PageDown','PageUp',' ','Home','End'].includes(e.key)){e.preventDefault();e.stopPropagation();body.scrollTop=e.key==='Home'?0:e.key==='End'?body.scrollHeight:body.scrollTop+(e.key==='ArrowDown'?40:e.key==='ArrowUp'?-40:e.key==='PageUp'||e.key===' '&&e.shiftKey?-body.clientHeight*.8:body.clientHeight*.8);}});
+  panel.addEventListener('keydown',e=>{if(e.key!=='Escape'||protectedEscape(e))return;e.preventDefault();e.stopPropagation();close();});
+  const actions=node('div','','panel-actions');actions.id='panel-actions';actions.append(btn('지도에서 계속 보기',close,'secondary','records-close'));
+  panel.append(head,body,actions);return panel;
 }
 function renderOverview(root:HTMLElement) {
   const active=project.space.areas.filter(a=>!a.archived),archived=project.space.areas.filter(a=>a.archived),brief=project.space.brief;
@@ -1678,7 +1719,8 @@ function renderOverview(root:HTMLElement) {
   const line=node('div','','space-head-line');line.append(title);
   const purpose=node('p',brief?brief.text:'무엇을 만드는지 한두 문장으로 적어 두면 영역을 나누기 쉬워요.',brief?'space-brief':'hint');purpose.id='space-brief';
   if(brief)line.append(node('span','프로젝트 목적','space-brief-label'));line.append(purpose);head.append(line);
-  const edit=details(brief?'목적 전체 보기 · 고치기':'목적 적기','brief-edit'),field=spaceInput(node('textarea'),'brief-edit-text',brief?.text??'');field.rows=4;field.maxLength=12000;
+  if(brief)line.append(btn('목적 전체 보기',readMapPurpose,'quiet','brief-read'));
+  const edit=details(brief?'목적 고치기':'목적 적기','brief-edit'),field=spaceInput(node('textarea'),'brief-edit-text',brief?.text??'');field.rows=4;field.maxLength=12000;
   field.setAttribute('aria-label','프로젝트 목적');
   edit.append(field,btn('목적 저장',()=>{if(!field.value.trim())return;commit(setBrief(project,field.value.trim()));clearInputs('brief-edit-text');},'secondary','brief-save'));
   if(brief?.previous.length)edit.append(node('p',`이전에 적은 목적 ${brief.previous.length}개는 그대로 보관돼요.`,'hint'));
@@ -1884,7 +1926,7 @@ function renderArea(root:HTMLElement,a:Area) {
   const checks=checkItems(project),here=checks.filter(c=>c.areaId===a.id).length,elsewhere=checks.length-here;
   if(here||elsewhere) {
     const line=node('p',`이어 볼 기록 · 이 영역 ${here}개${elsewhere?` · 다른 영역 ${elsewhere}개`:''} `,'hint area-checks');line.id='area-checks';
-    line.append(btn('전체 공간에서 보기',()=>{openSpace();const d=document.getElementById('check-list') as HTMLDetailsElement|null;if(d){d.open=true;d.scrollIntoView({block:'start'});}},'crumb-link','area-checks-open'));root.append(line);
+    line.append(btn('전체 공간에서 보기',()=>{openSpace();openRecords();},'crumb-link','area-checks-open'));root.append(line);
   }
   const tasks=areaRequests(a.id),list=node('section','','area-tasks');list.id='area-tasks';
   if(!a.archived&&route!=='example')root.append(guidePanel(a,tasks.length>0));
@@ -2136,7 +2178,7 @@ function renderUnplaced(root:HTMLElement) {
 function renderPlace(t:Task|null) {
   const bar=$('work-place');bar.replaceChildren();bar.hidden=!hasSpace(project)||route==='example';if(bar.hidden)return;
   const area=t?areaById(areaOf(project,t)):null;
-  bar.append(btn('전체 공간',openSpace,'crumb-link','place-space'));
+  bar.append(btn('전체 공간',()=>{endRecordsExcursion();openSpace();},'crumb-link','place-space'));
   if(area)bar.append(node('span','›','crumb-sep'),btn(area.name,()=>openArea(area.id),'crumb-link','place-area'));
   const receipt=t?receiptOf(t):null;
   bar.append(node('span','›','crumb-sep'),node('strong',!t?'새 요청':receipt!==null?`${receipt>=0?`작업 ${pad(receipt+1)}의 보고 · `:''}후속 확인 작업문 초안`:'앱에서 이어갈 작업'),node('span','이어가는 작업','layer-chip'));
@@ -2186,7 +2228,7 @@ function render(capturePanel=true,restoreReading=true) {
   // REPORT16-fix1: on the task screen, readOpen alone decides its disclosures (per request; a picked report's own parts per report).
   // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
   const taskScreen=view==='task'?$('space-view'):null;
-  for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&!taskScreen?.contains(d)&&!d.closest('#area-panel'))d.open=open.get(d.id)!;
+  for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&d.id!=='project-management'&&!taskScreen?.contains(d)&&!d.closest('#area-panel'))d.open=open.get(d.id)!;
   sizeWorkspace();finishInitialMapFit();if(restoreReading)restorePanelReading();
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
@@ -2290,7 +2332,9 @@ $('list-import').addEventListener('click',()=>$<HTMLInputElement>('import-file')
 for(const id of ['list-example','open-example'])$(id).addEventListener('click',()=>void openExample());
 $('example-start').addEventListener('click',()=>closeExample(true));
 $('example-close').addEventListener('click',()=>closeExample(false));
-$('nav-space').addEventListener('click',openSpace);
+/** Explicit navigation starts a new excursion. Part/endpoint locators and same-part actions keep their first caller. */
+function endRecordsExcursion(){const ended=located?.origin.panel==='records'||origin?.panel==='records';if(located?.origin.panel==='records')located=null;if(origin?.panel==='records')origin=null;recordsReturnNotice='';if(ended)renderPlace(project.currentTaskId?taskOf(project):null);}
+$('nav-space').addEventListener('click',()=>{endRecordsExcursion();openSpace();});
 document.addEventListener('keydown',e=>{
   if(!(e.ctrlKey||e.metaKey)||e.shiftKey||e.key.toLowerCase()!=='z')return;
   const t=e.target as HTMLElement|null;if(t&&(t.closest('input,textarea,select')||t.isContentEditable))return; // text undo first
@@ -2301,10 +2345,10 @@ $('brief-input').addEventListener('input',()=>{$<HTMLButtonElement>('brief-start
 $('brief-form').addEventListener('submit',e=>{e.preventDefault();const value=$<HTMLTextAreaElement>('brief-input').value.trim();if(!value)return;
   guard(()=>{let n=setBrief(project,value);if(!n.tasks.length&&n.name===createProject().name)n=rename(n,shortText(value,30));
     $<HTMLTextAreaElement>('brief-input').value='';commit(n);openSpace();$('area-name')?.focus();});});
-$('nav-work').addEventListener('click',()=>{contextOpen=false;showWork();$('context-title').scrollIntoView({block:'nearest'});});
+$('nav-work').addEventListener('click',()=>{endRecordsExcursion();contextOpen=false;showWork();$('context-title').scrollIntoView({block:'nearest'});});
 $('nav-context').addEventListener('click',()=>{if(contextOpen&&view==='work')closeContext();else showContext();});
 $('close-context').addEventListener('click',closeContext);
-$('nav-history').addEventListener('click',()=>{view='history';displayView();$<HTMLDetailsElement>('history').open=true;$('history-title').focus();});
+$('nav-history').addEventListener('click',()=>{endRecordsExcursion();view='history';displayView();$<HTMLDetailsElement>('history').open=true;$('history-title').focus();});
 $('back-to-work').addEventListener('click',()=>{showWork();$('nav-work').focus();});
 for(const example of document.querySelectorAll<HTMLButtonElement>('[data-example]'))example.addEventListener('click',()=>guard(()=>{commit(editDraft(project,example.dataset.example!));$('draft').focus();}));
 {
@@ -2315,6 +2359,8 @@ for(const example of document.querySelectorAll<HTMLButtonElement>('[data-example
   // The list behind stays where it was: the wheel scrolls only the text (which does not hand its overscroll to the page).
   dialog.addEventListener('wheel',e=>{if(!$('project-read-body').contains(e.target as Node))e.preventDefault();},{passive:false});
   dialog.addEventListener('keydown',e=>{
+    if(e.defaultPrevented)return;
+    if(e.key==='Escape'&&(e.isComposing||e.keyCode===229)){e.preventDefault();return;}
     // Keyboard scrolling is not stopped by overscroll-behavior: a scroll key would scroll the list behind. In the text it scrolls
     // the text and is stopped only at its end (or top); anywhere else in the window (e.g. on '닫기') it scrolls nothing.
     // Space/Enter on a button keep their own action (close).
@@ -2341,7 +2387,8 @@ document.addEventListener('click',e=>{
 function protectedEscape(e:KeyboardEvent):boolean {return e.defaultPrevented||e.isComposing||e.keyCode===229||!!(e.target as HTMLElement|null)?.closest?.('input,textarea,select,[contenteditable="true"],[role="combobox"]');}
 document.addEventListener('keydown',e=>{if(e.key!=='Escape'||protectedEscape(e)||$<HTMLDialogElement>('project-read').open)return;const m=document.querySelector<HTMLDetailsElement>('.project-more[open]');if(!m)return;
   e.stopImmediatePropagation();m.open=false;m.querySelector('summary')?.focus({preventScroll:true});},true);
-document.addEventListener('keydown',e=>{if(e.key!=='Escape'||protectedEscape(e))return;if($<HTMLDetailsElement>('connection-details').open){e.preventDefault();$<HTMLDetailsElement>('connection-details').open=false;$('connection-details').querySelector('summary')!.focus();}else if(contextOpen){e.preventDefault();closeContext();}});
+document.addEventListener('click',e=>{const menu=$<HTMLDetailsElement>('project-management');if(compactMapHeader&&menu.open&&!menu.contains(e.target as Node))menu.open=false;});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||protectedEscape(e)||$<HTMLDialogElement>('project-read').open)return;const menu=$<HTMLDetailsElement>('project-management');if(compactMapHeader&&menu.open){e.preventDefault();menu.open=false;$('project-management-toggle').focus({preventScroll:true});}else if($<HTMLDetailsElement>('connection-details').open){e.preventDefault();$<HTMLDetailsElement>('connection-details').open=false;$('connection-details').querySelector('summary')!.focus();}else if(contextOpen){e.preventDefault();closeContext();}});
 window.addEventListener('beforeunload',e=>{if(memoryDirty||pendingSave||draining){e.preventDefault();e.returnValue='';}});
 function restoreDraftPanels() {
   $<HTMLDetailsElement>('compose-panel').open=!project.tasks.length||!!project.draft.trim();
