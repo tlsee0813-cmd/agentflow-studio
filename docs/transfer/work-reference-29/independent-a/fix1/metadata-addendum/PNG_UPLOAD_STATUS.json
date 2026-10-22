@@ -1,0 +1,161 @@
+[
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-ui/1280-new-description-explicit-reopen.png",
+    "bytes": 127999,
+    "sha256": "151d519daec2f246c8c1c5eda83fa0de775aba9158f0c9ad964a3cfc02a426f9",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "normal-ui/1280-new-description-explicit-reopen.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-ui/1280-selected-description-and-N.png",
+    "bytes": 160591,
+    "sha256": "3c57c47d57c60b9e0bd9b5395aa7c1fead4aa4bd75cb4d2ce6eee150f26f1ffd",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "normal-ui/1280-selected-description-and-N.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-ui/1440-selected-description-and-N.png",
+    "bytes": 194320,
+    "sha256": "8fcd84270701d323ddf50a0a6bfd8ba5fcc3e790c4f011594d79865352b86311",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "normal-ui/1440-selected-description-and-N.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-ui/1440-new-description-explicit-reopen.png",
+    "bytes": 153007,
+    "sha256": "05c2cb7c34350929c362f5c1ed4a675f0a4a7ffae15be01cc91779be690b8739",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "normal-ui/1440-new-description-explicit-reopen.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-ui/1280-first-error.png",
+    "bytes": 105831,
+    "sha256": "98c542752eebff878058fcc4c2832979fa77fd5bdf4193720af213fb229523ec",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "first-wheel-target-preparation-error/1280-first-error.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-nested-scroll/1440-after-new-description-old-selected-reading.png",
+    "bytes": 122408,
+    "sha256": "273e448d398ac524926f10a8c1ad7cffcdcd063514497699dfe18a0d55a6b901",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "nested-scroll/1440-after-new-description-old-selected-reading.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-nested-scroll/1280-after-new-description-old-selected-reading.png",
+    "bytes": 105541,
+    "sha256": "52d5142aec45069c923a405bad175d8a7914281338c8aeb649c3497fb23940dc",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "nested-scroll/1280-after-new-description-old-selected-reading.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-nested-scroll/1280-first-error.png",
+    "bytes": 147500,
+    "sha256": "2d5e2ff5b013f02543aad411d4fdcfc575d818f888b0797aa42450f980577fba",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "first-wide-fail-narrow-reach-error/1280-first-error.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-ui/first-wheel-target-preparation-error/1280-first-error.png",
+    "bytes": 105831,
+    "sha256": "98c542752eebff878058fcc4c2832979fa77fd5bdf4193720af213fb229523ec",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "first-wheel-target-preparation-error/1280-first-error.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-nested-scroll/first-wide-fail-narrow-reach-error/1440-after-new-description-old-selected-reading.png",
+    "bytes": 122408,
+    "sha256": "273e448d398ac524926f10a8c1ad7cffcdcd063514497699dfe18a0d55a6b901",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "nested-scroll/1440-after-new-description-old-selected-reading.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-nested-scroll/first-wide-fail-narrow-reach-error/1280-first-error.png",
+    "bytes": 147500,
+    "sha256": "2d5e2ff5b013f02543aad411d4fdcfc575d818f888b0797aa42450f980577fba",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "first-wide-fail-narrow-reach-error/1280-first-error.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-author709/raw/work29-1280-test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference-last-state.png",
+    "bytes": 109461,
+    "sha256": "bd79b74ae8cae0c7c5aaacba23d206341caab7d465a7762b04609f4efa5e1867",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "author709/raw/work29-1280-test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference-last-state.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-author709/raw/work29-1440-test_03_new_applied_revision_requires_explicit_reopen-last-state.png",
+    "bytes": 120443,
+    "sha256": "90ed541540bcb05326e5dabbfbab25e16ccef629243f1024127c7ef447606bef",
+    "uploadedByContent": false,
+    "remotePathsRelativeToFix1": []
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-author709/raw/work29-1280-test_03_new_applied_revision_requires_explicit_reopen-last-state.png",
+    "bytes": 104814,
+    "sha256": "c2ddfa7687486723051e5e1e213a98876745f519bdc2afcbe5b9d0ccdfc13a6c",
+    "uploadedByContent": false,
+    "remotePathsRelativeToFix1": []
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-author709/raw/work29-1440-test_04_task_project_lifecycle_and_held_only-last-state.png",
+    "bytes": 133685,
+    "sha256": "85ad035770c48eb4f3a61400c456fa2244dcc93806db7df8a5cd550b9e3d4470",
+    "uploadedByContent": false,
+    "remotePathsRelativeToFix1": []
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-author709/raw/work29-1440-test_01_actual_editor_B_not_compose_or_map_A-last-state.png",
+    "bytes": 149308,
+    "sha256": "de546c3f8c83f392e7737ee65162ad03b60a4e9817f05b2e9ed7b1e2b485c020",
+    "uploadedByContent": false,
+    "remotePathsRelativeToFix1": []
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-author709/raw/work29-1440-test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference-last-state.png",
+    "bytes": 126181,
+    "sha256": "9a130df31d3fffc492487d8753d5149c7e53bd403042a5e37f98a34622d30610",
+    "uploadedByContent": true,
+    "remotePathsRelativeToFix1": [
+      "author709/raw/work29-1440-test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference-last-state.png"
+    ]
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-author709/raw/work29-1280-test_01_actual_editor_B_not_compose_or_map_A-last-state.png",
+    "bytes": 129050,
+    "sha256": "2a3ff144dd29f9da74cb7b3a19063e434e7e3ede476e5976f354c97cce8fd7a1",
+    "uploadedByContent": false,
+    "remotePathsRelativeToFix1": []
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle29-author709/raw/work29-1280-test_04_task_project_lifecycle_and_held_only-last-state.png",
+    "bytes": 96534,
+    "sha256": "8ccfc9285b13b4cda616f1df2fe6a916d3e45e5de89f183835ee51c969271292",
+    "uploadedByContent": false,
+    "remotePathsRelativeToFix1": []
+  }
+]
