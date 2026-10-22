@@ -2332,16 +2332,15 @@ function nextAction(t:Task,a:Area|null):HTMLElement {
 }
 /** The existing explicit continue stays separate from the unsent draft and names the record actually edited. */
 function taskContinueAction(t:Task):HTMLElement {
-  const target=continueTarget(t),edit=node('div','','task-edit'),er=node('div','','row');
+  const target=continueTarget(t),edit=node('div','','task-continue-context');
   const cur=project.currentTaskId?project.tasks.find(x=>x.id===project.currentTaskId):null;
   const edited=cur&&isReturnTask(project,cur)&&cur.parentTaskId===t.id?cur:t,owner=areaById(areaOf(project,edited));
   edit.id='task-continue-context';edit.dataset.taskId=edited.id;
   const current=cur&&cur.id!==edited.id?`현재 작업 ${pad(project.tasks.findIndex(x=>x.id===cur.id)+1)}에서 바꿀 대상 · `:'고칠 대상 · ';
-  const label=node('span',`${current}작업 ${pad(project.tasks.findIndex(x=>x.id===edited.id)+1)} · ${owner?.name??'영역 미지정'}${edited.id!==t.id?' · 현재 보고의 후속 작업문':''}`,'hint');label.id='task-continue-label';er.append(label);
-  if(currentGroup(t))er.append(appTag());
-  er.append(btn(target.button,()=>continueTask(t.id),'secondary','task-view-continue'));
-  const detail=details('이어갈 대상 확인','task-continue-details'),which=node('p',target.text,'hint task-view-target');which.id='task-view-target';detail.append(which);edit.append(er);
-  if(project.draft.trim())edit.append(node('p',`별도로 작성 중인 ${DRAFT_NAME[project.draftKind]} · ${unsentTarget()} · 그대로 둬요.`,'hint'));
+  const label=node('span',`${current}작업 ${pad(project.tasks.findIndex(x=>x.id===edited.id)+1)} · ${owner?.name??'영역 미지정'}${edited.id!==t.id?' · 현재 보고의 후속 작업문':''}`,'hint');label.id='task-continue-label';edit.append(label);
+  if(currentGroup(t))edit.append(appTag());
+  edit.append(btn(target.button,()=>continueTask(t.id),'secondary','task-view-continue'));
+  const detail=details('이어갈 대상 확인','task-continue-details'),which=node('p',target.text,'hint task-view-target');which.id='task-view-target';detail.append(which);
   edit.append(detail);
   return edit;
 }
@@ -2378,8 +2377,9 @@ function renderTaskView(root:HTMLElement,t:Task) {
   top.append(node('p',`요청 · ${area?`영역 ‘${area.name}’${area.archived?' · 보관됨':''}`:'영역 미지정'}`,'eyebrow'));
   // PC12: back to the view the reading started from; without one (e.g. after a reload) only a plain way to the whole space.
   top.append(originButton('task-return-origin')??btn('전체 공간으로',openSpace,'secondary','task-to-space'));
-  head.append(top,title,node('p',`작업 ${pad(project.tasks.indexOf(t)+1)} · ${taskStatus(project,t)}`,'hint task-view-status'));
-  head.append(taskContinueAction(t));
+  const context=node('div','','task-view-head-line');
+  context.append(node('p',`작업 ${pad(project.tasks.indexOf(t)+1)} · ${taskStatus(project,t)}`,'hint task-view-status'),taskContinueAction(t));
+  head.append(top,title,context);
   root.append(head);
   const body=node('section','','area-tasks task-view');body.id='task-view';
   const read=node('div','','task-read'),side=node('div','','task-read-side');

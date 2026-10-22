@@ -2515,6 +2515,10 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .task-next .row{gap:8px;align-items:center;flex-wrap:wrap}
 .task-next .hint{margin:6px 0 0}
 .task-edit{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.task-view-head .task-continue-context{display:flex;align-items:center;gap:4px 10px;flex-wrap:wrap;min-width:0;max-width:100%}
+.task-view-head .task-continue-context>.hint{margin:0;min-width:0;overflow-wrap:anywhere}
+.task-view-head .task-continue-context>details{margin:0}
+.task-view-head .task-continue-context>details[open]{flex-basis:100%}
 .task-reports{display:flex;flex-direction:column;gap:10px}
 .task-reports .report-picker-head{font-size:14px;margin:0}
 .task-pointed+.report-picker{border-top:1px solid var(--line);padding-top:10px}
