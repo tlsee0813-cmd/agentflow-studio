@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_962da3d0-cd7b-4522-9444-a02aa7ef471f",
+  "taskId": "T_d98e013a-8601-47da-8e58-af1ddc5c19b0",
+  "returnId": "H_1b85f5e8-b379-42af-8cc4-4a8399e6530f",
+  "report": "[명시 합성 결과] 외부 구현과 검사를 실행하지 않았다. 예약 가능 여부 확인 결과를 알림에서 사용한다는 구성을 읽었다. 남은 질문: 동시 접수 시 어느 예약을 먼저 받을 것인가?",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_903ca678-2d0f-4f24-a01c-d6e33e8d50c1",
+    "basedOn": 0,
+    "summary": "예약 가능 여부는 기존 예약을 확인해 중복 접수를 막는 부분이다. 동시 접수 기준은 아직 미확인이다.",
+    "changes": [
+      "명시 합성: 예약 가능 여부와 알림 역할을 구별했다."
+    ],
+    "proposal": null,
+    "origin": "독립 관측자가 실제 내보낸 템플릿에서 만든 합성 설명. 외부 AI/구현/검사 실행 없음."
+  }
+}

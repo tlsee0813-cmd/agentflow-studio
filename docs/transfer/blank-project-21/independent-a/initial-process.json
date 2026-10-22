@@ -1,0 +1,22 @@
+[
+  {
+    "kind": "before",
+    "command": [
+      "initial.py",
+      "before"
+    ],
+    "startUTC": "2026-10-22T16:09:55.509054+00:00",
+    "endUTC": "2026-10-22T16:10:02.333106+00:00",
+    "actualChildExit": 1
+  },
+  {
+    "kind": "after",
+    "command": [
+      "initial.py",
+      "after"
+    ],
+    "startUTC": "2026-10-22T16:10:02.333258+00:00",
+    "endUTC": "2026-10-22T16:10:08.800547+00:00",
+    "actualChildExit": 0
+  }
+]

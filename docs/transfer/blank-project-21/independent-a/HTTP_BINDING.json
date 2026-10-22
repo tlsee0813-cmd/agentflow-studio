@@ -1,0 +1,69 @@
+{
+  "actualBrowserHTTP": [
+    {
+      "run": "before",
+      "browserVersion": "154.0.8037.57",
+      "staticResponses": 30,
+      "allBodyDiskBeforeAfterEqual": true,
+      "pageerrors": [],
+      "console": []
+    },
+    {
+      "run": "after",
+      "browserVersion": "154.0.8037.57",
+      "staticResponses": 30,
+      "allBodyDiskBeforeAfterEqual": true,
+      "pageerrors": [],
+      "console": []
+    },
+    {
+      "run": "flow-v4",
+      "browserVersion": "154.0.8037.57",
+      "staticResponses": 30,
+      "allBodyDiskBeforeAfterEqual": true,
+      "pageerrors": [],
+      "console": []
+    },
+    {
+      "run": "preview-diag-before",
+      "browserVersion": "154.0.8037.57",
+      "staticResponses": 30,
+      "allBodyDiskBeforeAfterEqual": true,
+      "pageerrors": [],
+      "console": []
+    },
+    {
+      "run": "preview-diag-after",
+      "browserVersion": "154.0.8037.57",
+      "staticResponses": 30,
+      "allBodyDiskBeforeAfterEqual": true,
+      "pageerrors": [],
+      "console": []
+    },
+    {
+      "run": "preview-tail-screen",
+      "browserVersion": "154.0.8037.57",
+      "staticResponses": 15,
+      "allBodyDiskBeforeAfterEqual": true,
+      "pageerrors": [],
+      "console": []
+    },
+    {
+      "run": "question-v2/before",
+      "browserVersion": "154.0.8037.57",
+      "staticResponses": 15,
+      "allBodyDiskBeforeAfterEqual": true,
+      "pageerrors": [],
+      "console": []
+    },
+    {
+      "run": "question-v2/after",
+      "browserVersion": "154.0.8037.57",
+      "staticResponses": 15,
+      "allBodyDiskBeforeAfterEqual": true,
+      "pageerrors": [],
+      "console": []
+    }
+  ],
+  "boundary": "Response.body SHA and loaded disk SHA plus disk after that run; actual URLs in each runtime.json. No substitute route.fulfill/fetch for independent UI."
+}

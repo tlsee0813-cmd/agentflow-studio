@@ -1,0 +1,1614 @@
+{
+  "source": "df726e5898f24e23d69e47651d3bf6cbea302412",
+  "expectedRuns": 2,
+  "executedRuns": 2,
+  "runs": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "checks": [
+        {
+          "id": "initial-main-copy-and-closed-file-choice-visible-clip-hit",
+          "pass": false
+        }
+      ],
+      "initial": {
+        "copy": {
+          "rect": {
+            "x": 264,
+            "y": 178.078125,
+            "width": 110.328125,
+            "height": 45,
+            "top": 178.078125,
+            "right": 374.328125,
+            "bottom": 223.078125,
+            "left": 264
+          },
+          "viewport": [
+            1280,
+            720
+          ],
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "ancestors": [],
+          "points": [
+            {
+              "x": 319.1640625,
+              "y": 200.578125,
+              "inClip": true,
+              "hit": true,
+              "hitNode": "<button class=\"primary\" type=\"button\" id=\"copy-work\">작업문 복사</button>"
+            },
+            {
+              "x": 280.54921875,
+              "y": 200.578125,
+              "inClip": true,
+              "hit": true,
+              "hitNode": "<button class=\"primary\" type=\"button\" id=\"copy-work\">작업문 복사</button>"
+            },
+            {
+              "x": 357.77890625,
+              "y": 200.578125,
+              "inClip": true,
+              "hit": true,
+              "hitNode": "<button class=\"primary\" type=\"button\" id=\"copy-work\">작업문 복사</button>"
+            }
+          ],
+          "visible": true,
+          "full": true,
+          "texts": [
+            {
+              "text": "작업문 복사",
+              "rects": [
+                {
+                  "x": 285,
+                  "y": 190.078125,
+                  "width": 68.328125,
+                  "height": 20,
+                  "top": 190.078125,
+                  "right": 353.328125,
+                  "bottom": 210.078125,
+                  "left": 285
+                }
+              ]
+            }
+          ],
+          "scrollY": 114,
+          "focus": "outcome-home",
+          "open": null
+        },
+        "summary": {
+          "rect": {
+            "x": 300,
+            "y": 1782.015625,
+            "width": 902,
+            "height": 45.4375,
+            "top": 1782.015625,
+            "right": 1202,
+            "bottom": 1827.453125,
+            "left": 300
+          },
+          "viewport": [
+            1280,
+            720
+          ],
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "ancestors": [],
+          "points": [
+            {
+              "x": 751,
+              "y": 1804.734375,
+              "inClip": false,
+              "hit": false,
+              "hitNode": null
+            },
+            {
+              "x": 435.29999999999995,
+              "y": 1804.734375,
+              "inClip": false,
+              "hit": false,
+              "hitNode": null
+            },
+            {
+              "x": 1066.6999999999998,
+              "y": 1804.734375,
+              "inClip": false,
+              "hit": false,
+              "hitNode": null
+            }
+          ],
+          "visible": true,
+          "full": false,
+          "texts": [
+            {
+              "text": "결과를 파일로 받기 · 선택",
+              "rects": [
+                {
+                  "x": 313.765625,
+                  "y": 1795.015625,
+                  "width": 135.921875,
+                  "height": 19,
+                  "top": 1795.015625,
+                  "right": 449.6875,
+                  "bottom": 1814.015625,
+                  "left": 313.765625
+                }
+              ]
+            }
+          ],
+          "scrollY": 114,
+          "focus": "outcome-home",
+          "open": false
+        },
+        "AX": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n    - button \"전체 공간 3\"\n    - button \"현재 작업\"\n    - button \"기준 · 출처 1\"\n    - button \"지난 요청과 결과 1\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 도서 대출 예약 서비스 · 1280 알려진 경로 재현\n  - paragraph: 작업 1 · 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 도서 대출 예약 서비스 · 1280 알려진 경로 재현\n  - group: MOCK · 체험 모드\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 도서 대출 예약 서비스 · 1280 알려진 경로 재현\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - group:\n      - button \"＋ 새 프로젝트\"\n      - button \"↓ 백업 파일 저장\"\n      - button \"↑ 백업 파일 불러오기\"\n      - button \"휴지통으로 옮기기\"\n  - navigation \"공간 위치\":\n    - button \"전체 공간\"\n    - text: ›\n    - button \"예약 가능 여부\"\n    - text: ›\n    - strong: 앱에서 이어갈 작업\n    - text: 이어가는 작업\n  - region \"지금 할 일\":\n    - text: 현재 작업 01\n    - heading \"이제, 작업문을 전달하세요.\" [level=1]\n    - paragraph: 필요하면 직접 다듬고, 사용 중인 개발 도구에 복사해 전달하세요.\n    - text: 작업문 준비됨\n    - button \"작업문 복사\"\n    - button \"Markdown 저장\"\n    - button \"이 입력 다시 정리\"\n    - button \"전달할 작업문 전체 보기\"\n  - region \"목적 중심 프로젝트 홈\":\n    - paragraph: PROJECT OUTCOME\n    - heading \"지금 이어갈 작업\" [level=2]\n    - button \"방향 수정 / 다음 요청\"\n    - region \"전달 전 확인\":\n      - heading \"요청과 다음 행동 먼저 확인하기\" [level=3]\n      - paragraph: 아래는 기록의 앞부분이에요. 의미 요약이나 새 결정을 만들지 않으며, 전체 원문·기준은 아래와 전체 전달문에 그대로 남아요.\n      - term: 이번 요청 · 원문 앞부분\n      - definition: 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n      - term: 별도 조건란 · MOCK 정리 값\n      - definition: 별도 조건 값이 비어 있어요. 원문 속 조건·금지가 없다는 뜻은 아니에요.\n      - term: 미정 · 열린 질문·보류·모름 기록\n      - definition: 열린 질문이나 별도 보류·모름 기록은 없어요. 원문에 적힌 미정 사항은 자동 추출하지 않아요.\n      - term: 다음 행동 · 작업문 준비됨\n      - definition: 요청과 조건을 확인한 뒤 ‘작업문 복사’ 또는 ‘Markdown 저장’으로 가져가 쓰던 개발 도구에 붙여넣으세요. 복사·저장은 자동 실행이 아니에요.\n    - heading \"이 작업의 목표 · MOCK 정리\" [level=3]\n    - paragraph: 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n    - group: 정리 바로잡기 · 근거 보기\n    - group: 이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장\n    - group: 이번 요청 바로잡기\n    - group: 출발 · 방향 · 이번 요청 원문 보기\n    - group: 선택 · 이유와 보존 기준 1개\n    - group: 이 흐름에서 받은 보고 · 자료 0개\n    - button \"결과 붙여넣기\"\n    - button \"결과 JSON 가져오기\"\n    - group: 이 흐름의 범위\n  - region \"현재 작업\":\n    - paragraph: TASK 01\n    - heading \"이어갈 작업\" [level=2]\n    - text: 모의 제안 · 규칙 기반\n    - group: 요청 원문 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n    - paragraph: 입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.\n    - paragraph: 요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.\n    - text: 전달할 작업문 모의 제안\n    - paragraph: 요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.\n    - group: 완료 조건 · 확인할 동작\n    - group: 작업문에 넣을 프로젝트 배경·영역 구상 보기 · r10 사본\n    - paragraph: 작업문에 코드 파일은 포함되지 않습니다. 작업에 필요하다면 실행자가 대상 저장소나 관련 파일을 볼 수 있게 준비하세요. 복사·저장은 자동 실행이 아닙니다.\n    - group: 결과를 파일로 받기 · 선택\n    - group: 범위 · 제안 · 작업문 직접 다듬기\n    - group: 실제로 전달할 전체 문맥 보기\n  - group: ＋ 새 요청 · 돌아온 결과 붙여넣기 ⌄\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일",
+        "snapshot": {
+          "viewport": [
+            1280,
+            720
+          ],
+          "scrollY": 114,
+          "maxY": 1537,
+          "focus": "<section id=\"outcome-home\" class=\"card outcome-home\" aria-label=\"목적 중심 프로젝트 홈\" tabindex=\"-1\" data-outcome-id=\"S_e5b0def5-aae2-431f-ab59-b591a4a62902\"><div class=\"outcome-heading\"><div><p class=\"eyebrow\">PROJECT OUTCOME</p><h2>지금 이어갈 작업</h2></div><div class=\"outcome-actions\"><button class=\"secondary\" type=\"button\" id=\"change-direction\">방향 수정 / 다음 요청</button></div></div><section class=\"handoff-review\" id=\"handoff-review\" aria-label=\"전달 전 확인\"><h3>요청과 다음 행동 먼저 확인하기</h3><p class=\"hint\">아래는 기록의 앞부분이에요",
+          "open": [
+            "project-management",
+            "history"
+          ],
+          "buttons": [
+            {
+              "id": "nav-projects",
+              "text": "내 프로젝트",
+              "rect": {
+                "x": 17,
+                "y": 220.140625,
+                "width": 187,
+                "height": 42,
+                "top": 220.140625,
+                "right": 204,
+                "bottom": 262.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-space",
+              "text": "전체 공간3",
+              "rect": {
+                "x": 17,
+                "y": 267.140625,
+                "width": 187,
+                "height": 42,
+                "top": 267.140625,
+                "right": 204,
+                "bottom": 309.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-work",
+              "text": "현재 작업↗",
+              "rect": {
+                "x": 17,
+                "y": 314.140625,
+                "width": 187,
+                "height": 48,
+                "top": 314.140625,
+                "right": 204,
+                "bottom": 362.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-context",
+              "text": "기준 · 출처1",
+              "rect": {
+                "x": 17,
+                "y": 367.140625,
+                "width": 187,
+                "height": 42,
+                "top": 367.140625,
+                "right": 204,
+                "bottom": 409.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-history",
+              "text": "지난 요청과 결과1",
+              "rect": {
+                "x": 17,
+                "y": 414.140625,
+                "width": 187,
+                "height": 42,
+                "top": 414.140625,
+                "right": 204,
+                "bottom": 456.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "to-projects",
+              "text": "내 프로젝트",
+              "rect": {
+                "x": 264,
+                "y": -87.578125,
+                "width": 53.6875,
+                "height": 18.140625,
+                "top": -87.578125,
+                "right": 317.6875,
+                "bottom": -69.4375,
+                "left": 264
+              }
+            },
+            {
+              "id": "",
+              "text": "MOCK · 체험 모드⌄",
+              "rect": {
+                "x": 1096.828125,
+                "y": -95.40625,
+                "width": 141.171875,
+                "height": 33.796875,
+                "top": -95.40625,
+                "right": 1238,
+                "bottom": -61.609375,
+                "left": 1096.828125
+              }
+            },
+            {
+              "id": "new-project-top",
+              "text": "＋ 새 프로젝트",
+              "rect": {
+                "x": 792.015625,
+                "y": 5.09375,
+                "width": 89.765625,
+                "height": 30.5,
+                "top": 5.09375,
+                "right": 881.78125,
+                "bottom": 35.59375,
+                "left": 792.015625
+              }
+            },
+            {
+              "id": "backup",
+              "text": "↓ 백업 파일 저장",
+              "rect": {
+                "x": 889.78125,
+                "y": 5.09375,
+                "width": 102.96875,
+                "height": 30.5,
+                "top": 5.09375,
+                "right": 992.75,
+                "bottom": 35.59375,
+                "left": 889.78125
+              }
+            },
+            {
+              "id": "import",
+              "text": "↑ 백업 파일 불러오기",
+              "rect": {
+                "x": 1000.75,
+                "y": 5.09375,
+                "width": 123.203125,
+                "height": 30.5,
+                "top": 5.09375,
+                "right": 1123.953125,
+                "bottom": 35.59375,
+                "left": 1000.75
+              }
+            },
+            {
+              "id": "trash-current",
+              "text": "휴지통으로 옮기기",
+              "rect": {
+                "x": 1131.953125,
+                "y": 5.09375,
+                "width": 106.046875,
+                "height": 30.5,
+                "top": 5.09375,
+                "right": 1238,
+                "bottom": 35.59375,
+                "left": 1131.953125
+              }
+            },
+            {
+              "id": "place-space",
+              "text": "전체 공간",
+              "rect": {
+                "x": 264,
+                "y": 47.59375,
+                "width": 55.453125,
+                "height": 23.09375,
+                "top": 47.59375,
+                "right": 319.453125,
+                "bottom": 70.6875,
+                "left": 264
+              }
+            },
+            {
+              "id": "place-area",
+              "text": "예약 가능 여부",
+              "rect": {
+                "x": 335.34375,
+                "y": 47.59375,
+                "width": 85.125,
+                "height": 23.09375,
+                "top": 47.59375,
+                "right": 420.46875,
+                "bottom": 70.6875,
+                "left": 335.34375
+              }
+            },
+            {
+              "id": "copy-work",
+              "text": "작업문 복사",
+              "rect": {
+                "x": 264,
+                "y": 178.078125,
+                "width": 110.328125,
+                "height": 45,
+                "top": 178.078125,
+                "right": 374.328125,
+                "bottom": 223.078125,
+                "left": 264
+              }
+            },
+            {
+              "id": "download-work",
+              "text": "Markdown 저장",
+              "rect": {
+                "x": 382.328125,
+                "y": 179.078125,
+                "width": 134.78125,
+                "height": 43,
+                "top": 179.078125,
+                "right": 517.109375,
+                "bottom": 222.078125,
+                "left": 382.328125
+              }
+            },
+            {
+              "id": "retry-work",
+              "text": "이 입력 다시 정리",
+              "rect": {
+                "x": 525.109375,
+                "y": 182.578125,
+                "width": 111.375,
+                "height": 36,
+                "top": 182.578125,
+                "right": 636.484375,
+                "bottom": 218.578125,
+                "left": 525.109375
+              }
+            },
+            {
+              "id": "next-preview",
+              "text": "전달할 작업문 전체 보기",
+              "rect": {
+                "x": 644.484375,
+                "y": 182.578125,
+                "width": 144.484375,
+                "height": 36,
+                "top": 182.578125,
+                "right": 788.96875,
+                "bottom": 218.578125,
+                "left": 644.484375
+              }
+            },
+            {
+              "id": "change-direction",
+              "text": "방향 수정 / 다음 요청",
+              "rect": {
+                "x": 1050.8125,
+                "y": 313.25,
+                "width": 156.1875,
+                "height": 43,
+                "top": 313.25,
+                "right": 1207,
+                "bottom": 356.25,
+                "left": 1050.8125
+              }
+            },
+            {
+              "id": "",
+              "text": "정리 바로잡기 · 근거 보기",
+              "rect": {
+                "x": 314,
+                "y": 744.796875,
+                "width": 877,
+                "height": 43.796875,
+                "top": 744.796875,
+                "right": 1191,
+                "bottom": 788.59375,
+                "left": 314
+              }
+            },
+            {
+              "id": "",
+              "text": "이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장",
+              "rect": {
+                "x": 295,
+                "y": 810.59375,
+                "width": 912,
+                "height": 43.796875,
+                "top": 810.59375,
+                "right": 1207,
+                "bottom": 854.390625,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "이번 요청 바로잡기",
+              "rect": {
+                "x": 295,
+                "y": 898.390625,
+                "width": 912,
+                "height": 43.796875,
+                "top": 898.390625,
+                "right": 1207,
+                "bottom": 942.1875,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "출발 · 방향 · 이번 요청 원문 보기",
+              "rect": {
+                "x": 295,
+                "y": 942.1875,
+                "width": 912,
+                "height": 43.796875,
+                "top": 942.1875,
+                "right": 1207,
+                "bottom": 985.984375,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "선택 · 이유와 보존 기준 1개",
+              "rect": {
+                "x": 310,
+                "y": 1016.984375,
+                "width": 420,
+                "height": 43.796875,
+                "top": 1016.984375,
+                "right": 730,
+                "bottom": 1060.78125,
+                "left": 310
+              }
+            },
+            {
+              "id": "",
+              "text": "이 흐름에서 받은 보고 · 자료 0개",
+              "rect": {
+                "x": 772,
+                "y": 1016.984375,
+                "width": 420,
+                "height": 43.796875,
+                "top": 1016.984375,
+                "right": 1192,
+                "bottom": 1060.78125,
+                "left": 772
+              }
+            },
+            {
+              "id": "home-paste-result",
+              "text": "결과 붙여넣기",
+              "rect": {
+                "x": 295,
+                "y": 1085.78125,
+                "width": 93.609375,
+                "height": 36,
+                "top": 1085.78125,
+                "right": 388.609375,
+                "bottom": 1121.78125,
+                "left": 295
+              }
+            },
+            {
+              "id": "home-file-result",
+              "text": "결과 JSON 가져오기",
+              "rect": {
+                "x": 396.609375,
+                "y": 1085.78125,
+                "width": 129.5,
+                "height": 36,
+                "top": 1085.78125,
+                "right": 526.109375,
+                "bottom": 1121.78125,
+                "left": 396.609375
+              }
+            },
+            {
+              "id": "",
+              "text": "이 흐름의 범위",
+              "rect": {
+                "x": 295,
+                "y": 1121.78125,
+                "width": 912,
+                "height": 43.796875,
+                "top": 1121.78125,
+                "right": 1207,
+                "bottom": 1165.578125,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "요청 원문같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+              "rect": {
+                "x": 316,
+                "y": 1317.921875,
+                "width": 870,
+                "height": 44.734375,
+                "top": 1317.921875,
+                "right": 1186,
+                "bottom": 1362.65625,
+                "left": 316
+              }
+            },
+            {
+              "id": "",
+              "text": "완료 조건 · 확인할 동작",
+              "rect": {
+                "x": 321,
+                "y": 1603.578125,
+                "width": 860,
+                "height": 18.140625,
+                "top": 1603.578125,
+                "right": 1181,
+                "bottom": 1621.71875,
+                "left": 321
+              }
+            },
+            {
+              "id": "",
+              "text": "작업문에 넣을 프로젝트 배경·영역 구상 보기 · r10 사본",
+              "rect": {
+                "x": 300,
+                "y": 1640.71875,
+                "width": 902,
+                "height": 43.796875,
+                "top": 1640.71875,
+                "right": 1202,
+                "bottom": 1684.515625,
+                "left": 300
+              }
+            },
+            {
+              "id": "",
+              "text": "결과를 파일로 받기 · 선택",
+              "rect": {
+                "x": 300,
+                "y": 1782.015625,
+                "width": 902,
+                "height": 45.4375,
+                "top": 1782.015625,
+                "right": 1202,
+                "bottom": 1827.453125,
+                "left": 300
+              }
+            },
+            {
+              "id": "",
+              "text": "범위 · 제안 · 작업문 직접 다듬기",
+              "rect": {
+                "x": 300,
+                "y": 1849.453125,
+                "width": 902,
+                "height": 49.796875,
+                "top": 1849.453125,
+                "right": 1202,
+                "bottom": 1899.25,
+                "left": 300
+              }
+            },
+            {
+              "id": "",
+              "text": "실제로 전달할 전체 문맥 보기",
+              "rect": {
+                "x": 300,
+                "y": 1899.25,
+                "width": 902,
+                "height": 43.796875,
+                "top": 1899.25,
+                "right": 1202,
+                "bottom": 1943.046875,
+                "left": 300
+              }
+            },
+            {
+              "id": "compose-summary",
+              "text": "＋ 새 요청 · 돌아온 결과 붙여넣기",
+              "rect": {
+                "x": 272,
+                "y": 1989.046875,
+                "width": 958,
+                "height": 53.796875,
+                "top": 1989.046875,
+                "right": 1230,
+                "bottom": 2042.84375,
+                "left": 272
+              }
+            }
+          ]
+        },
+        "project": {
+          "schemaVersion": "idea015.project.7",
+          "id": "P_c143b348-188f-4139-9409-c616a5bc95d9",
+          "revision": 12,
+          "name": "도서 대출 예약 서비스 · 1280 알려진 경로 재현",
+          "sources": [
+            {
+              "id": "S_e5b0def5-aae2-431f-ab59-b591a4a62902",
+              "kind": "request",
+              "text": "같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+              "at": "2026-10-22T16:09:58.965Z",
+              "taskId": "T_970097ad-75ec-4852-809f-8996ab7881a5",
+              "replyTo": null,
+              "disposition": "provided"
+            }
+          ],
+          "bases": [
+            {
+              "id": "D1",
+              "text": "같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+              "status": "requested",
+              "sourceId": "S_e5b0def5-aae2-431f-ab59-b591a4a62902",
+              "revision": 11,
+              "history": []
+            }
+          ],
+          "tasks": [
+            {
+              "id": "T_970097ad-75ec-4852-809f-8996ab7881a5",
+              "sourceIds": [
+                "S_e5b0def5-aae2-431f-ab59-b591a4a62902"
+              ],
+              "parentTaskId": null,
+              "advice": {
+                "intent": {
+                  "version": "intent.1",
+                  "relation": "start",
+                  "goal": "같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+                  "conditions": [],
+                  "retired": [],
+                  "basisRefs": [
+                    {
+                      "basisId": "D1",
+                      "sourceId": "S_e5b0def5-aae2-431f-ab59-b591a4a62902",
+                      "revision": 11
+                    }
+                  ]
+                },
+                "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+                "question": null,
+                "relatedBasisIds": [
+                  "D1"
+                ],
+                "reviewBasisIds": [],
+                "suggestions": []
+              },
+              "adviceRevision": 11,
+              "mode": "mock",
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 10,
+                "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+                "area": {
+                  "id": "A_3953ebc8-7c6a-4cad-af55-64dd98f6e967",
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+                }
+              },
+              "areaId": "A_3953ebc8-7c6a-4cad-af55-64dd98f6e967"
+            }
+          ],
+          "currentTaskId": "T_970097ad-75ec-4852-809f-8996ab7881a5",
+          "draft": "",
+          "answerDraft": "",
+          "basisDraft": "",
+          "basisEdits": {},
+          "draftKind": "request",
+          "pending": null,
+          "notice": null,
+          "space": {
+            "brief": {
+              "text": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+              "at": "2026-10-22T16:09:57.273Z",
+              "previous": []
+            },
+            "areas": [
+              {
+                "id": "A_85605cd0-588f-4982-aaa5-b13dc616ae34",
+                "name": "예약",
+                "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                "archived": false,
+                "createdAt": "2026-10-22T16:09:57.436Z"
+              },
+              {
+                "id": "A_9f31d854-c9a5-4762-a82e-e4c392ecfc66",
+                "name": "알림",
+                "note": "예약 결과를 이용자에게 알린다.",
+                "archived": false,
+                "createdAt": "2026-10-22T16:09:57.616Z"
+              },
+              {
+                "id": "A_3953ebc8-7c6a-4cad-af55-64dd98f6e967",
+                "name": "예약 가능 여부",
+                "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                "archived": false,
+                "createdAt": "2026-10-22T16:09:58.035Z"
+              }
+            ],
+            "relations": [
+              {
+                "id": "L_6c35f322-09d4-44d4-8733-2f9712dd568f",
+                "from": "A_3953ebc8-7c6a-4cad-af55-64dd98f6e967",
+                "to": "A_9f31d854-c9a5-4762-a82e-e4c392ecfc66",
+                "kind": "flow",
+                "note": "예약 가능 여부 확인 결과를 알림에서 사용한다."
+              }
+            ],
+            "draftTarget": null,
+            "layout": {
+              "version": "layout.1",
+              "positions": {
+                "A_85605cd0-588f-4982-aaa5-b13dc616ae34": {
+                  "x": 340,
+                  "y": 80
+                },
+                "A_9f31d854-c9a5-4762-a82e-e4c392ecfc66": {
+                  "x": -120,
+                  "y": 100
+                },
+                "A_3953ebc8-7c6a-4cad-af55-64dd98f6e967": {
+                  "x": 640,
+                  "y": 280
+                }
+              }
+            },
+            "understanding": {},
+            "containment": {
+              "version": "containment.1",
+              "parents": {
+                "A_3953ebc8-7c6a-4cad-af55-64dd98f6e967": "A_85605cd0-588f-4982-aaa5-b13dc616ae34"
+              },
+              "revisions": {
+                "A_85605cd0-588f-4982-aaa5-b13dc616ae34": 0,
+                "A_9f31d854-c9a5-4762-a82e-e4c392ecfc66": 0,
+                "A_3953ebc8-7c6a-4cad-af55-64dd98f6e967": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "checks": [
+        {
+          "id": "initial-main-copy-and-closed-file-choice-visible-clip-hit",
+          "pass": false
+        }
+      ],
+      "initial": {
+        "copy": {
+          "rect": {
+            "x": 264,
+            "y": 178.078125,
+            "width": 110.328125,
+            "height": 45,
+            "top": 178.078125,
+            "right": 374.328125,
+            "bottom": 223.078125,
+            "left": 264
+          },
+          "viewport": [
+            1440,
+            900
+          ],
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "ancestors": [],
+          "points": [
+            {
+              "x": 319.1640625,
+              "y": 200.578125,
+              "inClip": true,
+              "hit": true,
+              "hitNode": "<button class=\"primary\" type=\"button\" id=\"copy-work\">작업문 복사</button>"
+            },
+            {
+              "x": 280.54921875,
+              "y": 200.578125,
+              "inClip": true,
+              "hit": true,
+              "hitNode": "<button class=\"primary\" type=\"button\" id=\"copy-work\">작업문 복사</button>"
+            },
+            {
+              "x": 357.77890625,
+              "y": 200.578125,
+              "inClip": true,
+              "hit": true,
+              "hitNode": "<button class=\"primary\" type=\"button\" id=\"copy-work\">작업문 복사</button>"
+            }
+          ],
+          "visible": true,
+          "full": true,
+          "texts": [
+            {
+              "text": "작업문 복사",
+              "rects": [
+                {
+                  "x": 285,
+                  "y": 190.078125,
+                  "width": 68.328125,
+                  "height": 20,
+                  "top": 190.078125,
+                  "right": 353.328125,
+                  "bottom": 210.078125,
+                  "left": 285
+                }
+              ]
+            }
+          ],
+          "scrollY": 114,
+          "focus": "outcome-home",
+          "open": null
+        },
+        "summary": {
+          "rect": {
+            "x": 380,
+            "y": 1760.578125,
+            "width": 902,
+            "height": 45.4375,
+            "top": 1760.578125,
+            "right": 1282,
+            "bottom": 1806.015625,
+            "left": 380
+          },
+          "viewport": [
+            1440,
+            900
+          ],
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "ancestors": [],
+          "points": [
+            {
+              "x": 831,
+              "y": 1783.296875,
+              "inClip": false,
+              "hit": false,
+              "hitNode": null
+            },
+            {
+              "x": 515.3,
+              "y": 1783.296875,
+              "inClip": false,
+              "hit": false,
+              "hitNode": null
+            },
+            {
+              "x": 1146.6999999999998,
+              "y": 1783.296875,
+              "inClip": false,
+              "hit": false,
+              "hitNode": null
+            }
+          ],
+          "visible": true,
+          "full": false,
+          "texts": [
+            {
+              "text": "결과를 파일로 받기 · 선택",
+              "rects": [
+                {
+                  "x": 393.765625,
+                  "y": 1773.578125,
+                  "width": 135.921875,
+                  "height": 19,
+                  "top": 1773.578125,
+                  "right": 529.6875,
+                  "bottom": 1792.578125,
+                  "left": 393.765625
+                }
+              ]
+            }
+          ],
+          "scrollY": 114,
+          "focus": "outcome-home",
+          "open": false
+        },
+        "AX": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n    - button \"전체 공간 3\"\n    - button \"현재 작업\"\n    - button \"기준 · 출처 1\"\n    - button \"지난 요청과 결과 1\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 도서 대출 예약 서비스 · 1440 알려진 경로 재현\n  - paragraph: 작업 1 · 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 도서 대출 예약 서비스 · 1440 알려진 경로 재현\n  - group: MOCK · 체험 모드\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 도서 대출 예약 서비스 · 1440 알려진 경로 재현\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - group:\n      - button \"＋ 새 프로젝트\"\n      - button \"↓ 백업 파일 저장\"\n      - button \"↑ 백업 파일 불러오기\"\n      - button \"휴지통으로 옮기기\"\n  - navigation \"공간 위치\":\n    - button \"전체 공간\"\n    - text: ›\n    - button \"예약 가능 여부\"\n    - text: ›\n    - strong: 앱에서 이어갈 작업\n    - text: 이어가는 작업\n  - region \"지금 할 일\":\n    - text: 현재 작업 01\n    - heading \"이제, 작업문을 전달하세요.\" [level=1]\n    - paragraph: 필요하면 직접 다듬고, 사용 중인 개발 도구에 복사해 전달하세요.\n    - text: 작업문 준비됨\n    - button \"작업문 복사\"\n    - button \"Markdown 저장\"\n    - button \"이 입력 다시 정리\"\n    - button \"전달할 작업문 전체 보기\"\n  - region \"목적 중심 프로젝트 홈\":\n    - paragraph: PROJECT OUTCOME\n    - heading \"지금 이어갈 작업\" [level=2]\n    - button \"방향 수정 / 다음 요청\"\n    - region \"전달 전 확인\":\n      - heading \"요청과 다음 행동 먼저 확인하기\" [level=3]\n      - paragraph: 아래는 기록의 앞부분이에요. 의미 요약이나 새 결정을 만들지 않으며, 전체 원문·기준은 아래와 전체 전달문에 그대로 남아요.\n      - term: 이번 요청 · 원문 앞부분\n      - definition: 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n      - term: 별도 조건란 · MOCK 정리 값\n      - definition: 별도 조건 값이 비어 있어요. 원문 속 조건·금지가 없다는 뜻은 아니에요.\n      - term: 미정 · 열린 질문·보류·모름 기록\n      - definition: 열린 질문이나 별도 보류·모름 기록은 없어요. 원문에 적힌 미정 사항은 자동 추출하지 않아요.\n      - term: 다음 행동 · 작업문 준비됨\n      - definition: 요청과 조건을 확인한 뒤 ‘작업문 복사’ 또는 ‘Markdown 저장’으로 가져가 쓰던 개발 도구에 붙여넣으세요. 복사·저장은 자동 실행이 아니에요.\n    - heading \"이 작업의 목표 · MOCK 정리\" [level=3]\n    - paragraph: 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n    - group: 정리 바로잡기 · 근거 보기\n    - group: 이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장\n    - group: 이번 요청 바로잡기\n    - group: 출발 · 방향 · 이번 요청 원문 보기\n    - group: 선택 · 이유와 보존 기준 1개\n    - group: 이 흐름에서 받은 보고 · 자료 0개\n    - button \"결과 붙여넣기\"\n    - button \"결과 JSON 가져오기\"\n    - group: 이 흐름의 범위\n  - region \"현재 작업\":\n    - paragraph: TASK 01\n    - heading \"이어갈 작업\" [level=2]\n    - text: 모의 제안 · 규칙 기반\n    - group: 요청 원문 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n    - paragraph: 입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.\n    - paragraph: 요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.\n    - text: 전달할 작업문 모의 제안\n    - paragraph: 요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.\n    - group: 완료 조건 · 확인할 동작\n    - group: 작업문에 넣을 프로젝트 배경·영역 구상 보기 · r10 사본\n    - paragraph: 작업문에 코드 파일은 포함되지 않습니다. 작업에 필요하다면 실행자가 대상 저장소나 관련 파일을 볼 수 있게 준비하세요. 복사·저장은 자동 실행이 아닙니다.\n    - group: 결과를 파일로 받기 · 선택\n    - group: 범위 · 제안 · 작업문 직접 다듬기\n    - group: 실제로 전달할 전체 문맥 보기\n  - group: ＋ 새 요청 · 돌아온 결과 붙여넣기 ⌄\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일",
+        "snapshot": {
+          "viewport": [
+            1440,
+            900
+          ],
+          "scrollY": 114,
+          "maxY": 1335,
+          "focus": "<section id=\"outcome-home\" class=\"card outcome-home\" aria-label=\"목적 중심 프로젝트 홈\" tabindex=\"-1\" data-outcome-id=\"S_f1d21c60-2928-4ed7-8600-7f9967fd1328\"><div class=\"outcome-heading\"><div><p class=\"eyebrow\">PROJECT OUTCOME</p><h2>지금 이어갈 작업</h2></div><div class=\"outcome-actions\"><button class=\"secondary\" type=\"button\" id=\"change-direction\">방향 수정 / 다음 요청</button></div></div><section class=\"handoff-review\" id=\"handoff-review\" aria-label=\"전달 전 확인\"><h3>요청과 다음 행동 먼저 확인하기</h3><p class=\"hint\">아래는 기록의 앞부분이에요",
+          "open": [
+            "project-management",
+            "history"
+          ],
+          "buttons": [
+            {
+              "id": "nav-projects",
+              "text": "내 프로젝트",
+              "rect": {
+                "x": 17,
+                "y": 220.140625,
+                "width": 187,
+                "height": 42,
+                "top": 220.140625,
+                "right": 204,
+                "bottom": 262.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-space",
+              "text": "전체 공간3",
+              "rect": {
+                "x": 17,
+                "y": 267.140625,
+                "width": 187,
+                "height": 42,
+                "top": 267.140625,
+                "right": 204,
+                "bottom": 309.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-work",
+              "text": "현재 작업↗",
+              "rect": {
+                "x": 17,
+                "y": 314.140625,
+                "width": 187,
+                "height": 48,
+                "top": 314.140625,
+                "right": 204,
+                "bottom": 362.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-context",
+              "text": "기준 · 출처1",
+              "rect": {
+                "x": 17,
+                "y": 367.140625,
+                "width": 187,
+                "height": 42,
+                "top": 367.140625,
+                "right": 204,
+                "bottom": 409.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-history",
+              "text": "지난 요청과 결과1",
+              "rect": {
+                "x": 17,
+                "y": 414.140625,
+                "width": 187,
+                "height": 42,
+                "top": 414.140625,
+                "right": 204,
+                "bottom": 456.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "to-projects",
+              "text": "내 프로젝트",
+              "rect": {
+                "x": 264,
+                "y": -87.578125,
+                "width": 53.6875,
+                "height": 18.140625,
+                "top": -87.578125,
+                "right": 317.6875,
+                "bottom": -69.4375,
+                "left": 264
+              }
+            },
+            {
+              "id": "",
+              "text": "MOCK · 체험 모드⌄",
+              "rect": {
+                "x": 1256.828125,
+                "y": -95.40625,
+                "width": 141.171875,
+                "height": 33.796875,
+                "top": -95.40625,
+                "right": 1398,
+                "bottom": -61.609375,
+                "left": 1256.828125
+              }
+            },
+            {
+              "id": "new-project-top",
+              "text": "＋ 새 프로젝트",
+              "rect": {
+                "x": 952.015625,
+                "y": 5.09375,
+                "width": 89.765625,
+                "height": 30.5,
+                "top": 5.09375,
+                "right": 1041.78125,
+                "bottom": 35.59375,
+                "left": 952.015625
+              }
+            },
+            {
+              "id": "backup",
+              "text": "↓ 백업 파일 저장",
+              "rect": {
+                "x": 1049.78125,
+                "y": 5.09375,
+                "width": 102.96875,
+                "height": 30.5,
+                "top": 5.09375,
+                "right": 1152.75,
+                "bottom": 35.59375,
+                "left": 1049.78125
+              }
+            },
+            {
+              "id": "import",
+              "text": "↑ 백업 파일 불러오기",
+              "rect": {
+                "x": 1160.75,
+                "y": 5.09375,
+                "width": 123.203125,
+                "height": 30.5,
+                "top": 5.09375,
+                "right": 1283.953125,
+                "bottom": 35.59375,
+                "left": 1160.75
+              }
+            },
+            {
+              "id": "trash-current",
+              "text": "휴지통으로 옮기기",
+              "rect": {
+                "x": 1291.953125,
+                "y": 5.09375,
+                "width": 106.046875,
+                "height": 30.5,
+                "top": 5.09375,
+                "right": 1398,
+                "bottom": 35.59375,
+                "left": 1291.953125
+              }
+            },
+            {
+              "id": "place-space",
+              "text": "전체 공간",
+              "rect": {
+                "x": 264,
+                "y": 47.59375,
+                "width": 55.453125,
+                "height": 23.09375,
+                "top": 47.59375,
+                "right": 319.453125,
+                "bottom": 70.6875,
+                "left": 264
+              }
+            },
+            {
+              "id": "place-area",
+              "text": "예약 가능 여부",
+              "rect": {
+                "x": 335.34375,
+                "y": 47.59375,
+                "width": 85.125,
+                "height": 23.09375,
+                "top": 47.59375,
+                "right": 420.46875,
+                "bottom": 70.6875,
+                "left": 335.34375
+              }
+            },
+            {
+              "id": "copy-work",
+              "text": "작업문 복사",
+              "rect": {
+                "x": 264,
+                "y": 178.078125,
+                "width": 110.328125,
+                "height": 45,
+                "top": 178.078125,
+                "right": 374.328125,
+                "bottom": 223.078125,
+                "left": 264
+              }
+            },
+            {
+              "id": "download-work",
+              "text": "Markdown 저장",
+              "rect": {
+                "x": 382.328125,
+                "y": 179.078125,
+                "width": 134.78125,
+                "height": 43,
+                "top": 179.078125,
+                "right": 517.109375,
+                "bottom": 222.078125,
+                "left": 382.328125
+              }
+            },
+            {
+              "id": "retry-work",
+              "text": "이 입력 다시 정리",
+              "rect": {
+                "x": 525.109375,
+                "y": 182.578125,
+                "width": 111.375,
+                "height": 36,
+                "top": 182.578125,
+                "right": 636.484375,
+                "bottom": 218.578125,
+                "left": 525.109375
+              }
+            },
+            {
+              "id": "next-preview",
+              "text": "전달할 작업문 전체 보기",
+              "rect": {
+                "x": 644.484375,
+                "y": 182.578125,
+                "width": 144.484375,
+                "height": 36,
+                "top": 182.578125,
+                "right": 788.96875,
+                "bottom": 218.578125,
+                "left": 644.484375
+              }
+            },
+            {
+              "id": "change-direction",
+              "text": "방향 수정 / 다음 요청",
+              "rect": {
+                "x": 1210.8125,
+                "y": 313.25,
+                "width": 156.1875,
+                "height": 43,
+                "top": 313.25,
+                "right": 1367,
+                "bottom": 356.25,
+                "left": 1210.8125
+              }
+            },
+            {
+              "id": "",
+              "text": "정리 바로잡기 · 근거 보기",
+              "rect": {
+                "x": 314,
+                "y": 723.359375,
+                "width": 1037,
+                "height": 43.796875,
+                "top": 723.359375,
+                "right": 1351,
+                "bottom": 767.15625,
+                "left": 314
+              }
+            },
+            {
+              "id": "",
+              "text": "이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장",
+              "rect": {
+                "x": 295,
+                "y": 789.15625,
+                "width": 1072,
+                "height": 43.796875,
+                "top": 789.15625,
+                "right": 1367,
+                "bottom": 832.953125,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "이번 요청 바로잡기",
+              "rect": {
+                "x": 295,
+                "y": 876.953125,
+                "width": 1072,
+                "height": 43.796875,
+                "top": 876.953125,
+                "right": 1367,
+                "bottom": 920.75,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "출발 · 방향 · 이번 요청 원문 보기",
+              "rect": {
+                "x": 295,
+                "y": 920.75,
+                "width": 1072,
+                "height": 43.796875,
+                "top": 920.75,
+                "right": 1367,
+                "bottom": 964.546875,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "선택 · 이유와 보존 기준 1개",
+              "rect": {
+                "x": 310,
+                "y": 995.546875,
+                "width": 500,
+                "height": 43.796875,
+                "top": 995.546875,
+                "right": 810,
+                "bottom": 1039.34375,
+                "left": 310
+              }
+            },
+            {
+              "id": "",
+              "text": "이 흐름에서 받은 보고 · 자료 0개",
+              "rect": {
+                "x": 852,
+                "y": 995.546875,
+                "width": 500,
+                "height": 43.796875,
+                "top": 995.546875,
+                "right": 1352,
+                "bottom": 1039.34375,
+                "left": 852
+              }
+            },
+            {
+              "id": "home-paste-result",
+              "text": "결과 붙여넣기",
+              "rect": {
+                "x": 295,
+                "y": 1064.34375,
+                "width": 93.609375,
+                "height": 36,
+                "top": 1064.34375,
+                "right": 388.609375,
+                "bottom": 1100.34375,
+                "left": 295
+              }
+            },
+            {
+              "id": "home-file-result",
+              "text": "결과 JSON 가져오기",
+              "rect": {
+                "x": 396.609375,
+                "y": 1064.34375,
+                "width": 129.5,
+                "height": 36,
+                "top": 1064.34375,
+                "right": 526.109375,
+                "bottom": 1100.34375,
+                "left": 396.609375
+              }
+            },
+            {
+              "id": "",
+              "text": "이 흐름의 범위",
+              "rect": {
+                "x": 295,
+                "y": 1100.34375,
+                "width": 1072,
+                "height": 43.796875,
+                "top": 1100.34375,
+                "right": 1367,
+                "bottom": 1144.140625,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "요청 원문같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+              "rect": {
+                "x": 396,
+                "y": 1296.484375,
+                "width": 870,
+                "height": 44.734375,
+                "top": 1296.484375,
+                "right": 1266,
+                "bottom": 1341.21875,
+                "left": 396
+              }
+            },
+            {
+              "id": "",
+              "text": "완료 조건 · 확인할 동작",
+              "rect": {
+                "x": 401,
+                "y": 1582.140625,
+                "width": 860,
+                "height": 18.140625,
+                "top": 1582.140625,
+                "right": 1261,
+                "bottom": 1600.28125,
+                "left": 401
+              }
+            },
+            {
+              "id": "",
+              "text": "작업문에 넣을 프로젝트 배경·영역 구상 보기 · r10 사본",
+              "rect": {
+                "x": 380,
+                "y": 1619.28125,
+                "width": 902,
+                "height": 43.796875,
+                "top": 1619.28125,
+                "right": 1282,
+                "bottom": 1663.078125,
+                "left": 380
+              }
+            },
+            {
+              "id": "",
+              "text": "결과를 파일로 받기 · 선택",
+              "rect": {
+                "x": 380,
+                "y": 1760.578125,
+                "width": 902,
+                "height": 45.4375,
+                "top": 1760.578125,
+                "right": 1282,
+                "bottom": 1806.015625,
+                "left": 380
+              }
+            },
+            {
+              "id": "",
+              "text": "범위 · 제안 · 작업문 직접 다듬기",
+              "rect": {
+                "x": 380,
+                "y": 1828.015625,
+                "width": 902,
+                "height": 49.796875,
+                "top": 1828.015625,
+                "right": 1282,
+                "bottom": 1877.8125,
+                "left": 380
+              }
+            },
+            {
+              "id": "",
+              "text": "실제로 전달할 전체 문맥 보기",
+              "rect": {
+                "x": 380,
+                "y": 1877.8125,
+                "width": 902,
+                "height": 43.796875,
+                "top": 1877.8125,
+                "right": 1282,
+                "bottom": 1921.609375,
+                "left": 380
+              }
+            },
+            {
+              "id": "compose-summary",
+              "text": "＋ 새 요청 · 돌아온 결과 붙여넣기",
+              "rect": {
+                "x": 352,
+                "y": 1967.609375,
+                "width": 958,
+                "height": 53.796875,
+                "top": 1967.609375,
+                "right": 1310,
+                "bottom": 2021.40625,
+                "left": 352
+              }
+            }
+          ]
+        },
+        "project": {
+          "schemaVersion": "idea015.project.7",
+          "id": "P_5e3507c9-ea6f-4f9b-a19b-c070b3f9f5a4",
+          "revision": 12,
+          "name": "도서 대출 예약 서비스 · 1440 알려진 경로 재현",
+          "sources": [
+            {
+              "id": "S_f1d21c60-2928-4ed7-8600-7f9967fd1328",
+              "kind": "request",
+              "text": "같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+              "at": "2026-10-22T16:10:01.800Z",
+              "taskId": "T_f770c24e-4430-4088-aa34-0c3b29a3b8f5",
+              "replyTo": null,
+              "disposition": "provided"
+            }
+          ],
+          "bases": [
+            {
+              "id": "D1",
+              "text": "같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+              "status": "requested",
+              "sourceId": "S_f1d21c60-2928-4ed7-8600-7f9967fd1328",
+              "revision": 11,
+              "history": []
+            }
+          ],
+          "tasks": [
+            {
+              "id": "T_f770c24e-4430-4088-aa34-0c3b29a3b8f5",
+              "sourceIds": [
+                "S_f1d21c60-2928-4ed7-8600-7f9967fd1328"
+              ],
+              "parentTaskId": null,
+              "advice": {
+                "intent": {
+                  "version": "intent.1",
+                  "relation": "start",
+                  "goal": "같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+                  "conditions": [],
+                  "retired": [],
+                  "basisRefs": [
+                    {
+                      "basisId": "D1",
+                      "sourceId": "S_f1d21c60-2928-4ed7-8600-7f9967fd1328",
+                      "revision": 11
+                    }
+                  ]
+                },
+                "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+                "question": null,
+                "relatedBasisIds": [
+                  "D1"
+                ],
+                "reviewBasisIds": [],
+                "suggestions": []
+              },
+              "adviceRevision": 11,
+              "mode": "mock",
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 10,
+                "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+                "area": {
+                  "id": "A_fea7306f-a195-4521-a202-b79e1e9609ce",
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+                }
+              },
+              "areaId": "A_fea7306f-a195-4521-a202-b79e1e9609ce"
+            }
+          ],
+          "currentTaskId": "T_f770c24e-4430-4088-aa34-0c3b29a3b8f5",
+          "draft": "",
+          "answerDraft": "",
+          "basisDraft": "",
+          "basisEdits": {},
+          "draftKind": "request",
+          "pending": null,
+          "notice": null,
+          "space": {
+            "brief": {
+              "text": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+              "at": "2026-10-22T16:10:00.037Z",
+              "previous": []
+            },
+            "areas": [
+              {
+                "id": "A_c2e68fd1-b99e-4d06-a418-d081570d16d9",
+                "name": "예약",
+                "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                "archived": false,
+                "createdAt": "2026-10-22T16:10:00.218Z"
+              },
+              {
+                "id": "A_57bf6dac-0322-4cc8-b694-b8124688d080",
+                "name": "알림",
+                "note": "예약 결과를 이용자에게 알린다.",
+                "archived": false,
+                "createdAt": "2026-10-22T16:10:00.421Z"
+              },
+              {
+                "id": "A_fea7306f-a195-4521-a202-b79e1e9609ce",
+                "name": "예약 가능 여부",
+                "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                "archived": false,
+                "createdAt": "2026-10-22T16:10:00.888Z"
+              }
+            ],
+            "relations": [
+              {
+                "id": "L_e77c3beb-d572-4ce1-a4e1-5e3073459cf4",
+                "from": "A_fea7306f-a195-4521-a202-b79e1e9609ce",
+                "to": "A_57bf6dac-0322-4cc8-b694-b8124688d080",
+                "kind": "flow",
+                "note": "예약 가능 여부 확인 결과를 알림에서 사용한다."
+              }
+            ],
+            "draftTarget": null,
+            "layout": {
+              "version": "layout.1",
+              "positions": {
+                "A_c2e68fd1-b99e-4d06-a418-d081570d16d9": {
+                  "x": 420,
+                  "y": 160
+                },
+                "A_57bf6dac-0322-4cc8-b694-b8124688d080": {
+                  "x": -40,
+                  "y": 180
+                },
+                "A_fea7306f-a195-4521-a202-b79e1e9609ce": {
+                  "x": 720,
+                  "y": 360
+                }
+              }
+            },
+            "understanding": {},
+            "containment": {
+              "version": "containment.1",
+              "parents": {
+                "A_fea7306f-a195-4521-a202-b79e1e9609ce": "A_c2e68fd1-b99e-4d06-a418-d081570d16d9"
+              },
+              "revisions": {
+                "A_c2e68fd1-b99e-4d06-a418-d081570d16d9": 0,
+                "A_57bf6dac-0322-4cc8-b694-b8124688d080": 0,
+                "A_fea7306f-a195-4521-a202-b79e1e9609ce": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "exit": 1
+}

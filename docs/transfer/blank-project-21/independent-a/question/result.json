@@ -1,0 +1,2876 @@
+{
+  "rows": [
+    {
+      "kind": "before",
+      "AX": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n    - button \"전체 공간 0\"\n    - button \"현재 작업\"\n    - button \"기준 · 출처 1\"\n    - button \"지난 요청과 결과 1\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n  - paragraph: 작업 1 · 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n  - group: MOCK · 체험 모드\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - group:\n      - button \"＋ 새 프로젝트\"\n      - button \"↓ 백업 파일 저장\"\n      - button \"↑ 백업 파일 불러오기\"\n      - button \"휴지통으로 옮기기\"\n  - region \"지금 할 일\":\n    - text: 현재 작업 01\n    - heading \"이 한 가지만 알려주세요.\" [level=1]\n    - paragraph: 답에 따라 달라지는 부분만 확인하고, 작업문으로 이어갑니다.\n    - text: 답변이 필요해요\n    - button \"질문에 답하기\"\n    - button \"작업문 복사\"\n    - button \"Markdown 저장\"\n    - button \"이 입력 다시 정리\"\n    - button \"전달할 작업문 전체 보기\"\n  - region \"목적 중심 프로젝트 홈\":\n    - paragraph: PROJECT OUTCOME\n    - heading \"지금 이어갈 작업\" [level=2]\n    - button \"방향 수정 / 다음 요청\"\n    - region \"전달 전 확인\":\n      - heading \"요청과 다음 행동 먼저 확인하기\" [level=3]\n      - paragraph: 아래는 기록의 앞부분이에요. 의미 요약이나 새 결정을 만들지 않으며, 전체 원문·기준은 아래와 전체 전달문에 그대로 남아요.\n      - term: 이번 요청 · 원문 앞부분\n      - definition: 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n      - term: 별도 조건란 · MOCK 정리 값\n      - definition: 별도 조건 값이 비어 있어요. 원문 속 조건·금지가 없다는 뜻은 아니에요.\n      - term: 미정 · 열린 질문·보류·모름 기록\n      - definition: \"답변할 질문: 문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?\"\n      - term: 다음 행동 · 답변이 필요해요\n      - definition: 아래 질문에 답하거나 ‘잘 모르겠음’·‘이 질문은 보류’를 선택해 이어가세요.\n    - heading \"이 작업의 목표 · MOCK 정리\" [level=3]\n    - paragraph: 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n    - group: 정리 바로잡기 · 근거 보기\n    - group: 이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장\n    - group: 이번 요청 바로잡기\n    - group: 출발 · 방향 · 이번 요청 원문 보기\n    - group: 선택 · 이유와 보존 기준 1개\n    - group: 이 흐름에서 받은 보고 · 자료 0개\n    - button \"결과 붙여넣기\"\n    - button \"결과 JSON 가져오기\"\n    - group: 이 흐름의 범위\n  - region \"현재 작업\":\n    - paragraph: TASK 01\n    - heading \"이어갈 작업\" [level=2]\n    - text: 모의 제안 · 규칙 기반\n    - group: 요청 원문 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n    - paragraph: 문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.\n    - paragraph: 요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.\n    - text: 모르는 사실 확인\n    - heading \"문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?\" [level=3]\n    - paragraph: 원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.\n    - text: 직접 답하거나 다른 방향을 적어 주세요.\n    - textbox \"직접 답하거나 다른 방향을 적어 주세요.\":\n      - /placeholder: 알고 있는 관찰만 적어 주세요. 모르면 아래 버튼으로 확인 작업만 이어갑니다.\n    - button \"이 답으로 이어가기\" [disabled]\n    - button \"잘 모르겠음\"\n    - button \"이 질문은 보류\"\n    - text: 전달할 작업문 모의 제안\n    - paragraph: 요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.\n    - group: 완료 조건 · 확인할 동작\n    - group: 작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음\n    - paragraph: 작업문에 코드 파일은 포함되지 않습니다. 작업에 필요하다면 실행자가 대상 저장소나 관련 파일을 볼 수 있게 준비하세요. 복사·저장은 자동 실행이 아닙니다.\n    - group: 결과를 파일로 받기 · 선택\n    - group: 범위 · 제안 · 작업문 직접 다듬기\n    - group: 실제로 전달할 전체 문맥 보기\n  - group: ＋ 새 요청 · 돌아온 결과 붙여넣기 ⌄\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일",
+      "screen": {
+        "viewport": [
+          1280,
+          720
+        ],
+        "scrollY": 81,
+        "maxY": 1820,
+        "focus": "<section id=\"outcome-home\" class=\"card outcome-home\" aria-label=\"목적 중심 프로젝트 홈\" tabindex=\"-1\" data-outcome-id=\"S_2a3b2b2c-3b00-492d-a447-673f9e834e99\"><div class=\"outcome-heading\"><div><p class=\"eyebrow\">PROJECT OUTCOME</p><h2>지금 이어갈 작업</h2></div><div class=\"outcome-actions\"><button class=\"secondary\" type=\"button\" id=\"change-direction\">방향 수정 / 다음 요청</button></div></div><section class=\"handoff-review\" id=\"handoff-review\" aria-label=\"전달 전 확인\"><h3>요청과 다음 행동 먼저 확인하기</h3><p class=\"hint\">아래는 기록의 앞부분이에요",
+        "open": [
+          "project-management",
+          "history"
+        ],
+        "buttons": [
+          {
+            "id": "nav-projects",
+            "text": "내 프로젝트",
+            "rect": {
+              "x": 17,
+              "y": 220.140625,
+              "width": 187,
+              "height": 42,
+              "top": 220.140625,
+              "right": 204,
+              "bottom": 262.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "nav-space",
+            "text": "전체 공간0",
+            "rect": {
+              "x": 17,
+              "y": 267.140625,
+              "width": 187,
+              "height": 42,
+              "top": 267.140625,
+              "right": 204,
+              "bottom": 309.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "nav-work",
+            "text": "현재 작업↗",
+            "rect": {
+              "x": 17,
+              "y": 314.140625,
+              "width": 187,
+              "height": 48,
+              "top": 314.140625,
+              "right": 204,
+              "bottom": 362.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "nav-context",
+            "text": "기준 · 출처1",
+            "rect": {
+              "x": 17,
+              "y": 367.140625,
+              "width": 187,
+              "height": 42,
+              "top": 367.140625,
+              "right": 204,
+              "bottom": 409.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "nav-history",
+            "text": "지난 요청과 결과1",
+            "rect": {
+              "x": 17,
+              "y": 414.140625,
+              "width": 187,
+              "height": 42,
+              "top": 414.140625,
+              "right": 204,
+              "bottom": 456.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "to-projects",
+            "text": "내 프로젝트",
+            "rect": {
+              "x": 264,
+              "y": -54.578125,
+              "width": 53.6875,
+              "height": 18.140625,
+              "top": -54.578125,
+              "right": 317.6875,
+              "bottom": -36.4375,
+              "left": 264
+            }
+          },
+          {
+            "id": "",
+            "text": "MOCK · 체험 모드⌄",
+            "rect": {
+              "x": 1096.828125,
+              "y": -62.40625,
+              "width": 141.171875,
+              "height": 33.796875,
+              "top": -62.40625,
+              "right": 1238,
+              "bottom": -28.609375,
+              "left": 1096.828125
+            }
+          },
+          {
+            "id": "new-project-top",
+            "text": "＋ 새 프로젝트",
+            "rect": {
+              "x": 792.015625,
+              "y": 38.09375,
+              "width": 89.765625,
+              "height": 30.5,
+              "top": 38.09375,
+              "right": 881.78125,
+              "bottom": 68.59375,
+              "left": 792.015625
+            }
+          },
+          {
+            "id": "backup",
+            "text": "↓ 백업 파일 저장",
+            "rect": {
+              "x": 889.78125,
+              "y": 38.09375,
+              "width": 102.96875,
+              "height": 30.5,
+              "top": 38.09375,
+              "right": 992.75,
+              "bottom": 68.59375,
+              "left": 889.78125
+            }
+          },
+          {
+            "id": "import",
+            "text": "↑ 백업 파일 불러오기",
+            "rect": {
+              "x": 1000.75,
+              "y": 38.09375,
+              "width": 123.203125,
+              "height": 30.5,
+              "top": 38.09375,
+              "right": 1123.953125,
+              "bottom": 68.59375,
+              "left": 1000.75
+            }
+          },
+          {
+            "id": "trash-current",
+            "text": "휴지통으로 옮기기",
+            "rect": {
+              "x": 1131.953125,
+              "y": 38.09375,
+              "width": 106.046875,
+              "height": 30.5,
+              "top": 38.09375,
+              "right": 1238,
+              "bottom": 68.59375,
+              "left": 1131.953125
+            }
+          },
+          {
+            "id": "next-answer",
+            "text": "질문에 답하기",
+            "rect": {
+              "x": 264,
+              "y": 177.984375,
+              "width": 123.203125,
+              "height": 45,
+              "top": 177.984375,
+              "right": 387.203125,
+              "bottom": 222.984375,
+              "left": 264
+            }
+          },
+          {
+            "id": "copy-work",
+            "text": "작업문 복사",
+            "rect": {
+              "x": 395.203125,
+              "y": 178.984375,
+              "width": 100.328125,
+              "height": 43,
+              "top": 178.984375,
+              "right": 495.53125,
+              "bottom": 221.984375,
+              "left": 395.203125
+            }
+          },
+          {
+            "id": "download-work",
+            "text": "Markdown 저장",
+            "rect": {
+              "x": 503.53125,
+              "y": 178.984375,
+              "width": 134.78125,
+              "height": 43,
+              "top": 178.984375,
+              "right": 638.3125,
+              "bottom": 221.984375,
+              "left": 503.53125
+            }
+          },
+          {
+            "id": "retry-work",
+            "text": "이 입력 다시 정리",
+            "rect": {
+              "x": 646.3125,
+              "y": 182.484375,
+              "width": 111.375,
+              "height": 36,
+              "top": 182.484375,
+              "right": 757.6875,
+              "bottom": 218.484375,
+              "left": 646.3125
+            }
+          },
+          {
+            "id": "next-preview",
+            "text": "전달할 작업문 전체 보기",
+            "rect": {
+              "x": 765.6875,
+              "y": 182.484375,
+              "width": 144.484375,
+              "height": 36,
+              "top": 182.484375,
+              "right": 910.171875,
+              "bottom": 218.484375,
+              "left": 765.6875
+            }
+          },
+          {
+            "id": "change-direction",
+            "text": "방향 수정 / 다음 요청",
+            "rect": {
+              "x": 1050.8125,
+              "y": 313.15625,
+              "width": 156.1875,
+              "height": 43,
+              "top": 313.15625,
+              "right": 1207,
+              "bottom": 356.15625,
+              "left": 1050.8125
+            }
+          },
+          {
+            "id": "",
+            "text": "정리 바로잡기 · 근거 보기",
+            "rect": {
+              "x": 314,
+              "y": 723.265625,
+              "width": 877,
+              "height": 43.796875,
+              "top": 723.265625,
+              "right": 1191,
+              "bottom": 767.0625,
+              "left": 314
+            }
+          },
+          {
+            "id": "",
+            "text": "이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장",
+            "rect": {
+              "x": 295,
+              "y": 789.0625,
+              "width": 912,
+              "height": 43.796875,
+              "top": 789.0625,
+              "right": 1207,
+              "bottom": 832.859375,
+              "left": 295
+            }
+          },
+          {
+            "id": "",
+            "text": "이번 요청 바로잡기",
+            "rect": {
+              "x": 295,
+              "y": 876.859375,
+              "width": 912,
+              "height": 43.796875,
+              "top": 876.859375,
+              "right": 1207,
+              "bottom": 920.65625,
+              "left": 295
+            }
+          },
+          {
+            "id": "",
+            "text": "출발 · 방향 · 이번 요청 원문 보기",
+            "rect": {
+              "x": 295,
+              "y": 920.65625,
+              "width": 912,
+              "height": 43.796875,
+              "top": 920.65625,
+              "right": 1207,
+              "bottom": 964.453125,
+              "left": 295
+            }
+          },
+          {
+            "id": "",
+            "text": "선택 · 이유와 보존 기준 1개",
+            "rect": {
+              "x": 310,
+              "y": 995.453125,
+              "width": 420,
+              "height": 43.796875,
+              "top": 995.453125,
+              "right": 730,
+              "bottom": 1039.25,
+              "left": 310
+            }
+          },
+          {
+            "id": "",
+            "text": "이 흐름에서 받은 보고 · 자료 0개",
+            "rect": {
+              "x": 772,
+              "y": 995.453125,
+              "width": 420,
+              "height": 43.796875,
+              "top": 995.453125,
+              "right": 1192,
+              "bottom": 1039.25,
+              "left": 772
+            }
+          },
+          {
+            "id": "home-paste-result",
+            "text": "결과 붙여넣기",
+            "rect": {
+              "x": 295,
+              "y": 1064.25,
+              "width": 93.609375,
+              "height": 36,
+              "top": 1064.25,
+              "right": 388.609375,
+              "bottom": 1100.25,
+              "left": 295
+            }
+          },
+          {
+            "id": "home-file-result",
+            "text": "결과 JSON 가져오기",
+            "rect": {
+              "x": 396.609375,
+              "y": 1064.25,
+              "width": 129.5,
+              "height": 36,
+              "top": 1064.25,
+              "right": 526.109375,
+              "bottom": 1100.25,
+              "left": 396.609375
+            }
+          },
+          {
+            "id": "",
+            "text": "이 흐름의 범위",
+            "rect": {
+              "x": 295,
+              "y": 1100.25,
+              "width": 912,
+              "height": 43.796875,
+              "top": 1100.25,
+              "right": 1207,
+              "bottom": 1144.046875,
+              "left": 295
+            }
+          },
+          {
+            "id": "",
+            "text": "요청 원문결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+            "rect": {
+              "x": 316,
+              "y": 1296.390625,
+              "width": 870,
+              "height": 44.734375,
+              "top": 1296.390625,
+              "right": 1186,
+              "bottom": 1341.125,
+              "left": 316
+            }
+          },
+          {
+            "id": "answer-send",
+            "text": "이 답으로 이어가기",
+            "rect": {
+              "x": 323,
+              "y": 1721.03125,
+              "width": 111.125,
+              "height": 36.5,
+              "top": 1721.03125,
+              "right": 434.125,
+              "bottom": 1757.53125,
+              "left": 323
+            }
+          },
+          {
+            "id": "answer-unknown",
+            "text": "잘 모르겠음",
+            "rect": {
+              "x": 441.125,
+              "y": 1721.03125,
+              "width": 77.6875,
+              "height": 36.5,
+              "top": 1721.03125,
+              "right": 518.8125,
+              "bottom": 1757.53125,
+              "left": 441.125
+            }
+          },
+          {
+            "id": "answer-defer",
+            "text": "이 질문은 보류",
+            "rect": {
+              "x": 525.8125,
+              "y": 1721.03125,
+              "width": 90.890625,
+              "height": 36.5,
+              "top": 1721.03125,
+              "right": 616.703125,
+              "bottom": 1757.53125,
+              "left": 525.8125
+            }
+          },
+          {
+            "id": "",
+            "text": "완료 조건 · 확인할 동작",
+            "rect": {
+              "x": 321,
+              "y": 1920.0625,
+              "width": 860,
+              "height": 18.140625,
+              "top": 1920.0625,
+              "right": 1181,
+              "bottom": 1938.203125,
+              "left": 321
+            }
+          },
+          {
+            "id": "",
+            "text": "작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음",
+            "rect": {
+              "x": 300,
+              "y": 1957.203125,
+              "width": 902,
+              "height": 43.796875,
+              "top": 1957.203125,
+              "right": 1202,
+              "bottom": 2001,
+              "left": 300
+            }
+          },
+          {
+            "id": "",
+            "text": "결과를 파일로 받기 · 선택",
+            "rect": {
+              "x": 300,
+              "y": 2098.5,
+              "width": 902,
+              "height": 45.4375,
+              "top": 2098.5,
+              "right": 1202,
+              "bottom": 2143.9375,
+              "left": 300
+            }
+          },
+          {
+            "id": "",
+            "text": "범위 · 제안 · 작업문 직접 다듬기",
+            "rect": {
+              "x": 300,
+              "y": 2165.9375,
+              "width": 902,
+              "height": 49.796875,
+              "top": 2165.9375,
+              "right": 1202,
+              "bottom": 2215.734375,
+              "left": 300
+            }
+          },
+          {
+            "id": "",
+            "text": "실제로 전달할 전체 문맥 보기",
+            "rect": {
+              "x": 300,
+              "y": 2215.734375,
+              "width": 902,
+              "height": 43.796875,
+              "top": 2215.734375,
+              "right": 1202,
+              "bottom": 2259.53125,
+              "left": 300
+            }
+          },
+          {
+            "id": "compose-summary",
+            "text": "＋ 새 요청 · 돌아온 결과 붙여넣기",
+            "rect": {
+              "x": 272,
+              "y": 2305.53125,
+              "width": 958,
+              "height": 53.796875,
+              "top": 2305.53125,
+              "right": 1230,
+              "bottom": 2359.328125,
+              "left": 272
+            }
+          }
+        ]
+      },
+      "project": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_1cd3f643-0009-44f9-b26b-e3a6dd5ea1ba",
+        "revision": 5,
+        "name": "결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+        "sources": [
+          {
+            "id": "S_2a3b2b2c-3b00-492d-a447-673f9e834e99",
+            "kind": "request",
+            "text": "결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+            "at": "2026-10-22T16:17:13.882Z",
+            "taskId": "T_8d0a0bfe-8dfc-4d14-949b-b696d500d4f9",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+            "status": "requested",
+            "sourceId": "S_2a3b2b2c-3b00-492d-a447-673f9e834e99",
+            "revision": 4,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_8d0a0bfe-8dfc-4d14-949b-b696d500d4f9",
+            "sourceIds": [
+              "S_2a3b2b2c-3b00-492d-a447-673f9e834e99"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D1",
+                    "sourceId": "S_2a3b2b2c-3b00-492d-a447-673f9e834e99",
+                    "revision": 4
+                  }
+                ]
+              },
+              "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+                "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D1"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 4,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 3,
+              "brief": null,
+              "area": null
+            }
+          }
+        ],
+        "currentTaskId": "T_8d0a0bfe-8dfc-4d14-949b-b696d500d4f9",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": null,
+          "areas": [],
+          "relations": [],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {}
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {},
+            "revisions": {}
+          }
+        }
+      },
+      "question": {
+        "rect": {
+          "x": 300,
+          "y": 1464.515625,
+          "width": 902,
+          "height": 316.015625,
+          "top": 1464.515625,
+          "right": 1202,
+          "bottom": 1780.53125,
+          "left": 300
+        },
+        "viewport": [
+          1280,
+          720
+        ],
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "ancestors": [],
+        "points": [
+          {
+            "x": 751,
+            "y": 1622.5234375,
+            "inClip": false,
+            "hit": false,
+            "hitNode": null
+          },
+          {
+            "x": 435.29999999999995,
+            "y": 1622.5234375,
+            "inClip": false,
+            "hit": false,
+            "hitNode": null
+          },
+          {
+            "x": 1066.6999999999998,
+            "y": 1622.5234375,
+            "inClip": false,
+            "hit": false,
+            "hitNode": null
+          }
+        ],
+        "visible": true,
+        "full": false,
+        "texts": [
+          {
+            "text": "모르는 사실 확인",
+            "rects": [
+              {
+                "x": 332,
+                "y": 1492.96875,
+                "width": 66.859375,
+                "height": 15,
+                "top": 1492.96875,
+                "right": 398.859375,
+                "bottom": 1507.96875,
+                "left": 332
+              }
+            ]
+          },
+          {
+            "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+            "rects": [
+              {
+                "x": 323,
+                "y": 1526.46875,
+                "width": 560.984375,
+                "height": 27,
+                "top": 1526.46875,
+                "right": 883.984375,
+                "bottom": 1553.46875,
+                "left": 323
+              }
+            ]
+          },
+          {
+            "text": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+            "rects": [
+              {
+                "x": 323,
+                "y": 1569.609375,
+                "width": 492.703125,
+                "height": 17,
+                "top": 1569.609375,
+                "right": 815.703125,
+                "bottom": 1586.609375,
+                "left": 323
+              }
+            ]
+          },
+          {
+            "text": "직접 답하거나 다른 방향을 적어 주세요.",
+            "rects": [
+              {
+                "x": 323,
+                "y": 1608.796875,
+                "width": 172.703125,
+                "height": 16,
+                "top": 1608.796875,
+                "right": 495.703125,
+                "bottom": 1624.796875,
+                "left": 323
+              }
+            ]
+          },
+          {
+            "text": "이 답으로 이어가기",
+            "rects": [
+              {
+                "x": 335,
+                "y": 1731.03125,
+                "width": 87.125,
+                "height": 16,
+                "top": 1731.03125,
+                "right": 422.125,
+                "bottom": 1747.03125,
+                "left": 335
+              }
+            ]
+          },
+          {
+            "text": "잘 모르겠음",
+            "rects": [
+              {
+                "x": 453.125,
+                "y": 1731.03125,
+                "width": 53.6875,
+                "height": 16,
+                "top": 1731.03125,
+                "right": 506.8125,
+                "bottom": 1747.03125,
+                "left": 453.125
+              }
+            ]
+          },
+          {
+            "text": "이 질문은 보류",
+            "rects": [
+              {
+                "x": 537.8125,
+                "y": 1731.03125,
+                "width": 66.890625,
+                "height": 16,
+                "top": 1731.03125,
+                "right": 604.703125,
+                "bottom": 1747.03125,
+                "left": 537.8125
+              }
+            ]
+          }
+        ],
+        "scrollY": 81,
+        "focus": "outcome-home",
+        "open": null
+      },
+      "copies": [
+        {
+          "id": "copy-work",
+          "disabled": false,
+          "text": "작업문 복사",
+          "rect": {
+            "x": 395.203125,
+            "y": 178.984375,
+            "width": 100.328125,
+            "height": 43,
+            "top": 178.984375,
+            "right": 495.53125,
+            "bottom": 221.984375,
+            "left": 395.203125
+          }
+        },
+        {
+          "id": "copy-file-work",
+          "disabled": false,
+          "text": "파일 결과용 작업문 복사",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          }
+        },
+        {
+          "id": "download-file-work",
+          "disabled": false,
+          "text": "파일 결과용 Markdown 저장",
+          "rect": {
+            "x": 460.484375,
+            "y": 2174.4375,
+            "width": 174.015625,
+            "height": 36,
+            "top": 2174.4375,
+            "right": 634.5,
+            "bottom": 2210.4375,
+            "left": 460.484375
+          }
+        }
+      ],
+      "afterDisclosure": {
+        "snapshot": {
+          "viewport": [
+            1280,
+            720
+          ],
+          "scrollY": 1511,
+          "maxY": 1917,
+          "focus": "<summary>결과를 파일로 받기 · 선택</summary>",
+          "open": [
+            "project-management",
+            "file-return-options",
+            "history"
+          ],
+          "buttons": [
+            {
+              "id": "nav-projects",
+              "text": "내 프로젝트",
+              "rect": {
+                "x": 17,
+                "y": 220.140625,
+                "width": 187,
+                "height": 42,
+                "top": 220.140625,
+                "right": 204,
+                "bottom": 262.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-space",
+              "text": "전체 공간0",
+              "rect": {
+                "x": 17,
+                "y": 267.140625,
+                "width": 187,
+                "height": 42,
+                "top": 267.140625,
+                "right": 204,
+                "bottom": 309.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-work",
+              "text": "현재 작업↗",
+              "rect": {
+                "x": 17,
+                "y": 314.140625,
+                "width": 187,
+                "height": 48,
+                "top": 314.140625,
+                "right": 204,
+                "bottom": 362.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-context",
+              "text": "기준 · 출처1",
+              "rect": {
+                "x": 17,
+                "y": 367.140625,
+                "width": 187,
+                "height": 42,
+                "top": 367.140625,
+                "right": 204,
+                "bottom": 409.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-history",
+              "text": "지난 요청과 결과1",
+              "rect": {
+                "x": 17,
+                "y": 414.140625,
+                "width": 187,
+                "height": 42,
+                "top": 414.140625,
+                "right": 204,
+                "bottom": 456.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "to-projects",
+              "text": "내 프로젝트",
+              "rect": {
+                "x": 264,
+                "y": -1484.578125,
+                "width": 53.6875,
+                "height": 18.140625,
+                "top": -1484.578125,
+                "right": 317.6875,
+                "bottom": -1466.4375,
+                "left": 264
+              }
+            },
+            {
+              "id": "",
+              "text": "MOCK · 체험 모드⌄",
+              "rect": {
+                "x": 1096.828125,
+                "y": -1492.40625,
+                "width": 141.171875,
+                "height": 33.796875,
+                "top": -1492.40625,
+                "right": 1238,
+                "bottom": -1458.609375,
+                "left": 1096.828125
+              }
+            },
+            {
+              "id": "new-project-top",
+              "text": "＋ 새 프로젝트",
+              "rect": {
+                "x": 792.015625,
+                "y": -1391.90625,
+                "width": 89.765625,
+                "height": 30.5,
+                "top": -1391.90625,
+                "right": 881.78125,
+                "bottom": -1361.40625,
+                "left": 792.015625
+              }
+            },
+            {
+              "id": "backup",
+              "text": "↓ 백업 파일 저장",
+              "rect": {
+                "x": 889.78125,
+                "y": -1391.90625,
+                "width": 102.96875,
+                "height": 30.5,
+                "top": -1391.90625,
+                "right": 992.75,
+                "bottom": -1361.40625,
+                "left": 889.78125
+              }
+            },
+            {
+              "id": "import",
+              "text": "↑ 백업 파일 불러오기",
+              "rect": {
+                "x": 1000.75,
+                "y": -1391.90625,
+                "width": 123.203125,
+                "height": 30.5,
+                "top": -1391.90625,
+                "right": 1123.953125,
+                "bottom": -1361.40625,
+                "left": 1000.75
+              }
+            },
+            {
+              "id": "trash-current",
+              "text": "휴지통으로 옮기기",
+              "rect": {
+                "x": 1131.953125,
+                "y": -1391.90625,
+                "width": 106.046875,
+                "height": 30.5,
+                "top": -1391.90625,
+                "right": 1238,
+                "bottom": -1361.40625,
+                "left": 1131.953125
+              }
+            },
+            {
+              "id": "next-answer",
+              "text": "질문에 답하기",
+              "rect": {
+                "x": 264,
+                "y": -1252.015625,
+                "width": 123.203125,
+                "height": 45,
+                "top": -1252.015625,
+                "right": 387.203125,
+                "bottom": -1207.015625,
+                "left": 264
+              }
+            },
+            {
+              "id": "copy-work",
+              "text": "작업문 복사",
+              "rect": {
+                "x": 395.203125,
+                "y": -1251.015625,
+                "width": 100.328125,
+                "height": 43,
+                "top": -1251.015625,
+                "right": 495.53125,
+                "bottom": -1208.015625,
+                "left": 395.203125
+              }
+            },
+            {
+              "id": "download-work",
+              "text": "Markdown 저장",
+              "rect": {
+                "x": 503.53125,
+                "y": -1251.015625,
+                "width": 134.78125,
+                "height": 43,
+                "top": -1251.015625,
+                "right": 638.3125,
+                "bottom": -1208.015625,
+                "left": 503.53125
+              }
+            },
+            {
+              "id": "retry-work",
+              "text": "이 입력 다시 정리",
+              "rect": {
+                "x": 646.3125,
+                "y": -1247.515625,
+                "width": 111.375,
+                "height": 36,
+                "top": -1247.515625,
+                "right": 757.6875,
+                "bottom": -1211.515625,
+                "left": 646.3125
+              }
+            },
+            {
+              "id": "next-preview",
+              "text": "전달할 작업문 전체 보기",
+              "rect": {
+                "x": 765.6875,
+                "y": -1247.515625,
+                "width": 144.484375,
+                "height": 36,
+                "top": -1247.515625,
+                "right": 910.171875,
+                "bottom": -1211.515625,
+                "left": 765.6875
+              }
+            },
+            {
+              "id": "change-direction",
+              "text": "방향 수정 / 다음 요청",
+              "rect": {
+                "x": 1050.8125,
+                "y": -1116.84375,
+                "width": 156.1875,
+                "height": 43,
+                "top": -1116.84375,
+                "right": 1207,
+                "bottom": -1073.84375,
+                "left": 1050.8125
+              }
+            },
+            {
+              "id": "",
+              "text": "정리 바로잡기 · 근거 보기",
+              "rect": {
+                "x": 314,
+                "y": -706.734375,
+                "width": 877,
+                "height": 43.796875,
+                "top": -706.734375,
+                "right": 1191,
+                "bottom": -662.9375,
+                "left": 314
+              }
+            },
+            {
+              "id": "",
+              "text": "이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장",
+              "rect": {
+                "x": 295,
+                "y": -640.9375,
+                "width": 912,
+                "height": 43.796875,
+                "top": -640.9375,
+                "right": 1207,
+                "bottom": -597.140625,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "이번 요청 바로잡기",
+              "rect": {
+                "x": 295,
+                "y": -553.140625,
+                "width": 912,
+                "height": 43.796875,
+                "top": -553.140625,
+                "right": 1207,
+                "bottom": -509.34375,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "출발 · 방향 · 이번 요청 원문 보기",
+              "rect": {
+                "x": 295,
+                "y": -509.34375,
+                "width": 912,
+                "height": 43.796875,
+                "top": -509.34375,
+                "right": 1207,
+                "bottom": -465.546875,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "선택 · 이유와 보존 기준 1개",
+              "rect": {
+                "x": 310,
+                "y": -434.546875,
+                "width": 420,
+                "height": 43.796875,
+                "top": -434.546875,
+                "right": 730,
+                "bottom": -390.75,
+                "left": 310
+              }
+            },
+            {
+              "id": "",
+              "text": "이 흐름에서 받은 보고 · 자료 0개",
+              "rect": {
+                "x": 772,
+                "y": -434.546875,
+                "width": 420,
+                "height": 43.796875,
+                "top": -434.546875,
+                "right": 1192,
+                "bottom": -390.75,
+                "left": 772
+              }
+            },
+            {
+              "id": "home-paste-result",
+              "text": "결과 붙여넣기",
+              "rect": {
+                "x": 295,
+                "y": -365.75,
+                "width": 93.609375,
+                "height": 36,
+                "top": -365.75,
+                "right": 388.609375,
+                "bottom": -329.75,
+                "left": 295
+              }
+            },
+            {
+              "id": "home-file-result",
+              "text": "결과 JSON 가져오기",
+              "rect": {
+                "x": 396.609375,
+                "y": -365.75,
+                "width": 129.5,
+                "height": 36,
+                "top": -365.75,
+                "right": 526.109375,
+                "bottom": -329.75,
+                "left": 396.609375
+              }
+            },
+            {
+              "id": "",
+              "text": "이 흐름의 범위",
+              "rect": {
+                "x": 295,
+                "y": -329.75,
+                "width": 912,
+                "height": 43.796875,
+                "top": -329.75,
+                "right": 1207,
+                "bottom": -285.953125,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "요청 원문결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+              "rect": {
+                "x": 316,
+                "y": -133.609375,
+                "width": 870,
+                "height": 44.734375,
+                "top": -133.609375,
+                "right": 1186,
+                "bottom": -88.875,
+                "left": 316
+              }
+            },
+            {
+              "id": "answer-send",
+              "text": "이 답으로 이어가기",
+              "rect": {
+                "x": 323,
+                "y": 291.03125,
+                "width": 111.125,
+                "height": 36.5,
+                "top": 291.03125,
+                "right": 434.125,
+                "bottom": 327.53125,
+                "left": 323
+              }
+            },
+            {
+              "id": "answer-unknown",
+              "text": "잘 모르겠음",
+              "rect": {
+                "x": 441.125,
+                "y": 291.03125,
+                "width": 77.6875,
+                "height": 36.5,
+                "top": 291.03125,
+                "right": 518.8125,
+                "bottom": 327.53125,
+                "left": 441.125
+              }
+            },
+            {
+              "id": "answer-defer",
+              "text": "이 질문은 보류",
+              "rect": {
+                "x": 525.8125,
+                "y": 291.03125,
+                "width": 90.890625,
+                "height": 36.5,
+                "top": 291.03125,
+                "right": 616.703125,
+                "bottom": 327.53125,
+                "left": 525.8125
+              }
+            },
+            {
+              "id": "",
+              "text": "완료 조건 · 확인할 동작",
+              "rect": {
+                "x": 321,
+                "y": 490.0625,
+                "width": 860,
+                "height": 18.140625,
+                "top": 490.0625,
+                "right": 1181,
+                "bottom": 508.203125,
+                "left": 321
+              }
+            },
+            {
+              "id": "",
+              "text": "작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음",
+              "rect": {
+                "x": 300,
+                "y": 527.203125,
+                "width": 902,
+                "height": 43.796875,
+                "top": 527.203125,
+                "right": 1202,
+                "bottom": 571,
+                "left": 300
+              }
+            },
+            {
+              "id": "",
+              "text": "결과를 파일로 받기 · 선택",
+              "rect": {
+                "x": 300,
+                "y": 668.5,
+                "width": 902,
+                "height": 45.4375,
+                "top": 668.5,
+                "right": 1202,
+                "bottom": 713.9375,
+                "left": 300
+              }
+            },
+            {
+              "id": "copy-file-work",
+              "text": "파일 결과용 작업문 복사",
+              "rect": {
+                "x": 300,
+                "y": 742.4375,
+                "width": 152.484375,
+                "height": 40,
+                "top": 742.4375,
+                "right": 452.484375,
+                "bottom": 782.4375,
+                "left": 300
+              }
+            },
+            {
+              "id": "download-file-work",
+              "text": "파일 결과용 Markdown 저장",
+              "rect": {
+                "x": 460.484375,
+                "y": 744.4375,
+                "width": 174.015625,
+                "height": 36,
+                "top": 744.4375,
+                "right": 634.5,
+                "bottom": 780.4375,
+                "left": 460.484375
+              }
+            },
+            {
+              "id": "",
+              "text": "범위 · 제안 · 작업문 직접 다듬기",
+              "rect": {
+                "x": 300,
+                "y": 832.9375,
+                "width": 902,
+                "height": 49.796875,
+                "top": 832.9375,
+                "right": 1202,
+                "bottom": 882.734375,
+                "left": 300
+              }
+            },
+            {
+              "id": "",
+              "text": "실제로 전달할 전체 문맥 보기",
+              "rect": {
+                "x": 300,
+                "y": 882.734375,
+                "width": 902,
+                "height": 43.796875,
+                "top": 882.734375,
+                "right": 1202,
+                "bottom": 926.53125,
+                "left": 300
+              }
+            },
+            {
+              "id": "compose-summary",
+              "text": "＋ 새 요청 · 돌아온 결과 붙여넣기",
+              "rect": {
+                "x": 272,
+                "y": 972.53125,
+                "width": 958,
+                "height": 53.796875,
+                "top": 972.53125,
+                "right": 1230,
+                "bottom": 1026.328125,
+                "left": 272
+              }
+            }
+          ]
+        },
+        "sameProject": true,
+        "copies": [
+          {
+            "id": "copy-work",
+            "disabled": false,
+            "text": "작업문 복사",
+            "rect": {
+              "x": 395.203125,
+              "y": -1251.015625,
+              "width": 100.328125,
+              "height": 43,
+              "top": -1251.015625,
+              "right": 495.53125,
+              "bottom": -1208.015625,
+              "left": 395.203125
+            }
+          },
+          {
+            "id": "copy-file-work",
+            "disabled": false,
+            "text": "파일 결과용 작업문 복사",
+            "rect": {
+              "x": 300,
+              "y": 742.4375,
+              "width": 152.484375,
+              "height": 40,
+              "top": 742.4375,
+              "right": 452.484375,
+              "bottom": 782.4375,
+              "left": 300
+            }
+          },
+          {
+            "id": "download-file-work",
+            "disabled": false,
+            "text": "파일 결과용 Markdown 저장",
+            "rect": {
+              "x": 460.484375,
+              "y": 744.4375,
+              "width": 174.015625,
+              "height": 36,
+              "top": 744.4375,
+              "right": 634.5,
+              "bottom": 780.4375,
+              "left": 460.484375
+            }
+          }
+        ]
+      },
+      "openPNG": "before-1280-question-file-open.png",
+      "unknownButtonCount": 0
+    },
+    {
+      "kind": "after",
+      "AX": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n    - button \"전체 공간 0\"\n    - button \"현재 작업\"\n    - button \"기준 · 출처 1\"\n    - button \"지난 요청과 결과 1\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n  - paragraph: 작업 1 · 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n  - group: MOCK · 체험 모드\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - group:\n      - button \"＋ 새 프로젝트\"\n      - button \"↓ 백업 파일 저장\"\n      - button \"↑ 백업 파일 불러오기\"\n      - button \"휴지통으로 옮기기\"\n  - region \"지금 할 일\":\n    - text: 현재 작업 01\n    - heading \"이 한 가지만 알려주세요.\" [level=1]\n    - paragraph: 답에 따라 달라지는 부분만 확인하고, 작업문으로 이어갑니다.\n    - text: 답변이 필요해요\n    - button \"질문에 답하기\"\n    - button \"작업문 복사\"\n    - button \"Markdown 저장\"\n    - button \"이 입력 다시 정리\"\n    - button \"전달할 작업문 전체 보기\"\n    - group: 결과를 파일로 받기 · 선택\n  - region \"목적 중심 프로젝트 홈\":\n    - paragraph: PROJECT OUTCOME\n    - heading \"지금 이어갈 작업\" [level=2]\n    - button \"방향 수정 / 다음 요청\"\n    - region \"전달 전 확인\":\n      - heading \"요청과 다음 행동 먼저 확인하기\" [level=3]\n      - paragraph: 아래는 기록의 앞부분이에요. 의미 요약이나 새 결정을 만들지 않으며, 전체 원문·기준은 아래와 전체 전달문에 그대로 남아요.\n      - term: 이번 요청 · 원문 앞부분\n      - definition: 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n      - term: 별도 조건란 · MOCK 정리 값\n      - definition: 별도 조건 값이 비어 있어요. 원문 속 조건·금지가 없다는 뜻은 아니에요.\n      - term: 미정 · 열린 질문·보류·모름 기록\n      - definition: \"답변할 질문: 문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?\"\n      - term: 다음 행동 · 답변이 필요해요\n      - definition: 아래 질문에 답하거나 ‘잘 모르겠음’·‘이 질문은 보류’를 선택해 이어가세요.\n    - heading \"이 작업의 목표 · MOCK 정리\" [level=3]\n    - paragraph: 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n    - group: 정리 바로잡기 · 근거 보기\n    - group: 이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장\n    - group: 이번 요청 바로잡기\n    - group: 출발 · 방향 · 이번 요청 원문 보기\n    - group: 선택 · 이유와 보존 기준 1개\n    - group: 이 흐름에서 받은 보고 · 자료 0개\n    - button \"결과 붙여넣기\"\n    - button \"결과 JSON 가져오기\"\n    - group: 이 흐름의 범위\n  - region \"현재 작업\":\n    - paragraph: TASK 01\n    - heading \"이어갈 작업\" [level=2]\n    - text: 모의 제안 · 규칙 기반\n    - group: 요청 원문 결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.\n    - paragraph: 문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.\n    - paragraph: 요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.\n    - text: 모르는 사실 확인\n    - heading \"문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?\" [level=3]\n    - paragraph: 원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.\n    - text: 직접 답하거나 다른 방향을 적어 주세요.\n    - textbox \"직접 답하거나 다른 방향을 적어 주세요.\":\n      - /placeholder: 알고 있는 관찰만 적어 주세요. 모르면 아래 버튼으로 확인 작업만 이어갑니다.\n    - button \"이 답으로 이어가기\" [disabled]\n    - button \"잘 모르겠음\"\n    - button \"이 질문은 보류\"\n    - text: 전달할 작업문 모의 제안\n    - paragraph: 요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.\n    - group: 완료 조건 · 확인할 동작\n    - group: 작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음\n    - paragraph: 작업문에 코드 파일은 포함되지 않습니다. 작업에 필요하다면 실행자가 대상 저장소나 관련 파일을 볼 수 있게 준비하세요. 복사·저장은 자동 실행이 아닙니다.\n    - group: 범위 · 제안 · 작업문 직접 다듬기\n    - group: 실제로 전달할 전체 문맥 보기\n  - group: ＋ 새 요청 · 돌아온 결과 붙여넣기 ⌄\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일",
+      "screen": {
+        "viewport": [
+          1280,
+          720
+        ],
+        "scrollY": 81,
+        "maxY": 1830,
+        "focus": "<section id=\"outcome-home\" class=\"card outcome-home\" aria-label=\"목적 중심 프로젝트 홈\" tabindex=\"-1\" data-outcome-id=\"S_55d1bbb8-ae05-4e6f-a5cc-b0d01720526f\"><div class=\"outcome-heading\"><div><p class=\"eyebrow\">PROJECT OUTCOME</p><h2>지금 이어갈 작업</h2></div><div class=\"outcome-actions\"><button class=\"secondary\" type=\"button\" id=\"change-direction\">방향 수정 / 다음 요청</button></div></div><section class=\"handoff-review\" id=\"handoff-review\" aria-label=\"전달 전 확인\"><h3>요청과 다음 행동 먼저 확인하기</h3><p class=\"hint\">아래는 기록의 앞부분이에요",
+        "open": [
+          "project-management",
+          "history"
+        ],
+        "buttons": [
+          {
+            "id": "nav-projects",
+            "text": "내 프로젝트",
+            "rect": {
+              "x": 17,
+              "y": 220.140625,
+              "width": 187,
+              "height": 42,
+              "top": 220.140625,
+              "right": 204,
+              "bottom": 262.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "nav-space",
+            "text": "전체 공간0",
+            "rect": {
+              "x": 17,
+              "y": 267.140625,
+              "width": 187,
+              "height": 42,
+              "top": 267.140625,
+              "right": 204,
+              "bottom": 309.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "nav-work",
+            "text": "현재 작업↗",
+            "rect": {
+              "x": 17,
+              "y": 314.140625,
+              "width": 187,
+              "height": 48,
+              "top": 314.140625,
+              "right": 204,
+              "bottom": 362.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "nav-context",
+            "text": "기준 · 출처1",
+            "rect": {
+              "x": 17,
+              "y": 367.140625,
+              "width": 187,
+              "height": 42,
+              "top": 367.140625,
+              "right": 204,
+              "bottom": 409.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "nav-history",
+            "text": "지난 요청과 결과1",
+            "rect": {
+              "x": 17,
+              "y": 414.140625,
+              "width": 187,
+              "height": 42,
+              "top": 414.140625,
+              "right": 204,
+              "bottom": 456.140625,
+              "left": 17
+            }
+          },
+          {
+            "id": "to-projects",
+            "text": "내 프로젝트",
+            "rect": {
+              "x": 264,
+              "y": -54.578125,
+              "width": 53.6875,
+              "height": 18.140625,
+              "top": -54.578125,
+              "right": 317.6875,
+              "bottom": -36.4375,
+              "left": 264
+            }
+          },
+          {
+            "id": "",
+            "text": "MOCK · 체험 모드⌄",
+            "rect": {
+              "x": 1096.828125,
+              "y": -62.40625,
+              "width": 141.171875,
+              "height": 33.796875,
+              "top": -62.40625,
+              "right": 1238,
+              "bottom": -28.609375,
+              "left": 1096.828125
+            }
+          },
+          {
+            "id": "new-project-top",
+            "text": "＋ 새 프로젝트",
+            "rect": {
+              "x": 792.015625,
+              "y": 38.09375,
+              "width": 89.765625,
+              "height": 30.5,
+              "top": 38.09375,
+              "right": 881.78125,
+              "bottom": 68.59375,
+              "left": 792.015625
+            }
+          },
+          {
+            "id": "backup",
+            "text": "↓ 백업 파일 저장",
+            "rect": {
+              "x": 889.78125,
+              "y": 38.09375,
+              "width": 102.96875,
+              "height": 30.5,
+              "top": 38.09375,
+              "right": 992.75,
+              "bottom": 68.59375,
+              "left": 889.78125
+            }
+          },
+          {
+            "id": "import",
+            "text": "↑ 백업 파일 불러오기",
+            "rect": {
+              "x": 1000.75,
+              "y": 38.09375,
+              "width": 123.203125,
+              "height": 30.5,
+              "top": 38.09375,
+              "right": 1123.953125,
+              "bottom": 68.59375,
+              "left": 1000.75
+            }
+          },
+          {
+            "id": "trash-current",
+            "text": "휴지통으로 옮기기",
+            "rect": {
+              "x": 1131.953125,
+              "y": 38.09375,
+              "width": 106.046875,
+              "height": 30.5,
+              "top": 38.09375,
+              "right": 1238,
+              "bottom": 68.59375,
+              "left": 1131.953125
+            }
+          },
+          {
+            "id": "next-answer",
+            "text": "질문에 답하기",
+            "rect": {
+              "x": 264,
+              "y": 177.984375,
+              "width": 123.203125,
+              "height": 45,
+              "top": 177.984375,
+              "right": 387.203125,
+              "bottom": 222.984375,
+              "left": 264
+            }
+          },
+          {
+            "id": "copy-work",
+            "text": "작업문 복사",
+            "rect": {
+              "x": 395.203125,
+              "y": 178.984375,
+              "width": 100.328125,
+              "height": 43,
+              "top": 178.984375,
+              "right": 495.53125,
+              "bottom": 221.984375,
+              "left": 395.203125
+            }
+          },
+          {
+            "id": "download-work",
+            "text": "Markdown 저장",
+            "rect": {
+              "x": 503.53125,
+              "y": 178.984375,
+              "width": 134.78125,
+              "height": 43,
+              "top": 178.984375,
+              "right": 638.3125,
+              "bottom": 221.984375,
+              "left": 503.53125
+            }
+          },
+          {
+            "id": "retry-work",
+            "text": "이 입력 다시 정리",
+            "rect": {
+              "x": 646.3125,
+              "y": 182.484375,
+              "width": 111.375,
+              "height": 36,
+              "top": 182.484375,
+              "right": 757.6875,
+              "bottom": 218.484375,
+              "left": 646.3125
+            }
+          },
+          {
+            "id": "next-preview",
+            "text": "전달할 작업문 전체 보기",
+            "rect": {
+              "x": 765.6875,
+              "y": 182.484375,
+              "width": 144.484375,
+              "height": 36,
+              "top": 182.484375,
+              "right": 910.171875,
+              "bottom": 218.484375,
+              "left": 765.6875
+            }
+          },
+          {
+            "id": "",
+            "text": "결과를 파일로 받기 · 선택",
+            "rect": {
+              "x": 264,
+              "y": 261.984375,
+              "width": 974,
+              "height": 45.4375,
+              "top": 261.984375,
+              "right": 1238,
+              "bottom": 307.421875,
+              "left": 264
+            }
+          },
+          {
+            "id": "change-direction",
+            "text": "방향 수정 / 다음 요청",
+            "rect": {
+              "x": 1050.8125,
+              "y": 397.59375,
+              "width": 156.1875,
+              "height": 43,
+              "top": 397.59375,
+              "right": 1207,
+              "bottom": 440.59375,
+              "left": 1050.8125
+            }
+          },
+          {
+            "id": "",
+            "text": "정리 바로잡기 · 근거 보기",
+            "rect": {
+              "x": 314,
+              "y": 807.703125,
+              "width": 877,
+              "height": 43.796875,
+              "top": 807.703125,
+              "right": 1191,
+              "bottom": 851.5,
+              "left": 314
+            }
+          },
+          {
+            "id": "",
+            "text": "이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장",
+            "rect": {
+              "x": 295,
+              "y": 873.5,
+              "width": 912,
+              "height": 43.796875,
+              "top": 873.5,
+              "right": 1207,
+              "bottom": 917.296875,
+              "left": 295
+            }
+          },
+          {
+            "id": "",
+            "text": "이번 요청 바로잡기",
+            "rect": {
+              "x": 295,
+              "y": 961.296875,
+              "width": 912,
+              "height": 43.796875,
+              "top": 961.296875,
+              "right": 1207,
+              "bottom": 1005.09375,
+              "left": 295
+            }
+          },
+          {
+            "id": "",
+            "text": "출발 · 방향 · 이번 요청 원문 보기",
+            "rect": {
+              "x": 295,
+              "y": 1005.09375,
+              "width": 912,
+              "height": 43.796875,
+              "top": 1005.09375,
+              "right": 1207,
+              "bottom": 1048.890625,
+              "left": 295
+            }
+          },
+          {
+            "id": "",
+            "text": "선택 · 이유와 보존 기준 1개",
+            "rect": {
+              "x": 310,
+              "y": 1079.890625,
+              "width": 420,
+              "height": 43.796875,
+              "top": 1079.890625,
+              "right": 730,
+              "bottom": 1123.6875,
+              "left": 310
+            }
+          },
+          {
+            "id": "",
+            "text": "이 흐름에서 받은 보고 · 자료 0개",
+            "rect": {
+              "x": 772,
+              "y": 1079.890625,
+              "width": 420,
+              "height": 43.796875,
+              "top": 1079.890625,
+              "right": 1192,
+              "bottom": 1123.6875,
+              "left": 772
+            }
+          },
+          {
+            "id": "home-paste-result",
+            "text": "결과 붙여넣기",
+            "rect": {
+              "x": 295,
+              "y": 1148.6875,
+              "width": 93.609375,
+              "height": 36,
+              "top": 1148.6875,
+              "right": 388.609375,
+              "bottom": 1184.6875,
+              "left": 295
+            }
+          },
+          {
+            "id": "home-file-result",
+            "text": "결과 JSON 가져오기",
+            "rect": {
+              "x": 396.609375,
+              "y": 1148.6875,
+              "width": 129.5,
+              "height": 36,
+              "top": 1148.6875,
+              "right": 526.109375,
+              "bottom": 1184.6875,
+              "left": 396.609375
+            }
+          },
+          {
+            "id": "",
+            "text": "이 흐름의 범위",
+            "rect": {
+              "x": 295,
+              "y": 1184.6875,
+              "width": 912,
+              "height": 43.796875,
+              "top": 1184.6875,
+              "right": 1207,
+              "bottom": 1228.484375,
+              "left": 295
+            }
+          },
+          {
+            "id": "",
+            "text": "요청 원문결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+            "rect": {
+              "x": 316,
+              "y": 1380.828125,
+              "width": 870,
+              "height": 44.734375,
+              "top": 1380.828125,
+              "right": 1186,
+              "bottom": 1425.5625,
+              "left": 316
+            }
+          },
+          {
+            "id": "answer-send",
+            "text": "이 답으로 이어가기",
+            "rect": {
+              "x": 323,
+              "y": 1805.46875,
+              "width": 111.125,
+              "height": 36.5,
+              "top": 1805.46875,
+              "right": 434.125,
+              "bottom": 1841.96875,
+              "left": 323
+            }
+          },
+          {
+            "id": "answer-unknown",
+            "text": "잘 모르겠음",
+            "rect": {
+              "x": 441.125,
+              "y": 1805.46875,
+              "width": 77.6875,
+              "height": 36.5,
+              "top": 1805.46875,
+              "right": 518.8125,
+              "bottom": 1841.96875,
+              "left": 441.125
+            }
+          },
+          {
+            "id": "answer-defer",
+            "text": "이 질문은 보류",
+            "rect": {
+              "x": 525.8125,
+              "y": 1805.46875,
+              "width": 90.890625,
+              "height": 36.5,
+              "top": 1805.46875,
+              "right": 616.703125,
+              "bottom": 1841.96875,
+              "left": 525.8125
+            }
+          },
+          {
+            "id": "",
+            "text": "완료 조건 · 확인할 동작",
+            "rect": {
+              "x": 321,
+              "y": 2004.5,
+              "width": 860,
+              "height": 18.140625,
+              "top": 2004.5,
+              "right": 1181,
+              "bottom": 2022.640625,
+              "left": 321
+            }
+          },
+          {
+            "id": "",
+            "text": "작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음",
+            "rect": {
+              "x": 300,
+              "y": 2041.640625,
+              "width": 902,
+              "height": 43.796875,
+              "top": 2041.640625,
+              "right": 1202,
+              "bottom": 2085.4375,
+              "left": 300
+            }
+          },
+          {
+            "id": "",
+            "text": "범위 · 제안 · 작업문 직접 다듬기",
+            "rect": {
+              "x": 300,
+              "y": 2175.9375,
+              "width": 902,
+              "height": 49.796875,
+              "top": 2175.9375,
+              "right": 1202,
+              "bottom": 2225.734375,
+              "left": 300
+            }
+          },
+          {
+            "id": "",
+            "text": "실제로 전달할 전체 문맥 보기",
+            "rect": {
+              "x": 300,
+              "y": 2225.734375,
+              "width": 902,
+              "height": 43.796875,
+              "top": 2225.734375,
+              "right": 1202,
+              "bottom": 2269.53125,
+              "left": 300
+            }
+          },
+          {
+            "id": "compose-summary",
+            "text": "＋ 새 요청 · 돌아온 결과 붙여넣기",
+            "rect": {
+              "x": 272,
+              "y": 2315.53125,
+              "width": 958,
+              "height": 53.796875,
+              "top": 2315.53125,
+              "right": 1230,
+              "bottom": 2369.328125,
+              "left": 272
+            }
+          }
+        ]
+      },
+      "project": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_69ce6ac7-fe6f-4b4e-9897-ef4561ddbf76",
+        "revision": 5,
+        "name": "결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+        "sources": [
+          {
+            "id": "S_55d1bbb8-ae05-4e6f-a5cc-b0d01720526f",
+            "kind": "request",
+            "text": "결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+            "at": "2026-10-22T16:17:16.294Z",
+            "taskId": "T_606df139-61b6-41ed-a5b2-c544eabbc5d3",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+            "status": "requested",
+            "sourceId": "S_55d1bbb8-ae05-4e6f-a5cc-b0d01720526f",
+            "revision": 4,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_606df139-61b6-41ed-a5b2-c544eabbc5d3",
+            "sourceIds": [
+              "S_55d1bbb8-ae05-4e6f-a5cc-b0d01720526f"
+            ],
+            "parentTaskId": null,
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D1",
+                    "sourceId": "S_55d1bbb8-ae05-4e6f-a5cc-b0d01720526f",
+                    "revision": 4
+                  }
+                ]
+              },
+              "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+                "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D1"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 4,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 3,
+              "brief": null,
+              "area": null
+            }
+          }
+        ],
+        "currentTaskId": "T_606df139-61b6-41ed-a5b2-c544eabbc5d3",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": null,
+          "areas": [],
+          "relations": [],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {}
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {},
+            "revisions": {}
+          }
+        }
+      },
+      "question": {
+        "rect": {
+          "x": 300,
+          "y": 1548.953125,
+          "width": 902,
+          "height": 316.015625,
+          "top": 1548.953125,
+          "right": 1202,
+          "bottom": 1864.96875,
+          "left": 300
+        },
+        "viewport": [
+          1280,
+          720
+        ],
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "ancestors": [],
+        "points": [
+          {
+            "x": 751,
+            "y": 1706.9609375,
+            "inClip": false,
+            "hit": false,
+            "hitNode": null
+          },
+          {
+            "x": 435.29999999999995,
+            "y": 1706.9609375,
+            "inClip": false,
+            "hit": false,
+            "hitNode": null
+          },
+          {
+            "x": 1066.6999999999998,
+            "y": 1706.9609375,
+            "inClip": false,
+            "hit": false,
+            "hitNode": null
+          }
+        ],
+        "visible": true,
+        "full": false,
+        "texts": [
+          {
+            "text": "모르는 사실 확인",
+            "rects": [
+              {
+                "x": 332,
+                "y": 1577.40625,
+                "width": 66.859375,
+                "height": 15,
+                "top": 1577.40625,
+                "right": 398.859375,
+                "bottom": 1592.40625,
+                "left": 332
+              }
+            ]
+          },
+          {
+            "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+            "rects": [
+              {
+                "x": 323,
+                "y": 1610.90625,
+                "width": 560.984375,
+                "height": 27,
+                "top": 1610.90625,
+                "right": 883.984375,
+                "bottom": 1637.90625,
+                "left": 323
+              }
+            ]
+          },
+          {
+            "text": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+            "rects": [
+              {
+                "x": 323,
+                "y": 1654.046875,
+                "width": 492.703125,
+                "height": 17,
+                "top": 1654.046875,
+                "right": 815.703125,
+                "bottom": 1671.046875,
+                "left": 323
+              }
+            ]
+          },
+          {
+            "text": "직접 답하거나 다른 방향을 적어 주세요.",
+            "rects": [
+              {
+                "x": 323,
+                "y": 1693.234375,
+                "width": 172.703125,
+                "height": 16,
+                "top": 1693.234375,
+                "right": 495.703125,
+                "bottom": 1709.234375,
+                "left": 323
+              }
+            ]
+          },
+          {
+            "text": "이 답으로 이어가기",
+            "rects": [
+              {
+                "x": 335,
+                "y": 1815.46875,
+                "width": 87.125,
+                "height": 16,
+                "top": 1815.46875,
+                "right": 422.125,
+                "bottom": 1831.46875,
+                "left": 335
+              }
+            ]
+          },
+          {
+            "text": "잘 모르겠음",
+            "rects": [
+              {
+                "x": 453.125,
+                "y": 1815.46875,
+                "width": 53.6875,
+                "height": 16,
+                "top": 1815.46875,
+                "right": 506.8125,
+                "bottom": 1831.46875,
+                "left": 453.125
+              }
+            ]
+          },
+          {
+            "text": "이 질문은 보류",
+            "rects": [
+              {
+                "x": 537.8125,
+                "y": 1815.46875,
+                "width": 66.890625,
+                "height": 16,
+                "top": 1815.46875,
+                "right": 604.703125,
+                "bottom": 1831.46875,
+                "left": 537.8125
+              }
+            ]
+          }
+        ],
+        "scrollY": 81,
+        "focus": "outcome-home",
+        "open": null
+      },
+      "copies": [
+        {
+          "id": "copy-work",
+          "disabled": false,
+          "text": "작업문 복사",
+          "rect": {
+            "x": 395.203125,
+            "y": 178.984375,
+            "width": 100.328125,
+            "height": 43,
+            "top": 178.984375,
+            "right": 495.53125,
+            "bottom": 221.984375,
+            "left": 395.203125
+          }
+        },
+        {
+          "id": "copy-file-work",
+          "disabled": false,
+          "text": "파일 결과용 작업문 복사",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          }
+        },
+        {
+          "id": "download-file-work",
+          "disabled": false,
+          "text": "파일 결과용 Markdown 저장",
+          "rect": {
+            "x": 444.5625,
+            "y": 345.109375,
+            "width": 174.015625,
+            "height": 36,
+            "top": 345.109375,
+            "right": 618.578125,
+            "bottom": 381.109375,
+            "left": 444.5625
+          }
+        }
+      ],
+      "afterDisclosure": {
+        "snapshot": {
+          "viewport": [
+            1280,
+            720
+          ],
+          "scrollY": 81,
+          "maxY": 1947,
+          "focus": "<summary>결과를 파일로 받기 · 선택</summary>",
+          "open": [
+            "project-management",
+            "file-return-options",
+            "history"
+          ],
+          "buttons": [
+            {
+              "id": "nav-projects",
+              "text": "내 프로젝트",
+              "rect": {
+                "x": 17,
+                "y": 220.140625,
+                "width": 187,
+                "height": 42,
+                "top": 220.140625,
+                "right": 204,
+                "bottom": 262.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-space",
+              "text": "전체 공간0",
+              "rect": {
+                "x": 17,
+                "y": 267.140625,
+                "width": 187,
+                "height": 42,
+                "top": 267.140625,
+                "right": 204,
+                "bottom": 309.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-work",
+              "text": "현재 작업↗",
+              "rect": {
+                "x": 17,
+                "y": 314.140625,
+                "width": 187,
+                "height": 48,
+                "top": 314.140625,
+                "right": 204,
+                "bottom": 362.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-context",
+              "text": "기준 · 출처1",
+              "rect": {
+                "x": 17,
+                "y": 367.140625,
+                "width": 187,
+                "height": 42,
+                "top": 367.140625,
+                "right": 204,
+                "bottom": 409.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "nav-history",
+              "text": "지난 요청과 결과1",
+              "rect": {
+                "x": 17,
+                "y": 414.140625,
+                "width": 187,
+                "height": 42,
+                "top": 414.140625,
+                "right": 204,
+                "bottom": 456.140625,
+                "left": 17
+              }
+            },
+            {
+              "id": "to-projects",
+              "text": "내 프로젝트",
+              "rect": {
+                "x": 264,
+                "y": -54.578125,
+                "width": 53.6875,
+                "height": 18.140625,
+                "top": -54.578125,
+                "right": 317.6875,
+                "bottom": -36.4375,
+                "left": 264
+              }
+            },
+            {
+              "id": "",
+              "text": "MOCK · 체험 모드⌄",
+              "rect": {
+                "x": 1096.828125,
+                "y": -62.40625,
+                "width": 141.171875,
+                "height": 33.796875,
+                "top": -62.40625,
+                "right": 1238,
+                "bottom": -28.609375,
+                "left": 1096.828125
+              }
+            },
+            {
+              "id": "new-project-top",
+              "text": "＋ 새 프로젝트",
+              "rect": {
+                "x": 792.015625,
+                "y": 38.09375,
+                "width": 89.765625,
+                "height": 30.5,
+                "top": 38.09375,
+                "right": 881.78125,
+                "bottom": 68.59375,
+                "left": 792.015625
+              }
+            },
+            {
+              "id": "backup",
+              "text": "↓ 백업 파일 저장",
+              "rect": {
+                "x": 889.78125,
+                "y": 38.09375,
+                "width": 102.96875,
+                "height": 30.5,
+                "top": 38.09375,
+                "right": 992.75,
+                "bottom": 68.59375,
+                "left": 889.78125
+              }
+            },
+            {
+              "id": "import",
+              "text": "↑ 백업 파일 불러오기",
+              "rect": {
+                "x": 1000.75,
+                "y": 38.09375,
+                "width": 123.203125,
+                "height": 30.5,
+                "top": 38.09375,
+                "right": 1123.953125,
+                "bottom": 68.59375,
+                "left": 1000.75
+              }
+            },
+            {
+              "id": "trash-current",
+              "text": "휴지통으로 옮기기",
+              "rect": {
+                "x": 1131.953125,
+                "y": 38.09375,
+                "width": 106.046875,
+                "height": 30.5,
+                "top": 38.09375,
+                "right": 1238,
+                "bottom": 68.59375,
+                "left": 1131.953125
+              }
+            },
+            {
+              "id": "next-answer",
+              "text": "질문에 답하기",
+              "rect": {
+                "x": 264,
+                "y": 177.984375,
+                "width": 123.203125,
+                "height": 45,
+                "top": 177.984375,
+                "right": 387.203125,
+                "bottom": 222.984375,
+                "left": 264
+              }
+            },
+            {
+              "id": "copy-work",
+              "text": "작업문 복사",
+              "rect": {
+                "x": 395.203125,
+                "y": 178.984375,
+                "width": 100.328125,
+                "height": 43,
+                "top": 178.984375,
+                "right": 495.53125,
+                "bottom": 221.984375,
+                "left": 395.203125
+              }
+            },
+            {
+              "id": "download-work",
+              "text": "Markdown 저장",
+              "rect": {
+                "x": 503.53125,
+                "y": 178.984375,
+                "width": 134.78125,
+                "height": 43,
+                "top": 178.984375,
+                "right": 638.3125,
+                "bottom": 221.984375,
+                "left": 503.53125
+              }
+            },
+            {
+              "id": "retry-work",
+              "text": "이 입력 다시 정리",
+              "rect": {
+                "x": 646.3125,
+                "y": 182.484375,
+                "width": 111.375,
+                "height": 36,
+                "top": 182.484375,
+                "right": 757.6875,
+                "bottom": 218.484375,
+                "left": 646.3125
+              }
+            },
+            {
+              "id": "next-preview",
+              "text": "전달할 작업문 전체 보기",
+              "rect": {
+                "x": 765.6875,
+                "y": 182.484375,
+                "width": 144.484375,
+                "height": 36,
+                "top": 182.484375,
+                "right": 910.171875,
+                "bottom": 218.484375,
+                "left": 765.6875
+              }
+            },
+            {
+              "id": "",
+              "text": "결과를 파일로 받기 · 선택",
+              "rect": {
+                "x": 264,
+                "y": 261.984375,
+                "width": 974,
+                "height": 45.4375,
+                "top": 261.984375,
+                "right": 1238,
+                "bottom": 307.421875,
+                "left": 264
+              }
+            },
+            {
+              "id": "copy-file-work",
+              "text": "파일 결과용 작업문 복사",
+              "rect": {
+                "x": 264,
+                "y": 346.609375,
+                "width": 172.5625,
+                "height": 43,
+                "top": 346.609375,
+                "right": 436.5625,
+                "bottom": 389.609375,
+                "left": 264
+              }
+            },
+            {
+              "id": "download-file-work",
+              "text": "파일 결과용 Markdown 저장",
+              "rect": {
+                "x": 444.5625,
+                "y": 350.109375,
+                "width": 174.015625,
+                "height": 36,
+                "top": 350.109375,
+                "right": 618.578125,
+                "bottom": 386.109375,
+                "left": 444.5625
+              }
+            },
+            {
+              "id": "change-direction",
+              "text": "방향 수정 / 다음 요청",
+              "rect": {
+                "x": 1050.8125,
+                "y": 513.96875,
+                "width": 156.1875,
+                "height": 43,
+                "top": 513.96875,
+                "right": 1207,
+                "bottom": 556.96875,
+                "left": 1050.8125
+              }
+            },
+            {
+              "id": "",
+              "text": "정리 바로잡기 · 근거 보기",
+              "rect": {
+                "x": 314,
+                "y": 924.078125,
+                "width": 877,
+                "height": 43.796875,
+                "top": 924.078125,
+                "right": 1191,
+                "bottom": 967.875,
+                "left": 314
+              }
+            },
+            {
+              "id": "",
+              "text": "이번 요청 · 사용자 원문 보기 · 위 목표와 같은 문장",
+              "rect": {
+                "x": 295,
+                "y": 989.875,
+                "width": 912,
+                "height": 43.796875,
+                "top": 989.875,
+                "right": 1207,
+                "bottom": 1033.671875,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "이번 요청 바로잡기",
+              "rect": {
+                "x": 295,
+                "y": 1077.671875,
+                "width": 912,
+                "height": 43.796875,
+                "top": 1077.671875,
+                "right": 1207,
+                "bottom": 1121.46875,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "출발 · 방향 · 이번 요청 원문 보기",
+              "rect": {
+                "x": 295,
+                "y": 1121.46875,
+                "width": 912,
+                "height": 43.796875,
+                "top": 1121.46875,
+                "right": 1207,
+                "bottom": 1165.265625,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "선택 · 이유와 보존 기준 1개",
+              "rect": {
+                "x": 310,
+                "y": 1196.265625,
+                "width": 420,
+                "height": 43.796875,
+                "top": 1196.265625,
+                "right": 730,
+                "bottom": 1240.0625,
+                "left": 310
+              }
+            },
+            {
+              "id": "",
+              "text": "이 흐름에서 받은 보고 · 자료 0개",
+              "rect": {
+                "x": 772,
+                "y": 1196.265625,
+                "width": 420,
+                "height": 43.796875,
+                "top": 1196.265625,
+                "right": 1192,
+                "bottom": 1240.0625,
+                "left": 772
+              }
+            },
+            {
+              "id": "home-paste-result",
+              "text": "결과 붙여넣기",
+              "rect": {
+                "x": 295,
+                "y": 1265.0625,
+                "width": 93.609375,
+                "height": 36,
+                "top": 1265.0625,
+                "right": 388.609375,
+                "bottom": 1301.0625,
+                "left": 295
+              }
+            },
+            {
+              "id": "home-file-result",
+              "text": "결과 JSON 가져오기",
+              "rect": {
+                "x": 396.609375,
+                "y": 1265.0625,
+                "width": 129.5,
+                "height": 36,
+                "top": 1265.0625,
+                "right": 526.109375,
+                "bottom": 1301.0625,
+                "left": 396.609375
+              }
+            },
+            {
+              "id": "",
+              "text": "이 흐름의 범위",
+              "rect": {
+                "x": 295,
+                "y": 1301.0625,
+                "width": 912,
+                "height": 43.796875,
+                "top": 1301.0625,
+                "right": 1207,
+                "bottom": 1344.859375,
+                "left": 295
+              }
+            },
+            {
+              "id": "",
+              "text": "요청 원문결제가 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+              "rect": {
+                "x": 316,
+                "y": 1497.203125,
+                "width": 870,
+                "height": 44.734375,
+                "top": 1497.203125,
+                "right": 1186,
+                "bottom": 1541.9375,
+                "left": 316
+              }
+            },
+            {
+              "id": "answer-send",
+              "text": "이 답으로 이어가기",
+              "rect": {
+                "x": 323,
+                "y": 1921.84375,
+                "width": 111.125,
+                "height": 36.5,
+                "top": 1921.84375,
+                "right": 434.125,
+                "bottom": 1958.34375,
+                "left": 323
+              }
+            },
+            {
+              "id": "answer-unknown",
+              "text": "잘 모르겠음",
+              "rect": {
+                "x": 441.125,
+                "y": 1921.84375,
+                "width": 77.6875,
+                "height": 36.5,
+                "top": 1921.84375,
+                "right": 518.8125,
+                "bottom": 1958.34375,
+                "left": 441.125
+              }
+            },
+            {
+              "id": "answer-defer",
+              "text": "이 질문은 보류",
+              "rect": {
+                "x": 525.8125,
+                "y": 1921.84375,
+                "width": 90.890625,
+                "height": 36.5,
+                "top": 1921.84375,
+                "right": 616.703125,
+                "bottom": 1958.34375,
+                "left": 525.8125
+              }
+            },
+            {
+              "id": "",
+              "text": "완료 조건 · 확인할 동작",
+              "rect": {
+                "x": 321,
+                "y": 2120.875,
+                "width": 860,
+                "height": 18.140625,
+                "top": 2120.875,
+                "right": 1181,
+                "bottom": 2139.015625,
+                "left": 321
+              }
+            },
+            {
+              "id": "",
+              "text": "작업문에 넣을 프로젝트 배경 · 요청 당시 저장된 구상 없음",
+              "rect": {
+                "x": 300,
+                "y": 2158.015625,
+                "width": 902,
+                "height": 43.796875,
+                "top": 2158.015625,
+                "right": 1202,
+                "bottom": 2201.8125,
+                "left": 300
+              }
+            },
+            {
+              "id": "",
+              "text": "범위 · 제안 · 작업문 직접 다듬기",
+              "rect": {
+                "x": 300,
+                "y": 2292.3125,
+                "width": 902,
+                "height": 49.796875,
+                "top": 2292.3125,
+                "right": 1202,
+                "bottom": 2342.109375,
+                "left": 300
+              }
+            },
+            {
+              "id": "",
+              "text": "실제로 전달할 전체 문맥 보기",
+              "rect": {
+                "x": 300,
+                "y": 2342.109375,
+                "width": 902,
+                "height": 43.796875,
+                "top": 2342.109375,
+                "right": 1202,
+                "bottom": 2385.90625,
+                "left": 300
+              }
+            },
+            {
+              "id": "compose-summary",
+              "text": "＋ 새 요청 · 돌아온 결과 붙여넣기",
+              "rect": {
+                "x": 272,
+                "y": 2431.90625,
+                "width": 958,
+                "height": 53.796875,
+                "top": 2431.90625,
+                "right": 1230,
+                "bottom": 2485.703125,
+                "left": 272
+              }
+            }
+          ]
+        },
+        "sameProject": true,
+        "copies": [
+          {
+            "id": "copy-work",
+            "disabled": false,
+            "text": "작업문 복사",
+            "rect": {
+              "x": 395.203125,
+              "y": 178.984375,
+              "width": 100.328125,
+              "height": 43,
+              "top": 178.984375,
+              "right": 495.53125,
+              "bottom": 221.984375,
+              "left": 395.203125
+            }
+          },
+          {
+            "id": "copy-file-work",
+            "disabled": false,
+            "text": "파일 결과용 작업문 복사",
+            "rect": {
+              "x": 264,
+              "y": 346.609375,
+              "width": 172.5625,
+              "height": 43,
+              "top": 346.609375,
+              "right": 436.5625,
+              "bottom": 389.609375,
+              "left": 264
+            }
+          },
+          {
+            "id": "download-file-work",
+            "disabled": false,
+            "text": "파일 결과용 Markdown 저장",
+            "rect": {
+              "x": 444.5625,
+              "y": 350.109375,
+              "width": 174.015625,
+              "height": 36,
+              "top": 350.109375,
+              "right": 618.578125,
+              "bottom": 386.109375,
+              "left": 444.5625
+            }
+          }
+        ]
+      },
+      "openPNG": "after-1280-question-file-open.png",
+      "unknownButtonCount": 0
+    }
+  ]
+}

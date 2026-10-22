@@ -1,0 +1,56 @@
+{
+  "boundary": "Selected actual exec/write_stdin completion records, not full tool transcript. Process files retain actual nested child exits vs collector planned exit.",
+  "externalCompletions": [
+    {
+      "session": 95609,
+      "command": "launch.py -> seven exact author suites and build",
+      "actualCollectorExit": 0
+    },
+    {
+      "session": 5956,
+      "command": "initial-collector.py (before child1/after child0 expected)",
+      "actualCollectorExit": 0
+    },
+    {
+      "session": 3690,
+      "command": "first flow collector",
+      "actualCollectorExit": 1
+    },
+    {
+      "session": 85827,
+      "command": "flow-v2 collector",
+      "actualCollectorExit": 1
+    },
+    {
+      "session": 9588,
+      "command": "flow-v3 collector",
+      "actualCollectorExit": 1
+    },
+    {
+      "session": 60105,
+      "command": "preview diagnostic before/after native completion",
+      "actualCollectorExit": 0
+    },
+    {
+      "session": 69740,
+      "command": "flow-v4 collector",
+      "actualCollectorExit": 0
+    },
+    {
+      "session": 33321,
+      "command": "selected exact author question2",
+      "actualCollectorExit": 0
+    },
+    {
+      "session": 7320,
+      "command": "question-v2 collector after setup indentation correction",
+      "actualCollectorExit": 0
+    },
+    {
+      "session": 4578,
+      "command": "preview tail representative screen",
+      "actualCollectorExit": 0
+    }
+  ],
+  "syntaxSetupErrorActualExit": 1
+}
