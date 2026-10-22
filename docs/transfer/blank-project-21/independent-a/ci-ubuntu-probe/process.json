@@ -1,0 +1,14 @@
+{
+  "source": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "cwd": "/workspace/browser-env/cycle21-a-candidate/app",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle21-ci-ubuntu-probe/probe.py"
+  ],
+  "startUTC": "2026-10-22T17:06:43.496632+00:00",
+  "endUTC": "2026-10-22T17:06:55.448147+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "c9219377bef2c31e15fd1ad22161521fb889d3e96d4cda785a022d93a0e77077",
+  "collectorPlannedExit": 0
+}

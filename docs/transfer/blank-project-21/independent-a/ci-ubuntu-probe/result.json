@@ -1,0 +1,9 @@
+{
+  "expected": 2,
+  "executed": 2,
+  "failures": 0,
+  "errors": 0,
+  "originalCheckerSHA256": "212163b1f4b7b6e328bc194676656eaed570a65179c6670dc6274e74d10a3117",
+  "instrumentation": "read-only observers around original methods, original assertions unchanged",
+  "scope": "same native original methods; runtime system154 differs CI installed143; timing effect of observation not excluded"
+}
