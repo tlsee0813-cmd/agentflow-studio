@@ -1,21 +1,17 @@
 # AgentFlow 현재 상태
 2026-10-23 KST · 단일 총괄: 현재 Codex 대화. 사용자의 연속 진행 지시에 따라 계속 진행한다. 현재 배정과 상태는 이 파일에 모으고 과거 판단·실패는 각 결과/원본에 보존한다.
 
-## 최종 확인 중 — 정확한 수신 결과 이어가기20
-[계약](2026-10-22-received-result-20/INPUT.md) · [조사](2026-10-22-received-result-20/RESEARCH.md) · [PR11](https://github.com/tlsee0813-cmd/agentflow-studio/pull/11). 최종 후보69b478ba6dc84f803290eb857e5c8b3d7a659ea4는 현재 B와 입력을 유지하며 A의 정확한 보고와 당시 인계 작업문 네 값을 명시적으로 읽고, 새 C를 만들면 C를 보존해 돌아오는 흐름이다. 제품 app3431CB/CSS86DDA3/HTMLC3981C. **미수용·미병합**, [양OS CI39810777281](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39810777281) 확인 중이다.
+## 마지막 완료 — 정확한 수신 결과 이어가기20
+[결과·반례·공유 근거](2026-10-22-received-result-20/RESULT.md) · [PR11](https://github.com/tlsee0813-cmd/agentflow-studio/pull/11). 최종69b478ba6dc84f803290eb857e5c8b3d7a659ea4, checkpoint병합58de4a9db3b0b060fb06a1b293f45afd15791ca6. 양OS CI39810777281 성공, 독립 Cloud 수정후/초기로직 재사용 범위와 총괄 이미지/8blob 대조를 분리해 수용했다. 현재 B와 입력을 유지하는 정확 A수신 검토, 당시 네값/현재구상 구분, 새C보존복귀를 통합했다. no-export 허위제목과 검사CRLF/초기노출 전제의 최초 실패는 결과에 남겼다. main/공개MOCK은 그대로다.
 
-독립 Cloud 수정후 [f099a48d](https://github.com/tlsee0813-cmd/agentflow-studio/tree/f099a48d300dcbfb4302e92023233e67f8d33bee/docs/transfer/received-result-20/independent-fix1)의 정확 작성자5종과 별도6장면이 통과했다. 이전 core8·저장4·기록/중첩 복귀는 변경되지 않은 로직의 이전 소스에서 실행했으며 새SHA 재실행과 구분한다. 최초 no-export 허위 제목 실패→제품 수정, 작성자 초기노출 전제/새C 준비 수정, AREA17 옛문구 오류를 원본과 분리했다.
-
-df726 CI는 Ubuntu 성공, Windows RECEIVED20 11실패·2오류 exit1이다. 도구의 in_progress 표시와 종료로그 불일치를 모두 보존했다. [원 로그와 정정](https://github.com/tlsee0813-cmd/agentflow-studio/tree/c8bfef75fbc4b23e5888121c0bce6531b8842c2d/docs/transfer/received-result-20/ci-df726). 검사에서 쓰기 전 LF 문자열을 기대했으나 실제 Windows 파일은 CRLF였던 문제다.69b478은 실제 파일 바이트와 textarea API의 LF 표시를 구분하는 두 줄 수정이며 원문·다운로드·정확 보고 조회 단언을 유지한다. 실행 예산15→25분 외 검사/실패 처리는 그대로다. [원 반례·최소 패치·독립 정적 검토](https://github.com/tlsee0813-cmd/agentflow-studio/tree/c8bfef75fbc4b23e5888121c0bce6531b8842c2d/docs/transfer/received-result-20/author-tests-fix2).
-
-## 병렬 검증 중 — 빈 프로젝트에서 첫 변경21
+## 진행 중 — 빈 프로젝트에서 첫 변경21
 [계약](2026-10-23-blank-project-21/INPUT.md) · [조사와 선택](2026-10-23-blank-project-21/RESEARCH.md). 정상 새 프로젝트에서 목적→두 부분/하위 하나→명시 관계→정확한 부분 요청→실제 H 인계→합성 수신→후속 요청→지도를 PC1280×720·1440×900에서 완주했다. [선관측과 원본](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b0c2c9331578c2ec7a5904db7c90b51f976518ab/docs/transfer/blank-project-21/observation-v0/REPORT.md). 코드지식이 있는 담당의 화면 관측이며 사람/블라인드 연구가 아니다.
 
-관측한 공백은 주복사와 긴 본문 아래 파일인계 입구 사이의 재탐색이다. 하위메뉴 가설은 핵심공백으로 확인되지 않았다. 후보922848c0957992f84b8a0e2696a86b98d5f51c0d는 기존 접힌 file-return-options를 주전달행 뒤로 옮긴 한 줄뿐이다(app5370D0A6). 일반복사와 실제파일H계약, ID/handler/도메인/스키마는 유지한다. [작성·독립 정적 대조](https://github.com/tlsee0813-cmd/agentflow-studio/tree/c8bfef75fbc4b23e5888121c0bce6531b8842c2d/docs/transfer/blank-project-21/author-a). 타입·구문·빌드는 통과했고 실제PC 전후노출·원문펼침·초점/스크롤·정상수신복귀를 기존 Cloud가 독립검증 중이다. Sol은 최소 회귀검사를 별도로 작성한다. **21도 미수용**이다.
+관측한 공백은 주복사와 긴 본문 아래 파일인계 입구 사이의 재탐색이다. 하위메뉴 가설은 핵심공백으로 확인되지 않았다. 제품 후보922848c0957992f84b8a0e2696a86b98d5f51c0d는 기존 접힌 file-return-options를 주전달행 뒤로 옮긴 한 줄뿐이다(app5370D0A6). 일반복사와 실제파일H계약, ID/handler/도메인/스키마는 유지한다. [작성·독립 정적 대조](https://github.com/tlsee0813-cmd/agentflow-studio/tree/c8bfef75fbc4b23e5888121c0bce6531b8842c2d/docs/transfer/blank-project-21/author-a). 타입·구문·빌드는 통과했고 실제PC 전후노출·원문펼침·초점/스크롤·정상수신복귀를 기존 Cloud가 독립검증 중이다. 최소 회귀검사41C9와workflow7F55를 포함한 최종 후보15b60a10b34bb06c7c173d0eca5653faef8e2bb6는 [Draft PR12](https://github.com/tlsee0813-cmd/agentflow-studio/pull/12), 양OS CI39813998848 진행 중이다. same-current 수신A→T의 검사 전제 오류를 정적으로 바로잡았다. 수정전/후 최초노출의 양PC 실패→통과는 Cloud 중간 확인이며 나머지 독립검증은 진행 중이다. **21은 미수용**이다.
 
 후속22 후보는 홈에서 재진입해 바뀐 부분을 찾고 현재 설명·보류·오래된 미결을 구분하는 관문이다. Astra의 전체제품 검토와 Web Pro 공식 사례 조사를 병렬 진행한다. 새 unread/알림함/변경엔진을 미리 구현하지 않는다. 20/21 결과를 본 뒤 범위를 정한다.
 
-## 마지막 완료와 이전 통합
+## 이전 통합
 - [지도/기록19 결과](2026-10-22-workspace-records-19/RESULT.md): PR10, 최종acfafd2d, checkpoint병합41b6854e. 지도 상단·기록 패널 공간과 정확한 기록→부분→인계→복귀를 한정 통합했다.
 - [포함18 결과](2026-10-22-mixed-depth-18/RESULT.md): PR9, 실제 부모 포함·부분별 접기·하위 신호·실제 관계 끝점·정확 자식 요청.
 - [이해 갱신17](2026-10-22-area-update-17/RESULT.md), [보고 연결16](2026-10-16-report-area-16/RESULT.md), [홈15](2026-10-16-project-home-15/RESULT.md), [PC 공간13](2026-10-16-pc-map-space-13/RESULT.md).
