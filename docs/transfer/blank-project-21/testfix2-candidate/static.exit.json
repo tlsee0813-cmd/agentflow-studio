@@ -1,0 +1,6 @@
+{
+  "startedUtc": "2026-10-22T17:27:37.8783900Z",
+  "command": "Existing bundled Python evidence/check-static.py (AST and Node syntax only)",
+  "exitCode": 0,
+  "finishedUtc": "2026-10-22T17:27:41.4006840Z"
+}

@@ -1,0 +1,4 @@
+{
+  "command": "git apply --check --reverse evidence/blank21-key-scroll.patch",
+  "exitCode": 0
+}

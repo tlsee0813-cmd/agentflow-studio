@@ -1,0 +1,12 @@
+{
+  "originalSHA256": "212163B1F4B7B6E328BC194676656EAED570A65179C6670DC6274E74D10A3117",
+  "candidateSHA256": "3A3C61B22EDB3F337457ADE10E1DBB13522B85BCD5B40B2E38C6038225F44303",
+  "candidateBytes": 18600,
+  "pythonAST": "pass, no test module imported",
+  "embeddedJavaScriptSyntax": 12,
+  "existingMethodsPreservedExceptTwoKeyboardCallSites": true,
+  "existingIOViewportClipHitAssertionsAndInitialViewportChecks": "unchanged",
+  "noScrollFocusInjectionOrSleepInHelper": true,
+  "browser": "NOT_RUN",
+  "server": "NOT_STARTED"
+}
