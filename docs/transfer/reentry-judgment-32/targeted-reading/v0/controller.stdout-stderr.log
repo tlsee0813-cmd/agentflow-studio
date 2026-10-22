@@ -1,0 +1,84 @@
+{"ready": true, "url": "http://127.0.0.1:40059", "browser": "154.0.8037.57", "PW": "1.57.0"}
+{"screenSaved": "start", "entryId": "", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "projects", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "T0-import-pending", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "T0-map", "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "layer": "space", "xy": [0, 0]}
+{"opaqueSaved": "T0-before-reading-envelope.json", "sha256": "e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee"}
+{"ok": true, "op": "opaque"}
+{"entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "xy": [0, 0], "map": {"x": 264, "y": 292.484375, "width": 974, "height": 411.515625, "top": 292.484375, "right": 1238, "bottom": 704, "left": 264}, "matrix": "matrix(0.731818, 0, 0, 0.731818, 68.8636, 64)", "selected": [], "panelOwner": null, "panelScroll": null, "focus": ""}
+{"screenSaved": "T0-map-before-owner", "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T0-preview-owner", "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T0-description-origin", "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T0-description-evidence-open", "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T0-description-evidence-read", "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "layer": "space", "xy": [0, 0]}
+{"ok": true, "op": "note"}
+{"opaqueSaved": "T0-after-reading-envelope.json", "sha256": "e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee"}
+{"ok": true, "op": "opaque"}
+{"entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "xy": [0, 0], "map": {"x": 264, "y": 292.484375, "width": 660, "height": 411.515625, "top": 292.484375, "right": 924, "bottom": 704, "left": 264}, "matrix": "matrix(0.731818, 0, 0, 0.731818, 68.8636, 64)", "selected": ["node-info-A_05c43a58-5f77-494d-b757-8e6370ef4305"], "panelOwner": "A_05c43a58-5f77-494d-b757-8e6370ef4305", "panelScroll": 194, "focus": ""}
+{"screenSaved": "T0-after-reading-geometry", "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "before-T2-projects", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "T2-import-pending", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "T2-first-map", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"opaqueSaved": "T2-before-reading-envelope.json", "sha256": "e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d"}
+{"ok": true, "op": "opaque"}
+{"entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "xy": [0, 0], "map": {"x": 264, "y": 314.078125, "width": 660, "height": 389.921875, "top": 314.078125, "right": 924, "bottom": 704, "left": 264}, "matrix": "matrix(0.731818, 0, 0, 0.731818, 68.8636, 64)", "selected": ["node-info-A_05c43a58-5f77-494d-b757-8e6370ef4305"], "panelOwner": "A_05c43a58-5f77-494d-b757-8e6370ef4305", "panelScroll": 194, "focus": ""}
+{"screenSaved": "T2-before-owner-geometry", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-preview-owner", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"ok": true, "op": "note"}
+{"screenSaved": "T2-current-summary-top", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-evidence-and-history-search", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+Traceback (most recent call last):
+  File "/workspace/browser-env/reentry32-targeted/controller.py", line 29, in <module>
+    elif op=='click':p.locator(cmd['selector']).click()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py", line 15637, in click
+    self._sync(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py", line 162, in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py", line 566, in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Locator.click: Error: strict mode violation: locator("#area-panel-body summary:has-text('근거 보기')") resolved to 3 elements:
+    1) <summary>근거 보기</summary> aka locator("#panel-understanding-A_05c43a58-5f77-494d-b757-8e6370ef4305-evidence").get_by_text("근거 보기")
+    2) <summary>근거 보기</summary> aka get_by_text("근거 보기").nth(1)
+    3) <summary>근거 보기</summary> aka get_by_text("근거 보기").nth(2)
+
+Call log:
+  - waiting for locator("#area-panel-body summary:has-text('근거 보기')")
+
+
+{"screenSaved": "T2-history-entry-search", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"ok": true, "op": "note"}
+{"screenSaved": "T2-history-open", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-history-first-version", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-history-context", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-previous20-evidence", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-previous20-evidence-read", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"ok": true, "op": "note"}
+{"opaqueSaved": "T2-after-preview-reading-envelope.json", "sha256": "e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d"}
+{"ok": true, "op": "opaque"}
+{"entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "xy": [0, 0], "map": {"x": 264, "y": 314.078125, "width": 660, "height": 389.921875, "top": 314.078125, "right": 924, "bottom": 704, "left": 264}, "matrix": "matrix(0.731818, 0, 0, 0.731818, 68.8636, 64)", "selected": ["node-info-A_05c43a58-5f77-494d-b757-8e6370ef4305"], "panelOwner": "A_05c43a58-5f77-494d-b757-8e6370ef4305", "panelScroll": 630, "focus": ""}
+{"screenSaved": "before-explicit-fit-for-export-owner", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "explicit-fit-to-read-other-owner", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "xy": [0, 0], "map": {"x": 264, "y": 314.078125, "width": 660, "height": 389.921875, "top": 314.078125, "right": 924, "bottom": 704, "left": 264}, "matrix": "matrix(0.535088, 0, 0, 0.535088, 24, 96.2807)", "selected": ["node-info-A_05c43a58-5f77-494d-b757-8e6370ef4305"], "panelOwner": "A_05c43a58-5f77-494d-b757-8e6370ef4305", "panelScroll": 630, "focus": "map-fit"}
+{"screenSaved": "after-explicit-fit", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-export-owner", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-export-previous-held-open", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-export-held-read", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-export-held-summary", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-export-held-evidence", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "T2-export-held-source-read", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}
+{"ok": true, "op": "note"}
+{"ok": true, "op": "note"}
+{"opaqueSaved": "T2-after-all-reading-envelope.json", "sha256": "e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d"}
+{"ok": true, "op": "opaque"}
+{"entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "xy": [0, 0], "map": {"x": 264, "y": 314.078125, "width": 660, "height": 389.921875, "top": 314.078125, "right": 924, "bottom": 704, "left": 264}, "matrix": "matrix(0.535088, 0, 0, 0.535088, 24, 96.2807)", "selected": ["node-info-A_4b8d71a7-6ed5-4dee-a14e-b2065b19eaa0"], "panelOwner": "A_4b8d71a7-6ed5-4dee-a14e-b2065b19eaa0", "panelScroll": 490, "focus": ""}
+{"screenSaved": "T2-final-read-only-geometry", "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f", "layer": "space", "xy": [0, 0]}

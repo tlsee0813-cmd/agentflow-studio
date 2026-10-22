@@ -1,0 +1,14 @@
+{
+  "scope": "tool completion metadata transcribed, not full transcript",
+  "main": {
+    "session": 21815,
+    "actualOuterExit": 0,
+    "actualChild": "process.json 0",
+    "actualServer": "runtime.json -15"
+  },
+  "readOnlyPostAudit": {
+    "chunk": "370bd8",
+    "actualExit": 0
+  },
+  "nonProductActionError": "actions.jsonl strict-mode summary selector, preserved"
+}

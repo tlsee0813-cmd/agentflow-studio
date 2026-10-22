@@ -1,0 +1,285 @@
+{
+  "UTC": "2026-10-22T22:38:30.451784+00:00",
+  "scope": "post-oracle designated reading, 1280x720 only, no workflow or original-experience rerun",
+  "sourceCommit": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+  "productSources": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 276739,
+      "sha256": "7c63a494627b1ce2da8f089573f4116b17ba04e4af4531f6e2d315ccacee2e0e",
+      "remoteByteEqual": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+      "remoteByteEqual": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "remoteByteEqual": true
+    }
+  ],
+  "inputHashes": {
+    "T0.json": "93bb9ad11ee21ffc2a27c8949e7465bc9a16e7beaa0b2b4275a4c4d14c009cbf",
+    "T2.json": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7"
+  },
+  "unchangedOldEvidence": [
+    {
+      "evidence": "57896a",
+      "unchangedSelfExcludedFiles": 71,
+      "manifestSHA256": "3973e35263e7cabacf05df660546d1b52051ca4694b0f561bdd82a7fc889bfe6"
+    },
+    {
+      "evidence": "936f9d",
+      "unchangedSelfExcludedFiles": 19,
+      "manifestSHA256": "a70da404c9c67b45aff88a4212c6324db6398fe96408920700bb00aa19fbf88f"
+    }
+  ],
+  "data": [
+    {
+      "input": "T0",
+      "wholeWorkspaceBeforeAfterByteEqual": true,
+      "before": "T0-before-reading-envelope.json",
+      "after": "T0-after-reading-envelope.json",
+      "sha256": "e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee"
+    },
+    {
+      "input": "T2",
+      "wholeWorkspaceBeforeAfterByteEqual": true,
+      "before": "T2-before-reading-envelope.json",
+      "after": "T2-after-all-reading-envelope.json",
+      "sha256": "e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d"
+    }
+  ],
+  "readOnlyGeometry": [
+    {
+      "utc": "2026-10-22T22:33:16.396074+00:00",
+      "seq": 6,
+      "kind": "read-only-geometry",
+      "data": {
+        "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d",
+        "xy": [
+          0,
+          0
+        ],
+        "map": {
+          "x": 264,
+          "y": 292.484375,
+          "width": 974,
+          "height": 411.515625,
+          "top": 292.484375,
+          "right": 1238,
+          "bottom": 704,
+          "left": 264
+        },
+        "matrix": "matrix(0.731818, 0, 0, 0.731818, 68.8636, 64)",
+        "selected": [],
+        "panelOwner": null,
+        "panelScroll": null,
+        "focus": ""
+      }
+    },
+    {
+      "utc": "2026-10-22T22:33:50.089121+00:00",
+      "seq": 13,
+      "kind": "read-only-geometry",
+      "data": {
+        "entryId": "E_af029df7-8e40-45fa-a2d3-29e8474f957d",
+        "xy": [
+          0,
+          0
+        ],
+        "map": {
+          "x": 264,
+          "y": 292.484375,
+          "width": 660,
+          "height": 411.515625,
+          "top": 292.484375,
+          "right": 924,
+          "bottom": 704,
+          "left": 264
+        },
+        "matrix": "matrix(0.731818, 0, 0, 0.731818, 68.8636, 64)",
+        "selected": [
+          "node-info-A_05c43a58-5f77-494d-b757-8e6370ef4305"
+        ],
+        "panelOwner": "A_05c43a58-5f77-494d-b757-8e6370ef4305",
+        "panelScroll": 194,
+        "focus": ""
+      }
+    },
+    {
+      "utc": "2026-10-22T22:33:57.687563+00:00",
+      "seq": 18,
+      "kind": "read-only-geometry",
+      "data": {
+        "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f",
+        "xy": [
+          0,
+          0
+        ],
+        "map": {
+          "x": 264,
+          "y": 314.078125,
+          "width": 660,
+          "height": 389.921875,
+          "top": 314.078125,
+          "right": 924,
+          "bottom": 704,
+          "left": 264
+        },
+        "matrix": "matrix(0.731818, 0, 0, 0.731818, 68.8636, 64)",
+        "selected": [
+          "node-info-A_05c43a58-5f77-494d-b757-8e6370ef4305"
+        ],
+        "panelOwner": "A_05c43a58-5f77-494d-b757-8e6370ef4305",
+        "panelScroll": 194,
+        "focus": ""
+      }
+    },
+    {
+      "utc": "2026-10-22T22:36:16.114175+00:00",
+      "seq": 33,
+      "kind": "read-only-geometry",
+      "data": {
+        "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f",
+        "xy": [
+          0,
+          0
+        ],
+        "map": {
+          "x": 264,
+          "y": 314.078125,
+          "width": 660,
+          "height": 389.921875,
+          "top": 314.078125,
+          "right": 924,
+          "bottom": 704,
+          "left": 264
+        },
+        "matrix": "matrix(0.731818, 0, 0, 0.731818, 68.8636, 64)",
+        "selected": [
+          "node-info-A_05c43a58-5f77-494d-b757-8e6370ef4305"
+        ],
+        "panelOwner": "A_05c43a58-5f77-494d-b757-8e6370ef4305",
+        "panelScroll": 630,
+        "focus": ""
+      }
+    },
+    {
+      "utc": "2026-10-22T22:36:16.406466+00:00",
+      "seq": 35,
+      "kind": "read-only-geometry",
+      "data": {
+        "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f",
+        "xy": [
+          0,
+          0
+        ],
+        "map": {
+          "x": 264,
+          "y": 314.078125,
+          "width": 660,
+          "height": 389.921875,
+          "top": 314.078125,
+          "right": 924,
+          "bottom": 704,
+          "left": 264
+        },
+        "matrix": "matrix(0.535088, 0, 0, 0.535088, 24, 96.2807)",
+        "selected": [
+          "node-info-A_05c43a58-5f77-494d-b757-8e6370ef4305"
+        ],
+        "panelOwner": "A_05c43a58-5f77-494d-b757-8e6370ef4305",
+        "panelScroll": 630,
+        "focus": "map-fit"
+      }
+    },
+    {
+      "utc": "2026-10-22T22:37:41.391196+00:00",
+      "seq": 45,
+      "kind": "read-only-geometry",
+      "data": {
+        "entryId": "E_bf3d6268-c4d0-46c8-b449-587004f31c3f",
+        "xy": [
+          0,
+          0
+        ],
+        "map": {
+          "x": 264,
+          "y": 314.078125,
+          "width": 660,
+          "height": 389.921875,
+          "top": 314.078125,
+          "right": 924,
+          "bottom": 704,
+          "left": 264
+        },
+        "matrix": "matrix(0.535088, 0, 0, 0.535088, 24, 96.2807)",
+        "selected": [
+          "node-info-A_4b8d71a7-6ed5-4dee-a14e-b2065b19eaa0"
+        ],
+        "panelOwner": "A_4b8d71a7-6ed5-4dee-a14e-b2065b19eaa0",
+        "panelScroll": 490,
+        "focus": ""
+      }
+    }
+  ],
+  "notes": [
+    {
+      "file": "T0-READ-FROZEN.md",
+      "UTC": "2026-10-22T22:33:50.082514+00:00",
+      "sha256": "ff203cee2986ef1f10e597c4360b0b6a37739e9f3617c1e74e53bda1ea605d40"
+    },
+    {
+      "file": "T2-ENTRY-MEMO-NOTE.md",
+      "UTC": "2026-10-22T22:34:17.293631+00:00",
+      "sha256": "92b57864bca49c92ffdf77ea272559ce55b2942cfa566dd15136e2d3a1c6a824"
+    },
+    {
+      "file": "HISTORY-ENTRY-AND-SELECTOR-ERROR.md",
+      "UTC": "2026-10-22T22:34:56.038971+00:00",
+      "sha256": "fc30b71de1d61bda44ff2cd9493af7a1bc3f852e00ed88036c77fd7f309ba651"
+    },
+    {
+      "file": "T2-PREVIEW-COMPARISON-FROZEN.md",
+      "UTC": "2026-10-22T22:36:16.105266+00:00",
+      "sha256": "d96d53a15f5474cb38b67077b70f74eefe1e0f3e97acb3d505b4778bc9ae0a42"
+    },
+    {
+      "file": "T2-EXPORT-READ-FROZEN.md",
+      "UTC": "2026-10-22T22:37:41.379266+00:00",
+      "sha256": "eba0aa0e2c115b1497dec09167062301046f248968594a5bf185776d61088a5a"
+    },
+    {
+      "file": "FIRST-MAP-VERSUS-DETAIL-NOTE.md",
+      "UTC": "2026-10-22T22:37:41.380648+00:00",
+      "sha256": "28fabc0e9342911b166a59f9063658b12ded5cb10fe32d94f4108ab6561f6981"
+    }
+  ],
+  "actionErrors": [
+    {
+      "utc": "2026-10-22T22:34:40.535633+00:00",
+      "seq": 23,
+      "kind": "action-error",
+      "data": "Traceback (most recent call last):\n  File \"/workspace/browser-env/reentry32-targeted/controller.py\", line 29, in <module>\n    elif op=='click':p.locator(cmd['selector']).click()\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 15637, in click\n    self._sync(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 162, in click\n    return await self._frame._click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 566, in _click\n    await self._channel.send(\"click\", self._timeout, locals_to_params(locals()))\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.Error: Locator.click: Error: strict mode violation: locator(\"#area-panel-body summary:has-text('근거 보기')\") resolved to 3 elements:\n    1) <summary>근거 보기</summary> aka locator(\"#panel-understanding-A_05c43a58-5f77-494d-b757-8e6370ef4305-evidence\").get_by_text(\"근거 보기\")\n    2) <summary>근거 보기</summary> aka get_by_text(\"근거 보기\").nth(1)\n    3) <summary>근거 보기</summary> aka get_by_text(\"근거 보기\").nth(2)\n\nCall log:\n  - waiting for locator(\"#area-panel-body summary:has-text('근거 보기')\")\n\n"
+    }
+  ],
+  "HTTPCount": 15,
+  "allBodyDiskAfterEqual": true,
+  "actualPOSTCount": 0,
+  "pageerrors": [],
+  "controllerChildExit": 0,
+  "serverExit": -15,
+  "noConditionDescriptionCurrentDraftEdits": true,
+  "noNewHOrReturn": true,
+  "limitations": [
+    "Numeric version labels and literal changes=[] not located in explored panel UI",
+    "C CSV-specific reason read as external-description/report assertion, current scope field not visited",
+    "Restored P panel at T2 entry differs from empty first-map condition",
+    "No human/blind/fullworkflow claim"
+  ]
+}

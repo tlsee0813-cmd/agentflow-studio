@@ -1,0 +1,26 @@
+[
+  {
+    "original": "saved-snapshots/e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee.json",
+    "bytes": 29228,
+    "sha256": "e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee",
+    "gzip": "saved-snapshots/e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee.json.gz",
+    "gzipSHA256": "312edbbfeff5cd2a52c99562326a75f012f1b2a7767adc0f9e5ff0969f50d5b2",
+    "roundTripEqual": true
+  },
+  {
+    "original": "saved-snapshots/e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d.json",
+    "bytes": 70474,
+    "sha256": "e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d",
+    "gzip": "saved-snapshots/e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d.json.gz",
+    "gzipSHA256": "749659c41722578fe969e1d0506985fd85822357359d1a65ba87038c56bb09b2",
+    "roundTripEqual": true
+  },
+  {
+    "original": "actions.jsonl",
+    "bytes": 1399367,
+    "sha256": "32e42bce949742486f671c120329bc36f73ea713152650dfca5af32ec4565329",
+    "gzip": "actions.jsonl.gz",
+    "gzipSHA256": "5377cbcc7928d04a4630a89cf7f301b336da29e30fb8fb95e45e4b7852c4c780",
+    "roundTripEqual": true
+  }
+]

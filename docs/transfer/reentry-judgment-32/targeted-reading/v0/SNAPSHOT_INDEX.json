@@ -1,0 +1,32 @@
+[
+  {
+    "alias": "T0-after-reading-envelope.json",
+    "sha256": "e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee",
+    "bytes": 29228,
+    "payload": "saved-snapshots/e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee.json.gz"
+  },
+  {
+    "alias": "T0-before-reading-envelope.json",
+    "sha256": "e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee",
+    "bytes": 29228,
+    "payload": "saved-snapshots/e4b588fbcc9dc82e4f2d987ce757714041be854ce35305577a130904ad456bee.json.gz"
+  },
+  {
+    "alias": "T2-after-all-reading-envelope.json",
+    "sha256": "e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d",
+    "bytes": 70474,
+    "payload": "saved-snapshots/e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d.json.gz"
+  },
+  {
+    "alias": "T2-after-preview-reading-envelope.json",
+    "sha256": "e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d",
+    "bytes": 70474,
+    "payload": "saved-snapshots/e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d.json.gz"
+  },
+  {
+    "alias": "T2-before-reading-envelope.json",
+    "sha256": "e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d",
+    "bytes": 70474,
+    "payload": "saved-snapshots/e0a5b2cc6e3c4a20ee87f9e359d404849963a5b649727eeef1e0dc52828a746d.json.gz"
+  }
+]
