@@ -16,6 +16,7 @@ Astra High의 독립 비판은 전체 흐름을 실험의 틀로 삼되, 이번 
 - [웹 Pro B — 구성 지도](https://chatgpt.com/c/6ad9c351-fcc0-83ec-85df-2c05238dc84e): 별도 새 세션, 공식 문서·공개 소스 비교. 이번 동적 데모 직접 조작 없음.
 - 총괄은 아래 Aider·Notion·Dolt·React Flow·Cytoscape 원문을 다시 확인했다. Pro가 제시한 릴리스 번호는 이번 도입 판단에 필요하지 않아 최신 버전 확정값으로 옮기지 않았다.
 - 총괄의 10월22일 Dify 실제 조작: 기존 workflow에서 User Input 선택 → Output 선택 → 닫기. 400px 단일 패널이 교체되고 배율 표시는 64%로 유지됐다. 버전 기록은 보기 전용/복원 비활성/해당 기록 없음 상태를 확인하고 종료했다. 실제 버전 복원·비교는 시험하지 않았다. 자동 저장 시각이 바뀌었으므로 모델 전체 불변을 입증했다고 쓰지 않는다.
+- 총괄의 10월22일 yFiles 실제 조작: Group 1을 접으면 외부 선에 E:2/E:1 표시가 남고, Group 2도 접으면 두 그룹 사이의 선 2개가 E:2 하나로 집약됐다. 줌을 한 단계 올려도 두 그룹의 접힌 상태가 유지됐다. 집약선을 한 번 선택했을 때 실제 끝점 목록은 나타나지 않았고, 두 그룹을 다시 펼치자 내부 노드와 각 연결이 같은 상대 배치로 돌아왔다. 픽셀 단위 위치·선택 복원, 성능, 모든 접근 경로는 검사하지 않았다. 데모에는 미결·출처·사용자 제안의 의미 구별이 없다. 하위 에이전트 브라우저 표면이 없어 총괄이 직접 관측했으며, 이를 AgentFlow 구현 성공으로 세지 않는다.
 - Dify 비교와 AI 역할 평가는 사람 대상 사용성 연구가 아니다. 사용자의 현재 평가 기준을 따른 사전 제품 비교다.
 
 ## 가져올 메커니즘과 제외할 것
@@ -27,7 +28,7 @@ Astra High의 독립 비판은 전체 흐름을 실험의 틀로 삼되, 이번 
 | [Dolt JSON merge, 2024년 글](https://www.dolthub.com/blog/2024-01-16-announcing-json-merge/) | 다른 key의 변경과 같은 key의 충돌을 구별하며 rename은 삭제·추가로 해석 | 하나의 상충 내용 때문에 무관한 구체화까지 모두 승인 대기로 보내지 않음 | JSON 병합이 자연어 의미 충돌을 해결한다는 가정, DB 도입 |
 | [React Flow Sub Flows](https://reactflow.dev/learn/layouting/sub-flows) | parentId는 상대 좌표·그룹 이동과 외부 연결을 지원 | 포함 관계·보기 상태·관계 끝점을 분리할 참고 | 라이브러리 parent가 제품 의미 모델의 정답이라는 가정, 즉시 엔진 교체 |
 | [Cytoscape expand-collapse](https://github.com/iVis-at-Bilkent/cytoscape.js-expand-collapse) | compound graph의 부분 접기·펼침. README에 유지보수 중단 명시 | 동작 아이디어 참고, 신규 의존성 채택 후보에서 제외 | 유지 상태 확인 없이 확장을 바로 도입 |
-| [yFiles folding 예시](https://www.yfiles.com/demos/application-features/folding-with-merged-edges/) | Pro B의 문서 관측: 접힌 그룹의 관계 집약 | 후속 계층에서 집약선과 실제 끝점 구별 | 상용 엔진 도입 결정, 직접 조작/성능 검증 주장 |
+| [yFiles folding 예시](https://www.yfiles.com/demos/application-features/folding-with-merged-edges/) | 문서 비교와 총괄의 실제 접기·펼치기·줌 관측: 접힌 그룹의 관계 집약 | 후속 계층에서 집약선과 실제 끝점 구별, 줌과 펼침 독립 | 상용 엔진 도입 결정, 끝점 열람/성능/픽셀 보존 검증 주장 |
 | [Dify 버전 관리](https://docs.dify.ai/en/cloud/use-dify/build/version-control) | 초안·게시·과거 버전을 분리한 작업 흐름 | 기본 화면은 현재, 이력은 필요할 때 읽기 | AgentFlow의 모든 자동 정리에 게시/승인 관문 적용 |
 
 OpenRefine의 이름과 대상 분리, Wikibase의 출처 있는 복수 주장 보존도 Pro A의 보조 비교다. 이번에는 기존 stable Area ID와 보고 소속을 사용할 수 있으므로 별칭·범용 엔터티 판별이나 지식베이스 엔진을 개발하지 않는다.
