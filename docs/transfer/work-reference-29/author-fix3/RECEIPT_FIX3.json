@@ -1,0 +1,40 @@
+{
+  "baseline": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "prior": "RECEIPT_FIX2.json",
+  "status": "fix3 CSS 조건분리 후보 동결; Cloud 인과/수용 미검증",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273253,
+      "sha256": "34f3610faae32b01d22f8a3fc52467b4e0b5d0d9c30059c6b4d201e22edc9477",
+      "gitBlob": "27098b83d48cef4289da076c46f0e93011dbe4e0",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74233,
+      "sha256": "d32e770b0b8208d48b050250512a94b68d4f2342b7841a51e0280d1387a5fefc",
+      "gitBlob": "6654a134054f2ffadb9b282595ba6c029b853dbc",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "delta": "닫힌 edit-work에 container-type을 적용하지 않고 [open]일 때만 적용. app.ts/scroll 복원 로직 무수정.",
+  "commands": {
+    "type-fix3": 0,
+    "build-fix3": 0,
+    "diff-fix3": 0
+  },
+  "scope": "Node24 보조 type/build/diff only; browser/server/CI/units/remote writes NOT_RUN",
+  "evidence": {
+    "commit": "de41f2c25027499797215e84c4252e00c0fc2d85",
+    "base27DiagnosticBlob": "37e36adeb742c3204fa970e7aa43f05b0b8fc476",
+    "base27GzipSha256": "79740e4e69f9e680cd4f5a9fe459b11099a3ed9eee922633392b4f31226093bc",
+    "fix2DiagnosticBlob": "a19caf4a3d2dfd798f959a3653819173b3f8be89",
+    "fix2GzipSha256": "56a8497ca44e166e17540db5664bd53814cbe41214e6b23d519518d4068213ff",
+    "verified": "GitHub public blob API JSON base64→memory gzip; Git blob/size verified; PNG NOT_DOWNLOADED.",
+    "observation": "f10 첫 send Y195 vs27 Y114. f10 1280 두번째 send→copy: copy pageY393.484375→311.984375, windowY215 유지. base27 Wide 같은 pending 수축: pageY393.484375→311.984375, Y215→134. 최종 복귀 버튼 pageY161.59375, 닫힌 편집기 높이50.796875는 동일.",
+    "hypothesis": "닫힌 editor의 container-type이 대기 표시 제거시 native scroll anchoring 반응에 영향을 준다. 원시값은 차이 시점을 좁힐 뿐 containment 인과를 입증하지 않는다.",
+    "counterpoint": "click 직후 비동기 pending 상태가 다르므로 동일 단계의 단일 CSS A/B 필요."
+  },
+  "preparationIssue": "첫 evidence 조립이 UTF8 exit JSON을 기본 cp949로 읽어 UnicodeDecodeError. 제품/검사결과 변경 없음. encoding=UTF8 명시로 재조립했으며 최초 snapshot/patch는 유지."
+}
