@@ -1,0 +1,15 @@
+{
+  "command": "node",
+  "args": [
+    "--input-type=module",
+    "-e",
+    "import {received20Fixture} from \"./app/continuity/tests/received20-fixtures.mjs\";import * as D from \"./app/continuity/dist/public/shared/domain.js\";import {parseProject} from \"./app/continuity/dist/public/shared/validation.js\";for(const cid of [\"powertoys\",\"product13\"]){for(const archived of [false,true]){const s=received20Fixture(cid,{archived}),b=s.p,n=D.importResultFile(b,s.raw),v=D.inspectResultFile(n,s.raw),second=D.importResultFile(n,JSON.stringify(s.variant));if(n.currentTaskId!==s.B||n.draft!==b.draft||v.duplicate.id!==n.tasks.at(-1).id||D.importResultFile(n,s.raw)!==n||second.tasks.length!==n.tasks.length+1)throw Error(\"receipt/data invariant\");if(JSON.stringify(parseProject(JSON.stringify(n)))!==JSON.stringify(n))throw Error(\"roundtrip\");console.log(JSON.stringify({cid,archived,root:s.A,exported:s.exported,distinct: s.A!==s.exported,H:s.H1,duplicate:v.duplicate.id,currentB:n.currentTaskId===s.B,reportLength:s.file.report.length,held:n.space.understanding[s.area]?.entries?.at(-1)?.held??null}));}}"
+  ],
+  "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-tests",
+  "node": "v24.19.0",
+  "start": "2026-10-22T14:49:23.111Z",
+  "end": "2026-10-22T14:49:23.186Z",
+  "status": 1,
+  "signal": null,
+  "error": null
+}

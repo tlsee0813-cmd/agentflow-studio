@@ -1,0 +1,2 @@
+PASS: 48 embedded JS expressions parsed without execution
+{"pythonAST": 2, "embeddedJS": 48, "newReceivedFixedWaits": 0, "homeOriginalExpectationsPreserved": true, "homeNewFixedWaits": 0, "workflowOnlyAddedLines": 7, "gitCachedApplyCheck": 0, "browser": "NOT RUN", "server": "NOT STARTED", "testModuleImport": false}

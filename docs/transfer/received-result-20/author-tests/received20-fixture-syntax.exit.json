@@ -1,0 +1,14 @@
+{
+  "command": "node",
+  "args": [
+    "--check",
+    "work/product20-tests/app/continuity/tests/received20-fixtures.mjs"
+  ],
+  "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4",
+  "node": "v24.19.0",
+  "start": "2026-10-22T14:37:58.144Z",
+  "end": "2026-10-22T14:37:58.212Z",
+  "status": 0,
+  "signal": null,
+  "error": null
+}

@@ -1,0 +1,40 @@
+{
+  "remote": "da3b0171c807dc7241f5fff0ce4f19ba3f2ef463",
+  "product19Merge": "41b6854e",
+  "copiedOnlyAfterRemoteGitBlobCheck": [
+    {
+      "path": "app/continuity/tests/browser.py",
+      "gitBlob": "258b991dd6054c6de21ded1287b5975ecbeb97ab",
+      "sha256": "D9B6348EEA92728F78F6DEEE0E60CF1BD590D6654855F01477B9FA7CA06D5E02",
+      "bytes": 26861
+    },
+    {
+      "path": "app/continuity/tests/home15_browser.py",
+      "gitBlob": "a2b03d79dc8f21d9a48fbe311316590df576774e",
+      "sha256": "52395BD907125F406543B1AB80DE8BBC2947CA1696D1662F8CA47CAFC08805A6",
+      "bytes": 33133
+    },
+    {
+      "path": "app/continuity/tests/hierarchy18-fixtures.mjs",
+      "gitBlob": "dac15c886e5ae6f88868281b62066e974c792cd6",
+      "sha256": "C37920C4007881CFD59F61DA347BD4DD69F6D241CB66E979DD4A60FCAD204F13",
+      "bytes": 5603
+    },
+    {
+      "path": "app/continuity/tests/understanding17-fixtures.mjs",
+      "gitBlob": "a07b654434b4e691bcd8bfdd593dc68a81137756",
+      "sha256": "9A4756B39A66AD687B46DEDA9625AFB5F76357A99F9744605C7534A3CA72A2F3",
+      "bytes": 5554
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "gitBlob": "fd0993fc656a79880f5ded793e18905c37c51b84",
+      "sha256": "5F4443BAA730CA1ABBE11DBBD65F525C03601EF6560FD07F90A17E599F5451AD",
+      "bytes": 10906
+    }
+  ],
+  "role": "tests/fixtures/workflow overlay; no product files",
+  "AGENTS": "None found in current local ancestry; overlay has no repository checkout",
+  "browser": "NOT RUN",
+  "server": "NOT STARTED"
+}
