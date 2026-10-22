@@ -1,0 +1,131 @@
+{
+  "sourceCommit": "57896a27266c20b21ac1c3b2a94ba27ca7294eec",
+  "path": "docs/transfer/reentry-judgment-32/observer-a/v0/actions.jsonl.gz",
+  "compressedBytes": 259983,
+  "compressedGitBlob": "da50d46eb61232672a279ace5c46d9a3fe72b46f",
+  "compressedSha256": "aedcb47e45479e6cc23210d74cf0d06a72787d58855ff548124d9efc06c316a0",
+  "rawSha256": "e1db71d8d1a9261f932d23f0512bcf1dc129f7501f920968d584b6e851a122c1",
+  "excerpts": [
+    {
+      "rawLine": 48,
+      "utc": "2026-10-22T22:15:01.535821+00:00",
+      "seq": 27,
+      "kind": "command",
+      "label": "1280-explicit-error-continue",
+      "texts": [],
+      "nearby": [
+        {
+          "utc": "2026-10-22T22:14:48.613845+00:00",
+          "seq": 25,
+          "kind": "screen",
+          "data": {
+            "label": "1280-error-task-lower-actions"
+          }
+        },
+        {
+          "utc": "2026-10-22T22:15:01.535455+00:00",
+          "seq": 26,
+          "kind": "command",
+          "data": {
+            "op": "note",
+            "file": "1280-EXPLICIT-CONTINUE.md",
+            "text": "화면을500px 내려서야 '이 작업 이어서 하기'와 설명(현재 작업04은 남고 작업02으로 바꿔02 작업문 편집)을 찾았다. 위의 주행동은 '작성 중인 요청 열기'였고 대상은 읽기·검토로 명시되어 있어 이를 오류행 후속요청으로 오인하지 않았다. 별개 미전송입력은 보내거나 비우지 않고 보존한다. 지금 명시적으로 작업02 이어가기를 선택해 current 전환을 허용하고, 작업02의 다음행동만 바꾸겠다. 다른 현재작업04 데이터는 그대로 남겨야 한다. 기억/화면왕복 부담: 오류행의 현재설명은 위쪽에 있고 이어가기/조건은 아래쪽이라 내용을 기억한 채 내려왔다."
+          }
+        }
+      ]
+    },
+    {
+      "rawLine": 49,
+      "utc": "2026-10-22T22:15:01.754863+00:00",
+      "seq": 27,
+      "kind": "screen",
+      "label": "1280-explicit-error-continue",
+      "texts": [
+        "작업 02로 이어가기 · 고치는 작업문은 작업 02의 것이에요. 전에 이어가던 작업 00은 그대로 남아요."
+      ],
+      "nearby": [
+        {
+          "utc": "2026-10-22T22:15:01.535455+00:00",
+          "seq": 26,
+          "kind": "command",
+          "data": {
+            "op": "note",
+            "file": "1280-EXPLICIT-CONTINUE.md",
+            "text": "화면을500px 내려서야 '이 작업 이어서 하기'와 설명(현재 작업04은 남고 작업02으로 바꿔02 작업문 편집)을 찾았다. 위의 주행동은 '작성 중인 요청 열기'였고 대상은 읽기·검토로 명시되어 있어 이를 오류행 후속요청으로 오인하지 않았다. 별개 미전송입력은 보내거나 비우지 않고 보존한다. 지금 명시적으로 작업02 이어가기를 선택해 current 전환을 허용하고, 작업02의 다음행동만 바꾸겠다. 다른 현재작업04 데이터는 그대로 남겨야 한다. 기억/화면왕복 부담: 오류행의 현재설명은 위쪽에 있고 이어가기/조건은 아래쪽이라 내용을 기억한 채 내려왔다."
+          }
+        },
+        {
+          "utc": "2026-10-22T22:15:01.535821+00:00",
+          "seq": 27,
+          "kind": "command",
+          "data": {
+            "op": "click",
+            "selector": "#task-view-continue",
+            "label": "1280-explicit-error-continue"
+          }
+        }
+      ]
+    },
+    {
+      "rawLine": 155,
+      "utc": "2026-10-22T22:19:03.353737+00:00",
+      "seq": 82,
+      "kind": "command",
+      "label": "1440-explicit-error-continue",
+      "texts": [],
+      "nearby": [
+        {
+          "utc": "2026-10-22T22:18:52.683488+00:00",
+          "seq": 80,
+          "kind": "screen",
+          "data": {
+            "label": "1440-learned-find-continue"
+          }
+        },
+        {
+          "utc": "2026-10-22T22:19:03.353472+00:00",
+          "seq": 81,
+          "kind": "command",
+          "data": {
+            "op": "note",
+            "file": "1440-EXPLICIT-CONTINUE.md",
+            "text": "1280에서배운경로로실제350px휠이후작업02이어가기버튼을확인했다. 작성중요청열기는읽기·검토의기존미전송을가리키므로누르지않고,이작업이어가기를명시선택한다. 1440의경로발견속도를초행개선으로세지않는다."
+          }
+        }
+      ]
+    },
+    {
+      "rawLine": 156,
+      "utc": "2026-10-22T22:19:03.610696+00:00",
+      "seq": 82,
+      "kind": "screen",
+      "label": "1440-explicit-error-continue",
+      "texts": [
+        "작업 02로 이어가기 · 고치는 작업문은 작업 02의 것이에요. 전에 이어가던 작업 00은 그대로 남아요."
+      ],
+      "nearby": [
+        {
+          "utc": "2026-10-22T22:19:03.353472+00:00",
+          "seq": 81,
+          "kind": "command",
+          "data": {
+            "op": "note",
+            "file": "1440-EXPLICIT-CONTINUE.md",
+            "text": "1280에서배운경로로실제350px휠이후작업02이어가기버튼을확인했다. 작성중요청열기는읽기·검토의기존미전송을가리키므로누르지않고,이작업이어가기를명시선택한다. 1440의경로발견속도를초행개선으로세지않는다."
+          }
+        },
+        {
+          "utc": "2026-10-22T22:19:03.353737+00:00",
+          "seq": 82,
+          "kind": "command",
+          "data": {
+            "op": "click",
+            "selector": "#task-view-continue",
+            "label": "1440-explicit-error-continue"
+          }
+        }
+      ]
+    }
+  ]
+}
+

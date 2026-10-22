@@ -1,0 +1,7 @@
+{
+  "exit": 0,
+  "testDelta": "Exactly three notice assertions inserted before manual edit; removing them reconstructs original bytes",
+  "appDelta": "Exactly continueTask local no helper identity lookup replaced; reversing it reconstructs original bytes",
+  "sameGroup02PositiveAndAllOtherAssertionsUnchanged": true,
+  "actualUI": "NOT_RUN"
+}

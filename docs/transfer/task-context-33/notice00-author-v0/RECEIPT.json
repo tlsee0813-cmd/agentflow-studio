@@ -1,0 +1,89 @@
+{
+  "status": "candidate frozen; UI NOT_RUN",
+  "base": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+  "changedFiles": [
+    "app/continuity/src/client/app.ts",
+    "app/continuity/tests/pc12_browser.py"
+  ],
+  "checks": {
+    "type-v0": {
+      "exit": 2,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+        "--noEmit",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "Node24 author auxiliary; existing TS5.8.3",
+      "startedUTC": "2026-10-22T22:34:32.665137+00:00",
+      "completedUTC": "2026-10-22T22:34:34.440807+00:00"
+    },
+    "build-v0": {
+      "exit": 2,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "Node24 author auxiliary; existing TS5.8.3",
+      "startedUTC": "2026-10-22T22:34:34.441808+00:00",
+      "completedUTC": "2026-10-22T22:34:36.718693+00:00"
+    },
+    "type-final": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+        "--noEmit",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "Node24 author auxiliary; reused TS5.8.3",
+      "startUTC": "2026-10-22T22:35:34.123093+00:00",
+      "endUTC": "2026-10-22T22:35:35.872445+00:00"
+    },
+    "build-final": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "Node24 author auxiliary; reused TS5.8.3",
+      "startUTC": "2026-10-22T22:35:35.873813+00:00",
+      "endUTC": "2026-10-22T22:35:37.977415+00:00"
+    },
+    "diff-final": {
+      "exit": 0,
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "--unsafe-paths",
+        "<workspace>\\work\\product33-task-context-author\\evidence\\candidate-final.patch"
+      ],
+      "runtime": "Node24 author auxiliary; reused TS5.8.3",
+      "startUTC": "2026-10-22T22:35:38.086620+00:00",
+      "endUTC": "2026-10-22T22:35:38.160128+00:00"
+    }
+  },
+  "AST": {
+    "exit": 0,
+    "testDelta": "Exactly three notice assertions inserted before manual edit; removing them reconstructs original bytes",
+    "appDelta": "Exactly continueTask local no helper identity lookup replaced; reversing it reconstructs original bytes",
+    "sameGroup02PositiveAndAllOtherAssertionsUnchanged": true,
+    "actualUI": "NOT_RUN"
+  },
+  "build": "TypeScript emit with existing pinned compiler, then exact unchanged CSS/HTML copied; no server process",
+  "sourceBinding": "SOURCE_BINDING.json",
+  "sourceRuntime": "Existing Node24 author auxiliary and TS5.8.3; no Node22 execution claim",
+  "setup": "Initial missing inherited parent config corrected using exact remote config; both failed logs preserved; no install/new junction",
+  "limits": [
+    "Actual notice01/previous04/no00 browser assertions not executed locally",
+    "Current/draft/return semantics not changed; broader task-action layout study separate",
+    "No browser/server/remote writes"
+  ]
+}

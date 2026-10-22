@@ -1,0 +1,23 @@
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -447,7 +447,7 @@
+   const current=project.currentTaskId?taskOf(project):null,same=current&&(current.id===id||isReturnTask(project,current)&&current.parentTaskId===id);
+   if(!same)commit(focusTask(project,id));view='work';render();
+   // PC12: say which record is now edited when it is not the request that was read.
+-  const read=project.tasks.find(x=>x.id===id),no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`;
++  const read=project.tasks.find(x=>x.id===id),no=(x:Task)=>`작업 ${pad(project.tasks.findIndex(t=>t.id===x.id)+1)}`;
+   if(read&&current&&same&&current.id!==id){project={...project,notice:`${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.`};renderStatus();}
+   else if(read&&current&&!same){project={...project,notice:`${no(read)}로 이어가기 · 고치는 작업문은 ${no(read)}의 것이에요. 전에 이어가던 ${no(current)}은 그대로 남아요.`};renderStatus();}
+   $('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});
+--- a/app/continuity/tests/pc12_browser.py
++++ b/app/continuity/tests/pc12_browser.py
+@@ -231,6 +231,9 @@
+         expect(self.page.locator('#task-view-target')).to_contain_text('이 요청(작업 01)으로 바꾸고');expect(self.page.locator('#task-view-target')).to_contain_text('이전 보고를 대신 고르지 않아요')
+         expect(self.page.locator('#task-view-continue')).to_have_text('이 작업 이어서 하기')
+         self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
++        expect(self.page.locator('#notice')).to_contain_text('작업 01로 이어가기')
++        expect(self.page.locator('#notice')).to_contain_text('전에 이어가던 작업 04은 그대로 남아요.')
++        expect(self.page.locator('#notice')).not_to_contain_text('작업 00')
+         self.assertEqual(self.state()['currentTaskId'],A);expect(self.page.locator('#current-work h2')).to_have_text('이어갈 작업')
+         vA={k:f'A만 고친 {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vA);self.shot('05-edit-A')
+         self.page.locator('#work-return-origin').click();self.assert_back(before,booking,A);self.shot('06-back-after-edit')

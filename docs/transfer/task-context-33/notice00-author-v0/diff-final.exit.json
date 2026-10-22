@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "command": [
+    "git",
+    "apply",
+    "--check",
+    "--unsafe-paths",
+    "<workspace>\\work\\product33-task-context-author\\evidence\\candidate-final.patch"
+  ],
+  "runtime": "Node24 author auxiliary; reused TS5.8.3",
+  "startUTC": "2026-10-22T22:35:38.086620+00:00",
+  "endUTC": "2026-10-22T22:35:38.160128+00:00"
+}
