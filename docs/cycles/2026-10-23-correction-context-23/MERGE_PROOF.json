@@ -1,0 +1,73 @@
+{
+  "merge": {
+    "sha": "04dd3301dcf87d73fdb8f4ce3b05036b68ee814d",
+    "node_id": "C_kwDOVDjOQdoAKDA0ZGQzMzAxZGNmODdkNzNmZGI4ZjRjZTNiMDUwMzZiNjhlZTgxNGQ",
+    "url": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/git/commits/04dd3301dcf87d73fdb8f4ce3b05036b68ee814d",
+    "html_url": "https://github.com/tlsee0813-cmd/agentflow-studio/commit/04dd3301dcf87d73fdb8f4ce3b05036b68ee814d",
+    "author": {
+      "name": "rkx",
+      "email": "tlsee0813@stu.jejunu.ac.kr",
+      "date": "2026-10-22T17:57:28Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-22T17:57:28Z"
+    },
+    "tree": {
+      "sha": "4ded34e6471a3d2854cc79785af3155f2e9d0315",
+      "url": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/git/trees/4ded34e6471a3d2854cc79785af3155f2e9d0315"
+    },
+    "message": "Merge cycle23: carry corrected area description as scoped reference\n\n고친 현재 설명을 다음 작업문 정리 입력에 전달",
+    "parents": [
+      {
+        "sha": "241cbd891672bf1ee81bcfd97d458217a20c9f54",
+        "url": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/git/commits/241cbd891672bf1ee81bcfd97d458217a20c9f54",
+        "html_url": "https://github.com/tlsee0813-cmd/agentflow-studio/commit/241cbd891672bf1ee81bcfd97d458217a20c9f54"
+      },
+      {
+        "sha": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+        "url": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/git/commits/689c47888fb7ab5040d184c2d36f2adff8f2a575",
+        "html_url": "https://github.com/tlsee0813-cmd/agentflow-studio/commit/689c47888fb7ab5040d184c2d36f2adff8f2a575"
+      }
+    ],
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq2k6ICRC1aQ7uu5UhlAAA/ZAQACJMfnAxAgvG+u3ttUXQHvnE\n1f9xFRLHZQaZkhvXT6Pds9nuWr8IscWf1i6xo41f6VsusZG4vXnlW4a8ndIEneZf\n5kZVKUfrLyYdg4IKiO6w/hxu2VYgOolR0IvfP0fyHgsHo67SWwFYt4AYon9bY34n\ndEwMTbrppmbjcUxLJwkZlEZNGbkgZlp1DfToB77QNS7+PhKNhP98gpbWKQc0Pneh\nCamk7BqcOzfexAr3+Yxo9fgcI9m8GyhwRYhOuhlHBIblZPgizCYLGWQOemt8hefP\nV6si75urxNeMAULULQf7gvNr9vpcL+of4wccEpIOnk6feKP3/5AQp+YZLp16UK1J\nKpiswzUohICO5NCoD8YIttqrYOLPzTrYy0QA2JRgJpQRBsBA7Sk70zIwQxjf/fe5\nmM+huvnQpOYlRVCy9nM/z39f/MdmbxrQIzUnhde6clwt5mQIjGCiETNJ2CO3br9d\nZq8wiNJqa696GBH0pHKC8GDdjgnYiHlO3zHgRmXkT2Cldj2VI9nz9ew9taNncxda\nNIymH6tUXPXy3hkCMMnlPgo/prH2/Xaf3ZO5JN+yyHikX5tO28HYfYpIm8PdgChJ\nHdG2LKnfe5ZVjOPCCsG3ikNZRnTnEATMh/MzsRUFTBddwl9Sx1pbFCpjMoEt5KJU\nwTyYKs374xraOOFIPcuC\n=05jO\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 4ded34e6471a3d2854cc79785af3155f2e9d0315\nparent 241cbd891672bf1ee81bcfd97d458217a20c9f54\nparent 689c47888fb7ab5040d184c2d36f2adff8f2a575\nauthor rkx <tlsee0813@stu.jejunu.ac.kr> 1792691848 +0900\ncommitter GitHub <noreply@github.com> 1792691848 +0900\n\nMerge cycle23: carry corrected area description as scoped reference\n\n고친 현재 설명을 다음 작업문 정리 입력에 전달",
+      "verified_at": "2026-10-22T17:57:30Z"
+    }
+  },
+  "verified": {
+    "candidateAppTree": "659ced070a6cd0ce6d9029978a0ee8e0f3119fe7",
+    "mergedAppTree": "659ced070a6cd0ce6d9029978a0ee8e0f3119fe7",
+    "files": [
+      {
+        "path": "app/continuity/src/shared/types.ts",
+        "sha256": "16202DB1C238E917C548950543686046977C21C61DE56B30D6F4140AAD607D47",
+        "blob": "8ca513f5be7749d4962eaf80582f6c8273f0aad9"
+      },
+      {
+        "path": "app/continuity/src/shared/domain.ts",
+        "sha256": "3A0D8945FB31E0A94BBF0E42407E2E5FCF9901EBD22686B73D75445EA1DE9314",
+        "blob": "74a422ee6b4fdf8dc189469c5c5d6ec10766ec8f"
+      },
+      {
+        "path": "app/continuity/src/shared/validation.ts",
+        "sha256": "CC958CF61B54AA9D552AAB07DDAA8C7E6D60EC5E61F7218CF597DD608E9B94DF",
+        "blob": "1d784d254588c268fca4a4780b095ec78be7f3fc"
+      },
+      {
+        "path": "app/continuity/server/prompt.mjs",
+        "sha256": "5AE270A09BE7A4A780F471D096C95CF1333C86345A42154B2F74CBB7581F31E1",
+        "blob": "4d66dbfd7138a796c11d8869d889d9632821cac3"
+      },
+      {
+        "path": "app/continuity/tests/description23.test.mjs",
+        "sha256": "C577AA68BF13242FFE7761BE90F27AB7177ABF5C8DC257A0FE4A3CF79E6C44ED",
+        "blob": "8117189ef43a6ced81b8d8a965c4065c28229595"
+      }
+    ]
+  }
+}

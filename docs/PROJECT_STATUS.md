@@ -1,8 +1,10 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-23 정확한 수신 결과 이어가기20 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-23 첫 파일 인계21·설명 정정 입력23 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint에 현재 작업을 유지하는 명시 수신 검토, 정확한 보고와 당시 인계 작업문 읽기, 새 작업을 보존하는 복귀를 반영했다.** [PR11](https://github.com/tlsee0813-cmd/agentflow-studio/pull/11) · [20 결과와 수용 경계](cycles/2026-10-22-received-result-20/RESULT.md).
+**제품 기준 checkpoint에 첫 파일 인계 선택의 노출과 고친 현재 설명의 다음 요청 입력을 반영했다.** [21 결과](cycles/2026-10-23-blank-project-21/RESULT.md) · [23 결과](cycles/2026-10-23-correction-context-23/RESULT.md). 정정문은 출처 있는 참고이며 확정 조건이나 AI 의미 해결로 승격하지 않는다.
+
+**이전20에서는 현재 작업을 유지하는 명시 수신 검토, 정확한 보고와 당시 인계 작업문 읽기, 새 작업을 보존하는 복귀를 반영했다.** [PR11](https://github.com/tlsee0813-cmd/agentflow-studio/pull/11) · [20 결과와 수용 경계](cycles/2026-10-22-received-result-20/RESULT.md).
 
 **이전19에서는 지도 공간을 유지하는 우측 기록 읽기·전체 목적 창·정확한 출발 복귀를 반영했다.** [PR10](https://github.com/tlsee0813-cmd/agentflow-studio/pull/10) · [19 결과와 잔여 위험](cycles/2026-10-22-workspace-records-19/RESULT.md).
 
@@ -18,7 +20,7 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합58de4a9d](https://github.com/tlsee0813-cmd/agentflow-studio/commit/58de4a9db3b0b060fb06a1b293f45afd15791ca6), 최종후보 [69b478ba](https://github.com/tlsee0813-cmd/agentflow-studio/commit/69b478ba6dc84f803290eb857e5c8b3d7a659ea4) | 정확한 수신 보고·당시 작업문과 현재 구상 구분·작업 및 지도 복귀. [결과·한계](cycles/2026-10-22-received-result-20/RESULT.md) |
+| 제품 기준 checkpoint | [병합04dd3301](https://github.com/tlsee0813-cmd/agentflow-studio/commit/04dd3301dcf87d73fdb8f4ce3b05036b68ee814d), 최종후보 [689c4788](https://github.com/tlsee0813-cmd/agentflow-studio/commit/689c47888fb7ab5040d184c2d36f2adff8f2a575) | 21 파일 인계 입구·23 정정 참고 입력 연결. [23 결과·한계](cycles/2026-10-23-correction-context-23/RESULT.md) |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
@@ -28,7 +30,13 @@
 
 USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·gh-pages는 그대로 유지하고, 기존22개 브랜치는 [태그 보관·SHA 검증 후 정리](REPOSITORY_ARCHIVE.md)했다. PR #1·#2는 미병합으로 닫았다. 이전 인계 당시 사용자 개편안 대기 상태였으며, 이후 연구는 [ACTIVE](cycles/ACTIVE.md)에 기록한다.
 
-## 수신 결과20 검증과 수용 경계
+## 첫 파일 인계21·설명 정정 입력23의 수용 경계
+
+21은 파일 선택 묶음을 주 전달행 뒤로 옮긴 좁은 노출 개선이다. 원검사의 Ubuntu/Cloud 실패를 보존하고 실제 키 스크롤 완료에 맞춘 검사로 보완한 후 최종 양OS CI를 확인했다. 긴 작업 읽기 전체 개선이나 내부 이동 원인 해결을 주장하지 않는다.
+
+23은 정확한 부분의 유효한 설명을 같은 작업 재정리와 새 요청에 출처 있는 참고로 전달한다. 두 PC 정상 UI·독립 검토·최종 양OS CI 성공. 실제 AI 의미 정확성은 별도이며 기본 MOCK 한도에서의 연속 사용/429 회복은 검증하지 않았다. 새 클라이언트와 옛 strict 서버의 혼합 배포를 지원하지 않아 같은 번들로 배포해야 한다. 과거 H·원보고·직접 편집과 기존 유효한 보관 설명 정책을 유지했다. 공개 MOCK은 그대로다.
+
+## 수신 결과20 당시 검증과 수용 경계
 
 현재 B와 입력을 유지하며 A의 보고를 명시적으로 읽는다. 수신 T와 H의 당시 네 값 사본을 현재 작업문과 구분하며 없는 사본을 최신 값으로 대신하지 않는다. no-export 붙여넣은 보고의 잘못된 제목은 최초 CI 반례 뒤 수정했다. exact69b478ba CI39810777281 양OS 성공과 별도 독립 수정후 검증을 확인했다. Windows 검사 원문의 CRLF 경계를 바로잡았고 제품3431CB은 유지했다. [20 결과](cycles/2026-10-22-received-result-20/RESULT.md)에 최초 실패, 제품 수정, 검사 전제 보완, 원본 로직의 이전 독립 실행 재사용을 구분한다.
 
