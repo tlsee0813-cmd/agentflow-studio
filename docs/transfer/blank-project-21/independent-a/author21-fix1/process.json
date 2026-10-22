@@ -1,0 +1,14 @@
+{
+  "source": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "cwd": "/workspace/browser-env/cycle21-a-candidate/app",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle21-a-independent/author21-fix1/blank21_browser.py"
+  ],
+  "startUTC": "2026-10-22T16:37:25.328138+00:00",
+  "endUTC": "2026-10-22T16:37:37.171254+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "cb41351eb74471cb432f97b425590b286cbe060f961f49c64e895598441b97b9",
+  "collectorPlannedExit": 0
+}

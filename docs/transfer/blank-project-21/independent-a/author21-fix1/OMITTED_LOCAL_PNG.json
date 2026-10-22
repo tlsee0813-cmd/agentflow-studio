@@ -1,0 +1,14 @@
+[
+  {
+    "path": "raw/blank21-1440-final-scene-including-failure.png",
+    "bytes": 112778,
+    "sha256": "4ee76a71e19fd6012e07cfee278c82c4c6e9542decb780443d2d7f930342dfaf",
+    "localOriginalPreserved": true
+  },
+  {
+    "path": "raw/blank21-1280-final-scene-including-failure.png",
+    "bytes": 95450,
+    "sha256": "0afa64c12c8423951e6ccf146061150c321b808ece1a66022d2f62c1db4bc253",
+    "localOriginalPreserved": true
+  }
+]
