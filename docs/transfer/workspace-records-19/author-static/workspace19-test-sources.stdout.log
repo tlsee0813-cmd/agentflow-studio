@@ -1,0 +1,2 @@
+PASS: 13 embedded JS expressions parsed without execution
+{"pythonAST": 21, "newEmbeddedJS": 13, "CIWorkspace19Calls": 1, "testModuleImport": false, "browser": "NOT RUN", "server": "NOT STARTED"}

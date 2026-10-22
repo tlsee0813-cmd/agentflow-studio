@@ -1,0 +1,16 @@
+{
+  "command": "git",
+  "args": [
+    "diff",
+    "--check",
+    "--",
+    ".github/workflows/verify.yml"
+  ],
+  "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+  "node": "v24.19.0",
+  "start": "2026-10-22T13:30:58.779Z",
+  "end": "2026-10-22T13:30:58.849Z",
+  "status": 2,
+  "signal": null,
+  "error": null
+}

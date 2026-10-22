@@ -1,0 +1,371 @@
+diff --git a/.github/workflows/verify.yml b/.github/workflows/verify.yml
+index f08ff5e..fd0993f 100644
+--- a/.github/workflows/verify.yml
++++ b/.github/workflows/verify.yml
+@@ -204,6 +204,13 @@ jobs:
+         run: |
+           set -o pipefail
+           python continuity/tests/hierarchy18_browser.py 2>&1 | tee test-results/area18-browser.log
++      - name: WORKSPACE19 compact map, bounded records and exact request return on two PCs (native HTTP, labelled fixtures, mock AI)
++        env:
++          IDEA015_EVIDENCE_DIR: test-results/workspace19
++        shell: bash
++        run: |
++          set -o pipefail
++          python continuity/tests/workspace19_browser.py 2>&1 | tee test-results/workspace19-browser.log
+       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
+       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
+         env:
+diff --git a/app/continuity/tests/ai055_browser.py b/app/continuity/tests/ai055_browser.py
+index 847c625..b79e1a5 100644
+--- a/app/continuity/tests/ai055_browser.py
++++ b/app/continuity/tests/ai055_browser.py
+@@ -63,6 +63,7 @@ class IntentFlow(unittest.TestCase):
+         self.page.locator('#retry-work').click();expect(self.page.locator('#working')).to_have_text('')
+         self.assertEqual(calls[-1]['previousIntent']['manualGoal'],'문자 링크로 취소, 12시간 만료')
+         expect(self.page.locator('#intent-goal')).to_have_text('문자 링크로 취소, 12시간 만료')
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as event:self.page.locator('#backup').click()
+         event.value.save_as(base.OUT/'ai055-backup.json')
+         self.page.locator('#intent-details').evaluate('(e)=>e.open=true')
+diff --git a/app/continuity/tests/browser.py b/app/continuity/tests/browser.py
+index 2811e44..258b991 100644
+--- a/app/continuity/tests/browser.py
++++ b/app/continuity/tests/browser.py
+@@ -32,6 +32,17 @@ def saved(page,timeout=6.0):
+ def read_state(page,prefix=''):
+     saved(page)
+     return page.evaluate(STATE_JS,[prefix,WORKSPACE,KEY])
++def reveal_management(page,selector):
++    """WORKSPACE19 structural precondition: the same real control lives in the named map-only management menu."""
++    control=page.locator(selector)
++    if not control.is_visible():
++        menu=page.locator('#project-management');expect(menu).to_be_visible()
++        if not menu.evaluate('(e)=>e.open'):page.locator('#project-management-toggle').click()
++    expect(control).to_be_visible()
++def open_records(page):
++    """WORKSPACE19 keeps the exact record buttons, now in the existing bounded side reader."""
++    if not page.locator('#area-panel[data-panel-mode="records"]').count():page.locator('#check-summary').click()
++    body=page.locator('#area-panel-body');expect(body).to_have_attribute('data-area-id','@records');return body
+ 
+ class Browser(unittest.TestCase):
+     @classmethod
+@@ -163,6 +174,7 @@ class Browser(unittest.TestCase):
+         self.compose();self.page.locator('#draft').fill('저장 실패 중에도 보존할 새 입력')
+         expect(self.page.locator('#storage-error')).to_be_visible();expect(self.page.locator('#draft')).to_have_value('저장 실패 중에도 보존할 새 입력')
+         self.assertEqual(self.state(),before)
++        reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         path=OUT/'browser-recovery.json';d.value.save_as(path);self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['draft'],'저장 실패 중에도 보존할 새 입력')
+         bad=OUT/'invalid-import.json';bad.write_text('{"schemaVersion":"future"}',encoding='utf-8')
+@@ -172,6 +184,7 @@ class Browser(unittest.TestCase):
+     def test_07_valid_import_roundtrip_and_clipboard_failure(self):
+         self.send('문구만 바꿔줘.');self.basis('기존 예약 순서는 유지한다.')
+         original=self.state()
++        reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         path=OUT/'valid-recovery.json';d.value.save_as(path)
+         self.import_file(path);expect(self.page.locator('#basis-count')).to_have_text('2')
+@@ -223,6 +236,7 @@ class Browser(unittest.TestCase):
+         finally:
+             self.page.remove_listener('dialog',accept)
+     def backup(self,name):
++        reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         path=OUT/name;d.value.save_as(path);return path
+     @unittest.skipIf(DOM,'needs native routing/localStorage')
+diff --git a/app/continuity/tests/connect039_browser.py b/app/continuity/tests/connect039_browser.py
+index 1697f7f..05deccc 100644
+--- a/app/continuity/tests/connect039_browser.py
++++ b/app/continuity/tests/connect039_browser.py
+@@ -32,6 +32,7 @@ class ResultFiles(unittest.TestCase):
+         f=json.loads((self.materials/'A-H1.result.json').read_text());f.update(changes)
+         (self.materials/name).write_text(json.dumps(f,ensure_ascii=False,indent=2),encoding='utf-8');return f
+     def download(self,button,name):
++        if button=='#backup':base.reveal_management(self.page,button)
+         with self.page.expect_download() as d:self.page.locator(button).click()
+         path=OUT/name;d.value.save_as(path);return path
+     def shot(self,name):
+diff --git a/app/continuity/tests/flow049_browser.py b/app/continuity/tests/flow049_browser.py
+index 1c38328..caec4c7 100644
+--- a/app/continuity/tests/flow049_browser.py
++++ b/app/continuity/tests/flow049_browser.py
+@@ -13,6 +13,7 @@ class OutcomeHome(unittest.TestCase):
+     state=base.Browser.state;compose=base.Browser.compose;send=base.Browser.send
+ 
+     def download(self,button,name):
++        if button=='#backup':base.reveal_management(self.page,button)
+         with self.page.expect_download() as event:self.page.locator(button).click()
+         path=base.OUT/name;event.value.save_as(path);return path
+ 
+diff --git a/app/continuity/tests/flow083_browser.py b/app/continuity/tests/flow083_browser.py
+index 0113f39..26fbf74 100644
+--- a/app/continuity/tests/flow083_browser.py
++++ b/app/continuity/tests/flow083_browser.py
+@@ -89,6 +89,7 @@ class Flow083(unittest.TestCase):
+     def test_04_trash_restore_and_backup_copy_keep_the_whole_project(self):
+         self.send('예약 취소 기능을 만들어줘.');self.clipboard();self.page.locator('#copy-work').click()
+         self.send('취소 버튼을 추가했다고 보고받음. 실제 클릭 검사는 아직.','report');saved=self.state();key=self.current_entry()
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         backup=base.OUT/'flow083-backup.json';d.value.save_as(backup)
+         self.page.locator('#nav-projects').click();self.page.once('dialog',lambda dlg:(self.assertIn('원문·기준·요청·돌아온 결과',dlg.message),self.assertIn('취소되지는 않아요',dlg.message),dlg.accept()))
+@@ -150,6 +151,7 @@ class Flow083(unittest.TestCase):
+ 
+     def test_07_a_late_answer_after_switching_to_a_same_id_copy_changes_neither(self):
+         self.send('예약 문구를 바꿔줘.');first=self.current_entry()
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         path=base.OUT/'flow083-same-id.json';d.value.save_as(path)
+         parked=[];self.page.route('**/api/continuity',lambda route:parked.append((route,route.fetch())))
+@@ -170,6 +172,7 @@ class Flow083(unittest.TestCase):
+         expect(tab.locator('#storage-error')).to_contain_text('Web Locks')
+         tab.locator('#draft').fill('잠금 없이 쓴 입력');expect(tab.locator('#saved')).to_have_text('저장되지 않은 변경 있음')
+         expect(tab.locator('#draft')).to_have_value('잠금 없이 쓴 입력');self.assertEqual(self.keys(tab),[])
++        base.reveal_management(tab,'#backup')
+         with tab.expect_download() as d:tab.locator('#backup').click()
+         self.assertEqual(json.loads(Path(d.value.path()).read_text(encoding='utf-8'))['draft'],'잠금 없이 쓴 입력');tab.close()
+ 
+@@ -185,6 +188,7 @@ class Flow083(unittest.TestCase):
+ 
+     def test_09_import_never_switches_over_input_that_failed_or_changed_while_saving(self):
+         self.send('공유 프로젝트 요청');key=self.current_entry()
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         path=base.OUT/'fix084-import.json';d.value.save_as(path)
+         other=self.new_tab();base.open_listed(other,key);base.Browser.compose(self,other);other.locator('#draft').fill('다른 탭의 최신 입력');base.saved(other)
+@@ -219,6 +223,7 @@ class Flow083(unittest.TestCase):
+         expect(self.page.locator('#working')).to_have_text('');self.assertIsNotNone(self.state()['tasks'][0]['advice'],'the same project\'s answer is applied')
+         self.assertIsNone(self.state()['pending'])
+         # Choosing a backup and then cancelling must not drop a normal pending answer.
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         path=base.OUT/'fix084-cancel.json';d.value.save_as(path)
+         self.page.locator('#retry-work').click();self.page.wait_for_timeout(200);self.assertEqual(len(parked),1)
+@@ -233,6 +238,7 @@ class Flow083(unittest.TestCase):
+         # FIX084-R2: already unsaved (conflict) -> another save waits on the lock -> agree to leave that input ->
+         # type new text while the flush waits -> release (still conflicting). The new text was never agreed to.
+         self.send('동의 범위 확인 요청');key=self.current_entry()
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         path=base.OUT/'fix084-r2-import.json';d.value.save_as(path)
+         other=self.new_tab();base.open_listed(other,key);base.Browser.compose(self,other);other.locator('#draft').fill('다른 탭의 최신 입력');base.saved(other)
+@@ -260,6 +266,7 @@ class Flow083(unittest.TestCase):
+                 expect(tab.locator('#mode')).to_contain_text('MOCK');self.assertEqual(errors,[])
+                 expect(tab.locator('#storage-error')).to_contain_text('저장소');expect(tab.locator('#projects-view')).to_be_hidden()
+                 tab.locator('#draft').fill('저장소가 막힌 탭의 입력');expect(tab.locator('#saved')).to_have_text('저장되지 않은 변경 있음')
++                base.reveal_management(tab,'#backup')
+                 with tab.expect_download() as d:tab.locator('#backup').click()
+                 self.assertEqual(json.loads(Path(d.value.path()).read_text(encoding='utf-8'))['draft'],'저장소가 막힌 탭의 입력')
+                 tab.close()
+diff --git a/app/continuity/tests/flow090_browser.py b/app/continuity/tests/flow090_browser.py
+index ad0f0c4..8931606 100644
+--- a/app/continuity/tests/flow090_browser.py
++++ b/app/continuity/tests/flow090_browser.py
+@@ -23,6 +23,7 @@ class SpatialWorkspace(unittest.TestCase):
+         expect(self.page.locator('#space-title')).to_contain_text(name.split()[0])
+     def area_id(self,name):return next(a['id'] for a in self.state()['space']['areas'] if a['name']==name)
+     def download(self,button,name):
++        if button=='#backup':base.reveal_management(self.page,button)
+         with self.page.expect_download() as event:self.page.locator(button).click()
+         path=base.OUT/name;event.value.save_as(path);return path
+ 
+diff --git a/app/continuity/tests/pc12_browser.py b/app/continuity/tests/pc12_browser.py
+index a614ac7..1393913 100644
+--- a/app/continuity/tests/pc12_browser.py
++++ b/app/continuity/tests/pc12_browser.py
+@@ -396,6 +396,7 @@ class Pc12Boundaries(unittest.TestCase):
+     def test_05_no_plan_copy_no_text_and_changed_plan(self):
+         """Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy."""
+         booking,notify=self.start([('예약','첫 구상'),('알림','')]);A=self.request_in(booking,'A: 예약 화면');B=self.request_in(notify,'B: 알림 문자')
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         raw=json.loads(Path(d.value.path()).read_text(encoding='utf-8'))
+         for t in raw['tasks']:
+@@ -425,6 +426,7 @@ class Pc12Boundaries(unittest.TestCase):
+         # Another project: nothing of this starting point comes along.
+         self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator(f'#panel-task-{A}').click()
+         self.page.locator('#task-view-continue').click();expect(self.page.locator('#work-return-origin')).to_be_visible()
++        base.reveal_management(self.page,'#new-project-top')
+         self.page.locator('#new-project-top').click();expect(self.page.locator('#work-return-origin')).to_have_count(0)
+         self.page.locator('#nav-projects').click();self.page.locator('.project-card').filter(has_text='공방').locator('.project-open').click()
+         expect(self.page.locator('#task-return-origin, #work-return-origin')).to_have_count(0)
+diff --git a/app/continuity/tests/pc13_browser.py b/app/continuity/tests/pc13_browser.py
+index d3d2274..3dd930c 100644
+--- a/app/continuity/tests/pc13_browser.py
++++ b/app/continuity/tests/pc13_browser.py
+@@ -141,6 +141,7 @@ class Pc13(unittest.TestCase):
+ 
+     def test_02_one_normal_notice_stays_visible(self):
+         ids,Q,A,R=self.short_project()
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         # A returning visit imports the backup from the project list of a new tab (no per-tab view memory).
+         path=base.OUT/f'pc13-{self.WIDTH}-backup.json';d.value.save_as(path);self.fresh_tab();self.page.locator('#nav-projects').click()
+@@ -167,18 +168,18 @@ class Pc13(unittest.TestCase):
+ 
+     def test_04_records_counts_zero_each_both_and_opening(self):
+         ids=self.start('동네 공방 원데이 클래스 예약 사이트',[('예약','날짜·시간 고르기'),('알림','예약 확인 문자')])
+-        summary=self.page.locator('#check-summary');records=self.page.locator('#check-list')
++        summary=self.page.locator('#check-summary');records=self.page.locator('#area-panel-body')
+         Q=self.request_in(ids['알림'],CHOICE);self.page.locator('#nav-space').click()
+         self.check('decision only',summary.inner_text(),'이어 볼 기록 1개 · 답 기다림 1')
+         self.page.locator('#nav-work').click();self.page.locator('.option-button').first.click();expect(self.page.locator('#working')).to_have_text('')
+         self.page.locator('#nav-space').click();self.check('zero',summary.inner_text(),'이어 볼 기록 0개')
+-        records.locator('summary').click();txt=records.inner_text();self.record('actual','zero: opened text',txt)
++        base.open_records(self.page);txt=records.inner_text();self.record('actual','zero: opened text',txt)
+         for word in ['확인할 일','미결','완료했','끝났']:self.check(f'zero: no "{word}"',word in txt,False)
+         A=self.request_in(ids['예약'],'A: 예약 접수 화면');R=self.paste_report('R 보고: 접수 화면을 만들었다고 주장');self.page.locator('#nav-space').click()
+         self.check('report only',summary.inner_text(),'이어 볼 기록 1개 · 후속 작업문 없는 보고 1')
+         Q2=self.request_in(ids['알림'],CHOICE+' (두 번째)');self.page.locator('#nav-space').click()
+         self.check('both',summary.inner_text(),'이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1')
+-        if not records.evaluate('(e)=>e.open'):records.locator('summary').click()  # leaving the space view does not keep it open
++        base.open_records(self.page)
+         rows=records.locator('.check-item');expect(rows).to_have_count(2);expect(records).to_contain_text('제품 선택 항목 있음');expect(records).to_contain_text('구현 보고 도착 · 앱 미검증')
+         for word in ['확인할 일','미결']:self.check(f'both: no "{word}"',word in records.inner_text(),False)
+         current=self.state()['currentTaskId'];before=self.geom('records depart')
+@@ -187,7 +188,7 @@ class Pc13(unittest.TestCase):
+         self.page.locator('#task-return-origin').click();after=self.geom('records back')
+         self.check('records back: open disclosures',after['openDetails'],before['openDetails']);self.check('records back: focus on the row button',after['focusId'],f'check-open-{R}')
+         self.page.locator(f'#node-enter-{ids["예약"]}').click();expect(self.page.locator('#area-checks')).to_contain_text('이어 볼 기록 · 이 영역 1개 · 다른 영역 1개')
+-        self.page.locator('#area-checks-open').click();expect(records).to_have_attribute('open','')
++        self.page.locator('#area-checks-open').click();expect(records).to_have_attribute('data-area-id','@records')
+ 
+     # ---------- product12 contracts from the new layout ----------
+     def panel_task_probe(self,task):
+@@ -195,7 +196,7 @@ class Pc13(unittest.TestCase):
+           const r=e.getBoundingClientRect(),b=body.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
+           return {top:r.top,bottom:r.bottom,bodyTop:b.top,bodyBottom:b.bottom,bodyY:body.scrollTop,
+             fullyVisible:r.top>=Math.max(0,b.top)&&r.bottom<=Math.min(innerHeight,b.bottom)&&r.left>=Math.max(0,b.left)&&r.right<=Math.min(innerWidth,b.right),
+-            hitIsControl:!!hit&&(hit===e||e.contains(hit))}}''',f'panel-task-{task}')
++            hitIsControl:!!hit&&(hit===e||e.contains(hit))}}''',task if task.startswith(('panel-task-','check-open-')) else f'panel-task-{task}')
+     def wheel_panel(self,delta):
+         # Padding is deliberately the target: a long original can have its own inner scroller. This is native wheel,
+         # without assigning scrollTop or asking Playwright to scroll the caller into view on the product's behalf.
+@@ -217,15 +218,15 @@ class Pc13(unittest.TestCase):
+             self.record('actual','native body wheel measured distance',{'needed':needed,'delta':delta,'caller':probe})
+             self.wheel_panel(delta);wheels+=1
+         probe=self.panel_task_probe(task);self.record('actual','native reading-body wheel steps to task',{'steps':wheels,'caller':probe})
+-        expect(self.page.locator(f'#panel-task-{task}')).to_be_in_viewport()
++        caller=task if task.startswith(('panel-task-','check-open-')) else f'panel-task-{task}'
++        expect(self.page.locator('#'+caller)).to_be_in_viewport()
+         self.record('condition','depart: task fully inside body and hit-testable',probe,{'fullyVisible':True,'hitIsControl':True})
+         self.assertTrue(probe and probe['fullyVisible'] and probe['hitIsControl'],'native body wheel must expose an actually clickable task')
+-    def depart(self,area,task,open_records):
++    def depart(self,area,task,open_records,record=None):
+         self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible()
+         if open_records:
+-            rec=self.page.locator('#check-list')
+-            if not rec.evaluate('(e)=>e.open'):rec.locator('summary').click()
+-            expect(rec).to_have_attribute('open','')
++            self.assertIsNotNone(record,'records departure names the exact report, never a latest fallback')
++            base.open_records(self.page)
+         self.page.locator('#map-zoom-in').click();self.page.locator('#map-zoom-in').click()
+         # fix1: the zoom clicks no longer scroll the page (tools are at the map's top), so the pan starts on the map's visible part;
+         # the first of a few points that is empty map background is used (cards move with the view), and recorded.
+@@ -235,15 +236,16 @@ class Pc13(unittest.TestCase):
+         empty=[p for p,h in zip(pts,hits) if h in ['space-map','space-plane','relation-layer']];self.record('actual','pan start candidates',{'points':pts,'hits':hits})
+         self.check('pan starts on the empty map',bool(empty),True);x,y=empty[0]
+         self.page.mouse.move(x,y);self.page.mouse.down();self.page.mouse.move(x-60,y-30,steps=6);self.page.mouse.up()
+-        self.wheel_to_panel_task(task,80);pick=self.page.locator(f'#panel-task-{task}')
++        caller=f'check-open-{record}' if open_records else f'panel-task-{task}'
++        self.wheel_to_panel_task(caller,80);pick=self.page.locator('#'+caller)
+         expect(pick).to_be_in_viewport()
+-        g=self.geom('depart');g['anchorY']=pick.bounding_box()['y'];g['cardRect']=self.page.locator(f'.area-node[data-area-id="{area}"]').bounding_box()
++        g=self.geom('depart');g['callerId']=caller;g['anchorY']=pick.bounding_box()['y'];g['cardRect']=self.page.locator(f'.area-node[data-area-id="{area}"]').bounding_box()
+         self.record('actual','depart anchor and card',{'anchorY':g['anchorY'],'cardRect':g['cardRect']})
+         pick.click();expect(self.page.locator('#task-view')).to_be_visible();return g
+     def assert_back(self,b,area,task,label):
+         expect(self.page.locator('#space-title')).to_have_text('전체 공간');a=self.geom(f'{label}: back')
+         raw=self.page.evaluate("""(id)=>{const e=document.getElementById(id);const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,h=document.elementFromPoint(x,y);
+-          return {y:r.top,hit:!!h&&(h===e||e.contains(h)),focused:document.activeElement===e}}""",f'panel-task-{task}')
++          return {y:r.top,hit:!!h&&(h===e||e.contains(h)),focused:document.activeElement===e}}""",b['callerId'])
+         card=self.page.locator(f'.area-node[data-area-id="{area}"]').bounding_box();self.record('actual',f'{label}: anchor and card',{'anchor':raw,'cardRect':card})
+         self.check(f'{label}: style transform',a['styleTransform'],b['styleTransform']);self.check(f'{label}: computed matrix',a['computedTransform'],b['computedTransform'])
+         self.check(f'{label}: card x/y/w',{k:round(card[k],1) for k in ('x','y','width')},{k:round(b['cardRect'][k],1) for k in ('x','y','width')})
+@@ -281,8 +283,8 @@ class Pc13(unittest.TestCase):
+         self.page.locator('#draft').fill('');base.saved(self.page)
+         B=self.request_in(ids['결제'],'B: 현장 결제 안내');self.export_current();RB=self.paste_report('RB 보고: 결제 안내 반영했다고 주장',B)
+         self.check('fixture: current RB',self.state()['currentTaskId'],RB);self.unsent_report('아직 보내지 않은 보고 2',A);s2=self.state()
+-        # (2) the records disclosure opened at departure: read A, continue (switches to A, not R), edit A, return.
+-        b=self.depart(ids['예약'],A,True);self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
++        # (2) WORKSPACE19: the same A/R is read from its exact record row in the alternate reader (not simultaneous panes).
++        b=self.depart(ids['예약'],A,True,R);self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+         vA={k:f'A {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vA);self.page.locator('#work-return-origin').click();self.assert_back(b,ids['예약'],A,'RB-A-edit')
+         s3=self.state();self.check('RB-A-edit: current A',s3['currentTaskId'],A);self.check('RB-A-edit: A manual',self.task(A,s3)['manual'],vA)
+         self.check('RB-A-edit: R kept',self.task(R,s3)['manual'],vR);self.check('RB-A-edit: RB untouched',self.task(RB,s3),self.task(RB,s2));self.check('RB-A-edit: B untouched',self.task(B,s3),self.task(B,s2))
+@@ -319,12 +321,13 @@ class Pc13(unittest.TestCase):
+     def tool_scenes(self,area,prefix):
+         self.assert_tools(f'{prefix}default')
+         self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible();self.assert_tools(f'{prefix}selected')
+-        self.page.locator('#check-list > summary').click();expect(self.page.locator('#check-list')).to_have_attribute('open','');self.assert_tools(f'{prefix}selected+records open')
+-        self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0);self.assert_tools(f'{prefix}closed+records open')
+-        self.page.locator('#check-list > summary').click();self.assert_tools(f'{prefix}closed');self.use_tools(f'{prefix}closed')
++        base.open_records(self.page);self.assert_tools(f'{prefix}selected+records open')
++        self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_attribute('data-panel-mode','area');self.assert_tools(f'{prefix}selected after records close')
++        self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0);self.assert_tools(f'{prefix}closed');self.use_tools(f'{prefix}closed')
+ 
+     def test_08_map_tools_usable_in_the_first_screen(self):
+         ids,Q,A,R=self.short_project();self.fresh_tab();self.tool_scenes(ids['예약'],'no notice: ');self.shot('07-tools')
++        base.reveal_management(self.page,'#backup')
+         with self.page.expect_download() as d:self.page.locator('#backup').click()
+         path=base.OUT/f'pc13-{self.WIDTH}-backup-tools.json';d.value.save_as(path);self.fresh_tab();self.page.locator('#nav-projects').click()
+         self.page.once('dialog',lambda dl:dl.accept());self.page.locator('#import-file').set_input_files(str(path))
+@@ -368,7 +371,7 @@ class Pc13Boundaries(unittest.TestCase):
+         self.page.set_viewport_size({'width':390,'height':844});self.page.locator('#nav-space').click()
+         self.page.locator(f'#list-info-{ids["알림"]}').click();expect(self.page.locator('#area-panel')).to_be_visible()
+         self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0)
+-        self.page.locator('#check-list > summary').click();expect(self.page.locator('#check-list')).to_have_attribute('open','')
++        base.open_records(self.page);expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id','@records')
+         n=self.geom('390');self.check('390: no horizontal overflow',n['docWidth']<=n['vw'],True)
+ 
+ 
+diff --git a/app/continuity/tests/select035_browser.py b/app/continuity/tests/select035_browser.py
+index cbbe4d3..696d666 100644
+--- a/app/continuity/tests/select035_browser.py
++++ b/app/continuity/tests/select035_browser.py
+@@ -24,6 +24,7 @@ class Selection(unittest.TestCase):
+         (OUT/'screens').mkdir(exist_ok=True);self.page.mouse.move(1,1);self.page.evaluate('window.scrollTo(0,0)')
+         self.page.screenshot(path=str(OUT/'screens'/name),full_page=True)
+     def download(self,button,name):
++        if button=='#backup':base.reveal_management(self.page,button)
+         with self.page.expect_download() as d:self.page.locator(button).click()
+         d.value.save_as(OUT/name);return OUT/name
+     def test_01_actual_A_B_replay(self):
+diff --git a/app/continuity/tests/spatial102_browser.py b/app/continuity/tests/spatial102_browser.py
+index 1133fa7..d0a8524 100644
+--- a/app/continuity/tests/spatial102_browser.py
++++ b/app/continuity/tests/spatial102_browser.py
+@@ -28,10 +28,8 @@ class EnterFirstSpace(unittest.TestCase):
+         return self.state()['currentTaskId']
+     def focused(self):return self.page.evaluate('document.activeElement && document.activeElement.id')
+     def records(self):
+-        """PC13: the items are the same, folded into the '이어 볼 기록' disclosure; open it with a real click when closed."""
+-        box=self.page.locator('#check-list')
+-        if not box.evaluate('(e)=>e.open'):box.locator('summary').click()
+-        return box
++        """WORKSPACE19: same exact record identities, opened by the real bounded-reader button."""
++        return base.open_records(self.page)
+ 
+     def test_01_card_enters_info_selects_handle_drags(self):
+         booking,notify=self.start(['예약','알림'])
+@@ -87,8 +85,8 @@ class EnterFirstSpace(unittest.TestCase):
+         with self.page.expect_download():self.page.locator('#download-work').click()
+         self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('보고: 예약 화면을 만들었다고 주장');self.page.locator('#send').click()
+         expect(self.page.locator('#working')).to_have_text('');current=self.state()['currentTaskId']
+-        self.page.locator('#nav-space').click();box=self.page.locator('#check-list')
+-        expect(box.locator('summary')).to_have_text('이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1');self.records()
++        self.page.locator('#nav-space').click();box=self.page.locator('#area-panel-body')
++        expect(self.page.locator('#check-summary')).to_have_text('이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1');self.records()
+         expect(box).to_contain_text('제품 선택 항목 있음');expect(box).to_contain_text('구현 보고 도착 · 앱 미검증')
+         expect(box).to_contain_text('개발 도구의 실행 상태나 완료 여부는 아니에요')
+         self.page.screenshot(path=str(base.OUT/'spatial102-checks.png'),full_page=True)
+@@ -100,7 +98,7 @@ class EnterFirstSpace(unittest.TestCase):
+         # Acting on the report (a follow-up request from it) takes it off the list; the report itself stays recorded.
+         self.page.locator('#nav-work').click();self.page.locator('#compose-panel').evaluate('(e)=>e.open=true');self.page.locator('#request-tab').click()
+         self.page.locator('#draft').fill('확인 대기 문구 고치기');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+-        self.page.locator('#nav-space').click();expect(box.locator('summary')).to_have_text('이어 볼 기록 1개 · 답 기다림 1');expect(box).not_to_contain_text('구현 보고 도착')
++        self.page.locator('#nav-space').click();expect(self.page.locator('#check-summary')).to_have_text('이어 볼 기록 1개 · 답 기다림 1');self.records();expect(box).not_to_contain_text('구현 보고 도착')
+         self.assertTrue(any(s['kind']=='report' for s in self.state()['sources']))
+ 
+     def test_04_start_points_for_an_empty_project_and_an_empty_area(self):

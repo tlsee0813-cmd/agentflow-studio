@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\������\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product19-author-evidence\freeze-tests.py", line 43, in <module>
+    item=json.loads(path.read_text(encoding='utf-8'));checks.append({'label':path.name.removesuffix('.exit.json'),'exit':item['status'],'command':item['command'],'args':item['args'],'node':item['node']})
+                                                                                                                         ~~~~^^^^^^^^^^
+KeyError: 'status'

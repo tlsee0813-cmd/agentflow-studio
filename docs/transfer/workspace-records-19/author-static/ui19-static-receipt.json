@@ -1,0 +1,57 @@
+{
+  "kind": "cycle19 UI author static checkpoint",
+  "baseline": "54eb53a07fed415cb0cc730a9616e251f2b78f93",
+  "contract": "3668f23a25bf055eb98f8512727ce7acb0945669",
+  "runtime": "Node v24.19.0 author auxiliary; existing locked TypeScript 5.8.3 via product18 app/node_modules junction",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 249782,
+      "sha256": "C9DF96891429CE72B25B02684248828CE0C3D918ED7A6AAE61BF5F4C9BE5DDBB"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72648,
+      "sha256": "F97FED78D87FBD7EDF15E8556894BA023BA3B01463D54730796904E36C37408D"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17909,
+      "sha256": "190C02C6615901C84735AB7F8D6B2504FF9D8351BA5FD784F6B62BBCE16EC34C"
+    }
+  ],
+  "checks": {
+    "diff_check": 0,
+    "build": 0,
+    "type_syntax_boundary": 0,
+    "staticHtmlUniqueIds": 121,
+    "duplicateStaticIds": 0
+  },
+  "browser": "NOT_RUN: no local browser or server; visual size, hit testing, native clipboard and geometry acceptance require independent Cloud",
+  "scope": [
+    "PC whole-map-only compact header and named management menu",
+    "Same right panel area/relations/records with separate per-view reading memo",
+    "Actual task/return IDs and explicit owner locator; first records Origin survives intermediate views",
+    "Disappearing caller falls back to records heading and short reason, no fabricated record"
+  ],
+  "limits": [
+    "Default 1280/1440 mapTop<=230 is a target only; not measured locally",
+    "390 minimum access and all browser regressions pending Cloud",
+    "Source only: no project schema/domain changes; no commit or remote write",
+    "Purpose full reading uses existing bounded modal; explicit purpose editing remains inline and may reduce map space"
+  ],
+  "reviewCorrections": [
+    "Origin panel mode is meaningful only in whole-map view",
+    "Explicit navigation or reopening records ends the prior excursion; actual endpoint + same area actions retain the first caller",
+    "Missing caller notice stays in fixed records header across render; clears on new reading/mode/project/navigation",
+    "General different-area information selection ends records excursion; explicit relation endpoint keeps it",
+    "Existing project-read modal moved once to main; map-purpose readonly opening/close caller separated from home entry caller"
+  ],
+  "intermediateSourceAvailability": {
+    "original": "NOT_RECOVERED: not copied before edit; no reconstruction",
+    "scopeGuardOriginal": "Parent captured in task tool store",
+    "initialAppSha256": "500697F7058E15B068B2D7644C72859F1FD1392EDFD709EF280362CD0AD1FB23",
+    "scopeGuardAppSha256": "A0A030E93D6622B503E43339AAC8FD6A950D7C8B3EEB44FCB9D5BAD8F8F7BFBB",
+    "review": "Intermediate author versions failed static review; not accepted product or browser evidence"
+  }
+}

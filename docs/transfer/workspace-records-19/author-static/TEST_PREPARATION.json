@@ -1,0 +1,10 @@
+{
+  "head": "54eb53a07fed415cb0cc730a9616e251f2b78f93",
+  "appSha256": "B5A6FDE628584D85097840B61EBF918F2E609FF08B060BC540F72A4EF2695C4A",
+  "stylesSha256": "A427A2D4D52BC061D2D42D747A8DD30E09BD475DF9860C66DCE3F96BCC51431C",
+  "compared": "cycle18 final exact product source at start, before UI author edits",
+  "agents": "No AGENTS.md in HEAD tree or checked filesystem ancestry",
+  "role": "tests and verify.yml only",
+  "browser": "NOT_RUN",
+  "server": "NOT_STARTED"
+}

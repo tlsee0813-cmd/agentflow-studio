@@ -1,0 +1,38 @@
+[
+  {
+    "file": "ai055_browser.py",
+    "nativeMenuPreconditions": 1
+  },
+  {
+    "file": "browser.py",
+    "nativeMenuPreconditions": 3
+  },
+  {
+    "file": "connect039_browser.py",
+    "nativeMenuPreconditions": 1
+  },
+  {
+    "file": "flow049_browser.py",
+    "nativeMenuPreconditions": 1
+  },
+  {
+    "file": "flow083_browser.py",
+    "nativeMenuPreconditions": 7
+  },
+  {
+    "file": "flow090_browser.py",
+    "nativeMenuPreconditions": 1
+  },
+  {
+    "file": "pc12_browser.py",
+    "nativeMenuPreconditions": 2
+  },
+  {
+    "file": "pc13_browser.py",
+    "nativeMenuPreconditions": 2
+  },
+  {
+    "file": "select035_browser.py",
+    "nativeMenuPreconditions": 1
+  }
+]

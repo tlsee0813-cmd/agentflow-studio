@@ -1,0 +1,14 @@
+.github/workflows/verify.yml:207: trailing whitespace.
++      - name: WORKSPACE19 compact map, bounded records and exact request return on two PCs (native HTTP, labelled fixtures, mock AI)
+.github/workflows/verify.yml:208: trailing whitespace.
++        env:
+.github/workflows/verify.yml:209: trailing whitespace.
++          IDEA015_EVIDENCE_DIR: test-results/workspace19
+.github/workflows/verify.yml:210: trailing whitespace.
++        shell: bash
+.github/workflows/verify.yml:211: trailing whitespace.
++        run: |
+.github/workflows/verify.yml:212: trailing whitespace.
++          set -o pipefail
+.github/workflows/verify.yml:213: trailing whitespace.
++          python continuity/tests/workspace19_browser.py 2>&1 | tee test-results/workspace19-browser.log

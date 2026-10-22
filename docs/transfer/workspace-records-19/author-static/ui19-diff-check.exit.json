@@ -1,0 +1,6 @@
+{
+  "finishedUtc": "2026-10-22T13:28:16.3884487Z",
+  "exitCode": 0,
+  "name": "ui19-diff-check",
+  "scope": "UI owned source3 only for diff; continuity for check/build"
+}

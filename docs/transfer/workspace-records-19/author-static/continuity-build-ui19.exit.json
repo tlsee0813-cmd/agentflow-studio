@@ -1,0 +1,6 @@
+{
+  "finishedUtc": "2026-10-22T13:28:16.3038314Z",
+  "exitCode": 0,
+  "name": "continuity-build-ui19",
+  "scope": "UI owned source3 only for diff; continuity for check/build"
+}
