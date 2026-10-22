@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_106635d1-04dc-4333-b3e7-d6df3fd52b4c",
+  "taskId": "T_a453175b-7db6-46f7-a4d7-a89a0dda1099",
+  "returnId": "H_72c323ac-91fa-42b9-b8e8-e4263c3820b7",
+  "report": "[명시 합성29 보류 보고] 실행 아님",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_c2fa404e-e5f2-44bf-8567-41841b878aec",
+    "basedOn": 0,
+    "summary": "[보류29] 현재 본문으로 승격하면 안 되는 옛 기준의 합성 설명",
+    "changes": [],
+    "proposal": null,
+    "origin": "실제 옛 H 기반 합성29"
+  }
+}

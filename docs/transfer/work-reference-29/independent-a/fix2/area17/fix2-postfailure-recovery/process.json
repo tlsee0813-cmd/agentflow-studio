@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle29-area17-regression/runner.py"
+  ],
+  "app": "/workspace/browser-env/cycle29-fix2-candidate/app",
+  "startUTC": "2026-10-22T20:09:51.902527+00:00",
+  "endUTC": "2026-10-22T20:10:00.436829+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "0ef40294be8af6448ee8ae6559faeedce6645d7fa50919f113cb3274b74018ba"
+}

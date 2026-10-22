@@ -1,0 +1,213 @@
+{
+  "sourceCommit": "f10eb68962ea1e6d35a491891b8c0c3b934eac77",
+  "expectedPC": 2,
+  "completedPC": 2,
+  "rows": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "complete": true,
+      "A": "T_eef04f48-a0f2-4ad1-ae01-e807a52dbf6b",
+      "A2": "T_4f20ad17-039f-4c58-8239-4fddda099d36",
+      "B": "T_08ad3a2d-98b1-4464-bda3-90cc2557fa6b",
+      "manual": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "cumulativeChecksSoFar": 16,
+      "finalCurrent": "T_ba451d79-d735-4a69-87c0-c32badfecc36"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "complete": true,
+      "A": "T_d6614bea-dfd1-4881-8c07-1942c8d267db",
+      "A2": "T_dab4c58a-4c3b-4440-bcff-0a2fd1049ddd",
+      "B": "T_a0c67984-7664-400d-80bb-c5c754deb865",
+      "manual": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "cumulativeChecksSoFar": 32,
+      "finalCurrent": "T_700f1d6c-2d93-408c-b438-8cd52ab34740"
+    }
+  ],
+  "checks": [
+    {
+      "label": "B edit while A reader visited is B only",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK B edit while A reader visited is B only"
+    },
+    {
+      "label": "B edit with A compose target is B only",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK B edit with A compose target is B only"
+    },
+    {
+      "label": "task switch closes prior B reference",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK task switch closes prior B reference"
+    },
+    {
+      "label": "explicit A selects exact user revision2",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK explicit A selects exact user revision2"
+    },
+    {
+      "label": "first native U key preserves DOM focus selection selected text revision scroll and N/S/C",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK first native U key preserves DOM focus selection selected text revision scroll and N/S/C"
+    },
+    {
+      "label": "manual display30 only actual policy7 unchanged",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK manual display30 only actual policy7 unchanged"
+    },
+    {
+      "label": "actual selected-description sentence and N same viewport",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK actual selected-description sentence and N same viewport"
+    },
+    {
+      "label": "actual H manual exact and stale current-description section excluded",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK actual H manual exact and stale current-description section excluded"
+    },
+    {
+      "label": "opened original JSON exact, inner textarea scroll out of scope",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK opened original JSON exact, inner textarea scroll out of scope"
+    },
+    {
+      "label": "actual pinned paragraph visible before new receipt",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK actual pinned paragraph visible before new receipt"
+    },
+    {
+      "label": "new separate-task description arrival keeps old selected body and announces new",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK new separate-task description arrival keeps old selected body and announces new"
+    },
+    {
+      "label": "same paragraph visible after page-only recovery",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK same paragraph visible after page-only recovery"
+    },
+    {
+      "label": "explicit reopen selects latest revision3",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK explicit reopen selects latest revision3"
+    },
+    {
+      "label": "origin return keeps current A1",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK origin return keeps current A1"
+    },
+    {
+      "label": "held-only no selected current body",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK held-only no selected current body"
+    },
+    {
+      "label": "archived owner labelled, no substitute A",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK archived owner labelled, no substitute A"
+    },
+    {
+      "label": "B edit while A reader visited is B only",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK B edit while A reader visited is B only"
+    },
+    {
+      "label": "B edit with A compose target is B only",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK B edit with A compose target is B only"
+    },
+    {
+      "label": "task switch closes prior B reference",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK task switch closes prior B reference"
+    },
+    {
+      "label": "explicit A selects exact user revision2",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK explicit A selects exact user revision2"
+    },
+    {
+      "label": "first native U key preserves DOM focus selection selected text revision scroll and N/S/C",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK first native U key preserves DOM focus selection selected text revision scroll and N/S/C"
+    },
+    {
+      "label": "manual display30 only actual policy7 unchanged",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK manual display30 only actual policy7 unchanged"
+    },
+    {
+      "label": "actual selected-description sentence and N same viewport",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK actual selected-description sentence and N same viewport"
+    },
+    {
+      "label": "actual H manual exact and stale current-description section excluded",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK actual H manual exact and stale current-description section excluded"
+    },
+    {
+      "label": "opened original JSON exact, inner textarea scroll out of scope",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK opened original JSON exact, inner textarea scroll out of scope"
+    },
+    {
+      "label": "actual pinned paragraph visible before new receipt",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK actual pinned paragraph visible before new receipt"
+    },
+    {
+      "label": "new separate-task description arrival keeps old selected body and announces new",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK new separate-task description arrival keeps old selected body and announces new"
+    },
+    {
+      "label": "same paragraph visible after page-only recovery",
+      "pass": false,
+      "rawReference": "ui.jsonl CHECK same paragraph visible after page-only recovery"
+    },
+    {
+      "label": "explicit reopen selects latest revision3",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK explicit reopen selects latest revision3"
+    },
+    {
+      "label": "origin return keeps current A1",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK origin return keeps current A1"
+    },
+    {
+      "label": "held-only no selected current body",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK held-only no selected current body"
+    },
+    {
+      "label": "archived owner labelled, no substitute A",
+      "pass": true,
+      "rawReference": "ui.jsonl CHECK archived owner labelled, no substitute A"
+    }
+  ],
+  "failedChecks": [
+    "same paragraph visible after page-only recovery"
+  ],
+  "harnessErrors": [],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 1
+}

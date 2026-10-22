@@ -1,0 +1,32 @@
+{
+  "provenance": "exec_command/write_stdin external completions; not self-report/full transcript",
+  "readingFirst": {
+    "session": 89368,
+    "actualOuterExit": 1
+  },
+  "readingFinal": {
+    "session": 74836,
+    "actualOuterExit": 0
+  },
+  "buildShell": {
+    "session": 9078,
+    "actualOuterExit": 0
+  },
+  "typecheckCollector": {
+    "session": 14872,
+    "actualOuterExit": 0
+  },
+  "area17FirstFix2": {
+    "session": 94656,
+    "actualOuterExit": 1
+  },
+  "parallelArea17Comparison": {
+    "sessions": [
+      22960,
+      73547
+    ],
+    "mapping": "per process.json command app and original result; one failure/one success",
+    "fix2ActualOuterExit": 1,
+    "base27ActualOuterExit": 0
+  }
+}

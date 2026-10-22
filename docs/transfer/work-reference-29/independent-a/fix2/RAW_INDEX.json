@@ -1,0 +1,74 @@
+[
+  {
+    "path": "normal-ui/ui.jsonl.gz",
+    "originalBytes": 1618660,
+    "originalSHA256": "bee1c6589960c3510d4e35b7cdfe0105875461d3fc2888286c7a4618a5d7aafc",
+    "compressedBytes": 151611,
+    "compressedSHA256": "205d0e51599c3abff561a48c301a89b108f44f66a734e9ae11369e649684d345",
+    "roundTripEqual": true
+  },
+  {
+    "path": "first-page-recovery-notice-overlay/ui.jsonl.gz",
+    "originalBytes": 1597537,
+    "originalSHA256": "13fb518de866167bb67b245ca86ee30e4e6c2bc5905d59085bdde0d98eaf9520",
+    "compressedBytes": 150680,
+    "compressedSHA256": "86f897a4e9118efe6cb8f49bc000bebba0dc88b88725a800532aead46b3deaf9",
+    "roundTripEqual": true
+  },
+  {
+    "path": "area17/fix2/diagnostic.jsonl.gz",
+    "originalBytes": 427336,
+    "originalSHA256": "d67d00209825c5fc9c4cabdd8826274af0c9ca6b145efe746ffba366f3bfb39e",
+    "compressedBytes": 31595,
+    "compressedSHA256": "56a8497ca44e166e17540db5664bd53814cbe41214e6b23d519518d4068213ff",
+    "roundTripEqual": true
+  },
+  {
+    "path": "area17/fix2/author-raw/understanding17-observations.jsonl.gz",
+    "originalBytes": 61850,
+    "originalSHA256": "02c2471eb249c5200c9cd0316ed1356f66c9cdbf47c9e4f39d398650068e04bd",
+    "compressedBytes": 7510,
+    "compressedSHA256": "69a7927708222b97cdfe3d069eef8f31679a1556c8d419fd6c08c3328e5624e0",
+    "roundTripEqual": true
+  },
+  {
+    "path": "area17/fix2-postfailure-recovery/diagnostic.jsonl.gz",
+    "originalBytes": 574039,
+    "originalSHA256": "6446ae74f1ec1f9479ed7bd170c2e2687b2a649db3a2003ef7dee3b4e30ea18a",
+    "compressedBytes": 42486,
+    "compressedSHA256": "cd940de14ae75f839ea3dee897ba489210cd5bf2854d9f33fc5b53bf951abc38",
+    "roundTripEqual": true
+  },
+  {
+    "path": "area17/fix2-postfailure-recovery/recovery.jsonl.gz",
+    "originalBytes": 2446,
+    "originalSHA256": "8e61686f4069c59bb271688d6e33df6b811f08bda6d31a731c5fbeca2bcf0789",
+    "compressedBytes": 909,
+    "compressedSHA256": "392fe8f7a2179e7a3b1ca00f07d93ece8105dced9be9c0c19624e219aabce652",
+    "roundTripEqual": true
+  },
+  {
+    "path": "area17/fix2-postfailure-recovery/author-raw/understanding17-observations.jsonl.gz",
+    "originalBytes": 63508,
+    "originalSHA256": "22a293b86aab6e7ccdca340b528067a44599d7ee781fdd4524cd3627528867e9",
+    "compressedBytes": 7642,
+    "compressedSHA256": "ce6dd31bc04393c45feaa0e0ba5e13b16694b593848b3633277a8f0f4bf9f8c7",
+    "roundTripEqual": true
+  },
+  {
+    "path": "area17/base27/diagnostic.jsonl.gz",
+    "originalBytes": 317452,
+    "originalSHA256": "d51680dc14590aa7452be99b377d7d5a017cc9ac554723a515b32637a8ec4955",
+    "compressedBytes": 26363,
+    "compressedSHA256": "79740e4e69f9e680cd4f5a9fe459b11099a3ed9eee922633392b4f31226093bc",
+    "roundTripEqual": true
+  },
+  {
+    "path": "area17/base27/author-raw/understanding17-observations.jsonl.gz",
+    "originalBytes": 70706,
+    "originalSHA256": "b7b9e6e36fd9bd49e3a88960741bf68ecf035d97b33345947770ebd57a3f1d12",
+    "compressedBytes": 10764,
+    "compressedSHA256": "5486e6ec5b488677c0d9c4e1706c79e400760363890cc6ccf5d50a5aecfe3f30",
+    "roundTripEqual": true
+  }
+]

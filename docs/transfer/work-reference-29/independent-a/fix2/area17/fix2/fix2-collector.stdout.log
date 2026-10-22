@@ -1,0 +1,44 @@
+test_06_locate_new_request_copy_and_return (understanding17_browser.Area17.test_06_locate_new_request_copy_and_return) ... FAIL
+test_06_locate_new_request_copy_and_return (understanding17_browser.Area17Wide.test_06_locate_new_request_copy_and_return) ... FAIL
+
+======================================================================
+FAIL: test_06_locate_new_request_copy_and_return (understanding17_browser.Area17.test_06_locate_new_request_copy_and_return)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/understanding17_browser.py", line 385, in <lambda>
+    Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/understanding17_browser.py", line 362, in locate_new_request
+    self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/understanding17_browser.py", line 79, in readable
+    v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/understanding17_browser.py", line 75, in check_true
+    self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : readable on screen (first line in view, not covered): work view: way back before locating
+
+======================================================================
+FAIL: test_06_locate_new_request_copy_and_return (understanding17_browser.Area17Wide.test_06_locate_new_request_copy_and_return)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/understanding17_browser.py", line 385, in <lambda>
+    Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')
+                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/understanding17_browser.py", line 362, in locate_new_request
+    self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/understanding17_browser.py", line 79, in readable
+    v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/understanding17_browser.py", line 75, in check_true
+    self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)
+                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : readable on screen (first line in view, not covered): work view: way back before locating
+
+----------------------------------------------------------------------
+Ran 2 tests in 6.501s
+
+FAILED (failures=2)
+

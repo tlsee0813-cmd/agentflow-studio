@@ -1,0 +1,101 @@
+{
+  "head": "f10eb68962ea1e6d35a491891b8c0c3b934eac77",
+  "overall": "PENDING ROOT: reader fix verified; AREA17 visibility regression remains",
+  "normalUI": {
+    "expectedPC": 2,
+    "completePC": 2,
+    "childExit": 0,
+    "outerExit": 0,
+    "reference": "normal-ui/result.json",
+    "owner": "work-reference-body",
+    "bodyPrePost": {
+      "1280": [
+        604,
+        604
+      ],
+      "1440": [
+        567,
+        567
+      ]
+    },
+    "summaryScrollMax": 0,
+    "samePinSameTextAndOpenOriginalPreserved": true
+  },
+  "firstFix2Run": {
+    "childExit": 1,
+    "outerExit": 1,
+    "reason": "1440 sample hit notice during page-only recovery; core reading preserved",
+    "reference": "first-page-recovery-notice-overlay/result.json"
+  },
+  "area17": {
+    "fix2First": {
+      "tests": 2,
+      "failures": 2,
+      "childExit": 1,
+      "outerExit": 1
+    },
+    "base27": {
+      "tests": 2,
+      "failures": 0,
+      "childExit": 0,
+      "outerExit": 0
+    },
+    "fix2WithSeparatePostfailureHome": {
+      "originalTests": 2,
+      "originalFailures": 2,
+      "childExit": 1,
+      "outerExit": 1,
+      "afterFailureRecoveryPossible": true
+    },
+    "reference": "area17/"
+  },
+  "oldWork29Eight": "NOT_RUN (known old preparation failure not repeated); awaiting new test candidate",
+  "projectSwitch": "REUSED fix1 app-identical evidence, not executed on f10",
+  "rawArtifacts": [
+    {
+      "path": "normal-ui/ui.jsonl.gz",
+      "originalSHA256": "bee1c6589960c3510d4e35b7cdfe0105875461d3fc2888286c7a4618a5d7aafc",
+      "compressedSHA256": "205d0e51599c3abff561a48c301a89b108f44f66a734e9ae11369e649684d345"
+    },
+    {
+      "path": "first-page-recovery-notice-overlay/ui.jsonl.gz",
+      "originalSHA256": "13fb518de866167bb67b245ca86ee30e4e6c2bc5905d59085bdde0d98eaf9520",
+      "compressedSHA256": "86f897a4e9118efe6cb8f49bc000bebba0dc88b88725a800532aead46b3deaf9"
+    },
+    {
+      "path": "area17/fix2/diagnostic.jsonl.gz",
+      "originalSHA256": "d67d00209825c5fc9c4cabdd8826274af0c9ca6b145efe746ffba366f3bfb39e",
+      "compressedSHA256": "56a8497ca44e166e17540db5664bd53814cbe41214e6b23d519518d4068213ff"
+    },
+    {
+      "path": "area17/fix2/author-raw/understanding17-observations.jsonl.gz",
+      "originalSHA256": "02c2471eb249c5200c9cd0316ed1356f66c9cdbf47c9e4f39d398650068e04bd",
+      "compressedSHA256": "69a7927708222b97cdfe3d069eef8f31679a1556c8d419fd6c08c3328e5624e0"
+    },
+    {
+      "path": "area17/fix2-postfailure-recovery/diagnostic.jsonl.gz",
+      "originalSHA256": "6446ae74f1ec1f9479ed7bd170c2e2687b2a649db3a2003ef7dee3b4e30ea18a",
+      "compressedSHA256": "cd940de14ae75f839ea3dee897ba489210cd5bf2854d9f33fc5b53bf951abc38"
+    },
+    {
+      "path": "area17/fix2-postfailure-recovery/recovery.jsonl.gz",
+      "originalSHA256": "8e61686f4069c59bb271688d6e33df6b811f08bda6d31a731c5fbeca2bcf0789",
+      "compressedSHA256": "392fe8f7a2179e7a3b1ca00f07d93ece8105dced9be9c0c19624e219aabce652"
+    },
+    {
+      "path": "area17/fix2-postfailure-recovery/author-raw/understanding17-observations.jsonl.gz",
+      "originalSHA256": "22a293b86aab6e7ccdca340b528067a44599d7ee781fdd4524cd3627528867e9",
+      "compressedSHA256": "ce6dd31bc04393c45feaa0e0ba5e13b16694b593848b3633277a8f0f4bf9f8c7"
+    },
+    {
+      "path": "area17/base27/diagnostic.jsonl.gz",
+      "originalSHA256": "d51680dc14590aa7452be99b377d7d5a017cc9ac554723a515b32637a8ec4955",
+      "compressedSHA256": "79740e4e69f9e680cd4f5a9fe459b11099a3ed9eee922633392b4f31226093bc"
+    },
+    {
+      "path": "area17/base27/author-raw/understanding17-observations.jsonl.gz",
+      "originalSHA256": "b7b9e6e36fd9bd49e3a88960741bf68ecf035d97b33345947770ebd57a3f1d12",
+      "compressedSHA256": "5486e6ec5b488677c0d9c4e1706c79e400760363890cc6ccf5d50a5aecfe3f30"
+    }
+  ]
+}
