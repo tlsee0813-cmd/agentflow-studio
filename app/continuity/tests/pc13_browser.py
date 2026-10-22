@@ -141,6 +141,7 @@ class Pc13(unittest.TestCase):
 
     def test_02_one_normal_notice_stays_visible(self):
         ids,Q,A,R=self.short_project()
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         # A returning visit imports the backup from the project list of a new tab (no per-tab view memory).
         path=base.OUT/f'pc13-{self.WIDTH}-backup.json';d.value.save_as(path);self.fresh_tab();self.page.locator('#nav-projects').click()
@@ -167,18 +168,18 @@ class Pc13(unittest.TestCase):
 
     def test_04_records_counts_zero_each_both_and_opening(self):
         ids=self.start('동네 공방 원데이 클래스 예약 사이트',[('예약','날짜·시간 고르기'),('알림','예약 확인 문자')])
-        summary=self.page.locator('#check-summary');records=self.page.locator('#check-list')
+        summary=self.page.locator('#check-summary');records=self.page.locator('#area-panel-body')
         Q=self.request_in(ids['알림'],CHOICE);self.page.locator('#nav-space').click()
         self.check('decision only',summary.inner_text(),'이어 볼 기록 1개 · 답 기다림 1')
         self.page.locator('#nav-work').click();self.page.locator('.option-button').first.click();expect(self.page.locator('#working')).to_have_text('')
         self.page.locator('#nav-space').click();self.check('zero',summary.inner_text(),'이어 볼 기록 0개')
-        records.locator('summary').click();txt=records.inner_text();self.record('actual','zero: opened text',txt)
+        base.open_records(self.page);txt=records.inner_text();self.record('actual','zero: opened text',txt)
         for word in ['확인할 일','미결','완료했','끝났']:self.check(f'zero: no "{word}"',word in txt,False)
         A=self.request_in(ids['예약'],'A: 예약 접수 화면');R=self.paste_report('R 보고: 접수 화면을 만들었다고 주장');self.page.locator('#nav-space').click()
         self.check('report only',summary.inner_text(),'이어 볼 기록 1개 · 후속 작업문 없는 보고 1')
         Q2=self.request_in(ids['알림'],CHOICE+' (두 번째)');self.page.locator('#nav-space').click()
         self.check('both',summary.inner_text(),'이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1')
-        if not records.evaluate('(e)=>e.open'):records.locator('summary').click()  # leaving the space view does not keep it open
+        base.open_records(self.page)
         rows=records.locator('.check-item');expect(rows).to_have_count(2);expect(records).to_contain_text('제품 선택 항목 있음');expect(records).to_contain_text('구현 보고 도착 · 앱 미검증')
         for word in ['확인할 일','미결']:self.check(f'both: no "{word}"',word in records.inner_text(),False)
         current=self.state()['currentTaskId'];before=self.geom('records depart')
@@ -187,7 +188,7 @@ class Pc13(unittest.TestCase):
         self.page.locator('#task-return-origin').click();after=self.geom('records back')
         self.check('records back: open disclosures',after['openDetails'],before['openDetails']);self.check('records back: focus on the row button',after['focusId'],f'check-open-{R}')
         self.page.locator(f'#node-enter-{ids["예약"]}').click();expect(self.page.locator('#area-checks')).to_contain_text('이어 볼 기록 · 이 영역 1개 · 다른 영역 1개')
-        self.page.locator('#area-checks-open').click();expect(records).to_have_attribute('open','')
+        self.page.locator('#area-checks-open').click();expect(records).to_have_attribute('data-area-id','@records')
 
     # ---------- product12 contracts from the new layout ----------
     def panel_task_probe(self,task):
@@ -195,7 +196,7 @@ class Pc13(unittest.TestCase):
           const r=e.getBoundingClientRect(),b=body.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
           return {top:r.top,bottom:r.bottom,bodyTop:b.top,bodyBottom:b.bottom,bodyY:body.scrollTop,
             fullyVisible:r.top>=Math.max(0,b.top)&&r.bottom<=Math.min(innerHeight,b.bottom)&&r.left>=Math.max(0,b.left)&&r.right<=Math.min(innerWidth,b.right),
-            hitIsControl:!!hit&&(hit===e||e.contains(hit))}}''',f'panel-task-{task}')
+            hitIsControl:!!hit&&(hit===e||e.contains(hit))}}''',task if task.startswith(('panel-task-','check-open-')) else f'panel-task-{task}')
     def wheel_panel(self,delta):
         # Padding is deliberately the target: a long original can have its own inner scroller. This is native wheel,
         # without assigning scrollTop or asking Playwright to scroll the caller into view on the product's behalf.
@@ -217,15 +218,15 @@ class Pc13(unittest.TestCase):
             self.record('actual','native body wheel measured distance',{'needed':needed,'delta':delta,'caller':probe})
             self.wheel_panel(delta);wheels+=1
         probe=self.panel_task_probe(task);self.record('actual','native reading-body wheel steps to task',{'steps':wheels,'caller':probe})
-        expect(self.page.locator(f'#panel-task-{task}')).to_be_in_viewport()
+        caller=task if task.startswith(('panel-task-','check-open-')) else f'panel-task-{task}'
+        expect(self.page.locator('#'+caller)).to_be_in_viewport()
         self.record('condition','depart: task fully inside body and hit-testable',probe,{'fullyVisible':True,'hitIsControl':True})
         self.assertTrue(probe and probe['fullyVisible'] and probe['hitIsControl'],'native body wheel must expose an actually clickable task')
-    def depart(self,area,task,open_records):
+    def depart(self,area,task,open_records,record=None):
         self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible()
         if open_records:
-            rec=self.page.locator('#check-list')
-            if not rec.evaluate('(e)=>e.open'):rec.locator('summary').click()
-            expect(rec).to_have_attribute('open','')
+            self.assertIsNotNone(record,'records departure names the exact report, never a latest fallback')
+            base.open_records(self.page)
         self.page.locator('#map-zoom-in').click();self.page.locator('#map-zoom-in').click()
         # fix1: the zoom clicks no longer scroll the page (tools are at the map's top), so the pan starts on the map's visible part;
         # the first of a few points that is empty map background is used (cards move with the view), and recorded.
@@ -235,15 +236,16 @@ class Pc13(unittest.TestCase):
         empty=[p for p,h in zip(pts,hits) if h in ['space-map','space-plane','relation-layer']];self.record('actual','pan start candidates',{'points':pts,'hits':hits})
         self.check('pan starts on the empty map',bool(empty),True);x,y=empty[0]
         self.page.mouse.move(x,y);self.page.mouse.down();self.page.mouse.move(x-60,y-30,steps=6);self.page.mouse.up()
-        self.wheel_to_panel_task(task,80);pick=self.page.locator(f'#panel-task-{task}')
+        caller=f'check-open-{record}' if open_records else f'panel-task-{task}'
+        self.wheel_to_panel_task(caller,80);pick=self.page.locator('#'+caller)
         expect(pick).to_be_in_viewport()
-        g=self.geom('depart');g['anchorY']=pick.bounding_box()['y'];g['cardRect']=self.page.locator(f'.area-node[data-area-id="{area}"]').bounding_box()
+        g=self.geom('depart');g['callerId']=caller;g['anchorY']=pick.bounding_box()['y'];g['cardRect']=self.page.locator(f'.area-node[data-area-id="{area}"]').bounding_box()
         self.record('actual','depart anchor and card',{'anchorY':g['anchorY'],'cardRect':g['cardRect']})
         pick.click();expect(self.page.locator('#task-view')).to_be_visible();return g
     def assert_back(self,b,area,task,label):
         expect(self.page.locator('#space-title')).to_have_text('전체 공간');a=self.geom(f'{label}: back')
         raw=self.page.evaluate("""(id)=>{const e=document.getElementById(id);const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,h=document.elementFromPoint(x,y);
-          return {y:r.top,hit:!!h&&(h===e||e.contains(h)),focused:document.activeElement===e}}""",f'panel-task-{task}')
+          return {y:r.top,hit:!!h&&(h===e||e.contains(h)),focused:document.activeElement===e}}""",b['callerId'])
         card=self.page.locator(f'.area-node[data-area-id="{area}"]').bounding_box();self.record('actual',f'{label}: anchor and card',{'anchor':raw,'cardRect':card})
         self.check(f'{label}: style transform',a['styleTransform'],b['styleTransform']);self.check(f'{label}: computed matrix',a['computedTransform'],b['computedTransform'])
         self.check(f'{label}: card x/y/w',{k:round(card[k],1) for k in ('x','y','width')},{k:round(b['cardRect'][k],1) for k in ('x','y','width')})
@@ -281,8 +283,8 @@ class Pc13(unittest.TestCase):
         self.page.locator('#draft').fill('');base.saved(self.page)
         B=self.request_in(ids['결제'],'B: 현장 결제 안내');self.export_current();RB=self.paste_report('RB 보고: 결제 안내 반영했다고 주장',B)
         self.check('fixture: current RB',self.state()['currentTaskId'],RB);self.unsent_report('아직 보내지 않은 보고 2',A);s2=self.state()
-        # (2) the records disclosure opened at departure: read A, continue (switches to A, not R), edit A, return.
-        b=self.depart(ids['예약'],A,True);self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+        # (2) WORKSPACE19: the same A/R is read from its exact record row in the alternate reader (not simultaneous panes).
+        b=self.depart(ids['예약'],A,True,R);self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
         vA={k:f'A {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vA);self.page.locator('#work-return-origin').click();self.assert_back(b,ids['예약'],A,'RB-A-edit')
         s3=self.state();self.check('RB-A-edit: current A',s3['currentTaskId'],A);self.check('RB-A-edit: A manual',self.task(A,s3)['manual'],vA)
         self.check('RB-A-edit: R kept',self.task(R,s3)['manual'],vR);self.check('RB-A-edit: RB untouched',self.task(RB,s3),self.task(RB,s2));self.check('RB-A-edit: B untouched',self.task(B,s3),self.task(B,s2))
@@ -319,12 +321,13 @@ class Pc13(unittest.TestCase):
     def tool_scenes(self,area,prefix):
         self.assert_tools(f'{prefix}default')
         self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible();self.assert_tools(f'{prefix}selected')
-        self.page.locator('#check-list > summary').click();expect(self.page.locator('#check-list')).to_have_attribute('open','');self.assert_tools(f'{prefix}selected+records open')
-        self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0);self.assert_tools(f'{prefix}closed+records open')
-        self.page.locator('#check-list > summary').click();self.assert_tools(f'{prefix}closed');self.use_tools(f'{prefix}closed')
+        base.open_records(self.page);self.assert_tools(f'{prefix}selected+records open')
+        self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_attribute('data-panel-mode','area');self.assert_tools(f'{prefix}selected after records close')
+        self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0);self.assert_tools(f'{prefix}closed');self.use_tools(f'{prefix}closed')
 
     def test_08_map_tools_usable_in_the_first_screen(self):
         ids,Q,A,R=self.short_project();self.fresh_tab();self.tool_scenes(ids['예약'],'no notice: ');self.shot('07-tools')
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=base.OUT/f'pc13-{self.WIDTH}-backup-tools.json';d.value.save_as(path);self.fresh_tab();self.page.locator('#nav-projects').click()
         self.page.once('dialog',lambda dl:dl.accept());self.page.locator('#import-file').set_input_files(str(path))
@@ -368,7 +371,7 @@ class Pc13Boundaries(unittest.TestCase):
         self.page.set_viewport_size({'width':390,'height':844});self.page.locator('#nav-space').click()
         self.page.locator(f'#list-info-{ids["알림"]}').click();expect(self.page.locator('#area-panel')).to_be_visible()
         self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0)
-        self.page.locator('#check-list > summary').click();expect(self.page.locator('#check-list')).to_have_attribute('open','')
+        base.open_records(self.page);expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id','@records')
         n=self.geom('390');self.check('390: no horizontal overflow',n['docWidth']<=n['vw'],True)
 
 

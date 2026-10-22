@@ -13,6 +13,7 @@ class OutcomeHome(unittest.TestCase):
     state=base.Browser.state;compose=base.Browser.compose;send=base.Browser.send
 
     def download(self,button,name):
+        if button=='#backup':base.reveal_management(self.page,button)
         with self.page.expect_download() as event:self.page.locator(button).click()
         path=base.OUT/name;event.value.save_as(path);return path
 

@@ -24,6 +24,7 @@ class Selection(unittest.TestCase):
         (OUT/'screens').mkdir(exist_ok=True);self.page.mouse.move(1,1);self.page.evaluate('window.scrollTo(0,0)')
         self.page.screenshot(path=str(OUT/'screens'/name),full_page=True)
     def download(self,button,name):
+        if button=='#backup':base.reveal_management(self.page,button)
         with self.page.expect_download() as d:self.page.locator(button).click()
         d.value.save_as(OUT/name);return OUT/name
     def test_01_actual_A_B_replay(self):

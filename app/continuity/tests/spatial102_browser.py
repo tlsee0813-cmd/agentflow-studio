@@ -28,10 +28,8 @@ class EnterFirstSpace(unittest.TestCase):
         return self.state()['currentTaskId']
     def focused(self):return self.page.evaluate('document.activeElement && document.activeElement.id')
     def records(self):
-        """PC13: the items are the same, folded into the '이어 볼 기록' disclosure; open it with a real click when closed."""
-        box=self.page.locator('#check-list')
-        if not box.evaluate('(e)=>e.open'):box.locator('summary').click()
-        return box
+        """WORKSPACE19: same exact record identities, opened by the real bounded-reader button."""
+        return base.open_records(self.page)
 
     def test_01_card_enters_info_selects_handle_drags(self):
         booking,notify=self.start(['예약','알림'])
@@ -87,8 +85,8 @@ class EnterFirstSpace(unittest.TestCase):
         with self.page.expect_download():self.page.locator('#download-work').click()
         self.page.locator('#home-paste-result').click();self.page.locator('#draft').fill('보고: 예약 화면을 만들었다고 주장');self.page.locator('#send').click()
         expect(self.page.locator('#working')).to_have_text('');current=self.state()['currentTaskId']
-        self.page.locator('#nav-space').click();box=self.page.locator('#check-list')
-        expect(box.locator('summary')).to_have_text('이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1');self.records()
+        self.page.locator('#nav-space').click();box=self.page.locator('#area-panel-body')
+        expect(self.page.locator('#check-summary')).to_have_text('이어 볼 기록 2개 · 답 기다림 1 · 후속 작업문 없는 보고 1');self.records()
         expect(box).to_contain_text('제품 선택 항목 있음');expect(box).to_contain_text('구현 보고 도착 · 앱 미검증')
         expect(box).to_contain_text('개발 도구의 실행 상태나 완료 여부는 아니에요')
         self.page.screenshot(path=str(base.OUT/'spatial102-checks.png'),full_page=True)
@@ -100,7 +98,7 @@ class EnterFirstSpace(unittest.TestCase):
         # Acting on the report (a follow-up request from it) takes it off the list; the report itself stays recorded.
         self.page.locator('#nav-work').click();self.page.locator('#compose-panel').evaluate('(e)=>e.open=true');self.page.locator('#request-tab').click()
         self.page.locator('#draft').fill('확인 대기 문구 고치기');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
-        self.page.locator('#nav-space').click();expect(box.locator('summary')).to_have_text('이어 볼 기록 1개 · 답 기다림 1');expect(box).not_to_contain_text('구현 보고 도착')
+        self.page.locator('#nav-space').click();expect(self.page.locator('#check-summary')).to_have_text('이어 볼 기록 1개 · 답 기다림 1');self.records();expect(box).not_to_contain_text('구현 보고 도착')
         self.assertTrue(any(s['kind']=='report' for s in self.state()['sources']))
 
     def test_04_start_points_for_an_empty_project_and_an_empty_area(self):

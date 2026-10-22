@@ -32,6 +32,17 @@ def saved(page,timeout=6.0):
 def read_state(page,prefix=''):
     saved(page)
     return page.evaluate(STATE_JS,[prefix,WORKSPACE,KEY])
+def reveal_management(page,selector):
+    """WORKSPACE19 structural precondition: the same real control lives in the named map-only management menu."""
+    control=page.locator(selector)
+    if not control.is_visible():
+        menu=page.locator('#project-management');expect(menu).to_be_visible()
+        if not menu.evaluate('(e)=>e.open'):page.locator('#project-management-toggle').click()
+    expect(control).to_be_visible()
+def open_records(page):
+    """WORKSPACE19 keeps the exact record buttons, now in the existing bounded side reader."""
+    if not page.locator('#area-panel[data-panel-mode="records"]').count():page.locator('#check-summary').click()
+    body=page.locator('#area-panel-body');expect(body).to_have_attribute('data-area-id','@records');return body
 
 class Browser(unittest.TestCase):
     @classmethod
@@ -163,6 +174,7 @@ class Browser(unittest.TestCase):
         self.compose();self.page.locator('#draft').fill('저장 실패 중에도 보존할 새 입력')
         expect(self.page.locator('#storage-error')).to_be_visible();expect(self.page.locator('#draft')).to_have_value('저장 실패 중에도 보존할 새 입력')
         self.assertEqual(self.state(),before)
+        reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=OUT/'browser-recovery.json';d.value.save_as(path);self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['draft'],'저장 실패 중에도 보존할 새 입력')
         bad=OUT/'invalid-import.json';bad.write_text('{"schemaVersion":"future"}',encoding='utf-8')
@@ -172,6 +184,7 @@ class Browser(unittest.TestCase):
     def test_07_valid_import_roundtrip_and_clipboard_failure(self):
         self.send('문구만 바꿔줘.');self.basis('기존 예약 순서는 유지한다.')
         original=self.state()
+        reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=OUT/'valid-recovery.json';d.value.save_as(path)
         self.import_file(path);expect(self.page.locator('#basis-count')).to_have_text('2')
@@ -223,6 +236,7 @@ class Browser(unittest.TestCase):
         finally:
             self.page.remove_listener('dialog',accept)
     def backup(self,name):
+        reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         path=OUT/name;d.value.save_as(path);return path
     @unittest.skipIf(DOM,'needs native routing/localStorage')

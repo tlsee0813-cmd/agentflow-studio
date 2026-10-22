@@ -63,6 +63,7 @@ class IntentFlow(unittest.TestCase):
         self.page.locator('#retry-work').click();expect(self.page.locator('#working')).to_have_text('')
         self.assertEqual(calls[-1]['previousIntent']['manualGoal'],'문자 링크로 취소, 12시간 만료')
         expect(self.page.locator('#intent-goal')).to_have_text('문자 링크로 취소, 12시간 만료')
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as event:self.page.locator('#backup').click()
         event.value.save_as(base.OUT/'ai055-backup.json')
         self.page.locator('#intent-details').evaluate('(e)=>e.open=true')

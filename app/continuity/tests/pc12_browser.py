@@ -396,6 +396,7 @@ class Pc12Boundaries(unittest.TestCase):
     def test_05_no_plan_copy_no_text_and_changed_plan(self):
         """Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy."""
         booking,notify=self.start([('예약','첫 구상'),('알림','')]);A=self.request_in(booking,'A: 예약 화면');B=self.request_in(notify,'B: 알림 문자')
+        base.reveal_management(self.page,'#backup')
         with self.page.expect_download() as d:self.page.locator('#backup').click()
         raw=json.loads(Path(d.value.path()).read_text(encoding='utf-8'))
         for t in raw['tasks']:
@@ -425,6 +426,7 @@ class Pc12Boundaries(unittest.TestCase):
         # Another project: nothing of this starting point comes along.
         self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{booking}').click();self.page.locator(f'#panel-task-{A}').click()
         self.page.locator('#task-view-continue').click();expect(self.page.locator('#work-return-origin')).to_be_visible()
+        base.reveal_management(self.page,'#new-project-top')
         self.page.locator('#new-project-top').click();expect(self.page.locator('#work-return-origin')).to_have_count(0)
         self.page.locator('#nav-projects').click();self.page.locator('.project-card').filter(has_text='공방').locator('.project-open').click()
         expect(self.page.locator('#task-return-origin, #work-return-origin')).to_have_count(0)
