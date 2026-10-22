@@ -1,0 +1,572 @@
+{
+  "source": "ba9bf6e477f6cf36d1a056b3db218c98bf8bf26e",
+  "scope": "normal request task has a pre-existing recorded mock question, no test_answer source at creation; only the answer source kind differs. Synthetic fixture/recorded question contents, not real user data. Not a task initially created as synthetic test_answer.",
+  "ids": {
+    "parent": "A_170c9504-c6d4-49f3-ace4-705be427cb01",
+    "owner": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+    "tid": "T_0d42a123-3265-4eb6-95bc-b176385a2a55"
+  },
+  "beforeProject": {
+    "schemaVersion": "idea015.project.7",
+    "id": "P_1fe968f7-76bf-4290-9b81-d9f5199c5b4a",
+    "revision": 8,
+    "name": "나의 프로젝트",
+    "sources": [
+      {
+        "id": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+        "kind": "request",
+        "text": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+        "at": "2026-10-22T11:26:58.710Z",
+        "taskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+        "replyTo": null,
+        "disposition": "provided"
+      }
+    ],
+    "bases": [
+      {
+        "id": "D1",
+        "text": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+        "status": "requested",
+        "sourceId": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+        "revision": 7,
+        "history": []
+      }
+    ],
+    "tasks": [
+      {
+        "id": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+        "sourceIds": [
+          "S_e03f96ea-a67c-495e-97f5-d1e1700e763e"
+        ],
+        "parentTaskId": null,
+        "advice": {
+          "intent": {
+            "version": "intent.1",
+            "relation": "start",
+            "goal": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+            "conditions": [],
+            "retired": [],
+            "basisRefs": [
+              {
+                "basisId": "D1",
+                "sourceId": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+                "revision": 7
+              }
+            ]
+          },
+          "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+          "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+          "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+          "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+          "question": {
+            "kind": "fact",
+            "text": "[고정 합성 원질문] 보존할 입력 조건은 무엇인가요?",
+            "why": "독립 최소 재현용이며 실제 사용자 질문을 사칭하지 않음",
+            "options": []
+          },
+          "relatedBasisIds": [
+            "D1"
+          ],
+          "reviewBasisIds": [],
+          "suggestions": []
+        },
+        "adviceRevision": 7,
+        "mode": "mock",
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": null,
+        "background": {
+          "version": "background.1",
+          "revision": 6,
+          "brief": "[독립 최소 합성 프로젝트] 답변 종류와 원질문 소유자",
+          "area": {
+            "id": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+            "name": "원질문 소유 자식",
+            "note": "정상 요청에서 나온 질문의 소유자를 유지"
+          }
+        },
+        "areaId": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71"
+      }
+    ],
+    "currentTaskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+    "draft": "",
+    "answerDraft": "",
+    "basisDraft": "",
+    "basisEdits": {},
+    "draftKind": "request",
+    "pending": null,
+    "notice": null,
+    "space": {
+      "brief": {
+        "text": "[독립 최소 합성 프로젝트] 답변 종류와 원질문 소유자",
+        "at": "2026-10-22T11:26:58.708Z",
+        "previous": []
+      },
+      "areas": [
+        {
+          "id": "A_170c9504-c6d4-49f3-ace4-705be427cb01",
+          "name": "부모",
+          "note": "부모 구상",
+          "archived": false,
+          "createdAt": "2026-10-22T11:26:58.710Z"
+        },
+        {
+          "id": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+          "name": "원질문 소유 자식",
+          "note": "정상 요청에서 나온 질문의 소유자를 유지",
+          "archived": false,
+          "createdAt": "2026-10-22T11:26:58.710Z"
+        }
+      ],
+      "relations": [],
+      "draftTarget": null,
+      "layout": {
+        "version": "layout.1",
+        "positions": {
+          "A_170c9504-c6d4-49f3-ace4-705be427cb01": {
+            "x": 40,
+            "y": 40
+          },
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": {
+            "x": 340,
+            "y": 240
+          }
+        }
+      },
+      "understanding": {},
+      "containment": {
+        "version": "containment.1",
+        "parents": {
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": "A_170c9504-c6d4-49f3-ace4-705be427cb01"
+        },
+        "revisions": {
+          "A_170c9504-c6d4-49f3-ace4-705be427cb01": 0,
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": 1
+        }
+      }
+    }
+  },
+  "regularAnswerProject": {
+    "schemaVersion": "idea015.project.7",
+    "id": "P_1fe968f7-76bf-4290-9b81-d9f5199c5b4a",
+    "revision": 9,
+    "name": "나의 프로젝트",
+    "sources": [
+      {
+        "id": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+        "kind": "request",
+        "text": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+        "at": "2026-10-22T11:26:58.710Z",
+        "taskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+        "replyTo": null,
+        "disposition": "provided"
+      },
+      {
+        "id": "S_0c5ddf8b-b36d-4ada-8d24-c20d399d4b20",
+        "kind": "answer",
+        "text": "[정상 답변 fixture] 입력 조건 유지",
+        "at": "2026-10-22T11:26:58.718Z",
+        "taskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+        "replyTo": "[고정 합성 원질문] 보존할 입력 조건은 무엇인가요?",
+        "disposition": "provided"
+      }
+    ],
+    "bases": [
+      {
+        "id": "D1",
+        "text": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+        "status": "requested",
+        "sourceId": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+        "revision": 7,
+        "history": []
+      },
+      {
+        "id": "D2",
+        "text": "사실 확인 질문: [고정 합성 원질문] 보존할 입력 조건은 무엇인가요?\n사용자 답변: [정상 답변 fixture] 입력 조건 유지",
+        "status": "answered",
+        "sourceId": "S_0c5ddf8b-b36d-4ada-8d24-c20d399d4b20",
+        "revision": 9,
+        "history": []
+      }
+    ],
+    "tasks": [
+      {
+        "id": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+        "sourceIds": [
+          "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+          "S_0c5ddf8b-b36d-4ada-8d24-c20d399d4b20"
+        ],
+        "parentTaskId": null,
+        "advice": {
+          "intent": {
+            "version": "intent.1",
+            "relation": "start",
+            "goal": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+            "conditions": [],
+            "retired": [],
+            "basisRefs": [
+              {
+                "basisId": "D1",
+                "sourceId": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+                "revision": 7
+              }
+            ]
+          },
+          "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+          "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+          "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+          "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+          "question": {
+            "kind": "fact",
+            "text": "[고정 합성 원질문] 보존할 입력 조건은 무엇인가요?",
+            "why": "독립 최소 재현용이며 실제 사용자 질문을 사칭하지 않음",
+            "options": []
+          },
+          "relatedBasisIds": [
+            "D1"
+          ],
+          "reviewBasisIds": [],
+          "suggestions": []
+        },
+        "adviceRevision": 7,
+        "mode": "mock",
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": null,
+        "background": {
+          "version": "background.1",
+          "revision": 6,
+          "brief": "[독립 최소 합성 프로젝트] 답변 종류와 원질문 소유자",
+          "area": {
+            "id": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+            "name": "원질문 소유 자식",
+            "note": "정상 요청에서 나온 질문의 소유자를 유지"
+          }
+        },
+        "areaId": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71"
+      }
+    ],
+    "currentTaskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+    "draft": "",
+    "answerDraft": "",
+    "basisDraft": "",
+    "basisEdits": {},
+    "draftKind": "request",
+    "pending": null,
+    "notice": null,
+    "space": {
+      "brief": {
+        "text": "[독립 최소 합성 프로젝트] 답변 종류와 원질문 소유자",
+        "at": "2026-10-22T11:26:58.708Z",
+        "previous": []
+      },
+      "areas": [
+        {
+          "id": "A_170c9504-c6d4-49f3-ace4-705be427cb01",
+          "name": "부모",
+          "note": "부모 구상",
+          "archived": false,
+          "createdAt": "2026-10-22T11:26:58.710Z"
+        },
+        {
+          "id": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+          "name": "원질문 소유 자식",
+          "note": "정상 요청에서 나온 질문의 소유자를 유지",
+          "archived": false,
+          "createdAt": "2026-10-22T11:26:58.710Z"
+        }
+      ],
+      "relations": [],
+      "draftTarget": null,
+      "layout": {
+        "version": "layout.1",
+        "positions": {
+          "A_170c9504-c6d4-49f3-ace4-705be427cb01": {
+            "x": 40,
+            "y": 40
+          },
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": {
+            "x": 340,
+            "y": 240
+          }
+        }
+      },
+      "understanding": {},
+      "containment": {
+        "version": "containment.1",
+        "parents": {
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": "A_170c9504-c6d4-49f3-ace4-705be427cb01"
+        },
+        "revisions": {
+          "A_170c9504-c6d4-49f3-ace4-705be427cb01": 0,
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": 1
+        }
+      }
+    }
+  },
+  "testAnswerProject": {
+    "schemaVersion": "idea015.project.7",
+    "id": "P_1fe968f7-76bf-4290-9b81-d9f5199c5b4a",
+    "revision": 9,
+    "name": "나의 프로젝트",
+    "sources": [
+      {
+        "id": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+        "kind": "request",
+        "text": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+        "at": "2026-10-22T11:26:58.710Z",
+        "taskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+        "replyTo": null,
+        "disposition": "provided"
+      },
+      {
+        "id": "S_b557f761-b7bc-4ab1-ae59-aa9dc3a4831f",
+        "kind": "test_answer",
+        "text": "[시험 답변 fixture] 원질문에 답한 시험자료",
+        "at": "2026-10-22T11:26:58.718Z",
+        "taskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+        "replyTo": "[고정 합성 원질문] 보존할 입력 조건은 무엇인가요?",
+        "disposition": "provided"
+      }
+    ],
+    "bases": [
+      {
+        "id": "D1",
+        "text": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+        "status": "requested",
+        "sourceId": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+        "revision": 7,
+        "history": []
+      }
+    ],
+    "tasks": [
+      {
+        "id": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+        "sourceIds": [
+          "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+          "S_b557f761-b7bc-4ab1-ae59-aa9dc3a4831f"
+        ],
+        "parentTaskId": null,
+        "advice": {
+          "intent": {
+            "version": "intent.1",
+            "relation": "start",
+            "goal": "[격리 합성 정상 요청] 이 자식의 입력 처리만 정리한다.",
+            "conditions": [],
+            "retired": [],
+            "basisRefs": [
+              {
+                "basisId": "D1",
+                "sourceId": "S_e03f96ea-a67c-495e-97f5-d1e1700e763e",
+                "revision": 7
+              }
+            ]
+          },
+          "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+          "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+          "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+          "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+          "question": {
+            "kind": "fact",
+            "text": "[고정 합성 원질문] 보존할 입력 조건은 무엇인가요?",
+            "why": "독립 최소 재현용이며 실제 사용자 질문을 사칭하지 않음",
+            "options": []
+          },
+          "relatedBasisIds": [
+            "D1"
+          ],
+          "reviewBasisIds": [],
+          "suggestions": []
+        },
+        "adviceRevision": 7,
+        "mode": "mock",
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": null,
+        "background": {
+          "version": "background.1",
+          "revision": 6,
+          "brief": "[독립 최소 합성 프로젝트] 답변 종류와 원질문 소유자",
+          "area": {
+            "id": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+            "name": "원질문 소유 자식",
+            "note": "정상 요청에서 나온 질문의 소유자를 유지"
+          }
+        },
+        "areaId": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71"
+      }
+    ],
+    "currentTaskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+    "draft": "",
+    "answerDraft": "",
+    "basisDraft": "",
+    "basisEdits": {},
+    "draftKind": "request",
+    "pending": null,
+    "notice": null,
+    "space": {
+      "brief": {
+        "text": "[독립 최소 합성 프로젝트] 답변 종류와 원질문 소유자",
+        "at": "2026-10-22T11:26:58.708Z",
+        "previous": []
+      },
+      "areas": [
+        {
+          "id": "A_170c9504-c6d4-49f3-ace4-705be427cb01",
+          "name": "부모",
+          "note": "부모 구상",
+          "archived": false,
+          "createdAt": "2026-10-22T11:26:58.710Z"
+        },
+        {
+          "id": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+          "name": "원질문 소유 자식",
+          "note": "정상 요청에서 나온 질문의 소유자를 유지",
+          "archived": false,
+          "createdAt": "2026-10-22T11:26:58.710Z"
+        }
+      ],
+      "relations": [],
+      "draftTarget": null,
+      "layout": {
+        "version": "layout.1",
+        "positions": {
+          "A_170c9504-c6d4-49f3-ace4-705be427cb01": {
+            "x": 40,
+            "y": 40
+          },
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": {
+            "x": 340,
+            "y": 240
+          }
+        }
+      },
+      "understanding": {},
+      "containment": {
+        "version": "containment.1",
+        "parents": {
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": "A_170c9504-c6d4-49f3-ace4-705be427cb01"
+        },
+        "revisions": {
+          "A_170c9504-c6d4-49f3-ace4-705be427cb01": 0,
+          "A_58bb0698-e62e-4157-a285-4a39ed1e2d71": 1
+        }
+      }
+    }
+  },
+  "before": {
+    "taskStatus": "사실 확인 항목 있음",
+    "questionAnswered": false,
+    "ownerSignals": [
+      {
+        "areaId": "A_170c9504-c6d4-49f3-ace4-705be427cb01",
+        "questions": [],
+        "reports": [],
+        "description": {
+          "current": null,
+          "held": []
+        }
+      },
+      {
+        "areaId": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+        "questions": [
+          {
+            "kind": "decision",
+            "taskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+            "returnId": null,
+            "areaId": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+            "status": "사실 확인 항목 있음",
+            "answered": false,
+            "applicability": "active"
+          }
+        ],
+        "reports": [],
+        "description": {
+          "current": null,
+          "held": []
+        }
+      }
+    ],
+    "count": 1
+  },
+  "regularAnswer": {
+    "taskStatus": "작업문 준비됨 · 미실행",
+    "questionAnswered": true,
+    "ownerSignals": [
+      {
+        "areaId": "A_170c9504-c6d4-49f3-ace4-705be427cb01",
+        "questions": [],
+        "reports": [],
+        "description": {
+          "current": null,
+          "held": []
+        }
+      },
+      {
+        "areaId": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+        "questions": [
+          {
+            "kind": "decision",
+            "taskId": "T_0d42a123-3265-4eb6-95bc-b176385a2a55",
+            "returnId": null,
+            "areaId": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+            "status": "답변 기록 있음",
+            "answered": true,
+            "applicability": "answered"
+          }
+        ],
+        "reports": [],
+        "description": {
+          "current": null,
+          "held": []
+        }
+      }
+    ],
+    "count": 1
+  },
+  "testAnswer": {
+    "taskStatus": "시험 문맥 · 실제 요구 아님",
+    "questionAnswered": true,
+    "ownerSignals": [
+      {
+        "areaId": "A_170c9504-c6d4-49f3-ace4-705be427cb01",
+        "questions": [],
+        "reports": [],
+        "description": {
+          "current": null,
+          "held": []
+        }
+      },
+      {
+        "areaId": "A_58bb0698-e62e-4157-a285-4a39ed1e2d71",
+        "questions": [],
+        "reports": [],
+        "description": {
+          "current": null,
+          "held": []
+        }
+      }
+    ],
+    "count": 0
+  },
+  "productCounterexampleCandidate": true,
+  "exit": 1
+}

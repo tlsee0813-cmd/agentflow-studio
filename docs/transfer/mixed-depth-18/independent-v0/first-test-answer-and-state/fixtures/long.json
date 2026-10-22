@@ -1,0 +1,767 @@
+{
+  "schemaVersion": "idea015.project.7",
+  "id": "P_96ca5d05-f0bc-4cf7-bd66-ce3f4e57c187",
+  "revision": 38,
+  "name": "나의 프로젝트",
+  "sources": [
+    {
+      "id": "S_47a121f4-d4a1-4607-a8ab-cd493e560ceb",
+      "kind": "request",
+      "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+      "at": "2026-10-22T11:17:25.683Z",
+      "taskId": "T_c1d8d139-e863-4507-9dbb-c3229bcf8006",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_c58d3ff0-69ea-4283-b7b7-b77400151b76",
+      "kind": "test_answer",
+      "text": "[독립 합성 답변 기록] 자동 해결 판정은 아니다.",
+      "at": "2026-10-22T11:17:25.688Z",
+      "taskId": "T_c1d8d139-e863-4507-9dbb-c3229bcf8006",
+      "replyTo": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+      "disposition": "provided"
+    },
+    {
+      "id": "S_ac7d5f02-ac77-4598-bf44-65ced88e08fd",
+      "kind": "report",
+      "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c1d8d139-e863-4507-9dbb-c3229bcf8006의 인계 H_independent18_powertoys / r16에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.",
+      "at": "2026-10-22T11:17:25.689Z",
+      "taskId": "T_c5199bdc-84ed-4042-b7f9-050f63c03b0a",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_798c2e8a-2585-4437-be5b-8b85b41be3e4",
+      "kind": "report",
+      "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c1d8d139-e863-4507-9dbb-c3229bcf8006의 인계 H_hierarchy_powertoys / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다. [합성 늦은 반환]",
+      "at": "2026-10-22T11:17:25.691Z",
+      "taskId": "T_fcc869b8-af6b-4fae-89c7-77f4dd25793f",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_56335cda-cad7-4644-bac8-0764ccdd928f",
+      "kind": "request",
+      "text": "[독립 합성 긴 요청 0] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "at": "2026-10-22T11:17:25.696Z",
+      "taskId": "T_19c57dad-f106-4f78-ab81-63bff0110211",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_151ad5ac-14fc-4597-9e20-f3836b315c30",
+      "kind": "request",
+      "text": "[독립 합성 긴 요청 1] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "at": "2026-10-22T11:17:25.696Z",
+      "taskId": "T_dc03a878-652e-4176-ab5d-98cff4c05c0f",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_511c32ca-4915-4a7a-8dbb-ed98ca55c4d0",
+      "kind": "request",
+      "text": "[독립 합성 긴 요청 2] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "at": "2026-10-22T11:17:25.696Z",
+      "taskId": "T_464ecb65-5032-408c-94eb-e6f173d0b477",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_862c6029-fac0-4770-ad05-b2e1fc0ae500",
+      "kind": "request",
+      "text": "[독립 합성 긴 요청 3] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "at": "2026-10-22T11:17:25.697Z",
+      "taskId": "T_5257dc3b-fa79-419a-96db-851d74e95d08",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_444c16b9-955c-4446-833c-9cd07fc657a7",
+      "kind": "request",
+      "text": "[독립 합성 긴 요청 4] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "at": "2026-10-22T11:17:25.697Z",
+      "taskId": "T_567226c0-7fa3-480e-94b3-914b7f91a1e1",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_f300f0ce-91b0-48ea-9dbc-f46d2e12319e",
+      "kind": "request",
+      "text": "[독립 합성 긴 요청 5] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "at": "2026-10-22T11:17:25.697Z",
+      "taskId": "T_a52eca7e-9b3b-4e35-8b3d-ddb8f9f4985b",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+      "status": "requested",
+      "sourceId": "S_47a121f4-d4a1-4607-a8ab-cd493e560ceb",
+      "revision": 13,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "[독립 합성 긴 요청 0] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "status": "requested",
+      "sourceId": "S_56335cda-cad7-4644-bac8-0764ccdd928f",
+      "revision": 28,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "[독립 합성 긴 요청 1] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "status": "requested",
+      "sourceId": "S_151ad5ac-14fc-4597-9e20-f3836b315c30",
+      "revision": 30,
+      "history": []
+    },
+    {
+      "id": "D4",
+      "text": "[독립 합성 긴 요청 2] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "status": "requested",
+      "sourceId": "S_511c32ca-4915-4a7a-8dbb-ed98ca55c4d0",
+      "revision": 32,
+      "history": []
+    },
+    {
+      "id": "D5",
+      "text": "[독립 합성 긴 요청 3] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "status": "requested",
+      "sourceId": "S_862c6029-fac0-4770-ad05-b2e1fc0ae500",
+      "revision": 34,
+      "history": []
+    },
+    {
+      "id": "D6",
+      "text": "[독립 합성 긴 요청 4] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "status": "requested",
+      "sourceId": "S_444c16b9-955c-4446-833c-9cd07fc657a7",
+      "revision": 36,
+      "history": []
+    },
+    {
+      "id": "D7",
+      "text": "[독립 합성 긴 요청 5] 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. 원문 근거를 확인한다. ",
+      "status": "requested",
+      "sourceId": "S_f300f0ce-91b0-48ea-9dbc-f46d2e12319e",
+      "revision": 38,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_c1d8d139-e863-4507-9dbb-c3229bcf8006",
+      "sourceIds": [
+        "S_47a121f4-d4a1-4607-a8ab-cd493e560ceb",
+        "S_c58d3ff0-69ea-4283-b7b7-b77400151b76"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_47a121f4-d4a1-4607-a8ab-cd493e560ceb",
+              "revision": 13
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+          "why": "실제 미결이 아님",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 14,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-22T11:17:25.685Z",
+          "method": "clipboard",
+          "revision": 13,
+          "chars": 4619,
+          "digest": "403f7aa3",
+          "work": {
+            "understanding": "",
+            "scope": "",
+            "next": "",
+            "checks": ""
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_hierarchy_powertoys",
+          "background": {
+            "version": "background.1",
+            "revision": 12,
+            "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+            "area": {
+              "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+            "understanding": 0,
+            "stamp": {
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_601aad30-695e-4570-b70c-9cdb19139708",
+                  "name": "키 매핑 편집기",
+                  "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                  "revision": 0
+                },
+                {
+                  "id": "A_16d57f68-8555-433a-9ffb-2493248797ec",
+                  "name": "키 검색·선택",
+                  "note": "제출한 검색어로 필터링한 키를 고른다.",
+                  "revision": 1
+                }
+              ]
+            }
+          }
+        },
+        {
+          "at": "2026-10-22T11:17:25.689Z",
+          "method": "download",
+          "revision": 16,
+          "chars": 5309,
+          "digest": "5b56e380",
+          "work": {
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_independent18_powertoys",
+          "background": {
+            "version": "background.1",
+            "revision": 12,
+            "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+            "area": {
+              "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+            "understanding": 0,
+            "stamp": {
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_601aad30-695e-4570-b70c-9cdb19139708",
+                  "name": "키 매핑 편집기",
+                  "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                  "revision": 0
+                },
+                {
+                  "id": "A_16d57f68-8555-433a-9ffb-2493248797ec",
+                  "name": "키 검색·선택",
+                  "note": "제출한 검색어로 필터링한 키를 고른다.",
+                  "revision": 1
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 12,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "검색 입력과 결과",
+          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+        }
+      },
+      "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c"
+    },
+    {
+      "id": "T_c5199bdc-84ed-4042-b7f9-050f63c03b0a",
+      "sourceIds": [
+        "S_ac7d5f02-ac77-4598-bf44-65ced88e08fd"
+      ],
+      "parentTaskId": "T_c1d8d139-e863-4507-9dbb-c3229bcf8006",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": {
+        "returnId": "H_independent18_powertoys",
+        "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_96ca5d05-f0bc-4cf7-bd66-ce3f4e57c187\",\"taskId\":\"T_c1d8d139-e863-4507-9dbb-c3229bcf8006\",\"returnId\":\"H_independent18_powertoys\",\"report\":\"[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_492d54b6-9a50-4d67-9847-d893b2081e8c\",\"basedOn\":0,\"summary\":\"제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"changes\":[\"제출된 검색어를 기존 결과 목록 대신 선택 기준으로 쓴다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"PowerToys 공개 고정 소스 일부의 한국어 재서술 · 분석자 구성\"}}"
+      },
+      "background": {
+        "version": "background.1",
+        "revision": 12,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "검색 입력과 결과",
+          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+        }
+      }
+    },
+    {
+      "id": "T_fcc869b8-af6b-4fae-89c7-77f4dd25793f",
+      "sourceIds": [
+        "S_798c2e8a-2585-4437-be5b-8b85b41be3e4"
+      ],
+      "parentTaskId": "T_c1d8d139-e863-4507-9dbb-c3229bcf8006",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": {
+        "returnId": "H_hierarchy_powertoys",
+        "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_96ca5d05-f0bc-4cf7-bd66-ce3f4e57c187\",\"taskId\":\"T_c1d8d139-e863-4507-9dbb-c3229bcf8006\",\"returnId\":\"H_hierarchy_powertoys\",\"report\":\"[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다. [합성 늦은 반환]\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_492d54b6-9a50-4d67-9847-d893b2081e8c\",\"basedOn\":999,\"summary\":\"제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"changes\":[\"제출된 검색어를 기존 결과 목록 대신 선택 기준으로 쓴다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"PowerToys 공개 고정 소스 일부의 한국어 재서술 · 분석자 구성\"}}"
+      },
+      "background": {
+        "version": "background.1",
+        "revision": 12,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "검색 입력과 결과",
+          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+        }
+      }
+    },
+    {
+      "id": "T_19c57dad-f106-4f78-ab81-63bff0110211",
+      "sourceIds": [
+        "S_56335cda-cad7-4644-bac8-0764ccdd928f"
+      ],
+      "parentTaskId": "T_fcc869b8-af6b-4fae-89c7-77f4dd25793f",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 27,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름",
+          "note": "https://example.invalid/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c"
+    },
+    {
+      "id": "T_dc03a878-652e-4176-ab5d-98cff4c05c0f",
+      "sourceIds": [
+        "S_151ad5ac-14fc-4597-9e20-f3836b315c30"
+      ],
+      "parentTaskId": "T_19c57dad-f106-4f78-ab81-63bff0110211",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 29,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름",
+          "note": "https://example.invalid/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c"
+    },
+    {
+      "id": "T_464ecb65-5032-408c-94eb-e6f173d0b477",
+      "sourceIds": [
+        "S_511c32ca-4915-4a7a-8dbb-ed98ca55c4d0"
+      ],
+      "parentTaskId": "T_dc03a878-652e-4176-ab5d-98cff4c05c0f",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 31,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름",
+          "note": "https://example.invalid/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c"
+    },
+    {
+      "id": "T_5257dc3b-fa79-419a-96db-851d74e95d08",
+      "sourceIds": [
+        "S_862c6029-fac0-4770-ad05-b2e1fc0ae500"
+      ],
+      "parentTaskId": "T_464ecb65-5032-408c-94eb-e6f173d0b477",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 33,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름",
+          "note": "https://example.invalid/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c"
+    },
+    {
+      "id": "T_567226c0-7fa3-480e-94b3-914b7f91a1e1",
+      "sourceIds": [
+        "S_444c16b9-955c-4446-833c-9cd07fc657a7"
+      ],
+      "parentTaskId": "T_5257dc3b-fa79-419a-96db-851d74e95d08",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 35,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름",
+          "note": "https://example.invalid/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c"
+    },
+    {
+      "id": "T_a52eca7e-9b3b-4e35-8b3d-ddb8f9f4985b",
+      "sourceIds": [
+        "S_f300f0ce-91b0-48ea-9dbc-f46d2e12319e"
+      ],
+      "parentTaskId": "T_567226c0-7fa3-480e-94b3-914b7f91a1e1",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 37,
+        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+        "area": {
+          "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+          "name": "긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름",
+          "note": "https://example.invalid/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      "areaId": "A_492d54b6-9a50-4d67-9847-d893b2081e8c"
+    }
+  ],
+  "currentTaskId": "T_a52eca7e-9b3b-4e35-8b3d-ddb8f9f4985b",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+      "at": "2026-10-22T11:17:25.681Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_601aad30-695e-4570-b70c-9cdb19139708",
+        "name": "키 매핑 편집기",
+        "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.682Z"
+      },
+      {
+        "id": "A_16d57f68-8555-433a-9ffb-2493248797ec",
+        "name": "키 검색·선택",
+        "note": "제출한 검색어로 필터링한 키를 고른다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.682Z"
+      },
+      {
+        "id": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+        "name": "긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름긴이름",
+        "note": "https://example.invalid/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.682Z"
+      },
+      {
+        "id": "A_456988b5-0903-4d87-a53d-a7e965c7c9fc",
+        "name": "녹화 종료 판단",
+        "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.682Z"
+      },
+      {
+        "id": "A_9e559b05-0064-447a-b8f0-258034d9b35d",
+        "name": "공통 입력 훅",
+        "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+        "archived": false,
+        "createdAt": "2026-10-22T11:17:25.682Z"
+      }
+    ],
+    "relations": [
+      {
+        "id": "L_6fa614e1-a79c-4a64-88a2-0805bb7b8ef3",
+        "from": "A_9e559b05-0064-447a-b8f0-258034d9b35d",
+        "to": "A_456988b5-0903-4d87-a53d-a7e965c7c9fc",
+        "kind": "flow",
+        "note": "고정 코드의 이벤트 종류 전달"
+      },
+      {
+        "id": "L_471dfcd1-48f1-44e6-a53a-6a0fe7b0f423",
+        "from": "A_601aad30-695e-4570-b70c-9cdb19139708",
+        "to": "A_9e559b05-0064-447a-b8f0-258034d9b35d",
+        "kind": "flow",
+        "note": "[독립 합성 직접]"
+      },
+      {
+        "id": "L_93d450ef-5782-4c15-a884-0f8047735db0",
+        "from": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+        "to": "A_9e559b05-0064-447a-b8f0-258034d9b35d",
+        "kind": "flow",
+        "note": "[독립 합성 숨은1]"
+      },
+      {
+        "id": "L_019576ec-420d-4f95-a3c8-b9bd9d35159b",
+        "from": "A_16d57f68-8555-433a-9ffb-2493248797ec",
+        "to": "A_9e559b05-0064-447a-b8f0-258034d9b35d",
+        "kind": "flow",
+        "note": "[독립 합성 숨은2]"
+      },
+      {
+        "id": "L_2e18adcc-a234-4368-8d71-5491c1ebdf1a",
+        "from": "A_9e559b05-0064-447a-b8f0-258034d9b35d",
+        "to": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+        "kind": "flow",
+        "note": "[독립 합성 반대]"
+      },
+      {
+        "id": "L_b1030e1d-b5f5-49f9-a107-e563258a4fa5",
+        "from": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+        "to": "A_9e559b05-0064-447a-b8f0-258034d9b35d",
+        "kind": "needs",
+        "note": "[독립 합성 다른종류]"
+      },
+      {
+        "id": "L_41017c22-58f9-47e6-b135-cac350fd4759",
+        "from": "A_16d57f68-8555-433a-9ffb-2493248797ec",
+        "to": "A_492d54b6-9a50-4d67-9847-d893b2081e8c",
+        "kind": "related",
+        "note": "[독립 합성 내부]"
+      }
+    ],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_601aad30-695e-4570-b70c-9cdb19139708": {
+          "x": 40,
+          "y": 40
+        },
+        "A_16d57f68-8555-433a-9ffb-2493248797ec": {
+          "x": 340,
+          "y": 40
+        },
+        "A_492d54b6-9a50-4d67-9847-d893b2081e8c": {
+          "x": -260,
+          "y": 40
+        },
+        "A_456988b5-0903-4d87-a53d-a7e965c7c9fc": {
+          "x": 40,
+          "y": 240
+        },
+        "A_9e559b05-0064-447a-b8f0-258034d9b35d": {
+          "x": 340,
+          "y": 240
+        }
+      }
+    },
+    "understanding": {
+      "A_492d54b6-9a50-4d67-9847-d893b2081e8c": {
+        "revision": 1,
+        "entries": [
+          {
+            "by": "external",
+            "at": "2026-10-22T11:17:25.690Z",
+            "revision": 1,
+            "taskId": "T_c5199bdc-84ed-4042-b7f9-050f63c03b0a",
+            "returnId": "H_independent18_powertoys",
+            "text": null,
+            "corrects": null,
+            "stamp": {
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_601aad30-695e-4570-b70c-9cdb19139708",
+                  "name": "키 매핑 편집기",
+                  "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                  "revision": 0
+                },
+                {
+                  "id": "A_16d57f68-8555-433a-9ffb-2493248797ec",
+                  "name": "키 검색·선택",
+                  "note": "제출한 검색어로 필터링한 키를 고른다.",
+                  "revision": 1
+                }
+              ]
+            },
+            "held": null
+          },
+          {
+            "by": "external",
+            "at": "2026-10-22T11:17:25.692Z",
+            "revision": null,
+            "taskId": "T_fcc869b8-af6b-4fae-89c7-77f4dd25793f",
+            "returnId": "H_hierarchy_powertoys",
+            "text": null,
+            "corrects": null,
+            "stamp": null,
+            "held": "file-basis"
+          }
+        ]
+      }
+    },
+    "containment": {
+      "version": "containment.1",
+      "parents": {
+        "A_16d57f68-8555-433a-9ffb-2493248797ec": "A_601aad30-695e-4570-b70c-9cdb19139708",
+        "A_492d54b6-9a50-4d67-9847-d893b2081e8c": "A_16d57f68-8555-433a-9ffb-2493248797ec",
+        "A_456988b5-0903-4d87-a53d-a7e965c7c9fc": "A_601aad30-695e-4570-b70c-9cdb19139708"
+      },
+      "revisions": {
+        "A_601aad30-695e-4570-b70c-9cdb19139708": 0,
+        "A_16d57f68-8555-433a-9ffb-2493248797ec": 1,
+        "A_492d54b6-9a50-4d67-9847-d893b2081e8c": 2,
+        "A_456988b5-0903-4d87-a53d-a7e965c7c9fc": 1,
+        "A_9e559b05-0064-447a-b8f0-258034d9b35d": 0
+      }
+    }
+  }
+}

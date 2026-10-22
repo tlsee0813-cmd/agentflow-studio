@@ -1,0 +1,1916 @@
+{
+  "source": "ba9bf6e477f6cf36d1a056b3db218c98bf8bf26e",
+  "runs": [
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1280,
+        720
+      ],
+      "checks": [
+        {
+          "id": "mixed-depth-collapse-is-view-only",
+          "pass": true,
+          "raw": {
+            "before": {
+              "schemaVersion": "idea015.project.7",
+              "id": "P_28c71320-dc5e-439f-8a0e-25cbdfbb1b5e",
+              "revision": 25,
+              "name": "나의 프로젝트",
+              "sources": [
+                {
+                  "id": "S_e7fbf105-7828-400b-a98f-36a038a00cf8",
+                  "kind": "request",
+                  "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                  "at": "2026-10-22T11:19:50.006Z",
+                  "taskId": "T_805aadcc-57ba-4621-b712-9c055b1fa883",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_384cc7b0-e8a8-4a12-aeaa-02a7e2fce713",
+                  "kind": "answer",
+                  "text": "[독립 합성 답변 기록] 자동 해결 판정은 아니다.",
+                  "at": "2026-10-22T11:19:50.011Z",
+                  "taskId": "T_805aadcc-57ba-4621-b712-9c055b1fa883",
+                  "replyTo": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_18676f02-8fa3-49c6-91c1-937a2b685b37",
+                  "kind": "report",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_805aadcc-57ba-4621-b712-9c055b1fa883의 인계 H_independent18_powertoys / r16에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.",
+                  "at": "2026-10-22T11:19:50.012Z",
+                  "taskId": "T_04f61696-5034-4bc2-bd57-596f55f77482",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_bc67c20b-5742-4402-9ecd-d42436c7a0f8",
+                  "kind": "report",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_805aadcc-57ba-4621-b712-9c055b1fa883의 인계 H_hierarchy_powertoys / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다. [합성 늦은 반환]",
+                  "at": "2026-10-22T11:19:50.014Z",
+                  "taskId": "T_3de9cb56-4cf5-4093-b5cb-85bd13234e1e",
+                  "replyTo": null,
+                  "disposition": "provided"
+                }
+              ],
+              "bases": [
+                {
+                  "id": "D1",
+                  "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                  "status": "requested",
+                  "sourceId": "S_e7fbf105-7828-400b-a98f-36a038a00cf8",
+                  "revision": 13,
+                  "history": []
+                },
+                {
+                  "id": "D2",
+                  "text": "사실 확인 질문: [독립 합성 질문] 자료에 없는 소유자 배선 질문\n사용자 답변: [독립 합성 답변 기록] 자동 해결 판정은 아니다.",
+                  "status": "answered",
+                  "sourceId": "S_384cc7b0-e8a8-4a12-aeaa-02a7e2fce713",
+                  "revision": 16,
+                  "history": []
+                }
+              ],
+              "tasks": [
+                {
+                  "id": "T_805aadcc-57ba-4621-b712-9c055b1fa883",
+                  "sourceIds": [
+                    "S_e7fbf105-7828-400b-a98f-36a038a00cf8",
+                    "S_384cc7b0-e8a8-4a12-aeaa-02a7e2fce713"
+                  ],
+                  "parentTaskId": null,
+                  "advice": {
+                    "intent": {
+                      "version": "intent.1",
+                      "relation": "start",
+                      "goal": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                      "conditions": [],
+                      "retired": [],
+                      "basisRefs": [
+                        {
+                          "basisId": "D1",
+                          "sourceId": "S_e7fbf105-7828-400b-a98f-36a038a00cf8",
+                          "revision": 13
+                        }
+                      ]
+                    },
+                    "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                    "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                    "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                    "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+                    "question": {
+                      "kind": "fact",
+                      "text": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+                      "why": "실제 미결이 아님",
+                      "options": []
+                    },
+                    "relatedBasisIds": [
+                      "D1"
+                    ],
+                    "reviewBasisIds": [],
+                    "suggestions": []
+                  },
+                  "adviceRevision": 14,
+                  "mode": "mock",
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [
+                    {
+                      "at": "2026-10-22T11:19:50.008Z",
+                      "method": "clipboard",
+                      "revision": 13,
+                      "chars": 4619,
+                      "digest": "1470c2c7",
+                      "work": {
+                        "understanding": "",
+                        "scope": "",
+                        "next": "",
+                        "checks": ""
+                      },
+                      "aiExcluded": false,
+                      "legacyText": null,
+                      "returnId": "H_hierarchy_powertoys",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 12,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                        "understanding": 0,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "at": "2026-10-22T11:19:50.012Z",
+                      "method": "download",
+                      "revision": 16,
+                      "chars": 5141,
+                      "digest": "1900d609",
+                      "work": {
+                        "understanding": "",
+                        "scope": "",
+                        "next": "",
+                        "checks": ""
+                      },
+                      "aiExcluded": true,
+                      "legacyText": null,
+                      "returnId": "H_independent18_powertoys",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 12,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                        "understanding": 0,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "resultFile": null,
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  },
+                  "areaId": "A_16be9de5-0f61-4143-8c25-84e7f1406c34"
+                },
+                {
+                  "id": "T_04f61696-5034-4bc2-bd57-596f55f77482",
+                  "sourceIds": [
+                    "S_18676f02-8fa3-49c6-91c1-937a2b685b37"
+                  ],
+                  "parentTaskId": "T_805aadcc-57ba-4621-b712-9c055b1fa883",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": {
+                    "returnId": "H_independent18_powertoys",
+                    "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_28c71320-dc5e-439f-8a0e-25cbdfbb1b5e\",\"taskId\":\"T_805aadcc-57ba-4621-b712-9c055b1fa883\",\"returnId\":\"H_independent18_powertoys\",\"report\":\"[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_16be9de5-0f61-4143-8c25-84e7f1406c34\",\"basedOn\":0,\"summary\":\"제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"changes\":[\"제출된 검색어를 기존 결과 목록 대신 선택 기준으로 쓴다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"PowerToys 공개 고정 소스 일부의 한국어 재서술 · 분석자 구성\"}}"
+                  },
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  }
+                },
+                {
+                  "id": "T_3de9cb56-4cf5-4093-b5cb-85bd13234e1e",
+                  "sourceIds": [
+                    "S_bc67c20b-5742-4402-9ecd-d42436c7a0f8"
+                  ],
+                  "parentTaskId": "T_805aadcc-57ba-4621-b712-9c055b1fa883",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": {
+                    "returnId": "H_hierarchy_powertoys",
+                    "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_28c71320-dc5e-439f-8a0e-25cbdfbb1b5e\",\"taskId\":\"T_805aadcc-57ba-4621-b712-9c055b1fa883\",\"returnId\":\"H_hierarchy_powertoys\",\"report\":\"[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다. [합성 늦은 반환]\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_16be9de5-0f61-4143-8c25-84e7f1406c34\",\"basedOn\":999,\"summary\":\"제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"changes\":[\"제출된 검색어를 기존 결과 목록 대신 선택 기준으로 쓴다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"PowerToys 공개 고정 소스 일부의 한국어 재서술 · 분석자 구성\"}}"
+                  },
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  }
+                }
+              ],
+              "currentTaskId": "T_3de9cb56-4cf5-4093-b5cb-85bd13234e1e",
+              "draft": "",
+              "answerDraft": "",
+              "basisDraft": "",
+              "basisEdits": {},
+              "draftKind": "request",
+              "pending": null,
+              "notice": null,
+              "space": {
+                "brief": {
+                  "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "at": "2026-10-22T11:19:50.004Z",
+                  "previous": []
+                },
+                "areas": [
+                  {
+                    "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                    "name": "키 매핑 편집기",
+                    "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:19:50.004Z"
+                  },
+                  {
+                    "id": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                    "name": "키 검색·선택",
+                    "note": "제출한 검색어로 필터링한 키를 고른다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:19:50.005Z"
+                  },
+                  {
+                    "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:19:50.005Z"
+                  },
+                  {
+                    "id": "A_3b894836-54d9-4d97-baf8-2161785ee1bf",
+                    "name": "녹화 종료 판단",
+                    "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:19:50.005Z"
+                  },
+                  {
+                    "id": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                    "name": "공통 입력 훅",
+                    "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:19:50.005Z"
+                  }
+                ],
+                "relations": [
+                  {
+                    "id": "L_a415ed48-fcec-42ed-bc9d-ea12815f2f3a",
+                    "from": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                    "to": "A_3b894836-54d9-4d97-baf8-2161785ee1bf",
+                    "kind": "flow",
+                    "note": "고정 코드의 이벤트 종류 전달"
+                  },
+                  {
+                    "id": "L_a7466a7c-3e01-45e5-a562-d38527420f81",
+                    "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                    "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                    "kind": "flow",
+                    "note": "[독립 합성 직접]"
+                  },
+                  {
+                    "id": "L_1435d14d-5357-4251-8924-aa4b3887b486",
+                    "from": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                    "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                    "kind": "flow",
+                    "note": "[독립 합성 숨은1]"
+                  },
+                  {
+                    "id": "L_622a2d64-7d87-471f-8256-bf72822fc8f9",
+                    "from": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                    "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                    "kind": "flow",
+                    "note": "[독립 합성 숨은2]"
+                  },
+                  {
+                    "id": "L_1fc26442-c829-4354-86fd-e9e237e95ea0",
+                    "from": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                    "to": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                    "kind": "flow",
+                    "note": "[독립 합성 반대]"
+                  },
+                  {
+                    "id": "L_6503583b-6b45-4f16-a77f-dd55b69877d9",
+                    "from": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                    "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                    "kind": "needs",
+                    "note": "[독립 합성 다른종류]"
+                  },
+                  {
+                    "id": "L_9765124a-baf4-42da-9b88-16af70c2d7e4",
+                    "from": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                    "to": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                    "kind": "related",
+                    "note": "[독립 합성 내부]"
+                  }
+                ],
+                "draftTarget": null,
+                "layout": {
+                  "version": "layout.1",
+                  "positions": {
+                    "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83": {
+                      "x": 40,
+                      "y": 40
+                    },
+                    "A_086347cf-eeae-484a-97dc-0b3a98a09681": {
+                      "x": 340,
+                      "y": 40
+                    },
+                    "A_16be9de5-0f61-4143-8c25-84e7f1406c34": {
+                      "x": -260,
+                      "y": 40
+                    },
+                    "A_3b894836-54d9-4d97-baf8-2161785ee1bf": {
+                      "x": 40,
+                      "y": 240
+                    },
+                    "A_460ecd25-5fa7-4273-b72d-53ee63cc681d": {
+                      "x": 340,
+                      "y": 240
+                    }
+                  }
+                },
+                "understanding": {
+                  "A_16be9de5-0f61-4143-8c25-84e7f1406c34": {
+                    "revision": 1,
+                    "entries": [
+                      {
+                        "by": "external",
+                        "at": "2026-10-22T11:19:50.013Z",
+                        "revision": 1,
+                        "taskId": "T_04f61696-5034-4bc2-bd57-596f55f77482",
+                        "returnId": "H_independent18_powertoys",
+                        "text": null,
+                        "corrects": null,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        },
+                        "held": null
+                      },
+                      {
+                        "by": "external",
+                        "at": "2026-10-22T11:19:50.015Z",
+                        "revision": null,
+                        "taskId": "T_3de9cb56-4cf5-4093-b5cb-85bd13234e1e",
+                        "returnId": "H_hierarchy_powertoys",
+                        "text": null,
+                        "corrects": null,
+                        "stamp": null,
+                        "held": "file-basis"
+                      }
+                    ]
+                  }
+                },
+                "containment": {
+                  "version": "containment.1",
+                  "parents": {
+                    "A_086347cf-eeae-484a-97dc-0b3a98a09681": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                    "A_16be9de5-0f61-4143-8c25-84e7f1406c34": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                    "A_3b894836-54d9-4d97-baf8-2161785ee1bf": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83"
+                  },
+                  "revisions": {
+                    "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83": 0,
+                    "A_086347cf-eeae-484a-97dc-0b3a98a09681": 1,
+                    "A_16be9de5-0f61-4143-8c25-84e7f1406c34": 1,
+                    "A_3b894836-54d9-4d97-baf8-2161785ee1bf": 1,
+                    "A_460ecd25-5fa7-4273-b72d-53ee63cc681d": 0
+                  }
+                }
+              }
+            },
+            "fold": {
+              "windowY": 0,
+              "docWidth": 1280,
+              "focus": "branch-toggle-A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+              "matrix": "matrix(0.768421, 0, 0, 0.768421, 363.053, -6.73684)",
+              "scale": "77%",
+              "map": {
+                "x": 264,
+                "y": 361.71875,
+                "width": 974,
+                "height": 342.28125,
+                "top": 361.71875,
+                "right": 1238,
+                "bottom": 704,
+                "left": 264
+              },
+              "panel": null,
+              "head": null,
+              "actions": null,
+              "body": null,
+              "bodyId": null,
+              "bodyTop": null,
+              "bodyMax": null,
+              "cards": [
+                {
+                  "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "rect": {
+                    "x": 658.7894897460938,
+                    "y": 386.71875,
+                    "width": 184.42108154296875,
+                    "height": 138.3157958984375,
+                    "top": 386.71875,
+                    "right": 843.2105712890625,
+                    "bottom": 525.0345458984375,
+                    "left": 658.7894897460938
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "rect": {
+                    "x": 889.3157958984375,
+                    "y": 540.4029541015625,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 540.4029541015625,
+                    "right": 1073.73681640625,
+                    "bottom": 678.71875,
+                    "left": 889.3157958984375
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "collapsed": [
+                "branch-toggle-A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83"
+              ],
+              "open": []
+            }
+          }
+        },
+        {
+          "id": "fixed-workspace-controls",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "windowY": 0,
+              "docWidth": 1280,
+              "focus": "node-info-A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+              "matrix": "matrix(0.768421, 0, 0, 0.768421, 363.053, -6.73684)",
+              "scale": "77%",
+              "map": {
+                "x": 264,
+                "y": 361.71875,
+                "width": 660,
+                "height": 342.28125,
+                "top": 361.71875,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "panel": {
+                "x": 938,
+                "y": 361.71875,
+                "width": 300,
+                "height": 342.28125,
+                "top": 361.71875,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "head": {
+                "x": 939,
+                "y": 362.71875,
+                "width": 298,
+                "height": 76.390625,
+                "top": 362.71875,
+                "right": 1237,
+                "bottom": 439.109375,
+                "left": 939
+              },
+              "actions": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 439.109375,
+                "width": 298,
+                "height": 210.890625,
+                "top": 439.109375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyId": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+              "bodyTop": 0,
+              "bodyMax": 135,
+              "cards": [
+                {
+                  "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "rect": {
+                    "x": 658.7894897460938,
+                    "y": 386.71875,
+                    "width": 184.42108154296875,
+                    "height": 138.3157958984375,
+                    "top": 386.71875,
+                    "right": 843.2105712890625,
+                    "bottom": 525.0345458984375,
+                    "left": 658.7894897460938
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "rect": {
+                    "x": 889.3157958984375,
+                    "y": 540.4029541015625,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 540.4029541015625,
+                    "right": 1073.73681640625,
+                    "bottom": 678.71875,
+                    "left": 889.3157958984375
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "collapsed": [
+                "branch-toggle-A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83"
+              ],
+              "open": []
+            },
+            "controls": {
+              "#area-panel-close": {
+                "rect": {
+                  "x": 1178.90625,
+                  "y": 372.71875,
+                  "width": 46.09375,
+                  "height": 36,
+                  "top": 372.71875,
+                  "right": 1225,
+                  "bottom": 408.71875,
+                  "left": 1178.90625
+                },
+                "clip": {
+                  "l": 939,
+                  "t": 362.71957236842104,
+                  "r": 1237,
+                  "b": 702.999177631579
+                },
+                "parents": [
+                  {
+                    "id": "area-panel-close",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "area-panel",
+                    "ox": "hidden",
+                    "oy": "hidden"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              },
+              "#panel-open": {
+                "rect": {
+                  "x": 949,
+                  "y": 659,
+                  "width": 136,
+                  "height": 36,
+                  "top": 659,
+                  "right": 1085,
+                  "bottom": 695,
+                  "left": 949
+                },
+                "clip": {
+                  "l": 939,
+                  "t": 362.71957236842104,
+                  "r": 1237,
+                  "b": 702.999177631579
+                },
+                "parents": [
+                  {
+                    "id": "panel-open",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "panel-actions",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "area-panel",
+                    "ox": "hidden",
+                    "oy": "hidden"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              },
+              "#panel-new-request": {
+                "rect": {
+                  "x": 1091,
+                  "y": 659,
+                  "width": 136,
+                  "height": 36,
+                  "top": 659,
+                  "right": 1227,
+                  "bottom": 695,
+                  "left": 1091
+                },
+                "clip": {
+                  "l": 939,
+                  "t": 362.71957236842104,
+                  "r": 1237,
+                  "b": 702.999177631579
+                },
+                "parents": [
+                  {
+                    "id": "panel-new-request",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "panel-actions",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "area-panel",
+                    "ox": "hidden",
+                    "oy": "hidden"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              }
+            }
+          }
+        },
+        {
+          "id": "answered-question-owner-not-unresolved",
+          "pass": true,
+          "raw": {
+            "text": "이 부분과 하위 기록 · 질문 1 · 설명 1\n\n앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.\n\n검색 입력과 결과 · 기록된 질문\n\n[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.\n\n답변 기록 있음 · 답변 기록 있음\n\n소유 부분 찾기\n\n검색 입력과 결과 · 후속 작업문 없는 보고\n\n[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.소유 부분 찾기\n검색 입력과 결과 · 현재 설명 있음 · 보류 1건설명 읽을 부분 찾기",
+            "owners": [
+              {
+                "owner": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                "text": "검색 입력과 결과 · 기록된 질문[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.답변 기록 있음 · 답변 기록 있음소유 부분 찾기"
+              }
+            ]
+          }
+        },
+        {
+          "id": "collapsed-current-held-owner",
+          "pass": true,
+          "raw": "이 부분과 하위 기록 · 질문 1 · 설명 1\n\n앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.\n\n검색 입력과 결과 · 기록된 질문\n\n[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.\n\n답변 기록 있음 · 답변 기록 있음\n\n소유 부분 찾기\n\n검색 입력과 결과 · 후속 작업문 없는 보고\n\n[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.소유 부분 찾기\n검색 입력과 결과 · 현재 설명 있음 · 보류 1건설명 읽을 부분 찾기"
+        },
+        {
+          "id": "raw-relation-IDs-not-deduplicated-kind-direction",
+          "pass": true,
+          "raw": {
+            "expected": [
+              {
+                "id": "L_a415ed48-fcec-42ed-bc9d-ea12815f2f3a",
+                "from": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "to": "A_3b894836-54d9-4d97-baf8-2161785ee1bf",
+                "kind": "flow",
+                "note": "고정 코드의 이벤트 종류 전달"
+              },
+              {
+                "id": "L_a7466a7c-3e01-45e5-a562-d38527420f81",
+                "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "kind": "flow",
+                "note": "[독립 합성 직접]"
+              },
+              {
+                "id": "L_1435d14d-5357-4251-8924-aa4b3887b486",
+                "from": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "kind": "flow",
+                "note": "[독립 합성 숨은1]"
+              },
+              {
+                "id": "L_622a2d64-7d87-471f-8256-bf72822fc8f9",
+                "from": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "kind": "flow",
+                "note": "[독립 합성 숨은2]"
+              },
+              {
+                "id": "L_1fc26442-c829-4354-86fd-e9e237e95ea0",
+                "from": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "to": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                "kind": "flow",
+                "note": "[독립 합성 반대]"
+              },
+              {
+                "id": "L_6503583b-6b45-4f16-a77f-dd55b69877d9",
+                "from": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "kind": "needs",
+                "note": "[독립 합성 다른종류]"
+              },
+              {
+                "id": "L_9765124a-baf4-42da-9b88-16af70c2d7e4",
+                "from": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                "to": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                "kind": "related",
+                "note": "[독립 합성 내부]"
+              }
+            ],
+            "raw": [
+              {
+                "id": "L_a415ed48-fcec-42ed-bc9d-ea12815f2f3a",
+                "text": "공통 입력 훅→녹화 종료 판단이어서 사용 · 고정 코드의 이벤트 종류 전달출발 기록도착 기록",
+                "from": "공통 입력 훅",
+                "to": "녹화 종료 판단",
+                "group": {
+                  "from": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "to": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "kind": "flow"
+                }
+              },
+              {
+                "id": "L_1fc26442-c829-4354-86fd-e9e237e95ea0",
+                "text": "공통 입력 훅→검색 입력과 결과이어서 사용 · [독립 합성 반대]출발 기록도착 기록",
+                "from": "공통 입력 훅",
+                "to": "검색 입력과 결과",
+                "group": {
+                  "from": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "to": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "kind": "flow"
+                }
+              },
+              {
+                "id": "L_a7466a7c-3e01-45e5-a562-d38527420f81",
+                "text": "키 매핑 편집기→공통 입력 훅이어서 사용 · [독립 합성 직접]출발 기록도착 기록",
+                "from": "키 매핑 편집기",
+                "to": "공통 입력 훅",
+                "group": {
+                  "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "kind": "flow"
+                }
+              },
+              {
+                "id": "L_1435d14d-5357-4251-8924-aa4b3887b486",
+                "text": "검색 입력과 결과→공통 입력 훅이어서 사용 · [독립 합성 숨은1]출발 기록도착 기록",
+                "from": "검색 입력과 결과",
+                "to": "공통 입력 훅",
+                "group": {
+                  "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "kind": "flow"
+                }
+              },
+              {
+                "id": "L_622a2d64-7d87-471f-8256-bf72822fc8f9",
+                "text": "키 검색·선택→공통 입력 훅이어서 사용 · [독립 합성 숨은2]출발 기록도착 기록",
+                "from": "키 검색·선택",
+                "to": "공통 입력 훅",
+                "group": {
+                  "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "kind": "flow"
+                }
+              },
+              {
+                "id": "L_6503583b-6b45-4f16-a77f-dd55b69877d9",
+                "text": "검색 입력과 결과→공통 입력 훅먼저 필요 · [독립 합성 다른종류]출발 기록도착 기록",
+                "from": "검색 입력과 결과",
+                "to": "공통 입력 훅",
+                "group": {
+                  "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "kind": "needs"
+                }
+              },
+              {
+                "id": "L_9765124a-baf4-42da-9b88-16af70c2d7e4",
+                "text": "키 검색·선택→검색 입력과 결과관련 · [독립 합성 내부]출발 기록도착 기록",
+                "from": "키 검색·선택",
+                "to": "검색 입력과 결과",
+                "group": {
+                  "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "to": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "kind": "related"
+                }
+              }
+            ],
+            "svg": [
+              {
+                "from": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "to": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                "kind": "flow"
+              },
+              {
+                "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "kind": "flow"
+              },
+              {
+                "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                "to": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                "kind": "needs"
+              }
+            ]
+          }
+        },
+        {
+          "id": "internal-relations-listed-no-svg-self-loop",
+          "pass": true,
+          "raw": [
+            {
+              "from": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+              "to": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+              "text": "키 매핑 편집기 안의 연결 · 관련 · 1건직접 연결 0 · 접힌 안쪽 연결 1키 검색·선택→검색 입력과 결과관련 · [독립 합성 내부]출발 기록도착 기록"
+            }
+          ]
+        },
+        {
+          "id": "actual-endpoint-after-minimal-reveal",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "windowY": 0,
+              "docWidth": 1280,
+              "focus": "area-panel",
+              "matrix": "matrix(0.768421, 0, 0, 0.768421, 363.053, 42.2632)",
+              "scale": "77%",
+              "map": {
+                "x": 264,
+                "y": 412.71875,
+                "width": 660,
+                "height": 291.28125,
+                "top": 412.71875,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "panel": {
+                "x": 938,
+                "y": 412.71875,
+                "width": 300,
+                "height": 291.28125,
+                "top": 412.71875,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "head": {
+                "x": 939,
+                "y": 413.71875,
+                "width": 298,
+                "height": 76.390625,
+                "top": 413.71875,
+                "right": 1237,
+                "bottom": 490.109375,
+                "left": 939
+              },
+              "actions": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 490.109375,
+                "width": 298,
+                "height": 159.890625,
+                "top": 490.109375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyId": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+              "bodyTop": 0,
+              "bodyMax": 816,
+              "cards": [
+                {
+                  "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "rect": {
+                    "x": 658.7894897460938,
+                    "y": 486.71875,
+                    "width": 184.42108154296875,
+                    "height": 138.3157958984375,
+                    "top": 486.71875,
+                    "right": 843.2105712890625,
+                    "bottom": 625.0345458984375,
+                    "left": 658.7894897460938
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                  "rect": {
+                    "x": 889.3157958984375,
+                    "y": 486.71875,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 486.71875,
+                    "right": 1073.73681640625,
+                    "bottom": 625.0345458984375,
+                    "left": 889.3157958984375
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                  "rect": {
+                    "x": 428.26318359375,
+                    "y": 486.71875,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 486.71875,
+                    "right": 612.6842041015625,
+                    "bottom": 625.0345458984375,
+                    "left": 428.26318359375
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_3b894836-54d9-4d97-baf8-2161785ee1bf",
+                  "rect": {
+                    "x": 658.7894897460938,
+                    "y": 640.4029541015625,
+                    "width": 184.42108154296875,
+                    "height": 138.3157958984375,
+                    "top": 640.4029541015625,
+                    "right": 843.2105712890625,
+                    "bottom": 778.71875,
+                    "left": 658.7894897460938
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "rect": {
+                    "x": 889.3157958984375,
+                    "y": 640.4029541015625,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 640.4029541015625,
+                    "right": 1073.73681640625,
+                    "bottom": 778.71875,
+                    "left": 889.3157958984375
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "collapsed": [],
+              "open": []
+            },
+            "controls": {
+              "#area-panel-close": {
+                "rect": {
+                  "x": 1178.90625,
+                  "y": 423.71875,
+                  "width": 46.09375,
+                  "height": 36,
+                  "top": 423.71875,
+                  "right": 1225,
+                  "bottom": 459.71875,
+                  "left": 1178.90625
+                },
+                "clip": {
+                  "l": 939,
+                  "t": 413.7197164948454,
+                  "r": 1237,
+                  "b": 702.9990335051547
+                },
+                "parents": [
+                  {
+                    "id": "area-panel-close",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "area-panel",
+                    "ox": "hidden",
+                    "oy": "hidden"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              },
+              "#panel-open": {
+                "rect": {
+                  "x": 949,
+                  "y": 659,
+                  "width": 136,
+                  "height": 36,
+                  "top": 659,
+                  "right": 1085,
+                  "bottom": 695,
+                  "left": 949
+                },
+                "clip": {
+                  "l": 939,
+                  "t": 413.7197164948454,
+                  "r": 1237,
+                  "b": 702.9990335051547
+                },
+                "parents": [
+                  {
+                    "id": "panel-open",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "panel-actions",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "area-panel",
+                    "ox": "hidden",
+                    "oy": "hidden"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              },
+              "#panel-new-request": {
+                "rect": {
+                  "x": 1091,
+                  "y": 659,
+                  "width": 136,
+                  "height": 36,
+                  "top": 659,
+                  "right": 1227,
+                  "bottom": 695,
+                  "left": 1091
+                },
+                "clip": {
+                  "l": 939,
+                  "t": 413.7197164948454,
+                  "r": 1237,
+                  "b": 702.9990335051547
+                },
+                "parents": [
+                  {
+                    "id": "panel-new-request",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "panel-actions",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "area-panel",
+                    "ox": "hidden",
+                    "oy": "hidden"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              }
+            }
+          }
+        },
+        {
+          "id": "exact-hidden-child-minimum-unfold",
+          "pass": true,
+          "raw": {
+            "origin": {
+              "windowY": 0,
+              "docWidth": 1280,
+              "focus": "area-panel-body",
+              "matrix": "matrix(0.768421, 0, 0, 0.768421, 363.053, -6.73684)",
+              "scale": "77%",
+              "map": {
+                "x": 264,
+                "y": 361.71875,
+                "width": 660,
+                "height": 342.28125,
+                "top": 361.71875,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "panel": {
+                "x": 938,
+                "y": 361.71875,
+                "width": 300,
+                "height": 342.28125,
+                "top": 361.71875,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "head": {
+                "x": 939,
+                "y": 362.71875,
+                "width": 298,
+                "height": 57,
+                "top": 362.71875,
+                "right": 1237,
+                "bottom": 419.71875,
+                "left": 939
+              },
+              "actions": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 419.71875,
+                "width": 298,
+                "height": 230.28125,
+                "top": 419.71875,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyId": "@relations",
+              "bodyTop": 425,
+              "bodyMax": 1798,
+              "cards": [
+                {
+                  "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "rect": {
+                    "x": 658.7894897460938,
+                    "y": 386.71875,
+                    "width": 184.42108154296875,
+                    "height": 138.3157958984375,
+                    "top": 386.71875,
+                    "right": 843.2105712890625,
+                    "bottom": 525.0345458984375,
+                    "left": 658.7894897460938
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "rect": {
+                    "x": 889.3157958984375,
+                    "y": 540.4029541015625,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 540.4029541015625,
+                    "right": 1073.73681640625,
+                    "bottom": 678.71875,
+                    "left": 889.3157958984375
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "collapsed": [
+                "branch-toggle-A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83"
+              ],
+              "open": []
+            },
+            "located": {
+              "windowY": 0,
+              "docWidth": 1280,
+              "focus": "area-panel",
+              "matrix": "matrix(0.768421, 0, 0, 0.768421, 363.053, 42.2632)",
+              "scale": "77%",
+              "map": {
+                "x": 264,
+                "y": 412.71875,
+                "width": 660,
+                "height": 291.28125,
+                "top": 412.71875,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "panel": {
+                "x": 938,
+                "y": 412.71875,
+                "width": 300,
+                "height": 291.28125,
+                "top": 412.71875,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "head": {
+                "x": 939,
+                "y": 413.71875,
+                "width": 298,
+                "height": 76.390625,
+                "top": 413.71875,
+                "right": 1237,
+                "bottom": 490.109375,
+                "left": 939
+              },
+              "actions": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 490.109375,
+                "width": 298,
+                "height": 159.890625,
+                "top": 490.109375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyId": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+              "bodyTop": 0,
+              "bodyMax": 816,
+              "cards": [
+                {
+                  "id": "A_063a20a8-3a4c-4a48-9965-4b8ca8f5bc83",
+                  "rect": {
+                    "x": 658.7894897460938,
+                    "y": 486.71875,
+                    "width": 184.42108154296875,
+                    "height": 138.3157958984375,
+                    "top": 486.71875,
+                    "right": 843.2105712890625,
+                    "bottom": 625.0345458984375,
+                    "left": 658.7894897460938
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_086347cf-eeae-484a-97dc-0b3a98a09681",
+                  "rect": {
+                    "x": 889.3157958984375,
+                    "y": 486.71875,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 486.71875,
+                    "right": 1073.73681640625,
+                    "bottom": 625.0345458984375,
+                    "left": 889.3157958984375
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                  "rect": {
+                    "x": 428.26318359375,
+                    "y": 486.71875,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 486.71875,
+                    "right": 612.6842041015625,
+                    "bottom": 625.0345458984375,
+                    "left": 428.26318359375
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_3b894836-54d9-4d97-baf8-2161785ee1bf",
+                  "rect": {
+                    "x": 658.7894897460938,
+                    "y": 640.4029541015625,
+                    "width": 184.42108154296875,
+                    "height": 138.3157958984375,
+                    "top": 640.4029541015625,
+                    "right": 843.2105712890625,
+                    "bottom": 778.71875,
+                    "left": 658.7894897460938
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_460ecd25-5fa7-4273-b72d-53ee63cc681d",
+                  "rect": {
+                    "x": 889.3157958984375,
+                    "y": 640.4029541015625,
+                    "width": 184.4210205078125,
+                    "height": 138.3157958984375,
+                    "top": 640.4029541015625,
+                    "right": 1073.73681640625,
+                    "bottom": 778.71875,
+                    "left": 889.3157958984375
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "collapsed": [],
+              "open": []
+            },
+            "targetGeom": {
+              "rect": {
+                "x": 574.9595336914062,
+                "y": 493.634521484375,
+                "width": 30.80889892578125,
+                "height": 19.97894287109375,
+                "top": 493.634521484375,
+                "right": 605.7684326171875,
+                "bottom": 513.6134643554688,
+                "left": 574.9595336914062
+              },
+              "clip": {
+                "l": 265,
+                "t": 413.7197164948454,
+                "r": 923,
+                "b": 702.9990335051547
+              },
+              "parents": [
+                {
+                  "id": "node-info-A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-plane",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-map",
+                  "ox": "hidden",
+                  "oy": "hidden"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "main",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                }
+              ],
+              "hits": [
+                true,
+                true,
+                true
+              ],
+              "full": true
+            },
+            "path": "키 매핑 편집기 › 키 검색·선택 › 검색 입력과 결과"
+          }
+        },
+        {
+          "id": "real-new-task-exact-child",
+          "pass": true,
+          "raw": {
+            "task": {
+              "id": "T_8ac934c9-8eb2-4950-a3de-089afc8367f1",
+              "sourceIds": [
+                "S_77ecde91-276c-4b38-8c7b-e26add9b8d65"
+              ],
+              "parentTaskId": "T_3de9cb56-4cf5-4093-b5cb-85bd13234e1e",
+              "advice": {
+                "intent": {
+                  "version": "intent.1",
+                  "relation": "start",
+                  "goal": "[독립 합성 실제 새 요청] 이 정확한 자식만 확인하고 조상 구상은 참고로 남긴다.",
+                  "conditions": [],
+                  "retired": [],
+                  "basisRefs": [
+                    {
+                      "basisId": "D3",
+                      "sourceId": "S_77ecde91-276c-4b38-8c7b-e26add9b8d65",
+                      "revision": 28
+                    }
+                  ]
+                },
+                "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+                "question": null,
+                "relatedBasisIds": [
+                  "D1",
+                  "D2",
+                  "D3"
+                ],
+                "reviewBasisIds": [],
+                "suggestions": []
+              },
+              "adviceRevision": 28,
+              "mode": "mock",
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 27,
+                "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                "area": {
+                  "id": "A_16be9de5-0f61-4143-8c25-84e7f1406c34",
+                  "name": "검색 입력과 결과",
+                  "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                }
+              },
+              "areaId": "A_16be9de5-0f61-4143-8c25-84e7f1406c34"
+            },
+            "source": {
+              "id": "S_77ecde91-276c-4b38-8c7b-e26add9b8d65",
+              "kind": "request",
+              "text": "[독립 합성 실제 새 요청] 이 정확한 자식만 확인하고 조상 구상은 참고로 남긴다.",
+              "at": "2026-10-22T11:22:49.226Z",
+              "taskId": "T_8ac934c9-8eb2-4950-a3de-089afc8367f1",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            "draftTarget": null
+          }
+        }
+      ]
+    }
+  ],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle18-independent/ui.py\", line 37, in <module>\n    count=len(state()['tasks']);body='[독립 합성 실제 새 요청] 이 정확한 자식만 확인하고 조상 구상은 참고로 남긴다.';p.locator('#panel-new-request').click();p.locator('#draft').fill(body);p.locator('#send').click();expect(p.locator('#working')).to_have_text('');new=state();tid=new['currentTaskId'];t=next(t for t in new['tasks'] if t['id']==tid);src=next(s for s in new['sources'] if s['id']==t['sourceIds'][0]);ck('real-new-task-exact-child',len(new['tasks'])==count+1 and t['areaId']==target and src['kind']=='request' and src['text']==body,{'task':t,'source':src,'draftTarget':new['space']['draftTarget']});p.locator('#copy-work').click();expect(p.locator('#notice')).to_contain_text('클립보드');text=p.evaluate('navigator.clipboard.readText()');base.saved(p);record=next(t for t in state()['tasks'] if t['id']==tid)['handoffs'][-1];ck('actual-handoff-child-and-ancestor-authority',record['anchor']['areaId']==target and m['c']['summary'] in text and '포함 맥락 참고' in text and '자동 상속' in text or record['anchor']['areaId']==target and m['c']['summary'] in text and '자식의 명시 범위' in text,{'text':text,'record':record});p.locator('#work-locate-return').click();returned=snap();back=anchor(caller);expectedScroll=max(0,min(back['max'],back['scroll']+back['relativeY']-reading['relativeY']));ck('explicit-origin-relations-reading-camera-fold-focus-and-saved-work',returned['matrix']==origin['matrix'] and returned['collapsed']==origin['collapsed'] and [z['id'] for z in returned['cards'] if z['selected']]==[z['id'] for z in origin['cards'] if z['selected']] and returned['bodyId']=='@relations' and returned['focus']==caller and abs(back['scroll']-expectedScroll)<=2 and state()['currentTaskId']==tid and state()['space']['layout']==before['space']['layout'],{'origin':origin,'readingBefore':reading,'returned':returned,'readingAfter':back,'expectedPanelScroll':expectedScroll,'saved':state()});\n                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ~~~~~~~~~~~~~~~~^^^^^^^^^^\nTypeError: 'NoneType' object is not subscriptable\n",
+  "exit": 1,
+  "end": "2026-10-22T11:22:49.594791+00:00"
+}

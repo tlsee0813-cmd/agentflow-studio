@@ -1,0 +1,40 @@
+{
+  "ui": {
+    "exit": 0,
+    "checks": 46,
+    "failed": [],
+    "fatal": null
+  },
+  "long-ui": {
+    "exit": 0,
+    "checks": 23,
+    "failed": [],
+    "fatal": null
+  },
+  "extra-ui": {
+    "exit": 1,
+    "checks": 6,
+    "failed": [
+      "1280-project-list-return-panel-reading",
+      "1280-input-Escape-context-and-focus",
+      "1280-composition-Escape-context-and-focus",
+      "1440-project-list-return-panel-reading",
+      "1440-input-Escape-context-and-focus",
+      "1440-composition-Escape-context-and-focus"
+    ],
+    "fatal": null
+  },
+  "extra-ui-key-observation": {
+    "exit": 1,
+    "checks": 6,
+    "failed": [
+      "1280-project-list-return-panel-reading",
+      "1280-input-Escape-context-and-focus",
+      "1280-composition-Escape-context-and-focus",
+      "1440-project-list-return-panel-reading",
+      "1440-input-Escape-context-and-focus",
+      "1440-composition-Escape-context-and-focus"
+    ],
+    "fatal": null
+  }
+}

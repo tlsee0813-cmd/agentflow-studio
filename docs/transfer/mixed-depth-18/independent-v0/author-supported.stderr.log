@@ -1,0 +1,61 @@
+test_01_powertoys_complete (author18.Area18.test_01_powertoys_complete) ... ERROR
+test_02_product13_complete (author18.Area18.test_02_product13_complete) ... ERROR
+test_04_relation_bundle_counts_direction_kind_and_internal_list (author18.Area18.test_04_relation_bundle_counts_direction_kind_and_internal_list) ... ok
+test_06_manual_child_parent_roundtrip_and_unsent_request_protection (author18.Area18.test_06_manual_child_parent_roundtrip_and_unsent_request_protection) ... ok
+test_01_powertoys_complete (author18.Area18Wide.test_01_powertoys_complete) ... ERROR
+test_02_product13_complete (author18.Area18Wide.test_02_product13_complete) ... ERROR
+test_04_relation_bundle_counts_direction_kind_and_internal_list (author18.Area18Wide.test_04_relation_bundle_counts_direction_kind_and_internal_list) ... ok
+test_06_manual_child_parent_roundtrip_and_unsent_request_protection (author18.Area18Wide.test_06_manual_child_parent_roundtrip_and_unsent_request_protection) ... ok
+
+======================================================================
+ERROR: test_01_powertoys_complete (author18.Area18.test_01_powertoys_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-candidate/app/continuity/tests/hierarchy18_browser.py", line 171, in test_01_powertoys_complete
+    def test_01_powertoys_complete(self):self.flow('powertoys')
+                                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-candidate/app/continuity/tests/hierarchy18_browser.py", line 135, in flow
+    self.equal('relation route export anchor uses actual endpoint',next(t for t in self.state()['tasks'] if t['id']==endpoint_task['id'])['handoffs'][-1]['anchor']['areaId'],real_to)
+                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+======================================================================
+ERROR: test_02_product13_complete (author18.Area18.test_02_product13_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-candidate/app/continuity/tests/hierarchy18_browser.py", line 172, in test_02_product13_complete
+    def test_02_product13_complete(self):self.flow('product13')
+                                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-candidate/app/continuity/tests/hierarchy18_browser.py", line 135, in flow
+    self.equal('relation route export anchor uses actual endpoint',next(t for t in self.state()['tasks'] if t['id']==endpoint_task['id'])['handoffs'][-1]['anchor']['areaId'],real_to)
+                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+======================================================================
+ERROR: test_01_powertoys_complete (author18.Area18Wide.test_01_powertoys_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-candidate/app/continuity/tests/hierarchy18_browser.py", line 171, in test_01_powertoys_complete
+    def test_01_powertoys_complete(self):self.flow('powertoys')
+                                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-candidate/app/continuity/tests/hierarchy18_browser.py", line 135, in flow
+    self.equal('relation route export anchor uses actual endpoint',next(t for t in self.state()['tasks'] if t['id']==endpoint_task['id'])['handoffs'][-1]['anchor']['areaId'],real_to)
+                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+======================================================================
+ERROR: test_02_product13_complete (author18.Area18Wide.test_02_product13_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-candidate/app/continuity/tests/hierarchy18_browser.py", line 172, in test_02_product13_complete
+    def test_02_product13_complete(self):self.flow('product13')
+                                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-candidate/app/continuity/tests/hierarchy18_browser.py", line 135, in flow
+    self.equal('relation route export anchor uses actual endpoint',next(t for t in self.state()['tasks'] if t['id']==endpoint_task['id'])['handoffs'][-1]['anchor']['areaId'],real_to)
+                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+----------------------------------------------------------------------
+Ran 8 tests in 17.324s
+
+FAILED (errors=4)

@@ -1,0 +1,146 @@
+[
+  {
+    "url": "http://127.0.0.1:34249/index.html",
+    "path": "index.html",
+    "status": 200,
+    "bytes": 17792,
+    "http_sha256": "2c3d4c08cec865194f8ce8e254ed8fa4832e0a601fd411090630244cf2c3f14f",
+    "disk_before_sha256": "2c3d4c08cec865194f8ce8e254ed8fa4832e0a601fd411090630244cf2c3f14f",
+    "disk_after_sha256": "2c3d4c08cec865194f8ce8e254ed8fa4832e0a601fd411090630244cf2c3f14f"
+  },
+  {
+    "url": "http://127.0.0.1:34249/styles.css",
+    "path": "styles.css",
+    "status": 200,
+    "bytes": 70095,
+    "http_sha256": "a427a2d4d52bc061d2d42d747a8dd30e09bd475df9860c66dce3f96bcc51431c",
+    "disk_before_sha256": "a427a2d4d52bc061d2d42d747a8dd30e09bd475df9860c66dce3f96bcc51431c",
+    "disk_after_sha256": "a427a2d4d52bc061d2d42d747a8dd30e09bd475df9860c66dce3f96bcc51431c"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/attention.js",
+    "path": "shared/attention.js",
+    "status": 200,
+    "bytes": 4759,
+    "http_sha256": "ed70664bce1eef14525aff8d5c4c4e4358a45102d6b183e71344abfe1322be97",
+    "disk_before_sha256": "ed70664bce1eef14525aff8d5c4c4e4358a45102d6b183e71344abfe1322be97",
+    "disk_after_sha256": "ed70664bce1eef14525aff8d5c4c4e4358a45102d6b183e71344abfe1322be97"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/domain.js",
+    "path": "shared/domain.js",
+    "status": 200,
+    "bytes": 74480,
+    "http_sha256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+    "disk_before_sha256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+    "disk_after_sha256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/outcome.js",
+    "path": "shared/outcome.js",
+    "status": 200,
+    "bytes": 4887,
+    "http_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "disk_before_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+    "disk_after_sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/mock.js",
+    "path": "shared/mock.js",
+    "status": 200,
+    "bytes": 18360,
+    "http_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "disk_before_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+    "disk_after_sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/storage.js",
+    "path": "shared/storage.js",
+    "status": 200,
+    "bytes": 12708,
+    "http_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "disk_before_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+    "disk_after_sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/plan-facts.js",
+    "path": "shared/plan-facts.js",
+    "status": 200,
+    "bytes": 4655,
+    "http_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "disk_before_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+    "disk_after_sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/validation.js",
+    "path": "shared/validation.js",
+    "status": 200,
+    "bytes": 48869,
+    "http_sha256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+    "disk_before_sha256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+    "disk_after_sha256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/guidance.js",
+    "path": "shared/guidance.js",
+    "status": 200,
+    "bytes": 6701,
+    "http_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "disk_before_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+    "disk_after_sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/hierarchy.js",
+    "path": "shared/hierarchy.js",
+    "status": 200,
+    "bytes": 2489,
+    "http_sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+    "disk_before_sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+    "disk_after_sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624"
+  },
+  {
+    "url": "http://127.0.0.1:34249/shared/types.js",
+    "path": "shared/types.js",
+    "status": 200,
+    "bytes": 2672,
+    "http_sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+    "disk_before_sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+    "disk_after_sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53"
+  },
+  {
+    "url": "http://127.0.0.1:34249/client/runtime.js",
+    "path": "client/runtime.js",
+    "status": 200,
+    "bytes": 2567,
+    "http_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "disk_before_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+    "disk_after_sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336"
+  },
+  {
+    "url": "http://127.0.0.1:34249/client/presentation.js",
+    "path": "client/presentation.js",
+    "status": 200,
+    "bytes": 7833,
+    "http_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+    "disk_before_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+    "disk_after_sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+  },
+  {
+    "url": "http://127.0.0.1:34249/client/app.js",
+    "path": "client/app.js",
+    "status": 200,
+    "bytes": 265421,
+    "http_sha256": "0931074b28591ad31d2e92e490fb9d2ebdf9cdc597abe02e6a10590a9254cae2",
+    "disk_before_sha256": "0931074b28591ad31d2e92e490fb9d2ebdf9cdc597abe02e6a10590a9254cae2",
+    "disk_after_sha256": "0931074b28591ad31d2e92e490fb9d2ebdf9cdc597abe02e6a10590a9254cae2"
+  },
+  {
+    "url": "http://127.0.0.1:34249/client/runtime-static.js",
+    "path": "client/runtime-static.js",
+    "status": 200,
+    "bytes": 1936,
+    "http_sha256": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a",
+    "disk_before_sha256": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a",
+    "disk_after_sha256": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+  }
+]
