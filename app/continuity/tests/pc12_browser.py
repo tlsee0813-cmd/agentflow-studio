@@ -211,6 +211,7 @@ class Pc12(unittest.TestCase):
         # (1) current = R (report of A): continuing A keeps R and edits R only.
         before=self.depart(booking,A)
         expect(self.page.locator('#task-view-target')).to_contain_text(f'작업 02의 후속 확인 작업문');expect(self.page.locator('#task-view-continue')).to_have_text('작업 화면으로')
+        expect(self.page.locator('#task-continue-context')).to_have_attribute('data-task-id',R)
         self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
         expect(self.page.locator('#notice')).to_contain_text('받은 현재 보고 작업 02에서 계속');expect(self.page.locator('#work-place')).to_contain_text('작업 01의 보고 · 후속 확인 작업문 초안')
         self.assertEqual(self.state()['currentTaskId'],R)
@@ -231,6 +232,9 @@ class Pc12(unittest.TestCase):
         expect(self.page.locator('#task-view-target')).to_contain_text('이 요청(작업 01)으로 바꾸고');expect(self.page.locator('#task-view-target')).to_contain_text('이전 보고를 대신 고르지 않아요')
         expect(self.page.locator('#task-view-continue')).to_have_text('이 작업 이어서 하기')
         self.page.locator('#task-view-continue').click();expect(self.page.locator('#current-work')).to_be_visible()
+        expect(self.page.locator('#notice')).to_contain_text('작업 01로 이어가기')
+        expect(self.page.locator('#notice')).to_contain_text('전에 이어가던 작업 04은 그대로 남아요.')
+        expect(self.page.locator('#notice')).not_to_contain_text('작업 00')
         self.assertEqual(self.state()['currentTaskId'],A);expect(self.page.locator('#current-work h2')).to_have_text('이어갈 작업')
         vA={k:f'A만 고친 {k} · {self.WIDTH}' for k in WORK_KEYS};self.edit_work(vA);self.shot('05-edit-A')
         self.page.locator('#work-return-origin').click();self.assert_back(before,booking,A);self.shot('06-back-after-edit')
@@ -357,6 +361,107 @@ class Pc12(unittest.TestCase):
         self.check_equal('RB-A-edit: R kept',self.task(R,s3)['manual'],vR);self.check_equal('RB-A-edit: RB untouched',self.task(RB,s3),self.task(RB,s2))
         self.shot('13-area-back-A')
         self.assertEqual(self.soft,[],'reading place after return')
+
+    def test_11_target_jumps_and_selected_file_review(self):
+        # Author-role normal UI/MOCK fixture, not a human discovery observation.
+        self.ctx.grant_permissions(['clipboard-read','clipboard-write'],origin=self.url)
+        a,b,c=self.start([('작성 중인 요청의 부분','초안은 보내지 않는다.'),('고칠 부분','작업02 소유'),('다른 현재 부분','작업04 소유')])
+        self.request_in(a,'01: 첫 요청을 보존해 주세요.')
+        read=self.request_in(b,'02: 이 부분의 다음 행동을 고치려 해요.')
+        self.request_in(a,'03: 앞선 내용도 그대로 보존해 주세요.')
+        current=self.request_in(c,'04: 지금 이어가는 별개 작업이에요.')
+        self.unsent_draft(a,'별도 미전송 요청33 · 보내지 않고 그대로 둔다.')
+        before=self.state();self.assertEqual([t['id'] for t in before['tasks']].index(read)+1,2)
+        self.assertEqual(before['currentTaskId'],current);self.assertEqual(len(before['tasks']),4)
+        self.page.locator('#nav-space').click();self.page.locator('#node-enter-'+b).click();self.page.locator('#task-open-'+read).click()
+        self.assertEqual(self.state(),before,'reading02 leaves current04/draft and every stored value unchanged')
+        expect(self.page.locator('.task-view-head #task-view-continue')).to_have_count(1)
+        expect(self.page.locator('#task-continue-context')).to_have_attribute('data-task-id',read)
+        expect(self.page.locator('#task-continue-label')).to_contain_text('현재 작업 04')
+        expect(self.page.locator('#task-continue-label')).to_contain_text('작업 02')
+        expect(self.page.locator('#task-continue-label')).to_contain_text('고칠 부분')
+        expect(self.page.locator('#task-next-action')).to_have_text('작성 중인 요청 열기')
+        expect(self.page.locator('#task-next-target')).to_contain_text('작성 중인 요청의 부분')
+        probe=r'''sel=>{const e=document.querySelector(sel);if(!e)return null;const r=e.getBoundingClientRect();let l=0,t=0,rr=innerWidth,bb=innerHeight;
+          for(let p=e.parentElement;p;p=p.parentElement){const s=getComputedStyle(p),q=p.getBoundingClientRect(),sx=q.width/(p.offsetWidth||1),sy=q.height/(p.offsetHeight||1);
+           if(/auto|scroll|hidden|clip/.test(s.overflowX)){l=Math.max(l,q.left+p.clientLeft*sx);rr=Math.min(rr,q.left+(p.clientLeft+p.clientWidth)*sx)}
+           if(/auto|scroll|hidden|clip/.test(s.overflowY)){t=Math.max(t,q.top+p.clientTop*sy);bb=Math.min(bb,q.top+(p.clientTop+p.clientHeight)*sy)}}
+          const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return {rect:r.toJSON(),clip:{l,t,r:rr,b:bb},inside:r.width>0&&r.height>0&&r.left>=l-.5&&r.right<=rr+.5&&r.top>=t-.5&&r.bottom<=bb+.5,hit:!!h&&e.contains(h)}}'''
+        def visible(sel):
+            g=self.page.evaluate(probe,sel);self.record('actual','33 product navigation actual clipping/hit '+sel,g)
+            self.assertTrue(g and g['inside'] and g['hit'],sel+' visible without test scroll/focus repair')
+        visible('#task-view-continue')
+        self.page.locator('#task-view-continue').click()
+        expect(self.page.locator('#context-title')).to_be_focused();visible('#context-title')
+        self.assertEqual(self.state()['currentTaskId'],read)
+        expect(self.page.locator('#work-context-jumps')).to_have_attribute('data-task-id',read)
+        expect(self.page.locator('#work-context-jumps')).to_contain_text('작업 02')
+        # Native Tab from the product's landing focus, then native Enter on the jump.
+        self.page.keyboard.press('Tab');expect(self.page.locator('#work-edit-next')).to_be_focused();visible('#work-edit-next')
+        before_jump=self.state();self.page.keyboard.press('Enter')
+        expect(self.page.locator('#work-next')).to_be_focused();visible('#work-next')
+        self.assertEqual(self.state(),before_jump,'jump opens the existing editor without changing any value')
+        expect(self.page.locator('#edit-work')).to_have_js_property('open',True)
+        expect(self.page.locator('#work-edit-fields')).to_have_attribute('data-task-id',read)
+        self.page.locator('#work-next').fill('33 N만 명시 수정 · 외부 실행은 하지 않는다.');base.saved(self.page)
+        edited=self.state()
+        for old in before['tasks']:
+            got=self.task(old['id'],edited)
+            if old['id']==read:
+                expected={**old,'manual':{**old['manual'],'next':'33 N만 명시 수정 · 외부 실행은 하지 않는다.'}}
+                self.assertEqual(got,expected)
+            else:self.assertEqual(got,old)
+        self.assertEqual(edited['sources'],before['sources']);self.assertEqual(edited['space'],before['space'])
+        for key in ['draft','draftKind','answerDraft','bases']:self.assertEqual(edited[key],before[key])
+        self.page.locator('#work-file-handoff').click()
+        expect(self.page.locator('#file-return-options')).to_have_js_property('open',True)
+        expect(self.page.locator('#file-return-options > summary')).to_be_focused();visible('#file-return-options > summary')
+        self.assertEqual(self.state(),edited,'file handoff navigation creates no H or copied content')
+        self.page.keyboard.press('Tab');expect(self.page.locator('#copy-file-work')).to_be_focused();visible('#copy-file-work')
+        self.page.keyboard.press('Enter');expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
+        base.saved(self.page)
+        raw=self.page.evaluate('navigator.clipboard.readText()');self.record('actual','33 actual clipboard raw',raw)
+        import re
+        blocks=[json.loads(x) for x in re.findall(r'```json\n([\s\S]*?)\n```',raw.replace('\r\n','\n'))]
+        file=next(x for x in blocks if x.get('schemaVersion')=='agentflow.return.2')
+        handed=self.state();H=self.task(read,handed)['handoffs'][-1]['returnId']
+        self.assertTrue(H);self.assertEqual(file['taskId'],read);self.assertEqual(file['returnId'],H)
+        file.update(report='[합성33] 파일 선택 확인만 검사한다. 실제 실행 결과가 아니다.',evidence=None,understanding=None)
+        path=base.OUT/f'flow33-{self.WIDTH}-actual-H-return.json';path.write_text(json.dumps(file,ensure_ascii=False),encoding='utf-8')
+        with self.page.expect_file_chooser() as chooser:self.page.locator('#home-file-result').click()
+        chooser.value.set_files(str(path))
+        expect(self.page.locator('#result-file-review-heading')).to_be_focused();visible('#result-file-review-heading')
+        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-selection-state','review')
+        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-target-task-id',read)
+        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-return-id',H)
+        expect(self.page.locator('#result-file-preview')).to_contain_text('아직 가져오지 않았습니다.')
+        expect(self.page.locator('#accept-result-file')).to_have_text('이 결과 가져오기')
+        self.assertEqual(self.state(),handed,'validated selection is not acceptance; current/draft/T/H/manual data unchanged')
+        self.shot('33-selected-not-imported')
+        bad={**file,'returnId':'H33_NOT_EXPORTED'};bad_path=base.OUT/f'flow33-{self.WIDTH}-wrong-H.json'
+        bad_path.write_text(json.dumps(bad,ensure_ascii=False),encoding='utf-8')
+        with self.page.expect_file_chooser() as chooser:self.page.locator('#select-result-file').click()
+        chooser.value.set_files(str(bad_path))
+        expect(self.page.locator('#result-file-error')).to_be_focused();visible('#result-file-error')
+        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-selection-state','invalid')
+        expect(self.page.locator('#accept-result-file')).to_have_count(0)
+        self.assertEqual(self.state(),handed,'wrong H stays a controlled error; no import or retargeting')
+        # Return to the same valid file, explicitly accept once, then select that same H again.
+        with self.page.expect_file_chooser() as chooser:self.page.locator('#select-result-file').click()
+        chooser.value.set_files(str(path));expect(self.page.locator('#result-file-review-heading')).to_be_focused()
+        self.page.locator('#accept-result-file').click();expect(self.page.locator('#received-result-open')).to_be_visible();base.saved(self.page)
+        received=self.state();self.assertEqual(len(received['tasks']),len(handed['tasks'])+1)
+        reports=[t for t in received['tasks'] if t['id'] not in {x['id'] for x in handed['tasks']}]
+        self.assertEqual(len(reports),1);self.assertEqual(reports[0]['resultFile']['returnId'],H)
+        self.assertEqual(received['currentTaskId'],reports[0]['id'],'existing same-current reception policy retained')
+        self.assertEqual(received['draft'],handed['draft']);self.assertEqual(received['space']['draftTarget'],handed['space']['draftTarget'])
+        with self.page.expect_file_chooser() as chooser:self.page.locator('#select-result-file').click()
+        chooser.value.set_files(str(path));expect(self.page.locator('#result-file-review-heading')).to_be_focused();visible('#result-file-review-heading')
+        expect(self.page.locator('#result-file-preview')).to_contain_text('이미 가져온 결과입니다. 기존 기록을 확인할 수 있습니다.')
+        expect(self.page.locator('#result-file-preview')).not_to_contain_text('아직 가져오지 않았습니다.')
+        expect(self.page.locator('#accept-result-file')).to_have_text('기존 기록 확인')
+        expect(self.page.locator('#result-file-preview')).to_have_attribute('data-return-id',H)
+        self.assertEqual(self.state(),received,'duplicate selection creates no extra report and does not change current/draft')
 
 class Pc12Wide(Pc12):
     WIDTH,HEIGHT=1440,900

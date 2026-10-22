@@ -1,0 +1,43 @@
+[
+  {
+    "PC": 1280,
+    "entryId": "E_34adf2fb-1849-423e-babe-c8dd66af7f62",
+    "snapshotSha256": "ebfe6f12b3d50d1e4bf2dc0a86bc2b3998a4bf63ca0e05157c53750e30cb9312",
+    "taskIndex1Based": 11,
+    "currentTaskId": "T_cf45ac73-cd06-4ef1-aba0-88fbcd2c5aa4",
+    "parentTaskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+    "sourceKinds": [
+      "report"
+    ],
+    "manual": {
+      "understanding": null,
+      "scope": null,
+      "next": null,
+      "checks": null
+    },
+    "advice": null,
+    "mode": null,
+    "resultFilePresent": true
+  },
+  {
+    "PC": 1440,
+    "entryId": "E_b2041525-2883-47b1-8daf-994a0b836fce",
+    "snapshotSha256": "882573bb80d2096739faf6eb6638135266aa9bfcd677fc27b4b175da6cd00183",
+    "taskIndex1Based": 11,
+    "currentTaskId": "T_6b245ae0-2f1b-4ac3-a3c8-a83034a41c59",
+    "parentTaskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+    "sourceKinds": [
+      "report"
+    ],
+    "manual": {
+      "understanding": null,
+      "scope": null,
+      "next": null,
+      "checks": null
+    },
+    "advice": null,
+    "mode": null,
+    "resultFilePresent": true
+  }
+]
+
