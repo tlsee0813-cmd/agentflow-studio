@@ -1,0 +1,25 @@
+{
+  "status": "SOURCE_ONLY",
+  "repos": {
+    "dify": "9f75925578ecd093ce3d1e30cb4c68f6efb8398c",
+    "xyflow": "8523d8dd9f1551954bc221dccabd6a3119ef9e22",
+    "tldraw": "71e9eae0502a06b8299b9a67b881539d28516f0d"
+  },
+  "filesRead": 8,
+  "extraReadScope": "ZoomTool.ts와 Idle.ts는 임시 줌의 실제 진입 연결을 확인하기 위해 읽음.",
+  "unfixedSearch": {
+    "query": "quickZoomOn repo:tldraw/tldraw",
+    "total_count": 0,
+    "scope": "default branch; not fixed revision proof"
+  },
+  "uiRun": false,
+  "serverRun": false,
+  "productChanged": false,
+  "remoteWrites": false,
+  "limits": [
+    "No usability or effectiveness experiment",
+    "No first-introduction date determination",
+    "No proof of whole-repository symbol absence",
+    "No exact-camera restoration guarantee from bounds-fit"
+  ]
+}
