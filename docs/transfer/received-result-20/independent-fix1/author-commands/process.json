@@ -1,0 +1,87 @@
+[
+  {
+    "name": "build",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "startUTC": "2026-10-22T15:29:14.487419+00:00",
+    "endUTC": "2026-10-22T15:29:16.297908+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "3336006047fb26f65b5e89c0048eac084c4b1d0ef082faa9f359a35939868e28",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "continuity-build",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T15:29:16.298188+00:00",
+    "endUTC": "2026-10-22T15:29:19.331515+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "understanding17",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/understanding17_browser.py"
+    ],
+    "startUTC": "2026-10-22T15:29:19.337075+00:00",
+    "endUTC": "2026-10-22T15:30:05.240445+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "77af50790a2ec5372a9400bba670b7cf62badea5b40fbd627f5210a7aa83feb2"
+  },
+  {
+    "name": "spatial102",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/spatial102_browser.py"
+    ],
+    "startUTC": "2026-10-22T15:30:05.240761+00:00",
+    "endUTC": "2026-10-22T15:30:32.753160+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "08d104bbfdfa19393c2a85b060f4fa19e7e891a472de84be0aaacdb56f214dde"
+  },
+  {
+    "name": "report16",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/report16_browser.py"
+    ],
+    "startUTC": "2026-10-22T15:30:32.754030+00:00",
+    "endUTC": "2026-10-22T15:31:33.650831+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "5216338af9fade16e7f938a7e79e1b768f6d4532d21636f83ea6f0cbd3d791be"
+  },
+  {
+    "name": "home15",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/home15_browser.py"
+    ],
+    "startUTC": "2026-10-22T15:31:33.651280+00:00",
+    "endUTC": "2026-10-22T15:32:11.346920+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "173aa2c7b138e13ed755989dbaac3baa1c1efce6d11172fd3ca30d72bc3edb3b",
+    "stderrSHA256": "83792c85dd53fcc73197a3b561d7c0de0d5718f514881fa6ee3b60bce15dee91"
+  },
+  {
+    "name": "received20",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/received20_browser.py"
+    ],
+    "startUTC": "2026-10-22T15:29:19.336200+00:00",
+    "endUTC": "2026-10-22T15:34:33.651906+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "195df3de6fa82e9a744b518fe555673803d331146c1a2b4572f9967a9ca31bce"
+  }
+]

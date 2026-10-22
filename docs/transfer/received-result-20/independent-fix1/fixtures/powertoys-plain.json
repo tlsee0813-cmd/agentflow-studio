@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "agentflow.return.1",
+  "projectId": "P_1facf9e3-f525-45e1-acf9-262d9a9dd65f",
+  "taskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+  "returnId": "H_independent20_powertoys_H1",
+  "report": "[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 보고 R1 끝]",
+  "evidence": "[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다."
+}

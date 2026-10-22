@@ -1,0 +1,14 @@
+{
+  "B": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+  "RB": "T_b748b3e0-21a4-4743-9abc-3c3e78fb564e",
+  "H": "H_independent20_origin_B",
+  "file": {
+    "schemaVersion": "agentflow.return.1",
+    "projectId": "P_1facf9e3-f525-45e1-acf9-262d9a9dd65f",
+    "taskId": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+    "returnId": "H_independent20_origin_B",
+    "report": "[독립20 합성 출발 보고 RB] 실제외부실행·수용 기록이 아니며 records원점확인에만 사용한다.",
+    "evidence": null
+  },
+  "setup": "Public domain API synthetic B report/handoff, current explicitly B; loaded via normal recovery UI."
+}

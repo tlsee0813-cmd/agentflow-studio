@@ -1,0 +1,18 @@
+[
+  {
+    "name": "original-no-file",
+    "startUTC": "2026-10-22T15:30:08.628474+00:00",
+    "endUTC": "2026-10-22T15:30:13.015152+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "35f4c7ee4958db6cdb8e2496b00082e1b5d84afde04b06eaa51e9dd34c72a88f",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "focused",
+    "startUTC": "2026-10-22T15:30:13.015500+00:00",
+    "endUTC": "2026-10-22T15:30:30.427894+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "06900ffcb7a5fa779380a9fba1520ee85332cca48d074a08be70e876927ec8f6",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

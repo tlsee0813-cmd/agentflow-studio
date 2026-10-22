@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "agentflow.return.1",
+  "projectId": "P_1facf9e3-f525-45e1-acf9-262d9a9dd65f",
+  "taskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+  "returnId": "H_independent20_nested_R0",
+  "report": "[독립20 중첩 합성 보고] root A 아래의 실제 R0 인계에 돌아온 보고이며 다른 보고로 대체하지 않는다.",
+  "evidence": null
+}

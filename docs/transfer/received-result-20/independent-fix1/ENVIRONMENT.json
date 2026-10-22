@@ -1,0 +1,10 @@
+{
+  "observedUTC": "2026-10-22T15:32:13.702807+00:00",
+  "node": "v22.16.0",
+  "typescript": "Version 5.8.3",
+  "playwright": "1.57.0",
+  "browserExecutable": "/usr/bin/chromium",
+  "actualBrowserVersion": "154.0.8037.57",
+  "networkPolicy": "existing restricted enforced, unchanged",
+  "paidAI": 0
+}

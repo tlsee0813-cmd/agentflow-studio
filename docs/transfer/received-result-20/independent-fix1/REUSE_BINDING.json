@@ -1,0 +1,12 @@
+{
+  "old": "afc3fbe0dd444d92560aacdd4292f20627826d79",
+  "new": "df726e5898f24e23d69e47651d3bf6cbea302412",
+  "changedPaths": [
+    "app/continuity/src/client/app.ts",
+    "app/continuity/tests/received20_browser.py",
+    "app/continuity/tests/understanding17_browser.py"
+  ],
+  "reusedIndependentSource": "0aafca2708863036055cbd3029521b4eb983d22e",
+  "v0EvidenceCommit": "151b935422e566e6e23403e92b8e3ce220f607e3",
+  "reuseBoundary": "Original core8/storage and identity/origin observations were NOT rerun on fix1. Delta is report export-context presentation only; no receipt/origin/storage/validator implementation changed. No-file focused regression and file snapshot values were newly executed."
+}

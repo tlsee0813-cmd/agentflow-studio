@@ -1,0 +1,30 @@
+{
+  "boundary": "Selected actual exec/write_stdin completions, not full tool transcript",
+  "entries": [
+    {
+      "session": 7833,
+      "actualExit": 0,
+      "command": "launch.py -> author-collector.py"
+    },
+    {
+      "session": 38278,
+      "actualExit": 1,
+      "command": "first focused-collector.py (original expected1; first fixed screenshot selector fatal1)"
+    },
+    {
+      "session": 16008,
+      "actualExit": 0,
+      "command": "external collector -> focused-v2.py"
+    },
+    {
+      "session": 60012,
+      "actualExit": 0,
+      "command": "external collector -> npm run check"
+    },
+    {
+      "session": 61361,
+      "actualExit": 0,
+      "command": "external collector -> receipt-screen.py"
+    }
+  ]
+}

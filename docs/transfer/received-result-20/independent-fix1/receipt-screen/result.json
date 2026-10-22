@@ -1,0 +1,157 @@
+{
+  "checks": [],
+  "receipt": {
+    "viewport": [
+      1440,
+      900
+    ],
+    "windowY": 2641,
+    "windowMax": 2641,
+    "docWidth": 1440,
+    "route": "project",
+    "work": true,
+    "task": false,
+    "focus": "",
+    "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+    "caller": {
+      "x": 380,
+      "y": 722.8125,
+      "width": 104.25,
+      "height": 43,
+      "top": 722.8125,
+      "right": 484.25,
+      "bottom": 765.8125,
+      "left": 380
+    },
+    "contextTitle": {
+      "x": 264,
+      "y": -2352.625,
+      "width": 308.03125,
+      "height": 31.5,
+      "top": -2352.625,
+      "right": 572.03125,
+      "bottom": -2321.125,
+      "left": 264
+    },
+    "receipt": {
+      "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_698caa75-26b0-4039-9cc5-f97f5eb65f0e",
+      "reportTaskId": "T_698caa75-26b0-4039-9cc5-f97f5eb65f0e",
+      "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+      "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+      "handoffId": "H_independent20_powertoys_H1",
+      "duplicate": "false",
+      "saveState": "saved"
+    },
+    "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+    "pointed": null,
+    "open": [
+      "project-management",
+      "compose-panel",
+      "result-file-panel",
+      "history"
+    ],
+    "returnControls": [],
+    "saving": null,
+    "saved": "이 브라우저에 저장됨",
+    "storageError": null
+  },
+  "buttonGeometry": {
+    "rect": {
+      "x": 380,
+      "y": 722.8125,
+      "width": 104.25,
+      "height": 43,
+      "top": 722.8125,
+      "right": 484.25,
+      "bottom": 765.8125,
+      "left": 380
+    },
+    "clip": {
+      "l": 0,
+      "t": 0,
+      "r": 1440,
+      "b": 900
+    },
+    "parents": [
+      {
+        "id": "received-result-open",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "received-result-receipt",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "received-result-host",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "result-file-panel",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "compose-panel",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "workspace",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "work-view",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "main",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "",
+        "ox": "visible",
+        "oy": "visible"
+      },
+      {
+        "id": "",
+        "ox": "visible",
+        "oy": "visible"
+      }
+    ],
+    "hits": [
+      true,
+      true,
+      true
+    ],
+    "full": true
+  },
+  "buttonText": "이 결과 검토",
+  "pageerrors": [],
+  "exit": 0
+}

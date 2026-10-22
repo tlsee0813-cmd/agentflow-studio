@@ -1,0 +1,8 @@
+{
+  "source": "df726e5898f24e23d69e47651d3bf6cbea302412",
+  "expected": 7,
+  "executed": 7,
+  "complete": true,
+  "collectorPlannedExit": 0,
+  "boundary": "actual collector exit recorded by external launcher"
+}
