@@ -178,6 +178,9 @@ function recallPlace(entryId:string) {
 let selectedReturnTaskId:string|undefined;
 // Local file reads/clipboard are not tickets or durable project data. Replacement invalidates both.
 let projectEpoch=0,resultRead=0,recoveryRead=0,resultMessage='';
+// Only the pending file read's automatic reveal is cancelled by leaving its work view.
+// The selected bytes and the existing read/import guards keep their separate lifetime.
+let resultRevealToken:{context:boolean}|null=null;
 let resultSelection:{rawText:string;projectId:string;revision:number;epoch:number}|null=null;
 let lastFileExport:{taskId:string;text:string}|null=null;
 function returnChoiceRequired():boolean {
@@ -282,6 +285,7 @@ function entryLimits():string {
 }
 function readyForAI():boolean {return !!config&&(route==='example'?config.mode==='mock':config.mode==='mock'||(config.configured&&config.paidEnabled&&$<HTMLInputElement>('consent').checked));}
 function displayView() {
+  if(view!=='work'||route==='projects'||resultRevealToken&&resultRevealToken.context!==contextOpen)resultRevealToken=null;
   const inProject=route!=='projects',starting=inProject&&!project.tasks.length;
   document.body.dataset.route=route;document.body.dataset.starting=String(starting);
   // FLOW091: inside a project (past the welcome) the head is one compact line so the map / next action come first.
@@ -447,10 +451,11 @@ function continueTask(id:string) {
   const current=project.currentTaskId?taskOf(project):null,same=current&&(current.id===id||isReturnTask(project,current)&&current.parentTaskId===id);
   if(!same)commit(focusTask(project,id));view='work';render();
   // PC12: say which record is now edited when it is not the request that was read.
-  const read=project.tasks.find(x=>x.id===id),no=(x:Task)=>`작업 ${pad(project.tasks.indexOf(x)+1)}`;
+  const read=project.tasks.find(x=>x.id===id),no=(x:Task)=>`작업 ${pad(project.tasks.findIndex(t=>t.id===x.id)+1)}`;
   if(read&&current&&same&&current.id!==id){project={...project,notice:`${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.`};renderStatus();}
   else if(read&&current&&!same){project={...project,notice:`${no(read)}로 이어가기 · 고치는 작업문은 ${no(read)}의 것이에요. 전에 이어가던 ${no(current)}은 그대로 남아요.`};renderStatus();}
-  $('outcome-home').focus({preventScroll:true});$('outcome-home').scrollIntoView({block:'start'});
+  const title=$('context-title');title.style.scrollMarginTop=`${(document.querySelector('.feedback-stack')?.getBoundingClientRect().height??0)+24}px`;
+  title.focus({preventScroll:true});title.scrollIntoView({block:'start'});
 }
 /** Explicit: write the next request for this area (null = no area). The only way, besides the composer's own choice, to set the target. */
 function writeInArea(id:string|null) {
@@ -767,11 +772,14 @@ function openReceivedReport(reportId:string) {
 function renderResultFile() {
   renderResultReceipt();
   $('result-file-message').textContent=resultMessage;
-  const area=$('result-file-preview');area.replaceChildren();if(!resultSelection)return;
+  const area=$('result-file-preview');area.replaceChildren();area.dataset.selectionState='none';if(!resultSelection)return;
   try {
     const {file,task,record,duplicate}=inspectResultFile(project,resultSelection.rawText),preview=exportPreview(project,task,record);
     resultSelection.revision=project.revision;
+    area.dataset.selectionState='review';
     area.dataset.targetTaskId=task.id;area.dataset.returnId=record.returnId!;
+    const heading=node('h3','선택한 결과 확인');heading.id='result-file-review-heading';heading.tabIndex=-1;
+    area.append(heading,node('p',duplicate?'이미 가져온 결과입니다. 기존 기록을 확인할 수 있습니다.':'아직 가져오지 않았습니다.','hint'));
     area.append(node('h3',`연결할 작업 · ${taskTitle(project,task)}`),node('p',`내보낸 시점 · ${dateLabel(record.at)} · 원래 버전 r${record.revision}`,'hint'));
     if(task.handoffs.at(-1)!==record)area.append(node('p','이전 내보내기에 대한 보고입니다. 더 최근 내보내기로 옮기지 않습니다.','alert warning'));
     const bases=details(preview.recordedBases===null?'기준 기록 비교 불가':`이후 기록된 기준 ${preview.recordedBases.length}개`,'file-return-bases');
@@ -786,7 +794,8 @@ function renderResultFile() {
     area.append(btn(duplicate?'기존 기록 확인':'이 결과 가져오기',()=>void acceptResultFile(),'primary','accept-result-file'));
     area.append(rawFileDetails(resultSelection.rawText,file.returnId,'result-file-raw'));
   } catch(e) {
-    area.dataset.targetTaskId='';area.dataset.returnId='';area.append(node('p',resultError(e),'alert warning'));
+    area.dataset.selectionState='invalid';area.dataset.targetTaskId='';area.dataset.returnId='';
+    const error=node('p',resultError(e),'alert warning');error.id='result-file-error';error.tabIndex=-1;area.append(error);
     const raw=details('선택 파일 원문 보기','result-file-raw'),field=node('textarea');field.readOnly=true;field.rows=5;field.value=resultSelection.rawText;field.setAttribute('aria-label','선택 파일 원문');raw.append(field);area.append(raw);
   }
   area.append(btn('닫고 기존 붙여넣기 이용',()=>{resultRead++;resultSelection=null;resultMessage='작성 중인 입력은 그대로입니다. 기존 입력란에 필요한 보고를 붙여넣으세요.';renderResultFile();$('draft').focus();},'quiet','cancel-result-file'));
@@ -966,11 +975,23 @@ function workReferenceReader(t:Task):HTMLDetailsElement {
   body.addEventListener('scroll',captureWorkReferenceReading,{passive:true});body.addEventListener('toggle',captureWorkReferenceReading,true);
   return ref;
 }
+function jumpWorkControl(id:string,part:'next'|'file') {
+  if(view!=='work'||project.currentTaskId!==id||$('work-edit-fields')?.dataset.taskId!==id)return;
+  const box=$<HTMLDetailsElement>(part==='next'?'edit-work':'file-return-options');box.open=true;
+  const control=part==='next'?$('work-next'):box.querySelector('summary');
+  control?.scrollIntoView({block:'center'});control?.focus({preventScroll:true});
+}
 function renderWork(t:Task|null) {
   captureWorkReferenceReading();if(!t||workReference&&!referenceMatches(t,workReference))workReference=null;
   // FLOW083: the stage's actions live in the '지금 할 일' card; this card is the output and its editing.
   const area=$('work'),actions=$('next-actions');area.replaceChildren();actions.replaceChildren();$('empty').hidden=!!t;if(!t)return;
   const w=currentWork(project,t),v=w.values,card=node('div','','card work-card');card.id='current-work';card.tabIndex=-1;
+  const jumps=node('div','','actions');jumps.id='work-context-jumps';jumps.dataset.taskId=t.id;
+  const owner=areaById(areaOf(project,t));
+  jumps.append(node('span',`작업 ${pad(project.tasks.findIndex(x=>x.id===t.id)+1)} · ${owner?.name??'영역 미지정'}`,'hint'),
+    btn('다음 행동 고치기',()=>jumpWorkControl(t.id,'next'),'secondary','work-edit-next'),
+    btn('파일 결과용 작업문으로',()=>jumpWorkControl(t.id,'file'),'quiet','work-file-handoff'));
+  actions.append(jumps);
   const local=project.sources.filter(s=>t.sourceIds.includes(s.id));
   const heading=node('div','','work-heading'),h=node('div');const receipt=receiptOf(t);
   h.append(node('p',`TASK ${pad(project.tasks.indexOf(t)+1)}${receipt!==null&&receipt>=0?` · 작업 ${pad(receipt+1)}에 받은 보고`:''}`,'eyebrow'),node('h2',receipt!==null?'후속 확인 작업문 초안':'이어갈 작업'));
@@ -2307,12 +2328,21 @@ function nextAction(t:Task,a:Area|null):HTMLElement {
     what.textContent=a?'보관된 영역이라 여기서 새 요청을 쓰지 않아요. 영역을 되살리면 쓸 수 있어요.':'영역 미지정 요청이라 이 화면에서는 영역 새 요청을 쓰지 않아요.';
     row.append(b);box.append(row,what);
   }
-  // Editing this task is the existing explicit continue (PC12 policy), kept secondary and apart from a new request.
-  const target=continueTarget(t),edit=node('div','','task-edit'),er=node('div','','row');
-  if(currentGroup(t))er.append(appTag());
-  er.append(btn(target.button,()=>continueTask(t.id),'secondary','task-view-continue'));
-  const which=node('p',target.text,'hint task-view-target');which.id='task-view-target';edit.append(er,which);box.append(edit);
   return box;
+}
+/** The existing explicit continue stays separate from the unsent draft and names the record actually edited. */
+function taskContinueAction(t:Task):HTMLElement {
+  const target=continueTarget(t),edit=node('div','','task-continue-context');
+  const cur=project.currentTaskId?project.tasks.find(x=>x.id===project.currentTaskId):null;
+  const edited=cur&&isReturnTask(project,cur)&&cur.parentTaskId===t.id?cur:t,owner=areaById(areaOf(project,edited));
+  edit.id='task-continue-context';edit.dataset.taskId=edited.id;
+  const current=cur&&cur.id!==edited.id?`현재 작업 ${pad(project.tasks.findIndex(x=>x.id===cur.id)+1)}에서 바꿀 대상 · `:'고칠 대상 · ';
+  const label=node('span',`${current}작업 ${pad(project.tasks.findIndex(x=>x.id===edited.id)+1)} · ${owner?.name??'영역 미지정'}${edited.id!==t.id?' · 현재 보고의 후속 작업문':''}`,'hint');label.id='task-continue-label';edit.append(label);
+  if(currentGroup(t))edit.append(appTag());
+  edit.append(btn(target.button,()=>continueTask(t.id),'secondary','task-view-continue'));
+  const detail=details('이어갈 대상 확인','task-continue-details'),which=node('p',target.text,'hint task-view-target');which.id='task-view-target';detail.append(which);
+  edit.append(detail);
+  return edit;
 }
 /** REPORT16: the picked report's own words first, level with the current idea beside it; then this request's reports as a
  * short pick list (existing title, source kind, time). Nothing is picked for the user; no unpicked report's text is listed. */
@@ -2347,7 +2377,9 @@ function renderTaskView(root:HTMLElement,t:Task) {
   top.append(node('p',`요청 · ${area?`영역 ‘${area.name}’${area.archived?' · 보관됨':''}`:'영역 미지정'}`,'eyebrow'));
   // PC12: back to the view the reading started from; without one (e.g. after a reload) only a plain way to the whole space.
   top.append(originButton('task-return-origin')??btn('전체 공간으로',openSpace,'secondary','task-to-space'));
-  head.append(top,title,node('p',`작업 ${pad(project.tasks.indexOf(t)+1)} · ${taskStatus(project,t)}`,'hint task-view-status'));
+  const context=node('div','','task-view-head-line');
+  context.append(node('p',`작업 ${pad(project.tasks.indexOf(t)+1)} · ${taskStatus(project,t)}`,'hint task-view-status'),taskContinueAction(t));
+  head.append(top,title,context);
   root.append(head);
   const body=node('section','','area-tasks task-view');body.id='task-view';
   const read=node('div','','task-read'),side=node('div','','task-read-side');
@@ -2538,15 +2570,25 @@ $('import').addEventListener('click',()=>$<HTMLInputElement>('import-file').clic
 $('select-result-file').addEventListener('click',()=>$<HTMLInputElement>('result-file-input').click());
 $('result-file-input').addEventListener('change',async()=>{
   const input=$<HTMLInputElement>('result-file-input'),file=input.files?.[0];input.value='';if(!file)return;
-  const read=++resultRead,epoch=projectEpoch,projectId=project.id;
+  const read=++resultRead,epoch=projectEpoch,projectId=project.id,revision=project.revision,current=project.currentTaskId,from=view;
+  const entry=target.kind==='entry'?target.ref.entryId:null;
+  const revealToken={context:contextOpen};resultRevealToken=revealToken;
+  const reveal=()=>{
+    if(resultRevealToken!==revealToken||read!==resultRead||epoch!==projectEpoch||project.id!==projectId||entry!==(target.kind==='entry'?target.ref.entryId:null)||from!=='work'||view!=='work'||route==='projects'||revision!==project.revision||current!==project.currentTaskId)return;
+    const focus=document.getElementById('result-file-review-heading')??document.getElementById('result-file-error')??document.getElementById('result-file-message');if(!focus)return;
+    $<HTMLDetailsElement>('compose-panel').open=true;$<HTMLDetailsElement>('result-file-panel').open=true;
+    focus.tabIndex=-1;focus.scrollIntoView({block:'center'});focus.focus({preventScroll:true});
+  };
   lastReceipt=null;resultSelection=null;resultMessage='선택한 파일을 읽는 중입니다. 아직 가져오지 않았습니다.';renderResultFile();
   try {
     if(file.size>RESULT_BYTES)throw new Error('RESULT_TOO_LARGE');
     const bytes=await file.arrayBuffer();
-    if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId)return;
+    if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId||entry!==(target.kind==='entry'?target.ref.entryId:null))return;
     const rawText=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
     resultSelection={rawText,projectId,revision:project.revision,epoch};resultMessage='원문과 연결 대상을 확인한 뒤 가져오세요.';renderResultFile();
-  }catch(e){if(read!==resultRead||epoch!==projectEpoch)return;resultMessage=resultError(e)+' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';renderResultFile();}
+    reveal();
+  }catch(e){if(read!==resultRead||epoch!==projectEpoch)return;resultMessage=resultError(e)+' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';renderResultFile();reveal();}
+  finally{if(resultRevealToken===revealToken)resultRevealToken=null;}
 });
 $('import-file').addEventListener('change',async()=>{
   const input=$<HTMLInputElement>('import-file'),file=input.files?.[0];input.value='';if(!file)return;
