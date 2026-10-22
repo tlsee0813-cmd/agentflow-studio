@@ -1,0 +1,62 @@
+{
+  "productBaseline": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "productSource": "fix1 exact e52eb74e531302905d6e2c86e6be164425ea13d354f8db98007dfc45516748e8, unchanged during test writing",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273592,
+      "sha256": "e52eb74e531302905d6e2c86e6be164425ea13d354f8db98007dfc45516748e8",
+      "gitBlob": "e045f45219fe38d4194dce7e9b076976c92c9410",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/tests/viewport30_browser.py",
+      "bytes": 9015,
+      "sha256": "673142733e8a1eb29d3ee59eab81424e609747672e6afdf68829030b384ee98a",
+      "gitBlob": "0e189eab163adfb920ebf17882e6390afc254076",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/tests/fixtures/viewport30-normal-ui-six.json",
+      "bytes": 25031,
+      "sha256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+      "gitBlob": "837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "bytes": 12129,
+      "sha256": "c90d57032a47001b86dc6837fb0b04c30dc0126490de913e14297bbb8490f0e3",
+      "gitBlob": "94a89788ca7dfebf8d6be05980e9c4d4c75739e5",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "plannedNativeCases": 4,
+  "static": {
+    "pythonAST": 0,
+    "JSsyntax": 0,
+    "JSexpressions": 10,
+    "fixtureParse": 0,
+    "firstDiff": 2,
+    "finalDiff": 0,
+    "firstDiffCause": "new workflow lines had CRLF reported as trailing whitespace; failed original copy/log preserved, normalized CRLF pairs to LF only",
+    "methods": [
+      "test_01_zero_work_scroll_return",
+      "test_02_deep_work_scroll_return"
+    ],
+    "nativePlannedCases": 4,
+    "browser": "NOT_RUN",
+    "server": "NOT_RUN",
+    "firstCameraCreation": "NOT_COVERED; normal UI import already creates existing camera",
+    "sourceAppUnchangedFromFix1": true
+  },
+  "fixtureProvenance": "c6b3b224532aacea5c8834271beceb2cc3be8c53/docs/transfer/map-reading-28/independent-a/v0/normal-ui-6-card-backup.json; blob837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8 byte-exact copied, source fixture is synthetic normal UI data",
+  "scope": "No local browser/server/CI/baseline failure run. First-map creation not covered; every case has existing import camera.",
+  "firstCapture": "trusted native nav-space click at document bubble after product target handler, same event task. Two native rAF snapshots kept separately; no replacement of first failure.",
+  "noRepair": "No saving wait/fit/resize/reach/native extra scroll after map click before first geometry assertions. Native wheel and saved input are pre-entry setup only.",
+  "limits": [
+    "No new all-card legibility or pointer usability claim; container overflow and individual card clip are distinct",
+    "No first-fit/missing-camera/nonzero remembered space-page test in these four cases",
+    "baseline expected failure follows PhaseA/source order but this new harness has not executed against it"
+  ]
+}

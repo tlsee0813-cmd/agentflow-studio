@@ -1,0 +1,18 @@
+{
+  "pythonAST": 0,
+  "JSsyntax": 0,
+  "JSexpressions": 10,
+  "fixtureParse": 0,
+  "firstDiff": 2,
+  "finalDiff": 0,
+  "firstDiffCause": "new workflow lines had CRLF reported as trailing whitespace; failed original copy/log preserved, normalized CRLF pairs to LF only",
+  "methods": [
+    "test_01_zero_work_scroll_return",
+    "test_02_deep_work_scroll_return"
+  ],
+  "nativePlannedCases": 4,
+  "browser": "NOT_RUN",
+  "server": "NOT_RUN",
+  "firstCameraCreation": "NOT_COVERED; normal UI import already creates existing camera",
+  "sourceAppUnchangedFromFix1": true
+}

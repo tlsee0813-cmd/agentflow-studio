@@ -1,0 +1,10 @@
+--- a/app/continuity/tests/viewport30_browser.py
++++ b/app/continuity/tests/viewport30_browser.py
+@@ -43,6 +43,7 @@
+         self.page.set_viewport_size({'width':self.WIDTH,'height':self.HEIGHT})
+         raw=FIXTURE.read_bytes();self.assertEqual(hashlib.sha256(raw).hexdigest(),'c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa')
+         self.record('source','normal UI cycle28 backup',{'bytes':len(raw),'gitBlob':'837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8','synthetic':True})
++        self.page.locator('#nav-projects').click();expect(self.page.locator('#projects-view')).to_be_visible()
+         with self.page.expect_file_chooser() as chooser:self.page.locator('#list-import').click()
+         self.page.once('dialog',lambda d:d.accept());chooser.value.set_files(str(FIXTURE))
+         expect(self.page.locator('#notice')).to_contain_text('사본으로 불러왔어요');base.saved(self.page)

@@ -1,0 +1,14 @@
+.github/workflows/verify.yml:235: trailing whitespace.
++      - name: VIEWPORT30 existing-camera map return after zero and deep work scroll on two PCs (native HTTP, normal UI backup, MOCK)
+.github/workflows/verify.yml:236: trailing whitespace.
++        env:
+.github/workflows/verify.yml:237: trailing whitespace.
++          IDEA015_EVIDENCE_DIR: test-results/viewport30
+.github/workflows/verify.yml:238: trailing whitespace.
++        shell: bash
+.github/workflows/verify.yml:239: trailing whitespace.
++        run: |
+.github/workflows/verify.yml:240: trailing whitespace.
++          set -o pipefail
+.github/workflows/verify.yml:241: trailing whitespace.
++          python continuity/tests/viewport30_browser.py 2>&1 | tee test-results/viewport30-browser.log

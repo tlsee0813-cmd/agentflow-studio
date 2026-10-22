@@ -1,0 +1,47 @@
+{
+  "prior": "TEST_RECEIPT.json",
+  "status": "testfix1 frozen; independent static review pending, native UI NOT_RUN",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273592,
+      "sha256": "e52eb74e531302905d6e2c86e6be164425ea13d354f8db98007dfc45516748e8",
+      "gitBlob": "e045f45219fe38d4194dce7e9b076976c92c9410",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/tests/viewport30_browser.py",
+      "bytes": 9126,
+      "sha256": "43798ea3a9503690155cc461f0a2c2447f54fb2b635153460fc6696e0b8fcc4d",
+      "gitBlob": "d32dc320fa8c0f2e10b10fede5e64ba2fa411e9d",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/tests/fixtures/viewport30-normal-ui-six.json",
+      "bytes": 25031,
+      "sha256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+      "gitBlob": "837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "bytes": 12129,
+      "sha256": "c90d57032a47001b86dc6837fb0b04c30dc0126490de913e14297bbb8490f0e3",
+      "gitBlob": "94a89788ca7dfebf8d6be05980e9c4d4c75739e5",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "finding": "Static reviewer found empty Browser context starts new work view, so hidden list-import would timeout. This was not an observed local test failure. Original673142 source preserved.",
+  "delta": "Only normal #nav-projects click and #projects-view visible precondition added before existing native file chooser. All first/camera/height/fold/data assertions unchanged byte-for-byte.",
+  "verification": {
+    "pythonAST": 0,
+    "diff": 0,
+    "JSsyntax": "previous ten expressions unchanged; not rerun",
+    "fixtureParse": "prior pure parse0; fixture byte-identical",
+    "productTypeBuild": "prior fix1 type/build0; product unchanged, not rerun",
+    "browser": "NOT_RUN",
+    "server": "NOT_RUN",
+    "baselineExecution": "NOT_RUN"
+  },
+  "scope": "4 existing-import-camera returns only; first-map creation and actual card usability remain separate."
+}
