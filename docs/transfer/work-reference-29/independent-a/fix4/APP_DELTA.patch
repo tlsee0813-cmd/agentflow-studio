@@ -1,0 +1,19 @@
+diff --git a/app/continuity/src/client/app.ts b/app/continuity/src/client/app.ts
+index 27098b83..82180891 100644
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -950,11 +950,12 @@ function workReferenceReader(t:Task):HTMLDetailsElement {
+   const caption=node('div','','work-reference-caption'),status=node('p','참고를 닫고 다시 열어 읽을 설명을 선택하세요.','hint'),newer=node('p','새 설명이 있어요. 읽던 본문은 그대로예요. 닫고 다시 열면 새 설명을 읽을 수 있어요.','hint');status.dataset.referenceStatus='';status.setAttribute('role','status');newer.dataset.referenceNew='';newer.hidden=true;caption.append(status,newer);ref.append(caption);
+   const body=node('div','','work-reference-body');body.id=`${id}-body`;body.tabIndex=0;body.setAttribute('role','region');body.setAttribute('aria-label','이 작업의 부분 구상과 선택한 설명 읽기');body.dataset.projectId=owner;body.dataset.taskId=t.id;body.dataset.areaId=area??'';ref.append(body);
+   if(workReference&&referenceMatches(t,workReference)){ref.open=true;fillWorkReference(body,workReference);workReference.restore=true;}
+-  ref.querySelector('summary')!.addEventListener('click',()=>{
++  ref.querySelector('summary')!.addEventListener('click',e=>{
+     if(!ref.isConnected||!ref.getClientRects().length||owner!==project.id||epoch!==projectEpoch||project.currentTaskId!==t.id||areaOf(project,taskOf(project))!==area)return;
+     if(ref.open){workReference=null;return;}
++    e.preventDefault();ref.open=true;
+     const revision=area&&areaById(area)?areaDescription(project,area).current?.entry.revision??null:null;
+-    workReference={project:owner,epoch,task:t.id,area,revision,openedAt:new Date().toISOString(),reading:{y:0,open:{}},restore:false};fillWorkReference(body,workReference);
++    workReference={project:owner,epoch,task:t.id,area,revision,openedAt:new Date().toISOString(),reading:{y:0,open:{}},restore:false};fillWorkReference(body,workReference);body.scrollTop=0;
+   });
+   body.addEventListener('scroll',captureWorkReferenceReading,{passive:true});body.addEventListener('toggle',captureWorkReferenceReading,true);
+   return ref;

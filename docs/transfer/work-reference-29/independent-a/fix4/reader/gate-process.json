@@ -1,0 +1,12 @@
+{
+  "scope": "offline aggregate evaluation; not another UI run",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle29-fix4-ui/gate.py"
+  ],
+  "startUTC": "2026-10-22T20:35:51.735822+00:00",
+  "endUTC": "2026-10-22T20:35:51.756760+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

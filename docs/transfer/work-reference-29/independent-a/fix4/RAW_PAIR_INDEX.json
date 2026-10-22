@@ -1,0 +1,62 @@
+[
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:34:39.949816+00:00",
+    "label": "CHECK same r2 explicit mouse reopen starts at zero before assistance",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:34:42.117746+00:00",
+    "label": "CHECK first native U key preserves DOM focus selection selected text revision scroll and N/S/C",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:34:42.263217+00:00",
+    "label": "CHECK actual selected-description sentence and N same viewport",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:34:47.797862+00:00",
+    "label": "CHECK new separate-task description arrival keeps old selected body and announces new",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1280,
+    "UTC": "2026-10-22T20:34:49.696909+00:00",
+    "label": "origin return after reference workflow",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:35:03.613966+00:00",
+    "label": "CHECK same r2 explicit mouse reopen starts at zero before assistance",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:35:05.870832+00:00",
+    "label": "CHECK first native U key preserves DOM focus selection selected text revision scroll and N/S/C",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:35:06.065565+00:00",
+    "label": "CHECK actual selected-description sentence and N same viewport",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:35:10.831489+00:00",
+    "label": "CHECK new separate-task description arrival keeps old selected body and announces new",
+    "rawReference": "reader/ui.jsonl.gz"
+  },
+  {
+    "viewport": 1440,
+    "UTC": "2026-10-22T20:35:12.175610+00:00",
+    "label": "origin return after reference workflow",
+    "rawReference": "reader/ui.jsonl.gz"
+  }
+]

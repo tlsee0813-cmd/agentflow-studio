@@ -1,0 +1,14 @@
+test_01_actual_editor_B_not_compose_or_map_A (__main__.WorkDescription29.test_01_actual_editor_B_not_compose_or_map_A) ... ok
+test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference (__main__.WorkDescription29.test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference) ... ok
+test_03_new_applied_revision_requires_explicit_reopen (__main__.WorkDescription29.test_03_new_applied_revision_requires_explicit_reopen) ... ok
+test_04_task_project_lifecycle_and_held_only (__main__.WorkDescription29.test_04_task_project_lifecycle_and_held_only) ... ok
+test_01_actual_editor_B_not_compose_or_map_A (__main__.WorkDescription29Wide.test_01_actual_editor_B_not_compose_or_map_A) ... ok
+test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference (__main__.WorkDescription29Wide.test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference) ... ok
+test_03_new_applied_revision_requires_explicit_reopen (__main__.WorkDescription29Wide.test_03_new_applied_revision_requires_explicit_reopen) ... ok
+test_04_task_project_lifecycle_and_held_only (__main__.WorkDescription29Wide.test_04_task_project_lifecycle_and_held_only) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 30.538s
+
+OK
+

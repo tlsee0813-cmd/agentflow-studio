@@ -1,0 +1,34 @@
+{
+  "build": {
+    "toolSession": 1588,
+    "completion": "da93f1",
+    "actualCollectorExit": 0
+  },
+  "AREA17": {
+    "toolSession": 56889,
+    "completion": "03cdcc",
+    "actualCollectorExit": 0,
+    "childExit": 0,
+    "serverExit": "NOT_CAPTURED separately by original author harness"
+  },
+  "reader": {
+    "toolSession": 79291,
+    "completion": "60a702",
+    "actualCollectorExit": 0,
+    "childExit": 0,
+    "serverExit": -15
+  },
+  "authorEight": {
+    "toolSession": 60630,
+    "completion": "139361",
+    "actualCollectorExit": 0,
+    "childExit": 0,
+    "serverExit": "NOT_CAPTURED separately by original author harness"
+  },
+  "offlineAggregate": {
+    "completion": "019e43",
+    "actualCollectorExit": 0,
+    "childExit": 0,
+    "notAnotherUIRun": true
+  }
+}

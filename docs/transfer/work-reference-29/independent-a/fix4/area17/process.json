@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle29-fix4-area17/runner.py"
+  ],
+  "app": "/workspace/browser-env/cycle29-fix4-candidate/app",
+  "startUTC": "2026-10-22T20:34:26.471781+00:00",
+  "endUTC": "2026-10-22T20:34:36.389414+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "4de6438c610e1bc82569e74f3a4c450a8ff73649aa010d8b172c8b16dd4f8c08"
+}
