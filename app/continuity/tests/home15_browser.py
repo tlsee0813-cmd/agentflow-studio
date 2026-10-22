@@ -203,6 +203,13 @@ class Home15(unittest.TestCase):
     def read_card(self,name):return self.page.locator('#project-list .project-card').filter(has=self.page.locator('.project-card-name',has_text=name))
     def envelope_project(self,name_part):
         return next(e['project'] for e in json.loads(self.envelope())['entries'] if name_part in e['project']['name'])
+    def page_scroll_phase(self,label):
+        """Read-only facts: distinguish pointer/focus/opening movement from a later native key's background scroll."""
+        value=self.page.evaluate('''()=>{const d=document.getElementById('project-read'),b=document.getElementById('project-read-body');
+          return {time:performance.now(),y:scrollY,max:Math.max(0,document.documentElement.scrollHeight-innerHeight),open:d.open,
+            active:document.activeElement&&(document.activeElement.id||document.activeElement.className),bodyY:b.scrollTop,
+            bodyMax:Math.max(0,b.scrollHeight-b.clientHeight),route:document.body.dataset.route}}''')
+        self.record('actual','HOME15 page scroll phase: '+label,value);return value
 
     def test_08_read_full_name_and_purpose_before_entering(self):
         self.install('read');before=self.envelope();alerts=[];self.page.on('dialog',lambda d:(alerts.append(d.message),d.dismiss()))
@@ -210,7 +217,9 @@ class Home15(unittest.TestCase):
         self.check('card keeps its 2-line clamp (suffix cut on the card)',a.locator('.project-card-name').evaluate('(e)=>e.scrollHeight>e.clientHeight+1'),True)
         a.scroll_into_view_if_needed();self.page.mouse.wheel(0,120);self.page.wait_for_timeout(150);y0=self.page.evaluate('scrollY')
         self.check_true('list scrolled before opening',y0>0,y0)
-        a.locator('.project-more-button').click();a.locator('.project-read-open').click()
+        self.page_scroll_phase('A before native menu click');a.locator('.project-more-button').click()
+        self.page_scroll_phase('A menu open, immediately before native read click');a.locator('.project-read-open').click()
+        self.page_scroll_phase('A immediately after native read click')
         g=self.dialog_geom();self.record('actual','A opened',g)
         self.check('opened by click: dialog open, menu closed, still the list',[g['open'],a.locator('.project-more').evaluate('e=>e.open'),g['route']],[True,False,'projects'])
         self.check('focus starts at the top of the text (name first)',[g['active'],g['bodyScroll']],['project-read-body',0])
@@ -224,23 +233,29 @@ class Home15(unittest.TestCase):
         end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만');self.check('purpose end not visible before scrolling',end['inside'],False)
         # Keyboard only: PageDown steps through the text, End reaches the distinguishing end, Home goes back to the name.
         tops=[]
-        for _ in range(2):self.page.keyboard.press('PageDown');self.page.wait_for_timeout(150);tops.append(self.dialog_geom()['bodyScroll'])
+        for _ in range(2):
+            self.page_scroll_phase(f'A before PageDown {_+1}');self.page.keyboard.press('PageDown');self.page_scroll_phase(f'A immediately after PageDown {_+1}')
+            self.page.wait_for_timeout(150);tops.append(self.dialog_geom()['bodyScroll']);self.page_scroll_phase(f'A existing PageDown observation {_+1}')
         self.check_true('PageDown scrolls the text (it may already reach the end)',tops[0]>0 and tops[1]>=tops[0],tops)
-        self.page.keyboard.press('End');self.page.wait_for_timeout(250);end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만')
+        self.page_scroll_phase('A before End');self.page.keyboard.press('End');self.page_scroll_phase('A immediately after End')
+        self.page.wait_for_timeout(250);end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만');self.page_scroll_phase('A existing End observation')
         self.check_true('End: purpose end actually visible',end['inside'] and end['hit'],end)
-        self.page.keyboard.press('Home');self.page.wait_for_timeout(250);v=self.visible_text('project-read-name','· 강남 지점')
+        self.page_scroll_phase('A before Home');self.page.keyboard.press('Home');self.page_scroll_phase('A immediately after Home')
+        self.page.wait_for_timeout(250);v=self.visible_text('project-read-name','· 강남 지점');self.page_scroll_phase('A existing Home observation')
         self.check_true('Home: back to the full name',v['inside'] and v['hit'],v)
         box=self.page.locator('#project-read-body').bounding_box();self.page.mouse.move(box['x']+box['width']/2,box['y']+box['height']/2)
         for _ in range(30):self.page.mouse.wheel(0,400)
         self.page.wait_for_timeout(200);end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만')
+        self.page_scroll_phase('A existing native wheel observation')
         self.check_true('wheel: purpose end visible after scrolling inside',end['inside'] and end['hit'],end)
         self.check('background list did not scroll',round(self.page.evaluate('scrollY')),round(y0))
         self.page.locator('#project-read-name').click(click_count=3)
         self.check_true('name selectable as text','강남 지점' in self.page.evaluate('getSelection().toString()'))
         trail=[]
-        for key in ['Tab','Tab','Tab','Shift+Tab','Shift+Tab','Shift+Tab']:self.page.keyboard.press(key);trail.append(self.dialog_geom()['inDialog'])
+        for key in ['Tab','Tab','Tab','Shift+Tab','Shift+Tab','Shift+Tab']:
+            self.page_scroll_phase('A before '+key);self.page.keyboard.press(key);trail.append(self.dialog_geom()['inDialog']);self.page_scroll_phase('A immediately after '+key)
         self.check('Tab/Shift+Tab never reach the background',trail,[True]*6)
-        self.page.keyboard.press('Escape');g=self.dialog_geom()
+        self.page_scroll_phase('A before Escape');self.page.keyboard.press('Escape');self.page_scroll_phase('A immediately after Escape');g=self.dialog_geom()
         self.check('Escape closes, list stays at the same scroll',[g['open'],g['route'],round(g['winY'])],[False,'projects',round(y0)])
         expect(a.locator('.project-more-button')).to_be_focused();self.check('reading wrote nothing',self.envelope(),before)
         # B by keyboard only: Enter on its menu button, Tab to the item, Space.
@@ -304,7 +319,17 @@ class Home15(unittest.TestCase):
         # The text is still read to its end by keyboard, and Space on 닫기 still closes.
         self.page.keyboard.press('Tab');self.page.keyboard.press('Tab')
         if self.dialog_geom()['active']!='project-read-body':self.page.locator('#project-read-body').focus()
-        self.page.keyboard.press('End');self.page.wait_for_timeout(250);end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만')
+        self.page_scroll_phase('body End: focus established before synthetic background setup')
+        # Existing test_10 already positions the background programmatically at its two ends. This labelled setup
+        # additionally places it in the actual middle AFTER focus, so End cannot pass just because the page is at max.
+        middle=self.page.evaluate('''()=>{const max=Math.max(0,document.documentElement.scrollHeight-innerHeight),before=scrollY;
+          scrollTo({top:max/2,behavior:'instant'});return {before,y:scrollY,max,setup:'synthetic background positioning, not a user path'}}''')
+        self.record('fixture','body End background has real room in both directions',middle)
+        self.check_true('body End starts strictly between page limits',0<middle['y']<middle['max'],middle);y=round(middle['y'])
+        key_start=self.page_scroll_phase('body End: actual middle immediately before native key')
+        self.check_true('body End has text left to scroll',key_start['bodyY']<key_start['bodyMax'],key_start)
+        self.page.keyboard.press('End');self.page_scroll_phase('body End: immediately after native key')
+        self.page.wait_for_timeout(250);end=self.visible_text('project-read-purpose','강남 지점은 현장 결제만');self.page_scroll_phase('body End: existing final observation')
         self.check_true('End in the text still reaches the end',end['inside'] and end['hit'],end)
         self.check('text keys do not move the list either',round(self.page.evaluate('scrollY')),y)
         self.page.keyboard.press('Tab');expect(self.page.locator('#project-read-close')).to_be_focused();self.page.keyboard.press('Space')
