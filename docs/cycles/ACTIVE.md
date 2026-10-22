@@ -21,9 +21,17 @@
 - 이전 중단된 Pro 계획은 미완료 과거 자료다. 이번에 새로 조사하며 기존 예약 agentflow의 PAUSED 설정은 그대로 둔다. 사용자 재개 요청이 현재 작업의 근거다.
 
 ## 현재 후보 검토 — 사이클17
-[초안 PR #8](https://github.com/tlsee0813-cmd/agentflow-studio/pull/8), 제품 소스98bc0097af132410f75734ac692f9b7d3b42edcb. 작성자 단위236/236·새 브라우저8/8은 수용 판정이 아니다. 독립 Astra 정적 검토에서 (1) 단순 새 요청 제출만으로 현재 설명이 낡아 다음 인계에서 빠지는 흐름, (2) 사용자 정정을 건너뛴 외부 적용 이력의 복구 허용, (3) 위치 찾기 뒤 영역 열기에서 출발 보기 정보 상실을 지적했다. 총괄은 구현 담당에게 수정을 요구했고 Cloud에서 고정 소스 반례·전체 흐름을 별도로 실행한다. 검사 자체의 실제 boolean 로그와 사용자 구상/받은 설명의 첫 화면 단언도 보완 요청했다. 최종 수용·병합 전이다.
+[초안 PR #8](https://github.com/tlsee0813-cmd/agentflow-studio/pull/8). **아직 수용·병합 전이다.** Claude Code가 product/area-understanding-17에서 구현하며 총괄과 Astra/Sol 정적 검토, 별도 Codex Cloud 실행을 분리한다.
 
-[Sol 중간본 독립 자료](https://github.com/tlsee0813-cmd/agentflow-studio/tree/fdad3ca80699bb6f36b66d482752a9c3fd40143f/docs/transfer/area-update-17/independent-sol-wip)는43파일418,024B, 원격 내용·해시 일치를 확인했다. 최초 고정4 반례는 중간본에서 모두 통과했고, PC의 정정 초안 기준·영역별 펼침 분리를 확인했다. 위치 CTA가 화면 밖 카드를 드러내지 않는 문제는 Code에서 수정 후 작성자 검사를 보고했으며 최종 독립 확인 전이다. 원시 UI수집exit1과 같은 수신 후 기준의 후처리 좌표 비교를 구분해 보존했다. 후처리는 새 브라우저 실행이나 UI 전체 통과가 아니다.
+첫 Code 소스98bc009의 작성자 단위236/236·브라우저8/8 및 Windows/Ubuntu CI 성공 뒤에도 세 결함을 확인했다: 단순 새 요청만으로 현재 설명이 낡아 다음 인계에서 제외됨, 사용자 정정을 건너뛰는 외부 적용 이력 복구 허용, 위치 찾기 뒤 영역 열기에서 출발 보기 정보 소실. [독립 v0 실행·원시 실패](https://github.com/tlsee0813-cmd/agentflow-studio/tree/975009a01ce67dd4c7d1c26aebe0a76b24943c87/docs/transfer/area-update-17/independent-v0)에 세 반례와 별도 통과 범위를 보존했다.
+
+fix1 d56eee9에서 위 세 결함을 보완했다. [별도 Cloud 고정 실행](https://github.com/tlsee0813-cmd/agentflow-studio/blob/f6dde37baf44469b6b2a6a2ec2c1bd2d9bcbe4ea/docs/transfer/area-update-17/independent-fix1/REPORT.md)은 원본 고정4개·새 요청 인계·복구·기존 작업 읽기 경유 복귀·두 표본×양PC·두 설명의 펼침 분리·긴 본문 휠/닫힘을 한정 통과했다. 자료139파일2,764,501B를 GitHub에서 회수할 수 있다.
+
+그 뒤 총괄이 직접 ‘위치 찾기→이 영역에 새 요청→제출·복사→원래 지도’ 전체 경로를 대조했다. Astra 정적 확인과 독립 양PC 실행에서 **실제 새 작업은 생성되지만 명시 복귀 버튼이 없고 원래 카메라 위치가 소실되는 결함**을 재현했다. 해당 child/collector exit1이며 기존 작업 읽기 통과로 대신하지 않는다. 현재 Code가 좁은 후속 수정을 진행한다. Sol이 지적한 새 요청 생성 자체의 UI 단언 누락도 보완 중이다. 작성자 단위239/239·브라우저10/10 및 전체 작성자 실행 통과 보고는 이 결함의 수용 근거가 아니다.
+
+총괄은 공유된1280/1440 기본 화면을 직접 읽었다. 사용자 구상·받은 설명의 첫 문장은 구별되지만 상단 정보의 높이와 하단 행동까지 읽을 부담이 남아 있다. 이번 갱신 흐름의 검증을 Dify 동등 이상의 전체 UI 완성으로 확대하지 않는다.
+
+[Sol WIP 독립 선행 자료](https://github.com/tlsee0813-cmd/agentflow-studio/tree/fdad3ca80699bb6f36b66d482752a9c3fd40143f/docs/transfer/area-update-17/independent-sol-wip)의 수신 전후 콘텐츠 차이를 포함한 원시 실패와 같은 수신 후 좌표 비교 후처리도 그대로 보존한다. 후처리를 새 브라우저 실행으로 세지 않는다.
 
 ## 유지하는 제품 경계
 사용자 기준은 목적 차이를 구분한 Dify 실제 조작 비교이며 사람 사용 기록 제출을 추가 관문으로 두지 않는다. PC1280×720·1440×900 중심,390 최소접근이다. Dify 실행 워크플로·편집 패널을 그대로 복제하지 않는다.
