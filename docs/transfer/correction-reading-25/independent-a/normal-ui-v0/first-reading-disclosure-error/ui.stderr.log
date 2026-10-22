@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle25-observation/observe.py", line 87, in <module>
+    try:u.run25(w,h)
+        ^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle25-observation/observe.py", line 61, in run25
+    d=self.p.get_by_text(CORRECTION,exact=True);self.reach(d);self.log('visible current description user reading',{'text':d.inner_text(),'geometry':d.evaluate(GEO),'currentAreaUserIdea':self.p.locator('#panel-idea').inner_text(),'readingMeaning':'表示30/実動作7; user correction is an app-unverified reference, not new policy'});self.screenshot('01-current-description-thirty')
+                                                ^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle25-observation/support.py", line 46, in reach
+    r=g['rect'];c=g['clip'];dy=r['top']-c['top']-5 if r['top']<c['top'] else r['bottom']-c['bottom']+5;panel=q.locator('xpath=ancestor::*[@id="area-panel-body"]');self.wheel(max(-400,min(400,dy)),panel if panel.count() else None)
+                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle25-observation/support.py", line 40, in wheel
+    try:self.p.mouse.move(x,y);self.p.mouse.wheel(0,dy);v=self.p.evaluate('async()=>await window.__ind23Wheel.promise');self.log('native wheel',v);assert v['ok'],v
+                                                                                                                                                          ~^^^^^^
+AssertionError: {'ok': False, 'reason': 'native-scroll-deadline', 'events': [{'type': 'wheel', 'delta': -351.28125, 'target': 'area-panel-body'}], 'y': 0}
+

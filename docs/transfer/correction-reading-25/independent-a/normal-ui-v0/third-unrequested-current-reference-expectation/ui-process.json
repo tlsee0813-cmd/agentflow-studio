@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle25-observation/observe.py"
+  ],
+  "startUTC": "2026-10-22T18:20:18.863294+00:00",
+  "endUTC": "2026-10-22T18:20:29.256839+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "28d9baad71b54acf838098c6e4acb64c7089b991c6c1ee575efad7050013a849",
+  "collectorPlannedExit": 1
+}

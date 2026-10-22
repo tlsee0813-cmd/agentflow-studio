@@ -1,0 +1,176 @@
+[
+  {
+    "UTC": "2026-10-22T18:21:24.223942+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:38631/api/continuity",
+    "status": 200,
+    "bytes": 1404,
+    "bodySHA256": "8f7d0487cbdfa6ba69d5b924834109f70f0229df95e8d4657e4d46670d5a1864",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_491c9ecd-87b2-4843-8901-ec0f3c0d8598",
+        "revision": 8,
+        "requestId": "R_c0e41702-bfdd-49d9-af47-0cb80a0e0626",
+        "taskId": "T_9cb44564-30f1-46a5-ab16-14ed7c7397ad"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_f2fbcd89-f129-4615-9da9-db30c0dd0604",
+              "revision": 8
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T18:21:26.750296+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:38631/api/continuity",
+    "status": 200,
+    "bytes": 1385,
+    "bodySHA256": "3df7fdf58d493c41c17825532d56c0752e8974eda80208bb590ae3babfad796b",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_491c9ecd-87b2-4843-8901-ec0f3c0d8598",
+        "revision": 18,
+        "requestId": "R_0205dfb0-3a6f-497c-8dbe-fc386d3ffdfb",
+        "taskId": "T_d838dc0d-8eec-4074-888d-eae6fedcd929"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D2",
+              "sourceId": "S_81625f6d-fe7e-4683-9088-130327b69a83",
+              "revision": 18
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T18:21:33.576198+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:38631/api/continuity",
+    "status": 200,
+    "bytes": 1404,
+    "bodySHA256": "7cc9e05d4ec8a412022e506df5bfb4dfce869aa29e0a688742bd4860591b5287",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_67eb4552-1b65-4f62-8d13-33296cbeec95",
+        "revision": 8,
+        "requestId": "R_cfcbd84c-f480-45c7-819e-6f72b0b2b4df",
+        "taskId": "T_dca09b00-9432-4395-86cd-4ac120df29a8"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_fc2e4343-9b38-47ef-a6dc-dae82d1259d0",
+              "revision": 8
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T18:21:36.123344+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:38631/api/continuity",
+    "status": 200,
+    "bytes": 1385,
+    "bodySHA256": "6cea9e63b31a22ea131dc5206ff1fd2bcfdf59be9f1904a03fd0db1f7632fb8c",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_67eb4552-1b65-4f62-8d13-33296cbeec95",
+        "revision": 18,
+        "requestId": "R_14999633-fd25-44a2-9efb-a18d948e6770",
+        "taskId": "T_75db05a3-b37d-41f3-8f59-be898054297d"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D2",
+              "sourceId": "S_cebdf89e-004f-4e1c-b5a4-b4499979d9bc",
+              "revision": 18
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  }
+]

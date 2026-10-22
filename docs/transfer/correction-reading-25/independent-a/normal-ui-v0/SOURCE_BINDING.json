@@ -1,0 +1,72 @@
+{
+  "sourceCommit": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+  "sourceTree": "1afe2e7203913cede1f395fc8ec2f2bea6bc9ed3",
+  "before": "unchanged 689c build/source verified by cycle23 7c733b45 and cycle24 b1f291c6; no product/build writes in cycle25",
+  "after": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260706,
+      "sha256": "5370d0a6acd3a1b60e3f5c81e8e3a4be647665d23c18667f810b6df7634f9f58",
+      "exactPinnedEqualAfter": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "exactPinnedEqualAfter": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "exactPinnedEqualAfter": true
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 16360,
+      "sha256": "16202db1c238e917c548950543686046977c21c61de56b30d6f4140aad607d47",
+      "exactPinnedEqualAfter": true
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 73179,
+      "sha256": "3a0d8945fb31e0a94bbf0e42407e2e5fcf9901ebd22686b73d75445ea1de9314",
+      "exactPinnedEqualAfter": true
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "bytes": 46546,
+      "sha256": "cc958cf61b54aa9d552aab07ddaa8c7e6d60ec5e61f7218cf597dd608e9b94df",
+      "exactPinnedEqualAfter": true
+    },
+    {
+      "path": "app/continuity/server/prompt.mjs",
+      "bytes": 24706,
+      "sha256": "5ae270a09be7a4a780f471d096c95cf1333c86345a42154b2f74cbb7581f31e1",
+      "exactPinnedEqualAfter": true
+    }
+  ],
+  "servedBinding": "runtime.json actual HTTP bodySHA=diskAtResponse=diskAfter; existing compiled runtime unchanged",
+  "environment": {
+    "node": "22.16.0",
+    "playwright": "1.57.0",
+    "actualChromium": "154.0.8037.57",
+    "executable": "/usr/bin/chromium",
+    "mode": "real loopback HTTP MOCK only"
+  },
+  "mockLimits": {
+    "AI_REQUESTS_PER_MINUTE": 60,
+    "AI_PROCESS_CALL_CAP": 100,
+    "scope": "same existing approved browser-suite MOCK limits, not paid provider settings"
+  },
+  "latestChildExit": 0,
+  "actualOuterCollectorExit": 0,
+  "outerPTY": 91752,
+  "actualServerExitAfterTerminate": -15,
+  "firstErrorOuterExits": {
+    "firstReadingDisclosure86954": 1,
+    "secondCopyReadiness42358": 1,
+    "thirdExtraReferenceExpectation86421": 1
+  },
+  "noNewBuildInstallDownloadAIOrRegression": true
+}

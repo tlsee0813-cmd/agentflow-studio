@@ -1,0 +1,26 @@
+[
+  {
+    "originalPath": "ui.jsonl",
+    "originalBytes": 755643,
+    "originalSHA256": "bbbc78cca138c62c29479e15302bbea877029723b429bdfb45c7b7aeb86a3be5",
+    "storedPath": "ui.jsonl.gz",
+    "encoding": "gzip lossless; mtime0",
+    "decodedByteEqual": true
+  },
+  {
+    "originalPath": "first-reading-disclosure-error/ui.jsonl",
+    "originalBytes": 209482,
+    "originalSHA256": "460ba722a080693097a40bb76627e1764b7e9eff3a450356b30f208ba08bb6e3",
+    "storedPath": "first-reading-disclosure-error/ui.jsonl.gz",
+    "encoding": "gzip lossless; mtime0",
+    "decodedByteEqual": true
+  },
+  {
+    "originalPath": "third-unrequested-current-reference-expectation/ui.jsonl",
+    "originalBytes": 383297,
+    "originalSHA256": "562e67073d7584d5f30f6d1329fcd89c3721455b2b71ce0adfdf8a21c618d820",
+    "storedPath": "third-unrequested-current-reference-expectation/ui.jsonl.gz",
+    "encoding": "gzip lossless; mtime0",
+    "decodedByteEqual": true
+  }
+]

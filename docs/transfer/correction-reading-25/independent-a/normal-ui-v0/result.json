@@ -1,0 +1,259 @@
+{
+  "sourceCommit": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+  "expectedPC": 2,
+  "completedPC": 2,
+  "failures": [],
+  "rows": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "complete": true,
+      "Aarea": "A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6",
+      "Barea": "A_1f14d61e-b157-4a29-b558-832525ae3cf1",
+      "Atask": "T_9cb44564-30f1-46a5-ab16-14ed7c7397ad",
+      "reportTask": "T_09de3721-6267-46db-a678-de3214335dd0",
+      "H0": "H_8d5ae677-bf76-49b9-ab7d-59be57f18f0a",
+      "H1": "H_45dca80a-65d3-419c-8da9-9fbcfa7614a9",
+      "H2": "H_68f2472a-97da-4516-a374-27affff330df",
+      "beforeCorrectionLabels": {
+        "stage": "작업문 내보냄",
+        "copyLabel": "작업문 복사",
+        "title": "돌아온 결과에서 이어가세요.",
+        "sub": "사용 중인 도구에 작업문을 전달한 뒤, 받은 결과를 여기에 붙여넣으세요.",
+        "snapshot": {
+          "y": 143,
+          "extent": 3039,
+          "focus": "<button class=\"secondary\" type=\"button\" id=\"copy-file-work\">파일 결과용 작업문 복사</button>",
+          "open": [
+            "project-management",
+            "file-return-options",
+            "edit-work",
+            "result-file-panel",
+            "history"
+          ],
+          "selected": [],
+          "plane": [],
+          "cards": []
+        }
+      },
+      "afterCorrectionBeforeEditLabels": {
+        "stage": "내보낸 뒤 수정됨",
+        "copyLabel": "수정한 작업문 복사",
+        "title": "이제, 작업문을 전달하세요.",
+        "sub": "필요하면 직접 다듬고, 사용 중인 개발 도구에 복사해 전달하세요.",
+        "snapshot": {
+          "y": 0,
+          "extent": 2865,
+          "focus": "<button id=\"nav-work\" class=\"nav-item active\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg><span>현재 작업</span><span class=\"nav-arrow\" aria-hidden=\"true\">↗</span></button>",
+          "open": [
+            "project-management",
+            "area-list",
+            "panel-understanding-A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6-full",
+            "file-return-options",
+            "edit-work",
+            "result-file-panel",
+            "history"
+          ],
+          "selected": [
+            "node-info-A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6"
+          ],
+          "plane": [
+            {
+              "transform": "none",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "cards": [
+            {
+              "id": "A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            },
+            {
+              "id": "A_1f14d61e-b157-4a29-b558-832525ae3cf1",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ]
+        }
+      },
+      "manualBefore": {
+        "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "manualAfter": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "historicalH0ManualUnchanged": true,
+      "historicalH1ManualUnchanged": true,
+      "reportAndBasesAndBUnchanged": true,
+      "currentDescriptionNotInlineInEditor": true,
+      "workToDescriptionAndBackTrips": 1,
+      "nestedMapToHistoricalTaskReaderAndBackTrips": 1,
+      "memoryRequirement": "표시30은 영역/reader에서 읽고 직접편집 네입력 화면으로 기억해 옮겼다. 범위/확인의 실제동작7·배포금지는 해당 입력에서 다시 읽어 보존했다.",
+      "previewValidationNotAllVisuallyRead": true,
+      "finalTarget": "same original A request; no new task or retry during observed phase",
+      "descriptionReferenceAfterManualEditIncluded": false,
+      "descriptionReferenceExclusionIsNotAutomaticPolicyChange": true
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "complete": true,
+      "Aarea": "A_63fa169a-2786-4886-9a87-8b0af23656bf",
+      "Barea": "A_308db756-4130-408c-a22f-ef5a1012f3f5",
+      "Atask": "T_dca09b00-9432-4395-86cd-4ac120df29a8",
+      "reportTask": "T_d384104d-7e49-441f-a02f-68b2a73130fc",
+      "H0": "H_92e4e349-090f-4596-8068-d9146aee2316",
+      "H1": "H_37effae9-0deb-43b9-a162-303850c87b55",
+      "H2": "H_ca534e3a-fe2c-46f2-adcb-bfa1b9232991",
+      "beforeCorrectionLabels": {
+        "stage": "작업문 내보냄",
+        "copyLabel": "작업문 복사",
+        "title": "돌아온 결과에서 이어가세요.",
+        "sub": "사용 중인 도구에 작업문을 전달한 뒤, 받은 결과를 여기에 붙여넣으세요.",
+        "snapshot": {
+          "y": 143,
+          "extent": 2837,
+          "focus": "<button class=\"secondary\" type=\"button\" id=\"copy-file-work\">파일 결과용 작업문 복사</button>",
+          "open": [
+            "project-management",
+            "file-return-options",
+            "edit-work",
+            "result-file-panel",
+            "history"
+          ],
+          "selected": [],
+          "plane": [],
+          "cards": []
+        }
+      },
+      "afterCorrectionBeforeEditLabels": {
+        "stage": "내보낸 뒤 수정됨",
+        "copyLabel": "수정한 작업문 복사",
+        "title": "이제, 작업문을 전달하세요.",
+        "sub": "필요하면 직접 다듬고, 사용 중인 개발 도구에 복사해 전달하세요.",
+        "snapshot": {
+          "y": 0,
+          "extent": 2685,
+          "focus": "<button id=\"nav-work\" class=\"nav-item active\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg><span>현재 작업</span><span class=\"nav-arrow\" aria-hidden=\"true\">↗</span></button>",
+          "open": [
+            "project-management",
+            "area-list",
+            "panel-understanding-A_63fa169a-2786-4886-9a87-8b0af23656bf-full",
+            "file-return-options",
+            "edit-work",
+            "result-file-panel",
+            "history"
+          ],
+          "selected": [
+            "node-info-A_63fa169a-2786-4886-9a87-8b0af23656bf"
+          ],
+          "plane": [
+            {
+              "transform": "none",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "cards": [
+            {
+              "id": "A_63fa169a-2786-4886-9a87-8b0af23656bf",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            },
+            {
+              "id": "A_308db756-4130-408c-a22f-ef5a1012f3f5",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ]
+        }
+      },
+      "manualBefore": {
+        "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "manualAfter": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "historicalH0ManualUnchanged": true,
+      "historicalH1ManualUnchanged": true,
+      "reportAndBasesAndBUnchanged": true,
+      "currentDescriptionNotInlineInEditor": true,
+      "workToDescriptionAndBackTrips": 1,
+      "nestedMapToHistoricalTaskReaderAndBackTrips": 1,
+      "memoryRequirement": "표시30은 영역/reader에서 읽고 직접편집 네입력 화면으로 기억해 옮겼다. 범위/확인의 실제동작7·배포금지는 해당 입력에서 다시 읽어 보존했다.",
+      "previewValidationNotAllVisuallyRead": true,
+      "finalTarget": "same original A request; no new task or retry during observed phase",
+      "descriptionReferenceAfterManualEditIncluded": false,
+      "descriptionReferenceExclusionIsNotAutomaticPolicyChange": true
+    }
+  ],
+  "pageerrors": [],
+  "cleanupErrors": [],
+  "plannedExit": 0
+}

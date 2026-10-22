@@ -1,0 +1,77 @@
+{
+  "scope": "latest original6 included; earlier error PNGs retained local, hash listed, not claimed uploaded",
+  "images": [
+    {
+      "path": "1280-03-minimal-direct-edit.png",
+      "bytes": 85467,
+      "sha256": "f43c49655972895ad833fba8feb7f3fa842ab65ac31c72c9c1de95c9abb41a7b",
+      "included": true
+    },
+    {
+      "path": "1280-02-modified-copy-label-before-manual-edit.png",
+      "bytes": 125723,
+      "sha256": "517f0e07f2d204f8452b8586e4c087af841043e598cf70fee12be93a954a5fc4",
+      "included": true
+    },
+    {
+      "path": "1280-01-current-description-thirty.png",
+      "bytes": 120547,
+      "sha256": "8b3b76b4f403c0aa1245bda91db5b3469c96b6403517dbadde6ce563e6fd486c",
+      "included": true
+    },
+    {
+      "path": "1440-03-minimal-direct-edit.png",
+      "bytes": 110761,
+      "sha256": "f2fec5ed0b0c619c92bee1e580c46a900a38a4822e0dcf4378f71c664d4fb1c5",
+      "included": true
+    },
+    {
+      "path": "1440-02-modified-copy-label-before-manual-edit.png",
+      "bytes": 159772,
+      "sha256": "45b35f42a301061106aac8ad8d24e469f32be912e91fdf1649b9c0b9b00de868",
+      "included": true
+    },
+    {
+      "path": "1440-01-current-description-thirty.png",
+      "bytes": 142264,
+      "sha256": "8dc11229374ba89d531b752dfe6aa0e219fcc903148d3877b7e643de50d5f945",
+      "included": true
+    },
+    {
+      "path": "first-reading-disclosure-error/1280-first-failure.png",
+      "bytes": 118447,
+      "sha256": "886833c1a231078b5f1f68f79aa19b0dc11793cb7743ddeafa004c8ad64a2b76",
+      "included": false
+    },
+    {
+      "path": "second-copy-readiness-error/1280-first-failure.png",
+      "bytes": 112026,
+      "sha256": "ae0c6205ecf377b8cd6404730c59212f3c3f6584ad8923c309266f2e680c8db5",
+      "included": false
+    },
+    {
+      "path": "third-unrequested-current-reference-expectation/1280-03-minimal-direct-edit.png",
+      "bytes": 85467,
+      "sha256": "f43c49655972895ad833fba8feb7f3fa842ab65ac31c72c9c1de95c9abb41a7b",
+      "included": false
+    },
+    {
+      "path": "third-unrequested-current-reference-expectation/1280-first-failure.png",
+      "bytes": 126515,
+      "sha256": "a631a92b4df320bf704ec74a3bc71831473c5ee1a49f177e8bf22387b0a6a920",
+      "included": false
+    },
+    {
+      "path": "third-unrequested-current-reference-expectation/1280-02-modified-copy-label-before-manual-edit.png",
+      "bytes": 125723,
+      "sha256": "517f0e07f2d204f8452b8586e4c087af841043e598cf70fee12be93a954a5fc4",
+      "included": false
+    },
+    {
+      "path": "third-unrequested-current-reference-expectation/1280-01-current-description-thirty.png",
+      "bytes": 120547,
+      "sha256": "8b3b76b4f403c0aa1245bda91db5b3469c96b6403517dbadde6ce563e6fd486c",
+      "included": false
+    }
+  ]
+}

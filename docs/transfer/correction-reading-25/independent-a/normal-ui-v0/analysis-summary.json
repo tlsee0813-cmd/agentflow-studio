@@ -1,0 +1,5338 @@
+[
+  {
+    "viewport": [
+      1280,
+      720
+    ],
+    "operations": {
+      "PHASE 1 current description correction and historical H reading": {
+        "clicks": [
+          "normal click 전체 공간",
+          "normal click 보관 안내 실제 정보 버튼",
+          "normal click 설명 오류 고치기",
+          "normal click 정정 저장",
+          "normal click 설명 오류 고치기",
+          "normal click 설명 전체 보기",
+          "normal click [합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요. ↘",
+          "normal click 실제 보고 원문 명시 선택",
+          "normal click 이 결과를 요청할 때 내보낸 작업문",
+          "normal click 읽기 출발 지도 패널로 복귀",
+          "normal click 원래 A 현재 작업 직접편집으로 돌아가기"
+        ],
+        "wheels": [
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -70.21875,
+                "target": "area-panel-body"
+              },
+              {
+                "type": "scrollend",
+                "target": "area-panel-body"
+              }
+            ],
+            "y": 0
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 5.59375,
+                "target": "area-panel-body"
+              },
+              {
+                "type": "scrollend",
+                "target": "area-panel-body"
+              }
+            ],
+            "y": 0
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -267,
+                "target": "area-panel-body"
+              },
+              {
+                "type": "scrollend",
+                "target": "area-panel-body"
+              }
+            ],
+            "y": 0
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 92.15625,
+                "target": "area-panel-body"
+              },
+              {
+                "type": "scrollend",
+                "target": "area-panel-body"
+              }
+            ],
+            "y": 0
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "area-panel-body"
+              },
+              {
+                "type": "scrollend",
+                "target": "area-panel-body"
+              }
+            ],
+            "y": 0
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 44.9375,
+                "target": "area-panel-body"
+              },
+              {
+                "type": "scrollend",
+                "target": "area-panel-body"
+              }
+            ],
+            "y": 0
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 14.640625,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 15
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 87.9375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 103
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 88.234375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 191
+          }
+        ],
+        "inputWrites": [
+          {
+            "id": "panel-understanding-A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6-text",
+            "value": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다."
+          }
+        ],
+        "clickCount": 11,
+        "wheelCount": 9,
+        "inputWriteCount": 1
+      },
+      "PHASE 2 unchanged seven-valued fields and changed-label counterexample": {
+        "clicks": [
+          "normal click open handoff-preview",
+          "normal click 전체 미리보기 접기"
+        ],
+        "wheels": [
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 400
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 800
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1200
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1600
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2000
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 93.46875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2093
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 138.359375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2232
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 185.34375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2417
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 138.234375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2555
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 115.21875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2671
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 349.21875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 3020
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2465
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2065
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1665
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1265
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 865
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 465
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -177.921875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 287
+          }
+        ],
+        "inputWrites": [],
+        "clickCount": 2,
+        "wheelCount": 18,
+        "inputWriteCount": 0
+      },
+      "PHASE 3 minimal direct edit and actual file copy": {
+        "clicks": [
+          "normal click 실제 파일 결과용 작업문 복사 H2-final-only-display-edited",
+          "normal click 전체 공간"
+        ],
+        "wheels": [
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 687
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1087
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1487
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1887
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 206.46875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2093
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 324.34375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2418
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 137.234375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2555
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2155
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1755
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1355
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 955
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 555
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -99.296875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 456
+          }
+        ],
+        "inputWrites": [
+          {
+            "id": "work-understanding",
+            "value": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다."
+          },
+          {
+            "id": "work-next",
+            "value": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다."
+          }
+        ],
+        "clickCount": 2,
+        "wheelCount": 13,
+        "inputWriteCount": 2
+      }
+    },
+    "countsAreObservedNotMinimum": "includes deliberate reading, verification and screenshot reach; excludes fixture work/B preparation",
+    "trips": {
+      "workToContextAndBack": 1,
+      "nestedMapReaderMap": 1,
+      "finalCopyToMap": "one-way completion, not another roundtrip"
+    },
+    "labelCounterexample": {
+      "before": {
+        "stage": "작업문 내보냄",
+        "copyLabel": "작업문 복사",
+        "title": "돌아온 결과에서 이어가세요.",
+        "sub": "사용 중인 도구에 작업문을 전달한 뒤, 받은 결과를 여기에 붙여넣으세요.",
+        "snapshot": {
+          "y": 143,
+          "extent": 3039,
+          "focus": "<button class=\"secondary\" type=\"button\" id=\"copy-file-work\">파일 결과용 작업문 복사</button>",
+          "open": [
+            "project-management",
+            "file-return-options",
+            "edit-work",
+            "result-file-panel",
+            "history"
+          ],
+          "selected": [],
+          "plane": [],
+          "cards": []
+        }
+      },
+      "after": {
+        "stage": "내보낸 뒤 수정됨",
+        "copyLabel": "수정한 작업문 복사",
+        "title": "이제, 작업문을 전달하세요.",
+        "sub": "필요하면 직접 다듬고, 사용 중인 개발 도구에 복사해 전달하세요.",
+        "snapshot": {
+          "y": 0,
+          "extent": 2865,
+          "focus": "<button id=\"nav-work\" class=\"nav-item active\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg><span>현재 작업</span><span class=\"nav-arrow\" aria-hidden=\"true\">↗</span></button>",
+          "open": [
+            "project-management",
+            "area-list",
+            "panel-understanding-A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6-full",
+            "file-return-options",
+            "edit-work",
+            "result-file-panel",
+            "history"
+          ],
+          "selected": [
+            "node-info-A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6"
+          ],
+          "plane": [
+            {
+              "transform": "none",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "cards": [
+            {
+              "id": "A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            },
+            {
+              "id": "A_1f14d61e-b157-4a29-b558-832525ae3cf1",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ]
+        }
+      },
+      "UIFieldsRemain": {
+        "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "H1TextSHA256": "3cca2a2a5625382202b4d773bb6f2b39e3abb749664950c58d556456017f80c9",
+      "previewAfterCorrectionSHA256": "da88775bae4a49ca2fb0026f8a9d4679a8c74d22197eb4d0f452712814b47ed5",
+      "differentTextDespiteSameFour": true,
+      "fullPreviewInputValueIsValidationOnly": true
+    },
+    "visibleHistoricalHRows": [
+      {
+        "field": "understanding",
+        "text": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+        "geometry": {
+          "rect": {
+            "x": 698.15625,
+            "y": 592.546875,
+            "width": 520.84375,
+            "height": 48.796875,
+            "top": 592.546875,
+            "right": 1219,
+            "bottom": 641.34375,
+            "left": 698.15625
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "textClip": {
+            "left": 699.15625,
+            "top": 593.546875,
+            "right": 1218.15625,
+            "bottom": 640.546875
+          },
+          "accessScope": "control border against ancestor client clips; own text clip separate",
+          "ancestors": [
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 698.15625,
+                "y": 592.546875,
+                "width": 520.84375,
+                "height": 48.796875,
+                "top": 592.546875,
+                "right": 1219,
+                "bottom": 641.34375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 699.15625,
+                "top": 593.546875,
+                "right": 1218.15625,
+                "bottom": 640.546875
+              },
+              "overflow": [
+                "auto",
+                "auto"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "SECTION",
+              "rect": {
+                "x": 698.15625,
+                "y": 568.046875,
+                "width": 520.84375,
+                "height": 73.296875,
+                "top": 568.046875,
+                "right": 1219,
+                "bottom": 641.34375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 568.046875,
+                "right": 1219.15625,
+                "bottom": 641.046875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-report-export-work",
+              "tag": "DETAILS",
+              "rect": {
+                "x": 698.15625,
+                "y": 495.421875,
+                "width": 520.84375,
+                "height": 459.25,
+                "top": 495.421875,
+                "right": 1219,
+                "bottom": 954.671875,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 495.421875,
+                "right": 1219.15625,
+                "bottom": 954.421875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-pointed",
+              "tag": "SECTION",
+              "rect": {
+                "x": 698.15625,
+                "y": 350.515625,
+                "width": 520.84375,
+                "height": 641.59375,
+                "top": 350.515625,
+                "right": 1219,
+                "bottom": 992.109375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 350.515625,
+                "right": 1219.15625,
+                "bottom": 992.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-reports",
+              "tag": "SECTION",
+              "rect": {
+                "x": 679.15625,
+                "y": 337.515625,
+                "width": 558.84375,
+                "height": 844.015625,
+                "top": 337.515625,
+                "right": 1238,
+                "bottom": 1181.53125,
+                "left": 679.15625
+              },
+              "client": {
+                "left": 680.15625,
+                "top": 338.515625,
+                "right": 1237.15625,
+                "bottom": 1180.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 264,
+                "y": 337.515625,
+                "width": 974,
+                "height": 844.015625,
+                "top": 337.515625,
+                "right": 1238,
+                "bottom": 1181.53125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 337.515625,
+                "right": 1238,
+                "bottom": 1181.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 337.515625,
+                "width": 974,
+                "height": 1158.140625,
+                "top": 337.515625,
+                "right": 1238,
+                "bottom": 1495.65625,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 337.515625,
+                "right": 1238,
+                "bottom": 1495.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "space-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 161.59375,
+                "width": 974,
+                "height": 1413.859375,
+                "top": 161.59375,
+                "right": 1238,
+                "bottom": 1575.453125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 161.59375,
+                "right": 1238,
+                "bottom": 1575.59375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "main",
+              "tag": "MAIN",
+              "rect": {
+                "x": 222,
+                "y": 72,
+                "width": 1058,
+                "height": 1583.296875,
+                "top": 72,
+                "right": 1280,
+                "bottom": 1655.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 72,
+                "right": 1280,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 222,
+                "y": 0,
+                "width": 1058,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1280,
+                "bottom": 1655.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 0,
+                "right": 1280,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1280,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1280,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "BODY",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1280,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1280,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "HTML",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1280,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1280,
+                "bottom": 720
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            }
+          ],
+          "hit": true,
+          "hitNode": "<div class=\"source-raw\">[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.</div>",
+          "full": true,
+          "visible": true,
+          "text": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+          "rangeRects": [
+            {
+              "x": 711.15625,
+              "y": 607.546875,
+              "width": 338,
+              "height": 17,
+              "top": 607.546875,
+              "right": 1049.15625,
+              "bottom": 624.546875,
+              "left": 711.15625
+            }
+          ],
+          "scrollY": 0,
+          "focus": ""
+        }
+      },
+      {
+        "field": "scope",
+        "text": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "geometry": {
+          "rect": {
+            "x": 698.15625,
+            "y": 665.84375,
+            "width": 520.84375,
+            "height": 48.796875,
+            "top": 665.84375,
+            "right": 1219,
+            "bottom": 714.640625,
+            "left": 698.15625
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "textClip": {
+            "left": 699.15625,
+            "top": 666.84375,
+            "right": 1218.15625,
+            "bottom": 713.84375
+          },
+          "accessScope": "control border against ancestor client clips; own text clip separate",
+          "ancestors": [
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 698.15625,
+                "y": 665.84375,
+                "width": 520.84375,
+                "height": 48.796875,
+                "top": 665.84375,
+                "right": 1219,
+                "bottom": 714.640625,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 699.15625,
+                "top": 666.84375,
+                "right": 1218.15625,
+                "bottom": 713.84375
+              },
+              "overflow": [
+                "auto",
+                "auto"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "SECTION",
+              "rect": {
+                "x": 698.15625,
+                "y": 641.34375,
+                "width": 520.84375,
+                "height": 73.296875,
+                "top": 641.34375,
+                "right": 1219,
+                "bottom": 714.640625,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 641.34375,
+                "right": 1219.15625,
+                "bottom": 714.34375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-report-export-work",
+              "tag": "DETAILS",
+              "rect": {
+                "x": 698.15625,
+                "y": 480.421875,
+                "width": 520.84375,
+                "height": 459.25,
+                "top": 480.421875,
+                "right": 1219,
+                "bottom": 939.671875,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 480.421875,
+                "right": 1219.15625,
+                "bottom": 939.421875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-pointed",
+              "tag": "SECTION",
+              "rect": {
+                "x": 698.15625,
+                "y": 335.515625,
+                "width": 520.84375,
+                "height": 641.59375,
+                "top": 335.515625,
+                "right": 1219,
+                "bottom": 977.109375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 335.515625,
+                "right": 1219.15625,
+                "bottom": 977.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-reports",
+              "tag": "SECTION",
+              "rect": {
+                "x": 679.15625,
+                "y": 322.515625,
+                "width": 558.84375,
+                "height": 844.015625,
+                "top": 322.515625,
+                "right": 1238,
+                "bottom": 1166.53125,
+                "left": 679.15625
+              },
+              "client": {
+                "left": 680.15625,
+                "top": 323.515625,
+                "right": 1237.15625,
+                "bottom": 1165.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 264,
+                "y": 322.515625,
+                "width": 974,
+                "height": 844.015625,
+                "top": 322.515625,
+                "right": 1238,
+                "bottom": 1166.53125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 322.515625,
+                "right": 1238,
+                "bottom": 1166.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 322.515625,
+                "width": 974,
+                "height": 1158.140625,
+                "top": 322.515625,
+                "right": 1238,
+                "bottom": 1480.65625,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 322.515625,
+                "right": 1238,
+                "bottom": 1480.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "space-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 146.59375,
+                "width": 974,
+                "height": 1413.859375,
+                "top": 146.59375,
+                "right": 1238,
+                "bottom": 1560.453125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 146.59375,
+                "right": 1238,
+                "bottom": 1560.59375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "main",
+              "tag": "MAIN",
+              "rect": {
+                "x": 222,
+                "y": 57,
+                "width": 1058,
+                "height": 1583.296875,
+                "top": 57,
+                "right": 1280,
+                "bottom": 1640.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 57,
+                "right": 1280,
+                "bottom": 1640
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 222,
+                "y": -15,
+                "width": 1058,
+                "height": 1655.296875,
+                "top": -15,
+                "right": 1280,
+                "bottom": 1640.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": -15,
+                "right": 1280,
+                "bottom": 1640
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 0,
+                "y": -15,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -15,
+                "right": 1280,
+                "bottom": 1640.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -15,
+                "right": 1280,
+                "bottom": 1640
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "BODY",
+              "rect": {
+                "x": 0,
+                "y": -15,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -15,
+                "right": 1280,
+                "bottom": 1640.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -15,
+                "right": 1280,
+                "bottom": 1640
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "HTML",
+              "rect": {
+                "x": 0,
+                "y": -15,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -15,
+                "right": 1280,
+                "bottom": 1640.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -15,
+                "right": 1280,
+                "bottom": 705
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                15
+              ]
+            }
+          ],
+          "hit": true,
+          "hitNode": "<div class=\"source-raw\">[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.</div>",
+          "full": true,
+          "visible": true,
+          "text": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+          "rangeRects": [
+            {
+              "x": 711.15625,
+              "y": 680.84375,
+              "width": 412.671875,
+              "height": 17,
+              "top": 680.84375,
+              "right": 1123.828125,
+              "bottom": 697.84375,
+              "left": 711.15625
+            }
+          ],
+          "scrollY": 15,
+          "focus": ""
+        }
+      },
+      {
+        "field": "next",
+        "text": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "geometry": {
+          "rect": {
+            "x": 698.15625,
+            "y": 666.140625,
+            "width": 520.84375,
+            "height": 48.796875,
+            "top": 666.140625,
+            "right": 1219,
+            "bottom": 714.9375,
+            "left": 698.15625
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "textClip": {
+            "left": 699.15625,
+            "top": 667.140625,
+            "right": 1218.15625,
+            "bottom": 714.140625
+          },
+          "accessScope": "control border against ancestor client clips; own text clip separate",
+          "ancestors": [
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 698.15625,
+                "y": 666.140625,
+                "width": 520.84375,
+                "height": 48.796875,
+                "top": 666.140625,
+                "right": 1219,
+                "bottom": 714.9375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 699.15625,
+                "top": 667.140625,
+                "right": 1218.15625,
+                "bottom": 714.140625
+              },
+              "overflow": [
+                "auto",
+                "auto"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "SECTION",
+              "rect": {
+                "x": 698.15625,
+                "y": 641.640625,
+                "width": 520.84375,
+                "height": 73.296875,
+                "top": 641.640625,
+                "right": 1219,
+                "bottom": 714.9375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 641.640625,
+                "right": 1219.15625,
+                "bottom": 714.640625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-report-export-work",
+              "tag": "DETAILS",
+              "rect": {
+                "x": 698.15625,
+                "y": 392.421875,
+                "width": 520.84375,
+                "height": 459.25,
+                "top": 392.421875,
+                "right": 1219,
+                "bottom": 851.671875,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 392.421875,
+                "right": 1219.15625,
+                "bottom": 851.421875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-pointed",
+              "tag": "SECTION",
+              "rect": {
+                "x": 698.15625,
+                "y": 247.515625,
+                "width": 520.84375,
+                "height": 641.59375,
+                "top": 247.515625,
+                "right": 1219,
+                "bottom": 889.109375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 247.515625,
+                "right": 1219.15625,
+                "bottom": 889.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-reports",
+              "tag": "SECTION",
+              "rect": {
+                "x": 679.15625,
+                "y": 234.515625,
+                "width": 558.84375,
+                "height": 844.015625,
+                "top": 234.515625,
+                "right": 1238,
+                "bottom": 1078.53125,
+                "left": 679.15625
+              },
+              "client": {
+                "left": 680.15625,
+                "top": 235.515625,
+                "right": 1237.15625,
+                "bottom": 1077.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 264,
+                "y": 234.515625,
+                "width": 974,
+                "height": 844.015625,
+                "top": 234.515625,
+                "right": 1238,
+                "bottom": 1078.53125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 234.515625,
+                "right": 1238,
+                "bottom": 1078.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 234.515625,
+                "width": 974,
+                "height": 1158.140625,
+                "top": 234.515625,
+                "right": 1238,
+                "bottom": 1392.65625,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 234.515625,
+                "right": 1238,
+                "bottom": 1392.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "space-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 58.59375,
+                "width": 974,
+                "height": 1413.859375,
+                "top": 58.59375,
+                "right": 1238,
+                "bottom": 1472.453125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 58.59375,
+                "right": 1238,
+                "bottom": 1472.59375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "main",
+              "tag": "MAIN",
+              "rect": {
+                "x": 222,
+                "y": -31,
+                "width": 1058,
+                "height": 1583.296875,
+                "top": -31,
+                "right": 1280,
+                "bottom": 1552.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": -31,
+                "right": 1280,
+                "bottom": 1552
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 222,
+                "y": -103,
+                "width": 1058,
+                "height": 1655.296875,
+                "top": -103,
+                "right": 1280,
+                "bottom": 1552.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": -103,
+                "right": 1280,
+                "bottom": 1552
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 0,
+                "y": -103,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -103,
+                "right": 1280,
+                "bottom": 1552.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -103,
+                "right": 1280,
+                "bottom": 1552
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "BODY",
+              "rect": {
+                "x": 0,
+                "y": -103,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -103,
+                "right": 1280,
+                "bottom": 1552.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -103,
+                "right": 1280,
+                "bottom": 1552
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "HTML",
+              "rect": {
+                "x": 0,
+                "y": -103,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -103,
+                "right": 1280,
+                "bottom": 1552.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -103,
+                "right": 1280,
+                "bottom": 617
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                103
+              ]
+            }
+          ],
+          "hit": true,
+          "hitNode": "<div class=\"source-raw\">[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.</div>",
+          "full": true,
+          "visible": true,
+          "text": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+          "rangeRects": [
+            {
+              "x": 711.15625,
+              "y": 681.140625,
+              "width": 440.25,
+              "height": 17,
+              "top": 681.140625,
+              "right": 1151.40625,
+              "bottom": 698.140625,
+              "left": 711.15625
+            }
+          ],
+          "scrollY": 103,
+          "focus": ""
+        }
+      },
+      {
+        "field": "checks",
+        "text": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다.",
+        "geometry": {
+          "rect": {
+            "x": 698.15625,
+            "y": 666.4375,
+            "width": 520.84375,
+            "height": 48.796875,
+            "top": 666.4375,
+            "right": 1219,
+            "bottom": 715.234375,
+            "left": 698.15625
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720
+          },
+          "textClip": {
+            "left": 699.15625,
+            "top": 667.4375,
+            "right": 1218.15625,
+            "bottom": 714.4375
+          },
+          "accessScope": "control border against ancestor client clips; own text clip separate",
+          "ancestors": [
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 698.15625,
+                "y": 666.4375,
+                "width": 520.84375,
+                "height": 48.796875,
+                "top": 666.4375,
+                "right": 1219,
+                "bottom": 715.234375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 699.15625,
+                "top": 667.4375,
+                "right": 1218.15625,
+                "bottom": 714.4375
+              },
+              "overflow": [
+                "auto",
+                "auto"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "SECTION",
+              "rect": {
+                "x": 698.15625,
+                "y": 641.9375,
+                "width": 520.84375,
+                "height": 73.296875,
+                "top": 641.9375,
+                "right": 1219,
+                "bottom": 715.234375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 641.9375,
+                "right": 1219.15625,
+                "bottom": 714.9375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-report-export-work",
+              "tag": "DETAILS",
+              "rect": {
+                "x": 698.15625,
+                "y": 304.421875,
+                "width": 520.84375,
+                "height": 459.25,
+                "top": 304.421875,
+                "right": 1219,
+                "bottom": 763.671875,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 304.421875,
+                "right": 1219.15625,
+                "bottom": 763.421875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-pointed",
+              "tag": "SECTION",
+              "rect": {
+                "x": 698.15625,
+                "y": 159.515625,
+                "width": 520.84375,
+                "height": 641.59375,
+                "top": 159.515625,
+                "right": 1219,
+                "bottom": 801.109375,
+                "left": 698.15625
+              },
+              "client": {
+                "left": 698.15625,
+                "top": 159.515625,
+                "right": 1219.15625,
+                "bottom": 801.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-reports",
+              "tag": "SECTION",
+              "rect": {
+                "x": 679.15625,
+                "y": 146.515625,
+                "width": 558.84375,
+                "height": 844.015625,
+                "top": 146.515625,
+                "right": 1238,
+                "bottom": 990.53125,
+                "left": 679.15625
+              },
+              "client": {
+                "left": 680.15625,
+                "top": 147.515625,
+                "right": 1237.15625,
+                "bottom": 989.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 264,
+                "y": 146.515625,
+                "width": 974,
+                "height": 844.015625,
+                "top": 146.515625,
+                "right": 1238,
+                "bottom": 990.53125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 146.515625,
+                "right": 1238,
+                "bottom": 990.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 146.515625,
+                "width": 974,
+                "height": 1158.140625,
+                "top": 146.515625,
+                "right": 1238,
+                "bottom": 1304.65625,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 146.515625,
+                "right": 1238,
+                "bottom": 1304.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "space-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": -29.40625,
+                "width": 974,
+                "height": 1413.859375,
+                "top": -29.40625,
+                "right": 1238,
+                "bottom": 1384.453125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": -29.40625,
+                "right": 1238,
+                "bottom": 1384.59375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "main",
+              "tag": "MAIN",
+              "rect": {
+                "x": 222,
+                "y": -119,
+                "width": 1058,
+                "height": 1583.296875,
+                "top": -119,
+                "right": 1280,
+                "bottom": 1464.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": -119,
+                "right": 1280,
+                "bottom": 1464
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 222,
+                "y": -191,
+                "width": 1058,
+                "height": 1655.296875,
+                "top": -191,
+                "right": 1280,
+                "bottom": 1464.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": -191,
+                "right": 1280,
+                "bottom": 1464
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 0,
+                "y": -191,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -191,
+                "right": 1280,
+                "bottom": 1464.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -191,
+                "right": 1280,
+                "bottom": 1464
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "BODY",
+              "rect": {
+                "x": 0,
+                "y": -191,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -191,
+                "right": 1280,
+                "bottom": 1464.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -191,
+                "right": 1280,
+                "bottom": 1464
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "HTML",
+              "rect": {
+                "x": 0,
+                "y": -191,
+                "width": 1280,
+                "height": 1655.296875,
+                "top": -191,
+                "right": 1280,
+                "bottom": 1464.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -191,
+                "right": 1280,
+                "bottom": 529
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                191
+              ]
+            }
+          ],
+          "hit": true,
+          "hitNode": "<div class=\"source-raw\">[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다.</div>",
+          "full": true,
+          "visible": true,
+          "text": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다.",
+          "rangeRects": [
+            {
+              "x": 711.15625,
+              "y": 681.4375,
+              "width": 455.78125,
+              "height": 17,
+              "top": 681.4375,
+              "right": 1166.9375,
+              "bottom": 698.4375,
+              "left": 711.15625
+            }
+          ],
+          "scrollY": 191,
+          "focus": ""
+        }
+      }
+    ],
+    "finalManualFieldPairs": {
+      "before": {
+        "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "after": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      }
+    },
+    "finalCurrentId": "T_9cb44564-30f1-46a5-ab16-14ed7c7397ad",
+    "finalH": {
+      "at": "2026-10-22T18:21:32.009Z",
+      "method": "clipboard",
+      "revision": 24,
+      "chars": 5289,
+      "digest": "70bdeb31",
+      "work": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "aiExcluded": false,
+      "legacyText": null,
+      "returnId": "H_68f2472a-97da-4516-a374-27affff330df",
+      "background": {
+        "version": "background.1",
+        "revision": 7,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6",
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+        }
+      },
+      "anchor": {
+        "version": "anchor.2",
+        "areaId": "A_f8b17538-5209-4ab6-b4bd-1d3f8aaeafe6",
+        "understanding": 2,
+        "stamp": {
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [
+            "T_9cb44564-30f1-46a5-ab16-14ed7c7397ad:9de9b2c917fac34d3653b0119d77da7e26ef585c951e0b49edba5f4d02f92990"
+          ],
+          "version": "plan.2",
+          "revision": 0,
+          "ancestors": []
+        }
+      }
+    },
+    "priorH0H1Unchanged": true,
+    "originalReportRawStillSeven": "[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.",
+    "referenceExclusionAfterManual": "## 영역 현재 설명 — 이번 작업문에 넣지 않음\n\n영역 ‘보관 안내’의 정리 설명 r2은 그 뒤 사용자 구상·기준이 바뀌어 현재 설명으로 쓰지 않습니다. 그 설명을 이번 작업의 근거로 삼지 마세요.\n\n\n",
+    "UIEvidenceBoundary": "UI chose the explicitly selected report and its historical-work heading; complete H0/H1 identities are verification metadata, not a claim of visually reading all long IDs. Collapsed 인계 연결 · 수신 원문 entry was not expanded in this run."
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "operations": {
+      "PHASE 1 current description correction and historical H reading": {
+        "clicks": [
+          "normal click 전체 공간",
+          "normal click 보관 안내 실제 정보 버튼",
+          "normal click 설명 오류 고치기",
+          "normal click 정정 저장",
+          "normal click 설명 오류 고치기",
+          "normal click 설명 전체 보기",
+          "normal click [합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요. ↘",
+          "normal click 실제 보고 원문 명시 선택",
+          "normal click 이 결과를 요청할 때 내보낸 작업문",
+          "normal click 읽기 출발 지도 패널로 복귀",
+          "normal click 원래 A 현재 작업 직접편집으로 돌아가기"
+        ],
+        "wheels": [
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -152,
+                "target": "area-panel-body"
+              },
+              {
+                "type": "scrollend",
+                "target": "area-panel-body"
+              }
+            ],
+            "y": 0
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 356.9375,
+                "target": "area-panel-body"
+              },
+              {
+                "type": "scrollend",
+                "target": "area-panel-body"
+              }
+            ],
+            "y": 0
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 11.234375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 11
+          }
+        ],
+        "inputWrites": [
+          {
+            "id": "panel-understanding-A_63fa169a-2786-4886-9a87-8b0af23656bf-text",
+            "value": "[합성25 사용자 설명 정정] 실제 안내의 표시는 30일이다. 이전 설명의 7일은 오류다. 실제 보관 동작은 7일 유지하며 보관 정책 변경 요청이 아니다."
+          }
+        ],
+        "clickCount": 11,
+        "wheelCount": 3,
+        "inputWriteCount": 1
+      },
+      "PHASE 2 unchanged seven-valued fields and changed-label counterexample": {
+        "clicks": [
+          "normal click open handoff-preview",
+          "normal click 전체 미리보기 접기"
+        ],
+        "wheels": [
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 400
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 800
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1200
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1600
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 313.46875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1914
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 137.359375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2051
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 186.34375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2238
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 137.234375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2375
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 115.21875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2490
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 350.21875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2840
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2285
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1885
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1485
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1085
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 685
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -397.921875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 287
+          }
+        ],
+        "inputWrites": [],
+        "clickCount": 2,
+        "wheelCount": 16,
+        "inputWriteCount": 0
+      },
+      "PHASE 3 minimal direct edit and actual file copy": {
+        "clicks": [
+          "normal click 실제 파일 결과용 작업문 복사 H2-final-only-display-edited",
+          "normal click 전체 공간"
+        ],
+        "wheels": [
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 687
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1087
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1487
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1887
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 26.46875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1914
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 323.34375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2237
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": 138.234375,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 2375
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1975
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1575
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 1175
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -400,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 775
+          },
+          {
+            "ok": true,
+            "reason": "native-scrollend",
+            "events": [
+              {
+                "type": "wheel",
+                "delta": -319.296875,
+                "target": "main"
+              },
+              {
+                "type": "scrollend",
+                "target": "document"
+              }
+            ],
+            "y": 456
+          }
+        ],
+        "inputWrites": [
+          {
+            "id": "work-understanding",
+            "value": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다."
+          },
+          {
+            "id": "work-next",
+            "value": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다."
+          }
+        ],
+        "clickCount": 2,
+        "wheelCount": 12,
+        "inputWriteCount": 2
+      }
+    },
+    "countsAreObservedNotMinimum": "includes deliberate reading, verification and screenshot reach; excludes fixture work/B preparation",
+    "trips": {
+      "workToContextAndBack": 1,
+      "nestedMapReaderMap": 1,
+      "finalCopyToMap": "one-way completion, not another roundtrip"
+    },
+    "labelCounterexample": {
+      "before": {
+        "stage": "작업문 내보냄",
+        "copyLabel": "작업문 복사",
+        "title": "돌아온 결과에서 이어가세요.",
+        "sub": "사용 중인 도구에 작업문을 전달한 뒤, 받은 결과를 여기에 붙여넣으세요.",
+        "snapshot": {
+          "y": 143,
+          "extent": 2837,
+          "focus": "<button class=\"secondary\" type=\"button\" id=\"copy-file-work\">파일 결과용 작업문 복사</button>",
+          "open": [
+            "project-management",
+            "file-return-options",
+            "edit-work",
+            "result-file-panel",
+            "history"
+          ],
+          "selected": [],
+          "plane": [],
+          "cards": []
+        }
+      },
+      "after": {
+        "stage": "내보낸 뒤 수정됨",
+        "copyLabel": "수정한 작업문 복사",
+        "title": "이제, 작업문을 전달하세요.",
+        "sub": "필요하면 직접 다듬고, 사용 중인 개발 도구에 복사해 전달하세요.",
+        "snapshot": {
+          "y": 0,
+          "extent": 2685,
+          "focus": "<button id=\"nav-work\" class=\"nav-item active\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg><span>현재 작업</span><span class=\"nav-arrow\" aria-hidden=\"true\">↗</span></button>",
+          "open": [
+            "project-management",
+            "area-list",
+            "panel-understanding-A_63fa169a-2786-4886-9a87-8b0af23656bf-full",
+            "file-return-options",
+            "edit-work",
+            "result-file-panel",
+            "history"
+          ],
+          "selected": [
+            "node-info-A_63fa169a-2786-4886-9a87-8b0af23656bf"
+          ],
+          "plane": [
+            {
+              "transform": "none",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "cards": [
+            {
+              "id": "A_63fa169a-2786-4886-9a87-8b0af23656bf",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            },
+            {
+              "id": "A_308db756-4130-408c-a22f-ef5a1012f3f5",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ]
+        }
+      },
+      "UIFieldsRemain": {
+        "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "H1TextSHA256": "83020d37839507cda484b5557b622ad54ea489ff102b0d6218d517468a062340",
+      "previewAfterCorrectionSHA256": "01a558bdd2c1daf43c95c6056b49593cc663c9844ea1b18ec2fe2cb453f99095",
+      "differentTextDespiteSameFour": true,
+      "fullPreviewInputValueIsValidationOnly": true
+    },
+    "visibleHistoricalHRows": [
+      {
+        "field": "understanding",
+        "text": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+        "geometry": {
+          "rect": {
+            "x": 764.828125,
+            "y": 592.546875,
+            "width": 614.15625,
+            "height": 48.796875,
+            "top": 592.546875,
+            "right": 1378.984375,
+            "bottom": 641.34375,
+            "left": 764.828125
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "textClip": {
+            "left": 765.828125,
+            "top": 593.546875,
+            "right": 1377.828125,
+            "bottom": 640.546875
+          },
+          "accessScope": "control border against ancestor client clips; own text clip separate",
+          "ancestors": [
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 764.828125,
+                "y": 592.546875,
+                "width": 614.15625,
+                "height": 48.796875,
+                "top": 592.546875,
+                "right": 1378.984375,
+                "bottom": 641.34375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 765.828125,
+                "top": 593.546875,
+                "right": 1377.828125,
+                "bottom": 640.546875
+              },
+              "overflow": [
+                "auto",
+                "auto"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "SECTION",
+              "rect": {
+                "x": 764.828125,
+                "y": 568.046875,
+                "width": 614.15625,
+                "height": 73.296875,
+                "top": 568.046875,
+                "right": 1378.984375,
+                "bottom": 641.34375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 568.046875,
+                "right": 1378.828125,
+                "bottom": 641.046875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-report-export-work",
+              "tag": "DETAILS",
+              "rect": {
+                "x": 764.828125,
+                "y": 495.421875,
+                "width": 614.15625,
+                "height": 459.25,
+                "top": 495.421875,
+                "right": 1378.984375,
+                "bottom": 954.671875,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 495.421875,
+                "right": 1378.828125,
+                "bottom": 954.421875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-pointed",
+              "tag": "SECTION",
+              "rect": {
+                "x": 764.828125,
+                "y": 350.515625,
+                "width": 614.15625,
+                "height": 641.59375,
+                "top": 350.515625,
+                "right": 1378.984375,
+                "bottom": 992.109375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 350.515625,
+                "right": 1378.828125,
+                "bottom": 992.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-reports",
+              "tag": "SECTION",
+              "rect": {
+                "x": 745.828125,
+                "y": 337.515625,
+                "width": 652.15625,
+                "height": 844.015625,
+                "top": 337.515625,
+                "right": 1397.984375,
+                "bottom": 1181.53125,
+                "left": 745.828125
+              },
+              "client": {
+                "left": 746.828125,
+                "top": 338.515625,
+                "right": 1396.828125,
+                "bottom": 1180.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 264,
+                "y": 337.515625,
+                "width": 1134,
+                "height": 844.015625,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1181.53125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1181.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 337.515625,
+                "width": 1134,
+                "height": 1158.140625,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1495.65625,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1495.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "space-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 161.59375,
+                "width": 1134,
+                "height": 1413.859375,
+                "top": 161.59375,
+                "right": 1398,
+                "bottom": 1575.453125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 161.59375,
+                "right": 1398,
+                "bottom": 1575.59375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "main",
+              "tag": "MAIN",
+              "rect": {
+                "x": 222,
+                "y": 72,
+                "width": 1218,
+                "height": 1583.296875,
+                "top": 72,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 72,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 222,
+                "y": 0,
+                "width": 1218,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "BODY",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "HTML",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 900
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            }
+          ],
+          "hit": true,
+          "hitNode": "<div class=\"source-raw\">[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.</div>",
+          "full": true,
+          "visible": true,
+          "text": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+          "rangeRects": [
+            {
+              "x": 777.828125,
+              "y": 607.546875,
+              "width": 338,
+              "height": 17,
+              "top": 607.546875,
+              "right": 1115.828125,
+              "bottom": 624.546875,
+              "left": 777.828125
+            }
+          ],
+          "scrollY": 0,
+          "focus": ""
+        }
+      },
+      {
+        "field": "scope",
+        "text": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "geometry": {
+          "rect": {
+            "x": 764.828125,
+            "y": 680.84375,
+            "width": 614.15625,
+            "height": 48.796875,
+            "top": 680.84375,
+            "right": 1378.984375,
+            "bottom": 729.640625,
+            "left": 764.828125
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "textClip": {
+            "left": 765.828125,
+            "top": 681.84375,
+            "right": 1377.828125,
+            "bottom": 728.84375
+          },
+          "accessScope": "control border against ancestor client clips; own text clip separate",
+          "ancestors": [
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 764.828125,
+                "y": 680.84375,
+                "width": 614.15625,
+                "height": 48.796875,
+                "top": 680.84375,
+                "right": 1378.984375,
+                "bottom": 729.640625,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 765.828125,
+                "top": 681.84375,
+                "right": 1377.828125,
+                "bottom": 728.84375
+              },
+              "overflow": [
+                "auto",
+                "auto"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "SECTION",
+              "rect": {
+                "x": 764.828125,
+                "y": 656.34375,
+                "width": 614.15625,
+                "height": 73.296875,
+                "top": 656.34375,
+                "right": 1378.984375,
+                "bottom": 729.640625,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 656.34375,
+                "right": 1378.828125,
+                "bottom": 729.34375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-report-export-work",
+              "tag": "DETAILS",
+              "rect": {
+                "x": 764.828125,
+                "y": 495.421875,
+                "width": 614.15625,
+                "height": 459.25,
+                "top": 495.421875,
+                "right": 1378.984375,
+                "bottom": 954.671875,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 495.421875,
+                "right": 1378.828125,
+                "bottom": 954.421875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-pointed",
+              "tag": "SECTION",
+              "rect": {
+                "x": 764.828125,
+                "y": 350.515625,
+                "width": 614.15625,
+                "height": 641.59375,
+                "top": 350.515625,
+                "right": 1378.984375,
+                "bottom": 992.109375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 350.515625,
+                "right": 1378.828125,
+                "bottom": 992.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-reports",
+              "tag": "SECTION",
+              "rect": {
+                "x": 745.828125,
+                "y": 337.515625,
+                "width": 652.15625,
+                "height": 844.015625,
+                "top": 337.515625,
+                "right": 1397.984375,
+                "bottom": 1181.53125,
+                "left": 745.828125
+              },
+              "client": {
+                "left": 746.828125,
+                "top": 338.515625,
+                "right": 1396.828125,
+                "bottom": 1180.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 264,
+                "y": 337.515625,
+                "width": 1134,
+                "height": 844.015625,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1181.53125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1181.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 337.515625,
+                "width": 1134,
+                "height": 1158.140625,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1495.65625,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1495.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "space-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 161.59375,
+                "width": 1134,
+                "height": 1413.859375,
+                "top": 161.59375,
+                "right": 1398,
+                "bottom": 1575.453125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 161.59375,
+                "right": 1398,
+                "bottom": 1575.59375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "main",
+              "tag": "MAIN",
+              "rect": {
+                "x": 222,
+                "y": 72,
+                "width": 1218,
+                "height": 1583.296875,
+                "top": 72,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 72,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 222,
+                "y": 0,
+                "width": 1218,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "BODY",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "HTML",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 900
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            }
+          ],
+          "hit": true,
+          "hitNode": "<div class=\"source-raw\">[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.</div>",
+          "full": true,
+          "visible": true,
+          "text": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+          "rangeRects": [
+            {
+              "x": 777.828125,
+              "y": 695.84375,
+              "width": 412.671875,
+              "height": 17,
+              "top": 695.84375,
+              "right": 1190.5,
+              "bottom": 712.84375,
+              "left": 777.828125
+            }
+          ],
+          "scrollY": 0,
+          "focus": ""
+        }
+      },
+      {
+        "field": "next",
+        "text": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "geometry": {
+          "rect": {
+            "x": 764.828125,
+            "y": 769.140625,
+            "width": 614.15625,
+            "height": 48.796875,
+            "top": 769.140625,
+            "right": 1378.984375,
+            "bottom": 817.9375,
+            "left": 764.828125
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "textClip": {
+            "left": 765.828125,
+            "top": 770.140625,
+            "right": 1377.828125,
+            "bottom": 817.140625
+          },
+          "accessScope": "control border against ancestor client clips; own text clip separate",
+          "ancestors": [
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 764.828125,
+                "y": 769.140625,
+                "width": 614.15625,
+                "height": 48.796875,
+                "top": 769.140625,
+                "right": 1378.984375,
+                "bottom": 817.9375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 765.828125,
+                "top": 770.140625,
+                "right": 1377.828125,
+                "bottom": 817.140625
+              },
+              "overflow": [
+                "auto",
+                "auto"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "SECTION",
+              "rect": {
+                "x": 764.828125,
+                "y": 744.640625,
+                "width": 614.15625,
+                "height": 73.296875,
+                "top": 744.640625,
+                "right": 1378.984375,
+                "bottom": 817.9375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 744.640625,
+                "right": 1378.828125,
+                "bottom": 817.640625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-report-export-work",
+              "tag": "DETAILS",
+              "rect": {
+                "x": 764.828125,
+                "y": 495.421875,
+                "width": 614.15625,
+                "height": 459.25,
+                "top": 495.421875,
+                "right": 1378.984375,
+                "bottom": 954.671875,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 495.421875,
+                "right": 1378.828125,
+                "bottom": 954.421875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-pointed",
+              "tag": "SECTION",
+              "rect": {
+                "x": 764.828125,
+                "y": 350.515625,
+                "width": 614.15625,
+                "height": 641.59375,
+                "top": 350.515625,
+                "right": 1378.984375,
+                "bottom": 992.109375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 350.515625,
+                "right": 1378.828125,
+                "bottom": 992.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-reports",
+              "tag": "SECTION",
+              "rect": {
+                "x": 745.828125,
+                "y": 337.515625,
+                "width": 652.15625,
+                "height": 844.015625,
+                "top": 337.515625,
+                "right": 1397.984375,
+                "bottom": 1181.53125,
+                "left": 745.828125
+              },
+              "client": {
+                "left": 746.828125,
+                "top": 338.515625,
+                "right": 1396.828125,
+                "bottom": 1180.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 264,
+                "y": 337.515625,
+                "width": 1134,
+                "height": 844.015625,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1181.53125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1181.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 337.515625,
+                "width": 1134,
+                "height": 1158.140625,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1495.65625,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 337.515625,
+                "right": 1398,
+                "bottom": 1495.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "space-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 161.59375,
+                "width": 1134,
+                "height": 1413.859375,
+                "top": 161.59375,
+                "right": 1398,
+                "bottom": 1575.453125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 161.59375,
+                "right": 1398,
+                "bottom": 1575.59375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "main",
+              "tag": "MAIN",
+              "rect": {
+                "x": 222,
+                "y": 72,
+                "width": 1218,
+                "height": 1583.296875,
+                "top": 72,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 72,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 222,
+                "y": 0,
+                "width": 1218,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "BODY",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "HTML",
+              "rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": 0,
+                "right": 1440,
+                "bottom": 1655.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": 0,
+                "right": 1440,
+                "bottom": 900
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            }
+          ],
+          "hit": true,
+          "hitNode": "<div class=\"source-raw\">[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.</div>",
+          "full": true,
+          "visible": true,
+          "text": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+          "rangeRects": [
+            {
+              "x": 777.828125,
+              "y": 784.140625,
+              "width": 440.25,
+              "height": 17,
+              "top": 784.140625,
+              "right": 1218.078125,
+              "bottom": 801.140625,
+              "left": 777.828125
+            }
+          ],
+          "scrollY": 0,
+          "focus": ""
+        }
+      },
+      {
+        "field": "checks",
+        "text": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다.",
+        "geometry": {
+          "rect": {
+            "x": 764.828125,
+            "y": 846.4375,
+            "width": 614.15625,
+            "height": 48.796875,
+            "top": 846.4375,
+            "right": 1378.984375,
+            "bottom": 895.234375,
+            "left": 764.828125
+          },
+          "clip": {
+            "left": 0,
+            "top": 0,
+            "right": 1440,
+            "bottom": 900
+          },
+          "textClip": {
+            "left": 765.828125,
+            "top": 847.4375,
+            "right": 1377.828125,
+            "bottom": 894.4375
+          },
+          "accessScope": "control border against ancestor client clips; own text clip separate",
+          "ancestors": [
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 764.828125,
+                "y": 846.4375,
+                "width": 614.15625,
+                "height": 48.796875,
+                "top": 846.4375,
+                "right": 1378.984375,
+                "bottom": 895.234375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 765.828125,
+                "top": 847.4375,
+                "right": 1377.828125,
+                "bottom": 894.4375
+              },
+              "overflow": [
+                "auto",
+                "auto"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "SECTION",
+              "rect": {
+                "x": 764.828125,
+                "y": 821.9375,
+                "width": 614.15625,
+                "height": 73.296875,
+                "top": 821.9375,
+                "right": 1378.984375,
+                "bottom": 895.234375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 821.9375,
+                "right": 1378.828125,
+                "bottom": 894.9375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-report-export-work",
+              "tag": "DETAILS",
+              "rect": {
+                "x": 764.828125,
+                "y": 484.421875,
+                "width": 614.15625,
+                "height": 459.25,
+                "top": 484.421875,
+                "right": 1378.984375,
+                "bottom": 943.671875,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 484.421875,
+                "right": 1378.828125,
+                "bottom": 943.421875
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-pointed",
+              "tag": "SECTION",
+              "rect": {
+                "x": 764.828125,
+                "y": 339.515625,
+                "width": 614.15625,
+                "height": 641.59375,
+                "top": 339.515625,
+                "right": 1378.984375,
+                "bottom": 981.109375,
+                "left": 764.828125
+              },
+              "client": {
+                "left": 764.828125,
+                "top": 339.515625,
+                "right": 1378.828125,
+                "bottom": 981.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-reports",
+              "tag": "SECTION",
+              "rect": {
+                "x": 745.828125,
+                "y": 326.515625,
+                "width": 652.15625,
+                "height": 844.015625,
+                "top": 326.515625,
+                "right": 1397.984375,
+                "bottom": 1170.53125,
+                "left": 745.828125
+              },
+              "client": {
+                "left": 746.828125,
+                "top": 327.515625,
+                "right": 1396.828125,
+                "bottom": 1169.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "flex",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 264,
+                "y": 326.515625,
+                "width": 1134,
+                "height": 844.015625,
+                "top": 326.515625,
+                "right": 1398,
+                "bottom": 1170.53125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 326.515625,
+                "right": 1398,
+                "bottom": 1170.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "task-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 326.515625,
+                "width": 1134,
+                "height": 1158.140625,
+                "top": 326.515625,
+                "right": 1398,
+                "bottom": 1484.65625,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 326.515625,
+                "right": 1398,
+                "bottom": 1484.515625
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "space-view",
+              "tag": "SECTION",
+              "rect": {
+                "x": 264,
+                "y": 150.59375,
+                "width": 1134,
+                "height": 1413.859375,
+                "top": 150.59375,
+                "right": 1398,
+                "bottom": 1564.453125,
+                "left": 264
+              },
+              "client": {
+                "left": 264,
+                "top": 150.59375,
+                "right": 1398,
+                "bottom": 1564.59375
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "main",
+              "tag": "MAIN",
+              "rect": {
+                "x": 222,
+                "y": 61,
+                "width": 1218,
+                "height": 1583.296875,
+                "top": 61,
+                "right": 1440,
+                "bottom": 1644.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": 61,
+                "right": 1440,
+                "bottom": 1644
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 222,
+                "y": -11,
+                "width": 1218,
+                "height": 1655.296875,
+                "top": -11,
+                "right": 1440,
+                "bottom": 1644.296875,
+                "left": 222
+              },
+              "client": {
+                "left": 222,
+                "top": -11,
+                "right": 1440,
+                "bottom": 1644
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "DIV",
+              "rect": {
+                "x": 0,
+                "y": -11,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": -11,
+                "right": 1440,
+                "bottom": 1644.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -11,
+                "right": 1440,
+                "bottom": 1644
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "grid",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "BODY",
+              "rect": {
+                "x": 0,
+                "y": -11,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": -11,
+                "right": 1440,
+                "bottom": 1644.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -11,
+                "right": 1440,
+                "bottom": 1644
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                0
+              ]
+            },
+            {
+              "id": "",
+              "tag": "HTML",
+              "rect": {
+                "x": 0,
+                "y": -11,
+                "width": 1440,
+                "height": 1655.296875,
+                "top": -11,
+                "right": 1440,
+                "bottom": 1644.296875,
+                "left": 0
+              },
+              "client": {
+                "left": 0,
+                "top": -11,
+                "right": 1440,
+                "bottom": 889
+              },
+              "overflow": [
+                "visible",
+                "visible"
+              ],
+              "transform": "none",
+              "clipPath": "none",
+              "display": "block",
+              "visibility": "visible",
+              "scroll": [
+                0,
+                11
+              ]
+            }
+          ],
+          "hit": true,
+          "hitNode": "<div class=\"source-raw\">[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다.</div>",
+          "full": true,
+          "visible": true,
+          "text": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다.",
+          "rangeRects": [
+            {
+              "x": 777.828125,
+              "y": 861.4375,
+              "width": 455.78125,
+              "height": 17,
+              "top": 861.4375,
+              "right": 1233.609375,
+              "bottom": 878.4375,
+              "left": 777.828125
+            }
+          ],
+          "scrollY": 11,
+          "focus": ""
+        }
+      }
+    ],
+    "finalManualFieldPairs": {
+      "before": {
+        "understanding": "[U25 고유] 현재 안내 표시는 7일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 7일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "after": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      }
+    },
+    "finalCurrentId": "T_dca09b00-9432-4395-86cd-4ac120df29a8",
+    "finalH": {
+      "at": "2026-10-22T18:21:40.895Z",
+      "method": "clipboard",
+      "revision": 24,
+      "chars": 5289,
+      "digest": "942903eb",
+      "work": {
+        "understanding": "[U25 고유] 현재 안내 표시는 30일이다. 실제 보관 동작은 별도 조건이다.",
+        "scope": "[S25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 자료 찾기 부분은 변경하지 않음.",
+        "next": "[N25 고유] 현재 안내 표시는 30일이라는 안내문을 정리한다. 실제 보관 동작을 바꾸지 않는다.",
+        "checks": "[C25 고유] 실제 보관 동작은 7일 유지, 배포하지 않음. 보관 동작·B구상 변경이 없는지 확인한다."
+      },
+      "aiExcluded": false,
+      "legacyText": null,
+      "returnId": "H_ca534e3a-fe2c-46f2-adcb-bfa1b9232991",
+      "background": {
+        "version": "background.1",
+        "revision": 7,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_63fa169a-2786-4886-9a87-8b0af23656bf",
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+        }
+      },
+      "anchor": {
+        "version": "anchor.2",
+        "areaId": "A_63fa169a-2786-4886-9a87-8b0af23656bf",
+        "understanding": 2,
+        "stamp": {
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [
+            "T_dca09b00-9432-4395-86cd-4ac120df29a8:9de9b2c917fac34d3653b0119d77da7e26ef585c951e0b49edba5f4d02f92990"
+          ],
+          "version": "plan.2",
+          "revision": 0,
+          "ancestors": []
+        }
+      }
+    },
+    "priorH0H1Unchanged": true,
+    "originalReportRawStillSeven": "[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.",
+    "referenceExclusionAfterManual": "## 영역 현재 설명 — 이번 작업문에 넣지 않음\n\n영역 ‘보관 안내’의 정리 설명 r2은 그 뒤 사용자 구상·기준이 바뀌어 현재 설명으로 쓰지 않습니다. 그 설명을 이번 작업의 근거로 삼지 마세요.\n\n\n",
+    "UIEvidenceBoundary": "UI chose the explicitly selected report and its historical-work heading; complete H0/H1 identities are verification metadata, not a claim of visually reading all long IDs. Collapsed 인계 연결 · 수신 원문 entry was not expanded in this run."
+  }
+]

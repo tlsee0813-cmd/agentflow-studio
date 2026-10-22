@@ -1,0 +1,157 @@
+[
+  {
+    "UTC": "2026-10-22T18:20:20.894373+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:37747/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_2429be8d-2714-47a3-a13d-ed691a7cd202",
+        "revision": 8,
+        "requestId": "R_bf8f0754-d73a-4dc3-96d3-c89b20e9516a",
+        "taskId": "T_93b3a34b-118c-452c-bd5f-075ee0fe6289"
+      },
+      "projectName": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 …",
+      "sources": [
+        {
+          "id": "S_2f200bf8-efc6-4824-98d9-c6a387f80efa",
+          "kind": "request",
+          "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+          "at": "2026-10-22T18:20:20.852Z",
+          "taskId": "T_93b3a34b-118c-452c-bd5f-075ee0fe6289",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+          "status": "requested",
+          "sourceId": "S_2f200bf8-efc6-4824-98d9-c6a387f80efa",
+          "revision": 8,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_93b3a34b-118c-452c-bd5f-075ee0fe6289",
+        "inputs": [
+          {
+            "sourceId": "S_2f200bf8-efc6-4824-98d9-c6a387f80efa",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D1",
+            "sourceId": "S_2f200bf8-efc6-4824-98d9-c6a387f80efa",
+            "revision": 8,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 7,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_4ee7425e-52e7-4ff1-bda4-a165b28a6982",
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내의 표시를 설명한다. 실제 보관 동작과 배포는 변경하지 않는다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  },
+  {
+    "UTC": "2026-10-22T18:20:23.395069+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:37747/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_2429be8d-2714-47a3-a13d-ed691a7cd202",
+        "revision": 18,
+        "requestId": "R_f7183ac6-daef-4891-8308-24d62d63a776",
+        "taskId": "T_b19cb037-cefa-4fea-874e-188a3e1df78d"
+      },
+      "projectName": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 …",
+      "sources": [
+        {
+          "id": "S_cc7d4655-8233-473f-a19f-1dff0a609504",
+          "kind": "request",
+          "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+          "at": "2026-10-22T18:20:23.371Z",
+          "taskId": "T_b19cb037-cefa-4fea-874e-188a3e1df78d",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성25] 보관 안내 문구를 읽기 쉽게 정리해 주세요. 실제 보관 동작은 7일 유지하고 배포하지 마세요.",
+          "status": "requested",
+          "sourceId": "S_2f200bf8-efc6-4824-98d9-c6a387f80efa",
+          "revision": 8,
+          "previousVersions": 0,
+          "partial": false
+        },
+        {
+          "id": "D2",
+          "text": "[합성25 준비] 자료를 찾는 안내문을 정리해 주세요. 보관 안내는 변경하지 마세요.",
+          "status": "requested",
+          "sourceId": "S_cc7d4655-8233-473f-a19f-1dff0a609504",
+          "revision": 18,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_b19cb037-cefa-4fea-874e-188a3e1df78d",
+        "inputs": [
+          {
+            "sourceId": "S_cc7d4655-8233-473f-a19f-1dff0a609504",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D2",
+            "sourceId": "S_cc7d4655-8233-473f-a19f-1dff0a609504",
+            "revision": 18,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 17,
+        "brief": "[합성25] 자료 보관 안내를 정리한다. 안내 표시와 실제 보관 동작을 구분하고 배포하지 않는다.",
+        "area": {
+          "id": "A_c051a24c-bf21-47d3-a75b-63034a783b69",
+          "name": "자료 찾기",
+          "note": "저장된 자료를 찾는 안내를 유지한다. 이번 보관 안내 표현 수정과 무관하다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  }
+]
