@@ -218,6 +218,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/received20_browser.py 2>&1 | tee test-results/received20-browser.log
+      - name: BLANK21 first handoff choice and long read return on two PCs (native HTTP, normal new project, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/blank21
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/blank21_browser.py 2>&1 | tee test-results/blank21-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:
