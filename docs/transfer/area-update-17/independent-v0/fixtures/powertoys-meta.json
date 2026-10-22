@@ -1,0 +1,14 @@
+{
+  "id": "powertoys",
+  "name": "키 검색과 녹화",
+  "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+  "report": "[공개 코드 재서술 · 실행 미검증] a964f08은 QuerySubmitted의 args.QueryText를 FilterKeyList에 전달한다. 녹화 종료 조건에 isKeyDown을 추가한다.",
+  "summary": "검색 선택은 제출한 검색어를 기준으로 처리한다. 녹화 종료와 공통 훅은 별도 역할이다.",
+  "proposal": "[명시 합성 제안] 정상 key-up까지 모두 생략하자.",
+  "wrong": "[명시 합성 오해석] 정상 key-up을 전부 무시하는 기능이다.",
+  "origin": "PowerToys 공개 리뷰와 고정 코드의 제한된 한국어 재서술 · 직접 실행 미검증",
+  "link": "https://github.com/microsoft/PowerToys/commit/a964f08cc6fbecb3b9f9d4fe6c1d7481330c7938",
+  "a": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+  "b": "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf",
+  "task": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e"
+}

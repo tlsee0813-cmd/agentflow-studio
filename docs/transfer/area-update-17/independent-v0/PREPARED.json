@@ -1,0 +1,11 @@
+{
+  "candidateSHA": null,
+  "executed": false,
+  "frozenCheckerSHA256": "ab65a98de50e1e0277322cddcf4db7975e6e737a92483dbf06fbb4a7c58e6c02",
+  "workspace": "/workspace/browser-env/cycle17-final-independent",
+  "sourceSetup": "new isolated candidate directory after exact SHA, no reuse of mutable WIP as final source",
+  "node": "/workspace/browser-env/tools/node_modules/.bin/node",
+  "python": "/workspace/browser-env/venv/bin/python",
+  "browser": "/usr/bin/chromium",
+  "baselineEvidenceUnchanged": true
+}

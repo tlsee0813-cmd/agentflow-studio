@@ -1,0 +1,916 @@
+{
+  "validBeforeTamper": {
+    "schemaVersion": "idea015.project.6",
+    "id": "P_b63efb18-6fd8-417e-b6ff-63209002fe8d",
+    "revision": 18,
+    "name": "나의 프로젝트",
+    "sources": [
+      {
+        "id": "S_f3439517-0102-4dfb-9d0b-455d15a5121a",
+        "kind": "request",
+        "text": "[분석자 재서술·합성 요청] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+        "at": "2026-10-22T09:24:19.017Z",
+        "taskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "replyTo": null,
+        "disposition": "provided"
+      },
+      {
+        "id": "S_69b0999e-e1af-41da-8352-0424b9be6d8e",
+        "kind": "report",
+        "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c1bde868-2639-41c8-b530-cd0fdea00c5e의 인계 H_independent_new_request / r14에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[합성 보고] 실행 미검증",
+        "at": "2026-10-22T09:29:19.139Z",
+        "taskId": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+        "replyTo": null,
+        "disposition": "provided"
+      },
+      {
+        "id": "S_1354b328-85bc-483c-813e-7cdea7514c7e",
+        "kind": "report",
+        "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c1bde868-2639-41c8-b530-cd0fdea00c5e의 인계 H_independent_new_request / r14에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[합성 보고] 실행 미검증",
+        "at": "2026-10-22T09:29:19.184Z",
+        "taskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+        "replyTo": null,
+        "disposition": "provided"
+      }
+    ],
+    "bases": [
+      {
+        "id": "D1",
+        "text": "[분석자 재서술·합성 요청] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+        "status": "requested",
+        "sourceId": "S_f3439517-0102-4dfb-9d0b-455d15a5121a",
+        "revision": 6,
+        "history": []
+      }
+    ],
+    "tasks": [
+      {
+        "id": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "sourceIds": [
+          "S_f3439517-0102-4dfb-9d0b-455d15a5121a"
+        ],
+        "parentTaskId": null,
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": "[독립 합성 understanding] 서로 다른 수동값 보존",
+          "scope": "[독립 합성 scope] 서로 다른 수동값 보존",
+          "next": "[독립 합성 next] 서로 다른 수동값 보존",
+          "checks": "[독립 합성 checks] 서로 다른 수동값 보존"
+        },
+        "suggestions": null,
+        "handoffs": [
+          {
+            "at": "2026-10-22T09:29:19.137Z",
+            "method": "clipboard",
+            "revision": 14,
+            "chars": 4189,
+            "digest": "b3add6ef",
+            "work": {
+              "understanding": "[독립 합성 understanding] 서로 다른 수동값 보존",
+              "scope": "[독립 합성 scope] 서로 다른 수동값 보존",
+              "next": "[독립 합성 next] 서로 다른 수동값 보존",
+              "checks": "[독립 합성 checks] 서로 다른 수동값 보존"
+            },
+            "aiExcluded": false,
+            "legacyText": null,
+            "returnId": "H_independent_new_request",
+            "background": {
+              "version": "background.1",
+              "revision": 5,
+              "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+              "area": {
+                "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+                "name": "키 검색과 녹화",
+                "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+              }
+            },
+            "anchor": {
+              "version": "anchor.1",
+              "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+              "understanding": 0,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              }
+            }
+          }
+        ],
+        "resultFile": null,
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        },
+        "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06"
+      },
+      {
+        "id": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+        "sourceIds": [
+          "S_69b0999e-e1af-41da-8352-0424b9be6d8e"
+        ],
+        "parentTaskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": {
+          "returnId": "H_independent_new_request",
+          "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_b63efb18-6fd8-417e-b6ff-63209002fe8d\",\"taskId\":\"T_c1bde868-2639-41c8-b530-cd0fdea00c5e\",\"returnId\":\"H_independent_new_request\",\"report\":\"[합성 보고] 실행 미검증\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_7acff4b9-f4d0-4c72-816f-726fc8558a06\",\"basedOn\":0,\"summary\":\"[독립 합성] 기존 구상과 양립하는 현재 설명 UNIQUE_CONTINUITY\",\"changes\":[],\"proposal\":null,\"origin\":\"독립 합성\"}}"
+        },
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        }
+      },
+      {
+        "id": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+        "sourceIds": [
+          "S_1354b328-85bc-483c-813e-7cdea7514c7e"
+        ],
+        "parentTaskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": {
+          "returnId": "H_independent_new_request",
+          "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_b63efb18-6fd8-417e-b6ff-63209002fe8d\",\"taskId\":\"T_c1bde868-2639-41c8-b530-cd0fdea00c5e\",\"returnId\":\"H_independent_new_request\",\"report\":\"[합성 보고] 실행 미검증\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_7acff4b9-f4d0-4c72-816f-726fc8558a06\",\"basedOn\":0,\"summary\":\"[옛 return 수정] 사용자 정정 전에 내보낸 해석\",\"changes\":[],\"proposal\":null,\"origin\":\"독립 합성\"}}"
+        },
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        }
+      }
+    ],
+    "currentTaskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+    "draft": "[독립 합성 미전송 B] 대상과 내용을 유지한다.",
+    "answerDraft": "",
+    "basisDraft": "",
+    "basisEdits": {},
+    "draftKind": "request",
+    "pending": null,
+    "notice": null,
+    "space": {
+      "brief": {
+        "text": "[합성 현재 목적] 키 검색과 녹화",
+        "at": "2026-10-22T09:24:19.018Z",
+        "previous": [
+          {
+            "text": "[합성 요청당시 목적] 키 검색과 녹화",
+            "at": "2026-10-22T09:24:19.016Z"
+          }
+        ]
+      },
+      "areas": [
+        {
+          "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+          "name": "키 검색과 녹화",
+          "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+          "archived": false,
+          "createdAt": "2026-10-22T09:24:19.017Z"
+        },
+        {
+          "id": "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf",
+          "name": "다른 영역 B",
+          "note": "B 구상 불변",
+          "archived": false,
+          "createdAt": "2026-10-22T09:24:19.017Z"
+        }
+      ],
+      "relations": [],
+      "draftTarget": {
+        "area": "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf"
+      },
+      "layout": {
+        "version": "layout.1",
+        "positions": {
+          "A_7acff4b9-f4d0-4c72-816f-726fc8558a06": {
+            "x": 40,
+            "y": 40
+          },
+          "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf": {
+            "x": 340,
+            "y": 40
+          }
+        }
+      },
+      "understanding": {
+        "A_7acff4b9-f4d0-4c72-816f-726fc8558a06": {
+          "revision": 2,
+          "entries": [
+            {
+              "by": "external",
+              "at": "2026-10-22T09:29:19.140Z",
+              "revision": 1,
+              "taskId": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+              "returnId": "H_independent_new_request",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              },
+              "held": null
+            },
+            {
+              "by": "user",
+              "at": "2026-10-22T09:29:19.181Z",
+              "revision": 2,
+              "taskId": null,
+              "returnId": null,
+              "text": "[명시 사용자 정정] 옛 외부 설명을 되살리지 않는다.",
+              "corrects": 1,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              },
+              "held": null
+            },
+            {
+              "by": "external",
+              "at": "2026-10-22T09:29:19.184Z",
+              "revision": null,
+              "taskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+              "returnId": "H_independent_new_request",
+              "text": null,
+              "corrects": null,
+              "stamp": null,
+              "held": "superseded"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "recovery": {
+    "schemaVersion": "idea015.project.6",
+    "id": "P_b63efb18-6fd8-417e-b6ff-63209002fe8d",
+    "revision": 18,
+    "name": "나의 프로젝트",
+    "sources": [
+      {
+        "id": "S_f3439517-0102-4dfb-9d0b-455d15a5121a",
+        "kind": "request",
+        "text": "[분석자 재서술·합성 요청] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+        "at": "2026-10-22T09:24:19.017Z",
+        "taskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "replyTo": null,
+        "disposition": "provided"
+      },
+      {
+        "id": "S_69b0999e-e1af-41da-8352-0424b9be6d8e",
+        "kind": "report",
+        "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c1bde868-2639-41c8-b530-cd0fdea00c5e의 인계 H_independent_new_request / r14에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[합성 보고] 실행 미검증",
+        "at": "2026-10-22T09:29:19.139Z",
+        "taskId": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+        "replyTo": null,
+        "disposition": "provided"
+      },
+      {
+        "id": "S_1354b328-85bc-483c-813e-7cdea7514c7e",
+        "kind": "report",
+        "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c1bde868-2639-41c8-b530-cd0fdea00c5e의 인계 H_independent_new_request / r14에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[합성 보고] 실행 미검증",
+        "at": "2026-10-22T09:29:19.184Z",
+        "taskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+        "replyTo": null,
+        "disposition": "provided"
+      }
+    ],
+    "bases": [
+      {
+        "id": "D1",
+        "text": "[분석자 재서술·합성 요청] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+        "status": "requested",
+        "sourceId": "S_f3439517-0102-4dfb-9d0b-455d15a5121a",
+        "revision": 6,
+        "history": []
+      }
+    ],
+    "tasks": [
+      {
+        "id": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "sourceIds": [
+          "S_f3439517-0102-4dfb-9d0b-455d15a5121a"
+        ],
+        "parentTaskId": null,
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": "[독립 합성 understanding] 서로 다른 수동값 보존",
+          "scope": "[독립 합성 scope] 서로 다른 수동값 보존",
+          "next": "[독립 합성 next] 서로 다른 수동값 보존",
+          "checks": "[독립 합성 checks] 서로 다른 수동값 보존"
+        },
+        "suggestions": null,
+        "handoffs": [
+          {
+            "at": "2026-10-22T09:29:19.137Z",
+            "method": "clipboard",
+            "revision": 14,
+            "chars": 4189,
+            "digest": "b3add6ef",
+            "work": {
+              "understanding": "[독립 합성 understanding] 서로 다른 수동값 보존",
+              "scope": "[독립 합성 scope] 서로 다른 수동값 보존",
+              "next": "[독립 합성 next] 서로 다른 수동값 보존",
+              "checks": "[독립 합성 checks] 서로 다른 수동값 보존"
+            },
+            "aiExcluded": false,
+            "legacyText": null,
+            "returnId": "H_independent_new_request",
+            "background": {
+              "version": "background.1",
+              "revision": 5,
+              "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+              "area": {
+                "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+                "name": "키 검색과 녹화",
+                "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+              }
+            },
+            "anchor": {
+              "version": "anchor.1",
+              "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+              "understanding": 0,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              }
+            }
+          }
+        ],
+        "resultFile": null,
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        },
+        "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06"
+      },
+      {
+        "id": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+        "sourceIds": [
+          "S_69b0999e-e1af-41da-8352-0424b9be6d8e"
+        ],
+        "parentTaskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": {
+          "returnId": "H_independent_new_request",
+          "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_b63efb18-6fd8-417e-b6ff-63209002fe8d\",\"taskId\":\"T_c1bde868-2639-41c8-b530-cd0fdea00c5e\",\"returnId\":\"H_independent_new_request\",\"report\":\"[합성 보고] 실행 미검증\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_7acff4b9-f4d0-4c72-816f-726fc8558a06\",\"basedOn\":0,\"summary\":\"[독립 합성] 기존 구상과 양립하는 현재 설명 UNIQUE_CONTINUITY\",\"changes\":[],\"proposal\":null,\"origin\":\"독립 합성\"}}"
+        },
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        }
+      },
+      {
+        "id": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+        "sourceIds": [
+          "S_1354b328-85bc-483c-813e-7cdea7514c7e"
+        ],
+        "parentTaskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": {
+          "returnId": "H_independent_new_request",
+          "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_b63efb18-6fd8-417e-b6ff-63209002fe8d\",\"taskId\":\"T_c1bde868-2639-41c8-b530-cd0fdea00c5e\",\"returnId\":\"H_independent_new_request\",\"report\":\"[합성 보고] 실행 미검증\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_7acff4b9-f4d0-4c72-816f-726fc8558a06\",\"basedOn\":0,\"summary\":\"[옛 return 수정] 사용자 정정 전에 내보낸 해석\",\"changes\":[],\"proposal\":null,\"origin\":\"독립 합성\"}}"
+        },
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        }
+      }
+    ],
+    "currentTaskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+    "draft": "[독립 합성 미전송 B] 대상과 내용을 유지한다.",
+    "answerDraft": "",
+    "basisDraft": "",
+    "basisEdits": {},
+    "draftKind": "request",
+    "pending": null,
+    "notice": null,
+    "space": {
+      "brief": {
+        "text": "[합성 현재 목적] 키 검색과 녹화",
+        "at": "2026-10-22T09:24:19.018Z",
+        "previous": [
+          {
+            "text": "[합성 요청당시 목적] 키 검색과 녹화",
+            "at": "2026-10-22T09:24:19.016Z"
+          }
+        ]
+      },
+      "areas": [
+        {
+          "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+          "name": "키 검색과 녹화",
+          "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+          "archived": false,
+          "createdAt": "2026-10-22T09:24:19.017Z"
+        },
+        {
+          "id": "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf",
+          "name": "다른 영역 B",
+          "note": "B 구상 불변",
+          "archived": false,
+          "createdAt": "2026-10-22T09:24:19.017Z"
+        }
+      ],
+      "relations": [],
+      "draftTarget": {
+        "area": "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf"
+      },
+      "layout": {
+        "version": "layout.1",
+        "positions": {
+          "A_7acff4b9-f4d0-4c72-816f-726fc8558a06": {
+            "x": 40,
+            "y": 40
+          },
+          "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf": {
+            "x": 340,
+            "y": 40
+          }
+        }
+      },
+      "understanding": {
+        "A_7acff4b9-f4d0-4c72-816f-726fc8558a06": {
+          "revision": 3,
+          "entries": [
+            {
+              "by": "external",
+              "at": "2026-10-22T09:29:19.140Z",
+              "revision": 1,
+              "taskId": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+              "returnId": "H_independent_new_request",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              },
+              "held": null
+            },
+            {
+              "by": "user",
+              "at": "2026-10-22T09:29:19.181Z",
+              "revision": 2,
+              "taskId": null,
+              "returnId": null,
+              "text": "[명시 사용자 정정] 옛 외부 설명을 되살리지 않는다.",
+              "corrects": 1,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              },
+              "held": null
+            },
+            {
+              "by": "external",
+              "at": "2026-10-22T09:29:19.184Z",
+              "revision": 3,
+              "taskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+              "returnId": "H_independent_new_request",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              },
+              "held": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "accepted": {
+    "schemaVersion": "idea015.project.6",
+    "id": "P_b63efb18-6fd8-417e-b6ff-63209002fe8d",
+    "revision": 18,
+    "name": "나의 프로젝트",
+    "sources": [
+      {
+        "id": "S_f3439517-0102-4dfb-9d0b-455d15a5121a",
+        "kind": "request",
+        "text": "[분석자 재서술·합성 요청] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+        "at": "2026-10-22T09:24:19.017Z",
+        "taskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "replyTo": null,
+        "disposition": "provided"
+      },
+      {
+        "id": "S_69b0999e-e1af-41da-8352-0424b9be6d8e",
+        "kind": "report",
+        "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c1bde868-2639-41c8-b530-cd0fdea00c5e의 인계 H_independent_new_request / r14에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[합성 보고] 실행 미검증",
+        "at": "2026-10-22T09:29:19.139Z",
+        "taskId": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+        "replyTo": null,
+        "disposition": "provided"
+      },
+      {
+        "id": "S_1354b328-85bc-483c-813e-7cdea7514c7e",
+        "kind": "report",
+        "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c1bde868-2639-41c8-b530-cd0fdea00c5e의 인계 H_independent_new_request / r14에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[합성 보고] 실행 미검증",
+        "at": "2026-10-22T09:29:19.184Z",
+        "taskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+        "replyTo": null,
+        "disposition": "provided"
+      }
+    ],
+    "bases": [
+      {
+        "id": "D1",
+        "text": "[분석자 재서술·합성 요청] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+        "status": "requested",
+        "sourceId": "S_f3439517-0102-4dfb-9d0b-455d15a5121a",
+        "revision": 6,
+        "history": []
+      }
+    ],
+    "tasks": [
+      {
+        "id": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "sourceIds": [
+          "S_f3439517-0102-4dfb-9d0b-455d15a5121a"
+        ],
+        "parentTaskId": null,
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": "[독립 합성 understanding] 서로 다른 수동값 보존",
+          "scope": "[독립 합성 scope] 서로 다른 수동값 보존",
+          "next": "[독립 합성 next] 서로 다른 수동값 보존",
+          "checks": "[독립 합성 checks] 서로 다른 수동값 보존"
+        },
+        "suggestions": null,
+        "handoffs": [
+          {
+            "at": "2026-10-22T09:29:19.137Z",
+            "method": "clipboard",
+            "revision": 14,
+            "chars": 4189,
+            "digest": "b3add6ef",
+            "work": {
+              "understanding": "[독립 합성 understanding] 서로 다른 수동값 보존",
+              "scope": "[독립 합성 scope] 서로 다른 수동값 보존",
+              "next": "[독립 합성 next] 서로 다른 수동값 보존",
+              "checks": "[독립 합성 checks] 서로 다른 수동값 보존"
+            },
+            "aiExcluded": false,
+            "legacyText": null,
+            "returnId": "H_independent_new_request",
+            "background": {
+              "version": "background.1",
+              "revision": 5,
+              "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+              "area": {
+                "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+                "name": "키 검색과 녹화",
+                "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+              }
+            },
+            "anchor": {
+              "version": "anchor.1",
+              "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+              "understanding": 0,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              }
+            }
+          }
+        ],
+        "resultFile": null,
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        },
+        "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06"
+      },
+      {
+        "id": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+        "sourceIds": [
+          "S_69b0999e-e1af-41da-8352-0424b9be6d8e"
+        ],
+        "parentTaskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": {
+          "returnId": "H_independent_new_request",
+          "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_b63efb18-6fd8-417e-b6ff-63209002fe8d\",\"taskId\":\"T_c1bde868-2639-41c8-b530-cd0fdea00c5e\",\"returnId\":\"H_independent_new_request\",\"report\":\"[합성 보고] 실행 미검증\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_7acff4b9-f4d0-4c72-816f-726fc8558a06\",\"basedOn\":0,\"summary\":\"[독립 합성] 기존 구상과 양립하는 현재 설명 UNIQUE_CONTINUITY\",\"changes\":[],\"proposal\":null,\"origin\":\"독립 합성\"}}"
+        },
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        }
+      },
+      {
+        "id": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+        "sourceIds": [
+          "S_1354b328-85bc-483c-813e-7cdea7514c7e"
+        ],
+        "parentTaskId": "T_c1bde868-2639-41c8-b530-cd0fdea00c5e",
+        "advice": null,
+        "adviceRevision": null,
+        "mode": null,
+        "manual": {
+          "understanding": null,
+          "scope": null,
+          "next": null,
+          "checks": null
+        },
+        "suggestions": null,
+        "handoffs": [],
+        "resultFile": {
+          "returnId": "H_independent_new_request",
+          "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_b63efb18-6fd8-417e-b6ff-63209002fe8d\",\"taskId\":\"T_c1bde868-2639-41c8-b530-cd0fdea00c5e\",\"returnId\":\"H_independent_new_request\",\"report\":\"[합성 보고] 실행 미검증\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_7acff4b9-f4d0-4c72-816f-726fc8558a06\",\"basedOn\":0,\"summary\":\"[옛 return 수정] 사용자 정정 전에 내보낸 해석\",\"changes\":[],\"proposal\":null,\"origin\":\"독립 합성\"}}"
+        },
+        "background": {
+          "version": "background.1",
+          "revision": 5,
+          "brief": "[합성 요청당시 목적] 키 검색과 녹화",
+          "area": {
+            "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+            "name": "키 검색과 녹화",
+            "note": "[합성 요청당시 구상] Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다."
+          }
+        }
+      }
+    ],
+    "currentTaskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+    "draft": "[독립 합성 미전송 B] 대상과 내용을 유지한다.",
+    "answerDraft": "",
+    "basisDraft": "",
+    "basisEdits": {},
+    "draftKind": "request",
+    "pending": null,
+    "notice": null,
+    "space": {
+      "brief": {
+        "text": "[합성 현재 목적] 키 검색과 녹화",
+        "at": "2026-10-22T09:24:19.018Z",
+        "previous": [
+          {
+            "text": "[합성 요청당시 목적] 키 검색과 녹화",
+            "at": "2026-10-22T09:24:19.016Z"
+          }
+        ]
+      },
+      "areas": [
+        {
+          "id": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+          "name": "키 검색과 녹화",
+          "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+          "archived": false,
+          "createdAt": "2026-10-22T09:24:19.017Z"
+        },
+        {
+          "id": "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf",
+          "name": "다른 영역 B",
+          "note": "B 구상 불변",
+          "archived": false,
+          "createdAt": "2026-10-22T09:24:19.017Z"
+        }
+      ],
+      "relations": [],
+      "draftTarget": {
+        "area": "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf"
+      },
+      "layout": {
+        "version": "layout.1",
+        "positions": {
+          "A_7acff4b9-f4d0-4c72-816f-726fc8558a06": {
+            "x": 40,
+            "y": 40
+          },
+          "A_15dcf5f2-4d64-4ab2-ac66-12aab02a01cf": {
+            "x": 340,
+            "y": 40
+          }
+        }
+      },
+      "understanding": {
+        "A_7acff4b9-f4d0-4c72-816f-726fc8558a06": {
+          "revision": 3,
+          "entries": [
+            {
+              "by": "external",
+              "at": "2026-10-22T09:29:19.140Z",
+              "revision": 1,
+              "taskId": "T_a2dac425-f5e9-409f-8d0d-711749bc06d5",
+              "returnId": "H_independent_new_request",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              },
+              "held": null
+            },
+            {
+              "by": "user",
+              "at": "2026-10-22T09:29:19.181Z",
+              "revision": 2,
+              "taskId": null,
+              "returnId": null,
+              "text": "[명시 사용자 정정] 옛 외부 설명을 되살리지 않는다.",
+              "corrects": 1,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              },
+              "held": null
+            },
+            {
+              "by": "external",
+              "at": "2026-10-22T09:29:19.184Z",
+              "revision": 3,
+              "taskId": "T_57f79c08-04e0-4d2c-9562-b69091416053",
+              "returnId": "H_independent_new_request",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "name": "키 검색과 녹화",
+                "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+                "brief": 2,
+                "decisions": [
+                  "D1@6"
+                ],
+                "work": [
+                  "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+                ]
+              },
+              "held": null
+            }
+          ]
+        }
+      }
+    }
+  },
+  "error": null,
+  "productCounterexample": true,
+  "exit": 1
+}

@@ -1,0 +1,237 @@
+{
+  "rows": [
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1280,
+        720
+      ],
+      "kind": "firstClipboard",
+      "actualCopiedUTF16Chars": 4215,
+      "recordChars": 4215,
+      "actualCopiedDigest": "55464891",
+      "recordDigest": "55464891",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+        "understanding": 0,
+        "stamp": {
+          "name": "키 검색과 녹화",
+          "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+          "brief": 2,
+          "decisions": [
+            "D1@6"
+          ],
+          "work": [
+            "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1280,
+        720
+      ],
+      "kind": "secondClipboard",
+      "actualCopiedUTF16Chars": 6918,
+      "recordChars": 6918,
+      "actualCopiedDigest": "a88083a0",
+      "recordDigest": "a88083a0",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+        "understanding": 3,
+        "stamp": {
+          "name": "키 검색과 녹화",
+          "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+          "brief": 2,
+          "decisions": [
+            "D1@6"
+          ],
+          "work": [
+            "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1440,
+        900
+      ],
+      "kind": "firstClipboard",
+      "actualCopiedUTF16Chars": 4215,
+      "recordChars": 4215,
+      "actualCopiedDigest": "7e759637",
+      "recordDigest": "7e759637",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+        "understanding": 0,
+        "stamp": {
+          "name": "키 검색과 녹화",
+          "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+          "brief": 2,
+          "decisions": [
+            "D1@6"
+          ],
+          "work": [
+            "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1440,
+        900
+      ],
+      "kind": "secondClipboard",
+      "actualCopiedUTF16Chars": 6918,
+      "recordChars": 6918,
+      "actualCopiedDigest": "a1846824",
+      "recordDigest": "a1846824",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_7acff4b9-f4d0-4c72-816f-726fc8558a06",
+        "understanding": 3,
+        "stamp": {
+          "name": "키 검색과 녹화",
+          "note": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다. 정상 key-up은 유지한다.",
+          "brief": 2,
+          "decisions": [
+            "D1@6"
+          ],
+          "work": [
+            "T_c1bde868-2639-41c8-b530-cd0fdea00c5e:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "p13",
+      "viewport": [
+        1280,
+        720
+      ],
+      "kind": "firstClipboard",
+      "actualCopiedUTF16Chars": 4184,
+      "recordChars": 4184,
+      "actualCopiedDigest": "01acee99",
+      "recordDigest": "01acee99",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_d980ec9b-4b0d-43d5-9364-17c366945e86",
+        "understanding": 0,
+        "stamp": {
+          "name": "PC 지도 조작부",
+          "note": "목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다.",
+          "brief": 2,
+          "decisions": [
+            "D1@6"
+          ],
+          "work": [
+            "T_459d931c-bcf8-47d8-9d37-2b5e5476a49f:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "p13",
+      "viewport": [
+        1280,
+        720
+      ],
+      "kind": "secondClipboard",
+      "actualCopiedUTF16Chars": 6843,
+      "recordChars": 6843,
+      "actualCopiedDigest": "8517739f",
+      "recordDigest": "8517739f",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_d980ec9b-4b0d-43d5-9364-17c366945e86",
+        "understanding": 3,
+        "stamp": {
+          "name": "PC 지도 조작부",
+          "note": "목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다.",
+          "brief": 2,
+          "decisions": [
+            "D1@6"
+          ],
+          "work": [
+            "T_459d931c-bcf8-47d8-9d37-2b5e5476a49f:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "p13",
+      "viewport": [
+        1440,
+        900
+      ],
+      "kind": "firstClipboard",
+      "actualCopiedUTF16Chars": 4184,
+      "recordChars": 4184,
+      "actualCopiedDigest": "4fa955e1",
+      "recordDigest": "4fa955e1",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_d980ec9b-4b0d-43d5-9364-17c366945e86",
+        "understanding": 0,
+        "stamp": {
+          "name": "PC 지도 조작부",
+          "note": "목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다.",
+          "brief": 2,
+          "decisions": [
+            "D1@6"
+          ],
+          "work": [
+            "T_459d931c-bcf8-47d8-9d37-2b5e5476a49f:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "p13",
+      "viewport": [
+        1440,
+        900
+      ],
+      "kind": "secondClipboard",
+      "actualCopiedUTF16Chars": 6843,
+      "recordChars": 6843,
+      "actualCopiedDigest": "9623e81e",
+      "recordDigest": "9623e81e",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_d980ec9b-4b0d-43d5-9364-17c366945e86",
+        "understanding": 3,
+        "stamp": {
+          "name": "PC 지도 조작부",
+          "note": "목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다.",
+          "brief": 2,
+          "decisions": [
+            "D1@6"
+          ],
+          "work": [
+            "T_459d931c-bcf8-47d8-9d37-2b5e5476a49f:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    }
+  ],
+  "scope": "independently recomputed actual clipboard text JS length/FNV vs asynchronous completed record; text and current/Background basis assertions in UI raw. No deliberately concurrent edit during clipboard operation was injected."
+}
