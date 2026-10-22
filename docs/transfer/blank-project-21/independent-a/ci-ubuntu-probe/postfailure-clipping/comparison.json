@@ -1,0 +1,113 @@
+{
+  "originalLastVisibleProbe": {
+    "test": "blank21_browser.Blank21.test_first_handoff_choice_and_long_read_return",
+    "pc": [
+      1280,
+      720
+    ],
+    "kind": "condition",
+    "label": "actual full clipping and hit #file-handoff-preview > summary",
+    "actual": {
+      "top": 4.125,
+      "bottom": 47.921875,
+      "left": 264,
+      "right": 1238,
+      "clipTop": 0,
+      "clipBottom": 720,
+      "inside": true,
+      "hit": true,
+      "wheelX": 1260,
+      "wheelY": 360,
+      "host": "window"
+    },
+    "expected": true
+  },
+  "afterUnittestRecordedFailure": {
+    "summaryRect": {
+      "x": 264,
+      "y": -2250.875,
+      "width": 974,
+      "height": 43.796875,
+      "top": -2250.875,
+      "right": 1238,
+      "bottom": -2207.078125,
+      "left": 264
+    },
+    "window": {
+      "scrollX": 0,
+      "scrollY": 2875,
+      "innerWidth": 1280,
+      "innerHeight": 720,
+      "outerWidth": 1280,
+      "outerHeight": 720,
+      "devicePixelRatio": 1
+    },
+    "detailsOpen": true,
+    "activeIsSummary": true,
+    "freshIO": {
+      "observedAt": 7899.799999952316,
+      "sameDOMIdentity": true,
+      "entries": [
+        {
+          "time": 7899.599999964237,
+          "isIntersecting": false,
+          "intersectionRatio": 0,
+          "boundingClientRect": {
+            "x": 264,
+            "y": -2250.875,
+            "width": 974,
+            "height": 43.796875,
+            "top": -2250.875,
+            "right": 1238,
+            "bottom": -2207.078125,
+            "left": 264
+          },
+          "intersectionRect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "rootBounds": {
+            "x": 0,
+            "y": 0,
+            "width": 1280,
+            "height": 720,
+            "top": 0,
+            "right": 1280,
+            "bottom": 720,
+            "left": 0
+          },
+          "isTarget": true
+        }
+      ],
+      "atCallback": {
+        "windowY": 2875,
+        "activeIsSummary": true,
+        "open": true,
+        "rect": {
+          "x": 264,
+          "y": -2250.875,
+          "width": 974,
+          "height": 43.796875,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125,
+          "left": 264
+        }
+      }
+    }
+  },
+  "measuredRectYDifference": -2255.0,
+  "limits": [
+    "No pre-failure observer/evaluate/wait by this runner",
+    "Last original PROBE has no DOM identity or timestamp/windowY; cannot prove exact transition moment or same-node identity across original PROBE",
+    "Same DOM identity only checked between post-failure IO registration and callback",
+    "Postfailure does not identify native-scroll pending cause",
+    "clientBox/scale are derived bounding/offset heuristics; HTML boundingHeight versus offsetHeight differ; raw clientRects/client metrics/style authoritative, no derived full-clip verdict is issued"
+  ]
+}

@@ -1,0 +1,2034 @@
+{
+  "UTC": "2026-10-22T17:24:51.157409+00:00",
+  "hook": "unittest result.addFailure after super; before original tearDown",
+  "test": "blank21_browser.Blank21.test_first_handoff_choice_and_long_read_return",
+  "kind": "failure",
+  "originalException": "Traceback (most recent call last):\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/case.py\", line 58, in testPartExecutor\n    yield\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/case.py\", line 634, in run\n    self._callTestMethod(testMethod)\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/case.py\", line 589, in _callTestMethod\n    if method() is not None:\n       ^^^^^^^^\n  File \"/workspace/browser-env/cycle21-postfailure-clipping/blank21_browser.py\", line 111, in test_first_handoff_choice_and_long_read_return\n    self.page.keyboard.press('Shift+Tab');expect(self.page.locator('#file-handoff-preview > summary')).to_be_focused();self.toggle('file-handoff-preview',False,'Enter');expect(field).to_be_hidden();self.equal('read and fold do not change current/draft/exports',self.state(),before_read)\n                                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle21-postfailure-clipping/blank21_browser.py\", line 47, in toggle\n    summary='#'+id+' > summary';self.reach(summary)\n                                ^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle21-a-candidate/app/continuity/tests/received20_browser.py\", line 72, in reach\n    self.visible(sel,marker)\n  File \"/workspace/browser-env/cycle21-a-candidate/app/continuity/tests/received20_browser.py\", line 45, in visible\n    if not marker:expect(self.page.locator(sel)).to_be_in_viewport()\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 20633, in to_be_in_viewport\n    self._sync(self._impl_obj.to_be_in_viewport(ratio=ratio, timeout=timeout))\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py\", line 807, in to_be_in_viewport\n    await self._expect_impl(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py\", line 85, in _expect_impl\n    raise AssertionError(\nAssertionError: Locator expected to be in viewport\nActual value: viewport ratio 0 \nCall log:\n  - Expect \"to_be_in_viewport\" with timeout 5000ms\n  - waiting for locator(\"#file-handoff-preview > summary\")\n    9 × locator resolved to <summary>이 탭에서 마지막으로 내보낸 파일용 전문</summary>\n      - unexpected value \"viewport ratio 0\"\n\n",
+  "snapshotBeforeFreshIO": {
+    "time": 7885.599999964237,
+    "utc": "2026-10-22T17:24:51.162Z",
+    "summaryPresent": true,
+    "summaryText": "이 탭에서 마지막으로 내보낸 파일용 전문",
+    "detailsOpen": true,
+    "ancestors": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "class": "",
+        "rect": {
+          "x": 264,
+          "y": -2250.875,
+          "width": 974,
+          "height": 43.796875,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2250.875,
+            "width": 974,
+            "height": 43.796875,
+            "top": -2250.875,
+            "right": 1238,
+            "bottom": -2207.078125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 44,
+        "offsetWidth": 974,
+        "offsetHeight": 44,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 44,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "list-item",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9953835227272727
+        ]
+      },
+      {
+        "id": "file-handoff-preview",
+        "tag": "DETAILS",
+        "class": "",
+        "rect": {
+          "x": 264,
+          "y": -2250.875,
+          "width": 974,
+          "height": 237.546875,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2013.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2250.875,
+            "width": 974,
+            "height": 237.546875,
+            "top": -2250.875,
+            "right": 1238,
+            "bottom": -2013.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2013.328125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 238,
+        "offsetWidth": 974,
+        "offsetHeight": 238,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 238,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9980961134453782
+        ]
+      },
+      {
+        "id": "file-return-options",
+        "tag": "DETAILS",
+        "class": "file-return-options",
+        "rect": {
+          "x": 264,
+          "y": -2425.6875,
+          "width": 974,
+          "height": 412.359375,
+          "top": -2425.6875,
+          "right": 1238,
+          "bottom": -2013.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2425.6875,
+            "width": 974,
+            "height": 412.359375,
+            "top": -2425.6875,
+            "right": 1238,
+            "bottom": -2013.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2424.6866277305826,
+          "right": 1238,
+          "bottom": -2013.328125
+        },
+        "clientLeft": 0,
+        "clientTop": 1,
+        "clientWidth": 974,
+        "clientHeight": 411,
+        "offsetWidth": 974,
+        "offsetHeight": 412,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 411,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.0008722694174756
+        ]
+      },
+      {
+        "id": "next-actions",
+        "tag": "DIV",
+        "class": "next-actions",
+        "rect": {
+          "x": 264,
+          "y": -2582.921875,
+          "width": 974,
+          "height": 569.59375,
+          "top": -2582.921875,
+          "right": 1238,
+          "bottom": -2013.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2582.921875,
+            "width": 974,
+            "height": 569.59375,
+            "top": -2582.921875,
+            "right": 1238,
+            "bottom": -2013.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2582.921875,
+          "right": 1238,
+          "bottom": -2013.328125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 570,
+        "offsetWidth": 974,
+        "offsetHeight": 570,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 570,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "flex",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9992872807017544
+        ]
+      },
+      {
+        "id": "",
+        "tag": "SECTION",
+        "class": "context-bar",
+        "rect": {
+          "x": 264,
+          "y": -2680.3125,
+          "width": 974,
+          "height": 690.984375,
+          "top": -2680.3125,
+          "right": 1238,
+          "bottom": -1989.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2680.3125,
+            "width": 974,
+            "height": 690.984375,
+            "top": -2680.3125,
+            "right": 1238,
+            "bottom": -1989.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2680.3125,
+          "right": 1238,
+          "bottom": -1990.3281023878437
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 690,
+        "offsetWidth": 974,
+        "offsetHeight": 691,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 690,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9999773878437048
+        ]
+      },
+      {
+        "id": "work-view",
+        "tag": "DIV",
+        "class": "",
+        "rect": {
+          "x": 264,
+          "y": -2713.40625,
+          "width": 974,
+          "height": 3353.734375,
+          "top": -2713.40625,
+          "right": 1238,
+          "bottom": 640.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2713.40625,
+            "width": 974,
+            "height": 3353.734375,
+            "top": -2713.40625,
+            "right": 1238,
+            "bottom": 640.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2713.40625,
+          "right": 1238,
+          "bottom": 640.328125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 3354,
+        "offsetWidth": 974,
+        "offsetHeight": 3354,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 3354,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9999208035181872
+        ]
+      },
+      {
+        "id": "main",
+        "tag": "MAIN",
+        "class": "shell",
+        "rect": {
+          "x": 222,
+          "y": -2803,
+          "width": 1058,
+          "height": 3523.171875,
+          "top": -2803,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 222
+        },
+        "clientRects": [
+          {
+            "x": 222,
+            "y": -2803,
+            "width": 1058,
+            "height": 3523.171875,
+            "top": -2803,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 222
+          }
+        ],
+        "clientBox": {
+          "left": 222,
+          "top": -2803,
+          "right": 1280,
+          "bottom": 720.1718750000005
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1058,
+        "clientHeight": 3523,
+        "offsetWidth": 1058,
+        "offsetHeight": 3523,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1058,
+        "scrollHeight": 3523,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.0000487865455578
+        ]
+      },
+      {
+        "id": "",
+        "tag": "DIV",
+        "class": "app-body",
+        "rect": {
+          "x": 222,
+          "y": -2875,
+          "width": 1058,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 222
+        },
+        "clientRects": [
+          {
+            "x": 222,
+            "y": -2875,
+            "width": 1058,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 222
+          }
+        ],
+        "clientBox": {
+          "left": 222,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1058,
+        "clientHeight": 3595,
+        "offsetWidth": 1058,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1058,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      {
+        "id": "",
+        "tag": "DIV",
+        "class": "app-shell",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 3595,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "grid",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      {
+        "id": "",
+        "tag": "BODY",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 3595,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      {
+        "id": "",
+        "tag": "HTML",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": -2154.9655771905423
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 720,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 2875,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      }
+    ],
+    "text": [
+      {
+        "text": "이 탭에서 마지막으로 내보낸 파일용 전문",
+        "rect": {
+          "x": 276.703125,
+          "y": -2237.875,
+          "width": 196.796875,
+          "height": 17,
+          "top": -2237.875,
+          "right": 473.5,
+          "bottom": -2220.875,
+          "left": 276.703125
+        },
+        "rects": [
+          {
+            "x": 276.703125,
+            "y": -2237.875,
+            "width": 196.796875,
+            "height": 17,
+            "top": -2237.875,
+            "right": 473.5,
+            "bottom": -2220.875,
+            "left": 276.703125
+          }
+        ]
+      }
+    ],
+    "points": [
+      {
+        "name": "center",
+        "x": 751,
+        "y": -2228.9765625,
+        "hit": null,
+        "targetOrDescendant": false
+      },
+      {
+        "name": "topLeft",
+        "x": 265,
+        "y": -2249.875,
+        "hit": null,
+        "targetOrDescendant": false
+      },
+      {
+        "name": "bottomRight",
+        "x": 1237,
+        "y": -2208.078125,
+        "hit": null,
+        "targetOrDescendant": false
+      }
+    ],
+    "activeElement": {
+      "node": {
+        "id": "",
+        "tag": "SUMMARY",
+        "class": "",
+        "rect": {
+          "x": 264,
+          "y": -2250.875,
+          "width": 974,
+          "height": 43.796875,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2250.875,
+            "width": 974,
+            "height": 43.796875,
+            "top": -2250.875,
+            "right": 1238,
+            "bottom": -2207.078125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 44,
+        "offsetWidth": 974,
+        "offsetHeight": 44,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 44,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "list-item",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9953835227272727
+        ]
+      },
+      "outerHTML": "<summary>이 탭에서 마지막으로 내보낸 파일용 전문</summary>",
+      "isSummary": true
+    },
+    "window": {
+      "scrollX": 0,
+      "scrollY": 2875,
+      "innerWidth": 1280,
+      "innerHeight": 720,
+      "outerWidth": 1280,
+      "outerHeight": 720,
+      "devicePixelRatio": 1
+    },
+    "visualViewport": {
+      "width": 1280,
+      "height": 720,
+      "offsetLeft": 0,
+      "offsetTop": 0,
+      "pageLeft": 0,
+      "pageTop": 2875,
+      "scale": 1
+    },
+    "document": {
+      "readyState": "complete",
+      "visibilityState": "visible",
+      "scrollingElement": {
+        "id": "",
+        "tag": "HTML",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": -2154.9655771905423
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 720,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 2875,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      "documentElement": {
+        "id": "",
+        "tag": "HTML",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": -2154.9655771905423
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 720,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 2875,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      "body": {
+        "id": "",
+        "tag": "BODY",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 3595,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      }
+    }
+  },
+  "freshIntersectionObserver": {
+    "observedAt": 7899.799999952316,
+    "sameDOMIdentity": true,
+    "entries": [
+      {
+        "time": 7899.599999964237,
+        "isIntersecting": false,
+        "intersectionRatio": 0,
+        "boundingClientRect": {
+          "x": 264,
+          "y": -2250.875,
+          "width": 974,
+          "height": 43.796875,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125,
+          "left": 264
+        },
+        "intersectionRect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "rootBounds": {
+          "x": 0,
+          "y": 0,
+          "width": 1280,
+          "height": 720,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720,
+          "left": 0
+        },
+        "isTarget": true
+      }
+    ],
+    "atCallback": {
+      "windowY": 2875,
+      "activeIsSummary": true,
+      "open": true,
+      "rect": {
+        "x": 264,
+        "y": -2250.875,
+        "width": 974,
+        "height": 43.796875,
+        "top": -2250.875,
+        "right": 1238,
+        "bottom": -2207.078125,
+        "left": 264
+      }
+    }
+  },
+  "snapshotAfterFreshIO": {
+    "time": 7903.899999976158,
+    "utc": "2026-10-22T17:24:51.180Z",
+    "summaryPresent": true,
+    "summaryText": "이 탭에서 마지막으로 내보낸 파일용 전문",
+    "detailsOpen": true,
+    "ancestors": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "class": "",
+        "rect": {
+          "x": 264,
+          "y": -2250.875,
+          "width": 974,
+          "height": 43.796875,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2250.875,
+            "width": 974,
+            "height": 43.796875,
+            "top": -2250.875,
+            "right": 1238,
+            "bottom": -2207.078125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 44,
+        "offsetWidth": 974,
+        "offsetHeight": 44,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 44,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "list-item",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9953835227272727
+        ]
+      },
+      {
+        "id": "file-handoff-preview",
+        "tag": "DETAILS",
+        "class": "",
+        "rect": {
+          "x": 264,
+          "y": -2250.875,
+          "width": 974,
+          "height": 237.546875,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2013.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2250.875,
+            "width": 974,
+            "height": 237.546875,
+            "top": -2250.875,
+            "right": 1238,
+            "bottom": -2013.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2013.328125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 238,
+        "offsetWidth": 974,
+        "offsetHeight": 238,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 238,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9980961134453782
+        ]
+      },
+      {
+        "id": "file-return-options",
+        "tag": "DETAILS",
+        "class": "file-return-options",
+        "rect": {
+          "x": 264,
+          "y": -2425.6875,
+          "width": 974,
+          "height": 412.359375,
+          "top": -2425.6875,
+          "right": 1238,
+          "bottom": -2013.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2425.6875,
+            "width": 974,
+            "height": 412.359375,
+            "top": -2425.6875,
+            "right": 1238,
+            "bottom": -2013.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2424.6866277305826,
+          "right": 1238,
+          "bottom": -2013.328125
+        },
+        "clientLeft": 0,
+        "clientTop": 1,
+        "clientWidth": 974,
+        "clientHeight": 411,
+        "offsetWidth": 974,
+        "offsetHeight": 412,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 411,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.0008722694174756
+        ]
+      },
+      {
+        "id": "next-actions",
+        "tag": "DIV",
+        "class": "next-actions",
+        "rect": {
+          "x": 264,
+          "y": -2582.921875,
+          "width": 974,
+          "height": 569.59375,
+          "top": -2582.921875,
+          "right": 1238,
+          "bottom": -2013.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2582.921875,
+            "width": 974,
+            "height": 569.59375,
+            "top": -2582.921875,
+            "right": 1238,
+            "bottom": -2013.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2582.921875,
+          "right": 1238,
+          "bottom": -2013.328125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 570,
+        "offsetWidth": 974,
+        "offsetHeight": 570,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 570,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "flex",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9992872807017544
+        ]
+      },
+      {
+        "id": "",
+        "tag": "SECTION",
+        "class": "context-bar",
+        "rect": {
+          "x": 264,
+          "y": -2680.3125,
+          "width": 974,
+          "height": 690.984375,
+          "top": -2680.3125,
+          "right": 1238,
+          "bottom": -1989.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2680.3125,
+            "width": 974,
+            "height": 690.984375,
+            "top": -2680.3125,
+            "right": 1238,
+            "bottom": -1989.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2680.3125,
+          "right": 1238,
+          "bottom": -1990.3281023878437
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 690,
+        "offsetWidth": 974,
+        "offsetHeight": 691,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 690,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9999773878437048
+        ]
+      },
+      {
+        "id": "work-view",
+        "tag": "DIV",
+        "class": "",
+        "rect": {
+          "x": 264,
+          "y": -2713.40625,
+          "width": 974,
+          "height": 3353.734375,
+          "top": -2713.40625,
+          "right": 1238,
+          "bottom": 640.328125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2713.40625,
+            "width": 974,
+            "height": 3353.734375,
+            "top": -2713.40625,
+            "right": 1238,
+            "bottom": 640.328125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2713.40625,
+          "right": 1238,
+          "bottom": 640.328125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 3354,
+        "offsetWidth": 974,
+        "offsetHeight": 3354,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 3354,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9999208035181872
+        ]
+      },
+      {
+        "id": "main",
+        "tag": "MAIN",
+        "class": "shell",
+        "rect": {
+          "x": 222,
+          "y": -2803,
+          "width": 1058,
+          "height": 3523.171875,
+          "top": -2803,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 222
+        },
+        "clientRects": [
+          {
+            "x": 222,
+            "y": -2803,
+            "width": 1058,
+            "height": 3523.171875,
+            "top": -2803,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 222
+          }
+        ],
+        "clientBox": {
+          "left": 222,
+          "top": -2803,
+          "right": 1280,
+          "bottom": 720.1718750000005
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1058,
+        "clientHeight": 3523,
+        "offsetWidth": 1058,
+        "offsetHeight": 3523,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1058,
+        "scrollHeight": 3523,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.0000487865455578
+        ]
+      },
+      {
+        "id": "",
+        "tag": "DIV",
+        "class": "app-body",
+        "rect": {
+          "x": 222,
+          "y": -2875,
+          "width": 1058,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 222
+        },
+        "clientRects": [
+          {
+            "x": 222,
+            "y": -2875,
+            "width": 1058,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 222
+          }
+        ],
+        "clientBox": {
+          "left": 222,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1058,
+        "clientHeight": 3595,
+        "offsetWidth": 1058,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1058,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      {
+        "id": "",
+        "tag": "DIV",
+        "class": "app-shell",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 3595,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "grid",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      {
+        "id": "",
+        "tag": "BODY",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 3595,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      {
+        "id": "",
+        "tag": "HTML",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": -2154.9655771905423
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 720,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 2875,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      }
+    ],
+    "text": [
+      {
+        "text": "이 탭에서 마지막으로 내보낸 파일용 전문",
+        "rect": {
+          "x": 276.703125,
+          "y": -2237.875,
+          "width": 196.796875,
+          "height": 17,
+          "top": -2237.875,
+          "right": 473.5,
+          "bottom": -2220.875,
+          "left": 276.703125
+        },
+        "rects": [
+          {
+            "x": 276.703125,
+            "y": -2237.875,
+            "width": 196.796875,
+            "height": 17,
+            "top": -2237.875,
+            "right": 473.5,
+            "bottom": -2220.875,
+            "left": 276.703125
+          }
+        ]
+      }
+    ],
+    "points": [
+      {
+        "name": "center",
+        "x": 751,
+        "y": -2228.9765625,
+        "hit": null,
+        "targetOrDescendant": false
+      },
+      {
+        "name": "topLeft",
+        "x": 265,
+        "y": -2249.875,
+        "hit": null,
+        "targetOrDescendant": false
+      },
+      {
+        "name": "bottomRight",
+        "x": 1237,
+        "y": -2208.078125,
+        "hit": null,
+        "targetOrDescendant": false
+      }
+    ],
+    "activeElement": {
+      "node": {
+        "id": "",
+        "tag": "SUMMARY",
+        "class": "",
+        "rect": {
+          "x": 264,
+          "y": -2250.875,
+          "width": 974,
+          "height": 43.796875,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125,
+          "left": 264
+        },
+        "clientRects": [
+          {
+            "x": 264,
+            "y": -2250.875,
+            "width": 974,
+            "height": 43.796875,
+            "top": -2250.875,
+            "right": 1238,
+            "bottom": -2207.078125,
+            "left": 264
+          }
+        ],
+        "clientBox": {
+          "left": 264,
+          "top": -2250.875,
+          "right": 1238,
+          "bottom": -2207.078125
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 974,
+        "clientHeight": 44,
+        "offsetWidth": 974,
+        "offsetHeight": 44,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 974,
+        "scrollHeight": 44,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "list-item",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          0.9953835227272727
+        ]
+      },
+      "outerHTML": "<summary>이 탭에서 마지막으로 내보낸 파일용 전문</summary>",
+      "isSummary": true
+    },
+    "window": {
+      "scrollX": 0,
+      "scrollY": 2875,
+      "innerWidth": 1280,
+      "innerHeight": 720,
+      "outerWidth": 1280,
+      "outerHeight": 720,
+      "devicePixelRatio": 1
+    },
+    "visualViewport": {
+      "width": 1280,
+      "height": 720,
+      "offsetLeft": 0,
+      "offsetTop": 0,
+      "pageLeft": 0,
+      "pageTop": 2875,
+      "scale": 1
+    },
+    "document": {
+      "readyState": "complete",
+      "visibilityState": "visible",
+      "scrollingElement": {
+        "id": "",
+        "tag": "HTML",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": -2154.9655771905423
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 720,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 2875,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      "documentElement": {
+        "id": "",
+        "tag": "HTML",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": -2154.9655771905423
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 720,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 2875,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      },
+      "body": {
+        "id": "",
+        "tag": "BODY",
+        "class": "",
+        "rect": {
+          "x": 0,
+          "y": -2875,
+          "width": 1280,
+          "height": 3595.171875,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875,
+          "left": 0
+        },
+        "clientRects": [
+          {
+            "x": 0,
+            "y": -2875,
+            "width": 1280,
+            "height": 3595.171875,
+            "top": -2875,
+            "right": 1280,
+            "bottom": 720.171875,
+            "left": 0
+          }
+        ],
+        "clientBox": {
+          "left": 0,
+          "top": -2875,
+          "right": 1280,
+          "bottom": 720.171875
+        },
+        "clientLeft": 0,
+        "clientTop": 0,
+        "clientWidth": 1280,
+        "clientHeight": 3595,
+        "offsetWidth": 1280,
+        "offsetHeight": 3595,
+        "scrollLeft": 0,
+        "scrollTop": 0,
+        "scrollWidth": 1280,
+        "scrollHeight": 3595,
+        "style": {
+          "overflowX": "visible",
+          "overflowY": "visible",
+          "clipPath": "none",
+          "clip": "auto",
+          "visibility": "visible",
+          "display": "block",
+          "contentVisibility": "visible",
+          "contain": "none",
+          "transform": "none",
+          "position": "static",
+          "scrollBehavior": "auto"
+        },
+        "scale": [
+          1,
+          1.00004780945758
+        ]
+      }
+    }
+  }
+}

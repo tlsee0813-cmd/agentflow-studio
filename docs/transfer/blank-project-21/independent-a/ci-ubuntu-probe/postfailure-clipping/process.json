@@ -1,0 +1,14 @@
+{
+  "source": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "cwd": "/workspace/browser-env/cycle21-a-candidate/app",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle21-postfailure-clipping/runner.py"
+  ],
+  "startUTC": "2026-10-22T17:24:42.426181+00:00",
+  "endUTC": "2026-10-22T17:24:51.439706+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "733b037209965b0fd0776aa9066e27ebde4b92b744a87a359e9ef1529fc36a04",
+  "collectorPlannedExit": 1
+}

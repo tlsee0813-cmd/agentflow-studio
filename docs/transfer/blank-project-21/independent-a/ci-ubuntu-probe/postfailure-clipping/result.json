@@ -1,0 +1,10 @@
+{
+  "expected": 1,
+  "executed": 1,
+  "failures": 1,
+  "errors": 0,
+  "originalCheckerSHA256": "212163b1f4b7b6e328bc194676656eaed570a65179c6670dc6274e74d10a3117",
+  "failureOnlyObservation": true,
+  "failureBeforeInstrumentation": true,
+  "previousEvidenceUnchanged": true
+}
