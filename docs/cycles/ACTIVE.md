@@ -9,7 +9,7 @@
 
 관측한 공백은 주복사와 긴 본문 아래 파일인계 입구 사이의 재탐색이다. 하위메뉴 가설은 핵심공백으로 확인되지 않았다. 제품 후보922848c0957992f84b8a0e2696a86b98d5f51c0d는 기존 접힌 file-return-options를 주전달행 뒤로 옮긴 한 줄뿐이다(app5370D0A6). 일반복사와 실제파일H계약, ID/handler/도메인/스키마는 유지한다. [작성·독립 정적 대조](https://github.com/tlsee0813-cmd/agentflow-studio/tree/c8bfef75fbc4b23e5888121c0bce6531b8842c2d/docs/transfer/blank-project-21/author-a). 타입·구문·빌드는 통과했고 실제PC 전후노출·원문펼침·초점/스크롤·정상수신복귀를 기존 Cloud가 독립검증 중이다. 최소 회귀검사41C9와workflow7F55를 포함한 최종 후보15b60a10b34bb06c7c173d0eca5653faef8e2bb6는 [Draft PR12](https://github.com/tlsee0813-cmd/agentflow-studio/pull/12), 양OS CI39813998848 진행 중이다. same-current 수신A→T의 검사 전제 오류를 정적으로 바로잡았다. 수정전/후 최초노출의 양PC 실패→통과는 Cloud 중간 확인이며 나머지 독립검증은 진행 중이다. **21은 미수용**이다.
 
-후속22 후보는 홈에서 재진입해 바뀐 부분을 찾고 현재 설명·보류·오래된 미결을 구분하는 관문이다. Astra의 전체제품 검토와 Web Pro 공식 사례 조사를 병렬 진행한다. 새 unread/알림함/변경엔진을 미리 구현하지 않는다. 20/21 결과를 본 뒤 범위를 정한다.
+22는 홈 재진입에서 현재 설명·보류·오래된 미결을 구분하고 정확한 부분 요청으로 이어가는 읽기 전용 선관측이다. [계약](2026-10-23-project-reentry-22/INPUT.md) · [원문 대조와 선택](2026-10-23-project-reentry-22/RESEARCH.md). Pro의 시간기준 비교는 채택하지만 홈에 있는 동안의 숨은입력 주입이나 특정 우선순위 강제는 채택하지 않는다. 기존 Cloud의21작성자 재검증 뒤 이어 배정하며21최종CI와 분리한다. 새 unread/알림함/변경엔진은 미리 구현하지 않는다.
 
 ## 이전 통합
 - [지도/기록19 결과](2026-10-22-workspace-records-19/RESULT.md): PR10, 최종acfafd2d, checkpoint병합41b6854e. 지도 상단·기록 패널 공간과 정확한 기록→부분→인계→복귀를 한정 통합했다.
