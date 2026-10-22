@@ -346,6 +346,11 @@ function understandingRefs(space:Record<string,unknown>,tasks:Task[],sources:Map
         const parent=byId.get(t.parentTaskId!),record=parent?.handoffs.find(h=>h.returnId===f.returnId),anchor=record?.anchor;
         ensure(f.understanding.areaId===areaId&&anchor&&anchor.areaId===areaId&&f.understanding.basedOn===anchor.understanding&&anchor.understanding<e.revision);
         ensure(JSON.stringify(e.stamp)===JSON.stringify(anchor.stamp));
+        // History: an applied external description follows exactly the revision its export carried, or a revised interpretation of
+        // that same export (same returnId) directly before it. Anything in between (a user correction, another return) means it
+        // was never applicable; a file claiming otherwise contradicts its own history.
+        const prev=state.entries.find(x=>x.revision===e.revision!-1);
+        ensure(anchor.understanding===e.revision-1||!!prev&&prev.by==='external'&&prev.returnId===e.returnId);
       }
     }
   }

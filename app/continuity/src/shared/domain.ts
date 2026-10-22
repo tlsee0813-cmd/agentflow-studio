@@ -632,13 +632,17 @@ export function placeTask(p: Project, taskId: string, areaId: string|null): Proj
  * (Area.note/name, bases, Task.manual, Background, drafts) is written. It cannot tell from the wording whether a summary
  * contradicts the user's idea or describes another area; it never claims to. */
 /** The user's plan an area description is made for: this area's idea text, how many times the project purpose was written,
- * the current revision of each user decision from this area's or unplaced work, and a fingerprint of each such task's own
- * user-written work values and purpose correction. Requests elsewhere and reports never
+ * the current revision of each user decision (or explicitly revised request basis) from this area's or unplaced work, and a
+ * fingerprint of each such task's own user-written work values and purpose correction. A new request alone is not included. Requests elsewhere and reports never
  * change it. A name change and direct user corrections are part of this explicit basis. */
 export function planStamp(p:Project,areaId:string):PlanStamp {
   const a=p.space.areas.find(x=>x.id===areaId);ensure(a,'AREA_MISSING');
   const tasks=new Map(p.tasks.map(t=>[t.id,t])),sources=new Map(p.sources.map(s=>[s.id,s]));
+  // A new request's own wording (a 'requested' basis never revised since it was written) is the next work, not a change of the
+  // plan: asking for more in the same area keeps the description current. Any explicit revision of an existing basis (history),
+  // and every user decision, answer or deferral, is part of the plan and makes an earlier description stale.
   const decisions=p.bases.filter(b=>{
+    if(b.status==='requested'&&!b.history.length)return false;
     const t=tasks.get(sources.get(b.sourceId)?.taskId??''),at=t?areaOf(p,t):null;return at===null||at===areaId;
   }).map(b=>`${b.id}@${b.revision}`).sort();
   // Exact-equality fingerprint of the task's own user-written values (fixed key order); the values stay in the task only.

@@ -37,6 +37,11 @@ SEEN_JS='''([sel,marker])=>{const root=document.querySelector(sel);if(!root)retu
   return {shown:false}}'''
 HEIGHT_JS='''(sel)=>{const e=document.querySelector(sel);if(!e||!e.getClientRects().length)return null;const r=e.getBoundingClientRect();
   return {h:Math.round(r.height),chars:e.innerText.length,top:Math.round(r.top),bottom:Math.round(r.bottom),vh:innerHeight}}'''
+READABLE_JS='''(sel)=>{const e=document.querySelector(sel);if(!e||!e.getClientRects().length)return {found:!!e,readable:false};
+  const w=document.createTreeWalker(e,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode())&&!n.data.trim());if(!n)return {found:true,readable:false,text:''};
+  const i=n.data.search(/\\S/),g=document.createRange();g.setStart(n,i);g.setEnd(n,Math.min(n.data.length,i+8));const r=g.getBoundingClientRect();
+  const inView=r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth,hit=inView?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
+  return {found:true,text:e.innerText.slice(0,40),top:Math.round(r.top),bottom:Math.round(r.bottom),inView,unobscured:!!hit&&e.contains(hit),hit:hit&&(hit.id||hit.className),readable:inView&&!!hit&&e.contains(hit)}}'''
 def inside(a,b,pad=0):return a and b and a['x']>=b['x']-pad and a['y']>=b['y']-pad and a['right']<=b['right']+pad and a['bottom']<=b['bottom']+pad
 def overlaps(a,b):return bool(a and b and a['x']<b['right'] and b['x']<a['right'] and a['y']<b['bottom'] and b['y']<a['bottom'])
 
@@ -53,14 +58,19 @@ class Area17(unittest.TestCase):
         self.posts=[];self.page.on('request',lambda r:self.posts.append(r.url) if r.method=='POST' else None)
 
     # ---------- raw observations ----------
-    def record(self,kind,name,value,expected=None):
+    def record(self,kind,name,value,expected=None,detail=None):
         rec={'test':self.id().split('.',1)[-1],'width':self.WIDTH,'height':self.HEIGHT,'kind':kind,'name':name,'value':value}
         if kind=='condition':rec['expected']=expected
+        if detail is not None:rec['detail']=detail
         with open(OBS,'a',encoding='utf-8') as fh:fh.write(json.dumps(rec,ensure_ascii=False)+'\n')
     def check(self,name,value,expected):self.record('condition',name,value,expected);self.assertEqual(value,expected,name)
-    def check_true(self,name,value,detail=None):self.record('condition',name,detail if detail is not None else value,True);self.assertTrue(value,name)
+    def check_true(self,name,value,detail=None):
+        # 'value' is exactly the boolean asserted; 'detail' only carries the measurements behind it.
+        self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)
     def snap(self,name,area=None):v=self.page.evaluate(SNAP_JS,area);self.record('actual',name,v);return v
     def seen(self,sel,marker,name):v=self.page.evaluate(SEEN_JS,[sel,marker]);self.record('actual',name,v);return v
+    def readable(self,sel,name):
+        v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v
     def height(self,sel,name):v=self.page.evaluate(HEIGHT_JS,sel);self.record('actual',name,v);return v
     def shot(self,name):self.page.mouse.move(1,1);self.page.screenshot(path=str(base.OUT/f'area17-{self.WIDTH}x{self.HEIGHT}-{name}.png'))
     def task(self,tid,s=None):return next(t for t in (s or self.state())['tasks'] if t['id']==tid)
@@ -157,10 +167,14 @@ class Area17(unittest.TestCase):
         expect(self.page.locator('#located-note')).to_be_in_viewport();expect(self.page.locator('#locate-return')).to_be_in_viewport()
         self.shot(f'{cid}-01-located')
         panel=self.page.locator(f'#panel-understanding-{area}')
+        # Both roles and their actual short text are read on this screen (not only present in the DOM).
+        for sel,label in [('#panel-idea .source-meta','user idea role label'),('#panel-idea .area-idea-text','user idea text'),
+                          (f'#panel-understanding-{area} > .source-meta','description role label'),(f'#panel-understanding-{area} .understanding-summary','description summary text')]:
+            self.readable(sel,f'located panel: {label}')
         expect(self.page.locator('#panel-idea')).to_contain_text(c['note'][:20]);expect(panel).to_contain_text('전달 기록에서 정리한 설명 · 앱 미검증')
         expect(panel.locator('.understanding-summary')).to_contain_text(c['summary'][:30]);expect(panel).to_contain_text('구상 변경 제안 · 미채택')
         expect(panel).to_contain_text('사용자 구상은 그대로예요')
-        self.check_true('read: summary painted in the panel',self.seen(f'#panel-understanding-{area}',c['summary'][:20],'summary seen')['shown'])
+        self.check_true('read: summary text painted in the panel',self.seen(f'#panel-understanding-{area}',c['summary'][:20],'summary seen')['shown'])
         # Evidence: read only. Nothing is picked or continued; no POST.
         ev=self.page.locator(f'#panel-understanding-{area}-evidence');ev.locator('> summary').click();expect(ev).to_have_attribute('open','')
         expect(ev).to_contain_text(c['report'][:20]);self.check('evidence read: project unchanged',self.state(),s_start);self.check('evidence read: no POST',self.posts,[])
@@ -176,6 +190,21 @@ class Area17(unittest.TestCase):
         self.check_true('[원래 배율·좌표 복귀] page scroll (wheel round trip)',abs(end['windowY']-start['windowY'])<=2,[end['windowY'],start['windowY']])
         self.check('[원래 배율·좌표 복귀] card rect on screen',end['card'],start['card'])
         expect(self.page.locator('#located-note')).to_have_count(0);expect(self.page.locator('#panel-note')).to_have_value(BUFFER)
+        # --- path 3: locate -> the panel's '영역 열기' -> read a task in that area -> back -> to the view before locating ---
+        self.page.locator(f'#received-area-{area}').focus();start2=self.snap('start view 2',area)
+        self.page.locator(f'#received-area-{area}').click();self.page.locator('#panel-open').click();expect(self.page.locator('#space-title')).to_have_text(c['area'])
+        expect(self.page.locator('#locate-return')).to_be_visible();self.readable('#locate-return','area screen: way back before locating')
+        self.page.locator(f'#task-open-{A}').click();expect(self.page.locator('#task-view')).to_be_visible();self.page.locator('#task-return-origin').click()
+        expect(self.page.locator('#space-title')).to_have_text(c['area']);expect(self.page.locator('#locate-return')).to_be_visible()
+        if cid=='product13':
+            # Variant: the crumb back to the whole space keeps the way back (same located area), then return.
+            self.page.locator('#space-crumb-root').click();expect(self.page.locator('#located-note')).to_be_visible()
+        self.page.locator('#locate-return').click();end2=self.snap('back to start view 2 (via area screen)',area)
+        for k in ('styleTransform','computedTransform','scaleLabel','selected','openDetails','focusId'):self.check(f'[원래 배율·좌표 복귀] via area screen: {k}',end2[k],start2[k])
+        self.check_true('[원래 배율·좌표 복귀] via area screen: page scroll',abs(end2['windowY']-start2['windowY'])<=2,[end2['windowY'],start2['windowY']])
+        # A different area is a new start: the way back is dropped (no confusion with an unrelated start).
+        self.page.locator(f'#received-area-{area}').click();expect(self.page.locator('#located-note')).to_be_visible()
+        self.page.locator('#nav-work').click();self.page.locator('#nav-space').click();expect(self.page.locator('#located-note')).to_have_count(0)
         self.check('[원래 배율·좌표 복귀] stored layout untouched by camera moves',self.state()['space']['layout'],kept['layout'])
         # Next handoff from the received report: the actual copied text and its record.
         # The full text shown before copying is what the copy carries (after copying the preview shows the next revision's text).
@@ -270,8 +299,34 @@ class Area17(unittest.TestCase):
         for m in ('ZZ-SUMMARY-END','ZZ-CHANGE3-END','ZZ-PROPOSAL-END'):self.check(f'long panel full: {m} present',self.page.locator(f'#panel-understanding-{area}-full').inner_text().count(m),1)
         self.page.locator(f'#panel-open').click();sel=f'#area-understanding-{area}';ha=self.height(sel,'area screen description block (default)')
         self.check_true('long area screen default: block is short (<= 420px, <= 700 chars)',ha['h']<=420 and ha['chars']<=700,ha)
-        self.check_true('long area screen: user idea and description roles both on the first screen',self.seen('#space-view','전달 기록에서 정리한 설명','role seen')['inView'],None)
+        # Area screen (existing PC12 head shows the idea text under the title, without a role label): the idea text, the
+        # description role label and the start of the description summary are each readable on the first screen.
+        for sel,label in [('.space-head .space-brief, #area-idea .area-idea-text','user idea text (area head)'),(f'#area-understanding-{area} > .source-meta','description role label'),
+                          (f'#area-understanding-{area} .understanding-summary','description summary text')]:
+            self.readable(sel,f'long area screen: {label}')
         self.shot('06-long-area-screen')
+
+
+Area17.test_05_next_request_carries_valid_description=lambda self:self.next_request('powertoys')
+def next_request(self,cid):
+    c=CASES[cid];area,other=self.start(c);A=self.request_in(area,c['request']);text,h=self.file_export(A)
+    path,f=self.result_file('next',self.state(),A,h['returnId'],c,area,h['anchor']['understanding']);self.import_file(path)
+    # The user writes the next request in the same area from the located panel (idea and conditions unchanged), sends it, copies.
+    self.page.locator('#result-show-area').click();self.page.locator('#panel-new-request').click()
+    self.page.locator('#draft').fill('[합성] 같은 영역의 다음 요청 · 구상과 조건은 그대로');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+    s=self.state();N=s['currentTaskId'];self.check('next request: written in the same area',self.task(N,s)['areaId'],area)
+    self.page.locator('#nav-work').click();self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
+    t=self.clipboard();self.record('raw','next request handoff (clipboard)',t);self.check_record('next request handoff',t,self.task(N)['handoffs'][-1])
+    j=t.find('## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증')
+    self.check_true('next request handoff: valid description carried, attributed, after the user plan',j>0 and c['summary'] in t and c['origin'] in t and 0<t.find('## 현재 사용자 구상')<j,j)
+    self.check_true('next request handoff: proposal only as unadopted reference',c['proposal'] not in t[:j] and '미채택 제안 · 사용자가 채택하지 않음' in t)
+    # An explicit change of the user's idea makes it stale: the next copy leaves its text out and says so.
+    self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();self.page.locator('#panel-edit > summary').click()
+    self.page.locator('#panel-note').fill('[합성] 사용자가 명시적으로 바꾼 구상');self.page.locator('#panel-save').click();base.saved(self.page)
+    self.page.locator('#nav-work').click();self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
+    t2=self.clipboard();self.record('raw','handoff after explicit idea change (clipboard)',t2)
+    self.check_true('after explicit idea change: description text excluded and the exclusion stated',c['summary'] not in t2 and '현재 설명으로 쓰지 않습니다' in t2)
+Area17.next_request=next_request
 
 
 class Area17Wide(Area17):WIDTH,HEIGHT=1440,900

@@ -34,7 +34,8 @@ for(const [name,change] of [
   ['user intent correction',(p,a,t)=>D.correctIntent(p,t,'사용자가 고친 목적','보존할 새 조건')],
   ['manual work condition',(p,a,t)=>D.editTask(p,t,'scope','바뀐 직접 조건')],
   ['recorded decision',(p)=>D.recordBasis(p,'새 사용자 기준')],
-  ['same-area user request',(p,a)=>D.submit(D.editDraft(p,'사용자가 추가한 유지 조건'),undefined,a)]
+  // A new request alone is not a plan change (see the next-request test below); an explicit revision of an existing basis is.
+  ['explicit revision of the request basis',(p)=>D.recordBasis(p,'사용자가 직접 고친 유지 조건','confirmed',p.bases[0].id)]
 ])test(`AREA17 late description after ${name} is held, report remains readable and user values survive`,()=>{
   let {p,area,task,file}=sample();p=change(p,area,task);const old=structuredClone(p);p=bring(p,file);
   assert.equal(D.areaDescription(p,area).current,null);assert.equal(D.areaDescription(p,area).held[0].entry.held,'plan-changed');
@@ -149,4 +150,37 @@ test('AREA17 next handoff: valid description attributed below the user plan, pro
     assert.ok(h.includes(c.summary)&&h.includes(c.origin));assert.ok(h.includes('미채택 제안 · 사용자가 채택하지 않음 · 실행·반영하지 말 것')&&h.includes(c.proposal));
     assert.ok(!h.slice(0,j).includes(c.proposal),'the proposal never appears as the user plan or the request');
     const stale=D.handoffText(D.editArea(p,area,p.space.areas[0].name,'바뀐 구상'),task);assert.ok(!stale.includes(c.summary)&&!stale.includes(c.proposal));}
+});
+
+// ---------- coordinator review of 98bc009: next request keeps a valid description; history contradictions are refused ----------
+test('AREA17 a plain new request in the same area keeps the description valid and the next handoff carries it attributed',()=>{
+  for(const c of cases){let {p,area,file}=sample(c);p=bring(p,file);const basisCount=p.bases.length;
+    p=D.submit(D.editDraft(p,'[합성] 같은 영역의 다음 요청 · 구상과 조건은 그대로'),undefined,area);assert.equal(p.bases.length,basisCount+1,'the request adds its own requested basis');
+    assert.equal(latest(p,area).valid,true,'a new request is not a plan change');
+    const h=D.handoffText(p);assert.ok(h.includes('## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증')&&h.includes(c.summary)&&h.includes(c.origin),'next work handoff carries the description');
+    assert.ok(h.indexOf('## 현재 사용자 구상')<h.indexOf('## 영역 현재 설명'));assert.ok(!h.slice(0,h.indexOf('## 영역 현재 설명')).includes(c.proposal));
+    // Explicit user changes still exclude it: a decision, an answer-like revision of a basis, the idea, a manual condition.
+    for(const change of [q=>D.recordBasis(q,'[합성] 새 사용자 결정'),q=>D.recordBasis(q,'[합성] 고친 요청 기준','confirmed',q.bases.at(-1).id),
+      q=>D.editArea(q,area,q.space.areas[0].name,'[합성] 바뀐 구상'),q=>D.editTask(q,q.currentTaskId,'scope','[합성] 바뀐 직접 조건')]){
+      const q=change(p);assert.equal(latest(q,area).valid,false);const hq=D.handoffText(q);assert.ok(!hq.includes(c.summary)&&hq.includes('현재 설명으로 쓰지 않습니다'));}
+  }
+});
+test('AREA17 a late description after a plain new request in the same area still applies; an explicit request revision holds it',()=>{
+  let {p,area,file}=sample();p=D.submit(D.editDraft(p,'[합성] 다음 요청'),undefined,area);assert.equal(latest(bring(p,file),area).valid,true);
+  // A request that explicitly revises the earlier request basis (exact quoted replacement) is a plan change.
+  let {p:q,area:a2,file:f2}=sample();const d1=q.bases[0];assert.ok(d1.text.includes('키를 고르는'));
+  q=D.submit(D.editDraft(q,`${d1.id}의 '키를 고르는'을 '키를 확정하는'으로 변경해줘`),undefined,a2);
+  assert.equal(q.bases[0].history.length,1,'the existing basis was revised, no new basis');assert.equal(q.bases.length,1);
+  assert.equal(D.areaDescription(bring(q,f2),a2).held[0].entry.held,'plan-changed');
+});
+test('AREA17 recovery refuses an applied external description that skips a user correction in its own history',()=>{
+  let {p,area,file}=sample();p=bring(p,file);p=D.correctUnderstanding(p,area,'[합성] 사용자 정정');
+  p=bring(p,{...file,understanding:{...file.understanding,summary:'[합성] 같은 반환의 늦은 수정본'}});
+  const st=p.space.understanding[area];assert.deepEqual(st.entries.map(e=>[e.by,e.revision,e.held]),[['external',1,null],['user',2,null],['external',null,'superseded']]);
+  assert.deepEqual(read(p),p,'the honest history roundtrips');
+  const forged=JSON.parse(serializeProject(p)),fs=forged.space.understanding[area],held=fs.entries[2],anchor=D.taskOf(p,p.tasks.find(t=>t.id===held.taskId).parentTaskId).handoffs.find(h=>h.returnId===held.returnId).anchor;
+  Object.assign(held,{revision:3,held:null,stamp:anchor.stamp});fs.revision=3;
+  assert.throws(()=>parseProject(JSON.stringify(forged)),'r3 external after a user r2 contradicts its own history');
+  // The legitimate chain (successive interpretations of one export, nothing in between) is still accepted.
+  let {p:c,file:g}=sample();for(let i=0;i<3;i++)c=bring(c,{...g,understanding:{...g.understanding,summary:`[합성] 해석 ${i}`}});assert.deepEqual(read(c),c);
 });

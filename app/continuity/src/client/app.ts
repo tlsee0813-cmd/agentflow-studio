@@ -274,13 +274,18 @@ function focusFirst(...ids:string[]):boolean {
 /** Coming back restores this layer's scroll and the card the user entered; an ID that no longer exists is just skipped. */
 function openSpace() {
   // PC12: arriving at the map by any other way makes it the new starting point; the earlier one is dropped.
-  origin=null;located=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;render();
+  // AREA17: back to the whole space from the located area's own screens keeps the way back to the view before 'where is it';
+  // arriving from anywhere else (the work view, another area) is a new start.
+  if(!(located&&(view==='space'||(view==='area'||view==='task')&&viewArea===located.area)))located=null;
+  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;render();
   const from=layerMemo.from;window.scrollTo({top:layerMemo.space??0});
   if(!(from&&focusFirst(`node-enter-${from}`,`list-enter-${from}`)))$('space-title')?.focus({preventScroll:true});
 }
 function openArea(id:string) {
   if(view==='space')layerMemo.from=id;
-  origin=null;located=null;leaveLayer();view='area';viewArea=id;viewTask=null;viewReturn=null;render();
+  // AREA17: opening the located area itself (its panel's '영역 열기', its crumb) keeps the way back; any other area is a new start.
+  if(!(located&&located.area===id&&(view==='space'||viewArea===id)))located=null;
+  origin=null;leaveLayer();view='area';viewArea=id;viewTask=null;viewReturn=null;render();
   const memo=layerMemo.areas[id];window.scrollTo({top:memo?.y??0});
   if(!(memo?.task&&focusFirst(`task-open-${memo.task}`)))$('space-title')?.focus({preventScroll:true});
 }
@@ -1307,7 +1312,10 @@ function revealCard(id:string) {
   if(located){located.moved=located.moved||!!(dx||dy)||scaled;located.scaled=located.scaled||scaled;}
 }
 function locatedLine():HTMLElement|null {
-  const l=located;if(!l||view!=='space'||l.origin.project!==project.id)return null;const a=areaById(l.area);if(!a||a.archived)return null;
+  const l=located;if(!l||l.origin.project!==project.id)return null;const a=areaById(l.area);if(!a||a.archived)return null;
+  if(view==='area'&&viewArea===l.area){const box=node('div','','located-note');box.id='located-note';
+    box.append(node('span','지도에서 위치를 찾아 연 영역이에요','hint'),btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`,returnFromLocate,'secondary origin-return','locate-return'));return box;}
+  if(view!=='space')return null;
   const box=node('div','','located-note');box.id='located-note';
   box.append(node('span',l.scaled?`‘${a.name}’ 카드가 다 보이도록 지도 보기를 옮기고 축소했어요 · 배치는 그대로예요`:l.moved?`‘${a.name}’ 카드가 보이도록 지도 보기만 옮겼어요 · 배치와 배율은 그대로예요`:`‘${a.name}’ 카드는 지금 지도에 보여요`,'hint'),
     btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`,returnFromLocate,'secondary origin-return','locate-return'));
@@ -1661,6 +1669,7 @@ function renderArea(root:HTMLElement,a:Area) {
   const note=spaceInput(node('textarea'),'area-edit-note',a.note,noteKey);note.rows=2;note.maxLength=2000;note.setAttribute('aria-label','영역 설명');
   edit.append(name,note,btn('저장',()=>{if(!name.value.trim())return;commit(editArea(project,a.id,name.value,note.value));clearInputs(nameKey,noteKey);},'secondary','area-edit-save'),
     btn('취소',()=>{clearInputs(nameKey,noteKey);edit.open=false;render();},'quiet','area-edit-cancel'));
+  const back=locatedLine();if(back)root.append(back);
   head.append(edit);root.append(head);const described=understandingPanel(a,'area-understanding');if(described)root.append(described);
   const checks=checkItems(project),here=checks.filter(c=>c.areaId===a.id).length,elsewhere=checks.length-here;
   if(here||elsewhere) {
