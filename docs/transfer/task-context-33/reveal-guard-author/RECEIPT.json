@@ -57,5 +57,62 @@
     "sourceSHA256": "83979bd309a84905a9afae2ead112aef734946bf024b837ea3c4ca8a84449dd5",
     "testSHA256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580",
     "result": "최종 delta 실바이트/해시 대조 완료 · 추가 정적 차단 없음 · 실제 UI 미실행"
+  },
+  "publicEvidencePackaging": {
+    "kind": "공개 사본의 개인 로컬 경로 표시 정리",
+    "localOriginal": "로컬 원본 그대로 보존",
+    "rawChecks": {
+      "rawFileCount": 63,
+      "original": {
+        "encodedBytes": 1837,
+        "encodedSHA256": "00767e32d8a479a4e4c4879cc10905bdad0e495ae394d9e264e62755da0a0bc5",
+        "gzipBytes": 1376,
+        "gzipSHA256": "08f229811683fa560316c2c7eebd3c4dc9f1841a464ce2221793c8eb8b1ff86e",
+        "decodedUTF8Bytes": 11331,
+        "decodedCharacters": 11193,
+        "decodedSHA256": "ad78a4a736159de10b1a195ac9aceb7738ac063f09e00030480b676ab30ff661",
+        "personalPatternMatches": 46
+      },
+      "public": {
+        "encodedBytes": 1709,
+        "encodedSHA256": "07c86ebedfb82ea442866f51dd3d185d63647dfd2ae8f6ae0e9d7a6d2588a8bb",
+        "gzipBytes": 1279,
+        "gzipSHA256": "633cf4e954411276de7296973a2c3688864c13e797d80a974085a530244cf49f",
+        "decodedUTF8Bytes": 9847,
+        "decodedCharacters": 9847,
+        "decodedSHA256": "dd6ba676a694f1cd7bced71cd46c31a50cc90b9f01951b0b812d379a77fa2b59",
+        "personalPatternMatchesAfterReadback": 0
+      },
+      "replacementCounts": {
+        "<LOCAL_WORKSPACE>": 2,
+        "<LOCAL_RUNTIME>": 21
+      },
+      "changedRawFiles": [
+        "build.exit.json",
+        "final-js-0.exit.json",
+        "final-js-1.exit.json",
+        "final-js-2.exit.json",
+        "final-js-3.exit.json",
+        "final-js-4.exit.json",
+        "final-js-5.exit.json",
+        "final-js-6.exit.json",
+        "final-js-7.exit.json",
+        "final-js-8.exit.json",
+        "js-0.exit.json",
+        "js-1.exit.json",
+        "js-2.exit.json",
+        "js-3.exit.json",
+        "js-4.exit.json",
+        "js-5.exit.json",
+        "js-6.exit.json",
+        "js-7.exit.json",
+        "js-8.exit.json",
+        "runtime.exit.json",
+        "type.exit.json"
+      ],
+      "localOriginalUnchanged": true,
+      "checksOrProductRerun": false
+    },
+    "transform": "로컬 작업 장소의 절대 경로 접두사를 <LOCAL_WORKSPACE>, 기존 런타임 접두사를 <LOCAL_RUNTIME>으로만 치환했다. 검사 결과는 다시 실행하지 않았다."
   }
 }
