@@ -1,0 +1,20 @@
+F
+======================================================================
+FAIL: test_01_f10_current_idea_beside_the_picked_report_and_back (__main__.Report16.test_01_f10_current_idea_beside_the_picked_report_and_back)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/task33-flow/candidate/app/continuity/tests/report16_browser.py", line 218, in test_01_f10_current_idea_beside_the_picked_report_and_back
+    for k in ('idea','lead','action'):self.check_true(f'F10: {k} fully inside the first screen',g[k] is not None and g[k]['top']>=0 and g[k]['bottom']<=g['vh'],g[k])
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/task33-flow/candidate/app/continuity/tests/report16_browser.py", line 76, in check_true
+    def check_true(self,name,value,detail=None):self.record('condition',name,detail if detail is not None else value,True);self.assertTrue(value,name)
+                                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/task33-flow/report16-runner.py", line 28, in guarded
+    return oldassert(self,expr,msg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : F10: action fully inside the first screen
+
+----------------------------------------------------------------------
+Ran 1 test in 4.164s
+
+FAILED (failures=1)

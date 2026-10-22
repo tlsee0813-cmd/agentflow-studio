@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-flow/exact-runner.py",
+    "Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+    "Pc12.test_11_target_jumps_and_selected_file_review",
+    "Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+    "Pc12Wide.test_11_target_jumps_and_selected_file_review"
+  ],
+  "startUTC": "2026-10-22T23:09:30.215255+00:00",
+  "endUTC": "2026-10-22T23:09:46.178323+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "2e570d0911ea1077c73f0fbb04a99579656d6aef1177a751a18f52249745d9a7",
+  "exactScriptUnchanged": true
+}

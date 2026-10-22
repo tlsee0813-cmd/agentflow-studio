@@ -1,0 +1,106 @@
+{
+  "rows": [
+    {
+      "name": "candidate",
+      "source": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 280166,
+      "sha256": "9267f4b8de7079f5630a99abc28a63396c3b42a3960084ad1b3856eeb0f18374",
+      "gitObjectBytesExact": true
+    },
+    {
+      "name": "candidate",
+      "source": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "gitObjectBytesExact": true
+    },
+    {
+      "name": "candidate",
+      "source": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+      "path": "app/continuity/tests/pc12_browser.py",
+      "bytes": 51746,
+      "sha256": "f3a77141907fdda15d1a51d55520b0d1ac5fce8d76020d460c53a9d25cf8e804",
+      "gitObjectBytesExact": true
+    },
+    {
+      "name": "candidate",
+      "source": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+      "path": "app/continuity/tests/report16_browser.py",
+      "bytes": 41205,
+      "sha256": "c224110c97af99676d2fba5e61d07626f66f552a52223c1b1cc385bb24d74276",
+      "gitObjectBytesExact": true
+    },
+    {
+      "name": "candidate",
+      "compiledDiskPath": "continuity/dist/public/client/app.js",
+      "bytes": 308517,
+      "sha256": "930a1fc6b2a89bea97a0d03b275a23a8eec6da029570bb4ab6c1ac8cdee6fc1f"
+    },
+    {
+      "name": "candidate",
+      "compiledDiskPath": "continuity/dist/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7"
+    },
+    {
+      "name": "candidate",
+      "compiledDiskPath": "continuity/dist/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    },
+    {
+      "name": "original729",
+      "source": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 276739,
+      "sha256": "7c63a494627b1ce2da8f089573f4116b17ba04e4af4531f6e2d315ccacee2e0e",
+      "gitObjectBytesExact": true
+    },
+    {
+      "name": "original729",
+      "source": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "gitObjectBytesExact": true
+    },
+    {
+      "name": "original729",
+      "source": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+      "path": "app/continuity/tests/pc12_browser.py",
+      "bytes": 41508,
+      "sha256": "727d633ad589164215508b8afe72fe29ab657429196f385f8f82976a2496b341",
+      "gitObjectBytesExact": true
+    },
+    {
+      "name": "original729",
+      "source": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+      "path": "app/continuity/tests/report16_browser.py",
+      "bytes": 41205,
+      "sha256": "c224110c97af99676d2fba5e61d07626f66f552a52223c1b1cc385bb24d74276",
+      "gitObjectBytesExact": true
+    },
+    {
+      "name": "original729",
+      "compiledDiskPath": "continuity/dist/public/client/app.js",
+      "bytes": 304670,
+      "sha256": "3e24ff2fe2a4af90931ffd00493c9dcaf3587db0dcef4713aeefce956184a89d"
+    },
+    {
+      "name": "original729",
+      "compiledDiskPath": "continuity/dist/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7"
+    },
+    {
+      "name": "original729",
+      "compiledDiskPath": "continuity/dist/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    }
+  ],
+  "TSActualVersion": "Version 5.8.3",
+  "notes": "source before/all files after in SOURCE.before/after; HTTP responses each runtime/raw; build output is native server runtime, not static MOCK overlay"
+}

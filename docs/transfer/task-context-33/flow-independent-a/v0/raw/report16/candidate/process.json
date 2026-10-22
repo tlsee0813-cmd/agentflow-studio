@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-flow/report16-runner.py",
+    "Report16.test_01_f10_current_idea_beside_the_picked_report_and_back"
+  ],
+  "cwd": "/workspace/browser-env/task33-flow/candidate/app",
+  "startUTC": "2026-10-22T23:11:09.347296+00:00",
+  "endUTC": "2026-10-22T23:11:13.681523+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "6c7d2ef9ace2b4a474489f601f93bb3527c04a02628f0d7e5de6d7bedc3421bf"
+}

@@ -1,0 +1,344 @@
+[
+  {
+    "local": "ui/001-1280-start-visible.json",
+    "bytes": 17518,
+    "sha256": "5d7f17bfe2120910b365f115bbe4158415559d810fe754b9af041b79ed1aa768",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/002-1280-projects-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/003-1280-T2-import-pending-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/004-1280-first-map-visible.json",
+    "bytes": 71029,
+    "sha256": "d018fbeb201ff58b5a32ec572f110936034d32e6f145cac98da89dd9cc9f448d",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/006-1280-parent-records-visible.json",
+    "bytes": 65692,
+    "sha256": "cae90699f837ef52609611c9d44ce5541147a0bb9d92a6949fb72bc4b72a9ef3",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/007-1280-question-records-visible.json",
+    "bytes": 67275,
+    "sha256": "6b4ea6218b3bd1b1287ad8cff5598c73cf60ae7fe3f80c76bd88d3f1bb27a3e1",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/008-1280-reader-first-visible.json",
+    "bytes": 31796,
+    "sha256": "eda67b6c4131389dc9ec2f50fdad68a938008154a0f8c4ddb75089d4b8b95f27",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/011-1280-explicit-continue-first-visible.json",
+    "bytes": 31218,
+    "sha256": "f91519c5ac7bca8e294458a29d915bae8a20ba93cce58a4127aaf0f58f420e9b",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/012-probe-visible.json",
+    "bytes": 31218,
+    "sha256": "f91519c5ac7bca8e294458a29d915bae8a20ba93cce58a4127aaf0f58f420e9b",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/014-1280-next-edit-reached-visible.json",
+    "bytes": 19306,
+    "sha256": "05e17b3ebba950f81d310890517767f1788cb474bb0eb0681fbff43aaf9e0d40",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/015-probe-visible.json",
+    "bytes": 19306,
+    "sha256": "05e17b3ebba950f81d310890517767f1788cb474bb0eb0681fbff43aaf9e0d40",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/016-1280-N-only-edit-visible.json",
+    "bytes": 19130,
+    "sha256": "e89233d9fd170cb9cb5ea78b99573b321883ca6309f1c84ae1d6e459be5ebfe5",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/019-1280-back-to-top-for-file-region-visible.json",
+    "bytes": 35240,
+    "sha256": "c2151c9d458c490df351e7c2d3dc8ffeb6cbf5ea38193da4a3d2f141dd18aeea",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/021-1280-file-region-only-visible.json",
+    "bytes": 33737,
+    "sha256": "36e3997b9ed11c376a3431e1d2549490aeada9110e9be458353b76e957c5ea40",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/023-1280-close-file-region-for-no-copy-guard-visible.json",
+    "bytes": 34480,
+    "sha256": "b207efd581d947dfd67cc80fb0cbb6c00b1686371da679164374ddb193d1523e",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/026-1280-file-region-no-copy-guard-visible.json",
+    "bytes": 33737,
+    "sha256": "36e3997b9ed11c376a3431e1d2549490aeada9110e9be458353b76e957c5ea40",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/030-1280-actual-file-copy-visible.json",
+    "bytes": 33751,
+    "sha256": "b33adf72f01bb4bb3948e30dff6be32c135671688f7027ef9abdf9ee340b1332",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/033-1280-result-input-search-visible.json",
+    "bytes": 25387,
+    "sha256": "20ec1f4d1776b250beb83e788919201b8f1680b8ae1a857087dcc6b3c150d660",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/035-1280-file-selection-immediate-visible.json",
+    "bytes": 23100,
+    "sha256": "52d6533808a30e5455e6ebee899ff38460adc1d412498addb94f8103db2c0ec1",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/038-1280-at-time-work-open-visible.json",
+    "bytes": 22378,
+    "sha256": "d526969ce1b481446b3f5a3a4f1c4e9f19cc3d3a57822896a30a37af9f72adab",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/039-1280-at-time-work-next-read-visible.json",
+    "bytes": 18620,
+    "sha256": "d58ae1d74950d533abeb2475daee6b7484a25b94fdde23560178ac9d6b8c32cc",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/040-1280-at-time-work-close-no-reselect-visible.json",
+    "bytes": 21187,
+    "sha256": "e1333136fc39c68f8f7473ae980a6dd4c714c9a4d52ee0fbfb742f8eca1da2f7",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/041-1280-preview-after-at-time-close-visible.json",
+    "bytes": 21187,
+    "sha256": "e1333136fc39c68f8f7473ae980a6dd4c714c9a4d52ee0fbfb742f8eca1da2f7",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/042-probe-visible.json",
+    "bytes": 21187,
+    "sha256": "e1333136fc39c68f8f7473ae980a6dd4c714c9a4d52ee0fbfb742f8eca1da2f7",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/043-1280-explicit-result-accept-visible.json",
+    "bytes": 22697,
+    "sha256": "61fc73149fe135d818e47fddd48ea9b7e29995e9127ff0b3d9cb6b82d1f1ec7a",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/045-1280-native-back-to-work-top-after-receipt-visible.json",
+    "bytes": 34420,
+    "sha256": "e89c07e30f79aaad50f22a0422309826f0cdd297be03f58e2c675cf4d0d681fa",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/046-1280-explicit-origin-map-return-visible.json",
+    "bytes": 68433,
+    "sha256": "aa7adef0c248b594d4920fda1e8e5ea2c24a9a707627131ecd8f2802ac47749b",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/047-1280-return-raw-before-other-action-visible.json",
+    "bytes": 68433,
+    "sha256": "aa7adef0c248b594d4920fda1e8e5ea2c24a9a707627131ecd8f2802ac47749b",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/049-1280-same-group-original-request-read-visible.json",
+    "bytes": 36474,
+    "sha256": "d03a8725886f440ec295da6fe99e79a13157eef919031eba45de1cff5a4b16c6",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/052-1280-same-group-actual-work-screen-action-visible.json",
+    "bytes": 29568,
+    "sha256": "15f1f4392e8d621f8580da9b37d32f74e251d1a266381a9ce23702af97ace1d0",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/054-1440-learned-repeat-new-context-visible.json",
+    "bytes": 20473,
+    "sha256": "6b62d0739909e90c6322f601468dd3d39973c5b86cd74fbf1521d9f7e53ee81f",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/055-1440-projects-visible.json",
+    "bytes": 8576,
+    "sha256": "4797304c438b265dfd2a68c662027d7ea85bb54d7eb0f515675f5c374b49b4c0",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/057-1440-import-complete-visible.json",
+    "bytes": 8576,
+    "sha256": "4797304c438b265dfd2a68c662027d7ea85bb54d7eb0f515675f5c374b49b4c0",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/058-1440-list-import-correct-visible-control-visible.json",
+    "bytes": 8573,
+    "sha256": "c9ed5282cad6c867c6670906bc27b0e9fcb8d4a8093dab394f5fbb241ffb36b9",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/059-1440-first-map-visible.json",
+    "bytes": 71761,
+    "sha256": "82d36ff457c0f8f6f01922a8db371ed187e6fd4a22ee33913cf70973ef335564",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/061-1440-parent-records-visible.json",
+    "bytes": 70115,
+    "sha256": "09a5e7bea5dd8fdec8b9a979a060545fd2d6dc1fa5e48b5b2bbd83bcc7198d8f",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/062-1440-record-list-native-scroll-visible.json",
+    "bytes": 71702,
+    "sha256": "d637ecaa0866b0a0d9e1ab1b10e69c489fb7eccfb72ef7c9f96c31158191c8b3",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/063-1440-reader-first-visible.json",
+    "bytes": 38047,
+    "sha256": "995ab0deb9aa48a2fd12786bf712266c4dfd059b2a1b6c3affcee86a5da6526b",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/066-1440-explicit-continue-first-visible.json",
+    "bytes": 34028,
+    "sha256": "078fd8d3f70b56232753dbfe8a159ba5d4d601177df98cad4bbb8945dec182c8",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/067-probe-visible.json",
+    "bytes": 34028,
+    "sha256": "078fd8d3f70b56232753dbfe8a159ba5d4d601177df98cad4bbb8945dec182c8",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/068-1440-native-N-entry-visible.json",
+    "bytes": 22024,
+    "sha256": "a99c37b122804ed4a0f028f9761fce1f0f2a297418c61b96682bb836c9ebdadf",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/069-probe-visible.json",
+    "bytes": 22024,
+    "sha256": "a99c37b122804ed4a0f028f9761fce1f0f2a297418c61b96682bb836c9ebdadf",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/070-1440-N-only-edit-visible.json",
+    "bytes": 21829,
+    "sha256": "eab9a020e0efed8d7a381ac3ff03041fcd2ba64a47ccef53e2221d42191adf92",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/072-1440-native-back-top-for-file-region-visible.json",
+    "bytes": 39189,
+    "sha256": "afcefa9a06a3c54514a274663e13edc9f58ab0cb10288787b512d350972535cc",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/075-1440-file-region-only-visible.json",
+    "bytes": 39342,
+    "sha256": "eaf6953fbbd2c2e1ecd4a2c80f14e485353f6d37e829611bb2d4cc009c284fd7",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/078-1440-actual-file-copy-visible.json",
+    "bytes": 39356,
+    "sha256": "4a58ea0531d9c18f25db3180338ec1c3e2852c6e9247f7bd1b5e552797f041ba",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/081-1440-native-result-input-reach-visible.json",
+    "bytes": 28676,
+    "sha256": "b76d9ea68b9ea30b8879b55e37747d41505e048f34d491d8496e0ba5802ce739",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/083-1440-file-selection-immediate-visible.json",
+    "bytes": 28678,
+    "sha256": "ddacf4cf6ab710e32c5217d3e2f6a39fdf36638a30658ca0ba7305ad8df81767",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/086-1440-at-time-work-open-visible.json",
+    "bytes": 23837,
+    "sha256": "8eca4b640423cac3770c86aabf11036284549d1e1610ec1da4a7a3e6bca1cdb7",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/087-1440-at-time-native-read-visible.json",
+    "bytes": 21520,
+    "sha256": "5974367f2db1ffcecf89ea7c5a169350b346fa098c01b3903881a532068baf86",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/088-1440-at-time-close-no-reselect-visible.json",
+    "bytes": 24596,
+    "sha256": "95dce2a4d80e85566951dd35c724bbde8c8dc93e11c993ec5d5ce0908e6c008e",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/089-1440-accept-native-reach-visible.json",
+    "bytes": 24596,
+    "sha256": "95dce2a4d80e85566951dd35c724bbde8c8dc93e11c993ec5d5ce0908e6c008e",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/090-probe-visible.json",
+    "bytes": 24596,
+    "sha256": "95dce2a4d80e85566951dd35c724bbde8c8dc93e11c993ec5d5ce0908e6c008e",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/091-1440-explicit-accept-visible.json",
+    "bytes": 25738,
+    "sha256": "ac9fc87b492848d48693ac04bef17458eeaee63143d2509e95d95f8cc6ee1654",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/093-1440-native-top-for-origin-return-visible.json",
+    "bytes": 38170,
+    "sha256": "bd5418e151974b2a04092b0ae8ac5025879dc3bfcd7ab335b6f5c17760d59888",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/094-1440-explicit-origin-return-visible.json",
+    "bytes": 72286,
+    "sha256": "dd91cac8df0b319e4dd9ba96f13a69bff6f6164175f2fc76603c76b5f37acb17",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "ui/095-1440-return-before-other-action-visible.json",
+    "bytes": 72286,
+    "sha256": "dd91cac8df0b319e4dd9ba96f13a69bff6f6164175f2fc76603c76b5f37acb17",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  }
+]

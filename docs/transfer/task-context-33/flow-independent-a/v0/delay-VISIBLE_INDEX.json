@@ -1,0 +1,110 @@
+[
+  {
+    "local": "delay/001-sameview-new-context-visible.json",
+    "bytes": 17518,
+    "sha256": "5d7f17bfe2120910b365f115bbe4158415559d810fe754b9af041b79ed1aa768",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/002-sameview-project-list-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/003-sameview-normal-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/004-sameview-import-complete-visible.json",
+    "bytes": 71029,
+    "sha256": "b11d3731653ba6345b18cd290009be29749296bdba21b04aa997af37cb8ae0bb",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/005-sameview-work-visible.json",
+    "bytes": 33395,
+    "sha256": "b13f8532e75b8ae9d59ad7be104387074ec66b2b284a4025babc009d319782c3",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/006-sameview-arraybuffer-completion-armed-visible.json",
+    "bytes": 33395,
+    "sha256": "b13f8532e75b8ae9d59ad7be104387074ec66b2b284a4025babc009d319782c3",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/007-sameview-file-pending-visible.json",
+    "bytes": 27164,
+    "sha256": "7d385a01f3222a2e28382a690c47181c089c62a2029825e425f63d50381dad37",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/009-sameview-release-visible.json",
+    "bytes": 23767,
+    "sha256": "e7ba34c82b6bf56f8a086cd08111f39c412d665b2bf65291ed4e531be04ef939",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/011-roundtrip-new-context-visible.json",
+    "bytes": 17518,
+    "sha256": "5d7f17bfe2120910b365f115bbe4158415559d810fe754b9af041b79ed1aa768",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/012-roundtrip-projects-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/013-roundtrip-normal-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/014-roundtrip-import-complete-visible.json",
+    "bytes": 71029,
+    "sha256": "0dfa9d20ccab869882a26501cf0b4d7e2715448b048592baba530a24be0a81fc",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/015-roundtrip-work-before-selection-visible.json",
+    "bytes": 33395,
+    "sha256": "ba43f4a390b963148dca4fbcb5de07df2c2475cbea90c8197b0f6959ffec34ca",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/016-roundtrip-delay-armed-visible.json",
+    "bytes": 33395,
+    "sha256": "ba43f4a390b963148dca4fbcb5de07df2c2475cbea90c8197b0f6959ffec34ca",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/017-roundtrip-file-pending-visible.json",
+    "bytes": 27164,
+    "sha256": "31f06c9477177df01d284b30a4a15b337eb473c67f1656afbafd327d2134521f",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/018-roundtrip-native-history-visible.json",
+    "bytes": 27765,
+    "sha256": "929e5c0ea1feb4484b0487a11aca3ac190bda521816633e0c2b9747a2aa30520",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/019-roundtrip-native-work-return-visible.json",
+    "bytes": 33395,
+    "sha256": "7250ec9057dee14dfe88f554b35d9eb727215e01cc288110effe273cfb572ebb",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "delay/021-roundtrip-release-visible.json",
+    "bytes": 23767,
+    "sha256": "5b2bd55870f08e1229930c90e0a0413f1e762ba9c89f5578e03aa97297780fac",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  }
+]

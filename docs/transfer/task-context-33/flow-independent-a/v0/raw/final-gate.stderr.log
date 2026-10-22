@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/task33-flow/final-gate.py", line 7, in <module>
+    assert runs['controlledDelaySemanticGate']==0 and runs['REPORT16Candidate']==0,'Product boundaries failed; preserve independent failures'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Product boundaries failed; preserve independent failures

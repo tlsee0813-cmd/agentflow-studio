@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+  "returnId": "H_3aff5104-142f-432b-9409-0cf357a19b2b",
+  "report": "[명시 합성33 1440 학습반복] 오류행 처리 다음안내만 구체화한 작업문의 전달을 관측했다. 중단/제외는 미선택이며 실제 구현·개발·외부 AI 실행·파일처리·배포는 하지 않았다.",
+  "evidence": null,
+  "understanding": null
+}

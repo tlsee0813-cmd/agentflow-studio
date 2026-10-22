@@ -1,0 +1,62 @@
+[
+  {
+    "local": "baseline-ui/001-original729-learned-short-comparison-visible.json",
+    "bytes": 17518,
+    "sha256": "5d7f17bfe2120910b365f115bbe4158415559d810fe754b9af041b79ed1aa768",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/002-original-projects-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/003-original-normal-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/004-original-first-map-visible.json",
+    "bytes": 71029,
+    "sha256": "ba5d03a6d39278ac7fcb2e02cbe51e8bb365602b7a0fcb5c0ae1550abfa958cc",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/006-original-parent-records-visible.json",
+    "bytes": 65692,
+    "sha256": "bc696f3a029979cbc94ff57f45f102fb4682af33917cab1e54a675555b69ac42",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/007-original-native-record-scroll-visible.json",
+    "bytes": 67275,
+    "sha256": "5eeb5c075e2145d1455e479e3605ae5a3f502c407a840129c650d7430f85b546",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/008-original-reader-first-visible.json",
+    "bytes": 33595,
+    "sha256": "75b861cdf46e7f50c36231a59669b74e73efb154997b87ccef43f4f410aacb91",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/010-original-work-without-continue-visible.json",
+    "bytes": 32562,
+    "sha256": "233742cc851dd6311f751fcf9ea97dd707754d892a139e56f64dceed814f4755",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/011-original-file-selection-first-visible.json",
+    "bytes": 27208,
+    "sha256": "0e2c002466d624792406beb89e608e733f0c8553dc7595326802f31d8c0702ad",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  },
+  {
+    "local": "baseline-ui/012-original-file-read-complete-no-navigation-visible.json",
+    "bytes": 27208,
+    "sha256": "0e2c002466d624792406beb89e608e733f0c8553dc7595326802f31d8c0702ad",
+    "rawContent": "corresponding label in raw actions.jsonl (read-only pre-screenshot DOM; screenshot may follow async frame)"
+  }
+]

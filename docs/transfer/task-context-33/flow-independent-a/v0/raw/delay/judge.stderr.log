@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/task33-flow/delay/judge.py", line 11, in <module>
+    assert result['noAutomaticRevealAfterViewExcursionExpected'],'FAIL: file completion after history→work steals returned position/focus; selection retained'
+           ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: file completion after history→work steals returned position/focus; selection retained

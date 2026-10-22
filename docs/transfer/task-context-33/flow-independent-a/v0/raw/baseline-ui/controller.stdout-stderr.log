@@ -1,0 +1,17 @@
+{"ready": true, "url": "http://127.0.0.1:39969", "browser": "154.0.8037.57", "PW": "1.57.0"}
+{"screenSaved": "original729-learned-short-comparison", "entryId": "", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "original-projects", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "original-normal-import", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "original-first-map", "entryId": "E_3f2f047c-dbe3-451e-aaf9-17d9817b059f", "layer": "space", "xy": [0, 0]}
+{"opaqueSaved": "before-reading-envelope.json", "sha256": "6f46f49e1c91900266c98173e697320948c4877ee000b59257b576d34a78d726"}
+{"ok": true, "op": "opaque"}
+{"screenSaved": "original-parent-records", "entryId": "E_3f2f047c-dbe3-451e-aaf9-17d9817b059f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "original-native-record-scroll", "entryId": "E_3f2f047c-dbe3-451e-aaf9-17d9817b059f", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "original-reader-first", "entryId": "E_3f2f047c-dbe3-451e-aaf9-17d9817b059f", "layer": "task", "xy": [0, 0]}
+{"opaqueSaved": "after-reading-envelope.json", "sha256": "6f46f49e1c91900266c98173e697320948c4877ee000b59257b576d34a78d726"}
+{"ok": true, "op": "opaque"}
+{"screenSaved": "original-work-without-continue", "entryId": "E_3f2f047c-dbe3-451e-aaf9-17d9817b059f", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "original-file-selection-first", "entryId": "E_3f2f047c-dbe3-451e-aaf9-17d9817b059f", "layer": "work", "xy": [0, 2345]}
+{"screenSaved": "original-file-read-complete-no-navigation", "entryId": "E_3f2f047c-dbe3-451e-aaf9-17d9817b059f", "layer": "work", "xy": [0, 2345]}
+{"opaqueSaved": "after-selection-envelope.json", "sha256": "6f46f49e1c91900266c98173e697320948c4877ee000b59257b576d34a78d726"}
+{"ok": true, "op": "opaque"}

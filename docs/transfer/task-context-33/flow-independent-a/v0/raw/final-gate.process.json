@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-flow/final-gate.py"
+  ],
+  "startUTC": "2026-10-22T23:13:37.142986+00:00",
+  "endUTC": "2026-10-22T23:13:37.168919+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "f2cf78bca8ed5cee0005a133d3b87f9e2f5f15c2f39a0937e1756d60c51061cb"
+}

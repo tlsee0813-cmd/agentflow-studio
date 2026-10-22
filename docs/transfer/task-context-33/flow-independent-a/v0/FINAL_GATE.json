@@ -1,0 +1,11 @@
+{
+  "runs": {
+    "exactPC12_02_11": 0,
+    "controlledDelaySemanticGate": 1,
+    "REPORT16Candidate": 1,
+    "REPORT16Original729": 0
+  },
+  "normalUI": "two learned screen-first rounds completed; two preparation errors retained",
+  "overall": "FAIL: controlled-delay automatic reveal after view roundtrip; REPORT16 first-screen action regression",
+  "notCombinedAssertionCount": true
+}
