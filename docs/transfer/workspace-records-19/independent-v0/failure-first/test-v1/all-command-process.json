@@ -1,0 +1,39 @@
+[
+  {
+    "name": "build",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "startUTC": "2026-10-22T13:52:17.021661+00:00",
+    "endUTC": "2026-10-22T13:52:18.607647+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "3336006047fb26f65b5e89c0048eac084c4b1d0ef082faa9f359a35939868e28",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "continuity-build",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T13:52:18.607928+00:00",
+    "endUTC": "2026-10-22T13:52:20.993829+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "workspace19",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/workspace19_browser.py"
+    ],
+    "startUTC": "2026-10-22T13:52:20.997569+00:00",
+    "endUTC": "2026-10-22T13:52:41.607048+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "7899f47f5239e5f0b76e238a915432a6c704799030fdad3c1181786c62ffed18"
+  }
+]

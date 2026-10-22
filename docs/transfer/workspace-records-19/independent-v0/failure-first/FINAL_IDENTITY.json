@@ -1,0 +1,68 @@
+{
+  "productRemoteAndDisk": [
+    {
+      "source": "8c46dc72057237cbc05da837ee75b3807969f9ef",
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 249782,
+      "remoteGitObjectSHA256": "c9df96891429ce72b25b02684248828ce0c3d918ed7a6aae61bf5f4c9be5ddbb",
+      "diskEqual": true
+    },
+    {
+      "source": "8c46dc72057237cbc05da837ee75b3807969f9ef",
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72648,
+      "remoteGitObjectSHA256": "f97fed78d87fbd7edf15e8556894ba023ba3b01463d54730796904e36c37408d",
+      "diskEqual": true
+    },
+    {
+      "source": "8c46dc72057237cbc05da837ee75b3807969f9ef",
+      "path": "app/continuity/public/index.html",
+      "bytes": 17909,
+      "remoteGitObjectSHA256": "190c02c6615901c84735ab7f8d6b2504ff9d8351ba5fd784f6b62bbce16ec34c",
+      "diskEqual": true
+    },
+    {
+      "source": "9fb83ef50252d56c6411c81a0dca56d99becd651",
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 249782,
+      "remoteGitObjectSHA256": "c9df96891429ce72b25b02684248828ce0c3d918ed7a6aae61bf5f4c9be5ddbb",
+      "diskEqual": true
+    },
+    {
+      "source": "9fb83ef50252d56c6411c81a0dca56d99becd651",
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72648,
+      "remoteGitObjectSHA256": "f97fed78d87fbd7edf15e8556894ba023ba3b01463d54730796904e36c37408d",
+      "diskEqual": true
+    },
+    {
+      "source": "9fb83ef50252d56c6411c81a0dca56d99becd651",
+      "path": "app/continuity/public/index.html",
+      "bytes": 17909,
+      "remoteGitObjectSHA256": "190c02c6615901c84735ab7f8d6b2504ff9d8351ba5fd784f6b62bbce16ec34c",
+      "diskEqual": true
+    },
+    {
+      "source": "81d50c72f6e4182b04d3b00576e9ae662c16cac2",
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 249782,
+      "remoteGitObjectSHA256": "c9df96891429ce72b25b02684248828ce0c3d918ed7a6aae61bf5f4c9be5ddbb",
+      "diskEqual": true
+    },
+    {
+      "source": "81d50c72f6e4182b04d3b00576e9ae662c16cac2",
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72648,
+      "remoteGitObjectSHA256": "f97fed78d87fbd7edf15e8556894ba023ba3b01463d54730796904e36c37408d",
+      "diskEqual": true
+    },
+    {
+      "source": "81d50c72f6e4182b04d3b00576e9ae662c16cac2",
+      "path": "app/continuity/public/index.html",
+      "bytes": 17909,
+      "remoteGitObjectSHA256": "190c02c6615901c84735ab7f8d6b2504ff9d8351ba5fd784f6b62bbce16ec34c",
+      "diskEqual": true
+    }
+  ],
+  "otherRegressionFilesUnchanged9fbTo81d": "app/continuity/tests/workspace19_browser.py\n"
+}
