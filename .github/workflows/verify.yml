@@ -197,6 +197,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/understanding17_browser.py 2>&1 | tee test-results/area17-browser.log
+      - name: WORK29 actual editor description reference on two PCs (native HTTP, synthetic recovery fixture, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/work-description29
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/work-description29_browser.py 2>&1 | tee test-results/work-description29-browser.log
       - name: AREA18 mixed depth, real endpoints and fixed reading workspace on two PCs (native HTTP, labelled reconstructions and synthetic boundaries, mock AI)
         env:
           IDEA015_EVIDENCE_DIR: test-results/area18
