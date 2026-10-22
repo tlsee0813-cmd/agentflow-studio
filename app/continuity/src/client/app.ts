@@ -1,7 +1,8 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, TEXT_LIMIT, type Basis, type Project, type Task, type Source, type Area, type RelationKind, type Point, type Question, type GuideAnswer, type GuideReply, type Proposal } from '../shared/types.js';
 import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask,
-  areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
+  areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask,
+  exportAnchor, areaDescription, returnUnderstanding, correctUnderstanding, type DescriptionView } from '../shared/domain.js';
 import { parseProject, parseResultFile, validateRequest, validateAdvice, validateGuideEnvelope } from '../shared/validation.js';
 import { buildGuideRequest, guideDigest, readOf, proposalText, adoptProposal, instructionOf } from '../shared/guidance.js';
 import { WorkspaceStore, serializeProject, storageErrorCode, type EntryRef, type WorkspaceEntry } from '../shared/storage.js';
@@ -45,6 +46,9 @@ let viewTask:string|null=null;
 // SPATIAL102-R1: the report a '확인할 일' item pointed to, shown on the task screen (may be a report to a follow-up handoff).
 // REPORT16: also the report the user picked on that screen. Never chosen for the user (no latest-report default).
 let viewReturn:string|null=null;
+// Received in this open project only; this is not tracking changes since a previous visit.
+const receivedAreas=new Set<string>();
+const understandingEditRevisions=new Map<string,number>();
 // REPORT16: which disclosures of the task screen are open, for that request and that picked report only (tab memory).
 // Ids starting with 'task-report-' belong to the picked report and are dropped when another report is picked.
 let readOpen:{task:string;ret:string|null;open:Record<string,boolean>}|null=null;
@@ -132,6 +136,8 @@ function resetEphemeral() {
   $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
+  receivedAreas.clear();
+  understandingEditRevisions.clear();
   mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
@@ -576,14 +582,15 @@ function safeName(value:string){return value.replace(/[^a-zA-Z0-9가-힣_-]/g,'_
 async function exportWork(id:string,method:'clipboard'|'download',fileMode=false) {
   let text:string;const exportRevision=project.revision,exportProjectId=project.id,epoch=projectEpoch;
   const returnId=fileMode?`H_${crypto.randomUUID()}`:null;
+  const anchor=fileMode?exportAnchor(project,taskOf(project,id)):null;
   try {text=handoffText(project,id,returnId);}catch {project={...project,notice:'작업 문맥 데이터가 유효하지 않아 내보내지 않았습니다. 복구 파일로 내용을 보존하세요.'};renderStatus();return;}
-  if(method==='download'){download(`${safeName(project.name)}-${fileMode?'파일반환-':''}작업문.md`,text,'text/markdown;charset=utf-8');if(fileMode)lastFileExport={taskId:id,text};commit({...markHandoff(project,id,text,method,exportRevision,returnId),notice:'작업문을 Markdown 파일로 저장했어요. 그 파일을 개발 도구에 전달하는 건 직접 해 주세요. 전달·실행된 것은 아니에요.'});
+  if(method==='download'){download(`${safeName(project.name)}-${fileMode?'파일반환-':''}작업문.md`,text,'text/markdown;charset=utf-8');if(fileMode)lastFileExport={taskId:id,text};commit({...markHandoff(project,id,text,method,exportRevision,returnId,anchor),notice:'작업문을 Markdown 파일로 저장했어요. 그 파일을 개발 도구에 전달하는 건 직접 해 주세요. 전달·실행된 것은 아니에요.'});
     // Saves are asynchronous (locked): judge the save record only after it finished, for the same project view.
     await flushSaves();if(memoryDirty&&projectEpoch===epoch){project={...project,notice:'Markdown 파일은 저장했지만 저장 기록은 브라우저에 남기지 못했습니다. 닫기 전에 백업 파일을 저장하세요.'};renderStatus();}return;}
   try {await navigator.clipboard.writeText(text);
     if(project.id!==exportProjectId||project.revision!==exportRevision||projectEpoch!==epoch){project={...project,notice:'작업문은 복사됐지만 그 사이 입력이 바뀌었습니다. 현재 내용의 내보내기 기록으로 표시하지 않았습니다. 최신 작업문이 필요하면 다시 복사하세요.'};renderStatus();return;}
     if(fileMode)lastFileExport={taskId:id,text};
-    commit(markHandoff(project,id,text,method,exportRevision,returnId));await flushSaves();if(projectEpoch!==epoch)return;project={...project,notice:memoryDirty?'작업문은 복사됐지만 내보내기 기록은 브라우저에 저장되지 않았습니다. 닫기 전에 JSON 백업을 저장하세요.':'작업문을 클립보드에 복사했습니다. 실행 도구에 직접 붙여넣으세요. 전송·실행된 것은 아닙니다.'};renderStatus();}
+    commit(markHandoff(project,id,text,method,exportRevision,returnId,anchor));await flushSaves();if(projectEpoch!==epoch)return;project={...project,notice:memoryDirty?'작업문은 복사됐지만 내보내기 기록은 브라우저에 저장되지 않았습니다. 닫기 전에 JSON 백업을 저장하세요.':'작업문을 클립보드에 복사했습니다. 실행 도구에 직접 붙여넣으세요. 전송·실행된 것은 아닙니다.'};renderStatus();}
   catch {
     project={...project,notice:'클립보드를 사용할 수 없습니다. 아래 작업문을 직접 선택해 복사하거나 파일로 저장하세요.'};render();
     const d=$<HTMLDetailsElement>('handoff-preview');d.open=true;const field=$<HTMLTextAreaElement>('handoff-text');field.focus();field.select();
@@ -616,7 +623,8 @@ function renderResultFile() {
     area.append(bases,work,node('p','외부 보고 원문 · 앱 미검증','source-meta'),node('div',file.report,'source-raw'));
     if(file.evidence!==null)area.append(node('p','외부 관찰·검사 원문 · 앱 미검증','source-meta'),node('div',file.evidence,'source-raw'));
     area.append(node('p','파일은 실행 증명이 아닙니다. 가져와도 AI 정리·명령·링크를 실행하지 않습니다.','hint'));
-    if(duplicate)area.append(node('p','같은 인계의 같은 본문이 이미 있습니다. 다시 추가하지 않습니다.','hint'));
+    if(file.understanding){const u=details('함께 받은 영역 설명','result-understanding-preview');u.append(node('p',file.understanding.summary,'source-raw'),node('p',`외부 정리 · ${file.understanding.origin} · 앱 미검증`,'hint'));area.append(u);}
+    if(duplicate)area.append(node('p','같은 인계의 보고와 정리가 이미 있습니다. 다시 추가하지 않습니다.','hint'));
     area.append(btn(duplicate?'기존 기록 확인':'이 결과 가져오기',()=>void acceptResultFile(),'primary','accept-result-file'));
     area.append(rawFileDetails(resultSelection.rawText,file.returnId,'result-file-raw'));
   } catch(e) {
@@ -632,9 +640,12 @@ async function acceptResultFile() {
   try {
     const n=importResultFile(project,resultSelection.rawText);
     if(n===project){resultMessage=memoryDirty?'같은 본문은 이미 이 탭에 있습니다. 브라우저에는 저장되지 않았습니다. JSON 백업으로 보존하세요.':'같은 본문의 기존 기록을 확인했습니다. 새 기록은 추가하지 않았습니다.';renderResultFile();return;}
+    for(const a of n.space.areas)if(n.space.understanding[a.id]?.revision!==(project.space.understanding[a.id]?.revision??0)&&n.space.understanding[a.id]?.revision)receivedAreas.add(a.id);
     controller?.abort();controller=null;resultRead++;resultSelection=null;resultMessage='';
     commit(n);const epoch=projectEpoch;await flushSaves();if(epoch!==projectEpoch)return;resultMessage=memoryDirty?'결과는 이 탭에만 있습니다. 브라우저에 저장하지 못했습니다. 닫기 전에 JSON 백업을 저장하세요.':'보고를 가져왔습니다 · 앱 미검증. 작성 중인 입력은 그대로입니다.';
     renderResultFile();showWork();
+    const added=n.tasks.at(-1),update=added?returnUnderstanding(n,added.id):null;
+    if(update?.areaId){const host=$('outcome-home');host.prepend(btn('지도에서 이 부분 보기',()=>showReceivedArea(update.areaId!),'secondary','result-show-area'));}
   }catch(e){resultMessage=resultError(e)+' 기존 붙여넣기도 계속 이용할 수 있습니다.';renderResultFile();}
 }
 function basisCard(b:Basis,focus=false):HTMLElement {
@@ -1099,6 +1110,7 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   const enter=node('button','','node-enter');enter.type='button';enter.id=`node-enter-${a.id}`;
   const name=node('strong',a.name,'area-card-name');name.append(node('span',' ↘','area-card-go'));
   enter.append(name,a.note?node('span',a.note,'area-card-note'):noNote(),node('span',areaSummary(a),'hint'));
+  if(receivedAreas.has(a.id))enter.append(node('span','설명 갱신','area-update-label'));
   if(areaRequests(a.id).some(currentGroup))enter.append(appTag());
   enter.addEventListener('click',()=>guard(()=>openArea(a.id)));
   // Information shows the short properties; it never opens the area or changes the open work.
@@ -1228,6 +1240,51 @@ function areaIdea(a:Area,id:string,limit=NOTE_SHORT,label='사용자 구상'):HT
   box.append(node('p',shortText(a.note,limit),'area-idea-text'),full);return box;
 }
 const PANEL_TASKS=5;
+function showReceivedArea(id:string) {
+  const a=areaById(id);if(!a||a.archived)return;
+  leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;mapSelected=id;sheetOpen=true;
+  rememberMap();render();const panel=$('area-panel');panel.tabIndex=-1;panel.focus({preventScroll:true});panel.scrollIntoView({block:'nearest'});
+}
+const heldMessage:Record<string,string>={
+  'no-anchor':'이전 인계에 설명 기준이 없어 현재 설명으로 쓰지 않았어요.',
+  'area-moved':'인계 뒤 작업의 영역이 달라져 현재 설명으로 쓰지 않았어요.',
+  'area-mismatch':'설명에 적힌 영역과 연결된 작업의 영역이 달라요.',
+  'area-archived':'보관된 영역이라 현재 설명으로 쓰지 않았어요.',
+  'file-basis':'파일의 설명 기준이 실제 인계 기록과 달라요.',
+  'superseded':'그 뒤 설명이나 사용자 정정이 있어 이전 입력을 적용하지 않았어요.',
+  'plan-changed':'인계 뒤 사용자 구상이나 조건이 바뀌어 적용하지 않았어요.'
+};
+/** Evidence opens here, without selecting a report or changing the work the user continues. */
+function descriptionEvidence(d:DescriptionView,id:string):HTMLElement {
+  const box=details('근거 보기',id);box.append(node('p',`${d.origin} · ${dateLabel(d.entry.at)} · 앱 미검증`,'hint'));
+  if(d.returnTask){for(const sid of d.returnTask.sourceIds){const s=project.sources.find(x=>x.id===sid);if(s)box.append(node('p',sourceName[s.kind],'source-meta'),node('div',reportBody(s),'source-raw'));}
+    if(d.returnTask.resultFile)box.append(rawFileDetails(d.returnTask.resultFile.rawText,d.returnTask.resultFile.returnId,`${id}-file`));
+  }else box.append(node('p','사용자가 이전 설명을 직접 정정했어요. 이전 설명과 근거는 아래 기록에 남아요.','hint'));
+  return box;
+}
+function understandingPanel(a:Area,id:string):HTMLElement {
+  id=`${id}-${a.id}`; // Disclosure state belongs to this area, never to another selected area's panel.
+  const box=node('section','','area-understanding');box.id=id;box.setAttribute('aria-label','영역 현재 설명');
+  const state=areaDescription(project,a.id),d=state.current;
+  box.append(node('p',d?.entry.by==='user'?'전달 기록에서 정리한 설명 · 사용자 정정':'전달 기록에서 정리한 설명 · 앱 미검증','source-meta'));
+  if(d?.valid){
+    box.append(node('p',shortText(d.summary,200),'understanding-summary'));
+    if(d.summary.length>200){const full=details('설명 전체 보기',`${id}-full`);full.append(node('div',d.summary,'source-raw'));box.append(full);}
+    if(d.changes.length){const changes=node('ul','','understanding-changes');for(const text of d.changes)changes.append(node('li',text));box.append(node('p','직전 정리에서 달라진 점','source-meta'),changes);}
+    if(d.proposal){const proposal=node('section','','understanding-proposal');proposal.append(node('p','구상을 바꾸자는 제안 · 미채택','source-meta'),node('p',shortText(d.proposal,150)));if(d.proposal.length>150){const full=details('제안 전체 보기',`${id}-proposal`);full.append(node('div',d.proposal,'source-raw'));proposal.append(full);}box.append(proposal);}
+  }else box.append(node('p',d?'구상이나 조건이 바뀌어 이전 설명은 현재 설명으로 쓰지 않아요.':'아직 전달 기록에서 정리한 설명이 없어요.','hint'));
+  if(d){box.append(descriptionEvidence(d,`${id}-evidence`));
+    if(!a.archived){const key=`understanding-edit:${a.id}`,edit=details('설명 오류 고치기',`${id}-edit`);edit.open=spaceInputs[`${project.id}:${key}`]!==undefined;
+      const field=spaceInput(node('textarea'),`${id}-text`,d.summary,key);field.rows=3;field.maxLength=2000;field.setAttribute('aria-label','영역 설명 정정');
+      field.addEventListener('input',()=>{if(!understandingEditRevisions.has(key))understandingEditRevisions.set(key,d.entry.revision!);});
+      const stale=understandingEditRevisions.has(key)&&understandingEditRevisions.get(key)!==d.entry.revision;
+      edit.append(field,node('p',stale?'고치는 동안 새 설명이 왔어요. 이 초안은 보존했지만 새 설명의 정정으로 저장하지 않아요. 취소 후 현재 설명에서 다시 시작할 수 있어요.':'사용자 구상을 바꾸지 않고 이 설명만 고쳐요. 이전 설명과 근거는 남아요.','hint'),btn('정정 저장',()=>guard(()=>{if(understandingEditRevisions.has(key)&&understandingEditRevisions.get(key)!==areaDescription(project,a.id).current?.entry.revision){project={...project,notice:'정정 초안 뒤 새 설명이 도착해 저장하지 않았어요. 작성한 내용은 그대로예요.'};renderStatus();return;}const n=correctUnderstanding(project,a.id,field.value);clearInputs(key);understandingEditRevisions.delete(key);commit(n);}), 'secondary',`${id}-save`),btn('취소',()=>{clearInputs(key);understandingEditRevisions.delete(key);render();},'quiet',`${id}-cancel`));box.append(edit);}
+  }
+  if(state.previous.length||state.held.length||d&&!d.valid){const history=details('이전 설명 · 반영하지 않은 정리',`${id}-history`);
+    for(const old of [...(d&&!d.valid?[d]:[]),...state.previous,...state.held]){const row=node('section','','understanding-record');row.append(node('p',old.entry.held?heldMessage[old.entry.held]!:old.entry.by==='user'?'사용자 정정 기록':'이전 정리 설명','source-meta'),node('div',old.summary,'source-raw'),descriptionEvidence(old,`${id}-history-${old.returnTask?.id??old.entry.revision}`));if(old.proposal)row.append(node('p',`미채택 제안: ${old.proposal}`,'source-raw'));history.append(row);}box.append(history);
+  }
+  return box;
+}
 /** Short properties of the selected area, read first: name, the user's idea, and this area's requests for the user to pick.
  * Editing opens explicitly. No report is picked for the user; reports are read inside the task the user chose. */
 function areaPanel(a:Area):HTMLElement {
@@ -1243,7 +1300,7 @@ function areaPanel(a:Area):HTMLElement {
   edit.append(node('label','이름'),name,node('label','한 줄 구상'),note,node('p','아이디어도, 아직 못 정한 점도 적을 수 있어요.','hint'),row);
   const go=node('div','','row');go.append(btn('영역 열기 ↗',()=>openArea(a.id),'primary','panel-open'),btn('이 영역에 새 요청',()=>writeInArea(a.id),'quiet','panel-new-request'),
     btn('무엇을 요청할지 같이 정하기',()=>{guideOf(a.id);openArea(a.id);document.getElementById(`guide-${a.id}`)?.scrollIntoView({block:'start'});},'quiet','panel-guide'));
-  panel.append(head,areaIdea(a,'panel-idea'),edit,node('p',areaSummary(a),'hint'));
+  panel.append(head,areaIdea(a,'panel-idea'),understandingPanel(a,'panel-understanding'),edit,node('p',areaSummary(a),'hint'));
   const requests=areaRequests(a.id),list=node('section','','panel-tasks');list.id='panel-tasks';
   if(requests.length) {
     list.append(node('p',`이 영역의 요청 ${requests.length}개 · 골라서 읽기`,'source-meta'));
@@ -1323,6 +1380,7 @@ function renderOverview(root:HTMLElement) {
     start.append(btn('영역 추가',()=>{$<HTMLDetailsElement>('area-add-panel').open=true;$('area-name').focus();},'secondary','start-add-area'),btn('바로 첫 요청 쓰기 · 영역 없이',()=>writeInArea(null),'quiet','start-first-request'));
     root.append(start);
   }
+  if(receivedAreas.size){const recent=node('div','','received-areas');recent.id='received-areas';recent.append(node('span','이번에 받은 설명 · '));for(const id of receivedAreas){const a=areaById(id);if(a&&!a.archived)recent.append(btn(a.name,()=>showReceivedArea(id),'quiet',`received-area-${id}`));}root.append(recent);}
   const records=checkSection();renderMap(root,active,records?[records]:[]);
   if(active.length>1||project.space.relations.length) {
     const rel=node('section','','area-relations');rel.id='area-relations';rel.append(node('h2','영역 사이 관계'),node('p','실행 순서나 자동 연결이 아니라, 영역끼리 어떤 사이인지 적어 두는 메모예요.','hint'));
@@ -1512,7 +1570,7 @@ function renderArea(root:HTMLElement,a:Area) {
   const note=spaceInput(node('textarea'),'area-edit-note',a.note,noteKey);note.rows=2;note.maxLength=2000;note.setAttribute('aria-label','영역 설명');
   edit.append(name,note,btn('저장',()=>{if(!name.value.trim())return;commit(editArea(project,a.id,name.value,note.value));clearInputs(nameKey,noteKey);},'secondary','area-edit-save'),
     btn('취소',()=>{clearInputs(nameKey,noteKey);edit.open=false;render();},'quiet','area-edit-cancel'));
-  head.append(edit);root.append(head);
+  head.append(edit);root.append(head,understandingPanel(a,'area-understanding'));
   const checks=checkItems(project),here=checks.filter(c=>c.areaId===a.id).length,elsewhere=checks.length-here;
   if(here||elsewhere) {
     const line=node('p',`이어 볼 기록 · 이 영역 ${here}개${elsewhere?` · 다른 영역 ${elsewhere}개`:''} `,'hint area-checks');line.id='area-checks';
@@ -1618,6 +1676,7 @@ function currentIdea(t:Task,a:Area|null):HTMLElement {
   const box=areaIdea(a,'task-view-idea',NOTE_SHORT,`지금의 영역 구상 · ${a.name}${a.archived?' (보관됨)':''}`);box.classList.add('task-idea');
   const copy=t.background?.area;
   if(copy&&copy.id===a.id&&(copy.note??'')!==a.note)box.append(node('p','이 요청을 쓸 때의 구상 사본과 달라요. 당시 사본은 아래 배경에 그대로 있어요.','hint task-idea-changed'));
+  box.append(understandingPanel(a,'task-understanding'));
   return box;
 }
 const DRAFT_NAME:Record<Project['draftKind'],string>={request:'요청',report:'보고',evidence:'관찰',test_answer:'시험자료'};
@@ -1730,6 +1789,8 @@ function pointedSection(t:Task,returnId:string):HTMLElement {
   // One low-emphasis line, level with the idea's own label: which report, whose words, unverified.
   const one=r.sourceIds.length===1&&first?` · ${KIND_SHORT[first.kind]}`:'';
   box.append(node('p',`고른 보고 · ${no(r)}${one} · ${first?dateLabel(first.at):'시각 미확인'} · 외부 원문 · 앱 미검증`,'source-meta'));
+  const update=returnUnderstanding(project,r.id);
+  if(update){const status=update.entry?.held?'설명은 현재 기준에 적용하지 않았어요.':update.current?'이 보고의 정리가 현재 영역 설명에 반영됐어요.':'이 보고에 붙은 정리는 이전 기록으로 보관돼요.';box.append(node('p',status,'hint'));const detail=details('이 보고의 정리 설명','task-report-understanding');detail.append(node('p',update.input.summary,'source-raw'),node('p',`정리: ${update.input.origin} · 앱 미검증`,'hint'));if(update.input.proposal)detail.append(node('p','미채택 제안','source-meta'),node('p',update.input.proposal,'source-raw'));box.append(detail);}
   for(const id of r.sourceIds) {
     const src=project.sources.find(s=>s.id===id);
     if(!src){box.append(node('p',`이 보고의 원문 하나(${id})를 찾지 못했어요. 다른 원문으로 대신하지 않았어요.`,'alert warning'));continue;}

@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket } from './types.js';
+import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -18,11 +18,21 @@ export function parseResultFile(raw: string): ResultFile {
   ensure(typeof raw==='string' && new TextEncoder().encode(raw).length<=RESULT_BYTES,'RESULT_TOO_LARGE');
   ensure(!raw.startsWith('\uFEFF'),'INVALID_RESULT_FILE');
   const v:unknown=JSON.parse(raw);
-  obj(v,['schemaVersion','projectId','taskId','returnId','report','evidence']);
-  ensure(v.schemaVersion===RESULT_SCHEMA,'INVALID_RESULT_FILE');
+  // AREA17: return.2 = return.1 + one required 'understanding' key (null or an organised area description).
+  const two=!!v&&typeof v==='object'&&(v as {schemaVersion?:unknown}).schemaVersion===RESULT2_SCHEMA;
+  obj(v,['schemaVersion','projectId','taskId','returnId','report','evidence',...(two?['understanding']:[])]);
+  ensure(v.schemaVersion===RESULT_SCHEMA||two,'INVALID_RESULT_FILE');
+  if(two&&v.understanding!==null)understandingInput(v.understanding);
   id(v.projectId); id(v.taskId); id(v.returnId);
   text(v.report,RESULT_TEXT_LIMIT); if(v.evidence!==null)text(v.evidence,RESULT_TEXT_LIMIT);
   return v as unknown as ResultFile;
+}
+/** AREA17 limits: a short current description, at most three key changes, one optional proposal. Never repaired. */
+export const SUMMARY_LIMIT=2000, CHANGE_LIMIT=300, PROPOSAL_LIMIT=1000;
+function understandingInput(v:unknown): asserts v is UnderstandingInput {
+  obj(v,['version','areaId','basedOn','summary','changes','proposal','origin']);ensure(v.version==='understanding.1');
+  id(v.areaId);integer(v.basedOn);text(v.summary,SUMMARY_LIMIT);list(v.changes,3);for(const c of v.changes)text(c,CHANGE_LIMIT);
+  if(v.proposal!==null)text(v.proposal,PROPOSAL_LIMIT);text(v.origin,200);
 }
 /** Prefix is Studio metadata; the following external field remains character-for-character intact. */
 export function resultSourceText(f:ResultFile, revision:number, kind:'report'|'evidence'):string {
@@ -231,7 +241,8 @@ function assertProject(v: unknown): asserts v is Project {
     obj(t.manual,['understanding','scope','next','checks']); for(const k of Object.keys(t.manual)) if(t.manual[k] !== null) text(t.manual[k],6000,true);
     if(t.suggestions !== null) { list(t.suggestions,8); for(const s of t.suggestions) {obj(s,['text','why']);text(s.text,2000,true);text(s.why,2000,true);} }
     list(t.handoffs); for(const h of t.handoffs) {
-      obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText','returnId','background']); date(h.at);background(h.background,v.revision as number); ensure(['clipboard','download'].includes(h.method as string));
+      obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText','returnId','background','anchor']); date(h.at);background(h.background,v.revision as number);
+      if(h.anchor!==null){ensure(h.returnId!==null);obj(h.anchor,['version','areaId','understanding','stamp']);ensure(h.anchor.version==='anchor.1');ensure(areaIds.has(h.anchor.areaId as string));integer(h.anchor.understanding);planStamp(h.anchor.stamp);} ensure(['clipboard','download'].includes(h.method as string));
       integer(h.revision); ensure((h.revision as number) <= (v.revision as number)); integer(h.chars); ensure(typeof h.digest === 'string' && /^[0-9a-f]{8}$/.test(h.digest)); ensure(typeof h.aiExcluded === 'boolean');
       if(h.work !== null) { obj(h.work,['understanding','scope','next','checks']); for(const k of Object.keys(h.work)) text(h.work[k],6000,true); }
       if(h.legacyText !== null) text(h.legacyText,250000);
@@ -254,6 +265,7 @@ function assertProject(v: unknown): asserts v is Project {
     ensure(!tasks.has(t.id as string)); tasks.add(t.id as string);
   }
   for(const s of sources.values()) ensure(tasks.has(s.taskId));
+  understandingRefs(v.space as Record<string,unknown>,v.tasks as Task[],sources);
   // Imported reports or synthetic answers cannot masquerade as an authoritative decision.
   for(const b of v.bases as Basis[]) {
     ensure(/^D[1-9]\d*$/.test(b.id));
@@ -270,7 +282,7 @@ function assertProject(v: unknown): asserts v is Project {
 }
 /** FLOW090 plan data: the user's purpose text, areas and typed relations. Returns the area IDs. */
 function space(v: unknown): Set<string> {
-  obj(v,['brief','areas','relations','draftTarget','layout']);
+  obj(v,['brief','areas','relations','draftTarget','layout','understanding']);
   if(v.brief!==null) {
     obj(v.brief,['text','at','previous']);text(v.brief.text,TEXT_LIMIT);date(v.brief.at);list(v.brief.previous,200);
     for(const old of v.brief.previous){obj(old,['text','at']);text(old.text,TEXT_LIMIT);date(old.at);}
@@ -290,9 +302,53 @@ function space(v: unknown): Set<string> {
     ensure(ids.has(key));obj(point,['x','y']);
     for(const n of [point.x,point.y])ensure(Number.isSafeInteger(n)&&Math.abs(n as number)<=POSITION_LIMIT);
   }
+  areaUnderstanding(v.understanding,ids);
   return ids;
 }
 export const POSITION_LIMIT=200000;
+function planStamp(v:unknown) {
+  obj(v,['name','note','brief','decisions','work']);text(v.name,60);text(v.note,2000,true);integer(v.brief);list(v.decisions,ITEM_LIMIT);list(v.work,ITEM_LIMIT);
+  for(const w of v.work)text(w,30000);
+  for(const d of v.decisions)ensure(typeof d==='string'&&/^D[1-9]\d*@\d+$/.test(d));ensure(new Set(v.decisions).size===v.decisions.length);
+}
+const HELD=['no-anchor','area-moved','area-mismatch','area-archived','file-basis','superseded','plan-changed'];
+/** AREA17 shape: per area, a revision counter and its entries in arrival order. Exactly one entry holds each applied revision
+ * 1..revision, in increasing order; held entries have no revision and no stamp. References are checked after the tasks. */
+function areaUnderstanding(v:unknown,ids:Set<string>) {
+  ensure(!!v&&typeof v==='object'&&!Array.isArray(v));
+  for(const [areaId,state] of Object.entries(v as Record<string,unknown>)) {
+    ensure(ids.has(areaId));obj(state,['revision','entries']);integer(state.revision);list(state.entries,ITEM_LIMIT);
+    let last=0;
+    for(const e of state.entries) {
+      obj(e,['by','at','revision','taskId','returnId','text','corrects','stamp','held']);date(e.at);ensure(e.by==='external'||e.by==='user');
+      if(e.revision===null){ensure(e.by==='external'&&e.stamp===null&&HELD.includes(e.held as string));}
+      else {integer(e.revision);ensure((e.revision as number)===last+1&&e.held===null);last=e.revision as number;planStamp(e.stamp);}
+      if(e.by==='external'){id(e.taskId);id(e.returnId);ensure(e.text===null&&e.corrects===null);}
+      else {ensure(e.taskId===null&&e.returnId===null&&e.revision!==null);text(e.text,SUMMARY_LIMIT);integer(e.corrects);ensure((e.corrects as number)>=1&&(e.corrects as number)===(e.revision as number)-1);}
+    }
+    ensure(last===state.revision);
+  }
+}
+/** External entries point at a received return task whose own return.2 file carries an organised description. An applied
+ * one must describe the area it is filed under; one task is filed once. */
+function understandingRefs(space:Record<string,unknown>,tasks:Task[],sources:Map<string,Source>) {
+  const byId=new Map(tasks.map(t=>[t.id,t])),seen=new Set<string>();
+  const states=space.understanding as Project['space']['understanding'];
+  for(const t of tasks)for(const h of t.handoffs)if(h.anchor)ensure(h.anchor.understanding<=(states[h.anchor.areaId]?.revision??0));
+  for(const [areaId,state] of Object.entries(states)) {
+    for(const e of state.entries) {
+      if(e.by!=='external')continue;
+      const t=byId.get(e.taskId!);ensure(t&&t.resultFile&&!seen.has(t.id)&&['report','evidence'].includes(sources.get(t.sourceIds[0]!)?.kind??''));seen.add(t.id);
+      const f=parseResultFile(t.resultFile.rawText);ensure(f.returnId===e.returnId&&!!f.understanding);
+      if(e.revision!==null){
+        const parent=byId.get(t.parentTaskId!),record=parent?.handoffs.find(h=>h.returnId===f.returnId),anchor=record?.anchor;
+        ensure(f.understanding.areaId===areaId&&anchor&&anchor.areaId===areaId&&f.understanding.basedOn===anchor.understanding&&anchor.understanding<e.revision);
+        ensure(JSON.stringify(e.stamp)===JSON.stringify(anchor.stamp));
+      }
+    }
+  }
+}
+/** The project.4/5 shape of an empty space (project.6 adds 'understanding' in migrateV5). */
 export const EMPTY_SPACE=()=>({brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1' as const,positions:{}}});
 export function validateProject(v: unknown): Project { assertProject(v); return structuredClone(v); }
 /** Identity check for an exported text (FNV-1a, 32 bit). Not a signature or security control. */
@@ -341,7 +397,18 @@ function migrateV4(v:unknown):unknown {
     ensure(t!==null&&typeof t==='object'&&!Array.isArray(t)&&!Object.hasOwn(t,'background'));const task=t as Record<string,unknown>;list(task.handoffs);
     return {...task,background:null,handoffs:task.handoffs.map(h=>{ensure(h!==null&&typeof h==='object'&&!Array.isArray(h)&&!Object.hasOwn(h,'background'));return {...h as object,background:null};})};
   });
-  return {...p,schemaVersion:SCHEMA,tasks};
+  return migrateV5({...p,schemaVersion:V5_SCHEMA,tasks});
+}
+/** project.5 -> project.6 (AREA17): no area has a derived description and no export has an anchor. Nothing is backfilled:
+ * the plan at the time of an older export is unknown, so a later return.2 to it is held, never applied by estimate. */
+function migrateV5(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown;tasks?:unknown;space?:unknown};ensure(p&&p.schemaVersion===V5_SCHEMA);list(p.tasks);
+  ensure(!!p.space&&typeof p.space==='object'&&!Array.isArray(p.space)&&!Object.hasOwn(p.space,'understanding'));
+  const tasks=p.tasks.map(t=>{
+    ensure(t!==null&&typeof t==='object'&&!Array.isArray(t));const task=t as Record<string,unknown>;list(task.handoffs);
+    return {...task,handoffs:task.handoffs.map(h=>{ensure(h!==null&&typeof h==='object'&&!Array.isArray(h)&&!Object.hasOwn(h,'anchor'));return {...h as object,anchor:null};})};
+  });
+  return {...p,schemaVersion:SCHEMA,tasks,space:{...p.space as object,understanding:{}}};
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -363,7 +430,7 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : v;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 
