@@ -1,0 +1,29 @@
+{
+  "baseline": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "prior": "RECEIPT_FIX3.json",
+  "status": "fix4 명시 참고 재열기 초기화 후보 동결; 실제 Cloud 검증 전",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273307,
+      "sha256": "774075e819ad2421a56765cbc6dc648d6c983e098bf71d166bb2453e25ee8156",
+      "gitBlob": "82180891d5f9c63818b4bec0f53c1cdc3c1dafbc",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74233,
+      "sha256": "d32e770b0b8208d48b050250512a94b68d4f2342b7841a51e0280d1387a5fefc",
+      "gitBlob": "6654a134054f2ffadb9b282595ba6c029b853dbc",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "delta": "실제 summary 닫힘→열림 클릭에서만 preventDefault/open=true로 열린 상태 동기 확정, 새 pin/fill 후 body.scrollTop=0. 닫힘 및 같은 pin render/수신 restore/수동 입력/카메라 무수정.",
+  "commands": {
+    "type-fix4": 0,
+    "build-fix4": 0,
+    "diff-fix4": 0
+  },
+  "evidenceScope": "총괄이 전달한 신규29 test03 양PC 동일 긴 r2 명시닫기/재열기 body150 유지(expected0). 작성자는 이 raw를 직접 회수하지 않았으며 source의 reading.y=0/실제 body 미초기화를 확인. e5d5 raw 정상클릭 가시성 검사는 CodeAudit 전달 근거.",
+  "scope": "Node24 보조 type/build/diff only; browser/server/CI/units/remote writes NOT_RUN"
+}
