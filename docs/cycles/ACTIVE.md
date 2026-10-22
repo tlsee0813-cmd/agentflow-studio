@@ -4,7 +4,7 @@
 ## 진행 중 — PC 지도와 기록 읽기19
 시작 checkpoint54eb53a07fed415cb0cc730a9616e251f2b78f93. [계약](2026-10-22-workspace-records-19/INPUT.md) · [착수 조사/판단](2026-10-22-workspace-records-19/RESEARCH.md).
 지도 전용 상단을 줄이고, 기존 우측 패널에서 부분·연결·기록을 전환해 기록을 읽는 동안 지도 높이를 유지한다. 의미 모델이나 사례별 시안을 늘리지 않는다.
-Sol High UI와 검사 구현을 나눠 배정했고 Astra High는 출발점·행동 대상·사라진 기록 반례를 검토한다. 기존 PC 주제 Pro 세션에 좁은 후속 조사/비판을 배정했다. 총괄은 Dify 기록 패널을 직접 관측하고 VS Code 공식 원리를 대조했다. 첫 UI 구현의 정적 검토에서 옛 기록 출발점이 새 탐색을 붙잡는 경계와 사라진 행 안내가 스크롤 밖에 숨는 문제를 찾아 보완 중이다. 목적 전체 읽기는 기존 대화상자를 재사용해 지도 높이를 유지하기로 했다. Pro 후속은 회수해 원문 대조 후 수용/제외를 조사 기록에 추가했다. 제품 후보 동결·실제 검사·수용은 아직 완료되지 않았다. 동결 후보는 기존 Cloud에서 작성과 분리해 검증한다.
+Sol High UI와 검사 구현을 나눠 배정했고 Astra High는 출발점·행동 대상·사라진 기록 반례를 검토한다. 기존 PC 주제 Pro 세션에 좁은 후속 조사/비판을 배정했다. 총괄은 Dify 기록 패널을 직접 관측하고 VS Code 공식 원리를 대조했다. 첫 UI 구현의 정적 검토에서 옛 기록 출발점이 새 탐색을 붙잡는 경계와 사라진 행 안내가 스크롤 밖에 숨는 문제를 찾아 보완했다. [정적 발견·회수한 중간 원문](https://github.com/tlsee0813-cmd/agentflow-studio/tree/355be72f83177acec4572fba83b241f5af57936a/docs/transfer/workspace-records-19/static-initial)을 공유했다. 최초500697 전체 파일 미회수 한계는 별도 명시한다. 목적 전체 읽기는 기존 대화상자를 재사용해 지도 높이를 유지하기로 했다. Pro 후속은 회수해 원문 대조 후 수용/제외를 조사 기록에 추가했다. 제품3파일 후보 [8c46dc72](https://github.com/tlsee0813-cmd/agentflow-studio/commit/8c46dc72057237cbc05da837ee75b3807969f9ef)를 동결해 원격 내용 일치를 확인했다. app SHA C9DF96891429CE72B25B02684248828CE0C3D918ED7A6AAE61BF5F4C9BE5DDBB. Astra 최종 정적 검토는 해당 범위 추가 결함 없음이며 실제 브라우저 수용은 아니다. 기존 Cloud에서 작성과 분리한 실제 PC 흐름 검증을 시작했다. 새19 하네스와 구형 화면 전제 보완은 작성 중이며 정확 최종head의 CI/하네스 실행은 별도로 확인한다. 제품 수용·병합은 아직 하지 않았다.
 
 ## 마지막 완료 — 실제 포함 구조와 PC 작업 공간18
 [결과·수용 범위·공유 대표 화면](2026-10-22-mixed-depth-18/RESULT.md) · [PR9](https://github.com/tlsee0813-cmd/agentflow-studio/pull/9).
