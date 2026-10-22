@@ -1,0 +1,200 @@
+export const SCHEMA = 'idea015.project.6' as const;
+/** project.5 had no area understanding and no export anchors: every area reads none, every export anchor=null (no backfill). */
+export const V5_SCHEMA = 'idea015.project.5' as const;
+/** project.4 had no background snapshots: every task and export reads background=null (nothing is backfilled). */
+export const V4_SCHEMA = 'idea015.project.4' as const;
+/** project.3 had no space; it is read as an empty one. */
+export const V3_SCHEMA = 'idea015.project.3' as const;
+export const PREVIOUS_SCHEMA = 'idea015.project.2' as const;
+export const LEGACY_SCHEMA = 'idea015.project.1' as const;
+export const RESULT_SCHEMA = 'agentflow.return.1' as const;
+export const RESULT_BYTES = 131072;
+export const RESULT_TEXT_LIMIT = 11000;
+/** AREA17: return.1 plus one optional, already organised description of the area the returned task belongs to. */
+export const RESULT2_SCHEMA = 'agentflow.return.2' as const;
+export interface ResultFile {
+  schemaVersion: typeof RESULT_SCHEMA | typeof RESULT2_SCHEMA; projectId: string; taskId: string; returnId: string;
+  report: string; evidence: string | null;
+  /** return.2 only (return.1 has no such key). */
+  understanding?: UnderstandingInput | null;
+}
+/** AREA17: the area's current description up to and including this return, as organised OUTSIDE the app (research premise).
+ * summary/changes are given as a description that does not change the user's intent; a change of intent goes in proposal only.
+ * The app checks target, basis and duplicates; it does not check that the wording is right or compatible. No status field. */
+export interface UnderstandingInput {
+  version: 'understanding.1'; areaId: string; basedOn: number;
+  summary: string; changes: string[]; proposal: string | null; origin: string;
+}
+/** AREA17: the user's own plan an area description is made for. Exact values, no hashing: the area idea text, how many times
+ * the project purpose was written, and the current revision of each user decision from this area's or unplaced work. */
+export interface PlanStamp { note: string; brief: number; decisions: string[] }
+/** AREA17: captured when a task is exported with a return file id: which area, which description revision went out, and the
+ * user's plan at that moment. Older exports have none (null); nothing is estimated for them. */
+export interface ExportAnchor { version: 'anchor.1'; areaId: string; understanding: number; stamp: PlanStamp }
+export type HeldReason = 'no-anchor' | 'area-moved' | 'area-mismatch' | 'area-archived' | 'file-basis' | 'superseded' | 'plan-changed';
+/** AREA17: one received or corrected description of an area. External text stays in the return file (single source);
+ * a user correction keeps its own text. revision=null: received but held (never the current description). */
+export interface UnderstandingEntry {
+  by: 'external' | 'user'; at: string; revision: number | null;
+  taskId: string | null; returnId: string | null;
+  text: string | null; corrects: number | null;
+  stamp: PlanStamp | null; held: HeldReason | null;
+}
+export interface AreaUnderstanding { revision: number; entries: UnderstandingEntry[] }
+export const API_SCHEMA = 'idea022.context.7' as const;
+export const TEXT_LIMIT = 12000;
+// One limit for the same compact JSON bytes: autosave, recovery file download and import.
+export const FILE_LIMIT = 8_000_000;
+// Element-count cap for every persisted/validated array, derived from FILE_LIMIT: an element written by
+// this app serialises to well over FILE_LIMIT / ITEM_LIMIT = 80 bytes, so the byte limit is what binds real
+// projects. The cap only bounds hand-crafted files; validation stays linear up to it.
+export const ITEM_LIMIT = 100_000;
+// AI request only. Local handoff, autosave and recovery files are not bound by it.
+export const REQUEST_BYTES = 131072;
+// Only when full context exceeds REQUEST_BYTES: older, never-edited requests may use marked excerpts.
+export const EXCERPT_CHARS = 200;
+export type SourceKind = 'request' | 'report' | 'evidence' | 'test_answer' | 'answer' | 'manual_decision';
+export type Disposition = 'provided' | 'unknown' | 'deferred';
+export interface Source {
+  id: string; kind: SourceKind; text: string; at: string; taskId: string;
+  replyTo: string | null; disposition: Disposition;
+}
+export interface BasisVersion { text: string; status: Basis['status']; sourceId: string; revision: number }
+// No lock flag: nothing enforced one. AI output simply has no write path to bases.
+export interface Basis {
+  id: string; text: string; status: 'requested' | 'answered' | 'confirmed' | 'deferred';
+  sourceId: string; revision: number; history: BasisVersion[];
+}
+export interface Question { kind: 'fact' | 'choice'; text: string; why: string; options: { label: string; consequence: string }[] }
+// This type intentionally has NO source-kind, authority, status, completion or patch fields.
+/** Versioned interpretation, never a write to user bases or an execution receipt. */
+export interface Intent {
+  version: 'intent.1'; relation: 'start'|'continue'|'revise'|'separate'|'uncertain';
+  goal: string; conditions: string[]; retired: string[];
+  basisRefs: {basisId:string;sourceId:string;revision:number}[];
+}
+/** value=null only when a user correction exists without a still-valid AI interpretation. */
+export interface PreviousIntent {
+  taskId:string; value:Intent|null; manualGoal:string|null; manualConditions:string|null;
+}
+export interface CurrentIntent extends PreviousIntent { value:Intent }
+export interface Advice {
+  // Absent in saved pre-AI055 advice. A new provider response must include it.
+  intent?: Intent;
+  understanding: string; scope: string; next: string; checks: string;
+  question: Question | null; relatedBasisIds: string[]; reviewBasisIds: string[];
+  suggestions: { text: string; why: string }[];
+}
+export interface WorkValues { understanding: string; scope: string; next: string; checks: string }
+/** FLOW091-C: copy of the user's plan fixed when an explicit new request was submitted: the project purpose and the
+ * area that request was written for (not the map selection). Background material, never an instruction, basis or
+ * user decision. Later purpose/area edits, moves, re-organisation and exports never change it. Empty = null. */
+export interface Background {
+  version: 'background.1'; revision: number; brief: string | null;
+  area: { id: string; name: string; note: string | null } | null;
+}
+/** Export metadata. The handoff text is derivable from stable IDs/revisions, so it is not copied again.
+ * Exception: background, the copy actually sent (older records: null; not recovered from the current plan). */
+export interface ExportRecord {
+  at: string; method: 'clipboard' | 'download'; revision: number; chars: number; digest: string;
+  work: WorkValues | null; aiExcluded: boolean; legacyText: string | null;
+  returnId: string | null; background: Background | null;
+  /** AREA17: only for a return-file export of a task in an area; null otherwise and for every older export. */
+  anchor: ExportAnchor | null;
+}
+export interface Task {
+  /** Purpose correction, stored apart from this task's own work fields (manual.*). goal=null (with conditions=null)
+   * keeps only the revision that withholds older AI text, with no correction. intent-edit.1 came from the
+   * unreleased AI055 candidate and is accepted on input only; parsing always converts it to intent-edit.2. */
+  intentEdit?: {version:'intent-edit.1';revision:number}|{version:'intent-edit.2';revision:number;goal:string;conditions:string}|{version:'intent-edit.2';revision:number;goal:null;conditions:null};
+  id: string; sourceIds: string[]; parentTaskId: string | null;
+  advice: Advice | null; adviceRevision: number | null; mode: 'mock' | 'deepseek' | null;
+  manual: { understanding: string | null; scope: string | null; next: string | null; checks: string | null };
+  suggestions: { text: string; why: string }[] | null; handoffs: ExportRecord[];
+  resultFile: { returnId: string; rawText: string } | null;
+  /** FLOW091-C: a request's own capture; a return carries the copy of the task (or exact export) it returns to. */
+  background: Background | null;
+  /** FLOW090: the area of a request task. Absent = not placed. Returns follow their parent and never carry it. */
+  areaId?: string;
+}
+/** FLOW090: the user's own plan of the product. Areas and relations are layout/plan data, not work records. */
+export interface Area { id: string; name: string; note: string; archived: boolean; createdAt: string }
+export type RelationKind = 'flow' | 'needs' | 'shares' | 'related';
+export interface Relation { id: string; from: string; to: string; kind: RelationKind; note: string }
+export interface Brief { text: string; at: string; previous: { text: string; at: string }[] }
+/** Where the unsent request goes: null = continue the current work's area; {area:null} = no area; {area:id} = that area.
+ * Part of the draft's meaning, so it is saved with the draft text (unlike the per-tab view). */
+export interface DraftTarget { area: string | null }
+/** FLOW090-B1: where the user put each area on the map (presentation data, versioned). Areas without a stored
+ * position use a fixed default from their place in the list, so adding or archiving never moves anyone else. */
+export interface Point { x: number; y: number }
+export interface Layout { version: 'layout.1'; positions: Record<string, Point> }
+/** understanding (AREA17): derived descriptions per area ID, kept apart from Area.note (the user's words). */
+export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null; layout: Layout; understanding: Record<string, AreaUnderstanding> }
+export interface Ticket { projectId: string; revision: number; requestId: string; taskId: string }
+export interface Project {
+  schemaVersion: typeof SCHEMA; id: string; revision: number; name: string;
+  sources: Source[]; bases: Basis[]; tasks: Task[]; currentTaskId: string | null;
+  draft: string; answerDraft: string; basisDraft: string; basisEdits: Record<string,string>; draftKind: 'request' | 'report' | 'evidence' | 'test_answer';
+  pending: Ticket | null; notice: string | null; space: Space;
+}
+export interface ContextBasis {
+  id: string; text: string; status: Basis['status']; sourceId: string; revision: number;
+  previousVersions: number; partial: boolean;
+}
+/** Read-only references to the supplied project's records; no intent/completion or durable-save claim. */
+export interface PlanFact {
+  basisId: string; sourceId: string; revision: number; status: Basis['status'];
+  versionIndex: number; isCurrent: boolean;
+  kind: 'input-retained' | 'basis-recorded' | 'version-only';
+  previousRevision: number | null;
+  /** Only actual text/status fields. null = comparison unavailable, [] = same values re-recorded. */
+  changedFields: ('text' | 'status')[] | null;
+}
+export interface AppFacts {
+  taskId: string; inputs: { sourceId: string; kind: SourceKind }[]; records: PlanFact[];
+}
+export interface ContextRequest {
+  schemaVersion: typeof API_SCHEMA; ticket: Ticket; projectName: string;
+  sources: Source[]; bases: ContextBasis[]; appFacts: AppFacts; previousIntent: PreviousIntent|null;
+  /** Only when previousIntent is a 'separate' interpretation: the nearest earlier non-separate one on this path. */
+  purposeIntent: CurrentIntent|null;
+  previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean; manualConditionFields: ('scope' | 'checks')[] }) | null;
+  /** FLOW091-C: this task's fixed plan copy, as separate material (not a source, basis or decision). */
+  background: Background | null;
+}
+export interface Envelope { mode: 'mock' | 'deepseek'; ticket: Ticket; advice: Advice }
+export const SOURCE_LABEL: Record<SourceKind, string> = {
+  request: '사용자 요청 원문', report: '가져온 구현 보고 · 앱 미검증',
+  evidence: '사용자가 가져온 관찰·검사 자료 · 앱 미검증', test_answer: '합성 시험답변 · 실제 요구 아님',
+  answer: '사용자 답변', manual_decision: '사용자가 직접 기록·수정한 기준'
+};
+export const BASIS_LABEL: Record<Basis['status'], string> = {
+  requested: '요청 원문 · 해석 미확정', answered: '사용자 답변 원문', confirmed: '사용자 확정', deferred: '사용자 보류'
+};
+/* ---------- GUIDE097: area guidance. A separate, unsaved preview before the user's own request; never project data. ---------- */
+/** guidance.2 (GUIDE098): the reply's proposal gains defaults. guidance.3 (GUIDE099): the request gains currentInstruction.
+ * The version moves each time so a stale client and server refuse each other plainly. Never stored. */
+export const GUIDE_SCHEMA = 'guidance.3' as const;
+export interface GuideTicket { projectId: string; revision: number; requestId: string; areaId: string }
+/** The user's reply to the one guidance question, sent back with that question. Not a basis until the user sends a request. */
+export interface GuideAnswer { question: Question; text: string; disposition: Disposition }
+/** Read-only material the preview may use. All user-written: purpose, this area, user decisions and this area's requests. */
+export interface GuideRequest {
+  schemaVersion: typeof GUIDE_SCHEMA; ticket: GuideTicket; projectName: string;
+  brief: string | null; area: { id: string; name: string; note: string | null };
+  /** Current values of confirmed/deferred/answered bases (user decisions), never shortened. */
+  decisions: { id: string; text: string; status: Basis['status'] }[];
+  /** Newest first: this area's own requests and the user's manual scope/checks for them. */
+  areaWork: { taskId: string; request: string; scope: string | null; checks: string | null }[];
+  answer: GuideAnswer | null;
+  /** GUIDE099: what the user typed as the work to hand over or the condition to change now, verbatim; null when left empty.
+   * Only ever the user's own input: never the area idea, an earlier request, an answer or an AI text. */
+  currentInstruction: string | null;
+}
+/** A reviewable draft of the user's next request, not an instruction. open = points the user still has to decide (the draft
+ * leaves them undecided). defaults = low-risk, reversible details the AI filled in as editable suggestions, never user decisions. */
+export interface Proposal { goal: string; scope: string; checks: string; open: string[]; defaults: string[] }
+/** Exactly one is non-null. After an answer the question is always null (one question at most). */
+export interface GuideReply { question: Question | null; proposal: Proposal | null }
+export interface GuideEnvelope { mode: 'mock' | 'deepseek'; ticket: GuideTicket; reply: GuideReply }

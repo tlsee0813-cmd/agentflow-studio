@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "caseId": "session14-product13-bounded-handoff-v1",
+  "title": "전체 공간을 지도부터 읽기 — 제품13 변경 표본",
+  "scope": "AgentFlow Studio의 전체 공간 화면 일부. 실제 외부 AI 배정·작성자 반환·고정 결과물에 대해 총괄과 보조 AI가 자료를 대응해 만든 연구 입력이며, 프로그램 전체 지도나 자동 추출 결과가 아니다.",
+  "nature": "총괄이 실제 전달했다고 확인한 구현 계약, 작성자 보고와 고정 diff/소스, 별도의 독립 검증 보고. 도구 전사 전체와 사람 원발화는 이 표본에 없다. 자기 프로젝트 표본이다.",
+  "basisTime": "2026-10-16. 코드 비교 9613208→9aeb4599; 독립 보고 709dab. 이 입력은 해당 후보의 수용·병합·공개 완료를 선언하지 않는다.",
+  "groupingNote": "이름과 1+4 분할, parent는 계약과 화면 코드를 읽고 만든 AI의 보기 제안이다. 제품 Area.parent, 실제 모듈 소속, 실행 단계, 작업·세션 계층을 확정하지 않는다. 네 자식은 이 화면의 사용자 대면 역할이며 전체 제품 구성의 전부가 아니다.",
+  "nodes": [
+    {
+      "id": "SPACE",
+      "parent": null,
+      "name": "전체 공간 읽기",
+      "role": "프로그램 목적과 영역 구상을 읽고, 필요한 부분이나 기록을 명시적으로 고르는 화면이다.",
+      "short": "구상과 지도를 먼저 읽기",
+      "evidence": ["EV_CONTRACT", "EV_GROUPING", "EV_CODE"]
+    },
+    {
+      "id": "PURPOSE",
+      "parent": "SPACE",
+      "name": "프로그램 목적 읽기",
+      "role": "목적의 짧은 표시를 보고 필요하면 전문과 편집을 연다.",
+      "short": "한 줄 목적 · 전문 접근",
+      "evidence": ["EV_GROUPING", "EV_CODE", "EV_DIFF"],
+      "change": {
+        "label": "고정 코드 변경 · 수용 판정 아님",
+        "summary": "중복 전체공간 제목은 시각적으로 숨기고 목적과 전문·편집 펼침을 같은 줄에 배치했다.",
+        "before": "전체공간 제목·목적 줄 뒤에 목적 전문·편집 펼침이 붙었다.",
+        "after": "제목은 초점·접근성용으로 남고, 목적과 펼침이 같은 줄에 놓인다.",
+        "basis": "기존 9613208과 후보 9aeb4599의 diff. 목적 내용의 자동 요약이나 사용자 이해 향상을 뜻하지 않는다.",
+        "evidence": ["EV_DIFF", "EV_CODE"]
+      }
+    },
+    {
+      "id": "MAP",
+      "parent": "SPACE",
+      "name": "영역 지도와 선택상세",
+      "role": "영역 구상과 관계를 보고 선택한 영역의 구상·관련 요청을 옆에서 읽는다.",
+      "short": "지도와 옆 상세 · 선택 카드 가림 한계",
+      "evidence": ["EV_GROUPING", "EV_CODE", "EV_DIFF", "EV_AUTHOR", "EV_INDEPENDENT"],
+      "change": {
+        "label": "고정 코드 변경 · 독립 한계 남음",
+        "summary": "상단 배치와 PC 지도 높이 규칙을 조정하고 기존 옆 상세·배율·맞춤 동작을 유지했다.",
+        "before": "목적·기록 목록·영역 추가 입력이 지도보다 앞에서 공간을 차지했다.",
+        "after": "기록·추가는 펼침으로 줄이고 PC 전체공간의 지도 높이 상한을 조정했다. 선택상세를 열면 오른쪽 선택 카드가 가려지는 한계는 남는다.",
+        "basis": "9613208→9aeb4599 고정 diff와 별도 709dab 독립 보고. 지도 최소 가시 기준 통과를 모든 조작 접근·사람 이해 통과로 확대하지 않는다.",
+        "evidence": ["EV_DIFF", "EV_INDEPENDENT"]
+      }
+    },
+    {
+      "id": "RECORDS",
+      "parent": "SPACE",
+      "name": "질문·보고 기록 읽기",
+      "role": "앱 기록의 답 대기 질문과 후속 작업문 없는 보고를 구별하고, 펼쳐 해당 대상을 읽는다.",
+      "short": "기록 종류와 수 · 개발 미완료 수 아님",
+      "evidence": ["EV_GROUPING", "EV_CODE", "EV_DIFF", "EV_INDEPENDENT"],
+      "change": {
+        "label": "고정 코드 변경 · 기존 집계 재사용",
+        "summary": "기존 ‘확인할 일’ 목록을 실제 종류·건수가 보이는 ‘이어 볼 기록’ 펼침으로 바꿨다.",
+        "before": "확인할 일 제목과 목록이 지도 앞에 표시됐다.",
+        "after": "답 기다림·후속 작업문 없는 보고의 실제 건수를 펼침 줄에 표시하고, 열면 기존 대상·상태·보기 버튼을 제공한다.",
+        "basis": "checkSection/checkItems의 고정 diff. 작업이 없는 경우와 집계 0을 프로그램 완료나 미결 없음으로 바꾸지 않는다.",
+        "evidence": ["EV_DIFF", "EV_CODE"]
+      }
+    },
+    {
+      "id": "ADD",
+      "parent": "SPACE",
+      "name": "영역 추가",
+      "role": "사용자가 새 영역의 이름과 구상을 입력하고 명시적으로 추가한다.",
+      "short": "명시 입력·추가 · 자동 구성 추출 아님",
+      "evidence": ["EV_GROUPING", "EV_CODE", "EV_DIFF", "EV_ADD_LINK", "EV_INDEPENDENT"],
+      "change": {
+        "label": "고정 코드 변경 · 입력 기능 유지",
+        "summary": "영역 추가 입력을 펼침으로 옮기되 영역이 없거나 입력 중인 값이 있으면 열린 상태로 시작한다.",
+        "before": "이름·구상 입력과 추가 버튼을 지도 도구줄에 바로 표시했다.",
+        "after": "‘영역 추가’를 열어 같은 입력을 사용한다. 입력 중 값이나 빈 프로젝트의 접근 경로는 남긴다.",
+        "basis": "renderMap의 고정 diff. 임의 세션에서 영역을 자동으로 생성하는 기능이 아니다.",
+        "evidence": ["EV_DIFF", "EV_CODE"]
+      }
+    }
+  ],
+  "relations": [
+    {
+      "id": "REL_ADD_MAP",
+      "from": "ADD",
+      "to": "MAP",
+      "kind": "추가된 영역의 표시 연결",
+      "short": "명시 추가 → 지도에 표시",
+      "condition": "이름이 비어 있지 않고 사용자의 제출로 addArea가 정상 처리되면, 새 영역이 지도에 렌더링되고 선택된다. 기존 화면 중심을 바탕으로 배치하며 화면 밖이면 보기 위치를 조정한다. 이는 기존 UI 연결이며 제품13이 새로 만든 관계, 자동 세션 해석, 개발 실행 순서가 아니다. 실패 경로나 모든 배치의 가독성을 보장하지 않는다.",
+      "evidence": ["EV_ADD_LINK", "EV_INDEPENDENT"]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "EV_CONTRACT",
+      "type": "총괄 AI 구현 계약 · 실제 배정의 대응 자료",
+      "source": {
+        "label": "제품13 구현·검증 계약",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/dbd034e05e9679f588a7170eed230299ea216dd8/docs/cycles/2026-10-16-pc-map-space-13/IMPLEMENTATION.md",
+        "pin": "dbd034e05e9679f588a7170eed230299ea216dd8"
+      },
+      "summary": "목적·영역 구상은 기본에 남기고 질문/보고와 영역 추가는 명시 펼침으로 옮기는 좁은 PC 변경을 배정한다.",
+      "quote": null,
+      "limits": "동일 요구가 브라우저에 실제 전달됐다는 것은 총괄 확인이다. 이 분석은 그 대화 원문을 재열람하지 않았고 사람 원발화나 전체 도구 전사를 확보하지 않았다. 계약은 구현·완료 증거가 아니다."
+    },
+    {
+      "id": "EV_GROUPING",
+      "type": "AI 해석 제안 · 이름과 보기 묶음의 근거",
+      "source": {
+        "label": "계약의 화면과 행동 항목",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/dbd034e05e9679f588a7170eed230299ea216dd8/docs/cycles/2026-10-16-pc-map-space-13/IMPLEMENTATION.md#L21",
+        "pin": "dbd034e05e9679f588a7170eed230299ea216dd8"
+      },
+      "summary": "계약의 사용자 대면 역할을 ‘전체 공간 읽기’ 아래 네 부분으로 묶어 비교할 수 있다는 분석자의 제안이다. 실제 구현 위치는 EV_CODE와 대조했다.",
+      "quote": null,
+      "limits": "이 1+4 이름·parent 구조 자체가 원문에 확정된 제품 모델은 아니다. 명칭/ID는 이 연구 입력용이며 제품 Area 소속, 실제 모듈, 작업·세션 부모, 유일한 정답 분할을 주장하지 않는다."
+    },
+    {
+      "id": "EV_CODE",
+      "type": "고정 후보 소스 · 정적 독해",
+      "source": {
+        "label": "후보 app.ts의 지도·상세·기록·목적 렌더링",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/9aeb4599aa0060e2d43143c4f1150884d7bcc7b3/app/continuity/src/client/app.ts#L1053",
+        "pin": "9aeb4599aa0060e2d43143c4f1150884d7bcc7b3"
+      },
+      "summary": "renderMap, areaPanel, checkSection, renderOverview에 각 사용자 대면 동작이 실제 코드로 존재한다. 이름과 보기 분할은 이 함수·파일을 그대로 노드화한 것이 아니다.",
+      "quote": null,
+      "limits": "소스 존재·구조를 확인한 것이며 이 분석이 제품을 실행한 것은 아니다. 자동 원문 해석, 병합·배포 완료, 사람 사용성을 증명하지 않는다."
+    },
+    {
+      "id": "EV_DIFF",
+      "type": "작성자 반환의 고정 6파일 diff · 정적 대조",
+      "source": {
+        "label": "9613208 기준 제품13 변경 diff",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/cc5a54ae067217c3abd1c8ef81b5b3034412e63b/docs/transfer/pc-map-space-13/author-v0/base-9613208-to-v0.diff",
+        "pin": "cc5a54ae067217c3abd1c8ef81b5b3034412e63b"
+      },
+      "summary": "목적 줄·기록 펼침·영역 추가 펼침·PC 높이 규칙의 전후 코드와 검사/CI 변경이 들어 있다. 사용자 대면 표현의 차이만 node.change로 옮겼다.",
+      "quote": null,
+      "limits": "6개 소스 파일은 여섯 기능이 아니다. 검사기/CI를 프로그램 기능 노드로 만들지 않았다. 고정 diff는 전체 편집 도구 전사나 실제 효과의 독립 관측이 아니다."
+    },
+    {
+      "id": "EV_AUTHOR",
+      "type": "외부 작성자 반환 · 실행 및 한계 주장",
+      "source": {
+        "label": "제품13 작성자 v0 보고",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/cc5a54ae067217c3abd1c8ef81b5b3034412e63b/docs/transfer/pc-map-space-13/author-v0/REPORT.md",
+        "pin": "cc5a54ae067217c3abd1c8ef81b5b3034412e63b"
+      },
+      "summary": "작성자는 지도 가시 공간 증가와 검사 결과를 보고하고, 옆 상세를 열면 오른쪽 선택 카드가 가려지는 기존 한계와 폭 예약안 철회를 밝혔다.",
+      "quote": null,
+      "limits": "작성자 보고이며 독립 검증과 합산하지 않는다. 보고된 통과를 모든 조건 완료나 사람 이해 향상으로 바꾸지 않는다."
+    },
+    {
+      "id": "EV_INDEPENDENT",
+      "type": "별도 독립 검증 보고 · 관측 범위 분리",
+      "source": {
+        "label": "제품13 독립 후보 관측",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/709dab4d730c87b44e1a08a1cddd0cb9832b807a/docs/transfer/pc-map-space-13/independent-v0/REPORT.md",
+        "pin": "709dab4d730c87b44e1a08a1cddd0cb9832b807a"
+      },
+      "summary": "보고는 초기 지도 최소 가시 기준 통과와 별개로 선택 카드 strict 조건 실패를 남긴다. 정상 안내가 있는 1280에서는 확대·맞춤이 첫 화면 아래에 있었다. 기록 종류/대상, 영역 추가, 읽기·편집·복귀는 각각 관측했다.",
+      "quote": null,
+      "limits": "이 입력 작성자는 독립 REPORT를 읽었으며 여기서 원시 검사 전체를 재감사하거나 실행하지 않았다. 저장 장애 주입·실제125% 확대는 미실행이고, 사람 이해·큰 지도·실제 AI 성공은 입증되지 않았다. 정적 CSS1024는 실제 확대와 다르다."
+    },
+    {
+      "id": "EV_ADD_LINK",
+      "type": "고정 코드의 명시 동작 연결 · 기존 관계",
+      "source": {
+        "label": "영역 추가 제출 후 지도 표시 경로",
+        "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/9aeb4599aa0060e2d43143c4f1150884d7bcc7b3/app/continuity/src/client/app.ts#L1103",
+        "pin": "9aeb4599aa0060e2d43143c4f1150884d7bcc7b3"
+      },
+      "summary": "submit 처리에서 빈 이름을 제외하고 addArea를 수행하며 새 영역 선택·화면 재표시로 연결한다. 이 구간은 기준 제품에도 있던 동작이다.",
+      "quote": null,
+      "limits": "관계 이름은 코드 연결을 읽기 위한 해석이다. 자동 작업 실행이나 제품13에서 새로 생긴 인과선이 아니며, 전체 기능 영향관계도 아니다."
+    }
+  ],
+  "initialView": {
+    "expanded": ["SPACE"]
+  }
+}

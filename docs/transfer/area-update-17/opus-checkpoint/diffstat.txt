@@ -1,0 +1,4 @@
+ app/continuity/src/shared/domain.ts     | 140 ++++++++++++++++++++++++++++++--
+ app/continuity/src/shared/types.ts      |  38 ++++++++-
+ app/continuity/src/shared/validation.ts |  74 +++++++++++++++--
+ 3 files changed, 236 insertions(+), 16 deletions(-)

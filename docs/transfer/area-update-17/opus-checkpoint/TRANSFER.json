@@ -1,0 +1,124 @@
+{
+  "status": "INCOMPLETE_OPUS_CHECKPOINT_NOT_PRODUCT_ACCEPTANCE",
+  "sourceSession": "https://claude.ai/chat/eca6a4f3-90f6-48cc-b300-c8754fc8ed46",
+  "description": "Original README.md and all 12 extracted files are preserved byte-for-byte. The original ZIP is retained. TRANSFER.json describes transfer verification, not product acceptance.",
+  "authorBase": "77aed39a4e2e32be40c370772ab4e7d048a02240",
+  "implementationWorkspaceBase": "87a7a0329a2663dff2fcc537baa4484722e6f52a",
+  "priorProductSource": "a0f0ae786c580a8919cede07db48d4397b58b114",
+  "appTree": "50452de0b17ca240ddc9cce758fc3d64bd2a90b6",
+  "baselineVerification": {
+    "scope": "Entire app/ source tree",
+    "files": 178,
+    "bytes": 1921353,
+    "sameAtAllThreeCommits": true,
+    "localSourceBytesAndGitBlob": "178/178 exact before applying WIP"
+  },
+  "applicationVerification": {
+    "diff": "area17-wip.diff",
+    "checkExit": 0,
+    "applyExit": 0,
+    "offsetOrFuzz": false,
+    "packagedChangedFileEquality": "3/3 exact at transfer",
+    "changed": [
+      "app/continuity/src/shared/domain.ts",
+      "app/continuity/src/shared/types.ts",
+      "app/continuity/src/shared/validation.ts"
+    ]
+  },
+  "authorClaims": {
+    "provenance": "Original README.md and sourceSession",
+    "continuityCheck": "exit 0; supplied logs/continuity-check.log also ends exit=0",
+    "unitTests": "198 passed, 12 failed out of 210; raw unit failure log was not supplied"
+  },
+  "limitations": [
+    "Incomplete shared-layer implementation; client UI and new tests are not implemented",
+    "No author manifest supplied; this transfer computes a full SHA256/Git blob inventory without claiming author-manifest verification",
+    "Raw unit failure log and representative PNG were not supplied; no reconstructed failure log",
+    "No independent build, source test or browser execution was performed for this transfer",
+    "Known cross-tab live-update counterexamples remain unresolved",
+    "This delivery does not change or accept the product"
+  ],
+  "inventoryScope": "The original 12 extracted files plus original ZIP; TRANSFER.json excludes its own digest",
+  "originalExtractedFiles": 12,
+  "originalExtractedBytes": 203260,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 7624,
+      "sha256": "0de72777f65392fa9bcb80f370ffc2b3229248ebcecb21a1c2d0560ea0253f7c",
+      "gitBlobSha1": "67ee4efe930e3fbd799dc0d0e2bed5f0f99ffc03"
+    },
+    {
+      "path": "area17-wip.diff",
+      "bytes": 36962,
+      "sha256": "0084d342db1a3422902c185622a41e32b4738e551f83758af1f4593c8603e1a8",
+      "gitBlobSha1": "74c7d181db17d63be3ba8ebbc85b979c74158d02"
+    },
+    {
+      "path": "base-sha.txt",
+      "bytes": 68,
+      "sha256": "5ab144ca17c3d68a85c93a21e0af91e04df9baaeed04dfd404f32cdc9590e404",
+      "gitBlobSha1": "b6e6d95392943d3537598359452540d7461431cb"
+    },
+    {
+      "path": "changed/app/continuity/src/shared/domain.ts",
+      "bytes": 64080,
+      "sha256": "9f8ecbed63041c37f491104cdc6ba189bf19b6ad3d19c0607455c24b4eb9fc5d",
+      "gitBlobSha1": "0d2b54184a5aca814dee0464ba47d6c77f43115e"
+    },
+    {
+      "path": "changed/app/continuity/src/shared/types.ts",
+      "bytes": 14693,
+      "sha256": "20dac34978583f4e25278f737dfd1edc5d51b5e77643a1c4bf887905272082ce",
+      "gitBlobSha1": "5efe1f447f2ea0aaad13858b4198e7aa935529f0"
+    },
+    {
+      "path": "changed/app/continuity/src/shared/validation.ts",
+      "bytes": 37866,
+      "sha256": "112abf9ed32c23bd7ad6142dc6118f1fc26942479b1e677361de88c1e3cd60ce",
+      "gitBlobSha1": "39367e70d80d5edbc1bf288d1f81fb57cd4e58d2"
+    },
+    {
+      "path": "diffstat.txt",
+      "bytes": 255,
+      "sha256": "5b5ab1aac6a129ff7386010b04ee3f460182ec5a5594af696c73c2b146774d7f",
+      "gitBlobSha1": "aa9afecdeed2aec76154646817cc66d1194e16dd"
+    },
+    {
+      "path": "git-status.txt",
+      "bytes": 120,
+      "sha256": "924cdaf4fc017ac7a074e25294b581c33c2031733250f0125ef9f657e313ce33",
+      "gitBlobSha1": "d7c137fc46b7d911539cc8ff01a027d18d1c47c7"
+    },
+    {
+      "path": "logs/continuity-check.log",
+      "bytes": 107,
+      "sha256": "3f52b5383bcb4cfe62888cec9c65da01c11e7f08d5d8eb14ca35cf65dd68b9b0",
+      "gitBlobSha1": "3562e298e63564ecb6576390d4cb95cbca847201"
+    },
+    {
+      "path": "samples/p13-fix1.json",
+      "bytes": 15215,
+      "sha256": "4659cf27226b32d0c69da653365f214d65cb05d8396e336e5ca87274a75b5a3b",
+      "gitBlobSha1": "5751efc48cdb5beda5937e216c5e0c5d57f77256"
+    },
+    {
+      "path": "samples/p13-v0.json",
+      "bytes": 12776,
+      "sha256": "af96a67ca249d85df037da3632810a352f1f8122d46654db03b1b8c9f79e56a2",
+      "gitBlobSha1": "16ffd915453f181965086a163481757e666bd151"
+    },
+    {
+      "path": "samples/powertoys.json",
+      "bytes": 13494,
+      "sha256": "c583dad774d756b959f84a9e62081b81eb87924750730162026c205240346aff",
+      "gitBlobSha1": "e01946b53fc41de2c80b5b9a539ee46918fab745"
+    },
+    {
+      "path": "area-update17-checkpoint.zip",
+      "bytes": 72412,
+      "sha256": "b0cff75e4a74970f53bcfa9369677b364f9b6ed7e57e663ed3094546746def0b",
+      "gitBlobSha1": "8905ba51ec8f4b3bea45d23d1bd2fe23a746a8f6"
+    }
+  ]
+}
