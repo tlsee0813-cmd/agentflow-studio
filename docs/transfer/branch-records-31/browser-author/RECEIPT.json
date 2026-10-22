@@ -1,0 +1,64 @@
+{
+  "role": "검사 작성자; 독립 수용 판정 아님",
+  "baseline": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "candidateProduct": "a4b7265a63691c584cd76b5fe17b985f12879b47",
+  "contract": "a177461049bf6a40a016cf3d915f54be46833a6d",
+  "files": [
+    {
+      "path": "app\\continuity\\tests\\branch-records31_browser.py",
+      "bytes": 19477,
+      "sha256": "9ca4cce0f1c6c7c8a0c723c576277c216a59c3c77b3396c083fd47c36452f9ab",
+      "gitBlob": "73d2baa8abca23e11aa98103c1dd24117da1364f"
+    },
+    {
+      "path": ".github\\workflows\\verify.yml",
+      "bytes": 12367,
+      "sha256": "f2108f3960099b25dd3e82291dca1e20f1613e85083b2368a24b0dcea9d04ef3",
+      "gitBlob": "67e430918b449dfe6576093c35c7d8036f36ab14"
+    }
+  ],
+  "sourceReadBindings": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha256": "0d516dbda6bdc7569acad78bc4a55e47035cb4b8b99a2ffbdae3a1b54f28955d",
+      "bytes": 276349
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+      "bytes": 74513
+    }
+  ],
+  "ast": 0,
+  "embeddedJsSyntax": 8,
+  "pureFixtureAndLateReturn": 0,
+  "methods": [
+    "test_01_exact_subtree_old_memo_and_keyboard",
+    "test_02_exact_report_return_and_input_escape",
+    "test_03_old_work_and_records_origin_yield_to_new_parent",
+    "test_04_caller_lifetime_modes_project_and_offscreen"
+  ],
+  "plannedPcCases": 8,
+  "workflow": "기존 바이트 그대로 + 7줄 단계 1개. timeout 25분 유지.",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "node": "v24.19.0",
+  "notRun": [
+    "브라우저/서버/실제 파일 가져오기",
+    "지원 Node22 실행",
+    "제품 타입/단위/빌드 재실행",
+    "실제 신호 소멸 후 같은 호출자 fallback"
+  ],
+  "limits": [
+    "합성 자료이며 사람 사용성/실제 AI/전체 개발 미결 판정이 아니다",
+    "신호 진입 전에 명시적 접기·맞춤으로 자료를 준비한다; 신호·복귀 직후에는 보정하지 않는다",
+    "제목 fallback은 sr-only의 실제 초점을 검사하고 가시 텍스트라고 부르지 않는다",
+    "서로 다른 프로젝트 전환은 신호 소멸 재현으로 세지 않는다"
+  ],
+  "independentReview": {
+    "reviewer": "resume_code_audit_sol",
+    "result": "D4E0의 프로젝트 재진입 뒤 nav-space/info가 caller 누출을 먼저 지울 수 있음을 지적. 해당 보정 제거와 즉시 owner/mode 확인 후 닫기인 9CA4 delta를 직접 대조하여 static clean. 실제 UI 미실행.",
+    "sourceSha256": "9ca4cce0f1c6c7c8a0c723c576277c216a59c3c77b3396c083fd47c36452f9ab"
+  },
+  "productWritten": false,
+  "remoteWritten": false
+}
