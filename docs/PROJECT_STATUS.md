@@ -1,8 +1,10 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-23 지도 복귀 높이30 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-23 하위 기록 진입31 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint는 깊은 작업에서 돌아올 때 지도 가용 높이를 복구하는30을 포함한다.** [30 결과·범위](cycles/2026-10-23-viewport-return-30/RESULT.md). 사용자가 맞춘 카메라·부분 접힘은 유지한다. 작은 지도 글자의 가독성까지 해결한 것은 아니다.
+**제품 기준 checkpoint는 접힌 부분의 신호에서 정확한 하위 기록으로 들어가고 원래 호출 지점으로 돌아오는31을 포함한다.** [31 결과·범위](cycles/2026-10-23-branch-records-31/RESULT.md). 신호를 열 때 바깥 페이지가 이동하던 반례를 보완했고, 현재 작업·미전송 입력을 보존한다. 질문 집계는 답변 기록도 포함하므로 미답/새 소식 수로 읽지 않는다.
+
+**앞선30은 깊은 작업에서 돌아올 때 지도 가용 높이를 복구한다.** [30 결과·범위](cycles/2026-10-23-viewport-return-30/RESULT.md). 사용자가 맞춘 카메라·부분 접힘은 유지한다. 작은 지도 글자의 가독성까지 해결한 것은 아니다.
 
 **이전29에서는 작업문을 고치면서 소유 부분의 구상·설명을 선택적으로 곁에 읽는 흐름을 반영했다.** [29 결과·검증 한계](cycles/2026-10-23-work-reference-29/RESULT.md). 명시 재열기는 최신 적용 설명의 처음으로, 새 보고 수신은 기존 읽기 위치 유지로 구분한다. 수동 값 자동 적용이나 실행 권한 부여는 없다.
 
@@ -24,7 +26,7 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합425c3df4](https://github.com/tlsee0813-cmd/agentflow-studio/commit/425c3df4ec5bc39805f7e3da069aaa952ae23437), 최종후보 [e5a5bf40](https://github.com/tlsee0813-cmd/agentflow-studio/commit/e5a5bf40d544cad62b4644ab13cc2958671b0869) | 30 지도 복귀 높이. [30 결과·한계](cycles/2026-10-23-viewport-return-30/RESULT.md) |
+| 제품 기준 checkpoint | [병합75ed2ed7](https://github.com/tlsee0813-cmd/agentflow-studio/commit/75ed2ed7d7aae5c8267810e544fbbfa807ed56bd), 최종후보 [72940a04](https://github.com/tlsee0813-cmd/agentflow-studio/commit/72940a043d7a7fdc225a9582ce48831fa0418cc0) | 31 하위 기록 진입과 위치 보존. [31 결과·한계](cycles/2026-10-23-branch-records-31/RESULT.md) |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
