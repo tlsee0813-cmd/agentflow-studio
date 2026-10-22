@@ -98,3 +98,9 @@ exact CI39792449163은 Ubuntu·Windows 모두 성공했다. [독립 Cloud 보고
 
 ## 공유·운영
 GitHub가 공유 원본이다. 결정·결과·대표 화면은 checkpoint, 원본 전달/실행증거는 delivery의 새 접두사에 보존한다. 검증 강도는 저장·대상·출처·복귀 위험에 맞춘다. main896dcf3848fec70357d0f9bd4fd6c09cab70db37·gh-pages63f5540d062861439f0932cd7311c6c5510e227c 유지. GUIDE107 실제AI HOLD. 제품/공개 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md).
+
+
+### 2026-10-23 최신 진행 정정
+20 df726 CI의 Ubuntu는 성공했고 Windows는 RECEIVED20 11실패·2오류로 exit1이다. 도구의 in_progress 상태와 종료 로그가 엇갈려 원본을 모두 보존했다. 실제 원인은 검사에서 JSON을 LF 문자열로 만든 뒤 Windows 파일 쓰기가 CRLF로 바뀌는데도 쓰기 전 문자열을 기대값으로 쓴 것이다. 제품이 저장 원문을 바꾼 결함으로 판정하지 않는다. 수정69b478ba6dc84f803290eb857e5c8b3d7a659ea4는 실제 읽은 파일 바이트를 기대값으로 쓰고 textarea API 표시값만 LF로 비교한다. 원문·다운로드 바이트·정확보고 연결 검사는 유지한다. job 제한은 관측된 전체 실행시간에 맞춰15→25분이다. 새 CI39810777281 양OS 진행 중이며20 수용은 보류한다.
+
+21 정상 빈 프로젝트 선관측은 [b0c2c933 원본](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b0c2c9331578c2ec7a5904db7c90b51f976518ab/docs/transfer/blank-project-21/observation-v0/REPORT.md)에 공유했다. 완주는 확인했고 파일 반환 인계 입구가 주복사와 멀리 떨어진 공백을 선택했다. 21 A [922848c0](https://github.com/tlsee0813-cmd/agentflow-studio/commit/922848c0957992f84b8a0e2696a86b98d5f51c0d)는 기존 접힌 선택묶음을 주전달행 뒤로 이동한 한 줄 변경이다. 타입/빌드·독립 정적 검토 완료, Cloud PC 전후비교와 회귀 준비 중. 20의 최종CI와21후보검증을 병렬로 진행하며21을 먼저 수용하지 않는다.
