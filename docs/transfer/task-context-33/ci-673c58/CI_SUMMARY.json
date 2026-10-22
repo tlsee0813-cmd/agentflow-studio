@@ -1,0 +1,331 @@
+{
+  "head": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+  "runId": 39868697925,
+  "account": "omitted throughout",
+  "acceptance": "HOLD; original candidate CI evidence only, not final acceptance",
+  "platforms": {
+    "ubuntu": {
+      "job": {
+        "id": 120137358082,
+        "head_sha": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      "logCharacters": 120000,
+      "logTruncated": true,
+      "groups": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 13.774,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 23.291,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 9.142,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 3.779,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 3.484,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 4.921,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 6.628,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 3.861,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 18.693,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 19.798,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 9.139,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 12.097,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 5.59,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 17,
+          "seconds": 32.829,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 29.386,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 21.941,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 35.287,
+          "status": "FAILED"
+        }
+      ],
+      "totalExecuted": 188,
+      "individuallyObservedPC12": [
+        "2026-10-22T23:03:51.7194812Z test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok",
+        "2026-10-22T23:04:00.8777402Z test_11_target_jumps_and_selected_file_review (__main__.Pc12.test_11_target_jumps_and_selected_file_review) ... ok",
+        "2026-10-22T23:04:10.3697617Z test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok",
+        "2026-10-22T23:04:19.1975679Z test_11_target_jumps_and_selected_file_review (__main__.Pc12Wide.test_11_target_jumps_and_selected_file_review) ... ok"
+      ],
+      "unitAndRuntimeVisible": [
+        "2026-10-22T23:01:10.9393596Z # tests 275",
+        "2026-10-22T23:01:10.9393687Z # pass 275",
+        "2026-10-22T23:01:10.9393730Z # fail 0",
+        "2026-10-22T23:01:13.1868359Z   Downloading playwright-1.57.0-py3-none-manylinux1_x86_64.whl.metadata (3.5 kB)",
+        "2026-10-22T23:01:13.3791508Z Downloading playwright-1.57.0-py3-none-manylinux1_x86_64.whl (46.0 MB)",
+        "2026-10-22T23:01:14.4856253Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "2026-10-22T23:01:25.8066799Z Downloading Chromium 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-linux.zip",
+        "2026-10-22T23:01:28.1996533Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200",
+        "2026-10-22T23:01:28.1998477Z Downloading FFMPEG playwright build v1011 from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip",
+        "2026-10-22T23:01:28.6384091Z FFMPEG playwright build v1011 downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011",
+        "2026-10-22T23:01:28.6386685Z Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux.zip",
+        "2026-10-22T23:01:30.4677394Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1200"
+      ],
+      "failures": [
+        "2026-10-22T23:05:46.2309072Z FAIL: test_01_f10_current_idea_beside_the_picked_report_and_back (__main__.Report16.test_01_f10_current_idea_beside_the_picked_report_and_back)",
+        "2026-10-22T23:05:46.2315033Z AssertionError: False is not true : F10: action fully inside the first screen",
+        "2026-10-22T23:05:46.2316339Z FAILED (failures=1)"
+      ],
+      "finalStatus": "failure",
+      "notRunAfterReport16": [
+        "understanding17_browser.py",
+        "work-description29_browser.py",
+        "branch-records31_browser.py",
+        "hierarchy18_browser.py",
+        "workspace19_browser.py",
+        "received20_browser.py",
+        "blank21_browser.py",
+        "viewport30_browser.py",
+        "static_browser.py"
+      ],
+      "basis": "Report16 exit1 gates later workflow steps; no later commands or result groups in final job log",
+      "browserPassed": 187,
+      "browserFailed": 1
+    },
+    "windows": {
+      "job": {
+        "id": 120137357878,
+        "head_sha": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      "logCharacters": 120000,
+      "logTruncated": true,
+      "groups": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 20.33,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 51.544,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 15.836,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 6.02,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 5.616,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 8.652,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 10.45,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 5.935,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 35.982,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 28.607,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 13.139,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 16.984,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 9.304,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 17,
+          "seconds": 44.198,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 40.095,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 30.742,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 45.866,
+          "status": "FAILED"
+        }
+      ],
+      "totalExecuted": 188,
+      "individuallyObservedPC12": [
+        "2026-10-22T23:07:39.4807062Z test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok",
+        "2026-10-22T23:07:51.1789752Z test_11_target_jumps_and_selected_file_review (__main__.Pc12.test_11_target_jumps_and_selected_file_review) ... ok",
+        "2026-10-22T23:08:05.2881812Z test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok",
+        "2026-10-22T23:08:16.5136952Z test_11_target_jumps_and_selected_file_review (__main__.Pc12Wide.test_11_target_jumps_and_selected_file_review) ... ok"
+      ],
+      "unitAndRuntimeVisible": [
+        "2026-10-22T23:02:33.8417347Z # tests 275",
+        "2026-10-22T23:02:33.8417555Z # pass 275",
+        "2026-10-22T23:02:33.8417709Z # fail 0",
+        "2026-10-22T23:02:39.9305857Z   Downloading playwright-1.57.0-py3-none-win_amd64.whl.metadata (3.5 kB)",
+        "2026-10-22T23:02:40.4716133Z Downloading playwright-1.57.0-py3-none-win_amd64.whl (36.6 MB)",
+        "2026-10-22T23:02:42.9502247Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "2026-10-22T23:03:26.7084042Z Downloading Chromium 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-win64.zip",
+        "2026-10-22T23:03:33.5409487Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium-1200",
+        "2026-10-22T23:03:33.5417674Z Downloading FFMPEG playwright build v1011 from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-win64.zip",
+        "2026-10-22T23:03:34.0629901Z FFMPEG playwright build v1011 downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\ffmpeg-1011",
+        "2026-10-22T23:03:34.0637502Z Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-win64.zip",
+        "2026-10-22T23:03:38.8290815Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1200",
+        "2026-10-22T23:03:38.8298498Z Downloading Winldd playwright build v1007 from https://cdn.playwright.dev/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip",
+        "2026-10-22T23:03:39.0327497Z Winldd playwright build v1007 downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\winldd-1007"
+      ],
+      "failures": [
+        "2026-10-22T23:10:14.2580405Z FAIL: test_01_f10_current_idea_beside_the_picked_report_and_back (__main__.Report16.test_01_f10_current_idea_beside_the_picked_report_and_back)",
+        "2026-10-22T23:10:14.2588629Z AssertionError: False is not true : F10: action fully inside the first screen",
+        "2026-10-22T23:10:14.2589882Z FAILED (failures=1)"
+      ],
+      "finalStatus": "failure",
+      "notRunAfterReport16": [
+        "understanding17_browser.py",
+        "work-description29_browser.py",
+        "branch-records31_browser.py",
+        "hierarchy18_browser.py",
+        "workspace19_browser.py",
+        "received20_browser.py",
+        "blank21_browser.py",
+        "viewport30_browser.py",
+        "static_browser.py"
+      ],
+      "basis": "Report16 exit1 gates later workflow steps; no later commands or result groups in final job log",
+      "browserPassed": 187,
+      "browserFailed": 1
+    }
+  },
+  "logs": "two final120000-character truncated tails; full artifact NOT_RECOVERED",
+  "missingDirectEvidence": [
+    "root app unit total",
+    "early type/build command exits",
+    "actual Node runtime output",
+    "browser.version JSON",
+    "failed action geometry"
+  ],
+  "noMutations": true
+}
