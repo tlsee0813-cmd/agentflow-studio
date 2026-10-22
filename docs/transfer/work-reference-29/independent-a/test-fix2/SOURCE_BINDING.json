@@ -1,0 +1,33 @@
+{
+  "head": "2c75d0c6e0b763225e3e90e68a756602f99c66dd",
+  "runtimeProductBase": "f10eb68962ea1e6d35a491891b8c0c3b934eac77",
+  "files": [
+    {
+      "path": "continuity/src/client/app.ts",
+      "bytes": 273253,
+      "sha256": "34f3610faae32b01d22f8a3fc52467b4e0b5d0d9c30059c6b4d201e22edc9477",
+      "postRunDiskEqualPinned": true
+    },
+    {
+      "path": "continuity/public/styles.css",
+      "bytes": 74227,
+      "sha256": "c7ff244982397a42fb3f0bb5133c9631892fc4efa96566d86718b10dd94bc8f2",
+      "postRunDiskEqualPinned": true
+    },
+    {
+      "path": "continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "postRunDiskEqualPinned": true
+    },
+    {
+      "path": "continuity/tests/work-description29_browser.py",
+      "bytes": 25397,
+      "sha256": "9713415a8acb0b6b700ab460119d6b8dbd666bad0dc6c4106a99d3164be4f4bf",
+      "postRunDiskEqualPinned": true
+    }
+  ],
+  "productDiffFromF10": [
+    "app/continuity/tests/work-description29_browser.py"
+  ]
+}

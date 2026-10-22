@@ -1,0 +1,90 @@
+[
+  {
+    "original": "work-description29-observations.jsonl",
+    "bytes": 635770,
+    "sha256": "4ee144f88222064d1e1a09f99d55b954cd57d4859c15c0f7f7305b6c59297cdd",
+    "gzip": "raw/work-description29-observations.jsonl.gz",
+    "gzipSHA256": "5a6d13e2ba79084756b21eb7683872d67b2f2b3441803ef8ebcec71df6738a68",
+    "roundtripEqual": true
+  },
+  {
+    "original": "work29-1280-test_04_task_project_lifecycle_and_held_only-recovery.json",
+    "bytes": 26316,
+    "sha256": "ac034f8df312dc2dd0ba6f987ed72300603dcda788ff53abdc9f14d9ce873d41",
+    "gzip": "raw/work29-1280-test_04_task_project_lifecycle_and_held_only-recovery.json.gz",
+    "gzipSHA256": "3175d8e8331dcae825c69d4dc65a11a30d5cda22430d7ccb234d2bf54d56c9a6",
+    "roundtripEqual": true
+  },
+  {
+    "original": "received20-observations.jsonl",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gzip": "raw/received20-observations.jsonl.gz",
+    "gzipSHA256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+    "roundtripEqual": true
+  },
+  {
+    "original": "work29-1440-test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference-recovery.json",
+    "bytes": 26316,
+    "sha256": "27872b64e6d38aacbfa8c2c3143cf878d16d784e054fc3542cba020e4198c8af",
+    "gzip": "raw/work29-1440-test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference-recovery.json.gz",
+    "gzipSHA256": "fcc559c349824809c6395a3d9afe47837196f9371d83226aa775b4823e41354d",
+    "roundtripEqual": true
+  },
+  {
+    "original": "browser-environment.json",
+    "bytes": 189,
+    "sha256": "585e37103657baddbfe1155f3b748b420f9f44231536749a283b529b142df7b0",
+    "gzip": "raw/browser-environment.json.gz",
+    "gzipSHA256": "c0b9a2fe23daff635360f20e4647f1cfefa59669f0bfad047749b845216913f8",
+    "roundtripEqual": true
+  },
+  {
+    "original": "work29-1440-test_01_actual_editor_B_not_compose_or_map_A-recovery.json",
+    "bytes": 26316,
+    "sha256": "bb67eca43a5451dbd7e9d5c586403f75f8a48e16fec22f7d0de7d2ebc4db38c0",
+    "gzip": "raw/work29-1440-test_01_actual_editor_B_not_compose_or_map_A-recovery.json.gz",
+    "gzipSHA256": "2700dac649e083a2fa27da18a2fd203a4bf19b14379ed9fea418da790d0a4508",
+    "roundtripEqual": true
+  },
+  {
+    "original": "work29-1440-test_03_new_applied_revision_requires_explicit_reopen-recovery.json",
+    "bytes": 26316,
+    "sha256": "7cd4cc540db5da733117ef871529118d79aa218f8400a6f80bd2cc679bf5e860",
+    "gzip": "raw/work29-1440-test_03_new_applied_revision_requires_explicit_reopen-recovery.json.gz",
+    "gzipSHA256": "a2a23208e121c3a91bfceb74e0bbca2fd5a7a04739c6a300fbc5f8745ab28db3",
+    "roundtripEqual": true
+  },
+  {
+    "original": "work29-1440-test_04_task_project_lifecycle_and_held_only-recovery.json",
+    "bytes": 26316,
+    "sha256": "b28e7593cc7eab0d5e37711baeb728d6fd27cf3f6dd452de1de55befdee4a526",
+    "gzip": "raw/work29-1440-test_04_task_project_lifecycle_and_held_only-recovery.json.gz",
+    "gzipSHA256": "56a0bd4820042b424b74ffede5fc3754aae9aa1291bf92e01e1911acb9d8e941",
+    "roundtripEqual": true
+  },
+  {
+    "original": "work29-1280-test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference-recovery.json",
+    "bytes": 26316,
+    "sha256": "7c4ad02c20debf53ea672d028847979815d3ad31555b2d8ef8147baad1b43a81",
+    "gzip": "raw/work29-1280-test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference-recovery.json.gz",
+    "gzipSHA256": "1522a9666a3456676d9750cc41b73899d12c3c1c307491a2565e6679e25f462a",
+    "roundtripEqual": true
+  },
+  {
+    "original": "work29-1280-test_03_new_applied_revision_requires_explicit_reopen-recovery.json",
+    "bytes": 26316,
+    "sha256": "ec75df1d82bda45bbb5b053300dd4004a8bc84a96dded0ea9d9be4f2c30061e3",
+    "gzip": "raw/work29-1280-test_03_new_applied_revision_requires_explicit_reopen-recovery.json.gz",
+    "gzipSHA256": "9f2280184e0d342f65edd61a8550637f4f357b164bf3e1c4e6b77bcecaff3e9e",
+    "roundtripEqual": true
+  },
+  {
+    "original": "work29-1280-test_01_actual_editor_B_not_compose_or_map_A-recovery.json",
+    "bytes": 26316,
+    "sha256": "6121f55633bc6ca6e46e2475e484d0da1da9d94afb6d6fb6d3acbf4fb8c1ea50",
+    "gzip": "raw/work29-1280-test_01_actual_editor_B_not_compose_or_map_A-recovery.json.gz",
+    "gzipSHA256": "958ff2e26667378e2ecd451bdb792ff5c48cab2d3efbb2ceaab944e8401e2ba2",
+    "roundtripEqual": true
+  }
+]

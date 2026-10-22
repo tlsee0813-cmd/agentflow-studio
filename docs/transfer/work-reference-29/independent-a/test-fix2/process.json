@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "continuity/tests/work-description29_browser.py"
+  ],
+  "sourceScriptHead": "2c75d0c6e0b763225e3e90e68a756602f99c66dd",
+  "runtimeProductBase": "f10eb68962ea1e6d35a491891b8c0c3b934eac77",
+  "startUTC": "2026-10-22T20:22:35.917066+00:00",
+  "endUTC": "2026-10-22T20:22:59.193872+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "0112257c094719d9e17c1c743d92b5dc24c5dc6f169d36f1fc144aadc04c3f7c",
+  "serverExit": "not separately captured by original author harness"
+}

@@ -1,0 +1,53 @@
+test_01_actual_editor_B_not_compose_or_map_A (__main__.WorkDescription29.test_01_actual_editor_B_not_compose_or_map_A) ... ok
+test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference (__main__.WorkDescription29.test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference) ... ok
+test_03_new_applied_revision_requires_explicit_reopen (__main__.WorkDescription29.test_03_new_applied_revision_requires_explicit_reopen) ... FAIL
+test_04_task_project_lifecycle_and_held_only (__main__.WorkDescription29.test_04_task_project_lifecycle_and_held_only) ... ok
+test_01_actual_editor_B_not_compose_or_map_A (__main__.WorkDescription29Wide.test_01_actual_editor_B_not_compose_or_map_A) ... ok
+test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference (__main__.WorkDescription29Wide.test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference) ... ok
+test_03_new_applied_revision_requires_explicit_reopen (__main__.WorkDescription29Wide.test_03_new_applied_revision_requires_explicit_reopen) ... FAIL
+test_04_task_project_lifecycle_and_held_only (__main__.WorkDescription29Wide.test_04_task_project_lifecycle_and_held_only) ... ok
+
+======================================================================
+FAIL: test_03_new_applied_revision_requires_explicit_reopen (__main__.WorkDescription29.test_03_new_applied_revision_requires_explicit_reopen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/work-description29_browser.py", line 217, in test_03_new_applied_revision_requires_explicit_reopen
+    self.equal('동일한 긴 r2도 명시 재열기는 처음부터 읽음',[reopened['y'],reopened['summaryY']],[0,0])
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/work-description29_browser.py", line 73, in equal
+    self.record('condition',label,actual,expected);self.assertEqual(actual,expected,label)
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [150, 0] != [0, 0]
+
+First differing element 0:
+150
+0
+
+- [150, 0]
+?  --
+
++ [0, 0] : 동일한 긴 r2도 명시 재열기는 처음부터 읽음
+
+======================================================================
+FAIL: test_03_new_applied_revision_requires_explicit_reopen (__main__.WorkDescription29Wide.test_03_new_applied_revision_requires_explicit_reopen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/work-description29_browser.py", line 217, in test_03_new_applied_revision_requires_explicit_reopen
+    self.equal('동일한 긴 r2도 명시 재열기는 처음부터 읽음',[reopened['y'],reopened['summaryY']],[0,0])
+  File "/workspace/browser-env/cycle29-fix2-candidate/app/continuity/tests/work-description29_browser.py", line 73, in equal
+    self.record('condition',label,actual,expected);self.assertEqual(actual,expected,label)
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [150, 0] != [0, 0]
+
+First differing element 0:
+150
+0
+
+- [150, 0]
+?  --
+
++ [0, 0] : 동일한 긴 r2도 명시 재열기는 처음부터 읽음
+
+----------------------------------------------------------------------
+Ran 8 tests in 23.095s
+
+FAILED (failures=2)
