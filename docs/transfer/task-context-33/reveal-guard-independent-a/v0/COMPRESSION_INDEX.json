@@ -1,0 +1,66 @@
+[
+  {
+    "stored": "raw/controlled/actions.jsonl.gz",
+    "originalBytes": 345904,
+    "originalSHA256": "d0f9cb1e37f864cb688236e2416b51fe220f2a39d3aae238e3685975691cde9d",
+    "gzipBytes": 38408,
+    "gzipSHA256": "9e73fb1c3c2186648ff291ecd4992819491c6de82f4836763a481f8e4998d601",
+    "roundtripByteEqual": true
+  },
+  {
+    "stored": "raw/controlled/inputs/T2.json.gz",
+    "originalBytes": 41069,
+    "originalSHA256": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7",
+    "gzipBytes": 5269,
+    "gzipSHA256": "51c40fcbbeb655119c1a63dbc171c5e20f93596b933beee94d5e4b7afa6bfcef",
+    "roundtripByteEqual": true
+  },
+  {
+    "stored": "raw/controlled/roundtrip-after-release-envelope.json.gz",
+    "originalBytes": 41320,
+    "originalSHA256": "ce02615bcdbe9078f3a5749187c52c7b2979b6f4078e6c7e05ad6665c790f0c1",
+    "gzipBytes": 5414,
+    "gzipSHA256": "587af7a88f108454375d201f31e34879d75e222bec5ac0add2e350803a7edf37",
+    "roundtripByteEqual": true
+  },
+  {
+    "stored": "raw/controlled/sameview-after-release-envelope.json.gz",
+    "originalBytes": 41320,
+    "originalSHA256": "0908cd0ea13efc0e322c4d12f07a62ae5f2b95b6585af17655d02761be992562",
+    "gzipBytes": 5416,
+    "gzipSHA256": "36a62f64edd6b3618d95bddf15685ada6a0e0c435d85e6f7c4457913819a7341",
+    "roundtripByteEqual": true
+  },
+  {
+    "stored": "raw/candidate/execution/raw/http-console.jsonl.gz",
+    "originalBytes": 2320,
+    "originalSHA256": "b48274ea6fb1bc9d1565940ce5f114fafa8a99bf327e9f104e37083e929a1ac6",
+    "gzipBytes": 480,
+    "gzipSHA256": "9de08da32a4d10200ab53b9005646159df9bc4b51a5c1d1cd8156d6c3c8783c2",
+    "roundtripByteEqual": true
+  },
+  {
+    "stored": "raw/candidate/execution/raw/pc12-observations.jsonl.gz",
+    "originalBytes": 1474,
+    "originalSHA256": "fe2e172ca501dc82786a722c6b57882fe0c2811a7b87651fec648310a10184ad",
+    "gzipBytes": 320,
+    "gzipSHA256": "75bfc9315182158f0c57c4752a142d7fc8447950144739fe2f32ece0ae17a710",
+    "roundtripByteEqual": true
+  },
+  {
+    "stored": "raw/original673/execution/raw/http-console.jsonl.gz",
+    "originalBytes": 2320,
+    "originalSHA256": "822e78e448e025b09ace23774aec791ce579aab9c1c1cb41e8c66cb94e55bf46",
+    "gzipBytes": 483,
+    "gzipSHA256": "8189a85516cae244ba9357d1d61dcf56d93bf5b202bcd8c73a696a79640d64c4",
+    "roundtripByteEqual": true
+  },
+  {
+    "stored": "raw/original673/execution/raw/pc12-observations.jsonl.gz",
+    "originalBytes": 1516,
+    "originalSHA256": "1a045eea24901cc26930e9353952830bbeb00e0824d2cd2e314933bf4ccd0895",
+    "gzipBytes": 344,
+    "gzipSHA256": "b15915ee2d3ca559a7850ee81357556636d74443dcb1f755e8f2779ecd7bbfde",
+    "roundtripByteEqual": true
+  }
+]

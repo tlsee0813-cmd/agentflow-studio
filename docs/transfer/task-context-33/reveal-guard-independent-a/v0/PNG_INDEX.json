@@ -1,0 +1,134 @@
+[
+  {
+    "localOriginal": "controlled/001-sameview-new-context.png",
+    "bytes": 85539,
+    "sha256": "0b5d12e192a3b6bbce652badeb441e0f47c2454d6fa83db907061daa4e039784",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/002-sameview-project-list.png",
+    "bytes": 34113,
+    "sha256": "fa55b5c4e223e1968c76c51f5b31f3c987617e189794e7d40d9f2e802275adbb",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/003-sameview-normal-import.png",
+    "bytes": 115323,
+    "sha256": "9192b123a26cb1e4abc9c73466d8002beb65879246ed5b8a19f8d06d184b0715",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/004-sameview-import-complete.png",
+    "bytes": 115167,
+    "sha256": "63cad4a241cb539cc988b6b99740bbac919cd312f960ec26f10dff556b1f0283",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/005-sameview-work.png",
+    "bytes": 101151,
+    "sha256": "088ebb31688ba01f28a9757003294e63a5db5453c55ce7920d6c8a92c16fbf36",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/006-sameview-arraybuffer-completion-armed.png",
+    "bytes": 101032,
+    "sha256": "73cc7600779101ee515643e0a720286db336f1b37a7313dba079569efeef4584",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/007-sameview-file-pending.png",
+    "bytes": 85417,
+    "sha256": "c9557ae5c5f24a1f9305c414fa4833ac1ed4cc0f3502e2c980068497411b3a6e",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/009-sameview-release.png",
+    "bytes": 106985,
+    "sha256": "b2c4b6deed44717d181803c879b68981626a4bedbd2f632e4847f735f14b43f5",
+    "publishedRepresentative": "screens/03-same-work-positive-review-reveal.png"
+  },
+  {
+    "localOriginal": "controlled/011-roundtrip-new-context.png",
+    "bytes": 85539,
+    "sha256": "0b5d12e192a3b6bbce652badeb441e0f47c2454d6fa83db907061daa4e039784",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/012-roundtrip-projects.png",
+    "bytes": 34119,
+    "sha256": "83ca928ac5919bca703180761e3eee075766aa6ca6f23089283ecdcf0c1cc982",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/013-roundtrip-normal-import.png",
+    "bytes": 115453,
+    "sha256": "94c0560445a1ea3e5595edbdfe0d22507d36366b4ca47cd9ee06f91721e3d495",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/014-roundtrip-import-complete.png",
+    "bytes": 115167,
+    "sha256": "63cad4a241cb539cc988b6b99740bbac919cd312f960ec26f10dff556b1f0283",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/015-roundtrip-work-before-selection.png",
+    "bytes": 101151,
+    "sha256": "677bc08a29d7889e81a341d1923adff77af4f4a6d75f0442b5c556166909b414",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/016-roundtrip-delay-armed.png",
+    "bytes": 101032,
+    "sha256": "73cc7600779101ee515643e0a720286db336f1b37a7313dba079569efeef4584",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/017-roundtrip-file-pending.png",
+    "bytes": 85409,
+    "sha256": "85f2b3d580ac779a25ee35d4f446097abe52270e17bba3055969ca375ca7aa9f",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/018-roundtrip-native-history.png",
+    "bytes": 103893,
+    "sha256": "0f6fb424ce2ecf73381a4d68ac76c66870bfc978349e1f5acd3f6339993841e2",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/019-roundtrip-native-work-return.png",
+    "bytes": 101083,
+    "sha256": "772a4cc792d150c7e526029be1c3bf1e26aae247980661701e264d34deecbaf9",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "controlled/021-roundtrip-release.png",
+    "bytes": 101034,
+    "sha256": "7f6f9489fab04ae0ea4c752cbd2d890b1801fe9b7c20c2cb9ec07438de22149d",
+    "publishedRepresentative": "screens/02-history-work-after-release-no-move.png"
+  },
+  {
+    "localOriginal": "controlled/roundtrip-release-before.png",
+    "bytes": 101119,
+    "sha256": "4898561834552312edf7d03409582da9219de208fd835fc82b6a0653825d5852",
+    "publishedRepresentative": "screens/01-history-work-before-release.png"
+  },
+  {
+    "localOriginal": "controlled/sameview-release-before.png",
+    "bytes": 85386,
+    "sha256": "e21a2933a200b9b5f42bffc72367b5c5fd78a8b400b4bdfb128063cf8bd6bee8",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "candidate/execution/raw/pc12-1280-33-delay-reveal-scope.png",
+    "bytes": 78747,
+    "sha256": "65b2038eadeb365683c064d4aa34cffe1d4dd893a51aee69300d6fb3624ff334",
+    "publishedRepresentative": null
+  },
+  {
+    "localOriginal": "candidate/execution/raw/pc12-1440-33-delay-reveal-scope.png",
+    "bytes": 103632,
+    "sha256": "5e43dc0bcc29f142645e5d0cbf03d4cae58398205cc834263a55fbab4f986bba",
+    "publishedRepresentative": null
+  }
+]

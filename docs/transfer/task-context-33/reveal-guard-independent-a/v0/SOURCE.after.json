@@ -1,0 +1,26 @@
+{
+  "afterAllProcessesUTC": "2026-10-22T23:24:33.778682+00:00",
+  "sources": [
+    {
+      "name": "candidate",
+      "commit": "0e11efb932f0826f40cd5d36983f33044a895157",
+      "tree": "c6a4fdfa005a5209c8497d7439b0e0df6eb72326",
+      "changes": [],
+      "productSourceUnchanged": true
+    },
+    {
+      "name": "original673",
+      "commit": "673c580d69ab5f9cffcb7f0003bcf331c57e3c93",
+      "tree": "b3929afed8ef4e6f40fc5996ed3ea06f348d8186",
+      "changes": [
+        {
+          "path": "app/continuity/tests/pc12_browser.py",
+          "beforeSHA256": "f3a77141907fdda15d1a51d55520b0d1ac5fce8d76020d460c53a9d25cf8e804",
+          "afterSHA256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580",
+          "afterBytes": 60650
+        }
+      ],
+      "productSourceUnchanged": true
+    }
+  ]
+}

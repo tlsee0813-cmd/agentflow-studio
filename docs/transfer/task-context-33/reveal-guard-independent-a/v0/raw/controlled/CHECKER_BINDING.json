@@ -1,0 +1,12 @@
+{
+  "frozenControllerSHA256": "858f82f02bdfa1cf0142ff145c2e62c684c0616ba15bc88da6b8b5ebe6d8c5b6",
+  "priorControllerSHA256": "858f82f02bdfa1cf0142ff145c2e62c684c0616ba15bc88da6b8b5ebe6d8c5b6",
+  "controllerBytesIdentical": true,
+  "frozenJudgeSHA256": "2ba43eb539c655c05565a10f7fdbf5d7544115e0772a198081b8caaa4527c1ef",
+  "judgeBytesIdentical": true,
+  "wrapperOnly": "source path/runtime source metadata binding; __file__ chooses separate output directory. Actions, delay injection, waits, observations, meaning assertion unchanged",
+  "commandsIdenticalToPriorActions": true,
+  "sourceCandidate": "0e11efb932f0826f40cd5d36983f33044a895157",
+  "publishedOriginalCommit": "8ac357a4b77bab9eb70a7f9852c568aff84f898a",
+  "publishedOriginalControllerJudgeByteEqual": true
+}

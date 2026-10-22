@@ -1,0 +1,91 @@
+{
+  "files": [
+    {
+      "name": "candidate",
+      "path": "continuity/src/client/app.ts",
+      "bytes": 280692,
+      "sha256": "83979bd309a84905a9afae2ead112aef734946bf024b837ea3c4ca8a84449dd5"
+    },
+    {
+      "name": "candidate",
+      "path": "continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7"
+    },
+    {
+      "name": "candidate",
+      "path": "continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    },
+    {
+      "name": "candidate",
+      "path": "continuity/tests/pc12_browser.py",
+      "bytes": 60650,
+      "sha256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580"
+    },
+    {
+      "name": "candidate",
+      "path": "continuity/dist/public/client/app.js",
+      "bytes": 309101,
+      "sha256": "6fdb54b7de3ff97a656237ce9636db56ab8c86f7ab299f7ea7e3b6c8e0678b28"
+    },
+    {
+      "name": "candidate",
+      "path": "continuity/dist/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7"
+    },
+    {
+      "name": "candidate",
+      "path": "continuity/dist/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    },
+    {
+      "name": "original673",
+      "path": "continuity/src/client/app.ts",
+      "bytes": 280166,
+      "sha256": "9267f4b8de7079f5630a99abc28a63396c3b42a3960084ad1b3856eeb0f18374"
+    },
+    {
+      "name": "original673",
+      "path": "continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7"
+    },
+    {
+      "name": "original673",
+      "path": "continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    },
+    {
+      "name": "original673",
+      "path": "continuity/tests/pc12_browser.py",
+      "bytes": 60650,
+      "sha256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580"
+    },
+    {
+      "name": "original673",
+      "path": "continuity/dist/public/client/app.js",
+      "bytes": 308517,
+      "sha256": "930a1fc6b2a89bea97a0d03b275a23a8eec6da029570bb4ab6c1ac8cdee6fc1f"
+    },
+    {
+      "name": "original673",
+      "path": "continuity/dist/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7"
+    },
+    {
+      "name": "original673",
+      "path": "continuity/dist/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    }
+  ],
+  "TSActualVersion": "Version 5.8.3",
+  "oldCompiledRuntimeReuse": "original673 copied exact existing673 dist; no source/product modification; candidate built fresh",
+  "controlledFrozenSourceBindingOnly": true
+}

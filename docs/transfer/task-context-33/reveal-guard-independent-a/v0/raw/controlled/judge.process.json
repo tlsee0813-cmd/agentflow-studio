@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-reveal-guard/controlled/frozen-judge.py"
+  ],
+  "startUTC": "2026-10-22T23:21:18.777201+00:00",
+  "endUTC": "2026-10-22T23:21:18.798403+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

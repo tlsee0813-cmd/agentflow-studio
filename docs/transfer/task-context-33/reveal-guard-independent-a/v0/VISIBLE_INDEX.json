@@ -1,0 +1,110 @@
+[
+  {
+    "localOriginal": "controlled/001-sameview-new-context-visible.json",
+    "bytes": 17518,
+    "sha256": "5d7f17bfe2120910b365f115bbe4158415559d810fe754b9af041b79ed1aa768",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/002-sameview-project-list-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/003-sameview-normal-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/004-sameview-import-complete-visible.json",
+    "bytes": 71029,
+    "sha256": "ad480e4b6bc6c111134791f114e258eff7a85e7a26171e303aae2d073e7eb75e",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/005-sameview-work-visible.json",
+    "bytes": 33395,
+    "sha256": "32de5d7d21d01d5e4e770568afe0f0141318b0636f9624200acbd5267a2707a9",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/006-sameview-arraybuffer-completion-armed-visible.json",
+    "bytes": 33395,
+    "sha256": "32de5d7d21d01d5e4e770568afe0f0141318b0636f9624200acbd5267a2707a9",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/007-sameview-file-pending-visible.json",
+    "bytes": 27164,
+    "sha256": "3d148f8d9b49ae378c88ee0f325a2ed264a2363b731269f8b211164da7c50d25",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/009-sameview-release-visible.json",
+    "bytes": 23767,
+    "sha256": "b22d684bfa43315e307d60b6cc9a9ef7a9a3ae7c1bdd01db7964dfbdb6bb6e28",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/011-roundtrip-new-context-visible.json",
+    "bytes": 18424,
+    "sha256": "8ff44e2934f0e18a382bc4d8f4a00c2fbbcc693533089efcb454fec54776f8e5",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/012-roundtrip-projects-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/013-roundtrip-normal-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/014-roundtrip-import-complete-visible.json",
+    "bytes": 71029,
+    "sha256": "20e86f72e30076dc7f72c24c8800340ae50f880ccb28b2c2900209708ac21afa",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/015-roundtrip-work-before-selection-visible.json",
+    "bytes": 33395,
+    "sha256": "7a7c562bb6db80381710705123bbf6ccb277b6c3fc86bce59c4da93ab2ecf829",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/016-roundtrip-delay-armed-visible.json",
+    "bytes": 33395,
+    "sha256": "7a7c562bb6db80381710705123bbf6ccb277b6c3fc86bce59c4da93ab2ecf829",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/017-roundtrip-file-pending-visible.json",
+    "bytes": 27164,
+    "sha256": "79d524dd3923b3bdfd6bd97a62dcadcec8481dac32221616e0dec7b320918eea",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/018-roundtrip-native-history-visible.json",
+    "bytes": 27765,
+    "sha256": "0a09e8373e20992c6ce79210920f6c1a28b3a8ab78c9263c0da607210c4bb0e3",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/019-roundtrip-native-work-return-visible.json",
+    "bytes": 33395,
+    "sha256": "40a0910164a462d285adf675d274c4cb408eb4ccd5e7e36dc99104e8e3af328a",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  },
+  {
+    "localOriginal": "controlled/021-roundtrip-release-visible.json",
+    "bytes": 33395,
+    "sha256": "5e9c319bb7a35fb9cfd84c638415e79ac2d17dc758fe41934abb02e80c0cdeec",
+    "rawContent": "same label in controlled/actions.jsonl; no duplicate full DOM dump"
+  }
+]

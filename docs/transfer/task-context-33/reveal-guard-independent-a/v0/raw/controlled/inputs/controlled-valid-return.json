@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+  "returnId": "H_SYN32_B1",
+  "report": "[합성32 보고 B1] 오류행 처리 방식은 아직 선택되지 않았다. 중단/제외 중 어느 것도 적용하지 않은 상태다. 이 문장은 준비자가 만든 상태 주장이고 실제 구현·검사·AI 실행 증거가 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_0330ba8f-3bf0-408f-90dc-2a52688e8323",
+    "basedOn": 0,
+    "summary": "오류행 처리 방식은 아직 선택되지 않았다. 중단/제외 중 어느 것도 적용하지 않은 상태다.",
+    "changes": [],
+    "proposal": null,
+    "origin": "합성32 입력 준비자 · 실제 구현/AI 실행 증거 아님"
+  }
+}

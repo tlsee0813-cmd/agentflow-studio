@@ -1,0 +1,2 @@
+Post-run evidence packaging only, original tool chunk48d178 exit1:
+SOURCE_BINDING metadata attempted nonexistent continuity/src/client/styles.css and raised FileNotFoundError. Consequently package.py first invocation could not read SOURCE_BINDING.json and raised FileNotFoundError. Actual CSS source is continuity/public/styles.css. No product/test/browser modification or rerun. Metadata path corrected and packaging retried. Product-source integrity remains SOURCE.before/after exact.

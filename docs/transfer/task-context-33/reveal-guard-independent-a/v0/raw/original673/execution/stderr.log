@@ -1,0 +1,33 @@
+test_12_delayed_file_reveal_respects_view_departure (__main__.Pc12.test_12_delayed_file_reveal_respects_view_departure)
+Controlled file-API delay only; actual selected bytes and every navigation use the native UI. ... FAIL
+test_12_delayed_file_reveal_respects_view_departure (__main__.Pc12Wide.test_12_delayed_file_reveal_respects_view_departure)
+Controlled file-API delay only; actual selected bytes and every navigation use the native UI. ... FAIL
+
+======================================================================
+FAIL: test_12_delayed_file_reveal_respects_view_departure (__main__.Pc12.test_12_delayed_file_reveal_respects_view_departure)
+Controlled file-API delay only; actual selected bytes and every navigation use the native UI.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/task33-reveal-guard/original673/app/continuity/tests/pc12_browser.py", line 521, in test_12_delayed_file_reveal_respects_view_departure
+    self.assertEqual(after['focus'],departure['focus'],'a completed old read must not take focus after the user left work')
+AssertionError: 'result-file-review-heading' != 'nav-work'
+- result-file-review-heading
++ nav-work
+ : a completed old read must not take focus after the user left work
+
+======================================================================
+FAIL: test_12_delayed_file_reveal_respects_view_departure (__main__.Pc12Wide.test_12_delayed_file_reveal_respects_view_departure)
+Controlled file-API delay only; actual selected bytes and every navigation use the native UI.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/task33-reveal-guard/original673/app/continuity/tests/pc12_browser.py", line 521, in test_12_delayed_file_reveal_respects_view_departure
+    self.assertEqual(after['focus'],departure['focus'],'a completed old read must not take focus after the user left work')
+AssertionError: 'result-file-review-heading' != 'nav-work'
+- result-file-review-heading
++ nav-work
+ : a completed old read must not take focus after the user left work
+
+----------------------------------------------------------------------
+Ran 2 tests in 5.819s
+
+FAILED (failures=2)

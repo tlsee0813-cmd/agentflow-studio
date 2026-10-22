@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-reveal-guard/runner.py",
+    "Pc12.test_12_delayed_file_reveal_respects_view_departure",
+    "Pc12Wide.test_12_delayed_file_reveal_respects_view_departure"
+  ],
+  "cwd": "/workspace/browser-env/task33-reveal-guard/original673/app",
+  "startUTC": "2026-10-22T23:21:20.502099+00:00",
+  "endUTC": "2026-10-22T23:21:26.594440+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "1b9c8d9031e0b3df02346383b126b84e2a093926f8029f747319b961033fb91c",
+  "exactTestSHA256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580"
+}
