@@ -1,0 +1,23 @@
+{
+  "observedAt": "2026-10-22T16:35:46.167Z",
+  "tool": "mcp__code_review__pull_requests_checks",
+  "request": {
+    "pullRequest": {
+      "hostname": "github.com",
+      "number": 12,
+      "owner": "tlsee0813-cmd",
+      "repository": "agentflow-studio"
+    },
+    "headRevision": "15b60a10b34bb06c7c173d0eca5653faef8e2bb6",
+    "jobId": 119947522678
+  },
+  "response": {
+    "content": [
+      {
+        "type": "text",
+        "text": "GitHub provider request failed (HTTP 502)"
+      }
+    ],
+    "isError": true
+  }
+}

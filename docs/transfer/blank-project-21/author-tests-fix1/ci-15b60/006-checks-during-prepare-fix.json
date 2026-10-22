@@ -1,0 +1,57 @@
+{
+  "observedAt": "2026-10-22T16:34:30.818Z",
+  "tool": "mcp__code_review__pull_requests_checks",
+  "request": {
+    "pullRequest": {
+      "hostname": "github.com",
+      "number": 12,
+      "owner": "tlsee0813-cmd",
+      "repository": "agentflow-studio"
+    },
+    "headRevision": "15b60a10b34bb06c7c173d0eca5653faef8e2bb6"
+  },
+  "response": {
+    "content": [],
+    "structuredContent": {
+      "headRevision": "15b60a10b34bb06c7c173d0eca5653faef8e2bb6",
+      "checks": [
+        {
+          "id": 119947522986,
+          "name": "verify (ubuntu-24.04)",
+          "head_sha": "15b60a10b34bb06c7c173d0eca5653faef8e2bb6",
+          "status": "in_progress",
+          "conclusion": null,
+          "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39813998848/job/119947522986",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 0
+          }
+        },
+        {
+          "id": 119947522678,
+          "name": "verify (windows-2022)",
+          "head_sha": "15b60a10b34bb06c7c173d0eca5653faef8e2bb6",
+          "status": "in_progress",
+          "conclusion": null,
+          "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39813998848/job/119947522678",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 0
+          }
+        }
+      ],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  }
+}

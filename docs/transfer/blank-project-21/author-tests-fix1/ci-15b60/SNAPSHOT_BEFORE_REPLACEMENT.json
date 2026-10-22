@@ -1,0 +1,36 @@
+{
+  "capturedAt": "2026-10-22T16:36:07.244Z",
+  "pullRequest": 12,
+  "headRevision": "15b60a10b34bb06c7c173d0eca5653faef8e2bb6",
+  "runId": 39813998848,
+  "selectedAccount": "No selected account returned on discovery; omission preserved on all reads.",
+  "tool": "mcp__code_review__pull_requests_checks only",
+  "latestSuccessfulSnapshot": "006-checks-during-prepare-fix.json",
+  "jobs": [
+    {
+      "os": "ubuntu-24.04",
+      "jobId": 119947522986,
+      "statusAtLatestSuccessfulSnapshot": "in_progress",
+      "conclusion": null
+    },
+    {
+      "os": "windows-2022",
+      "jobId": 119947522678,
+      "statusAtLatestSuccessfulSnapshot": "in_progress",
+      "conclusion": null
+    }
+  ],
+  "rawLogReadAttempts": [
+    {
+      "file": "003-windows-progress.json",
+      "result": "GitHub provider HTTP502; no log returned."
+    },
+    {
+      "file": "007-windows-before-head-replacement.json",
+      "result": "GitHub provider HTTP502; no log returned."
+    }
+  ],
+  "interpretation": "Original CI has no observed final pass/failure. Cloud8ebed74 original preparation failure is independent evidence; do not label this unfinished CI a failure/pass. New head may supersede/cancel this run through workflow concurrency. No cancel/rerun command issued.",
+  "fallback": "No CLI/GitHub CI API/browser fallback used.",
+  "next": "Track new exact head/run in separate prefix once supplied by root."
+}

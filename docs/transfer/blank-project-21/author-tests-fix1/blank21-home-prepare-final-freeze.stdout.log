@@ -1,0 +1,2 @@
+PASS: 9 embedded JS expressions parsed without execution
+{"publicationFiles": [{"path": "app/continuity/tests/blank21_browser.py", "bytes": 14859, "sha256": "212163B1F4B7B6E328BC194676656EAED570A65179C6670DC6274E74D10A3117"}, {"path": ".github/workflows/verify.yml", "bytes": 11616, "sha256": "7F55B486DA7B2F63F4F8964125107B7D205AD2440BD3C17C67E4943AB914FAF8"}], "pythonAST": 1, "embeddedJS": 9, "methods": 2, "fixedWaits": 0, "patchApplyCheck": 0, "browser": "NOT RUN", "server": "NOT STARTED"}

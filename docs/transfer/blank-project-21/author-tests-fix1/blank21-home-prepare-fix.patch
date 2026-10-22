@@ -1,0 +1,10 @@
+--- a/app/continuity/tests/blank21_browser.py
++++ b/app/continuity/tests/blank21_browser.py
+@@ -68,6 +68,7 @@
+         self.equal('actual copied UTF16 chars/FNV match the recorded export',self.page.evaluate(FNV,text),{'chars':record['chars'],'digest':record['digest']})
+         return text
+     def prepare(self):
++        self.page.locator('#nav-projects').click()
+         expect(self.page.locator('#projects-view')).to_be_visible();self.page.locator('#new-project').click()
+         self.page.locator('#brief-input').fill(PURPOSE);self.page.locator('#brief-start').click()
+         self.page.locator('#area-name').fill('예약');self.page.locator('#area-note').fill(NOTE);self.page.locator('#area-add').click();base.saved(self.page)
