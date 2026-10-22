@@ -1,0 +1,3583 @@
+{
+  "source": "9fb83ef50252d56c6411c81a0dca56d99becd651",
+  "method": "normal summary click; passive DOM geometry listeners only; app handlers/state/style untouched; document observer registered after app capture listener and target observer runs after capture phase",
+  "runs": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "events": [
+        {
+          "phase": "document-capture-after-app-capture-registration",
+          "eventTimeStamp": 585.6000000238419,
+          "performanceNow": 597.9000000357628,
+          "isTrusted": true,
+          "open": true,
+          "raw": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 660,
+              "height": 240,
+              "top": 540.671875,
+              "right": 924,
+              "bottom": 780.671875,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 974,
+                "height": 240,
+                "top": 540.671875,
+                "right": 1238,
+                "bottom": 780.671875,
+                "left": 264
+              },
+              "inline": "height: 240px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 952,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1227,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 974,
+                  "height": 286,
+                  "top": 494.671875,
+                  "right": 1238,
+                  "bottom": 780.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 792.671875,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 792.671875,
+                  "right": 1238,
+                  "bottom": 1293.65625,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        },
+        {
+          "phase": "on-target-toggle-after-document-capture",
+          "eventTimeStamp": 585.6000000238419,
+          "performanceNow": 599.2000000476837,
+          "isTrusted": true,
+          "open": true,
+          "raw": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 660,
+              "height": 240,
+              "top": 540.671875,
+              "right": 924,
+              "bottom": 780.671875,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 974,
+                "height": 240,
+                "top": 540.671875,
+                "right": 1238,
+                "bottom": 780.671875,
+                "left": 264
+              },
+              "inline": "height: 240px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 952,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1227,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 974,
+                  "height": 286,
+                  "top": 494.671875,
+                  "right": 1238,
+                  "bottom": 780.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 792.671875,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 792.671875,
+                  "right": 1238,
+                  "bottom": 1293.65625,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        },
+        {
+          "phase": "document-capture-after-app-capture-registration",
+          "eventTimeStamp": 654,
+          "performanceNow": 664.8000000119209,
+          "isTrusted": true,
+          "open": false,
+          "raw": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 660,
+              "height": 411.515625,
+              "top": 292.484375,
+              "right": 924,
+              "bottom": 704,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 974,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 264
+              },
+              "inline": "height: 411.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1151.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1227,
+                "bottom": 232.203125,
+                "left": 1151.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 974,
+                  "height": 457.515625,
+                  "top": 246.484375,
+                  "right": 1238,
+                  "bottom": 704,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 716,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 716,
+                  "right": 1238,
+                  "bottom": 1216.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        },
+        {
+          "phase": "on-target-toggle-after-document-capture",
+          "eventTimeStamp": 654,
+          "performanceNow": 665.6000000238419,
+          "isTrusted": true,
+          "open": false,
+          "raw": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 660,
+              "height": 411.515625,
+              "top": 292.484375,
+              "right": 924,
+              "bottom": 704,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 974,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 264
+              },
+              "inline": "height: 411.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1151.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1227,
+                "bottom": 232.203125,
+                "left": 1151.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 974,
+                  "height": 457.515625,
+                  "top": 246.484375,
+                  "right": 1238,
+                  "bottom": 704,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 716,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 716,
+                  "right": 1238,
+                  "bottom": 1216.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        }
+      ],
+      "clicks": [
+        {
+          "action": "open",
+          "beforeClick": {
+            "performanceNow": 549.7000000476837,
+            "open": false
+          },
+          "rawBefore": {
+            "windowY": 0,
+            "focus": "records-heading",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 660,
+              "height": 411.515625,
+              "top": 292.484375,
+              "right": 924,
+              "bottom": 704,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 974,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 264
+              },
+              "inline": "height: 411.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1151.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1227,
+                "bottom": 232.203125,
+                "left": 1151.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 974,
+                  "height": 457.515625,
+                  "top": 246.484375,
+                  "right": 1238,
+                  "bottom": 704,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 716,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 716,
+                  "right": 1238,
+                  "bottom": 1216.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          },
+          "afterNormalClickReturn": {
+            "performanceNow": 591.6000000238419,
+            "open": true
+          },
+          "rawAfterClickReturn": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 660,
+              "height": 411.515625,
+              "top": 540.671875,
+              "right": 924,
+              "bottom": 952.1875,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 974,
+                "height": 411.515625,
+                "top": 540.671875,
+                "right": 1238,
+                "bottom": 952.1875,
+                "left": 264
+              },
+              "inline": "height: 411.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 952,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1227,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 974,
+                  "height": 457.515625,
+                  "top": 494.671875,
+                  "right": 1238,
+                  "bottom": 952.1875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 964.1875,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 964.1875,
+                  "right": 1238,
+                  "bottom": 1465.171875,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          },
+          "targetEvents": [
+            {
+              "phase": "document-capture-after-app-capture-registration",
+              "eventTimeStamp": 585.6000000238419,
+              "performanceNow": 597.9000000357628,
+              "isTrusted": true,
+              "open": true,
+              "raw": {
+                "windowY": 0,
+                "focus": "",
+                "viewport": [
+                  1280,
+                  720
+                ],
+                "map": {
+                  "x": 264,
+                  "y": 540.671875,
+                  "width": 660,
+                  "height": 240,
+                  "top": 540.671875,
+                  "right": 924,
+                  "bottom": 780.671875,
+                  "left": 264
+                },
+                "layout": {
+                  "rect": {
+                    "x": 264,
+                    "y": 540.671875,
+                    "width": 974,
+                    "height": 240,
+                    "top": 540.671875,
+                    "right": 1238,
+                    "bottom": 780.671875,
+                    "left": 264
+                  },
+                  "inline": "height: 240px;"
+                },
+                "notice": {
+                  "hidden": false,
+                  "rect": {
+                    "x": 264,
+                    "y": 89.796875,
+                    "width": 974,
+                    "height": 49.59375,
+                    "top": 89.796875,
+                    "right": 1238,
+                    "bottom": 139.390625,
+                    "left": 264
+                  },
+                  "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+                },
+                "brief": {
+                  "open": true,
+                  "rect": {
+                    "x": 275,
+                    "y": 241.484375,
+                    "width": 952,
+                    "height": 240.1875,
+                    "top": 241.484375,
+                    "right": 1227,
+                    "bottom": 481.671875,
+                    "left": 275
+                  }
+                },
+                "rootChildren": [
+                  {
+                    "id": "space-crumb",
+                    "class": "space-crumb",
+                    "rect": {
+                      "x": 264,
+                      "y": 161.390625,
+                      "width": 974,
+                      "height": 23.09375,
+                      "top": 161.390625,
+                      "right": 1238,
+                      "bottom": 184.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "space-head compact overview-head",
+                    "rect": {
+                      "x": 264,
+                      "y": 190.484375,
+                      "width": 974,
+                      "height": 298.1875,
+                      "top": 190.484375,
+                      "right": 1238,
+                      "bottom": 488.671875,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "area-map",
+                    "rect": {
+                      "x": 264,
+                      "y": 494.671875,
+                      "width": 974,
+                      "height": 286,
+                      "top": 494.671875,
+                      "right": 1238,
+                      "bottom": 780.671875,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "area-relations",
+                    "class": "area-relations",
+                    "rect": {
+                      "x": 264,
+                      "y": 792.671875,
+                      "width": 974,
+                      "height": 500.984375,
+                      "top": 792.671875,
+                      "right": 1238,
+                      "bottom": 1293.65625,
+                      "left": 264
+                    },
+                    "hidden": false
+                  }
+                ],
+                "panelMode": "records"
+              }
+            },
+            {
+              "phase": "on-target-toggle-after-document-capture",
+              "eventTimeStamp": 585.6000000238419,
+              "performanceNow": 599.2000000476837,
+              "isTrusted": true,
+              "open": true,
+              "raw": {
+                "windowY": 0,
+                "focus": "",
+                "viewport": [
+                  1280,
+                  720
+                ],
+                "map": {
+                  "x": 264,
+                  "y": 540.671875,
+                  "width": 660,
+                  "height": 240,
+                  "top": 540.671875,
+                  "right": 924,
+                  "bottom": 780.671875,
+                  "left": 264
+                },
+                "layout": {
+                  "rect": {
+                    "x": 264,
+                    "y": 540.671875,
+                    "width": 974,
+                    "height": 240,
+                    "top": 540.671875,
+                    "right": 1238,
+                    "bottom": 780.671875,
+                    "left": 264
+                  },
+                  "inline": "height: 240px;"
+                },
+                "notice": {
+                  "hidden": false,
+                  "rect": {
+                    "x": 264,
+                    "y": 89.796875,
+                    "width": 974,
+                    "height": 49.59375,
+                    "top": 89.796875,
+                    "right": 1238,
+                    "bottom": 139.390625,
+                    "left": 264
+                  },
+                  "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+                },
+                "brief": {
+                  "open": true,
+                  "rect": {
+                    "x": 275,
+                    "y": 241.484375,
+                    "width": 952,
+                    "height": 240.1875,
+                    "top": 241.484375,
+                    "right": 1227,
+                    "bottom": 481.671875,
+                    "left": 275
+                  }
+                },
+                "rootChildren": [
+                  {
+                    "id": "space-crumb",
+                    "class": "space-crumb",
+                    "rect": {
+                      "x": 264,
+                      "y": 161.390625,
+                      "width": 974,
+                      "height": 23.09375,
+                      "top": 161.390625,
+                      "right": 1238,
+                      "bottom": 184.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "space-head compact overview-head",
+                    "rect": {
+                      "x": 264,
+                      "y": 190.484375,
+                      "width": 974,
+                      "height": 298.1875,
+                      "top": 190.484375,
+                      "right": 1238,
+                      "bottom": 488.671875,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "area-map",
+                    "rect": {
+                      "x": 264,
+                      "y": 494.671875,
+                      "width": 974,
+                      "height": 286,
+                      "top": 494.671875,
+                      "right": 1238,
+                      "bottom": 780.671875,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "area-relations",
+                    "class": "area-relations",
+                    "rect": {
+                      "x": 264,
+                      "y": 792.671875,
+                      "width": 974,
+                      "height": 500.984375,
+                      "top": 792.671875,
+                      "right": 1238,
+                      "bottom": 1293.65625,
+                      "left": 264
+                    },
+                    "hidden": false
+                  }
+                ],
+                "panelMode": "records"
+              }
+            }
+          ],
+          "afterObservedTargetEvent": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 660,
+              "height": 240,
+              "top": 540.671875,
+              "right": 924,
+              "bottom": 780.671875,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 974,
+                "height": 240,
+                "top": 540.671875,
+                "right": 1238,
+                "bottom": 780.671875,
+                "left": 264
+              },
+              "inline": "height: 240px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 952,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1227,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 974,
+                  "height": 286,
+                  "top": 494.671875,
+                  "right": 1238,
+                  "bottom": 780.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 792.671875,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 792.671875,
+                  "right": 1238,
+                  "bottom": 1293.65625,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        },
+        {
+          "action": "close",
+          "beforeClick": {
+            "performanceNow": 615,
+            "open": true
+          },
+          "rawBefore": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 660,
+              "height": 240,
+              "top": 540.671875,
+              "right": 924,
+              "bottom": 780.671875,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 974,
+                "height": 240,
+                "top": 540.671875,
+                "right": 1238,
+                "bottom": 780.671875,
+                "left": 264
+              },
+              "inline": "height: 240px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 952,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1227,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 974,
+                  "height": 286,
+                  "top": 494.671875,
+                  "right": 1238,
+                  "bottom": 780.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 792.671875,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 792.671875,
+                  "right": 1238,
+                  "bottom": 1293.65625,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          },
+          "afterNormalClickReturn": {
+            "performanceNow": 659.1000000238419,
+            "open": false
+          },
+          "rawAfterClickReturn": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 660,
+              "height": 240,
+              "top": 292.484375,
+              "right": 924,
+              "bottom": 532.484375,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 974,
+                "height": 240,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 532.484375,
+                "left": 264
+              },
+              "inline": "height: 240px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1151.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1227,
+                "bottom": 232.203125,
+                "left": 1151.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 974,
+                  "height": 286,
+                  "top": 246.484375,
+                  "right": 1238,
+                  "bottom": 532.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 544.484375,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 544.484375,
+                  "right": 1238,
+                  "bottom": 1045.46875,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          },
+          "targetEvents": [
+            {
+              "phase": "document-capture-after-app-capture-registration",
+              "eventTimeStamp": 654,
+              "performanceNow": 664.8000000119209,
+              "isTrusted": true,
+              "open": false,
+              "raw": {
+                "windowY": 0,
+                "focus": "",
+                "viewport": [
+                  1280,
+                  720
+                ],
+                "map": {
+                  "x": 264,
+                  "y": 292.484375,
+                  "width": 660,
+                  "height": 411.515625,
+                  "top": 292.484375,
+                  "right": 924,
+                  "bottom": 704,
+                  "left": 264
+                },
+                "layout": {
+                  "rect": {
+                    "x": 264,
+                    "y": 292.484375,
+                    "width": 974,
+                    "height": 411.515625,
+                    "top": 292.484375,
+                    "right": 1238,
+                    "bottom": 704,
+                    "left": 264
+                  },
+                  "inline": "height: 411.516px;"
+                },
+                "notice": {
+                  "hidden": false,
+                  "rect": {
+                    "x": 264,
+                    "y": 89.796875,
+                    "width": 974,
+                    "height": 49.59375,
+                    "top": 89.796875,
+                    "right": 1238,
+                    "bottom": 139.390625,
+                    "left": 264
+                  },
+                  "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+                },
+                "brief": {
+                  "open": false,
+                  "rect": {
+                    "x": 1151.890625,
+                    "y": 202.765625,
+                    "width": 75.109375,
+                    "height": 29.4375,
+                    "top": 202.765625,
+                    "right": 1227,
+                    "bottom": 232.203125,
+                    "left": 1151.890625
+                  }
+                },
+                "rootChildren": [
+                  {
+                    "id": "space-crumb",
+                    "class": "space-crumb",
+                    "rect": {
+                      "x": 264,
+                      "y": 161.390625,
+                      "width": 974,
+                      "height": 23.09375,
+                      "top": 161.390625,
+                      "right": 1238,
+                      "bottom": 184.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "space-head compact overview-head",
+                    "rect": {
+                      "x": 264,
+                      "y": 190.484375,
+                      "width": 974,
+                      "height": 50,
+                      "top": 190.484375,
+                      "right": 1238,
+                      "bottom": 240.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "area-map",
+                    "rect": {
+                      "x": 264,
+                      "y": 246.484375,
+                      "width": 974,
+                      "height": 457.515625,
+                      "top": 246.484375,
+                      "right": 1238,
+                      "bottom": 704,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "area-relations",
+                    "class": "area-relations",
+                    "rect": {
+                      "x": 264,
+                      "y": 716,
+                      "width": 974,
+                      "height": 500.984375,
+                      "top": 716,
+                      "right": 1238,
+                      "bottom": 1216.984375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  }
+                ],
+                "panelMode": "records"
+              }
+            },
+            {
+              "phase": "on-target-toggle-after-document-capture",
+              "eventTimeStamp": 654,
+              "performanceNow": 665.6000000238419,
+              "isTrusted": true,
+              "open": false,
+              "raw": {
+                "windowY": 0,
+                "focus": "",
+                "viewport": [
+                  1280,
+                  720
+                ],
+                "map": {
+                  "x": 264,
+                  "y": 292.484375,
+                  "width": 660,
+                  "height": 411.515625,
+                  "top": 292.484375,
+                  "right": 924,
+                  "bottom": 704,
+                  "left": 264
+                },
+                "layout": {
+                  "rect": {
+                    "x": 264,
+                    "y": 292.484375,
+                    "width": 974,
+                    "height": 411.515625,
+                    "top": 292.484375,
+                    "right": 1238,
+                    "bottom": 704,
+                    "left": 264
+                  },
+                  "inline": "height: 411.516px;"
+                },
+                "notice": {
+                  "hidden": false,
+                  "rect": {
+                    "x": 264,
+                    "y": 89.796875,
+                    "width": 974,
+                    "height": 49.59375,
+                    "top": 89.796875,
+                    "right": 1238,
+                    "bottom": 139.390625,
+                    "left": 264
+                  },
+                  "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+                },
+                "brief": {
+                  "open": false,
+                  "rect": {
+                    "x": 1151.890625,
+                    "y": 202.765625,
+                    "width": 75.109375,
+                    "height": 29.4375,
+                    "top": 202.765625,
+                    "right": 1227,
+                    "bottom": 232.203125,
+                    "left": 1151.890625
+                  }
+                },
+                "rootChildren": [
+                  {
+                    "id": "space-crumb",
+                    "class": "space-crumb",
+                    "rect": {
+                      "x": 264,
+                      "y": 161.390625,
+                      "width": 974,
+                      "height": 23.09375,
+                      "top": 161.390625,
+                      "right": 1238,
+                      "bottom": 184.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "space-head compact overview-head",
+                    "rect": {
+                      "x": 264,
+                      "y": 190.484375,
+                      "width": 974,
+                      "height": 50,
+                      "top": 190.484375,
+                      "right": 1238,
+                      "bottom": 240.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "area-map",
+                    "rect": {
+                      "x": 264,
+                      "y": 246.484375,
+                      "width": 974,
+                      "height": 457.515625,
+                      "top": 246.484375,
+                      "right": 1238,
+                      "bottom": 704,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "area-relations",
+                    "class": "area-relations",
+                    "rect": {
+                      "x": 264,
+                      "y": 716,
+                      "width": 974,
+                      "height": 500.984375,
+                      "top": 716,
+                      "right": 1238,
+                      "bottom": 1216.984375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  }
+                ],
+                "panelMode": "records"
+              }
+            }
+          ],
+          "afterObservedTargetEvent": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1280,
+              720
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 660,
+              "height": 411.515625,
+              "top": 292.484375,
+              "right": 924,
+              "bottom": 704,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 974,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 264
+              },
+              "inline": "height: 411.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 974,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1238,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1151.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1227,
+                "bottom": 232.203125,
+                "left": 1151.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 974,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1238,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 974,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1238,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 974,
+                  "height": 457.515625,
+                  "top": 246.484375,
+                  "right": 1238,
+                  "bottom": 704,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 716,
+                  "width": 974,
+                  "height": 500.984375,
+                  "top": 716,
+                  "right": 1238,
+                  "bottom": 1216.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        }
+      ],
+      "finalOpen": false,
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "events": [
+        {
+          "phase": "document-capture-after-app-capture-registration",
+          "eventTimeStamp": 575.8999999761581,
+          "performanceNow": 589.1999999880791,
+          "isTrusted": true,
+          "open": true,
+          "raw": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 820,
+              "height": 343.328125,
+              "top": 540.671875,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 1134,
+                "height": 343.328125,
+                "top": 540.671875,
+                "right": 1398,
+                "bottom": 884,
+                "left": 264
+              },
+              "inline": "height: 343.328px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 1112,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1387,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 1134,
+                  "height": 389.328125,
+                  "top": 494.671875,
+                  "right": 1398,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 896,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 896,
+                  "right": 1398,
+                  "bottom": 1396.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        },
+        {
+          "phase": "on-target-toggle-after-document-capture",
+          "eventTimeStamp": 575.8999999761581,
+          "performanceNow": 590.6999999880791,
+          "isTrusted": true,
+          "open": true,
+          "raw": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 820,
+              "height": 343.328125,
+              "top": 540.671875,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 1134,
+                "height": 343.328125,
+                "top": 540.671875,
+                "right": 1398,
+                "bottom": 884,
+                "left": 264
+              },
+              "inline": "height: 343.328px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 1112,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1387,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 1134,
+                  "height": 389.328125,
+                  "top": 494.671875,
+                  "right": 1398,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 896,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 896,
+                  "right": 1398,
+                  "bottom": 1396.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        },
+        {
+          "phase": "document-capture-after-app-capture-registration",
+          "eventTimeStamp": 644.1999999880791,
+          "performanceNow": 656.6000000238419,
+          "isTrusted": true,
+          "open": false,
+          "raw": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 820,
+              "height": 591.515625,
+              "top": 292.484375,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 1134,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 264
+              },
+              "inline": "height: 591.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1311.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1387,
+                "bottom": 232.203125,
+                "left": 1311.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 1134,
+                  "height": 637.515625,
+                  "top": 246.484375,
+                  "right": 1398,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 896,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 896,
+                  "right": 1398,
+                  "bottom": 1396.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        },
+        {
+          "phase": "on-target-toggle-after-document-capture",
+          "eventTimeStamp": 644.1999999880791,
+          "performanceNow": 657.3000000119209,
+          "isTrusted": true,
+          "open": false,
+          "raw": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 820,
+              "height": 591.515625,
+              "top": 292.484375,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 1134,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 264
+              },
+              "inline": "height: 591.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1311.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1387,
+                "bottom": 232.203125,
+                "left": 1311.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 1134,
+                  "height": 637.515625,
+                  "top": 246.484375,
+                  "right": 1398,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 896,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 896,
+                  "right": 1398,
+                  "bottom": 1396.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        }
+      ],
+      "clicks": [
+        {
+          "action": "open",
+          "beforeClick": {
+            "performanceNow": 539,
+            "open": false
+          },
+          "rawBefore": {
+            "windowY": 0,
+            "focus": "records-heading",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 820,
+              "height": 591.515625,
+              "top": 292.484375,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 1134,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 264
+              },
+              "inline": "height: 591.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1311.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1387,
+                "bottom": 232.203125,
+                "left": 1311.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 1134,
+                  "height": 637.515625,
+                  "top": 246.484375,
+                  "right": 1398,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 896,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 896,
+                  "right": 1398,
+                  "bottom": 1396.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          },
+          "afterNormalClickReturn": {
+            "performanceNow": 581.6000000238419,
+            "open": true
+          },
+          "rawAfterClickReturn": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 820,
+              "height": 591.515625,
+              "top": 540.671875,
+              "right": 1084,
+              "bottom": 1132.1875,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 1134,
+                "height": 591.515625,
+                "top": 540.671875,
+                "right": 1398,
+                "bottom": 1132.1875,
+                "left": 264
+              },
+              "inline": "height: 591.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 1112,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1387,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 1134,
+                  "height": 637.515625,
+                  "top": 494.671875,
+                  "right": 1398,
+                  "bottom": 1132.1875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 1144.1875,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 1144.1875,
+                  "right": 1398,
+                  "bottom": 1645.171875,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          },
+          "targetEvents": [
+            {
+              "phase": "document-capture-after-app-capture-registration",
+              "eventTimeStamp": 575.8999999761581,
+              "performanceNow": 589.1999999880791,
+              "isTrusted": true,
+              "open": true,
+              "raw": {
+                "windowY": 0,
+                "focus": "",
+                "viewport": [
+                  1440,
+                  900
+                ],
+                "map": {
+                  "x": 264,
+                  "y": 540.671875,
+                  "width": 820,
+                  "height": 343.328125,
+                  "top": 540.671875,
+                  "right": 1084,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "layout": {
+                  "rect": {
+                    "x": 264,
+                    "y": 540.671875,
+                    "width": 1134,
+                    "height": 343.328125,
+                    "top": 540.671875,
+                    "right": 1398,
+                    "bottom": 884,
+                    "left": 264
+                  },
+                  "inline": "height: 343.328px;"
+                },
+                "notice": {
+                  "hidden": false,
+                  "rect": {
+                    "x": 264,
+                    "y": 89.796875,
+                    "width": 1134,
+                    "height": 49.59375,
+                    "top": 89.796875,
+                    "right": 1398,
+                    "bottom": 139.390625,
+                    "left": 264
+                  },
+                  "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+                },
+                "brief": {
+                  "open": true,
+                  "rect": {
+                    "x": 275,
+                    "y": 241.484375,
+                    "width": 1112,
+                    "height": 240.1875,
+                    "top": 241.484375,
+                    "right": 1387,
+                    "bottom": 481.671875,
+                    "left": 275
+                  }
+                },
+                "rootChildren": [
+                  {
+                    "id": "space-crumb",
+                    "class": "space-crumb",
+                    "rect": {
+                      "x": 264,
+                      "y": 161.390625,
+                      "width": 1134,
+                      "height": 23.09375,
+                      "top": 161.390625,
+                      "right": 1398,
+                      "bottom": 184.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "space-head compact overview-head",
+                    "rect": {
+                      "x": 264,
+                      "y": 190.484375,
+                      "width": 1134,
+                      "height": 298.1875,
+                      "top": 190.484375,
+                      "right": 1398,
+                      "bottom": 488.671875,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "area-map",
+                    "rect": {
+                      "x": 264,
+                      "y": 494.671875,
+                      "width": 1134,
+                      "height": 389.328125,
+                      "top": 494.671875,
+                      "right": 1398,
+                      "bottom": 884,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "area-relations",
+                    "class": "area-relations",
+                    "rect": {
+                      "x": 264,
+                      "y": 896,
+                      "width": 1134,
+                      "height": 500.984375,
+                      "top": 896,
+                      "right": 1398,
+                      "bottom": 1396.984375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  }
+                ],
+                "panelMode": "records"
+              }
+            },
+            {
+              "phase": "on-target-toggle-after-document-capture",
+              "eventTimeStamp": 575.8999999761581,
+              "performanceNow": 590.6999999880791,
+              "isTrusted": true,
+              "open": true,
+              "raw": {
+                "windowY": 0,
+                "focus": "",
+                "viewport": [
+                  1440,
+                  900
+                ],
+                "map": {
+                  "x": 264,
+                  "y": 540.671875,
+                  "width": 820,
+                  "height": 343.328125,
+                  "top": 540.671875,
+                  "right": 1084,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "layout": {
+                  "rect": {
+                    "x": 264,
+                    "y": 540.671875,
+                    "width": 1134,
+                    "height": 343.328125,
+                    "top": 540.671875,
+                    "right": 1398,
+                    "bottom": 884,
+                    "left": 264
+                  },
+                  "inline": "height: 343.328px;"
+                },
+                "notice": {
+                  "hidden": false,
+                  "rect": {
+                    "x": 264,
+                    "y": 89.796875,
+                    "width": 1134,
+                    "height": 49.59375,
+                    "top": 89.796875,
+                    "right": 1398,
+                    "bottom": 139.390625,
+                    "left": 264
+                  },
+                  "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+                },
+                "brief": {
+                  "open": true,
+                  "rect": {
+                    "x": 275,
+                    "y": 241.484375,
+                    "width": 1112,
+                    "height": 240.1875,
+                    "top": 241.484375,
+                    "right": 1387,
+                    "bottom": 481.671875,
+                    "left": 275
+                  }
+                },
+                "rootChildren": [
+                  {
+                    "id": "space-crumb",
+                    "class": "space-crumb",
+                    "rect": {
+                      "x": 264,
+                      "y": 161.390625,
+                      "width": 1134,
+                      "height": 23.09375,
+                      "top": 161.390625,
+                      "right": 1398,
+                      "bottom": 184.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "space-head compact overview-head",
+                    "rect": {
+                      "x": 264,
+                      "y": 190.484375,
+                      "width": 1134,
+                      "height": 298.1875,
+                      "top": 190.484375,
+                      "right": 1398,
+                      "bottom": 488.671875,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "area-map",
+                    "rect": {
+                      "x": 264,
+                      "y": 494.671875,
+                      "width": 1134,
+                      "height": 389.328125,
+                      "top": 494.671875,
+                      "right": 1398,
+                      "bottom": 884,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "area-relations",
+                    "class": "area-relations",
+                    "rect": {
+                      "x": 264,
+                      "y": 896,
+                      "width": 1134,
+                      "height": 500.984375,
+                      "top": 896,
+                      "right": 1398,
+                      "bottom": 1396.984375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  }
+                ],
+                "panelMode": "records"
+              }
+            }
+          ],
+          "afterObservedTargetEvent": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 820,
+              "height": 343.328125,
+              "top": 540.671875,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 1134,
+                "height": 343.328125,
+                "top": 540.671875,
+                "right": 1398,
+                "bottom": 884,
+                "left": 264
+              },
+              "inline": "height: 343.328px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 1112,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1387,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 1134,
+                  "height": 389.328125,
+                  "top": 494.671875,
+                  "right": 1398,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 896,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 896,
+                  "right": 1398,
+                  "bottom": 1396.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        },
+        {
+          "action": "close",
+          "beforeClick": {
+            "performanceNow": 601.6000000238419,
+            "open": true
+          },
+          "rawBefore": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 820,
+              "height": 343.328125,
+              "top": 540.671875,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 540.671875,
+                "width": 1134,
+                "height": 343.328125,
+                "top": 540.671875,
+                "right": 1398,
+                "bottom": 884,
+                "left": 264
+              },
+              "inline": "height: 343.328px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": true,
+              "rect": {
+                "x": 275,
+                "y": 241.484375,
+                "width": 1112,
+                "height": 240.1875,
+                "top": 241.484375,
+                "right": 1387,
+                "bottom": 481.671875,
+                "left": 275
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 298.1875,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 488.671875,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 494.671875,
+                  "width": 1134,
+                  "height": 389.328125,
+                  "top": 494.671875,
+                  "right": 1398,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 896,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 896,
+                  "right": 1398,
+                  "bottom": 1396.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          },
+          "afterNormalClickReturn": {
+            "performanceNow": 649,
+            "open": false
+          },
+          "rawAfterClickReturn": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 820,
+              "height": 343.328125,
+              "top": 292.484375,
+              "right": 1084,
+              "bottom": 635.8125,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 1134,
+                "height": 343.328125,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 635.8125,
+                "left": 264
+              },
+              "inline": "height: 343.328px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1311.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1387,
+                "bottom": 232.203125,
+                "left": 1311.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 1134,
+                  "height": 389.328125,
+                  "top": 246.484375,
+                  "right": 1398,
+                  "bottom": 635.8125,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 647.8125,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 647.8125,
+                  "right": 1398,
+                  "bottom": 1148.796875,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          },
+          "targetEvents": [
+            {
+              "phase": "document-capture-after-app-capture-registration",
+              "eventTimeStamp": 644.1999999880791,
+              "performanceNow": 656.6000000238419,
+              "isTrusted": true,
+              "open": false,
+              "raw": {
+                "windowY": 0,
+                "focus": "",
+                "viewport": [
+                  1440,
+                  900
+                ],
+                "map": {
+                  "x": 264,
+                  "y": 292.484375,
+                  "width": 820,
+                  "height": 591.515625,
+                  "top": 292.484375,
+                  "right": 1084,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "layout": {
+                  "rect": {
+                    "x": 264,
+                    "y": 292.484375,
+                    "width": 1134,
+                    "height": 591.515625,
+                    "top": 292.484375,
+                    "right": 1398,
+                    "bottom": 884,
+                    "left": 264
+                  },
+                  "inline": "height: 591.516px;"
+                },
+                "notice": {
+                  "hidden": false,
+                  "rect": {
+                    "x": 264,
+                    "y": 89.796875,
+                    "width": 1134,
+                    "height": 49.59375,
+                    "top": 89.796875,
+                    "right": 1398,
+                    "bottom": 139.390625,
+                    "left": 264
+                  },
+                  "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+                },
+                "brief": {
+                  "open": false,
+                  "rect": {
+                    "x": 1311.890625,
+                    "y": 202.765625,
+                    "width": 75.109375,
+                    "height": 29.4375,
+                    "top": 202.765625,
+                    "right": 1387,
+                    "bottom": 232.203125,
+                    "left": 1311.890625
+                  }
+                },
+                "rootChildren": [
+                  {
+                    "id": "space-crumb",
+                    "class": "space-crumb",
+                    "rect": {
+                      "x": 264,
+                      "y": 161.390625,
+                      "width": 1134,
+                      "height": 23.09375,
+                      "top": 161.390625,
+                      "right": 1398,
+                      "bottom": 184.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "space-head compact overview-head",
+                    "rect": {
+                      "x": 264,
+                      "y": 190.484375,
+                      "width": 1134,
+                      "height": 50,
+                      "top": 190.484375,
+                      "right": 1398,
+                      "bottom": 240.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "area-map",
+                    "rect": {
+                      "x": 264,
+                      "y": 246.484375,
+                      "width": 1134,
+                      "height": 637.515625,
+                      "top": 246.484375,
+                      "right": 1398,
+                      "bottom": 884,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "area-relations",
+                    "class": "area-relations",
+                    "rect": {
+                      "x": 264,
+                      "y": 896,
+                      "width": 1134,
+                      "height": 500.984375,
+                      "top": 896,
+                      "right": 1398,
+                      "bottom": 1396.984375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  }
+                ],
+                "panelMode": "records"
+              }
+            },
+            {
+              "phase": "on-target-toggle-after-document-capture",
+              "eventTimeStamp": 644.1999999880791,
+              "performanceNow": 657.3000000119209,
+              "isTrusted": true,
+              "open": false,
+              "raw": {
+                "windowY": 0,
+                "focus": "",
+                "viewport": [
+                  1440,
+                  900
+                ],
+                "map": {
+                  "x": 264,
+                  "y": 292.484375,
+                  "width": 820,
+                  "height": 591.515625,
+                  "top": 292.484375,
+                  "right": 1084,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "layout": {
+                  "rect": {
+                    "x": 264,
+                    "y": 292.484375,
+                    "width": 1134,
+                    "height": 591.515625,
+                    "top": 292.484375,
+                    "right": 1398,
+                    "bottom": 884,
+                    "left": 264
+                  },
+                  "inline": "height: 591.516px;"
+                },
+                "notice": {
+                  "hidden": false,
+                  "rect": {
+                    "x": 264,
+                    "y": 89.796875,
+                    "width": 1134,
+                    "height": 49.59375,
+                    "top": 89.796875,
+                    "right": 1398,
+                    "bottom": 139.390625,
+                    "left": 264
+                  },
+                  "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+                },
+                "brief": {
+                  "open": false,
+                  "rect": {
+                    "x": 1311.890625,
+                    "y": 202.765625,
+                    "width": 75.109375,
+                    "height": 29.4375,
+                    "top": 202.765625,
+                    "right": 1387,
+                    "bottom": 232.203125,
+                    "left": 1311.890625
+                  }
+                },
+                "rootChildren": [
+                  {
+                    "id": "space-crumb",
+                    "class": "space-crumb",
+                    "rect": {
+                      "x": 264,
+                      "y": 161.390625,
+                      "width": 1134,
+                      "height": 23.09375,
+                      "top": 161.390625,
+                      "right": 1398,
+                      "bottom": 184.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "space-head compact overview-head",
+                    "rect": {
+                      "x": 264,
+                      "y": 190.484375,
+                      "width": 1134,
+                      "height": 50,
+                      "top": 190.484375,
+                      "right": 1398,
+                      "bottom": 240.484375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "",
+                    "class": "area-map",
+                    "rect": {
+                      "x": 264,
+                      "y": 246.484375,
+                      "width": 1134,
+                      "height": 637.515625,
+                      "top": 246.484375,
+                      "right": 1398,
+                      "bottom": 884,
+                      "left": 264
+                    },
+                    "hidden": false
+                  },
+                  {
+                    "id": "area-relations",
+                    "class": "area-relations",
+                    "rect": {
+                      "x": 264,
+                      "y": 896,
+                      "width": 1134,
+                      "height": 500.984375,
+                      "top": 896,
+                      "right": 1398,
+                      "bottom": 1396.984375,
+                      "left": 264
+                    },
+                    "hidden": false
+                  }
+                ],
+                "panelMode": "records"
+              }
+            }
+          ],
+          "afterObservedTargetEvent": {
+            "windowY": 0,
+            "focus": "",
+            "viewport": [
+              1440,
+              900
+            ],
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 820,
+              "height": 591.515625,
+              "top": 292.484375,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "layout": {
+              "rect": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 1134,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 264
+              },
+              "inline": "height: 591.516px;"
+            },
+            "notice": {
+              "hidden": false,
+              "rect": {
+                "x": 264,
+                "y": 89.796875,
+                "width": 1134,
+                "height": 49.59375,
+                "top": 89.796875,
+                "right": 1398,
+                "bottom": 139.390625,
+                "left": 264
+              },
+              "text": "“같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19”을(를) 새 프로젝트 사본으로 불러왔어요. 이전 프로젝트는 ‘내 프로젝트’에 그대로 있어요."
+            },
+            "brief": {
+              "open": false,
+              "rect": {
+                "x": 1311.890625,
+                "y": 202.765625,
+                "width": 75.109375,
+                "height": 29.4375,
+                "top": 202.765625,
+                "right": 1387,
+                "bottom": 232.203125,
+                "left": 1311.890625
+              }
+            },
+            "rootChildren": [
+              {
+                "id": "space-crumb",
+                "class": "space-crumb",
+                "rect": {
+                  "x": 264,
+                  "y": 161.390625,
+                  "width": 1134,
+                  "height": 23.09375,
+                  "top": 161.390625,
+                  "right": 1398,
+                  "bottom": 184.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "space-head compact overview-head",
+                "rect": {
+                  "x": 264,
+                  "y": 190.484375,
+                  "width": 1134,
+                  "height": 50,
+                  "top": 190.484375,
+                  "right": 1398,
+                  "bottom": 240.484375,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "",
+                "class": "area-map",
+                "rect": {
+                  "x": 264,
+                  "y": 246.484375,
+                  "width": 1134,
+                  "height": 637.515625,
+                  "top": 246.484375,
+                  "right": 1398,
+                  "bottom": 884,
+                  "left": 264
+                },
+                "hidden": false
+              },
+              {
+                "id": "area-relations",
+                "class": "area-relations",
+                "rect": {
+                  "x": 264,
+                  "y": 896,
+                  "width": 1134,
+                  "height": 500.984375,
+                  "top": 896,
+                  "right": 1398,
+                  "bottom": 1396.984375,
+                  "left": 264
+                },
+                "hidden": false
+              }
+            ],
+            "panelMode": "records"
+          }
+        }
+      ],
+      "finalOpen": false,
+      "pageerrors": []
+    }
+  ],
+  "exit": 0
+}
