@@ -75,6 +75,7 @@ const MAP_CARD_HEIGHT=180; // Matches the bounded card footprint in styles.css a
 let collapsed=new Set<string>();
 type SidePanel='area'|'relations'|'records';
 let panelMode:SidePanel='area',relationCaller='map-relations-open';
+let branchRecordCaller:{project:string;epoch:number;area:string;id:string}|null=null;
 let compactMapHeader=false;
 let recordsReturnNotice='';
 type PanelReading={y:number;anchor:{id:string;top:number}|null;open:Record<string,boolean>};
@@ -187,6 +188,7 @@ function changeKind(kind:Project['draftKind']) {selectedReturnTaskId=undefined;c
 let contextReturn:HTMLElement|null=null;
 const unreadable='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 않습니다. 이 화면의 입력은 메모리에 남으며 복구 파일로 저장할 수 있습니다.';
 function resetEphemeral() {
+  branchRecordCaller=null;
   // USE106: this unsubmitted entry field belongs to the project being left, never to the next project.
   $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
@@ -330,6 +332,7 @@ function focusFirst(...ids:string[]):boolean {
 }
 /** Coming back restores this layer's scroll and the card the user entered; an ID that no longer exists is just skipped. */
 function openSpace() {
+  branchRecordCaller=null;
   // PC12: arriving at the map by any other way makes it the new starting point; the earlier one is dropped.
   // AREA17: back to the whole space from the located area's own screens keeps the way back to the view before 'where is it';
   // arriving from anywhere else (the work view, another area) is a new start.
@@ -341,6 +344,7 @@ function openSpace() {
   if(!(from&&focusFirst(`node-enter-${from}`,`list-enter-${from}`)))$('space-title')?.focus({preventScroll:true});
 }
 function openArea(id:string) {
+  branchRecordCaller=null;
   if(view==='space')layerMemo.from=id;
   // AREA17: opening the located area itself (its panel's '영역 열기', its crumb) keeps the way back; any other area is a new start.
   if(!(located&&located.area===id&&(view==='space'||viewArea===id)))located=null;
@@ -1361,6 +1365,33 @@ function undoPosition() {
   try {commit(undoMove(project,step.id,step.from,step.to));project={...project,notice:`‘${a?.name??'영역'}’의 위치를 되돌렸어요. 다른 내용은 바뀌지 않았어요.`};renderStatus();}
   catch {posUndo=[];project={...project,notice:'그 뒤 위치가 다시 바뀌어(다른 이동이나 다른 탭) 되돌리지 않았어요. 지금 위치를 그대로 두었어요.'};render();}
 }
+/** Only the branch-record close path: focus a control at a visible, unobscured point inside the map. */
+function focusBranchRecordControl(id:string):boolean {
+  const el=document.getElementById(id),map=document.getElementById('space-map');
+  if(!el||!map?.contains(el)||!el.checkVisibility({visibilityProperty:true}))return false;
+  const r=el.getBoundingClientRect(),m=map.getBoundingClientRect(),sx=m.width/(map.offsetWidth||1),sy=m.height/(map.offsetHeight||1);
+  const left=Math.max(0,r.left,m.left+map.clientLeft*sx),top=Math.max(0,r.top,m.top+map.clientTop*sy);
+  const right=Math.min(innerWidth,r.right,m.left+(map.clientLeft+map.clientWidth)*sx),bottom=Math.min(innerHeight,r.bottom,m.top+(map.clientTop+map.clientHeight)*sy);
+  if(right<=left||bottom<=top)return false;
+  const hit=document.elementFromPoint((left+right)/2,(top+bottom)/2);if(!hit||!el.contains(hit))return false;
+  el.focus({preventScroll:true});return document.activeElement===el;
+}
+function openBranchRecords(id:string) {
+  const a=areaById(id);if(!a||a.archived||view!=='space')return;
+  const page={x:window.scrollX,y:window.scrollY};
+  capturePanelReading();
+  if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==id)endRecordsExcursion();
+  branchRecordCaller={project:project.id,epoch:projectEpoch,area:id,id:`branch-records-${id}`};
+  mapSelected=id;sheetOpen=true;panelMode='area';rememberMap();render(true,true,()=>window.scrollTo({left:page.x,top:page.y}));
+  // The explicit record entry wins only after render has restored the old panel reading.
+  const body=document.getElementById('area-panel-body'),box=document.getElementById(`subtree-records-${id}`) as HTMLDetailsElement|null;
+  const summary=document.getElementById(`subtree-records-heading-${id}`);
+  if(body?.dataset.areaId===id&&box&&summary&&body.contains(box)){
+    box.open=true;summary.focus({preventScroll:true});
+    body.scrollTop+=summary.getBoundingClientRect().top-body.getBoundingClientRect().top;
+    capturePanelReading(summary.id);rememberMap();
+  }
+}
 function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   const pt=areaPosition(project,a),el=node('div','','area-node');el.dataset.areaId=a.id;
   el.style.left=`${pt.x}px`;el.style.top=`${pt.y}px`;el.classList.toggle('selected',mapSelected===a.id);
@@ -1378,7 +1409,7 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   // Information shows the short properties; it never opens the area or changes the open work.
   const info=node('button','정보','quiet node-info');info.type='button';info.id=`node-info-${a.id}`;info.setAttribute('aria-pressed',String(mapSelected===a.id));
   info.setAttribute('aria-label',`${a.name} 정보 (들어가지 않음)`);
-  info.addEventListener('click',()=>{capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();$(`node-info-${a.id}`)?.focus({preventScroll:true});});
+  info.addEventListener('click',()=>{branchRecordCaller=null;capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();$(`node-info-${a.id}`)?.focus({preventScroll:true});});
   el.append(handle,enter,info);
   const children=childrenOf(project,a.id).filter(x=>!x.archived);
   if(children.length){const folded=collapsed.has(a.id),toggle=btn(folded?`하위 ${descendantAreas(project,a.id).filter(x=>!x.archived).length}개 펼치기`:'하위 접기',()=>toggleBranch(a.id),'quiet branch-toggle',`branch-toggle-${a.id}`);
@@ -1387,7 +1418,7 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
     const current=signals.filter(s=>s.description.current?.valid).length,held=signals.reduce((n,s)=>n+s.description.held.length,0),stale=signals.filter(s=>s.description.current&&!s.description.current.valid).length;
     const updated=signals.filter(s=>receivedAreas.has(s.areaId)&&s.description.current?.valid).length;
     const bits=[`기록된 질문 ${questions}`,...(current?[`현재 설명 ${current}`]:[]),...(updated?[`이번 탭 설명 갱신 ${updated}`]:[]),...(held?[`설명 보류 ${held}`]:[]),...(stale?[`이전 기준 ${stale}`]:[])];
-    if(questions||current||held||stale){const signal=node('span',bits.join(' · '),'branch-signals');signal.title=signal.textContent??'';el.append(signal);}
+    if(questions||current||held||stale){const signal=btn(bits.join(' · '),()=>openBranchRecords(a.id),'branch-signals',`branch-records-${a.id}`);signal.title=signal.textContent??'';signal.setAttribute('aria-label',`${a.name} · ${bits.join(' · ')} · 이 부분과 하위 기록 읽기`);signal.setAttribute('aria-controls','area-panel-body');el.append(signal);}
   }
   // Dragging uses only the handle (outside the enter button); a drag never ends as a click on enter or information.
   handle.addEventListener('pointerdown',e=>{
@@ -1446,7 +1477,7 @@ function sizeWorkspace() {
 }
 window.addEventListener('resize',()=>{capturePanelReading();syncProjectHeader();sizeWorkspace();restorePanelReading();});
 document.addEventListener('toggle',e=>{if(e.target instanceof HTMLDetailsElement&&e.target.closest('#space-view')&&!e.target.closest('#area-panel'))sizeWorkspace();},true);
-function openRelations(from='map-relations-open') {capturePanelReading();relationCaller=from;panelMode='relations';rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});}
+function openRelations(from='map-relations-open') {branchRecordCaller=null;capturePanelReading();relationCaller=from;panelMode='relations';rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});}
 function relationBrowser():HTMLElement {
   const panel=node('aside','','area-panel relation-panel sheet-open');panel.id='area-panel';panel.dataset.panelMode='relations';panel.setAttribute('aria-label','연결의 실제 부분과 기록 읽기');
   const close=()=>{capturePanelReading();panelMode='area';rememberMap();render();(document.getElementById(relationCaller)??$('map-relations-open'))?.focus({preventScroll:true});};
@@ -1524,7 +1555,7 @@ function renderMap(root:HTMLElement,active:Area[],extra:HTMLElement[]=[]) {
   const submitArea=node('button','＋ 영역 추가','secondary');submitArea.type='submit';submitArea.id='area-add';add.append(name,note,submitArea);
   addPanel.append(add);bar.append(addPanel,...extra);
   bar.append(btn(`연결 ${project.space.relations.length}건`,()=>openRelations(),'quiet','map-relations-open'));
-  const areaTab=btn('선택 부분',()=>{capturePanelReading();panelMode='area';sheetOpen=true;rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});},'quiet','map-area-open');
+  const areaTab=btn('선택 부분',()=>{branchRecordCaller=null;capturePanelReading();panelMode='area';sheetOpen=true;rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});},'quiet','map-area-open');
   areaTab.disabled=!mapSelected;bar.append(areaTab);
   for(const [id,mode] of [['check-summary','records'],['map-relations-open','relations'],['map-area-open','area']] as const)bar.querySelector(`#${id}`)?.setAttribute('aria-pressed',String(panelMode===mode));
   const unplaced=areaRequests(null);
@@ -1591,7 +1622,7 @@ function areaList(active:Area[]):HTMLElement {
     const enter=btn('',()=>openArea(a.id),'quiet area-list-enter',`list-enter-${a.id}`);
     enter.append(node('strong',`${a.name} ↘`),node('span',a.note?shortText(a.note,40):'구상 미기재','hint'));
     if(areaRequests(a.id).some(currentGroup))enter.append(appTag());
-    const info=btn('정보',()=>{capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();},'secondary area-list-info',`list-info-${a.id}`);
+    const info=btn('정보',()=>{branchRecordCaller=null;capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();},'secondary area-list-info',`list-info-${a.id}`);
     info.setAttribute('aria-pressed',String(mapSelected===a.id));info.setAttribute('aria-label',`${a.name} 정보 (들어가지 않음)`);
     row.append(enter,info);box.append(row);
   }
@@ -1786,8 +1817,11 @@ function understandingPanel(a:Area,id:string,compact=false):HTMLElement|null {
 /** Short properties of the selected area, read first: name, the user's idea, and this area's requests for the user to pick.
  * Editing opens explicitly. No report is picked for the user; reports are read inside the task the user chose. */
 function areaPanel(a:Area):HTMLElement {
+  if(branchRecordCaller&&(branchRecordCaller.project!==project.id||branchRecordCaller.epoch!==projectEpoch||branchRecordCaller.area!==a.id))branchRecordCaller=null;
   const panel=node('aside','','area-panel');panel.id='area-panel';panel.dataset.panelMode='area';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
-  const close=()=>{capturePanelReading();mapSelected=null;sheetOpen=false;rememberMap();render();$(`node-info-${visibleRepresentative(project,a.id,collapsed)??a.id}`)?.focus({preventScroll:true});};
+  const close=()=>{capturePanelReading();const caller=branchRecordCaller;branchRecordCaller=null;mapSelected=null;sheetOpen=false;rememberMap();render();
+    if(caller){if(caller.project===project.id&&caller.epoch===projectEpoch&&caller.area===a.id&&(focusBranchRecordControl(caller.id)||focusBranchRecordControl(`node-info-${a.id}`)))return;$('space-title')?.focus({preventScroll:true});return;}
+    if(!focusFirst(`node-info-${visibleRepresentative(project,a.id,collapsed)??a.id}`))$('space-title')?.focus({preventScroll:true});};
   const head=node('div','','panel-top'),heading=node('strong',a.name);heading.id='area-panel-title';
   heading.title=a.name;
   const path=node('p',areaPath(project,a.id).map(x=>x.name).join(' › '),'panel-path');path.id='panel-path';
@@ -1853,6 +1887,7 @@ function subtreePanel(a:Area):HTMLElement {
   const signals=subtreeSignals(project,a.id),items=signals.flatMap(s=>[...s.questions,...s.reports]);
   const descriptions=signals.map(s=>({id:s.areaId,state:s.description})).filter(x=>x.state.current||x.state.held.length);
   const box=details(`이 부분과 하위 기록 · 질문 ${items.filter(it=>it.kind==='decision').length} · 설명 ${descriptions.length}`,`subtree-records-${a.id}`);box.className='subtree-records';
+  box.querySelector('summary')!.id=`subtree-records-heading-${a.id}`;
   box.append(node('p','앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.','hint'));
   for(const it of items){const task=project.tasks.find(t=>t.id===it.taskId),owner=areaById(it.areaId),row=node('div','','subtree-record');row.dataset.ownerArea=it.areaId??'';
     row.append(node('p',`${owner?.name??'영역 미지정'} · ${it.kind==='decision'?'기록된 질문':'후속 작업문 없는 보고'}`,'source-meta'),
@@ -1901,7 +1936,7 @@ function checkSection():HTMLElement|null {
   box.setAttribute('aria-controls','area-panel');box.setAttribute('aria-pressed',String(panelMode==='records'));
   return box;
 }
-function openRecords() {capturePanelReading();located=null;origin=null;panelMode='records';recordsReturnNotice='';rememberMap();render();$('records-heading')?.focus({preventScroll:true});}
+function openRecords() {branchRecordCaller=null;capturePanelReading();located=null;origin=null;panelMode='records';recordsReturnNotice='';rememberMap();render();$('records-heading')?.focus({preventScroll:true});}
 function recordsBrowser():HTMLElement {
   const panel=node('aside','','area-panel records-panel sheet-open');panel.id='area-panel';panel.dataset.panelMode='records';panel.setAttribute('aria-label','이어 볼 기록 읽기');
   const close=()=>{capturePanelReading();panelMode='area';rememberMap();render();$('check-summary')?.focus({preventScroll:true});};
@@ -2559,6 +2594,7 @@ $('example-start').addEventListener('click',()=>closeExample(true));
 $('example-close').addEventListener('click',()=>closeExample(false));
 /** Explicit navigation starts a new excursion. Part/endpoint locators and same-part actions keep their first caller. */
 function endRecordsExcursion(){
+  branchRecordCaller=null;
   let ended=false;
   if(origin?.view==='work'){origin=origin.work.upstream;ended=true;}
   if(located?.origin.view==='work'){located=null;ended=true;}
