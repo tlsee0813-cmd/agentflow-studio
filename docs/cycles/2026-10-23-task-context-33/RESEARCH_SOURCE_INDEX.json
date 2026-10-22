@@ -1,0 +1,42 @@
+{
+  "readOnly": true,
+  "sourceFiles": [
+    {
+      "key": "difyPanel",
+      "repo": "langgenius/dify",
+      "commit": "9f75925578ecd093ce3d1e30cb4c68f6efb8398c",
+      "path": "web/app/components/workflow/nodes/_base/components/workflow-panel/index.tsx",
+      "blob": "739e4e2d15b602ebba0153472c21c8c3a2cd80b6"
+    },
+    {
+      "key": "difyBefore",
+      "repo": "langgenius/dify",
+      "commit": "9f75925578ecd093ce3d1e30cb4c68f6efb8398c",
+      "path": "web/app/components/workflow/nodes/_base/components/before-run-form/index.tsx",
+      "blob": "1ae6e776bc6da19665a69cb9178b7fb15520e00c"
+    },
+    {
+      "key": "n8nHeader",
+      "repo": "n8n-io/n8n",
+      "commit": "80fc1ce17371495d04e27db86b85cb75feb6af09",
+      "path": "packages/frontend/editor-ui/src/features/ndv/settings/components/NodeSettingsHeader.vue",
+      "blob": "06f43b4f7144a8273e42660633da239e2b80ef41"
+    },
+    {
+      "key": "n8nSettings",
+      "repo": "n8n-io/n8n",
+      "commit": "80fc1ce17371495d04e27db86b85cb75feb6af09",
+      "path": "packages/frontend/editor-ui/src/features/ndv/settings/components/NodeSettings.vue",
+      "blob": "9c5c6e18ba538daaa7305a7cef2173607ff2db43"
+    },
+    {
+      "key": "vscodeBread",
+      "repo": "microsoft/vscode",
+      "commit": "c024bfb636e6db359ca29775b88c819866c84863",
+      "path": "src/vs/workbench/browser/parts/editor/breadcrumbsControl.ts",
+      "blob": "f73aa7c3b62d2486594de26f2300fb5403321ab7"
+    }
+  ],
+  "scope": "총괄이 전달한 Pro 주장 검증; Pro 대화 전체·제품 실행 미실행"
+}
+
