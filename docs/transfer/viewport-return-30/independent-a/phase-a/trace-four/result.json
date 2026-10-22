@@ -1,0 +1,55 @@
+{
+  "sourceCommit": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "scope": "PhaseA hypothesis observation only; no candidate or product changes",
+  "expectedTrials": 1,
+  "completedTrials": 1,
+  "originalGeometryFailures": [],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 0,
+  "trials": [
+    {
+      "id": "4-1280-deep-observe-trace",
+      "viewport": [
+        1280,
+        720
+      ],
+      "count": 4,
+      "depth": "deep",
+      "firstY": 0,
+      "firstMap": {
+        "x": 264,
+        "y": 268.890625,
+        "width": 974,
+        "height": 435.109375,
+        "top": 268.890625,
+        "right": 1238,
+        "bottom": 704,
+        "left": 264
+      },
+      "firstInline": "435.109px",
+      "bad": false,
+      "laterFrames": {
+        "time": 1764.8999999761581,
+        "y": 0,
+        "layout": "435.109px",
+        "mapRect": {
+          "x": 264,
+          "y": 268.890625,
+          "width": 974,
+          "height": 435.109375,
+          "top": 268.890625,
+          "right": 1238,
+          "bottom": 704,
+          "left": 264
+        },
+        "areaListOpen": true,
+        "saving": null
+      },
+      "dataUnchanged": true,
+      "cameraUnchangedOnEntry": true,
+      "rawReference": "ui.jsonl TRIAL RESULT 4-1280-deep-observe-trace"
+    }
+  ]
+}

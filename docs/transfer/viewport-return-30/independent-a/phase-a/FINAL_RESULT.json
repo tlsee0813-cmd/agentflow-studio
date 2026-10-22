@@ -1,0 +1,63 @@
+{
+  "sourceCommit": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "Phase": "A original-product hypothesis observation only",
+  "firstMainComparisons": {
+    "executed": 4,
+    "scrollZero": [
+      {
+        "viewport": [
+          1280,
+          720
+        ],
+        "bottom": 704
+      },
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "bottom": 884
+      }
+    ],
+    "deepFailures": [
+      {
+        "viewport": [
+          1280,
+          720
+        ],
+        "bottom": 972.890625
+      },
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "bottom": 1152.890625
+      }
+    ]
+  },
+  "firstSetupErrorPreserved": "original real-resize branch TypeError: wait_for_function positional argument; first 5 trials preserved. Continuation corrected only runner preparation + visible-list setup, not product or geometry predicates. Not one clean run.",
+  "geometryFailures": [
+    "6-1280-deep-observe",
+    "6-1440-deep-observe",
+    "6-1280-deep-fit-only",
+    "6-1280-deep-real-resize",
+    "6-1280-deep-observe-trace",
+    "6-1280-deep-uninstrumented-recheck"
+  ],
+  "completedTrialsByExecution": {
+    "original": 5,
+    "continuation": 6,
+    "trace-four": 1
+  },
+  "allCompletedTrialsDataUnchanged": true,
+  "allCompletedEntriesRetainedExistingCameraMemo": true,
+  "actualInitialCamera": "Created by normal backup import; never deleted. Work-to-space is existing camera, not a synthetic no-camera case.",
+  "aggregateDecisionExit": 1,
+  "limits": [
+    "read-only DOM event trace does not prove renderStatus function invocation",
+    "4-card default import already creates native open memory; explicit remembered control uses actual narrow viewport then restores PC width",
+    "PC1440 list-memory/recovery branches not repeated after smallest counterexample fixed",
+    "no product candidate/change, new fit algorithm, semantics/human usability/paid AI/full regression"
+  ]
+}

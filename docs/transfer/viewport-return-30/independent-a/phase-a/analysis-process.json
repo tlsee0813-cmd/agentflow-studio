@@ -1,0 +1,12 @@
+{
+  "scope": "offline raw analysis, not another UI execution",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle30-phase-a/analyze.py"
+  ],
+  "startUTC": "2026-10-22T20:48:17.374903+00:00",
+  "endUTC": "2026-10-22T20:48:17.413102+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "b0e9a9e7a4cf63d7011094d616df2765c95617684ece8e870670fa4db683e121",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

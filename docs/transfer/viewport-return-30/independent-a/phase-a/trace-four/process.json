@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle30-phase-a/trace-four/probe.py"
+  ],
+  "sourceCommit": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "startUTC": "2026-10-22T20:45:40.238698+00:00",
+  "endUTC": "2026-10-22T20:45:43.203623+00:00",
+  "checkerSHA256": "09cafde5e74ec7c57da21db70d1af00a39a3f4e1cfc13cad72879a85b97ae33d",
+  "checkerAfterSHA256": "09cafde5e74ec7c57da21db70d1af00a39a3f4e1cfc13cad72879a85b97ae33d",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

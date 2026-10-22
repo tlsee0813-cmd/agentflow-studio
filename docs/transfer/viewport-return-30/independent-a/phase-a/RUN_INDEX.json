@@ -1,0 +1,41 @@
+[
+  {
+    "run": "original",
+    "actualChildExit": 1,
+    "completedTrials": 5,
+    "expectedTrials": 11,
+    "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle30-phase-a/probe.py\", line 84, in <module>\n    for branch in ['fit-only','real-resize']:u.trial(1280,720,'deep',branch=branch)\n                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle30-phase-a/probe.py\", line 69, in trial\n    self.p.set_viewport_size({'width':w-1,'height':h});self.p.wait_for_function('(width)=>innerWidth===width',w-1);observed['afterResize']=self.snapshot('after real viewport width minus1 resize');self.p.screenshot(path=str(R/(name+'-after-resize.png')));observed['infoButtonsAfterResize']=self.infoGeometry();observed['projectAfterRecovery']=self.briefState(self.project())\n                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Page.wait_for_function() takes 2 positional arguments but 3 were given\n",
+    "pageerrors": [],
+    "cleanup": [],
+    "actualServerExit": -15,
+    "HTTPCount": 90,
+    "HTTPAllEqualDiskDuringAndAfter": true,
+    "POSTCount": 0
+  },
+  {
+    "run": "continuation",
+    "actualChildExit": 1,
+    "completedTrials": 6,
+    "expectedTrials": 6,
+    "fatal": null,
+    "pageerrors": [],
+    "cleanup": [],
+    "actualServerExit": -15,
+    "HTTPCount": 90,
+    "HTTPAllEqualDiskDuringAndAfter": true,
+    "POSTCount": 0
+  },
+  {
+    "run": "trace-four",
+    "actualChildExit": 0,
+    "completedTrials": 1,
+    "expectedTrials": 1,
+    "fatal": null,
+    "pageerrors": [],
+    "cleanup": [],
+    "actualServerExit": -15,
+    "HTTPCount": 15,
+    "HTTPAllEqualDiskDuringAndAfter": true,
+    "POSTCount": 0
+  }
+]

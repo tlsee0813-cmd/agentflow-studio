@@ -1,0 +1,34 @@
+{
+  "original": {
+    "toolSession": 85307,
+    "completion": "2e1368",
+    "actualCollectorExit": 1,
+    "childExit": 1,
+    "preparationErrorPreserved": true,
+    "geometryFailureAlsoObserved": true
+  },
+  "continuation": {
+    "toolSession": 36424,
+    "completion": "979358",
+    "actualCollectorExit": 1,
+    "childExit": 1,
+    "fatal": null,
+    "geometryFailureObserved": true
+  },
+  "trace-four": {
+    "toolSession": 98307,
+    "completion": "573209",
+    "actualCollectorExit": 0,
+    "childExit": 0
+  },
+  "offline-analysis": {
+    "completion": "f77e84",
+    "actualCollectorExit": 1,
+    "childExit": 1,
+    "notAnotherUIRun": true
+  },
+  "allServers": {
+    "actualExit": -15,
+    "meaning": "explicit termination requested after each execution, separate from child/collector"
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "sourceCommit": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "scope": "PhaseA hypothesis observation only; no candidate or product changes",
+  "expectedTrials": 11,
+  "completedTrials": 5,
+  "originalGeometryFailures": [
+    "6-1280-deep-observe",
+    "6-1440-deep-observe",
+    "6-1280-deep-fit-only"
+  ],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle30-phase-a/probe.py\", line 84, in <module>\n    for branch in ['fit-only','real-resize']:u.trial(1280,720,'deep',branch=branch)\n                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle30-phase-a/probe.py\", line 69, in trial\n    self.p.set_viewport_size({'width':w-1,'height':h});self.p.wait_for_function('(width)=>innerWidth===width',w-1);observed['afterResize']=self.snapshot('after real viewport width minus1 resize');self.p.screenshot(path=str(R/(name+'-after-resize.png')));observed['infoButtonsAfterResize']=self.infoGeometry();observed['projectAfterRecovery']=self.briefState(self.project())\n                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Page.wait_for_function() takes 2 positional arguments but 3 were given\n",
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 1,
+  "trials": [
+    {
+      "id": "6-1280-zero-observe",
+      "viewport": [
+        1280,
+        720
+      ],
+      "count": 6,
+      "depth": "zero",
+      "firstY": 0,
+      "firstMap": {
+        "x": 264,
+        "y": 268.890625,
+        "width": 974,
+        "height": 435.109375,
+        "top": 268.890625,
+        "right": 1238,
+        "bottom": 704,
+        "left": 264
+      },
+      "firstInline": "435.109px",
+      "bad": false,
+      "laterFrames": {
+        "time": 1926.8999999761581,
+        "y": 0,
+        "layout": "435.109px",
+        "mapRect": {
+          "x": 264,
+          "y": 268.890625,
+          "width": 974,
+          "height": 435.109375,
+          "top": 268.890625,
+          "right": 1238,
+          "bottom": 704,
+          "left": 264
+        },
+        "areaListOpen": false,
+        "saving": null
+      },
+      "dataUnchanged": true,
+      "cameraUnchangedOnEntry": true,
+      "rawReference": "ui.jsonl TRIAL RESULT 6-1280-zero-observe"
+    },
+    {
+      "id": "6-1280-deep-observe",
+      "viewport": [
+        1280,
+        720
+      ],
+      "count": 6,
+      "depth": "deep",
+      "firstY": 0,
+      "firstMap": {
+        "x": 264,
+        "y": 268.890625,
+        "width": 974,
+        "height": 704,
+        "top": 268.890625,
+        "right": 1238,
+        "bottom": 972.890625,
+        "left": 264
+      },
+      "firstInline": "704px",
+      "bad": true,
+      "laterFrames": {
+        "time": 1832.800000011921,
+        "y": 0,
+        "layout": "704px",
+        "mapRect": {
+          "x": 264,
+          "y": 268.890625,
+          "width": 974,
+          "height": 704,
+          "top": 268.890625,
+          "right": 1238,
+          "bottom": 972.890625,
+          "left": 264
+        },
+        "areaListOpen": false,
+        "saving": null
+      },
+      "dataUnchanged": true,
+      "cameraUnchangedOnEntry": true,
+      "rawReference": "ui.jsonl TRIAL RESULT 6-1280-deep-observe"
+    },
+    {
+      "id": "6-1440-zero-observe",
+      "viewport": [
+        1440,
+        900
+      ],
+      "count": 6,
+      "depth": "zero",
+      "firstY": 0,
+      "firstMap": {
+        "x": 264,
+        "y": 268.890625,
+        "width": 1134,
+        "height": 615.109375,
+        "top": 268.890625,
+        "right": 1398,
+        "bottom": 884,
+        "left": 264
+      },
+      "firstInline": "615.109px",
+      "bad": false,
+      "laterFrames": {
+        "time": 1749.699999988079,
+        "y": 0,
+        "layout": "615.109px",
+        "mapRect": {
+          "x": 264,
+          "y": 268.890625,
+          "width": 1134,
+          "height": 615.109375,
+          "top": 268.890625,
+          "right": 1398,
+          "bottom": 884,
+          "left": 264
+        },
+        "areaListOpen": false,
+        "saving": null
+      },
+      "dataUnchanged": true,
+      "cameraUnchangedOnEntry": true,
+      "rawReference": "ui.jsonl TRIAL RESULT 6-1440-zero-observe"
+    },
+    {
+      "id": "6-1440-deep-observe",
+      "viewport": [
+        1440,
+        900
+      ],
+      "count": 6,
+      "depth": "deep",
+      "firstY": 0,
+      "firstMap": {
+        "x": 264,
+        "y": 268.890625,
+        "width": 1134,
+        "height": 884,
+        "top": 268.890625,
+        "right": 1398,
+        "bottom": 1152.890625,
+        "left": 264
+      },
+      "firstInline": "884px",
+      "bad": true,
+      "laterFrames": {
+        "time": 1951,
+        "y": 0,
+        "layout": "884px",
+        "mapRect": {
+          "x": 264,
+          "y": 268.890625,
+          "width": 1134,
+          "height": 884,
+          "top": 268.890625,
+          "right": 1398,
+          "bottom": 1152.890625,
+          "left": 264
+        },
+        "areaListOpen": false,
+        "saving": null
+      },
+      "dataUnchanged": true,
+      "cameraUnchangedOnEntry": true,
+      "rawReference": "ui.jsonl TRIAL RESULT 6-1440-deep-observe"
+    },
+    {
+      "id": "6-1280-deep-fit-only",
+      "viewport": [
+        1280,
+        720
+      ],
+      "count": 6,
+      "depth": "deep",
+      "firstY": 0,
+      "firstMap": {
+        "x": 264,
+        "y": 268.890625,
+        "width": 974,
+        "height": 704,
+        "top": 268.890625,
+        "right": 1238,
+        "bottom": 972.890625,
+        "left": 264
+      },
+      "firstInline": "704px",
+      "bad": true,
+      "laterFrames": {
+        "time": 1815.199999988079,
+        "y": 0,
+        "layout": "704px",
+        "mapRect": {
+          "x": 264,
+          "y": 268.890625,
+          "width": 974,
+          "height": 704,
+          "top": 268.890625,
+          "right": 1238,
+          "bottom": 972.890625,
+          "left": 264
+        },
+        "areaListOpen": false,
+        "saving": null
+      },
+      "dataUnchanged": true,
+      "cameraUnchangedOnEntry": true,
+      "rawReference": "ui.jsonl TRIAL RESULT 6-1280-deep-fit-only"
+    }
+  ]
+}
