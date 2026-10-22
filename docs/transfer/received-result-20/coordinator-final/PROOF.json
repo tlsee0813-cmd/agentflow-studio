@@ -1,0 +1,81 @@
+{
+  "head": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+  "merge": "58de4a9db3b0b060fb06a1b293f45afd15791ca6",
+  "mergeParents": [
+    "da08dd900fe2bacaabc5a11dccdcca0bdfa78dbe",
+    "69b478ba6dc84f803290eb857e5c8b3d7a659ea4"
+  ],
+  "changedBlobs": [
+    {
+      "path": ".github/workflows/verify.yml",
+      "sha": "886295d7205c751fd971129a31f06f88497e81ef",
+      "equal": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "sha": "bfa5b1d2172f682e7d5c167ce2df2fd52eea7a8d",
+      "equal": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "sha": "c3f93975b3f67b7f94f3a2daa435cc4cc615217a",
+      "equal": true
+    },
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha": "a230948a74da7d8d56a68c792a1c734b4fa9a1c2",
+      "equal": true
+    },
+    {
+      "path": "app/continuity/tests/home15_browser.py",
+      "sha": "9d901170eab02a4290817eba19aab8dda9a552ee",
+      "equal": true
+    },
+    {
+      "path": "app/continuity/tests/received20-fixtures.mjs",
+      "sha": "7edeba8b85c9186e8231e12dba65da373133708f",
+      "equal": true
+    },
+    {
+      "path": "app/continuity/tests/received20_browser.py",
+      "sha": "64e64be3e194a4f5a9b93525051b70b28f89dc3a",
+      "equal": true
+    },
+    {
+      "path": "app/continuity/tests/understanding17_browser.py",
+      "sha": "1cc8cf6714be9e5edaa95edb841fd2f151dece9b",
+      "equal": true
+    }
+  ],
+  "ci": {
+    "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+    "checks": [],
+    "statuses": [],
+    "annotations": [],
+    "hasMore": false,
+    "job": null,
+    "jobs": [
+      {
+        "id": 119936100416,
+        "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 119936101063,
+        "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "log": null,
+    "logTruncated": false,
+    "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+  },
+  "main": "896dcf3848fec70357d0f9bd4fd6c09cab70db37",
+  "ghPages": "63f5540d062861439f0932cd7311c6c5510e227c",
+  "visual": "Root inspected remote f099a48d three representative PNG through CUA:1440 work receipt retains B draft/target with explicit review CTA;1280 reader visibly separates current idea and chosen report with historic-work disclosure folded;1440 legacy shows neutral missing-context inside connection path and no export-work heading. Screenshots alone do not prove all four fields simultaneously visible or every interaction; raw focused values and scripts provide separate evidence. 1280 initial next-action fold limitation retained.",
+  "reuseBoundary": "f099 exact five suites + focused six scenes; older151b core/storage/records/origin runs explicitly reused only for unchanged logic. No claim all scenarios rerun69b."
+}

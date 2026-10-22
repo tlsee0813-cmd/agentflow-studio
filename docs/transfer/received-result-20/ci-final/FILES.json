@@ -1,0 +1,32 @@
+[
+  {
+    "sha256": "E655136A533A02CCA13BA8755AE1C89EE8BC1963A394FB45231AA27507A51C0A",
+    "bytes": 5950,
+    "path": "checkpoint-1613.json"
+  },
+  {
+    "sha256": "C41C49BBAE79A8D8EC2706100985A09F5424BAAF1C0185FD1C4917FCF519DF00",
+    "bytes": 6472,
+    "path": "ci69-receipt.json"
+  },
+  {
+    "sha256": "7323AD18C93C0AB3A50BFBD752A96BE477DD94A56E0B4248A86D71A33A06D1DF",
+    "bytes": 12221,
+    "path": "final-status-history.json"
+  },
+  {
+    "sha256": "C2FA72DCF4182D66F074DED667CED6BB3E788D7D0983F9E46940AA965E472653",
+    "bytes": 1735,
+    "path": "status-history.json"
+  },
+  {
+    "sha256": "3AF2E4CD6AEC6F3F0EB4F7C1AC6DC151CA924DF52FB59AA8408AA21FFE2F2363",
+    "bytes": 125567,
+    "path": "ubuntu-job-response.json"
+  },
+  {
+    "sha256": "C529BA26802BAA5BAB03733EB2B3FD072882BC2F05E99F15C6510CABAE9224FE",
+    "bytes": 128175,
+    "path": "windows-job-response.json"
+  }
+]

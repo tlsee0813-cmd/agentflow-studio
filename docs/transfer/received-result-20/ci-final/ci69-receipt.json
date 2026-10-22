@@ -1,0 +1,124 @@
+{
+  "kind": "PR11 final CI status and returned raw log windows, read-only",
+  "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+  "runId": 39810777281,
+  "finalStatusCapturedAt": "2026-10-22 16:26:43 UTC",
+  "completedEvidenceAt": "2026-10-22 16:27:43 UTC",
+  "conclusion": "Both exact-head jobs completed/success; returned log windows support success",
+  "finalStatus": [
+    {
+      "id": 119936100416,
+      "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 119936101063,
+      "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "jobs": [
+    {
+      "os": "windows",
+      "capturedAt": "2026-10-22 16:16:12 UTC",
+      "job": {
+        "id": 119936100416,
+        "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "returnedLogCharacters": 120000,
+      "logTruncated": true,
+      "returnedWindowFirstLine": "10-22T16:07:56.9123254Z   ...",
+      "lastLogLine": "2026-10-22T16:15:48.5302515Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+      "testResultTail": [
+        "2026-10-22T16:12:41.2154410Z Ran 14 tests in 31.578s",
+        "2026-10-22T16:12:41.2154542Z OK",
+        "2026-10-22T16:13:05.0220062Z Ran 21 tests in 23.560s",
+        "2026-10-22T16:13:05.0220255Z OK",
+        "2026-10-22T16:13:42.1189672Z Ran 13 tests in 36.892s",
+        "2026-10-22T16:13:42.1189884Z OK",
+        "2026-10-22T16:14:12.3948910Z Ran 12 tests in 30.008s",
+        "2026-10-22T16:14:12.3949110Z OK",
+        "2026-10-22T16:14:31.5873859Z Ran 12 tests in 18.977s",
+        "2026-10-22T16:14:31.5873992Z OK",
+        "2026-10-22T16:14:52.9696374Z Ran 6 tests in 21.188s",
+        "2026-10-22T16:14:52.9696576Z OK",
+        "2026-10-22T16:15:40.7915164Z Ran 11 tests in 47.619s",
+        "2026-10-22T16:15:40.7915363Z OK",
+        "2026-10-22T16:15:42.9516713Z OK"
+      ],
+      "failureLines": [],
+      "artifactLines": [
+        "2026-10-22T16:15:44.8727703Z SHA256 digest of uploaded artifact zip is 992a513b4b8e111536ae3bd8a3a514a8f1027527c884181d6ddc8969a1d0532b",
+        "2026-10-22T16:15:45.4002886Z Artifact agentflow-windows-2022-39810777281.zip successfully finalized. Artifact ID 12441340100",
+        "2026-10-22T16:15:45.4003749Z Artifact agentflow-windows-2022-39810777281 has been successfully uploaded! Final size is 20267698 bytes. Artifact ID is 12441340100"
+      ]
+    },
+    {
+      "os": "ubuntu",
+      "capturedAt": "2026-10-22 16:27:01 UTC",
+      "job": {
+        "id": 119936101063,
+        "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "returnedLogCharacters": 120000,
+      "logTruncated": true,
+      "returnedWindowFirstLine": "026-10-22T16:07:27.9593651Z # Subtest: RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries",
+      "lastLogLine": "2026-10-22T16:23:30.2040181Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+      "testResultTail": [
+        "2026-10-22T16:19:29.5322349Z Ran 14 tests in 44.373s",
+        "2026-10-22T16:19:29.5323402Z OK",
+        "2026-10-22T16:20:01.0755606Z Ran 21 tests in 31.243s",
+        "2026-10-22T16:20:01.0756069Z OK",
+        "2026-10-22T16:20:52.8721667Z Ran 13 tests in 51.534s",
+        "2026-10-22T16:20:52.8722380Z OK",
+        "2026-10-22T16:21:34.7166142Z Ran 12 tests in 41.474s",
+        "2026-10-22T16:21:34.7167029Z OK",
+        "2026-10-22T16:22:02.5814859Z Ran 12 tests in 27.681s",
+        "2026-10-22T16:22:02.5815330Z OK",
+        "2026-10-22T16:22:30.7013460Z Ran 6 tests in 27.865s",
+        "2026-10-22T16:22:30.7014337Z OK",
+        "2026-10-22T16:23:23.3306416Z Ran 11 tests in 52.409s",
+        "2026-10-22T16:23:23.3306819Z OK",
+        "2026-10-22T16:23:26.1465565Z OK"
+      ],
+      "failureLines": [],
+      "artifactLines": [
+        "2026-10-22T16:23:29.0452402Z SHA256 digest of uploaded artifact zip is f34ad5b531dd3bc50047fbe0d7a70527d163fd46e6bfa7818fb1ccab16d3646d",
+        "2026-10-22T16:23:29.6041655Z Artifact agentflow-ubuntu-24.04-39810777281.zip successfully finalized. Artifact ID 12440758335",
+        "2026-10-22T16:23:29.6046682Z Artifact agentflow-ubuntu-24.04-39810777281 has been successfully uploaded! Final size is 30524770 bytes. Artifact ID is 12440758335"
+      ]
+    }
+  ],
+  "provider": "CodeReview pull_requests_checks only; no selected account supplied; returned headRevision retained",
+  "statusLogBoundary": "Earlier in-progress provider snapshots and HTTP502 log retrieval errors are preserved; no CI failure inferred from these. Final provider status and final returned log windows agree. Ubuntu log cleanup ends16:23:30 while latest in-progress snapshot16:23:14 was still valid; no contradictory final result found.",
+  "coverageBoundary": "Each provider log is truncated to last120000 characters. JSON response preserves exact returned string (including Windows CRLF), not a complete artifact/job-log download. No claim of whole-log byte verification.",
+  "unchanged": [
+    "Product3431 source",
+    "remote branches",
+    "CI execution/configuration"
+  ],
+  "notPerformed": [
+    "CLI or GitHub Actions API fallback",
+    "rerun/cancel",
+    "local server/browser",
+    "remote writes"
+  ],
+  "files": [
+    "status-history.json (initial discovery)",
+    "checkpoint-1613.json (early status/provider errors)",
+    "final-status-history.json",
+    "windows-job-response.json",
+    "ubuntu-job-response.json"
+  ],
+  "logRequestFailures": "Initial both-OS log requests HTTP502; later Ubuntu repeated HTTP502. Final both-OS log retrieval succeeded."
+}

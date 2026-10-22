@@ -1,0 +1,333 @@
+[
+  {
+    "capturedAt": "2026-10-22 16:04:47 UTC",
+    "request": "discovery",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [
+        {
+          "id": 119936101063,
+          "name": "verify (ubuntu-24.04)",
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "status": "in_progress",
+          "conclusion": null,
+          "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39810777281/job/119936101063",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 0
+          }
+        },
+        {
+          "id": 119936100416,
+          "name": "verify (windows-2022)",
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "status": "in_progress",
+          "conclusion": null,
+          "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39810777281/job/119936100416",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 0
+          }
+        }
+      ],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:06:52 UTC",
+    "request": "runId:39810777281",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [
+        {
+          "id": 119936100416,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (windows-2022)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 119936101063,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (ubuntu-24.04)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:09:09 UTC",
+    "request": "runId:39810777281",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [
+        {
+          "id": 119936100416,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (windows-2022)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 119936101063,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (ubuntu-24.04)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:12:28 UTC",
+    "request": "runId:39810777281",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [
+        {
+          "id": 119936100416,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (windows-2022)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "id": 119936101063,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (ubuntu-24.04)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:12:49 UTC",
+    "request": "job logs Windows119936100416 / Ubuntu119936101063",
+    "responses": {
+      "windows": {
+        "content": [
+          {
+            "type": "text",
+            "text": "GitHub provider request failed (HTTP 502)"
+          }
+        ],
+        "isError": true
+      },
+      "ubuntu": {
+        "content": [
+          {
+            "type": "text",
+            "text": "GitHub provider request failed (HTTP 502)"
+          }
+        ],
+        "isError": true
+      }
+    },
+    "note": "Both provider HTTP502; no fallback used, no CI conclusion inferred"
+  },
+  {
+    "capturedAt": "2026-10-22 16:15:54 UTC",
+    "request": "runId:39810777281",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [
+        {
+          "id": 119936100416,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (windows-2022)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119936101063,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (ubuntu-24.04)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:17:24 UTC",
+    "request": "runId:39810777281",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [
+        {
+          "id": 119936100416,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (windows-2022)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119936101063,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (ubuntu-24.04)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:19:56 UTC",
+    "request": "runId:39810777281",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [
+        {
+          "id": 119936100416,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (windows-2022)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119936101063,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (ubuntu-24.04)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:23:14 UTC",
+    "request": "runId:39810777281",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [
+        {
+          "id": 119936100416,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (windows-2022)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119936101063,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (ubuntu-24.04)",
+          "status": "in_progress",
+          "conclusion": null
+        }
+      ],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:23:28 UTC",
+    "request": "jobId:119936101063",
+    "response": {
+      "content": [
+        {
+          "type": "text",
+          "text": "GitHub provider request failed (HTTP 502)"
+        }
+      ],
+      "isError": true
+    }
+  },
+  {
+    "capturedAt": "2026-10-22 16:26:43 UTC",
+    "request": "runId:39810777281",
+    "response": {
+      "headRevision": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+      "checks": [],
+      "statuses": [],
+      "annotations": [],
+      "hasMore": false,
+      "job": null,
+      "jobs": [
+        {
+          "id": 119936100416,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (windows-2022)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 119936101063,
+          "head_sha": "69b478ba6dc84f803290eb857e5c8b3d7a659ea4",
+          "name": "verify (ubuntu-24.04)",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "log": null,
+      "logTruncated": false,
+      "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+    }
+  }
+]
