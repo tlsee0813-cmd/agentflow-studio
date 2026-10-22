@@ -1,0 +1,23 @@
+diff --git "a/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-author-evidence/candidate-v0-source/app.ts" "b/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-author-evidence/candidate-v1-source/app.ts"
+index 5df3302..214de58 100644
+--- "a/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-author-evidence/candidate-v0-source/app.ts"
++++ "b/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product20-author-evidence/candidate-v1-source/app.ts"
+@@ -348,7 +348,7 @@ function markOrigin(focus:string|null=null) {
+   if(view!=='space'&&view!=='area'&&view!=='work')return;
+   if(view==='work'){
+     const id=focus??(document.activeElement as HTMLElement|null)?.id??null,el=id?document.getElementById(id):null,r=el?.getClientRects().length?el.getBoundingClientRect():null;
+-    const upstream=origin?.view==='work'?origin.work.upstream:origin??(located?.origin.view!=='work'?located?.origin??null:null);
++    const upstream=origin?.view==='work'?origin.work.upstream:origin;
+     const priorLocation=located&&located.origin.view!=='work'?{...located,origin:located.origin}:null;
+     origin={project:project.id,view:'work',area:null,map:mapView?{...mapView}:null,selected:mapSelected,sheet:sheetOpen,y:window.scrollY,focus:id,
+       open:Object.fromEntries([...$('work-view').querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open])),anchor:id&&r?{id,top:r.top,page:r.top+window.scrollY}:null,
+@@ -386,7 +386,8 @@ function restoreOrigin(o:Origin|null) {
+   if(!o||o.project!==project.id){openSpace();return;}
+   if(o.view==='work'){
+     const same=project.currentTaskId===o.work.taskId,sameReceipt=(lastReceipt?.taskId??null)===o.work.receiptId;
+-    origin=o.work.upstream?structuredClone(o.work.upstream):null;located=same&&o.work.located?structuredClone(o.work.located):null;
++    const upstream=o.work.upstream??(!same?o.work.located?.origin??null:null);
++    origin=upstream?structuredClone(upstream):null;located=same&&o.work.located?structuredClone(o.work.located):null;
+     mapView=o.map?{...o.map}:null;initialMapFitPending=false;mapSelected=o.selected&&areaById(o.selected)&&!areaById(o.selected)!.archived?o.selected:null;
+     sheetOpen=o.sheet&&!!mapSelected;collapsed=new Set(o.collapsed);panelReadings=structuredClone(o.panels);panelMode=o.panel;rememberMap();
+     leaveLayer();view='work';viewArea=null;viewTask=null;viewReturn=null;contextOpen=o.work.context;render(false,false);

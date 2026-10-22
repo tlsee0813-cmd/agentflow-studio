@@ -1,0 +1,46 @@
+{
+  "kind": "cycle20 candidate-v1 bounded origin slot fix",
+  "baseline": "da3b0171c807dc7241f5fff0ce4f19ba3f2ef463",
+  "beforeAppSha256": "010CC3F4A2B19DB25350B7685ECBD54F1BF5E38E34C8FFCFE068A87A5C91B17B",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260449,
+      "sha256": "564B5DCB45896D1543708D90514EDCDE9699B33AA997394A55047746B4DA3E9B"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0"
+    }
+  ],
+  "source": "candidate-v1-source/",
+  "previousSource": "candidate-v0-source/ preserved exact bytes",
+  "reason": "Astra static P2: a located-only departure had been duplicated into upstream origin; same-current return could expose an extra return action and leave the locator unconsumed",
+  "change": [
+    "Capture actual origin slot only; do not synthesize upstream from located",
+    "Keep prior MapLocated independently by value",
+    "Same B restores the original origin and located slots as captured",
+    "Changed C keeps current C; if actual upstream is absent, retain one prior map origin as a single fallback and leave located empty"
+  ],
+  "checks": {
+    "diffCheck": 0,
+    "build": 0,
+    "typeSyntaxBoundary": 0
+  },
+  "runtime": "Node24.19 author auxiliary; existing locked TypeScript5.8.3",
+  "browser": "NOT_RUN; Cloud actual return/caller/camera verification pending",
+  "preserved": [
+    "No new history or persistence schema",
+    "No domain or validation change",
+    "No current-task or draft restore",
+    "CSS/HTML identical to v0"
+  ],
+  "review": "Frozen v1 source SHA sent to Astra for independent static review",
+  "commands": "ui20-v1-{check,build,diff-check}.{stdout.log,stderr.log,exit.json}"
+}

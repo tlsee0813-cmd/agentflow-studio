@@ -1,0 +1,79 @@
+{
+  "kind": "cycle20 UI candidate-v0 author static receipt",
+  "codeBase": "da3b0171c807dc7241f5fff0ce4f19ba3f2ef463",
+  "contract": "da3b0171c807dc7241f5fff0ce4f19ba3f2ef463 INPUT+RESEARCH; parent clarification e8ba6fee4fc6121b79858ad2d4408eebd881b02d",
+  "baseline19": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 250194,
+      "sha256": "C3A8E77A96E58758D62EC6819CB902E9F9762362C48A9D60E22CEE00AF15773D"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72648,
+      "sha256": "F97FED78D87FBD7EDF15E8556894BA023BA3B01463D54730796904E36C37408D"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17909,
+      "sha256": "190C02C6615901C84735AB7F8D6B2504FF9D8351BA5FD784F6B62BBCE16EC34C"
+    }
+  ],
+  "candidate": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260444,
+      "sha256": "010CC3F4A2B19DB25350B7685ECBD54F1BF5E38E34C8FFCFE068A87A5C91B17B"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0"
+    }
+  ],
+  "originalSources": {
+    "initialCF38": "NOT_RECOVERED: initial CF38 app/C01D index complete source was not copied; no reconstruction presented as original",
+    "candidate": "candidate-v0-source/ frozen exact bytes",
+    "baseline": "baseline19/ exact Git blob bytes"
+  },
+  "runtime": "Node24.19 author auxiliary, existing locked TypeScript5.8.3 through existing app/node_modules junction; no install",
+  "checks": {
+    "ownedDiffCheck": 0,
+    "duplicateStaticIds": 0,
+    "continuityBuild": 0,
+    "continuityTypeSyntaxBoundary": 0,
+    "staticHtmlUniqueIds": 122
+  },
+  "scope": [
+    "app.ts plus one receipt host and focusable fallback heading in index; two CSS overflow rules",
+    "All valid return.1/return.2 receipts pin actual report T/root request/export task/H; explicit review click only",
+    "New report selection checks existing-ID set difference, exact parent/file target/H and root membership; duplicate uses existing exact Task",
+    "Snapshot shows exact ExportRecord.work four values; current intent conditions are separately labelled",
+    "WorkOrigin stores view state and at most one MapOrigin parent; consumes work return before restoring parent; current/draft never restored",
+    "Existing placeReturn policy unchanged; no domain, persistence schema or transport parser change",
+    "Save await only updates same-receipt status, no late navigation; pending duplicate failure transitions to memory",
+    "New selection/project switch invalidates receipt; older description CTA validates report identity"
+  ],
+  "reviewCorrections": [
+    "Root: focus fallback heading needed tabindex=-1",
+    "Root: pending duplicate needed final failed-save transition",
+    "Astra interim: map/area/records origin must survive report reader to owner locator",
+    "Author: capture exact receipt ID to avoid focusing replacement report button",
+    "Author: preserve map view preferences on work return while avoiding data/current rollback",
+    "Author: clear active prior locator after storing a bounded value snapshot to avoid nested/self origin"
+  ],
+  "limits": [
+    "Local browser/server NOT_RUN; geometry, actual focus, clipboard, scroll and OS acceptance require independent Cloud/CI",
+    "The new general receipt exists only inside work result-file input; no new task-origin or global inbox",
+    "B-specific work disclosures/page/caller restore only if currentTaskId is unchanged; changed current keeps C and focuses stable work heading",
+    "Legacy/pasted report may lack export snapshot; valid new return-file target validation remains strict",
+    "Actual OS IME and final user understanding not verified by these static checks"
+  ],
+  "mutation": "No commit, push, GitHub mutation, installation, server or browser execution",
+  "tests": "Separate audit agent owns tests/workflow overlay; product author did not edit tests"
+}
