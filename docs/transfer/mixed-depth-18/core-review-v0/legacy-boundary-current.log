@@ -1,0 +1,5 @@
+fixed_old6_history_and_attach_detach_reload: PASS
+anchor2_recovery_cannot_skip_user_correction: PASS
+old6_future_keys_and_return_exact_keys: PASS
+old5_late_return_exact_raw_and_no_anchor: PASS
+Node v24.19.0; supplementary domain observations only

@@ -1,0 +1,15 @@
+{
+  "base": "0bda82ee12c4a8e3e8b0559aa6c57271b87ba1aa",
+  "appTree": "4cebf529317e52bcd78aa9beca386560420cf7b1",
+  "scope": "app and .github; shallow depth1 blob-filter",
+  "trackedSourceFiles": 182,
+  "trackedSourceBytes": 2050111,
+  "node": "v24.19.0",
+  "typescript": "5.8.3",
+  "compilerReuse": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product17-author\\app\\node_modules\\typescript",
+  "productChanges": "NONE",
+  "agents": "No AGENTS.md in repository tree or checked cwd ancestry",
+  "server": "NOT_STARTED",
+  "browser": "NOT_CREATED",
+  "tests": "NOT_RUN; waiting for contract"
+}

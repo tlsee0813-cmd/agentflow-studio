@@ -1,0 +1,23 @@
+{
+  "node": "v24.19.0",
+  "before": {
+    "applicability": "active",
+    "questions": [
+      {
+        "taskId": "T_93cb98da-3d0b-458d-b749-8326bbf6c721",
+        "areaId": "A_95172b39-e1d1-493b-9aea-3b4849992dd1",
+        "answered": false
+      }
+    ]
+  },
+  "after": {
+    "applicability": "active",
+    "questions": [
+      {
+        "taskId": "T_93cb98da-3d0b-458d-b749-8326bbf6c721",
+        "areaId": "A_95172b39-e1d1-493b-9aea-3b4849992dd1",
+        "answered": false
+      }
+    ]
+  }
+}

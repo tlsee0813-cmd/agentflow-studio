@@ -1,0 +1,60 @@
+✔ H18 one inclusion forest is separate from Task continuation, relations and absolute positions (9.509ms)
+✔ H18 self/cycle/missing/cross-project/archived parents are rejected atomically; archived history and active-child rule survive restore (2.1977ms)
+✔ H18 child creation is near its parent without moving any existing position or work (0.8657ms)
+✔ H18 branch fold uses the outermost representative and never mutates model, scale or actual edges (1.0444ms)
+✔ H18 powertoys: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery (8.2988ms)
+✔ H18 product13: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery (3.1436ms)
+✔ H18 parent note: reference changes hold late descriptions and stale current/correction/handoff consistently (3.4283ms)
+✔ H18 parent name: reference changes hold late descriptions and stale current/correction/handoff consistently (2.5735ms)
+✔ H18 parent A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently (3.2269ms)
+✔ H18 parent note restore: reference changes hold late descriptions and stale current/correction/handoff consistently (2.6605ms)
+✔ H18 self A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently (1.9863ms)
+✔ H18 unrelated branches, layout and derived parent description do not change child reference basis (1.3559ms)
+✖ H18 legacy anchor.1/current root remain readable; adding then removing a parent never invents old ancestry (1.3085ms)
+✔ H18 v6 migration preserves exact legacy stamps, raw return files, ids and positions without ancestor backfill (1.3761ms)
+✖ H18 recorded synthetic question/report/description signals retain exact area owners; relations never duplicate them (3.2199ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 13
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.8553
+
+✖ failing tests:
+
+test at app\continuity\tests\hierarchy18.test.mjs:53:1
+✖ H18 legacy anchor.1/current root remain readable; adding then removing a parent never invents old ancestry (1.3085ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:7:11)
+      at understandingRefs (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:680:17)
+      at assertProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:476:5)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:891:5)
+      at Module.importResultFile (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/domain.js:207:12)
+      at bring (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/hierarchy18.test.mjs:9:63)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/hierarchy18.test.mjs:57:4)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+
+test at app\continuity\tests\hierarchy18.test.mjs:65:1
+✖ H18 recorded synthetic question/report/description signals retain exact area owners; relations never duplicate them (3.2199ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/hierarchy18.test.mjs:67:90)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

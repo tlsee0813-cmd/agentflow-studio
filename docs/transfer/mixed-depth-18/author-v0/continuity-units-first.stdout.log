@@ -1,0 +1,487 @@
+✔ AI055 hand-authored four-turn interpretation reaches next HTTP input, home projection and handoff; raw user history untouched (39.5934ms)
+✔ AI055 invalid version/source/revision/current-input omission is rejected atomically; stored legacy eight-key advice still readable (5.5783ms)
+✔ AI055 separate purpose and uncertain interpretation do not turn parent linkage into a purpose or a decision (8.5871ms)
+✔ AI055 manual correction/undo values survive regeneration; stale response and changed source cannot replace them (4.8098ms)
+✔ AI055 exact late return preserves manual purpose, raw file and independent branch; no semantic promotion from report (12.1183ms)
+✔ C039 exact A/H1 return while current B; atomic source pair, drafts, provenance, recovery and B isolation (49.7721ms)
+✔ C039 dedup by decoded fields; partial reports append and external instructions never gain authority (8.2336ms)
+✔ C039 invalid file/reference/oversize rejects without mutation; restore checks generated prefix but permits real later decisions and answers (437.8796ms)
+✖ C039 v1/v2 migration preserves exact original bytes and null IDs; backup failure blocks save and replacement (6.7151ms)
+✔ C039 pending response cannot apply after import; quota/conflict preserve persisted project and in-memory raw result (6.8401ms)
+✔ C039 file footer stays optional; export freshness pins returnId and manual routes stay unchanged (4.023ms)
+✔ C039 rev1 external v1/v2 recovery fits a v3-only quota and remains writable; stored legacy backup rules stay intact (17.4637ms)
+✔ I15-D01 exact free input preserved; immutable requested origin, not confirmed; small wording change no question (21.0785ms)
+✔ I15-D02 meaningful choice and unknown technical fact use separate paths, no compulsory alternatives (3.4688ms)
+✔ I15-D03 actual answer attached to real question and no new forced confirmation (6.818ms)
+✔ I15-D04 unknown/defer applies only to answer; untouched old bases survive, no repeat question (9.0809ms)
+✔ I15-D05 AI cannot set source kind/status or write a basis; whole malformed result refused (1.9246ms)
+✔ I15-D06 report claim and supplied evidence never become verified/customer requested bases (6.7231ms)
+✔ I15-D07 synthetic test answers stay test-only on initial and followup, including explicit looking changes (2.8477ms)
+✔ I15-D08 explicit unique scalar change updates only intended span, stable ID/history and no extra approval (4.2191ms)
+✔ I15-D09 exact quoted change preserved; ambiguous multi-value or quoted report cannot rewrite basis (1.2754ms)
+✔ I15-D10 relevant set has no 2-item cap and omitted important bases remain in handoff/context (3.2315ms)
+✔ I15-D11 input edits arriving before response invalidate only that response, preserve draft/old advice (2.4392ms)
+✔ I15-D12 manual edits & suggestion edits survive stale response and a subsequent successful retry (2.4673ms)
+✔ I15-D13 retry reuses sources; duplicate/stale ticket cannot overwrite new ticket (1.0919ms)
+✔ I15-D14 cancellation and reload preserve inputs, do not automatically dispatch (1.4053ms)
+✔ I15-D15 lossless JSON roundtrip includes history, manual fields, source kinds and export records (2.3188ms)
+✔ I15-D16 malformed/version/foreign refs/cycle/authority promotion import rejected without mutating old project (2.0904ms)
+✔ I15-D17 storage failure and cross-tab conflict leave memory and previous valid persisted data intact (2.1874ms)
+✔ I15-D18 corrupted stored file is not overwritten automatically; explicit replacement can recover (0.9142ms)
+✔ I15-D19 full unrelated chat is not sent; known bases and adjacent return group are retained (17.3695ms)
+✔ I15-D20 invalid reference, authority key or control character in AI text rejected (0.9372ms)
+✔ I15-D21 real choice/unknown answers remain available after several later changes without another confirmation (14.8087ms)
+✔ I15-D22 after a pasted report, the next change still carries the handed-off work and its user-edited scope (3.854ms)
+✔ I15-D23 explicit quoted change inserts the typed text literally ($$, $& are not replacement patterns) (1.0703ms)
+✔ I15-D24 AI text written before a basis change is withheld from the current handoff, also after reload; user text stays (4.4636ms)
+✔ I15-D25 previous work AI text is withheld after its basis changed; user-edited previous scope is still carried (2.8908ms)
+✖ I15-D26 project.1 files migrate without losing records; old AI text is treated as unknown-revision (17.5178ms)
+✔ I15-D27 68 report/export cycles and 54 long requests keep editing, export, AI context and backup->import working (2152.9979ms)
+✔ I15-D28 important confirmed/answered/edited bases are never shortened; within-budget old requests also stay full (IDEA017) (1.4923ms)
+✔ I15-D29 a reply is recorded once even when re-organisation fails and is retried (0.6369ms)
+✖ I15-D30 storage reports why it did not save; legacy browser data is kept before the first project.3 write (2.7036ms)
+✔ I15-D31 1001 short requests saved through the app reopen after save and after backup->import (8663.6044ms)
+✔ I15-D32 byte boundary: largest project under 8MB saves, reopens and imports; one step over is refused without touching storage (1613.8195ms)
+✔ I15-D33 item boundary: ITEM_LIMIT elements in one array are accepted, one more is refused by save and import alike (554.3042ms)
+✔ I15-D34 app-made elements stay above FILE_LIMIT/ITEM_LIMIT bytes, so the byte limit binds before the item cap (5.286ms)
+✔ F058-B1 editing this task's understanding/scope stays a work instruction; it never becomes the next turn's purpose (50.1952ms)
+✔ F058-B2 purpose correction on a small task keeps that task narrow; stale AI action/question excluded; next turn carries the correction (14.5599ms)
+✔ F058-B2 a correction stays visible after the AI interpretation goes stale; regeneration cannot overwrite it (9.554ms)
+✔ F058-N1 AI retired wording cannot cancel a confirmed decision; precedence is consistent and requests-only flows are unchanged (4.8702ms)
+✔ F058-N2 new responses reject separate+retired and the same sentence kept and retired; stored advice still loads (3.2281ms)
+✔ F058-N5 explicit MOCK handoff is not labelled as an AI interpretation (1.7134ms)
+✔ F058 intent-edit.1 from the earlier candidate stays readable with its original meaning (4.1973ms)
+✔ F059 first task: correction plus a new confirmed basis both reach the next request without a made-up AI intent (1.9951ms)
+✔ F059 intent-edit.1 restore -> ordinary work edit leaves the converted correction, handoff and next request unchanged (7.927ms)
+✔ F061 legacy intent-edit.1 without a non-blank goal keeps withholding old AI text, is never a purpose, and round-trips (18.3607ms)
+✔ F066-P1 a separate detail task no longer erases the earlier maintained/replaced reading from the next request (33.187ms)
+✔ F066-P1 the purpose chain never jumps over a stale interpretation; the contract rejects inconsistent purposeIntent (24.0822ms)
+✔ F066-P2 a purpose correction is attributed to this task; its pre-correction request is not printed as a current value (9.147ms)
+✔ F066-P2 regenerating a corrected follow-up task names this task even when the AI value comes from its predecessor (1.9148ms)
+✔ F066 prompt states the correction, preserve, continuing-purpose and no-invention rules (0.7117ms)
+✔ F069/F071 a separate small edit is printed next to the earlier purpose as a sourced reference; nothing is retired or invented (4.8481ms)
+✔ F069 no earlier-purpose line for continue, for a user correction, or across a stale interpretation (13.5285ms)
+✔ F069 prompt separates the purpose relation from the size of this edit (0.6239ms)
+✔ F071 an explicit discard with a separate reading and a fresh old interpretation: the old purpose is a sourced reference, never "still valid" (2.8561ms)
+✔ F088-1 MOCK keeps the request as the goal of a returned report; the report text never becomes the purpose (24.5535ms)
+✔ F088-2 a late A report stays with A; the current B request, its scope and its export are unchanged (14.9905ms)
+✔ F088-3 the same holds for an exact result file; duplicates still add nothing (8.345ms)
+✔ F088-4 a report for the current work still continues it (normal flow), with sibling evidence (2.4559ms)
+✔ F088-5 opening A explicitly continues A; B stays visible as the latest request and can be resumed (4.007ms)
+✔ F088-6 a basis recorded on the opened report task is cited, with earlier refs kept by basis ID (3.5822ms)
+✔ F088-7 a corrected condition list fits the response limits without loss or blank items (16.9982ms)
+✔ F088-8 a long continued goal is shortened visibly within the limit; the correction stays whole (1.9265ms)
+✔ F049 purpose identity survives handoff, exact return, changed direction and storage without a second state store (35.0212ms)
+✔ F049 revised origin basis is current, immutable origin stays attributed; home projection never mutates data (1.8397ms)
+✔ F049 late A return is scoped; latest B request is flagged and A report never leaks into B handoff (12.7605ms)
+✔ F049 empty/report-only/legacy projects do not acquire an invented goal; existing IDs survive migration (6.2323ms)
+✔ F049 sibling report and evidence match the existing adjacent return group, without unrelated B reports (9.4902ms)
+✔ F049 long chain retains old requests as bases, not duplicate sources; stale question rejection remains atomic (7.5719ms)
+✔ FIX051 direction remains visible through a small request; correction uses one basis and retains original history (8.0147ms)
+✔ FIX051 two 11000-character requests fit; no root duplication or invented global purpose for unrelated scope (4.7533ms)
+✔ FIX051 off-path B remains visible after late A return and next request, without report mixing (2.8419ms)
+✔ FIX053 return work keeps its effective request and exclusion in current bases, not past-only references (5.3812ms)
+✔ F083-S1 the old key is migrated once, never written; a valid workspace never re-imports it (22.6268ms)
+✔ F083-S2 an unreadable old value, or a migration that does not fit, stays as is: readable where possible, nothing written (2.0886ms)
+✔ F083-S3 a damaged workspace is never overwritten with an empty one (2.4401ms)
+✔ F083-S4 without Web Locks nothing is written (no unprotected fallback); reading still works (1.697ms)
+✔ F083-S5 an imported copy gets only a new entryId; an exact result file matches inside that entry (7.8679ms)
+✔ F083-S6 autosave edits only its active entry in the lifecycle it opened; trash+restore elsewhere blocks a late save (3.2074ms)
+✔ F083-S7 another tab's newer save of the same entry is not overwritten; concurrent trash and autosave serialise (4.1074ms)
+✔ F083-S8 a quota failure keeps the stored workspace and reports it; nothing is half-written (2.2983ms)
+✔ F083-S9 a refused storage read is not an empty workspace: no migration, no create, nothing written (1.0874ms)
+✖ F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import (30.0241ms)
+✔ F090-2 areas: add (blank note = undecided), rename, archive/restore; typed relations, no self/duplicate links (3.6746ms)
+✔ F090-3 a request written for an area is placed there and continues that area, not the open work of another (7.1397ms)
+✔ F090-4 reports follow their task; validation refuses areas on returns, unknown areas and broken relations (5.7116ms)
+✔ F090-5 the purpose text is kept (with earlier wording) and is not sent as a request or work instruction (3.6037ms)
+✖ F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space (4.8518ms)
+✔ F090-7 returning to an area continues its latest request (and that request's returns), not a late old report (10.831ms)
+✖ F090-8 the unsent request's area is saved with the draft; old formats default to following the current work (2.2596ms)
+✖ F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo (1.1918ms)
+✔ F090-10 automatic slots never land on an archived area or on another area at the coordinate limit (2.0804ms)
+✔ F090-11 fit shows every measured card inside the map, however far apart (no 0.4 floor) (3.8518ms)
+✔ F091C-a the request's own area goes out the same way in the AI input, preview/Markdown and export record; other areas never (28.2142ms)
+✔ F091C-b later plan edits, moves, re-organising and repeated exports never change A; only the next explicit request (B) is current (11.0348ms)
+✖ F091C-c A export -> B -> late A report (paste and exact file returnId): A's copy, B's focus/request/copy unchanged (7.9144ms)
+✔ F091C-d ideas and undecided points in the background never become bases, sources, intent or decisions; manual edits keep priority (3.0421ms)
+✖ F091C-e old formats, reload, backup, empty values, maximum Unicode and byte limits: null, exact, refused (never cut) (2.4521ms)
+✔ F091C-server MOCK and simulated provider receive background as its own field; old request shapes are refused (144.242ms)
+✔ F094-1 REUSE093 A/B and the four counterexamples: nothing added, no assumed incident, request and copies untouched (31.2023ms)
+✔ F094-2 explicit implementation, explicit reproduction and a partial ban are not cancelled or widened (3.0275ms)
+✔ F094-3 a stated unknown cause still gets the fact question (question features); no reproduction is added (3.1052ms)
+✔ F094-4 a returned report is compared and sorted; no fixes or test runs are added (9.722ms)
+✔ F095-1 the same request sent twice (REUSE093 shape): one full copy, every entry keeps its ID, role and order (28.2113ms)
+✔ F095-2 no normalisation: a different space or line break is a different text and prints in full (6.0583ms)
+✔ F095-3 edits, corrections, reports and decisions are never folded into the request (10.8581ms)
+✔ F033-1 relay exact stale choice cannot create a source/basis or enter the next request (25.741ms)
+✔ F033-2 fresh replies and existing duplicate precedence survive bookkeeping (5.84ms)
+✔ F033-3 all dispositions and synthetic paths reject stale without input mutation; refreshed questions work (5.5016ms)
+✔ F033-4 unknown advice revision and imported legacy remain read-only; current recovery preserves the boundary (27.9037ms)
+✔ F033-5 rev1 history boundaries recover without repairs, while new same-task bases still reject old replies (8.2486ms)
+✔ G097-1 the same idea: one question, two answers give different scope and completion; unknown/deferred keep the choice open (17.0568ms)
+✔ G097-2 enough existing information: note, a user decision or an earlier area request already answers it, so no question (5.9254ms)
+✔ G097-3 one question at most: after an answer only a proposal is accepted; exactly one of question/proposal (1.5025ms)
+✔ G097-4 nothing is written before adoption; adoption fills only the request draft and never replaces an unsent one (13.579ms)
+✔ G097-5 a reply is bound to its material and area: purpose/area/decision/answer changes invalidate it, typing a request does not (3.549ms)
+✔ G097-6 HTTP: MOCK route, same origin checks; fake DeepSeek upstream gets the guidance prompt and the material only (104.3815ms)
+✔ G097-7 fake upstream failures map to fixed codes; a second question, extra keys or an echoed key are refused; paid off sends nothing (147.8321ms)
+✔ G097-8 (R2) MOCK never turns a ban, a deferral, a quote or a free answer into a positive choice; status and wording are kept (2.18ms)
+✔ G097-9 (R3) blank manual scope/checks are valid as in task edits; length and character checks stay (7.3083ms)
+✔ G097-10 (R2-1) many deferred confirmation decisions stay inside the reply contract (max 6 open) and all are named (7.2985ms)
+✔ G097-11 (R2-2) a long free answer is kept whole through draft, adoption, request and handoff; its closing ban is never cut (3.5205ms)
+✔ G098-1 strict reply contract: fact never has options (actual C2 content), defaults required and bounded, open/defaults never overlap (1.025ms)
+✔ G098-2 the draft shows AI defaults apart from user decisions (hidden when empty) and explains a changed basis without a re-approval step (0.3965ms)
+✔ G098-3 the guidance prompt separates fact and choice examples and states the general rules (no case answers) (0.1554ms)
+✔ G098-4 a stale guidance.1 request is refused plainly (400) instead of yielding a reply the old client cannot read (6.7388ms)
+✔ G098-5 free answers asking only for design or reading: original kept, MOCK checks add no implementation or run; option branches unchanged (1.7254ms)
+✔ G099-1 contract: currentInstruction is required and nullable, verbatim, same text limit, never cut; blank means none (7.8835ms)
+✔ G099-2 empty input keeps the earlier path; a typed instruction gets a neutral MOCK draft with no question and no design of its own (0.593ms)
+✔ G099-3 the draft carries the instruction whole in its own section; adoption makes it the request, never a decision (1.6843ms)
+✔ G099-4 a reply is bound to the instruction it was asked with; the prompt and the fake upstream carry it as its own field (7.7216ms)
+✔ H18 one inclusion forest is separate from Task continuation, relations and absolute positions (25.1807ms)
+✔ H18 self/cycle/missing/cross-project/archived parents are rejected atomically; archived history and active-child rule survive restore (5.3135ms)
+✔ H18 child creation is near its parent without moving any existing position or work (2.9988ms)
+✔ H18 branch fold uses the outermost representative and never mutates model, scale or actual edges (2.8932ms)
+✔ H18 powertoys: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery (21.5041ms)
+✔ H18 product13: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery (14.6799ms)
+✔ H18 parent note: reference changes hold late descriptions and stale current/correction/handoff consistently (8.1944ms)
+✔ H18 parent name: reference changes hold late descriptions and stale current/correction/handoff consistently (5.4862ms)
+✔ H18 parent A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently (9.046ms)
+✔ H18 parent note restore: reference changes hold late descriptions and stale current/correction/handoff consistently (17.3183ms)
+✔ H18 self A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently (5.2241ms)
+✔ H18 unrelated branches, layout and derived parent description do not change child reference basis (3.6694ms)
+✔ H18 legacy anchor.1/current root remain readable; adding then removing a parent never invents old ancestry (4.0706ms)
+✔ H18 v6 migration preserves exact legacy stamps, raw return files, ids and positions without ancestor backfill (3.7576ms)
+✔ H18 recorded synthetic question/report/description signals retain exact area owners; relations never duplicate them (8.3945ms)
+✔ H18 fixed actual project.6 state paths migrate without rewriting valid/held/user history, then parent attach-detach stays stale after reload (7.5369ms)
+✔ H18 project.5 export has no invented anchor: late return.2 report/raw kept and only description held (5.1958ms)
+✔ I15-H01 real local HTTP -> mock -> typed envelope, safe config and static entry, no external fetch (141.9142ms)
+✔ I15-H02 invalid origin/host/content-type/body rejected without mock or provider invocation (13.4373ms)
+✔ I15-H03 oversized input is rejected without truncating or invoking provider; static traversal denied (12.8097ms)
+✔ I15-H04 missing key and paid opt-out prevent all outbound calls (9.8169ms)
+✔ I15-H05 request IDs and process cap cannot be silently retried through old interview endpoint (7.8392ms)
+✔ I15-H06 malformed response over HTTP cannot patch a basis; response includes only fixed error code (4.54ms)
+✔ I15-P01 exact DeepSeek adapter request uses server endpoint, disabled thinking, JSON and no retry (8.2307ms)
+✔ I15-P02 empty/non-JSON/truncated/authority-injection responses fail once, preserve model errors as codes (4.3233ms)
+✔ I15-P03 provider errors never expose raw body or credentials and never retry (2.7468ms)
+✔ I15-P04 timeout and cancelled requests work even with a transport that ignores AbortSignal (33.1508ms)
+✔ I15-P05 real local HTTP -> DeepSeek adapter -> injected fake upstream uses the same route as live mode (6.1326ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product18-author\experiments\idea016\cases.mjs' imported from C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product18-author\app\continuity\tests\idea017.test.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:253:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/experiments/idea016/cases.mjs'
+}
+
+Node.js v24.19.0
+✖ app\continuity\tests\idea017.test.mjs (276.7366ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product18-author\experiments\idea016\cases.mjs' imported from C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product18-author\app\continuity\tests\idea022.test.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:253:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/experiments/idea016/cases.mjs'
+}
+
+Node.js v24.19.0
+✖ app\continuity\tests\idea022.test.mjs (314.3516ms)
+✔ S035-1 explicit report/evidence parent equals preview; sources, bases, history and manual values survive JSON recovery (32.075ms)
+✔ S035-2 invalid, unexported and other-project IDs fail atomically in submit and preview (6.02ms)
+✔ S035-3 omitted target preserves zero/single/multiple fallback and reverse task order, not export date (3.9391ms)
+✔ S035-4 next B request context contains B return and excludes A return without removing global A request basis (3.4343ms)
+✔ S102-1 nothing to check without evidence: no tasks, a kept input, a prepared or exported request (25.1688ms)
+✔ S102-2 an open product choice waits for the user until answered, or until the user continues from that request (4.3394ms)
+✔ S102-3 a returned report is listed until the user acts on it (a follow-up request or a follow-up handoff) (7.4027ms)
+✔ S102-4 only the latest return of a task counts; an older report is never counted again (3.5125ms)
+✔ S102-5 a report returning to a follow-up handoff opens the original request; items keep their area; pure and unsaved (8.4694ms)
+✔ S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report (5.3583ms)
+✔ UI001-P1 stage labels distinguish source preservation, API response waiting and prepared work; none claims execution (12.7044ms)
+✔ UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy (2.1109ms)
+✔ UI001-P3 real export metadata changes next action; editing a work field asks for recopy, typing a separate draft does not (5.3913ms)
+✔ UI001-P4 stale state remains explicit even with a saved handoff and a preserved manual instruction (1.8683ms)
+✔ UI001-P5 report/source labels stay attributed and titles derive from actual source rather than invented task names (2.859ms)
+✔ UI001-P6 editing-draft indicators do not change confirmed values or mutate any project data (1.0193ms)
+✔ UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path (118.8513ms)
+✔ UI001-P8 rev1 full handoff detects suggestion text/why and inclusion changes, clears on re-export, ignores equal content (5.7775ms)
+✔ UI001-P9 rev1 compares other delivered context as well, keeps legacy conservative, uses the selected task without writes (3.8131ms)
+✔ RETURN032-R1 array order remains the parent contract, including a later re-export of an older task (3.6798ms)
+✔ RETURN032-R2 no prior task and no export stay distinct without blocking returned sources (0.5715ms)
+✔ RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries (1.5638ms)
+✔ RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap (2.778ms)
+✔ RETURN032-R5 legacy, missing work, invalid export revisions and unordered basis histories are unknown, never zero (4.43ms)
+✔ RETURN032-R6 projection leaves handoff text, manual values, source bytes and recovery data untouched (2.014ms)
+✔ AREA17 powertoys: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact (18.0076ms)
+✔ AREA17 product13: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact (5.0537ms)
+✔ AREA17 same returnId supports successive revised interpretations without dropping report history (5.9972ms)
+✔ AREA17 an explicit same-text user correction owns a new revision; old/revised returns cannot overwrite it (2.3708ms)
+✔ AREA17 late description after name is held, report remains readable and user values survive (1.7806ms)
+✔ AREA17 late description after note is held, report remains readable and user values survive (1.1359ms)
+✔ AREA17 late description after purpose is held, report remains readable and user values survive (1.3145ms)
+✔ AREA17 late description after user intent correction is held, report remains readable and user values survive (3.5971ms)
+✔ AREA17 late description after manual work condition is held, report remains readable and user values survive (3.0814ms)
+✔ AREA17 late description after recorded decision is held, report remains readable and user values survive (3.3072ms)
+✔ AREA17 late description after explicit revision of the request basis is held, report remains readable and user values survive (1.9718ms)
+✔ AREA17 unrelated work, unsent draft, layout and reading do not invalidate the target explanation (2.3626ms)
+✔ AREA17 current user plan is sent separately while Background stays immutable (1.1054ms)
+✔ AREA17 plan change makes a previous explanation stale and excludes its text from the next handoff (1.8888ms)
+✔ AREA17 wrong area/basis and archived/moved work hold only the derived description (6.2973ms)
+✔ AREA17 syntactically valid wrong-area prose is not claimed as detected; user can correct it separately (1.469ms)
+✔ AREA17 recovery cannot move a wrong-target held description into another area as applied (2.1364ms)
+✔ AREA17 strict return shapes and byte limits are retained (1.3987ms)
+✖ AREA17 return.1 and project.1 through project.5 migrate without invented descriptions or export anchors (3.0751ms)
+✔ AREA17 cross-tab seq rejection preserves the external project including its description (4.3819ms)
+✔ AREA17 sha256 equals Node crypto on quote/backslash/emoji/unpaired-surrogate text and on block boundaries (47.3002ms)
+✔ AREA17 plan stamp stays fixed-size and valid for maximal quote/backslash-heavy manual and intent values, and still detects a one-character change (215.7914ms)
+✔ AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives (1.8086ms)
+✔ AREA17 current plan in the handoff: identical text points to the request-time copy, a different value is printed in full (0.8195ms)
+✔ AREA17 a description made before a plan change cannot be re-saved as a correction (no adopt-stale shortcut) (1.1406ms)
+✔ AREA17 next handoff: valid description attributed below the user plan, proposal unadopted, stale text never sent (1.9389ms)
+✔ AREA17 a plain new request in the same area keeps the description valid and the next handoff carries it attributed (3.8468ms)
+✔ AREA17 a late description after a plain new request in the same area still applies; an explicit request revision holds it (2.0945ms)
+✔ AREA17 recovery refuses an applied external description that skips a user correction in its own history (6.6136ms)
+ℹ tests 225
+ℹ suites 0
+ℹ pass 213
+ℹ fail 12
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13443.2077
+
+✖ failing tests:
+
+test at app\continuity\tests\connect039.test.mjs:51:1
+✖ C039 v1/v2 migration preserves exact original bytes and null IDs; backup failure blocks save and replacement (6.7151ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'idea015.project.7'
+  - 'idea015.project.6'
+                     ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/connect039.test.mjs:55:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'idea015.project.7',
+    expected: 'idea015.project.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\domain.test.mjs:175:1
+✖ I15-D26 project.1 files migrate without losing records; old AI text is treated as unknown-revision (17.5178ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'idea015.project.7'
+  - 'idea015.project.6'
+                     ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/domain.test.mjs:177:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'idea015.project.7',
+    expected: 'idea015.project.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\domain.test.mjs:211:1
+✖ I15-D30 storage reports why it did not save; legacy browser data is kept before the first project.3 write (2.7036ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'idea015.project.7'
+  - 'idea015.project.6'
+                     ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/domain.test.mjs:217:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'idea015.project.7',
+    expected: 'idea015.project.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\flow090.test.mjs:18:1
+✖ F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import (30.0241ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'idea015.project.7'
+  - 'idea015.project.6'
+                     ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/flow090.test.mjs:21:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'idea015.project.7',
+    expected: 'idea015.project.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\flow090.test.mjs:77:1
+✖ F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space (4.8518ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      areas: [],
+      brief: null,
+  +   containment: {
+  +     parents: {},
+  +     revisions: {},
+  +     version: 'containment.1'
+  +   },
+      draftTarget: null,
+      layout: {
+        positions: {},
+        version: 'layout.1'
+      },
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/flow090.test.mjs:83:33)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} }, understanding: {}, containment: { version: 'containment.1', parents: {}, revisions: {} } },
+    expected: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} }, understanding: {} },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\flow090.test.mjs:105:1
+✖ F090-8 the unsent request's area is saved with the draft; old formats default to following the current work (2.2596ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:7:11)
+      at migrateV6 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:832:5)
+      at migrateV5 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:825:12)
+      at migrateV4 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:810:12)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:890:172)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/flow090.test.mjs:108:73)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at app\continuity\tests\flow090.test.mjs:118:1
+✖ F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo (1.1918ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:7:11)
+      at migrateV6 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:832:5)
+      at migrateV5 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:825:12)
+      at migrateV4 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:810:12)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:890:172)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/flow090.test.mjs:122:13)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at app\continuity\tests\flow091c.test.mjs:68:1
+✖ F091C-c A export -> B -> late A report (paste and exact file returnId): A's copy, B's focus/request/copy unchanged (7.9144ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:7:11)
+      at migrateV6 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:832:5)
+      at migrateV5 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:825:12)
+      at migrateV4 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:810:12)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:890:172)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/flow091c.test.mjs:86:18)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at app\continuity\tests\flow091c.test.mjs:107:1
+✖ F091C-e old formats, reload, backup, empty values, maximum Unicode and byte limits: null, exact, refused (never cut) (2.4521ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:7:11)
+      at migrateV6 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:832:5)
+      at migrateV5 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:825:12)
+      at migrateV4 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:810:12)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/dist/public/shared/validation.js:890:172)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/flow091c.test.mjs:111:11)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+
+test at app\continuity\tests\idea017.test.mjs:1:1
+✖ app\continuity\tests\idea017.test.mjs (276.7366ms)
+  'test failed'
+
+test at app\continuity\tests\idea022.test.mjs:1:1
+✖ app\continuity\tests\idea022.test.mjs (314.3516ms)
+  'test failed'
+
+test at app\continuity\tests\understanding17.test.mjs:74:1
+✖ AREA17 return.1 and project.1 through project.5 migrate without invented descriptions or export anchors (3.0751ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'idea015.project.7'
+  - 'idea015.project.6'
+                     ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/understanding17.test.mjs:82:61)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'idea015.project.7',
+    expected: 'idea015.project.6',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

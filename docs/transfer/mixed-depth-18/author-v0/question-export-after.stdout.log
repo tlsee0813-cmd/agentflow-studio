@@ -1,0 +1,9 @@
+✔ H18 handoff never hides an active recorded question, and its later answer stays a reply record rather than an obligation (14.4636ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 125.657

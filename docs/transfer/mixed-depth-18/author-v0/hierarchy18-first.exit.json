@@ -1,0 +1,14 @@
+{
+  "command": "node",
+  "args": [
+    "--test",
+    "app/continuity/tests/hierarchy18.test.mjs"
+  ],
+  "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author",
+  "node": "v24.19.0",
+  "start": "2026-10-22T10:57:04.076Z",
+  "end": "2026-10-22T10:57:04.314Z",
+  "status": 1,
+  "signal": null,
+  "error": null
+}

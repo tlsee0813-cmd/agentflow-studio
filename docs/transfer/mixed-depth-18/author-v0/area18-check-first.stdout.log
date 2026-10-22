@@ -1,0 +1,7 @@
+src/client/app.ts(114,36): error TS2375: Type '{ view: MapView | null; selected: {} | null; collapsed: unknown; panels: Record<string, PanelReading> | undefined; }' is not assignable to type 'MapMemo' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'panels' are incompatible.
+    Type 'Record<string, PanelReading> | undefined' is not assignable to type 'Record<string, PanelReading>'.
+      Type 'undefined' is not assignable to type 'Record<string, PanelReading>'.
+src/client/app.ts(347,24): error TS2554: Expected 0 arguments, but got 1.
+src/shared/domain.ts(612,43): error TS2532: Object is possibly 'undefined'.
+src/shared/domain.ts(621,3): error TS2532: Object is possibly 'undefined'.

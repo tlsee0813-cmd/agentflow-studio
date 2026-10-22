@@ -1,0 +1,30 @@
+✖ H18 test-only questions remain excluded from real recorded-question signals (10.7177ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.5924
+
+✖ failing tests:
+
+test at app\continuity\tests\hierarchy18.test.mjs:104:1
+✖ H18 test-only questions remain excluded from real recorded-question signals (10.7177ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/hierarchy18.test.mjs:107:142)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
