@@ -1,0 +1,315 @@
+{
+  "case": "powertoys",
+  "mode": "ordinary-reply",
+  "task": "T_a69dd1dc-4f72-4a04-b4b2-ad160861c0a3",
+  "area": "A_35d45abb-cc58-4bd4-a371-5f60f0524ceb",
+  "parent": "A_0b9a1af0-b15a-4fcb-888b-d880d4caa163",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [
+    {
+      "kind": "decision",
+      "taskId": "T_a69dd1dc-4f72-4a04-b4b2-ad160861c0a3",
+      "returnId": null,
+      "areaId": "A_35d45abb-cc58-4bd4-a371-5f60f0524ceb",
+      "status": "사실 확인 항목 있음",
+      "answered": false,
+      "applicability": "active"
+    }
+  ],
+  "after": [
+    {
+      "kind": "decision",
+      "taskId": "T_a69dd1dc-4f72-4a04-b4b2-ad160861c0a3",
+      "returnId": null,
+      "areaId": "A_35d45abb-cc58-4bd4-a371-5f60f0524ceb",
+      "status": "답변 기록 있음",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "questionAnswered": true,
+  "applicability": "answered",
+  "taskStatus": "작업문 준비됨 · 미실행",
+  "sources": [
+    {
+      "id": "S_6c12a229-f8c2-4863-be60-1b378669de2d",
+      "kind": "request",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:26:18.657Z",
+      "taskId": "T_a69dd1dc-4f72-4a04-b4b2-ad160861c0a3",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_741b9471-5477-46ae-9f74-be3d01867278",
+      "kind": "answer",
+      "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+      "at": "2026-10-22T11:26:18.659Z",
+      "taskId": "T_a69dd1dc-4f72-4a04-b4b2-ad160861c0a3",
+      "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_0b9a1af0-b15a-4fcb-888b-d880d4caa163",
+  "reloadedQuestions": [
+    {
+      "kind": "decision",
+      "taskId": "T_a69dd1dc-4f72-4a04-b4b2-ad160861c0a3",
+      "returnId": null,
+      "areaId": "A_35d45abb-cc58-4bd4-a371-5f60f0524ceb",
+      "status": "답변 기록 있음",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "expectedQuestionCount": 1,
+  "pass": true
+}
+{
+  "case": "powertoys",
+  "mode": "synthetic-reply-to-real-question",
+  "task": "T_3435ac8c-c638-43aa-a327-984f1ab25422",
+  "area": "A_d8f24ccb-9bfc-441d-b78d-340ed481f082",
+  "parent": "A_27eefd43-4fa6-407d-8c2d-ca66fb3f050b",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [
+    {
+      "kind": "decision",
+      "taskId": "T_3435ac8c-c638-43aa-a327-984f1ab25422",
+      "returnId": null,
+      "areaId": "A_d8f24ccb-9bfc-441d-b78d-340ed481f082",
+      "status": "사실 확인 항목 있음",
+      "answered": false,
+      "applicability": "active"
+    }
+  ],
+  "after": [],
+  "questionAnswered": true,
+  "applicability": "answered",
+  "taskStatus": "시험 문맥 · 실제 요구 아님",
+  "sources": [
+    {
+      "id": "S_5bf8b6c3-b544-4086-a29e-f0f2b3753ac4",
+      "kind": "request",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:26:18.664Z",
+      "taskId": "T_3435ac8c-c638-43aa-a327-984f1ab25422",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_2caf407c-340f-4519-a44f-e693c5834637",
+      "kind": "test_answer",
+      "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+      "at": "2026-10-22T11:26:18.665Z",
+      "taskId": "T_3435ac8c-c638-43aa-a327-984f1ab25422",
+      "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_27eefd43-4fa6-407d-8c2d-ca66fb3f050b",
+  "reloadedQuestions": [],
+  "expectedQuestionCount": 1,
+  "pass": false
+}
+{
+  "case": "powertoys",
+  "mode": "synthetic-question",
+  "task": "T_88f006a7-e7ad-4994-8649-2b18c29d8c87",
+  "area": "A_1da39ce3-dc7a-4e81-bf78-4e6e634089a5",
+  "parent": "A_b13b9346-c243-4e06-a69f-e1b317e0d044",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [],
+  "after": [],
+  "questionAnswered": false,
+  "applicability": "active",
+  "taskStatus": "시험 문맥 · 실제 요구 아님",
+  "sources": [
+    {
+      "id": "S_cb940bed-64b6-420f-a5e8-f4b4aff6835b",
+      "kind": "test_answer",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:26:18.666Z",
+      "taskId": "T_88f006a7-e7ad-4994-8649-2b18c29d8c87",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_b13b9346-c243-4e06-a69f-e1b317e0d044",
+  "reloadedQuestions": [],
+  "expectedQuestionCount": 0,
+  "pass": true
+}
+{
+  "case": "product13",
+  "mode": "ordinary-reply",
+  "task": "T_d18d77fd-29f0-4bb4-9ee6-93fa8217720c",
+  "area": "A_5e53c988-2b01-4103-a1d2-27a1354c61d9",
+  "parent": "A_23cb004d-5a82-42ef-bb4a-e169a481e0bf",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [
+    {
+      "kind": "decision",
+      "taskId": "T_d18d77fd-29f0-4bb4-9ee6-93fa8217720c",
+      "returnId": null,
+      "areaId": "A_5e53c988-2b01-4103-a1d2-27a1354c61d9",
+      "status": "사실 확인 항목 있음",
+      "answered": false,
+      "applicability": "active"
+    }
+  ],
+  "after": [
+    {
+      "kind": "decision",
+      "taskId": "T_d18d77fd-29f0-4bb4-9ee6-93fa8217720c",
+      "returnId": null,
+      "areaId": "A_5e53c988-2b01-4103-a1d2-27a1354c61d9",
+      "status": "답변 기록 있음",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "questionAnswered": true,
+  "applicability": "answered",
+  "taskStatus": "작업문 준비됨 · 미실행",
+  "sources": [
+    {
+      "id": "S_a504daeb-63e0-42a4-92d6-a69891ff7a7f",
+      "kind": "request",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:26:18.669Z",
+      "taskId": "T_d18d77fd-29f0-4bb4-9ee6-93fa8217720c",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_205da2b0-1cca-45d7-b66b-5a28cc25f342",
+      "kind": "answer",
+      "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+      "at": "2026-10-22T11:26:18.669Z",
+      "taskId": "T_d18d77fd-29f0-4bb4-9ee6-93fa8217720c",
+      "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_23cb004d-5a82-42ef-bb4a-e169a481e0bf",
+  "reloadedQuestions": [
+    {
+      "kind": "decision",
+      "taskId": "T_d18d77fd-29f0-4bb4-9ee6-93fa8217720c",
+      "returnId": null,
+      "areaId": "A_5e53c988-2b01-4103-a1d2-27a1354c61d9",
+      "status": "답변 기록 있음",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "expectedQuestionCount": 1,
+  "pass": true
+}
+{
+  "case": "product13",
+  "mode": "synthetic-reply-to-real-question",
+  "task": "T_442832a9-0972-47a2-9506-bf01620ae658",
+  "area": "A_dd9ce789-fadb-475e-aba4-c0b640cb9b6f",
+  "parent": "A_8ea740fa-d33f-4a3b-afc2-cdeb7b476f05",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [
+    {
+      "kind": "decision",
+      "taskId": "T_442832a9-0972-47a2-9506-bf01620ae658",
+      "returnId": null,
+      "areaId": "A_dd9ce789-fadb-475e-aba4-c0b640cb9b6f",
+      "status": "사실 확인 항목 있음",
+      "answered": false,
+      "applicability": "active"
+    }
+  ],
+  "after": [],
+  "questionAnswered": true,
+  "applicability": "answered",
+  "taskStatus": "시험 문맥 · 실제 요구 아님",
+  "sources": [
+    {
+      "id": "S_96c0663b-2922-4fcc-b071-4e352a185c54",
+      "kind": "request",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:26:18.671Z",
+      "taskId": "T_442832a9-0972-47a2-9506-bf01620ae658",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_dda0d0d6-8ab4-4ed3-98eb-e0f8c56b77e7",
+      "kind": "test_answer",
+      "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+      "at": "2026-10-22T11:26:18.672Z",
+      "taskId": "T_442832a9-0972-47a2-9506-bf01620ae658",
+      "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_8ea740fa-d33f-4a3b-afc2-cdeb7b476f05",
+  "reloadedQuestions": [],
+  "expectedQuestionCount": 1,
+  "pass": false
+}
+{
+  "case": "product13",
+  "mode": "synthetic-question",
+  "task": "T_12e319ce-0e81-4856-a948-01dca80fe328",
+  "area": "A_51a0aafe-699d-48d7-88ea-358abaefad09",
+  "parent": "A_6d9283bf-dcc5-49bf-a16d-8277db6c5356",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [],
+  "after": [],
+  "questionAnswered": false,
+  "applicability": "active",
+  "taskStatus": "시험 문맥 · 실제 요구 아님",
+  "sources": [
+    {
+      "id": "S_7334b9dd-72d8-49ab-8c95-5e4913b4fed9",
+      "kind": "test_answer",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:26:18.673Z",
+      "taskId": "T_12e319ce-0e81-4856-a948-01dca80fe328",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_6d9283bf-dcc5-49bf-a16d-8277db6c5356",
+  "reloadedQuestions": [],
+  "expectedQuestionCount": 0,
+  "pass": true
+}
+{"output":"C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author-evidence\\question-synthetic-reply-probe.json","tests":6,"pass":4,"fail":2}

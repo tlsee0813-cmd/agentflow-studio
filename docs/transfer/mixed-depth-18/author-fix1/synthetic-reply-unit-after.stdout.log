@@ -1,0 +1,10 @@
+✔ H18 powertoys: original question retains attributed synthetic reply, while test-created and regenerated different questions stay excluded (26.5239ms)
+✔ H18 product13: original question retains attributed synthetic reply, while test-created and regenerated different questions stay excluded (7.8646ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 191.2703

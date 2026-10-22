@@ -1,0 +1,37 @@
+{
+  "kind": "AREA18 and FLOW090 harness correction",
+  "scope": [
+    "app/continuity/tests/hierarchy18_browser.py",
+    "app/continuity/tests/flow090_browser.py"
+  ],
+  "cause": [
+    "Result import tried to use a disclosure inside the still-closed compose panel.",
+    "Ordinary work copy intentionally has a null file-return anchor; the test must select file-return export.",
+    "FLOW090 retained the old disclaimer text and outer-panel scrolling assumption."
+  ],
+  "verification": {
+    "pythonAST": "passed for both files",
+    "productEdits": false,
+    "browser": "NOT_RUN",
+    "server": "NOT_RUN",
+    "gitDiffCheck": "passed"
+  },
+  "files": [
+    {
+      "path": "app/continuity/tests/hierarchy18_browser.py",
+      "sha256": "181CEE125D70708AC9C236B9823FFE4AF84724DF73BA55F509A1A6DD4A2754EA"
+    },
+    {
+      "path": "app/continuity/tests/flow090_browser.py",
+      "sha256": "E9321F7E8078C091DC8E9A08DD0E989DE1F69B9B7187E0919642EB15C88D8B85"
+    }
+  ],
+  "preserved": [
+    "real request creation and ownership",
+    "actual clipboard contents and stored hash/length",
+    "non-null exact endpoint anchor",
+    "explicit Origin return and reading anchor",
+    "input height and fixed controls"
+  ],
+  "audit": "Searched all continuity *browser.py for scrollTop, scrollHeight, clientHeight and overflow references; no further old outer-area-panel scroll assertion found."
+}

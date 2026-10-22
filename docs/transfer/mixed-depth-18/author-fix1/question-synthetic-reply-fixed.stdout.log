@@ -1,0 +1,355 @@
+{
+  "case": "powertoys",
+  "mode": "ordinary-reply",
+  "task": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+  "area": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+  "parent": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [
+    {
+      "kind": "decision",
+      "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+      "returnId": null,
+      "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+      "status": "사실 확인 항목 있음",
+      "answered": false,
+      "applicability": "active"
+    }
+  ],
+  "after": [
+    {
+      "kind": "decision",
+      "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+      "returnId": null,
+      "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+      "status": "답변 기록 있음",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "questionAnswered": true,
+  "applicability": "answered",
+  "taskStatus": "작업문 준비됨 · 미실행",
+  "sources": [
+    {
+      "id": "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+      "kind": "request",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:29:48.088Z",
+      "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_fc331028-b874-4a59-b1cc-53fda4b12625",
+      "kind": "answer",
+      "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+      "at": "2026-10-22T11:29:48.091Z",
+      "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+      "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+  "reloadedQuestions": [
+    {
+      "kind": "decision",
+      "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+      "returnId": null,
+      "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+      "status": "답변 기록 있음",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "expectedQuestionCount": 1,
+  "pass": true
+}
+{
+  "case": "powertoys",
+  "mode": "synthetic-reply-to-real-question",
+  "task": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+  "area": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+  "parent": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [
+    {
+      "kind": "decision",
+      "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+      "returnId": null,
+      "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+      "status": "사실 확인 항목 있음",
+      "answered": false,
+      "applicability": "active"
+    }
+  ],
+  "after": [
+    {
+      "kind": "decision",
+      "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+      "returnId": null,
+      "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+      "status": "시험 답변 기록 · 실제 답변 아님",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "questionAnswered": true,
+  "applicability": "answered",
+  "taskStatus": "시험 문맥 · 실제 요구 아님",
+  "sources": [
+    {
+      "id": "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+      "kind": "request",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:29:48.100Z",
+      "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_7be958d8-1e28-47f0-aa59-c2a69029641f",
+      "kind": "test_answer",
+      "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+      "at": "2026-10-22T11:29:48.102Z",
+      "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+      "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+  "reloadedQuestions": [
+    {
+      "kind": "decision",
+      "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+      "returnId": null,
+      "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+      "status": "시험 답변 기록 · 실제 답변 아님",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "expectedQuestionCount": 1,
+  "pass": true
+}
+{
+  "case": "powertoys",
+  "mode": "synthetic-question",
+  "task": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+  "area": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+  "parent": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [],
+  "after": [],
+  "questionAnswered": false,
+  "applicability": "active",
+  "taskStatus": "시험 문맥 · 실제 요구 아님",
+  "sources": [
+    {
+      "id": "S_ca6a7037-e4e3-4d53-a225-c50330a95014",
+      "kind": "test_answer",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:29:48.106Z",
+      "taskId": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+  "reloadedQuestions": [],
+  "expectedQuestionCount": 0,
+  "pass": true
+}
+{
+  "case": "product13",
+  "mode": "ordinary-reply",
+  "task": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+  "area": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+  "parent": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [
+    {
+      "kind": "decision",
+      "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+      "returnId": null,
+      "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+      "status": "사실 확인 항목 있음",
+      "answered": false,
+      "applicability": "active"
+    }
+  ],
+  "after": [
+    {
+      "kind": "decision",
+      "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+      "returnId": null,
+      "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+      "status": "답변 기록 있음",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "questionAnswered": true,
+  "applicability": "answered",
+  "taskStatus": "작업문 준비됨 · 미실행",
+  "sources": [
+    {
+      "id": "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+      "kind": "request",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:29:48.109Z",
+      "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_4ff6da1b-7226-426c-9803-91d0d2d4873f",
+      "kind": "answer",
+      "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+      "at": "2026-10-22T11:29:48.109Z",
+      "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+      "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+  "reloadedQuestions": [
+    {
+      "kind": "decision",
+      "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+      "returnId": null,
+      "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+      "status": "답변 기록 있음",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "expectedQuestionCount": 1,
+  "pass": true
+}
+{
+  "case": "product13",
+  "mode": "synthetic-reply-to-real-question",
+  "task": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+  "area": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+  "parent": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [
+    {
+      "kind": "decision",
+      "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+      "returnId": null,
+      "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+      "status": "사실 확인 항목 있음",
+      "answered": false,
+      "applicability": "active"
+    }
+  ],
+  "after": [
+    {
+      "kind": "decision",
+      "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+      "returnId": null,
+      "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+      "status": "시험 답변 기록 · 실제 답변 아님",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "questionAnswered": true,
+  "applicability": "answered",
+  "taskStatus": "시험 문맥 · 실제 요구 아님",
+  "sources": [
+    {
+      "id": "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+      "kind": "request",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:29:48.112Z",
+      "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_9d066530-4b2a-4fc2-9a04-e2ec44efdd0d",
+      "kind": "test_answer",
+      "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+      "at": "2026-10-22T11:29:48.113Z",
+      "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+      "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+  "reloadedQuestions": [
+    {
+      "kind": "decision",
+      "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+      "returnId": null,
+      "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+      "status": "시험 답변 기록 · 실제 답변 아님",
+      "answered": true,
+      "applicability": "answered"
+    }
+  ],
+  "expectedQuestionCount": 1,
+  "pass": true
+}
+{
+  "case": "product13",
+  "mode": "synthetic-question",
+  "task": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+  "area": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+  "parent": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+  "question": {
+    "kind": "fact",
+    "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+    "why": "의미 품질 판단이 아닌 상태 경계 재현",
+    "options": []
+  },
+  "before": [],
+  "after": [],
+  "questionAnswered": false,
+  "applicability": "active",
+  "taskStatus": "시험 문맥 · 실제 요구 아님",
+  "sources": [
+    {
+      "id": "S_0a5c91c5-395a-43d4-9400-d9331ece499e",
+      "kind": "test_answer",
+      "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+      "at": "2026-10-22T11:29:48.115Z",
+      "taskId": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "foldedRepresentative": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+  "reloadedQuestions": [],
+  "expectedQuestionCount": 0,
+  "pass": true
+}
+{"output":"C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author-evidence\\question-synthetic-reply-after.json","tests":6,"pass":6,"fail":0}

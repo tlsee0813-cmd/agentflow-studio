@@ -1,0 +1,48 @@
+{
+  "scope": "Only attention subtree projection + hierarchy18 unit tests since frozen core; existing global questionAnswered/taskStatus/schema/UI untouched",
+  "files": [
+    {
+      "path": "app/continuity/src/shared/attention.ts",
+      "oldSha256": "9c506ed0a3acdad68a49a16733f2f8984bbee9ee7681a7ec00c56fb1cfc743e2",
+      "newSha256": "affaa930475942a73535ee4c995931ae5853ef308423175cfbd3835489ff770d"
+    },
+    {
+      "path": "app/continuity/tests/hierarchy18.test.mjs",
+      "oldSha256": "17edd960fb5be29ea5f80c966171089351bd95a83e8dd665bfbac0bf45dadb5c",
+      "newSha256": "b1b000e1ebbd1610c0ce777bb97fb1681a3e9875937f596bbecf73e819875ff9"
+    }
+  ],
+  "otherProductFilesVerifiedUnchanged": [
+    "app/continuity/public/styles.css",
+    "app/continuity/src/client/app.ts",
+    "app/continuity/src/shared/domain.ts",
+    "app/continuity/src/shared/hierarchy.ts",
+    "app/continuity/src/shared/types.ts",
+    "app/continuity/src/shared/validation.ts"
+  ],
+  "rule": "Preserve current question only when the original first source is a request and every synthetic source is an exact replyTo for current question text; label synthetic reply, not a real answer. Synthetic original input or different regenerated question remains excluded.",
+  "label": "시험 답변 기록 · 실제 답변 아님",
+  "uiEvidence": [
+    "app.ts:1273 renders q.status unchanged",
+    "app.ts:1602 renders it.status unchanged"
+  ],
+  "limitation": "Question identity in existing records is task+exact question text. Advice generation history/time and a per-source project revision are not stored. A same-text re-generation cannot be distinguished as a separate question generation; no timestamp or semantic origin is inferred. Existing questionAnswered behavior stays unchanged.",
+  "checks": {
+    "node": "v24.19.0",
+    "typescript": "5.8.3",
+    "focusedBefore": "synthetic-reply-unit-before: exit1,0pass2fail",
+    "focusedAfter": "synthetic-reply-unit-after: exit0,2pass0fail",
+    "publicApiBefore": "question-synthetic-reply-original:exit1,4pass2fail",
+    "publicApiAfter": "question-synthetic-reply-fixed:exit0,6pass0fail",
+    "type": "synthetic-reply-check:exit0",
+    "build": "synthetic-reply-build:exit0",
+    "allUnits": "synthetic-reply-units:exit0,261/261 (H18 22)",
+    "static": "synthetic-reply-static:exit0",
+    "browser": "NOT RUN",
+    "server": "NOT STARTED",
+    "commitPush": "NOT RUN"
+  },
+  "preservedBeforeProject": "question-synthetic-reply-probe.json",
+  "separateAfterProject": "question-synthetic-reply-after.json",
+  "focusedDiff": "synthetic-reply-focused.patch"
+}

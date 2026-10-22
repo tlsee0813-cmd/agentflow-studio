@@ -1,0 +1,46 @@
+✖ H18 powertoys: original question retains attributed synthetic reply, while test-created and regenerated different questions stay excluded (17.6288ms)
+✖ H18 product13: original question retains attributed synthetic reply, while test-created and regenerated different questions stay excluded (3.7239ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 159.7625
+
+✖ failing tests:
+
+test at app\continuity\tests\hierarchy18.test.mjs:118:31
+✖ H18 powertoys: original question retains attributed synthetic reply, while test-created and regenerated different questions stay excluded (17.6288ms)
+  AssertionError [ERR_ASSERTION]: a synthetic reply must not erase the original real-request question
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/hierarchy18.test.mjs:123:212)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\hierarchy18.test.mjs:118:31
+✖ H18 product13: original question retains attributed synthetic reply, while test-created and regenerated different questions stay excluded (3.7239ms)
+  AssertionError [ERR_ASSERTION]: a synthetic reply must not erase the original real-request question
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product18-author/app/continuity/tests/hierarchy18.test.mjs:123:212)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

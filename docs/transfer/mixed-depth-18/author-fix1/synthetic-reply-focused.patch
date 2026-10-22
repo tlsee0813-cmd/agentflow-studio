@@ -1,0 +1,39 @@
+diff --git "a/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author-evidence\\synthetic-reply-before-attention.ts" "b/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author\\app\\continuity\\src\\shared\\attention.ts"
+index b470181..fffa5ca 100644
+--- "a/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author-evidence\\synthetic-reply-before-attention.ts"
++++ "b/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author\\app\\continuity\\src\\shared\\attention.ts"
+@@ -71,9 +71,14 @@ export function subtreeSignals(p:Project,id:string):AreaSignals[] {
+     const own=items.filter(it=>it.areaId===a.id),questions:AreaSignals['questions']=[];
+     // taskStatus is a work-view label: export/arrival can take precedence over a question there. A recorded question
+     // keeps its own applicability and owner here even after exporting. This read-only projection creates no new task.
+-    for(const task of p.tasks){if(isReturnTask(p,task)||!task.advice?.question||areaOf(p,task)!==a.id||taskStatus(p,task)==='시험 문맥 · 실제 요구 아님')continue;
++    for(const task of p.tasks){if(isReturnTask(p,task)||!task.advice?.question||areaOf(p,task)!==a.id)continue;
++      const sources=task.sourceIds.flatMap(id=>{const s=p.sources.find(s=>s.id===id);return s?[s]:[];}),trial=sources.filter(s=>s.kind==='test_answer');
++      // Exact reply provenance can preserve the original real-request question, but never a different question from
++      // test-context reorganisation. Same-text questions share the existing task+text identity; no generation time is inferred.
++      const syntheticReply=trial.length>0&&sources[0]?.kind==='request'&&trial.every(s=>s.replyTo===task.advice!.question!.text);
++      if(trial.length&&!syntheticReply)continue;
+       const key=`${a.id}:${task.id}`;if(seen.has(key))continue;seen.add(key);
+-      const applicability=questionApplicability(p,task),answered=questionAnswered(p,task),status=answered?'답변 기록 있음':applicability==='active'?(task.advice.question.kind==='fact'?'사실 확인 항목 있음':'제품 선택 항목 있음'):'이전 질문 · 참고 기록';
++      const applicability=questionApplicability(p,task),answered=questionAnswered(p,task),status=syntheticReply?'시험 답변 기록 · 실제 답변 아님':answered?'답변 기록 있음':applicability==='active'?(task.advice.question.kind==='fact'?'사실 확인 항목 있음':'제품 선택 항목 있음'):'이전 질문 · 참고 기록';
+       questions.push({kind:'decision',taskId:task.id,returnId:null,areaId:a.id,status,answered,applicability});
+     }
+     const d=areaDescription(p,a.id);return {areaId:a.id,questions,reports:own.filter(it=>it.kind==='report'),description:{current:d.current,held:d.held}};
+diff --git "a/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author-evidence\\synthetic-reply-before-hierarchy18.test.mjs" "b/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author\\app\\continuity\\tests\\hierarchy18.test.mjs"
+index 38fa54c..3e1136a 100644
+--- "a/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author-evidence\\synthetic-reply-before-hierarchy18.test.mjs"
++++ "b/C:\\Users\\\354\235\264\354\244\200\355\230\201\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author\\app\\continuity\\tests\\hierarchy18.test.mjs"
+@@ -115,3 +115,13 @@ test('H18 parent-recorded common and local decisions keep their authority and ve
+  assert.ok(section.includes(`기록 소유 영역: A [${a}] / 기록 작업: ${ownerTask}`));assert.match(section,/source.taskId나 기록 위치로 실제 적용 범위를 판정하지 않으며/);assert.match(section,/자식의 실행 범위로 자동 상속하지 않습니다/);assert.match(section,/공통 조건은 해당 범위에서 유지/);assert.match(text,/각 원문이 명시한 범위에서 아래 현재 값 그대로 유효/);
+  assert.deepEqual(p,before);assert.deepEqual(round(p),p);const childTask=p.currentTaskId,Hid='H_scoped';const anchor=D.exportAnchor(p,D.taskOf(p));p=D.markHandoff(p,childTask,D.handoffText(p,childTask,Hid),'clipboard',p.revision,Hid,anchor);assert.deepEqual(p.bases,before.bases);assert.deepEqual(D.taskOf(p,childTask).handoffs.at(-1).anchor,anchor);
+ });
++for(const c of hierarchyCases)test(`H18 ${c.id}: original question retains attributed synthetic reply, while test-created and regenerated different questions stay excluded`,()=>{
++ const make=(kind='request')=>{let {p,ids,area}=hierarchySample(c);p=D.submit(D.setKind(D.editDraft(p,'[합성 경계] 원질문과 시험 답변의 출처 검사'),kind),undefined,area);const task=p.currentTaskId,s=D.begin(p),advice=mockAdvice(s.request);
++  advice.question={kind:'fact',text:'[합성 경계] 원래 질문',why:'실제 자료에 없는 질문 표시 경계',options:[]};p=D.receive(s.project,s.request,{mode:'mock',ticket:s.request.ticket,advice});return {p,parent:ids[c.parent],area,task};};
++ const owned=(p,parent,area)=>subtreeSignals(p,parent).find(s=>s.areaId===area).questions;
++ let {p,parent,area,task}=make();const original=D.taskOf(p,task).advice.question,bases=structuredClone(p.bases);assert.equal(owned(p,parent,area).length,1);
++ p=D.answer(p,task,'[합성] 시험 답변일 뿐 실제 답변 아님','provided',true);const reply=p.sources.at(-1),question=owned(p,parent,area)[0];assert.equal(reply.kind,'test_answer');assert.equal(reply.replyTo,original.text);assert.ok(question,'a synthetic reply must not erase the original real-request question');
++ assert.equal(question.answered,true);assert.equal(question.applicability,'answered');assert.equal(question.status,'시험 답변 기록 · 실제 답변 아님');assert.equal(D.taskStatus(p,D.taskOf(p,task)),'시험 문맥 · 실제 요구 아님');assert.equal(D.questionAnswered(p,D.taskOf(p,task)),true);assert.deepEqual(p.bases,bases);assert.deepEqual(owned(round(p),parent,area),owned(p,parent,area));
++ const next=D.begin(p,task),newAdvice=mockAdvice(next.request);newAdvice.question={...original,text:'[합성 경계] 시험 답변 후 재정리로 생긴 다른 질문'};p=D.receive(next.project,next.request,{mode:'mock',ticket:next.request.ticket,advice:newAdvice});assert.equal(D.questionAnswered(p,D.taskOf(p,task)),false);assert.equal(owned(p,parent,area).length,0,'old replyTo never establishes provenance for a new current question');
++ const trial=make('test_answer');assert.equal(owned(trial.p,trial.parent,trial.area).length,0);trial.p=D.answer(trial.p,trial.task,'[합성] 시험 문맥의 답변','provided',true);assert.equal(owned(trial.p,trial.parent,trial.area).length,0,'a synthetic original input remains excluded even when its question has a reply');assert.deepEqual(round(trial.p),trial.p);
++});

@@ -1,0 +1,4083 @@
+{
+  "boundary": "Public domain APIs, synthetic labelled question and reply; source reconstructions not actual user questions; before/after run labels distinguish product state",
+  "results": [
+    {
+      "case": "powertoys",
+      "mode": "ordinary-reply",
+      "task": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+      "area": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+      "parent": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+      "question": {
+        "kind": "fact",
+        "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+        "why": "의미 품질 판단이 아닌 상태 경계 재현",
+        "options": []
+      },
+      "before": [
+        {
+          "kind": "decision",
+          "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+          "returnId": null,
+          "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+          "status": "사실 확인 항목 있음",
+          "answered": false,
+          "applicability": "active"
+        }
+      ],
+      "after": [
+        {
+          "kind": "decision",
+          "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+          "returnId": null,
+          "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+          "status": "답변 기록 있음",
+          "answered": true,
+          "applicability": "answered"
+        }
+      ],
+      "questionAnswered": true,
+      "applicability": "answered",
+      "taskStatus": "작업문 준비됨 · 미실행",
+      "sources": [
+        {
+          "id": "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+          "kind": "request",
+          "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+          "at": "2026-10-22T11:29:48.088Z",
+          "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+          "replyTo": null,
+          "disposition": "provided"
+        },
+        {
+          "id": "S_fc331028-b874-4a59-b1cc-53fda4b12625",
+          "kind": "answer",
+          "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+          "at": "2026-10-22T11:29:48.091Z",
+          "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+          "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+          "disposition": "provided"
+        }
+      ],
+      "foldedRepresentative": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+      "reloadedQuestions": [
+        {
+          "kind": "decision",
+          "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+          "returnId": null,
+          "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+          "status": "답변 기록 있음",
+          "answered": true,
+          "applicability": "answered"
+        }
+      ],
+      "expectedQuestionCount": 1,
+      "pass": true,
+      "original": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_6bf643d6-8996-4f8c-9fd1-6158ef2a506a",
+        "revision": 17,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_51356c89-bec7-45c0-989b-ff3bd329459b",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.083Z",
+            "taskId": "T_a714ffd7-a3cb-491d-a49f-d0392aabd071",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+            "kind": "request",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.088Z",
+            "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_51356c89-bec7-45c0-989b-ff3bd329459b",
+            "revision": 13,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "status": "requested",
+            "sourceId": "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+            "revision": 16,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_a714ffd7-a3cb-491d-a49f-d0392aabd071",
+            "sourceIds": [
+              "S_51356c89-bec7-45c0-989b-ff3bd329459b"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.088Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4619,
+                "digest": "4cdbbe25",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_powertoys",
+                "background": {
+                  "version": "background.1",
+                  "revision": 12,
+                  "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "area": {
+                    "id": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+                        "name": "키 매핑 편집기",
+                        "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_788a751f-4228-40bb-aac5-cefaaa0d4279",
+                        "name": "키 검색·선택",
+                        "note": "제출한 검색어로 필터링한 키를 고른다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 12,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d"
+          },
+          {
+            "id": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+            "sourceIds": [
+              "S_329a3452-4e56-4197-b4d7-4dfbbc670684"
+            ],
+            "parentTaskId": "T_a714ffd7-a3cb-491d-a49f-d0392aabd071",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+                    "revision": 16
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 16,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 15,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d"
+          }
+        ],
+        "currentTaskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+            "at": "2026-10-22T11:29:48.077Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+              "name": "키 매핑 편집기",
+              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.080Z"
+            },
+            {
+              "id": "A_788a751f-4228-40bb-aac5-cefaaa0d4279",
+              "name": "키 검색·선택",
+              "note": "제출한 검색어로 필터링한 키를 고른다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.081Z"
+            },
+            {
+              "id": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.081Z"
+            },
+            {
+              "id": "A_4259c229-b1d9-4d8e-a64c-2df629830b65",
+              "name": "녹화 종료 판단",
+              "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.081Z"
+            },
+            {
+              "id": "A_a9c7e9f3-30e7-4940-8c6c-03e1ccbc164e",
+              "name": "공통 입력 훅",
+              "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.081Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_9a3368e5-e578-4aab-8cbd-a1ef954efcd4",
+              "from": "A_a9c7e9f3-30e7-4940-8c6c-03e1ccbc164e",
+              "to": "A_4259c229-b1d9-4d8e-a64c-2df629830b65",
+              "kind": "flow",
+              "note": "고정 코드의 이벤트 종류 전달"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_c496bce0-8678-4d02-8d94-1f67dcd583f4": {
+                "x": 40,
+                "y": 40
+              },
+              "A_788a751f-4228-40bb-aac5-cefaaa0d4279": {
+                "x": 340,
+                "y": 40
+              },
+              "A_d682b0eb-1755-42aa-b122-a5227495064d": {
+                "x": -260,
+                "y": 40
+              },
+              "A_4259c229-b1d9-4d8e-a64c-2df629830b65": {
+                "x": 40,
+                "y": 240
+              },
+              "A_a9c7e9f3-30e7-4940-8c6c-03e1ccbc164e": {
+                "x": 340,
+                "y": 240
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_788a751f-4228-40bb-aac5-cefaaa0d4279": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+              "A_d682b0eb-1755-42aa-b122-a5227495064d": "A_788a751f-4228-40bb-aac5-cefaaa0d4279",
+              "A_4259c229-b1d9-4d8e-a64c-2df629830b65": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4"
+            },
+            "revisions": {
+              "A_c496bce0-8678-4d02-8d94-1f67dcd583f4": 0,
+              "A_788a751f-4228-40bb-aac5-cefaaa0d4279": 1,
+              "A_d682b0eb-1755-42aa-b122-a5227495064d": 1,
+              "A_4259c229-b1d9-4d8e-a64c-2df629830b65": 1,
+              "A_a9c7e9f3-30e7-4940-8c6c-03e1ccbc164e": 0
+            }
+          }
+        }
+      },
+      "afterProject": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_6bf643d6-8996-4f8c-9fd1-6158ef2a506a",
+        "revision": 18,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_51356c89-bec7-45c0-989b-ff3bd329459b",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.083Z",
+            "taskId": "T_a714ffd7-a3cb-491d-a49f-d0392aabd071",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+            "kind": "request",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.088Z",
+            "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_fc331028-b874-4a59-b1cc-53fda4b12625",
+            "kind": "answer",
+            "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+            "at": "2026-10-22T11:29:48.091Z",
+            "taskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+            "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_51356c89-bec7-45c0-989b-ff3bd329459b",
+            "revision": 13,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "status": "requested",
+            "sourceId": "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+            "revision": 16,
+            "history": []
+          },
+          {
+            "id": "D3",
+            "text": "사실 확인 질문: [검사 전용 질문] 기록의 표시를 유지하는가?\n사용자 답변: [합성 검사 답변] 원래 질문에 대한 답변 기록",
+            "status": "answered",
+            "sourceId": "S_fc331028-b874-4a59-b1cc-53fda4b12625",
+            "revision": 18,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_a714ffd7-a3cb-491d-a49f-d0392aabd071",
+            "sourceIds": [
+              "S_51356c89-bec7-45c0-989b-ff3bd329459b"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.088Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4619,
+                "digest": "4cdbbe25",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_powertoys",
+                "background": {
+                  "version": "background.1",
+                  "revision": 12,
+                  "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "area": {
+                    "id": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+                        "name": "키 매핑 편집기",
+                        "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_788a751f-4228-40bb-aac5-cefaaa0d4279",
+                        "name": "키 검색·선택",
+                        "note": "제출한 검색어로 필터링한 키를 고른다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 12,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d"
+          },
+          {
+            "id": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+            "sourceIds": [
+              "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+              "S_fc331028-b874-4a59-b1cc-53fda4b12625"
+            ],
+            "parentTaskId": "T_a714ffd7-a3cb-491d-a49f-d0392aabd071",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_329a3452-4e56-4197-b4d7-4dfbbc670684",
+                    "revision": 16
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 16,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 15,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_d682b0eb-1755-42aa-b122-a5227495064d"
+          }
+        ],
+        "currentTaskId": "T_d3eac233-35ba-4bbb-a88c-65fb809c5e3f",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+            "at": "2026-10-22T11:29:48.077Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+              "name": "키 매핑 편집기",
+              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.080Z"
+            },
+            {
+              "id": "A_788a751f-4228-40bb-aac5-cefaaa0d4279",
+              "name": "키 검색·선택",
+              "note": "제출한 검색어로 필터링한 키를 고른다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.081Z"
+            },
+            {
+              "id": "A_d682b0eb-1755-42aa-b122-a5227495064d",
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.081Z"
+            },
+            {
+              "id": "A_4259c229-b1d9-4d8e-a64c-2df629830b65",
+              "name": "녹화 종료 판단",
+              "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.081Z"
+            },
+            {
+              "id": "A_a9c7e9f3-30e7-4940-8c6c-03e1ccbc164e",
+              "name": "공통 입력 훅",
+              "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.081Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_9a3368e5-e578-4aab-8cbd-a1ef954efcd4",
+              "from": "A_a9c7e9f3-30e7-4940-8c6c-03e1ccbc164e",
+              "to": "A_4259c229-b1d9-4d8e-a64c-2df629830b65",
+              "kind": "flow",
+              "note": "고정 코드의 이벤트 종류 전달"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_c496bce0-8678-4d02-8d94-1f67dcd583f4": {
+                "x": 40,
+                "y": 40
+              },
+              "A_788a751f-4228-40bb-aac5-cefaaa0d4279": {
+                "x": 340,
+                "y": 40
+              },
+              "A_d682b0eb-1755-42aa-b122-a5227495064d": {
+                "x": -260,
+                "y": 40
+              },
+              "A_4259c229-b1d9-4d8e-a64c-2df629830b65": {
+                "x": 40,
+                "y": 240
+              },
+              "A_a9c7e9f3-30e7-4940-8c6c-03e1ccbc164e": {
+                "x": 340,
+                "y": 240
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_788a751f-4228-40bb-aac5-cefaaa0d4279": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4",
+              "A_d682b0eb-1755-42aa-b122-a5227495064d": "A_788a751f-4228-40bb-aac5-cefaaa0d4279",
+              "A_4259c229-b1d9-4d8e-a64c-2df629830b65": "A_c496bce0-8678-4d02-8d94-1f67dcd583f4"
+            },
+            "revisions": {
+              "A_c496bce0-8678-4d02-8d94-1f67dcd583f4": 0,
+              "A_788a751f-4228-40bb-aac5-cefaaa0d4279": 1,
+              "A_d682b0eb-1755-42aa-b122-a5227495064d": 1,
+              "A_4259c229-b1d9-4d8e-a64c-2df629830b65": 1,
+              "A_a9c7e9f3-30e7-4940-8c6c-03e1ccbc164e": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "case": "powertoys",
+      "mode": "synthetic-reply-to-real-question",
+      "task": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+      "area": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+      "parent": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+      "question": {
+        "kind": "fact",
+        "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+        "why": "의미 품질 판단이 아닌 상태 경계 재현",
+        "options": []
+      },
+      "before": [
+        {
+          "kind": "decision",
+          "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+          "returnId": null,
+          "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+          "status": "사실 확인 항목 있음",
+          "answered": false,
+          "applicability": "active"
+        }
+      ],
+      "after": [
+        {
+          "kind": "decision",
+          "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+          "returnId": null,
+          "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+          "status": "시험 답변 기록 · 실제 답변 아님",
+          "answered": true,
+          "applicability": "answered"
+        }
+      ],
+      "questionAnswered": true,
+      "applicability": "answered",
+      "taskStatus": "시험 문맥 · 실제 요구 아님",
+      "sources": [
+        {
+          "id": "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+          "kind": "request",
+          "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+          "at": "2026-10-22T11:29:48.100Z",
+          "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+          "replyTo": null,
+          "disposition": "provided"
+        },
+        {
+          "id": "S_7be958d8-1e28-47f0-aa59-c2a69029641f",
+          "kind": "test_answer",
+          "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+          "at": "2026-10-22T11:29:48.102Z",
+          "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+          "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+          "disposition": "provided"
+        }
+      ],
+      "foldedRepresentative": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+      "reloadedQuestions": [
+        {
+          "kind": "decision",
+          "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+          "returnId": null,
+          "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+          "status": "시험 답변 기록 · 실제 답변 아님",
+          "answered": true,
+          "applicability": "answered"
+        }
+      ],
+      "expectedQuestionCount": 1,
+      "pass": true,
+      "original": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_d9fbc610-09f2-4cac-89f7-0584a9a64de0",
+        "revision": 17,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_f117709e-9bfa-4d5d-8497-d6e6c29306db",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.098Z",
+            "taskId": "T_e8682169-8155-4126-a1bd-2811e541796c",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+            "kind": "request",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.100Z",
+            "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_f117709e-9bfa-4d5d-8497-d6e6c29306db",
+            "revision": 13,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "status": "requested",
+            "sourceId": "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+            "revision": 16,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_e8682169-8155-4126-a1bd-2811e541796c",
+            "sourceIds": [
+              "S_f117709e-9bfa-4d5d-8497-d6e6c29306db"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.098Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4619,
+                "digest": "dbbbdbb7",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_powertoys",
+                "background": {
+                  "version": "background.1",
+                  "revision": 12,
+                  "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "area": {
+                    "id": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+                        "name": "키 매핑 편집기",
+                        "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_dc50f72d-3071-4e41-9188-65601af58469",
+                        "name": "키 검색·선택",
+                        "note": "제출한 검색어로 필터링한 키를 고른다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 12,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2"
+          },
+          {
+            "id": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+            "sourceIds": [
+              "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6"
+            ],
+            "parentTaskId": "T_e8682169-8155-4126-a1bd-2811e541796c",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+                    "revision": 16
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 16,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 15,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2"
+          }
+        ],
+        "currentTaskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+            "at": "2026-10-22T11:29:48.097Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+              "name": "키 매핑 편집기",
+              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            },
+            {
+              "id": "A_dc50f72d-3071-4e41-9188-65601af58469",
+              "name": "키 검색·선택",
+              "note": "제출한 검색어로 필터링한 키를 고른다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            },
+            {
+              "id": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            },
+            {
+              "id": "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb",
+              "name": "녹화 종료 판단",
+              "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            },
+            {
+              "id": "A_10008e22-51c0-4eea-8fdd-2cd7f6cd1872",
+              "name": "공통 입력 훅",
+              "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_1710d25d-667a-46f3-90d5-2535390e9ee9",
+              "from": "A_10008e22-51c0-4eea-8fdd-2cd7f6cd1872",
+              "to": "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb",
+              "kind": "flow",
+              "note": "고정 코드의 이벤트 종류 전달"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_be90c247-3ef7-45fd-88cb-03f207fb0297": {
+                "x": 40,
+                "y": 40
+              },
+              "A_dc50f72d-3071-4e41-9188-65601af58469": {
+                "x": 340,
+                "y": 40
+              },
+              "A_24149bd2-0790-4100-a5ed-38fc7184d1f2": {
+                "x": -260,
+                "y": 40
+              },
+              "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb": {
+                "x": 40,
+                "y": 240
+              },
+              "A_10008e22-51c0-4eea-8fdd-2cd7f6cd1872": {
+                "x": 340,
+                "y": 240
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_dc50f72d-3071-4e41-9188-65601af58469": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+              "A_24149bd2-0790-4100-a5ed-38fc7184d1f2": "A_dc50f72d-3071-4e41-9188-65601af58469",
+              "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb": "A_be90c247-3ef7-45fd-88cb-03f207fb0297"
+            },
+            "revisions": {
+              "A_be90c247-3ef7-45fd-88cb-03f207fb0297": 0,
+              "A_dc50f72d-3071-4e41-9188-65601af58469": 1,
+              "A_24149bd2-0790-4100-a5ed-38fc7184d1f2": 1,
+              "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb": 1,
+              "A_10008e22-51c0-4eea-8fdd-2cd7f6cd1872": 0
+            }
+          }
+        }
+      },
+      "afterProject": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_d9fbc610-09f2-4cac-89f7-0584a9a64de0",
+        "revision": 18,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_f117709e-9bfa-4d5d-8497-d6e6c29306db",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.098Z",
+            "taskId": "T_e8682169-8155-4126-a1bd-2811e541796c",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+            "kind": "request",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.100Z",
+            "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_7be958d8-1e28-47f0-aa59-c2a69029641f",
+            "kind": "test_answer",
+            "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+            "at": "2026-10-22T11:29:48.102Z",
+            "taskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+            "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_f117709e-9bfa-4d5d-8497-d6e6c29306db",
+            "revision": 13,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "status": "requested",
+            "sourceId": "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+            "revision": 16,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_e8682169-8155-4126-a1bd-2811e541796c",
+            "sourceIds": [
+              "S_f117709e-9bfa-4d5d-8497-d6e6c29306db"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.098Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4619,
+                "digest": "dbbbdbb7",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_powertoys",
+                "background": {
+                  "version": "background.1",
+                  "revision": 12,
+                  "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "area": {
+                    "id": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+                        "name": "키 매핑 편집기",
+                        "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_dc50f72d-3071-4e41-9188-65601af58469",
+                        "name": "키 검색·선택",
+                        "note": "제출한 검색어로 필터링한 키를 고른다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 12,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2"
+          },
+          {
+            "id": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+            "sourceIds": [
+              "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+              "S_7be958d8-1e28-47f0-aa59-c2a69029641f"
+            ],
+            "parentTaskId": "T_e8682169-8155-4126-a1bd-2811e541796c",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_ca129b11-9d2f-49ed-a8d4-96813b66ffe6",
+                    "revision": 16
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 16,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 15,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2"
+          }
+        ],
+        "currentTaskId": "T_d546ebd7-7438-4bcf-a191-1e75f771cd2a",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+            "at": "2026-10-22T11:29:48.097Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+              "name": "키 매핑 편집기",
+              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            },
+            {
+              "id": "A_dc50f72d-3071-4e41-9188-65601af58469",
+              "name": "키 검색·선택",
+              "note": "제출한 검색어로 필터링한 키를 고른다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            },
+            {
+              "id": "A_24149bd2-0790-4100-a5ed-38fc7184d1f2",
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            },
+            {
+              "id": "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb",
+              "name": "녹화 종료 판단",
+              "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            },
+            {
+              "id": "A_10008e22-51c0-4eea-8fdd-2cd7f6cd1872",
+              "name": "공통 입력 훅",
+              "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.097Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_1710d25d-667a-46f3-90d5-2535390e9ee9",
+              "from": "A_10008e22-51c0-4eea-8fdd-2cd7f6cd1872",
+              "to": "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb",
+              "kind": "flow",
+              "note": "고정 코드의 이벤트 종류 전달"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_be90c247-3ef7-45fd-88cb-03f207fb0297": {
+                "x": 40,
+                "y": 40
+              },
+              "A_dc50f72d-3071-4e41-9188-65601af58469": {
+                "x": 340,
+                "y": 40
+              },
+              "A_24149bd2-0790-4100-a5ed-38fc7184d1f2": {
+                "x": -260,
+                "y": 40
+              },
+              "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb": {
+                "x": 40,
+                "y": 240
+              },
+              "A_10008e22-51c0-4eea-8fdd-2cd7f6cd1872": {
+                "x": 340,
+                "y": 240
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_dc50f72d-3071-4e41-9188-65601af58469": "A_be90c247-3ef7-45fd-88cb-03f207fb0297",
+              "A_24149bd2-0790-4100-a5ed-38fc7184d1f2": "A_dc50f72d-3071-4e41-9188-65601af58469",
+              "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb": "A_be90c247-3ef7-45fd-88cb-03f207fb0297"
+            },
+            "revisions": {
+              "A_be90c247-3ef7-45fd-88cb-03f207fb0297": 0,
+              "A_dc50f72d-3071-4e41-9188-65601af58469": 1,
+              "A_24149bd2-0790-4100-a5ed-38fc7184d1f2": 1,
+              "A_c8fd53b1-a6c3-48b1-a3f2-dbc2a2ecb6eb": 1,
+              "A_10008e22-51c0-4eea-8fdd-2cd7f6cd1872": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "case": "powertoys",
+      "mode": "synthetic-question",
+      "task": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+      "area": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+      "parent": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+      "question": {
+        "kind": "fact",
+        "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+        "why": "의미 품질 판단이 아닌 상태 경계 재현",
+        "options": []
+      },
+      "before": [],
+      "after": [],
+      "questionAnswered": false,
+      "applicability": "active",
+      "taskStatus": "시험 문맥 · 실제 요구 아님",
+      "sources": [
+        {
+          "id": "S_ca6a7037-e4e3-4d53-a225-c50330a95014",
+          "kind": "test_answer",
+          "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+          "at": "2026-10-22T11:29:48.106Z",
+          "taskId": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "foldedRepresentative": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+      "reloadedQuestions": [],
+      "expectedQuestionCount": 0,
+      "pass": true,
+      "original": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_931f6815-bf5d-43af-b91d-cd049702249f",
+        "revision": 18,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_be5178ea-02e7-48bc-b766-51c1db73be3a",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.104Z",
+            "taskId": "T_4e68ef32-f15a-42b6-b8a8-a55eddf4e701",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_ca6a7037-e4e3-4d53-a225-c50330a95014",
+            "kind": "test_answer",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.106Z",
+            "taskId": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_be5178ea-02e7-48bc-b766-51c1db73be3a",
+            "revision": 13,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_4e68ef32-f15a-42b6-b8a8-a55eddf4e701",
+            "sourceIds": [
+              "S_be5178ea-02e7-48bc-b766-51c1db73be3a"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.105Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4619,
+                "digest": "50762341",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_powertoys",
+                "background": {
+                  "version": "background.1",
+                  "revision": 12,
+                  "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "area": {
+                    "id": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+                        "name": "키 매핑 편집기",
+                        "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_1c67ef50-e562-4431-bc3d-04eb014068fd",
+                        "name": "키 검색·선택",
+                        "note": "제출한 검색어로 필터링한 키를 고른다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 12,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08"
+          },
+          {
+            "id": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+            "sourceIds": [
+              "S_ca6a7037-e4e3-4d53-a225-c50330a95014"
+            ],
+            "parentTaskId": "T_4e68ef32-f15a-42b6-b8a8-a55eddf4e701",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": []
+              },
+              "understanding": "합성 시험답변을 별도 조건으로 보존했습니다. 실제 요구를 바꾸지 않습니다.",
+              "scope": "가정한 시험 장면만. 기존 확정 기준과 실제 구현 완료 상태는 유지합니다.",
+              "next": "시험 조건에서 다음 작업의 차이를 검토하세요. 실제 변경 승인으로 사용하지 마세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 17,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": null,
+            "areaId": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08"
+          }
+        ],
+        "currentTaskId": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "test_answer",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+            "at": "2026-10-22T11:29:48.103Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+              "name": "키 매핑 편집기",
+              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.103Z"
+            },
+            {
+              "id": "A_1c67ef50-e562-4431-bc3d-04eb014068fd",
+              "name": "키 검색·선택",
+              "note": "제출한 검색어로 필터링한 키를 고른다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.103Z"
+            },
+            {
+              "id": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.103Z"
+            },
+            {
+              "id": "A_88806296-7379-4863-a07e-7e5f76c342bb",
+              "name": "녹화 종료 판단",
+              "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.104Z"
+            },
+            {
+              "id": "A_80e05412-37b3-41ac-846a-1f655ed9f526",
+              "name": "공통 입력 훅",
+              "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.104Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_0af78faa-1aa9-4bb7-abb1-a646ad5096cb",
+              "from": "A_80e05412-37b3-41ac-846a-1f655ed9f526",
+              "to": "A_88806296-7379-4863-a07e-7e5f76c342bb",
+              "kind": "flow",
+              "note": "고정 코드의 이벤트 종류 전달"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_7c1095e7-7e14-4622-aab4-8e35f1a56590": {
+                "x": 40,
+                "y": 40
+              },
+              "A_1c67ef50-e562-4431-bc3d-04eb014068fd": {
+                "x": 340,
+                "y": 40
+              },
+              "A_4cbfced5-6041-4f42-9a78-3b05eefeee08": {
+                "x": -260,
+                "y": 40
+              },
+              "A_88806296-7379-4863-a07e-7e5f76c342bb": {
+                "x": 40,
+                "y": 240
+              },
+              "A_80e05412-37b3-41ac-846a-1f655ed9f526": {
+                "x": 340,
+                "y": 240
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_1c67ef50-e562-4431-bc3d-04eb014068fd": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+              "A_4cbfced5-6041-4f42-9a78-3b05eefeee08": "A_1c67ef50-e562-4431-bc3d-04eb014068fd",
+              "A_88806296-7379-4863-a07e-7e5f76c342bb": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590"
+            },
+            "revisions": {
+              "A_7c1095e7-7e14-4622-aab4-8e35f1a56590": 0,
+              "A_1c67ef50-e562-4431-bc3d-04eb014068fd": 1,
+              "A_4cbfced5-6041-4f42-9a78-3b05eefeee08": 1,
+              "A_88806296-7379-4863-a07e-7e5f76c342bb": 1,
+              "A_80e05412-37b3-41ac-846a-1f655ed9f526": 0
+            }
+          }
+        }
+      },
+      "afterProject": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_931f6815-bf5d-43af-b91d-cd049702249f",
+        "revision": 18,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_be5178ea-02e7-48bc-b766-51c1db73be3a",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.104Z",
+            "taskId": "T_4e68ef32-f15a-42b6-b8a8-a55eddf4e701",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_ca6a7037-e4e3-4d53-a225-c50330a95014",
+            "kind": "test_answer",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.106Z",
+            "taskId": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_be5178ea-02e7-48bc-b766-51c1db73be3a",
+            "revision": 13,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_4e68ef32-f15a-42b6-b8a8-a55eddf4e701",
+            "sourceIds": [
+              "S_be5178ea-02e7-48bc-b766-51c1db73be3a"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.105Z",
+                "method": "clipboard",
+                "revision": 13,
+                "chars": 4619,
+                "digest": "50762341",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_powertoys",
+                "background": {
+                  "version": "background.1",
+                  "revision": 12,
+                  "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "area": {
+                    "id": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "검색 입력과 결과",
+                    "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+                        "name": "키 매핑 편집기",
+                        "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_1c67ef50-e562-4431-bc3d-04eb014068fd",
+                        "name": "키 검색·선택",
+                        "note": "제출한 검색어로 필터링한 키를 고른다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 12,
+              "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+              "area": {
+                "id": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+                "name": "검색 입력과 결과",
+                "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+              }
+            },
+            "areaId": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08"
+          },
+          {
+            "id": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+            "sourceIds": [
+              "S_ca6a7037-e4e3-4d53-a225-c50330a95014"
+            ],
+            "parentTaskId": "T_4e68ef32-f15a-42b6-b8a8-a55eddf4e701",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": []
+              },
+              "understanding": "합성 시험답변을 별도 조건으로 보존했습니다. 실제 요구를 바꾸지 않습니다.",
+              "scope": "가정한 시험 장면만. 기존 확정 기준과 실제 구현 완료 상태는 유지합니다.",
+              "next": "시험 조건에서 다음 작업의 차이를 검토하세요. 실제 변경 승인으로 사용하지 마세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 17,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": null,
+            "areaId": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08"
+          }
+        ],
+        "currentTaskId": "T_82bb01eb-b753-4dcf-b72f-1737febd4506",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "test_answer",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+            "at": "2026-10-22T11:29:48.103Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+              "name": "키 매핑 편집기",
+              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.103Z"
+            },
+            {
+              "id": "A_1c67ef50-e562-4431-bc3d-04eb014068fd",
+              "name": "키 검색·선택",
+              "note": "제출한 검색어로 필터링한 키를 고른다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.103Z"
+            },
+            {
+              "id": "A_4cbfced5-6041-4f42-9a78-3b05eefeee08",
+              "name": "검색 입력과 결과",
+              "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.103Z"
+            },
+            {
+              "id": "A_88806296-7379-4863-a07e-7e5f76c342bb",
+              "name": "녹화 종료 판단",
+              "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.104Z"
+            },
+            {
+              "id": "A_80e05412-37b3-41ac-846a-1f655ed9f526",
+              "name": "공통 입력 훅",
+              "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.104Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_0af78faa-1aa9-4bb7-abb1-a646ad5096cb",
+              "from": "A_80e05412-37b3-41ac-846a-1f655ed9f526",
+              "to": "A_88806296-7379-4863-a07e-7e5f76c342bb",
+              "kind": "flow",
+              "note": "고정 코드의 이벤트 종류 전달"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_7c1095e7-7e14-4622-aab4-8e35f1a56590": {
+                "x": 40,
+                "y": 40
+              },
+              "A_1c67ef50-e562-4431-bc3d-04eb014068fd": {
+                "x": 340,
+                "y": 40
+              },
+              "A_4cbfced5-6041-4f42-9a78-3b05eefeee08": {
+                "x": -260,
+                "y": 40
+              },
+              "A_88806296-7379-4863-a07e-7e5f76c342bb": {
+                "x": 40,
+                "y": 240
+              },
+              "A_80e05412-37b3-41ac-846a-1f655ed9f526": {
+                "x": 340,
+                "y": 240
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_1c67ef50-e562-4431-bc3d-04eb014068fd": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590",
+              "A_4cbfced5-6041-4f42-9a78-3b05eefeee08": "A_1c67ef50-e562-4431-bc3d-04eb014068fd",
+              "A_88806296-7379-4863-a07e-7e5f76c342bb": "A_7c1095e7-7e14-4622-aab4-8e35f1a56590"
+            },
+            "revisions": {
+              "A_7c1095e7-7e14-4622-aab4-8e35f1a56590": 0,
+              "A_1c67ef50-e562-4431-bc3d-04eb014068fd": 1,
+              "A_4cbfced5-6041-4f42-9a78-3b05eefeee08": 1,
+              "A_88806296-7379-4863-a07e-7e5f76c342bb": 1,
+              "A_80e05412-37b3-41ac-846a-1f655ed9f526": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "case": "product13",
+      "mode": "ordinary-reply",
+      "task": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+      "area": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+      "parent": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+      "question": {
+        "kind": "fact",
+        "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+        "why": "의미 품질 판단이 아닌 상태 경계 재현",
+        "options": []
+      },
+      "before": [
+        {
+          "kind": "decision",
+          "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+          "returnId": null,
+          "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+          "status": "사실 확인 항목 있음",
+          "answered": false,
+          "applicability": "active"
+        }
+      ],
+      "after": [
+        {
+          "kind": "decision",
+          "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+          "returnId": null,
+          "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+          "status": "답변 기록 있음",
+          "answered": true,
+          "applicability": "answered"
+        }
+      ],
+      "questionAnswered": true,
+      "applicability": "answered",
+      "taskStatus": "작업문 준비됨 · 미실행",
+      "sources": [
+        {
+          "id": "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+          "kind": "request",
+          "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+          "at": "2026-10-22T11:29:48.109Z",
+          "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+          "replyTo": null,
+          "disposition": "provided"
+        },
+        {
+          "id": "S_4ff6da1b-7226-426c-9803-91d0d2d4873f",
+          "kind": "answer",
+          "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+          "at": "2026-10-22T11:29:48.109Z",
+          "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+          "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+          "disposition": "provided"
+        }
+      ],
+      "foldedRepresentative": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+      "reloadedQuestions": [
+        {
+          "kind": "decision",
+          "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+          "returnId": null,
+          "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+          "status": "답변 기록 있음",
+          "answered": true,
+          "applicability": "answered"
+        }
+      ],
+      "expectedQuestionCount": 1,
+      "pass": true,
+      "original": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_60dc14f2-c141-49f2-aaa6-4723fc2db9a1",
+        "revision": 24,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_4ba36b20-bca0-4e47-b920-4ec9d0255864",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.108Z",
+            "taskId": "T_75da0646-3c98-4d30-a6c3-ae86c23dfdce",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+            "kind": "request",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.109Z",
+            "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_4ba36b20-bca0-4e47-b920-4ec9d0255864",
+            "revision": 20,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "status": "requested",
+            "sourceId": "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+            "revision": 23,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_75da0646-3c98-4d30-a6c3-ae86c23dfdce",
+            "sourceIds": [
+              "S_4ba36b20-bca0-4e47-b920-4ec9d0255864"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.108Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 4569,
+                "digest": "7b4ae09c",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_product13",
+                "background": {
+                  "version": "background.1",
+                  "revision": 19,
+                  "brief": "제품13 전체 공간의 포함 구성 재서술",
+                  "area": {
+                    "id": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+                        "name": "전체 공간 읽기",
+                        "note": "목적과 영역 구상을 기본에서 읽는다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+                        "name": "영역 지도와 선택상세",
+                        "note": "현재 영역과 관계를 읽고 선택한다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 19,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646"
+          },
+          {
+            "id": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+            "sourceIds": [
+              "S_8eb852bb-9f41-4705-90cb-02abafd239c5"
+            ],
+            "parentTaskId": "T_75da0646-3c98-4d30-a6c3-ae86c23dfdce",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+                    "revision": 23
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 23,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 22,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646"
+          }
+        ],
+        "currentTaskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "제품13 전체 공간의 포함 구성 재서술",
+            "at": "2026-10-22T11:29:48.107Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "name": "전체 공간 읽기",
+              "note": "목적과 영역 구상을 기본에서 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_54c687c5-6950-4cfd-a809-27288ce4d59a",
+              "name": "프로그램 목적 읽기",
+              "note": "짧게 읽고 원문에 접근한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+              "name": "영역 지도와 선택상세",
+              "note": "현재 영역과 관계를 읽고 선택한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_a455b72f-3808-4e77-bfc5-5b9b4284d99d",
+              "name": "질문·보고 기록 읽기",
+              "note": "기록 종류를 구별하며 개발 미완료로 합산하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_b758eecc-9f37-4206-9664-9a00a44aa8ce",
+              "name": "영역 추가",
+              "note": "사용자 명시 입력으로 추가한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.108Z"
+            },
+            {
+              "id": "A_211033f4-ad44-4551-87e9-82b0802be077",
+              "name": "영역 카드",
+              "note": "영역 ID를 유지하는 선택·진입 대상이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.108Z"
+            },
+            {
+              "id": "A_3fdb495c-8969-4e18-ae71-ccf91d375817",
+              "name": "선택 상세",
+              "note": "선택한 영역의 구상·요청을 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.108Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_50176424-942e-4972-b604-52f20f65396d",
+              "from": "A_b758eecc-9f37-4206-9664-9a00a44aa8ce",
+              "to": "A_211033f4-ad44-4551-87e9-82b0802be077",
+              "kind": "flow",
+              "note": "추가 후 표시되는 카드와의 정밀 대응은 분석자 판단"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_1770603d-071d-4d5f-be82-495ce76ce19a": {
+                "x": 40,
+                "y": 40
+              },
+              "A_54c687c5-6950-4cfd-a809-27288ce4d59a": {
+                "x": 340,
+                "y": 40
+              },
+              "A_67e93d73-e3cd-4fbd-9487-3a91391d4068": {
+                "x": -260,
+                "y": 40
+              },
+              "A_a455b72f-3808-4e77-bfc5-5b9b4284d99d": {
+                "x": 40,
+                "y": 240
+              },
+              "A_b758eecc-9f37-4206-9664-9a00a44aa8ce": {
+                "x": 340,
+                "y": 240
+              },
+              "A_e3b35f61-f760-477b-87b5-27038ad7e646": {
+                "x": -260,
+                "y": 240
+              },
+              "A_211033f4-ad44-4551-87e9-82b0802be077": {
+                "x": 40,
+                "y": -160
+              },
+              "A_3fdb495c-8969-4e18-ae71-ccf91d375817": {
+                "x": 340,
+                "y": -160
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_54c687c5-6950-4cfd-a809-27288ce4d59a": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "A_67e93d73-e3cd-4fbd-9487-3a91391d4068": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "A_a455b72f-3808-4e77-bfc5-5b9b4284d99d": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "A_b758eecc-9f37-4206-9664-9a00a44aa8ce": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "A_e3b35f61-f760-477b-87b5-27038ad7e646": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+              "A_211033f4-ad44-4551-87e9-82b0802be077": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+              "A_3fdb495c-8969-4e18-ae71-ccf91d375817": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068"
+            },
+            "revisions": {
+              "A_1770603d-071d-4d5f-be82-495ce76ce19a": 0,
+              "A_54c687c5-6950-4cfd-a809-27288ce4d59a": 1,
+              "A_67e93d73-e3cd-4fbd-9487-3a91391d4068": 1,
+              "A_a455b72f-3808-4e77-bfc5-5b9b4284d99d": 1,
+              "A_b758eecc-9f37-4206-9664-9a00a44aa8ce": 1,
+              "A_e3b35f61-f760-477b-87b5-27038ad7e646": 1,
+              "A_211033f4-ad44-4551-87e9-82b0802be077": 1,
+              "A_3fdb495c-8969-4e18-ae71-ccf91d375817": 1
+            }
+          }
+        }
+      },
+      "afterProject": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_60dc14f2-c141-49f2-aaa6-4723fc2db9a1",
+        "revision": 25,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_4ba36b20-bca0-4e47-b920-4ec9d0255864",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.108Z",
+            "taskId": "T_75da0646-3c98-4d30-a6c3-ae86c23dfdce",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+            "kind": "request",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.109Z",
+            "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_4ff6da1b-7226-426c-9803-91d0d2d4873f",
+            "kind": "answer",
+            "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+            "at": "2026-10-22T11:29:48.109Z",
+            "taskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+            "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_4ba36b20-bca0-4e47-b920-4ec9d0255864",
+            "revision": 20,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "status": "requested",
+            "sourceId": "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+            "revision": 23,
+            "history": []
+          },
+          {
+            "id": "D3",
+            "text": "사실 확인 질문: [검사 전용 질문] 기록의 표시를 유지하는가?\n사용자 답변: [합성 검사 답변] 원래 질문에 대한 답변 기록",
+            "status": "answered",
+            "sourceId": "S_4ff6da1b-7226-426c-9803-91d0d2d4873f",
+            "revision": 25,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_75da0646-3c98-4d30-a6c3-ae86c23dfdce",
+            "sourceIds": [
+              "S_4ba36b20-bca0-4e47-b920-4ec9d0255864"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.108Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 4569,
+                "digest": "7b4ae09c",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_product13",
+                "background": {
+                  "version": "background.1",
+                  "revision": 19,
+                  "brief": "제품13 전체 공간의 포함 구성 재서술",
+                  "area": {
+                    "id": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+                        "name": "전체 공간 읽기",
+                        "note": "목적과 영역 구상을 기본에서 읽는다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+                        "name": "영역 지도와 선택상세",
+                        "note": "현재 영역과 관계를 읽고 선택한다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 19,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646"
+          },
+          {
+            "id": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+            "sourceIds": [
+              "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+              "S_4ff6da1b-7226-426c-9803-91d0d2d4873f"
+            ],
+            "parentTaskId": "T_75da0646-3c98-4d30-a6c3-ae86c23dfdce",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_8eb852bb-9f41-4705-90cb-02abafd239c5",
+                    "revision": 23
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 23,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 22,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_e3b35f61-f760-477b-87b5-27038ad7e646"
+          }
+        ],
+        "currentTaskId": "T_064f0fb8-44de-4f30-b435-9a97761079b8",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "제품13 전체 공간의 포함 구성 재서술",
+            "at": "2026-10-22T11:29:48.107Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "name": "전체 공간 읽기",
+              "note": "목적과 영역 구상을 기본에서 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_54c687c5-6950-4cfd-a809-27288ce4d59a",
+              "name": "프로그램 목적 읽기",
+              "note": "짧게 읽고 원문에 접근한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+              "name": "영역 지도와 선택상세",
+              "note": "현재 영역과 관계를 읽고 선택한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_a455b72f-3808-4e77-bfc5-5b9b4284d99d",
+              "name": "질문·보고 기록 읽기",
+              "note": "기록 종류를 구별하며 개발 미완료로 합산하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_b758eecc-9f37-4206-9664-9a00a44aa8ce",
+              "name": "영역 추가",
+              "note": "사용자 명시 입력으로 추가한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.107Z"
+            },
+            {
+              "id": "A_e3b35f61-f760-477b-87b5-27038ad7e646",
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.108Z"
+            },
+            {
+              "id": "A_211033f4-ad44-4551-87e9-82b0802be077",
+              "name": "영역 카드",
+              "note": "영역 ID를 유지하는 선택·진입 대상이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.108Z"
+            },
+            {
+              "id": "A_3fdb495c-8969-4e18-ae71-ccf91d375817",
+              "name": "선택 상세",
+              "note": "선택한 영역의 구상·요청을 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.108Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_50176424-942e-4972-b604-52f20f65396d",
+              "from": "A_b758eecc-9f37-4206-9664-9a00a44aa8ce",
+              "to": "A_211033f4-ad44-4551-87e9-82b0802be077",
+              "kind": "flow",
+              "note": "추가 후 표시되는 카드와의 정밀 대응은 분석자 판단"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_1770603d-071d-4d5f-be82-495ce76ce19a": {
+                "x": 40,
+                "y": 40
+              },
+              "A_54c687c5-6950-4cfd-a809-27288ce4d59a": {
+                "x": 340,
+                "y": 40
+              },
+              "A_67e93d73-e3cd-4fbd-9487-3a91391d4068": {
+                "x": -260,
+                "y": 40
+              },
+              "A_a455b72f-3808-4e77-bfc5-5b9b4284d99d": {
+                "x": 40,
+                "y": 240
+              },
+              "A_b758eecc-9f37-4206-9664-9a00a44aa8ce": {
+                "x": 340,
+                "y": 240
+              },
+              "A_e3b35f61-f760-477b-87b5-27038ad7e646": {
+                "x": -260,
+                "y": 240
+              },
+              "A_211033f4-ad44-4551-87e9-82b0802be077": {
+                "x": 40,
+                "y": -160
+              },
+              "A_3fdb495c-8969-4e18-ae71-ccf91d375817": {
+                "x": 340,
+                "y": -160
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_54c687c5-6950-4cfd-a809-27288ce4d59a": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "A_67e93d73-e3cd-4fbd-9487-3a91391d4068": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "A_a455b72f-3808-4e77-bfc5-5b9b4284d99d": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "A_b758eecc-9f37-4206-9664-9a00a44aa8ce": "A_1770603d-071d-4d5f-be82-495ce76ce19a",
+              "A_e3b35f61-f760-477b-87b5-27038ad7e646": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+              "A_211033f4-ad44-4551-87e9-82b0802be077": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068",
+              "A_3fdb495c-8969-4e18-ae71-ccf91d375817": "A_67e93d73-e3cd-4fbd-9487-3a91391d4068"
+            },
+            "revisions": {
+              "A_1770603d-071d-4d5f-be82-495ce76ce19a": 0,
+              "A_54c687c5-6950-4cfd-a809-27288ce4d59a": 1,
+              "A_67e93d73-e3cd-4fbd-9487-3a91391d4068": 1,
+              "A_a455b72f-3808-4e77-bfc5-5b9b4284d99d": 1,
+              "A_b758eecc-9f37-4206-9664-9a00a44aa8ce": 1,
+              "A_e3b35f61-f760-477b-87b5-27038ad7e646": 1,
+              "A_211033f4-ad44-4551-87e9-82b0802be077": 1,
+              "A_3fdb495c-8969-4e18-ae71-ccf91d375817": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "case": "product13",
+      "mode": "synthetic-reply-to-real-question",
+      "task": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+      "area": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+      "parent": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+      "question": {
+        "kind": "fact",
+        "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+        "why": "의미 품질 판단이 아닌 상태 경계 재현",
+        "options": []
+      },
+      "before": [
+        {
+          "kind": "decision",
+          "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+          "returnId": null,
+          "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+          "status": "사실 확인 항목 있음",
+          "answered": false,
+          "applicability": "active"
+        }
+      ],
+      "after": [
+        {
+          "kind": "decision",
+          "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+          "returnId": null,
+          "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+          "status": "시험 답변 기록 · 실제 답변 아님",
+          "answered": true,
+          "applicability": "answered"
+        }
+      ],
+      "questionAnswered": true,
+      "applicability": "answered",
+      "taskStatus": "시험 문맥 · 실제 요구 아님",
+      "sources": [
+        {
+          "id": "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+          "kind": "request",
+          "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+          "at": "2026-10-22T11:29:48.112Z",
+          "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+          "replyTo": null,
+          "disposition": "provided"
+        },
+        {
+          "id": "S_9d066530-4b2a-4fc2-9a04-e2ec44efdd0d",
+          "kind": "test_answer",
+          "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+          "at": "2026-10-22T11:29:48.113Z",
+          "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+          "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+          "disposition": "provided"
+        }
+      ],
+      "foldedRepresentative": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+      "reloadedQuestions": [
+        {
+          "kind": "decision",
+          "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+          "returnId": null,
+          "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+          "status": "시험 답변 기록 · 실제 답변 아님",
+          "answered": true,
+          "applicability": "answered"
+        }
+      ],
+      "expectedQuestionCount": 1,
+      "pass": true,
+      "original": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_2e9194e3-75d2-44be-bf61-5108af9a2281",
+        "revision": 24,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_d97b96a6-d899-4829-af20-1adc09d6d175",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.111Z",
+            "taskId": "T_54bf263a-9441-47be-a145-70a0c0497387",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+            "kind": "request",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.112Z",
+            "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_d97b96a6-d899-4829-af20-1adc09d6d175",
+            "revision": 20,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "status": "requested",
+            "sourceId": "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+            "revision": 23,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_54bf263a-9441-47be-a145-70a0c0497387",
+            "sourceIds": [
+              "S_d97b96a6-d899-4829-af20-1adc09d6d175"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.112Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 4569,
+                "digest": "ba545446",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_product13",
+                "background": {
+                  "version": "background.1",
+                  "revision": 19,
+                  "brief": "제품13 전체 공간의 포함 구성 재서술",
+                  "area": {
+                    "id": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+                        "name": "전체 공간 읽기",
+                        "note": "목적과 영역 구상을 기본에서 읽는다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+                        "name": "영역 지도와 선택상세",
+                        "note": "현재 영역과 관계를 읽고 선택한다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 19,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6"
+          },
+          {
+            "id": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+            "sourceIds": [
+              "S_546d798a-9bf5-4bee-991f-96dcf24ebb05"
+            ],
+            "parentTaskId": "T_54bf263a-9441-47be-a145-70a0c0497387",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+                    "revision": 23
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 23,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 22,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6"
+          }
+        ],
+        "currentTaskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "제품13 전체 공간의 포함 구성 재서술",
+            "at": "2026-10-22T11:29:48.111Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "name": "전체 공간 읽기",
+              "note": "목적과 영역 구상을 기본에서 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_4785e76a-80c3-4aaf-b6ea-907167dce9b7",
+              "name": "프로그램 목적 읽기",
+              "note": "짧게 읽고 원문에 접근한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+              "name": "영역 지도와 선택상세",
+              "note": "현재 영역과 관계를 읽고 선택한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_15dcdd22-6433-42fe-81a0-b81c1bc1d5ec",
+              "name": "질문·보고 기록 읽기",
+              "note": "기록 종류를 구별하며 개발 미완료로 합산하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1",
+              "name": "영역 추가",
+              "note": "사용자 명시 입력으로 추가한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_63d8945e-eb38-4215-b096-580db64e7a8a",
+              "name": "영역 카드",
+              "note": "영역 ID를 유지하는 선택·진입 대상이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_2fdac20e-7514-4e2d-aa7c-d38917635d16",
+              "name": "선택 상세",
+              "note": "선택한 영역의 구상·요청을 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_11af4f26-546c-4206-ad28-aeff80a4215c",
+              "from": "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1",
+              "to": "A_63d8945e-eb38-4215-b096-580db64e7a8a",
+              "kind": "flow",
+              "note": "추가 후 표시되는 카드와의 정밀 대응은 분석자 판단"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1": {
+                "x": 40,
+                "y": 40
+              },
+              "A_4785e76a-80c3-4aaf-b6ea-907167dce9b7": {
+                "x": 340,
+                "y": 40
+              },
+              "A_09031fad-ca78-49fe-874f-51ece791db2e": {
+                "x": -260,
+                "y": 40
+              },
+              "A_15dcdd22-6433-42fe-81a0-b81c1bc1d5ec": {
+                "x": 40,
+                "y": 240
+              },
+              "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1": {
+                "x": 340,
+                "y": 240
+              },
+              "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6": {
+                "x": -260,
+                "y": 240
+              },
+              "A_63d8945e-eb38-4215-b096-580db64e7a8a": {
+                "x": 40,
+                "y": -160
+              },
+              "A_2fdac20e-7514-4e2d-aa7c-d38917635d16": {
+                "x": 340,
+                "y": -160
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_4785e76a-80c3-4aaf-b6ea-907167dce9b7": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "A_09031fad-ca78-49fe-874f-51ece791db2e": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "A_15dcdd22-6433-42fe-81a0-b81c1bc1d5ec": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+              "A_63d8945e-eb38-4215-b096-580db64e7a8a": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+              "A_2fdac20e-7514-4e2d-aa7c-d38917635d16": "A_09031fad-ca78-49fe-874f-51ece791db2e"
+            },
+            "revisions": {
+              "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1": 0,
+              "A_4785e76a-80c3-4aaf-b6ea-907167dce9b7": 1,
+              "A_09031fad-ca78-49fe-874f-51ece791db2e": 1,
+              "A_15dcdd22-6433-42fe-81a0-b81c1bc1d5ec": 1,
+              "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1": 1,
+              "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6": 1,
+              "A_63d8945e-eb38-4215-b096-580db64e7a8a": 1,
+              "A_2fdac20e-7514-4e2d-aa7c-d38917635d16": 1
+            }
+          }
+        }
+      },
+      "afterProject": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_2e9194e3-75d2-44be-bf61-5108af9a2281",
+        "revision": 25,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_d97b96a6-d899-4829-af20-1adc09d6d175",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.111Z",
+            "taskId": "T_54bf263a-9441-47be-a145-70a0c0497387",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+            "kind": "request",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.112Z",
+            "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_9d066530-4b2a-4fc2-9a04-e2ec44efdd0d",
+            "kind": "test_answer",
+            "text": "[합성 검사 답변] 원래 질문에 대한 답변 기록",
+            "at": "2026-10-22T11:29:48.113Z",
+            "taskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+            "replyTo": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_d97b96a6-d899-4829-af20-1adc09d6d175",
+            "revision": 20,
+            "history": []
+          },
+          {
+            "id": "D2",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "status": "requested",
+            "sourceId": "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+            "revision": 23,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_54bf263a-9441-47be-a145-70a0c0497387",
+            "sourceIds": [
+              "S_d97b96a6-d899-4829-af20-1adc09d6d175"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.112Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 4569,
+                "digest": "ba545446",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_product13",
+                "background": {
+                  "version": "background.1",
+                  "revision": 19,
+                  "brief": "제품13 전체 공간의 포함 구성 재서술",
+                  "area": {
+                    "id": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+                        "name": "전체 공간 읽기",
+                        "note": "목적과 영역 구상을 기본에서 읽는다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+                        "name": "영역 지도와 선택상세",
+                        "note": "현재 영역과 관계를 읽고 선택한다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 19,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6"
+          },
+          {
+            "id": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+            "sourceIds": [
+              "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+              "S_9d066530-4b2a-4fc2-9a04-e2ec44efdd0d"
+            ],
+            "parentTaskId": "T_54bf263a-9441-47be-a145-70a0c0497387",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": [
+                  {
+                    "basisId": "D2",
+                    "sourceId": "S_546d798a-9bf5-4bee-991f-96dcf24ebb05",
+                    "revision": 23
+                  }
+                ]
+              },
+              "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+              "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+              "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [
+                "D2"
+              ],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 23,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 22,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6"
+          }
+        ],
+        "currentTaskId": "T_6ca1b8de-2930-433c-a54c-881fd56676f6",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "request",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "제품13 전체 공간의 포함 구성 재서술",
+            "at": "2026-10-22T11:29:48.111Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "name": "전체 공간 읽기",
+              "note": "목적과 영역 구상을 기본에서 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_4785e76a-80c3-4aaf-b6ea-907167dce9b7",
+              "name": "프로그램 목적 읽기",
+              "note": "짧게 읽고 원문에 접근한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+              "name": "영역 지도와 선택상세",
+              "note": "현재 영역과 관계를 읽고 선택한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_15dcdd22-6433-42fe-81a0-b81c1bc1d5ec",
+              "name": "질문·보고 기록 읽기",
+              "note": "기록 종류를 구별하며 개발 미완료로 합산하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1",
+              "name": "영역 추가",
+              "note": "사용자 명시 입력으로 추가한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6",
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_63d8945e-eb38-4215-b096-580db64e7a8a",
+              "name": "영역 카드",
+              "note": "영역 ID를 유지하는 선택·진입 대상이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            },
+            {
+              "id": "A_2fdac20e-7514-4e2d-aa7c-d38917635d16",
+              "name": "선택 상세",
+              "note": "선택한 영역의 구상·요청을 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.111Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_11af4f26-546c-4206-ad28-aeff80a4215c",
+              "from": "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1",
+              "to": "A_63d8945e-eb38-4215-b096-580db64e7a8a",
+              "kind": "flow",
+              "note": "추가 후 표시되는 카드와의 정밀 대응은 분석자 판단"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1": {
+                "x": 40,
+                "y": 40
+              },
+              "A_4785e76a-80c3-4aaf-b6ea-907167dce9b7": {
+                "x": 340,
+                "y": 40
+              },
+              "A_09031fad-ca78-49fe-874f-51ece791db2e": {
+                "x": -260,
+                "y": 40
+              },
+              "A_15dcdd22-6433-42fe-81a0-b81c1bc1d5ec": {
+                "x": 40,
+                "y": 240
+              },
+              "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1": {
+                "x": 340,
+                "y": 240
+              },
+              "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6": {
+                "x": -260,
+                "y": 240
+              },
+              "A_63d8945e-eb38-4215-b096-580db64e7a8a": {
+                "x": 40,
+                "y": -160
+              },
+              "A_2fdac20e-7514-4e2d-aa7c-d38917635d16": {
+                "x": 340,
+                "y": -160
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_4785e76a-80c3-4aaf-b6ea-907167dce9b7": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "A_09031fad-ca78-49fe-874f-51ece791db2e": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "A_15dcdd22-6433-42fe-81a0-b81c1bc1d5ec": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1": "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1",
+              "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+              "A_63d8945e-eb38-4215-b096-580db64e7a8a": "A_09031fad-ca78-49fe-874f-51ece791db2e",
+              "A_2fdac20e-7514-4e2d-aa7c-d38917635d16": "A_09031fad-ca78-49fe-874f-51ece791db2e"
+            },
+            "revisions": {
+              "A_105cc309-10a4-4e3f-9d7a-a38a75e0d2a1": 0,
+              "A_4785e76a-80c3-4aaf-b6ea-907167dce9b7": 1,
+              "A_09031fad-ca78-49fe-874f-51ece791db2e": 1,
+              "A_15dcdd22-6433-42fe-81a0-b81c1bc1d5ec": 1,
+              "A_8f5e4dfd-bd34-490c-b50b-a915a6e35cc1": 1,
+              "A_cca6af73-d6fe-49bf-bb87-f31b5f78f3d6": 1,
+              "A_63d8945e-eb38-4215-b096-580db64e7a8a": 1,
+              "A_2fdac20e-7514-4e2d-aa7c-d38917635d16": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "case": "product13",
+      "mode": "synthetic-question",
+      "task": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+      "area": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+      "parent": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+      "question": {
+        "kind": "fact",
+        "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+        "why": "의미 품질 판단이 아닌 상태 경계 재현",
+        "options": []
+      },
+      "before": [],
+      "after": [],
+      "questionAnswered": false,
+      "applicability": "active",
+      "taskStatus": "시험 문맥 · 실제 요구 아님",
+      "sources": [
+        {
+          "id": "S_0a5c91c5-395a-43d4-9400-d9331ece499e",
+          "kind": "test_answer",
+          "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+          "at": "2026-10-22T11:29:48.115Z",
+          "taskId": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "foldedRepresentative": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+      "reloadedQuestions": [],
+      "expectedQuestionCount": 0,
+      "pass": true,
+      "original": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_d7ef04e8-37d0-4340-9247-aa7b196cf8aa",
+        "revision": 25,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_4483805f-5f4a-479d-916c-fd918b23df75",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.114Z",
+            "taskId": "T_27fcda04-e0c6-47bc-bfe1-52a382f064ea",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_0a5c91c5-395a-43d4-9400-d9331ece499e",
+            "kind": "test_answer",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.115Z",
+            "taskId": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_4483805f-5f4a-479d-916c-fd918b23df75",
+            "revision": 20,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_27fcda04-e0c6-47bc-bfe1-52a382f064ea",
+            "sourceIds": [
+              "S_4483805f-5f4a-479d-916c-fd918b23df75"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.115Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 4569,
+                "digest": "0e140106",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_product13",
+                "background": {
+                  "version": "background.1",
+                  "revision": 19,
+                  "brief": "제품13 전체 공간의 포함 구성 재서술",
+                  "area": {
+                    "id": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+                        "name": "전체 공간 읽기",
+                        "note": "목적과 영역 구상을 기본에서 읽는다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+                        "name": "영역 지도와 선택상세",
+                        "note": "현재 영역과 관계를 읽고 선택한다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 19,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_558ae388-bf08-4d42-820c-752187a48d2c"
+          },
+          {
+            "id": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+            "sourceIds": [
+              "S_0a5c91c5-395a-43d4-9400-d9331ece499e"
+            ],
+            "parentTaskId": "T_27fcda04-e0c6-47bc-bfe1-52a382f064ea",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": []
+              },
+              "understanding": "합성 시험답변을 별도 조건으로 보존했습니다. 실제 요구를 바꾸지 않습니다.",
+              "scope": "가정한 시험 장면만. 기존 확정 기준과 실제 구현 완료 상태는 유지합니다.",
+              "next": "시험 조건에서 다음 작업의 차이를 검토하세요. 실제 변경 승인으로 사용하지 마세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 24,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": null,
+            "areaId": "A_558ae388-bf08-4d42-820c-752187a48d2c"
+          }
+        ],
+        "currentTaskId": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "test_answer",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "제품13 전체 공간의 포함 구성 재서술",
+            "at": "2026-10-22T11:29:48.114Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "name": "전체 공간 읽기",
+              "note": "목적과 영역 구상을 기본에서 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_0f81083a-ad25-4ca2-bc46-617db4733142",
+              "name": "프로그램 목적 읽기",
+              "note": "짧게 읽고 원문에 접근한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+              "name": "영역 지도와 선택상세",
+              "note": "현재 영역과 관계를 읽고 선택한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_686f9f9b-c74f-4756-99d6-6445c9d8a74e",
+              "name": "질문·보고 기록 읽기",
+              "note": "기록 종류를 구별하며 개발 미완료로 합산하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102",
+              "name": "영역 추가",
+              "note": "사용자 명시 입력으로 추가한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_c3af60f1-076f-4f9b-9f74-fc80522793a5",
+              "name": "영역 카드",
+              "note": "영역 ID를 유지하는 선택·진입 대상이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_89897bc0-8334-4ccb-8862-6ea9f99b032e",
+              "name": "선택 상세",
+              "note": "선택한 영역의 구상·요청을 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_17dfbbd3-677b-4287-a452-680ebac8e965",
+              "from": "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102",
+              "to": "A_c3af60f1-076f-4f9b-9f74-fc80522793a5",
+              "kind": "flow",
+              "note": "추가 후 표시되는 카드와의 정밀 대응은 분석자 판단"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_1ae12971-4d2d-44bb-9711-71dc7cab846e": {
+                "x": 40,
+                "y": 40
+              },
+              "A_0f81083a-ad25-4ca2-bc46-617db4733142": {
+                "x": 340,
+                "y": 40
+              },
+              "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b": {
+                "x": -260,
+                "y": 40
+              },
+              "A_686f9f9b-c74f-4756-99d6-6445c9d8a74e": {
+                "x": 40,
+                "y": 240
+              },
+              "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102": {
+                "x": 340,
+                "y": 240
+              },
+              "A_558ae388-bf08-4d42-820c-752187a48d2c": {
+                "x": -260,
+                "y": 240
+              },
+              "A_c3af60f1-076f-4f9b-9f74-fc80522793a5": {
+                "x": 40,
+                "y": -160
+              },
+              "A_89897bc0-8334-4ccb-8862-6ea9f99b032e": {
+                "x": 340,
+                "y": -160
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_0f81083a-ad25-4ca2-bc46-617db4733142": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "A_686f9f9b-c74f-4756-99d6-6445c9d8a74e": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "A_558ae388-bf08-4d42-820c-752187a48d2c": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+              "A_c3af60f1-076f-4f9b-9f74-fc80522793a5": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+              "A_89897bc0-8334-4ccb-8862-6ea9f99b032e": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b"
+            },
+            "revisions": {
+              "A_1ae12971-4d2d-44bb-9711-71dc7cab846e": 0,
+              "A_0f81083a-ad25-4ca2-bc46-617db4733142": 1,
+              "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b": 1,
+              "A_686f9f9b-c74f-4756-99d6-6445c9d8a74e": 1,
+              "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102": 1,
+              "A_558ae388-bf08-4d42-820c-752187a48d2c": 1,
+              "A_c3af60f1-076f-4f9b-9f74-fc80522793a5": 1,
+              "A_89897bc0-8334-4ccb-8862-6ea9f99b032e": 1
+            }
+          }
+        }
+      },
+      "afterProject": {
+        "schemaVersion": "idea015.project.7",
+        "id": "P_d7ef04e8-37d0-4340-9247-aa7b196cf8aa",
+        "revision": 25,
+        "name": "나의 프로젝트",
+        "sources": [
+          {
+            "id": "S_4483805f-5f4a-479d-916c-fd918b23df75",
+            "kind": "request",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "at": "2026-10-22T11:29:48.114Z",
+            "taskId": "T_27fcda04-e0c6-47bc-bfe1-52a382f064ea",
+            "replyTo": null,
+            "disposition": "provided"
+          },
+          {
+            "id": "S_0a5c91c5-395a-43d4-9400-d9331ece499e",
+            "kind": "test_answer",
+            "text": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+            "at": "2026-10-22T11:29:48.115Z",
+            "taskId": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+            "replyTo": null,
+            "disposition": "provided"
+          }
+        ],
+        "bases": [
+          {
+            "id": "D1",
+            "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+            "status": "requested",
+            "sourceId": "S_4483805f-5f4a-479d-916c-fd918b23df75",
+            "revision": 20,
+            "history": []
+          }
+        ],
+        "tasks": [
+          {
+            "id": "T_27fcda04-e0c6-47bc-bfe1-52a382f064ea",
+            "sourceIds": [
+              "S_4483805f-5f4a-479d-916c-fd918b23df75"
+            ],
+            "parentTaskId": null,
+            "advice": null,
+            "adviceRevision": null,
+            "mode": null,
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [
+              {
+                "at": "2026-10-22T11:29:48.115Z",
+                "method": "clipboard",
+                "revision": 20,
+                "chars": 4569,
+                "digest": "0e140106",
+                "work": {
+                  "understanding": "",
+                  "scope": "",
+                  "next": "",
+                  "checks": ""
+                },
+                "aiExcluded": false,
+                "legacyText": null,
+                "returnId": "H_hierarchy_product13",
+                "background": {
+                  "version": "background.1",
+                  "revision": 19,
+                  "brief": "제품13 전체 공간의 포함 구성 재서술",
+                  "area": {
+                    "id": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+                  }
+                },
+                "anchor": {
+                  "version": "anchor.2",
+                  "areaId": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+                  "understanding": 0,
+                  "stamp": {
+                    "name": "지도 조작",
+                    "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+                        "name": "전체 공간 읽기",
+                        "note": "목적과 영역 구상을 기본에서 읽는다.",
+                        "revision": 0
+                      },
+                      {
+                        "id": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+                        "name": "영역 지도와 선택상세",
+                        "note": "현재 영역과 관계를 읽고 선택한다.",
+                        "revision": 1
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "resultFile": null,
+            "background": {
+              "version": "background.1",
+              "revision": 19,
+              "brief": "제품13 전체 공간의 포함 구성 재서술",
+              "area": {
+                "id": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+                "name": "지도 조작",
+                "note": "확대·축소·맞춤은 포함 깊이와 별개이다."
+              }
+            },
+            "areaId": "A_558ae388-bf08-4d42-820c-752187a48d2c"
+          },
+          {
+            "id": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+            "sourceIds": [
+              "S_0a5c91c5-395a-43d4-9400-d9331ece499e"
+            ],
+            "parentTaskId": "T_27fcda04-e0c6-47bc-bfe1-52a382f064ea",
+            "advice": {
+              "intent": {
+                "version": "intent.1",
+                "relation": "start",
+                "goal": "[합성 검사] 실제 요청 경로에 생성되는 원래 질문의 답변 경계를 검사한다.",
+                "conditions": [],
+                "retired": [],
+                "basisRefs": []
+              },
+              "understanding": "합성 시험답변을 별도 조건으로 보존했습니다. 실제 요구를 바꾸지 않습니다.",
+              "scope": "가정한 시험 장면만. 기존 확정 기준과 실제 구현 완료 상태는 유지합니다.",
+              "next": "시험 조건에서 다음 작업의 차이를 검토하세요. 실제 변경 승인으로 사용하지 마세요.",
+              "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+              "question": {
+                "kind": "fact",
+                "text": "[검사 전용 질문] 기록의 표시를 유지하는가?",
+                "why": "의미 품질 판단이 아닌 상태 경계 재현",
+                "options": []
+              },
+              "relatedBasisIds": [],
+              "reviewBasisIds": [],
+              "suggestions": []
+            },
+            "adviceRevision": 24,
+            "mode": "mock",
+            "manual": {
+              "understanding": null,
+              "scope": null,
+              "next": null,
+              "checks": null
+            },
+            "suggestions": null,
+            "handoffs": [],
+            "resultFile": null,
+            "background": null,
+            "areaId": "A_558ae388-bf08-4d42-820c-752187a48d2c"
+          }
+        ],
+        "currentTaskId": "T_b8e59716-d880-46fb-aab3-69efcdb70fde",
+        "draft": "",
+        "answerDraft": "",
+        "basisDraft": "",
+        "basisEdits": {},
+        "draftKind": "test_answer",
+        "pending": null,
+        "notice": null,
+        "space": {
+          "brief": {
+            "text": "제품13 전체 공간의 포함 구성 재서술",
+            "at": "2026-10-22T11:29:48.114Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "name": "전체 공간 읽기",
+              "note": "목적과 영역 구상을 기본에서 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_0f81083a-ad25-4ca2-bc46-617db4733142",
+              "name": "프로그램 목적 읽기",
+              "note": "짧게 읽고 원문에 접근한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+              "name": "영역 지도와 선택상세",
+              "note": "현재 영역과 관계를 읽고 선택한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_686f9f9b-c74f-4756-99d6-6445c9d8a74e",
+              "name": "질문·보고 기록 읽기",
+              "note": "기록 종류를 구별하며 개발 미완료로 합산하지 않는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102",
+              "name": "영역 추가",
+              "note": "사용자 명시 입력으로 추가한다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_558ae388-bf08-4d42-820c-752187a48d2c",
+              "name": "지도 조작",
+              "note": "확대·축소·맞춤은 포함 깊이와 별개이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_c3af60f1-076f-4f9b-9f74-fc80522793a5",
+              "name": "영역 카드",
+              "note": "영역 ID를 유지하는 선택·진입 대상이다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            },
+            {
+              "id": "A_89897bc0-8334-4ccb-8862-6ea9f99b032e",
+              "name": "선택 상세",
+              "note": "선택한 영역의 구상·요청을 읽는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T11:29:48.114Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_17dfbbd3-677b-4287-a452-680ebac8e965",
+              "from": "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102",
+              "to": "A_c3af60f1-076f-4f9b-9f74-fc80522793a5",
+              "kind": "flow",
+              "note": "추가 후 표시되는 카드와의 정밀 대응은 분석자 판단"
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_1ae12971-4d2d-44bb-9711-71dc7cab846e": {
+                "x": 40,
+                "y": 40
+              },
+              "A_0f81083a-ad25-4ca2-bc46-617db4733142": {
+                "x": 340,
+                "y": 40
+              },
+              "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b": {
+                "x": -260,
+                "y": 40
+              },
+              "A_686f9f9b-c74f-4756-99d6-6445c9d8a74e": {
+                "x": 40,
+                "y": 240
+              },
+              "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102": {
+                "x": 340,
+                "y": 240
+              },
+              "A_558ae388-bf08-4d42-820c-752187a48d2c": {
+                "x": -260,
+                "y": 240
+              },
+              "A_c3af60f1-076f-4f9b-9f74-fc80522793a5": {
+                "x": 40,
+                "y": -160
+              },
+              "A_89897bc0-8334-4ccb-8862-6ea9f99b032e": {
+                "x": 340,
+                "y": -160
+              }
+            }
+          },
+          "understanding": {},
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_0f81083a-ad25-4ca2-bc46-617db4733142": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "A_686f9f9b-c74f-4756-99d6-6445c9d8a74e": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102": "A_1ae12971-4d2d-44bb-9711-71dc7cab846e",
+              "A_558ae388-bf08-4d42-820c-752187a48d2c": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+              "A_c3af60f1-076f-4f9b-9f74-fc80522793a5": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b",
+              "A_89897bc0-8334-4ccb-8862-6ea9f99b032e": "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b"
+            },
+            "revisions": {
+              "A_1ae12971-4d2d-44bb-9711-71dc7cab846e": 0,
+              "A_0f81083a-ad25-4ca2-bc46-617db4733142": 1,
+              "A_9eab79d0-9da5-48f0-8de8-41ab7b42242b": 1,
+              "A_686f9f9b-c74f-4756-99d6-6445c9d8a74e": 1,
+              "A_2dd2ffdb-cf94-4f0c-b6be-e605ba4f0102": 1,
+              "A_558ae388-bf08-4d42-820c-752187a48d2c": 1,
+              "A_c3af60f1-076f-4f9b-9f74-fc80522793a5": 1,
+              "A_89897bc0-8334-4ccb-8862-6ea9f99b032e": 1
+            }
+          }
+        }
+      }
+    }
+  ]
+}

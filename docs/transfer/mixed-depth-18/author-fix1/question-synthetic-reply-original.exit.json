@@ -1,0 +1,13 @@
+{
+  "command": "node",
+  "args": [
+    "../product18-author-evidence/question-synthetic-reply-probe.mjs"
+  ],
+  "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author",
+  "node": "v24.19.0",
+  "start": "2026-10-22T11:26:18.567Z",
+  "end": "2026-10-22T11:26:18.691Z",
+  "status": 1,
+  "signal": null,
+  "error": null
+}

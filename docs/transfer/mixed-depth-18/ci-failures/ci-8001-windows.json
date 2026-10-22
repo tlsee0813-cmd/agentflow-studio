@@ -1,0 +1,9 @@
+{
+  "head": "8001ccbe97132ae3203518300dfb30b20ffe0094",
+  "run": 39769779405,
+  "job": 119794119578,
+  "source": "Code Review pull_requests_checks",
+  "logTruncated": true,
+  "conclusion": "failure",
+  "meaning": "Same obsolete FLOW090 phrase and outer panel scroll expectations as Ubuntu"
+}
