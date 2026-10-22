@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle28-ab/check.py", line 60, in <module>
+    if VARIANT=='baseline' and not BACKUP.exists():u.prepare()
+                                                   ^^^^^^^^^^^
+  File "/workspace/browser-env/cycle28-ab/check.py", line 33, in prepare
+    d.value.save_as(str(BACKUP));self.log('actual UI backup exported',{'path':str(BACKUP),'sha256':sha(BACKUP.read_bytes()),'project':self.state()});(ROOT/'setup-ids.json').write_text(json.dumps({'ids':self.ids,'tasks':self.tasks,'P_H':H},ensure_ascii=False,indent=2))
+                                                                                                   ^^^
+NameError: name 'sha' is not defined
+

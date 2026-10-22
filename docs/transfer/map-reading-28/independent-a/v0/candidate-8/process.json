@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle28-ab/check-eight.py"
+  ],
+  "APP_DIR": "/workspace/browser-env/cycle28-candidate/app",
+  "VARIANT": "candidate",
+  "startUTC": "2026-10-22T19:25:57.974827+00:00",
+  "endUTC": "2026-10-22T19:26:13.324425+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle28-ab/check.py"
+  ],
+  "APP_DIR": "/workspace/browser-env/cycle28-candidate/app",
+  "VARIANT": "candidate",
+  "startUTC": "2026-10-22T19:22:35.416662+00:00",
+  "endUTC": "2026-10-22T19:22:35.637805+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "12a2113f9d3b7082c893db64aff3b42212eb3b820ef72dfe6c6c9aa60be8beb6"
+}

@@ -1,0 +1,55 @@
+{
+  "pairs": 6,
+  "collectionRuns": [
+    {
+      "cards": 4,
+      "variant": "baseline",
+      "completePC": 2,
+      "fatal": null,
+      "errors": [],
+      "collectionExit": 0
+    },
+    {
+      "cards": 4,
+      "variant": "candidate",
+      "completePC": 2,
+      "fatal": null,
+      "errors": [],
+      "collectionExit": 0
+    },
+    {
+      "cards": 6,
+      "variant": "baseline",
+      "completePC": 2,
+      "fatal": null,
+      "errors": [],
+      "collectionExit": 0
+    },
+    {
+      "cards": 6,
+      "variant": "candidate",
+      "completePC": 2,
+      "fatal": null,
+      "errors": [],
+      "collectionExit": 0
+    },
+    {
+      "cards": 8,
+      "variant": "baseline",
+      "completePC": 2,
+      "fatal": null,
+      "errors": [],
+      "collectionExit": 0
+    },
+    {
+      "cards": 8,
+      "variant": "candidate",
+      "completePC": 2,
+      "fatal": null,
+      "errors": [],
+      "collectionExit": 0
+    }
+  ],
+  "visualFailureEntries": 29,
+  "exit": 1
+}

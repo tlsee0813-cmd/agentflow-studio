@@ -1,0 +1,64 @@
+{
+  "provenance": "exec_command / write_stdin actual completion; not collector self-report or full transcript",
+  "normalCollections": {
+    "baseline4": {
+      "session": 65798,
+      "actualOuterExit": 0
+    },
+    "candidate4": {
+      "session": 13853,
+      "actualOuterExit": 0
+    },
+    "both6": {
+      "sessions": [
+        23054,
+        71440
+      ],
+      "eachActualOuterExit": 0
+    },
+    "both8": {
+      "sessions": [
+        19917,
+        88161
+      ],
+      "eachActualOuterExit": 0
+    }
+  },
+  "prepareExpanded": {
+    "session": 41881,
+    "actualOuterExit": 0
+  },
+  "initialErrors": {
+    "backupLedger": {
+      "session": 59329,
+      "exit": 1
+    },
+    "importDialog": {
+      "session": 25357,
+      "exit": 1
+    },
+    "importStartView": {
+      "session": 16529,
+      "exit": 1
+    },
+    "candidateMissingRootBuild": {
+      "immediateExecExit": 1
+    }
+  },
+  "offlineVisualComparison": {
+    "actualChildExit": 1,
+    "actualOuterExecExit": 1,
+    "meaning": "expected visual failure, not runner fatal"
+  },
+  "builds": {
+    "continuityCandidate": {
+      "session": 80315,
+      "exit": 0
+    },
+    "rootCandidate": {
+      "session": 42589,
+      "exit": 0
+    },
+    "baseline": "existing exact 27 build reused; not rerun as 28 tests"
+  }
+}

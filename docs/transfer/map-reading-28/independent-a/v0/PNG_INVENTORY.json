@@ -1,0 +1,92 @@
+[
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/baseline/1440-four-expanded-fit.png",
+    "bytes": 121337,
+    "sha256": "f3105f5b2397f2a0dd60f00c3c98ad55c7145992a4db360c0bd32697c020937a",
+    "uploadedRelative": "baseline/1440-four-expanded-fit.png"
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/baseline/1280-four-expanded-fit.png",
+    "bytes": 123520,
+    "sha256": "2ee33b64a7b9335d756736e40a65140772274e7c73dcd37e7a2ae56c6b5bf6b5",
+    "uploadedRelative": "baseline/1280-four-expanded-fit.png"
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/candidate/1440-four-expanded-fit.png",
+    "bytes": 109132,
+    "sha256": "b53281ad0e2b70e200b6914848f1c005dea845152bbd7323885851cbf6e7fdb8",
+    "uploadedRelative": "candidate/1440-four-expanded-fit.png"
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/candidate/1280-four-expanded-fit.png",
+    "bytes": 109814,
+    "sha256": "3129d248a8cc285330ea5024d965b96c0a5bdb588fdcf55cf2be64ca6722ea66",
+    "uploadedRelative": "candidate/1280-four-expanded-fit.png"
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/baseline-6/1280-6-expanded-fit.png",
+    "bytes": 109045,
+    "sha256": "1cb5c081001e37e80728b9da299632f6ac757e604b3a43986e423b7566433c26",
+    "uploadedRelative": null
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/baseline-6/1440-6-expanded-fit.png",
+    "bytes": 147039,
+    "sha256": "c1661a0ac7274f3cca95724b27d4f6638ee14f72b6ba6b2752c9cb5c66600d2b",
+    "uploadedRelative": null
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/candidate-6/1280-6-expanded-fit.png",
+    "bytes": 98858,
+    "sha256": "46f2943e92119c190d76a46abb8572d7429cfefb33b7f2f0f681d5873772ee7c",
+    "uploadedRelative": "candidate-6/1280-6-expanded-fit.png"
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/candidate-6/1440-6-expanded-fit.png",
+    "bytes": 126782,
+    "sha256": "2353c4c9861af2ea272260c7b969c2b96243668e857efe40831383487cfd6a2d",
+    "uploadedRelative": null
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/baseline-8/1280-8-expanded-fit.png",
+    "bytes": 117692,
+    "sha256": "1d087ec276480c0708fe20b6be47e30548e63396ce4903bedd98b4c6b4ab5829",
+    "uploadedRelative": null
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/baseline-8/1440-8-expanded-fit.png",
+    "bytes": 145148,
+    "sha256": "60dea69fe9689c99f989b563736e62306f1f234d76175da5fb12054429df378d",
+    "uploadedRelative": null
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/candidate-8/1440-8-same-parent-existing-full-name.png",
+    "bytes": 157373,
+    "sha256": "42e11ed136558ab9ffa38f0dd416f32e043eec447ef48a6d90f5ccfbced7d6ed",
+    "uploadedRelative": "candidate-8/1440-8-same-parent-existing-full-name.png"
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/candidate-8/1280-8-expanded-fit.png",
+    "bytes": 108303,
+    "sha256": "c0fe5544b85a2c221513020367311454b0ba91d12805cf86e1272e967fee1ef9",
+    "uploadedRelative": null
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/candidate-8/1440-8-expanded-fit.png",
+    "bytes": 125263,
+    "sha256": "7660e7c4cefac2f9947b6e27d01379228c3a363f6908a1c793989b768322b3f7",
+    "uploadedRelative": null
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/second-import-dialog-preparation-error/1280-first-error.png",
+    "bytes": 35026,
+    "sha256": "c1ab3c918d8867e650fb3aead8667c556173f9eaaead65c25dd509cc051810a6",
+    "uploadedRelative": "second-import-dialog-preparation-error/1280-first-error.png"
+  },
+  {
+    "localOriginal": "/workspace/browser-env/cycle28-ab/third-import-start-view-error/1280-first-error.png",
+    "bytes": 121056,
+    "sha256": "08126271aa3ed4f3b43e1b9e1dfb60a4e36ff8941600f576f9d3eb02fc3f4b67",
+    "uploadedRelative": "third-import-start-view-error/1280-first-error.png"
+  }
+]

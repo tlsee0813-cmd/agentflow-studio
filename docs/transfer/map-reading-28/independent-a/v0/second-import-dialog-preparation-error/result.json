@@ -1,0 +1,20 @@
+{
+  "variant": "baseline",
+  "expectedPC": 2,
+  "completed": [],
+  "measurements": [],
+  "harnessFailures": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 63, in <module>\n    try:u.observe(w,h)\n        ^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 53, in observe\n    self.restore(w,h);before=self.state();self.measure('four-expanded-fit',True)\n    ^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 38, in restore\n    f.value.set_files(str(BACKUP));expect(self.p.locator('#notice')).to_contain_text('사본으로 불러왔어요');expect(self.p.locator('#nav-space')).to_be_visible();self.state();self.ids={a['name']:a['id'] for a in self.state()['space']['areas']}\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 19319, in to_contain_text\n    self._sync(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py\", line 229, in to_contain_text\n    await self._expect_impl(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py\", line 85, in _expect_impl\n    raise AssertionError(\nAssertionError: Locator expected to contain text '사본으로 불러왔어요'\nActual value:  \nCall log:\n  - Expect \"to_contain_text\" with timeout 5000ms\n  - waiting for locator(\"#notice\")\n    9 × locator resolved to <div hidden=\"\" id=\"notice\" class=\"alert\" role=\"status\"></div>\n      - unexpected value \"\"\n\n"
+    }
+  ],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedExit": 1,
+  "visualAcceptance": "separate offline raw/PNG comparison; runner completion is not candidate acceptance"
+}

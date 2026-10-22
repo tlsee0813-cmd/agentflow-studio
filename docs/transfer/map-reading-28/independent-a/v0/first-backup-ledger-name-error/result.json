@@ -1,0 +1,12 @@
+{
+  "variant": "baseline",
+  "expectedPC": 2,
+  "completed": [],
+  "measurements": [],
+  "harnessFailures": [],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 60, in <module>\n    if VARIANT=='baseline' and not BACKUP.exists():u.prepare()\n                                                   ^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 33, in prepare\n    d.value.save_as(str(BACKUP));self.log('actual UI backup exported',{'path':str(BACKUP),'sha256':sha(BACKUP.read_bytes()),'project':self.state()});(ROOT/'setup-ids.json').write_text(json.dumps({'ids':self.ids,'tasks':self.tasks,'P_H':H},ensure_ascii=False,indent=2))\n                                                                                                   ^^^\nNameError: name 'sha' is not defined\n",
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedExit": 1,
+  "visualAcceptance": "separate offline raw/PNG comparison; runner completion is not candidate acceptance"
+}

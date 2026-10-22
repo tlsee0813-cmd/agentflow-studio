@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+  "taskId": "T_ac0c66f3-cd4c-429d-a76a-06409b91e253",
+  "returnId": "H_43ae0082-d06e-4b40-9b14-7c1dc48c9cd7",
+  "report": "[명시 합성28 보고] 자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 준비 자료를 읽었다. 실제 실행이나 외부 AI 검증은 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_f1c97142-cdad-4056-aa16-43b483c4c84b",
+    "basedOn": 0,
+    "summary": "[합성28 설명] 자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 안내를 정리한다. 실제 보관 동작과 배포는 바꾸지 않는다.",
+    "changes": [
+      "안내를 읽는 범위를 정리했다."
+    ],
+    "proposal": null,
+    "origin": "관측자가 실제 UI H/template에 작성한 명시 합성. 외부 AI/구현/검사 없음."
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "variant": "baseline",
+  "expectedPC": 2,
+  "completed": [],
+  "measurements": [],
+  "harnessFailures": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 63, in <module>\n    try:u.observe(w,h)\n        ^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 53, in observe\n    self.restore(w,h);before=self.state();self.measure('four-expanded-fit',True)\n    ^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 39, in restore\n    self.receive(PFILE);self.log('restored backup then identical P actual return',{'backupSHA256':sha(BACKUP.read_bytes()),'returnSHA256':sha(PFILE.read_bytes()),'state':self.state()});self.map()\n    ^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle28-ab/check.py\", line 16, in receive\n    self.button('결과 JSON 가져오기')\n  File \"/workspace/browser-env/cycle28-ab/support.py\", line 50, in button\n    def button(self,name):self.click(self.p.get_by_role('button',name=name,exact=True),name)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle28-ab/support.py\", line 49, in click\n    before=self.reach(q);q.click();self.log('normal click '+label,{'before':before,'after':self.snap()})\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle28-ab/support.py\", line 44, in reach\n    g=q.evaluate(GEO)\n      ^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 15843, in evaluate\n    self._sync(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 191, in evaluate\n    return await self._with_element(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 113, in _with_element\n    handle = await self.element_handle(timeout=timeout)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 319, in element_handle\n    handle = await self._frame.wait_for_selector(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 369, in wait_for_selector\n    await self._channel.send(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.evaluate: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"결과 JSON 가져오기\", exact=True)\n\n"
+    }
+  ],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedExit": 1,
+  "visualAcceptance": "separate offline raw/PNG comparison; runner completion is not candidate acceptance"
+}
