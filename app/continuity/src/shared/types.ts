@@ -25,8 +25,10 @@ export interface UnderstandingInput {
   version: 'understanding.1'; areaId: string; basedOn: number;
   summary: string; changes: string[]; proposal: string | null; origin: string;
 }
-/** AREA17: the user's own plan an area description is made for. Exact values, no hashing: the area idea text, how many times
- * the project purpose was written, and the current revision of each user decision from this area's or unplaced work. */
+/** AREA17: the user's own plan an area description is made for: the area name and idea text, how many times the project
+ * purpose was written, the current revision of each user decision from this area's or unplaced work ('D3@2'), and for each such
+ * task with user-written work values or a purpose correction one '<task id>:<sha256>' of those values. The fingerprint keeps
+ * the stamp small and valid for any allowed text; the values themselves stay only in the task. */
 export interface PlanStamp { name: string; note: string; brief: number; decisions: string[]; work: string[] }
 /** AREA17: captured when a task is exported with a return file id: which area, which description revision went out, and the
  * user's plan at that moment. Older exports have none (null); nothing is estimated for them. */

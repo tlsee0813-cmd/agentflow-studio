@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile } from './types.js';
-import { ensure, text, validateEnvelope, digest, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
+import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { outcomeOf, contextLinks } from './outcome.js';
 export { planFacts, planFactsText } from './plan-facts.js';
@@ -432,13 +432,7 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
     `이번 요청 원문 [${req.id}] — ${SOURCE_LABEL[req.kind]}\n${req.text}`,
     '후속 사용자 발언이 바꾼 부분은 앞선 요청보다 우선합니다. 바꾸지 않은 유지 조건은 보존하되, 관련 없는 이전 요청을 이번 작업에 추가하지 마세요. 코드 영향은 실행 도구가 실제 자료로 판단합니다.');
   const background=backgroundLines(p,t);if(background.length)lines.push(...background);
-  const currentAreaId=areaOf(p,t),currentArea=currentAreaId?p.space.areas.find(a=>a.id===currentAreaId):null;
-  if(currentArea)lines.push('\n## 현재 사용자 구상 — 전달 시점의 기준',
-    '위 요청 당시 사본과 구별되는 현재 사용자 구상입니다. 이번 요청이 실행 범위를 정하며, 아래 외부 참고 설명이 사용자 구상이나 직접 기록한 조건을 바꾸지는 않습니다.',
-    ...(p.space.brief?[`현재 프로젝트 목적:\n${p.space.brief.text}`]:[]),
-    `현재 대상 영역: ${currentArea.name} [${currentArea.id}]`,
-    ...(currentArea.note?[`현재 영역 구상:\n${currentArea.note}`]:[]));
-  lines.push(...understandingLines(p,t));
+  lines.push(...currentPlanLines(p,t,returnId),...understandingLines(p,t));
   const intent=currentIntent(p,t),correction=intentCorrection(t);
   if(intent||correction) {
     // A user's purpose correction stays visible even after the AI interpretation behind it went stale.
@@ -510,18 +504,36 @@ export function backgroundLines(p:Project,t:Task):string[] {
     ...(b.brief!==null?[`프로젝트 목적 원문:\n${b.brief}`]:[]),
     ...(b.area?[`요청 대상 영역: ${b.area.name} [${b.area.id}]`,...(b.area.note!==null?[`영역 구상 원문:\n${b.area.note}`]:[])]:[])];
 }
+/** AREA17: the user's plan as it is when this text goes out, apart from the request-time copy above. Printed when the text
+ * carries something made for or against that plan: a return.2 template (its export anchor records this plan) or the area's
+ * current description (made for this plan, or left out because the plan changed after it). Otherwise the prepared task keeps sending only its own copy (FLOW091-C, unchanged).
+ * A value exactly equal (same string) to the copy above points to it instead of printing the same prose twice. */
+function currentPlanLines(p:Project,t:Task,returnId:string|null):string[] {
+  const areaId=areaOf(p,t),a=areaId?p.space.areas.find(x=>x.id===areaId):undefined;if(!a)return [];
+  if(returnId===null&&!areaDescription(p,a.id).current)return [];
+  const b=t.background,same=(label:string)=>`(글자 그대로 같은 본문 생략 — 위 ‘프로젝트 배경·영역 구상’ 절의 요청 당시 ${label} 원문과 같고, 지금도 현재 값)`;
+  const brief=p.space.brief?.text,note=a.note;
+  return ['\n## 현재 사용자 구상 — 전달 시점의 기준',
+    '위 요청 당시 사본과 구별되는 지금의 사용자 구상입니다. 이번 요청이 실행 범위를 정하며, 아래 외부 참고 설명이 사용자 구상이나 직접 기록한 조건을 바꾸지는 않습니다.',
+    ...(brief!==undefined?[`현재 프로젝트 목적:\n${b?.brief===brief?same('프로젝트 목적'):brief}`]:[]),
+    `현재 대상 영역: ${a.name} [${a.id}]`,
+    ...(note?[`현재 영역 구상:\n${b?.area?.note===note?same('영역 구상'):note}`]:[])];
+}
 function basisLine(b:Basis,shown:(text:string)=>string=x=>x):string {
   // Earlier values stay in the project (and recovery file); they are not repeated as instructions.
   return `[${b.id}] ${BASIS_LABEL[b.status]} / r${b.revision} / ${b.sourceId}\n${shown(b.text)}${b.history.length ? `\n(이전 값 ${b.history.length}건은 앱 기록에 보존 · 현재 지시 아님)`:''}`;
 }
 export function markHandoff(p:Project,id:string,text:string,method:'clipboard'|'download',exportRevision=p.revision,returnId:string|null=null,capturedAnchor?:ExportAnchor|null):Project {
   ensure(returnId===null || /^[A-Za-z0-9_-]{1,100}$/.test(returnId) && !p.tasks.some(t=>t.handoffs.some(h=>h.returnId===returnId)));
-  const w=currentWork(p,taskOf(p,id)),n=change(p);
-  const t=taskOf(n,id);
+  const w=currentWork(p,taskOf(p,id)),anchor=returnId===null?null:exportAnchor(p,taskOf(p,id));
+  // AREA17: an anchor captured with the text must be the one this same project state gives, and the text must be the one it
+  // gives for this export: the record can never claim a plan, area or description revision the text did not carry.
+  if(capturedAnchor!==undefined)ensure(JSON.stringify(capturedAnchor)===JSON.stringify(anchor)&&text===handoffText(p,id,returnId),'ANCHOR_MISMATCH');
+  const n=change(p),t=taskOf(n,id);
   // FLOW091-C: the background actually sent with this export (the task's fixed copy), kept with the record.
   t.handoffs.push({at:now(),method,revision:exportRevision,chars:text.length,digest:digest(text),work:w.values,aiExcluded:w.aiExcluded,legacyText:null,returnId,background:copy(t.background),
     // AREA17: what the return file's description may build on, captured now (not the request-time background copy).
-    anchor:returnId===null?null:copy(capturedAnchor===undefined?exportAnchor(p,t):capturedAnchor)});
+    anchor});
   return n;
 }
 export function restore(p: Project): Project {
@@ -620,7 +632,8 @@ export function placeTask(p: Project, taskId: string, areaId: string|null): Proj
  * (Area.note/name, bases, Task.manual, Background, drafts) is written. It cannot tell from the wording whether a summary
  * contradicts the user's idea or describes another area; it never claims to. */
 /** The user's plan an area description is made for: this area's idea text, how many times the project purpose was written,
- * and the current revision of each user decision from this area's or unplaced work. Requests elsewhere and reports never
+ * the current revision of each user decision from this area's or unplaced work, and a fingerprint of each such task's own
+ * user-written work values and purpose correction. Requests elsewhere and reports never
  * change it. A name change and direct user corrections are part of this explicit basis. */
 export function planStamp(p:Project,areaId:string):PlanStamp {
   const a=p.space.areas.find(x=>x.id===areaId);ensure(a,'AREA_MISSING');
@@ -628,8 +641,9 @@ export function planStamp(p:Project,areaId:string):PlanStamp {
   const decisions=p.bases.filter(b=>{
     const t=tasks.get(sources.get(b.sourceId)?.taskId??''),at=t?areaOf(p,t):null;return at===null||at===areaId;
   }).map(b=>`${b.id}@${b.revision}`).sort();
+  // Exact-equality fingerprint of the task's own user-written values (fixed key order); the values stay in the task only.
   const work=p.tasks.filter(t=>{const at=areaOf(p,t);return (at===null||at===areaId)&&(Object.values(t.manual).some(v=>v!==null)||t.intentEdit!==undefined);})
-    .map(t=>JSON.stringify({id:t.id,manual:t.manual,intentEdit:t.intentEdit??null}));
+    .map(t=>`${t.id}:${sha256(JSON.stringify([t.manual.understanding,t.manual.scope,t.manual.next,t.manual.checks,t.intentEdit??null]))}`);
   return {name:a.name,note:a.note,brief:p.space.brief?p.space.brief.previous.length+1:0,decisions,work};
 }
 function sameStamp(a:PlanStamp|null,b:PlanStamp):boolean {
@@ -678,7 +692,9 @@ function fileUnderstanding(p:Project,n:Project,task:Task,record:ExportRecord,fil
 export function correctUnderstanding(p:Project,areaId:string,value:string):Project {
   const v=value.trim();text(v,SUMMARY_LIMIT);
   const a=p.space.areas.find(x=>x.id===areaId);ensure(a&&!a.archived,'AREA_MISSING');
-  const st=areaState(p,areaId),cur=areaDescription(p,areaId).current;ensure(st.revision>0&&cur,'NOTHING_TO_CORRECT');
+  // Only the valid current description: re-saving a description made before a plan change would make it current again
+  // without the plan check (the same shortcut a held description never gets).
+  const st=areaState(p,areaId),cur=areaDescription(p,areaId).current;ensure(st.revision>0&&cur&&cur.valid,'NOTHING_TO_CORRECT');
   // Saving a user correction is explicit authority even when its text equals the received summary.
   const n=change(p),next=copy(st);next.revision++;
   next.entries.push({by:'user',at:now(),revision:next.revision,taskId:null,returnId:null,text:v,corrects:st.revision,stamp:planStamp(p,areaId),held:null});

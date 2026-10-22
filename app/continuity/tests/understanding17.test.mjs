@@ -86,3 +86,67 @@ test('AREA17 cross-tab seq rejection preserves the external project including it
   const first=new WorkspaceStore(storage,lock);await first.init();let {p,area,file}=sample();const ref=await first.create(p,'new');const stale={...ref};p=bring(p,file);await first.save(ref,p);
   const bytes=[...memory.values()];await assert.rejects(()=>first.save(stale,D.editArea(p,area,'오래된 탭','덮기')),/STORAGE_CONFLICT/);assert.deepEqual([...memory.values()],bytes);
 });
+// ---------- Claude Code continuation: stamp representation, export-anchor invariant, current-plan references ----------
+import {createHash} from 'node:crypto';
+import {sha256} from '../dist/public/shared/validation.js';
+import {FILE_LIMIT} from '../dist/public/shared/types.js';
+test('AREA17 sha256 equals Node crypto on quote/backslash/emoji/unpaired-surrogate text and on block boundaries',()=>{
+  const samples=['','abc','"\\'.repeat(3000),'가"\\\n😀'.repeat(1500),'\uD800x','a'.repeat(55),'a'.repeat(56),'a'.repeat(63),'a'.repeat(64),'a'.repeat(65)];
+  for(let i=0;i<200;i++)samples.push(Array.from({length:i*7},(_,k)=>String.fromCharCode((k*7919+i*131)%0xD7FF+1)).join(''));
+  for(const s of samples)assert.equal(sha256(s),createHash('sha256').update(s,'utf8').digest('hex'));
+});
+test('AREA17 plan stamp stays fixed-size and valid for maximal quote/backslash-heavy manual and intent values, and still detects a one-character change',()=>{
+  let {p,area,task}=sample();const heavy=k=>('"\\'+k).repeat(2000).slice(0,6000);
+  // Several tasks of the area with every allowed user-written field at its 6000 limit, escaping-heavy.
+  for(let i=0;i<3;i++){p=D.submit(D.editDraft(p,`[합성] 같은 영역 요청 ${i}`),undefined,area);const t=p.currentTaskId;
+    for(const key of ['understanding','scope','next','checks'])p=D.editTask(p,t,key,heavy(key+i));p=D.correctIntent(p,t,heavy('goal'+i),heavy('cond'+i));}
+  const t=p.currentTaskId,stamp=D.planStamp(p,area);assert.equal(stamp.work.length,3);for(const w of stamp.work)assert.match(w,/^[A-Za-z0-9_-]+:[0-9a-f]{64}$/);
+  assert.ok(JSON.stringify(stamp).length<1000,'the stamp does not copy the values');
+  // A return-file export of that task records the anchor; the project stays valid and roundtrips exactly.
+  const rid='H_heavy',anchor=D.exportAnchor(p,D.taskOf(p,t)),text=D.handoffText(p,t,rid);p=D.markHandoff(p,t,text,'download',p.revision,rid,anchor);
+  assert.deepEqual(read(p),p);assert.ok(serializeProject(p).length<FILE_LIMIT);
+  // Ten more anchored exports grow the file by fixed-size stamps only (no copy of the 24,000+ characters per task).
+  const before=serializeProject(p).length;for(let i=0;i<10;i++){const r=`H_more${i}`;p=D.markHandoff(p,t,D.handoffText(p,t,r),'download',p.revision,r,D.exportAnchor(p,D.taskOf(p,t)));}
+  assert.ok((serializeProject(p).length-before)/10<text.length+2000,'per-export growth is the record, not copied work values');
+  // A received description applies under that exact plan; one changed character of one field holds the next one.
+  const f={schemaVersion:'agentflow.return.2',projectId:p.id,taskId:t,returnId:rid,report:'[합성] 보고',evidence:null,understanding:{version:'understanding.1',areaId:area,basedOn:anchor.understanding,summary:'[합성] 설명',changes:[],proposal:null,origin:'합성'}};
+  const applied=bring(p,f);assert.equal(latest(applied,area).valid,true);
+  const changed=D.editTask(p,t,'checks',heavy('checks2').slice(0,5999)+'x');assert.notDeepEqual(D.planStamp(changed,area),D.planStamp(p,area));
+  assert.equal(D.areaDescription(bring(changed,f),area).held[0].entry.held,'plan-changed');
+  // Strict shape: a stamp entry that is not '<id>:<sha256>' (e.g. the earlier raw serialized value) is refused.
+  const bad=JSON.parse(serializeProject(p));bad.tasks.find(x=>x.id===t).handoffs.at(-1).anchor.stamp.work[0]=JSON.stringify({id:t});assert.throws(()=>parseProject(JSON.stringify(bad)));
+});
+test('AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives',()=>{
+  let {p,area,other,task}=sample();const rid='H_inv',anchor=D.exportAnchor(p,D.taskOf(p,task)),text=D.handoffText(p,task,rid);
+  for(const wrong of [{...anchor,areaId:other},{...anchor,understanding:anchor.understanding+1},{...anchor,stamp:{...anchor.stamp,note:'다른 구상'}},null])
+    assert.throws(()=>D.markHandoff(p,task,text,'clipboard',p.revision,rid,wrong),/ANCHOR_MISMATCH/);
+  assert.throws(()=>D.markHandoff(p,task,text+' ',`clipboard`,p.revision,rid,anchor),/ANCHOR_MISMATCH/,'text other than the one this state gives');
+  assert.throws(()=>D.markHandoff(p,task,D.handoffText(p,task),'clipboard',p.revision,null,anchor),/ANCHOR_MISMATCH/,'no anchor without a return id');
+  // Captured before a change, passed after it: refused rather than recorded against the new state.
+  const later=D.editArea(p,area,p.space.areas[0].name,'그 사이 바뀐 구상');assert.throws(()=>D.markHandoff(later,task,text,'clipboard',p.revision,rid,anchor),/ANCHOR_MISMATCH/);
+  const n=D.markHandoff(p,task,text,'clipboard',p.revision,rid,anchor),h=D.taskOf(n,task).handoffs.at(-1);
+  assert.deepEqual(h.anchor,anchor);assert.equal(h.chars,text.length);assert.equal(h.returnId,rid);
+  assert.ok(text.includes(`"basedOn": ${anchor.understanding}`)&&text.includes(`"areaId": "${area}"`)&&text.includes('agentflow.return.2'),'template carries the same anchor');
+});
+test('AREA17 current plan in the handoff: identical text points to the request-time copy, a different value is printed in full',()=>{
+  let {p,area,task}=sample();const note=p.space.areas[0].note,brief=p.space.brief.text,count=(h,s)=>h.split(s).length-1;
+  const same=D.handoffText(p,task,'H_same');assert.equal(count(same,note),1,'identical idea printed once');assert.equal(count(same,brief),1,'identical purpose printed once');
+  const cur=same.slice(same.indexOf('## 현재 사용자 구상'));assert.ok(cur.includes('요청 당시 영역 구상 원문과 같고, 지금도 현재 값')&&cur.includes('요청 당시 프로젝트 목적 원문과 같고'));
+  // One character differs (editArea trims spaces): the current value is printed in full and the copy above is unchanged.
+  const q=D.editArea(p,area,p.space.areas[0].name,note+'!');const diff=D.handoffText(q,task,'H_diff'),cur2=diff.slice(diff.indexOf('## 현재 사용자 구상'));
+  assert.ok(cur2.includes(`현재 영역 구상:\n${note}!`));assert.ok(diff.slice(0,diff.indexOf('## 현재 사용자 구상')).includes(`영역 구상 원문:\n${note}`));
+  assert.deepEqual(D.taskOf(q,task).background,D.taskOf(p,task).background);
+  // A plain (not file) handoff without any area description keeps the earlier contract: only the request-time copy.
+  assert.ok(!D.handoffText(q,task).includes('## 현재 사용자 구상'));
+});
+test('AREA17 a description made before a plan change cannot be re-saved as a correction (no adopt-stale shortcut)',()=>{
+  let {p,area,file}=sample();p=bring(p,file);p=D.editArea(p,area,p.space.areas[0].name,'바뀐 구상');assert.equal(latest(p,area).valid,false);
+  assert.throws(()=>D.correctUnderstanding(p,area,file.understanding.summary),/NOTHING_TO_CORRECT/);
+});
+test('AREA17 next handoff: valid description attributed below the user plan, proposal unadopted, stale text never sent',()=>{
+  for(const c of cases){let {p,area,task,file}=sample(c);p=bring(p,file);const h=D.handoffText(p,task);
+    const i=h.indexOf('## 현재 사용자 구상'),j=h.indexOf('## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증');assert.ok(i>0&&j>i,'user plan first, then the attributed description');
+    assert.ok(h.includes(c.summary)&&h.includes(c.origin));assert.ok(h.includes('미채택 제안 · 사용자가 채택하지 않음 · 실행·반영하지 말 것')&&h.includes(c.proposal));
+    assert.ok(!h.slice(0,j).includes(c.proposal),'the proposal never appears as the user plan or the request');
+    const stale=D.handoffText(D.editArea(p,area,p.space.areas[0].name,'바뀐 구상'),task);assert.ok(!stale.includes(c.summary)&&!stale.includes(c.proposal));}
+});

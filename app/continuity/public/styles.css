@@ -2531,3 +2531,13 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .understanding-record+.understanding-record{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
 .area-update-label{color:var(--accent);font-size:12px;font-weight:600}
 .received-areas{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 8px;font-size:13px}
+.understanding-change{font-size:13px;line-height:1.5;margin:0 0 6px}
+.understanding-proposal strong{font-weight:600;color:var(--muted)}
+/* An explicit 'where is it' outlines the located card (view state only; nothing moves but the viewport). */
+.area-node.located{outline:3px solid var(--accent);outline-offset:3px}
+.located-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}
+.outcome-received{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.outcome-received .hint{margin:0}
+.understanding-more{display:flex;flex-wrap:wrap;column-gap:16px;align-items:flex-start}
+.area-understanding .understanding-more>details{margin:0}
+.area-understanding .understanding-more>details[open]{flex-basis:100%}

@@ -308,7 +308,9 @@ function space(v: unknown): Set<string> {
 export const POSITION_LIMIT=200000;
 function planStamp(v:unknown) {
   obj(v,['name','note','brief','decisions','work']);text(v.name,60);text(v.note,2000,true);integer(v.brief);list(v.decisions,ITEM_LIMIT);list(v.work,ITEM_LIMIT);
-  for(const w of v.work)text(w,30000);
+  // One fixed-length entry per task with user-written work values or a purpose correction: '<task id>:<sha256>'. Never the
+  // values themselves, so an allowed text (any quotes or backslashes, up to its own limit) cannot make the stamp invalid.
+  for(const w of v.work)ensure(typeof w==='string'&&/^[A-Za-z0-9_-]{1,100}:[0-9a-f]{64}$/.test(w));ensure(new Set(v.work).size===v.work.length);
   for(const d of v.decisions)ensure(typeof d==='string'&&/^D[1-9]\d*@\d+$/.test(d));ensure(new Set(v.decisions).size===v.decisions.length);
 }
 const HELD=['no-anchor','area-moved','area-mismatch','area-archived','file-basis','superseded','plan-changed'];
@@ -354,6 +356,29 @@ export function validateProject(v: unknown): Project { assertProject(v); return 
 /** Identity check for an exported text (FNV-1a, 32 bit). Not a signature or security control. */
 export function digest(value: string): string {
   let h=0x811c9dc5; for(let i=0;i<value.length;i++){h^=value.charCodeAt(i);h=Math.imul(h,0x01000193);} return (h>>>0).toString(16).padStart(8,'0');
+}
+/** AREA17: SHA-256 (FIPS 180-4) of the UTF-8 bytes, hex. Synchronous and dependency-free so the shared code computes the same
+ * fixed-length fingerprint in the browser and in Node. Used where an exact-equality check must not grow with the text. */
+const K256=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+  0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+  0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+  0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+export function sha256(value:string):string {
+  const data=new TextEncoder().encode(value),n=((data.length+9+63)>>6)<<6,m=new Uint8Array(n);m.set(data);m[data.length]=0x80;
+  const bits=data.length*8;new DataView(m.buffer).setUint32(n-4,bits>>>0);new DataView(m.buffer).setUint32(n-8,Math.floor(bits/0x100000000));
+  const h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19],w=new Uint32Array(64),view=new DataView(m.buffer);
+  const r=(x:number,k:number)=>(x>>>k)|(x<<(32-k));
+  for(let off=0;off<n;off+=64) {
+    for(let i=0;i<16;i++)w[i]=view.getUint32(off+i*4);
+    for(let i=16;i<64;i++){const a=w[i-15]!,b=w[i-2]!;w[i]=(w[i-16]!+(r(a,7)^r(a,18)^(a>>>3))+w[i-7]!+(r(b,17)^r(b,19)^(b>>>10)))>>>0;}
+    let [a,b,c,d,e,f,g,k]=h as [number,number,number,number,number,number,number,number];
+    for(let i=0;i<64;i++){
+      const t1=(k+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K256[i]!+w[i]!)>>>0,t2=((r(a,2)^r(a,13)^r(a,22))+((a&b)^(a&c)^(b&c)))>>>0;
+      k=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;
+    }
+    [a,b,c,d,e,f,g,k].forEach((x,i)=>{h[i]=(h[i]!+x)>>>0;});
+  }
+  return h.map(x=>x.toString(16).padStart(8,'0')).join('');
 }
 export const MIGRATION_NOTICE='이전 형식(project.1)에서 변환했습니다. 기록은 지우지 않았습니다. 이전 AI 정리는 어느 기준 시점에 작성됐는지 알 수 없어 현재 작업문에서 제외합니다.';
 export const V2_MIGRATION_NOTICE='이전 형식(project.2)을 최신 형식으로 변환했습니다. 기록은 유지하며 과거 내보내기에 파일 식별자를 만들지 않습니다.';
