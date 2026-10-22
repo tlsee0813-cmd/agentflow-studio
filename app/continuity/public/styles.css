@@ -1147,7 +1147,7 @@ details[open]>summary {
   font-size:12px;
 }
 /* 실제 편집 작업의 읽기 참고. 닫혀 있으면 옆 열을 사용하지 않는다. */
-.work-reference-editor{container-type:inline-size}
+.work-reference-editor[open]{container-type:inline-size}
 .work-edit-layout{display:flex;flex-direction:column;gap:12px;min-width:0}
 .work-edit-fields,.work-reference{min-width:0;max-width:100%}
 .work-reference{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper)}
