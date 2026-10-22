@@ -1,0 +1,549 @@
+--- a/.github/workflows/verify.yml
++++ b/.github/workflows/verify.yml
+@@ -204,6 +204,13 @@
+         run: |
+           set -o pipefail
+           python continuity/tests/work-description29_browser.py 2>&1 | tee test-results/work-description29-browser.log
++      - name: BRANCH31 exact subtree reader and native caller return on two PCs (synthetic recovery, mock AI)
++        env:
++          IDEA015_EVIDENCE_DIR: test-results/branch-records31
++        shell: bash
++        run: |
++          set -o pipefail
++          python continuity/tests/branch-records31_browser.py 2>&1 | tee test-results/branch-records31-browser.log
+       - name: AREA18 mixed depth, real endpoints and fixed reading workspace on two PCs (native HTTP, labelled reconstructions and synthetic boundaries, mock AI)
+         env:
+           IDEA015_EVIDENCE_DIR: test-results/area18
+@@ -232,6 +239,13 @@
+         run: |
+           set -o pipefail
+           python continuity/tests/blank21_browser.py 2>&1 | tee test-results/blank21-browser.log
++      - name: VIEWPORT30 existing-camera map return after zero and deep work scroll on two PCs (native HTTP, normal UI backup, MOCK)
++        env:
++          IDEA015_EVIDENCE_DIR: test-results/viewport30
++        shell: bash
++        run: |
++          set -o pipefail
++          python continuity/tests/viewport30_browser.py 2>&1 | tee test-results/viewport30-browser.log
+       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
+       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
+         env:
+--- a/app/continuity/public/styles.css
++++ b/app/continuity/public/styles.css
+@@ -2578,7 +2578,8 @@
+ .area-card-name,.area-card-path{overflow-wrap:anywhere;min-width:0;max-width:100%}
+ .area-card-path{display:block;font-size:11px;color:var(--muted);line-height:14px;max-height:14px;overflow:hidden;flex-shrink:0}
+ .branch-toggle{font-size:12px;padding:3px 7px;align-self:flex-start}
+-.branch-signals{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
++.branch-signals{font:inherit;font-size:11px;line-height:inherit;font-weight:400;letter-spacing:inherit;color:var(--muted);overflow-wrap:anywhere;text-align:left;border:0;border-radius:0;padding:0;margin:0;min-height:0;background:transparent}
++.branch-signals:hover:not(:disabled){background:transparent;color:var(--accent-dark);text-decoration:underline}
+ .map-relation-list{margin-top:10px;font-size:13px}
+ .map-relation-list summary{cursor:pointer}
+ .relation-bundle{padding:8px 0;border-bottom:1px solid var(--line)}
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -75,6 +75,7 @@
+ let collapsed=new Set<string>();
+ type SidePanel='area'|'relations'|'records';
+ let panelMode:SidePanel='area',relationCaller='map-relations-open';
++let branchRecordCaller:{project:string;epoch:number;area:string;id:string}|null=null;
+ let compactMapHeader=false;
+ let recordsReturnNotice='';
+ type PanelReading={y:number;anchor:{id:string;top:number}|null;open:Record<string,boolean>};
+@@ -187,6 +188,7 @@
+ let contextReturn:HTMLElement|null=null;
+ const unreadable='기존 저장 내용을 읽지 못했습니다. 덮어쓰지 않습니다. 이 화면의 입력은 메모리에 남으며 복구 파일로 저장할 수 있습니다.';
+ function resetEphemeral() {
++  branchRecordCaller=null;
+   // USE106: this unsubmitted entry field belongs to the project being left, never to the next project.
+   $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
+   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
+@@ -330,15 +332,19 @@
+ }
+ /** Coming back restores this layer's scroll and the card the user entered; an ID that no longer exists is just skipped. */
+ function openSpace() {
++  branchRecordCaller=null;
+   // PC12: arriving at the map by any other way makes it the new starting point; the earlier one is dropped.
+   // AREA17: back to the whole space from the located area's own screens keeps the way back to the view before 'where is it';
+   // arriving from anywhere else (the work view, another area) is a new start.
+   if(!(located&&(view==='space'||(view==='area'||view==='task')&&viewArea===located.area)))located=null;
+-  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;render();
+-  const from=layerMemo.from;window.scrollTo({top:layerMemo.space??0});
++  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;
++  render(true,true,()=>window.scrollTo({top:layerMemo.space??0}));
++  const plane=document.getElementById('space-plane');if(plane)markOffscreen(plane);
++  const from=layerMemo.from;
+   if(!(from&&focusFirst(`node-enter-${from}`,`list-enter-${from}`)))$('space-title')?.focus({preventScroll:true});
+ }
+ function openArea(id:string) {
++  branchRecordCaller=null;
+   if(view==='space')layerMemo.from=id;
+   // AREA17: opening the located area itself (its panel's '영역 열기', its crumb) keeps the way back; any other area is a new start.
+   if(!(located&&located.area===id&&(view==='space'||viewArea===id)))located=null;
+@@ -1359,6 +1365,32 @@
+   try {commit(undoMove(project,step.id,step.from,step.to));project={...project,notice:`‘${a?.name??'영역'}’의 위치를 되돌렸어요. 다른 내용은 바뀌지 않았어요.`};renderStatus();}
+   catch {posUndo=[];project={...project,notice:'그 뒤 위치가 다시 바뀌어(다른 이동이나 다른 탭) 되돌리지 않았어요. 지금 위치를 그대로 두었어요.'};render();}
+ }
++/** Only the branch-record close path: focus a control at a visible, unobscured point inside the map. */
++function focusBranchRecordControl(id:string):boolean {
++  const el=document.getElementById(id),map=document.getElementById('space-map');
++  if(!el||!map?.contains(el)||!el.checkVisibility({visibilityProperty:true}))return false;
++  const r=el.getBoundingClientRect(),m=map.getBoundingClientRect(),sx=m.width/(map.offsetWidth||1),sy=m.height/(map.offsetHeight||1);
++  const left=Math.max(0,r.left,m.left+map.clientLeft*sx),top=Math.max(0,r.top,m.top+map.clientTop*sy);
++  const right=Math.min(innerWidth,r.right,m.left+(map.clientLeft+map.clientWidth)*sx),bottom=Math.min(innerHeight,r.bottom,m.top+(map.clientTop+map.clientHeight)*sy);
++  if(right<=left||bottom<=top)return false;
++  const hit=document.elementFromPoint((left+right)/2,(top+bottom)/2);if(!hit||!el.contains(hit))return false;
++  el.focus({preventScroll:true});return document.activeElement===el;
++}
++function openBranchRecords(id:string) {
++  const a=areaById(id);if(!a||a.archived||view!=='space')return;
++  capturePanelReading();
++  if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==id)endRecordsExcursion();
++  branchRecordCaller={project:project.id,epoch:projectEpoch,area:id,id:`branch-records-${id}`};
++  mapSelected=id;sheetOpen=true;panelMode='area';rememberMap();render();
++  // The explicit record entry wins only after render has restored the old panel reading.
++  const body=document.getElementById('area-panel-body'),box=document.getElementById(`subtree-records-${id}`) as HTMLDetailsElement|null;
++  const summary=document.getElementById(`subtree-records-heading-${id}`);
++  if(body?.dataset.areaId===id&&box&&summary&&body.contains(box)){
++    box.open=true;summary.focus({preventScroll:true});
++    body.scrollTop+=summary.getBoundingClientRect().top-body.getBoundingClientRect().top;
++    capturePanelReading(summary.id);rememberMap();
++  }
++}
+ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
+   const pt=areaPosition(project,a),el=node('div','','area-node');el.dataset.areaId=a.id;
+   el.style.left=`${pt.x}px`;el.style.top=`${pt.y}px`;el.classList.toggle('selected',mapSelected===a.id);
+@@ -1376,7 +1408,7 @@
+   // Information shows the short properties; it never opens the area or changes the open work.
+   const info=node('button','정보','quiet node-info');info.type='button';info.id=`node-info-${a.id}`;info.setAttribute('aria-pressed',String(mapSelected===a.id));
+   info.setAttribute('aria-label',`${a.name} 정보 (들어가지 않음)`);
+-  info.addEventListener('click',()=>{capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();$(`node-info-${a.id}`)?.focus({preventScroll:true});});
++  info.addEventListener('click',()=>{branchRecordCaller=null;capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();$(`node-info-${a.id}`)?.focus({preventScroll:true});});
+   el.append(handle,enter,info);
+   const children=childrenOf(project,a.id).filter(x=>!x.archived);
+   if(children.length){const folded=collapsed.has(a.id),toggle=btn(folded?`하위 ${descendantAreas(project,a.id).filter(x=>!x.archived).length}개 펼치기`:'하위 접기',()=>toggleBranch(a.id),'quiet branch-toggle',`branch-toggle-${a.id}`);
+@@ -1385,7 +1417,7 @@
+     const current=signals.filter(s=>s.description.current?.valid).length,held=signals.reduce((n,s)=>n+s.description.held.length,0),stale=signals.filter(s=>s.description.current&&!s.description.current.valid).length;
+     const updated=signals.filter(s=>receivedAreas.has(s.areaId)&&s.description.current?.valid).length;
+     const bits=[`기록된 질문 ${questions}`,...(current?[`현재 설명 ${current}`]:[]),...(updated?[`이번 탭 설명 갱신 ${updated}`]:[]),...(held?[`설명 보류 ${held}`]:[]),...(stale?[`이전 기준 ${stale}`]:[])];
+-    if(questions||current||held||stale){const signal=node('span',bits.join(' · '),'branch-signals');signal.title=signal.textContent??'';el.append(signal);}
++    if(questions||current||held||stale){const signal=btn(bits.join(' · '),()=>openBranchRecords(a.id),'branch-signals',`branch-records-${a.id}`);signal.title=signal.textContent??'';signal.setAttribute('aria-label',`${a.name} · ${bits.join(' · ')} · 이 부분과 하위 기록 읽기`);signal.setAttribute('aria-controls','area-panel-body');el.append(signal);}
+   }
+   // Dragging uses only the handle (outside the enter button); a drag never ends as a click on enter or information.
+   handle.addEventListener('pointerdown',e=>{
+@@ -1444,7 +1476,7 @@
+ }
+ window.addEventListener('resize',()=>{capturePanelReading();syncProjectHeader();sizeWorkspace();restorePanelReading();});
+ document.addEventListener('toggle',e=>{if(e.target instanceof HTMLDetailsElement&&e.target.closest('#space-view')&&!e.target.closest('#area-panel'))sizeWorkspace();},true);
+-function openRelations(from='map-relations-open') {capturePanelReading();relationCaller=from;panelMode='relations';rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});}
++function openRelations(from='map-relations-open') {branchRecordCaller=null;capturePanelReading();relationCaller=from;panelMode='relations';rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});}
+ function relationBrowser():HTMLElement {
+   const panel=node('aside','','area-panel relation-panel sheet-open');panel.id='area-panel';panel.dataset.panelMode='relations';panel.setAttribute('aria-label','연결의 실제 부분과 기록 읽기');
+   const close=()=>{capturePanelReading();panelMode='area';rememberMap();render();(document.getElementById(relationCaller)??$('map-relations-open'))?.focus({preventScroll:true});};
+@@ -1522,7 +1554,7 @@
+   const submitArea=node('button','＋ 영역 추가','secondary');submitArea.type='submit';submitArea.id='area-add';add.append(name,note,submitArea);
+   addPanel.append(add);bar.append(addPanel,...extra);
+   bar.append(btn(`연결 ${project.space.relations.length}건`,()=>openRelations(),'quiet','map-relations-open'));
+-  const areaTab=btn('선택 부분',()=>{capturePanelReading();panelMode='area';sheetOpen=true;rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});},'quiet','map-area-open');
++  const areaTab=btn('선택 부분',()=>{branchRecordCaller=null;capturePanelReading();panelMode='area';sheetOpen=true;rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});},'quiet','map-area-open');
+   areaTab.disabled=!mapSelected;bar.append(areaTab);
+   for(const [id,mode] of [['check-summary','records'],['map-relations-open','relations'],['map-area-open','area']] as const)bar.querySelector(`#${id}`)?.setAttribute('aria-pressed',String(panelMode===mode));
+   const unplaced=areaRequests(null);
+@@ -1589,7 +1621,7 @@
+     const enter=btn('',()=>openArea(a.id),'quiet area-list-enter',`list-enter-${a.id}`);
+     enter.append(node('strong',`${a.name} ↘`),node('span',a.note?shortText(a.note,40):'구상 미기재','hint'));
+     if(areaRequests(a.id).some(currentGroup))enter.append(appTag());
+-    const info=btn('정보',()=>{capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();},'secondary area-list-info',`list-info-${a.id}`);
++    const info=btn('정보',()=>{branchRecordCaller=null;capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();},'secondary area-list-info',`list-info-${a.id}`);
+     info.setAttribute('aria-pressed',String(mapSelected===a.id));info.setAttribute('aria-label',`${a.name} 정보 (들어가지 않음)`);
+     row.append(enter,info);box.append(row);
+   }
+@@ -1784,8 +1816,11 @@
+ /** Short properties of the selected area, read first: name, the user's idea, and this area's requests for the user to pick.
+  * Editing opens explicitly. No report is picked for the user; reports are read inside the task the user chose. */
+ function areaPanel(a:Area):HTMLElement {
++  if(branchRecordCaller&&(branchRecordCaller.project!==project.id||branchRecordCaller.epoch!==projectEpoch||branchRecordCaller.area!==a.id))branchRecordCaller=null;
+   const panel=node('aside','','area-panel');panel.id='area-panel';panel.dataset.panelMode='area';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
+-  const close=()=>{capturePanelReading();mapSelected=null;sheetOpen=false;rememberMap();render();$(`node-info-${visibleRepresentative(project,a.id,collapsed)??a.id}`)?.focus({preventScroll:true});};
++  const close=()=>{capturePanelReading();const caller=branchRecordCaller;branchRecordCaller=null;mapSelected=null;sheetOpen=false;rememberMap();render();
++    if(caller){if(caller.project===project.id&&caller.epoch===projectEpoch&&caller.area===a.id&&(focusBranchRecordControl(caller.id)||focusBranchRecordControl(`node-info-${a.id}`)))return;$('space-title')?.focus({preventScroll:true});return;}
++    if(!focusFirst(`node-info-${visibleRepresentative(project,a.id,collapsed)??a.id}`))$('space-title')?.focus({preventScroll:true});};
+   const head=node('div','','panel-top'),heading=node('strong',a.name);heading.id='area-panel-title';
+   heading.title=a.name;
+   const path=node('p',areaPath(project,a.id).map(x=>x.name).join(' › '),'panel-path');path.id='panel-path';
+@@ -1851,6 +1886,7 @@
+   const signals=subtreeSignals(project,a.id),items=signals.flatMap(s=>[...s.questions,...s.reports]);
+   const descriptions=signals.map(s=>({id:s.areaId,state:s.description})).filter(x=>x.state.current||x.state.held.length);
+   const box=details(`이 부분과 하위 기록 · 질문 ${items.filter(it=>it.kind==='decision').length} · 설명 ${descriptions.length}`,`subtree-records-${a.id}`);box.className='subtree-records';
++  box.querySelector('summary')!.id=`subtree-records-heading-${a.id}`;
+   box.append(node('p','앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.','hint'));
+   for(const it of items){const task=project.tasks.find(t=>t.id===it.taskId),owner=areaById(it.areaId),row=node('div','','subtree-record');row.dataset.ownerArea=it.areaId??'';
+     row.append(node('p',`${owner?.name??'영역 미지정'} · ${it.kind==='decision'?'기록된 질문':'후속 작업문 없는 보고'}`,'source-meta'),
+@@ -1899,7 +1935,7 @@
+   box.setAttribute('aria-controls','area-panel');box.setAttribute('aria-pressed',String(panelMode==='records'));
+   return box;
+ }
+-function openRecords() {capturePanelReading();located=null;origin=null;panelMode='records';recordsReturnNotice='';rememberMap();render();$('records-heading')?.focus({preventScroll:true});}
++function openRecords() {branchRecordCaller=null;capturePanelReading();located=null;origin=null;panelMode='records';recordsReturnNotice='';rememberMap();render();$('records-heading')?.focus({preventScroll:true});}
+ function recordsBrowser():HTMLElement {
+   const panel=node('aside','','area-panel records-panel sheet-open');panel.id='area-panel';panel.dataset.panelMode='records';panel.setAttribute('aria-label','이어 볼 기록 읽기');
+   const close=()=>{capturePanelReading();panelMode='area';rememberMap();render();$('check-summary')?.focus({preventScroll:true});};
+@@ -2425,7 +2461,7 @@
+   if(parked){const o=node('option',`보관된 영역: ${parked.name} · 되살리거나 다른 영역을 고르세요`);o.value=parked.id;sel.append(o);}
+   sel.value=dt===null?'@follow':dt.area===null?'@none':dt.area;
+ }
+-function render(capturePanel=true,restoreReading=true) {
++function render(capturePanel=true,restoreReading=true,beforeWorkspaceSizing?:()=>void) {
+   if(capturePanel)capturePanelReading();
+   if(route==='projects'){renderProjects();renderStatus();displayView();return;}
+   const open=new Map([...document.querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]));
+@@ -2451,7 +2487,8 @@
+   // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
+   const taskScreen=view==='task'?$('space-view'):null;
+   for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&d.id!=='project-management'&&!taskScreen?.contains(d)&&!d.closest('#area-panel'))d.open=open.get(d.id)!;
+-  sizeWorkspace();finishInitialMapFit();if(restoreReading)restorePanelReading();restoreWorkReferenceReading();
++  // A layer entry may restore page scroll after its final DOM/disclosures, before sizing or its first camera/reading restore.
++  beforeWorkspaceSizing?.();sizeWorkspace();finishInitialMapFit();if(restoreReading)restorePanelReading();restoreWorkReferenceReading();
+   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
+ }
+ function submitInput(withAI:boolean) {
+@@ -2556,6 +2593,7 @@
+ $('example-close').addEventListener('click',()=>closeExample(false));
+ /** Explicit navigation starts a new excursion. Part/endpoint locators and same-part actions keep their first caller. */
+ function endRecordsExcursion(){
++  branchRecordCaller=null;
+   let ended=false;
+   if(origin?.view==='work'){origin=origin.work.upstream;ended=true;}
+   if(located?.origin.view==='work'){located=null;ended=true;}
+--- a/app/continuity/tests/branch-records31_browser.py
++++ b/app/continuity/tests/branch-records31_browser.py
+@@ -0,0 +1,219 @@
++"""BRANCH31: native signal -> exact subtree reader -> caller, on two PCs.
++
++Author-role regression, not an independent UI verdict. Synthetic public-domain-API
++fixture enters through the normal recovery chooser. No storage/DOM/product-state
++injection. The author runs only AST and the pure seed; Cloud/CI run HTTP Chromium.
++Signal disappearance during an unchanged caller session is NOT covered by navigation.
++"""
++import json, subprocess, unittest
++from pathlib import Path
++from playwright.sync_api import expect
++import browser as base
++import received20_browser as native
++
++APP=Path(__file__).resolve().parents[2]
++OBS=base.OUT/'branch-records31-observations.jsonl'
++OBS.write_text('',encoding='utf-8')
++SEED=r'''
++import * as D from './continuity/dist/public/shared/domain.js';
++import {mockAdvice} from './continuity/dist/public/shared/mock.js';
++import {subtreeSignals} from './continuity/dist/public/shared/attention.js';
++let p=D.rename(D.setBrief(D.createProject(),'[합성31] 기록의 실제 소유와 읽기 출발점을 보존한다.'),'합성31 동일 이름의 두 부모');
++const ids={};
++for(const [key,name]of [['P','같은 부모'],['M','중간 부분'],['L','질문과 현재 설명'],['H','보류 설명'],['S','이전 기준 설명'],['Q','같은 부모'],['B','다른 부모의 현재 작업']]){
++ p=D.addArea(p,name,'[합성31 구상] '+key+' 소유의 원문. 실행 권한을 추가하지 않는다.');ids[key]=p.space.areas.at(-1).id;
++}
++for(const [child,parent]of [['M','P'],['L','M'],['H','M'],['S','M'],['B','Q']])p=D.setAreaParent(p,ids[child],ids[parent]);
++for(const [key,x,y]of [['P',0,0],['Q',300,0],['M',0,200],['L',0,400],['H',300,400],['S',600,400],['B',600,0]])p=D.moveArea(p,ids[key],{x,y});
++p=D.addRelation(p,ids.L,ids.B,'flow','[합성31] 소유를 복제하지 않는 연결');
++function task(key,marker,question=false){p=D.submit(D.editDraft(p,'[합성31 요청] '+marker),undefined,ids[key]);const id=p.currentTaskId,s=D.begin(p,id),advice=mockAdvice(s.request);
++ advice.question=question?{kind:'fact',text:'[합성31 질문] L의 표시 조건을 확인했나요?',why:'실제 개발 미결이 아닌 합성 기록',options:[]}:null;
++ p=D.receive(s.project,s.request,{mode:'mock',ticket:s.request.ticket,advice});
++ for(const k of ['understanding','scope','next','checks'])p=D.editTask(p,id,k,'[합성31 '+marker+'] '+k+' · 배포하지 않는다.');return id;}
++const tasks={L:task('L','L',true),H:task('H','H'),S:task('S','S'),B0:task('B','B0'),B:task('B','B')},reports={};
++function exported(id,H){const a=D.exportAnchor(p,D.taskOf(p,id));p=D.markHandoff(p,id,D.handoffText(p,id,H),'clipboard',p.revision,H,a);return a;}
++function file(id,H,a,summary,held=false){return {schemaVersion:'agentflow.return.2',projectId:p.id,taskId:id,returnId:H,report:'[합성31 보고] '+H,evidence:null,
++ understanding:{version:'understanding.1',areaId:a.areaId,basedOn:held?99:a.understanding,summary,changes:[],proposal:null,origin:'합성31 검사 작성자 구성 · 앱/실행 검증 아님'}};}
++for(const key of ['L','H','S','B0']){const H='H31_'+key,a=exported(tasks[key],H),old=new Set(p.tasks.map(t=>t.id));
++ p=D.importResultFile(p,JSON.stringify(file(tasks[key],H,a,'[합성31 '+key+' 설명] 정확한 소유 부분에서 읽는다.',key==='H')));
++ const added=p.tasks.filter(t=>!old.has(t.id));if(added.length!==1)throw Error('exact new report');reports[key]=added[0].id;}
++p=D.editTask(p,tasks.S,'next','[합성31 명시 변경] 이전 설명을 현재로 재사용하지 않는다.');
++const anchor=exported(tasks.B0,'H31_B_LATE'),late=file(tasks.B0,'H31_B_LATE',anchor,'[합성31 B 새 설명] 이번 탭 수신으로 표시한다.');
++p=D.focusTask(p,tasks.B);p=D.editDraft(D.setDraftTarget(p,ids.L),'[합성31 미전송 L 입력] 현재 B와 읽기 P를 구별한다.');
++const project2=D.rename(D.createProject(),'합성31 다른 프로젝트');
++console.log(JSON.stringify({p,ids,tasks,reports,late,project2,signals:{P:subtreeSignals(p,ids.P),Q:subtreeSignals(p,ids.Q)},metadata:{
++ nature:'공개 domain API로 만든 합성 경계 자료; 정상 복구 가져오기로 준비',limits:'사람 사용성·실제 AI·모든 미결·신호 소멸·모든 배율을 검증하지 않음',
++ owners:'P > M > L/H/S; Q > B. P와 Q는 이름이 같고 ID는 다름. L 질문/현재, H 보류, S 이전 기준. 현재 작업 B, 미전송 대상 L.'}}));
++'''
++
++# Read-only geometry: full control clipping through every clipping ancestor, and actual centre hit.
++CLIP=r'''sel=>{const e=document.querySelector(sel);if(!e||!e.checkVisibility({visibilityProperty:true}))return null;
++ const r=e.getBoundingClientRect();let l=0,t=0,rr=innerWidth,b=innerHeight;
++ for(let p=e.parentElement;p;p=p.parentElement){const s=getComputedStyle(p),q=p.getBoundingClientRect(),sx=q.width/(p.offsetWidth||1),sy=q.height/(p.offsetHeight||1);
++  if(/auto|scroll|hidden|clip/.test(s.overflowX)){l=Math.max(l,q.left+p.clientLeft*sx);rr=Math.min(rr,q.left+(p.clientLeft+p.clientWidth)*sx)}
++  if(/auto|scroll|hidden|clip/.test(s.overflowY)){t=Math.max(t,q.top+p.clientTop*sy);b=Math.min(b,q.top+(p.clientTop+p.clientHeight)*sy)}}
++ const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
++ return {rect:r.toJSON(),clip:{l,t,r:rr,b},inside:r.width>0&&r.height>0&&r.left>=l-.5&&r.right<=rr+.5&&r.top>=t-.5&&r.bottom<=b+.5,hit:!!h&&e.contains(h),cover:h?.id||h?.className||null}}'''
++MAP=r'''()=>({matrix:document.querySelector('#space-plane')?.style.transform,
++ folds:[...document.querySelectorAll('.branch-toggle')].map(e=>[e.id,e.getAttribute('aria-expanded')]),
++ selected:document.querySelector('.area-node.selected')?.dataset.areaId??null,mode:document.querySelector('#area-panel')?.dataset.panelMode??null,
++ owner:document.querySelector('#area-panel-body')?.dataset.areaId??null,body:document.querySelector('#area-panel-body')?.scrollTop??null,
++ page:scrollY,focus:document.activeElement?.id,entry:document.documentElement.dataset.entryId})'''
++
++class BranchRecords31(unittest.TestCase):
++    WIDTH,HEIGHT=1280,720
++    setUpClass=classmethod(base.Browser.setUpClass.__func__)
++    tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
++    state=base.Browser.state
++    details=native.Received20.details
++    reach=native.Received20.reach
++    wheel=native.Received20.wheel
++    def setUp(self):
++        base.Browser.setUp(self);self.page.set_viewport_size({'width':self.WIDTH,'height':self.HEIGHT})
++        self.posts=[];self.page.on('request',lambda r:self.posts.append(r.url) if r.method=='POST' and r.url.endswith('/api/continuity') else None)
++    def tearDown(self):
++        try:
++            self.record('actual','최초 실패 또는 종료 직후',self.page.evaluate(MAP))
++            self.page.screenshot(path=str(base.OUT/f'branch31-{self.WIDTH}-{self._testMethodName}-last.png'))
++        finally:base.Browser.tearDown(self)
++    def record(self,kind,label,actual,expected=None):
++        with OBS.open('a',encoding='utf-8') as f:f.write(json.dumps({'test':self.id(),'pc':[self.WIDTH,self.HEIGHT],'kind':kind,'label':label,'actual':actual,'expected':expected},ensure_ascii=False)+'\n')
++    def equal(self,label,actual,expected):self.record('condition',label,actual,expected);self.assertEqual(actual,expected,label)
++    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
++    def visible(self,sel,marker=None):
++        g=self.page.evaluate(CLIP,sel) if marker is None else self.page.evaluate(native.PROBE,[sel,marker])
++        self.yes('실제 clip/hit '+sel,bool(g and g['inside'] and g['hit']),g)
++    def click(self,sel):self.reach(sel);self.page.locator(sel).click()
++    def map_click(self,sel):self.visible(sel);self.page.locator(sel).click()
++    def snap(self,label):v=self.page.evaluate(MAP);self.record('actual',label,v);return v
++    def unchanged(self,before,data,label):
++        after=self.snap(label)
++        for key in ['matrix','folds']:self.equal(label+' '+key,after[key],before[key])
++        self.equal(label+' 저장 자료/current/draft/target 전체',self.state(),data)
++        self.equal(label+' 새 AI 요청 없음',self.posts,[])
++        return after
++    def import_project(self,p,label):
++        path=base.OUT/f'branch31-{self.WIDTH}-{self._testMethodName}-{label}.json';path.write_text(json.dumps(p,ensure_ascii=False),encoding='utf-8')
++        base.reveal_management(self.page,'#import')
++        with self.page.expect_file_chooser() as chooser:self.page.locator('#import').click()
++        self.page.once('dialog',lambda d:d.accept());chooser.value.set_files(str(path))
++        expect(self.page.locator('#notice')).to_contain_text('사본으로 불러왔어요');base.saved(self.page)
++    def load(self):
++        s=json.loads(subprocess.check_output(['node','--input-type=module','-e',SEED],cwd=APP,text=True,encoding='utf-8'));self.record('fixture',s['metadata']['nature'],s)
++        self.import_project(s['p'],'recovery');self.click('#nav-space');self.map_click('#map-fit')
++        # Explicit fixture preparation. These actions precede every preservation baseline.
++        for key in ['P','Q']:
++            self.map_click('#branch-toggle-'+s['ids'][key]);expect(self.page.locator('#branch-toggle-'+s['ids'][key])).to_have_attribute('aria-expanded','false')
++        self.map_click('#map-fit');self.map_click('#node-info-'+s['ids']['P']);self.map_click('#map-fit')
++        self.equal('실제 현재 B',self.state()['currentTaskId'],s['tasks']['B'])
++        self.yes('서로 다른 같은 이름 부모',s['ids']['P']!=s['ids']['Q'])
++        return s
++    def signal(self,id):
++        before=self.snap('신호 전');data=self.state();self.map_click('#branch-records-'+id)
++        expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',id)
++        expect(self.page.locator('#subtree-records-'+id)).to_have_js_property('open',True)
++        expect(self.page.locator('#subtree-records-heading-'+id)).to_be_focused()
++        self.visible('#subtree-records-heading-'+id)
++        self.unchanged(before,data,'신호 직후 보정 없이');return before,data
++    def close_to(self,id):
++        before=self.snap('닫기 전');data=self.state();self.map_click('#area-panel-close')
++        expect(self.page.locator('#'+id)).to_be_focused()
++        if id!='space-title':self.visible('#'+id)
++        self.unchanged(before,data,'닫기 직후 보정 없이')
++    def row_roundtrip(self,s,owner):
++        caller='#subtree-task-'+s['reports']['L'];self.reach(caller);before=self.snap('보고 호출 행');data=self.state()
++        r=self.page.locator(caller).bounding_box();self.page.locator(caller).click()
++        expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',s['reports']['L'])
++        self.equal('읽기 중 현재 B와 미전송 L 유지',self.state(),data)
++        self.click('#task-return-origin')
++        expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',owner)
++        self.visible(caller);expect(self.page.locator(caller)).to_be_focused()
++        self.unchanged(before,data,'정확 보고에서 원 부모 호출행 복귀')
++        rr=self.page.locator(caller).bounding_box();self.yes('원 호출행 세로 위치 복원',abs(rr['y']-r['y'])<=2,{'before':r,'after':rr})
++    def test_01_exact_subtree_old_memo_and_keyboard(self):
++        s=self.load();p=s['ids']['P'];q=s['ids']['Q'];signal='#branch-records-'+p
++        text=self.page.locator(signal).inner_text()
++        for word in ['기록된 질문 1','현재 설명 1','설명 보류 1','이전 기준 1']:self.yes('신호의 실제 종류 '+word,word in text,text)
++        self.signal(p)
++        owners=self.page.locator('#subtree-records-'+p+' [data-owner-area]').evaluate_all('(es)=>es.map(e=>e.dataset.ownerArea)')
++        for key in ['L','H','S']:self.yes('두 층 아래 실제 소유 '+key,s['ids'][key] in owners,owners)
++        self.yes('동명 다른 부모 B를 섞지 않음',s['ids']['B'] not in owners,owners)
++        self.details('subtree-records-'+p,False);self.details('panel-more');self.details('panel-edit')
++        # Native panel keyboard scroll: the body padding is the actual hit target, never a JS scroll assignment.
++        body=self.page.locator('#area-panel-body');g=body.bounding_box();point={'x':g['x']+3,'y':g['y']+g['height']/2}
++        self.yes('패널 빈 여백 hit',self.page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id',point)=='area-panel-body',point)
++        self.page.mouse.click(point['x'],point['y']);expect(body).to_be_focused();self.page.keyboard.press('End')
++        self.yes('과거 닫힌 기록과 깊은 패널 읽기 준비',body.evaluate('(e)=>e.scrollTop')>0)
++        self.map_click('#node-info-'+q);self.signal(p) # explicit open must override P's closed/deep memo
++        self.close_to('branch-records-'+p)
++        # Browser-native activation from the real returned focus; no locator.focus/DOM event injection.
++        for key in ['Enter','Space']:
++            before=self.snap('키보드 신호 전');data=self.state();self.page.keyboard.press(key)
++            expect(self.page.locator('#subtree-records-heading-'+p)).to_be_focused();self.visible('#subtree-records-heading-'+p)
++            self.unchanged(before,data,key+' 신호');self.page.keyboard.press('Escape')
++            expect(self.page.locator(signal)).to_be_focused();self.visible(signal);self.unchanged(before,data,'Escape 호출자 복귀')
++    def test_02_exact_report_return_and_input_escape(self):
++        s=self.load();p=s['ids']['P'];self.signal(p);self.row_roundtrip(s,p)
++        self.details('panel-edit');self.click('#panel-name');self.page.locator('#panel-name').fill('[합성31 미저장 이름]')
++        data=self.state();before=self.snap('입력 Escape 전');self.page.keyboard.press('Escape')
++        expect(self.page.locator('#panel-name')).to_be_focused();expect(self.page.locator('#panel-name')).to_have_value('[합성31 미저장 이름]')
++        expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',p);self.unchanged(before,data,'입력 Escape는 닫기를 소비하지 않음')
++        self.close_to('branch-records-'+p)
++        self.signal(p);self.details('panel-edit');expect(self.page.locator('#panel-name')).to_have_value('[합성31 미저장 이름]')
++    def test_03_old_work_and_records_origin_yield_to_new_parent(self):
++        s=self.load();p=s['ids']['P'];q=s['ids']['Q'];self.click('#nav-work')
++        raw=native.Received20.select(self,s,file=s['late']);before=self.state();native.Received20.accept(self);base.saved(self.page);after=self.state()
++        added=[t for t in after['tasks'] if t['id'] not in {x['id'] for x in before['tasks']}]
++        self.equal('정확 H에서 새 보고 한 개',len(added),1);ret=added[0]
++        self.equal('늦은 B0 보고는 실제 현재 B 유지',after['currentTaskId'],s['tasks']['B'])
++        self.equal('실제 선택 파일 원문 그대로',ret['resultFile']['rawText'],raw)
++        self.equal('실제 선택 H 그대로',ret['resultFile']['returnId'],s['late']['returnId'])
++        self.click('#received-result-open');expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',ret['id'])
++        self.click('#task-view-find-area');expect(self.page.locator('#locate-return')).to_have_count(1)
++        for origin_kind in ['work','records']:
++            if origin_kind=='records':
++                self.click('#nav-space');self.click('#check-summary');self.click('#check-area-'+ret['id'])
++                expect(self.page.locator('#locate-return')).to_have_count(1)
++            # Explicit normal fit/fold preparation, not a post-failure repair.
++            self.map_click('#map-fit')
++            if self.page.locator('#branch-toggle-'+q).get_attribute('aria-expanded')=='true':self.map_click('#branch-toggle-'+q)
++            self.map_click('#map-fit')
++            self.yes('정확한 B 수신이 Q의 이번 탭 갱신 신호에 포함됨','이번 탭 설명 갱신 1' in self.page.locator('#branch-records-'+q).inner_text())
++            self.signal(p)
++            expect(self.page.locator('#locate-return')).to_have_count(0)
++            self.row_roundtrip(s,p);self.close_to('branch-records-'+p)
++            self.record('coverage','이전 '+origin_kind+' 출발점 대신 명시 새 부모 읽기 왕복',True)
++    def test_04_caller_lifetime_modes_project_and_offscreen(self):
++        s=self.load();p=s['ids']['P'];q=s['ids']['Q'];self.signal(p);self.signal(q);self.close_to('branch-records-'+q)
++        self.signal(p);self.map_click('#node-info-'+p);self.close_to('node-info-'+p)
++        for control,mode,focus in [('#map-relations-open','relations','map-relations-open'),('#check-summary','records','check-summary')]:
++            self.signal(p);before=self.snap('다른 읽기 모드 전');data=self.state();self.click(control)
++            expect(self.page.locator('#area-panel')).to_have_attribute('data-panel-mode',mode)
++            self.unchanged(before,data,'모드 전환');self.close_to(focus)
++        self.signal(p);entry=self.page.evaluate('()=>document.documentElement.dataset.entryId');data=self.state()
++        self.click('#nav-projects');expect(self.page.locator('#projects-view')).to_be_visible()
++        self.click('#new-project');expect(self.page.locator('#work-view')).to_be_visible()
++        self.yes('새 프로젝트가 실제 다른 entry로 열림',self.page.evaluate('()=>document.documentElement.dataset.entryId')!=entry)
++        self.click('#nav-projects')
++        self.click('.project-card[data-entry-id="'+entry+'"] .project-open')
++        expect(self.page.locator('#area-panel')).to_have_attribute('data-panel-mode','area')
++        expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',p)
++        self.equal('프로젝트 재진입 원 데이터 보존',self.state(),data)
++        # Do not navigate or select info first: either would clear a leaked caller and hide the regression.
++        self.close_to('node-info-'+p)
++        self.signal(p)
++        # Actual background drags, never node moves or camera injection. Move both original fallback controls out of clip.
++        for _ in range(4):
++            point=self.page.evaluate('''()=>{const m=document.querySelector('#space-map'),r=m.getBoundingClientRect();for(let y=Math.max(0,r.top)+20;y<Math.min(innerHeight,r.bottom)-20;y+=30)for(let x=Math.min(innerWidth,r.right)-30;x>r.left+r.width*.6;x-=30){const h=document.elementFromPoint(x,y);if(h&&m.contains(h)&&!h.closest('.area-node,.map-controls,button,input,textarea,select,a'))return {x,y,dx:-Math.min(450,r.width*.55)}}return null}''')
++            self.yes('실제 지도 빈 배경에서 pan 준비',point is not None,point)
++            self.page.mouse.move(point['x'],point['y']);self.page.mouse.down();self.page.mouse.move(point['x']+point['dx'],point['y'],steps=12);self.page.mouse.up()
++        for sel in ['#branch-records-'+p,'#node-info-'+p]:
++            g=self.page.evaluate(CLIP,sel)
++            self.yes('원 호출자와 owner info가 DOM에 남음',g is not None,g)
++            r,c=g['rect'],g['clip'];empty=r['right']<=c['l'] or r['left']>=c['r'] or r['bottom']<=c['t'] or r['top']>=c['b']
++            self.yes('원 호출자와 owner info의 가시 교집합이 0',empty,g)
++        self.close_to('space-title') # title is intentionally sr-only; actual focus and no camera jump are checked.
++
++class BranchRecords31Wide(BranchRecords31):WIDTH,HEIGHT=1440,900
++
++if __name__=='__main__':unittest.main(verbosity=2)
+--- a/app/continuity/tests/fixtures/viewport30-normal-ui-six.json
++++ b/app/continuity/tests/fixtures/viewport30-normal-ui-six.json
+@@ -0,0 +1 @@
++{"schemaVersion":"idea015.project.7","id":"P_9369fc80-5d53-4567-b826-1bdca9f28b5a","revision":36,"name":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동…","sources":[{"id":"S_ca2fc4e7-3274-46d7-884e-f493db795a96","kind":"request","text":"[합성28 Q] 안내 오류 원인은 아직 모르겠어요. 실제 원인을 정하지 말고 확인할 질문을 남겨 주세요.","at":"2026-10-22T19:20:28.693Z","taskId":"T_3fd42f39-994e-4507-bad1-58b5455ddedd","replyTo":null,"disposition":"provided"},{"id":"S_e2311ee0-32d2-4505-a9c8-b3cd5dcbd134","kind":"request","text":"[합성28 S] 안내 표시 문구만 정리해 주세요.","at":"2026-10-22T19:20:29.260Z","taskId":"T_c24407d6-cd3f-4de9-bf41-dd5e86f1aca6","replyTo":null,"disposition":"provided"},{"id":"S_b85879f1-9b7a-440f-b5b8-ca310230005f","kind":"report","text":"[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_c24407d6-cd3f-4de9-bf41-dd5e86f1aca6의 인계 H_544cee93-3071-476b-943f-6d43b340040b / r18에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성28 보고] 자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 준비 자료를 읽었다. 실제 실행이나 외부 AI 검증은 아니다.","at":"2026-10-22T19:20:30.657Z","taskId":"T_1cb4c14e-25ef-42db-8a7a-89b13a16ecff","replyTo":null,"disposition":"provided"},{"id":"S_5d12688b-7c20-4cf6-8354-eefdfe3febf3","kind":"request","text":"[합성28 H] 요청 접수 안내만 정리해 주세요.","at":"2026-10-22T19:20:31.844Z","taskId":"T_ac0c66f3-cd4c-429d-a76a-06409b91e253","replyTo":null,"disposition":"provided"},{"id":"S_9397dc0f-11d4-4359-a36b-fd63a0472e99","kind":"report","text":"[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_ac0c66f3-cd4c-429d-a76a-06409b91e253의 인계 H_43ae0082-d06e-4b40-9b14-7c1dc48c9cd7 / r25에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성28 보고] 자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 준비 자료를 읽었다. 실제 실행이나 외부 AI 검증은 아니다.","at":"2026-10-22T19:20:34.010Z","taskId":"T_be56981c-de07-4d65-a60e-0fc10de93dab","replyTo":null,"disposition":"provided"},{"id":"S_e5d7c70f-cb4b-494f-8e4b-7fbd4558b710","kind":"request","text":"[합성28 P] 전체 안내를 정리하되 자식의 실제 역할을 구분해 주세요.","at":"2026-10-22T19:20:34.623Z","taskId":"T_c778aaf6-6958-44b7-8f0d-be88c57c1286","replyTo":null,"disposition":"provided"}],"bases":[{"id":"D1","text":"[합성28 Q] 안내 오류 원인은 아직 모르겠어요. 실제 원인을 정하지 말고 확인할 질문을 남겨 주세요.","status":"requested","sourceId":"S_ca2fc4e7-3274-46d7-884e-f493db795a96","revision":13,"history":[]},{"id":"D2","text":"[합성28 S] 안내 표시 문구만 정리해 주세요.","status":"requested","sourceId":"S_e2311ee0-32d2-4505-a9c8-b3cd5dcbd134","revision":17,"history":[]},{"id":"D3","text":"[합성28 H] 요청 접수 안내만 정리해 주세요.","status":"requested","sourceId":"S_5d12688b-7c20-4cf6-8354-eefdfe3febf3","revision":24,"history":[]},{"id":"D4","text":"[합성28 P] 전체 안내를 정리하되 자식의 실제 역할을 구분해 주세요.","status":"requested","sourceId":"S_e5d7c70f-cb4b-494f-8e4b-7fbd4558b710","revision":31,"history":[]}],"tasks":[{"id":"T_3fd42f39-994e-4507-bad1-58b5455ddedd","sourceIds":["S_ca2fc4e7-3274-46d7-884e-f493db795a96"],"parentTaskId":null,"advice":{"intent":{"version":"intent.1","relation":"start","goal":"[합성28 Q] 안내 오류 원인은 아직 모르겠어요. 실제 원인을 정하지 말고 확인할 질문을 남겨 주세요.","conditions":[],"retired":[],"basisRefs":[{"basisId":"D1","sourceId":"S_ca2fc4e7-3274-46d7-884e-f493db795a96","revision":13}]},"understanding":"문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.","scope":"요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.","next":"요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.","checks":"원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.","question":{"kind":"fact","text":"문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?","why":"원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.","options":[]},"relatedBasisIds":["D1"],"reviewBasisIds":[],"suggestions":[]},"adviceRevision":13,"mode":"mock","manual":{"understanding":null,"scope":null,"next":null,"checks":null},"suggestions":null,"handoffs":[],"resultFile":null,"background":{"version":"background.1","revision":12,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_e254f0c1-0100-462f-bb0a-e9864d0bb537","name":"자료 보관 안내의 공통 절차에서 질문을 확인하는 부분","note":"자료 보관 안내의 공통 절차에서 질문을 확인하는 부분의 안내만 정리한다."}},"areaId":"A_e254f0c1-0100-462f-bb0a-e9864d0bb537"},{"id":"T_c24407d6-cd3f-4de9-bf41-dd5e86f1aca6","sourceIds":["S_e2311ee0-32d2-4505-a9c8-b3cd5dcbd134"],"parentTaskId":null,"advice":{"intent":{"version":"intent.1","relation":"start","goal":"[합성28 S] 안내 표시 문구만 정리해 주세요.","conditions":[],"retired":[],"basisRefs":[{"basisId":"D2","sourceId":"S_e2311ee0-32d2-4505-a9c8-b3cd5dcbd134","revision":17}]},"understanding":"입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.","scope":"요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.","next":"요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.","checks":"원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.","question":null,"relatedBasisIds":["D1","D2"],"reviewBasisIds":[],"suggestions":[]},"adviceRevision":17,"mode":"mock","manual":{"understanding":null,"scope":null,"next":null,"checks":null},"suggestions":null,"handoffs":[{"at":"2026-10-22T19:20:29.537Z","method":"clipboard","revision":18,"chars":5631,"digest":"1f7d87b2","work":{"understanding":"입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.","scope":"요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.","next":"요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.","checks":"원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."},"aiExcluded":false,"legacyText":null,"returnId":"H_544cee93-3071-476b-943f-6d43b340040b","background":{"version":"background.1","revision":16,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b","name":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분","note":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 안내만 정리한다."}},"anchor":{"version":"anchor.2","areaId":"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b","understanding":0,"stamp":{"name":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분","note":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 안내만 정리한다.","brief":1,"decisions":[],"work":[],"version":"plan.2","revision":1,"ancestors":[{"id":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","name":"자료 보관 안내를 함께 준비하는 전체 운영 흐름","note":"안내를 준비하는 전체 흐름과 실제 소속을 읽는다.","revision":0}]}}}],"resultFile":null,"background":{"version":"background.1","revision":16,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b","name":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분","note":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 안내만 정리한다."}},"areaId":"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b"},{"id":"T_1cb4c14e-25ef-42db-8a7a-89b13a16ecff","sourceIds":["S_b85879f1-9b7a-440f-b5b8-ca310230005f"],"parentTaskId":"T_c24407d6-cd3f-4de9-bf41-dd5e86f1aca6","advice":null,"adviceRevision":null,"mode":null,"manual":{"understanding":null,"scope":null,"next":null,"checks":null},"suggestions":null,"handoffs":[],"resultFile":{"returnId":"H_544cee93-3071-476b-943f-6d43b340040b","rawText":"{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_9369fc80-5d53-4567-b826-1bdca9f28b5a\",\n  \"taskId\": \"T_c24407d6-cd3f-4de9-bf41-dd5e86f1aca6\",\n  \"returnId\": \"H_544cee93-3071-476b-943f-6d43b340040b\",\n  \"report\": \"[명시 합성28 보고] 자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 준비 자료를 읽었다. 실제 실행이나 외부 AI 검증은 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b\",\n    \"basedOn\": 0,\n    \"summary\": \"[합성28 설명] 자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 안내를 정리한다. 실제 보관 동작과 배포는 바꾸지 않는다.\",\n    \"changes\": [\n      \"안내를 읽는 범위를 정리했다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"관측자가 실제 UI H/template에 작성한 명시 합성. 외부 AI/구현/검사 없음.\"\n  }\n}"},"background":{"version":"background.1","revision":16,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b","name":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분","note":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 안내만 정리한다."}}},{"id":"T_ac0c66f3-cd4c-429d-a76a-06409b91e253","sourceIds":["S_5d12688b-7c20-4cf6-8354-eefdfe3febf3"],"parentTaskId":null,"advice":{"intent":{"version":"intent.1","relation":"start","goal":"[합성28 H] 요청 접수 안내만 정리해 주세요.","conditions":[],"retired":[],"basisRefs":[{"basisId":"D3","sourceId":"S_5d12688b-7c20-4cf6-8354-eefdfe3febf3","revision":24}]},"understanding":"입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.","scope":"요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.","next":"요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.","checks":"원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.","question":null,"relatedBasisIds":["D1","D2","D3"],"reviewBasisIds":[],"suggestions":[]},"adviceRevision":24,"mode":"mock","manual":{"understanding":null,"scope":null,"next":null,"checks":null},"suggestions":null,"handoffs":[{"at":"2026-10-22T19:20:32.035Z","method":"clipboard","revision":25,"chars":5856,"digest":"bfa044f8","work":{"understanding":"입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.","scope":"요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.","next":"요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.","checks":"원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."},"aiExcluded":false,"legacyText":null,"returnId":"H_43ae0082-d06e-4b40-9b14-7c1dc48c9cd7","background":{"version":"background.1","revision":23,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_f1c97142-cdad-4056-aa16-43b483c4c84b","name":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분","note":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 안내만 정리한다."}},"anchor":{"version":"anchor.2","areaId":"A_f1c97142-cdad-4056-aa16-43b483c4c84b","understanding":0,"stamp":{"name":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분","note":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 안내만 정리한다.","brief":1,"decisions":[],"work":[],"version":"plan.2","revision":1,"ancestors":[{"id":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","name":"자료 보관 안내를 함께 준비하는 전체 운영 흐름","note":"안내를 준비하는 전체 흐름과 실제 소속을 읽는다.","revision":0}]}}}],"resultFile":null,"background":{"version":"background.1","revision":23,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_f1c97142-cdad-4056-aa16-43b483c4c84b","name":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분","note":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 안내만 정리한다."}},"areaId":"A_f1c97142-cdad-4056-aa16-43b483c4c84b"},{"id":"T_be56981c-de07-4d65-a60e-0fc10de93dab","sourceIds":["S_9397dc0f-11d4-4359-a36b-fd63a0472e99"],"parentTaskId":"T_ac0c66f3-cd4c-429d-a76a-06409b91e253","advice":null,"adviceRevision":null,"mode":null,"manual":{"understanding":null,"scope":null,"next":null,"checks":null},"suggestions":null,"handoffs":[],"resultFile":{"returnId":"H_43ae0082-d06e-4b40-9b14-7c1dc48c9cd7","rawText":"{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_9369fc80-5d53-4567-b826-1bdca9f28b5a\",\n  \"taskId\": \"T_ac0c66f3-cd4c-429d-a76a-06409b91e253\",\n  \"returnId\": \"H_43ae0082-d06e-4b40-9b14-7c1dc48c9cd7\",\n  \"report\": \"[명시 합성28 보고] 자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 준비 자료를 읽었다. 실제 실행이나 외부 AI 검증은 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_f1c97142-cdad-4056-aa16-43b483c4c84b\",\n    \"basedOn\": 0,\n    \"summary\": \"[합성28 설명] 자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 안내를 정리한다. 실제 보관 동작과 배포는 바꾸지 않는다.\",\n    \"changes\": [\n      \"안내를 읽는 범위를 정리했다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"관측자가 실제 UI H/template에 작성한 명시 합성. 외부 AI/구현/검사 없음.\"\n  }\n}"},"background":{"version":"background.1","revision":23,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_f1c97142-cdad-4056-aa16-43b483c4c84b","name":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분","note":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 안내만 정리한다."}}},{"id":"T_c778aaf6-6958-44b7-8f0d-be88c57c1286","sourceIds":["S_e5d7c70f-cb4b-494f-8e4b-7fbd4558b710"],"parentTaskId":null,"advice":{"intent":{"version":"intent.1","relation":"start","goal":"[합성28 P] 전체 안내를 정리하되 자식의 실제 역할을 구분해 주세요.","conditions":[],"retired":[],"basisRefs":[{"basisId":"D4","sourceId":"S_e5d7c70f-cb4b-494f-8e4b-7fbd4558b710","revision":31}]},"understanding":"입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.","scope":"요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.","next":"요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.","checks":"원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.","question":null,"relatedBasisIds":["D1","D2","D3","D4"],"reviewBasisIds":[],"suggestions":[]},"adviceRevision":31,"mode":"mock","manual":{"understanding":null,"scope":null,"next":null,"checks":null},"suggestions":null,"handoffs":[{"at":"2026-10-22T19:20:34.751Z","method":"clipboard","revision":32,"chars":5777,"digest":"8b2a64fc","work":{"understanding":"입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.","scope":"요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.","next":"요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.","checks":"원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."},"aiExcluded":false,"legacyText":null,"returnId":"H_b3c187fd-f01b-44e9-a437-b75a2aa35380","background":{"version":"background.1","revision":30,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","name":"자료 보관 안내를 함께 준비하는 전체 운영 흐름","note":"안내를 준비하는 전체 흐름과 실제 소속을 읽는다."}},"anchor":{"version":"anchor.2","areaId":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","understanding":0,"stamp":{"name":"자료 보관 안내를 함께 준비하는 전체 운영 흐름","note":"안내를 준비하는 전체 흐름과 실제 소속을 읽는다.","brief":1,"decisions":[],"work":[],"version":"plan.2","revision":0,"ancestors":[]}}}],"resultFile":null,"background":{"version":"background.1","revision":30,"brief":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","area":{"id":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","name":"자료 보관 안내를 함께 준비하는 전체 운영 흐름","note":"안내를 준비하는 전체 흐름과 실제 소속을 읽는다."}},"areaId":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"}],"currentTaskId":"T_c778aaf6-6958-44b7-8f0d-be88c57c1286","draft":"","answerDraft":"","basisDraft":"","basisEdits":{},"draftKind":"request","pending":null,"notice":null,"space":{"brief":{"text":"[합성28] 자료 보관 안내를 함께 정리한다. 실제 동작과 배포는 바꾸지 않는다.","at":"2026-10-22T19:20:26.575Z","previous":[]},"areas":[{"id":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","name":"자료 보관 안내를 함께 준비하는 전체 운영 흐름","note":"안내를 준비하는 전체 흐름과 실제 소속을 읽는다.","archived":false,"createdAt":"2026-10-22T19:20:26.743Z"},{"id":"A_e254f0c1-0100-462f-bb0a-e9864d0bb537","name":"자료 보관 안내의 공통 절차에서 질문을 확인하는 부분","note":"자료 보관 안내의 공통 절차에서 질문을 확인하는 부분의 안내만 정리한다.","archived":false,"createdAt":"2026-10-22T19:20:27.492Z"},{"id":"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b","name":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분","note":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 안내만 정리한다. [정상 UI 변경28] 표현 검토 범위만 덧붙인다.","archived":false,"createdAt":"2026-10-22T19:20:27.779Z"},{"id":"A_f1c97142-cdad-4056-aa16-43b483c4c84b","name":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분","note":"자료 보관 안내의 공통 절차에서 요청을 접수하는 부분의 안내만 정리한다. [정상 UI 변경28] 표현 검토 범위만 덧붙인다.","archived":false,"createdAt":"2026-10-22T19:20:28.151Z"},{"id":"A_8274295e-c28d-45f9-b43d-ba091d154d87","name":"다른 자료 안내의 독립 흐름","note":"[합성28 추가] 다른 가지의 실제 소속을 읽는다.","archived":false,"createdAt":"2026-10-22T19:24:48.901Z"},{"id":"A_a00d9478-d810-4a27-84e5-d4f74a57b6c5","name":"자료 보관 안내를 함께 준비하는 전체 운영 흐름","note":"[합성28 추가] 같은 이름의 직접 부모지만 실제 다른 가지에 속한다.","archived":false,"createdAt":"2026-10-22T19:24:49.681Z"}],"relations":[],"draftTarget":null,"layout":{"version":"layout.1","positions":{"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae":{"x":340,"y":80},"A_e254f0c1-0100-462f-bb0a-e9864d0bb537":{"x":640,"y":280},"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b":{"x":940,"y":280},"A_f1c97142-cdad-4056-aa16-43b483c4c84b":{"x":340,"y":280},"A_8274295e-c28d-45f9-b43d-ba091d154d87":{"x":640,"y":-60},"A_a00d9478-d810-4a27-84e5-d4f74a57b6c5":{"x":1240,"y":140}}},"understanding":{"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b":{"revision":1,"entries":[{"by":"external","at":"2026-10-22T19:20:30.658Z","revision":1,"taskId":"T_1cb4c14e-25ef-42db-8a7a-89b13a16ecff","returnId":"H_544cee93-3071-476b-943f-6d43b340040b","text":null,"corrects":null,"stamp":{"name":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분","note":"자료 보관 안내의 공통 절차에서 표시를 정리하는 부분의 안내만 정리한다.","brief":1,"decisions":[],"work":[],"version":"plan.2","revision":1,"ancestors":[{"id":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","name":"자료 보관 안내를 함께 준비하는 전체 운영 흐름","note":"안내를 준비하는 전체 흐름과 실제 소속을 읽는다.","revision":0}]},"held":null}]},"A_f1c97142-cdad-4056-aa16-43b483c4c84b":{"revision":0,"entries":[{"by":"external","at":"2026-10-22T19:20:34.010Z","revision":null,"taskId":"T_be56981c-de07-4d65-a60e-0fc10de93dab","returnId":"H_43ae0082-d06e-4b40-9b14-7c1dc48c9cd7","text":null,"corrects":null,"stamp":null,"held":"plan-changed"}]}},"containment":{"version":"containment.1","parents":{"A_e254f0c1-0100-462f-bb0a-e9864d0bb537":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","A_f1c97142-cdad-4056-aa16-43b483c4c84b":"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae","A_a00d9478-d810-4a27-84e5-d4f74a57b6c5":"A_8274295e-c28d-45f9-b43d-ba091d154d87"},"revisions":{"A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae":0,"A_e254f0c1-0100-462f-bb0a-e9864d0bb537":1,"A_a8612ff8-c594-4ff5-80e8-29b1bb908e7b":2,"A_f1c97142-cdad-4056-aa16-43b483c4c84b":2,"A_8274295e-c28d-45f9-b43d-ba091d154d87":0,"A_a00d9478-d810-4a27-84e5-d4f74a57b6c5":1}}}}--- a/app/continuity/tests/viewport30_browser.py
++++ b/app/continuity/tests/viewport30_browser.py
+@@ -0,0 +1,104 @@
++"""VIEWPORT30: four existing-camera return regressions, native HTTP/MOCK, two PCs.
++
++The six-part fixture is the byte-exact backup made through normal UI in cycle28,
++blob837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8 (not a reconstructed project).
++Import already creates a camera: these tests do NOT claim a missing-camera first fit.
++No fit/resize/storage wait/reach repair between native map click and first assertion.
++Author PC: syntax only; actual baseline/candidate runs belong to Cloud/CI.
++"""
++import hashlib,json,unittest
++from pathlib import Path
++from playwright.sync_api import expect
++import browser as base
++import received20_browser as reused
++
++FIXTURE=Path(__file__).parent/'fixtures/viewport30-normal-ui-six.json'
++OBS=base.OUT/'viewport30-observations.jsonl';OBS.write_text('',encoding='utf-8')
++SNAP=r'''pid=>{const map=document.getElementById('space-map'),layout=document.querySelector('.map-layout'),plane=document.getElementById('space-plane');
++ const store=JSON.parse(sessionStorage.getItem('agentflow.workspace.map')||'null'),memo=store?.project===pid?{view:store.view,selected:store.selected,collapsed:store.collapsed,panel:store.panel}:store?.others?.[pid]??null;
++ const mr=map?.getBoundingClientRect(),left=mr?mr.left+map.clientLeft:0,top=mr?mr.top+map.clientTop:0,right=left+(map?.clientWidth??0),bottom=top+(map?.clientHeight??0);
++ const cards=[...document.querySelectorAll('.area-node')].map(e=>{const r=e.getBoundingClientRect();return {id:e.dataset.areaId,rect:r.toJSON(),off:e.classList.contains('offscreen'),outside:r.left<left-.5||r.top<top-.5||r.right>right+.5||r.bottom>bottom+.5}});
++ return {y:scrollY,viewport:[innerWidth,innerHeight],layer:document.body.dataset.layer,saving:document.documentElement.dataset.saving??null,
++ layout:layout?.getBoundingClientRect().toJSON(),inlineHeight:layout?.style.height,map:mr?.toJSON(),client:[map?.clientWidth,map?.clientHeight],
++ transform:plane?.style.transform,computed:plane?getComputedStyle(plane).transform:null,memo,cards,
++ listOpen:document.getElementById('area-list')?.open,collapsed:[...document.querySelectorAll('.branch-toggle[aria-expanded="false"]')].map(e=>e.id),
++ selected:document.querySelector('.area-node.selected')?.dataset.areaId??null,focus:document.activeElement.id,
++ offscreen:{hidden:document.getElementById('map-offscreen')?.hidden,text:document.getElementById('map-offscreen')?.textContent}}}'''
++ARM=r'''pid=>{const snap='''+SNAP+r''';let resolve,timer;const p={first:null,frames:[],done:null};
++ p.done=new Promise(r=>resolve=r);const finish=ok=>{clearTimeout(timer);document.removeEventListener('click',clicked);resolve({ok,first:p.first,frames:p.frames})};
++ const clicked=e=>{if(!e.isTrusted||!e.target.closest('#nav-space'))return;
++   p.first=snap(pid);document.removeEventListener('click',clicked);
++   requestAnimationFrame(()=>{p.frames.push(snap(pid));requestAnimationFrame(()=>{p.frames.push(snap(pid));finish(true)})})};
++ document.addEventListener('click',clicked);timer=setTimeout(()=>finish(false),5000);window.__viewport30Entry=p}'''
++
++class Viewport30(unittest.TestCase):
++    WIDTH,HEIGHT=1280,720
++    setUpClass=classmethod(base.Browser.setUpClass.__func__);tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
++    state=base.Browser.state
++    wheel=reused.Received20.wheel;yes=reused.Received20.yes
++    def record(self,kind,label,actual,expected=None):
++        with OBS.open('a',encoding='utf-8') as f:f.write(json.dumps({'test':self.id(),'pc':[self.WIDTH,self.HEIGHT],'kind':kind,'label':label,'actual':actual,'expected':expected},ensure_ascii=False)+'\n')
++    def setUp(self):
++        base.Browser.setUp(self);self.assertFalse(base.DOM,'VIEWPORT30 requires native browser/storage')
++        self.page.set_viewport_size({'width':self.WIDTH,'height':self.HEIGHT})
++        raw=FIXTURE.read_bytes();self.assertEqual(hashlib.sha256(raw).hexdigest(),'c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa')
++        self.record('source','normal UI cycle28 backup',{'bytes':len(raw),'gitBlob':'837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8','synthetic':True})
++        self.page.locator('#nav-projects').click();expect(self.page.locator('#projects-view')).to_be_visible()
++        with self.page.expect_file_chooser() as chooser:self.page.locator('#list-import').click()
++        self.page.once('dialog',lambda d:d.accept());chooser.value.set_files(str(FIXTURE))
++        expect(self.page.locator('#notice')).to_contain_text('사본으로 불러왔어요');base.saved(self.page)
++        # Normal rename clears the import notice, before either condition's saved preparation.
++        self.page.locator('#project-name').fill('[합성30] 같은 여섯 부분의 지도 복귀');expect(self.page.locator('#notice')).to_be_hidden();base.saved(self.page)
++        self.pid=self.state()['id'];self.assertEqual(len(self.state()['space']['areas']),6)
++        self.page.locator('.branch-toggle[aria-expanded="true"]').first.click()
++        expect(self.page.locator('.branch-toggle[aria-expanded="false"]')).to_have_count(1)
++        self.map_before=self.page.evaluate(SNAP,self.pid)
++        self.assertIsNotNone(self.map_before['memo']['view'],'normal import created an existing camera')
++        self.assertFalse(self.map_before['listOpen'],'six-part closed-list condition; no later default-open repair')
++        self.page.locator('#nav-work').click()
++        if not self.page.locator('#edit-work').evaluate('e=>e.open'):self.page.locator('#edit-work > summary').click()
++        self.before=self.state()
++        self.record('preparation','existing camera/fold and unchanged saved input',{'map':self.map_before,'project':self.before})
++    def tearDown(self):
++        try:self.page.screenshot(path=str(base.OUT/f'viewport30-{self.WIDTH}-{self._testMethodName}-final.png'))
++        finally:base.Browser.tearDown(self)
++    def geometry(self,label,v):
++        self.record('actual',label,v)
++        self.assertEqual(v['layer'],'space');self.assertAlmostEqual(v['y'],0,delta=1)
++        expected=max(240,v['viewport'][1]-max(0,v['layout']['top'])-16)
++        self.assertAlmostEqual(v['layout']['height'],expected,delta=1,msg='final available height, before any repair')
++        self.assertAlmostEqual(v['map']['height'],expected,delta=1)
++        self.assertLessEqual(v['map']['bottom'],v['viewport'][1]-.5,'container fits viewport; not a claim every card is visible')
++        self.assertEqual(v['transform'],self.map_before['transform']);self.assertEqual(v['memo']['view'],self.map_before['memo']['view'])
++        self.assertEqual(v['collapsed'],self.map_before['collapsed']);self.assertEqual(v['memo']['collapsed'],self.map_before['memo']['collapsed'])
++        self.assertEqual(v['selected'],self.map_before['selected'])
++        self.assertEqual([c['id'] for c in v['cards']],[c['id'] for c in self.map_before['cards']])
++        self.assertEqual([c['off'] for c in v['cards']],[c['outside'] for c in v['cards']],'offscreen classes use final map client clip')
++        count=sum(c['outside'] for c in v['cards']);self.assertEqual(v['offscreen']['hidden'],count==0)
++        self.assertIn(f'화면 밖 영역 {count}개',v['offscreen']['text'])
++    def return_from_work(self,deep):
++        if self.page.evaluate('scrollY')>0:self.wheel('#work-view',-10000)
++        self.assertLessEqual(self.page.evaluate('scrollY'),1)
++        if deep:
++            self.assertGreaterEqual(self.page.evaluate('document.documentElement.scrollHeight-innerHeight'),1200,'deep preparation is real document space')
++            self.wheel('#work-view',1200)
++            self.assertGreaterEqual(self.page.evaluate('scrollY'),1199)
++        departure=self.page.evaluate('()=>({y:scrollY,layer:document.body.dataset.layer,saving:document.documentElement.dataset.saving??null})')
++        self.record('preparation','native wheel completed before entry observer',departure);self.assertEqual(departure['layer'],'work');self.assertIsNone(departure['saving'])
++        self.page.evaluate(ARM,self.pid)
++        try:
++            self.page.locator('#nav-space').click()
++            first=self.page.evaluate('()=>window.__viewport30Entry.first')
++            self.assertIsNotNone(first,'trusted click bubble captured after product target handler in the same event task')
++            self.geometry('same native click task: first map geometry',first)
++        finally:
++            later=self.page.evaluate('async()=>{const p=window.__viewport30Entry;const v=await p.done;delete window.__viewport30Entry;return v}')
++            self.record('actual','separate two native frames; never replace first failure',later)
++        self.assertTrue(later['ok']);self.assertEqual(len(later['frames']),2)
++        for i,v in enumerate(later['frames']):self.geometry(f'later native frame {i+1}',v)
++        self.assertEqual(self.state(),self.before,'navigation leaves current/draft/coordinates/relations/descriptions/exports/raw reports unchanged')
++    def test_01_zero_work_scroll_return(self):self.return_from_work(False)
++    def test_02_deep_work_scroll_return(self):self.return_from_work(True)
++
++class Viewport30Wide(Viewport30):WIDTH,HEIGHT=1440,900
++if __name__=='__main__':unittest.main(verbosity=2)

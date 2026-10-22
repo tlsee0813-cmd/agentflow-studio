@@ -1,0 +1,93 @@
+{
+  "status": "PREPARATION_ONLY_NOT_ACCEPTED",
+  "createdUTC": "2026-10-22T21:36:10.571896+00:00",
+  "inputs": {
+    "base": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+    "cycle30": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+    "cycle31": "0d9831b1141fe14ba0ce91dfc762ce9119041348"
+  },
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 276634,
+      "sha256": "da2502c6a011578c77931a10f41a7fcd09f182ae3b8b186b26f640966b747c2b",
+      "gitBlob": "99ecf0d2839949c6fe47557a1aebbb008077afdf"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+      "gitBlob": "3574c4d4e9baa295b101208a46e03e469b8afd30"
+    },
+    {
+      "path": "app/continuity/tests/viewport30_browser.py",
+      "bytes": 9126,
+      "sha256": "43798ea3a9503690155cc461f0a2c2447f54fb2b635153460fc6696e0b8fcc4d",
+      "gitBlob": "d32dc320fa8c0f2e10b10fede5e64ba2fa411e9d"
+    },
+    {
+      "path": "app/continuity/tests/branch-records31_browser.py",
+      "bytes": 19477,
+      "sha256": "9ca4cce0f1c6c7c8a0c723c576277c216a59c3c77b3396c083fd47c36452f9ab",
+      "gitBlob": "73d2baa8abca23e11aa98103c1dd24117da1364f"
+    },
+    {
+      "path": "app/continuity/tests/fixtures/viewport30-normal-ui-six.json",
+      "bytes": 25031,
+      "sha256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+      "gitBlob": "837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8"
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "bytes": 12740,
+      "sha256": "11c28b3164beefc47c2e92f37044731ea5d18528f75161b1fb74ee909db2a232",
+      "gitBlob": "73348f8f342e0f13f28285305129a850d4ca3dec"
+    }
+  ],
+  "verification": {
+    "git3WayExitAllZero": true,
+    "independentDisjointLineUnionByteExact": true,
+    "onlySixExpectedFilesDifferFromBase": true,
+    "sourceAndTestsFromEachSidePreserved": true,
+    "branchCallerClearBeforeCallback": true,
+    "pageRestoreBeforeFinalSizeInitialFitPanelReading": true,
+    "finalMarkOffscreenPreserved": true,
+    "twoDistinctCIBlocksPresent": true,
+    "node": "v24.19.0",
+    "checks": [
+      [
+        "continuity-check",
+        0
+      ],
+      [
+        "continuity-build",
+        0
+      ],
+      [
+        "two-new-tests-AST-only",
+        0
+      ]
+    ]
+  },
+  "notRun": [
+    "UI",
+    "server",
+    "unit execution",
+    "CI",
+    "merged-source Cloud integration scenes"
+  ],
+  "boundary": [
+    "No existing author folder modified.",
+    "No Git branch/commit/PR or remote mutation.",
+    "No source acceptance or completed integration claim.",
+    "If either input SHA changes, regenerate this preparation; do not silently reuse.",
+    "Local Node24 auxiliary type/build; target Node22.16 CI still required.",
+    "Public REST initial commit lookup hit rate limit before reading source; exact SHAs resolved via GitHub connector and source bytes fetched from immutable raw GitHub URLs."
+  ],
+  "sourcePayload": {
+    "path": "upload-tree-integration-source.json",
+    "bytes": 426578,
+    "sha256": "935c997c8ef8601554f36649591992c60dbfbc9fa3b2250043e20d8809564cca",
+    "gitBlob": "9cde94a57509ce70c87bffef260cc34215faa65d"
+  }
+}

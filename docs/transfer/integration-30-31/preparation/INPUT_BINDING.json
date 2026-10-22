@@ -1,0 +1,132 @@
+{
+  "refs": {
+    "base": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+    "cycle30": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+    "cycle31": "0d9831b1141fe14ba0ce91dfc762ce9119041348"
+  },
+  "files": [
+    {
+      "version": "base",
+      "commit": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273307,
+      "sha256": "774075e819ad2421a56765cbc6dc648d6c983e098bf71d166bb2453e25ee8156",
+      "gitBlob": "82180891d5f9c63818b4bec0f53c1cdc3c1dafbc"
+    },
+    {
+      "version": "cycle30",
+      "commit": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273592,
+      "sha256": "e52eb74e531302905d6e2c86e6be164425ea13d354f8db98007dfc45516748e8",
+      "gitBlob": "e045f45219fe38d4194dce7e9b076976c92c9410"
+    },
+    {
+      "version": "cycle31",
+      "commit": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 276349,
+      "sha256": "0d516dbda6bdc7569acad78bc4a55e47035cb4b8b99a2ffbdae3a1b54f28955d",
+      "gitBlob": "2a01e5118e866cdc30b4ecae2e7a40e4f679cb0b"
+    },
+    {
+      "version": "base",
+      "commit": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74233,
+      "sha256": "d32e770b0b8208d48b050250512a94b68d4f2342b7841a51e0280d1387a5fefc",
+      "gitBlob": "6654a134054f2ffadb9b282595ba6c029b853dbc"
+    },
+    {
+      "version": "cycle30",
+      "commit": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74233,
+      "sha256": "d32e770b0b8208d48b050250512a94b68d4f2342b7841a51e0280d1387a5fefc",
+      "gitBlob": "6654a134054f2ffadb9b282595ba6c029b853dbc"
+    },
+    {
+      "version": "cycle31",
+      "commit": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+      "gitBlob": "3574c4d4e9baa295b101208a46e03e469b8afd30"
+    },
+    {
+      "version": "cycle30",
+      "commit": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+      "path": "app/continuity/tests/viewport30_browser.py",
+      "bytes": 9126,
+      "sha256": "43798ea3a9503690155cc461f0a2c2447f54fb2b635153460fc6696e0b8fcc4d",
+      "gitBlob": "d32dc320fa8c0f2e10b10fede5e64ba2fa411e9d"
+    },
+    {
+      "version": "cycle31",
+      "commit": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+      "path": "app/continuity/tests/branch-records31_browser.py",
+      "bytes": 19477,
+      "sha256": "9ca4cce0f1c6c7c8a0c723c576277c216a59c3c77b3396c083fd47c36452f9ab",
+      "gitBlob": "73d2baa8abca23e11aa98103c1dd24117da1364f"
+    },
+    {
+      "version": "cycle30",
+      "commit": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+      "path": "app/continuity/tests/fixtures/viewport30-normal-ui-six.json",
+      "bytes": 25031,
+      "sha256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+      "gitBlob": "837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8"
+    },
+    {
+      "version": "base",
+      "commit": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+      "path": ".github/workflows/verify.yml",
+      "bytes": 11999,
+      "sha256": "e38dab9e764baeca926551689bb3ae4785c18fb4958386696953940ce1e881d5",
+      "gitBlob": "a47ad7fb1be8678d897acf3825cc2d48b3916954"
+    },
+    {
+      "version": "cycle30",
+      "commit": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+      "path": ".github/workflows/verify.yml",
+      "bytes": 12372,
+      "sha256": "3873c4c315fff14b038f0d643bbbdfae85230c78ab8cf22dc2db30744c8d5166",
+      "gitBlob": "88b10af5447bb08ebbfa2fb9cc40d627a77ea5ee"
+    },
+    {
+      "version": "cycle31",
+      "commit": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+      "path": ".github/workflows/verify.yml",
+      "bytes": 12367,
+      "sha256": "f2108f3960099b25dd3e82291dca1e20f1613e85083b2368a24b0dcea9d04ef3",
+      "gitBlob": "67e430918b449dfe6576093c35c7d8036f36ab14"
+    }
+  ],
+  "merges": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "mergeExit": 0
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "mergeExit": 0
+    },
+    {
+      "path": "app/continuity/tests/viewport30_browser.py",
+      "mergeExit": 0
+    },
+    {
+      "path": "app/continuity/tests/branch-records31_browser.py",
+      "mergeExit": 0
+    },
+    {
+      "path": "app/continuity/tests/fixtures/viewport30-normal-ui-six.json",
+      "mergeExit": 0
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "mergeExit": 0
+    }
+  ],
+  "status": "preparation only; integration not accepted"
+}

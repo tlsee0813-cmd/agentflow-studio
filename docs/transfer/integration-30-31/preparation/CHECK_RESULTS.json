@@ -1,0 +1,34 @@
+{
+  "node": "v24.19.0",
+  "declaredRuntime": "Node22.16; local Node24 auxiliary only",
+  "checks": [
+    {
+      "name": "continuity-check",
+      "command": [
+        "<runtime>/node.exe",
+        "continuity/scripts/check.mjs"
+      ],
+      "cwd": "<workspace>/work/product30-31-integration-prep/app",
+      "startUTC": "2026-10-22T21:35:10.306735+00:00",
+      "endUTC": "2026-10-22T21:35:15.877458+00:00",
+      "exit": 0
+    },
+    {
+      "name": "continuity-build",
+      "command": [
+        "<runtime>/node.exe",
+        "continuity/scripts/build.mjs"
+      ],
+      "cwd": "<workspace>/work/product30-31-integration-prep/app",
+      "startUTC": "2026-10-22T21:35:15.877458+00:00",
+      "endUTC": "2026-10-22T21:35:18.242776+00:00",
+      "exit": 0
+    },
+    {
+      "name": "two-new-tests-AST-only",
+      "exit": 0,
+      "noModuleImport": true
+    }
+  ],
+  "browserServer": "NOT_RUN"
+}

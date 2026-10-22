@@ -1,0 +1,202 @@
+{
+  "inputs": {
+    "base": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+    "cycle30": "e5a5bf40d544cad62b4644ab13cc2958671b0869",
+    "cycle31": "0d9831b1141fe14ba0ce91dfc762ce9119041348"
+  },
+  "threeWay": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "mergeExit": 0
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "mergeExit": 0
+    },
+    {
+      "path": "app/continuity/tests/viewport30_browser.py",
+      "mergeExit": 0
+    },
+    {
+      "path": "app/continuity/tests/branch-records31_browser.py",
+      "mergeExit": 0
+    },
+    {
+      "path": "app/continuity/tests/fixtures/viewport30-normal-ui-six.json",
+      "mergeExit": 0
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "mergeExit": 0
+    }
+  ],
+  "independentUnion": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "disjointChanges": true,
+      "independentUnionBytesEqualGit3Way": true,
+      "changes": [
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 78,
+          "baselineEnd": 77,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 190,
+          "baselineEnd": 189,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 333,
+          "baselineEnd": 332,
+          "newLines": 1
+        },
+        {
+          "from": "cycle30",
+          "tag": "replace",
+          "baselineStart": 337,
+          "baselineEnd": 338,
+          "newLines": 4
+        },
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 342,
+          "baselineEnd": 341,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 1362,
+          "baselineEnd": 1361,
+          "newLines": 26
+        },
+        {
+          "from": "cycle31",
+          "tag": "replace",
+          "baselineStart": 1379,
+          "baselineEnd": 1379,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "replace",
+          "baselineStart": 1388,
+          "baselineEnd": 1388,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "replace",
+          "baselineStart": 1447,
+          "baselineEnd": 1447,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "replace",
+          "baselineStart": 1525,
+          "baselineEnd": 1525,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "replace",
+          "baselineStart": 1592,
+          "baselineEnd": 1592,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 1787,
+          "baselineEnd": 1786,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "replace",
+          "baselineStart": 1788,
+          "baselineEnd": 1788,
+          "newLines": 3
+        },
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 1854,
+          "baselineEnd": 1853,
+          "newLines": 1
+        },
+        {
+          "from": "cycle31",
+          "tag": "replace",
+          "baselineStart": 1902,
+          "baselineEnd": 1902,
+          "newLines": 1
+        },
+        {
+          "from": "cycle30",
+          "tag": "replace",
+          "baselineStart": 2428,
+          "baselineEnd": 2428,
+          "newLines": 1
+        },
+        {
+          "from": "cycle30",
+          "tag": "replace",
+          "baselineStart": 2454,
+          "baselineEnd": 2454,
+          "newLines": 2
+        },
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 2559,
+          "baselineEnd": 2558,
+          "newLines": 1
+        }
+      ]
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "disjointChanges": true,
+      "independentUnionBytesEqualGit3Way": true,
+      "changes": [
+        {
+          "from": "cycle31",
+          "tag": "insert",
+          "baselineStart": 207,
+          "baselineEnd": 206,
+          "newLines": 7
+        },
+        {
+          "from": "cycle30",
+          "tag": "insert",
+          "baselineStart": 235,
+          "baselineEnd": 234,
+          "newLines": 7
+        }
+      ]
+    }
+  ],
+  "changed": [
+    ".github/workflows/verify.yml",
+    "app/continuity/public/styles.css",
+    "app/continuity/src/client/app.ts"
+  ],
+  "added": [
+    "app/continuity/tests/branch-records31_browser.py",
+    "app/continuity/tests/viewport30_browser.py",
+    "app/continuity/tests/fixtures/viewport30-normal-ui-six.json"
+  ],
+  "sourceInvariantChecks": "passed; caller clear + callback + final markOffscreen; source-only files exact upstream",
+  "remoteWrites": false,
+  "UI": "NOT_RUN"
+}
