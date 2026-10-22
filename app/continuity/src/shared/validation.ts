@@ -1,4 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
+import {V6_SCHEMA,type Area,type PlanStamp} from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -242,7 +243,8 @@ function assertProject(v: unknown): asserts v is Project {
     if(t.suggestions !== null) { list(t.suggestions,8); for(const s of t.suggestions) {obj(s,['text','why']);text(s.text,2000,true);text(s.why,2000,true);} }
     list(t.handoffs); for(const h of t.handoffs) {
       obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText','returnId','background','anchor']); date(h.at);background(h.background,v.revision as number);
-      if(h.anchor!==null){ensure(h.returnId!==null);obj(h.anchor,['version','areaId','understanding','stamp']);ensure(h.anchor.version==='anchor.1');ensure(areaIds.has(h.anchor.areaId as string));integer(h.anchor.understanding);planStamp(h.anchor.stamp);} ensure(['clipboard','download'].includes(h.method as string));
+      if(h.anchor!==null){ensure(h.returnId!==null);obj(h.anchor,['version','areaId','understanding','stamp']);ensure(h.anchor.version==='anchor.1'||h.anchor.version==='anchor.2');ensure(areaIds.has(h.anchor.areaId as string));integer(h.anchor.understanding);planStamp(h.anchor.stamp);
+        ensure((h.anchor.version==='anchor.2')===Object.hasOwn(h.anchor.stamp as object,'version'));} ensure(['clipboard','download'].includes(h.method as string));
       integer(h.revision); ensure((h.revision as number) <= (v.revision as number)); integer(h.chars); ensure(typeof h.digest === 'string' && /^[0-9a-f]{8}$/.test(h.digest)); ensure(typeof h.aiExcluded === 'boolean');
       if(h.work !== null) { obj(h.work,['understanding','scope','next','checks']); for(const k of Object.keys(h.work)) text(h.work[k],6000,true); }
       if(h.legacyText !== null) text(h.legacyText,250000);
@@ -282,7 +284,7 @@ function assertProject(v: unknown): asserts v is Project {
 }
 /** FLOW090 plan data: the user's purpose text, areas and typed relations. Returns the area IDs. */
 function space(v: unknown): Set<string> {
-  obj(v,['brief','areas','relations','draftTarget','layout','understanding']);
+  obj(v,['brief','areas','relations','draftTarget','layout','understanding','containment']);
   if(v.brief!==null) {
     obj(v.brief,['text','at','previous']);text(v.brief.text,TEXT_LIMIT);date(v.brief.at);list(v.brief.previous,200);
     for(const old of v.brief.previous){obj(old,['text','at']);text(old.text,TEXT_LIMIT);date(old.at);}
@@ -290,6 +292,7 @@ function space(v: unknown): Set<string> {
   list(v.areas,500);list(v.relations,2000);
   for(const a of v.areas){obj(a,['id','name','note','archived','createdAt']);id(a.id);text(a.name,60);text(a.note,2000,true);ensure(typeof a.archived==='boolean');date(a.createdAt);}
   unique(v.areas as {id:string}[]);const ids=new Set((v.areas as {id:string}[]).map(a=>a.id));
+  containment(v.containment,v.areas as Area[]);
   for(const r of v.relations) {
     obj(r,['id','from','to','kind','note']);id(r.id);ensure(ids.has(r.from as string)&&ids.has(r.to as string)&&r.from!==r.to);
     ensure(['flow','needs','shares','related'].includes(r.kind as string));text(r.note,200,true);
@@ -307,11 +310,23 @@ function space(v: unknown): Set<string> {
 }
 export const POSITION_LIMIT=200000;
 function planStamp(v:unknown) {
-  obj(v,['name','note','brief','decisions','work']);text(v.name,60);text(v.note,2000,true);integer(v.brief);list(v.decisions,ITEM_LIMIT);list(v.work,ITEM_LIMIT);
+  const two=!!v&&typeof v==='object'&&Object.hasOwn(v,'version');
+  obj(v,['name','note','brief','decisions','work',...(two?['version','revision','ancestors']:[])]);text(v.name,60);text(v.note,2000,true);integer(v.brief);list(v.decisions,ITEM_LIMIT);list(v.work,ITEM_LIMIT);
+  if(two){ensure(v.version==='plan.2');integer(v.revision);list(v.ancestors,500);const seen=new Set<string>();for(const a of v.ancestors){obj(a,['id','name','note','revision']);id(a.id);text(a.name,60);text(a.note,2000,true);integer(a.revision);ensure(!seen.has(a.id as string));seen.add(a.id as string);}}
   // One fixed-length entry per task with user-written work values or a purpose correction: '<task id>:<sha256>'. Never the
   // values themselves, so an allowed text (any quotes or backslashes, up to its own limit) cannot make the stamp invalid.
   for(const w of v.work)ensure(typeof w==='string'&&/^[A-Za-z0-9_-]{1,100}:[0-9a-f]{64}$/.test(w));ensure(new Set(v.work).size===v.work.length);
   for(const d of v.decisions)ensure(typeof d==='string'&&/^D[1-9]\d*@\d+$/.test(d));ensure(new Set(v.decisions).size===v.decisions.length);
+}
+/** One parent, explicit stable ids, ordered acyclic forest; inactive historical links remain readable. */
+function containment(v:unknown,areas:Area[]) {
+  obj(v,['version','parents','revisions']);ensure(v.version==='containment.1');
+  ensure(!!v.parents&&typeof v.parents==='object'&&!Array.isArray(v.parents));ensure(!!v.revisions&&typeof v.revisions==='object'&&!Array.isArray(v.revisions));
+  const byId=new Map(areas.map(a=>[a.id,a])),parents=v.parents as Record<string,unknown>,revisions=v.revisions as Record<string,unknown>;
+  ensure(Object.keys(revisions).length===areas.length);
+  for(const a of areas){ensure(Object.hasOwn(revisions,a.id));integer(revisions[a.id]);}
+  for(const [child,parent] of Object.entries(parents)){ensure(byId.has(child)&&typeof parent==='string'&&byId.has(parent)&&child!==parent);if(!byId.get(child)!.archived)ensure(!byId.get(parent as string)!.archived);}
+  for(const a of areas){const seen=new Set<string>();let id:string|undefined=a.id;while(id){ensure(!seen.has(id));seen.add(id);id=parents[id] as string|undefined;}}
 }
 const HELD=['no-anchor','area-moved','area-mismatch','area-archived','file-basis','superseded','plan-changed'];
 /** AREA17 shape: per area, a revision counter and its entries in arrival order. Exactly one entry holds each applied revision
@@ -336,9 +351,13 @@ function areaUnderstanding(v:unknown,ids:Set<string>) {
 function understandingRefs(space:Record<string,unknown>,tasks:Task[],sources:Map<string,Source>) {
   const byId=new Map(tasks.map(t=>[t.id,t])),seen=new Set<string>();
   const states=space.understanding as Project['space']['understanding'];
+  const context=space.containment as Project['space']['containment'];
+  const checkStamp=(stamp:PlanStamp|null,areaId:string)=>{if(!stamp||!('version' in stamp))return;ensure(stamp.revision<=context.revisions[areaId]!);for(const a of stamp.ancestors)ensure(a.id!==areaId&&Object.hasOwn(context.revisions,a.id)&&a.revision<=context.revisions[a.id]!);};
+  for(const t of tasks)for(const h of t.handoffs)if(h.anchor)checkStamp(h.anchor.stamp,h.anchor.areaId);
   for(const t of tasks)for(const h of t.handoffs)if(h.anchor)ensure(h.anchor.understanding<=(states[h.anchor.areaId]?.revision??0));
   for(const [areaId,state] of Object.entries(states)) {
     for(const e of state.entries) {
+      checkStamp(e.stamp,areaId);
       if(e.by!=='external')continue;
       const t=byId.get(e.taskId!);ensure(t&&t.resultFile&&!seen.has(t.id)&&['report','evidence'].includes(sources.get(t.sourceIds[0]!)?.kind??''));seen.add(t.id);
       const f=parseResultFile(t.resultFile.rawText);ensure(f.returnId===e.returnId&&!!f.understanding);
@@ -438,7 +457,19 @@ function migrateV5(v:unknown):unknown {
     ensure(t!==null&&typeof t==='object'&&!Array.isArray(t));const task=t as Record<string,unknown>;list(task.handoffs);
     return {...task,handoffs:task.handoffs.map(h=>{ensure(h!==null&&typeof h==='object'&&!Array.isArray(h)&&!Object.hasOwn(h,'anchor'));return {...h as object,anchor:null};})};
   });
-  return {...p,schemaVersion:SCHEMA,tasks,space:{...p.space as object,understanding:{}}};
+  return migrateV6({...p,schemaVersion:V6_SCHEMA,tasks,space:{...p.space as object,understanding:{}}});
+}
+/** A flat v6 project has no inclusion context. Old anchors/stamps remain byte-shaped as recorded, never upgraded. */
+function migrateV6(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown;space?:unknown;tasks?:unknown};ensure(p&&p.schemaVersion===V6_SCHEMA);list(p.tasks);
+  ensure(!!p.space&&typeof p.space==='object'&&!Array.isArray(p.space)&&!Object.hasOwn(p.space,'containment'));
+  const space=p.space as Record<string,unknown>;list(space.areas,500);
+  // v6 never carried the new context format: migration must not repair a mislabeled v7 document.
+  for(const t of p.tasks){ensure(!!t&&typeof t==='object'&&!Array.isArray(t));const task=t as Record<string,unknown>;list(task.handoffs);for(const h of task.handoffs){ensure(!!h&&typeof h==='object'&&!Array.isArray(h));const a=(h as Record<string,unknown>).anchor;if(a!==null){obj(a,['version','areaId','understanding','stamp']);ensure(a.version==='anchor.1');planStamp(a.stamp);ensure(!Object.hasOwn(a.stamp as object,'version'));}}}
+  ensure(!!space.understanding&&typeof space.understanding==='object'&&!Array.isArray(space.understanding));
+  for(const state of Object.values(space.understanding as Record<string,unknown>)){obj(state,['revision','entries']);list(state.entries);for(const entry of state.entries){ensure(!!entry&&typeof entry==='object'&&!Array.isArray(entry));const stamp=(entry as Record<string,unknown>).stamp;if(stamp!==null){planStamp(stamp);ensure(!Object.hasOwn(stamp as object,'version'));}}}
+  const revisions=Object.fromEntries((space.areas as {id:unknown}[]).map(a=>{id(a.id);return [a.id,0];}));
+  return {...p,schemaVersion:SCHEMA,space:{...space,containment:{version:'containment.1',parents:{},revisions}}};
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -460,7 +491,7 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : v;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : schema===V6_SCHEMA ? migrateV6(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 

@@ -1,5 +1,6 @@
 import type { Project, Task } from './types.js';
-import { areaOf, isReturnTask, taskStatus } from './domain.js';
+import { areaOf, isReturnTask, taskStatus, areaDescription, questionAnswered, questionApplicability, type DescriptionView } from './domain.js';
+import { descendantAreas } from './hierarchy.js';
 /* SPATIAL102: the project's "확인할 일" — a read-only list computed from existing records, never stored.
  * Only two states with evidence in the record are counted; no completion rate, no guess about external tools. */
 export type CheckItem = {
@@ -54,4 +55,27 @@ export function checkItems(p: Project): CheckItem[] {
       out.push({kind: 'decision', taskId: t.id, returnId: null, areaId: areaOf(p, t), status});
   }
   return out;
+}
+export interface AreaSignals {
+  areaId:string;
+  /** Recorded questions, not automatically a new obligation. answered distinguishes a recorded reply. */
+  questions:(CheckItem & {answered:boolean;applicability:ReturnType<typeof questionApplicability>})[];
+  reports:CheckItem[];
+  description:{current:DescriptionView|null;held:DescriptionView[]};
+}
+/** Self and active descendants, each question owned once by its real area/task. Relations do not duplicate signals. */
+export function subtreeSignals(p:Project,id:string):AreaSignals[] {
+  const root=p.space.areas.find(a=>a.id===id);if(!root)return [];
+  const items=checkItems(p),seen=new Set<string>();
+  return [root,...descendantAreas(p,id)].filter(a=>!a.archived).map(a=>{
+    const own=items.filter(it=>it.areaId===a.id),questions:AreaSignals['questions']=[];
+    // taskStatus is a work-view label: export/arrival can take precedence over a question there. A recorded question
+    // keeps its own applicability and owner here even after exporting. This read-only projection creates no new task.
+    for(const task of p.tasks){if(isReturnTask(p,task)||!task.advice?.question||areaOf(p,task)!==a.id||taskStatus(p,task)==='시험 문맥 · 실제 요구 아님')continue;
+      const key=`${a.id}:${task.id}`;if(seen.has(key))continue;seen.add(key);
+      const applicability=questionApplicability(p,task),answered=questionAnswered(p,task),status=answered?'답변 기록 있음':applicability==='active'?(task.advice.question.kind==='fact'?'사실 확인 항목 있음':'제품 선택 항목 있음'):'이전 질문 · 참고 기록';
+      questions.push({kind:'decision',taskId:task.id,returnId:null,areaId:a.id,status,answered,applicability});
+    }
+    const d=areaDescription(p,a.id);return {areaId:a.id,questions,reports:own.filter(it=>it.kind==='report'),description:{current:d.current,held:d.held}};
+  });
 }
