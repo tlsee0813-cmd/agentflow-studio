@@ -10,6 +10,8 @@
 
 정적 검토에서 기존records→보고→소유부분찾기의 출발점 소실, 복귀h1 초점, 중복수신 저장실패 상태를 보완했다. v0는 located만 있던 출발점을 origin에도 복제해 복귀 버튼/안내가 남는 P2로 보류했고 v1은 실제 두 슬롯을 분리해 좁은 재검토를 통과했다. [작성 원문·명령별 종료·v0/v1 정적 기록](https://github.com/tlsee0813-cmd/agentflow-studio/tree/624c27e3a9707503fceb2ca63079c8e38cf96c67/docs/transfer/received-result-20). 초기CF38의 전체 원문 미회수는 명시했고 v0/v1 전체는 공유했다. 브라우저 통과를 뜻하지 않는다.
 
+수정후보 [df726e58](https://github.com/tlsee0813-cmd/agentflow-studio/commit/df726e5898f24e23d69e47651d3bf6cbea302412)를 동결했다. 제품3431CB은 no-file의 허위 과거 작업문 제목을 없애고 기존 연결경로에 사본 부재를 표시한다. [원문·정적 검토](https://github.com/tlsee0813-cmd/agentflow-studio/tree/4c7324ae10d616aa22009b2b39d35c6a818eec73/docs/transfer/received-result-20/author-v2). 검사 F489370/7F5B7AC는 최초 화면 기하를 보존하고 필요한 스크롤·새C의 입력부 명시열기를 적용했으며 기존 SPATIAL102/REPORT16 보호는 유지했다. [검사 수정과 판정](https://github.com/tlsee0813-cmd/agentflow-studio/tree/6dad7cd92039ecbfb4ff6cf0578dcf70007f74f2/docs/transfer/received-result-20/author-tests-fix1). root원격5파일대조true. [수정후 양OS CI39805110367](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39805110367) 및 Cloud exact 재검증 진행 중이다. 최초1280에서 다음행동이 fold밖에 걸리는 공간부담을 해결했다고 표현하지 않는다.
+
 ## 마지막 완료 — PC 지도와 기록 읽기19
 [결과·한계·공유 화면](2026-10-22-workspace-records-19/RESULT.md) · [PR10](https://github.com/tlsee0813-cmd/agentflow-studio/pull/10). 최종 acfafd2dd6426e3fa6fa5443bd2e67d8461608c9, checkpoint 병합41b6854e877d8cc4054dcf6af47b597602b7cf11. 지도 상단과 기록 패널의 공간 점유를 줄이고 정확한 기록→부분→요청/인계→복귀를 제한 통합했다.
 
