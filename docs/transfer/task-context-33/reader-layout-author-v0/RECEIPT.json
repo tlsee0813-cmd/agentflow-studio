@@ -1,0 +1,46 @@
+{
+  "status": "STATIC_ONLY_UI_NOT_RUN",
+  "base": "0e11efb932f0826f40cd5d36983f33044a895157",
+  "source": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 280577,
+      "sha256": "a104d3dc3210f841ac4275e8095b5a597a4d41e0d29809da338f672637bf6a09",
+      "gitBlob": "42233d475b379b3fae36f4cae4a0b771eeae876f",
+      "before": {
+        "bytes": 280692,
+        "sha256": "83979bd309a84905a9afae2ead112aef734946bf024b837ea3c4ca8a84449dd5",
+        "gitBlob": "339b2ea349565a5d6e75422df1c4a4a7027abfcc"
+      }
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74857,
+      "sha256": "8e4c3847129348deffadbdd7e317a8af76f603b8b2b7020241508a25f8ff1084",
+      "gitBlob": "7fcd448412be495581f5aad73a426efe0a65f64d",
+      "before": {
+        "bytes": 74513,
+        "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+        "gitBlob": "3574c4d4e9baa295b101208a46e03e469b8afd30"
+      }
+    }
+  ],
+  "checks": {
+    "type": 0,
+    "build": 0,
+    "ast": 0,
+    "patchApply": 0,
+    "patchWhitespace": 0
+  },
+  "runtime": "Node24 author auxiliary; not Node22 CI",
+  "unchangedTests": [
+    "pc12_browser.py (guard test12 included)",
+    "report16_browser.py (original assertions)"
+  ],
+  "limitations": [
+    "Actual compact header geometry not run",
+    "Existing REPORT16 first-screen requirements remain",
+    "Cloud673 async/geometry failures preserved separately"
+  ],
+  "remoteWrites": false
+}

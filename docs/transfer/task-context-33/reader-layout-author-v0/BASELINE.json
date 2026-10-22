@@ -1,0 +1,132 @@
+{
+  "commit": "0e11efb932f0826f40cd5d36983f33044a895157",
+  "files": [
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "gitBlob": "bfa5b1d2172f682e7d5c167ce2df2fd52eea7a8d"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+      "gitBlob": "3574c4d4e9baa295b101208a46e03e469b8afd30"
+    },
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 280692,
+      "sha256": "83979bd309a84905a9afae2ead112aef734946bf024b837ea3c4ca8a84449dd5",
+      "gitBlob": "339b2ea349565a5d6e75422df1c4a4a7027abfcc"
+    },
+    {
+      "path": "app/continuity/src/client/presentation.ts",
+      "bytes": 8406,
+      "sha256": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639",
+      "gitBlob": "a11e4e52c876ccde322ccba6faf3696ded09f8b6"
+    },
+    {
+      "path": "app/continuity/src/client/runtime-static.ts",
+      "bytes": 2198,
+      "sha256": "7164e02c145857a23fd40416a936b007649009ebc25615f361256c98178fe589",
+      "gitBlob": "f228722f6c8f5574f51b926eaff1844839e5a7ae"
+    },
+    {
+      "path": "app/continuity/src/client/runtime.ts",
+      "bytes": 2934,
+      "sha256": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd",
+      "gitBlob": "01838cc0856f0d46c60cd06e9bb87169802c01b1"
+    },
+    {
+      "path": "app/continuity/src/shared/attention.ts",
+      "bytes": 6051,
+      "sha256": "affaa930475942a73535ee4c995931ae5853ef308423175cfbd3835489ff770d",
+      "gitBlob": "fffa5cafc552cbd765794d9ce654d1d1d0d2024a"
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 75793,
+      "sha256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf",
+      "gitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e"
+    },
+    {
+      "path": "app/continuity/src/shared/guidance.ts",
+      "bytes": 6903,
+      "sha256": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18",
+      "gitBlob": "5003772cb09c6110881014443ddfeb73cfd02b4f"
+    },
+    {
+      "path": "app/continuity/src/shared/hierarchy.ts",
+      "bytes": 2591,
+      "sha256": "c9e5a4d9679e6720bc5cd3b86e624904d17a5a7d22b8806d574640ddad605ffa",
+      "gitBlob": "3548ad1f1b6ab44742daad2ca0f5ea4a0354d6cd"
+    },
+    {
+      "path": "app/continuity/src/shared/mock.ts",
+      "bytes": 17369,
+      "sha256": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+      "gitBlob": "fede7bb924608c1a73eb5c97db63001b0ff12906"
+    },
+    {
+      "path": "app/continuity/src/shared/outcome.ts",
+      "bytes": 4625,
+      "sha256": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+      "gitBlob": "4d64d4ad7213b7aaff2adc9dfd9859835a961574"
+    },
+    {
+      "path": "app/continuity/src/shared/plan-facts.ts",
+      "bytes": 4322,
+      "sha256": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+      "gitBlob": "6766c24cae83a8b68417c06e61c3df95fb373f18"
+    },
+    {
+      "path": "app/continuity/src/shared/storage.ts",
+      "bytes": 11615,
+      "sha256": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5",
+      "gitBlob": "f4b2607e70ad762e924539a34dd36f684003bca8"
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 16360,
+      "sha256": "16202db1c238e917c548950543686046977c21c61de56b30d6f4140aad607d47",
+      "gitBlob": "8ca513f5be7749d4962eaf80582f6c8273f0aad9"
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "bytes": 46546,
+      "sha256": "cc958cf61b54aa9d552aab07ddaa8c7e6d60ec5e61f7218cf597dd608e9b94df",
+      "gitBlob": "1d784d254588c268fca4a4780b095ec78be7f3fc"
+    },
+    {
+      "path": "app/continuity/tests/pc12_browser.py",
+      "bytes": 60650,
+      "sha256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580",
+      "gitBlob": "7c7599571ca47bef4bc7249590ecac97beb0a89e"
+    },
+    {
+      "path": "app/continuity/tests/report16_browser.py",
+      "bytes": 41205,
+      "sha256": "c224110c97af99676d2fba5e61d07626f66f552a52223c1b1cc385bb24d74276",
+      "gitBlob": "490b8aa801bb371eba29a8291b7233def23a2e0f"
+    },
+    {
+      "path": "app/continuity/tsconfig.json",
+      "bytes": 134,
+      "sha256": "1f5fe5a159c7d25421ee783ad375583bdc1a6c063ead8d0e055e0db983e167b3",
+      "gitBlob": "493acc461202daea6aa6de9aa75a58367b7ecee9"
+    },
+    {
+      "path": "app/package.json",
+      "bytes": 559,
+      "sha256": "4016406d4f008c3bd9275df082ec17cdda667149c032ab378ad2e19da9c8a0d3",
+      "gitBlob": "f42ee82e7a541bf94a88bf02aec8e8c54834b294"
+    },
+    {
+      "path": "app/tsconfig.json",
+      "bytes": 443,
+      "sha256": "3be26a30cfda09591a2caa51efea7f5c9d189904f3ad95e7de1bbab5916fe657",
+      "gitBlob": "c1ffc989d4ef7c43a6da7ac9d61a581a03043c2f"
+    }
+  ],
+  "source": "Exact remote blobs; guard app/test bytes loaded from frozen guard payload; no changes to original folders"
+}

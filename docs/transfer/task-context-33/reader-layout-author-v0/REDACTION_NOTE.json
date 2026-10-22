@@ -1,0 +1,57 @@
+{
+  "rule": "Only absolute workspace/runtime prefixes in command metadata are replaced; source patch and original local logs unchanged.",
+  "files": [
+    {
+      "path": "type.exit.json",
+      "original": {
+        "bytes": 641,
+        "sha256": "402f92824e5f77f59830c2cccee83d6eb3648b6e8129b9a6e333fbab388611f0",
+        "gitBlob": "14e611fc3e40c25ec9850e507881ad4417d65196"
+      },
+      "public": {
+        "bytes": 413,
+        "sha256": "3c0f7d076d5d2a1b2eec70b4bcc3d8a06ffae916a3f9da68fd9725b2c7002d5e",
+        "gitBlob": "dad7e2d6ca1910994d0e57b332b8851e1fe6106c"
+      }
+    },
+    {
+      "path": "build.exit.json",
+      "original": {
+        "bytes": 624,
+        "sha256": "7a81ce87b315cbb7dcd0906dd76d5be7ac2b6212ab2ec3d72507b9181f0345a4",
+        "gitBlob": "bd369f0e711fdd446e459577909c768955b74ced"
+      },
+      "public": {
+        "bytes": 396,
+        "sha256": "8bf9f27472610e397d16b18f4b40f78f3b4410f4bf1faa0288d08d8d21b6ba1e",
+        "gitBlob": "268405f8f42d74c623628cf18c8edcfa8cf213d3"
+      }
+    },
+    {
+      "path": "diff-check.exit.json",
+      "original": {
+        "bytes": 412,
+        "sha256": "7831584132b874a4265eb0415334128f105f435aab93ecafbe161b7a400692f3",
+        "gitBlob": "13b877e647cd28036fab393f238a2e14c3c7820f"
+      },
+      "public": {
+        "bytes": 242,
+        "sha256": "3038b376847d860a8b4e05192c418b2804dbf32da53d5858b7dac0be148ef9c4",
+        "gitBlob": "c306f7d01a27819019d856157f06568952ab5943"
+      }
+    },
+    {
+      "path": "diff-whitespace.exit.json",
+      "original": {
+        "bytes": 443,
+        "sha256": "d2d18a47e5e3b516cf51219a242ba39e93596123cc9dbdf265995cdf3f3c1fe1",
+        "gitBlob": "bb5e9a4878e10a8bd87121fdc15b8b6ede159e39"
+      },
+      "public": {
+        "bytes": 273,
+        "sha256": "b4aab2fe4d7e69080269f72d14ae67841e1c58dfe809b9cabdc9b9c7ced44cdf",
+        "gitBlob": "50ca21fbb6263d912b5b538ef04112ede1076556"
+      }
+    }
+  ]
+}

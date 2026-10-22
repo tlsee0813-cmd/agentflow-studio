@@ -1,0 +1,10 @@
+{
+  "command": [
+    "git",
+    "apply",
+    "--check",
+    "<workspace>\\work\\product33-reader-layout-fix\\evidence\\candidate.patch"
+  ],
+  "cwd": "<workspace>\\work\\product33-reader-layout-fix\\evidence\\before",
+  "exit": 0
+}

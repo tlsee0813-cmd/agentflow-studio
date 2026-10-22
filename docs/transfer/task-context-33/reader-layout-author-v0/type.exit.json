@@ -1,0 +1,13 @@
+{
+  "command": [
+    "<runtime>\\dependencies\\node\\bin\\node.exe",
+    "<workspace>\\work\\product17-author\\app\\node_modules\\typescript\\bin\\tsc",
+    "--noEmit",
+    "-p",
+    "app/continuity/tsconfig.json"
+  ],
+  "cwd": "<workspace>\\work\\product33-reader-layout-fix",
+  "exit": 0,
+  "at": "2026-10-22T23:19:11.227521+00:00",
+  "runtime": "Node24 author auxiliary; no UI/server execution"
+}
