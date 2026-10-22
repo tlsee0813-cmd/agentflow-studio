@@ -1,0 +1,24 @@
+{
+  "scope": "tool completion metadata transcribed, not full tool transcript",
+  "initialNonTTY": {
+    "chunk": "9cd2e2",
+    "outerExit": 0,
+    "UI": "NOT_RUN stdinEOF"
+  },
+  "main": {
+    "session": 5485,
+    "outerExit": 0,
+    "childActual": "process.json 0",
+    "serverActual": "runtime.json -15"
+  },
+  "firstPostdecisionAnalysis": {
+    "chunk": "53e415",
+    "exit": 1,
+    "reason": "KeyError resultFile.taskId"
+  },
+  "correctedPostdecisionAnalysis": {
+    "chunk": "ac5025",
+    "exit": 0
+  },
+  "stdoutError": "actions.jsonl seq100, screenshot/DOM snapshot saved before print exception; no product repair"
+}

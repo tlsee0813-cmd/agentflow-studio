@@ -1,0 +1,562 @@
+[
+  {
+    "file": "001-1280-start-visible.json",
+    "bytes": 19213,
+    "sha256": "9f795b63dbae7b3a703e00ff9fa05cbb5166b0649ce089edc328ce586598d9f3",
+    "canonical": "actions.jsonl.gz screen seq 1",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "002-1280-project-list-visible.json",
+    "bytes": 10327,
+    "sha256": "d7aee98aa662c7d90b08bd76d02675fcccb8bc361a6452fedf43c3ad31cd6ef1",
+    "canonical": "actions.jsonl.gz screen seq 2",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "003-1280-T0-import-visible.json",
+    "bytes": 10324,
+    "sha256": "970634ac6fafc0fd0675a69dfb9678e1bea852da996f57c5bd19a1bb36ee8114",
+    "canonical": "actions.jsonl.gz screen seq 3",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "004-1280-T0-loaded-visible.json",
+    "bytes": 74938,
+    "sha256": "690327f578bbbc4a33e6790c3e5d010e68bc42a398832b45e6659d15024e2637",
+    "canonical": "actions.jsonl.gz screen seq 4",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "005-1280-T0-card-visible.json",
+    "bytes": 15518,
+    "sha256": "907c569f64c58a83efc40b9df00feb38862d60acc57c0583cdc4cfac8b3821a0",
+    "canonical": "actions.jsonl.gz screen seq 5",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "006-1280-T0-reentry-map-visible.json",
+    "bytes": 75563,
+    "sha256": "140625241fb467eeb8d362affac445cb1a681b27b52e76b9679791d6afbbbb26",
+    "canonical": "actions.jsonl.gz screen seq 6",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "009-1280-before-T2-import-visible.json",
+    "bytes": 15518,
+    "sha256": "907c569f64c58a83efc40b9df00feb38862d60acc57c0583cdc4cfac8b3821a0",
+    "canonical": "actions.jsonl.gz screen seq 9",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "010-1280-T2-import-pending-visible.json",
+    "bytes": 15529,
+    "sha256": "37b30212cc0064ba811099d38d93eb93d122357073ed68a578ff59539c766898",
+    "canonical": "actions.jsonl.gz screen seq 10",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "011-1280-T2-first-map-visible.json",
+    "bytes": 75319,
+    "sha256": "f3ddf53a73118d58920a9751844f85cc6450068bf1475a81fd2314534dd73bea",
+    "canonical": "actions.jsonl.gz screen seq 11",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "012-1280-T2-cards-visible.json",
+    "bytes": 21034,
+    "sha256": "eb1698f9ab40f313459925d9b84e523e7dd43987a64d6d259aadc8c6dc3623db",
+    "canonical": "actions.jsonl.gz screen seq 12",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "013-1280-T2-card-reentry-visible.json",
+    "bytes": 75617,
+    "sha256": "308d34867b474ee886932a98ab9b5dc3ae2c5a1f6d87c1002a92e77a665a87ee",
+    "canonical": "actions.jsonl.gz screen seq 13",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "016-1280-T2-first-detail-visible.json",
+    "bytes": 70787,
+    "sha256": "ec501e54010f0d54de2b3d9015d797e2a55c1338c7f81457401e247163c519e3",
+    "canonical": "actions.jsonl.gz screen seq 16",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "017-1280-T2-records-lower-visible.json",
+    "bytes": 72056,
+    "sha256": "bfe18bb62a567b6fb225419b62e74bba6ff13b17bc6d5f0cfa5e1d535d026f73",
+    "canonical": "actions.jsonl.gz screen seq 17",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "019-1280-error-owner-locate-visible.json",
+    "bytes": 73824,
+    "sha256": "a869dedd1b956eabb9d73a0a8644b1923e966efa6813a04070ab14d52dfae21e",
+    "canonical": "actions.jsonl.gz screen seq 19",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "022-1280-error-records-open-visible.json",
+    "bytes": 74117,
+    "sha256": "8f1cdf35c345721e28e2f3f5d808e47d54444a2b7a83169a61fa9423f24a4869",
+    "canonical": "actions.jsonl.gz screen seq 22",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "023-1280-error-records-read-visible.json",
+    "bytes": 79551,
+    "sha256": "ebf1b2600889f0856ee3414f9a338d36c14f36b21746401312ce416146d1e5bf",
+    "canonical": "actions.jsonl.gz screen seq 23",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "024-1280-error-task-read-visible.json",
+    "bytes": 40343,
+    "sha256": "a4415ca7fa2620d2db616bebcfaa9704e321268d90aa5c9e1b508dbcf93d4030",
+    "canonical": "actions.jsonl.gz screen seq 24",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "025-1280-error-task-lower-actions-visible.json",
+    "bytes": 43020,
+    "sha256": "5d091bfa7a0d6e366470fb9812ba9e6765303039e573b83079d0d3347ac2ac48",
+    "canonical": "actions.jsonl.gz screen seq 25",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "027-1280-explicit-error-continue-visible.json",
+    "bytes": 23074,
+    "sha256": "4960665c93cdda87e6690416c7a8348605e293fa628178d547415b71679c3456",
+    "canonical": "actions.jsonl.gz screen seq 27",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "028-1280-work-question-actions-visible.json",
+    "bytes": 19912,
+    "sha256": "68fa6ba5cead5e5b9c9b4e8249a0e51be09c2801b6c194d4b6cc81275948cb9e",
+    "canonical": "actions.jsonl.gz screen seq 28",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "029-1280-work-lower-search-visible.json",
+    "bytes": 36166,
+    "sha256": "c2db74d4a60d3881b83d494962f5df94bb868da671584eff5f96742c09a9d49b",
+    "canonical": "actions.jsonl.gz screen seq 29",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "030-1280-work-question-found-visible.json",
+    "bytes": 28670,
+    "sha256": "d862b65d47ec3412d4a87c84de07c58f351f4045747770e6aacc3de7501074f0",
+    "canonical": "actions.jsonl.gz screen seq 30",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "031-1280-work-edit-entry-visible.json",
+    "bytes": 30808,
+    "sha256": "ad22f5c0e26697dbad2eeaa8a614d5ee47ff4e8f0527d0b237e27e9d6fed14be",
+    "canonical": "actions.jsonl.gz screen seq 31",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "032-1280-manual-open-visible.json",
+    "bytes": 22927,
+    "sha256": "d1dd76d0edc64622abf95826f1362e2cb5d81aaa798edc7e84ef530bec70f0a7",
+    "canonical": "actions.jsonl.gz screen seq 32",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "033-1280-manual-next-visible-visible.json",
+    "bytes": 19838,
+    "sha256": "a108df14852f7385ea982ba7459dc7a44903453ca836d6ef2fefdfd58ddf6ec9",
+    "canonical": "actions.jsonl.gz screen seq 33",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "034-1280-manual-next-explicit-edit-visible.json",
+    "bytes": 19687,
+    "sha256": "545c95e59d0782dac916a1d988667e0f02e2fba913231b5e3bc5d7bfa780143d",
+    "canonical": "actions.jsonl.gz screen seq 34",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "036-1280-work-top-for-handoff-visible.json",
+    "bytes": 19687,
+    "sha256": "545c95e59d0782dac916a1d988667e0f02e2fba913231b5e3bc5d7bfa780143d",
+    "canonical": "actions.jsonl.gz screen seq 36",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "038-1280-work-top-native-recovery-visible.json",
+    "bytes": 38073,
+    "sha256": "c364394febb7a6b6bad338a33fd4012d1eba89c13df0905e53a7dc08ff78b867",
+    "canonical": "actions.jsonl.gz screen seq 38",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "039-1280-file-mode-open-visible.json",
+    "bytes": 35688,
+    "sha256": "91e33e1bb911b179d1f1d50c6f58b65ce0929313d8f7fe26879f26259c73581b",
+    "canonical": "actions.jsonl.gz screen seq 39",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "040-1280-actual-file-H-copy-visible.json",
+    "bytes": 35702,
+    "sha256": "abfa31fe8bffcf4bf55968932079db27edc473263d19ab09d13ad95f01db9093",
+    "canonical": "actions.jsonl.gz screen seq 40",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "044-1280-find-result-import-visible.json",
+    "bytes": 25544,
+    "sha256": "6455bcbc5ee1048a6eacafa01ab10e66d9fa098f39dc7652929ada2b34b06b5d",
+    "canonical": "actions.jsonl.gz screen seq 44",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "045-1280-result-import-reached-visible.json",
+    "bytes": 40165,
+    "sha256": "13cac79baea7f37f94934dc1d82dc0885a1ab5d223bd682a5bcc674158dab517",
+    "canonical": "actions.jsonl.gz screen seq 45",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "046-1280-synthetic-return-input-visible.json",
+    "bytes": 40167,
+    "sha256": "91e8f6e304aac4a68bcd4a8c3654aa408205b526c1312e33428f4191f58f1562",
+    "canonical": "actions.jsonl.gz screen seq 46",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "047-1280-receipt-after-input-visible.json",
+    "bytes": 36369,
+    "sha256": "eca66c1a8d07943a2af4d648317e53818d17f1e40e19cfa9bb08183c85aa66b7",
+    "canonical": "actions.jsonl.gz screen seq 47",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "049-1280-result-file-review-visible.json",
+    "bytes": 24340,
+    "sha256": "b59937c6c7aff3646e61732eb3865487f52a24c0e8d3f5afc01e7b65bab7f6c4",
+    "canonical": "actions.jsonl.gz screen seq 49",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "051-1280-return-explicit-accept-visible.json",
+    "bytes": 23474,
+    "sha256": "198a146cde5fb6d5403ddf63d1995008eddc61196d3df6574e873f7bfea75635",
+    "canonical": "actions.jsonl.gz screen seq 51",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "052-1280-return-receipt-top-visible.json",
+    "bytes": 36566,
+    "sha256": "7fdbc1d92bee2752ef26bac4159c383b520c1a8c5c1ecd6bb560472de4013a2d",
+    "canonical": "actions.jsonl.gz screen seq 52",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "054-1280-final-map-return-visible.json",
+    "bytes": 88941,
+    "sha256": "182b89ad31baa85059fe8b25add0ffe1899815e4f9647f3bebf4d5d6978df968",
+    "canonical": "actions.jsonl.gz screen seq 54",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "057-1440-new-context-learned-repeat-visible.json",
+    "bytes": 22178,
+    "sha256": "df3eb82984617cc53b0bd40c1152db8d7c40316b3edcd20f0ddd8197254a5b5b",
+    "canonical": "actions.jsonl.gz screen seq 57",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "058-1440-project-list-visible.json",
+    "bytes": 10331,
+    "sha256": "9c2da27dd23ecf7c2270478bc4fe6b1ee83b751e181044d83d7357dc43a3840f",
+    "canonical": "actions.jsonl.gz screen seq 58",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "059-1440-T0-import-pending-visible.json",
+    "bytes": 10328,
+    "sha256": "eb10d6d07f4b9e208abedc9138e7bbb3017589402eeb8652b29a2df18bba5b4b",
+    "canonical": "actions.jsonl.gz screen seq 59",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "060-1440-T0-loaded-visible.json",
+    "bytes": 75301,
+    "sha256": "cfc62224292f992b8684c009bb3f5e235676696d268cc28b9784d4432c70bb66",
+    "canonical": "actions.jsonl.gz screen seq 60",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "061-1440-T0-card-visible.json",
+    "bytes": 15522,
+    "sha256": "368a391e514d1a8999b8847bcb43f7eac697324f5c7e7e2aeb3adcdcea91ce5d",
+    "canonical": "actions.jsonl.gz screen seq 61",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "062-1440-T0-reentry-visible.json",
+    "bytes": 75852,
+    "sha256": "75f2ae0dd8635406f66cafcfb37c2c8520411d29ec1f82796fb1d398b1c7f011",
+    "canonical": "actions.jsonl.gz screen seq 62",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "065-1440-before-T2-visible.json",
+    "bytes": 15522,
+    "sha256": "368a391e514d1a8999b8847bcb43f7eac697324f5c7e7e2aeb3adcdcea91ce5d",
+    "canonical": "actions.jsonl.gz screen seq 65",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "066-1440-T2-import-pending-visible.json",
+    "bytes": 15533,
+    "sha256": "93262c25b32693a781865abdb844b3e7f1455fc05df49a55d9e418da191433cd",
+    "canonical": "actions.jsonl.gz screen seq 66",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "067-1440-T2-first-map-visible.json",
+    "bytes": 76739,
+    "sha256": "7a6d8241c1b7f76ab41ca246112fefef60435ccf24c8f32c44ba2ecd05c5d274",
+    "canonical": "actions.jsonl.gz screen seq 67",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "068-1440-T2-cards-visible.json",
+    "bytes": 21029,
+    "sha256": "0d9b13a737665ec20b09f9271cb2316b2f154649912b026d64270e4bcb578f3d",
+    "canonical": "actions.jsonl.gz screen seq 68",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "069-1440-T2-reentry-visible.json",
+    "bytes": 75903,
+    "sha256": "d0cc902f6a07fbb34070dfbb786b37b4b18a3a7090fa2f8edc4cff282a69568e",
+    "canonical": "actions.jsonl.gz screen seq 69",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "072-1440-T2-first-detail-visible.json",
+    "bytes": 74658,
+    "sha256": "0b07a21a406646da6ea2a306f3cfb98f033bdc443584ad0795e5c18aa7d58ea2",
+    "canonical": "actions.jsonl.gz screen seq 72",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "073-1440-parent-lower-records-visible.json",
+    "bytes": 75986,
+    "sha256": "823e7b1e18cde300036f31a94ac017e9e240ce3a0894f6950d7b4c7147dd13c1",
+    "canonical": "actions.jsonl.gz screen seq 73",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "074-1440-error-owner-visible.json",
+    "bytes": 85107,
+    "sha256": "4479340fc843e1319c20ac5592ede67cc430d36a28b065b6b96b0655aef400c6",
+    "canonical": "actions.jsonl.gz screen seq 74",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "077-1440-error-records-visible.json",
+    "bytes": 81485,
+    "sha256": "9d95c22ad4d7d004ce0e402b91ba167e6166c276b40770eead69e964a94ea2b2",
+    "canonical": "actions.jsonl.gz screen seq 77",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "078-1440-error-question-visible-visible.json",
+    "bytes": 87464,
+    "sha256": "6423f57377c46ce358e5f8e4e47b1c2e1b7f0e9dd8c5092468f20f687f3fd5c7",
+    "canonical": "actions.jsonl.gz screen seq 78",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "079-1440-error-task-visible.json",
+    "bytes": 48356,
+    "sha256": "d4facfb99e0ef9a7476b4e9bacfc2087a226abcc2da1e0af5ab69df9a8d5bdd4",
+    "canonical": "actions.jsonl.gz screen seq 79",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "080-1440-learned-find-continue-visible.json",
+    "bytes": 49494,
+    "sha256": "beb82526f5a6037362624d5893f2cff38bae3f7de1f3f2d9995ca2985ebb6135",
+    "canonical": "actions.jsonl.gz screen seq 80",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "082-1440-explicit-error-continue-visible.json",
+    "bytes": 25927,
+    "sha256": "7f73c3f57d7ed8a3842a744d6e09fcf16e65c2ed6150a9655469658d41c6857c",
+    "canonical": "actions.jsonl.gz screen seq 82",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "083-1440-learned-work-edit-search-visible.json",
+    "bytes": 34258,
+    "sha256": "15d411a2b3f2e6182c1a9ddcdde3f9b221eeeb3c62b5ba852123cad745b787d6",
+    "canonical": "actions.jsonl.gz screen seq 83",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "084-1440-manual-open-visible.json",
+    "bytes": 24301,
+    "sha256": "1efbc778ff3b01f893f8fba9ebcbfdbc9bed35196fd68f56a3c4bf7d9fc09e1a",
+    "canonical": "actions.jsonl.gz screen seq 84",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "085-1440-next-field-visible-visible.json",
+    "bytes": 24129,
+    "sha256": "1f5004bc0188a40f17a6da789772ebe3ae9e6651560b4c677204b9c4a9ba9cf2",
+    "canonical": "actions.jsonl.gz screen seq 85",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "086-1440-manual-N-only-visible.json",
+    "bytes": 23969,
+    "sha256": "35d6118b4cb121e985037c2f6cf9e43d923c03bd7fd2aaa703551b7f49fa8185",
+    "canonical": "actions.jsonl.gz screen seq 86",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "088-1440-work-top-native-visible.json",
+    "bytes": 41270,
+    "sha256": "4005255d05282c414fc50021a055460e6bdb472dbf84c8133600d4af778ed73d",
+    "canonical": "actions.jsonl.gz screen seq 88",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "089-1440-file-mode-open-visible.json",
+    "bytes": 39616,
+    "sha256": "bfc1d208dd5ea93188a19ee1a1dbf4e8b047482c05e6875832bd67341b257308",
+    "canonical": "actions.jsonl.gz screen seq 89",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "090-1440-actual-H-copy-visible.json",
+    "bytes": 39630,
+    "sha256": "cf87212100689e53420c0f8eb4dacfbeb7e4201429cdee88cabfd2a68d14e1d8",
+    "canonical": "actions.jsonl.gz screen seq 90",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "094-1440-result-import-search-visible.json",
+    "bytes": 44957,
+    "sha256": "83f900b92f36688b0e9666f7320ba2d1e0e2f283871343ee840ecd19e11dc41b",
+    "canonical": "actions.jsonl.gz screen seq 94",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "095-1440-result-file-selected-visible.json",
+    "bytes": 44959,
+    "sha256": "619a42d2f1047cced1d138dd7fc59934018c467ebf07109de631dd1b02be0404",
+    "canonical": "actions.jsonl.gz screen seq 95",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "096-1440-result-file-confirmation-visible.json",
+    "bytes": 29553,
+    "sha256": "221684e1de2aff110e2547989d7ff43b19b3a9b356d072ede991151f18ac1e78",
+    "canonical": "actions.jsonl.gz screen seq 96",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "097-1440-return-explicit-accept-visible.json",
+    "bytes": 26735,
+    "sha256": "ec6c7f8036463f44ea435c97f6559356801cc568aefe44bde90fac7772f55948",
+    "canonical": "actions.jsonl.gz screen seq 97",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "098-1440-return-receipt-visible.json",
+    "bytes": 40092,
+    "sha256": "2d8700feb20f326df08fa8f006a1e1d2795da839ae732487195766a3fbf01571",
+    "canonical": "actions.jsonl.gz screen seq 98",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  },
+  {
+    "file": "100-1440-final-map-return-visible.json",
+    "bytes": 100503,
+    "sha256": "9c82bd1df31b0a2c0dc0d74355435e2633f2a13d8de19b3c00c994be6a4ecbcd",
+    "canonical": "actions.jsonl.gz screen seq 100",
+    "exactReconstruct": "json.dumps(visible,ensure_ascii=False,indent=2) UTF8",
+    "byteVerified": true
+  }
+]

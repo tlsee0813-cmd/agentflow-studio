@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/reentry32-observer/first-preservation-error/preservation.py", line 11, in <module>
+    before=P('T2-before-reading');decision=P('decision-before');edited=P('after-selected-edit');export=P('after-H');final=P('final');text=(R/f'{w}-actual-H-work.md').read_text();file=load(f'inputs/{w}-observer-return2.json');tid=file['taskId'];area='A_0330ba8f-3bf0-408f-90dc-2a52688e8323';bt=next(t for t in before['tasks'] if t['id']==tid);et=next(t for t in edited['tasks'] if t['id']==tid);xt=next(t for t in export['tasks'] if t['id']==tid);ft=next(t for t in final['tasks'] if t['id']==tid)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/reentry32-observer/first-preservation-error/preservation.py", line 10, in P
+    def P(label):return next(e['project'] for e in load(f'{w}-{label}-envelope.json')['entries'] if e['entryId']==entry[w])
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/reentry32-observer/first-preservation-error/preservation.py", line 5, in load
+    def load(name):return json.loads((R/name).read_text())
+                                     ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/browser-env/reentry32-observer/first-preservation-error/1280-T2-before-reading-envelope.json'

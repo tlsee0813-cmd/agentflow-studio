@@ -1,0 +1,62 @@
+{
+  "UTC": "2026-10-22T22:22:44.659942+00:00",
+  "scenes": [
+    {
+      "PC": 1280,
+      "learnedRepeat": false,
+      "recordedCommandCount": 56,
+      "commandsByOp": {
+        "click": 15,
+        "clipboard": 1,
+        "fill": 1,
+        "import": 3,
+        "key": 1,
+        "new": 1,
+        "note": 9,
+        "observe": 2,
+        "opaque": 8,
+        "role": 1,
+        "wheel": 14
+      },
+      "purposeReentryInput": 0,
+      "existingOriginalReportExplicitFullOpen": 0,
+      "newReturnedReportAccepted": true,
+      "finalMapScreen": "054-1280-final-map-return-visible.json"
+    },
+    {
+      "PC": 1440,
+      "learnedRepeat": true,
+      "recordedCommandCount": 46,
+      "commandsByOp": {
+        "click": 15,
+        "clipboard": 1,
+        "fill": 1,
+        "import": 3,
+        "new": 1,
+        "note": 6,
+        "observe": 2,
+        "opaque": 7,
+        "role": 1,
+        "wheel": 9
+      },
+      "purposeReentryInput": 0,
+      "existingOriginalReportExplicitFullOpen": 0,
+      "newReturnedReportAccepted": true,
+      "finalMapScreen": "100-1440-final-map-return-visible.json"
+    }
+  ],
+  "UIActionExceptions": [
+    {
+      "utc": "2026-10-22T22:20:02.113935+00:00",
+      "seq": 100,
+      "kind": "action-error",
+      "data": "Traceback (most recent call last):\n  File \"/workspace/browser-env/reentry32-observer/controller.py\", line 46, in <module>\n    if op not in ['note','opaque','clipboard']:print(json.dumps(observe(cmd.get('label',op)),ensure_ascii=False),flush=True)\n                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nBlockingIOError: [Errno 11] write could not complete without blocking\n"
+    }
+  ],
+  "pageerrors": [],
+  "actualControllerChildExit": 0,
+  "actualServerExit": -15,
+  "full32UIRoundComplete": true,
+  "humanOrBlindStudy": false,
+  "noOracleValidation": true
+}

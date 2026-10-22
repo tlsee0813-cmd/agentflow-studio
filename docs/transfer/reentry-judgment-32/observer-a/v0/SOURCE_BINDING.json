@@ -1,0 +1,122 @@
+{
+  "source": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+  "tree": "4be9b2c91e11e88587b84b1cc4cf4461e1433493",
+  "candidateNotFinalAccepted": true,
+  "existingBuildReused": "branch31-author-fix2/candidate/app, earlier exact72940a Node22 type/build logs referenced; no new build claimed in32",
+  "productSourceRemoteAndAfter": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 276739,
+      "sha256": "7c63a494627b1ce2da8f089573f4116b17ba04e4af4531f6e2d315ccacee2e0e",
+      "remoteByteEqual": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+      "remoteByteEqual": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "remoteByteEqual": true
+    }
+  ],
+  "HTTPBinding": "runtime.json actual Chromium response bodies and disk before/after SHA",
+  "forbiddenOracleAndInputBodiesNotRead": true,
+  "inputsHashOnlyBeforeNormalUIImport": "INPUT_BINDING.json",
+  "firstJudgments": [
+    {
+      "seq": 7,
+      "UTC": "2026-10-22T22:12:48.293072+00:00",
+      "file": "1280-T0-FIRST.md",
+      "sha256": "ceb02364c841b65c8aaac8461543ff7580b21db1251740dbd167348bce243803"
+    },
+    {
+      "seq": 14,
+      "UTC": "2026-10-22T22:13:20.375551+00:00",
+      "file": "1280-T2-FIRST.md",
+      "sha256": "5525e6b91cdf68e2cb2cebab104820f90da1f09fb3522405f05cb6cd0c806866"
+    },
+    {
+      "seq": 18,
+      "UTC": "2026-10-22T22:13:46.417156+00:00",
+      "file": "1280-T2-DETAIL-REVISION.md",
+      "sha256": "f619acca1d9bdd58d856e23c9004aa8fc3e0f561ff2bda516d24370e0419a770"
+    },
+    {
+      "seq": 20,
+      "UTC": "2026-10-22T22:14:14.581834+00:00",
+      "file": "1280-DECISION-FROZEN.md",
+      "sha256": "4f3f1975a439964845cc6513c6c2cadf7865cacddaf9b2b1609c3c19bdfe6d39"
+    },
+    {
+      "seq": 26,
+      "UTC": "2026-10-22T22:15:01.535455+00:00",
+      "file": "1280-EXPLICIT-CONTINUE.md",
+      "sha256": "5c61ddfd31791c85b0f1de27fbf081ad48d4de623b78c516ab0a8ac828596c27"
+    },
+    {
+      "seq": 37,
+      "UTC": "2026-10-22T22:16:07.870557+00:00",
+      "file": "1280-EDIT-AND-NAVIGATION.md",
+      "sha256": "edd7c86b0ea01aa43c9ddf491c9109f4f7abfdc926fd579a854a12d53df76f8b"
+    },
+    {
+      "seq": 43,
+      "UTC": "2026-10-22T22:16:46.045121+00:00",
+      "file": "1280-H-FROZEN.md",
+      "sha256": "dc8676b2b3be583b0c7345939f49dbe1c1840878441d3319fb85cb78b688940b"
+    },
+    {
+      "seq": 50,
+      "UTC": "2026-10-22T22:17:29.676873+00:00",
+      "file": "1280-RETURN-CONFIRMATION.md",
+      "sha256": "81fb398f80fe196e4da7c49f99e36d1b94fd5560c905e0f5ede2647d81c30523"
+    },
+    {
+      "seq": 56,
+      "UTC": "2026-10-22T22:17:55.874999+00:00",
+      "file": "1280-ROUND-FINAL.md",
+      "sha256": "2d4ee6b52bed0a34c9ce1c3539b0067932ba038b0e5d1680598dfc7b03e79c59"
+    },
+    {
+      "seq": 63,
+      "UTC": "2026-10-22T22:18:10.077790+00:00",
+      "file": "1440-T0-FIRST.md",
+      "sha256": "c0904563f245068766bdb8b7679aefd79a5343097c3a5564b388bcfa4069079c"
+    },
+    {
+      "seq": 70,
+      "UTC": "2026-10-22T22:18:37.537847+00:00",
+      "file": "1440-T2-FIRST.md",
+      "sha256": "cd3431a4d5929895570a51d25e583cb3b47746a798bb2fae68463c8688f2c453"
+    },
+    {
+      "seq": 75,
+      "UTC": "2026-10-22T22:18:51.774833+00:00",
+      "file": "1440-DECISION-FROZEN.md",
+      "sha256": "8991406267327d39bea08918a0d524d6bb2add79109253f6d67d1deb7afea2f6"
+    },
+    {
+      "seq": 81,
+      "UTC": "2026-10-22T22:19:03.353472+00:00",
+      "file": "1440-EXPLICIT-CONTINUE.md",
+      "sha256": "1ff68c4aad9e0245d981e78ba7806959d60500edfd53396a6e70db6bebd8e1f0"
+    },
+    {
+      "seq": 93,
+      "UTC": "2026-10-22T22:19:40.140948+00:00",
+      "file": "1440-H-FROZEN.md",
+      "sha256": "aced9f161c4c71858925cfee943e5bcad85f41c336c1a9f485196e4386a0d212"
+    },
+    {
+      "seq": 102,
+      "UTC": "2026-10-22T22:20:02.119312+00:00",
+      "file": "1440-ROUND-FINAL.md",
+      "sha256": "8dc05bfe88e83a43b414b0d35e0eb654b987ff80774f0309a4f540997d1edcb9"
+    }
+  ],
+  "renderedVisibleProbeLimit": "Raw Range collector can include descendants of closed details; no UI visibility success inferred from these alone. Screen reading judgments use PNG and truly open controls. The discovery is recorded in 1280-ROUND-FINAL.md."
+}

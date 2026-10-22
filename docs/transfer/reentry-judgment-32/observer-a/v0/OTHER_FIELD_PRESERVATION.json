@@ -1,0 +1,36 @@
+[
+  {
+    "PC": 1280,
+    "unchangedOtherProjectFields": {
+      "schemaVersion": true,
+      "id": true,
+      "name": true,
+      "bases": true,
+      "draft": true,
+      "answerDraft": true,
+      "basisDraft": true,
+      "basisEdits": true,
+      "draftKind": true,
+      "pending": true,
+      "notice": false,
+      "space": true
+    }
+  },
+  {
+    "PC": 1440,
+    "unchangedOtherProjectFields": {
+      "schemaVersion": true,
+      "id": true,
+      "name": true,
+      "bases": true,
+      "draft": true,
+      "answerDraft": true,
+      "basisDraft": true,
+      "basisEdits": true,
+      "draftKind": true,
+      "pending": true,
+      "notice": false,
+      "space": true
+    }
+  }
+]

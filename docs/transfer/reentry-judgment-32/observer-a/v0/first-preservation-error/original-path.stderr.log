@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/reentry32-observer/preservation.py", line 29, in <module>
+    received=next(t for t in final['tasks'] if t.get('resultFile') and t['resultFile']['returnId']==file['returnId']);h=next(h for h in xt['handoffs'] if h['returnId']==file['returnId']);checks.update({'newReportPointsToSelectedActualH':received['resultFile']['taskId']==tid,'newReportSourceParentExactSelected':received.get('parentTaskId')==tid if 'parentTaskId' in received else received.get('parentId')==tid,'currentRemainsReceivedTaskAfterMapReturn':final['currentTaskId']==received['id'],'newHFourValuesExactManual':h['work']==et['manual']})
+                                                                                                                                                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'taskId'

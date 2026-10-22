@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/reentry32-observer/controller.py"
+  ],
+  "startUTC": "2026-10-22T22:11:53.757101+00:00",
+  "endUTC": "2026-10-22T22:20:02.271702+00:00",
+  "actualChildExit": 0,
+  "combinedLogSHA256": "408f5ba3ca8a82438afde4d1b7da14569997587e1ffce84d12801fdbde518218"
+}

@@ -1,0 +1,124 @@
+[
+  {
+    "PC": 1280,
+    "entryId": "E_34adf2fb-1849-423e-babe-c8dd66af7f62",
+    "actualProject": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+    "actualSelectedTask": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+    "actualH": {
+      "at": "2026-10-22T22:16:14.937Z",
+      "method": "clipboard",
+      "revision": 71,
+      "chars": 6597,
+      "digest": "674a47ee",
+      "work": {
+        "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+        "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+        "next": "오류행 처리 방식은 아직 사용자가 선택하지 않았다. 중단 또는 제외 중 어느 것도 임의로 적용하지 말고, 두 선택의 차이와 사용자에게 확인할 안내 문구만 정리한다. 실제 파일 처리·구현·배포는 이번 요청 범위 밖이다.",
+        "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+      },
+      "aiExcluded": false,
+      "legacyText": null,
+      "returnId": "H_b8e2e4bd-5550-4230-b479-f9a062133ec6",
+      "background": {
+        "version": "background.1",
+        "revision": 29,
+        "brief": "[합성32] 파일 내용을 바꾸지 않고 앞부분을 미리 읽고 오류행 처리 방식을 정한 뒤 검토 결과를 파일로 내보내는 도구. 실제 구현·실행·배포 자료가 아니다.",
+        "area": {
+          "id": "A_0330ba8f-3bf0-408f-90dc-2a52688e8323",
+          "name": "오류행 처리",
+          "note": "오류행이 있을 때 사용자가 처리 방식을 정한다."
+        }
+      },
+      "anchor": {
+        "version": "anchor.2",
+        "areaId": "A_0330ba8f-3bf0-408f-90dc-2a52688e8323",
+        "understanding": 1,
+        "stamp": {
+          "name": "오류행 처리",
+          "note": "오류행이 있을 때 사용자가 처리 방식을 정한다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [
+            "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4:bb57ce30d6a3dbbb59ca5d7dae9b6af6fc5e9ccbbbe9d78bb14f4e762ad6364e"
+          ],
+          "version": "plan.2",
+          "revision": 1,
+          "ancestors": [
+            {
+              "id": "A_678cb43e-59e0-4d77-8261-337733912108",
+              "name": "읽기·검토",
+              "note": "파일의 표시와 오류행 판단을 맡는 구성 부분이다.",
+              "revision": 0
+            }
+          ]
+        }
+      }
+    },
+    "receivedTask": "T_cf45ac73-cd06-4ef1-aba0-88fbcd2c5aa4",
+    "parentTaskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+    "finalCurrentTask": "T_cf45ac73-cd06-4ef1-aba0-88fbcd2c5aa4",
+    "syntheticReturnSHA256": "129839950895530a6f9a624e5fcb0493ec9ed2838d29dfe74afb6f19e9e9d125",
+    "clipboardSHA256": "eb2028a85fb52264ddc422aa904935cecb5f36a934c724451ba95dd5fc9ffcee"
+  },
+  {
+    "PC": 1440,
+    "entryId": "E_b2041525-2883-47b1-8daf-994a0b836fce",
+    "actualProject": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+    "actualSelectedTask": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+    "actualH": {
+      "at": "2026-10-22T22:19:15.586Z",
+      "method": "clipboard",
+      "revision": 71,
+      "chars": 6597,
+      "digest": "6dd03d82",
+      "work": {
+        "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+        "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+        "next": "오류행 처리 방식은 아직 사용자가 선택하지 않았다. 중단 또는 제외 중 어느 것도 임의로 적용하지 말고, 두 선택의 차이와 사용자에게 확인할 안내 문구만 정리한다. 실제 파일 처리·구현·배포는 이번 요청 범위 밖이다.",
+        "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+      },
+      "aiExcluded": false,
+      "legacyText": null,
+      "returnId": "H_e08ca52d-8a93-4807-9755-be145294faca",
+      "background": {
+        "version": "background.1",
+        "revision": 29,
+        "brief": "[합성32] 파일 내용을 바꾸지 않고 앞부분을 미리 읽고 오류행 처리 방식을 정한 뒤 검토 결과를 파일로 내보내는 도구. 실제 구현·실행·배포 자료가 아니다.",
+        "area": {
+          "id": "A_0330ba8f-3bf0-408f-90dc-2a52688e8323",
+          "name": "오류행 처리",
+          "note": "오류행이 있을 때 사용자가 처리 방식을 정한다."
+        }
+      },
+      "anchor": {
+        "version": "anchor.2",
+        "areaId": "A_0330ba8f-3bf0-408f-90dc-2a52688e8323",
+        "understanding": 1,
+        "stamp": {
+          "name": "오류행 처리",
+          "note": "오류행이 있을 때 사용자가 처리 방식을 정한다.",
+          "brief": 1,
+          "decisions": [],
+          "work": [
+            "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4:bb57ce30d6a3dbbb59ca5d7dae9b6af6fc5e9ccbbbe9d78bb14f4e762ad6364e"
+          ],
+          "version": "plan.2",
+          "revision": 1,
+          "ancestors": [
+            {
+              "id": "A_678cb43e-59e0-4d77-8261-337733912108",
+              "name": "읽기·검토",
+              "note": "파일의 표시와 오류행 판단을 맡는 구성 부분이다.",
+              "revision": 0
+            }
+          ]
+        }
+      }
+    },
+    "receivedTask": "T_6b245ae0-2f1b-4ac3-a3c8-a83034a41c59",
+    "parentTaskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+    "finalCurrentTask": "T_6b245ae0-2f1b-4ac3-a3c8-a83034a41c59",
+    "syntheticReturnSHA256": "809be9d9bd58295310908137112914d81ca9e4abc9d48a44b6a37766e1be7902",
+    "clipboardSHA256": "6cdc07364310b1f933390c24f3d9a3f661d8c44eebbf9aaf50524b6195bf28bd"
+  }
+]

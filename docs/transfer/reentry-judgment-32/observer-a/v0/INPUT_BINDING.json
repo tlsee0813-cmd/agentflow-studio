@@ -1,0 +1,18 @@
+[
+  {
+    "file": "T0.json",
+    "sourceCommit": "24baf91fa2d519fd8cd33bb5ece28ec5b32323df",
+    "sourcePath": "docs/transfer/reentry-judgment-32/input-v0/generated-v0/observer-input/T0.json",
+    "bytes": 28977,
+    "sha256": "93bb9ad11ee21ffc2a27c8949e7465bc9a16e7beaa0b2b4275a4c4d14c009cbf",
+    "bodyReadByObserver": false
+  },
+  {
+    "file": "T2.json",
+    "sourceCommit": "24baf91fa2d519fd8cd33bb5ece28ec5b32323df",
+    "sourcePath": "docs/transfer/reentry-judgment-32/input-v0/generated-v0/observer-input/T2.json",
+    "bytes": 41069,
+    "sha256": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7",
+    "bodyReadByObserver": false
+  }
+]
