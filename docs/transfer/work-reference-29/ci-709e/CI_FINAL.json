@@ -1,0 +1,606 @@
+{
+  "pullRequest": "https://github.com/tlsee0813-cmd/agentflow-studio/pull/15",
+  "headRevision": "709e402b2e44a4864139eda03201e186f5761c6f",
+  "runId": 39843851282,
+  "finalStatusSource": "007-jobs-status.json",
+  "overall": "양 OS completed/failure: 기존 AREA17 test06 양PC first-line readable 실패",
+  "tool": "mcp__code_review__pull_requests_checks만 사용",
+  "account": "처음 계정을 지정하지 않았고 응답도 계정을 반환하지 않았다. 모든 후속 읽기에 같은 선택 생략과 정확 head를 유지했다.",
+  "rawSources": [
+    "001-discovery.json",
+    "002-jobs-in-progress.json",
+    "003-jobs-status.json",
+    "004-jobs-status.json",
+    "005-jobs-status.json",
+    "006-ubuntu-log.json",
+    "007-jobs-status.json",
+    "008-windows-log.json",
+    "009-ubuntu-annotations.json",
+    "010-windows-annotations.json"
+  ],
+  "jobs": [
+    {
+      "source": "006-ubuntu-log.json",
+      "requestedAt": "2026-10-22T20:02:17.534Z",
+      "returnedAt": "2026-10-22T20:02:20.931Z",
+      "job": {
+        "id": 120051785794,
+        "head_sha": "709e402b2e44a4864139eda03201e186f5761c6f",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      "logTruncated": true,
+      "characters": 120000,
+      "firstLine": "T19:54:52.1889105Z   type: 'test'",
+      "lastLine": "2026-10-22T20:00:17.0216264Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+      "unitSummaryLines": [
+        "2026-10-22T19:54:52.1920144Z # tests 275",
+        "2026-10-22T19:54:52.1920244Z # pass 275",
+        "2026-10-22T19:54:52.1920289Z # fail 0",
+        "2026-10-22T19:54:52.1920398Z # cancelled 0",
+        "2026-10-22T19:54:52.1920448Z # skipped 0"
+      ],
+      "browserSuites": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 14.006,
+          "ranLine": "2026-10-22T19:55:27.3624265Z Ran 18 tests in 14.006s",
+          "outcomeLine": "2026-10-22T19:55:27.3624468Z OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 24.737,
+          "ranLine": "2026-10-22T19:55:52.2218941Z Ran 13 tests in 24.737s",
+          "outcomeLine": "2026-10-22T19:55:52.2219183Z OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 10.235,
+          "ranLine": "2026-10-22T19:56:02.6925187Z Ran 11 tests in 10.235s",
+          "outcomeLine": "2026-10-22T19:56:02.6925413Z OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 4.173,
+          "ranLine": "2026-10-22T19:56:07.0204033Z Ran 3 tests in 4.173s",
+          "outcomeLine": "2026-10-22T19:56:07.0521023Z OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 3.659,
+          "ranLine": "2026-10-22T19:56:10.8186435Z Ran 3 tests in 3.659s",
+          "outcomeLine": "2026-10-22T19:56:10.8186800Z OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 5.301,
+          "ranLine": "2026-10-22T19:56:16.2546803Z Ran 5 tests in 5.301s",
+          "outcomeLine": "2026-10-22T19:56:16.2546947Z OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 7.449,
+          "ranLine": "2026-10-22T19:56:23.8322331Z Ran 6 tests in 7.449s",
+          "outcomeLine": "2026-10-22T19:56:23.8322814Z OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 4.425,
+          "ranLine": "2026-10-22T19:56:28.3955265Z Ran 4 tests in 4.425s",
+          "outcomeLine": "2026-10-22T19:56:28.3955480Z OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 20.596,
+          "ranLine": "2026-10-22T19:56:49.1418687Z Ran 12 tests in 20.596s",
+          "outcomeLine": "2026-10-22T19:56:49.1418892Z OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 21.511,
+          "ranLine": "2026-10-22T19:57:10.7954261Z Ran 18 tests in 21.511s",
+          "outcomeLine": "2026-10-22T19:57:10.7955187Z OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 10.226,
+          "ranLine": "2026-10-22T19:57:21.1500041Z Ran 8 tests in 10.226s",
+          "outcomeLine": "2026-10-22T19:57:21.1500189Z OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 13.407,
+          "ranLine": "2026-10-22T19:57:34.6882865Z Ran 11 tests in 13.407s",
+          "outcomeLine": "2026-10-22T19:57:34.6883365Z OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 6.077,
+          "ranLine": "2026-10-22T19:57:40.8946374Z Ran 11 tests in 6.077s",
+          "outcomeLine": "2026-10-22T19:57:40.8946585Z OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 15,
+          "seconds": 30.139,
+          "ranLine": "2026-10-22T19:58:11.1644897Z Ran 15 tests in 30.139s",
+          "outcomeLine": "2026-10-22T19:58:11.1645134Z OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 30.877,
+          "ranLine": "2026-10-22T19:58:42.1828978Z Ran 14 tests in 30.877s",
+          "outcomeLine": "2026-10-22T19:58:42.1829190Z OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 23.231,
+          "ranLine": "2026-10-22T19:59:05.6070194Z Ran 21 tests in 23.231s",
+          "outcomeLine": "2026-10-22T19:59:05.6070392Z OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 38.737,
+          "ranLine": "2026-10-22T19:59:44.4855937Z Ran 13 tests in 38.737s",
+          "outcomeLine": "2026-10-22T19:59:44.4858386Z OK"
+        },
+        {
+          "script": "continuity/tests/understanding17_browser.py",
+          "tests": 12,
+          "seconds": 29.777,
+          "ranLine": "2026-10-22T20:00:14.4447680Z Ran 12 tests in 29.777s",
+          "outcomeLine": "2026-10-22T20:00:14.4447906Z FAILED (failures=2)"
+        }
+      ],
+      "visibleBrowserTests": 198,
+      "visibleBrowserSuiteCount": 18,
+      "work29IndividualLines": [],
+      "work29Suite": null,
+      "work29Status": "NOT_RUN: 기존 AREA17 단계 exit1 뒤 신규29 명령/개별 결과 없음",
+      "afterArea17NotRun": [
+        "WORK29",
+        "AREA18",
+        "WORKSPACE19",
+        "RECEIVED20",
+        "BLANK21",
+        "static"
+      ],
+      "failureExcerpt": [
+        "2026-10-22T19:59:55.7679821Z test_04_long_description_reading_load (__main__.Area17.test_04_long_description_reading_load) ... ok",
+        "2026-10-22T19:59:57.4497603Z test_05_next_request_carries_valid_description (__main__.Area17.test_05_next_request_carries_valid_description) ... ok",
+        "2026-10-22T19:59:59.2727601Z test_06_locate_new_request_copy_and_return (__main__.Area17.test_06_locate_new_request_copy_and_return) ... FAIL",
+        "2026-10-22T20:00:02.9163547Z test_01_powertoys_full_flow (__main__.Area17Wide.test_01_powertoys_full_flow) ... ok",
+        "2026-10-22T20:00:06.2157699Z test_02_product13_full_flow (__main__.Area17Wide.test_02_product13_full_flow) ... ok",
+        "2026-10-22T20:00:09.5998880Z test_03_counterexamples_and_correction_draft (__main__.Area17Wide.test_03_counterexamples_and_correction_draft) ... ok",
+        "2026-10-22T20:00:10.8728017Z test_04_long_description_reading_load (__main__.Area17Wide.test_04_long_description_reading_load) ... ok",
+        "2026-10-22T20:00:12.6000851Z test_05_next_request_carries_valid_description (__main__.Area17Wide.test_05_next_request_carries_valid_description) ... ok",
+        "2026-10-22T20:00:14.4068761Z test_06_locate_new_request_copy_and_return (__main__.Area17Wide.test_06_locate_new_request_copy_and_return) ... FAIL",
+        "2026-10-22T20:00:14.4429083Z ",
+        "2026-10-22T20:00:14.4429896Z ======================================================================",
+        "2026-10-22T20:00:14.4430417Z FAIL: test_06_locate_new_request_copy_and_return (__main__.Area17.test_06_locate_new_request_copy_and_return)",
+        "2026-10-22T20:00:14.4430792Z ----------------------------------------------------------------------",
+        "2026-10-22T20:00:14.4431038Z Traceback (most recent call last):",
+        "2026-10-22T20:00:14.4431454Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 385, in <lambda>",
+        "2026-10-22T20:00:14.4431966Z     Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')",
+        "2026-10-22T20:00:14.4432302Z                                                                   ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4432749Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 362, in locate_new_request",
+        "2026-10-22T20:00:14.4433566Z     self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')",
+        "2026-10-22T20:00:14.4434150Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4434803Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 79, in readable",
+        "2026-10-22T20:00:14.4435492Z     v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v",
+        "2026-10-22T20:00:14.4435930Z                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4436580Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 75, in check_true",
+        "2026-10-22T20:00:14.4437250Z     self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)",
+        "2026-10-22T20:00:14.4437541Z                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^"
+      ],
+      "firstFailureTrace": [
+        "2026-10-22T20:00:14.4430417Z FAIL: test_06_locate_new_request_copy_and_return (__main__.Area17.test_06_locate_new_request_copy_and_return)",
+        "2026-10-22T20:00:14.4430792Z ----------------------------------------------------------------------",
+        "2026-10-22T20:00:14.4431038Z Traceback (most recent call last):",
+        "2026-10-22T20:00:14.4431454Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 385, in <lambda>",
+        "2026-10-22T20:00:14.4431966Z     Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')",
+        "2026-10-22T20:00:14.4432302Z                                                                   ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4432749Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 362, in locate_new_request",
+        "2026-10-22T20:00:14.4433566Z     self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')",
+        "2026-10-22T20:00:14.4434150Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4434803Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 79, in readable",
+        "2026-10-22T20:00:14.4435492Z     v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v",
+        "2026-10-22T20:00:14.4435930Z                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4436580Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 75, in check_true",
+        "2026-10-22T20:00:14.4437250Z     self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)",
+        "2026-10-22T20:00:14.4437541Z                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4437941Z AssertionError: False is not true : readable on screen (first line in view, not covered): work view: way back before locating",
+        "2026-10-22T20:00:14.4438239Z ",
+        "2026-10-22T20:00:14.4438419Z ======================================================================",
+        "2026-10-22T20:00:14.4438999Z FAIL: test_06_locate_new_request_copy_and_return (__main__.Area17Wide.test_06_locate_new_request_copy_and_return)",
+        "2026-10-22T20:00:14.4439444Z ----------------------------------------------------------------------",
+        "2026-10-22T20:00:14.4439670Z Traceback (most recent call last):",
+        "2026-10-22T20:00:14.4440045Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 385, in <lambda>",
+        "2026-10-22T20:00:14.4440773Z     Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')",
+        "2026-10-22T20:00:14.4441278Z                                                                   ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4441708Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 362, in locate_new_request",
+        "2026-10-22T20:00:14.4442528Z     self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')",
+        "2026-10-22T20:00:14.4442938Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4443330Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 79, in readable",
+        "2026-10-22T20:00:14.4444460Z     v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v",
+        "2026-10-22T20:00:14.4445064Z                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4445508Z   File \"/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/understanding17_browser.py\", line 75, in check_true",
+        "2026-10-22T20:00:14.4446098Z     self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)",
+        "2026-10-22T20:00:14.4446545Z                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^",
+        "2026-10-22T20:00:14.4446939Z AssertionError: False is not true : readable on screen (first line in view, not covered): work view: way back before locating",
+        "2026-10-22T20:00:14.4447189Z ",
+        "2026-10-22T20:00:14.4447315Z ----------------------------------------------------------------------",
+        "2026-10-22T20:00:14.4447680Z Ran 12 tests in 29.777s",
+        "2026-10-22T20:00:14.4447811Z ",
+        "2026-10-22T20:00:14.4447906Z FAILED (failures=2)",
+        "2026-10-22T20:00:14.4707683Z ##[error]Process completed with exit code 1.",
+        "2026-10-22T20:00:14.4781060Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+        "2026-10-22T20:00:14.4781288Z with:"
+      ],
+      "processExitLines": [
+        "2026-10-22T20:00:14.4707683Z ##[error]Process completed with exit code 1."
+      ],
+      "actualNodeVersionLines": [],
+      "browserInstallLines": [
+        "2026-10-22T19:54:56.0071683Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "2026-10-22T19:55:10.7678494Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200",
+        "2026-10-22T19:55:13.1636172Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1200"
+      ],
+      "runtimeLimit": "browser.version() 환경 artifact는 이 도구로 회수하지 않았다. 설치 기록·action Node 경고·제품 실행 버전을 구분한다."
+    },
+    {
+      "source": "008-windows-log.json",
+      "requestedAt": "2026-10-22T20:05:21.385Z",
+      "returnedAt": "2026-10-22T20:05:25.080Z",
+      "job": {
+        "id": 120051786284,
+        "head_sha": "709e402b2e44a4864139eda03201e186f5761c6f",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      "logTruncated": true,
+      "characters": 120000,
+      "firstLine": "ontract manual provenance is input-only, narrow, versioned; advice parser is not relaxed",
+      "lastLine": "2026-10-22T20:03:55.5940383Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+      "unitSummaryLines": [
+        "2026-10-22T19:56:36.9831930Z # tests 275",
+        "2026-10-22T19:56:36.9832213Z # pass 275",
+        "2026-10-22T19:56:36.9832354Z # fail 0",
+        "2026-10-22T19:56:36.9832493Z # cancelled 0",
+        "2026-10-22T19:56:36.9832638Z # skipped 0"
+      ],
+      "browserSuites": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 18.556,
+          "ranLine": "2026-10-22T19:58:06.3404039Z Ran 18 tests in 18.556s",
+          "outcomeLine": "2026-10-22T19:58:06.3404292Z OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 42.158,
+          "ranLine": "2026-10-22T19:58:48.7378121Z Ran 13 tests in 42.158s",
+          "outcomeLine": "2026-10-22T19:58:48.7378411Z OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 13.506,
+          "ranLine": "2026-10-22T19:59:02.5349538Z Ran 11 tests in 13.506s",
+          "outcomeLine": "2026-10-22T19:59:02.5349792Z OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 4.974,
+          "ranLine": "2026-10-22T19:59:07.7439354Z Ran 3 tests in 4.974s",
+          "outcomeLine": "2026-10-22T19:59:07.7439672Z OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 4.837,
+          "ranLine": "2026-10-22T19:59:12.8252390Z Ran 3 tests in 4.837s",
+          "outcomeLine": "2026-10-22T19:59:12.8252647Z OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 6.711,
+          "ranLine": "2026-10-22T19:59:19.7713188Z Ran 5 tests in 6.711s",
+          "outcomeLine": "2026-10-22T19:59:19.7713442Z OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 8.759,
+          "ranLine": "2026-10-22T19:59:28.7473139Z Ran 6 tests in 8.759s",
+          "outcomeLine": "2026-10-22T19:59:28.7473327Z OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 5.427,
+          "ranLine": "2026-10-22T19:59:34.4574316Z Ran 4 tests in 5.427s",
+          "outcomeLine": "2026-10-22T19:59:34.4574576Z OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 30.796,
+          "ranLine": "2026-10-22T20:00:05.4833810Z Ran 12 tests in 30.796s",
+          "outcomeLine": "2026-10-22T20:00:05.4834052Z OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 24.108,
+          "ranLine": "2026-10-22T20:00:29.8385799Z Ran 18 tests in 24.108s",
+          "outcomeLine": "2026-10-22T20:00:29.8385993Z OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 11.539,
+          "ranLine": "2026-10-22T20:00:41.7054690Z Ran 8 tests in 11.539s",
+          "outcomeLine": "2026-10-22T20:00:41.7054969Z OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 13.575,
+          "ranLine": "2026-10-22T20:00:55.5069415Z Ran 11 tests in 13.575s",
+          "outcomeLine": "2026-10-22T20:00:55.5069686Z OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 7.101,
+          "ranLine": "2026-10-22T20:01:02.9428695Z Ran 11 tests in 7.101s",
+          "outcomeLine": "2026-10-22T20:01:02.9428883Z OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 15,
+          "seconds": 32.224,
+          "ranLine": "2026-10-22T20:01:35.3687632Z Ran 15 tests in 32.224s",
+          "outcomeLine": "2026-10-22T20:01:35.3687935Z OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 34.35,
+          "ranLine": "2026-10-22T20:02:09.9467766Z Ran 14 tests in 34.350s",
+          "outcomeLine": "2026-10-22T20:02:09.9468013Z OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 27.816,
+          "ranLine": "2026-10-22T20:02:38.0595413Z Ran 21 tests in 27.816s",
+          "outcomeLine": "2026-10-22T20:02:38.0595661Z OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 39.862,
+          "ranLine": "2026-10-22T20:03:18.1428225Z Ran 13 tests in 39.862s",
+          "outcomeLine": "2026-10-22T20:03:18.1428753Z OK"
+        },
+        {
+          "script": "continuity/tests/understanding17_browser.py",
+          "tests": 12,
+          "seconds": 32.414,
+          "ranLine": "2026-10-22T20:03:50.8345911Z Ran 12 tests in 32.414s",
+          "outcomeLine": "2026-10-22T20:03:50.8346102Z FAILED (failures=2)"
+        }
+      ],
+      "visibleBrowserTests": 198,
+      "visibleBrowserSuiteCount": 18,
+      "work29IndividualLines": [],
+      "work29Suite": null,
+      "work29Status": "NOT_RUN: 기존 AREA17 단계 exit1 뒤 신규29 명령/개별 결과 없음",
+      "afterArea17NotRun": [
+        "WORK29",
+        "AREA18",
+        "WORKSPACE19",
+        "RECEIVED20",
+        "BLANK21",
+        "static"
+      ],
+      "failureExcerpt": [
+        "2026-10-22T20:03:30.7470824Z test_04_long_description_reading_load (__main__.Area17.test_04_long_description_reading_load) ... ok",
+        "2026-10-22T20:03:32.5258037Z test_05_next_request_carries_valid_description (__main__.Area17.test_05_next_request_carries_valid_description) ... ok",
+        "2026-10-22T20:03:34.3573153Z test_06_locate_new_request_copy_and_return (__main__.Area17.test_06_locate_new_request_copy_and_return) ... FAIL",
+        "2026-10-22T20:03:38.4876900Z test_01_powertoys_full_flow (__main__.Area17Wide.test_01_powertoys_full_flow) ... ok",
+        "2026-10-22T20:03:42.0172156Z test_02_product13_full_flow (__main__.Area17Wide.test_02_product13_full_flow) ... ok",
+        "2026-10-22T20:03:45.6577669Z test_03_counterexamples_and_correction_draft (__main__.Area17Wide.test_03_counterexamples_and_correction_draft) ... ok",
+        "2026-10-22T20:03:47.0914385Z test_04_long_description_reading_load (__main__.Area17Wide.test_04_long_description_reading_load) ... ok",
+        "2026-10-22T20:03:48.9422226Z test_05_next_request_carries_valid_description (__main__.Area17Wide.test_05_next_request_carries_valid_description) ... ok",
+        "2026-10-22T20:03:50.7850517Z test_06_locate_new_request_copy_and_return (__main__.Area17Wide.test_06_locate_new_request_copy_and_return) ... FAIL",
+        "2026-10-22T20:03:50.8323378Z ",
+        "2026-10-22T20:03:50.8326290Z ======================================================================",
+        "2026-10-22T20:03:50.8326951Z FAIL: test_06_locate_new_request_copy_and_return (__main__.Area17.test_06_locate_new_request_copy_and_return)",
+        "2026-10-22T20:03:50.8327430Z ----------------------------------------------------------------------",
+        "2026-10-22T20:03:50.8327746Z Traceback (most recent call last):",
+        "2026-10-22T20:03:50.8328222Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 385, in <lambda>",
+        "2026-10-22T20:03:50.8328833Z     Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')",
+        "2026-10-22T20:03:50.8329275Z                                                                   ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8329811Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 362, in locate_new_request",
+        "2026-10-22T20:03:50.8332416Z     self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')",
+        "2026-10-22T20:03:50.8333054Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8333578Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 79, in readable",
+        "2026-10-22T20:03:50.8334300Z     v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v",
+        "2026-10-22T20:03:50.8334872Z                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8335422Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 75, in check_true",
+        "2026-10-22T20:03:50.8335952Z     self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)",
+        "2026-10-22T20:03:50.8336336Z                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^"
+      ],
+      "firstFailureTrace": [
+        "2026-10-22T20:03:50.8326951Z FAIL: test_06_locate_new_request_copy_and_return (__main__.Area17.test_06_locate_new_request_copy_and_return)",
+        "2026-10-22T20:03:50.8327430Z ----------------------------------------------------------------------",
+        "2026-10-22T20:03:50.8327746Z Traceback (most recent call last):",
+        "2026-10-22T20:03:50.8328222Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 385, in <lambda>",
+        "2026-10-22T20:03:50.8328833Z     Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')",
+        "2026-10-22T20:03:50.8329275Z                                                                   ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8329811Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 362, in locate_new_request",
+        "2026-10-22T20:03:50.8332416Z     self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')",
+        "2026-10-22T20:03:50.8333054Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8333578Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 79, in readable",
+        "2026-10-22T20:03:50.8334300Z     v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v",
+        "2026-10-22T20:03:50.8334872Z                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8335422Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 75, in check_true",
+        "2026-10-22T20:03:50.8335952Z     self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)",
+        "2026-10-22T20:03:50.8336336Z                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8336847Z AssertionError: False is not true : readable on screen (first line in view, not covered): work view: way back before locating",
+        "2026-10-22T20:03:50.8337172Z ",
+        "2026-10-22T20:03:50.8337314Z ======================================================================",
+        "2026-10-22T20:03:50.8337772Z FAIL: test_06_locate_new_request_copy_and_return (__main__.Area17Wide.test_06_locate_new_request_copy_and_return)",
+        "2026-10-22T20:03:50.8338224Z ----------------------------------------------------------------------",
+        "2026-10-22T20:03:50.8338510Z Traceback (most recent call last):",
+        "2026-10-22T20:03:50.8338956Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 385, in <lambda>",
+        "2026-10-22T20:03:50.8339516Z     Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')",
+        "2026-10-22T20:03:50.8339929Z                                                                   ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8340447Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 362, in locate_new_request",
+        "2026-10-22T20:03:50.8341106Z     self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')",
+        "2026-10-22T20:03:50.8341552Z     ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8342016Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 79, in readable",
+        "2026-10-22T20:03:50.8342690Z     v=self.page.evaluate(READABLE_JS,sel);self.check_true(f'readable on screen (first line in view, not covered): {name}',v['readable'],v);return v",
+        "2026-10-22T20:03:50.8343246Z                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8343785Z   File \"D:\\a\\agentflow-studio\\agentflow-studio\\app\\continuity\\tests\\understanding17_browser.py\", line 75, in check_true",
+        "2026-10-22T20:03:50.8344312Z     self.record('condition',name,bool(value),True,detail);self.assertTrue(value,name)",
+        "2026-10-22T20:03:50.8344672Z                                                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^",
+        "2026-10-22T20:03:50.8345171Z AssertionError: False is not true : readable on screen (first line in view, not covered): work view: way back before locating",
+        "2026-10-22T20:03:50.8345499Z ",
+        "2026-10-22T20:03:50.8345652Z ----------------------------------------------------------------------",
+        "2026-10-22T20:03:50.8345911Z Ran 12 tests in 32.414s",
+        "2026-10-22T20:03:50.8346023Z ",
+        "2026-10-22T20:03:50.8346102Z FAILED (failures=2)",
+        "2026-10-22T20:03:50.8825938Z ##[error]Process completed with exit code 1.",
+        "2026-10-22T20:03:50.8980452Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+        "2026-10-22T20:03:50.8980830Z with:"
+      ],
+      "processExitLines": [
+        "2026-10-22T20:03:50.8825938Z ##[error]Process completed with exit code 1."
+      ],
+      "actualNodeVersionLines": [],
+      "browserInstallLines": [
+        "2026-10-22T19:56:44.2174866Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "2026-10-22T19:57:42.8942829Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium-1200",
+        "2026-10-22T19:57:47.2037491Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1200"
+      ],
+      "runtimeLimit": "browser.version() 환경 artifact는 이 도구로 회수하지 않았다. 설치 기록·action Node 경고·제품 실행 버전을 구분한다."
+    }
+  ],
+  "annotations": [
+    {
+      "source": "009-ubuntu-annotations.json",
+      "requestedAt": "2026-10-22T20:05:39.236Z",
+      "returnedAt": "2026-10-22T20:05:40.999Z",
+      "checks": [
+        {
+          "id": 120051785794,
+          "name": "verify (ubuntu-24.04)",
+          "head_sha": "709e402b2e44a4864139eda03201e186f5761c6f",
+          "status": "completed",
+          "conclusion": "failure",
+          "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39843851282/job/120051785794",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2
+          }
+        }
+      ],
+      "annotations": [
+        {
+          "path": ".github",
+          "start_line": 2,
+          "end_line": 2,
+          "annotation_level": "warning",
+          "message": "Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+          "title": "",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "start_line": 74,
+          "end_line": 74,
+          "annotation_level": "failure",
+          "message": "Process completed with exit code 1.",
+          "title": "",
+          "raw_details": ""
+        }
+      ],
+      "hasMore": false
+    },
+    {
+      "source": "010-windows-annotations.json",
+      "requestedAt": "2026-10-22T20:05:39.236Z",
+      "returnedAt": "2026-10-22T20:05:41.269Z",
+      "checks": [
+        {
+          "id": 120051786284,
+          "name": "verify (windows-2022)",
+          "head_sha": "709e402b2e44a4864139eda03201e186f5761c6f",
+          "status": "completed",
+          "conclusion": "failure",
+          "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39843851282/job/120051786284",
+          "output": {
+            "title": null,
+            "summary": null,
+            "text": null,
+            "annotations_count": 2
+          }
+        }
+      ],
+      "annotations": [
+        {
+          "path": ".github",
+          "start_line": 2,
+          "end_line": 2,
+          "annotation_level": "warning",
+          "message": "Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+          "title": "",
+          "raw_details": ""
+        },
+        {
+          "path": ".github",
+          "start_line": 73,
+          "end_line": 73,
+          "annotation_level": "failure",
+          "message": "Process completed with exit code 1.",
+          "title": "",
+          "raw_details": ""
+        }
+      ],
+      "hasMore": false
+    }
+  ],
+  "limitations": [
+    "logTruncated가 true인 로그는 반환된 tail만 확인한 것이다. 보이지 않는 앞부분 단위/버전/개별 검사 통과를 직접 확인했다고 하지 않는다.",
+    "작성자 신규29 회귀는 합성 domain fixture→정상 복구 파일을 사용하는 검사다. 별도 Cloud 정상 UI 관측이나 실제 AI 의미 품질 검증과 구분한다.",
+    "GitHub Actions API/CLI/artifact 대체 조회, 로컬 서버/브라우저, source 수정, 원격 쓰기, rerun/merge는 하지 않았다."
+  ]
+}
