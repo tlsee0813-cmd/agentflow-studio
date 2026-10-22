@@ -250,7 +250,10 @@ class Area17(unittest.TestCase):
         c=CASES['powertoys'];area,other=self.start(c);A=self.request_in(area,c['request'])
         text,h=self.file_export(A,'download');self.check_record('download file export',text,h)
         s=self.state();p1,_=self.result_file('r1',s,A,h['returnId'],c,area,0);self.import_file(p1)
-        n=len(self.state()['tasks']);self.import_file(p1,'새 기록은 추가하지 않았습니다');self.check('exact duplicate: no new record',len(self.state()['tasks']),n)
+        duplicate_before=self.state();n=len(duplicate_before['tasks']);originals=[t for t in duplicate_before['tasks'] if t['resultFile'] and t['resultFile']['rawText']==p1.read_text(encoding='utf-8')]
+        self.check('duplicate fixture: one exact original report',len(originals),1)
+        self.import_file(p1,'새 기록을 추가하지 않았어요');self.check('exact duplicate: no new record',len(self.state()['tasks']),n);self.check('exact duplicate: all saved data including timestamps unchanged',self.state(),duplicate_before)
+        receipt=self.page.locator('#received-result-receipt');expect(receipt).to_have_attribute('data-report-task-id',originals[0]['id']);expect(receipt).to_have_attribute('data-export-task-id',A);expect(receipt).to_have_attribute('data-handoff-id',h['returnId']);expect(receipt).to_have_attribute('data-duplicate','true')
         # Correction draft started on r1, then r2 (same returnId, revised interpretation) arrives.
         self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click()
         ed=self.page.locator(f'#area-understanding-{area}-edit');ed.locator('> summary').click()

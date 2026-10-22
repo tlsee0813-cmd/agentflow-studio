@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: app
@@ -211,6 +211,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/workspace19_browser.py 2>&1 | tee test-results/workspace19-browser.log
+      - name: RECEIVED20 exact result, export snapshot and explicit return on two PCs (native HTTP, labelled fixtures, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/received20
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/received20_browser.py 2>&1 | tee test-results/received20-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:

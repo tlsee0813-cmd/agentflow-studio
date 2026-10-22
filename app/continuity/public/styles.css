@@ -2540,6 +2540,8 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .located-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}
 .outcome-received{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
 .outcome-received .hint{margin:0}
+#received-result-receipt{min-width:0;max-width:100%;overflow-wrap:anywhere}
+#received-result-receipt>.hint{min-width:0;max-width:100%}
 .understanding-more{display:flex;flex-wrap:wrap;column-gap:16px;align-items:flex-start}
 .area-understanding .understanding-more>details{margin:0}
 .area-understanding .understanding-more>details[open]{flex-basis:100%}
