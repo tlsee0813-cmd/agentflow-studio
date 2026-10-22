@@ -1,0 +1,50 @@
+{
+  "productHead": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "testCommit": "b80cfefed2f40a372d8ae456ad4f3fb4d40f2ee6",
+  "testPath": "docs/transfer/blank-project-21/testfix2-candidate/blank21_browser.py",
+  "testBytes": 18600,
+  "testSHA256": "3a3c61b22edb3f337457ade10e1dbb13522b85bcd5b40b2e38c6038225f44303",
+  "sourceAndHelpers": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260706,
+      "sha256": "5370d0a6acd3a1b60e3f5c81e8e3a4be647665d23c18667f810b6df7634f9f58",
+      "pinnedEqualAfterRun": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "pinnedEqualAfterRun": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "pinnedEqualAfterRun": true
+    },
+    {
+      "path": "app/continuity/tests/browser.py",
+      "bytes": 26861,
+      "sha256": "d9b6348eea92728f78f6deee0e60cf1bd590d6654855f01477b9fa7ca06d5e02",
+      "pinnedEqualAfterRun": true
+    },
+    {
+      "path": "app/continuity/tests/received20_browser.py",
+      "bytes": 32681,
+      "sha256": "2f9fbf172a2cbeb08804e7bb08a8e63921420673a2c7a1639ea5f5b44f5499e8",
+      "pinnedEqualAfterRun": true
+    }
+  ],
+  "beforeEvidence": "unchanged prior postfailure/version-match source and helper binding; pre-run app/helper hash printed and post-run all pinned bytes verified",
+  "actualOuterCollectorExit": 0,
+  "toolPTY": 40977,
+  "runtime": {
+    "node": "v22.16.0",
+    "playwright": "1.57.0",
+    "chromium": "154.0.8037.57",
+    "transport": "real browser -> real local HTTP -> mock; injected faults in named tests",
+    "paidCalls": 0
+  },
+  "HTTP": "exact original real loopback browser test server; no fresh HTTP body instrumentation; earlier same-build source/HTTP evidence remains separate"
+}

@@ -1,0 +1,8 @@
+test_first_handoff_choice_and_long_read_return (__main__.Blank21.test_first_handoff_choice_and_long_read_return) ... ok
+test_first_handoff_choice_and_long_read_return (__main__.Blank21Wide.test_first_handoff_choice_and_long_read_return) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 10.158s
+
+OK
+

@@ -1,0 +1,18 @@
+{
+  "expectedMethods": 2,
+  "completedMethods": 2,
+  "failures": 0,
+  "errors": 0,
+  "actualChildExit": 0,
+  "actualOuterCollectorExit": 0,
+  "additionalObservationWrapper": false,
+  "productSourceChanged": false,
+  "originalAllAssertionsBytePreservedAfterHelperAndTwoCallRemoval": true,
+  "pageErrors": [],
+  "comparison": {
+    "original212163_uninstrumented154": "2FAIL child/outer1 at line111; e2cbc448c0309d628eea2dcd99cce1dde790cc92",
+    "testfix2_154": "2PASS child/outer0",
+    "exactCause": "not concluded",
+    "143CI": "NOT_RUN; download remains blocked, no retry"
+  }
+}

@@ -1,0 +1,696 @@
+[
+  {
+    "viewport": [
+      1280,
+      720
+    ],
+    "preservedOriginalEqualAssertions": [
+      {
+        "label": "disclosing alone creates no export/H or other saved mutation",
+        "actualEqualsExpected": true,
+        "actualSHA256": "ba3c222cd0cbf37a8fec2adcf592d94cd778cefe731dfb03cb7b010640dc4728",
+        "actual": {
+          "fullRaw": "raw/blank21-observations.jsonl",
+          "keys": [
+            "schemaVersion",
+            "id",
+            "revision",
+            "name",
+            "sources",
+            "bases",
+            "tasks",
+            "currentTaskId",
+            "draft",
+            "answerDraft",
+            "basisDraft",
+            "basisEdits",
+            "draftKind",
+            "pending",
+            "notice",
+            "space"
+          ]
+        }
+      },
+      {
+        "label": "folding alone changes no saved data",
+        "actualEqualsExpected": true,
+        "actualSHA256": "ba3c222cd0cbf37a8fec2adcf592d94cd778cefe731dfb03cb7b010640dc4728",
+        "actual": {
+          "fullRaw": "raw/blank21-observations.jsonl",
+          "keys": [
+            "schemaVersion",
+            "id",
+            "revision",
+            "name",
+            "sources",
+            "bases",
+            "tasks",
+            "currentTaskId",
+            "draft",
+            "answerDraft",
+            "basisDraft",
+            "basisEdits",
+            "draftKind",
+            "pending",
+            "notice",
+            "space"
+          ]
+        }
+      },
+      {
+        "label": "ordinary copy creates one export",
+        "actualEqualsExpected": true,
+        "actualSHA256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "actual": 1
+      },
+      {
+        "label": "ordinary copy does not create a return H",
+        "actualEqualsExpected": true,
+        "actualSHA256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "actual": null
+      },
+      {
+        "label": "ordinary copy does not claim a file anchor",
+        "actualEqualsExpected": true,
+        "actualSHA256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "actual": null
+      },
+      {
+        "label": "file copy adds exactly one export record",
+        "actualEqualsExpected": true,
+        "actualSHA256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "actual": 2
+      },
+      {
+        "label": "template identities come from this actual export",
+        "actualEqualsExpected": true,
+        "actualSHA256": "db43ed205dd416ccd45bbf6bc92ce3dd7a913cc13490cb659e6e3680919c049e",
+        "actual": [
+          "P_088f0f7d-787f-4420-b47e-12dc593ba4a7",
+          "T_f1cb268b-ae9d-4a2f-bebd-31ca72cde857",
+          "H_84d2bf8c-2668-486c-9fbb-13b1bb16695c"
+        ]
+      },
+      {
+        "label": "read and fold do not change current/draft/exports",
+        "actualEqualsExpected": true,
+        "actualSHA256": "848e1da355f164b8428eb54ad9fd6fbbedf2849b5cdf882a3d632b711d4475b3",
+        "actual": {
+          "fullRaw": "raw/blank21-observations.jsonl",
+          "keys": [
+            "schemaVersion",
+            "id",
+            "revision",
+            "name",
+            "sources",
+            "bases",
+            "tasks",
+            "currentTaskId",
+            "draft",
+            "answerDraft",
+            "basisDraft",
+            "basisEdits",
+            "draftKind",
+            "pending",
+            "notice",
+            "space"
+          ]
+        }
+      },
+      {
+        "label": "return restores actual T-work departure scroll",
+        "actualEqualsExpected": true,
+        "actualSHA256": "8793bd5319f8d066921e5ac23d5269d20d84f9bf25d45de5174fca12a6c009fb",
+        "actual": 2667
+      },
+      {
+        "label": "return restores actual T-work disclosures",
+        "actualEqualsExpected": true,
+        "actualSHA256": "0b2fa0bccae3c61883eb2c9b0e26ff0f43e29eb11c2a854dbff4bbf55ea018d6",
+        "actual": [
+          "project-management",
+          "file-return-options",
+          "compose-panel",
+          "result-file-panel",
+          "history"
+        ]
+      },
+      {
+        "label": "read/return leaves complete saved project unchanged including current T and draft",
+        "actualEqualsExpected": true,
+        "actualSHA256": "62fecbafbc30cf68cc94ea89b6bf99fa35b43e429dd24c66aeededfe8f579730",
+        "actual": {
+          "fullRaw": "raw/blank21-observations.jsonl",
+          "keys": [
+            "schemaVersion",
+            "id",
+            "revision",
+            "name",
+            "sources",
+            "bases",
+            "tasks",
+            "currentTaskId",
+            "draft",
+            "answerDraft",
+            "basisDraft",
+            "basisEdits",
+            "draftKind",
+            "pending",
+            "notice",
+            "space"
+          ]
+        }
+      },
+      {
+        "label": "draft stays visible and exact",
+        "actualEqualsExpected": true,
+        "actualSHA256": "adff0d29786f3b947355134d2245439adb2005b96daf2f27923fe6e73bc1029a",
+        "actual": "[합성21 미전송] 다음 문구를 더 검토하려는 초안. 지금은 보내지 않는다."
+      },
+      {
+        "label": "only initial request used mocked generation",
+        "actualEqualsExpected": true,
+        "actualSHA256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "actual": 1
+      }
+    ],
+    "newNativeKeyObservations": [
+      {
+        "test": "__main__.Blank21.test_first_handoff_choice_and_long_read_return",
+        "pc": [
+          1280,
+          720
+        ],
+        "kind": "condition",
+        "label": "native keyboard scroll completed Control+End",
+        "actual": {
+          "ok": true,
+          "reason": "native-scrollend-then-render-stable",
+          "key": "Control+End",
+          "sel": "#file-handoff-preview textarea",
+          "mustScroll": false,
+          "textareaScrollend": false,
+          "pending": [],
+          "events": [
+            {
+              "kind": "keydown",
+              "target": "TEXTAREA",
+              "time": 2740.699999988079
+            },
+            {
+              "kind": "keyup",
+              "target": "TEXTAREA",
+              "time": 2741.899999976158
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2763.699999988079
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2780.5
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2797
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2813.599999964237
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2830.300000011921
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2847.099999964237
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2863.899999976158
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2880.899999976158
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2897.099999964237
+            },
+            {
+              "kind": "scrollend",
+              "target": "document",
+              "time": 2914.300000011921
+            }
+          ],
+          "render": {
+            "frames": 11,
+            "matchingFrames": 2,
+            "state": {
+              "focus": true,
+              "page": [
+                0,
+                2875
+              ],
+              "position": [
+                0,
+                5574
+              ],
+              "rect": [
+                264,
+                -2202.078125,
+                974,
+                188.75
+              ],
+              "tail": true
+            }
+          }
+        },
+        "expected": true
+      },
+      {
+        "test": "__main__.Blank21.test_first_handoff_choice_and_long_read_return",
+        "pc": [
+          1280,
+          720
+        ],
+        "kind": "condition",
+        "label": "native keyboard scroll completed Shift+Tab",
+        "actual": {
+          "ok": true,
+          "reason": "native-scrollend-then-render-stable",
+          "key": "Shift+Tab",
+          "sel": "#file-handoff-preview > summary",
+          "mustScroll": false,
+          "textareaScrollend": false,
+          "pending": [],
+          "events": [
+            {
+              "kind": "keydown",
+              "target": "TEXTAREA",
+              "time": 2934.199999988079
+            },
+            {
+              "kind": "keyup",
+              "target": "SUMMARY",
+              "time": 2935.300000011921
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2947.699999988079
+            },
+            {
+              "kind": "scrollend",
+              "target": "document",
+              "time": 2947.699999988079
+            }
+          ],
+          "render": {
+            "frames": 2,
+            "matchingFrames": 2,
+            "state": {
+              "focus": true,
+              "page": [
+                0,
+                286
+              ],
+              "position": [
+                0,
+                0
+              ],
+              "rect": [
+                264,
+                338.125,
+                974,
+                43.796875
+              ],
+              "tail": true
+            }
+          }
+        },
+        "expected": true
+      }
+    ],
+    "pageerrors": [],
+    "external": [],
+    "originalFocusAndViewportExpectations": "unchanged source, whole method passed; no fresh diagnostic IO added"
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "preservedOriginalEqualAssertions": [
+      {
+        "label": "disclosing alone creates no export/H or other saved mutation",
+        "actualEqualsExpected": true,
+        "actualSHA256": "93481ef7a0b89df54a863a1432bec3cc2bf85e48b8822562d01ac3dedc686d4a",
+        "actual": {
+          "fullRaw": "raw/blank21-observations.jsonl",
+          "keys": [
+            "schemaVersion",
+            "id",
+            "revision",
+            "name",
+            "sources",
+            "bases",
+            "tasks",
+            "currentTaskId",
+            "draft",
+            "answerDraft",
+            "basisDraft",
+            "basisEdits",
+            "draftKind",
+            "pending",
+            "notice",
+            "space"
+          ]
+        }
+      },
+      {
+        "label": "folding alone changes no saved data",
+        "actualEqualsExpected": true,
+        "actualSHA256": "93481ef7a0b89df54a863a1432bec3cc2bf85e48b8822562d01ac3dedc686d4a",
+        "actual": {
+          "fullRaw": "raw/blank21-observations.jsonl",
+          "keys": [
+            "schemaVersion",
+            "id",
+            "revision",
+            "name",
+            "sources",
+            "bases",
+            "tasks",
+            "currentTaskId",
+            "draft",
+            "answerDraft",
+            "basisDraft",
+            "basisEdits",
+            "draftKind",
+            "pending",
+            "notice",
+            "space"
+          ]
+        }
+      },
+      {
+        "label": "ordinary copy creates one export",
+        "actualEqualsExpected": true,
+        "actualSHA256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "actual": 1
+      },
+      {
+        "label": "ordinary copy does not create a return H",
+        "actualEqualsExpected": true,
+        "actualSHA256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "actual": null
+      },
+      {
+        "label": "ordinary copy does not claim a file anchor",
+        "actualEqualsExpected": true,
+        "actualSHA256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "actual": null
+      },
+      {
+        "label": "file copy adds exactly one export record",
+        "actualEqualsExpected": true,
+        "actualSHA256": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        "actual": 2
+      },
+      {
+        "label": "template identities come from this actual export",
+        "actualEqualsExpected": true,
+        "actualSHA256": "a6e5a18ba6628c6c3fa4003872ef74c08583f62f621cddc8af7864321f8ccf67",
+        "actual": [
+          "P_a196d6d8-c07f-4d43-988b-e522a90ed93b",
+          "T_edb6b356-86b9-463d-86a7-bb24652e8ebc",
+          "H_9f5c9af2-0bbc-477b-8e66-fd49cfe78e38"
+        ]
+      },
+      {
+        "label": "read and fold do not change current/draft/exports",
+        "actualEqualsExpected": true,
+        "actualSHA256": "c2809feb01fa4fc5c16c7587ea4dd10b48c6476704b1cca55a996a88e33a6b38",
+        "actual": {
+          "fullRaw": "raw/blank21-observations.jsonl",
+          "keys": [
+            "schemaVersion",
+            "id",
+            "revision",
+            "name",
+            "sources",
+            "bases",
+            "tasks",
+            "currentTaskId",
+            "draft",
+            "answerDraft",
+            "basisDraft",
+            "basisEdits",
+            "draftKind",
+            "pending",
+            "notice",
+            "space"
+          ]
+        }
+      },
+      {
+        "label": "return restores actual T-work departure scroll",
+        "actualEqualsExpected": true,
+        "actualSHA256": "1070a982af22fe711ec54707c0cd838baec99ff81ec4fd7a00fa4ca0ca48c8c4",
+        "actual": 2466
+      },
+      {
+        "label": "return restores actual T-work disclosures",
+        "actualEqualsExpected": true,
+        "actualSHA256": "0b2fa0bccae3c61883eb2c9b0e26ff0f43e29eb11c2a854dbff4bbf55ea018d6",
+        "actual": [
+          "project-management",
+          "file-return-options",
+          "compose-panel",
+          "result-file-panel",
+          "history"
+        ]
+      },
+      {
+        "label": "read/return leaves complete saved project unchanged including current T and draft",
+        "actualEqualsExpected": true,
+        "actualSHA256": "e46e13debdffac11cde1e9907e34ec43c096170a2ca15844d663938d84f3dde8",
+        "actual": {
+          "fullRaw": "raw/blank21-observations.jsonl",
+          "keys": [
+            "schemaVersion",
+            "id",
+            "revision",
+            "name",
+            "sources",
+            "bases",
+            "tasks",
+            "currentTaskId",
+            "draft",
+            "answerDraft",
+            "basisDraft",
+            "basisEdits",
+            "draftKind",
+            "pending",
+            "notice",
+            "space"
+          ]
+        }
+      },
+      {
+        "label": "draft stays visible and exact",
+        "actualEqualsExpected": true,
+        "actualSHA256": "adff0d29786f3b947355134d2245439adb2005b96daf2f27923fe6e73bc1029a",
+        "actual": "[합성21 미전송] 다음 문구를 더 검토하려는 초안. 지금은 보내지 않는다."
+      },
+      {
+        "label": "only initial request used mocked generation",
+        "actualEqualsExpected": true,
+        "actualSHA256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "actual": 1
+      }
+    ],
+    "newNativeKeyObservations": [
+      {
+        "test": "__main__.Blank21Wide.test_first_handoff_choice_and_long_read_return",
+        "pc": [
+          1440,
+          900
+        ],
+        "kind": "condition",
+        "label": "native keyboard scroll completed Control+End",
+        "actual": {
+          "ok": true,
+          "reason": "native-scrollend-then-render-stable",
+          "key": "Control+End",
+          "sel": "#file-handoff-preview textarea",
+          "mustScroll": false,
+          "textareaScrollend": false,
+          "pending": [],
+          "events": [
+            {
+              "kind": "keydown",
+              "target": "TEXTAREA",
+              "time": 2861.2000000476837
+            },
+            {
+              "kind": "keyup",
+              "target": "TEXTAREA",
+              "time": 2861.800000011921
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2888.600000023842
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2905.300000011921
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2921.600000023842
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2938.400000035763
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2955.400000035763
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2971.800000011921
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 2988.400000035763
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 3005.100000023842
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 3021.600000023842
+            },
+            {
+              "kind": "scrollend",
+              "target": "document",
+              "time": 3038.600000023842
+            }
+          ],
+          "render": {
+            "frames": 11,
+            "matchingFrames": 2,
+            "state": {
+              "focus": true,
+              "page": [
+                0,
+                2674
+              ],
+              "position": [
+                0,
+                5493
+              ],
+              "rect": [
+                264,
+                -2001.078125,
+                1134,
+                188.75
+              ],
+              "tail": true
+            }
+          }
+        },
+        "expected": true
+      },
+      {
+        "test": "__main__.Blank21Wide.test_first_handoff_choice_and_long_read_return",
+        "pc": [
+          1440,
+          900
+        ],
+        "kind": "condition",
+        "label": "native keyboard scroll completed Shift+Tab",
+        "actual": {
+          "ok": true,
+          "reason": "native-scrollend-then-render-stable",
+          "key": "Shift+Tab",
+          "sel": "#file-handoff-preview > summary",
+          "mustScroll": false,
+          "textareaScrollend": false,
+          "pending": [],
+          "events": [
+            {
+              "kind": "keydown",
+              "target": "TEXTAREA",
+              "time": 3057.600000023842
+            },
+            {
+              "kind": "keyup",
+              "target": "SUMMARY",
+              "time": 3058.400000035763
+            },
+            {
+              "kind": "scroll",
+              "target": "document",
+              "time": 3072.400000035763
+            },
+            {
+              "kind": "scrollend",
+              "target": "document",
+              "time": 3072.400000035763
+            }
+          ],
+          "render": {
+            "frames": 2,
+            "matchingFrames": 2,
+            "state": {
+              "focus": true,
+              "page": [
+                0,
+                196
+              ],
+              "position": [
+                0,
+                0
+              ],
+              "rect": [
+                264,
+                428.125,
+                1134,
+                43.796875
+              ],
+              "tail": true
+            }
+          }
+        },
+        "expected": true
+      }
+    ],
+    "pageerrors": [],
+    "external": [],
+    "originalFocusAndViewportExpectations": "unchanged source, whole method passed; no fresh diagnostic IO added"
+  }
+]

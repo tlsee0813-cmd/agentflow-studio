@@ -1,0 +1,8 @@
+{
+  "sourceCommit": "b80cfefed2f40a372d8ae456ad4f3fb4d40f2ee6",
+  "candidateBytes": 18600,
+  "candidateSHA256": "3a3c61b22edb3f337457ade10e1dbb13522b85bcd5b40b2e38c6038225f44303",
+  "originalSHA256": "212163b1f4b7b6e328bc194676656eaed570a65179c6670dc6274e74d10a3117",
+  "removeOnlyNewKeyScrollHelperAndRestoreTwoKeyCallsMakesExactOriginalBytes": true,
+  "productOrHelperChanged": false
+}
