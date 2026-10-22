@@ -1,0 +1,55 @@
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... FAIL
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... FAIL
+
+======================================================================
+FAIL: test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/notice33-independent/base/app/continuity/tests/pc12_browser.py", line 235, in test_02_continue_keeps_R_then_switches_from_RB_to_A
+    expect(self.page.locator('#notice')).to_contain_text('전에 이어가던 작업 04은 그대로 남아요.')
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py", line 19319, in to_contain_text
+    self._sync(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+AssertionError: Locator expected to contain text '전에 이어가던 작업 04은 그대로 남아요.'
+Actual value: 작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 00은 그대로 남아요. 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#notice")
+    9 × locator resolved to <div id="notice" class="alert" role="status">작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 00…</div>
+      - unexpected value "작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 00은 그대로 남아요."
+
+
+======================================================================
+FAIL: test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/notice33-independent/base/app/continuity/tests/pc12_browser.py", line 235, in test_02_continue_keeps_R_then_switches_from_RB_to_A
+    expect(self.page.locator('#notice')).to_contain_text('전에 이어가던 작업 04은 그대로 남아요.')
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py", line 19319, in to_contain_text
+    self._sync(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+AssertionError: Locator expected to contain text '전에 이어가던 작업 04은 그대로 남아요.'
+Actual value: 작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 00은 그대로 남아요. 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#notice")
+    9 × locator resolved to <div id="notice" class="alert" role="status">작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 00…</div>
+      - unexpected value "작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 00은 그대로 남아요."
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 18.876s
+
+FAILED (failures=2)

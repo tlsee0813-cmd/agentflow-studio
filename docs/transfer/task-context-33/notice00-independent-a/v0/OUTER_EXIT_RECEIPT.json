@@ -1,0 +1,17 @@
+{
+  "scope": "tool completion metadata transcribed, not full tool transcript",
+  "build": {
+    "session": 15409,
+    "outerExit": 0
+  },
+  "candidate": {
+    "session": 3763,
+    "outerExit": 0
+  },
+  "base": {
+    "session": 24231,
+    "outerExit": 1
+  },
+  "child": "execution/process.json subprocess.run actualChildExit propagated",
+  "server": "raw/http-console.jsonl server-process actualReturnCode"
+}

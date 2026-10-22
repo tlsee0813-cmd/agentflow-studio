@@ -1,0 +1,42 @@
+[
+  {
+    "original": "SOURCE.before.json",
+    "bytes": 71204,
+    "sha256": "a055cd50b1c1dcac5d8cb3769715a67a4aafa2f273018f94bcef09087f40a2ab",
+    "gzip": "SOURCE.before.json.gz",
+    "gzipSHA256": "2226143c86a81437c67fccefca28a1b5799d49c3a7ed3d4a388c8dcbc56b1b0c",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/http-console.jsonl",
+    "bytes": 6830,
+    "sha256": "12b8f7e233eae76de94b3f1d16d50c33fa1b9d2126b0fc623eb4d7978d81cd41",
+    "gzip": "candidate/execution/raw/http-console.jsonl.gz",
+    "gzipSHA256": "1f6c189f79734ed9fa23c70d9746ce22258e1190b25755b87e8a1747ccf30976",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/pc12-observations.jsonl",
+    "bytes": 22127,
+    "sha256": "f8baafad10385f610ff606b2a88d000ff2b6f75936c4bfa61e11dd16fa6f6197",
+    "gzip": "candidate/execution/raw/pc12-observations.jsonl.gz",
+    "gzipSHA256": "51568c7bdf31472041aadc5cc905461588b549267bf7cffdbdece3640f05b395",
+    "roundTripEqual": true
+  },
+  {
+    "original": "base/execution/raw/http-console.jsonl",
+    "bytes": 4652,
+    "sha256": "a050b1126f18b7683a71c194fb9650b9a1e8f3df059b2571b6497110f5456928",
+    "gzip": "base/execution/raw/http-console.jsonl.gz",
+    "gzipSHA256": "1974f75f97319776b8c97b24742261937177f5a1197bd344a121e661ba17bc2f",
+    "roundTripEqual": true
+  },
+  {
+    "original": "base/execution/raw/pc12-observations.jsonl",
+    "bytes": 15192,
+    "sha256": "095392e2a417225429315adf2a35a473006c24ca4da93baa971cf9d5d93ab2f4",
+    "gzip": "base/execution/raw/pc12-observations.jsonl.gz",
+    "gzipSHA256": "921f3c73313d0747518c13e7b6f1bf1167d6e60d221803222f3c2d2091fe37d2",
+    "roundTripEqual": true
+  }
+]

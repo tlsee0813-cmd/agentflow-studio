@@ -1,0 +1,7 @@
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 9.855s
+
+OK

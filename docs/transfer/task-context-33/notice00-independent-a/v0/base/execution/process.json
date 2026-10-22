@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/notice33-independent/runner.py",
+    "Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+    "Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A"
+  ],
+  "cwd": "/workspace/browser-env/notice33-independent/base/app",
+  "startUTC": "2026-10-22T22:46:17.382860+00:00",
+  "endUTC": "2026-10-22T22:46:36.405568+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "ff789b83877ab6dddfe60a35d169dda6699c9ea89f8e8281cebcf970dfac791f",
+  "testUnchanged": true,
+  "wrapper": "read-only response/console listeners; teardown return-code recording; no UI/action/assertion changes"
+}

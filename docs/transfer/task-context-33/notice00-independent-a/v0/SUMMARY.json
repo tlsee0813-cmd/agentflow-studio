@@ -1,0 +1,324 @@
+[
+  {
+    "source": "candidate",
+    "commit": "4ffa06dc28c51f20db9f93887747d353911ccdc9",
+    "process": {
+      "command": [
+        "/workspace/browser-env/venv/bin/python",
+        "/workspace/browser-env/notice33-independent/runner.py",
+        "Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+        "Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A"
+      ],
+      "cwd": "/workspace/browser-env/notice33-independent/candidate/app",
+      "startUTC": "2026-10-22T22:45:49.859735+00:00",
+      "endUTC": "2026-10-22T22:45:59.880579+00:00",
+      "actualChildExit": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "a9f3aa6cc6bd850918bf4d5fb13890513876bac6d446bede71cecfe7f02c910a",
+      "testUnchanged": true,
+      "wrapper": "read-only response/console listeners; teardown return-code recording; no UI/action/assertion changes"
+    },
+    "environment": {
+      "node": "v22.16.0",
+      "playwright": "1.57.0",
+      "chromium": "154.0.8037.57",
+      "transport": "real browser -> real local HTTP -> mock; injected faults in named tests",
+      "paidCalls": 0
+    },
+    "notices": [
+      {
+        "kind": "notice-after-native-continue-click",
+        "sequence": 1,
+        "utc": "2026-10-22T22:45:52.974359+00:00",
+        "actual": {
+          "text": "작업 01 요청에서 이어가기 · 이 요청에 받은 현재 보고 작업 02에서 계속해요. 고치는 작업문은 작업 02의 후속 확인 작업문이고, 작업 01의 작업문은 그대로예요.",
+          "hidden": false,
+          "visible": true,
+          "rect": {
+            "x": 264,
+            "y": 10,
+            "width": 974,
+            "height": 49.59375,
+            "top": 10,
+            "right": 1238,
+            "bottom": 59.59375,
+            "left": 264
+          },
+          "inViewport": true,
+          "centerHit": true,
+          "display": "block",
+          "focus": "outcome-home",
+          "windowY": 592,
+          "viewport": [
+            1280,
+            720
+          ]
+        }
+      },
+      {
+        "kind": "notice-after-native-continue-click",
+        "sequence": 2,
+        "utc": "2026-10-22T22:45:54.436762+00:00",
+        "actual": {
+          "text": "작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 04은 그대로 남아요.",
+          "hidden": false,
+          "visible": true,
+          "rect": {
+            "x": 264,
+            "y": 10,
+            "width": 974,
+            "height": 49.59375,
+            "top": 10,
+            "right": 1238,
+            "bottom": 59.59375,
+            "left": 264
+          },
+          "inViewport": true,
+          "centerHit": true,
+          "display": "block",
+          "focus": "outcome-home",
+          "windowY": 557,
+          "viewport": [
+            1280,
+            720
+          ]
+        }
+      },
+      {
+        "kind": "notice-after-native-continue-click",
+        "sequence": 3,
+        "utc": "2026-10-22T22:45:57.881624+00:00",
+        "actual": {
+          "text": "작업 01 요청에서 이어가기 · 이 요청에 받은 현재 보고 작업 02에서 계속해요. 고치는 작업문은 작업 02의 후속 확인 작업문이고, 작업 01의 작업문은 그대로예요.",
+          "hidden": false,
+          "visible": true,
+          "rect": {
+            "x": 264,
+            "y": 10,
+            "width": 1134,
+            "height": 49.59375,
+            "top": 10,
+            "right": 1398,
+            "bottom": 59.59375,
+            "left": 264
+          },
+          "inViewport": true,
+          "centerHit": true,
+          "display": "block",
+          "focus": "outcome-home",
+          "windowY": 592,
+          "viewport": [
+            1440,
+            900
+          ]
+        }
+      },
+      {
+        "kind": "notice-after-native-continue-click",
+        "sequence": 4,
+        "utc": "2026-10-22T22:45:59.232669+00:00",
+        "actual": {
+          "text": "작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 04은 그대로 남아요.",
+          "hidden": false,
+          "visible": true,
+          "rect": {
+            "x": 264,
+            "y": 10,
+            "width": 1134,
+            "height": 49.59375,
+            "top": 10,
+            "right": 1398,
+            "bottom": 59.59375,
+            "left": 264
+          },
+          "inViewport": true,
+          "centerHit": true,
+          "display": "block",
+          "focus": "outcome-home",
+          "windowY": 557,
+          "viewport": [
+            1440,
+            900
+          ]
+        }
+      }
+    ],
+    "HTTPCount": 12,
+    "allActualBodyDiskEqual": true,
+    "pageerrors": [],
+    "captureErrors": [],
+    "serverExits": [
+      {
+        "kind": "server-process",
+        "class": "Pc12",
+        "actualReturnCode": -15
+      },
+      {
+        "kind": "server-process",
+        "class": "Pc12Wide",
+        "actualReturnCode": -15
+      }
+    ]
+  },
+  {
+    "source": "base",
+    "commit": "72940a043d7a7fdc225a9582ce48831fa0418cc0",
+    "process": {
+      "command": [
+        "/workspace/browser-env/venv/bin/python",
+        "/workspace/browser-env/notice33-independent/runner.py",
+        "Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+        "Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A"
+      ],
+      "cwd": "/workspace/browser-env/notice33-independent/base/app",
+      "startUTC": "2026-10-22T22:46:17.382860+00:00",
+      "endUTC": "2026-10-22T22:46:36.405568+00:00",
+      "actualChildExit": 1,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "ff789b83877ab6dddfe60a35d169dda6699c9ea89f8e8281cebcf970dfac791f",
+      "testUnchanged": true,
+      "wrapper": "read-only response/console listeners; teardown return-code recording; no UI/action/assertion changes"
+    },
+    "environment": {
+      "node": "v22.16.0",
+      "playwright": "1.57.0",
+      "chromium": "154.0.8037.57",
+      "transport": "real browser -> real local HTTP -> mock; injected faults in named tests",
+      "paidCalls": 0
+    },
+    "notices": [
+      {
+        "kind": "notice-after-native-continue-click",
+        "sequence": 1,
+        "utc": "2026-10-22T22:46:20.339027+00:00",
+        "actual": {
+          "text": "작업 01 요청에서 이어가기 · 이 요청에 받은 현재 보고 작업 02에서 계속해요. 고치는 작업문은 작업 02의 후속 확인 작업문이고, 작업 01의 작업문은 그대로예요.",
+          "hidden": false,
+          "visible": true,
+          "rect": {
+            "x": 264,
+            "y": 10,
+            "width": 974,
+            "height": 49.59375,
+            "top": 10,
+            "right": 1238,
+            "bottom": 59.59375,
+            "left": 264
+          },
+          "inViewport": true,
+          "centerHit": true,
+          "display": "block",
+          "focus": "outcome-home",
+          "windowY": 592,
+          "viewport": [
+            1280,
+            720
+          ]
+        }
+      },
+      {
+        "kind": "notice-after-native-continue-click",
+        "sequence": 2,
+        "utc": "2026-10-22T22:46:21.699077+00:00",
+        "actual": {
+          "text": "작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 00은 그대로 남아요.",
+          "hidden": false,
+          "visible": true,
+          "rect": {
+            "x": 264,
+            "y": 10,
+            "width": 974,
+            "height": 49.59375,
+            "top": 10,
+            "right": 1238,
+            "bottom": 59.59375,
+            "left": 264
+          },
+          "inViewport": true,
+          "centerHit": true,
+          "display": "block",
+          "focus": "outcome-home",
+          "windowY": 557,
+          "viewport": [
+            1280,
+            720
+          ]
+        }
+      },
+      {
+        "kind": "notice-after-native-continue-click",
+        "sequence": 3,
+        "utc": "2026-10-22T22:46:29.779498+00:00",
+        "actual": {
+          "text": "작업 01 요청에서 이어가기 · 이 요청에 받은 현재 보고 작업 02에서 계속해요. 고치는 작업문은 작업 02의 후속 확인 작업문이고, 작업 01의 작업문은 그대로예요.",
+          "hidden": false,
+          "visible": true,
+          "rect": {
+            "x": 264,
+            "y": 10,
+            "width": 1134,
+            "height": 49.59375,
+            "top": 10,
+            "right": 1398,
+            "bottom": 59.59375,
+            "left": 264
+          },
+          "inViewport": true,
+          "centerHit": true,
+          "display": "block",
+          "focus": "outcome-home",
+          "windowY": 592,
+          "viewport": [
+            1440,
+            900
+          ]
+        }
+      },
+      {
+        "kind": "notice-after-native-continue-click",
+        "sequence": 4,
+        "utc": "2026-10-22T22:46:31.185089+00:00",
+        "actual": {
+          "text": "작업 01로 이어가기 · 고치는 작업문은 작업 01의 것이에요. 전에 이어가던 작업 00은 그대로 남아요.",
+          "hidden": false,
+          "visible": true,
+          "rect": {
+            "x": 264,
+            "y": 10,
+            "width": 1134,
+            "height": 49.59375,
+            "top": 10,
+            "right": 1398,
+            "bottom": 59.59375,
+            "left": 264
+          },
+          "inViewport": true,
+          "centerHit": true,
+          "display": "block",
+          "focus": "outcome-home",
+          "windowY": 557,
+          "viewport": [
+            1440,
+            900
+          ]
+        }
+      }
+    ],
+    "HTTPCount": 6,
+    "allActualBodyDiskEqual": true,
+    "pageerrors": [],
+    "captureErrors": [],
+    "serverExits": [
+      {
+        "kind": "server-process",
+        "class": "Pc12",
+        "actualReturnCode": -15
+      },
+      {
+        "kind": "server-process",
+        "class": "Pc12Wide",
+        "actualReturnCode": -15
+      }
+    ]
+  }
+]

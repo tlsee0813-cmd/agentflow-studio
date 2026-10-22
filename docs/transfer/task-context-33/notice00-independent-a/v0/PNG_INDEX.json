@@ -1,0 +1,98 @@
+[
+  {
+    "path": "candidate/execution/raw/notice-1-1280.png",
+    "bytes": 157959,
+    "sha256": "8772eba38ee80d7341f587bb988d70444bdb66994ebdeb446f18865825290097",
+    "publishedRepresentative": true
+  },
+  {
+    "path": "candidate/execution/raw/notice-2-1280.png",
+    "bytes": 133827,
+    "sha256": "2957ee4e90e1e28248bcab435492f3ce2b58bb157b3fbb379a51b317cd84f310",
+    "publishedRepresentative": true
+  },
+  {
+    "path": "candidate/execution/raw/notice-3-1440.png",
+    "bytes": 175398,
+    "sha256": "856432593c517725a3793d2f22b2de0291920bd2ac9dbded28ee3e835ec9ef82",
+    "publishedRepresentative": true
+  },
+  {
+    "path": "candidate/execution/raw/notice-4-1440.png",
+    "bytes": 176744,
+    "sha256": "6e0d1d0b9c0ac67323e1d64c04c65ffea6373bffe847b922381ede3f23c06432",
+    "publishedRepresentative": true
+  },
+  {
+    "path": "candidate/execution/raw/pc12-1280-04-edit-R.png",
+    "bytes": 66679,
+    "sha256": "db773ca038de40b860625634eaa1346488d391684bf58062c1800e1787f4ac6c",
+    "publishedRepresentative": false
+  },
+  {
+    "path": "candidate/execution/raw/pc12-1280-05-edit-A.png",
+    "bytes": 68966,
+    "sha256": "53b0359bcf5299e0893f5afc06f245c3d7c9d9db416bc64846d232f69451cac8",
+    "publishedRepresentative": false
+  },
+  {
+    "path": "candidate/execution/raw/pc12-1280-06-back-after-edit.png",
+    "bytes": 106829,
+    "sha256": "bcccc289567f0504326c997d5b5f0722b1f8232a873083426d7a9ad99f6da607",
+    "publishedRepresentative": false
+  },
+  {
+    "path": "candidate/execution/raw/pc12-1440-04-edit-R.png",
+    "bytes": 82744,
+    "sha256": "28c5608e837b7398e61c457ed13bfa307225e47588d025534ef0c6c966ea6891",
+    "publishedRepresentative": false
+  },
+  {
+    "path": "candidate/execution/raw/pc12-1440-05-edit-A.png",
+    "bytes": 88256,
+    "sha256": "86617d1086916a97a9b065302e0a1a14164c85005666301d791d7af7272ab70e",
+    "publishedRepresentative": false
+  },
+  {
+    "path": "candidate/execution/raw/pc12-1440-06-back-after-edit.png",
+    "bytes": 129648,
+    "sha256": "41205bb1b75d903604dd599a2d327964d3003b92eaa9ba2d52dc3ac917df9c4c",
+    "publishedRepresentative": false
+  },
+  {
+    "path": "base/execution/raw/notice-1-1280.png",
+    "bytes": 157959,
+    "sha256": "8772eba38ee80d7341f587bb988d70444bdb66994ebdeb446f18865825290097",
+    "publishedRepresentative": true
+  },
+  {
+    "path": "base/execution/raw/notice-2-1280.png",
+    "bytes": 133787,
+    "sha256": "bd0e17e23c5181eb00ceb36c840bf98738b7aa013271b8246b92f4d8fe9fcc46",
+    "publishedRepresentative": true
+  },
+  {
+    "path": "base/execution/raw/notice-3-1440.png",
+    "bytes": 175398,
+    "sha256": "856432593c517725a3793d2f22b2de0291920bd2ac9dbded28ee3e835ec9ef82",
+    "publishedRepresentative": true
+  },
+  {
+    "path": "base/execution/raw/notice-4-1440.png",
+    "bytes": 176677,
+    "sha256": "f91f10e5748c446c2bfbd90f0c3f948ea7dfbd247195614700e9baa09dd742e4",
+    "publishedRepresentative": true
+  },
+  {
+    "path": "base/execution/raw/pc12-1280-04-edit-R.png",
+    "bytes": 66679,
+    "sha256": "db773ca038de40b860625634eaa1346488d391684bf58062c1800e1787f4ac6c",
+    "publishedRepresentative": false
+  },
+  {
+    "path": "base/execution/raw/pc12-1440-04-edit-R.png",
+    "bytes": 82744,
+    "sha256": "28c5608e837b7398e61c457ed13bfa307225e47588d025534ef0c6c966ea6891",
+    "publishedRepresentative": false
+  }
+]
