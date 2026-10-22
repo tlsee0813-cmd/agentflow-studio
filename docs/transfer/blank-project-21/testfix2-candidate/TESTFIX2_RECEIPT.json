@@ -1,0 +1,63 @@
+{
+  "kind": "BLANK21 keyboard scroll serialization test-only candidate, no runtime acceptance",
+  "product": "f7b25a586dca42466f07c7db2bedb9c59703deda app5370D0",
+  "original": {
+    "path": "original/blank21_browser.py",
+    "bytes": 14859,
+    "sha256": "212163B1F4B7B6E328BC194676656EAED570A65179C6670DC6274E74D10A3117",
+    "originalWorkspaceUnchanged": true
+  },
+  "candidate": {
+    "path": "app/continuity/tests/blank21_browser.py",
+    "bytes": 18600,
+    "sha256": "3A3C61B22EDB3F337457ADE10E1DBB13522B85BCD5B40B2E38C6038225F44303"
+  },
+  "helpers": [
+    {
+      "path": "app/continuity/tests/received20_browser.py",
+      "bytes": 32681,
+      "sha256": "2F9FBF172A2CBEB08804E7BB08A8E63921420673A2C7A1639EA5F5B44F5499E8",
+      "changed": false
+    },
+    {
+      "path": "app/continuity/tests/browser.py",
+      "bytes": 26861,
+      "sha256": "D9B6348EEA92728F78F6DEEE0E60CF1BD590D6654855F01477B9FA7CA06D5E02",
+      "changed": false
+    },
+    {
+      "path": "app/continuity/tests/dom_harness.py",
+      "bytes": 3914,
+      "sha256": "3AA0ABCBC6E959B9E0A7FEC21CC9AF553A06693DCC95C954F66BBD8092B02E0B",
+      "changed": false
+    }
+  ],
+  "delta": "One local key_scroll method plus two existing native keypress call sites. All other original methods/assertions unchanged as verified by AST source segments.",
+  "completionEvidence": [
+    "Trusted keydown and keyup are observed before success",
+    "End that must move the textarea requires that textarea scrollend",
+    "Every scroll target actually observed since keydown must emit scrollend",
+    "After those event prerequisites, focus/tail state and matching render samples are recorded separately"
+  ],
+  "renderBoundary": "Two consecutive requestAnimationFrame samples must match; this is a separate rendering observation, not a replacement for native scrollend and not the visibility assertion. A no-scroll key can finish only after trusted keyup and matching focus/render samples. No elapsed-delay success path exists.",
+  "failureBoundary": "A bounded5s deadline only fails. Existing focus, internal tail, viewport IntersectionObserver, clip/hit and initial viewport assertions remain. No DOM scroll/focus repair, forced click or arbitrary sleep added. A late scroll beginning after readiness can still fail the original visibility/IO checks.",
+  "hypothesis": "Control+End internal tail/selection can be reported before later native document scrolling completes, allowing overlap with Shift+Tab. Root-reported postfailure actual movement proves the IO failure was real, but exact scroll cause/timing and candidate effectiveness remain unproven.",
+  "observedByOthers": {
+    "versionMatch": "delivery/docs/transfer/blank-project-21/independent-a/ci-ubuntu-probe/version-match/REPORT.md, original154 two failures vs measured wrapper two passes;143 official download blocked403, no retry",
+    "postFailure": "21a621b7/docs/transfer/blank-project-21/independent-a/ci-ubuntu-probe/postfailure-clipping, root reports1280 original child/collector1, summary4.125→-2250.875/windowY2875 with focus/open retained; not executed here"
+  },
+  "static": {
+    "ASTAndJS": 0,
+    "patchReverseCheck": 0,
+    "modulesImportedForAST": false
+  },
+  "notRun": [
+    "browser",
+    "server",
+    "143 download retry or bypass",
+    "paid AI",
+    "product edits",
+    "remote writes"
+  ],
+  "patch": "blank21-key-scroll.patch"
+}
