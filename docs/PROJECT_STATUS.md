@@ -1,8 +1,10 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-23 현재 설명 다시 기록27 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-23 작업문 곁의 설명 읽기29 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint에 현재 상황을 대조해 설명을 새 사용자 판본으로 기록하는 흐름을 반영했다.** [27 결과·검증 한계](cycles/2026-10-23-description-refresh-27/RESULT.md). 이전 첫 파일 인계 선택의 노출과 고친 설명의 다음 요청 입력도 포함한다. [21 결과](cycles/2026-10-23-blank-project-21/RESULT.md) · [23 결과](cycles/2026-10-23-correction-context-23/RESULT.md). 정정문은 출처 있는 참고이며 확정 조건이나 AI 의미 해결로 승격하지 않는다.
+**제품 기준 checkpoint에 작업문을 고치면서 소유 부분의 구상·설명을 선택적으로 곁에 읽는 흐름을 반영했다.** [29 결과·검증 한계](cycles/2026-10-23-work-reference-29/RESULT.md). 명시 재열기는 최신 적용 설명의 처음으로, 새 보고 수신은 기존 읽기 위치 유지로 구분한다. 수동 값 자동 적용이나 실행 권한 부여는 없다.
+
+이전27의 현재 맥락 대조·새 사용자 설명 기록,21의 첫 파일 인계 선택,23의 고친 설명의 다음 요청 입력도 포함한다. [27 결과](cycles/2026-10-23-description-refresh-27/RESULT.md) · [21 결과](cycles/2026-10-23-blank-project-21/RESULT.md) · [23 결과](cycles/2026-10-23-correction-context-23/RESULT.md). 정정문은 출처 있는 참고이며 확정 조건이나 AI 의미 해결로 승격하지 않는다.
 
 **이전20에서는 현재 작업을 유지하는 명시 수신 검토, 정확한 보고와 당시 인계 작업문 읽기, 새 작업을 보존하는 복귀를 반영했다.** [PR11](https://github.com/tlsee0813-cmd/agentflow-studio/pull/11) · [20 결과와 수용 경계](cycles/2026-10-22-received-result-20/RESULT.md).
 
@@ -20,7 +22,7 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합548cf480](https://github.com/tlsee0813-cmd/agentflow-studio/commit/548cf48058706207430e2087d9fe99d3e8a5acb7), 최종후보 [6b96543f](https://github.com/tlsee0813-cmd/agentflow-studio/commit/6b96543fdf980ff45f0e1b67f83e8a0a561a1542) | 27 현재 맥락 대조·새 사용자 설명 기록. [27 결과·한계](cycles/2026-10-23-description-refresh-27/RESULT.md) |
+| 제품 기준 checkpoint | [병합5415b8aa](https://github.com/tlsee0813-cmd/agentflow-studio/commit/5415b8aa5fbf52a738ca833348f7f60247cfdbfd), 최종후보 [aa0938ec](https://github.com/tlsee0813-cmd/agentflow-studio/commit/aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b) | 29 작업문 곁의 선택적 소유 부분 설명. [29 결과·한계](cycles/2026-10-23-work-reference-29/RESULT.md) |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
@@ -29,6 +31,12 @@
 | [과거 Draft PR #2](https://github.com/tlsee0813-cmd/agentflow-studio/pull/2) | `flow049/outcome-home@f0fa5326` → `init-003/fix-review-regressions@61c3b2f0` | 과거 목적 홈 단계, closed·미병합. 본문·댓글 보존. 최신 제품 통합 PR 아님 |
 
 USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·gh-pages는 그대로 유지하고, 기존22개 브랜치는 [태그 보관·SHA 검증 후 정리](REPOSITORY_ARCHIVE.md)했다. PR #1·#2는 미병합으로 닫았다. 이전 인계 당시 사용자 개편안 대기 상태였으며, 이후 연구는 [ACTIVE](cycles/ACTIVE.md)에 기록한다.
+
+## 작업문 곁의 설명 읽기29의 수용 경계
+
+실제 편집 작업의 소유 부분을 따른다. 현재 인계에 쓰이지 않는 이전 기준을 알리되 읽던 본문은 유지하며, 직접 재열기로만 새 적용 설명을 선택한다. 첫 입력·재열기·새 보고 수신·인계·복귀를 독립 양PC에서 확인하고 정확 최종 양OS CI와 원자료 검토를 구분해 수용했다. [결과와 공유 근거](cycles/2026-10-23-work-reference-29/RESULT.md).
+
+합성 입력이며 사람 연구·실제 AI 의미 품질 검증은 아니다. 기존 인계·원보고·원기준을 보존했으나 전체 실행의 기준은 후속 요청으로2→4가 됐다. 관계는0개이고 JSON 원문 textarea 내부 스크롤·760px 분기점 자체는 미검증이다. 공개 MOCK은 그대로다.
 
 ## 현재 설명 다시 기록27의 수용 경계
 
