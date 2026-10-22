@@ -1,0 +1,83 @@
+{
+  "capturedAt": "2026-10-22T16:57:02.998Z",
+  "tool": "mcp__code_review__pull_requests_checks only",
+  "selectedAccount": "No account returned by discovery; same omission preserved on every read.",
+  "pullRequest": 12,
+  "headRevision": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "runId": 39815440492,
+  "jobs": [
+    {
+      "id": 119953002268,
+      "head_sha": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 119953002489,
+      "head_sha": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "failureClassification": {
+    "confirmed": "New BLANK21 browser regression step:2methods/2fail on Ubuntu,16.590s. Windows same2methods pass,10.209s. Preceding RECEIVED20 all11 pass and preceding W19 all6 pass in retained Ubuntu log. Not an installation/build/infra failure.",
+    "unresolved": "Product defect vs harness/intersection/scroll readiness is not concluded. No source/test/assertion modification after this CI result.",
+    "exactPath": "blank21_browser.py111 Shift+Tab -> summary focus expectation returns -> toggle47 reach -> received20_browser.py72 visible -> visible45 Playwright to_be_in_viewport fails; ratio0 repeatedly during5sec.",
+    "notRunAfterFailure": "The close-toggle Enter, post-fold preservation, receipt acceptance/reader-return assertions after111 were not reached on Ubuntu. Windows passes do not fill those missing Ubuntu steps."
+  },
+  "visibilityOrder": {
+    "sourceBasis": "Frozen reused received20_browser.py SHA2F9FBF172A2CBEB08804E7BB08A8E63921420673A2C7A1639EA5F5B44F5499E8; helper methods remain unmodified in the new harness.",
+    "controlFlow": "visible() evaluates PROBE then asserts bool(v && v.inside && v.hit) via self.yes; only afterward calls expect(locator).to_be_in_viewport(). Failure is at this latter call, so the preceding full clipping/hit assertion returned successfully. This is a control-flow inference from exact source+stack, not a numeric PROBE artifact read.",
+    "numericLimit": "Actual per-test numeric PROBE/pageY/focus values are in blank21-observations.jsonl within artifact12441584319 and have not been recovered through the permitted checks tool. No exact elapsed gap or stable geometry is inferred.",
+    "nextEvidence": "Root assigned Cloud to measure native Shift+Tab then rect/pageY/focus/IntersectionObserver/scroll event order. Await those measurements before deciding cause or modification. No fixed sleep or assertion relaxation proposed."
+  },
+  "versions": {
+    "ubuntu": {
+      "installationLog": [
+        "2026-10-22T16:40:21.1279674Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "2026-10-22T16:40:32.4457103Z Downloading Chromium 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-linux.zip",
+        "2026-10-22T16:40:35.8272841Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200",
+        "2026-10-22T16:40:36.2343187Z Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux.zip",
+        "2026-10-22T16:40:38.9035658Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1200"
+      ],
+      "actualBrowserRuntimeLimit": "Logs prove installed/downloaded PW1.57.0 and Chromium/HeadlessShell143.0.7499.4 build1200. Actual browser.version() is written to the CI artifact environment JSON, not shown in this retained log; not independently read here."
+    },
+    "windows": {
+      "installationLog": [
+        "2026-10-22T16:41:32.6631178Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "2026-10-22T16:42:13.1884509Z Downloading Chromium 143.0.7499.4 (playwright build v1200)\u001b[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-win64.zip\u001b[22m",
+        "2026-10-22T16:42:20.1946860Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium-1200",
+        "2026-10-22T16:42:20.4592357Z Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200)\u001b[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-win64.zip\u001b[22m",
+        "2026-10-22T16:42:25.2851833Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1200"
+      ],
+      "actualBrowserRuntimeLimit": "Same limit: installed/downloaded versions observed, launched browser.version() not read from artifact."
+    }
+  },
+  "rawEvidence": [
+    {
+      "file": "007-ubuntu-failure-log.json",
+      "logStringChars": 120000,
+      "logTruncated": true
+    },
+    {
+      "file": "008-windows-success-log.json",
+      "logStringChars": 120000,
+      "logTruncated": true
+    }
+  ],
+  "artifact": {
+    "ubuntuId": 12441584319,
+    "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39815440492/artifacts/12441584319"
+  },
+  "oldHead": "15b60/run39813998848 original snapshot remains separately in ci-15b60; no final pass/failure was observed there before replacement.",
+  "notDone": [
+    "remote edits",
+    "cancel/rerun",
+    "local server/browser",
+    "CLI or alternate GitHub CI API",
+    "test/source/assertion modification after f7b25 failure"
+  ]
+}
+
