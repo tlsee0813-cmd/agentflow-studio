@@ -1,0 +1,191 @@
+diff --git a/app/continuity/src/client/app.ts b/app/continuity/src/client/app.ts
+index dbe2bf4..43b848f 100644
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -2,7 +2,7 @@ import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, TEXT_LIMIT, type B
+ import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
+   currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask,
+   areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, addChildArea, setAreaParent, editArea, setAreaArchived, addRelation, removeRelation, placeTask,
+-  exportAnchor, areaDescription, returnUnderstanding, correctUnderstanding, type DescriptionView } from '../shared/domain.js';
++  exportAnchor, areaDescription, returnUnderstanding, planStamp, beginUnderstandingReview, understandingReviewMatches, recordUnderstandingReview, understandingReviewWork, type UnderstandingReviewToken, type DescriptionView } from '../shared/domain.js';
+ import { parseProject, parseResultFile, validateRequest, validateAdvice, validateGuideEnvelope } from '../shared/validation.js';
+ import { buildGuideRequest, guideDigest, readOf, proposalText, adoptProposal, instructionOf } from '../shared/guidance.js';
+ import { WorkspaceStore, serializeProject, storageErrorCode, type EntryRef, type WorkspaceEntry } from '../shared/storage.js';
+@@ -49,7 +49,7 @@ let viewTask:string|null=null;
+ let viewReturn:string|null=null;
+ // Received in this open project only; this is not tracking changes since a previous visit.
+ const receivedAreas=new Set<string>();
+-const understandingEditRevisions=new Map<string,number>();
++const understandingEdits=new Map<string,{token:UnderstandingReviewToken;epoch:number}>();
+ // AREA17: the last result file with an organised description imported in this tab (work view line with the location action).
+ type ResultReceipt={project:string;epoch:number;taskId:string;requestId:string;exportTaskId:string;handoffId:string;duplicate:boolean;save:'pending'|'saved'|'memory'};
+ let lastReceipt:ResultReceipt|null=null;
+@@ -189,7 +189,7 @@ function resetEphemeral() {
+   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
+   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
+   receivedAreas.clear();
+-  understandingEditRevisions.clear();lastReceipt=null;located=null;
++  understandingEdits.clear();lastReceipt=null;located=null;
+   mapView=null;mapSelected=null;initialMapFitPending=false;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};panelMode='area';recordsReturnNotice='';backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
+   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
+ }
+@@ -1603,7 +1603,7 @@ const heldMessage:Record<string,string>={
+   'area-archived':'보관된 영역이라 현재 설명으로 쓰지 않았어요.',
+   'file-basis':'파일의 설명 기준이 실제 인계 기록과 달라요.',
+   'superseded':'그 뒤 설명이나 사용자 정정이 있어 이전 입력을 적용하지 않았어요.',
+-  'plan-changed':'인계 뒤 구상·조건 또는 포함 맥락의 참고 기준이 바뀌어 적용하지 않았어요.'
++  'plan-changed':'인계 뒤 구상·조건·직접 쓴 작업문 또는 포함 맥락의 참고 기준이 바뀌어 적용하지 않았어요.'
+ };
+ /** Evidence opens here, without selecting a report or changing the work the user continues. */
+ function descriptionEvidence(d:DescriptionView,id:string):HTMLElement {
+@@ -1613,6 +1613,30 @@ function descriptionEvidence(d:DescriptionView,id:string):HTMLElement {
+   }else box.append(node('p','사용자가 이전 설명을 직접 정정했어요. 이전 설명과 근거는 아래 기록에 남아요.','hint'));
+   return box;
+ }
++/** Current read-only comparison material, only inside the explicitly opened stale-description editor. */
++function understandingReviewContext(a:Area,id:string):HTMLElement {
++  const box=node('div'),context=details('현재 구상·조건 보기',`${id}-context`);
++  context.append(node('p','현재 기록을 읽어 설명과 대조하세요. 앱이 차이의 의미를 판단하지 않아요.','hint'));
++  if(project.space.brief)context.append(node('p','프로젝트 목적','source-meta'),node('div',project.space.brief.text,'source-raw'));
++  for(const part of areaPath(project,a.id))context.append(node('p',`${part.id===a.id?'이 부분':'상위 부분의 참고 구상'} · ${part.name}`,'source-meta'),node('div',part.note||'아직 구상이 적혀 있지 않아요.','source-raw'));
++  const ids=new Set(planStamp(project,a.id).decisions.map(x=>x.slice(0,x.lastIndexOf('@'))));
++  for(const basis of project.bases.filter(b=>ids.has(b.id)))context.append(node('p',BASIS_LABEL[basis.status],'source-meta'),node('div',basis.text,'source-raw'));
++  const work=details('관련 작업문 보기',`${id}-work`),related=understandingReviewWork(project,a.id);
++  work.append(node('p','현재 작업문을 읽고 설명과 대조하세요.','hint'));
++  for(const {task,changed} of related){
++    const owner=areaById(areaOf(project,task)),place=owner?`부분 · ${owner.name}${owner.archived?' (보관됨)':''}`:'부분 미지정 · 함께 참고하는 작업';
++    const row=related.length>1?details(`${taskTitle(project,task)} · ${place}`,`${id}-task-${task.id}`):node('section');row.dataset.taskId=task.id;row.dataset.changed=String(changed);
++    if(related.length===1)row.append(node('p',taskTitle(project,task),'source-meta'),node('p',place,'hint'));
++    const grid=node('dl','','review-grid task-context-grid');
++    if(fieldRows(task,currentWork(project,task),grid,[['understanding','짧은 이해'],['scope','이번 범위와 유지할 것'],['next','실행 도구에 전달할 작업문'],['checks','확인할 동작 / 완료 조건']],null,`${id}-${task.id}`))row.append(grid);
++    else row.append(node('p','아직 적힌 작업문이 없어요.','hint'));
++    const correction=intentCorrection(task);
++    if(correction)row.append(node('p','사용자 직접 정정한 작업 목적·유지 조건','source-meta'),node('div',correction.goal,'source-raw'),node('div',correction.conditions||'(조건을 직접 비워 둠)','source-raw'));
++    work.append(row);
++  }
++  if(!related.length)work.append(node('p','관련된 직접 작성 작업문이 없어요.','hint'));
++  box.append(context,work);return box;
++}
+ /** AREA17 default reading: a short current description, the first key change and the one judgement it may need (an
+  * unadopted proposal), each cut to its opening words; the whole description, every change, the proposal, its source, the
+  * evidence, the earlier descriptions and the correction are one disclosure away. Nothing stored is cut or changed.
+@@ -1638,22 +1662,37 @@ function understandingPanel(a:Area,id:string,compact=false):HTMLElement|null {
+       if(d.changes.length){const changes=node('ul','','understanding-changes');for(const text of d.changes)changes.append(node('li',text));full.append(node('p','직전 정리에서 달라진 점','source-meta'),changes);}
+       if(d.proposal)full.append(node('p','구상 변경 제안 · 미채택 · 실행 지시 아님','source-meta'),node('div',d.proposal,'source-raw'));}
+     full.append(node('p',`정리: ${d.origin} · 앱 미검증`,'hint'));more.append(full);
+-  }else box.append(node('p',d?'구상·조건 또는 포함 맥락의 참고 기준이 바뀌어 이전 설명은 현재 설명으로 쓰지 않아요.':'아직 현재 설명은 없어요. 받은 정리는 아래 기록에 있어요.','hint'));
++  }else box.append(node('p',d?'구상·조건·직접 쓴 작업문 또는 포함 맥락의 참고 기준이 바뀌어 이전 설명은 현재 설명으로 쓰지 않아요.':'아직 현재 설명은 없어요. 받은 정리는 아래 기록에 있어요.','hint'));
+   if(d){more.append(descriptionEvidence(d,`${id}-evidence`));
+-    // Only the valid current description can be corrected (a stale one is never re-saved as current).
+-    if(d.valid&&!a.archived){const key=`understanding-edit:${a.id}`,edit=details('설명 오류 고치기',`${id}-edit`);edit.open=spaceInputs[`${project.id}:${key}`]!==undefined;
++    if(!a.archived){
++      const key=`understanding-edit:${a.id}`,sessionKey=`${project.id}:${key}`,epoch=projectEpoch,owner=project.id;
++      const edit=details(d.valid?'설명 오류 고치기':'현재 상황과 대조해 설명 고치기',`${id}-edit`);edit.open=understandingEdits.has(sessionKey);
+       const field=spaceInput(node('textarea'),`${id}-text`,d.summary,key);field.rows=3;field.maxLength=2000;field.setAttribute('aria-label','영역 설명 정정');
+-      // The draft belongs to the description it was started from: a newer one arriving meanwhile is never 'corrected' by it.
+-      field.addEventListener('input',()=>{if(!understandingEditRevisions.has(key))understandingEditRevisions.set(key,d.entry.revision!);});
+-      const stale=understandingEditRevisions.has(key)&&understandingEditRevisions.get(key)!==d.entry.revision;
+-      if(stale){const n=node('p','고치는 동안 새 설명이 왔어요. 이 초안은 보존했지만 새 설명의 정정으로 저장하지 않아요. 새 설명을 읽은 뒤 취소하고 다시 시작하세요.','alert warning');n.id=`${id}-stale`;edit.append(n);}
+-      edit.append(field,node('p','사용자 구상을 바꾸지 않고 이 설명만 고쳐요. 이전 설명과 근거는 남아요.','hint'),btn('정정 저장',()=>guard(()=>{
+-        if(understandingEditRevisions.has(key)&&understandingEditRevisions.get(key)!==areaDescription(project,a.id).current?.entry.revision){project={...project,notice:'정정 초안 뒤 새 설명이 도착해 저장하지 않았어요. 작성한 내용은 그대로예요.'};renderStatus();return;}
+-        const n=correctUnderstanding(project,a.id,field.value);clearInputs(key);understandingEditRevisions.delete(key);commit(n);}),'secondary',`${id}-save`),
+-        btn('취소',()=>{clearInputs(key);understandingEditRevisions.delete(key);render();},'quiet',`${id}-cancel`));more.append(edit);}
++      const warning=node('p','편집을 연 뒤 설명이나 구상·조건·작업문 등의 기준이 바뀌었어요. 초안은 남겼지만 저장하지 않아요. 취소한 뒤 최신 내용을 읽고 다시 열어 주세요.','alert warning');
++      warning.id=`${id}-stale`;warning.setAttribute('role','status');
++      const matches=()=>{const session=understandingEdits.get(sessionKey);return !!session&&owner===project.id&&epoch===projectEpoch&&session.epoch===projectEpoch&&understandingReviewMatches(project,a.id,session.token);};
++      warning.hidden=!understandingEdits.has(sessionKey)||matches();
++      // Only native summary activation starts a review. Render/restored disclosures and typing cannot refresh its token.
++      edit.querySelector('summary')!.addEventListener('click',()=>{
++        if(edit.open||understandingEdits.has(sessionKey)||!edit.isConnected||!edit.getClientRects().length||owner!==project.id||epoch!==projectEpoch)return;
++        const token=beginUnderstandingReview(project,a.id);understandingEdits.set(sessionKey,{token,epoch});
++        field.value=areaDescription(project,a.id).current!.summary;spaceInputs[sessionKey]=field.value;
++      });
++      edit.append(field,node('p','이전 설명은 남습니다. 작업문과 조건은 바뀌지 않으며, 앱이 사실을 검증한 것은 아닙니다.','hint'));
++      if(!d.valid)edit.append(understandingReviewContext(a,`${id}-review`));
++      edit.append(warning,btn(d.valid?'정정 저장':'현재 설명으로 기록',()=>{
++        if(owner!==project.id||epoch!==projectEpoch||!edit.isConnected)return;
++        if(!matches()){spaceInputs[sessionKey]=field.value;warning.hidden=false;return;}
++        const n=recordUnderstandingReview(project,a.id,field.value,understandingEdits.get(sessionKey)!.token);
++        edit.open=false;clearInputs(key);understandingEdits.delete(sessionKey);commit(n);
++      },'secondary',`${id}-save`),btn('취소',()=>{
++        if(owner!==project.id||epoch!==projectEpoch||!edit.isConnected)return;
++        edit.open=false;clearInputs(key);understandingEdits.delete(sessionKey);render();
++      },'quiet',`${id}-cancel`));more.append(edit);
++    }
+   }
+   if(state.previous.length||state.held.length||d&&!d.valid){const history=details('이전 설명 · 반영하지 않은 정리',`${id}-history`);
+-    for(const old of [...(d&&!d.valid?[d]:[]),...state.previous,...state.held]){const row=node('section','','understanding-record');row.append(node('p',old.entry.held?heldMessage[old.entry.held]!:old===d?'구상이나 조건이 바뀌기 전의 설명 · 지금은 현재 설명이 아니에요':old.entry.by==='user'?'사용자 정정 기록':'이전 정리 설명','source-meta'),node('div',old.summary,'source-raw'),descriptionEvidence(old,`${id}-history-${old.returnTask?.id??old.entry.revision}`));if(old.proposal)row.append(node('p',`미채택 제안: ${old.proposal}`,'source-raw'));history.append(row);}more.append(history);
++    for(const old of [...(d&&!d.valid?[d]:[]),...state.previous,...state.held]){const row=node('section','','understanding-record');row.append(node('p',old.entry.held?heldMessage[old.entry.held]!:old===d?'구상·조건·직접 쓴 작업문 등의 이전 기준 설명 · 지금은 현재 설명이 아니에요':old.entry.by==='user'?'사용자 정정 기록':'이전 정리 설명','source-meta'),node('div',old.summary,'source-raw'),descriptionEvidence(old,`${id}-history-${old.returnTask?.id??old.entry.revision}`));if(old.proposal)row.append(node('p',`미채택 제안: ${old.proposal}`,'source-raw'));history.append(row);}more.append(history);
+   }
+   if(more.childElementCount)box.append(more);
+   return box;
+@@ -2044,16 +2083,16 @@ function fieldOf(t:Task,w:Work,key:keyof Task['manual']):{text:string;label:stri
+   if(ai)return {text:ai,label:`이전 ${who} 문구 · ${staleCause(w)}이라 작업문에서 제외됨`,state:'stale'};
+   return {text:'',label:'',state:'empty'};
+ }
+-function fieldRows(t:Task,w:Work,grid:HTMLElement,keys:[keyof Task['manual'],string][],limit:number|null):number {
++function fieldRows(t:Task,w:Work,grid:HTMLElement,keys:[keyof Task['manual'],string][],limit:number|null,prefix='task-view'):number {
+   let shown=0;
+   for(const [key,label] of keys) {
+     const f=fieldOf(t,w,key);if(f.state==='empty')continue;shown++;
+     const cell=node('div');cell.dataset.field=key;cell.dataset.origin=f.state;
+     const dt=node('dt',`${label} · `);dt.append(node('span',f.label,`field-origin ${f.state}`));cell.append(dt);
+-    if(f.state==='stale'){const old=details('제외된 이전 문구 보기 (현재 작업문 아님)',`task-view-stale-${key}`);old.append(node('div',f.text,'source-raw'));cell.append(node('dd','지금 작업문에는 들어가지 않아요.'),old);}
++    if(f.state==='stale'){const old=details('제외된 이전 문구 보기 (현재 작업문 아님)',`${prefix}-stale-${key}`);old.append(node('div',f.text,'source-raw'));cell.append(node('dd','지금 작업문에는 들어가지 않아요.'),old);}
+     else if(limit!==null&&f.text.length>limit) {
+       // fix1: a long field shows its opening words, and its whole text (with the same origin) one explicit click away. Read-only.
+-      const whole=details(`${label} 전문 보기 · ${f.text.length}자 · ${f.label}`,`task-view-full-${key}`);whole.append(node('div',f.text,'source-raw'));
++      const whole=details(`${label} 전문 보기 · ${f.text.length}자 · ${f.label}`,`${prefix}-full-${key}`);whole.append(node('div',f.text,'source-raw'));
+       cell.append(node('dd',`${shortText(f.text,limit)} · 앞부분`),whole);
+     }
+     else cell.append(node('dd',!f.text?'(직접 비워 둠)':f.text));
+diff --git a/app/continuity/src/shared/domain.ts b/app/continuity/src/shared/domain.ts
+index 74a422e..71b7f4d 100644
+--- a/app/continuity/src/shared/domain.ts
++++ b/app/continuity/src/shared/domain.ts
+@@ -756,6 +756,36 @@ export function correctUnderstanding(p:Project,areaId:string,value:string):Proje
+   next.entries.push({by:'user',at:now(),revision:next.revision,taskId:null,returnId:null,text:v,corrects:st.revision,stamp:planStamp(p,areaId),held:null});
+   n.space.understanding[areaId]=next;return n;
+ }
++/** Ephemeral review context, captured when the user opens the editor. Never persisted or an export anchor. */
++export interface UnderstandingReviewToken { projectId:string;areaId:string;revision:number;stamp:ContextPlanStamp }
++export function beginUnderstandingReview(p:Project,areaId:string):UnderstandingReviewToken {
++  const a=p.space.areas.find(x=>x.id===areaId);ensure(a&&!a.archived,'AREA_MISSING');
++  const current=areaDescription(p,areaId).current;ensure(current&&current.entry.revision!==null,'NOTHING_TO_REVIEW');
++  return {projectId:p.id,areaId,revision:current.entry.revision,stamp:copy(planStamp(p,areaId))};
++}
++export function understandingReviewMatches(p:Project,areaId:string,token:UnderstandingReviewToken):boolean {
++  const a=p.space.areas.find(x=>x.id===areaId);
++  return !!a&&!a.archived&&token.projectId===p.id&&token.areaId===areaId
++    &&areaDescription(p,areaId).current?.entry.revision===token.revision&&sameStamp(token.stamp,planStamp(p,areaId));
++}
++/** Explicitly records a new user version after comparison with the current context. A stale entry is never altered or
++ * automatically made valid; even unchanged text becomes a new user-attributed version with the reviewed live stamp. */
++export function recordUnderstandingReview(p:Project,areaId:string,value:string,token:UnderstandingReviewToken):Project {
++  ensure(understandingReviewMatches(p,areaId,token),'UNDERSTANDING_REVIEW_CHANGED');
++  const v=value.trim();text(v,SUMMARY_LIMIT);
++  const n=change(p),next=copy(areaState(p,areaId));next.revision++;
++  next.entries.push({by:'user',at:now(),revision:next.revision,taskId:null,returnId:null,text:v,corrects:token.revision,stamp:copy(token.stamp),held:null});
++  n.space.understanding[areaId]=next;return n;
++}
++/** The work actually participating in the old or live broad stamp, independent of currentTaskId. Changed fingerprints
++ * come first; this identifies records to compare, not a semantic explanation of why a description is stale. */
++export function understandingReviewWork(p:Project,areaId:string):{task:Task;changed:boolean}[] {
++  const entries=(items:string[])=>new Map(items.map(s=>{const i=s.indexOf(':');return [s.slice(0,i),s.slice(i+1)] as const;}));
++  const previous=entries(areaDescription(p,areaId).current?.entry.stamp?.work??[]),current=entries(planStamp(p,areaId).work);
++  return [...new Set([...previous.keys(),...current.keys()])].flatMap(id=>{
++    const task=p.tasks.find(t=>t.id===id);return task?[{task,changed:previous.get(id)!==current.get(id)}]:[];
++  }).sort((a,b)=>Number(b.changed)-Number(a.changed));
++}
+ export interface DescriptionView {
+   entry:UnderstandingEntry; summary:string; changes:string[]; proposal:string|null; origin:string;
+   /** The received return task (external) and the request it returned to. */
+@@ -788,7 +818,7 @@ function understandingLines(p:Project,t:Task):string[] {
+   const areaId=areaOf(p,t),a=areaId?p.space.areas.find(x=>x.id===areaId):undefined;if(!a)return [];
+   const d=areaDescription(p,a.id).current;if(!d)return [];
+   if(!d.valid)return ['\n## 영역 현재 설명 — 이번 작업문에 넣지 않음',
+-    `영역 ‘${a.name}’의 정리 설명 r${d.entry.revision}은 그 뒤 사용자 구상·기준이 바뀌어 현재 설명으로 쓰지 않습니다. 그 설명을 이번 작업의 근거로 삼지 마세요.`];
++    `영역 ‘${a.name}’의 정리 설명 r${d.entry.revision}은 그 뒤 구상·조건·직접 쓴 작업문 또는 포함 맥락의 참고 기준이 바뀌어 현재 설명으로 쓰지 않습니다. 그 설명을 이번 작업의 근거로 삼지 마세요.`];
+   const from=d.entry.by==='user'?`사용자가 설명 r${d.entry.corrects}을 직접 고친 값 (사용자 정정도 앱이 검증한 사실은 아님)`
+     :`작업 ${String(p.tasks.indexOf(d.returnTask!)+1).padStart(2,'0')}에 돌아온 결과에 붙은 외부 정리 · ${d.origin}`;
+   return ['\n## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증',

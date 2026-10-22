@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "command": "node node_modules/typescript/bin/tsc --noEmit",
+  "runtime": "Node24.19.0 author auxiliary"
+}

@@ -1,0 +1,28 @@
+{
+  "baseline": "b24e790333318d97b1ab713a136a96f2bd6ece98",
+  "appTree": "659ced070a6cd0ce6d9029978a0ee8e0f3119fe7",
+  "appTreeAt689c": "659ced070a6cd0ce6d9029978a0ee8e0f3119fe7",
+  "sourceFiles": 203,
+  "sourceBytes": 2408628,
+  "allSelectedSourceBlobsEqual": true,
+  "status": "",
+  "stagedDiff": "",
+  "checkoutByteAdjustments": "checkout-byte-adjustments.json,10 fresh experiments files CRLF→fixed Git blob; app already exact; index stat refreshed with unchanged blobs/no staged delta",
+  "preparationFailures": "Initial byte verification and then status-only strict check stopped; fixed only fresh checkout bytes/cache; source integrity now verified",
+  "runtime": "Existing Node24.19.0 author auxiliary; locked TypeScript5.8.3; app/node_modules junction to product18-author",
+  "notRun": [
+    "type/check/build/unit",
+    "server/browser",
+    "remote writes"
+  ],
+  "commandsFromApp": [
+    "node node_modules/typescript/bin/tsc --noEmit",
+    "node scripts/check.mjs",
+    "node continuity/scripts/check.mjs",
+    "PATH including app/node_modules/.bin; node scripts/build.mjs",
+    "node continuity/scripts/build.mjs",
+    "node --test tests/*.test.mjs",
+    "node --test continuity/tests/*.test.mjs"
+  ],
+  "powershellUnitNote": "Pass explicit .test.mjs file array from Get-ChildItem to node --test on Windows; build parent and continuity first. No build/unit run in preparation."
+}

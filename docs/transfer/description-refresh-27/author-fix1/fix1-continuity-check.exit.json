@@ -1,0 +1,5 @@
+{
+  "runtime": "Node24.19.0 author auxiliary",
+  "exit": 0,
+  "command": "node continuity/scripts/check.mjs"
+}

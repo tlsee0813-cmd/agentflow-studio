@@ -1,0 +1,13 @@
+{
+  "test": {
+    "path": "app/continuity/tests/description-refresh27.test.mjs",
+    "bytes": 13211,
+    "sha256": "B1F942044D682E33E71CDF9D17178C829307A2B45A5FA792780204E7160BDA09"
+  },
+  "node": "v24.19.0",
+  "total": 99,
+  "pass": 99,
+  "fail": 0,
+  "bindingFiles": 7,
+  "appSourceSHA256": "89E5C3B07EDF573AD0724A9E9D4E89386BB199184026B8282A5688556022DA17"
+}

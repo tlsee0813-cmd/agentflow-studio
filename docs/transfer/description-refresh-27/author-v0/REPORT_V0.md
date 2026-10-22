@@ -1,0 +1,13 @@
+# Description refresh27 — author v0 evidence
+
+Baseline: `b24e790333318d97b1ab713a136a96f2bd6ece98`; fixed input: `4afe1ef10fc9758fbaa9716986e396c88c91aa54`. V0 product was published by the coordinator as `5dcf269bd7f25dec3f6432fb3386adb23c89d526`. This is an intermediate author snapshot, not browser acceptance.
+
+Only `app/continuity/src/client/app.ts` and `app/continuity/src/shared/domain.ts` changed. The broad fingerprint, old valid-only `correctUnderstanding`, persisted schema, historical descriptions, original reports, exported H snapshots, four work values and current task policy remain unchanged. `UI27_V0_RECEIPT.json` records exact source bytes, SHA256 and Git blobs; `candidate-v0.patch` is the baseline delta. Complete v0 source remains in `candidate-v0-source/` and the fixed product commit, excluded from the evidence upload to avoid duplication.
+
+An explicit editor opening captures project, area, latest applied description revision and live plan stamp. Recording rejects changed context while retaining the draft. Recording identical text still adds a new user-attributed revision. The stale editor offers current context and actual related work, independent of the selected current task. Multiple related tasks open separately and show their current owner. Render/disclosure restoration never creates or refreshes the token.
+
+Node24.19.0 author auxiliary checks: parent type/check/build, continuity check/build and whitespace check ended at zero. The first parent build failed because the reused dependency directory had no `.bin` shim. Its original stdout/stderr/exit are preserved as `parent-build.*`; reusing the existing pinned TypeScript5.8.3 `product18-author-evidence/tsc.cmd` produced `parent-build-bootstrap.*` exit0 without installation. The separate test author ran new8 plus related existing pure91 tests,99/99 exit0; raw evidence is under the separate `product27-test-evidence/unit27-first.*` prefix.
+
+Independent static review subsequently found a v0 task-reader close-memo issue: native toggle is asynchronous, so cancel/successful save could restore an open editor after its token had been cleared. V0 is preserved as this pre-fix snapshot. The UI-only fix and its checks are recorded separately in `UI27_FIX1_RECEIPT.json`, `candidate-fix1-only.patch` and `REPORT_FIX1.md`. Domain source and the99 pure-test result remain unchanged.
+
+No local server, browser, HTTP listener, paid AI request, install or remote write was performed by this author. Full unit wildcard was deliberately not run because it includes HTTP listeners. Actual Cloud UI, geometry, interaction and Node22 CI acceptance remain the coordinator's separate checks.

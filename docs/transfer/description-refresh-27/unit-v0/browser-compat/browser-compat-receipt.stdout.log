@@ -1,0 +1,39 @@
+{
+  "scope": "Test-only one expectation update for27 inline rejection status; browser NOT RUN",
+  "path": "app/continuity/tests/understanding17_browser.py",
+  "changedLine": 265,
+  "before": {
+    "bytes": 42855,
+    "sha256": "7F5B7AC1386480C1D0D72E3380B8AA1ABC5083E6EAD2E4B9780E9210E99265B2",
+    "gitBlob": "1cc8cf6714be9e5edaa95edb841fd2f151dece9b",
+    "line": "        before=self.state();self.page.locator(f'#area-understanding-{area}-save').click();expect(self.page.locator('#notice')).to_contain_text('저장하지 않았어요')"
+  },
+  "after": {
+    "bytes": 42920,
+    "sha256": "455FDF36FAB594C22665D5577B4D809720BD9600C2B6AC9533660D51DAE7EDE7",
+    "gitBlob": "62c8668c359daa367e988b2884c6d03d297a9a26",
+    "line": "        before=self.state();self.page.locator(f'#area-understanding-{area}-save').click();stale=self.page.locator(f'#area-understanding-{area}-stale');expect(stale).to_be_visible();expect(stale).to_contain_text('저장하지 않아요')"
+  },
+  "allOtherBytesUnchanged": true,
+  "preserved": "Following revision/state/draft assertions on line266 and all other tests/fixtures unchanged",
+  "ast": {
+    "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+    "args": [
+      "work/product27-test-evidence/check_browser_ast.py",
+      "work/product27-author/app/continuity/tests/understanding17_browser.py"
+    ],
+    "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4",
+    "node": "v24.19.0",
+    "start": "2026-10-22T18:56:41.259Z",
+    "end": "2026-10-22T18:56:41.487Z",
+    "status": 0,
+    "signal": null,
+    "error": null
+  },
+  "notRun": [
+    "browser suite",
+    "local server",
+    "new suite or product change"
+  ],
+  "reason": "Rejection feedback intentionally moved from global #notice to the exact area editor inline -stale status. New expectation requires it actually visible after click and containing rejection wording."
+}

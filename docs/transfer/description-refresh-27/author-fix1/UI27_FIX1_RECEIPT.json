@@ -1,0 +1,54 @@
+{
+  "baseline": "b24e790333318d97b1ab713a136a96f2bd6ece98",
+  "prior": "UI27_V0_RECEIPT.json",
+  "status": "fix1 source frozen; independent source review pending",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 264518,
+      "sha256": "55be6a0a47f4a116a3a19593320e09d3820bb5c46b07250dfda25efd78ccb691",
+      "gitBlob": "2fdc74d9451c550367f12fd79344e2ed510ba9fb",
+      "source": "candidate-fix1-source/app.ts"
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 75793,
+      "sha256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf",
+      "gitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e",
+      "source": "candidate-v0-source/domain.ts"
+    }
+  ],
+  "commands": [
+    {
+      "record": "fix1-continuity-check.exit.json",
+      "runtime": "Node24.19.0 author auxiliary",
+      "exit": 0,
+      "command": "node continuity/scripts/check.mjs"
+    },
+    {
+      "record": "fix1-continuity-build.exit.json",
+      "runtime": "Node24.19.0 author auxiliary",
+      "exit": 0,
+      "command": "node continuity/scripts/build.mjs"
+    },
+    {
+      "record": "fix1-diff-check.exit.json",
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "fix": "On cancel/successful save synchronously close only the current task-reader editor memo before render; asynchronous toggle cannot reopen a tokenless editor.",
+  "domainUnchanged": true,
+  "unit": "v0 domain/new8+pure91=99/99 unchanged domain; UI-only fix1 no redundant unit rerun",
+  "sourceBefore": "candidate-v0-source/app.ts preserved; published v0 5dcf269bd7f25dec3f6432fb3386adb23c89d526",
+  "patches": [
+    "candidate-fix1-only.patch",
+    "candidate-fix1.patch"
+  ],
+  "notRun": [
+    "local browser/server",
+    "Cloud UI acceptance",
+    "Node22 CI",
+    "remote writes"
+  ]
+}

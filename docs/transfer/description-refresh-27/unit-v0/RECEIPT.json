@@ -1,0 +1,118 @@
+{
+  "basis": "b24e790333318d97b1ab713a136a96f2bd6ece98",
+  "contract": {
+    "ref": "4afe1ef10fc9758fbaa9716986e396c88c91aa54",
+    "path": "docs/cycles/2026-10-23-description-refresh-27/INPUT.md",
+    "blob": "6e0dc2bf8149999e16dd74cf02758565aa655630"
+  },
+  "role": "New test author/executor only; no domain/app edits and not independent product acceptance",
+  "node": "v24.19.0",
+  "typescript": "5.8.3",
+  "testFile": {
+    "path": "app/continuity/tests/description-refresh27.test.mjs",
+    "bytes": 13211,
+    "sha256": "B1F942044D682E33E71CDF9D17178C829307A2B45A5FA792780204E7160BDA09"
+  },
+  "sourceDistBinding": [
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "sourceSHA256": "98291A502FB90225B58286130336E8060130C56A45EDA6E0CE7963BB594760BF",
+      "distSHA256": "F8559B0A01A633385BEA417AE76F797F9051B109E300A43B6BECC3C9CD1BDCBD",
+      "inMemoryTranspileEqualsDist": true
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "sourceSHA256": "16202DB1C238E917C548950543686046977C21C61DE56B30D6F4140AAD607D47",
+      "distSHA256": "D1DD2C914E0332A57BB6875E4CBD660D95EC529E2038E04A2E69C585C4DEAF53",
+      "inMemoryTranspileEqualsDist": true
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "sourceSHA256": "CC958CF61B54AA9D552AAB07DDAA8C7E6D60EC5E61F7218CF597DD608E9B94DF",
+      "distSHA256": "5C1C5F2ED79435A3250FE31FA3D8C43442F080D757368B157DA97B22572960B4",
+      "inMemoryTranspileEqualsDist": true
+    },
+    {
+      "path": "app/continuity/src/shared/plan-facts.ts",
+      "sourceSHA256": "6BA83E873FC795C8E1ECD8E6AC82F334849E4C108EBF4149A870A0A554FD7C44",
+      "distSHA256": "33F23F4EF8ED4009D6F2B64E30E26E367B83302146CEDBC85AE910B5CA889C45",
+      "inMemoryTranspileEqualsDist": true
+    },
+    {
+      "path": "app/continuity/src/shared/hierarchy.ts",
+      "sourceSHA256": "C9E5A4D9679E6720BC5CD3B86E624904D17A5A7D22B8806D574640DDAD605FFA",
+      "distSHA256": "5D09D7C3EAC8E75B012EB69C086DFDD84DB645C9318140B5E82B883B9D919624",
+      "inMemoryTranspileEqualsDist": true
+    },
+    {
+      "path": "app/continuity/src/shared/outcome.ts",
+      "sourceSHA256": "F206DF59FF9697368820CE99F74995E9B2E2467A523A7A0217E07DC2DE29D5DD",
+      "distSHA256": "C230973C7021A31FFD27D0A0A389CF978E3DF501BA6F98817A14BD27F8C100E8",
+      "inMemoryTranspileEqualsDist": true
+    },
+    {
+      "path": "app/continuity/src/shared/mock.ts",
+      "sourceSHA256": "1EBC9A9B593B10AF04A4C113282F2D509B926131F6BE930C3A946CBDB052B0F2",
+      "distSHA256": "C1504250A298A86EFCBAB8DE932218CD38E2772D79A0759403DC497F829BC9EF",
+      "inMemoryTranspileEqualsDist": true
+    }
+  ],
+  "appSourceSHA256": "89E5C3B07EDF573AD0724A9E9D4E89386BB199184026B8282A5688556022DA17",
+  "gitStatus": " M app/continuity/src/client/app.ts\n M app/continuity/src/shared/domain.ts\n?? app/continuity/tests/description-refresh27.test.mjs\n",
+  "executed": {
+    "syntaxInitial": {
+      "status": 0,
+      "note": "Before final fixture preservation refinements; final author continuity check also includes all mjs syntax."
+    },
+    "unit": {
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "--test",
+        "continuity/tests/description-refresh27.test.mjs",
+        "continuity/tests/domain.test.mjs",
+        "continuity/tests/understanding17.test.mjs",
+        "continuity/tests/hierarchy18.test.mjs",
+        "continuity/tests/description23.test.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product27-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T18:51:09.714Z",
+      "end": "2026-10-22T18:51:22.195Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    "result": {
+      "total": 99,
+      "newRefresh27": 8,
+      "relatedExisting": 91,
+      "pass": 99,
+      "fail": 0
+    },
+    "included": [
+      "description-refresh27.test.mjs",
+      "domain.test.mjs",
+      "understanding17.test.mjs",
+      "hierarchy18.test.mjs",
+      "description23.test.mjs"
+    ]
+  },
+  "notRun": [
+    "Full wildcard: other suites start HTTP servers",
+    "Local server/browser",
+    "Node22: independent Cloud/CI required",
+    "Real AI/provider network/paid calls",
+    "Author check/build not repeated: implementation owner performed them and retains own raw evidence"
+  ],
+  "safety": "Selected source inspection found no listen/createServer/spawn in these five test files. description23 provider test injects fake fetch only. Existing public APIs create synthetic records, no malformed archived-parent state injection. No remote write/commit/push.",
+  "coverage": [
+    "Initial U7/N7/S7/C7 including no-deploy -> external description -> user correction -> only U/N30 edit; S/C bytes preserved",
+    "Explicit new user revision/corrects/current stamp, unchanged text permitted; original correctUnderstanding valid-only remains",
+    "Opening context rejects changed stamp/latest applied revision/project/area/archive and preserves input state",
+    "Unrelated B current/draft/manual and later held-only arrival do not become a false A-context change",
+    "Held-only cannot begin or forge revision0 adoption; archived area cannot review",
+    "Another work/idea edit stales the new description; late original-H return stays held",
+    "Related work uses old/live stamp union, actual moved owner and global task instead of current B",
+    "Existing description length limit, exact project schema roundtrip and original H/report/basis/idea/manual data preserved"
+  ]
+}

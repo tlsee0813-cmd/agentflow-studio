@@ -1,0 +1,6 @@
+{
+  "exit": 0,
+  "compiler": "existing product18-author-evidence/tsc.cmd to locked TypeScript5.8.3; no installation",
+  "runtime": "Node24.19.0 author auxiliary",
+  "command": "node scripts/build.mjs"
+}

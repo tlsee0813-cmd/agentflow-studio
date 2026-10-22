@@ -1,0 +1,18 @@
+{
+  "baseline": "b24e790333318d97b1ab713a136a96f2bd6ece98",
+  "domainUnchanged": true,
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 264518,
+      "sha256": "55be6a0a47f4a116a3a19593320e09d3820bb5c46b07250dfda25efd78ccb691",
+      "gitBlob": "2fdc74d9451c550367f12fd79344e2ed510ba9fb"
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 75793,
+      "sha256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf",
+      "gitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e"
+    }
+  ]
+}

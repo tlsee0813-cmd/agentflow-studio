@@ -1,0 +1,35 @@
+{
+  "baseline": "b24e790333318d97b1ab713a136a96f2bd6ece98",
+  "contract": "4afe1ef10fc9758fbaa9716986e396c88c91aa54",
+  "sourceFixedCommit": "5dcf269bd7f25dec3f6432fb3386adb23c89d526",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 264295,
+      "sha256": "89e5c3b07edf573ad0724a9e9d4e89386bb199184026b8282a5688556022da17",
+      "gitBlob": "43b848fa2d209c10648b78ae8098047b90e022dc",
+      "changed": true
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 75793,
+      "sha256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf",
+      "gitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e",
+      "changed": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "gitBlob": "c3f93975b3f67b7f94f3a2daa435cc4cc615217a",
+      "changed": false
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "gitBlob": "bfa5b1d2172f682e7d5c167ce2df2fd52eea7a8d",
+      "changed": false
+    }
+  ]
+}
