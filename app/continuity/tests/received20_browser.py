@@ -86,7 +86,7 @@ class Received20(unittest.TestCase):
             expect(self.page.locator('#result-file-preview')).to_have_attribute('data-target-task-id',(file or s['file'])['taskId']);expect(self.page.locator('#accept-result-file')).to_be_visible()
         else:
             expect(self.page.locator('#result-file-preview')).to_contain_text('정확히 일치하는 내보내기');expect(self.page.locator('#accept-result-file')).to_have_count(0)
-        return raw
+        return path.read_bytes().decode('utf-8')
     def accept(self):self.reach('#accept-result-file');self.page.locator('#accept-result-file').click()
     def receipt(self,s,report,duplicate=False,state='saved'):
         r=self.page.locator('#received-result-receipt')
@@ -120,7 +120,7 @@ class Received20(unittest.TestCase):
         self.details('task-report-src-'+t['sourceIds'][0]);sel='#task-report-src-'+t['sourceIds'][0]+' .source-raw'
         self.equal('report original remains exact',self.page.locator(sel).text_content(),s['file']['report']);self.reach(sel,'W20-REPORT-'+s['c']['id']+'-END')
         self.details('task-report-src-'+t['sourceIds'][0],False);self.details('task-report-export-work');self.details('task-report-export-proof');self.details('task-report-result-raw')
-        self.equal('received JSON source remains exact',self.page.locator('#task-report-result-raw textarea').input_value(),raw)
+        self.equal('textarea API displays source with LF newlines (stored raw/download stay exact)',self.page.locator('#task-report-result-raw textarea').input_value(),raw.replace('\r\n','\n').replace('\r','\n'))
         self.reach('#task-report-result-raw button')
         with self.page.expect_download() as result:self.page.locator('#task-report-result-raw button').click()
         path=base.OUT/f'received20-{self.WIDTH}-{s["c"]["id"]}-original.json';result.value.save_as(path);self.yes('downloaded original is exact UTF8 bytes',path.read_bytes()==raw.encode('utf-8'),{'bytes':len(path.read_bytes()),'expectedUtf8Bytes':len(raw.encode('utf-8'))})
