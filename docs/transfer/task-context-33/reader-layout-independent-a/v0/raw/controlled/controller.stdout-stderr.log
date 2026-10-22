@@ -1,0 +1,27 @@
+{"ready": true, "url": "http://127.0.0.1:43947", "browser": "154.0.8037.57", "PW": "1.57.0"}
+{"screenSaved": "sameview-new-context", "entryId": "", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "sameview-project-list", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "sameview-normal-import", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "sameview-import-complete", "entryId": "E_16943648-363d-41cc-aba7-8a1a769badae", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "sameview-work", "entryId": "E_16943648-363d-41cc-aba7-8a1a769badae", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "sameview-arraybuffer-completion-armed", "entryId": "E_16943648-363d-41cc-aba7-8a1a769badae", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "sameview-file-pending", "entryId": "E_16943648-363d-41cc-aba7-8a1a769badae", "layer": "work", "xy": [0, 2378]}
+{"opaqueSaved": "sameview-before-release-envelope.json", "sha256": "79ec3ac3e6268f0835514c07d4c41d3e6eb71feff25c645896e34fda99d49131"}
+{"ok": true, "op": "opaque"}
+{"screenSaved": "sameview-release", "entryId": "E_16943648-363d-41cc-aba7-8a1a769badae", "layer": "work", "xy": [0, 4005]}
+{"opaqueSaved": "sameview-after-release-envelope.json", "sha256": "79ec3ac3e6268f0835514c07d4c41d3e6eb71feff25c645896e34fda99d49131"}
+{"ok": true, "op": "opaque"}
+{"screenSaved": "roundtrip-new-context", "entryId": "", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "roundtrip-projects", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "roundtrip-normal-import", "entryId": "", "layer": "", "xy": [0, 0]}
+{"screenSaved": "roundtrip-import-complete", "entryId": "E_2becc9eb-cd39-411c-82a8-9a57dd187ca2", "layer": "space", "xy": [0, 0]}
+{"screenSaved": "roundtrip-work-before-selection", "entryId": "E_2becc9eb-cd39-411c-82a8-9a57dd187ca2", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "roundtrip-delay-armed", "entryId": "E_2becc9eb-cd39-411c-82a8-9a57dd187ca2", "layer": "work", "xy": [0, 0]}
+{"screenSaved": "roundtrip-file-pending", "entryId": "E_2becc9eb-cd39-411c-82a8-9a57dd187ca2", "layer": "work", "xy": [0, 2378]}
+{"screenSaved": "roundtrip-native-history", "entryId": "E_2becc9eb-cd39-411c-82a8-9a57dd187ca2", "layer": "history", "xy": [0, 0]}
+{"screenSaved": "roundtrip-native-work-return", "entryId": "E_2becc9eb-cd39-411c-82a8-9a57dd187ca2", "layer": "work", "xy": [0, 0]}
+{"opaqueSaved": "roundtrip-before-release-envelope.json", "sha256": "058b0194bb9b3d913bd0a2047b2321628073c1c6e3ebd7be31e671dad12e8c3c"}
+{"ok": true, "op": "opaque"}
+{"screenSaved": "roundtrip-release", "entryId": "E_2becc9eb-cd39-411c-82a8-9a57dd187ca2", "layer": "work", "xy": [0, 0]}
+{"opaqueSaved": "roundtrip-after-release-envelope.json", "sha256": "058b0194bb9b3d913bd0a2047b2321628073c1c6e3ebd7be31e671dad12e8c3c"}
+{"ok": true, "op": "opaque"}

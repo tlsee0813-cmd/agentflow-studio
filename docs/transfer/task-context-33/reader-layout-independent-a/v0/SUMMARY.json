@@ -1,0 +1,3300 @@
+{
+  "source": "843ca3993615824452bfc80a6c0c4c65d35df376",
+  "tree": "513f3fc42c5a6c189eda3a0e485ae0c7dfebd969",
+  "sourceOverlay": false,
+  "UI": {
+    "1280": {
+      "checks": {
+        "readOnlyStateUnchanged": true,
+        "NOnlyEditedTaskChange": true,
+        "otherTasksUnchanged": true,
+        "areasRelationsBasesUnchanged": true,
+        "draftPreserved": true,
+        "regionOnlyNoH": true,
+        "onlyActualCopyAddsH": true,
+        "HExactManualFour": true,
+        "selectionNotImport": true,
+        "noNewReportInShortSegment": true,
+        "currentOnlyExplicitContinued": true,
+        "sourcesPreserved": true
+      },
+      "manualBefore": {
+        "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+        "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+        "next": "오류행 처리 방식을 사용자에게 확인한다.",
+        "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+      },
+      "manualAfter": {
+        "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+        "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+        "next": "[명시 합성33 결합후보] 오류행 중단/제외를 자동 선택하지 말고 두 선택의 차이와 사용자에게 물을 다음 안내만 구체화한다. 실제 파일 처리·구현·배포는 하지 않는다.",
+        "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+      },
+      "actualH": "H_f72812d2-c302-4208-bd6c-f580367688ce",
+      "firstContext": "learned observer; 1280 then 1440",
+      "fileSelectionWithoutAcceptance": true
+    },
+    "1440": {
+      "checks": {
+        "readOnlyStateUnchanged": true,
+        "NOnlyEditedTaskChange": true,
+        "otherTasksUnchanged": true,
+        "areasRelationsBasesUnchanged": true,
+        "draftPreserved": true,
+        "regionOnlyNoH": true,
+        "onlyActualCopyAddsH": true,
+        "HExactManualFour": true,
+        "selectionNotImport": true,
+        "noNewReportInShortSegment": true,
+        "currentOnlyExplicitContinued": true,
+        "sourcesPreserved": true
+      },
+      "manualBefore": {
+        "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+        "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+        "next": "오류행 처리 방식을 사용자에게 확인한다.",
+        "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+      },
+      "manualAfter": {
+        "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+        "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+        "next": "[명시 합성33 결합후보1440 반복] 오류행 중단/제외를 자동 선택하지 말고 두 선택의 차이와 사용자에게 물을 다음 안내만 구체화한다. 실제 파일 처리·구현·배포는 하지 않는다.",
+        "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+      },
+      "actualH": "H_338c5595-6cfd-412f-8501-daee52ebeb44",
+      "firstContext": "learned observer; 1280 then 1440",
+      "fileSelectionWithoutAcceptance": true
+    }
+  },
+  "firstFoldLimit": {
+    "1280": {
+      "firstWindowY": 0,
+      "primaryDraftAction": {
+        "rect": {
+          "x": 283,
+          "y": 760.515625,
+          "width": 156.8125,
+          "height": 45,
+          "top": 760.515625,
+          "right": 439.8125,
+          "bottom": 805.515625,
+          "left": 283
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "full": false,
+        "hit": false,
+        "visible": true,
+        "text": "작성 중인 요청 열기",
+        "focus": "space-title",
+        "focused": false,
+        "xy": [
+          0,
+          0
+        ],
+        "ancestors": [
+          {
+            "id": "task-next-action",
+            "tag": "BUTTON",
+            "rect": {
+              "x": 283,
+              "y": 760.515625,
+              "width": 156.8125,
+              "height": 45,
+              "top": 760.515625,
+              "right": 439.8125,
+              "bottom": 805.515625,
+              "left": 283
+            },
+            "client": {
+              "left": 283.9988057324841,
+              "top": 761.515625,
+              "right": 438.8136942675159,
+              "bottom": 804.515625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 760.515625,
+              "width": 361.15625,
+              "height": 45,
+              "top": 760.515625,
+              "right": 644.15625,
+              "bottom": 805.515625,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 760.515625,
+              "right": 644.15625,
+              "bottom": 805.515625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-next",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 747.515625,
+              "width": 399.15625,
+              "height": 149.5625,
+              "top": 747.515625,
+              "right": 663.15625,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 265.00039160401,
+              "top": 748.5127083333333,
+              "right": 662.15585839599,
+              "bottom": 896.0810416666667
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 399.15625,
+              "height": 448.765625,
+              "top": 448.3125,
+              "right": 663.15625,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 663.15625,
+              "bottom": 897.078125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 974,
+              "height": 448.765625,
+              "top": 448.3125,
+              "right": 1238,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 1238,
+              "bottom": 897.078125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 974,
+              "height": 762.890625,
+              "top": 448.3125,
+              "right": 1238,
+              "bottom": 1211.203125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 1238,
+              "bottom": 1211.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 250.78125,
+              "width": 974,
+              "height": 1040.21875,
+              "top": 250.78125,
+              "right": 1238,
+              "bottom": 1291,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 250.78125,
+              "right": 1238,
+              "bottom": 1291
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1298.84375,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 719.9179431072209
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              651
+            ]
+          }
+        ]
+      },
+      "draftTarget": {
+        "rect": {
+          "x": 283,
+          "y": 811.515625,
+          "width": 361.15625,
+          "height": 44.375,
+          "top": 811.515625,
+          "right": 644.15625,
+          "bottom": 855.890625,
+          "left": 283
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "full": false,
+        "hit": false,
+        "visible": true,
+        "text": "‘[합성32 미전송] 읽기 화면의 안내 문구를 더 검토하고 싶다. 이 입력은 아직 보내지…’ · 대상 그대로 · 영역 ‘읽기·검토’",
+        "focus": "space-title",
+        "focused": false,
+        "xy": [
+          0,
+          0
+        ],
+        "ancestors": [
+          {
+            "id": "task-next-target",
+            "tag": "P",
+            "rect": {
+              "x": 283,
+              "y": 811.515625,
+              "width": 361.15625,
+              "height": 44.375,
+              "top": 811.515625,
+              "right": 644.15625,
+              "bottom": 855.890625,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 811.515625,
+              "right": 644.15625,
+              "bottom": 855.890625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-next",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 747.515625,
+              "width": 399.15625,
+              "height": 149.5625,
+              "top": 747.515625,
+              "right": 663.15625,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 265.00039160401,
+              "top": 748.5127083333333,
+              "right": 662.15585839599,
+              "bottom": 896.0810416666667
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 399.15625,
+              "height": 448.765625,
+              "top": 448.3125,
+              "right": 663.15625,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 663.15625,
+              "bottom": 897.078125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 974,
+              "height": 448.765625,
+              "top": 448.3125,
+              "right": 1238,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 1238,
+              "bottom": 897.078125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 974,
+              "height": 762.890625,
+              "top": 448.3125,
+              "right": 1238,
+              "bottom": 1211.203125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 1238,
+              "bottom": 1211.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 250.78125,
+              "width": 974,
+              "height": 1040.21875,
+              "top": 250.78125,
+              "right": 1238,
+              "bottom": 1291,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 250.78125,
+              "right": 1238,
+              "bottom": 1291
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1298.84375,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 719.9179431072209
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              651
+            ]
+          }
+        ]
+      },
+      "newContinue": {
+        "rect": {
+          "x": 968.625,
+          "y": 379.90625,
+          "width": 146.8125,
+          "height": 43,
+          "top": 379.90625,
+          "right": 1115.4375,
+          "bottom": 422.90625,
+          "left": 968.625
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "full": true,
+        "hit": true,
+        "visible": true,
+        "text": "이 작업 이어서 하기",
+        "focus": "space-title",
+        "focused": false,
+        "xy": [
+          0,
+          0
+        ],
+        "ancestors": [
+          {
+            "id": "task-view-continue",
+            "tag": "BUTTON",
+            "rect": {
+              "x": 968.625,
+              "y": 379.90625,
+              "width": 146.8125,
+              "height": 43,
+              "top": 379.90625,
+              "right": 1115.4375,
+              "bottom": 422.90625,
+              "left": 968.625
+            },
+            "client": {
+              "left": 969.6237244897959,
+              "top": 380.90625,
+              "right": 1114.438775510204,
+              "bottom": 421.90625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-continue-context",
+            "tag": "DIV",
+            "rect": {
+              "x": 706.5,
+              "y": 379.515625,
+              "width": 512.5,
+              "height": 43.796875,
+              "top": 379.515625,
+              "right": 1219,
+              "bottom": 423.3125,
+              "left": 706.5
+            },
+            "client": {
+              "left": 706.5,
+              "top": 379.515625,
+              "right": 1219,
+              "bottom": 423.3125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 379.515625,
+              "width": 936,
+              "height": 43.796875,
+              "top": 379.515625,
+              "right": 1219,
+              "bottom": 423.3125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 379.515625,
+              "right": 1219,
+              "bottom": 423.3125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 291.875,
+              "width": 974,
+              "height": 144.4375,
+              "top": 291.875,
+              "right": 1238,
+              "bottom": 436.3125,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 292.87803819444446,
+              "right": 1237,
+              "bottom": 435.30946180555554
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 250.78125,
+              "width": 974,
+              "height": 1040.21875,
+              "top": 250.78125,
+              "right": 1238,
+              "bottom": 1291,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 250.78125,
+              "right": 1238,
+              "bottom": 1291
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1298.84375,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 719.9179431072209
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              651
+            ]
+          }
+        ]
+      },
+      "continueTarget": {
+        "rect": {
+          "x": 706.5,
+          "y": 390.3125,
+          "width": 252.125,
+          "height": 22.1875,
+          "top": 390.3125,
+          "right": 958.625,
+          "bottom": 412.5,
+          "left": 706.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 720
+        },
+        "full": true,
+        "hit": true,
+        "visible": true,
+        "text": "현재 작업 04에서 바꿀 대상 · 작업 02 · 오류행 처리",
+        "focus": "space-title",
+        "focused": false,
+        "xy": [
+          0,
+          0
+        ],
+        "ancestors": [
+          {
+            "id": "task-continue-label",
+            "tag": "SPAN",
+            "rect": {
+              "x": 706.5,
+              "y": 390.3125,
+              "width": 252.125,
+              "height": 22.1875,
+              "top": 390.3125,
+              "right": 958.625,
+              "bottom": 412.5,
+              "left": 706.5
+            },
+            "client": {
+              "left": 706.5,
+              "top": 390.3125,
+              "right": 958.625,
+              "bottom": 412.5
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-continue-context",
+            "tag": "DIV",
+            "rect": {
+              "x": 706.5,
+              "y": 379.515625,
+              "width": 512.5,
+              "height": 43.796875,
+              "top": 379.515625,
+              "right": 1219,
+              "bottom": 423.3125,
+              "left": 706.5
+            },
+            "client": {
+              "left": 706.5,
+              "top": 379.515625,
+              "right": 1219,
+              "bottom": 423.3125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 379.515625,
+              "width": 936,
+              "height": 43.796875,
+              "top": 379.515625,
+              "right": 1219,
+              "bottom": 423.3125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 379.515625,
+              "right": 1219,
+              "bottom": 423.3125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 291.875,
+              "width": 974,
+              "height": 144.4375,
+              "top": 291.875,
+              "right": 1238,
+              "bottom": 436.3125,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 292.87803819444446,
+              "right": 1237,
+              "bottom": 435.30946180555554
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 250.78125,
+              "width": 974,
+              "height": 1040.21875,
+              "top": 250.78125,
+              "right": 1238,
+              "bottom": 1291,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 250.78125,
+              "right": 1238,
+              "bottom": 1291
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1298.84375,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1280,
+              "bottom": 719.9179431072209
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              651
+            ]
+          }
+        ]
+      }
+    },
+    "1440": {
+      "firstWindowY": 0,
+      "primaryDraftAction": {
+        "rect": {
+          "x": 283,
+          "y": 760.515625,
+          "width": 156.8125,
+          "height": 45,
+          "top": 760.515625,
+          "right": 439.8125,
+          "bottom": 805.515625,
+          "left": 283
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "full": true,
+        "hit": true,
+        "visible": true,
+        "text": "작성 중인 요청 열기",
+        "focus": "space-title",
+        "focused": false,
+        "xy": [
+          0,
+          0
+        ],
+        "ancestors": [
+          {
+            "id": "task-next-action",
+            "tag": "BUTTON",
+            "rect": {
+              "x": 283,
+              "y": 760.515625,
+              "width": 156.8125,
+              "height": 45,
+              "top": 760.515625,
+              "right": 439.8125,
+              "bottom": 805.515625,
+              "left": 283
+            },
+            "client": {
+              "left": 283.9988057324841,
+              "top": 761.515625,
+              "right": 438.8136942675159,
+              "bottom": 804.515625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 760.515625,
+              "width": 427.828125,
+              "height": 45,
+              "top": 760.515625,
+              "right": 710.828125,
+              "bottom": 805.515625,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 760.515625,
+              "right": 710.828125,
+              "bottom": 805.515625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-next",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 747.515625,
+              "width": 465.828125,
+              "height": 149.5625,
+              "top": 747.515625,
+              "right": 729.828125,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264.9996311695279,
+              "top": 748.5127083333333,
+              "right": 728.8284938304721,
+              "bottom": 896.0810416666667
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 465.828125,
+              "height": 448.765625,
+              "top": 448.3125,
+              "right": 729.828125,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 729.828125,
+              "bottom": 897.078125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 1134,
+              "height": 448.765625,
+              "top": 448.3125,
+              "right": 1398,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 1398,
+              "bottom": 897.078125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 1134,
+              "height": 762.890625,
+              "top": 448.3125,
+              "right": 1398,
+              "bottom": 1211.203125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 1398,
+              "bottom": 1211.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 250.78125,
+              "width": 1134,
+              "height": 1040.21875,
+              "top": 250.78125,
+              "right": 1398,
+              "bottom": 1291,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 250.78125,
+              "right": 1398,
+              "bottom": 1291
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1218,
+              "height": 1298.84375,
+              "top": 72,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1218,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 899.8974288840262
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              471
+            ]
+          }
+        ]
+      },
+      "draftTarget": {
+        "rect": {
+          "x": 283,
+          "y": 811.515625,
+          "width": 427.828125,
+          "height": 44.375,
+          "top": 811.515625,
+          "right": 710.828125,
+          "bottom": 855.890625,
+          "left": 283
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "full": true,
+        "hit": true,
+        "visible": true,
+        "text": "‘[합성32 미전송] 읽기 화면의 안내 문구를 더 검토하고 싶다. 이 입력은 아직 보내지…’ · 대상 그대로 · 영역 ‘읽기·검토’",
+        "focus": "space-title",
+        "focused": false,
+        "xy": [
+          0,
+          0
+        ],
+        "ancestors": [
+          {
+            "id": "task-next-target",
+            "tag": "P",
+            "rect": {
+              "x": 283,
+              "y": 811.515625,
+              "width": 427.828125,
+              "height": 44.375,
+              "top": 811.515625,
+              "right": 710.828125,
+              "bottom": 855.890625,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 811.515625,
+              "right": 710.828125,
+              "bottom": 855.890625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-next",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 747.515625,
+              "width": 465.828125,
+              "height": 149.5625,
+              "top": 747.515625,
+              "right": 729.828125,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264.9996311695279,
+              "top": 748.5127083333333,
+              "right": 728.8284938304721,
+              "bottom": 896.0810416666667
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 465.828125,
+              "height": 448.765625,
+              "top": 448.3125,
+              "right": 729.828125,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 729.828125,
+              "bottom": 897.078125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 1134,
+              "height": 448.765625,
+              "top": 448.3125,
+              "right": 1398,
+              "bottom": 897.078125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 1398,
+              "bottom": 897.078125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 448.3125,
+              "width": 1134,
+              "height": 762.890625,
+              "top": 448.3125,
+              "right": 1398,
+              "bottom": 1211.203125,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 448.3125,
+              "right": 1398,
+              "bottom": 1211.203125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 250.78125,
+              "width": 1134,
+              "height": 1040.21875,
+              "top": 250.78125,
+              "right": 1398,
+              "bottom": 1291,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 250.78125,
+              "right": 1398,
+              "bottom": 1291
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1218,
+              "height": 1298.84375,
+              "top": 72,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1218,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 899.8974288840262
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              471
+            ]
+          }
+        ]
+      },
+      "newContinue": {
+        "rect": {
+          "x": 1128.625,
+          "y": 379.90625,
+          "width": 146.8125,
+          "height": 43,
+          "top": 379.90625,
+          "right": 1275.4375,
+          "bottom": 422.90625,
+          "left": 1128.625
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "full": true,
+        "hit": true,
+        "visible": true,
+        "text": "이 작업 이어서 하기",
+        "focus": "space-title",
+        "focused": false,
+        "xy": [
+          0,
+          0
+        ],
+        "ancestors": [
+          {
+            "id": "task-view-continue",
+            "tag": "BUTTON",
+            "rect": {
+              "x": 1128.625,
+              "y": 379.90625,
+              "width": 146.8125,
+              "height": 43,
+              "top": 379.90625,
+              "right": 1275.4375,
+              "bottom": 422.90625,
+              "left": 1128.625
+            },
+            "client": {
+              "left": 1129.623724489796,
+              "top": 380.90625,
+              "right": 1274.438775510204,
+              "bottom": 421.90625
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-continue-context",
+            "tag": "DIV",
+            "rect": {
+              "x": 866.5,
+              "y": 379.515625,
+              "width": 512.5,
+              "height": 43.796875,
+              "top": 379.515625,
+              "right": 1379,
+              "bottom": 423.3125,
+              "left": 866.5
+            },
+            "client": {
+              "left": 866.5,
+              "top": 379.515625,
+              "right": 1379,
+              "bottom": 423.3125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 379.515625,
+              "width": 1096,
+              "height": 43.796875,
+              "top": 379.515625,
+              "right": 1379,
+              "bottom": 423.3125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 379.515625,
+              "right": 1379,
+              "bottom": 423.3125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 291.875,
+              "width": 1134,
+              "height": 144.4375,
+              "top": 291.875,
+              "right": 1398,
+              "bottom": 436.3125,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 292.87803819444446,
+              "right": 1397,
+              "bottom": 435.30946180555554
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 250.78125,
+              "width": 1134,
+              "height": 1040.21875,
+              "top": 250.78125,
+              "right": 1398,
+              "bottom": 1291,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 250.78125,
+              "right": 1398,
+              "bottom": 1291
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1218,
+              "height": 1298.84375,
+              "top": 72,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1218,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 899.8974288840262
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              471
+            ]
+          }
+        ]
+      },
+      "continueTarget": {
+        "rect": {
+          "x": 866.5,
+          "y": 390.3125,
+          "width": 252.125,
+          "height": 22.1875,
+          "top": 390.3125,
+          "right": 1118.625,
+          "bottom": 412.5,
+          "left": 866.5
+        },
+        "clip": {
+          "left": 0,
+          "top": 0,
+          "right": 1440,
+          "bottom": 900
+        },
+        "full": true,
+        "hit": true,
+        "visible": true,
+        "text": "현재 작업 04에서 바꿀 대상 · 작업 02 · 오류행 처리",
+        "focus": "space-title",
+        "focused": false,
+        "xy": [
+          0,
+          0
+        ],
+        "ancestors": [
+          {
+            "id": "task-continue-label",
+            "tag": "SPAN",
+            "rect": {
+              "x": 866.5,
+              "y": 390.3125,
+              "width": 252.125,
+              "height": 22.1875,
+              "top": 390.3125,
+              "right": 1118.625,
+              "bottom": 412.5,
+              "left": 866.5
+            },
+            "client": {
+              "left": 866.5,
+              "top": 390.3125,
+              "right": 1118.625,
+              "bottom": 412.5
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "task-continue-context",
+            "tag": "DIV",
+            "rect": {
+              "x": 866.5,
+              "y": 379.515625,
+              "width": 512.5,
+              "height": 43.796875,
+              "top": 379.515625,
+              "right": 1379,
+              "bottom": 423.3125,
+              "left": 866.5
+            },
+            "client": {
+              "left": 866.5,
+              "top": 379.515625,
+              "right": 1379,
+              "bottom": 423.3125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 283,
+              "y": 379.515625,
+              "width": 1096,
+              "height": 43.796875,
+              "top": 379.515625,
+              "right": 1379,
+              "bottom": 423.3125,
+              "left": 283
+            },
+            "client": {
+              "left": 283,
+              "top": 379.515625,
+              "right": 1379,
+              "bottom": 423.3125
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 264,
+              "y": 291.875,
+              "width": 1134,
+              "height": 144.4375,
+              "top": 291.875,
+              "right": 1398,
+              "bottom": 436.3125,
+              "left": 264
+            },
+            "client": {
+              "left": 265,
+              "top": 292.87803819444446,
+              "right": 1397,
+              "bottom": 435.30946180555554
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "space-view",
+            "tag": "SECTION",
+            "rect": {
+              "x": 264,
+              "y": 250.78125,
+              "width": 1134,
+              "height": 1040.21875,
+              "top": 250.78125,
+              "right": 1398,
+              "bottom": 1291,
+              "left": 264
+            },
+            "client": {
+              "left": 264,
+              "top": 250.78125,
+              "right": 1398,
+              "bottom": 1291
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1218,
+              "height": 1298.84375,
+              "top": 72,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 72,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1218,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 222
+            },
+            "client": {
+              "left": 222,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              0
+            ]
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 1370.84375,
+              "top": 0,
+              "right": 1440,
+              "bottom": 1370.84375,
+              "left": 0
+            },
+            "client": {
+              "left": 0,
+              "top": 0,
+              "right": 1440,
+              "bottom": 899.8974288840262
+            },
+            "overflow": [
+              "visible",
+              "visible"
+            ],
+            "scroll": [
+              0,
+              0
+            ],
+            "extent": [
+              0,
+              471
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "exactPC12": {
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/task33-reader-layout/runner.py",
+      "Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+      "Pc12.test_11_target_jumps_and_selected_file_review",
+      "Pc12.test_12_delayed_file_reveal_respects_view_departure",
+      "Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+      "Pc12Wide.test_11_target_jumps_and_selected_file_review",
+      "Pc12Wide.test_12_delayed_file_reveal_respects_view_departure"
+    ],
+    "cwd": "/workspace/browser-env/task33-reader-layout/candidate/app",
+    "startUTC": "2026-10-22T23:26:45.748725+00:00",
+    "endUTC": "2026-10-22T23:27:07.762261+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "7cc40ef9d218c72f19cd8100d8802d16091a9d0227f5b4d7ef64a6204c0b9c7e",
+    "exactTestSHA256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580"
+  },
+  "exactREPORT16": {
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/task33-reader-layout/report16-runner.py",
+      "Report16.test_01_f10_current_idea_beside_the_picked_report_and_back",
+      "Report16Wide.test_01_f10_current_idea_beside_the_picked_report_and_back"
+    ],
+    "cwd": "/workspace/browser-env/task33-reader-layout/candidate/app",
+    "startUTC": "2026-10-22T23:25:57.454664+00:00",
+    "endUTC": "2026-10-22T23:26:08.020357+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "10204716ec0dc249d0350152ea5ecfe500dd0648c68a9393c21db26f194f31b2"
+  },
+  "controlled": {
+    "positiveSameView": {
+      "before": {
+        "layer": "work",
+        "xy": [
+          0,
+          2378
+        ],
+        "focus": "home-file-result",
+        "selection": [
+          null,
+          0,
+          0
+        ],
+        "current": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+        "delay": {
+          "calls": 1,
+          "released": false
+        }
+      },
+      "after": {
+        "layer": "work",
+        "xy": [
+          0,
+          4005
+        ],
+        "focus": "result-file-review-heading",
+        "selection": [
+          null,
+          0,
+          0
+        ],
+        "current": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+        "delay": {
+          "calls": 1,
+          "released": true
+        },
+        "preview": {
+          "state": "review",
+          "text": "선택한 결과 확인이미 가져온 결과입니다. 기존 기록을 확인할 수 있습니다.연결할 작업 · [합성32·처음 남긴 요청] 오류행에서 중단할지 제외하고 계속할지 아직 정하지 않았어요. 먼저 물어봐 주세요.내보낸 시점 · 10월 22일 21:26 · 원래 버전 r51이후 기록된 기준 0개이 결과에 적용되는지는 직접 확인하세요. 기준·수동값을 자동으로 바꾸지 않습니다.당시 작업문 내용understanding: 오류행의 처리 방식은 아직 사용자가 선택하지 않았다.scope: 중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.next: 오류행 처리 방식을 사용자에게 확인한다.checks: 답변하지 않은 선택을 완료·확정으로 표시하지 않는다.외부 보고 원문 · 앱 미검증[합성32 보고 B1] 오류행 처리 방식은 아직 선택되지 않았다. 중단/제외 중 어느 것도 적용하지 않은 상태다. 이 문장은 준비자가 만든 상태 주장이고 실제 구현·검사·AI 실행 증거가 아니다.파일은 실행 증명이 아닙니다. 가져와도 AI 정리·명령·링크를 실행하지 않습니다.함께 받은 영역 설명오류행 처리 방식은 아직 선택되지 않았다. 중단/제외 중 어느 것도 적용하지 않은 상태다.외부 정리 · 합성32 입력 준비자 · 실제 구현/AI 실행 증거 아님 · 앱 미검증같은 인계의 보고와 정리가 이미 있습니다. 다시 추가하지 않습니다.기존 기록 확인수신 JSON 원문 · 파일 저장원문 파일 저장닫고 기존 붙여넣기 이용"
+        }
+      }
+    },
+    "negativeHistoryWorkRoundtrip": {
+      "before": {
+        "layer": "work",
+        "xy": [
+          0,
+          0
+        ],
+        "focus": "nav-work",
+        "selection": [
+          null,
+          0,
+          0
+        ],
+        "current": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+        "delay": {
+          "calls": 1,
+          "released": false
+        }
+      },
+      "after": {
+        "layer": "work",
+        "xy": [
+          0,
+          0
+        ],
+        "focus": "nav-work",
+        "selection": [
+          null,
+          0,
+          0
+        ],
+        "current": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+        "delay": {
+          "calls": 1,
+          "released": true
+        },
+        "preview": {
+          "state": "review",
+          "text": "선택한 결과 확인이미 가져온 결과입니다. 기존 기록을 확인할 수 있습니다.연결할 작업 · [합성32·처음 남긴 요청] 오류행에서 중단할지 제외하고 계속할지 아직 정하지 않았어요. 먼저 물어봐 주세요.내보낸 시점 · 10월 22일 21:26 · 원래 버전 r51이후 기록된 기준 0개이 결과에 적용되는지는 직접 확인하세요. 기준·수동값을 자동으로 바꾸지 않습니다.당시 작업문 내용understanding: 오류행의 처리 방식은 아직 사용자가 선택하지 않았다.scope: 중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.next: 오류행 처리 방식을 사용자에게 확인한다.checks: 답변하지 않은 선택을 완료·확정으로 표시하지 않는다.외부 보고 원문 · 앱 미검증[합성32 보고 B1] 오류행 처리 방식은 아직 선택되지 않았다. 중단/제외 중 어느 것도 적용하지 않은 상태다. 이 문장은 준비자가 만든 상태 주장이고 실제 구현·검사·AI 실행 증거가 아니다.파일은 실행 증명이 아닙니다. 가져와도 AI 정리·명령·링크를 실행하지 않습니다.함께 받은 영역 설명오류행 처리 방식은 아직 선택되지 않았다. 중단/제외 중 어느 것도 적용하지 않은 상태다.외부 정리 · 합성32 입력 준비자 · 실제 구현/AI 실행 증거 아님 · 앱 미검증같은 인계의 보고와 정리가 이미 있습니다. 다시 추가하지 않습니다.기존 기록 확인수신 JSON 원문 · 파일 저장원문 파일 저장닫고 기존 붙여넣기 이용"
+        }
+      }
+    },
+    "controlledNotNaturalDelay": true,
+    "productSourceDOMUnmodified": true,
+    "selectionPreserved": true,
+    "storedDataUnchanged": true,
+    "noAutomaticRevealAfterViewExcursionExpected": true
+  },
+  "uiRuntime": {
+    "source": "843ca3993615824452bfc80a6c0c4c65d35df376",
+    "Node": "v22.16.0",
+    "PW": "1.57.0",
+    "browser": "154.0.8037.57",
+    "pageerrors": [],
+    "serverExit": -15,
+    "paidAI": 0,
+    "HTTPCount": 30,
+    "HTTPDiskBeforeAfterEqual": true
+  },
+  "controlledRuntime": {
+    "source": "843ca3993615824452bfc80a6c0c4c65d35df376",
+    "Node": "v22.16.0",
+    "PW": "1.57.0",
+    "browser": "154.0.8037.57",
+    "pageerrors": [],
+    "serverExit": -15,
+    "paidAI": 0,
+    "HTTPCount": 30,
+    "HTTPDiskBeforeAfterEqual": true
+  },
+  "actionErrors": [],
+  "overlap": {
+    "judgment": {
+      "checks": {
+        "buffersExactSelectedBytes": true,
+        "bothRealBuffersWaiting": true,
+        "ACompletionDoesNotMoveOrStealFocus": true,
+        "BStillWaitingAfterA": true,
+        "BCompletionKeepsRevealEligibility": true,
+        "previewExactB": true,
+        "previewExactTaskH": true,
+        "noWriteAtSelection": true,
+        "oneExplicitReceivedB": true,
+        "allOldTasksUnchanged": true,
+        "oldSourcesPreserved": true,
+        "draftAndKindUnchanged": true,
+        "spaceAndBasesUnchanged": true,
+        "currentPolicyNotRolledBack": true,
+        "ANeverStored": true
+      },
+      "currentBefore": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+      "currentAfter": "T_07145004-687d-4804-bfdf-3263e79116bd",
+      "actualH": "H_7048e911-fb90-426d-9289-fc0606fe7b5c",
+      "actualParent": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+      "addedTaskId": "T_07145004-687d-4804-bfdf-3263e79116bd",
+      "controlledNotNaturalDelay": true,
+      "source": "843ca3993615824452bfc80a6c0c4c65d35df376"
+    },
+    "process": {
+      "command": [
+        "/workspace/browser-env/venv/bin/python",
+        "/workspace/browser-env/task33-reader-layout/overlap/judge.py"
+      ],
+      "startUTC": "2026-10-22T23:35:49.511896+00:00",
+      "endUTC": "2026-10-22T23:35:49.538033+00:00",
+      "actualChildExit": 0,
+      "stdoutSHA256": "38bfdd884901ed47559c5240948b1555e352cdd9396e57e120b9697c73dae2b5",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "runtime": {
+      "source": "843ca3993615824452bfc80a6c0c4c65d35df376",
+      "Node": "v22.16.0",
+      "PW": "1.57.0",
+      "browser": "154.0.8037.57",
+      "pageerrors": [],
+      "serverExit": -15,
+      "paidAI": 0
+    },
+    "HTTPCount": 15,
+    "HTTPDiskBeforeAfterEqual": true
+  },
+  "candidate/executionHTTP": {
+    "count": 24,
+    "all200AndBodyEqualsDisk": true,
+    "serverExits": [
+      {
+        "kind": "server-process",
+        "class": "Pc12",
+        "actualReturnCode": -15
+      },
+      {
+        "kind": "server-process",
+        "class": "Pc12Wide",
+        "actualReturnCode": -15
+      }
+    ],
+    "afterAllProcessesDiskStillMatchesEveryHTTP": true
+  },
+  "report16/finalHTTP": {
+    "count": 6,
+    "all200AndBodyEqualsDisk": true,
+    "serverExits": [
+      {
+        "kind": "server-process",
+        "class": "Report16",
+        "actualReturnCode": -15
+      },
+      {
+        "kind": "server-process",
+        "class": "Report16Wide",
+        "actualReturnCode": -15
+      }
+    ],
+    "afterAllProcessesDiskStillMatchesEveryHTTP": true
+  }
+}

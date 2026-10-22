@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-reader-layout/overlap/judge.py"
+  ],
+  "startUTC": "2026-10-22T23:35:49.511896+00:00",
+  "endUTC": "2026-10-22T23:35:49.538033+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "38bfdd884901ed47559c5240948b1555e352cdd9396e57e120b9697c73dae2b5",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

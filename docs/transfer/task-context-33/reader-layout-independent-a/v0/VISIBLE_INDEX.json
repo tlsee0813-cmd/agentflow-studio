@@ -1,0 +1,506 @@
+[
+  {
+    "localOriginal": "ui/001-1280-final-learned-change-segment-visible.json",
+    "bytes": 17518,
+    "sha256": "5d7f17bfe2120910b365f115bbe4158415559d810fe754b9af041b79ed1aa768",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/002-1280-project-list-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/003-1280-normal-T2-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/004-1280-import-complete-visible.json",
+    "bytes": 71029,
+    "sha256": "bcdefc8ffe11b152579d4541946a85621a0e9e07539defa046633410b16f7a8d",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/006-1280-parent-records-visible.json",
+    "bytes": 65692,
+    "sha256": "673702bd9b20deb43a434d0aca9d45e90bb865492b06a66dcd4c2365a13b5705",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/007-1280-records-native-read-visible.json",
+    "bytes": 67275,
+    "sha256": "9fcdda6674724964ce4d8724bf7fdd495faf65d2f00ffd5357f6d9855eea7272",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/008-1280-final-reader-first-visible.json",
+    "bytes": 35779,
+    "sha256": "9aa88aead1f4eef7ab7f3f1172d5de074e4cbff22fe5e6d567b1e982605fca02",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/009-probe-visible.json",
+    "bytes": 35779,
+    "sha256": "9aa88aead1f4eef7ab7f3f1172d5de074e4cbff22fe5e6d567b1e982605fca02",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/011-1280-native-details-first-open-visible.json",
+    "bytes": 31889,
+    "sha256": "9a83f3a00985be0bc05f81b1fee2d214adeb7422fb27cd1f506abbdef2cf7e0b",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/012-1280-key-Enter-close-details-visible.json",
+    "bytes": 35768,
+    "sha256": "75c48b8b7195dfc74ce34444144c7506f3fd29d45dc7e7cd51a2c4ac88be5a5e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/013-1280-key-Space-open-details-visible.json",
+    "bytes": 31889,
+    "sha256": "9a83f3a00985be0bc05f81b1fee2d214adeb7422fb27cd1f506abbdef2cf7e0b",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/014-probe-visible.json",
+    "bytes": 31889,
+    "sha256": "9a83f3a00985be0bc05f81b1fee2d214adeb7422fb27cd1f506abbdef2cf7e0b",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/015-1280-key-Enter-final-close-details-visible.json",
+    "bytes": 35768,
+    "sha256": "75c48b8b7195dfc74ce34444144c7506f3fd29d45dc7e7cd51a2c4ac88be5a5e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/017-1280-final-explicit-continue-visible.json",
+    "bytes": 31218,
+    "sha256": "e5e874b0905b9398ec6e2b2fb897fd633378275a95eb8e70b0807b8d7566255e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/018-probe-visible.json",
+    "bytes": 31218,
+    "sha256": "e5e874b0905b9398ec6e2b2fb897fd633378275a95eb8e70b0807b8d7566255e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/019-1280-final-native-N-jump-visible.json",
+    "bytes": 19306,
+    "sha256": "f73467d33c0a03cd18bf058d3145539fc3f5bb805beade018a812252e062a9fe",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/020-1280-final-N-only-edit-visible.json",
+    "bytes": 19089,
+    "sha256": "2d40da921133bfef8fe7cbfa3ceaca844a381399e8ffd2976b68320756b9c0f7",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/022-1280-final-native-top-for-file-action-visible.json",
+    "bytes": 35240,
+    "sha256": "cf597e449069ad2d71a16322c063e0d938f45c1fea117feaaaa8273ab0b4ce5c",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/024-1280-final-file-region-jump-visible.json",
+    "bytes": 33737,
+    "sha256": "544c282fcb830a485655ad94c63eff2ffbe7c72b961b83bb81f972c441181c60",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/026-1280-final-actual-file-copy-visible.json",
+    "bytes": 33751,
+    "sha256": "ef353ffb35376fd073824ee6241bcdd31caef0701d028aebccf396d13cc5b9ae",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/029-1280-final-native-file-input-reach-visible.json",
+    "bytes": 25387,
+    "sha256": "9399b2e8aa7196c9cb9ecf5f7fbbbc157dc271446b80f1f13f189e6aa6d04d74",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/031-1280-final-file-selection-first-visible.json",
+    "bytes": 22433,
+    "sha256": "82fe806ec8b4eb80ee8aa71757e67c79feea2b5b3abd200b12182f8918b57ded",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/034-1440-final-learned-repeat-visible.json",
+    "bytes": 20473,
+    "sha256": "6b62d0739909e90c6322f601468dd3d39973c5b86cd74fbf1521d9f7e53ee81f",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/035-1440-final-project-list-visible.json",
+    "bytes": 8576,
+    "sha256": "4797304c438b265dfd2a68c662027d7ea85bb54d7eb0f515675f5c374b49b4c0",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/036-1440-final-normal-import-visible.json",
+    "bytes": 8573,
+    "sha256": "c9ed5282cad6c867c6670906bc27b0e9fcb8d4a8093dab394f5fbb241ffb36b9",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/037-1440-final-import-complete-visible.json",
+    "bytes": 71761,
+    "sha256": "605ab1b12d2455403729f51648c9d97489b5d8671770fe1527c2f829fd5b125c",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/039-1440-final-parent-records-visible.json",
+    "bytes": 70115,
+    "sha256": "6fe7657012482d6d608853ab5e8edd7ee96872ac48533153163baeefd804b5e8",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/040-1440-final-records-native-read-visible.json",
+    "bytes": 71702,
+    "sha256": "16cdb9133427c826752db3e04b1473d8c242b28dc3cc82394a9308e44ab696f3",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/041-1440-final-reader-first-visible.json",
+    "bytes": 39349,
+    "sha256": "630105be9679fce669666604ee1fe57416fe35b89f185bf45b595cc652614dc2",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/042-probe-visible.json",
+    "bytes": 39349,
+    "sha256": "630105be9679fce669666604ee1fe57416fe35b89f185bf45b595cc652614dc2",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/044-1440-native-details-first-open-visible.json",
+    "bytes": 38141,
+    "sha256": "d0c7069eeeeb2319d5809a6afdc96c98837e07f563a038e29e5261d4fb97b296",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/045-1440-key-Enter-close-details-visible.json",
+    "bytes": 39338,
+    "sha256": "c63208171af21dde3872a28a254abdee4aef319855ad1cb63c87a515c17cdb89",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/046-1440-key-Space-open-details-visible.json",
+    "bytes": 38141,
+    "sha256": "d0c7069eeeeb2319d5809a6afdc96c98837e07f563a038e29e5261d4fb97b296",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/047-probe-visible.json",
+    "bytes": 38141,
+    "sha256": "d0c7069eeeeb2319d5809a6afdc96c98837e07f563a038e29e5261d4fb97b296",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/048-1440-key-Enter-final-close-details-visible.json",
+    "bytes": 39338,
+    "sha256": "c63208171af21dde3872a28a254abdee4aef319855ad1cb63c87a515c17cdb89",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/050-1440-final-explicit-continue-visible.json",
+    "bytes": 34028,
+    "sha256": "5f2f5e98ad865a7566193bdd940810dbcadd4e000015295d979e33d59fe5c6ad",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/051-probe-visible.json",
+    "bytes": 34028,
+    "sha256": "5f2f5e98ad865a7566193bdd940810dbcadd4e000015295d979e33d59fe5c6ad",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/052-1440-final-native-N-jump-visible.json",
+    "bytes": 22024,
+    "sha256": "636d2cc2efc5f8bec6c26f74d9e277d66871aa4da2af257d8ab52d226232168f",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/053-1440-final-N-only-edit-visible.json",
+    "bytes": 21795,
+    "sha256": "07e25af34ed7219f1d6e43e45a05eb6cb2016007b152db83522a5ae730dc9b84",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/055-1440-final-native-top-for-file-action-visible.json",
+    "bytes": 39189,
+    "sha256": "ea85669bff621fc2eeb831d9bd340f616a9a1e9a37cf451f5c94bdc03d4c431f",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/057-1440-final-file-region-jump-visible.json",
+    "bytes": 39342,
+    "sha256": "3c1a8d8e36c42a528facf847d31d20287816313a6f364654ff991dc484dc8ad7",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/059-1440-final-actual-file-copy-visible.json",
+    "bytes": 39356,
+    "sha256": "1b51480ec4c1aad71f13fd9219987d3cc8360aa82e9467ff2e0c0b0124744ff0",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/062-1440-final-native-file-input-reach-visible.json",
+    "bytes": 28676,
+    "sha256": "3a24ce30444fcb98b4e14ad30fdcd1d6a312adca69a90019dc3bb8d19f1bf347",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/064-1440-final-file-selection-first-visible.json",
+    "bytes": 24350,
+    "sha256": "f09e544ed3ee1d28c5a859dd81a8037ffc7dedcc95ff7f3d8ab5919f3f6d104b",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "ui/067-probe-visible.json",
+    "bytes": 24350,
+    "sha256": "f09e544ed3ee1d28c5a859dd81a8037ffc7dedcc95ff7f3d8ab5919f3f6d104b",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/001-sameview-new-context-visible.json",
+    "bytes": 17518,
+    "sha256": "5d7f17bfe2120910b365f115bbe4158415559d810fe754b9af041b79ed1aa768",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/002-sameview-project-list-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/003-sameview-normal-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/004-sameview-import-complete-visible.json",
+    "bytes": 71029,
+    "sha256": "7b3f23efe72d7c2e12ae44fd450d8816a07a3052e5bd47ac828793d062b05897",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/005-sameview-work-visible.json",
+    "bytes": 33395,
+    "sha256": "e8f8483a436af8526ce483eeffd31e545a5685716a8827cc74dc84c2fd764b6b",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/006-sameview-arraybuffer-completion-armed-visible.json",
+    "bytes": 33395,
+    "sha256": "e8f8483a436af8526ce483eeffd31e545a5685716a8827cc74dc84c2fd764b6b",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/007-sameview-file-pending-visible.json",
+    "bytes": 27164,
+    "sha256": "9f1773268600bc6903f0d97f74741f4f87de00372a733342897c94a4ebecac6e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/009-sameview-release-visible.json",
+    "bytes": 23767,
+    "sha256": "2ac4d3f130d9c2f6953e58762847644341a16780daad95cf09426fee21e75f36",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/011-roundtrip-new-context-visible.json",
+    "bytes": 18424,
+    "sha256": "8ff44e2934f0e18a382bc4d8f4a00c2fbbcc693533089efcb454fec54776f8e5",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/012-roundtrip-projects-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/013-roundtrip-normal-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/014-roundtrip-import-complete-visible.json",
+    "bytes": 71029,
+    "sha256": "21a85ce5869ac4d6778062b98ac8ab759ede0126a1be45c3a107c48e45b9ea9c",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/015-roundtrip-work-before-selection-visible.json",
+    "bytes": 33395,
+    "sha256": "57d4e4111f4339ff72150e0c943e32c6200f217c540db2b9c9a1445708d7f854",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/016-roundtrip-delay-armed-visible.json",
+    "bytes": 33395,
+    "sha256": "57d4e4111f4339ff72150e0c943e32c6200f217c540db2b9c9a1445708d7f854",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/017-roundtrip-file-pending-visible.json",
+    "bytes": 27164,
+    "sha256": "1bb5958f05d7cdd5b045e978c9f8496238e2ff36c6a6336dfb23a6d55227c2fe",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/018-roundtrip-native-history-visible.json",
+    "bytes": 27765,
+    "sha256": "c0496070171014c59d37a4806ba7251ead80b31b64283155771bd68378b52673",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/019-roundtrip-native-work-return-visible.json",
+    "bytes": 33395,
+    "sha256": "3e35b34c3786a254c2af1e04847a84cf180fd3fd1d9897814cc9d8c261c42bfb",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "controlled/021-roundtrip-release-visible.json",
+    "bytes": 33395,
+    "sha256": "5c291c91be69a2e003d3239c0747fe88e2de2062c5bc85b02ac2427f882a4b61",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/001-overlap-separate-1280-context-visible.json",
+    "bytes": 17518,
+    "sha256": "5d7f17bfe2120910b365f115bbe4158415559d810fe754b9af041b79ed1aa768",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/002-overlap-projects-visible.json",
+    "bytes": 8574,
+    "sha256": "f51c9e4b573ae43b8252c9132da017fc3f2517e6d88a0b49e733f0859d9a4b9e",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/003-overlap-normal-T2-import-visible.json",
+    "bytes": 8571,
+    "sha256": "5d630aa13f6535729cb1292f49429ac9976482dbc37515da342472c47bcf8c83",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/004-overlap-import-complete-visible.json",
+    "bytes": 71029,
+    "sha256": "1b079d262c6c74c228087ac59e5ea9f1b299daa5522ddd593ca8d03ab21f53a6",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/005-overlap-normal-current-work-visible.json",
+    "bytes": 33395,
+    "sha256": "312886275b21cce629db5221dc4f44af7e6dab2bbe530d48f244372d20eb54ac",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/006-overlap-file-region-visible.json",
+    "bytes": 28163,
+    "sha256": "3b76596496062dd35d6eb3ee312804bf467d5d61a26cc9d8ffbd9f359c464450",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/007-overlap-actual-H-copy-visible.json",
+    "bytes": 28177,
+    "sha256": "df685a8b6ac1780f0cacf705cc99640f74f49a3cb431dfc652541702da1768c6",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/010-overlap-gates-armed-visible.json",
+    "bytes": 33727,
+    "sha256": "97b5aad220b97b508753c63b0353c01b3e89778afca10615b1a4532f78b046d4",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/011-overlap-A-native-choice-pending-visible.json",
+    "bytes": 26731,
+    "sha256": "0d0ded2688c9155ab8c76774caff8681e1580b05cba708a375a1d118a8cce717",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/012-overlap-A-real-buffer-ready-visible.json",
+    "bytes": 26731,
+    "sha256": "0d0ded2688c9155ab8c76774caff8681e1580b05cba708a375a1d118a8cce717",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/013-overlap-A-gated-before-B-visible.json",
+    "bytes": 26731,
+    "sha256": "0d0ded2688c9155ab8c76774caff8681e1580b05cba708a375a1d118a8cce717",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/014-overlap-B-native-choice-pending-visible.json",
+    "bytes": 22612,
+    "sha256": "b1ad52d119e49277823988cad382db2e4ddc4e8af2455ed8bc49d27cd3c955e2",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/015-overlap-B-real-buffer-ready-visible.json",
+    "bytes": 22612,
+    "sha256": "b1ad52d119e49277823988cad382db2e4ddc4e8af2455ed8bc49d27cd3c955e2",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/016-overlap-both-pending-before-A-release-visible.json",
+    "bytes": 22612,
+    "sha256": "b1ad52d119e49277823988cad382db2e4ddc4e8af2455ed8bc49d27cd3c955e2",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/017-overlap-after-A-release-B-still-pending-visible.json",
+    "bytes": 22612,
+    "sha256": "b1ad52d119e49277823988cad382db2e4ddc4e8af2455ed8bc49d27cd3c955e2",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/019-overlap-after-B-release-visible.json",
+    "bytes": 22934,
+    "sha256": "ab8321e834fa4657b059ae834c0bad501485356368ec6e34e0a373cfb3828af1",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/021-probe-visible.json",
+    "bytes": 22934,
+    "sha256": "ab8321e834fa4657b059ae834c0bad501485356368ec6e34e0a373cfb3828af1",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/022-overlap-native-B-accept-reach-visible.json",
+    "bytes": 20428,
+    "sha256": "73f23bf3089beb3da87053a5a71aa6e11804233059bc7dc35085794b25fe7aba",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/023-probe-visible.json",
+    "bytes": 20428,
+    "sha256": "73f23bf3089beb3da87053a5a71aa6e11804233059bc7dc35085794b25fe7aba",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/024-overlap-explicit-B-accept-visible.json",
+    "bytes": 24182,
+    "sha256": "f5dfe88391ddcf8344ed570ec7c0228b46e5d025d043c4122da2c06f240e5dc1",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  },
+  {
+    "localOriginal": "overlap/026-overlap-final-B-receipt-visible.json",
+    "bytes": 24182,
+    "sha256": "f5dfe88391ddcf8344ed570ec7c0228b46e5d025d043c4122da2c06f240e5dc1",
+    "rawContent": "same label in actions.jsonl; read-only DOM collected before screenshot"
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-reader-layout/runner.py",
+    "Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+    "Pc12.test_11_target_jumps_and_selected_file_review",
+    "Pc12.test_12_delayed_file_reveal_respects_view_departure",
+    "Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A",
+    "Pc12Wide.test_11_target_jumps_and_selected_file_review",
+    "Pc12Wide.test_12_delayed_file_reveal_respects_view_departure"
+  ],
+  "cwd": "/workspace/browser-env/task33-reader-layout/candidate/app",
+  "startUTC": "2026-10-22T23:26:45.748725+00:00",
+  "endUTC": "2026-10-22T23:27:07.762261+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "7cc40ef9d218c72f19cd8100d8802d16091a9d0227f5b4d7ef64a6204c0b9c7e",
+  "exactTestSHA256": "9ca1026516a3b5e897b88e49d5505b677b107a026f5a2c930df433de239bd580"
+}

@@ -1,0 +1,3 @@
+from pathlib import Path
+import json,subprocess,datetime,hashlib,sys
+r=Path(__file__).parent;cmd=['/workspace/browser-env/venv/bin/python',str(r/'judge.py')];start=datetime.datetime.now(datetime.timezone.utc).isoformat();p=subprocess.run(cmd,capture_output=True);(r/'judge.stdout.log').write_bytes(p.stdout);(r/'judge.stderr.log').write_bytes(p.stderr);(r/'judge.process.json').write_text(json.dumps({'command':cmd,'startUTC':start,'endUTC':datetime.datetime.now(datetime.timezone.utc).isoformat(),'actualChildExit':p.returncode,'stdoutSHA256':hashlib.sha256(p.stdout).hexdigest(),'stderrSHA256':hashlib.sha256(p.stderr).hexdigest()},indent=2));print(p.stdout.decode(),p.stderr.decode());sys.exit(p.returncode)

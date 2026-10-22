@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+  "returnId": "H_f72812d2-c302-4208-bd6c-f580367688ce",
+  "report": "[명시 합성33 결합후보] 파일 선택 단계 확인용이다. 중단/제외를 확정하거나 실제 구현·개발·검사·배포하지 않았다.",
+  "evidence": null,
+  "understanding": null
+}

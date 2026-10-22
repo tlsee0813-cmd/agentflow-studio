@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+  "returnId": "H_b8cfcc47-b114-49e7-82c7-4df0e6be6901",
+  "report": "[명시 합성33 관측자 보고] 정상 UI에서 오류행 처리 기존요청의 다음안내만 구체화해 파일용으로 전달했다. 중단/제외는 여전히 미선택이며 어느 것도 실제 적용하거나 완료로 표시하지 않았다. 실제 외부 AI·개발·파일처리·배포·프로그램검사는 하지 않았다.",
+  "evidence": null,
+  "understanding": null
+}

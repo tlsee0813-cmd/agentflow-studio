@@ -1,0 +1,452 @@
+[
+  {
+    "selector": "#accept-result-file",
+    "count": 1,
+    "geometry": {
+      "rect": {
+        "x": 300,
+        "y": 451.421875,
+        "width": 902,
+        "height": 45,
+        "top": 451.421875,
+        "right": 1202,
+        "bottom": 496.421875,
+        "left": 300
+      },
+      "clip": {
+        "left": 0,
+        "top": 0,
+        "right": 1280,
+        "bottom": 720
+      },
+      "full": true,
+      "hit": true,
+      "visible": true,
+      "text": "이 결과 가져오기",
+      "focus": "result-file-review-heading",
+      "focused": false,
+      "xy": [
+        0,
+        4572
+      ],
+      "ancestors": [
+        {
+          "id": "accept-result-file",
+          "tag": "BUTTON",
+          "rect": {
+            "x": 300,
+            "y": 451.421875,
+            "width": 902,
+            "height": 45,
+            "top": 451.421875,
+            "right": 1202,
+            "bottom": 496.421875,
+            "left": 300
+          },
+          "client": {
+            "left": 301,
+            "top": 452.421875,
+            "right": 1201,
+            "bottom": 495.421875
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "result-file-preview",
+          "tag": "DIV",
+          "rect": {
+            "x": 300,
+            "y": 6.96875,
+            "width": 902,
+            "height": 589.25,
+            "top": 6.96875,
+            "right": 1202,
+            "bottom": 596.21875,
+            "left": 300
+          },
+          "client": {
+            "left": 300,
+            "top": 6.96875,
+            "right": 1202,
+            "bottom": 596.21875
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "result-file-panel",
+          "tag": "DETAILS",
+          "rect": {
+            "x": 300,
+            "y": -167.84375,
+            "width": 902,
+            "height": 764.0625,
+            "top": -167.84375,
+            "right": 1202,
+            "bottom": 596.21875,
+            "left": 300
+          },
+          "client": {
+            "left": 300,
+            "top": -166.84366819371726,
+            "right": 1202,
+            "bottom": 596.21875
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "",
+          "tag": "SECTION",
+          "rect": {
+            "x": 272,
+            "y": -766,
+            "width": 958,
+            "height": 1386.21875,
+            "top": -766,
+            "right": 1230,
+            "bottom": 620.21875,
+            "left": 272
+          },
+          "client": {
+            "left": 272,
+            "top": -766,
+            "right": 1230,
+            "bottom": 620.21875
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "compose-panel",
+          "tag": "DETAILS",
+          "rect": {
+            "x": 271,
+            "y": -826.796875,
+            "width": 960,
+            "height": 1448.015625,
+            "top": -826.796875,
+            "right": 1231,
+            "bottom": 621.21875,
+            "left": 271
+          },
+          "client": {
+            "left": 272,
+            "top": -825.7968642092542,
+            "right": 1230,
+            "bottom": 620.2187392092542
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "",
+          "tag": "DIV",
+          "rect": {
+            "x": 271,
+            "y": -1496.53125,
+            "width": 960,
+            "height": 2136.75,
+            "top": -1496.53125,
+            "right": 1231,
+            "bottom": 640.21875,
+            "left": 271
+          },
+          "client": {
+            "left": 271,
+            "top": -1496.53125,
+            "right": 1231,
+            "bottom": 640.21875
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "workspace",
+          "tag": "DIV",
+          "rect": {
+            "x": 271,
+            "y": -1496.53125,
+            "width": 960,
+            "height": 2136.75,
+            "top": -1496.53125,
+            "right": 1231,
+            "bottom": 640.21875,
+            "left": 271
+          },
+          "client": {
+            "left": 271,
+            "top": -1496.53125,
+            "right": 1231,
+            "bottom": 640.21875
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "work-view",
+          "tag": "DIV",
+          "rect": {
+            "x": 264,
+            "y": -4342.8125,
+            "width": 974,
+            "height": 4983.03125,
+            "top": -4342.8125,
+            "right": 1238,
+            "bottom": 640.21875,
+            "left": 264
+          },
+          "client": {
+            "left": 264,
+            "top": -4342.8125,
+            "right": 1238,
+            "bottom": 640.21875
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "main",
+          "tag": "MAIN",
+          "rect": {
+            "x": 222,
+            "y": -4500,
+            "width": 1058,
+            "height": 5220.0625,
+            "top": -4500,
+            "right": 1280,
+            "bottom": 720.0625,
+            "left": 222
+          },
+          "client": {
+            "left": 222,
+            "top": -4500,
+            "right": 1280,
+            "bottom": 720.0625000000009
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "",
+          "tag": "DIV",
+          "rect": {
+            "x": 222,
+            "y": -4572,
+            "width": 1058,
+            "height": 5292.0625,
+            "top": -4572,
+            "right": 1280,
+            "bottom": 720.0625,
+            "left": 222
+          },
+          "client": {
+            "left": 222,
+            "top": -4572,
+            "right": 1280,
+            "bottom": 720.0625
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "",
+          "tag": "DIV",
+          "rect": {
+            "x": 0,
+            "y": -4572,
+            "width": 1280,
+            "height": 5292.0625,
+            "top": -4572,
+            "right": 1280,
+            "bottom": 720.0625,
+            "left": 0
+          },
+          "client": {
+            "left": 0,
+            "top": -4572,
+            "right": 1280,
+            "bottom": 720.0625
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "",
+          "tag": "BODY",
+          "rect": {
+            "x": 0,
+            "y": -4572,
+            "width": 1280,
+            "height": 5292.0625,
+            "top": -4572,
+            "right": 1280,
+            "bottom": 720.0625,
+            "left": 0
+          },
+          "client": {
+            "left": 0,
+            "top": -4572,
+            "right": 1280,
+            "bottom": 720.0625
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            0
+          ],
+          "extent": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "",
+          "tag": "HTML",
+          "rect": {
+            "x": 0,
+            "y": -4572,
+            "width": 1280,
+            "height": 5292.0625,
+            "top": -4572,
+            "right": 1280,
+            "bottom": 720.0625,
+            "left": 0
+          },
+          "client": {
+            "left": 0,
+            "top": -4572,
+            "right": 1280,
+            "bottom": -3851.9914965986395
+          },
+          "overflow": [
+            "visible",
+            "visible"
+          ],
+          "scroll": [
+            0,
+            4572
+          ],
+          "extent": [
+            0,
+            4572
+          ]
+        }
+      ]
+    }
+  }
+]

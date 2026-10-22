@@ -1,0 +1,37 @@
+{
+  "layer": "work",
+  "entry": "E_c325397d-0f48-414f-9d8f-65e7abdbc24c",
+  "xy": [
+    0,
+    2603
+  ],
+  "focus": {
+    "id": "home-file-result",
+    "tag": "BUTTON",
+    "text": "결과 JSON 가져오기"
+  },
+  "current": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+  "message": "선택한 파일을 읽는 중입니다. 아직 가져오지 않았습니다.",
+  "preview": {
+    "dataset": {
+      "selectionState": "none"
+    },
+    "text": "",
+    "raw": null
+  },
+  "heading": null,
+  "slots": {
+    "overlap-A-valid.json": {
+      "started": true,
+      "released": false,
+      "bytes": 429,
+      "raw": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_33df7a80-d848-40e1-a535-80e809d0f482\",\n  \"taskId\": \"T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf\",\n  \"returnId\": \"H_7048e911-fb90-426d-9289-fc0606fe7b5c\",\n  \"report\": \"[명시 합성33 OVERLAP-A] 서로 다른 원문 A 파일이다. 실제 AI·개발·검사·배포 완료가 아니다. 최종 선택은 B로만 확인한다.\",\n  \"evidence\": null,\n  \"understanding\": null\n}"
+    },
+    "overlap-B-valid.json": {
+      "started": false,
+      "released": false,
+      "bytes": null,
+      "raw": null
+    }
+  }
+}

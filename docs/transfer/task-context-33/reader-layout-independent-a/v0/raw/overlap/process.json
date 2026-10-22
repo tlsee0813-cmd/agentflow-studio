@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-reader-layout/overlap/controller.py"
+  ],
+  "startUTC": "2026-10-22T23:32:52.643556+00:00",
+  "endUTC": "2026-10-22T23:34:19.857677+00:00",
+  "actualChildExit": 0,
+  "combinedLogSHA256": "e75f5009a2bb4c4d1d862c626b254f5b754f2b0aa98c2bd3f0a37378b9347719"
+}

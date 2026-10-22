@@ -1,0 +1,330 @@
+[
+  {
+    "label": "1280-native-details-first-open",
+    "xy": [
+      0,
+      0
+    ],
+    "extent": [
+      0,
+      754
+    ],
+    "focusId": "",
+    "summary": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "text": "이어갈 대상 확인",
+        "rect": {
+          "x": 283,
+          "y": 454.703125,
+          "width": 936,
+          "height": 43.796875,
+          "top": 454.703125,
+          "right": 1219,
+          "bottom": 498.5,
+          "left": 283
+        },
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1280,
+          "b": 720
+        },
+        "full": true,
+        "positive": true,
+        "hit": true,
+        "expanded": null,
+        "open": true,
+        "value": null
+      }
+    ]
+  },
+  {
+    "label": "1280-key-Enter-close-details",
+    "xy": [
+      0,
+      0
+    ],
+    "extent": [
+      0,
+      651
+    ],
+    "focusId": "",
+    "summary": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "text": "이어갈 대상 확인",
+        "rect": {
+          "x": 1125.4375,
+          "y": 379.515625,
+          "width": 93.5625,
+          "height": 43.796875,
+          "top": 379.515625,
+          "right": 1219,
+          "bottom": 423.3125,
+          "left": 1125.4375
+        },
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1280,
+          "b": 720
+        },
+        "full": true,
+        "positive": true,
+        "hit": true,
+        "expanded": null,
+        "open": false,
+        "value": null
+      }
+    ]
+  },
+  {
+    "label": "1280-key-Space-open-details",
+    "xy": [
+      0,
+      0
+    ],
+    "extent": [
+      0,
+      754
+    ],
+    "focusId": "",
+    "summary": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "text": "이어갈 대상 확인",
+        "rect": {
+          "x": 283,
+          "y": 454.703125,
+          "width": 936,
+          "height": 43.796875,
+          "top": 454.703125,
+          "right": 1219,
+          "bottom": 498.5,
+          "left": 283
+        },
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1280,
+          "b": 720
+        },
+        "full": true,
+        "positive": true,
+        "hit": true,
+        "expanded": null,
+        "open": true,
+        "value": null
+      }
+    ]
+  },
+  {
+    "label": "1280-key-Enter-final-close-details",
+    "xy": [
+      0,
+      0
+    ],
+    "extent": [
+      0,
+      651
+    ],
+    "focusId": "",
+    "summary": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "text": "이어갈 대상 확인",
+        "rect": {
+          "x": 1125.4375,
+          "y": 379.515625,
+          "width": 93.5625,
+          "height": 43.796875,
+          "top": 379.515625,
+          "right": 1219,
+          "bottom": 423.3125,
+          "left": 1125.4375
+        },
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1280,
+          "b": 720
+        },
+        "full": true,
+        "positive": true,
+        "hit": true,
+        "expanded": null,
+        "open": false,
+        "value": null
+      }
+    ]
+  },
+  {
+    "label": "1440-native-details-first-open",
+    "xy": [
+      0,
+      0
+    ],
+    "extent": [
+      0,
+      574
+    ],
+    "focusId": "",
+    "summary": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "text": "이어갈 대상 확인",
+        "rect": {
+          "x": 283,
+          "y": 454.703125,
+          "width": 1096,
+          "height": 43.796875,
+          "top": 454.703125,
+          "right": 1379,
+          "bottom": 498.5,
+          "left": 283
+        },
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "positive": true,
+        "hit": true,
+        "expanded": null,
+        "open": true,
+        "value": null
+      }
+    ]
+  },
+  {
+    "label": "1440-key-Enter-close-details",
+    "xy": [
+      0,
+      0
+    ],
+    "extent": [
+      0,
+      471
+    ],
+    "focusId": "",
+    "summary": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "text": "이어갈 대상 확인",
+        "rect": {
+          "x": 1285.4375,
+          "y": 379.515625,
+          "width": 93.5625,
+          "height": 43.796875,
+          "top": 379.515625,
+          "right": 1379,
+          "bottom": 423.3125,
+          "left": 1285.4375
+        },
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "positive": true,
+        "hit": true,
+        "expanded": null,
+        "open": false,
+        "value": null
+      }
+    ]
+  },
+  {
+    "label": "1440-key-Space-open-details",
+    "xy": [
+      0,
+      0
+    ],
+    "extent": [
+      0,
+      574
+    ],
+    "focusId": "",
+    "summary": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "text": "이어갈 대상 확인",
+        "rect": {
+          "x": 283,
+          "y": 454.703125,
+          "width": 1096,
+          "height": 43.796875,
+          "top": 454.703125,
+          "right": 1379,
+          "bottom": 498.5,
+          "left": 283
+        },
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "positive": true,
+        "hit": true,
+        "expanded": null,
+        "open": true,
+        "value": null
+      }
+    ]
+  },
+  {
+    "label": "1440-key-Enter-final-close-details",
+    "xy": [
+      0,
+      0
+    ],
+    "extent": [
+      0,
+      471
+    ],
+    "focusId": "",
+    "summary": [
+      {
+        "id": "",
+        "tag": "SUMMARY",
+        "text": "이어갈 대상 확인",
+        "rect": {
+          "x": 1285.4375,
+          "y": 379.515625,
+          "width": 93.5625,
+          "height": 43.796875,
+          "top": 379.515625,
+          "right": 1379,
+          "bottom": 423.3125,
+          "left": 1285.4375
+        },
+        "clip": {
+          "l": 0,
+          "t": 0,
+          "r": 1440,
+          "b": 900
+        },
+        "full": true,
+        "positive": true,
+        "hit": true,
+        "expanded": null,
+        "open": false,
+        "value": null
+      }
+    ]
+  }
+]

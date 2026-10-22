@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/task33-reader-layout/controlled/controller.py"
+  ],
+  "startUTC": "2026-10-22T23:26:47.110749+00:00",
+  "endUTC": "2026-10-22T23:26:52.166907+00:00",
+  "actualChildExit": 0,
+  "combinedLogSHA256": "dee1992cd34e38deef2ac4839d7e2dd88a5acd1b09c5781119b1267adb522e5e"
+}

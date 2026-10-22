@@ -1,0 +1,51 @@
+{
+  "layer": "work",
+  "entry": "E_c325397d-0f48-414f-9d8f-65e7abdbc24c",
+  "xy": [
+    0,
+    4230
+  ],
+  "focus": {
+    "id": "result-file-review-heading",
+    "tag": "H3",
+    "text": "선택한 결과 확인"
+  },
+  "current": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+  "message": "원문과 연결 대상을 확인한 뒤 가져오세요.",
+  "preview": {
+    "dataset": {
+      "selectionState": "review",
+      "targetTaskId": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+      "returnId": "H_7048e911-fb90-426d-9289-fc0606fe7b5c"
+    },
+    "text": "선택한 결과 확인아직 가져오지 않았습니다.연결할 작업 · [합성32] 출력 안내 문구의 표현을 검토해 주세요. 지금 이어갈 별도 작업입니다.내보낸 시점 · 10월 22일 23:33 · 원래 버전 r69이후 기록된 기준 0개이 결과에 적용되는지는 직접 확인하세요. 기준·수동값을 자동으로 바꾸지 않습니다.당시 작업문 내용understanding: 출력 안내 문구를 검토하는 별도 작업이다.scope: 안내 문구만 검토한다. 미리보기와 오류행 정책은 바꾸지 않는다.next: 저장 위치 안내 문구를 확인한다.checks: 실행·전송됐다고 오해하게 표현하지 않는다.외부 보고 원문 · 앱 미검증[명시 합성33 OVERLAP-B] 서로 다른 원문 B 파일이다. 실제 AI·개발·검사·배포 완료가 아니다. 최종 선택은 B로만 확인한다.파일은 실행 증명이 아닙니다. 가져와도 AI 정리·명령·링크를 실행하지 않습니다.이 결과 가져오기수신 JSON 원문 · 파일 저장원문 파일 저장닫고 기존 붙여넣기 이용",
+    "raw": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_33df7a80-d848-40e1-a535-80e809d0f482\",\n  \"taskId\": \"T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf\",\n  \"returnId\": \"H_7048e911-fb90-426d-9289-fc0606fe7b5c\",\n  \"report\": \"[명시 합성33 OVERLAP-B] 서로 다른 원문 B 파일이다. 실제 AI·개발·검사·배포 완료가 아니다. 최종 선택은 B로만 확인한다.\",\n  \"evidence\": null,\n  \"understanding\": null\n}"
+  },
+  "heading": {
+    "rect": {
+      "x": 300,
+      "y": 348.96875,
+      "width": 902,
+      "height": 22.5,
+      "top": 348.96875,
+      "right": 1202,
+      "bottom": 371.46875,
+      "left": 300
+    },
+    "text": "선택한 결과 확인"
+  },
+  "slots": {
+    "overlap-A-valid.json": {
+      "started": true,
+      "released": true,
+      "bytes": 429,
+      "raw": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_33df7a80-d848-40e1-a535-80e809d0f482\",\n  \"taskId\": \"T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf\",\n  \"returnId\": \"H_7048e911-fb90-426d-9289-fc0606fe7b5c\",\n  \"report\": \"[명시 합성33 OVERLAP-A] 서로 다른 원문 A 파일이다. 실제 AI·개발·검사·배포 완료가 아니다. 최종 선택은 B로만 확인한다.\",\n  \"evidence\": null,\n  \"understanding\": null\n}"
+    },
+    "overlap-B-valid.json": {
+      "started": true,
+      "released": true,
+      "bytes": 429,
+      "raw": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_33df7a80-d848-40e1-a535-80e809d0f482\",\n  \"taskId\": \"T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf\",\n  \"returnId\": \"H_7048e911-fb90-426d-9289-fc0606fe7b5c\",\n  \"report\": \"[명시 합성33 OVERLAP-B] 서로 다른 원문 B 파일이다. 실제 AI·개발·검사·배포 완료가 아니다. 최종 선택은 B로만 확인한다.\",\n  \"evidence\": null,\n  \"understanding\": null\n}"
+    }
+  }
+}

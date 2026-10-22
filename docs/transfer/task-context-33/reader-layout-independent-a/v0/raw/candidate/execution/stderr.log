@@ -1,0 +1,13 @@
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+test_11_target_jumps_and_selected_file_review (__main__.Pc12.test_11_target_jumps_and_selected_file_review) ... ok
+test_12_delayed_file_reveal_respects_view_departure (__main__.Pc12.test_12_delayed_file_reveal_respects_view_departure)
+Controlled file-API delay only; actual selected bytes and every navigation use the native UI. ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+test_11_target_jumps_and_selected_file_review (__main__.Pc12Wide.test_11_target_jumps_and_selected_file_review) ... ok
+test_12_delayed_file_reveal_respects_view_departure (__main__.Pc12Wide.test_12_delayed_file_reveal_respects_view_departure)
+Controlled file-API delay only; actual selected bytes and every navigation use the native UI. ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 21.854s
+
+OK

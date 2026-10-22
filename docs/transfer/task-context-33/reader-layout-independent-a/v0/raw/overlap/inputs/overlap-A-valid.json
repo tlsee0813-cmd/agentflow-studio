@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+  "returnId": "H_7048e911-fb90-426d-9289-fc0606fe7b5c",
+  "report": "[명시 합성33 OVERLAP-A] 서로 다른 원문 A 파일이다. 실제 AI·개발·검사·배포 완료가 아니다. 최종 선택은 B로만 확인한다.",
+  "evidence": null,
+  "understanding": null
+}

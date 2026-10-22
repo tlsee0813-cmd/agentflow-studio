@@ -1,0 +1,23 @@
+{"op": "new", "width": 1280, "height": 720, "label": "sameview-new-context"}
+{"op": "click", "selector": "#nav-projects", "label": "sameview-project-list"}
+{"op": "import", "selector": "#list-import", "file": "T2.json", "label": "sameview-normal-import"}
+{"op": "observe", "label": "sameview-import-complete"}
+{"op": "click", "selector": "#nav-work", "label": "sameview-work"}
+{"op": "arm-delay", "label": "sameview-arraybuffer-completion-armed"}
+{"op": "import", "selector": "#home-file-result", "file": "controlled-valid-return.json", "label": "sameview-file-pending"}
+{"op": "opaque", "file": "sameview-before-release-envelope.json"}
+{"op": "release-delay", "label": "sameview-release"}
+{"op": "opaque", "file": "sameview-after-release-envelope.json"}
+{"op": "new", "width": 1280, "height": 720, "label": "roundtrip-new-context"}
+{"op": "click", "selector": "#nav-projects", "label": "roundtrip-projects"}
+{"op": "import", "selector": "#list-import", "file": "T2.json", "label": "roundtrip-normal-import"}
+{"op": "observe", "label": "roundtrip-import-complete"}
+{"op": "click", "selector": "#nav-work", "label": "roundtrip-work-before-selection"}
+{"op": "arm-delay", "label": "roundtrip-delay-armed"}
+{"op": "import", "selector": "#home-file-result", "file": "controlled-valid-return.json", "label": "roundtrip-file-pending"}
+{"op": "click", "selector": "#nav-history", "label": "roundtrip-native-history"}
+{"op": "click", "selector": "#nav-work", "label": "roundtrip-native-work-return"}
+{"op": "opaque", "file": "roundtrip-before-release-envelope.json"}
+{"op": "release-delay", "label": "roundtrip-release"}
+{"op": "opaque", "file": "roundtrip-after-release-envelope.json"}
+{"op": "finish"}

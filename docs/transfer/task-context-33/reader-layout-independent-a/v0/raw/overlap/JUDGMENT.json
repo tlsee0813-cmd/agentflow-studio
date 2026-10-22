@@ -1,0 +1,26 @@
+{
+  "checks": {
+    "buffersExactSelectedBytes": true,
+    "bothRealBuffersWaiting": true,
+    "ACompletionDoesNotMoveOrStealFocus": true,
+    "BStillWaitingAfterA": true,
+    "BCompletionKeepsRevealEligibility": true,
+    "previewExactB": true,
+    "previewExactTaskH": true,
+    "noWriteAtSelection": true,
+    "oneExplicitReceivedB": true,
+    "allOldTasksUnchanged": true,
+    "oldSourcesPreserved": true,
+    "draftAndKindUnchanged": true,
+    "spaceAndBasesUnchanged": true,
+    "currentPolicyNotRolledBack": true,
+    "ANeverStored": true
+  },
+  "currentBefore": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+  "currentAfter": "T_07145004-687d-4804-bfdf-3263e79116bd",
+  "actualH": "H_7048e911-fb90-426d-9289-fc0606fe7b5c",
+  "actualParent": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+  "addedTaskId": "T_07145004-687d-4804-bfdf-3263e79116bd",
+  "controlledNotNaturalDelay": true,
+  "source": "843ca3993615824452bfc80a6c0c4c65d35df376"
+}
