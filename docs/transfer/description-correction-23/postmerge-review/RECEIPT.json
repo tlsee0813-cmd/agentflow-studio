@@ -1,0 +1,254 @@
+{
+  "checkpoint": "debc550f70c1cd4bd6ceb920fe8250be7420f41b",
+  "delivery": "0d568e78061199956b4d73a5fd1f95d99947edc6",
+  "docs": [
+    {
+      "title": "RESULT.md",
+      "sha": "5ac5eaf24f117eabd9a76da80f48c4b25a297f54",
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/debc550f70c1cd4bd6ceb920fe8250be7420f41b/docs/cycles/2026-10-23-blank-project-21/RESULT.md"
+    },
+    {
+      "title": "RESULT.md",
+      "sha": "f4d6e730873336654839a05551ba1b5ea76f877a",
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/debc550f70c1cd4bd6ceb920fe8250be7420f41b/docs/cycles/2026-10-23-correction-context-23/RESULT.md"
+    },
+    {
+      "title": "PROJECT_STATUS.md",
+      "sha": "5a4e85cd25cfcd8ae917fc5b6ac50b8d51c4dc7d",
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/debc550f70c1cd4bd6ceb920fe8250be7420f41b/docs/PROJECT_STATUS.md"
+    },
+    {
+      "title": "ACTIVE.md",
+      "sha": "a36a180ce894b4d8b85c8bc26912355a8ba2f21f",
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/debc550f70c1cd4bd6ceb920fe8250be7420f41b/docs/cycles/ACTIVE.md"
+    },
+    {
+      "title": "INPUT.md",
+      "sha": "fbfd0dff1d33465e457d1a09601240ebba84afc9",
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/debc550f70c1cd4bd6ceb920fe8250be7420f41b/docs/cycles/2026-10-23-map-reading-24/INPUT.md"
+    },
+    {
+      "title": "RESEARCH.md",
+      "sha": "e0f9d6a77467ce21e5642bb196254f6244c972ee",
+      "url": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/debc550f70c1cd4bd6ceb920fe8250be7420f41b/docs/cycles/2026-10-23-map-reading-24/RESEARCH.md"
+    }
+  ],
+  "missingRelativeLinks": [],
+  "importantClaimConflictFound": false,
+  "ci21": [
+    {
+      "file": "CI_FINAL.json",
+      "bytes": 8882,
+      "gitBlob": "cb81fa39fcef7bc84d0b2669dfc65b484cf67158",
+      "remoteGitBlob": "cb81fa39fcef7bc84d0b2669dfc65b484cf67158",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "FILES.json",
+      "bytes": 1084,
+      "gitBlob": "e1223daadeb47231c500a766b6c947e7f1729dcb",
+      "remoteGitBlob": "e1223daadeb47231c500a766b6c947e7f1729dcb",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "initial-status.json",
+      "bytes": 1201,
+      "gitBlob": "c08206a03fd4591ecfa74c4242bef374cbf386f3",
+      "remoteGitBlob": "c08206a03fd4591ecfa74c4242bef374cbf386f3",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "status-history.json",
+      "bytes": 5972,
+      "gitBlob": "c46c778d9a4a2089f5e3c59267ae482ca9f5e2a2",
+      "remoteGitBlob": "c46c778d9a4a2089f5e3c59267ae482ca9f5e2a2",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "ubuntu-annotations-response.json",
+      "bytes": 1768,
+      "gitBlob": "17cb4c1db364fdf2554e547c7a1325b2957e289f",
+      "remoteGitBlob": "17cb4c1db364fdf2554e547c7a1325b2957e289f",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "ubuntu-job-response.json",
+      "bytes": 125590,
+      "gitBlob": "793fabd4f0be8972cfefcd5e6febc45d4ce872bd",
+      "remoteGitBlob": "793fabd4f0be8972cfefcd5e6febc45d4ce872bd",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "windows-annotations-response.json",
+      "bytes": 1768,
+      "gitBlob": "f5fd1b789147e721618a346380120f3f9ac2d641",
+      "remoteGitBlob": "f5fd1b789147e721618a346380120f3f9ac2d641",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "windows-job-response.json",
+      "bytes": 128297,
+      "gitBlob": "338dcd827551911035a847883ded0280595c9358",
+      "remoteGitBlob": "338dcd827551911035a847883ded0280595c9358",
+      "match": true,
+      "utf8Valid": true
+    }
+  ],
+  "ci23": [
+    {
+      "file": "001-discovery.json",
+      "bytes": 1597,
+      "gitBlob": "6e5be493cc5544ed74886b6be23847077dcca592",
+      "remoteGitBlob": "6e5be493cc5544ed74886b6be23847077dcca592",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "002-run-jobs.json",
+      "bytes": 1081,
+      "gitBlob": "b7c24f51ecb64711b450e62ed8b732553ebada88",
+      "remoteGitBlob": "b7c24f51ecb64711b450e62ed8b732553ebada88",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "003-run-jobs.json",
+      "bytes": 1081,
+      "gitBlob": "b7c24f51ecb64711b450e62ed8b732553ebada88",
+      "remoteGitBlob": "b7c24f51ecb64711b450e62ed8b732553ebada88",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "004-run-jobs.json",
+      "bytes": 1081,
+      "gitBlob": "b7c24f51ecb64711b450e62ed8b732553ebada88",
+      "remoteGitBlob": "b7c24f51ecb64711b450e62ed8b732553ebada88",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "005-run-jobs.json",
+      "bytes": 1081,
+      "gitBlob": "b7c24f51ecb64711b450e62ed8b732553ebada88",
+      "remoteGitBlob": "b7c24f51ecb64711b450e62ed8b732553ebada88",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "006-ubuntu-live-response.json",
+      "bytes": 125459,
+      "gitBlob": "d5ec5e523eda078c353c2d299d07ceb6b17c2c7c",
+      "remoteGitBlob": "d5ec5e523eda078c353c2d299d07ceb6b17c2c7c",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "007-windows-live-response.json",
+      "bytes": 133,
+      "gitBlob": "cce241df2366e0a2ad61ee9bfb3a8f3364115dec",
+      "remoteGitBlob": "cce241df2366e0a2ad61ee9bfb3a8f3364115dec",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "008-final-run-jobs.json",
+      "bytes": 1087,
+      "gitBlob": "315195f720d04eb4c79bb97a3011642056c8d60e",
+      "remoteGitBlob": "315195f720d04eb4c79bb97a3011642056c8d60e",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "009-windows-final-response.json",
+      "bytes": 128098,
+      "gitBlob": "a579034ba1d7dd51856b518e71b78085cdd2ffe6",
+      "remoteGitBlob": "a579034ba1d7dd51856b518e71b78085cdd2ffe6",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "010-ubuntu-final-response.json",
+      "bytes": 125462,
+      "gitBlob": "a17c019b85befeec98f6f79bc25bdc1d8a9551d4",
+      "remoteGitBlob": "a17c019b85befeec98f6f79bc25bdc1d8a9551d4",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "FINAL.json",
+      "bytes": 15958,
+      "gitBlob": "b346a11cab7b6b7b03d9b9b72d8109b2facbed7a",
+      "remoteGitBlob": "b346a11cab7b6b7b03d9b9b72d8109b2facbed7a",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "REPORT.md",
+      "bytes": 2819,
+      "gitBlob": "ca8347063fcd37684a1d89b635dedd639a9be058",
+      "remoteGitBlob": "ca8347063fcd37684a1d89b635dedd639a9be058",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "SHA256.json",
+      "bytes": 2188,
+      "gitBlob": "18709b3cb0b5c5bc95931e24264f5740f7e2021c",
+      "remoteGitBlob": "18709b3cb0b5c5bc95931e24264f5740f7e2021c",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "summarize.mjs",
+      "bytes": 6176,
+      "gitBlob": "d8ce6b3ba4f4fc03c57ddd0a2ddb44758c4bbfd4",
+      "remoteGitBlob": "d8ce6b3ba4f4fc03c57ddd0a2ddb44758c4bbfd4",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "ubuntu-returned.log",
+      "bytes": 122808,
+      "gitBlob": "0f5f57dfad418592b9566ef7be423efc08f9791b",
+      "remoteGitBlob": "0f5f57dfad418592b9566ef7be423efc08f9791b",
+      "match": true,
+      "utf8Valid": true
+    },
+    {
+      "file": "windows-returned.log",
+      "bytes": 123224,
+      "gitBlob": "3612dc7ef5358862d64844d1dd8ccbee92bf58d4",
+      "remoteGitBlob": "3612dc7ef5358862d64844d1dd8ccbee92bf58d4",
+      "match": true,
+      "utf8Valid": true
+    }
+  ],
+  "remoteOnlyMergeProof": {
+    "path": "docs/transfer/blank-project-21/ci-799077/MERGE_PROOF.json",
+    "localByteComparison": "EXCLUDED: created by root directly from tool memory, no local original",
+    "remoteGitBlob": "b0426f029ef6df5ee534439553a2d80e8cfe667d",
+    "recordedMerge": "241cbd891672bf1ee81bcfd97d458217a20c9f54",
+    "parents": [
+      "94db8147c019eb9b14fde18e300f6dc11c4c3f1d",
+      "799077ea2f645f1753f29da7fe9d4b50a81971e6"
+    ],
+    "rootSuppliedFactsMatch": true,
+    "verifiedThreeBlobsMatchCheckpointTree": true
+  },
+  "summary": {
+    "ciComparedFiles": 24,
+    "byteExactGitBlobMatches": 24,
+    "utf8Valid": 24,
+    "conflictingImportantClaims": 0,
+    "missingRelativeLinks": 0,
+    "scope": "Six specified checkpoint documents and two CI evidence directories; no code/unit/browser/server run, no remote write"
+  }
+}
