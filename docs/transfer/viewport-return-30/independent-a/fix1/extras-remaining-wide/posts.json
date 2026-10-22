@@ -1,0 +1,71 @@
+[
+  {
+    "UTC": "2026-10-22T21:07:37.874349+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:33803/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_67b5f565-9aaf-4dd8-ab15-39cebb646884",
+        "revision": 5,
+        "requestId": "R_77783eee-8207-42fe-bf8a-3f9c5b2eba7f",
+        "taskId": "T_07f36a30-431f-4187-b5a7-31b5b6ff68ff"
+      },
+      "projectName": "[명시 합성30] 안내문 표현만 정리해 주세요. 실제 …",
+      "sources": [
+        {
+          "id": "S_6b16e1e4-33de-47ea-bc6e-3bd247d4c4c3",
+          "kind": "request",
+          "text": "[명시 합성30] 안내문 표현만 정리해 주세요. 실제 코드 실행이나 배포는 하지 마세요.",
+          "at": "2026-10-22T21:07:37.834Z",
+          "taskId": "T_07f36a30-431f-4187-b5a7-31b5b6ff68ff",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[명시 합성30] 안내문 표현만 정리해 주세요. 실제 코드 실행이나 배포는 하지 마세요.",
+          "status": "requested",
+          "sourceId": "S_6b16e1e4-33de-47ea-bc6e-3bd247d4c4c3",
+          "revision": 5,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_07f36a30-431f-4187-b5a7-31b5b6ff68ff",
+        "inputs": [
+          {
+            "sourceId": "S_6b16e1e4-33de-47ea-bc6e-3bd247d4c4c3",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D1",
+            "sourceId": "S_6b16e1e4-33de-47ea-bc6e-3bd247d4c4c3",
+            "revision": 5,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 4,
+        "brief": "[명시 합성30] 작은 자료 안내를 준비한다. 실제 동작·배포는 하지 않는다.",
+        "area": null
+      },
+      "currentAreaDescription": null
+    }
+  }
+]

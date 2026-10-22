@@ -1,0 +1,119 @@
+[
+  {
+    "originalPath": "base29/ui.jsonl",
+    "originalBytes": 132101,
+    "originalSHA256": "caaf0611dbc7be45cd88f14ee1ddb185604aadc087670a6d739cc6a23fceb63e",
+    "gzip": "base29/ui.jsonl.gz",
+    "gzipBytes": 11745,
+    "gzipSHA256": "fe7c0a61444fd0208050e98ee384bde94e0444885859bbf648432e21aeadc39b",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "base29/runtime.json",
+    "originalBytes": 12717,
+    "originalSHA256": "33f19afbf3c2a8096d12675d570680a7a8d263a0d343e0e8ea9fce712f474d45",
+    "gzip": "base29/runtime.json.gz",
+    "gzipBytes": 1470,
+    "gzipSHA256": "1e0ba9d04f7f7b6011259fc9e5a52710b06ea73a686575f125c5d18f758c9166",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "candidate-main/ui.jsonl",
+    "originalBytes": 303433,
+    "originalSHA256": "0dbeb074ddd38e4c4fad64b023a78be5976506583f0fed0bec88cd9a5933cb2a",
+    "gzip": "candidate-main/ui.jsonl.gz",
+    "gzipBytes": 23667,
+    "gzipSHA256": "ef97756035294bc30bb2ba0cba99b147cb3712b4b36f39b8e1d0a5ea95fa0c61",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "candidate-main/runtime.json",
+    "originalBytes": 25131,
+    "originalSHA256": "d3407483d2179b78ddc3718302e62bdcc439b4fa162653f9ba3261471a84be1b",
+    "gzip": "candidate-main/runtime.json.gz",
+    "gzipBytes": 1610,
+    "gzipSHA256": "963862a9737466607d8d12a9aa7f125aad6113c02a8eb3a94f7b0b4c741973c8",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "extras-first/ui.jsonl",
+    "originalBytes": 896475,
+    "originalSHA256": "e647ea6ce19641a43e2a05bbd6cdb1ab1c477c0eb10a0c5eb9408d1023e81257",
+    "gzip": "extras-first/ui.jsonl.gz",
+    "gzipBytes": 56581,
+    "gzipSHA256": "eaab274bb796364b9e56e957f8b5ee8cb158ece0cf393195aca3c556748b63b9",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "extras-first/runtime.json",
+    "originalBytes": 18924,
+    "originalSHA256": "4a97409d670ff021fa46ad1557715457e88d267fcc9e0e454ca96aa98166fd79",
+    "gzip": "extras-first/runtime.json.gz",
+    "gzipBytes": 1528,
+    "gzipSHA256": "23dcb5eb535760b9eb6f7cad41dd89029ffd3d5bf319d1acb091d531b7a866df",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "extras-remaining-wide/ui.jsonl",
+    "originalBytes": 821974,
+    "originalSHA256": "257fafa389757e3c537da07b871baeb048ec65cfb3d484153f44321189eca0c4",
+    "gzip": "extras-remaining-wide/ui.jsonl.gz",
+    "gzipBytes": 49844,
+    "gzipSHA256": "aa9abbb4f61f615218b59eb2abb93da609074262395eb0022501ae763a1da0c4",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "extras-remaining-wide/runtime.json",
+    "originalBytes": 12717,
+    "originalSHA256": "1bf4fac7a5c53fd2409fc371edb33117b739205e2cb20375dcd45237838bca21",
+    "gzip": "extras-remaining-wide/runtime.json.gz",
+    "gzipBytes": 1457,
+    "gzipSHA256": "c81dbdfbe0141950e6c94afa25b6592033a2bcdf569f80922bb9b9ceaaaa1211",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "candidate-PNG-recheck/ui.jsonl",
+    "originalBytes": 151975,
+    "originalSHA256": "eab11fadda1cf4bd66e8b2e91ee945be88ebb7e7a9fae62a471ae973c5106ffb",
+    "gzip": "candidate-PNG-recheck/ui.jsonl.gz",
+    "gzipBytes": 12905,
+    "gzipSHA256": "7856c933d5826e296177d2c0d4f1ec7e5a8a2e43d98ef1b889e960faf304a748",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "candidate-PNG-recheck/runtime.json",
+    "originalBytes": 12717,
+    "originalSHA256": "2e26ee249ee6a32da3d22196c93a4987015be08d3bfc7d2426ca7384a99dc52c",
+    "gzip": "candidate-PNG-recheck/runtime.json.gz",
+    "gzipBytes": 1467,
+    "gzipSHA256": "96cb3edbde0d5704f41238499cb04749fcaffa0f7b90c26b058fe1e7a7608413",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "shared-input/normal-ui-6-card-backup.json",
+    "originalBytes": 25031,
+    "originalSHA256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+    "gzip": "shared-input/normal-ui-6-card-backup.json.gz",
+    "gzipBytes": 3837,
+    "gzipSHA256": "705c69c140d396c27505eeb67d417c2f1c3cd6e2469d64bb8d884a5d9db32340",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "shared-input/normal-ui-four-card-backup.json",
+    "originalBytes": 24373,
+    "originalSHA256": "a62d6bcece8866c6e2a02da5fd16ad500ab810c33fcf0ddc7f5e74de484f22a9",
+    "gzip": "shared-input/normal-ui-four-card-backup.json.gz",
+    "gzipBytes": 3726,
+    "gzipSHA256": "8d7e6376bc410a00a6fefe1bd587211d1e55031aaffeca9caf78185f7f0797f7",
+    "decompressedEqual": true
+  },
+  {
+    "originalPath": "EXTRA_CHECK_INDEX.json",
+    "originalBytes": 11144,
+    "originalSHA256": "b22861d6f399c6d61d699694ad015def2cdb713690d775430596dde7b5002e30",
+    "gzip": "EXTRA_CHECK_INDEX.json.gz",
+    "gzipBytes": 1009,
+    "gzipSHA256": "6e81c30de065653af6aa739b06f8d7660610acf0a15d602d18261f69a3e5a005",
+    "decompressedEqual": true
+  }
+]

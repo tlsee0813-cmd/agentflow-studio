@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle30-fix1-extras/extras.py"
+  ],
+  "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+  "startUTC": "2026-10-22T21:06:25.989059+00:00",
+  "endUTC": "2026-10-22T21:06:35.126452+00:00",
+  "checkerSHA256": "b476cb5c9d26de3e6f73591d71dedc640054c0bae79aae751e0f6709632df10c",
+  "checkerAfterSHA256": "b476cb5c9d26de3e6f73591d71dedc640054c0bae79aae751e0f6709632df10c",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "f8917c707184c7a67864b9079ee4182c11e73852c166ad9cea9447aea2824291"
+}

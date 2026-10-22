@@ -1,0 +1,45 @@
+[
+  {
+    "UTC": "2026-10-22T21:06:32.535001+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:44099/api/continuity",
+    "status": 200,
+    "bytes": 1382,
+    "bodySHA256": "8f5d64462896a81725caff6decb5903e5870d9c47fa6a776b7d09060b5820c54",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_195ad11b-0ce4-4243-a819-be22d202fde1",
+        "revision": 5,
+        "requestId": "R_dcb494e6-1fa7-46a9-b833-555a95268fe0",
+        "taskId": "T_c17d6400-b446-4a9f-b8c1-16e17dd4488d"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성30] 안내문 표현만 정리해 주세요. 실제 코드 실행이나 배포는 하지 마세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_cebf4ac7-bae1-441a-9ee6-e5c7c5e0073d",
+              "revision": 5
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  }
+]

@@ -1,0 +1,135 @@
+{
+  "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+  "expectedScenes": 4,
+  "completed": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scene": "existing-camera/panel/origin/nonzero-page/fit",
+      "complete": true
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scene": "normal-first-request/no-area/missing-camera",
+      "complete": true,
+      "task": "T_c17d6400-b446-4a9f-b8c1-16e17dd4488d"
+    }
+  ],
+  "checks": [
+    {
+      "pass": true,
+      "label": "actual native pan changed viewport only",
+      "rawReference": "ui.jsonl CHECK actual native pan changed viewport only"
+    },
+    {
+      "pass": true,
+      "label": "offscreen chip after actual pan/zoom matches final map rect",
+      "rawReference": "ui.jsonl CHECK offscreen chip after actual pan/zoom matches final map rect"
+    },
+    {
+      "pass": true,
+      "label": "panel original is exact actual-H synthetic P return",
+      "rawReference": "ui.jsonl CHECK panel original is exact actual-H synthetic P return"
+    },
+    {
+      "pass": true,
+      "label": "native panel reading nonzero without page movement",
+      "rawReference": "ui.jsonl CHECK native panel reading nonzero without page movement"
+    },
+    {
+      "pass": true,
+      "label": "panel original really hidden after normal close",
+      "rawReference": "ui.jsonl CHECK panel original really hidden after normal close"
+    },
+    {
+      "pass": true,
+      "label": "task original exact source displayed",
+      "rawReference": "ui.jsonl CHECK task original exact source displayed"
+    },
+    {
+      "pass": true,
+      "label": "task original hidden after close",
+      "rawReference": "ui.jsonl CHECK task original hidden after close"
+    },
+    {
+      "pass": true,
+      "label": "explicit origin camera fold selection and actual caller position focus preserved",
+      "rawReference": "ui.jsonl CHECK explicit origin camera fold selection and actual caller position focus preserved"
+    },
+    {
+      "pass": true,
+      "label": "long panel reading/open state survives task original roundtrip",
+      "rawReference": "ui.jsonl CHECK long panel reading/open state survives task original roundtrip"
+    },
+    {
+      "pass": true,
+      "label": "ordinary nav preserves user zoom pan fold and selection",
+      "rawReference": "ui.jsonl CHECK ordinary nav preserves user zoom pan fold and selection"
+    },
+    {
+      "pass": true,
+      "label": "ordinary nav restores panel reading after final sizing",
+      "rawReference": "ui.jsonl CHECK ordinary nav restores panel reading after final sizing"
+    },
+    {
+      "pass": true,
+      "label": "ordinary user-camera entry final bottom16",
+      "rawReference": "ui.jsonl CHECK ordinary user-camera entry final bottom16"
+    },
+    {
+      "pass": true,
+      "label": "ordinary work return offscreen chip final rect",
+      "rawReference": "ui.jsonl CHECK ordinary work return offscreen chip final rect"
+    },
+    {
+      "pass": true,
+      "label": "real nonzero space page memory returns with final size/clamp coherent",
+      "rawReference": "ui.jsonl CHECK real nonzero space page memory returns with final size/clamp coherent"
+    },
+    {
+      "pass": true,
+      "label": "nonzero page return preserves camera fold owner selection",
+      "rawReference": "ui.jsonl CHECK nonzero page return preserves camera fold owner selection"
+    },
+    {
+      "pass": true,
+      "label": "nonzero page final offscreen matches actual rect",
+      "rawReference": "ui.jsonl CHECK nonzero page final offscreen matches actual rect"
+    },
+    {
+      "pass": true,
+      "label": "explicit fit chip counts final actual rect",
+      "rawReference": "ui.jsonl CHECK explicit fit chip counts final actual rect"
+    },
+    {
+      "pass": true,
+      "label": "explicit fit fits currently visible cards in final sized map",
+      "rawReference": "ui.jsonl CHECK explicit fit fits currently visible cards in final sized map"
+    },
+    {
+      "pass": true,
+      "label": "read pan zoom fold fit origin navigation leave project data unchanged",
+      "rawReference": "ui.jsonl CHECK read pan zoom fold fit origin navigation leave project data unchanged"
+    },
+    {
+      "pass": true,
+      "label": "normal no-area first space creates camera only at final height",
+      "rawReference": "ui.jsonl CHECK normal no-area first space creates camera only at final height"
+    },
+    {
+      "pass": true,
+      "label": "no-area first map preserves actual task purpose and draft",
+      "rawReference": "ui.jsonl CHECK no-area first map preserves actual task purpose and draft"
+    }
+  ],
+  "failedChecks": [],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle30-fix1-extras/extras.py\", line 55, in <module>\n    u.runExisting(w,h);u.runMissing(w,h)\n    ^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle30-fix1-extras/extras.py\", line 19, in runExisting\n    prePan=self.p.evaluate(SNAP);mapRect=prePan['map']['rect'];x=mapRect['left']+12;y=min(h-25,mapRect['bottom']-18);hit=self.p.evaluate('p=>({id:document.elementFromPoint(p.x,p.y)?.id,class:document.elementFromPoint(p.x,p.y)?.className})',{'x':x,'y':y});self.log('native pan blank-map start',{'point':[x,y],'hit':hit,'before':prePan});assert hit['id']=='space-map','no blank map for native pan; do not drag a card'\n                                                                                                                                                                                                                                                                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: no blank map for native pan; do not drag a card\n",
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 1
+}

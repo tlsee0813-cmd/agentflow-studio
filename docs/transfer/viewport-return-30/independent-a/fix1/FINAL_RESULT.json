@@ -1,0 +1,57 @@
+{
+  "baseline29": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "candidate30": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+  "old27": "prior PhaseA only, not rerun here; 38921a1e evidence",
+  "baselineDeepCounterexampleReproducedBothPC": true,
+  "candidateZeroDeepFourScenes": true,
+  "extraFunctionalCoverageBothPC": true,
+  "extraScenesAcrossExecutions": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scene": "existing-camera/panel/origin/nonzero-page/fit",
+      "complete": true
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scene": "normal-first-request/no-area/missing-camera",
+      "complete": true,
+      "task": "T_c17d6400-b446-4a9f-b8c1-16e17dd4488d"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scene": "existing-camera/panel/origin/nonzero-page/fit",
+      "complete": true
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scene": "normal-first-request/no-area/missing-camera",
+      "complete": true,
+      "task": "T_07f36a30-431f-4187-b5a7-31b5b6ff68ff"
+    }
+  ],
+  "preparationErrorsPreserved": [
+    "extras-first/first-loader-preparation-error: script prefix split caused SyntaxError before browser",
+    "extras-first: 1280 two scenes complete, then1440 fixed pan point hit card; aborted before mouse down. Remaining-wide uses read-only actual empty-map point selection. Original assertions unchanged."
+  ],
+  "aggregateDecisionExit": 0,
+  "notOneCleanExtraRun": true,
+  "representativeDeepRecheck": "Separate two-PC same procedure for missing first-entry PNG; no additional matrix or fit/resize repair",
+  "limits": [
+    "final scroll clamp was not activated (space y120, final max>=120); no blanket clamp-branch claim",
+    "genuine missing-camera public UI coverage is zero areas; imported nonempty project already fitted at import",
+    "full29 regression/CI/31 NOT_RUN",
+    "no paidAI/human usability/automatic semantics/large arbitrary maps"
+  ]
+}

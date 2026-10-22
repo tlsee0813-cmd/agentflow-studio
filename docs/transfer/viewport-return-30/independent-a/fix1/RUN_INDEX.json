@@ -1,0 +1,103 @@
+[
+  {
+    "run": "base29",
+    "sourceCommit": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+    "childExit": 1,
+    "fatal": null,
+    "pageerrors": [],
+    "cleanup": [],
+    "serverExit": -15,
+    "HTTPCount": 30,
+    "HTTPBodyDiskDuringAfterEqual": true,
+    "POSTCount": 0,
+    "completed": 2
+  },
+  {
+    "run": "candidate-main",
+    "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+    "childExit": 0,
+    "fatal": null,
+    "pageerrors": [],
+    "cleanup": [],
+    "serverExit": -15,
+    "HTTPCount": 60,
+    "HTTPBodyDiskDuringAfterEqual": true,
+    "POSTCount": 0,
+    "completed": 4
+  },
+  {
+    "run": "extras-first",
+    "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+    "childExit": 1,
+    "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle30-fix1-extras/extras.py\", line 55, in <module>\n    u.runExisting(w,h);u.runMissing(w,h)\n    ^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle30-fix1-extras/extras.py\", line 19, in runExisting\n    prePan=self.p.evaluate(SNAP);mapRect=prePan['map']['rect'];x=mapRect['left']+12;y=min(h-25,mapRect['bottom']-18);hit=self.p.evaluate('p=>({id:document.elementFromPoint(p.x,p.y)?.id,class:document.elementFromPoint(p.x,p.y)?.className})',{'x':x,'y':y});self.log('native pan blank-map start',{'point':[x,y],'hit':hit,'before':prePan});assert hit['id']=='space-map','no blank map for native pan; do not drag a card'\n                                                                                                                                                                                                                                                                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: no blank map for native pan; do not drag a card\n",
+    "pageerrors": [],
+    "cleanup": [],
+    "serverExit": -15,
+    "HTTPCount": 45,
+    "HTTPBodyDiskDuringAfterEqual": true,
+    "POSTCount": 1,
+    "completed": [
+      {
+        "viewport": [
+          1280,
+          720
+        ],
+        "scene": "existing-camera/panel/origin/nonzero-page/fit",
+        "complete": true
+      },
+      {
+        "viewport": [
+          1280,
+          720
+        ],
+        "scene": "normal-first-request/no-area/missing-camera",
+        "complete": true,
+        "task": "T_c17d6400-b446-4a9f-b8c1-16e17dd4488d"
+      }
+    ]
+  },
+  {
+    "run": "extras-remaining-wide",
+    "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+    "childExit": 0,
+    "fatal": null,
+    "pageerrors": [],
+    "cleanup": [],
+    "serverExit": -15,
+    "HTTPCount": 30,
+    "HTTPBodyDiskDuringAfterEqual": true,
+    "POSTCount": 1,
+    "completed": [
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "scene": "existing-camera/panel/origin/nonzero-page/fit",
+        "complete": true
+      },
+      {
+        "viewport": [
+          1440,
+          900
+        ],
+        "scene": "normal-first-request/no-area/missing-camera",
+        "complete": true,
+        "task": "T_07f36a30-431f-4187-b5a7-31b5b6ff68ff"
+      }
+    ]
+  },
+  {
+    "run": "candidate-PNG-recheck",
+    "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+    "childExit": 0,
+    "fatal": null,
+    "pageerrors": [],
+    "cleanup": [],
+    "serverExit": -15,
+    "HTTPCount": 30,
+    "HTTPBodyDiskDuringAfterEqual": true,
+    "POSTCount": 0,
+    "completed": 2
+  }
+]

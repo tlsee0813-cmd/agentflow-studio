@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle30-fix1-extras/extras.py", line 4, in <module>
+    exec(compile((R0/'probe.py').read_text().split('u=None;fatal=None;cleanup=[];code=1')[0],str(R0/'probe.py'),'exec'))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle30-fix1-extras/probe.py", line 6
+    exec(compile((R0/'check-expanded.py').read_text().split('
+                                                            ^
+SyntaxError: unterminated string literal (detected at line 6)
+

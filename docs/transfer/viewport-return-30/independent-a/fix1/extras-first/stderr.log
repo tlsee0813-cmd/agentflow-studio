@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle30-fix1-extras/extras.py", line 55, in <module>
+    u.runExisting(w,h);u.runMissing(w,h)
+    ^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle30-fix1-extras/extras.py", line 19, in runExisting
+    prePan=self.p.evaluate(SNAP);mapRect=prePan['map']['rect'];x=mapRect['left']+12;y=min(h-25,mapRect['bottom']-18);hit=self.p.evaluate('p=>({id:document.elementFromPoint(p.x,p.y)?.id,class:document.elementFromPoint(p.x,p.y)?.className})',{'x':x,'y':y});self.log('native pan blank-map start',{'point':[x,y],'hit':hit,'before':prePan});assert hit['id']=='space-map','no blank map for native pan; do not drag a card'
+                                                                                                                                                                                                                                                                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: no blank map for native pan; do not drag a card
+

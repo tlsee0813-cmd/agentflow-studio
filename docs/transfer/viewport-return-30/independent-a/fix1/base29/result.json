@@ -1,0 +1,102 @@
+{
+  "sourceCommit": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "scope": "PhaseA hypothesis observation only; no candidate or product changes",
+  "expectedTrials": 2,
+  "completedTrials": 2,
+  "originalGeometryFailures": [
+    "6-1280-deep-observe",
+    "6-1440-deep-observe"
+  ],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 1,
+  "trials": [
+    {
+      "id": "6-1280-deep-observe",
+      "viewport": [
+        1280,
+        720
+      ],
+      "count": 6,
+      "depth": "deep",
+      "firstY": 0,
+      "firstMap": {
+        "x": 264,
+        "y": 268.890625,
+        "width": 974,
+        "height": 704,
+        "top": 268.890625,
+        "right": 1238,
+        "bottom": 972.890625,
+        "left": 264
+      },
+      "firstInline": "704px",
+      "margin16Pass": false,
+      "bad": true,
+      "laterFrames": {
+        "time": 1868.4000000357628,
+        "y": 0,
+        "layout": "704px",
+        "mapRect": {
+          "x": 264,
+          "y": 268.890625,
+          "width": 974,
+          "height": 704,
+          "top": 268.890625,
+          "right": 1238,
+          "bottom": 972.890625,
+          "left": 264
+        },
+        "areaListOpen": false,
+        "saving": null
+      },
+      "dataUnchanged": true,
+      "cameraUnchangedOnEntry": true,
+      "rawReference": "ui.jsonl TRIAL RESULT 6-1280-deep-observe"
+    },
+    {
+      "id": "6-1440-deep-observe",
+      "viewport": [
+        1440,
+        900
+      ],
+      "count": 6,
+      "depth": "deep",
+      "firstY": 0,
+      "firstMap": {
+        "x": 264,
+        "y": 268.890625,
+        "width": 1134,
+        "height": 884,
+        "top": 268.890625,
+        "right": 1398,
+        "bottom": 1152.890625,
+        "left": 264
+      },
+      "firstInline": "884px",
+      "margin16Pass": false,
+      "bad": true,
+      "laterFrames": {
+        "time": 1733.0999999642372,
+        "y": 0,
+        "layout": "884px",
+        "mapRect": {
+          "x": 264,
+          "y": 268.890625,
+          "width": 1134,
+          "height": 884,
+          "top": 268.890625,
+          "right": 1398,
+          "bottom": 1152.890625,
+          "left": 264
+        },
+        "areaListOpen": false,
+        "saving": null
+      },
+      "dataUnchanged": true,
+      "cameraUnchangedOnEntry": true,
+      "rawReference": "ui.jsonl TRIAL RESULT 6-1440-deep-observe"
+    }
+  ]
+}

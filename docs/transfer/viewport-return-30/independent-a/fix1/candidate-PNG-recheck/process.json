@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle30-fix1/representative-deep/probe.py"
+  ],
+  "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+  "startUTC": "2026-10-22T21:09:02.863819+00:00",
+  "endUTC": "2026-10-22T21:09:08.491756+00:00",
+  "checkerSHA256": "6364fbe3cfc48f5f835ec75cb4ed192e67d71bd3f6558731aa37d9be03a951af",
+  "checkerAfterSHA256": "6364fbe3cfc48f5f835ec75cb4ed192e67d71bd3f6558731aa37d9be03a951af",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

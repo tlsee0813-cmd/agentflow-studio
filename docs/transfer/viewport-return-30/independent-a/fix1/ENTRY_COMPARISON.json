@@ -1,0 +1,194 @@
+[
+  {
+    "run": "base29",
+    "id": "6-1280-deep-observe",
+    "viewport": [
+      1280,
+      720
+    ],
+    "workY": 1200,
+    "spaceY": 0,
+    "top": 268.890625,
+    "height": 704,
+    "bottom": 972.890625,
+    "margin16Pass": false,
+    "listOpen": false,
+    "cameraMemoUnchangedOnEntry": true,
+    "dataUnchanged": true,
+    "infoVisible": 6,
+    "infoCount": 6,
+    "actualInfoClick": {},
+    "rawReference": "base29/ui.jsonl TRIAL RESULT 6-1280-deep-observe"
+  },
+  {
+    "run": "base29",
+    "id": "6-1440-deep-observe",
+    "viewport": [
+      1440,
+      900
+    ],
+    "workY": 1200,
+    "spaceY": 0,
+    "top": 268.890625,
+    "height": 884,
+    "bottom": 1152.890625,
+    "margin16Pass": false,
+    "listOpen": false,
+    "cameraMemoUnchangedOnEntry": true,
+    "dataUnchanged": true,
+    "infoVisible": 6,
+    "infoCount": 6,
+    "actualInfoClick": {},
+    "rawReference": "base29/ui.jsonl TRIAL RESULT 6-1440-deep-observe"
+  },
+  {
+    "run": "candidate-main",
+    "id": "6-1280-zero-observe",
+    "viewport": [
+      1280,
+      720
+    ],
+    "workY": 0,
+    "spaceY": 0,
+    "top": 268.890625,
+    "height": 435.109375,
+    "bottom": 704,
+    "margin16Pass": true,
+    "listOpen": false,
+    "cameraMemoUnchangedOnEntry": true,
+    "dataUnchanged": true,
+    "infoVisible": 6,
+    "infoCount": 6,
+    "actualInfoClick": {
+      "id": "node-info-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "panelVisible": true,
+      "projectDataUnchanged": true
+    },
+    "rawReference": "candidate-main/ui.jsonl TRIAL RESULT 6-1280-zero-observe"
+  },
+  {
+    "run": "candidate-main",
+    "id": "6-1280-deep-observe",
+    "viewport": [
+      1280,
+      720
+    ],
+    "workY": 1200,
+    "spaceY": 0,
+    "top": 268.890625,
+    "height": 435.109375,
+    "bottom": 704,
+    "margin16Pass": true,
+    "listOpen": false,
+    "cameraMemoUnchangedOnEntry": true,
+    "dataUnchanged": true,
+    "infoVisible": 6,
+    "infoCount": 6,
+    "actualInfoClick": {
+      "id": "node-info-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "panelVisible": true,
+      "projectDataUnchanged": true
+    },
+    "rawReference": "candidate-main/ui.jsonl TRIAL RESULT 6-1280-deep-observe"
+  },
+  {
+    "run": "candidate-main",
+    "id": "6-1440-zero-observe",
+    "viewport": [
+      1440,
+      900
+    ],
+    "workY": 0,
+    "spaceY": 0,
+    "top": 268.890625,
+    "height": 615.109375,
+    "bottom": 884,
+    "margin16Pass": true,
+    "listOpen": false,
+    "cameraMemoUnchangedOnEntry": true,
+    "dataUnchanged": true,
+    "infoVisible": 6,
+    "infoCount": 6,
+    "actualInfoClick": {
+      "id": "node-info-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "panelVisible": true,
+      "projectDataUnchanged": true
+    },
+    "rawReference": "candidate-main/ui.jsonl TRIAL RESULT 6-1440-zero-observe"
+  },
+  {
+    "run": "candidate-main",
+    "id": "6-1440-deep-observe",
+    "viewport": [
+      1440,
+      900
+    ],
+    "workY": 1200,
+    "spaceY": 0,
+    "top": 268.890625,
+    "height": 615.109375,
+    "bottom": 884,
+    "margin16Pass": true,
+    "listOpen": false,
+    "cameraMemoUnchangedOnEntry": true,
+    "dataUnchanged": true,
+    "infoVisible": 6,
+    "infoCount": 6,
+    "actualInfoClick": {
+      "id": "node-info-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "panelVisible": true,
+      "projectDataUnchanged": true
+    },
+    "rawReference": "candidate-main/ui.jsonl TRIAL RESULT 6-1440-deep-observe"
+  },
+  {
+    "run": "candidate-PNG-recheck",
+    "id": "6-1280-deep-observe",
+    "viewport": [
+      1280,
+      720
+    ],
+    "workY": 1200,
+    "spaceY": 0,
+    "top": 268.890625,
+    "height": 435.109375,
+    "bottom": 704,
+    "margin16Pass": true,
+    "listOpen": false,
+    "cameraMemoUnchangedOnEntry": true,
+    "dataUnchanged": true,
+    "infoVisible": 6,
+    "infoCount": 6,
+    "actualInfoClick": {
+      "id": "node-info-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "panelVisible": true,
+      "projectDataUnchanged": true
+    },
+    "rawReference": "candidate-PNG-recheck/ui.jsonl TRIAL RESULT 6-1280-deep-observe"
+  },
+  {
+    "run": "candidate-PNG-recheck",
+    "id": "6-1440-deep-observe",
+    "viewport": [
+      1440,
+      900
+    ],
+    "workY": 1200,
+    "spaceY": 0,
+    "top": 268.890625,
+    "height": 615.109375,
+    "bottom": 884,
+    "margin16Pass": true,
+    "listOpen": false,
+    "cameraMemoUnchangedOnEntry": true,
+    "dataUnchanged": true,
+    "infoVisible": 6,
+    "infoCount": 6,
+    "actualInfoClick": {
+      "id": "node-info-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "panelVisible": true,
+      "projectDataUnchanged": true
+    },
+    "rawReference": "candidate-PNG-recheck/ui.jsonl TRIAL RESULT 6-1440-deep-observe"
+  }
+]

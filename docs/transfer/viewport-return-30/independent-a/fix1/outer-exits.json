@@ -1,0 +1,45 @@
+{
+  "build": {
+    "session": 49367,
+    "completion": "920fc0",
+    "actualCollectorExit": 0
+  },
+  "base29": {
+    "session": 22805,
+    "completion": "f2099a",
+    "actualCollectorExit": 1,
+    "expectedProductCounterexample": true
+  },
+  "candidate-main": {
+    "session": 94285,
+    "completion": "a19c49",
+    "actualCollectorExit": 0
+  },
+  "first-loader-preparation-error": {
+    "completion": "a4865c",
+    "actualCollectorExit": 1,
+    "noBrowserStarted": true
+  },
+  "extras-first": {
+    "session": 86348,
+    "completion": "4559d9",
+    "actualCollectorExit": 1,
+    "prepared1280CompleteButWidePanPointGuardStopped": true
+  },
+  "extras-remaining-wide": {
+    "session": 81965,
+    "completion": "2c1fe0",
+    "actualCollectorExit": 0
+  },
+  "candidate-PNG-recheck": {
+    "session": 57687,
+    "completion": "888862",
+    "actualCollectorExit": 0
+  },
+  "offline-analysis": {
+    "completion": "1ecfb3",
+    "actualCollectorExit": 0,
+    "notAnotherUIRun": true
+  },
+  "serverExit": "actual -15 after explicit termination in each UI execution, distinct from child/collector"
+}

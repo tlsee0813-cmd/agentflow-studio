@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle30-fix1/probe.py"
+  ],
+  "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+  "startUTC": "2026-10-22T21:02:08.915989+00:00",
+  "endUTC": "2026-10-22T21:02:20.650701+00:00",
+  "checkerSHA256": "ca3b954a67a09ecebbd17dc2fc4eea7dea6c50242902bfa1f68228e42a92a7cc",
+  "checkerAfterSHA256": "ca3b954a67a09ecebbd17dc2fc4eea7dea6c50242902bfa1f68228e42a92a7cc",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle30-fix1-extras/remaining-wide/extras.py"
+  ],
+  "sourceCommit": "28fd10b4126bd62b6fc05e4bc36328f1d2f51ff5",
+  "startUTC": "2026-10-22T21:07:32.081441+00:00",
+  "endUTC": "2026-10-22T21:07:38.219690+00:00",
+  "checkerSHA256": "d94cc5007cd25bfdf1408a359b779374e5b2e51997fdff1155ac2f2de61561d2",
+  "checkerAfterSHA256": "d94cc5007cd25bfdf1408a359b779374e5b2e51997fdff1155ac2f2de61561d2",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
