@@ -2,7 +2,7 @@ import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_
 import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
-import type {ContextPlanStamp} from './types.js';
+import type {ContextPlanStamp,ContextAreaDescription} from './types.js';
 import { outcomeOf, contextLinks } from './outcome.js';
 export { planFacts, planFactsText } from './plan-facts.js';
 const uid = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
@@ -320,12 +320,21 @@ function contextBasis(b: Basis): ContextBasis {
   return {id:b.id,text:b.text,status:b.status,sourceId:b.sourceId,revision:b.revision,previousVersions:b.history.length,partial:false};
 }
 const jsonBytes=(v:unknown)=>new TextEncoder().encode(JSON.stringify(v)).length;
+/** Same actual target and current-description verdict as the existing export path. No report/history projection,
+ * no promotion to basis/intent, and no mutation or freshness change to the task's four work values. */
+function currentAreaDescription(p:Project,t:Task):ContextAreaDescription|null {
+  const anchor=exportAnchor(p,t);if(!anchor)return null;
+  const d=areaDescription(p,anchor.areaId).current;if(!d?.valid)return null;
+  return {taskId:t.id,areaId:anchor.areaId,revision:d.entry.revision!,by:d.entry.by,corrects:d.entry.corrects,
+    source:d.entry.by==='external'?{taskId:d.returnTask!.id,returnId:d.returnTask!.resultFile!.returnId,origin:d.origin}:null,
+    text:d.summary};
+}
 export function buildRequest(p: Project, ticket: Ticket): ContextRequest {
   const t=taskOf(p,ticket.taskId),parts=contextParts(p,t);
   const req:ContextRequest={schemaVersion:API_SCHEMA,ticket:copy(ticket),projectName:p.name,sources:parts.sources,
     bases:p.bases.map(contextBasis),appFacts:planFacts(p,t.id),previousWork:parts.previousWork,previousIntent:null,purposeIntent:null,
     // Never excerpted or dropped for size: over the limit the request is refused (CONTEXT_TOO_LARGE) and nothing is cut.
-    background:copy(t.background)};
+    background:copy(t.background),currentAreaDescription:currentAreaDescription(p,t)};
   req.previousIntent=requestIntent(p,t);req.purposeIntent=purposeIntent(p,t,req.previousIntent);
   let bytes=jsonBytes(req);
   if(bytes>REQUEST_BYTES) {
