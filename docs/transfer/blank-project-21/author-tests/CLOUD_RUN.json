@@ -1,0 +1,26 @@
+{
+  "role": "Concrete independent execution scenario, not a local execution record or a discovery study",
+  "candidate": "922848c0957992f84b8a0e2696a86b98d5f51c0d",
+  "candidateAppSHA256": "5370D0A6ACD3A1B60E3F5C81E8E3A4BE647665D23C18667F810B6DF7634F9F58",
+  "beforeAppSHA256": "3431CB1344E22C291EFD28334C76257B522325B61B037270AC9EF76CEEBA0151",
+  "contract": "7099735067d77e0599b4e14b7e9664e0353cdf99/docs/cycles/2026-10-23-blank-project-21/INPUT.md",
+  "scope": "Narrow first-handoff regression. Earlier full blank-project two-root/child/relation/next-request observation remains separate.",
+  "prerequisites": [
+    "Use the already authorized independent Cloud/CI environment and existing mock/browser dependencies. No paid AI or user project.",
+    "Overlay the frozen new blank21_browser.py. Existing received20_browser.py helper must match test-only20fix2 SHA2F9FBF172A2CBEB08804E7BB08A8E63921420673A2C7A1639EA5F5B44F5499E8 (remote69b478), avoiding the known pre-write-LF Windows expectation bug.",
+    "Check exact source/build/static response hashes before calling before/after comparable. Keep the same test/helper bytes and independent new contexts on both products. Never edit/retry the first failure evidence in place."
+  ],
+  "invocation": {"cwd":"app","argv":["python","continuity/tests/blank21_browser.py"],"env":{"AI_MODE":"mock","ALLOW_PAID_AI":"false","BROWSER_TRANSPORT":"direct-http","IDEA015_EVIDENCE_DIR":"test-results/blank21"}},
+  "firstFailureComparison": [
+    "Before product3431: run both PC methods against their untouched initial prepared scene. Preserve initial copy/file-entry rects, documentY, focus, PNG and actual failed clipping/hit assertion. A before failure is expected from the observation, not predeclared as executed here.",
+    "Candidate5370: normal home/new project -> purpose once -> one part -> exact long first request using UI only. Before reach/focus repair, ordinary copy and closed optional entry must both be fully visible and hit-testable.",
+    "From ordinary copy, native Tab reaches the named optional summary; Enter opens/closes the same native details. Entire saved project must stay equal, including all export/H records. Actual file copy must be a separate explicit action.",
+    "Ordinary clipboard copy produces one null-returnId export, full source/purpose and recorded UTF16/FNV. File copy produces one actual newH with exact task/project/part/basedOn in the actual clipboard template. Preserve OS raw clipboard separately; only existing CRLF-pair clipboard comparison representation applies.",
+    "Type a real unsent draft; open last-file-handoff full text inside the relocated choice. Its full textarea API text must equal the actual copied file handoff. Native Tab/Control+End reaches its actual scroll tail, Shift+Tab/Enter folds, and the whole saved project stays unchanged by reading.",
+    "Use only this actual copied template to write a clearly synthetic result file. Accept via normal input. Existing placeReturn intentionally advances currentA to returned reportT; verify T+exact unsent draft and immutable A exports, with A-only last-file preview absent on T. Capture actual T-work departure, explicitly open exact reportT, then return once. Observe actual caller focus/full clip/hit, departureY/open-detail set, no leaked A-only preview, and currentT/draft/whole saved project unchanged by read/return."
+  ],
+  "existingRegressionReuse": "RECEIVED20 independent-current/duplicate/archive/memory/late-save suites remain unchanged and separate; REPORT16 first-screen and existing AREA17/H18/W19/HOME15 guards remain unchanged.",
+  "rawOutputs": ["blank21-observations.jsonl","blank21-<width>-first-prepared.png","blank21-<width>-same-work-return.png","blank21-<width>-final-scene-including-failure.png","actual stdout/stderr/exit plus runtime/static response hashes"],
+  "time": "No author-side timing measurement. Provisional30-90s total for2methods; report actual independent duration, not this estimate. CI keeps25min job budget.",
+  "notRunHere": ["server","browser","clipboard","actual mock generation","remote CI"]
+}

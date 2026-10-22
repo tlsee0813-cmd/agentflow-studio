@@ -1,0 +1,235 @@
+{
+  "publicationFiles": [
+    {
+      "path": "app/continuity/tests/blank21_browser.py",
+      "bytes": 14808,
+      "sha256": "41C9F1B2EB71B55F1B468CFB3E0903C6F512394056CC2F1F1D5474F5815501E4"
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "bytes": 11616,
+      "sha256": "7F55B486DA7B2F63F4F8964125107B7D205AD2440BD3C17C67E4943AB914FAF8"
+    }
+  ],
+  "candidateRemote": "922848c0957992f84b8a0e2696a86b98d5f51c0d",
+  "contract": "7099735067d77e0599b4e14b7e9664e0353cdf99/docs/cycles/2026-10-23-blank-project-21/INPUT.md",
+  "observation": "b0c2c9331578c2ec7a5904db7c90b51f976518ab/docs/transfer/blank-project-21/observation-v0/REPORT.md",
+  "originalFailure": "Previous real observation:1280 ordinary copy y178.08 vs optional file choice y1782.02;1440 file choice y1760.58. Original raw evidence stays at its fixed prefix. This harness has NOT been run against before/after product here.",
+  "productReadOnly": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260706,
+      "sha256": "5370D0A6ACD3A1B60E3F5C81E8E3A4BE647665D23C18667F810B6DF7634F9F58"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0"
+    }
+  ],
+  "helpersReadOnly": [
+    {
+      "path": "app/continuity/tests/browser.py",
+      "bytes": 26861,
+      "sha256": "D9B6348EEA92728F78F6DEEE0E60CF1BD590D6654855F01477B9FA7CA06D5E02",
+      "source": "work/product20-tests/app/continuity/tests/browser.py",
+      "publication": false
+    },
+    {
+      "path": "app/continuity/tests/dom_harness.py",
+      "bytes": 3914,
+      "sha256": "3AA0ABCBC6E959B9E0A7FEC21CC9AF553A06693DCC95C954F66BBD8092B02E0B",
+      "source": "work/product21-author/app/continuity/tests/dom_harness.py",
+      "publication": false
+    },
+    {
+      "path": "app/continuity/tests/received20_browser.py",
+      "bytes": 32681,
+      "sha256": "2F9FBF172A2CBEB08804E7BB08A8E63921420673A2C7A1639EA5F5B44F5499E8",
+      "source": "work/product20-tests/app/continuity/tests/received20_browser.py",
+      "publication": false
+    }
+  ],
+  "baseline": {
+    "helpers": [
+      {
+        "path": "app/continuity/tests/browser.py",
+        "bytes": 26861,
+        "sha256": "D9B6348EEA92728F78F6DEEE0E60CF1BD590D6654855F01477B9FA7CA06D5E02",
+        "source": "work/product20-tests/app/continuity/tests/browser.py",
+        "publication": false
+      },
+      {
+        "path": "app/continuity/tests/dom_harness.py",
+        "bytes": 3914,
+        "sha256": "3AA0ABCBC6E959B9E0A7FEC21CC9AF553A06693DCC95C954F66BBD8092B02E0B",
+        "source": "work/product21-author/app/continuity/tests/dom_harness.py",
+        "publication": false
+      },
+      {
+        "path": "app/continuity/tests/received20_browser.py",
+        "bytes": 32681,
+        "sha256": "2F9FBF172A2CBEB08804E7BB08A8E63921420673A2C7A1639EA5F5B44F5499E8",
+        "source": "work/product20-tests/app/continuity/tests/received20_browser.py",
+        "publication": false
+      }
+    ],
+    "product": "5370D0A6ACD3A1B60E3F5C81E8E3A4BE647665D23C18667F810B6DF7634F9F58",
+    "baseline": "3431CB1344E22C291EFD28334C76257B522325B61B037270AC9EF76CEEBA0151",
+    "AGENTS": "No AGENTS.md in known workspace/ancestry; no product edits",
+    "scope": "One new regression file only; reused helpers are not publication changes",
+    "preparationFailure": "First copy tried product20-tests/dom_harness.py, absent there. ENOENT raw exists in tool transcript, not a separate raw log. Corrected explicit source is product21-author dom_harness.py; no product modified.",
+    "browser": "NOT RUN",
+    "server": "NOT STARTED"
+  },
+  "scope": "One new regression file plus one7-line CI step after RECEIVED20, existing25min timeout and all other workflow bytes unchanged from remote69b478. Two inherited PC methods total(1280x720,1440x900), no fixture/recovery project/storage injection. One purpose/part/first request uses normal new-project UI. This is a narrow candidate regression, not a replay or acceptance claim for the complete earlier two-root/child/relation observation.",
+  "coverage": [
+    "Actual first prepared viewport/full clipping/hit of ordinary copy and folded optional file entry before reach/focus repair; short native Tab route and Enter open/close; saved project entirely unchanged by toggling.",
+    "Ordinary copy actual OS raw clipboard separately preserved; existing USE106 CRLF-pair-only comparison; record UTF16/FNV match and noH. Actual file copy creates oneH; exact project/task/H/area/basedOn from the copied template and recorded anchor. No CSS parent/position formula assertion.",
+    "Long typed source/purpose remain exact. The last-file-handoff preview inside the relocated disclosure starts folded and its full textarea API value matches the actual copied handoff. Actual native Tab/Control+End reaches that textarea tail and Shift+Tab/Enter folds. Current/unsent draft/export history remain exact during read/fold. Receiving a report to the actual current A intentionally advances current to T under the existing placeReturn policy while retaining the draft and A exports. Capture T-work as the actual departure for one RECEIVED20 receipt reader roundtrip; preserve that T-work scroll/focus/open state and entire saved data. A-only last-file preview must be absent on T both before/after this roundtrip. Other RECEIVED20 matrices remain separate."
+  ],
+  "nativeReadiness": "Reused native wheel/scrollend and full viewport clip/hit; new trusted summary click + same-details old/newState toggle event after product capture listener, bounded failure-only timeout and cleanup diagnostics. No sleeps, DOM scroll/force click, injected response or product state hook.",
+  "checkResults": {
+    "pythonAST": 1,
+    "embeddedJS": 9,
+    "actualUnittestMethods": 2,
+    "fixedWaits": 0,
+    "productWrites": 0,
+    "patchApplyCheck": 0,
+    "testModuleImportsDuringAuthorCheck": false
+  },
+  "checks": [
+    {
+      "file": "blank21-file-readiness-static-freeze.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-freeze.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product21-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T16:16:49.396Z",
+        "end": "2026-10-22T16:16:49.671Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "blank21-helper-setup.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "args": [
+          "--input-type=module",
+          "-e",
+          "import {readFileSync,writeFileSync,mkdirSync} from \"node:fs\";import {createHash} from \"node:crypto\";const root=\"work/product21-tests\",paths=[\"browser.py\",\"dom_harness.py\",\"received20_browser.py\"],manifest=[];for(const name of paths){const src=(name===\"dom_harness.py\"?\"work/product21-author\":\"work/product20-tests\")+\"/app/continuity/tests/\"+name,b=readFileSync(src);writeFileSync(root+\"/app/continuity/tests/\"+name,b);manifest.push({path:\"app/continuity/tests/\"+name,bytes:b.length,sha256:createHash(\"sha256\").update(b).digest(\"hex\").toUpperCase(),source:src,publication:false});}writeFileSync(root+\"/evidence/BASELINE.json\",JSON.stringify({helpers:manifest,product:\"5370D0A6ACD3A1B60E3F5C81E8E3A4BE647665D23C18667F810B6DF7634F9F58\",baseline:\"3431CB1344E22C291EFD28334C76257B522325B61B037270AC9EF76CEEBA0151\",AGENTS:\"No AGENTS.md in known workspace/ancestry; no product edits\",scope:\"One new regression file only; reused helpers are not publication changes\",preparationFailure:\"First copy tried product20-tests/dom_harness.py, absent there. ENOENT raw exists in tool transcript, not a separate raw log. Corrected explicit source is product21-author dom_harness.py; no product modified.\",browser:\"NOT RUN\",server:\"NOT STARTED\"},null,2));console.log(JSON.stringify(manifest));"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4",
+        "node": "v24.19.0",
+        "start": "2026-10-22T16:09:14.499Z",
+        "end": "2026-10-22T16:09:14.576Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "blank21-moved-preview-static-freeze.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-freeze.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product21-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T16:19:43.693Z",
+        "end": "2026-10-22T16:19:43.967Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "blank21-native-tab-static-freeze.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-freeze.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product21-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T16:17:50.708Z",
+        "end": "2026-10-22T16:17:50.981Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "blank21-static-freeze.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-freeze.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product21-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T16:13:08.333Z",
+        "end": "2026-10-22T16:13:08.618Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "blank21-static-review-correction-freeze.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-freeze.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product21-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T16:23:57.969Z",
+        "end": "2026-10-22T16:23:58.245Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "file": "blank21-workflow-static-freeze.exit.json",
+      "raw": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "evidence/check-freeze.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product21-tests",
+        "node": "v24.19.0",
+        "start": "2026-10-22T16:16:06.404Z",
+        "end": "2026-10-22T16:16:06.692Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    }
+  ],
+  "ciStep": "Root authorized one native blank21_browser.py step after RECEIVED20; included with unchanged25min timeout, old steps, pipefail and artifact collection. Reuses existing mock/Playwright/build. Two methods with one request+one receipt each vs RECEIVED20 eleven methods. No timing measurement here; estimate30-90s total Cloud/CI, not a measured promise. Existing25min job budget may suffice but Windows full run determines that.",
+  "remoteHelperProvenance": "Received20 copied helper Gitblob64e64be3e194a4f5a9b93525051b70b28f89dc3a equals69b478 remote API content blob; workflow baseline blob886295d7205c751fd971129a31f06f88497e81ef likewise. These test-only20 fixes are prerequisites when combining21 product with this harness on Windows.",
+  "review": "Astra found the initial test expected current A after a report to current A, contrary to existing placeReturn target===current -> T policy. The pre-review2E318 source/patch/receipt is preserved in evidence/v0-2E318-before-static-review, not reported as a browser failure. Corrected to actual current T+draft, immutable original A exports, T-work departure/return and absence of A-only preview. Astra directly checked final script41C9F1B2EB71B55F1B468CFB3E0903C6F512394056CC2F1F1D5474F5815501E4 against2E318 and unchanged workflow7F55B486DA7B2F63F4F8964125107B7D205AD2440BD3C17C67E4943AB914FAF8: the premise error is resolved, no additional actionable static issue, can freeze. Reviewer did not execute browser. No browser result inferred.",
+  "notRun": [
+    "local server",
+    "browser",
+    "mock generation",
+    "clipboard",
+    "product type/build (UI author already owns these checks)",
+    "remote CI",
+    "paid AI"
+  ],
+  "limits": "Static syntax/helper/hash/patch checks only. Known selectors are used; not discovery/usability evidence. Actual first-state rendering, keyboard/navigation/clipboard and native return require independent Cloud execution. No future pass or old failure erased."
+}
