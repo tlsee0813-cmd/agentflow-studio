@@ -42,6 +42,8 @@ READABLE_JS='''(sel)=>{const e=document.querySelector(sel);if(!e||!e.getClientRe
   const i=n.data.search(/\\S/),g=document.createRange();g.setStart(n,i);g.setEnd(n,Math.min(n.data.length,i+8));const r=g.getBoundingClientRect();
   const inView=r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth,hit=inView?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
   return {found:true,text:e.innerText.slice(0,40),top:Math.round(r.top),bottom:Math.round(r.bottom),inView,unobscured:!!hit&&e.contains(hit),hit:hit&&(hit.id||hit.className),readable:inView&&!!hit&&e.contains(hit)}}'''
+CTRL_JS='''(id)=>{const e=document.getElementById(id),r=e&&e.getClientRects().length?e.getBoundingClientRect():null,d=document.documentElement;
+  return {windowY:window.scrollY,top:r&&r.top,page:r&&r.top+window.scrollY,maxScroll:d.scrollHeight-innerHeight}}'''
 def inside(a,b,pad=0):return a and b and a['x']>=b['x']-pad and a['y']>=b['y']-pad and a['right']<=b['right']+pad and a['bottom']<=b['bottom']+pad
 def overlaps(a,b):return bool(a and b and a['x']<b['right'] and b['x']<a['right'] and a['y']<b['bottom'] and b['y']<a['bottom'])
 
@@ -338,7 +340,9 @@ def locate_new_request(self,cid):
     """Whole path: receive -> explicit locate -> the panel's '이 영역에 새 요청' -> send -> copy -> explicit way back to the view before locating."""
     c=CASES[cid];area,other=self.start(c);A=self.request_in(area,c['request']);text,h=self.file_export(A)
     path,f=self.result_file('locate-next',self.state(),A,h['returnId'],c,area,h['anchor']['understanding']);self.import_file(path)
-    self.make_offscreen(area,other);self.page.locator(f'#received-area-{area}').focus();start=self.snap('locate-new-request: start view (before locating)',area)
+    ctrl=f'received-area-{area}'  # the control restoreOrigin anchors on (its id is the origin focus)
+    self.make_offscreen(area,other);self.page.locator(f'#{ctrl}').focus();start=self.snap('locate-new-request: start view (before locating)',area)
+    c0=self.page.evaluate(CTRL_JS,ctrl);self.record('actual','locate-new-request: calling control at start',c0)
     self.page.locator(f'#received-area-{area}').click();self.located_ok('locate-new-request',self.snap('locate-new-request: located',area),area,start)
     self.page.locator('#panel-new-request').click();N=self.send_next(area,'[합성] 위치를 찾은 영역의 다음 요청 · 구상과 조건은 그대로')
     self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
@@ -348,14 +352,24 @@ def locate_new_request(self,cid):
     self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')
     back.click();end=self.snap('locate-new-request: back to start view',area)
     for k in ('styleTransform','computedTransform','scaleLabel','selected','openDetails','focusId'):self.check(f'[원래 배율·좌표 복귀] after new request: {k}',end[k],start[k])
-    # Sending the request adds records above the map (real content change), so the existing return keeps the reading place
-    # (PC12 fix2 anchor) instead of the raw scroll value: same window scroll, or the same on-screen card position.
-    self.check_true('[원래 배율·좌표 복귀] after new request: reading place (scroll, or on-screen card y when content above grew)',
-        abs(end['windowY']-start['windowY'])<=2 or abs(end['card']['y']-start['card']['y'])<=2,
-        {'windowY':[end['windowY'],start['windowY']],'cardY':[end['card']['y'],start['card']['y']],'mapY':[end['map']['y'],start['map']['y']]})
+    # Reading place, the branch restoreOrigin actually takes on its anchor (the calling control): if the control is at the same
+    # page position, the old scroll (clamped to the document end); if content above it changed, the control's old viewport y
+    # (scroll = new page y - old top, clamped to [0, max scroll]). All measurements are recorded.
+    c1=self.page.evaluate(CTRL_JS,ctrl);clamp=lambda y:max(0,min(y,c1['maxScroll']))
+    moved=abs(c1['page']-c0['page'])>=1;expected=clamp(c1['page']-c0['top']) if moved else clamp(start['windowY'])
+    self.record('actual','locate-new-request: calling control at return',{'start':c0,'end':c1,'branch':'control moved: keep its viewport y' if moved else 'unchanged: old scroll','expectedScroll':expected})
+    self.check_true('[원래 배율·좌표 복귀] after new request: reading place on the anchor branch (scroll = expected, clamped)',abs(c1['windowY']-expected)<=1,
+        {'windowY':c1['windowY'],'expected':expected,'moved':moved,'controlTop':[c1['top'],c0['top']],'controlPage':[c1['page'],c0['page']],'maxScroll':c1['maxScroll']})
+    if not moved or expected==c1['page']-c0['top']:
+        self.check_true('[원래 배율·좌표 복귀] after new request: calling control at its viewport y (when not clamped)',abs(c1['top']-c0['top'])<=1,[c1['top'],c0['top']])
     expect(self.page.locator('#panel-note')).to_have_value(BUFFER);expect(self.page.locator('#located-note')).to_have_count(0)
     # Another area is a new start: writing in it drops the way back.
-    self.page.locator(f'#received-area-{area}').click();self.page.locator(f'#node-info-{other}').evaluate('(e)=>e.click()');self.page.locator('#panel-new-request').click()
+    self.page.locator(f'#received-area-{area}').click()
+    # The other card may be clipped by the moved camera; its button is clicked through the DOM (handler-level boundary check,
+    # not a claim that the pointer could reach it).
+    self.record('note','another area: node-info clicked via element.click() (handler boundary, not pointer access)',other)
+    self.page.locator(f'#node-info-{other}').evaluate('(e)=>e.click()');expect(self.page.locator('#area-panel')).to_contain_text(OTHER);self.page.locator('#panel-new-request').click()
+    expect(self.page.locator('#work-view')).to_be_visible();self.check('another area: the request goes to that area',self.state()['space']['draftTarget'],{'area':other})
     self.check('another area: no way back to the earlier locate',self.page.locator('#work-locate-return').count(),0)
 Area17.locate_new_request=locate_new_request
 Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')
