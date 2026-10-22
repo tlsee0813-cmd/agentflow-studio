@@ -1,0 +1,28 @@
+{
+  "result": "PASS",
+  "results": [
+    {
+      "path": "app/continuity/tests/understanding17_browser.py",
+      "sha256": "d82a4c6d923654d607c348d881b80a5ebc72fea1fde9e261e064ee4d535821bb",
+      "sixPureBoundaryChecks": "PASS",
+      "normalizerCallLines": [
+        86
+      ],
+      "moduleImported": false
+    },
+    {
+      "path": "app/continuity/tests/hierarchy18_browser.py",
+      "sha256": "d875b5bdd1aeddbe25b336f47e7b69902713da2244511c32b47c8d55ce09c297",
+      "sixPureBoundaryChecks": "PASS",
+      "normalizerCallLines": [
+        90
+      ],
+      "moduleImported": false
+    }
+  ],
+  "USE106": "same one-pass CRLF-pair replacement",
+  "normalizationNotIdempotenceClaim": "A CR followed by CRLF preserves its original lone CR in one pass; helper is called once after OS read",
+  "browser": "NOT RUN",
+  "server": "NOT STARTED",
+  "productAndTestsEdited": false
+}

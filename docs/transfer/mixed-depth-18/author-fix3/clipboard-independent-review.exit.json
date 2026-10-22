@@ -1,0 +1,13 @@
+{
+  "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+  "args": [
+    "../product18-review-evidence/clipboard-compat-probe.py"
+  ],
+  "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author",
+  "node": "v24.19.0",
+  "start": "2026-10-22T11:57:28.858Z",
+  "end": "2026-10-22T11:57:29.003Z",
+  "status": 0,
+  "signal": null,
+  "error": null
+}

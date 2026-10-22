@@ -1,0 +1,62 @@
+{
+  "commit": "9fb311b93910000f7a1e9ac096a2303d3dc1c445",
+  "tree": "f2dcfc5c101f22465f123a86efce9365f80629fe",
+  "comparison": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "app/continuity/src/client/app.ts",
+        "equal": true,
+        "chars": 216277
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "app/continuity/tests/hierarchy18_browser.py",
+        "equal": true,
+        "chars": 30664
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "app/continuity/tests/understanding17_browser.py",
+        "equal": true,
+        "chars": 40638
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "app/continuity/tests/pc12_browser.py",
+        "equal": true,
+        "chars": 39974
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "app/continuity/tests/pc13_browser.py",
+        "equal": true,
+        "chars": 34832
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "app/continuity/tests/report16_browser.py",
+        "equal": true,
+        "chars": 39725
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "app/continuity/tests/static_browser.py",
+        "equal": true,
+        "chars": 11778
+      }
+    }
+  ]
+}

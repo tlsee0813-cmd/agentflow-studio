@@ -1,0 +1,56 @@
+{
+  "kind": "PC13 actual info-control occlusion fix",
+  "source": "app/continuity/src/client/app.ts",
+  "beforeSha256": "C777D4A7CDDD1F3FB4D512689763E60507D461F2CFB789192C97A1C6A9E2DFE0",
+  "sha256": "2309F23A52A522BD96D5DA9F2280FA3E333908E611448A6FCE9BE8C66579DB4C",
+  "evidence": {
+    "defaultMap": {
+      "height": 409.875,
+      "y": 294.125,
+      "x": 264,
+      "width": 974
+    },
+    "firstInfoCenterHit": "map-fit in four scenes",
+    "controls": {
+      "height": 46,
+      "y": 305.125,
+      "bottom": 351.125,
+      "x": 1015.4375,
+      "width": 211.56
+    },
+    "commit": "241316207a08834d6fdfa24833a8202e362044aa",
+    "path": "diagnostics/rect-hit.json",
+    "firstInfoCenter": {
+      "y": 340.025,
+      "x": 1212.4
+    },
+    "class": "Parent-reported independent Cloud actual hit and PNG/rect evidence; not a local run"
+  },
+  "changes": [
+    "PC fit reserves measured map-controls top+height+8px beyond the already-present 24px fit margin.",
+    "Missing-card fit measurement uses the actual bounded 180px UI card footprint.",
+    "Only a missing initial mapView defers fit until displayView and final sizeWorkspace; a valid recalled/user/return viewport always wins.",
+    "At the end of the genuinely initial fit only, rememberMap serializes the resulting viewport and existing selection/panels/collapsed/relation state once; recalled/user/return viewports do not enter this path."
+  ],
+  "scope": {
+    "userPanZoom": "not automatically corrected",
+    "pc13FixtureAndHitAssertions": "not edited by this author",
+    "changedProductFiles": [
+      "app/continuity/src/client/app.ts"
+    ],
+    "storedWorldCoordinates": "unchanged",
+    "css": "unchanged",
+    "selectionAndReturnCameras": "not automatically refitted"
+  },
+  "causeDistinction": "Actual reproduced cause is toolbar intercepting the info button. Initial sizing order is a static consistency correction, not claimed as the reproduced cause; hidden DOM fallback was not an established cause.",
+  "checks": {
+    "diffCheck": 0,
+    "browser": "NOT_RUN",
+    "build": 0,
+    "server": "NOT_RUN",
+    "runtime": "Node24 author auxiliary",
+    "typeSyntaxBoundary": 0
+  },
+  "review": "Top-band and initial-camera priority reviewed by Astra; final one-line initial rememberMap change awaiting final source read. Actual Cloud rerun still required.",
+  "commitPush": "not performed by this author"
+}

@@ -1,0 +1,26 @@
+{
+  "files": [
+    {
+      "file": "pc13_browser.py",
+      "sha256": "fc297ab8ba578b8dc5e4e27fc5023ae611e4e4c2a970a852cdbea2c74bb0f484",
+      "change": "depart native input target + exact frozen PC12 helper only; every other AST node unchanged"
+    },
+    {
+      "file": "report16_browser.py",
+      "sha256": "c224110c97af99676d2fba5e61d07626f66f552a52223c1b1cc385bb24d74276",
+      "change": "depart native input target + exact frozen PC12 helper only; every other AST node unchanged"
+    },
+    {
+      "file": "static_browser.py",
+      "sha256": "c8fdfeab5df94710dea9ea44c22fd3ad2a6f9a1e13b3b06f9ab52f48a21343b1",
+      "change": "exactly one expected shared/hierarchy.js entry; actual local static manifest equals exact expected set",
+      "staticFiles": 16
+    }
+  ],
+  "pc12": "frozen SHA unchanged",
+  "source": "no product edits",
+  "tests": "3 Python AST pass; AST outside allowed depart/helper changes identical; static exact local file set pass; diffcheck0",
+  "browserServer": "NOT RUN",
+  "commitPush": "NOT RUN",
+  "remainingProductCandidates": "PC13 firstInfoHit (3) and mapfit interception (1) untouched; independent UI investigation remains"
+}
