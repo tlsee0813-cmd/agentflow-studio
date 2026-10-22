@@ -1,0 +1,76 @@
+{
+  "status": "PASS",
+  "runtime": "v24.19.0",
+  "fixtureNature": "labelled synthetic fixture uses normal answer API; not testimony by a real user and not test_answer API",
+  "stages": {
+    "T0": {
+      "A": {
+        "kind": "decision",
+        "taskId": "T_486b0fa6-fe42-401b-8ade-13fe881e1fab",
+        "returnId": null,
+        "areaId": "A_05c43a58-5f77-494d-b757-8e6370ef4305",
+        "status": "답변 기록 있음",
+        "answered": true,
+        "applicability": "answered"
+      },
+      "B": {
+        "kind": "decision",
+        "taskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+        "returnId": null,
+        "areaId": "A_0330ba8f-3bf0-408f-90dc-2a52688e8323",
+        "status": "제품 선택 항목 있음",
+        "answered": false,
+        "applicability": "active"
+      },
+      "AReplyKinds": [
+        "request",
+        "answer"
+      ],
+      "C": {
+        "currentValid": false,
+        "currentRevision": 1,
+        "summary": "검토 결과의 파일 내보내기 범위를 확인하는 부분이다. CSV/XLSX 지원은 이 설명만으로 검증되지 않았다.",
+        "held": []
+      }
+    },
+    "T2": {
+      "A": {
+        "kind": "decision",
+        "taskId": "T_486b0fa6-fe42-401b-8ade-13fe881e1fab",
+        "returnId": null,
+        "areaId": "A_05c43a58-5f77-494d-b757-8e6370ef4305",
+        "status": "답변 기록 있음",
+        "answered": true,
+        "applicability": "answered"
+      },
+      "B": {
+        "kind": "decision",
+        "taskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+        "returnId": null,
+        "areaId": "A_0330ba8f-3bf0-408f-90dc-2a52688e8323",
+        "status": "제품 선택 항목 있음",
+        "answered": false,
+        "applicability": "active"
+      },
+      "AReplyKinds": [
+        "request",
+        "answer"
+      ],
+      "C": {
+        "currentValid": false,
+        "currentRevision": 1,
+        "summary": "검토 결과의 파일 내보내기 범위를 확인하는 부분이다. CSV/XLSX 지원은 이 설명만으로 검증되지 않았다.",
+        "held": [
+          "plan-changed"
+        ]
+      }
+    }
+  },
+  "manualPreservation": {
+    "A": "scope/checks unchanged; U/N explicit10→20",
+    "B": true,
+    "C": true,
+    "D": true
+  },
+  "HAndRawProof": "verify.mjs separately checks all six original export records, UTF16/FNV/SHA and six exact return raw files"
+}

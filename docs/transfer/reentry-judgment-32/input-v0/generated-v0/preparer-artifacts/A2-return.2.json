@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_486b0fa6-fe42-401b-8ade-13fe881e1fab",
+  "returnId": "H_SYN32_A2",
+  "report": "[합성32 보고 A2] 미리보기는 데이터20행을 표시하고 헤더는 따로 표시한다. 원본 파일은 바꾸지 않는다. 이 문장은 준비자가 만든 상태 주장이고 실제 구현·검사·AI 실행 증거가 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_05c43a58-5f77-494d-b757-8e6370ef4305",
+    "basedOn": 1,
+    "summary": "미리보기는 데이터20행을 표시하고 헤더는 따로 표시한다. 원본 파일은 바꾸지 않는다.",
+    "changes": [
+      "미리보기 데이터 행 표시가10행에서20행으로 바뀌었다."
+    ],
+    "proposal": null,
+    "origin": "합성32 입력 준비자 · 실제 구현/AI 실행 증거 아님"
+  }
+}

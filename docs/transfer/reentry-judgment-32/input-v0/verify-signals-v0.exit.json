@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "runtime": "Node24 pure auxiliary",
+  "kind": "public questionAnswered + subtreeSignals answered/applicability/status and C stale/held projection"
+}

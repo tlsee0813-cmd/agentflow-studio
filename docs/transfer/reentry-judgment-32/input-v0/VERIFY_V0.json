@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "runtime": "v24.19.0",
+  "kind": "pure parse/domain/hash only; no UI/storage injection",
+  "T0SHA256": "93bb9ad11ee21ffc2a27c8949e7465bc9a16e7beaa0b2b4275a4c4d14c009cbf",
+  "T2SHA256": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7",
+  "binding": [
+    {
+      "file": "domain.js",
+      "bytes": 77648,
+      "sha256": "f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd"
+    },
+    {
+      "file": "validation.js",
+      "bytes": 50121,
+      "sha256": "5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4"
+    },
+    {
+      "file": "attention.js",
+      "bytes": 5422,
+      "sha256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072"
+    },
+    {
+      "file": "hierarchy.js",
+      "bytes": 2489,
+      "sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624"
+    },
+    {
+      "file": "mock.js",
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+    },
+    {
+      "file": "types.js",
+      "bytes": 2672,
+      "sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53"
+    },
+    {
+      "file": "plan-facts.js",
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+    },
+    {
+      "file": "outcome.js",
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+    }
+  ],
+  "limitations": [
+    "B is older by event order, not backdated by days. Public APIs provide no timestamp edit.",
+    "T0/T2 are separate recovery snapshots with one Project.id. Normal imports create different workspace entryId values, not live sync.",
+    "No last-read baseline, unread status, external implementation or validation is invented."
+  ]
+}

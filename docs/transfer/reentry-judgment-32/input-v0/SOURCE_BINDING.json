@@ -1,0 +1,37 @@
+{
+  "baseProduct": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "files": [
+    {
+      "file": "domain.ts",
+      "bytes": 75793,
+      "sha256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf"
+    },
+    {
+      "file": "types.ts",
+      "bytes": 16360,
+      "sha256": "16202db1c238e917c548950543686046977c21c61de56b30d6f4140aad607d47"
+    },
+    {
+      "file": "validation.ts",
+      "bytes": 46546,
+      "sha256": "cc958cf61b54aa9d552aab07ddaa8c7e6d60ec5e61f7218cf597dd608e9b94df"
+    },
+    {
+      "file": "attention.ts",
+      "bytes": 6051,
+      "sha256": "affaa930475942a73535ee4c995931ae5853ef308423175cfbd3835489ff770d"
+    },
+    {
+      "file": "hierarchy.ts",
+      "bytes": 2591,
+      "sha256": "c9e5a4d9679e6720bc5cd3b86e624904d17a5a7d22b8806d574640ddad605ffa"
+    },
+    {
+      "file": "mock.ts",
+      "bytes": 17369,
+      "sha256": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2"
+    }
+  ],
+  "scope": "source read-only; compiled binding separately in VERIFY_V0.json",
+  "UI_NOT_RUN": true
+}

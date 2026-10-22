@@ -1,0 +1,40 @@
+{
+  "status": "prepared/frozen PUBLIC input v0; one stdout path redaction; UI acceptance NOT_RUN",
+  "generationExit": 0,
+  "verifyExit": 0,
+  "syntax": "5 scripts exit0",
+  "filesExcludingManifestAndReceipt": 39,
+  "bytes": 229344,
+  "T0": {
+    "path": "generated-v0/observer-input/T0.json",
+    "bytes": 28977,
+    "sha256": "93bb9ad11ee21ffc2a27c8949e7465bc9a16e7beaa0b2b4275a4c4d14c009cbf",
+    "gitBlob": "78929a6370da8c8299b9e02a7ba6a756e18337cf"
+  },
+  "T2": {
+    "path": "generated-v0/observer-input/T2.json",
+    "bytes": 41069,
+    "sha256": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7",
+    "gitBlob": "9d449c0e8468cb300c827664a5527f9bcb772d21"
+  },
+  "facts": "generated-v0/sealed-answer/FACTS.json; preparer-only before initial observation",
+  "limits": [
+    "B is older by event order, not backdated by days. Public APIs provide no timestamp edit.",
+    "T0/T2 are separate recovery snapshots with one Project.id. Normal imports create different workspace entryId values, not live sync.",
+    "No last-read baseline, unread status, external implementation or validation is invented.",
+    "No UI/server/install/remote writes. Final integrated source and Node22 reparse pending."
+  ],
+  "questionSignalVerifyExit": 0,
+  "questionProjection": "T0/T2 each A count1 answered=true/applicability=answered/status=답변 기록 있음; B count1 answered=false/applicability=active/status=제품 선택 항목 있음",
+  "C": "T0/T2 current.valid=false/revision1/summary unchanged; T2 held plan-changed is not applied current",
+  "signalProof": "generated-v0/sealed-answer/QUESTION_SIGNAL_PROOF.json; preparer-only",
+  "manifest": {
+    "path": "MANIFEST.json",
+    "bytes": 9044,
+    "sha256": "2c81b3eea3d046851100af95a1ba162482c912b8eddef83c4a092af422ef403e",
+    "gitBlob": "b148b67366aff172287cd73e70e2397d324f457f"
+  },
+  "publicFileCount": 41,
+  "redaction": "See REDACTION_NOTE.json. Original local log and local metadata preserved; do not use previous unredacted upload payload.",
+  "byteEquality": "37 original files unchanged; one stdout copy redacted; MANIFEST/RECEIPT regenerated; REDACTION_NOTE added."
+}

@@ -1,0 +1,52 @@
+{
+  "kind": "Public-copy redaction; original local evidence retained unchanged",
+  "file": "generate-v0.stdout.log",
+  "original": {
+    "path": "generate-v0.stdout.log",
+    "bytes": 325,
+    "sha256": "69d2318fd20421e2274fe0b74a7ae0407493093939534a41a49142c364dcc4c5",
+    "gitBlob": "e986ac5a9e75636d4407cb26e409fe16e42b8fed"
+  },
+  "publicCopy": {
+    "path": "generate-v0.stdout.log",
+    "bytes": 236,
+    "sha256": "6e79c9543de5927db33ca72af9e14b2c32887c11fb5ad4554dc9a7bd6f295c00",
+    "gitBlob": "ecd1c4e012880d13b765d473dde22945ed70a650"
+  },
+  "rule": "Replace exactly the JSON output field absolute local workspace directory with <workspace>/work/product32-input/generated-v0/. One occurrence. No other JSON field, message, exit value, failure or newline changed.",
+  "originalManifests": {
+    "MANIFEST.json": {
+      "path": "MANIFEST.json",
+      "bytes": 8739,
+      "sha256": "8272773304c072e17e42187e8fea739b74f5ce31de020cd2cb6ecbc606d7a21a",
+      "gitBlob": "739f33a19342c660c06c4493785c5f3b329f0408"
+    },
+    "RECEIPT.json": {
+      "path": "RECEIPT.json",
+      "bytes": 1823,
+      "sha256": "854a6150eab7af7b57fbd4c4353e20172bb71dd251d733ddc3aba98f07eb6242",
+      "gitBlob": "6743709ab81d6664354d04e3488e806d904fe85e"
+    }
+  },
+  "unchangedInputs": {
+    "generated-v0/observer-input/T0.json": {
+      "path": "generated-v0/observer-input/T0.json",
+      "bytes": 28977,
+      "sha256": "93bb9ad11ee21ffc2a27c8949e7465bc9a16e7beaa0b2b4275a4c4d14c009cbf",
+      "gitBlob": "78929a6370da8c8299b9e02a7ba6a756e18337cf"
+    },
+    "generated-v0/observer-input/T2.json": {
+      "path": "generated-v0/observer-input/T2.json",
+      "bytes": 41069,
+      "sha256": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7",
+      "gitBlob": "9d449c0e8468cb300c827664a5527f9bcb772d21"
+    },
+    "generated-v0/sealed-answer/FACTS.json": {
+      "path": "generated-v0/sealed-answer/FACTS.json",
+      "bytes": 26703,
+      "sha256": "2fb77b3f2a907ff589cda94ef801a37995712204a580aee990fab580af8f07d8",
+      "gitBlob": "6588fcd439ec84d02aabe4d0c666b7a6b9af2924"
+    }
+  },
+  "claimLimit": "The public set is not byte-identical across all 40 original files: the stdout copy is redacted, public MANIFEST/RECEIPT are regenerated, and this note is added. Other 37 original files remain byte-identical. Original raw log and original metadata are preserved locally."
+}

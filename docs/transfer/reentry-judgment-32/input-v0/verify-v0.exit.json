@@ -1,0 +1,6 @@
+{
+  "exit": 0,
+  "runtime": "Node24 pure author auxiliary",
+  "command": "node verify.mjs --receipt VERIFY_V0.json",
+  "at": "2026-10-22T21:27:45.261798+00:00"
+}

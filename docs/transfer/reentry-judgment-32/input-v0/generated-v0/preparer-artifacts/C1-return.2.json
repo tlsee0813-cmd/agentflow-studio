@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_2356fc5d-b4d6-4d1d-9c68-09e095d15ea7",
+  "returnId": "H_SYN32_C1",
+  "report": "[합성32 보고 C1] 검토 결과의 파일 내보내기 범위를 확인하는 부분이다. CSV/XLSX 지원은 이 설명만으로 검증되지 않았다. 이 문장은 준비자가 만든 상태 주장이고 실제 구현·검사·AI 실행 증거가 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_4b8d71a7-6ed5-4dee-a14e-b2065b19eaa0",
+    "basedOn": 0,
+    "summary": "검토 결과의 파일 내보내기 범위를 확인하는 부분이다. CSV/XLSX 지원은 이 설명만으로 검증되지 않았다.",
+    "changes": [],
+    "proposal": null,
+    "origin": "합성32 입력 준비자 · 실제 구현/AI 실행 증거 아님"
+  }
+}

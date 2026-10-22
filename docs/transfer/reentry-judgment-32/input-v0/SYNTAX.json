@@ -1,0 +1,32 @@
+[
+  {
+    "file": "api.mjs",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "file": "generate.mjs",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "file": "verify.mjs",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "file": "make-return.mjs",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "file": "verify-signals.mjs",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

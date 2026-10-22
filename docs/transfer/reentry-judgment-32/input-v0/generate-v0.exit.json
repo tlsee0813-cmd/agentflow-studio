@@ -1,0 +1,6 @@
+{
+  "exit": 0,
+  "runtime": "Node24.19.0 pure author auxiliary",
+  "command": "node generate.mjs",
+  "at": "2026-10-22T21:26:43.741046+00:00"
+}
