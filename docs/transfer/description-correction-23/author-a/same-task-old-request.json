@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "idea022.context.7",
+  "ticket": {
+    "projectId": "P_fd6783f6-7cdb-4847-a9bb-ce8e095dedcb",
+    "revision": 9,
+    "requestId": "R_1fac648e-7f0d-49c3-b2de-f774844b473b",
+    "taskId": "T_958490d7-ee0a-4679-93de-d6b7e7eb1af6"
+  },
+  "projectName": "나의 프로젝트",
+  "sources": [
+    {
+      "id": "S_ffa04c62-434b-4bae-a2fb-31b2268f6e13",
+      "kind": "request",
+      "text": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+      "at": "2026-10-22T17:32:25.288Z",
+      "taskId": "T_958490d7-ee0a-4679-93de-d6b7e7eb1af6",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "[합성] 현재 문서 보관 안내를 정리해줘. 확인한 자료와 미확인 부분을 구분해줘.",
+      "status": "requested",
+      "sourceId": "S_ffa04c62-434b-4bae-a2fb-31b2268f6e13",
+      "revision": 5,
+      "previousVersions": 0,
+      "partial": false
+    }
+  ],
+  "appFacts": {
+    "taskId": "T_958490d7-ee0a-4679-93de-d6b7e7eb1af6",
+    "inputs": [
+      {
+        "sourceId": "S_ffa04c62-434b-4bae-a2fb-31b2268f6e13",
+        "kind": "request"
+      }
+    ],
+    "records": [
+      {
+        "basisId": "D1",
+        "sourceId": "S_ffa04c62-434b-4bae-a2fb-31b2268f6e13",
+        "revision": 5,
+        "status": "requested",
+        "versionIndex": 0,
+        "isCurrent": true,
+        "kind": "input-retained",
+        "previousRevision": null,
+        "changedFields": null
+      }
+    ]
+  },
+  "previousWork": null,
+  "previousIntent": null,
+  "purposeIntent": null,
+  "background": {
+    "version": "background.1",
+    "revision": 4,
+    "brief": "[합성] 문서 보관 안내를 정리하는 한 부분. 보관기간 자체를 여기서 새 정책으로 결정하지 않는다.",
+    "area": {
+      "id": "A_964aafb2-e16d-4e6d-b3b5-1883bf1652c8",
+      "name": "문서 보관 안내 · 합성",
+      "note": "[합성] 문서 보관 안내의 현재 자료를 확인한다. 이 구상은 설명 정정 전후 그대로다."
+    }
+  }
+}

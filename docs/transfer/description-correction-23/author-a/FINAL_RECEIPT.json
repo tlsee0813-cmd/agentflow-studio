@@ -1,0 +1,357 @@
+{
+  "head": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "detached": true,
+  "contract": {
+    "ref": "01aa3cbb80b44bca51e17301f6de6ecd7dae5513",
+    "path": "docs/cycles/2026-10-23-correction-context-23",
+    "INPUTblob": "eede0e579947e4303e6a6a0330ad6c4a7cb55b46",
+    "RESEARCHblob": "b61ff54c2496666ea419312504f3793c9ef78df3"
+  },
+  "node": "v24.19.0",
+  "typescript": "5.8.3 reused locked dependency",
+  "files": [
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 16360,
+      "sha256": "16202DB1C238E917C548950543686046977C21C61DE56B30D6F4140AAD607D47"
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 73179,
+      "sha256": "3A0D8945FB31E0A94BBF0E42407E2E5FCF9901EBD22686B73D75445EA1DE9314"
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "bytes": 46546,
+      "sha256": "CC958CF61B54AA9D552AAB07DDAA8C7E6D60EC5E61F7218CF597DD608E9B94DF"
+    },
+    {
+      "path": "app/continuity/server/prompt.mjs",
+      "bytes": 24706,
+      "sha256": "5AE270A09BE7A4A780F471D096C95CF1333C86345A42154B2F74CBB7581F31E1"
+    },
+    {
+      "path": "app/continuity/tests/description23.test.mjs",
+      "bytes": 12153,
+      "sha256": "C577AA68BF13242FFE7761BE90F27AB7177ABF5C8DC257A0FE4A3CF79E6C44ED"
+    }
+  ],
+  "patchSHA256": "72D464ACB085711B1E6AECCF8FBD790DB5AC019AE5702E3974E24049B76591D7",
+  "unchangedUI": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha256": "5370D0A6ACD3A1B60E3F5C81E8E3A4BE647665D23C18667F810B6DF7634F9F58",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0",
+      "byteIdenticalToBase": true
+    }
+  ],
+  "guideByteIdentical": true,
+  "guideSHA256": "F4A68601F44F20E23B084F0B8C6046993B3CBA092B3B873E0EC1267A9F982036",
+  "diffCheckExit": 0,
+  "execution": [
+    {
+      "raw": "before-after-23.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "work/product23-author-evidence/before-after-probe.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:32:25.190Z",
+      "end": "2026-10-22T17:32:25.322Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "build-23-final.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "continuity/scripts/build.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:31:13.162Z",
+      "end": "2026-10-22T17:31:16.227Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "build-23.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "continuity/scripts/build.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:25:52.009Z",
+      "end": "2026-10-22T17:25:54.294Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "build-approot-pinned-path.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "scripts/build.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:26:27.133Z",
+      "end": "2026-10-22T17:26:27.241Z",
+      "status": 1,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "build-approot-provider-dependency.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "scripts/build.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:26:07.869Z",
+      "end": "2026-10-22T17:26:07.975Z",
+      "status": 1,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "check-23-final.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "continuity/scripts/check.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:31:02.829Z",
+      "end": "2026-10-22T17:31:08.659Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "check-23.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "continuity/scripts/check.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:25:35.717Z",
+      "end": "2026-10-22T17:25:40.253Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "emit-approot-provider-dependencies.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "node_modules/typescript/bin/tsc"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:27:02.714Z",
+      "end": "2026-10-22T17:27:04.349Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "setup-checkout.exit.json",
+      "command": "git",
+      "args": [
+        "-C",
+        "work/product23-author",
+        "checkout",
+        "--detach",
+        "f7b25a586dca42466f07c7db2bedb9c59703deda"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:17:21.012Z",
+      "end": "2026-10-22T17:17:22.081Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "setup-sparse.exit.json",
+      "command": "git",
+      "args": [
+        "-C",
+        "work/product23-author",
+        "sparse-checkout",
+        "set",
+        "app",
+        ".github"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:17:20.864Z",
+      "end": "2026-10-22T17:17:20.941Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "setup-worktree.exit.json",
+      "command": "git",
+      "args": [
+        "-C",
+        "work/product21-author",
+        "worktree",
+        "add",
+        "--detach",
+        "--no-checkout",
+        "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author",
+        "f7b25a586dca42466f07c7db2bedb9c59703deda"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:17:20.670Z",
+      "end": "2026-10-22T17:17:20.791Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "unit-description23-after-runtime.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "--test",
+        "continuity/tests/description23.test.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:26:08.056Z",
+      "end": "2026-10-22T17:26:08.219Z",
+      "status": 1,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "unit-description23-final.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "--test",
+        "continuity/tests/description23.test.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:31:23.119Z",
+      "end": "2026-10-22T17:31:23.427Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "unit-description23-first.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "--test",
+        "continuity/tests/description23.test.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:25:54.379Z",
+      "end": "2026-10-22T17:25:54.550Z",
+      "status": 1,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "unit-description23-ready.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "--test",
+        "continuity/tests/description23.test.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:27:04.470Z",
+      "end": "2026-10-22T17:27:04.913Z",
+      "status": 1,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "unit-description23-scope-corrected.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "--test",
+        "continuity/tests/description23.test.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:28:06.744Z",
+      "end": "2026-10-22T17:28:07.020Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "raw": "unit-focused-regression23.exit.json",
+      "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+      "args": [
+        "--test",
+        "continuity/tests/domain.test.mjs",
+        "continuity/tests/understanding17.test.mjs",
+        "continuity/tests/hierarchy18.test.mjs",
+        "continuity/tests/ai055.test.mjs"
+      ],
+      "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+      "node": "v24.19.0",
+      "start": "2026-10-22T17:28:07.106Z",
+      "end": "2026-10-22T17:28:23.513Z",
+      "status": 0,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "expectedFailures": [
+    {
+      "label": "unit-description23-first",
+      "reason": "Provider dependency approot dist absent before test bodies ran"
+    },
+    {
+      "label": "unit-description23-after-runtime",
+      "reason": "Same dependency absent after failed build setup"
+    },
+    {
+      "label": "build-approot-provider-dependency",
+      "reason": "Existing script tsc command unavailable; no product fix"
+    },
+    {
+      "label": "build-approot-pinned-path",
+      "reason": "No executable tsc shim; direct existing pinned TS invocation later succeeded"
+    },
+    {
+      "label": "unit-description23-ready",
+      "reason": "5 pass/1 fail: overbroad archived=null test expectation. Existing valid-reference archive policy retained and positive boundary added; original failure preserved"
+    }
+  ],
+  "compatibility": "New validator accepts old absent-key requests without injecting null. New generator adds nullable currentAreaDescription; old strict server rejects that key. Same client/server bundle required; project/return/API schema constants unchanged.",
+  "limits": [
+    "No local server/browser, real AI, paid call, remote write, commit or push",
+    "Node24 supplementary only; Node22 CI and independent PC UI not run here",
+    "7/30 evidence is synthetic exact-payload transport proof, not AI semantic conflict resolution",
+    "Archived valid-description reading follows existing areaDescription.valid; no reactivation or new execution permission",
+    "Provider strict validation checks structural provenance; external source IDs/origin/text are not authenticated truth",
+    "Existing seven-day work and reports intentionally remain; no new automatic stale/delete/copy-block policy"
+  ],
+  "focusedRegression": "90/90 domain + understanding17 + hierarchy18 + ai055; new description23 6/6; check/build 0; before-after probe 0"
+}

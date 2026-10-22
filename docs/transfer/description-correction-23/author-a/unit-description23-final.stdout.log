@@ -1,0 +1,14 @@
+✔ DESC23 valid external description carries exact target and return attribution through strict request validation (17.3096ms)
+✔ DESC23 synthetic7/30 correction reaches same-task retry and new same-area request without rewriting work or historical H (4.8458ms)
+✔ DESC23 direct four values, user plan/conditions and old exports survive correction and normal retry (4.5361ms)
+✔ DESC23 held/stale references and other/global targets do not leak, while valid current survives a later held result (7.7412ms)
+✔ DESC23 strict provenance, exact keys and existing2000-char limit; earlier requests keep their absent-key byte shape (10.9467ms)
+✔ DESC23 provider receives the validated reference only as JSON data, including untrusted origin/text (30.3192ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 218.1978

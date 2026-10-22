@@ -1,0 +1,11 @@
+file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product23-author/app/scripts/build.mjs:7
+  throw new Error('TypeScript 5.8.3 required. Run npm ci in a network-enabled environment.');
+        ^
+
+Error: TypeScript 5.8.3 required. Run npm ci in a network-enabled environment.
+    at file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product23-author/app/scripts/build.mjs:7:9
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.19.0

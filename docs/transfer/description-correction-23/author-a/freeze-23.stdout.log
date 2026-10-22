@@ -1,0 +1,120 @@
+{
+  "head": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "files": [
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 16360,
+      "sha256": "16202DB1C238E917C548950543686046977C21C61DE56B30D6F4140AAD607D47"
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 73179,
+      "sha256": "3A0D8945FB31E0A94BBF0E42407E2E5FCF9901EBD22686B73D75445EA1DE9314"
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "bytes": 46546,
+      "sha256": "CC958CF61B54AA9D552AAB07DDAA8C7E6D60EC5E61F7218CF597DD608E9B94DF"
+    },
+    {
+      "path": "app/continuity/server/prompt.mjs",
+      "bytes": 24706,
+      "sha256": "5AE270A09BE7A4A780F471D096C95CF1333C86345A42154B2F74CBB7581F31E1"
+    },
+    {
+      "path": "app/continuity/tests/description23.test.mjs",
+      "bytes": 12153,
+      "sha256": "C577AA68BF13242FFE7761BE90F27AB7177ABF5C8DC257A0FE4A3CF79E6C44ED"
+    }
+  ],
+  "patchSHA256": "72D464ACB085711B1E6AECCF8FBD790DB5AC019AE5702E3974E24049B76591D7",
+  "diffCheckExit": 0,
+  "guideByteIdentical": true,
+  "unchangedUI": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha256": "5370D0A6ACD3A1B60E3F5C81E8E3A4BE647665D23C18667F810B6DF7634F9F58",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0",
+      "byteIdenticalToBase": true
+    }
+  ],
+  "execution": [
+    {
+      "raw": "before-after-23.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "build-23-final.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "build-23.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "build-approot-pinned-path.exit.json",
+      "status": 1
+    },
+    {
+      "raw": "build-approot-provider-dependency.exit.json",
+      "status": 1
+    },
+    {
+      "raw": "check-23-final.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "check-23.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "emit-approot-provider-dependencies.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "setup-checkout.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "setup-sparse.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "setup-worktree.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "unit-description23-after-runtime.exit.json",
+      "status": 1
+    },
+    {
+      "raw": "unit-description23-final.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "unit-description23-first.exit.json",
+      "status": 1
+    },
+    {
+      "raw": "unit-description23-ready.exit.json",
+      "status": 1
+    },
+    {
+      "raw": "unit-description23-scope-corrected.exit.json",
+      "status": 0
+    },
+    {
+      "raw": "unit-focused-regression23.exit.json",
+      "status": 0
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+  "args": [
+    "scripts/build.mjs"
+  ],
+  "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product23-author\\app",
+  "node": "v24.19.0",
+  "start": "2026-10-22T17:26:07.869Z",
+  "end": "2026-10-22T17:26:07.975Z",
+  "status": 1,
+  "signal": null,
+  "error": null
+}

@@ -1,0 +1,39 @@
+{
+  "head": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "files": [
+    {
+      "path": "src/shared/types.ts",
+      "bytes": 15760,
+      "sha256": "6B5865AB6E85EE19187BFE62748CD073CC90E3E7E96595DA0423C46869180316",
+      "crlf": 0,
+      "lf": 210
+    },
+    {
+      "path": "src/shared/domain.ts",
+      "bytes": 72412,
+      "sha256": "B7218594345F34C4D9343B5CB75100DA50ACB0C650AC7370E8263984DB5C3A43",
+      "crlf": 0,
+      "lf": 801
+    },
+    {
+      "path": "src/shared/validation.ts",
+      "bytes": 45411,
+      "sha256": "A6FA118A7AC14F286DDAC9FAD34CF8AF7C65EB3BEAD451B7E2ACD876BA242AA8",
+      "crlf": 0,
+      "lf": 533
+    },
+    {
+      "path": "server/prompt.mjs",
+      "bytes": 23230,
+      "sha256": "95F4C88E2877F22C574C0C7A442FF6AB0C2FFFB7D1F84EA1F544C1265E90B7B2",
+      "crlf": 0,
+      "lf": 61
+    }
+  ],
+  "node": "v24.19.0",
+  "scope": "new isolated sparse worktree; product21 untouched",
+  "dependencies": "Existing TypeScript5.8.3 reused through ignored local junction; no install",
+  "AGENTS": "None in fetched root/app/continuity/shared/server/tests paths or sparse worktree",
+  "server": "NOT STARTED",
+  "browser": "NOT RUN"
+}

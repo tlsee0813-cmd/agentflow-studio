@@ -1,0 +1,47 @@
+✔ DESC23 valid external description carries exact target and return attribution through strict request validation (29.4875ms)
+✔ DESC23 synthetic7/30 correction reaches same-task retry and new same-area request without rewriting work or historical H (5.7454ms)
+✔ DESC23 direct four values, user plan/conditions and old exports survive correction and normal retry (5.5446ms)
+✖ DESC23 held/stale/inactive references and other/global targets do not leak, while valid current survives a later held result (9.5294ms)
+✔ DESC23 strict provenance, exact keys and existing2000-char limit; earlier requests keep their absent-key byte shape (12.998ms)
+✔ DESC23 provider receives the validated reference only as JSON data, including untrusted origin/text (56.1571ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 320.3651
+
+✖ failing tests:
+
+test at continuity\tests\description23.test.mjs:64:1
+✖ DESC23 held/stale/inactive references and other/global targets do not leak, while valid current survives a later held result (9.5294ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   areaId: 'A_2cadca1c-2b0b-4fbc-9b87-917c789fa3ad',
+  +   by: 'user',
+  +   corrects: 1,
+  +   revision: 2,
+  +   source: null,
+  +   taskId: 'T_fa475391-b51e-4b44-a5a4-b7bea7a44152',
+  +   text: '[합성 사용자 설명 정정] CORRECTED_30_DAYS: 현재 표시는 30일이다. 이전 설명의 7일은 오류다.'
+  + }
+  - null
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product23-author/app/continuity/tests/description23.test.mjs:71:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { taskId: 'T_fa475391-b51e-4b44-a5a4-b7bea7a44152', areaId: 'A_2cadca1c-2b0b-4fbc-9b87-917c789fa3ad', revision: 2, by: 'user', corrects: 1, source: null, text: '[합성 사용자 설명 정정] CORRECTED_30_DAYS: 현재 표시는 30일이다. 이전 설명의 7일은 오류다.' },
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
