@@ -93,10 +93,10 @@ class SpatialWorkspace(unittest.TestCase):
         self.add_area('확정 화면');self.page.locator('#open-unplaced').click()
         self.page.locator('.area-task').locator('.area-place').click()
         expect(self.page.locator('#area-tasks')).to_contain_text('영역 미지정 요청이 없어요')
-        s=self.state();self.assertEqual(s['schemaVersion'],'idea015.project.6');self.assertEqual(s['tasks'][0]['areaId'],self.area_id('확정 화면'))
+        s=self.state();self.assertEqual(s['schemaVersion'],'idea015.project.7');self.assertEqual(s['tasks'][0]['areaId'],self.area_id('확정 화면'))
         for k in ['sources','bases','currentTaskId']:self.assertEqual(s[k],old[k],k)
         backup=self.download('#backup','flow090-backup.json');data=json.loads(backup.read_text(encoding='utf-8'))
-        self.assertEqual(data['schemaVersion'],'idea015.project.6');self.assertEqual(data['space'],s['space']);self.assertEqual(data['tasks'][0]['areaId'],s['tasks'][0]['areaId'])
+        self.assertEqual(data['schemaVersion'],'idea015.project.7');self.assertEqual(data['space'],s['space']);self.assertEqual(data['tasks'][0]['areaId'],s['tasks'][0]['areaId'])
         self.page.once('dialog',lambda d:d.accept());self.page.locator('#import-file').set_input_files(str(backup))
         expect(self.page.locator('#notice')).to_contain_text('사본');copy=self.state()
         self.assertEqual(copy['space'],s['space']);self.assertEqual(copy['tasks'][0]['areaId'],s['tasks'][0]['areaId'])
@@ -393,7 +393,7 @@ class SpatialWorkspace(unittest.TestCase):
         self.assertEqual(B['background']['brief'],'미용실과 네일숍 예약');self.assertEqual(B['background']['area']['name'],'알림');self.assertIsNone(B['background']['area']['note'])
         saved=self.state();self.page.reload();expect(self.page.locator('#mode')).to_contain_text('MOCK');self.assertEqual(self.state(),saved)
         backup=json.loads(self.download('#backup','flow091c-backup.json').read_text(encoding='utf-8'))
-        self.assertEqual(backup['schemaVersion'],'idea015.project.6');self.assertEqual([t['background'] for t in backup['tasks']],[t['background'] for t in saved['tasks']])
+        self.assertEqual(backup['schemaVersion'],'idea015.project.7');self.assertEqual([t['background'] for t in backup['tasks']],[t['background'] for t in saved['tasks']])
 
     # ---------- FLOW093-U: the narrow settings sheet scrolls; its fields keep their height (real HTTP) ----------
     def test_17_narrow_sheet_fields_keep_their_height(self):
