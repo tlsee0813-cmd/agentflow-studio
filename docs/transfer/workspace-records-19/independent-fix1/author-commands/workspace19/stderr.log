@@ -1,0 +1,11 @@
+test_01_default_record_growth_and_unsaved_owner_isolation (__main__.Workspace19.test_01_default_record_growth_and_unsaved_owner_isolation) ... ok
+test_02_first_records_origin_survives_area_relations_endpoint_request (__main__.Workspace19.test_02_first_records_origin_survives_area_relations_endpoint_request) ... ok
+test_03_long_originals_and_vanished_report_caller (__main__.Workspace19.test_03_long_originals_and_vanished_report_caller) ... ok
+test_01_default_record_growth_and_unsaved_owner_isolation (__main__.Workspace19Wide.test_01_default_record_growth_and_unsaved_owner_isolation) ... ok
+test_02_first_records_origin_survives_area_relations_endpoint_request (__main__.Workspace19Wide.test_02_first_records_origin_survives_area_relations_endpoint_request) ... ok
+test_03_long_originals_and_vanished_report_caller (__main__.Workspace19Wide.test_03_long_originals_and_vanished_report_caller) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 35.896s
+
+OK

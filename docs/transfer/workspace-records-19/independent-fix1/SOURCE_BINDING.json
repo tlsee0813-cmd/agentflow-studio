@@ -1,0 +1,40 @@
+{
+  "source": "acfafd2dd6426e3fa6fa5443bd2e67d8461608c9",
+  "gitTree": "35c276b1e5c02e6039bf8e87f955bf45e78828e0",
+  "sourceURL": "https://github.com/tlsee0813-cmd/agentflow-studio/tree/acfafd2dd6426e3fa6fa5443bd2e67d8461608c9",
+  "productAndTest": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 250194,
+      "sha256": "c3a8e77a96e58758d62ec6819cb902e9f9762362c48a9d60e22cee00af15773d",
+      "remoteObjectDiskEqual": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72648,
+      "sha256": "f97fed78d87fbd7edf15e8556894ba023ba3b01463d54730796904e36c37408d",
+      "remoteObjectDiskEqual": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17909,
+      "sha256": "190c02c6615901c84735ab7f8d6b2504ff9d8351ba5fd784f6b62bbce16ec34c",
+      "remoteObjectDiskEqual": true
+    },
+    {
+      "path": "app/continuity/tests/workspace19_browser.py",
+      "bytes": 27965,
+      "sha256": "e1fce56c2509dac4cb9667f411e78e8b63d5f2f8973110631087aff5d2682328",
+      "remoteObjectDiskEqual": true
+    }
+  ],
+  "diffFrom81d": "M\tapp/continuity/src/client/app.ts\nM\tapp/continuity/tests/workspace19_browser.py\n",
+  "W19testMethodSourceExact81dEqualsAcf": true,
+  "W19testMethods": [
+    "test_01_default_record_growth_and_unsaved_owner_isolation",
+    "test_02_first_records_origin_survives_area_relations_endpoint_request",
+    "test_03_long_originals_and_vanished_report_caller"
+  ],
+  "compiledHTTPBinding": "http-runtime.json (16 real HTTP responses vs running disk before/after)",
+  "sourceAfter": "SOURCE_AFTER.json"
+}

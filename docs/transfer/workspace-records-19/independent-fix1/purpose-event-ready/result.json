@@ -1,0 +1,1940 @@
+{
+  "source": "acfafd2dd6426e3fa6fa5443bd2e67d8461608c9",
+  "expectedRuns": 2,
+  "executedRuns": 2,
+  "runs": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "purpose-menu",
+      "checks": [
+        {
+          "id": "records-native-nonzero-before-purpose",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1280,
+              "matrix": "matrix(0.847368, 0, 0, 0.847368, 350.421, 30.1053)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 660,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 938,
+                "y": 292.484375,
+                "width": 300,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "mode": "records",
+              "head": {
+                "x": 939,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1237,
+                "bottom": 350.484375,
+                "left": 939
+              },
+              "footer": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 350.484375,
+                "width": 298,
+                "height": 299.515625,
+                "top": 350.484375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyTop": 280,
+              "bodyMax": 758,
+              "bodyId": "@records",
+              "focus": "records-heading",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 649.3157958984375,
+                    "y": 357.484375,
+                    "width": 203.368408203125,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 852.6842041015625,
+                    "bottom": 510.01068115234375,
+                    "left": 649.3157958984375
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 903.5263061523438,
+                    "y": 357.484375,
+                    "width": 203.36846923828125,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 1106.894775390625,
+                    "bottom": 510.01068115234375,
+                    "left": 903.5263061523438
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 395.1052551269531,
+                    "y": 357.484375,
+                    "width": 203.36843872070312,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 598.4736938476562,
+                    "bottom": 510.01068115234375,
+                    "left": 395.1052551269531
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 649.3157958984375,
+                    "y": 526.9580688476562,
+                    "width": 203.368408203125,
+                    "height": 152.52630615234375,
+                    "top": 526.9580688476562,
+                    "right": 852.6842041015625,
+                    "bottom": 679.484375,
+                    "left": 649.3157958984375
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 903.5263061523438,
+                    "y": 526.9580688476562,
+                    "width": 203.36846923828125,
+                    "height": 152.52630615234375,
+                    "top": 526.9580688476562,
+                    "right": 1106.894775390625,
+                    "bottom": 679.484375,
+                    "left": 903.5263061523438
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "anchor": {
+              "id": "check-open-T_d5e8a6b8-3891-4619-9e5a-26fe655475e1",
+              "rect": {
+                "x": 951,
+                "y": 487.765625,
+                "width": 46.09375,
+                "height": 36,
+                "top": 487.765625,
+                "right": 997.09375,
+                "bottom": 523.765625,
+                "left": 951
+              }
+            }
+          }
+        },
+        {
+          "id": "bounded-full-purpose-real-tail-access",
+          "pass": true,
+          "raw": {
+            "text": "[합성 긴 목적] https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890  목적의 마지막 조건-끝19",
+            "tail": {
+              "rect": {
+                "x": 693.265625,
+                "y": 529.65625,
+                "width": 176.09375,
+                "height": 20,
+                "top": 529.65625,
+                "right": 869.359375,
+                "bottom": 549.65625,
+                "left": 693.265625
+              },
+              "body": {
+                "x": 321,
+                "y": 164.296875,
+                "width": 638,
+                "height": 409.703125,
+                "top": 164.296875,
+                "right": 959,
+                "bottom": 574,
+                "left": 321
+              },
+              "inside": true,
+              "hit": true,
+              "scroll": 1498,
+              "max": 1498
+            }
+          }
+        },
+        {
+          "id": "purpose-close-caller-camera-scroll-draft-saved-unchanged",
+          "pass": true,
+          "raw": {
+            "before": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1280,
+              "matrix": "matrix(0.847368, 0, 0, 0.847368, 350.421, 30.1053)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 660,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 938,
+                "y": 292.484375,
+                "width": 300,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "mode": "records",
+              "head": {
+                "x": 939,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1237,
+                "bottom": 350.484375,
+                "left": 939
+              },
+              "footer": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 350.484375,
+                "width": 298,
+                "height": 299.515625,
+                "top": 350.484375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyTop": 280,
+              "bodyMax": 758,
+              "bodyId": "@records",
+              "focus": "records-heading",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 649.3157958984375,
+                    "y": 357.484375,
+                    "width": 203.368408203125,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 852.6842041015625,
+                    "bottom": 510.01068115234375,
+                    "left": 649.3157958984375
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 903.5263061523438,
+                    "y": 357.484375,
+                    "width": 203.36846923828125,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 1106.894775390625,
+                    "bottom": 510.01068115234375,
+                    "left": 903.5263061523438
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 395.1052551269531,
+                    "y": 357.484375,
+                    "width": 203.36843872070312,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 598.4736938476562,
+                    "bottom": 510.01068115234375,
+                    "left": 395.1052551269531
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 649.3157958984375,
+                    "y": 526.9580688476562,
+                    "width": 203.368408203125,
+                    "height": 152.52630615234375,
+                    "top": 526.9580688476562,
+                    "right": 852.6842041015625,
+                    "bottom": 679.484375,
+                    "left": 649.3157958984375
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 903.5263061523438,
+                    "y": 526.9580688476562,
+                    "width": 203.36846923828125,
+                    "height": 152.52630615234375,
+                    "top": 526.9580688476562,
+                    "right": 1106.894775390625,
+                    "bottom": 679.484375,
+                    "left": 903.5263061523438
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "after": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1280,
+              "matrix": "matrix(0.847368, 0, 0, 0.847368, 350.421, 30.1053)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 660,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 938,
+                "y": 292.484375,
+                "width": 300,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "mode": "records",
+              "head": {
+                "x": 939,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1237,
+                "bottom": 350.484375,
+                "left": 939
+              },
+              "footer": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 350.484375,
+                "width": 298,
+                "height": 299.515625,
+                "top": 350.484375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyTop": 280,
+              "bodyMax": 758,
+              "bodyId": "@records",
+              "focus": "brief-read",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 649.3157958984375,
+                    "y": 357.484375,
+                    "width": 203.368408203125,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 852.6842041015625,
+                    "bottom": 510.01068115234375,
+                    "left": 649.3157958984375
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 903.5263061523438,
+                    "y": 357.484375,
+                    "width": 203.36846923828125,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 1106.894775390625,
+                    "bottom": 510.01068115234375,
+                    "left": 903.5263061523438
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 395.1052551269531,
+                    "y": 357.484375,
+                    "width": 203.36843872070312,
+                    "height": 152.52630615234375,
+                    "top": 357.484375,
+                    "right": 598.4736938476562,
+                    "bottom": 510.01068115234375,
+                    "left": 395.1052551269531
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 649.3157958984375,
+                    "y": 526.9580688476562,
+                    "width": 203.368408203125,
+                    "height": 152.52630615234375,
+                    "top": 526.9580688476562,
+                    "right": 852.6842041015625,
+                    "bottom": 679.484375,
+                    "left": 649.3157958984375
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 903.5263061523438,
+                    "y": 526.9580688476562,
+                    "width": 203.36846923828125,
+                    "height": 152.52630615234375,
+                    "top": 526.9580688476562,
+                    "right": 1106.894775390625,
+                    "bottom": 679.484375,
+                    "left": 903.5263061523438
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "recordAnchorBefore": {
+              "id": "check-open-T_d5e8a6b8-3891-4619-9e5a-26fe655475e1",
+              "rect": {
+                "x": 951,
+                "y": 487.765625,
+                "width": 46.09375,
+                "height": 36,
+                "top": 487.765625,
+                "right": 997.09375,
+                "bottom": 523.765625,
+                "left": 951
+              }
+            },
+            "recordAnchorAfter": {
+              "x": 951,
+              "y": 487.765625,
+              "width": 46.09375,
+              "height": 36
+            }
+          }
+        },
+        {
+          "id": "purpose-Escape-close-same-caller",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1280,
+              720
+            ],
+            "windowY": 0,
+            "windowMax": 613,
+            "docWidth": 1280,
+            "matrix": "matrix(0.847368, 0, 0, 0.847368, 350.421, 30.1053)",
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 660,
+              "height": 411.515625,
+              "top": 292.484375,
+              "right": 924,
+              "bottom": 704,
+              "left": 264
+            },
+            "mapScroll": {
+              "x": 0,
+              "y": 0
+            },
+            "panel": {
+              "x": 938,
+              "y": 292.484375,
+              "width": 300,
+              "height": 411.515625,
+              "top": 292.484375,
+              "right": 1238,
+              "bottom": 704,
+              "left": 938
+            },
+            "mode": "records",
+            "head": {
+              "x": 939,
+              "y": 293.484375,
+              "width": 298,
+              "height": 57,
+              "top": 293.484375,
+              "right": 1237,
+              "bottom": 350.484375,
+              "left": 939
+            },
+            "footer": {
+              "x": 939,
+              "y": 650,
+              "width": 298,
+              "height": 53,
+              "top": 650,
+              "right": 1237,
+              "bottom": 703,
+              "left": 939
+            },
+            "body": {
+              "x": 939,
+              "y": 350.484375,
+              "width": 298,
+              "height": 299.515625,
+              "top": 350.484375,
+              "right": 1237,
+              "bottom": 650,
+              "left": 939
+            },
+            "bodyTop": 280,
+            "bodyMax": 758,
+            "bodyId": "@records",
+            "focus": "brief-read",
+            "cards": [
+              {
+                "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                "rect": {
+                  "x": 649.3157958984375,
+                  "y": 357.484375,
+                  "width": 203.368408203125,
+                  "height": 152.52630615234375,
+                  "top": 357.484375,
+                  "right": 852.6842041015625,
+                  "bottom": 510.01068115234375,
+                  "left": 649.3157958984375
+                },
+                "x": "40px",
+                "y": "40px",
+                "selected": false
+              },
+              {
+                "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                "rect": {
+                  "x": 903.5263061523438,
+                  "y": 357.484375,
+                  "width": 203.36846923828125,
+                  "height": 152.52630615234375,
+                  "top": 357.484375,
+                  "right": 1106.894775390625,
+                  "bottom": 510.01068115234375,
+                  "left": 903.5263061523438
+                },
+                "x": "340px",
+                "y": "40px",
+                "selected": false
+              },
+              {
+                "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                "rect": {
+                  "x": 395.1052551269531,
+                  "y": 357.484375,
+                  "width": 203.36843872070312,
+                  "height": 152.52630615234375,
+                  "top": 357.484375,
+                  "right": 598.4736938476562,
+                  "bottom": 510.01068115234375,
+                  "left": 395.1052551269531
+                },
+                "x": "-260px",
+                "y": "40px",
+                "selected": true
+              },
+              {
+                "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                "rect": {
+                  "x": 649.3157958984375,
+                  "y": 526.9580688476562,
+                  "width": 203.368408203125,
+                  "height": 152.52630615234375,
+                  "top": 526.9580688476562,
+                  "right": 852.6842041015625,
+                  "bottom": 679.484375,
+                  "left": 649.3157958984375
+                },
+                "x": "40px",
+                "y": "240px",
+                "selected": false
+              },
+              {
+                "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                "rect": {
+                  "x": 903.5263061523438,
+                  "y": 526.9580688476562,
+                  "width": 203.36846923828125,
+                  "height": 152.52630615234375,
+                  "top": 526.9580688476562,
+                  "right": 1106.894775390625,
+                  "bottom": 679.484375,
+                  "left": 903.5263061523438
+                },
+                "x": "340px",
+                "y": "240px",
+                "selected": false
+              }
+            ],
+            "folds": [],
+            "paths": [
+              {
+                "from": null,
+                "to": null,
+                "kind": null,
+                "d": "M0,0L10,5L0,10z"
+              }
+            ],
+            "open": []
+          }
+        },
+        {
+          "id": "inline-purpose-edit-distinct-from-reading",
+          "pass": true,
+          "raw": {
+            "readingMap": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 660,
+              "height": 411.515625,
+              "top": 292.484375,
+              "right": 924,
+              "bottom": 704,
+              "left": 264
+            },
+            "inlineEditMap": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 660,
+              "height": 411.515625,
+              "top": 540.671875,
+              "right": 924,
+              "bottom": 952.1875,
+              "left": 264
+            },
+            "actualHeightDelta": 0.0
+          }
+        },
+        {
+          "id": "project-menu-existing-backup-import-access",
+          "pass": true,
+          "raw": {
+            "controls": {
+              "#backup": {
+                "rect": {
+                  "x": 1029,
+                  "y": 140.796875,
+                  "width": 198,
+                  "height": 36,
+                  "top": 140.796875,
+                  "right": 1227,
+                  "bottom": 176.796875,
+                  "left": 1029
+                },
+                "clip": {
+                  "l": 0,
+                  "t": 0,
+                  "r": 1280,
+                  "b": 720
+                },
+                "parents": [
+                  {
+                    "id": "backup",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "project-management",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              },
+              "#import": {
+                "rect": {
+                  "x": 1029,
+                  "y": 181.796875,
+                  "width": 198,
+                  "height": 36,
+                  "top": 181.796875,
+                  "right": 1227,
+                  "bottom": 217.796875,
+                  "left": 1029
+                },
+                "clip": {
+                  "l": 0,
+                  "t": 0,
+                  "r": 1280,
+                  "b": 720
+                },
+                "parents": [
+                  {
+                    "id": "import",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "project-management",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              }
+            },
+            "backupSHA256": "1250bfe15a92f66b33862afda79390453686c7a4c06424770eb377d7a8d58354"
+          }
+        },
+        {
+          "id": "project-menu-import-opens-real-filechooser",
+          "pass": true,
+          "raw": {
+            "chooserObserved": true
+          }
+        },
+        {
+          "id": "A-unsaved-after-records-purpose",
+          "pass": true,
+          "raw": {
+            "value": "[미저장 구상19] 목적 읽기 때문에 지우지 않는다"
+          }
+        },
+        {
+          "id": "home-full-title-purpose-reuses-dialog",
+          "pass": true,
+          "raw": {
+            "title": "같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19",
+            "purpose": "[합성 긴 목적] https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890  목적의 마지막 조건-끝19"
+          }
+        },
+        {
+          "id": "home-dialog-close-original-more-focus",
+          "pass": true,
+          "raw": {
+            "focus": "<summary class=\"project-more-button\" aria-label=\"‘같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary>",
+            "windowY": 0
+          }
+        }
+      ],
+      "purposeNativeEndWheelSteps": [
+        {
+          "top": 1498,
+          "max": 1498
+        }
+      ],
+      "homeCloseReadinessEvent": {
+        "isTrusted": true,
+        "timeStamp": 2829.5,
+        "performanceNow": 2836.899999976158,
+        "focus": "<summary class=\"project-more-button\" aria-label=\"‘같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary>",
+        "windowY": 0
+      },
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "purpose-menu",
+      "checks": [
+        {
+          "id": "records-native-nonzero-before-purpose",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1440,
+              "matrix": "matrix(1.2, 0, 0, 1.2, 374, 39)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 820,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1084,
+                "bottom": 884,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 1098,
+                "y": 292.484375,
+                "width": 300,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 1098
+              },
+              "mode": "records",
+              "head": {
+                "x": 1099,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1397,
+                "bottom": 350.484375,
+                "left": 1099
+              },
+              "footer": {
+                "x": 1099,
+                "y": 830,
+                "width": 298,
+                "height": 53,
+                "top": 830,
+                "right": 1397,
+                "bottom": 883,
+                "left": 1099
+              },
+              "body": {
+                "x": 1099,
+                "y": 350.484375,
+                "width": 298,
+                "height": 479.515625,
+                "top": 350.484375,
+                "right": 1397,
+                "bottom": 830,
+                "left": 1099
+              },
+              "bodyTop": 280,
+              "bodyMax": 578,
+              "bodyId": "@records",
+              "focus": "records-heading",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 687,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 975,
+                    "bottom": 596.484375,
+                    "left": 687
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 1047,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 1335,
+                    "bottom": 596.484375,
+                    "left": 1047
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 327,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 615,
+                    "bottom": 596.484375,
+                    "left": 327
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 687,
+                    "y": 620.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 620.484375,
+                    "right": 975,
+                    "bottom": 836.484375,
+                    "left": 687
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 1047,
+                    "y": 620.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 620.484375,
+                    "right": 1335,
+                    "bottom": 836.484375,
+                    "left": 1047
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "anchor": {
+              "id": "check-open-T_d5e8a6b8-3891-4619-9e5a-26fe655475e1",
+              "rect": {
+                "x": 1111,
+                "y": 487.765625,
+                "width": 46.09375,
+                "height": 36,
+                "top": 487.765625,
+                "right": 1157.09375,
+                "bottom": 523.765625,
+                "left": 1111
+              }
+            }
+          }
+        },
+        {
+          "id": "bounded-full-purpose-real-tail-access",
+          "pass": true,
+          "raw": {
+            "text": "[합성 긴 목적] https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890  목적의 마지막 조건-끝19",
+            "tail": {
+              "rect": {
+                "x": 773.265625,
+                "y": 659.859375,
+                "width": 176.09375,
+                "height": 20,
+                "top": 659.859375,
+                "right": 949.359375,
+                "bottom": 679.859375,
+                "left": 773.265625
+              },
+              "body": {
+                "x": 401,
+                "y": 213.5,
+                "width": 638,
+                "height": 491.3125,
+                "top": 213.5,
+                "right": 1039,
+                "bottom": 704.8125,
+                "left": 401
+              },
+              "inside": true,
+              "hit": true,
+              "scroll": 1417,
+              "max": 1417
+            }
+          }
+        },
+        {
+          "id": "purpose-close-caller-camera-scroll-draft-saved-unchanged",
+          "pass": true,
+          "raw": {
+            "before": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1440,
+              "matrix": "matrix(1.2, 0, 0, 1.2, 374, 39)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 820,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1084,
+                "bottom": 884,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 1098,
+                "y": 292.484375,
+                "width": 300,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 1098
+              },
+              "mode": "records",
+              "head": {
+                "x": 1099,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1397,
+                "bottom": 350.484375,
+                "left": 1099
+              },
+              "footer": {
+                "x": 1099,
+                "y": 830,
+                "width": 298,
+                "height": 53,
+                "top": 830,
+                "right": 1397,
+                "bottom": 883,
+                "left": 1099
+              },
+              "body": {
+                "x": 1099,
+                "y": 350.484375,
+                "width": 298,
+                "height": 479.515625,
+                "top": 350.484375,
+                "right": 1397,
+                "bottom": 830,
+                "left": 1099
+              },
+              "bodyTop": 280,
+              "bodyMax": 578,
+              "bodyId": "@records",
+              "focus": "records-heading",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 687,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 975,
+                    "bottom": 596.484375,
+                    "left": 687
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 1047,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 1335,
+                    "bottom": 596.484375,
+                    "left": 1047
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 327,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 615,
+                    "bottom": 596.484375,
+                    "left": 327
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 687,
+                    "y": 620.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 620.484375,
+                    "right": 975,
+                    "bottom": 836.484375,
+                    "left": 687
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 1047,
+                    "y": 620.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 620.484375,
+                    "right": 1335,
+                    "bottom": 836.484375,
+                    "left": 1047
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "after": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1440,
+              "matrix": "matrix(1.2, 0, 0, 1.2, 374, 39)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 820,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1084,
+                "bottom": 884,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 1098,
+                "y": 292.484375,
+                "width": 300,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 1098
+              },
+              "mode": "records",
+              "head": {
+                "x": 1099,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1397,
+                "bottom": 350.484375,
+                "left": 1099
+              },
+              "footer": {
+                "x": 1099,
+                "y": 830,
+                "width": 298,
+                "height": 53,
+                "top": 830,
+                "right": 1397,
+                "bottom": 883,
+                "left": 1099
+              },
+              "body": {
+                "x": 1099,
+                "y": 350.484375,
+                "width": 298,
+                "height": 479.515625,
+                "top": 350.484375,
+                "right": 1397,
+                "bottom": 830,
+                "left": 1099
+              },
+              "bodyTop": 280,
+              "bodyMax": 578,
+              "bodyId": "@records",
+              "focus": "brief-read",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 687,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 975,
+                    "bottom": 596.484375,
+                    "left": 687
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 1047,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 1335,
+                    "bottom": 596.484375,
+                    "left": 1047
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 327,
+                    "y": 380.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 380.484375,
+                    "right": 615,
+                    "bottom": 596.484375,
+                    "left": 327
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": true
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 687,
+                    "y": 620.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 620.484375,
+                    "right": 975,
+                    "bottom": 836.484375,
+                    "left": 687
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 1047,
+                    "y": 620.484375,
+                    "width": 288,
+                    "height": 216,
+                    "top": 620.484375,
+                    "right": 1335,
+                    "bottom": 836.484375,
+                    "left": 1047
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": false
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "recordAnchorBefore": {
+              "id": "check-open-T_d5e8a6b8-3891-4619-9e5a-26fe655475e1",
+              "rect": {
+                "x": 1111,
+                "y": 487.765625,
+                "width": 46.09375,
+                "height": 36,
+                "top": 487.765625,
+                "right": 1157.09375,
+                "bottom": 523.765625,
+                "left": 1111
+              }
+            },
+            "recordAnchorAfter": {
+              "x": 1111,
+              "y": 487.765625,
+              "width": 46.09375,
+              "height": 36
+            }
+          }
+        },
+        {
+          "id": "purpose-Escape-close-same-caller",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1440,
+              900
+            ],
+            "windowY": 0,
+            "windowMax": 613,
+            "docWidth": 1440,
+            "matrix": "matrix(1.2, 0, 0, 1.2, 374, 39)",
+            "map": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 820,
+              "height": 591.515625,
+              "top": 292.484375,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "mapScroll": {
+              "x": 0,
+              "y": 0
+            },
+            "panel": {
+              "x": 1098,
+              "y": 292.484375,
+              "width": 300,
+              "height": 591.515625,
+              "top": 292.484375,
+              "right": 1398,
+              "bottom": 884,
+              "left": 1098
+            },
+            "mode": "records",
+            "head": {
+              "x": 1099,
+              "y": 293.484375,
+              "width": 298,
+              "height": 57,
+              "top": 293.484375,
+              "right": 1397,
+              "bottom": 350.484375,
+              "left": 1099
+            },
+            "footer": {
+              "x": 1099,
+              "y": 830,
+              "width": 298,
+              "height": 53,
+              "top": 830,
+              "right": 1397,
+              "bottom": 883,
+              "left": 1099
+            },
+            "body": {
+              "x": 1099,
+              "y": 350.484375,
+              "width": 298,
+              "height": 479.515625,
+              "top": 350.484375,
+              "right": 1397,
+              "bottom": 830,
+              "left": 1099
+            },
+            "bodyTop": 280,
+            "bodyMax": 578,
+            "bodyId": "@records",
+            "focus": "brief-read",
+            "cards": [
+              {
+                "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                "rect": {
+                  "x": 687,
+                  "y": 380.484375,
+                  "width": 288,
+                  "height": 216,
+                  "top": 380.484375,
+                  "right": 975,
+                  "bottom": 596.484375,
+                  "left": 687
+                },
+                "x": "40px",
+                "y": "40px",
+                "selected": false
+              },
+              {
+                "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                "rect": {
+                  "x": 1047,
+                  "y": 380.484375,
+                  "width": 288,
+                  "height": 216,
+                  "top": 380.484375,
+                  "right": 1335,
+                  "bottom": 596.484375,
+                  "left": 1047
+                },
+                "x": "340px",
+                "y": "40px",
+                "selected": false
+              },
+              {
+                "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                "rect": {
+                  "x": 327,
+                  "y": 380.484375,
+                  "width": 288,
+                  "height": 216,
+                  "top": 380.484375,
+                  "right": 615,
+                  "bottom": 596.484375,
+                  "left": 327
+                },
+                "x": "-260px",
+                "y": "40px",
+                "selected": true
+              },
+              {
+                "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                "rect": {
+                  "x": 687,
+                  "y": 620.484375,
+                  "width": 288,
+                  "height": 216,
+                  "top": 620.484375,
+                  "right": 975,
+                  "bottom": 836.484375,
+                  "left": 687
+                },
+                "x": "40px",
+                "y": "240px",
+                "selected": false
+              },
+              {
+                "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                "rect": {
+                  "x": 1047,
+                  "y": 620.484375,
+                  "width": 288,
+                  "height": 216,
+                  "top": 620.484375,
+                  "right": 1335,
+                  "bottom": 836.484375,
+                  "left": 1047
+                },
+                "x": "340px",
+                "y": "240px",
+                "selected": false
+              }
+            ],
+            "folds": [],
+            "paths": [
+              {
+                "from": null,
+                "to": null,
+                "kind": null,
+                "d": "M0,0L10,5L0,10z"
+              }
+            ],
+            "open": []
+          }
+        },
+        {
+          "id": "inline-purpose-edit-distinct-from-reading",
+          "pass": true,
+          "raw": {
+            "readingMap": {
+              "x": 264,
+              "y": 292.484375,
+              "width": 820,
+              "height": 591.515625,
+              "top": 292.484375,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "inlineEditMap": {
+              "x": 264,
+              "y": 540.671875,
+              "width": 820,
+              "height": 591.515625,
+              "top": 540.671875,
+              "right": 1084,
+              "bottom": 1132.1875,
+              "left": 264
+            },
+            "actualHeightDelta": 0.0
+          }
+        },
+        {
+          "id": "project-menu-existing-backup-import-access",
+          "pass": true,
+          "raw": {
+            "controls": {
+              "#backup": {
+                "rect": {
+                  "x": 1189,
+                  "y": 140.796875,
+                  "width": 198,
+                  "height": 36,
+                  "top": 140.796875,
+                  "right": 1387,
+                  "bottom": 176.796875,
+                  "left": 1189
+                },
+                "clip": {
+                  "l": 0,
+                  "t": 0,
+                  "r": 1440,
+                  "b": 900
+                },
+                "parents": [
+                  {
+                    "id": "backup",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "project-management",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              },
+              "#import": {
+                "rect": {
+                  "x": 1189,
+                  "y": 181.796875,
+                  "width": 198,
+                  "height": 36,
+                  "top": 181.796875,
+                  "right": 1387,
+                  "bottom": 217.796875,
+                  "left": 1189
+                },
+                "clip": {
+                  "l": 0,
+                  "t": 0,
+                  "r": 1440,
+                  "b": 900
+                },
+                "parents": [
+                  {
+                    "id": "import",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "project-management",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": true
+              }
+            },
+            "backupSHA256": "1250bfe15a92f66b33862afda79390453686c7a4c06424770eb377d7a8d58354"
+          }
+        },
+        {
+          "id": "project-menu-import-opens-real-filechooser",
+          "pass": true,
+          "raw": {
+            "chooserObserved": true
+          }
+        },
+        {
+          "id": "A-unsaved-after-records-purpose",
+          "pass": true,
+          "raw": {
+            "value": "[미저장 구상19] 목적 읽기 때문에 지우지 않는다"
+          }
+        },
+        {
+          "id": "home-full-title-purpose-reuses-dialog",
+          "pass": true,
+          "raw": {
+            "title": "같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19",
+            "purpose": "[합성 긴 목적] https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890 https://example.invalid/longpathWITHOUTspaces1234567890  목적의 마지막 조건-끝19"
+          }
+        },
+        {
+          "id": "home-dialog-close-original-more-focus",
+          "pass": true,
+          "raw": {
+            "focus": "<summary class=\"project-more-button\" aria-label=\"‘같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary>",
+            "windowY": 0
+          }
+        }
+      ],
+      "purposeNativeEndWheelSteps": [
+        {
+          "top": 1417,
+          "max": 1417
+        }
+      ],
+      "homeCloseReadinessEvent": {
+        "isTrusted": true,
+        "timeStamp": 2631.899999976158,
+        "performanceNow": 2639.199999988079,
+        "focus": "<summary class=\"project-more-button\" aria-label=\"‘같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트같은접두사프로젝트 끝이름-19’ 더보기\" title=\"더보기\"><span class=\"project-more-dots\" aria-hidden=\"true\">⋯</span></summary>",
+        "windowY": 0
+      },
+      "pageerrors": []
+    }
+  ],
+  "exit": 0
+}

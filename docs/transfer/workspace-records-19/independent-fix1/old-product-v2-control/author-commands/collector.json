@@ -1,0 +1,8 @@
+{
+  "source": "old81d-product+acf-v2-test",
+  "expected": 3,
+  "executed": 3,
+  "complete": true,
+  "collectorPlannedExit": 1,
+  "boundary": "actual collector exit recorded by external launcher"
+}

@@ -1,0 +1,12 @@
+{
+  "node": "v22.16.0",
+  "nodePath": "/workspace/browser-env/tools/node_modules/.bin/node",
+  "typescript": "Version 5.8.3",
+  "tscPath": "/workspace/browser-env/tools/node_modules/.bin/tsc",
+  "playwright": "1.57.0",
+  "chromiumExecutable": "/usr/bin/chromium",
+  "actualBrowserVersion": "154.0.8037.57",
+  "newInstalls": false,
+  "npmCi": false,
+  "paidCalls": 0
+}

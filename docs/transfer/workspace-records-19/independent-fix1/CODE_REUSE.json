@@ -1,0 +1,26 @@
+[
+  {
+    "name": "core",
+    "change": "source folder and source SHA only; logic unchanged"
+  },
+  {
+    "name": "purpose-followup",
+    "change": "source folder and source SHA only; logic unchanged"
+  },
+  {
+    "name": "minimum",
+    "change": "source folder and source SHA only; logic unchanged"
+  },
+  {
+    "name": "record-list-memo",
+    "change": "source folder and source SHA only; logic unchanged"
+  },
+  {
+    "name": "boundaries-established",
+    "change": "source folder/SHA/output path; execute only established fallback/new-search (4 runs). Known erroneous purpose first attempt retained in v0; corrected purpose is separately rerun."
+  },
+  {
+    "name": "layout-phase",
+    "change": "source/output root fixture path/SHA only; helper file is AST-read JS literal, not executed"
+  }
+]

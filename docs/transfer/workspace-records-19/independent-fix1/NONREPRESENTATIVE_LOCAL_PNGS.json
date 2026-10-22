@@ -1,0 +1,674 @@
+[
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1440x900-false-frame-fallback.png",
+    "bytes": 104814,
+    "sha256": "ace199f96bdecaa4aa4bff3fa00903ef113e43dd3823f2b5a3379e8e63d1d13e",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1280x720-long-body-fixed-actions.png",
+    "bytes": 136667,
+    "sha256": "bb2edf86f60de579ef4fbe343e0eec9316ee3c8f571a0615bc5a2e6d4d76f913",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1440x900-powertoys-leaf.png",
+    "bytes": 172327,
+    "sha256": "6ff935cc89df45d179428496c71d3bd9af8c66e0568a665a1ef31c8c9d39c168",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1280x720-false-frame-fallback.png",
+    "bytes": 87032,
+    "sha256": "bc9bd0674421fa918b126533888fb10d7ddcd8338e07133a36569fe3c36f4467",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1440x900-long-body-fixed-actions.png",
+    "bytes": 170776,
+    "sha256": "1fdd48f1557e1b4dcad7802106a194ca77625ef1cea9d256fe8331e37630e66c",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1280x720-powertoys-returned.png",
+    "bytes": 107899,
+    "sha256": "af3faeb02c2a625371f62a8542323f72489b2e801dd002cf84bded15d5f02228",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1440x900-product13-returned.png",
+    "bytes": 153414,
+    "sha256": "9c49a9f9f456a9c60e6d1426ba1a5fb847140a6aa6074fe8c97af49dac6e7172",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1280x720-product13-leaf.png",
+    "bytes": 145726,
+    "sha256": "6b102486b978fbbd745d56988d18dcd548d763634dde8ae58ecebe03b987989e",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1280x720-product13-returned.png",
+    "bytes": 128640,
+    "sha256": "27508ba722d8b013d7786b05c95eced855a6aa1b1a11c5484490044dde12fa57",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1440x900-product13-leaf.png",
+    "bytes": 177883,
+    "sha256": "accdc21a4a0962ff0526797538522bd4c36d8fbef4a0a426f4a59b4b47f895a2",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1440x900-powertoys-returned.png",
+    "bytes": 136527,
+    "sha256": "d60a2aa78bd12d56cb01b06eb0c7f5f76406decc97db53c2bc2f4aced9516853",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/hierarchy18/raw/area18-1280x720-powertoys-leaf.png",
+    "bytes": 141864,
+    "sha256": "1daa7e60085df8fae9838731606aa0cc266637d390ff409807dbcd6dbfe3b486",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-02-task-context.png",
+    "bytes": 158915,
+    "sha256": "0e1e4a9bc216545dad87de34429e817116b6e23d59b4abab8075b9e52dc432a5",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-13-area-back-A.png",
+    "bytes": 179976,
+    "sha256": "b482734d4ebdcb30d8b8c36ccbb214e0d7d5cd0bc3289d7502a2e4fa3523d823",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-06-back-after-edit.png",
+    "bytes": 129604,
+    "sha256": "dc0deb407ba423ec72e508715261dde9b4b5365e5234ad8b3b8b94cc282f0fc9",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-11-idea-open-back.png",
+    "bytes": 120939,
+    "sha256": "140e4fc19560a0a974f0cf5e2b6ba51c7d68dfe451d183765f23b72caa49dc22",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-06-back-after-edit.png",
+    "bytes": 106829,
+    "sha256": "bcccc289567f0504326c997d5b5f0722b1f8232a873083426d7a9ad99f6da607",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-12-area-back-R.png",
+    "bytes": 140790,
+    "sha256": "331a55749e5dce1267ecc88959af08b8b5b5816fd41704f569ab75c2f28cf0f3",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-10-long-fields-open.png",
+    "bytes": 129870,
+    "sha256": "11e80bc0fc12393d635347cb56f1d0c25fe674709e0f7f82f60c7d9e323afb1f",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-10-long-fields-open.png",
+    "bytes": 95253,
+    "sha256": "00ca75f57f2d6593ef55aca6aaf0e5cc9a7e1357802846c7a266bbf65097f9f9",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-390-task.png",
+    "bytes": 68280,
+    "sha256": "c6798dabeba7fec4328f3908ee6bdfe2b0d3d4b729055bed415f2b6147d61f97",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-05-edit-A.png",
+    "bytes": 68966,
+    "sha256": "53b0359bcf5299e0893f5afc06f245c3d7c9d9db416bc64846d232f69451cac8",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-01-area-read.png",
+    "bytes": 97109,
+    "sha256": "d65c4ca85e8973ca725da3348d95994bc815b26d38ff1180fddf215dbbedd014",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-01-area-read.png",
+    "bytes": 121246,
+    "sha256": "e1f87a4be11e7d7a081ed488e511f0bed0a9091d932f21a5dcdfec75f9c3d8f1",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-04-edit-R.png",
+    "bytes": 82723,
+    "sha256": "0694a0055cba314f8e5895d16beddc6262537db946b573e8dcb022834a9b05e3",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-02-task-context.png",
+    "bytes": 133363,
+    "sha256": "9cfece0f138013d62329a9380828b705feaad30efdc27902320fe25d8f927f33",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-03-back-read.png",
+    "bytes": 133356,
+    "sha256": "5715b48d51ca78390c04588ef3b57e11e79cbfb8ca127ecd64386d1de470be56",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-07-empty.png",
+    "bytes": 81752,
+    "sha256": "0487fedc5906d15c6fb4c295b7c5b044665d98c021df75a549396edd18e3aaf9",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-08-stale.png",
+    "bytes": 93962,
+    "sha256": "8b847baeae21679ca296e2fe29506dadbfbdd24ae7dbe383444dcc1381ae7b10",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-04-edit-R.png",
+    "bytes": 68952,
+    "sha256": "3a492cc4a4074bea1499579c776c5d1cfc8d52733da63abaaeee037f60e1d5b4",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-05-edit-A.png",
+    "bytes": 87977,
+    "sha256": "d0f10ca44c40ccd8a919ef4afa9fc9af25346367f0fa106b2d52074a7ad3f13d",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-13-area-back-A.png",
+    "bytes": 139510,
+    "sha256": "cd02eca4e0757e82cb55093fcaa77f0e0a286a4bb5465038223f5cc47f0cde50",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-11-idea-open-back.png",
+    "bytes": 92247,
+    "sha256": "76e77c2c1b7b6c268b3cbf5b277c98ee257f3a0247ed07e5d9381fe462ee1c2e",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-12-area-back-R.png",
+    "bytes": 179991,
+    "sha256": "7ebff06055ea10007d35fde4b08374ff3cef83aac14c56c00526f5830afd1660",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1440-03-back-read.png",
+    "bytes": 158885,
+    "sha256": "8af6276d166c0f13c2aaaea9aab54072e8ec9a8f7bd3a8ebb95fbcc1edc87ebd",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc12/raw/pc12-1280-09-no-copy.png",
+    "bytes": 77233,
+    "sha256": "3874e68b6ecc1aca2ac9323c1dd583efedf66e73932209707e89b2ec0c93438e",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1440-01-default.png",
+    "bytes": 85926,
+    "sha256": "7f335f4632b6a2d577018c944c07994e04581c4f80f300fe7953d2f2097716f3",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1280-07-tools.png",
+    "bytes": 79273,
+    "sha256": "3ad0997b89298e4385e9286a26e55cc85790821b23404b9feab837b0efe0eb9a",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1440-02-selected.png",
+    "bytes": 115713,
+    "sha256": "e2a31cdd2fcc69b7e75e3ad9640db9c09e9bd6ed212925fcb1fac5b281fbd3bb",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1280-01-default.png",
+    "bytes": 78790,
+    "sha256": "8331b7f4fca39ca4a7076da12d43a598c60bede9c0103d23bfbb01832cf339ac",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1440-08-tools-notice.png",
+    "bytes": 94689,
+    "sha256": "ffd90c2aaf2c6353e52553e8079a71c43bf5b916d2b2cfadd146b2b5a6f9ae30",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1440-03-notice.png",
+    "bytes": 97621,
+    "sha256": "c97c5eb93d9e0742783b596f86632bae45ee0b302a4eef47bb11dd392decb6c6",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1440-05-back-A-records-open.png",
+    "bytes": 111954,
+    "sha256": "43fb55ad5b62af192378c6c690ecb188b8f3fe75c85bb24b211ce7b7701efbb5",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1440-04-back-R.png",
+    "bytes": 120226,
+    "sha256": "3176c2345d0a36241961f36423cdbdb4358a362e0fca65bcc88a0e9ecc2d7a6e",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1280-08-tools-notice.png",
+    "bytes": 87421,
+    "sha256": "75806d36323b8f8844bb5f24f5788ff9a076776eff0292cf8176945ad25b0338",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1280-03-notice.png",
+    "bytes": 90267,
+    "sha256": "edef643822db3babad79b1fc09aa4da6e0088c2551f19ad49ae96b03d338b6cc",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1280-04-back-R.png",
+    "bytes": 104991,
+    "sha256": "ce336709b1b111099515f8c9efe323d9b1af06ec1f6a6efcb39b140b5e284af8",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1280-02-selected.png",
+    "bytes": 101645,
+    "sha256": "c2f757db2bd0c6ebcf820477552389ab4f08ac0fd7521bd50cf56ed36c33e04f",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1440-07-tools.png",
+    "bytes": 86537,
+    "sha256": "0bd6e0a4305f09338ed679cd083307b795f38f0924190f2866bb14f98a1e9273",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1280-06-long.png",
+    "bytes": 125905,
+    "sha256": "4b8d1ec2be308d7c2d98d6b7bed3e7e1ba6ffd055eae55f518fbaa645b4d3efb",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/pc13/raw/pc13-1280-05-back-A-records-open.png",
+    "bytes": 99728,
+    "sha256": "e1f6f28fbb1b5324ae2ee710d7b66cc48e12f4bf5048952df957a58a22a1dad2",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1280-03-r2-opening.png",
+    "bytes": 184015,
+    "sha256": "94239ecfdfc3a40648f4ee6d16664bb5b1b333da4410f4a37e0f7c7ecfc055d2",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1280-01-before-pick.png",
+    "bytes": 150712,
+    "sha256": "359ec26ab4ccada24a23b1505bb1b33438253f4c0b867ccf8f6d7d0b2e96a90c",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1440-05-unsent-opened.png",
+    "bytes": 116378,
+    "sha256": "901b796927256140050152eacf71b522a7cfc767019a8da1e427aad78bfc1040",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1280-09-redraw-kept.png",
+    "bytes": 164515,
+    "sha256": "5e9a2d4a58112d7415001744a4045e5087b483552d8039598a76aeb734187c77",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1280-02-f10-picked.png",
+    "bytes": 159859,
+    "sha256": "6366e52eb981e90ff1811281bd9651c0b8f56983fa3d835e8160685b93835b1e",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1280-06-stale.png",
+    "bytes": 153547,
+    "sha256": "0b2eb067a77400502bae89eb1ce4ccd120c76bcf80974a7bfac8af0a399d44f7",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1440-04-r2-full.png",
+    "bytes": 268113,
+    "sha256": "b75caa58ce371de451e8b7c290d112b2173d341c09cd8a17d9574a1d9a7e4fc9",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1440-02-f10-picked.png",
+    "bytes": 196968,
+    "sha256": "2418820a3cafb4ed2164405952eaad67db044f7d2c50eff8e751bf84d31a5784",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1280-07-archived.png",
+    "bytes": 115485,
+    "sha256": "235c6a2ac6d9f814bf1c3f1c9d8d626ac5e9619ddb2d7f4a943592d7b8ec7c69",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1280-05-unsent-opened.png",
+    "bytes": 101159,
+    "sha256": "867de81e666e6b7ca61671233b4f23dffa434951570ccf79fe835494c6eec01a",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1440-03-r2-opening.png",
+    "bytes": 213293,
+    "sha256": "a34e7454d480d61af90b397dc2b56850048af6603d0f53562a1c8b45f91aa1d4",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1440-01-before-pick.png",
+    "bytes": 186831,
+    "sha256": "489936bf0a515de814344ba1272e9235093467f7f746a1a63917dbefc12b1297",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/report16/raw/report16-1280-04-r2-full.png",
+    "bytes": 181373,
+    "sha256": "feaf1d664b6a8df25f46e62d82b15bbe88d72a7f01a68f1c626867acc8711c40",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/workspace19/raw/workspace19-1280-records-endpoint-return.png",
+    "bytes": 127462,
+    "sha256": "837c240d095f87e85b8e93ae27d02e4e368dc82bf9a9403bf11d1e6b821f13d4",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/workspace19/raw/workspace19-1280-long-originals-fallback.png",
+    "bytes": 139672,
+    "sha256": "301ad348a3c5b131ba04e8da8792ba597a34f2052d2df266751cc1b3595c0ebf",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/workspace19/raw/workspace19-1440-records-endpoint-return.png",
+    "bytes": 154547,
+    "sha256": "015f76a841e36685eb1be79d55542411f5f3da503861cfa016545874f6dc9b95",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/workspace19/raw/workspace19-1280-records-growth.png",
+    "bytes": 124666,
+    "sha256": "d1fa46734eeb793adfd871860666da248cab8ec0af9023fab47d2913a884440f",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/workspace19/raw/workspace19-1440-records-growth.png",
+    "bytes": 146831,
+    "sha256": "d3aac13ba639e42ded1128bf386d5fb427830b04a299c9cf4b5c4dfd65a3f110",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/workspace19/raw/workspace19-1440-long-originals-fallback.png",
+    "bytes": 168885,
+    "sha256": "658e47118871fd74e78d418b5d3735fb617fd73a333e31f981f92e4e740f55be",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1280-zero.png",
+    "bytes": 35308,
+    "sha256": "6961a82290d17a3536bec6f59e61b37ff572ed30d6233ec665751cb17583ec34",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-390-six.png",
+    "bytes": 87021,
+    "sha256": "f9971ed32c5d0771cf6871e11ba2c35d38c50504d87cbdb24669332f5581ea6d",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1440-one.png",
+    "bytes": 43124,
+    "sha256": "ea8134e063fd826fa6f603ba14b28895d1f880046c9a85b1d66498d20261da0a",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1440-six.png",
+    "bytes": 92332,
+    "sha256": "10dfeaa8a6d46b753a2c6d87d5064fcc54ca16bd85e9686ff809d86486093d6c",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1440-A-space.png",
+    "bytes": 75606,
+    "sha256": "89277d6cb166ba9f8cf08f8af79fec7289e15fb5035d58a6ab70e01b7f77adb7",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1440-zero.png",
+    "bytes": 37147,
+    "sha256": "7b21da9aa06e74ffcfda59e3f5f1f3e2c10e3a865f42917c639b2d52c96d4230",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1280-six.png",
+    "bytes": 86948,
+    "sha256": "1513b41b50e2f4d75d12a3d51d419f0a729bf66a162b26518b2a769132a34961",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1280-A-space.png",
+    "bytes": 70966,
+    "sha256": "244fb9a05f8aad04ed1e862300c06fe67531860cefb8fd8b71b6d6434bf6c197",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1280-one.png",
+    "bytes": 41411,
+    "sha256": "32fde70b822fcfe8faf0e874a56ad602592d052c9cee3dd091990cb39476ad66",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1280-read-open.png",
+    "bytes": 195301,
+    "sha256": "70c75c8bee04ddbc1bd84da30736873bad36b7a30aceeb82235734ecbd6ff972",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/home15/raw/home15-1440-read-open.png",
+    "bytes": 240438,
+    "sha256": "27ea68b7e0ee8c7426caa5aa9baa92de0100907f6fd993f1e709b6ea3184336a",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-product13-02-evidence.png",
+    "bytes": 163541,
+    "sha256": "fb5a2c27c669f04987c6b26c825fe7f99f6c6bb44de93d807d04771fe7b693b9",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-product13-01-located.png",
+    "bytes": 163869,
+    "sha256": "5d95354ac3ba4468003b39c9fe1e46506990b32f0e67af3b578308683f5f0e43",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-powertoys-01-located.png",
+    "bytes": 133695,
+    "sha256": "958f3735cefdd16ab56279ee97c6104f7549bc9ba41d847acaf0bad20c4c8f88",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-03-stale-correction-draft.png",
+    "bytes": 99051,
+    "sha256": "2aade121a8121e3817ac18d18a843bcc2be779681f8edfcafc67847ab2e6a7be",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-04-synthetic-conflict-history.png",
+    "bytes": 91517,
+    "sha256": "59f703985daf0d19ee1bff926197a1f8799a667d6924930bb58504cc7b4c7a49",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-06-long-area-screen.png",
+    "bytes": 134282,
+    "sha256": "d94fbdba56bccd5903d97213bbba4e88b2e5c979f3e11779e7975c23c7c23006",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-powertoys-02-evidence.png",
+    "bytes": 152664,
+    "sha256": "c0313535a63b57e732a990560c836ba3cf448bfe3005c06929c1f9a3d431ad24",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-powertoys-03-handoff-preview.png",
+    "bytes": 112946,
+    "sha256": "5903f39781e1b844e0730142cc967fe1da743c73627acd3036cf7e50fbb8fda4",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-05-long-panel.png",
+    "bytes": 135795,
+    "sha256": "a01dc81b9ae735495fcf00e9c2abb52cace9083de8472b93c808eedba92a31b8",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-product13-03-handoff-preview.png",
+    "bytes": 112831,
+    "sha256": "84d82df0ae2bf7b4cfa99aa5ef2ec4fbf5871130a5b73cc7bdf0a86e8d353b57",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-powertoys-03-handoff-preview.png",
+    "bytes": 140804,
+    "sha256": "5d3d89fa0a219b098867aba3a3a8f8d3c0177bc6bd5679a045e5ad72078515a5",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-05-long-panel.png",
+    "bytes": 158068,
+    "sha256": "609331f6fbb3d3dace55470e15d6b23b732a2053fd6da2da40f935f9cac48615",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-powertoys-01-located.png",
+    "bytes": 153303,
+    "sha256": "e4413ee16ae98409b028f9be06671229cb7c0637124b1d1287edbbc7c943f7be",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-powertoys-02-evidence.png",
+    "bytes": 131246,
+    "sha256": "feaada44cdff6b914c54a606477b5a31fcf615648287c736cd2e8a7e20d5a528",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-04-synthetic-conflict-history.png",
+    "bytes": 110532,
+    "sha256": "87e11f316a46a2a1d1f68ed5da7f5e682bec8eb3c33d846935f462d99226a773",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-product13-01-located.png",
+    "bytes": 144013,
+    "sha256": "dd9755f7b3b7feecccb7495e858947d7d2a505efc309379fa8eca795e6d293e1",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-product13-07-locate-new-request-work.png",
+    "bytes": 154869,
+    "sha256": "c18b2ac2c5c2579db4e5fe9e9fa2f611928cfda1a48464c01652e9df1caff49c",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-03-stale-correction-draft.png",
+    "bytes": 126746,
+    "sha256": "06455684087cdc0085248cc4dbef0cb8c2e8fcfca728a804bea9ae2924ebd4dd",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-product13-02-evidence.png",
+    "bytes": 140216,
+    "sha256": "7c02f0ed61445d74ec4b14575757b43107a0c3c5156e20c3d26950019b296c73",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-product13-03-handoff-preview.png",
+    "bytes": 142807,
+    "sha256": "507c2c0418e47f9310b58b6c88a514b8d0dcd0f04b72c7a2160625aa0e00cea6",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1440x900-06-long-area-screen.png",
+    "bytes": 153075,
+    "sha256": "ce008848f79e588b5239e9739f087e143c7a9501fc8f768e65e484db080ecbde",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "author-commands/understanding17/raw/area17-1280x720-product13-07-locate-new-request-work.png",
+    "bytes": 117449,
+    "sha256": "f0aef13b3f1851f8c54c6026841866094b7c9209f17cb8b3679bd07dcdb9150f",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "core/1280-records-origin-return.png",
+    "bytes": 126260,
+    "sha256": "47b3db5d49ed60bd84f4447d62a131920609106fa96831724fafc0231aee2f93",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "boundaries-established/1280-gone-record-fixedhead.png",
+    "bytes": 106501,
+    "sha256": "f7e9940ce710e598f7ad653451a1a995e34efe06ff85fdfc331c95ac63a10e13",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "record-list-memo/1440-records-after-project-list.png",
+    "bytes": 149374,
+    "sha256": "0018e80df3667e4d79f29bcd52f9cb8593c022ce04bc7aead9338463121408f8",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "layout-phase/1280-notice-cleared-stale-height.png",
+    "bytes": 108594,
+    "sha256": "e2ff5c8756ffc4d35b0f01414462ed54f98cbeb0bc1eb0b13a47ea3dcb28e350",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "layout-phase/1440-notice-cleared-stale-height.png",
+    "bytes": 115012,
+    "sha256": "fa7932f757ad92e4497faea3178b688b6aa1995e65d399995a42649b87b91d7f",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "old-product-v2-control/author-commands/workspace19/raw/workspace19-1280-records-endpoint-return.png",
+    "bytes": 127365,
+    "sha256": "3d510a78412852a551cae1eddc3753267f44db335b646cda83949a671311af43",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "old-product-v2-control/author-commands/workspace19/raw/workspace19-1280-long-originals-fallback.png",
+    "bytes": 139645,
+    "sha256": "71c9dd050d59e6c0a539429d5dde4b1bd99720637d0cadc604c0c9921046f62c",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "old-product-v2-control/author-commands/workspace19/raw/workspace19-1440-records-endpoint-return.png",
+    "bytes": 154547,
+    "sha256": "015f76a841e36685eb1be79d55542411f5f3da503861cfa016545874f6dc9b95",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  },
+  {
+    "localRelativePath": "old-product-v2-control/author-commands/workspace19/raw/workspace19-1440-long-originals-fallback.png",
+    "bytes": 168824,
+    "sha256": "ef2cec0190ec22bfe02526ee05f5930a37add1872b66fa7f4c1f58e112e45a3f",
+    "reason": "nonrepresentative auto screenshot, retained unchanged locally; raw JSONL/input/log published"
+  }
+]

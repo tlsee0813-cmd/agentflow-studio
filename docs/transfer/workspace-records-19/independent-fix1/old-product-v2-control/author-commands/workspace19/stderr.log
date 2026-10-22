@@ -1,0 +1,49 @@
+test_01_default_record_growth_and_unsaved_owner_isolation (__main__.Workspace19.test_01_default_record_growth_and_unsaved_owner_isolation) ... FAIL
+test_02_first_records_origin_survives_area_relations_endpoint_request (__main__.Workspace19.test_02_first_records_origin_survives_area_relations_endpoint_request) ... ok
+test_03_long_originals_and_vanished_report_caller (__main__.Workspace19.test_03_long_originals_and_vanished_report_caller) ... ok
+test_01_default_record_growth_and_unsaved_owner_isolation (__main__.Workspace19Wide.test_01_default_record_growth_and_unsaved_owner_isolation) ... FAIL
+test_02_first_records_origin_survives_area_relations_endpoint_request (__main__.Workspace19Wide.test_02_first_records_origin_survives_area_relations_endpoint_request) ... ok
+test_03_long_originals_and_vanished_report_caller (__main__.Workspace19Wide.test_03_long_originals_and_vanished_report_caller) ... ok
+
+======================================================================
+FAIL: test_01_default_record_growth_and_unsaved_owner_isolation (__main__.Workspace19.test_01_default_record_growth_and_unsaved_owner_isolation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle19-old-product-v2-check/app/continuity/tests/workspace19_browser.py", line 135, in test_01_default_record_growth_and_unsaved_owner_isolation
+    closed=self.map_ok('one record closed');self.records();one=self.map_ok('one record open');self.equal('one record does not take map height',[one['map'][k] for k in ['y','h','bottom']],[closed['map'][k] for k in ['y','h','bottom']])
+                                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle19-old-product-v2-check/app/continuity/tests/workspace19_browser.py", line 38, in equal
+    def equal(self,name,value,expected):self.record('condition',name,value,expected);self.assertEqual(value,expected,name)
+                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [224.890625, 479.109375, 704] != [224.890625, 411.515625, 636.40625]
+
+First differing element 1:
+479.109375
+411.515625
+
+- [224.890625, 479.109375, 704]
++ [224.890625, 411.515625, 636.40625] : one record does not take map height
+
+======================================================================
+FAIL: test_01_default_record_growth_and_unsaved_owner_isolation (__main__.Workspace19Wide.test_01_default_record_growth_and_unsaved_owner_isolation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle19-old-product-v2-check/app/continuity/tests/workspace19_browser.py", line 135, in test_01_default_record_growth_and_unsaved_owner_isolation
+    closed=self.map_ok('one record closed');self.records();one=self.map_ok('one record open');self.equal('one record does not take map height',[one['map'][k] for k in ['y','h','bottom']],[closed['map'][k] for k in ['y','h','bottom']])
+                                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle19-old-product-v2-check/app/continuity/tests/workspace19_browser.py", line 38, in equal
+    def equal(self,name,value,expected):self.record('condition',name,value,expected);self.assertEqual(value,expected,name)
+                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [224.890625, 659.109375, 884] != [224.890625, 591.515625, 816.40625]
+
+First differing element 1:
+659.109375
+591.515625
+
+- [224.890625, 659.109375, 884]
++ [224.890625, 591.515625, 816.40625] : one record does not take map height
+
+----------------------------------------------------------------------
+Ran 6 tests in 28.163s
+
+FAILED (failures=2)

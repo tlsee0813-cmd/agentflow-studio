@@ -1,0 +1,30 @@
+[
+  {
+    "executionOutput": "core/1280-records-origin-return.png",
+    "deliveredPath": "representative/1280-records-origin-return.png",
+    "bytes": 126260,
+    "sha256": "47b3db5d49ed60bd84f4447d62a131920609106fa96831724fafc0231aee2f93",
+    "byteIdentical": true
+  },
+  {
+    "executionOutput": "boundaries-established/1280-gone-record-fixedhead.png",
+    "deliveredPath": "representative/1280-gone-record-fixedhead.png",
+    "bytes": 106501,
+    "sha256": "f7e9940ce710e598f7ad653451a1a995e34efe06ff85fdfc331c95ac63a10e13",
+    "byteIdentical": true
+  },
+  {
+    "executionOutput": "record-list-memo/1440-records-after-project-list.png",
+    "deliveredPath": "representative/1440-records-after-project-list.png",
+    "bytes": 149374,
+    "sha256": "0018e80df3667e4d79f29bcd52f9cb8593c022ce04bc7aead9338463121408f8",
+    "byteIdentical": true
+  },
+  {
+    "executionOutput": "layout-phase/1440-notice-cleared-stale-height.png",
+    "deliveredPath": "representative/1440-notice-cleared-height-fixed.png",
+    "bytes": 115012,
+    "sha256": "fa7932f757ad92e4497faea3178b688b6aa1995e65d399995a42649b87b91d7f",
+    "byteIdentical": true
+  }
+]
