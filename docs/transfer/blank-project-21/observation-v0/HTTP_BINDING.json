@@ -1,0 +1,276 @@
+{
+  "boundary": "actual browser response body / disk at response / disk after observation; no substitute fetch",
+  "staticResponses": [
+    {
+      "url": "http://127.0.0.1:36471/",
+      "status": 200,
+      "bytes": 17960,
+      "bodySHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "diskSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "diskAfterObservationSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/styles.css",
+      "status": 200,
+      "bytes": 72783,
+      "bodySHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "diskSHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "diskAfterObservationSHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/client/app.js",
+      "status": 200,
+      "bytes": 286984,
+      "bodySHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1",
+      "diskSHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1",
+      "diskAfterObservationSHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/types.js",
+      "status": 200,
+      "bytes": 2672,
+      "bodySHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+      "diskSHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+      "diskAfterObservationSHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/domain.js",
+      "status": 200,
+      "bytes": 74480,
+      "bodySHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+      "diskSHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+      "diskAfterObservationSHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "bodySHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "diskSHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "diskAfterObservationSHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/validation.js",
+      "status": 200,
+      "bytes": 48869,
+      "bodySHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+      "diskSHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+      "diskAfterObservationSHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "bodySHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "diskSHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "diskAfterObservationSHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "bodySHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "diskSHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "diskAfterObservationSHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "bodySHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "diskSHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "diskAfterObservationSHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "bodySHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "diskSHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "diskAfterObservationSHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/attention.js",
+      "status": 200,
+      "bytes": 5422,
+      "bodySHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+      "diskSHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+      "diskAfterObservationSHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "bodySHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "diskSHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "diskAfterObservationSHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/hierarchy.js",
+      "status": 200,
+      "bytes": 2489,
+      "bodySHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "diskSHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "diskAfterObservationSHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "bodySHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "diskSHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "diskAfterObservationSHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/",
+      "status": 200,
+      "bytes": 17960,
+      "bodySHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "diskSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "diskAfterObservationSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/styles.css",
+      "status": 200,
+      "bytes": 72783,
+      "bodySHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "diskSHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "diskAfterObservationSHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/client/app.js",
+      "status": 200,
+      "bytes": 286984,
+      "bodySHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1",
+      "diskSHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1",
+      "diskAfterObservationSHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/types.js",
+      "status": 200,
+      "bytes": 2672,
+      "bodySHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+      "diskSHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+      "diskAfterObservationSHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/guidance.js",
+      "status": 200,
+      "bytes": 6701,
+      "bodySHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "diskSHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "diskAfterObservationSHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/validation.js",
+      "status": 200,
+      "bytes": 48869,
+      "bodySHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+      "diskSHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+      "diskAfterObservationSHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/storage.js",
+      "status": 200,
+      "bytes": 12708,
+      "bodySHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "diskSHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "diskAfterObservationSHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/mock.js",
+      "status": 200,
+      "bytes": 18360,
+      "bodySHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "diskSHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "diskAfterObservationSHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/client/presentation.js",
+      "status": 200,
+      "bytes": 7833,
+      "bodySHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "diskSHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "diskAfterObservationSHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/domain.js",
+      "status": 200,
+      "bytes": 74480,
+      "bodySHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+      "diskSHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+      "diskAfterObservationSHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/client/runtime.js",
+      "status": 200,
+      "bytes": 2567,
+      "bodySHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "diskSHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "diskAfterObservationSHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/outcome.js",
+      "status": 200,
+      "bytes": 4887,
+      "bodySHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "diskSHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "diskAfterObservationSHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/attention.js",
+      "status": 200,
+      "bytes": 5422,
+      "bodySHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+      "diskSHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+      "diskAfterObservationSHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/hierarchy.js",
+      "status": 200,
+      "bytes": 2489,
+      "bodySHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "diskSHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "diskAfterObservationSHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "match": true
+    },
+    {
+      "url": "http://127.0.0.1:36471/shared/plan-facts.js",
+      "status": 200,
+      "bytes": 4655,
+      "bodySHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "diskSHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "diskAfterObservationSHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "match": true
+    }
+  ],
+  "complete": true
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_6339d392-8072-4ab3-a0d9-7804681eccb2",
+  "taskId": "T_af120394-68e9-4f80-b17e-8a3d9077a84a",
+  "returnId": "H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c",
+  "report": "[명시 합성 반환] 실제 구현이나 외부 검사는 실행하지 않았다. 예약 가능 여부 확인 결과는 알림으로 이어진다는 구성을 읽었다. 남은 질문: 동시에 두 예약이 들어오면 어떤 기준으로 하나만 받을 것인가?",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+    "basedOn": 0,
+    "summary": "예약 가능 여부는 같은 도서의 기존 예약을 확인하여 중복 접수를 막는 부분이다. 동시 접수 처리는 아직 확인하지 않았다.",
+    "changes": [
+      "명시 합성 설명: 예약 가능 여부와 알림의 역할을 구별했다."
+    ],
+    "proposal": null,
+    "origin": "독립 실행 관측자가 실제 내보낸 템플릿으로 작성한 합성 설명. AI·구현·검사 실행 없음."
+  }
+}

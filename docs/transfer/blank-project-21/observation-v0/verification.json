@@ -1,0 +1,1728 @@
+{
+  "source": "df726e5898f24e23d69e47651d3bf6cbea302412",
+  "observedUTC": "2026-10-22T15:47:19.601851+00:00",
+  "checks": [
+    {
+      "id": "1280-normal-UI-project-exact-purpose-tree-relation",
+      "pass": true,
+      "raw": {
+        "areas": [
+          {
+            "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+            "name": "예약",
+            "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+            "archived": false,
+            "createdAt": "2026-10-22T15:40:44.785Z"
+          },
+          {
+            "id": "A_f33b3688-7edb-4163-92f8-21e06d4aa047",
+            "name": "알림",
+            "note": "예약 결과를 이용자에게 알린다.",
+            "archived": false,
+            "createdAt": "2026-10-22T15:40:56.235Z"
+          },
+          {
+            "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+            "name": "예약 가능 여부",
+            "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+            "archived": false,
+            "createdAt": "2026-10-22T15:41:07.807Z"
+          }
+        ],
+        "brief": {
+          "text": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+          "at": "2026-10-22T15:40:35.068Z",
+          "previous": []
+        },
+        "containment": {
+          "version": "containment.1",
+          "parents": {
+            "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f"
+          },
+          "revisions": {
+            "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f": 0,
+            "A_f33b3688-7edb-4163-92f8-21e06d4aa047": 0,
+            "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": 2
+          }
+        },
+        "relations": [
+          {
+            "id": "L_c9f74044-c684-4e2e-877d-d6421dcff5ff",
+            "from": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+            "to": "A_f33b3688-7edb-4163-92f8-21e06d4aa047",
+            "kind": "flow",
+            "note": "예약 가능 여부 확인 결과를 알림에서 사용한다."
+          }
+        ]
+      }
+    },
+    {
+      "id": "1280-actual-first-H-anchor-exact-template-result-T",
+      "pass": true,
+      "raw": {
+        "A": {
+          "id": "T_af120394-68e9-4f80-b17e-8a3d9077a84a",
+          "sourceIds": [
+            "S_c246bb48-2b30-445e-bae6-90a7301b0214"
+          ],
+          "parentTaskId": null,
+          "advice": {
+            "intent": {
+              "version": "intent.1",
+              "relation": "start",
+              "goal": "같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+              "conditions": [],
+              "retired": [],
+              "basisRefs": [
+                {
+                  "basisId": "D1",
+                  "sourceId": "S_c246bb48-2b30-445e-bae6-90a7301b0214",
+                  "revision": 12
+                }
+              ]
+            },
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+            "question": null,
+            "relatedBasisIds": [
+              "D1"
+            ],
+            "reviewBasisIds": [],
+            "suggestions": []
+          },
+          "adviceRevision": 12,
+          "mode": "mock",
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": null,
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [
+            {
+              "at": "2026-10-22T15:42:14.213Z",
+              "method": "clipboard",
+              "revision": 13,
+              "chars": 5044,
+              "digest": "419364b1",
+              "work": {
+                "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+              },
+              "aiExcluded": false,
+              "legacyText": null,
+              "returnId": "H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c",
+              "background": {
+                "version": "background.1",
+                "revision": 11,
+                "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+                "area": {
+                  "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+                }
+              },
+              "anchor": {
+                "version": "anchor.2",
+                "areaId": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+                "understanding": 0,
+                "stamp": {
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                  "brief": 1,
+                  "decisions": [],
+                  "work": [],
+                  "version": "plan.2",
+                  "revision": 2,
+                  "ancestors": [
+                    {
+                      "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+                      "name": "예약",
+                      "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                      "revision": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 11,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          },
+          "areaId": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c"
+        },
+        "H": {
+          "at": "2026-10-22T15:42:14.213Z",
+          "method": "clipboard",
+          "revision": 13,
+          "chars": 5044,
+          "digest": "419364b1",
+          "work": {
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c",
+          "background": {
+            "version": "background.1",
+            "revision": 11,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+            "understanding": 0,
+            "stamp": {
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 2,
+              "ancestors": [
+                {
+                  "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+                  "name": "예약",
+                  "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        },
+        "report": {
+          "id": "T_f4993ded-3593-4a6d-bff9-13ffbdb663f2",
+          "sourceIds": [
+            "S_9d96d6cc-a905-4368-ab9c-f7abe516fde9"
+          ],
+          "parentTaskId": "T_af120394-68e9-4f80-b17e-8a3d9077a84a",
+          "advice": null,
+          "adviceRevision": null,
+          "mode": null,
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": null,
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [],
+          "resultFile": {
+            "returnId": "H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c",
+            "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_6339d392-8072-4ab3-a0d9-7804681eccb2\",\n  \"taskId\": \"T_af120394-68e9-4f80-b17e-8a3d9077a84a\",\n  \"returnId\": \"H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c\",\n  \"report\": \"[명시 합성 반환] 실제 구현이나 외부 검사는 실행하지 않았다. 예약 가능 여부 확인 결과는 알림으로 이어진다는 구성을 읽었다. 남은 질문: 동시에 두 예약이 들어오면 어떤 기준으로 하나만 받을 것인가?\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_49325092-2f8b-4b9e-bfdc-cdd48483c20c\",\n    \"basedOn\": 0,\n    \"summary\": \"예약 가능 여부는 같은 도서의 기존 예약을 확인하여 중복 접수를 막는 부분이다. 동시 접수 처리는 아직 확인하지 않았다.\",\n    \"changes\": [\n      \"명시 합성 설명: 예약 가능 여부와 알림의 역할을 구별했다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"독립 실행 관측자가 실제 내보낸 템플릿으로 작성한 합성 설명. AI·구현·검사 실행 없음.\"\n  }\n}"
+          },
+          "background": {
+            "version": "background.1",
+            "revision": 11,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          }
+        },
+        "projectId": "P_6339d392-8072-4ab3-a0d9-7804681eccb2"
+      }
+    },
+    {
+      "id": "1280-report-description-note-separated",
+      "pass": true,
+      "raw": {
+        "understanding": {
+          "revision": 1,
+          "entries": [
+            {
+              "by": "external",
+              "at": "2026-10-22T15:42:58.167Z",
+              "revision": 1,
+              "taskId": "T_f4993ded-3593-4a6d-bff9-13ffbdb663f2",
+              "returnId": "H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "name": "예약 가능 여부",
+                "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                "brief": 1,
+                "decisions": [],
+                "work": [],
+                "version": "plan.2",
+                "revision": 2,
+                "ancestors": [
+                  {
+                    "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+                    "name": "예약",
+                    "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                    "revision": 0
+                  }
+                ]
+              },
+              "held": null
+            }
+          ]
+        },
+        "userNote": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+        "syntheticSummary": "예약 가능 여부는 같은 도서의 기존 예약을 확인하여 중복 접수를 막는 부분이다. 동시 접수 처리는 아직 확인하지 않았다."
+      }
+    },
+    {
+      "id": "1280-followup-real-new-C-clipboard-H-same-child",
+      "pass": true,
+      "raw": {
+        "C": {
+          "id": "T_177cd312-b8f5-4847-a612-aeedbff54be8",
+          "sourceIds": [
+            "S_2aa11185-7c15-4a38-aae4-73a69232c273"
+          ],
+          "parentTaskId": "T_f4993ded-3593-4a6d-bff9-13ffbdb663f2",
+          "advice": {
+            "intent": {
+              "version": "intent.1",
+              "relation": "separate",
+              "goal": "예약 가능 여부에서 동시에 들어온 두 예약 중 하나만 접수하는 기준을 제안해 주세요. 알림 구현은 바꾸지 마세요.",
+              "conditions": [],
+              "retired": [],
+              "basisRefs": [
+                {
+                  "basisId": "D2",
+                  "sourceId": "S_2aa11185-7c15-4a38-aae4-73a69232c273",
+                  "revision": 18
+                }
+              ]
+            },
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+            "question": null,
+            "relatedBasisIds": [
+              "D1",
+              "D2"
+            ],
+            "reviewBasisIds": [],
+            "suggestions": []
+          },
+          "adviceRevision": 18,
+          "mode": "mock",
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": null,
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [
+            {
+              "at": "2026-10-22T15:43:38.123Z",
+              "method": "clipboard",
+              "revision": 19,
+              "chars": 6873,
+              "digest": "5be19188",
+              "work": {
+                "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+              },
+              "aiExcluded": false,
+              "legacyText": null,
+              "returnId": "H_2bde9dc2-864f-4cc8-89c5-3554f9f9a83a",
+              "background": {
+                "version": "background.1",
+                "revision": 17,
+                "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+                "area": {
+                  "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+                }
+              },
+              "anchor": {
+                "version": "anchor.2",
+                "areaId": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+                "understanding": 1,
+                "stamp": {
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                  "brief": 1,
+                  "decisions": [],
+                  "work": [],
+                  "version": "plan.2",
+                  "revision": 2,
+                  "ancestors": [
+                    {
+                      "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+                      "name": "예약",
+                      "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                      "revision": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 17,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          },
+          "areaId": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c"
+        },
+        "clipboardTemplate": {
+          "schemaVersion": "agentflow.return.2",
+          "projectId": "P_6339d392-8072-4ab3-a0d9-7804681eccb2",
+          "taskId": "T_177cd312-b8f5-4847-a612-aeedbff54be8",
+          "returnId": "H_2bde9dc2-864f-4cc8-89c5-3554f9f9a83a",
+          "report": "실제 결과와 못 한 일로 이 안내를 바꾸세요.",
+          "evidence": null,
+          "understanding": null
+        },
+        "handoff": {
+          "at": "2026-10-22T15:43:38.123Z",
+          "method": "clipboard",
+          "revision": 19,
+          "chars": 6873,
+          "digest": "5be19188",
+          "work": {
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_2bde9dc2-864f-4cc8-89c5-3554f9f9a83a",
+          "background": {
+            "version": "background.1",
+            "revision": 17,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+            "understanding": 1,
+            "stamp": {
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 2,
+              "ancestors": [
+                {
+                  "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+                  "name": "예약",
+                  "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "1280-map-return-preserves-purpose-tree-other-area-report-and-current-C",
+      "pass": true,
+      "raw": {
+        "before": {
+          "brief": {
+            "text": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "at": "2026-10-22T15:40:35.068Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+              "name": "예약",
+              "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:40:44.785Z"
+            },
+            {
+              "id": "A_f33b3688-7edb-4163-92f8-21e06d4aa047",
+              "name": "알림",
+              "note": "예약 결과를 이용자에게 알린다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:40:56.235Z"
+            },
+            {
+              "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:41:07.807Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_c9f74044-c684-4e2e-877d-d6421dcff5ff",
+              "from": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "to": "A_f33b3688-7edb-4163-92f8-21e06d4aa047",
+              "kind": "flow",
+              "note": "예약 가능 여부 확인 결과를 알림에서 사용한다."
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f": {
+                "x": 340,
+                "y": 80
+              },
+              "A_f33b3688-7edb-4163-92f8-21e06d4aa047": {
+                "x": -120,
+                "y": 100
+              },
+              "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": {
+                "x": 640,
+                "y": 280
+              }
+            }
+          },
+          "understanding": {
+            "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": {
+              "revision": 1,
+              "entries": [
+                {
+                  "by": "external",
+                  "at": "2026-10-22T15:42:58.167Z",
+                  "revision": 1,
+                  "taskId": "T_f4993ded-3593-4a6d-bff9-13ffbdb663f2",
+                  "returnId": "H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c",
+                  "text": null,
+                  "corrects": null,
+                  "stamp": {
+                    "name": "예약 가능 여부",
+                    "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 2,
+                    "ancestors": [
+                      {
+                        "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+                        "name": "예약",
+                        "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                        "revision": 0
+                      }
+                    ]
+                  },
+                  "held": null
+                }
+              ]
+            }
+          },
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f"
+            },
+            "revisions": {
+              "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f": 0,
+              "A_f33b3688-7edb-4163-92f8-21e06d4aa047": 0,
+              "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": 2
+            }
+          }
+        },
+        "after": {
+          "brief": {
+            "text": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "at": "2026-10-22T15:40:35.068Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+              "name": "예약",
+              "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:40:44.785Z"
+            },
+            {
+              "id": "A_f33b3688-7edb-4163-92f8-21e06d4aa047",
+              "name": "알림",
+              "note": "예약 결과를 이용자에게 알린다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:40:56.235Z"
+            },
+            {
+              "id": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:41:07.807Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_c9f74044-c684-4e2e-877d-d6421dcff5ff",
+              "from": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+              "to": "A_f33b3688-7edb-4163-92f8-21e06d4aa047",
+              "kind": "flow",
+              "note": "예약 가능 여부 확인 결과를 알림에서 사용한다."
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f": {
+                "x": 340,
+                "y": 80
+              },
+              "A_f33b3688-7edb-4163-92f8-21e06d4aa047": {
+                "x": -120,
+                "y": 100
+              },
+              "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": {
+                "x": 640,
+                "y": 280
+              }
+            }
+          },
+          "understanding": {
+            "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": {
+              "revision": 1,
+              "entries": [
+                {
+                  "by": "external",
+                  "at": "2026-10-22T15:42:58.167Z",
+                  "revision": 1,
+                  "taskId": "T_f4993ded-3593-4a6d-bff9-13ffbdb663f2",
+                  "returnId": "H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c",
+                  "text": null,
+                  "corrects": null,
+                  "stamp": {
+                    "name": "예약 가능 여부",
+                    "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 2,
+                    "ancestors": [
+                      {
+                        "id": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+                        "name": "예약",
+                        "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                        "revision": 0
+                      }
+                    ]
+                  },
+                  "held": null
+                }
+              ]
+            }
+          },
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f"
+            },
+            "revisions": {
+              "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f": 0,
+              "A_f33b3688-7edb-4163-92f8-21e06d4aa047": 0,
+              "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": 2
+            }
+          }
+        },
+        "current": "T_177cd312-b8f5-4847-a612-aeedbff54be8"
+      }
+    },
+    {
+      "id": "1280-UI-export-snapshot-four-strings",
+      "pass": true,
+      "raw": {
+        "expectedWork": {
+          "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+          "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+          "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+          "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+        },
+        "AX": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n    - button \"전체 공간 3\"\n    - button \"현재 작업\"\n    - button \"기준 · 출처 1\"\n    - button \"지난 요청과 결과 2\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 도서 대출 예약 서비스 · 1280 합성 관측\n  - paragraph: 작업 2 · 작업 1에 받은 보고 · 후속 확인 작업문 초안\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 도서 대출 예약 서비스 · 1280 합성 관측\n  - group: MOCK · 체험 모드\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 도서 대출 예약 서비스 · 1280 합성 관측\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - group:\n      - button \"＋ 새 프로젝트\"\n      - button \"↓ 백업 파일 저장\"\n      - button \"↑ 백업 파일 불러오기\"\n      - button \"휴지통으로 옮기기\"\n  - region \"전체 공간\":\n    - navigation \"공간 경로\":\n      - button \"전체 공간\"\n      - text: ›\n      - button \"예약 가능 여부\"\n      - text: ›\n      - strong: 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n      - text: 작업\n    - paragraph: 요청 · 영역 ‘예약 가능 여부’\n    - button \"← 검토 전 작업 화면으로\"\n    - heading \"같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\" [level=1]\n    - paragraph: 작업 01 · 구현 보고 도착 · 앱 미검증\n    - paragraph: 지금의 영역 구상 · 예약 가능 여부\n    - paragraph: 같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.\n    - region \"영역 현재 설명\":\n      - paragraph: 전달 기록에서 정리한 설명 · 앱 미검증\n      - paragraph: 예약 가능 여부는 같은 도서의 기존 예약을 확인하여 중복 접수를 막는 부분이다. 동시 접수 처리는 아직 확인하지 않았다.\n      - paragraph: \"달라진 점 · 명시 합성 설명: 예약 가능 여부와 알림의 역할을 구별했다.\"\n      - group: 정리한 곳 보기\n      - group: 근거 보기\n      - group: 설명 오류 고치기\n    - button \"지도에서 소유 부분 보기\"\n    - region \"다음 동작\":\n      - button \"이 영역에 새 요청\"\n      - paragraph: 영역 ‘예약 가능 여부’에 쓸 빈 요청 입력칸을 열어요. 보내기 전에는 작업이 생기지 않아요.\n      - text: 앱에서 이어갈 작업\n      - button \"작업 화면으로\"\n      - paragraph: 이어가면 이 요청에 받은 현재 보고(작업 02)에서 계속해요. 고치는 대상은 작업 02의 후속 확인 작업문이고, 읽고 있는 작업 01의 작업문은 바뀌지 않아요.\n    - region \"돌아온 보고\":\n      - paragraph: 고른 보고 · 작업 02 · 구현자 보고 · 10월 22일 15:42 · 외부 원문 · 앱 미검증\n      - paragraph: 이 보고의 정리가 현재 영역 설명에 반영됐어요.\n      - group: 이 보고의 정리 설명\n      - text: \"[명시 합성 반환] 실제 구현이나 외부 검사는 실행하지 않았다. 예약 가능 여부 확인 결과는 알림으로 이어진다는 구성을 읽었다. 남은 질문: 동시에 두 예약이 들어오면 어떤 기준으로 하나만 받을 것인가?\"\n      - group:\n        - text: 이 결과를 요청할 때 내보낸 작업문\n        - paragraph: 10월 22일 15:42에 내보낸 작업문이에요. 지금의 작업문이나 현재 기준과는 다를 수 있어요.\n        - paragraph: 짧은 이해\n        - text: 입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.\n        - paragraph: 이번 범위와 유지할 것\n        - text: 요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.\n        - paragraph: 실행 도구에 전달할 작업문\n        - text: 요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.\n        - paragraph: 확인할 동작 / 완료 조건\n        - text: 원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.\n        - group: 인계 연결 · 수신 원문\n      - group: 연결 경로 보기 · 이 요청에 바로 연결된 보고\n      - heading \"돌아온 결과 1개 · 외부 원문 · 앱 미검증\" [level=2]\n      - list \"읽을 보고 고르기\":\n        - listitem:\n          - button \"[명시 합성 반환] 실제 구현이나 외부 검사는 실행하지 않았다. 예약 가능 여부 확인 결과는 알림으로 이어진다는 구성을 읽… 작업 02 · 구현자 보고 · 미검증 · 10월 22일 15:42\" [pressed]\n      - group: 잘못 가져온 보고라면\n    - heading \"이 요청 자세히\" [level=2]\n    - paragraph: 요청 · 작업 01 · 영역 ‘예약 가능 여부’\n    - term: 짧은 이해 · MOCK 제안 · 원문과 다를 수 있음\n    - definition: 입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.\n    - term: 이번 범위와 유지할 것 · MOCK 제안 · 원문과 다를 수 있음\n    - definition: 요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.\n    - group: 요청 원문 보기 · 사용자 원문 · 49자\n    - group: 현재 작업문 · 완료 조건 · 유지할 조건 보기\n    - group: 작업문에 넣을 프로젝트 배경·영역 구상 보기 · r11 사본\n    - group: 이 작업의 기준 1개\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일"
+      }
+    },
+    {
+      "id": "1440-normal-UI-project-exact-purpose-tree-relation",
+      "pass": true,
+      "raw": {
+        "areas": [
+          {
+            "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+            "name": "예약",
+            "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+            "archived": false,
+            "createdAt": "2026-10-22T15:44:10.045Z"
+          },
+          {
+            "id": "A_7994f522-7417-45e3-89a2-ada885eb18bb",
+            "name": "알림",
+            "note": "예약 결과를 이용자에게 알린다.",
+            "archived": false,
+            "createdAt": "2026-10-22T15:44:10.176Z"
+          },
+          {
+            "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+            "name": "예약 가능 여부",
+            "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+            "archived": false,
+            "createdAt": "2026-10-22T15:44:10.592Z"
+          }
+        ],
+        "brief": {
+          "text": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+          "at": "2026-10-22T15:44:09.925Z",
+          "previous": []
+        },
+        "containment": {
+          "version": "containment.1",
+          "parents": {
+            "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66"
+          },
+          "revisions": {
+            "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66": 0,
+            "A_7994f522-7417-45e3-89a2-ada885eb18bb": 0,
+            "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": 1
+          }
+        },
+        "relations": [
+          {
+            "id": "L_c9c9c4e4-c747-4152-a74a-525a3dd4b886",
+            "from": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+            "to": "A_7994f522-7417-45e3-89a2-ada885eb18bb",
+            "kind": "flow",
+            "note": "예약 가능 여부 확인 결과를 알림에서 사용한다."
+          }
+        ]
+      }
+    },
+    {
+      "id": "1440-actual-first-H-anchor-exact-template-result-T",
+      "pass": true,
+      "raw": {
+        "A": {
+          "id": "T_2fbd6579-26c0-4c44-839c-a953f87b7cfa",
+          "sourceIds": [
+            "S_7e7a3b0b-a07e-4b1e-b94e-275f2d78e531"
+          ],
+          "parentTaskId": null,
+          "advice": {
+            "intent": {
+              "version": "intent.1",
+              "relation": "start",
+              "goal": "같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.",
+              "conditions": [],
+              "retired": [],
+              "basisRefs": [
+                {
+                  "basisId": "D1",
+                  "sourceId": "S_7e7a3b0b-a07e-4b1e-b94e-275f2d78e531",
+                  "revision": 11
+                }
+              ]
+            },
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+            "question": null,
+            "relatedBasisIds": [
+              "D1"
+            ],
+            "reviewBasisIds": [],
+            "suggestions": []
+          },
+          "adviceRevision": 11,
+          "mode": "mock",
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": null,
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [
+            {
+              "at": "2026-10-22T15:44:12.026Z",
+              "method": "clipboard",
+              "revision": 12,
+              "chars": 5046,
+              "digest": "52d6ef31",
+              "work": {
+                "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+              },
+              "aiExcluded": false,
+              "legacyText": null,
+              "returnId": "H_1fdea125-118b-4d3e-8529-022871581dca",
+              "background": {
+                "version": "background.1",
+                "revision": 10,
+                "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+                "area": {
+                  "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+                }
+              },
+              "anchor": {
+                "version": "anchor.2",
+                "areaId": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+                "understanding": 0,
+                "stamp": {
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                  "brief": 1,
+                  "decisions": [],
+                  "work": [],
+                  "version": "plan.2",
+                  "revision": 1,
+                  "ancestors": [
+                    {
+                      "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+                      "name": "예약",
+                      "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                      "revision": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 10,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          },
+          "areaId": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd"
+        },
+        "H": {
+          "at": "2026-10-22T15:44:12.026Z",
+          "method": "clipboard",
+          "revision": 12,
+          "chars": 5046,
+          "digest": "52d6ef31",
+          "work": {
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_1fdea125-118b-4d3e-8529-022871581dca",
+          "background": {
+            "version": "background.1",
+            "revision": 10,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+            "understanding": 0,
+            "stamp": {
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+                  "name": "예약",
+                  "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        },
+        "report": {
+          "id": "T_c149d003-8417-47e8-b5e1-4c150f0778fd",
+          "sourceIds": [
+            "S_be96b3b6-3c1c-4547-a003-2cc056ee3aa2"
+          ],
+          "parentTaskId": "T_2fbd6579-26c0-4c44-839c-a953f87b7cfa",
+          "advice": null,
+          "adviceRevision": null,
+          "mode": null,
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": null,
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [],
+          "resultFile": {
+            "returnId": "H_1fdea125-118b-4d3e-8529-022871581dca",
+            "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_8580fce0-38e1-4f04-924f-86c2e9ec53aa\",\n  \"taskId\": \"T_2fbd6579-26c0-4c44-839c-a953f87b7cfa\",\n  \"returnId\": \"H_1fdea125-118b-4d3e-8529-022871581dca\",\n  \"report\": \"[명시 합성 반환] 실제 구현이나 외부 검사는 실행하지 않았다. 예약 가능 여부 확인 결과는 알림으로 이어진다는 구성을 읽었다. 남은 질문: 동시에 두 예약이 들어오면 어떤 기준으로 하나만 받을 것인가?\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_0a493f7a-995c-4488-bf09-e44fbde9cdfd\",\n    \"basedOn\": 0,\n    \"summary\": \"예약 가능 여부는 같은 도서의 기존 예약을 확인하여 중복 접수를 막는 부분이다. 동시 접수 처리는 아직 확인하지 않았다.\",\n    \"changes\": [\n      \"명시 합성 설명: 예약 가능 여부와 알림의 역할을 구별했다.\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"독립 실행 관측자가 실제 내보낸 템플릿으로 작성한 합성 설명. AI·구현·검사 실행 없음.\"\n  }\n}"
+          },
+          "background": {
+            "version": "background.1",
+            "revision": 10,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          }
+        },
+        "projectId": "P_8580fce0-38e1-4f04-924f-86c2e9ec53aa"
+      }
+    },
+    {
+      "id": "1440-report-description-note-separated",
+      "pass": true,
+      "raw": {
+        "understanding": {
+          "revision": 1,
+          "entries": [
+            {
+              "by": "external",
+              "at": "2026-10-22T15:44:35.477Z",
+              "revision": 1,
+              "taskId": "T_c149d003-8417-47e8-b5e1-4c150f0778fd",
+              "returnId": "H_1fdea125-118b-4d3e-8529-022871581dca",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "name": "예약 가능 여부",
+                "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                "brief": 1,
+                "decisions": [],
+                "work": [],
+                "version": "plan.2",
+                "revision": 1,
+                "ancestors": [
+                  {
+                    "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+                    "name": "예약",
+                    "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                    "revision": 0
+                  }
+                ]
+              },
+              "held": null
+            }
+          ]
+        },
+        "userNote": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+        "syntheticSummary": "예약 가능 여부는 같은 도서의 기존 예약을 확인하여 중복 접수를 막는 부분이다. 동시 접수 처리는 아직 확인하지 않았다."
+      }
+    },
+    {
+      "id": "1440-followup-real-new-C-clipboard-H-same-child",
+      "pass": true,
+      "raw": {
+        "C": {
+          "id": "T_65370d85-112e-4113-afef-b2056031d0be",
+          "sourceIds": [
+            "S_40ac0b91-7015-48c6-ab7f-c4eb7ca4a50b"
+          ],
+          "parentTaskId": "T_c149d003-8417-47e8-b5e1-4c150f0778fd",
+          "advice": {
+            "intent": {
+              "version": "intent.1",
+              "relation": "separate",
+              "goal": "예약 가능 여부에서 동시에 들어온 두 예약 중 하나만 접수하는 기준을 제안해 주세요. 알림 구현은 바꾸지 마세요.",
+              "conditions": [],
+              "retired": [],
+              "basisRefs": [
+                {
+                  "basisId": "D2",
+                  "sourceId": "S_40ac0b91-7015-48c6-ab7f-c4eb7ca4a50b",
+                  "revision": 17
+                }
+              ]
+            },
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+            "question": null,
+            "relatedBasisIds": [
+              "D1",
+              "D2"
+            ],
+            "reviewBasisIds": [],
+            "suggestions": []
+          },
+          "adviceRevision": 17,
+          "mode": "mock",
+          "manual": {
+            "understanding": null,
+            "scope": null,
+            "next": null,
+            "checks": null
+          },
+          "suggestions": null,
+          "handoffs": [
+            {
+              "at": "2026-10-22T15:44:36.493Z",
+              "method": "clipboard",
+              "revision": 18,
+              "chars": 6875,
+              "digest": "d88dff43",
+              "work": {
+                "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+              },
+              "aiExcluded": false,
+              "legacyText": null,
+              "returnId": "H_156b9593-1802-4c84-9e01-dbf257def272",
+              "background": {
+                "version": "background.1",
+                "revision": 16,
+                "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+                "area": {
+                  "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+                }
+              },
+              "anchor": {
+                "version": "anchor.2",
+                "areaId": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+                "understanding": 1,
+                "stamp": {
+                  "name": "예약 가능 여부",
+                  "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                  "brief": 1,
+                  "decisions": [],
+                  "work": [],
+                  "version": "plan.2",
+                  "revision": 1,
+                  "ancestors": [
+                    {
+                      "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+                      "name": "예약",
+                      "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                      "revision": 0
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "resultFile": null,
+          "background": {
+            "version": "background.1",
+            "revision": 16,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          },
+          "areaId": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd"
+        },
+        "clipboardTemplate": {
+          "schemaVersion": "agentflow.return.2",
+          "projectId": "P_8580fce0-38e1-4f04-924f-86c2e9ec53aa",
+          "taskId": "T_65370d85-112e-4113-afef-b2056031d0be",
+          "returnId": "H_156b9593-1802-4c84-9e01-dbf257def272",
+          "report": "실제 결과와 못 한 일로 이 안내를 바꾸세요.",
+          "evidence": null,
+          "understanding": null
+        },
+        "handoff": {
+          "at": "2026-10-22T15:44:36.493Z",
+          "method": "clipboard",
+          "revision": 18,
+          "chars": 6875,
+          "digest": "d88dff43",
+          "work": {
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_156b9593-1802-4c84-9e01-dbf257def272",
+          "background": {
+            "version": "background.1",
+            "revision": 16,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "area": {
+              "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+            "understanding": 1,
+            "stamp": {
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+                  "name": "예약",
+                  "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "1440-map-return-preserves-purpose-tree-other-area-report-and-current-C",
+      "pass": true,
+      "raw": {
+        "before": {
+          "brief": {
+            "text": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "at": "2026-10-22T15:44:09.925Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+              "name": "예약",
+              "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:44:10.045Z"
+            },
+            {
+              "id": "A_7994f522-7417-45e3-89a2-ada885eb18bb",
+              "name": "알림",
+              "note": "예약 결과를 이용자에게 알린다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:44:10.176Z"
+            },
+            {
+              "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:44:10.592Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_c9c9c4e4-c747-4152-a74a-525a3dd4b886",
+              "from": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "to": "A_7994f522-7417-45e3-89a2-ada885eb18bb",
+              "kind": "flow",
+              "note": "예약 가능 여부 확인 결과를 알림에서 사용한다."
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66": {
+                "x": 420,
+                "y": 160
+              },
+              "A_7994f522-7417-45e3-89a2-ada885eb18bb": {
+                "x": -40,
+                "y": 180
+              },
+              "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": {
+                "x": 720,
+                "y": 360
+              }
+            }
+          },
+          "understanding": {
+            "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": {
+              "revision": 1,
+              "entries": [
+                {
+                  "by": "external",
+                  "at": "2026-10-22T15:44:35.477Z",
+                  "revision": 1,
+                  "taskId": "T_c149d003-8417-47e8-b5e1-4c150f0778fd",
+                  "returnId": "H_1fdea125-118b-4d3e-8529-022871581dca",
+                  "text": null,
+                  "corrects": null,
+                  "stamp": {
+                    "name": "예약 가능 여부",
+                    "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+                        "name": "예약",
+                        "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                        "revision": 0
+                      }
+                    ]
+                  },
+                  "held": null
+                }
+              ]
+            }
+          },
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66"
+            },
+            "revisions": {
+              "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66": 0,
+              "A_7994f522-7417-45e3-89a2-ada885eb18bb": 0,
+              "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": 1
+            }
+          }
+        },
+        "after": {
+          "brief": {
+            "text": "도서 대출 예약 서비스. 중복 예약은 막는다.",
+            "at": "2026-10-22T15:44:09.925Z",
+            "previous": []
+          },
+          "areas": [
+            {
+              "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+              "name": "예약",
+              "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:44:10.045Z"
+            },
+            {
+              "id": "A_7994f522-7417-45e3-89a2-ada885eb18bb",
+              "name": "알림",
+              "note": "예약 결과를 이용자에게 알린다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:44:10.176Z"
+            },
+            {
+              "id": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "name": "예약 가능 여부",
+              "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+              "archived": false,
+              "createdAt": "2026-10-22T15:44:10.592Z"
+            }
+          ],
+          "relations": [
+            {
+              "id": "L_c9c9c4e4-c747-4152-a74a-525a3dd4b886",
+              "from": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+              "to": "A_7994f522-7417-45e3-89a2-ada885eb18bb",
+              "kind": "flow",
+              "note": "예약 가능 여부 확인 결과를 알림에서 사용한다."
+            }
+          ],
+          "draftTarget": null,
+          "layout": {
+            "version": "layout.1",
+            "positions": {
+              "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66": {
+                "x": 420,
+                "y": 160
+              },
+              "A_7994f522-7417-45e3-89a2-ada885eb18bb": {
+                "x": -40,
+                "y": 180
+              },
+              "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": {
+                "x": 720,
+                "y": 360
+              }
+            }
+          },
+          "understanding": {
+            "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": {
+              "revision": 1,
+              "entries": [
+                {
+                  "by": "external",
+                  "at": "2026-10-22T15:44:35.477Z",
+                  "revision": 1,
+                  "taskId": "T_c149d003-8417-47e8-b5e1-4c150f0778fd",
+                  "returnId": "H_1fdea125-118b-4d3e-8529-022871581dca",
+                  "text": null,
+                  "corrects": null,
+                  "stamp": {
+                    "name": "예약 가능 여부",
+                    "note": "같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.",
+                    "brief": 1,
+                    "decisions": [],
+                    "work": [],
+                    "version": "plan.2",
+                    "revision": 1,
+                    "ancestors": [
+                      {
+                        "id": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+                        "name": "예약",
+                        "note": "도서 대출 예약을 받고 중복 예약을 막는다.",
+                        "revision": 0
+                      }
+                    ]
+                  },
+                  "held": null
+                }
+              ]
+            }
+          },
+          "containment": {
+            "version": "containment.1",
+            "parents": {
+              "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66"
+            },
+            "revisions": {
+              "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66": 0,
+              "A_7994f522-7417-45e3-89a2-ada885eb18bb": 0,
+              "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": 1
+            }
+          }
+        },
+        "current": "T_65370d85-112e-4113-afef-b2056031d0be"
+      }
+    },
+    {
+      "id": "1440-UI-export-snapshot-four-strings",
+      "pass": true,
+      "raw": {
+        "expectedWork": {
+          "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+          "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+          "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+          "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+        },
+        "AX": "- link \"현재 작업으로 건너뛰기\":\n  - /url: \"#main\"\n- complementary \"작업 공간 탐색\":\n  - link \"AgentFlow Studio 홈\":\n    - /url: ./\n    - text: AgentFlow STUDIO\n  - text: 내 작업 공간 이 브라우저의 프로젝트\n  - paragraph: 프로젝트\n  - navigation \"프로젝트 화면\":\n    - button \"내 프로젝트\"\n    - button \"전체 공간 3\"\n    - button \"현재 작업\"\n    - button \"기준 · 출처 1\"\n    - button \"지난 요청과 결과 2\"\n  - text: 지금 이어가는 프로젝트\n  - strong: 도서 대출 예약 서비스 · 1440 학습 후 재현\n  - paragraph: 작업 2 · 작업 1에 받은 보고 · 후속 확인 작업문 초안\n  - strong: 쓰던 도구에서, 계속.\n  - paragraph: 여기서 준비한 작업문을 사용 중인 개발 도구에 전달하세요.\n  - text: 복사 · 붙여넣기 방식\n- banner:\n  - button \"내 프로젝트\"\n  - strong: 도서 대출 예약 서비스 · 1440 학습 후 재현\n  - group: MOCK · 체험 모드\n- main:\n  - region \"현재 프로젝트\":\n    - text: 프로젝트 이름\n    - textbox \"프로젝트 이름\": 도서 대출 예약 서비스 · 1440 학습 후 재현\n    - text: 이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.\n    - status \"이 브라우저 안의 자동 저장입니다. 다른 기기로 옮기거나 따로 보관하려면 백업 파일을 저장하세요.\": 이 브라우저에 저장됨\n    - group:\n      - button \"＋ 새 프로젝트\"\n      - button \"↓ 백업 파일 저장\"\n      - button \"↑ 백업 파일 불러오기\"\n      - button \"휴지통으로 옮기기\"\n  - region \"전체 공간\":\n    - navigation \"공간 경로\":\n      - button \"전체 공간\"\n      - text: ›\n      - button \"예약 가능 여부\"\n      - text: ›\n      - strong: 같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\n      - text: 작업\n    - paragraph: 요청 · 영역 ‘예약 가능 여부’\n    - button \"← 검토 전 작업 화면으로\"\n    - heading \"같은 도서에 이미 예약이 있으면 새 예약을 받지 않도록 예약 가능 여부를 확인해 주세요.\" [level=1]\n    - paragraph: 작업 01 · 구현 보고 도착 · 앱 미검증\n    - paragraph: 지금의 영역 구상 · 예약 가능 여부\n    - paragraph: 같은 도서에 이미 예약이 있는지 확인하여 중복 예약을 막는다.\n    - region \"영역 현재 설명\":\n      - paragraph: 전달 기록에서 정리한 설명 · 앱 미검증\n      - paragraph: 예약 가능 여부는 같은 도서의 기존 예약을 확인하여 중복 접수를 막는 부분이다. 동시 접수 처리는 아직 확인하지 않았다.\n      - paragraph: \"달라진 점 · 명시 합성 설명: 예약 가능 여부와 알림의 역할을 구별했다.\"\n      - group: 정리한 곳 보기\n      - group: 근거 보기\n      - group: 설명 오류 고치기\n    - button \"지도에서 소유 부분 보기\"\n    - region \"다음 동작\":\n      - button \"이 영역에 새 요청\"\n      - paragraph: 영역 ‘예약 가능 여부’에 쓸 빈 요청 입력칸을 열어요. 보내기 전에는 작업이 생기지 않아요.\n      - text: 앱에서 이어갈 작업\n      - button \"작업 화면으로\"\n      - paragraph: 이어가면 이 요청에 받은 현재 보고(작업 02)에서 계속해요. 고치는 대상은 작업 02의 후속 확인 작업문이고, 읽고 있는 작업 01의 작업문은 바뀌지 않아요.\n    - region \"돌아온 보고\":\n      - paragraph: 고른 보고 · 작업 02 · 구현자 보고 · 10월 22일 15:44 · 외부 원문 · 앱 미검증\n      - paragraph: 이 보고의 정리가 현재 영역 설명에 반영됐어요.\n      - group: 이 보고의 정리 설명\n      - text: \"[명시 합성 반환] 실제 구현이나 외부 검사는 실행하지 않았다. 예약 가능 여부 확인 결과는 알림으로 이어진다는 구성을 읽었다. 남은 질문: 동시에 두 예약이 들어오면 어떤 기준으로 하나만 받을 것인가?\"\n      - group:\n        - text: 이 결과를 요청할 때 내보낸 작업문\n        - paragraph: 10월 22일 15:44에 내보낸 작업문이에요. 지금의 작업문이나 현재 기준과는 다를 수 있어요.\n        - paragraph: 짧은 이해\n        - text: 입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.\n        - paragraph: 이번 범위와 유지할 것\n        - text: 요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.\n        - paragraph: 실행 도구에 전달할 작업문\n        - text: 요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.\n        - paragraph: 확인할 동작 / 완료 조건\n        - text: 원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.\n        - group: 인계 연결 · 수신 원문\n      - group: 연결 경로 보기 · 이 요청에 바로 연결된 보고\n      - heading \"돌아온 결과 1개 · 외부 원문 · 앱 미검증\" [level=2]\n      - list \"읽을 보고 고르기\":\n        - listitem:\n          - button \"[명시 합성 반환] 실제 구현이나 외부 검사는 실행하지 않았다. 예약 가능 여부 확인 결과는 알림으로 이어진다는 구성을 읽… 작업 02 · 구현자 보고 · 미검증 · 10월 22일 15:44\" [pressed]\n      - group: 잘못 가져온 보고라면\n    - heading \"이 요청 자세히\" [level=2]\n    - paragraph: 요청 · 작업 01 · 영역 ‘예약 가능 여부’\n    - term: 짧은 이해 · MOCK 제안 · 원문과 다를 수 있음\n    - definition: 입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.\n    - term: 이번 범위와 유지할 것 · MOCK 제안 · 원문과 다를 수 있음\n    - definition: 요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.\n    - group: 요청 원문 보기 · 사용자 원문 · 49자\n    - group: 현재 작업문 · 완료 조건 · 유지할 조건 보기\n    - group: 작업문에 넣을 프로젝트 배경·영역 구상 보기 · r10 사본\n    - group: 이 작업의 기준 1개\n  - text: AgentFlow Studio 이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일"
+      }
+    },
+    {
+      "id": "actualHTTP-static-response-byte-binding",
+      "pass": true,
+      "raw": [
+        {
+          "url": "http://127.0.0.1:36471/",
+          "status": 200,
+          "bytes": 17960,
+          "bodySHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+          "diskSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+        },
+        {
+          "url": "http://127.0.0.1:36471/styles.css",
+          "status": 200,
+          "bytes": 72783,
+          "bodySHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+          "diskSHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38"
+        },
+        {
+          "url": "http://127.0.0.1:36471/client/app.js",
+          "status": 200,
+          "bytes": 286984,
+          "bodySHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1",
+          "diskSHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/types.js",
+          "status": 200,
+          "bytes": 2672,
+          "bodySHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+          "diskSHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/domain.js",
+          "status": 200,
+          "bytes": 74480,
+          "bodySHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+          "diskSHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/guidance.js",
+          "status": 200,
+          "bytes": 6701,
+          "bodySHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+          "diskSHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/validation.js",
+          "status": 200,
+          "bytes": 48869,
+          "bodySHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+          "diskSHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/storage.js",
+          "status": 200,
+          "bytes": 12708,
+          "bodySHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+          "diskSHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+        },
+        {
+          "url": "http://127.0.0.1:36471/client/runtime.js",
+          "status": 200,
+          "bytes": 2567,
+          "bodySHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+          "diskSHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336"
+        },
+        {
+          "url": "http://127.0.0.1:36471/client/presentation.js",
+          "status": 200,
+          "bytes": 7833,
+          "bodySHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+          "diskSHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/mock.js",
+          "status": 200,
+          "bytes": 18360,
+          "bodySHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+          "diskSHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/attention.js",
+          "status": 200,
+          "bytes": 5422,
+          "bodySHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+          "diskSHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/outcome.js",
+          "status": 200,
+          "bytes": 4887,
+          "bodySHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+          "diskSHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/hierarchy.js",
+          "status": 200,
+          "bytes": 2489,
+          "bodySHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+          "diskSHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/plan-facts.js",
+          "status": 200,
+          "bytes": 4655,
+          "bodySHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+          "diskSHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+        },
+        {
+          "url": "http://127.0.0.1:36471/",
+          "status": 200,
+          "bytes": 17960,
+          "bodySHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+          "diskSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+        },
+        {
+          "url": "http://127.0.0.1:36471/styles.css",
+          "status": 200,
+          "bytes": 72783,
+          "bodySHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+          "diskSHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38"
+        },
+        {
+          "url": "http://127.0.0.1:36471/client/app.js",
+          "status": 200,
+          "bytes": 286984,
+          "bodySHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1",
+          "diskSHA256": "a74c5afcb68880660a0f1b53e06855517d884e10f0126bd0a60d5464daf6d9b1"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/types.js",
+          "status": 200,
+          "bytes": 2672,
+          "bodySHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+          "diskSHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/guidance.js",
+          "status": 200,
+          "bytes": 6701,
+          "bodySHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+          "diskSHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/validation.js",
+          "status": 200,
+          "bytes": 48869,
+          "bodySHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a",
+          "diskSHA256": "4b7b584c30a3607cebd93b3ecb4b7e98472a0963ca8dcd1e5f35f4b4c62f075a"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/storage.js",
+          "status": 200,
+          "bytes": 12708,
+          "bodySHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+          "diskSHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/mock.js",
+          "status": 200,
+          "bytes": 18360,
+          "bodySHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+          "diskSHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+        },
+        {
+          "url": "http://127.0.0.1:36471/client/presentation.js",
+          "status": 200,
+          "bytes": 7833,
+          "bodySHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d",
+          "diskSHA256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/domain.js",
+          "status": 200,
+          "bytes": 74480,
+          "bodySHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e",
+          "diskSHA256": "a9e6e19775bb35bad214bf9a59486731958874116607e2ea5ec3cca1766f619e"
+        },
+        {
+          "url": "http://127.0.0.1:36471/client/runtime.js",
+          "status": 200,
+          "bytes": 2567,
+          "bodySHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336",
+          "diskSHA256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/outcome.js",
+          "status": 200,
+          "bytes": 4887,
+          "bodySHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+          "diskSHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/attention.js",
+          "status": 200,
+          "bytes": 5422,
+          "bodySHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+          "diskSHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/hierarchy.js",
+          "status": 200,
+          "bytes": 2489,
+          "bodySHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+          "diskSHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624"
+        },
+        {
+          "url": "http://127.0.0.1:36471/shared/plan-facts.js",
+          "status": 200,
+          "bytes": 4655,
+          "bodySHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+          "diskSHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+        }
+      ]
+    },
+    {
+      "id": "no-pageerror-or-console-error",
+      "pass": true,
+      "raw": []
+    },
+    {
+      "id": "both-PC-normal-map-return-observed",
+      "pass": true,
+      "raw": {
+        "mapReturn": "explicit breadcrumb navigation, not an exact origin camera restoration assertion",
+        "fitAfter1440Return": "separate explicit fit, original return scene retained"
+      }
+    }
+  ],
+  "identityPairs": [
+    {
+      "viewport": "1280",
+      "A": "T_af120394-68e9-4f80-b17e-8a3d9077a84a",
+      "reportT": "T_f4993ded-3593-4a6d-bff9-13ffbdb663f2",
+      "C": "T_177cd312-b8f5-4847-a612-aeedbff54be8",
+      "H": "H_bad5e2de-2bf8-4b41-977a-ac5ad9de9a4c",
+      "followupH": "H_2bde9dc2-864f-4cc8-89c5-3554f9f9a83a",
+      "child": "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c",
+      "parent": "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f",
+      "other": "A_f33b3688-7edb-4163-92f8-21e06d4aa047",
+      "initialLayout": {
+        "version": "layout.1",
+        "positions": {
+          "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f": {
+            "x": 340,
+            "y": 80
+          },
+          "A_f33b3688-7edb-4163-92f8-21e06d4aa047": {
+            "x": -120,
+            "y": 100
+          },
+          "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": {
+            "x": 640,
+            "y": 280
+          }
+        }
+      },
+      "receivedLayout": {
+        "version": "layout.1",
+        "positions": {
+          "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f": {
+            "x": 340,
+            "y": 80
+          },
+          "A_f33b3688-7edb-4163-92f8-21e06d4aa047": {
+            "x": -120,
+            "y": 100
+          },
+          "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": {
+            "x": 640,
+            "y": 280
+          }
+        }
+      },
+      "finalLayout": {
+        "version": "layout.1",
+        "positions": {
+          "A_eab4c83e-4a6c-4cad-b7ab-104ad4344d5f": {
+            "x": 340,
+            "y": 80
+          },
+          "A_f33b3688-7edb-4163-92f8-21e06d4aa047": {
+            "x": -120,
+            "y": 100
+          },
+          "A_49325092-2f8b-4b9e-bfdc-cdd48483c20c": {
+            "x": 640,
+            "y": 280
+          }
+        }
+      }
+    },
+    {
+      "viewport": "1440",
+      "A": "T_2fbd6579-26c0-4c44-839c-a953f87b7cfa",
+      "reportT": "T_c149d003-8417-47e8-b5e1-4c150f0778fd",
+      "C": "T_65370d85-112e-4113-afef-b2056031d0be",
+      "H": "H_1fdea125-118b-4d3e-8529-022871581dca",
+      "followupH": "H_156b9593-1802-4c84-9e01-dbf257def272",
+      "child": "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd",
+      "parent": "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66",
+      "other": "A_7994f522-7417-45e3-89a2-ada885eb18bb",
+      "initialLayout": {
+        "version": "layout.1",
+        "positions": {
+          "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66": {
+            "x": 420,
+            "y": 160
+          },
+          "A_7994f522-7417-45e3-89a2-ada885eb18bb": {
+            "x": -40,
+            "y": 180
+          },
+          "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": {
+            "x": 720,
+            "y": 360
+          }
+        }
+      },
+      "receivedLayout": {
+        "version": "layout.1",
+        "positions": {
+          "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66": {
+            "x": 420,
+            "y": 160
+          },
+          "A_7994f522-7417-45e3-89a2-ada885eb18bb": {
+            "x": -40,
+            "y": 180
+          },
+          "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": {
+            "x": 720,
+            "y": 360
+          }
+        }
+      },
+      "finalLayout": {
+        "version": "layout.1",
+        "positions": {
+          "A_8b5cf9e3-41d6-4846-a24e-dc498a4f1a66": {
+            "x": 420,
+            "y": 160
+          },
+          "A_7994f522-7417-45e3-89a2-ada885eb18bb": {
+            "x": -40,
+            "y": 180
+          },
+          "A_0a493f7a-995c-4488-bf09-e44fbde9cdfd": {
+            "x": 720,
+            "y": 360
+          }
+        }
+      }
+    }
+  ],
+  "operatorActionErrors": [
+    {
+      "seq": 51,
+      "command": {
+        "action": "click",
+        "role": "button",
+        "name": "이 결과 검토"
+      },
+      "error": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle21-observation/observe.py\", line 32, in <module>\n    elif c['action']=='click':rec['before']=snap();loc(c).click(timeout=5000);rec['AX']=p.locator('body').aria_snapshot();rec['after']=snap()\n                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 15637, in click\n    self._sync(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 162, in click\n    return await self._frame._click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 566, in _click\n    await self._channel.send(\"click\", self._timeout, locals_to_params(locals()))\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"button\", name=\"이 결과 검토\", exact=True)\n\n"
+    }
+  ],
+  "exit": 0,
+  "boundary": "Post-observation read-only verification, not UI discovery criteria or human usability pass"
+}

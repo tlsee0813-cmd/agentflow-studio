@@ -1,0 +1,20 @@
+[
+  {
+    "path": "1280-final-map.png",
+    "bytes": 114839,
+    "sha256": "8d8cf62d38d023f12b678bb0c385bea1bee4e9ddb0cfe00e370afbbf9049b20f",
+    "preservedLocal": true
+  },
+  {
+    "path": "1440-current-description-and-report.png",
+    "bytes": 186506,
+    "sha256": "29deab25603d277482f3d5b00ece6229926ada24f277409ad56c23efa9ece5f4",
+    "preservedLocal": true
+  },
+  {
+    "path": "1440-final-map.png",
+    "bytes": 149618,
+    "sha256": "e7c723b00a43d1cec0aa001aba56ff3c3a07d5c96feadadd68ed1da9077a1334",
+    "preservedLocal": true
+  }
+]

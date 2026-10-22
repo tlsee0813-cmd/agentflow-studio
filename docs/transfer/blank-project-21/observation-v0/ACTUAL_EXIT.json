@@ -1,0 +1,16 @@
+{
+  "actualExternalCollectorExit": 0,
+  "actualChildExit": 0,
+  "externalToolSession": 97634,
+  "verificationCommand": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle21-observation/verify-observations.py"
+  ],
+  "verificationActualExit": 0,
+  "syntheticTemplateGenerationActualExit": {
+    "1280": 0,
+    "1440": 0
+  },
+  "closeoutActualExitRecordedByTool": 0,
+  "boundary": "selected command completion record, not full tool transcript; actionErrors separately retained"
+}
