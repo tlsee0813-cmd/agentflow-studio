@@ -1,0 +1,61 @@
+{
+  "merge": {
+    "sha": "241cbd891672bf1ee81bcfd97d458217a20c9f54",
+    "node_id": "C_kwDOVDjOQdoAKDI0MWNiZDg5MTY3MmJmMWVlODFiY2ZkOTdkNDU4MjE3YTIwYzlmNTQ",
+    "url": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/git/commits/241cbd891672bf1ee81bcfd97d458217a20c9f54",
+    "html_url": "https://github.com/tlsee0813-cmd/agentflow-studio/commit/241cbd891672bf1ee81bcfd97d458217a20c9f54",
+    "author": {
+      "name": "rkx",
+      "email": "tlsee0813@stu.jejunu.ac.kr",
+      "date": "2026-10-22T17:49:25Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2026-10-22T17:49:25Z"
+    },
+    "tree": {
+      "sha": "1033184bce1ad331ad943a530ca953b34cbc3c0e",
+      "url": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/git/trees/1033184bce1ad331ad943a530ca953b34cbc3c0e"
+    },
+    "message": "Merge cycle21: expose optional file-return handoff beside primary actions\n\n첫 작업문에서 파일 반환 선택을 바로 찾도록 배치",
+    "parents": [
+      {
+        "sha": "94db8147c019eb9b14fde18e300f6dc11c4c3f1d",
+        "url": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/git/commits/94db8147c019eb9b14fde18e300f6dc11c4c3f1d",
+        "html_url": "https://github.com/tlsee0813-cmd/agentflow-studio/commit/94db8147c019eb9b14fde18e300f6dc11c4c3f1d"
+      },
+      {
+        "sha": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+        "url": "https://api.github.com/repos/tlsee0813-cmd/agentflow-studio/git/commits/799077ea2f645f1753f29da7fe9d4b50a81971e6",
+        "html_url": "https://github.com/tlsee0813-cmd/agentflow-studio/commit/799077ea2f645f1753f29da7fe9d4b50a81971e6"
+      }
+    ],
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq2kylCRC1aQ7uu5UhlAAAe2sQAE0OwQDZIe+HtzdmohoG0Ndb\n9vAREinzQi6X4Xoyq/4JnDnA3LGpmbO8bfKqnF+8sJ0DYJxqnCEQqo5HE1XWHWhg\nra11v4PvyMIDBJkDoY0CoRCg+6WnDKWHYiGprLzLiqIHhHmQqilSnOoGorId11ks\nlzSKwnuWH73cyuEWTVUsNtyVk+4qbhlj8n9I7avkEhk3EJB2MKMVDGAyl5gZ15hw\nEkaeFnC2iSfBtVXjUTEWqVEZJ5UdNOJhuknxIrLSHqinb81To5us50+K4EaWtn5H\nmjh5NN1B1gjKL9aEquxChnL7H2rUfqH1k8g7nUTbkCbuhSUMZvnKRXc63rmivWKE\n/10K1HgEx3Ck/zno3WR5Wfb4pxC1zQi3SpJBLaezg8rUtI7hDzHU3A93vSHVM8xq\nSYp8qc5O81JpsPF5MoGfEbcbzZtd1svO93jnUVVgsm9lGUA0AK0lYcURJ+/NjAKh\nuCgMaT/a9yjWz6CMbwVqcGtjIBUIBkTTz5Nw+OhS4wZHpLKQiYpzM2g2qwbrZOnL\ns7sMbYA6mmFd+UVh7DjF/fDTzrTpwxLglK9/dZTull1DjggQQuUe/xk4MRg8TgYY\ni6SGe4ROPTTKsod0pnIwmHUxcLWVluW2KDB1QOl91SGhLhM2Oau2WCItHVltN1Mq\n58fTwvO5xBx/hrzDVXAG\n=sxWc\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 1033184bce1ad331ad943a530ca953b34cbc3c0e\nparent 94db8147c019eb9b14fde18e300f6dc11c4c3f1d\nparent 799077ea2f645f1753f29da7fe9d4b50a81971e6\nauthor rkx <tlsee0813@stu.jejunu.ac.kr> 1792691365 +0900\ncommitter GitHub <noreply@github.com> 1792691365 +0900\n\nMerge cycle21: expose optional file-return handoff beside primary actions\n\n첫 작업문에서 파일 반환 선택을 바로 찾도록 배치",
+      "verified_at": "2026-10-22T17:49:25Z"
+    }
+  },
+  "verifiedBlobs": [
+    {
+      "path": ".github/workflows/verify.yml",
+      "sha": "319c464422bef913ab4eb33fdd92951101ad1aa8",
+      "actual": "319c464422bef913ab4eb33fdd92951101ad1aa8"
+    },
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha": "dbe2bf48810ab15d064edbf524d2021e3d25d39d",
+      "actual": "dbe2bf48810ab15d064edbf524d2021e3d25d39d"
+    },
+    {
+      "path": "app/continuity/tests/blank21_browser.py",
+      "sha": "43f6e5c199974617007332878b58bebeb01f9b83",
+      "actual": "43f6e5c199974617007332878b58bebeb01f9b83"
+    }
+  ],
+  "candidate": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+  "claim": "Only three changed blobs matched. This is not a new browser execution."
+}

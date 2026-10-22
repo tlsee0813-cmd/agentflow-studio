@@ -1,0 +1,37 @@
+[
+  {
+    "path": "CI_FINAL.json",
+    "sha256": "A12902589E472F49C086C6868C4389428287E21448D5084FAB9602F39FDA3179",
+    "bytes": 8882
+  },
+  {
+    "path": "initial-status.json",
+    "sha256": "6DF6DB51E64EA77E1F52542B068BBEEA6587D8EAD66E577EEED13C1D85DC5A45",
+    "bytes": 1201
+  },
+  {
+    "path": "status-history.json",
+    "sha256": "8EBD6138D14F0C95A97A6E4E12086D1ED9418217EEF6FBFE95441356FB83AC2C",
+    "bytes": 5972
+  },
+  {
+    "path": "ubuntu-annotations-response.json",
+    "sha256": "1E4864B1FC19DE7592D6AD269AB7B9863A96AAB6F594A7066866B9C4C8CA38BD",
+    "bytes": 1768
+  },
+  {
+    "path": "ubuntu-job-response.json",
+    "sha256": "E2781B6E0DCBD9E56BBEF36359349561E8C058E51F9B2D20E1D03C5159D52C42",
+    "bytes": 125590
+  },
+  {
+    "path": "windows-annotations-response.json",
+    "sha256": "BF9EC696BD369EC2D8FFA77CED44D961EA088085726E5DF50C8CF5E419BCD195",
+    "bytes": 1768
+  },
+  {
+    "path": "windows-job-response.json",
+    "sha256": "624809D0BFA1C179C5F3E31AB1459FFA0CFA5A08E20E8819E1ABAD2014CA4841",
+    "bytes": 128297
+  }
+]

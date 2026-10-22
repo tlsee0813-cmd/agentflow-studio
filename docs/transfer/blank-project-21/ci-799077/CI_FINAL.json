@@ -1,0 +1,136 @@
+{
+  "kind": "PR12 exact799077 final CI evidence, read-only",
+  "headRevision": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+  "runId": 39823679426,
+  "finalStatus": {
+    "capturedAt": "2026-10-22 17:47:17 UTC",
+    "request": {
+      "runId": 39823679426
+    },
+    "response": {
+      "content": [],
+      "structuredContent": {
+        "headRevision": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+        "checks": [],
+        "statuses": [],
+        "annotations": [],
+        "hasMore": false,
+        "job": null,
+        "jobs": [
+          {
+            "id": 119981211229,
+            "head_sha": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+            "name": "verify (ubuntu-24.04)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 119981211554,
+            "head_sha": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+            "name": "verify (windows-2022)",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ],
+        "log": null,
+        "logTruncated": false,
+        "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub."
+      }
+    }
+  },
+  "jobs": [
+    {
+      "os": "windows",
+      "capturedAt": "2026-10-22 17:47:39 UTC",
+      "job": {
+        "id": 119981211554,
+        "head_sha": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "logTruncated": true,
+      "returnedLogCharacters": 120000,
+      "blank21": [
+        "2026-10-22T17:45:16.4437861Z \u001b[36;1mpython continuity/tests/blank21_browser.py 2>&1 | tee test-results/blank21-browser.log\u001b[0m",
+        "2026-10-22T17:45:21.1742934Z test_first_handoff_choice_and_long_read_return (__main__.Blank21.test_first_handoff_choice_and_long_read_return) ... ok",
+        "2026-10-22T17:45:25.5536594Z test_first_handoff_choice_and_long_read_return (__main__.Blank21Wide.test_first_handoff_choice_and_long_read_return) ... ok",
+        "2026-10-22T17:45:25.5982317Z Ran 2 tests in 8.977s",
+        "2026-10-22T17:45:25.5982628Z OK"
+      ],
+      "staticAfterBlank21": [
+        "2026-10-22T17:45:25.6576076Z \u001b[36;1mpython continuity/tests/static_browser.py 2>&1 | tee test-results/static-browser.log\u001b[0m",
+        "2026-10-22T17:45:28.0297612Z test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation) ... ok",
+        "2026-10-22T17:45:28.1234542Z Ran 1 test in 2.189s",
+        "2026-10-22T17:45:28.1234894Z OK"
+      ],
+      "runtimeInstallEvidence": [
+        "2026-10-22T17:36:55.7727940Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "2026-10-22T17:37:44.8965589Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium-1200",
+        "2026-10-22T17:37:50.2698369Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1200"
+      ],
+      "actualBrowserVersionJsonRead": false,
+      "artifact": [
+        "2026-10-22T17:45:30.1354772Z SHA256 digest of uploaded artifact zip is 0bfd162946b31dc92c5c9dd675f243e4725402902f56c8f504d01ffb14d72b6a",
+        "2026-10-22T17:45:30.6235971Z Artifact agentflow-windows-2022-39823679426.zip successfully finalized. Artifact ID 12445844412",
+        "2026-10-22T17:45:30.6237062Z Artifact agentflow-windows-2022-39823679426 has been successfully uploaded! Final size is 20701753 bytes. Artifact ID is 12445844412",
+        "2026-10-22T17:45:30.6243619Z Artifact download URL: https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39823679426/artifacts/12445844412"
+      ],
+      "failuresInReturnedWindow": []
+    },
+    {
+      "os": "ubuntu",
+      "capturedAt": "2026-10-22 17:47:39 UTC",
+      "job": {
+        "id": 119981211229,
+        "head_sha": "799077ea2f645f1753f29da7fe9d4b50a81971e6",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "logTruncated": true,
+      "returnedLogCharacters": 120000,
+      "blank21": [
+        "2026-10-22T17:44:07.3498804Z \u001b[36;1mpython continuity/tests/blank21_browser.py 2>&1 | tee test-results/blank21-browser.log\u001b[0m",
+        "2026-10-22T17:44:12.2441166Z test_first_handoff_choice_and_long_read_return (__main__.Blank21.test_first_handoff_choice_and_long_read_return) ... ok",
+        "2026-10-22T17:44:16.9458681Z test_first_handoff_choice_and_long_read_return (__main__.Blank21Wide.test_first_handoff_choice_and_long_read_return) ... ok",
+        "2026-10-22T17:44:16.9775052Z Ran 2 tests in 9.466s",
+        "2026-10-22T17:44:16.9775302Z OK"
+      ],
+      "staticAfterBlank21": [
+        "2026-10-22T17:44:17.0063648Z \u001b[36;1mpython continuity/tests/static_browser.py 2>&1 | tee test-results/static-browser.log\u001b[0m",
+        "2026-10-22T17:44:19.1707234Z test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation) ... ok",
+        "2026-10-22T17:44:19.5935663Z Ran 1 test in 2.436s",
+        "2026-10-22T17:44:19.5936017Z OK"
+      ],
+      "runtimeInstallEvidence": [
+        "2026-10-22T17:35:53.3741514Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "2026-10-22T17:36:08.6765220Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200",
+        "2026-10-22T17:36:11.6202148Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1200"
+      ],
+      "actualBrowserVersionJsonRead": false,
+      "artifact": [
+        "2026-10-22T17:44:21.7023588Z SHA256 digest of uploaded artifact zip is 2402bb44c4d51a4e48ed017991bee97a36bee6b7e8acae8627b973a8fb2d1f4c",
+        "2026-10-22T17:44:22.2060907Z Artifact agentflow-ubuntu-24.04-39823679426.zip successfully finalized. Artifact ID 12446915538",
+        "2026-10-22T17:44:22.2063208Z Artifact agentflow-ubuntu-24.04-39823679426 has been successfully uploaded! Final size is 31219191 bytes. Artifact ID is 12446915538",
+        "2026-10-22T17:44:22.2068297Z Artifact download URL: https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39823679426/artifacts/12446915538"
+      ],
+      "failuresInReturnedWindow": []
+    }
+  ],
+  "conclusion": "Both exact-head jobs completed/success. BLANK21 two methods and following static browser one method ran and passed on each OS; final status and returned raw logs agree.",
+  "warning": "Each checkRun has exactly one upload-artifact action Node20 deprecation/forcedNode24 warning; no test-failure annotation.",
+  "browserVersionBoundary": "Logs explicitly show Playwright1.57 installation plus Chromium/HeadlessShell143.0.7499.4 build1200 downloaded. The known browser helper launches default bundled Chromium unless BROWSER_EXECUTABLE is supplied; no override appears in the returned step env. Thus143 execution is an inference from installation and launch path. Actual browser.version is written by the helper to artifact test-results/blank21/browser-environment.json but not stdout, and that JSON was not retrieved here.",
+  "artifactBoundary": "Artifact upload IDs/digests/sizes are visible in job logs; no full artifact downloaded or byte-verified through another API/CLI.",
+  "rawBoundary": "Both returned job logs are logTruncated=true, last120000 characters. JSON preserves returned text including CRLF; not a complete job log.",
+  "earlierFailures": "Original212163 failure and Cloud154 diagnostic/plain-run observations remain separate. Current2/2pass does not prove the exact native-scroll cause or complete usability.",
+  "access": "Only CodeReview pull_requests_checks; selected account absent; exact returned headRevision preserved. No source-control CLI/GitHub Actions API fallback, remote write, rerun/cancel/merge, or local browser/server.",
+  "notPerformed": [
+    "Actual artifact browser.version read",
+    "Full artifact recovery",
+    "143 local download retry/bypass",
+    "Product/test source changes"
+  ],
+  "expectedCandidateSHA256": "3A3C61B22EDB3F337457ADE10E1DBB13522B85BCD5B40B2E38C6038225F44303",
+  "sourceBindingBoundary": "Root reported exact testfix2 publish at799077; this monitor binds provider checks/logs to that exacthead, not a separate whole-tree verification."
+}

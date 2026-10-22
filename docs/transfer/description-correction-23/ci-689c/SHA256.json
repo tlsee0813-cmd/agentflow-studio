@@ -1,0 +1,77 @@
+[
+  {
+    "file": "001-discovery.json",
+    "bytes": 1597,
+    "sha256": "BF50EA664642818596FEFC34E1475DCF8776F8DE4A7709DBD74C719A910B1D85"
+  },
+  {
+    "file": "002-run-jobs.json",
+    "bytes": 1081,
+    "sha256": "99B79DE26A6ACF1C084BA24660CC411F0E7D280C3D2853F9892D4F8345AE06F8"
+  },
+  {
+    "file": "003-run-jobs.json",
+    "bytes": 1081,
+    "sha256": "99B79DE26A6ACF1C084BA24660CC411F0E7D280C3D2853F9892D4F8345AE06F8"
+  },
+  {
+    "file": "004-run-jobs.json",
+    "bytes": 1081,
+    "sha256": "99B79DE26A6ACF1C084BA24660CC411F0E7D280C3D2853F9892D4F8345AE06F8"
+  },
+  {
+    "file": "005-run-jobs.json",
+    "bytes": 1081,
+    "sha256": "99B79DE26A6ACF1C084BA24660CC411F0E7D280C3D2853F9892D4F8345AE06F8"
+  },
+  {
+    "file": "006-ubuntu-live-response.json",
+    "bytes": 125459,
+    "sha256": "862FFB7EED27336E8895A2A88932A4EC2CF668324A1B905B9F7A90F4057C3C91"
+  },
+  {
+    "file": "007-windows-live-response.json",
+    "bytes": 133,
+    "sha256": "2D61DAE4AE746A0DF7632D36445583566FB41CD0B42061C871FF12A49A8C743F"
+  },
+  {
+    "file": "008-final-run-jobs.json",
+    "bytes": 1087,
+    "sha256": "EBC6CA71603BAED124672CFEFAE44B9659F344533285A935C5434675C5022296"
+  },
+  {
+    "file": "009-windows-final-response.json",
+    "bytes": 128098,
+    "sha256": "F714D3D3C4489D0B92767541573B82D4A081B7530F27FE80D53F38702954193B"
+  },
+  {
+    "file": "010-ubuntu-final-response.json",
+    "bytes": 125462,
+    "sha256": "6E023258BAD6CD632E74483ADB4FEAA64E75953093D85040E96C56B0451D6330"
+  },
+  {
+    "file": "FINAL.json",
+    "bytes": 15958,
+    "sha256": "5AD3121DA78E3E16617385BB03329E1309E3AF5847A09B3169F54A936170E200"
+  },
+  {
+    "file": "REPORT.md",
+    "bytes": 2819,
+    "sha256": "A08961A82B991C8232049A0FB509FD8DC3E4835C4C42FAA0E7236CF260D5B177"
+  },
+  {
+    "file": "summarize.mjs",
+    "bytes": 6176,
+    "sha256": "B4B8AA6E4350565CE7A90E563DC997CA4CC95D84A859742092A654FBBD1A80AA"
+  },
+  {
+    "file": "ubuntu-returned.log",
+    "bytes": 122808,
+    "sha256": "6B5D7CD7276976465B46F5B19395E59F5297BAE49B848F8058CA73C8D2061700"
+  },
+  {
+    "file": "windows-returned.log",
+    "bytes": 123224,
+    "sha256": "B267CDE2B866CA7F219CE1B9698E1B5BCF9D6627F435951FCBFF65DD76E304EF"
+  }
+]

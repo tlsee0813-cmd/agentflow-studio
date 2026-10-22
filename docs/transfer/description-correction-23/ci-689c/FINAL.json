@@ -1,0 +1,396 @@
+{
+  "pullRequest": "https://github.com/tlsee0813-cmd/agentflow-studio/pull/13",
+  "headRevision": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+  "runId": 39824210631,
+  "account": "Discovery supplied no explicit account and returned none; follow-ups retained the same omitted-account selection.",
+  "readToolOnly": "Code Review pull_requests_checks",
+  "status": "both OS completed/success",
+  "jobs": [
+    {
+      "os": "ubuntu",
+      "job": {
+        "id": 119983063953,
+        "head_sha": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "logTruncated": true,
+      "returnedCharacters": 120000,
+      "firstReturnedLine": "22T17:39:13.6467181Z   ---",
+      "versions": {
+        "playwrightInstalled": "2026-10-22T17:39:17.4459687Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "chromiumDownloaded": "2026-10-22T17:39:33.4530691Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200",
+        "nodeRuntime": "NOT_VISIBLE_IN_TRUNCATED_LOG",
+        "browserRuntime": "Browser.version() not read; installer download version only"
+      },
+      "suites": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 13.378,
+          "ranLine": "2026-10-22T17:39:49.3272082Z Ran 18 tests in 13.378s",
+          "okLine": "2026-10-22T17:39:49.3272231Z OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 23.75,
+          "ranLine": "2026-10-22T17:40:13.1999873Z Ran 13 tests in 23.750s",
+          "okLine": "2026-10-22T17:40:13.2000092Z OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 9.663,
+          "ranLine": "2026-10-22T17:40:23.0512046Z Ran 11 tests in 9.663s",
+          "okLine": "2026-10-22T17:40:23.0512973Z OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 4.193,
+          "ranLine": "2026-10-22T17:40:27.3724350Z Ran 3 tests in 4.193s",
+          "okLine": "2026-10-22T17:40:27.3724496Z OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 3.492,
+          "ranLine": "2026-10-22T17:40:30.9908667Z Ran 3 tests in 3.492s",
+          "okLine": "2026-10-22T17:40:30.9909161Z OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 5.261,
+          "ranLine": "2026-10-22T17:40:36.3775263Z Ran 5 tests in 5.261s",
+          "okLine": "2026-10-22T17:40:36.3775471Z OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 6.893,
+          "ranLine": "2026-10-22T17:40:43.3891664Z Ran 6 tests in 6.893s",
+          "okLine": "2026-10-22T17:40:43.3891810Z OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 3.996,
+          "ranLine": "2026-10-22T17:40:47.5064585Z Ran 4 tests in 3.996s",
+          "okLine": "2026-10-22T17:40:47.5064725Z OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 19.711,
+          "ranLine": "2026-10-22T17:41:07.3454408Z Ran 12 tests in 19.711s",
+          "okLine": "2026-10-22T17:41:07.3454549Z OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 21.055,
+          "ranLine": "2026-10-22T17:41:28.5257900Z Ran 18 tests in 21.055s",
+          "okLine": "2026-10-22T17:41:28.5258242Z OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 10.059,
+          "ranLine": "2026-10-22T17:41:38.7080360Z Ran 8 tests in 10.059s",
+          "okLine": "2026-10-22T17:41:38.7080591Z OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 12.422,
+          "ranLine": "2026-10-22T17:41:51.2493778Z Ran 11 tests in 12.422s",
+          "okLine": "2026-10-22T17:41:51.2493916Z OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 5.975,
+          "ranLine": "2026-10-22T17:41:57.3501528Z Ran 11 tests in 5.975s",
+          "okLine": "2026-10-22T17:41:57.3501918Z OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 15,
+          "seconds": 28.541,
+          "ranLine": "2026-10-22T17:42:26.0120332Z Ran 15 tests in 28.541s",
+          "okLine": "2026-10-22T17:42:26.0120485Z OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 30.105,
+          "ranLine": "2026-10-22T17:42:56.2494393Z Ran 14 tests in 30.105s",
+          "okLine": "2026-10-22T17:42:56.2494610Z OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 22.852,
+          "ranLine": "2026-10-22T17:43:19.2501655Z Ran 21 tests in 22.852s",
+          "okLine": "2026-10-22T17:43:19.2501803Z OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 36.527,
+          "ranLine": "2026-10-22T17:43:55.9028240Z Ran 13 tests in 36.527s",
+          "okLine": "2026-10-22T17:43:55.9028385Z OK"
+        },
+        {
+          "script": "continuity/tests/understanding17_browser.py",
+          "tests": 12,
+          "seconds": 29.231,
+          "ranLine": "2026-10-22T17:44:25.2807280Z Ran 12 tests in 29.231s",
+          "okLine": "2026-10-22T17:44:25.2807426Z OK"
+        },
+        {
+          "script": "continuity/tests/hierarchy18_browser.py",
+          "tests": 12,
+          "seconds": 17.823,
+          "ranLine": "2026-10-22T17:44:43.2315650Z Ran 12 tests in 17.823s",
+          "okLine": "2026-10-22T17:44:43.2315844Z OK"
+        },
+        {
+          "script": "continuity/tests/workspace19_browser.py",
+          "tests": 6,
+          "seconds": 20.238,
+          "ranLine": "2026-10-22T17:45:03.5912342Z Ran 6 tests in 20.238s",
+          "okLine": "2026-10-22T17:45:03.5912572Z OK"
+        },
+        {
+          "script": "continuity/tests/received20_browser.py",
+          "tests": 11,
+          "seconds": 45.849,
+          "ranLine": "2026-10-22T17:45:49.5705882Z Ran 11 tests in 45.849s",
+          "okLine": "2026-10-22T17:45:49.5706099Z OK"
+        },
+        {
+          "script": "continuity/tests/blank21_browser.py",
+          "tests": 2,
+          "seconds": 8.528,
+          "ranLine": "2026-10-22T17:45:58.2329642Z Ran 2 tests in 8.528s",
+          "okLine": "2026-10-22T17:45:58.2601364Z OK"
+        },
+        {
+          "script": "continuity/tests/static_browser.py",
+          "tests": 1,
+          "seconds": 1.723,
+          "ranLine": "2026-10-22T17:46:00.0891314Z Ran 1 test in 1.723s",
+          "okLine": "2026-10-22T17:46:00.0891485Z OK"
+        }
+      ],
+      "continuityUnit": {
+        "tests": 267,
+        "pass": 267,
+        "fail": 0
+      },
+      "description23": "All 267 continuity unit tests passed. Exact candidate adds description23.test.mjs (six cases) under the existing tests/*.test.mjs command. Individual DESC23 lines lie before the returned log tail: inclusion is supported by unchanged wildcard command + exact file, not separately visible subtest lines."
+    },
+    {
+      "os": "windows",
+      "job": {
+        "id": 119983064365,
+        "head_sha": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "logTruncated": true,
+      "returnedCharacters": 120000,
+      "firstReturnedLine": "t neither mutate nor share writable objects with project",
+      "versions": {
+        "playwrightInstalled": "2026-10-22T17:40:41.2397905Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "chromiumDownloaded": "2026-10-22T17:41:29.0160972Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium-1200",
+        "nodeRuntime": "NOT_VISIBLE_IN_TRUNCATED_LOG",
+        "browserRuntime": "Browser.version() not read; installer download version only"
+      },
+      "suites": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 19.342,
+          "ranLine": "2026-10-22T17:41:55.2563853Z Ran 18 tests in 19.342s",
+          "okLine": "2026-10-22T17:41:55.2564206Z OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 50.33,
+          "ranLine": "2026-10-22T17:42:45.8988744Z Ran 13 tests in 50.330s",
+          "okLine": "2026-10-22T17:42:45.8989100Z OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 14.644,
+          "ranLine": "2026-10-22T17:43:00.8932101Z Ran 11 tests in 14.644s",
+          "okLine": "2026-10-22T17:43:00.8932413Z OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 5.796,
+          "ranLine": "2026-10-22T17:43:06.9999472Z Ran 3 tests in 5.796s",
+          "okLine": "2026-10-22T17:43:06.9999698Z OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 5.622,
+          "ranLine": "2026-10-22T17:43:12.9147590Z Ran 3 tests in 5.622s",
+          "okLine": "2026-10-22T17:43:12.9147911Z OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 8.602,
+          "ranLine": "2026-10-22T17:43:21.7968798Z Ran 5 tests in 8.602s",
+          "okLine": "2026-10-22T17:43:21.7969200Z OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 10.135,
+          "ranLine": "2026-10-22T17:43:32.2394130Z Ran 6 tests in 10.135s",
+          "okLine": "2026-10-22T17:43:32.2394473Z OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 5.877,
+          "ranLine": "2026-10-22T17:43:38.4073451Z Ran 4 tests in 5.877s",
+          "okLine": "2026-10-22T17:43:38.4073908Z OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 35.6,
+          "ranLine": "2026-10-22T17:44:14.3031794Z Ran 12 tests in 35.600s",
+          "okLine": "2026-10-22T17:44:14.3032105Z OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 27.78,
+          "ranLine": "2026-10-22T17:44:42.3843165Z Ran 18 tests in 27.780s",
+          "okLine": "2026-10-22T17:44:42.3843555Z OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 13.058,
+          "ranLine": "2026-10-22T17:44:55.7408494Z Ran 8 tests in 13.058s",
+          "okLine": "2026-10-22T17:44:55.7408929Z OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 16.647,
+          "ranLine": "2026-10-22T17:45:12.6815833Z Ran 11 tests in 16.647s",
+          "okLine": "2026-10-22T17:45:12.6816192Z OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 8.857,
+          "ranLine": "2026-10-22T17:45:21.8397007Z Ran 11 tests in 8.857s",
+          "okLine": "2026-10-22T17:45:21.8397338Z OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 15,
+          "seconds": 36.65,
+          "ranLine": "2026-10-22T17:45:58.7608017Z Ran 15 tests in 36.650s",
+          "okLine": "2026-10-22T17:45:58.7608384Z OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 39.39,
+          "ranLine": "2026-10-22T17:46:38.4363134Z Ran 14 tests in 39.390s",
+          "okLine": "2026-10-22T17:46:38.4363490Z OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 30.415,
+          "ranLine": "2026-10-22T17:47:09.2319089Z Ran 21 tests in 30.415s",
+          "okLine": "2026-10-22T17:47:09.2319393Z OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 45.126,
+          "ranLine": "2026-10-22T17:47:54.6579299Z Ran 13 tests in 45.126s",
+          "okLine": "2026-10-22T17:47:54.6579667Z OK"
+        },
+        {
+          "script": "continuity/tests/understanding17_browser.py",
+          "tests": 12,
+          "seconds": 36.718,
+          "ranLine": "2026-10-22T17:48:31.7181305Z Ran 12 tests in 36.718s",
+          "okLine": "2026-10-22T17:48:31.7181764Z OK"
+        },
+        {
+          "script": "continuity/tests/hierarchy18_browser.py",
+          "tests": 12,
+          "seconds": 24.262,
+          "ranLine": "2026-10-22T17:48:56.2808990Z Ran 12 tests in 24.262s",
+          "okLine": "2026-10-22T17:48:56.2809332Z OK"
+        },
+        {
+          "script": "continuity/tests/workspace19_browser.py",
+          "tests": 6,
+          "seconds": 25.566,
+          "ranLine": "2026-10-22T17:49:22.1405053Z Ran 6 tests in 25.566s",
+          "okLine": "2026-10-22T17:49:22.1405482Z OK"
+        },
+        {
+          "script": "continuity/tests/received20_browser.py",
+          "tests": 11,
+          "seconds": 53.214,
+          "ranLine": "2026-10-22T17:50:15.6259194Z Ran 11 tests in 53.214s",
+          "okLine": "2026-10-22T17:50:15.6259526Z OK"
+        },
+        {
+          "script": "continuity/tests/blank21_browser.py",
+          "tests": 2,
+          "seconds": 9.975,
+          "ranLine": "2026-10-22T17:50:25.8982669Z Ran 2 tests in 9.975s",
+          "okLine": "2026-10-22T17:50:25.8982906Z OK"
+        },
+        {
+          "script": "continuity/tests/static_browser.py",
+          "tests": 1,
+          "seconds": 3.031,
+          "ranLine": "2026-10-22T17:50:29.2376626Z Ran 1 test in 3.031s",
+          "okLine": "2026-10-22T17:50:29.2567700Z OK"
+        }
+      ],
+      "continuityUnit": {
+        "tests": 267,
+        "pass": 267,
+        "fail": 0
+      },
+      "description23": "All 267 continuity unit tests passed. Exact candidate adds description23.test.mjs (six cases) under the existing tests/*.test.mjs command. Individual DESC23 lines lie before the returned log tail: inclusion is supported by unchanged wildcard command + exact file, not separately visible subtest lines."
+    }
+  ],
+  "transientToolFailure": {
+    "file": "007-windows-live-response.json",
+    "message": "GitHub provider request failed (HTTP 502)",
+    "resolution": "Later same-head job log read succeeded. No rerun or product change."
+  },
+  "limitations": [
+    "Both final job logs are returned as truncated 120000-character tails. Earlier setup/check/build/approot unit lines and individual DESC23 names are not recoverable from these tool responses. Final successful job conclusion covers the complete workflow, but those omitted lines are not represented as independently read raw logs.",
+    "Node version is not visible in returned tails. Do not infer runtime version from upload-artifact action warning about Node24.",
+    "No alternate CI API/CLI, server/browser, remote write, cancel, rerun or merge was used. Existing author evidence untouched."
+  ]
+}

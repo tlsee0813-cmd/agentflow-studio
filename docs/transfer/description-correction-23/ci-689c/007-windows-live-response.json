@@ -1,0 +1,9 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "GitHub provider request failed (HTTP 502)"
+    }
+  ],
+  "isError": true
+}
