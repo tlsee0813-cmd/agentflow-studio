@@ -1290,7 +1290,11 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   const enter=node('button','','node-enter');enter.type='button';enter.id=`node-enter-${a.id}`;
   enter.setAttribute('aria-label',`${a.name} 영역 열기`);
   const name=node('strong',a.name,'area-card-name');name.append(node('span',' ↘','area-card-go'));
-  enter.append(name,node('span',areaPath(project,a.id).length>1?`소속 · ${areaPath(project,a.id).slice(0,-1).map(x=>x.name).join(' › ')}`:'독립 영역','area-card-path'),a.note?node('span',a.note,'area-card-note'):noNote(),node('span',areaSummary(a),'hint'));
+  const ancestors=areaPath(project,a.id).slice(0,-1),parent=ancestors.at(-1),parentLabel=node('span','','area-card-parent');
+  parentLabel.append(node('span',parent?`소속 · ${parent.name}`:'독립 영역','area-card-parent-name'));
+  if(ancestors.length>1)parentLabel.append(node('span','상위 생략','area-card-parent-omitted'));
+  parentLabel.title=parent?`직접 부모 · ${parent.name}${ancestors.length>1?' · 더 위의 경로는 정보 패널에서 읽기':''}`:'독립 영역';
+  enter.append(name,node('span',areaPath(project,a.id).length>1?`소속 · ${areaPath(project,a.id).slice(0,-1).map(x=>x.name).join(' › ')}`:'독립 영역','area-card-path'),parentLabel,a.note?node('span',a.note,'area-card-note'):noNote(),node('span',areaSummary(a),'hint'));
   if(receivedAreas.has(a.id))enter.append(node('span','설명 갱신','area-update-label'));
   el.classList.toggle('located',located?.area===a.id&&view==='space');
   if(areaRequests(a.id).some(currentGroup))enter.append(appTag());
@@ -1433,7 +1437,7 @@ function drawRelations(svg:SVGSVGElement,labels:HTMLElement,plane:HTMLElement) {
 function renderMap(root:HTMLElement,active:Area[],extra:HTMLElement[]=[]) {
   if(panelMode!=='records')recordsReturnNotice='';
   const shown=visibleAreas(project,collapsed);
-  const section=node('section','','area-map');section.setAttribute('aria-label','영역 지도');
+  const section=node('section','','area-map reading-probe-28');section.setAttribute('aria-label','영역 지도');
   const bar=node('div','','map-toolbar');bar.append(node('h2','영역'));
   // PC13: adding an area is an explicit disclosure. It starts open when there is no area yet or an unsent name/idea is kept.
   const addPanel=details('＋ 영역 추가','area-add-panel');addPanel.classList.add('toolbar-disclosure');

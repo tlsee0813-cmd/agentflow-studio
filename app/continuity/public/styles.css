@@ -2562,6 +2562,15 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .area-card-path{display:block;font-size:11px;color:var(--muted);line-height:14px;max-height:14px;overflow:hidden;flex-shrink:0}
 .branch-toggle{font-size:12px;padding:3px 7px;align-self:flex-start}
 .branch-signals{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+/* 연구용28: 이 격리 후보에만 적용. 카드·조작·신호 배치와 카메라는 기존 그대로 둔다. */
+.reading-probe-28 .area-node .area-card-name{font-size:24px;line-height:27px;-webkit-line-clamp:2}
+.reading-probe-28 .area-node .area-card-path,
+.reading-probe-28 .area-node .area-card-note,
+.reading-probe-28 .area-node .area-undecided,
+.reading-probe-28 .area-node .node-enter>.hint{display:none}
+.reading-probe-28 .area-card-parent{display:flex;gap:4px;max-width:100%;min-width:0;flex-shrink:0;font-size:11px;line-height:14px;color:var(--muted);white-space:nowrap}
+.reading-probe-28 .area-card-parent-name{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.reading-probe-28 .area-card-parent-omitted{flex-shrink:0}
 .map-relation-list{margin-top:10px;font-size:13px}
 .map-relation-list summary{cursor:pointer}
 .relation-bundle{padding:8px 0;border-bottom:1px solid var(--line)}
