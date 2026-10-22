@@ -501,6 +501,10 @@ function renderStatus() {
   if($('handoff-ready'))$('handoff-ready').hidden=stage.kind!=='exported';
   if($('bring-report'))$('bring-report').textContent=project.draft.trim()?'작성 중인 입력 이어쓰기':'결과 붙여넣기';
   if($('copy-work')){const copy=$<HTMLButtonElement>('copy-work');copy.className=stage.kind==='exported'||stage.kind==='question'?'secondary':'primary';copy.textContent=t&&exportNeedsRefresh(project,t)?'수정한 작업문 복사':'작업문 복사';}
+  // Status-only edits can remove an alert above the map without a render or a details toggle.
+  // Measure only the displayed PC map; do not capture/restore panel memo or refit its camera here.
+  const map=document.getElementById('space-map');
+  if(route!=='projects'&&view==='space'&&innerWidth>760&&document.body.dataset.layer==='space'&&!$('space-view').hidden&&map?.getClientRects().length)sizeWorkspace();
 }
 function renderOutcome(t:Task|null) {
   const area=$('outcome-home');area.replaceChildren();area.hidden=!t;if(!t)return;

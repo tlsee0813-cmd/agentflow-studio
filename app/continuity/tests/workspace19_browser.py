@@ -41,7 +41,28 @@ class Workspace19(unittest.TestCase):
     def shot(self,name):self.page.mouse.move(1,1);self.page.screenshot(path=str(base.OUT/f'workspace19-{self.WIDTH}-{name}.png'))
     def disclosure(self,id,opened=True):
         box=self.page.locator('#'+id)
-        if box.evaluate('(e)=>e.open')!=opened:box.locator('> summary').click()
+        if box.evaluate('(e)=>e.open')==opened:return
+        if id!='brief-edit':box.locator('> summary').click();return
+        # Native details toggle is queued: the app's document-capture sizing runs before this target listener.
+        armed=self.page.evaluate(r'''([id,expected])=>{
+          const d=document.getElementById(id),s=d.querySelector(':scope > summary'),events=[],p={result:null,promise:null,cancel:null};
+          let activation=false,resolve,timer;const initialOpen=d.open;p.promise=new Promise(r=>resolve=r);
+          const finish=(ok,reason)=>{if(p.result)return;clearTimeout(timer);s.removeEventListener('click',click,true);d.removeEventListener('toggle',toggle);
+            const m=document.getElementById('space-map');p.result={ok,reason,initialOpen,expected,open:d.open,sameNode:document.getElementById(id)===d,events,map:m?.getBoundingClientRect().toJSON()??null};resolve(p.result)};
+          const click=e=>{events.push({kind:'click',trusted:e.isTrusted,open:d.open,time:performance.now()});if(e.isTrusted)activation=true};
+          const toggle=e=>{const same=e.target===d&&document.getElementById(id)===d&&d.isConnected;
+            events.push({kind:'toggle',trusted:e.isTrusted,activation,oldState:e.oldState,newState:e.newState,open:d.open,same,time:performance.now()});
+            if(activation&&same&&e.isTrusted&&d.open===expected&&e.newState===(expected?'open':'closed'))finish(true,'native-toggle-complete')};
+          p.cancel=()=>finish(false,'cleanup');window.__w19BriefToggle=p;s.addEventListener('click',click,true);d.addEventListener('toggle',toggle);
+          timer=setTimeout(()=>finish(false,'native-toggle-timeout'),5000);return {id,initialOpen,expected};}''',[id,opened])
+        self.record('actual','brief native toggle armed before click',armed)
+        try:
+            box.locator('> summary').click()
+            result=self.page.evaluate('async()=>await window.__w19BriefToggle.promise')
+            self.yes('brief native toggle completed after trusted activation',result['ok'],result)
+        finally:
+            raw=self.page.evaluate('()=>{const p=window.__w19BriefToggle;if(!p)return null;p.cancel();delete window.__w19BriefToggle;return p.result}')
+            self.record('actual','brief native toggle raw diagnostics and cleanup',raw)
     def management(self):
         menu=self.page.locator('#project-management')
         if menu.count() and menu.is_visible():self.disclosure('project-management')
