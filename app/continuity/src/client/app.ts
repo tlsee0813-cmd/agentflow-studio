@@ -64,6 +64,8 @@ let layerMemo:LayerMemo={space:null,from:null,areas:{}};
 // FLOW090-B1: map viewport and selection are this tab's view of one project; positions are project data.
 type MapView={x:number;y:number;s:number};
 let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
+let initialMapFitPending=false;
+const MAP_CARD_HEIGHT=180; // Matches the bounded card footprint in styles.css and new-slot collision checks.
 let collapsed=new Set<string>();
 let relationReading=false,relationCaller='map-relations-open';
 type PanelReading={y:number;anchor:{id:string;top:number}|null;open:Record<string,boolean>};
@@ -78,13 +80,16 @@ function safePanelReadings(raw:unknown):Record<string,PanelReading> {
   }return out;
 }
 const panelKey=(area:string)=>`${project.id}:${area}`;
-function capturePanelReading() {
+function capturePanelReading(preferredId:string|null=null) {
   const body=document.getElementById('area-panel-body'),id=body?.dataset.areaId;
   // A previous project's hidden DOM can remain while the list/open-entry transition recalls its saved reading memo.
   if(!body||!id||route==='projects'||body.dataset.projectId!==project.id||!body.getClientRects().length)return;
   const rect=body.getBoundingClientRect(),items=[...body.querySelectorAll<HTMLElement>('[id]')];
   const visible=items.filter(el=>el.getClientRects().length&&el.getBoundingClientRect().bottom>rect.top+1&&el.getBoundingClientRect().top<rect.bottom);
-  const anchor=visible.find(el=>el.getBoundingClientRect().top>=rect.top)??visible.at(-1);
+  const preferred=preferredId?document.getElementById(preferredId):null;
+  // An explicit navigation returns to its surviving caller, even when an earlier report row legitimately disappears.
+  const anchor=preferred&&visible.includes(preferred)&&getComputedStyle(preferred).visibility==='visible'?preferred:
+    visible.find(el=>el.getBoundingClientRect().top>=rect.top)??visible.at(-1);
   panelReadings[`${body.dataset.projectId}:${id}`]={y:body.scrollTop,anchor:anchor?{id:anchor.id,top:anchor.getBoundingClientRect().top-rect.top}:null,
     open:Object.fromEntries([...body.querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]))};
 }
@@ -177,7 +182,7 @@ function resetEphemeral() {
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
   receivedAreas.clear();
   understandingEditRevisions.clear();lastReceipt=null;located=null;
-  mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};relationReading=false;backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
+  mapView=null;mapSelected=null;initialMapFitPending=false;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};relationReading=false;backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
 function openEntry(entry:WorkspaceEntry,fromList=false) {
@@ -326,10 +331,10 @@ function openArea(id:string) {
 /** PC12: leaving the map or an area screen to read (or continue) a task records where the user was. Tab memory only. */
 function markOrigin(focus:string|null=null) {
   if(view!=='space'&&view!=='area')return;
-  capturePanelReading();
   const active=document.activeElement as HTMLElement|null,used=active?.id&&$('space-view').contains(active)?active.id:null;
+  const id=focus??used;capturePanelReading(id);
   const open=Object.fromEntries([...$('space-view').querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]));
-  const id=focus??used,el=id?document.getElementById(id):null,r=el&&el.getClientRects().length?el.getBoundingClientRect():null;
+  const el=id?document.getElementById(id):null,r=el&&el.getClientRects().length?el.getBoundingClientRect():null;
   origin={project:project.id,view,area:view==='area'?viewArea:null,map:mapView?{...mapView}:null,selected:mapSelected,sheet:sheetOpen,y:window.scrollY,focus:id,open,
     anchor:id&&r&&!el?.closest('#area-panel-body')?{id,top:r.top,page:r.top+window.scrollY}:null,collapsed:[...collapsed],panels:structuredClone(panelReadings),relations:relationReading};
 }
@@ -1132,8 +1137,21 @@ function markOffscreen(plane:HTMLElement) {
 function fitView(map:HTMLElement,active:Area[]):MapView {
   // Measured card sizes (long names/notes make cards taller), in plane units.
   const boxes=active.map(a=>{const pt=areaPosition(project,a),el=map.querySelector<HTMLElement>(`.area-node[data-area-id="${a.id}"]`);
-    return {x:pt.x,y:pt.y,w:el?.offsetWidth||NODE_W,h:el?.offsetHeight||NODE_H};});
-  return fitViewport(map.clientWidth||800,map.clientHeight||480,boxes);
+    return {x:pt.x,y:pt.y,w:el?.offsetWidth||NODE_W,h:el?.offsetHeight||MAP_CARD_HEIGHT};});
+  const controls=map.querySelector<HTMLElement>('.map-controls'),margin=24;
+  // PC controls remain inside the map. Reserve only their measured top band beyond the existing fit margin.
+  const top=innerWidth>760&&controls?Math.max(0,controls.offsetTop+controls.offsetHeight+8-margin):0;
+  const fitted=fitViewport(map.clientWidth||800,Math.max(1,(map.clientHeight||480)-top),boxes,margin);
+  return {...fitted,y:fitted.y+top};
+}
+function finishInitialMapFit() {
+  if(!initialMapFitPending)return;
+  // A recalled/user/return viewport always wins. Only a genuinely missing initial viewport is fitted here.
+  if(mapView){initialMapFitPending=false;return;}
+  if(route==='projects'||view!=='space')return;
+  const map=document.getElementById('space-map'),plane=document.getElementById('space-plane');
+  if(!map||!plane||!map.clientWidth||!map.clientHeight)return;
+  mapView=fitView(map,visibleAreas(project,collapsed));initialMapFitPending=false;applyView(plane);$('map-scale').textContent=scaleLabel(mapView.s);rememberMap();
 }
 function zoom(map:HTMLElement,plane:HTMLElement,factor:number) {
   // Buttons stay within a comfortable range, but never force a smaller fitted scale back up to it.
@@ -1356,8 +1374,8 @@ function renderMap(root:HTMLElement,active:Area[],extra:HTMLElement[]=[]) {
   const sel=mapSelected?areaById(mapSelected):null;
   if(relationReading)layout.append(relationBrowser());else if(sel&&!sel.archived)layout.append(areaPanel(sel));
   section.append(layout);root.append(section);sizeWorkspace();
-  if(!mapView)mapView=fitView(map,shown);
-  applyView(plane);scale.textContent=scaleLabel(mapView.s);redraw();
+  if(!mapView)initialMapFitPending=true;
+  applyView(plane);scale.textContent=scaleLabel(mapView?.s??1);redraw();
   add.addEventListener('submit',e=>{e.preventDefault();if(!name.value.trim())return;
     // Place the new area where the user is looking (free slot nearest to the map centre).
     const v=mapView??{x:0,y:0,s:1},near={x:(map.clientWidth/2-v.x)/v.s-NODE_W/2,y:(map.clientHeight/2-v.y)/v.s-NODE_H/2};
@@ -2168,7 +2186,7 @@ function render(capturePanel=true) {
   // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
   const taskScreen=view==='task'?$('space-view'):null;
   for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&!taskScreen?.contains(d)&&!d.closest('#area-panel'))d.open=open.get(d.id)!;
-  sizeWorkspace();restorePanelReading();
+  sizeWorkspace();finishInitialMapFit();restorePanelReading();
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
 function submitInput(withAI:boolean) {

@@ -9,6 +9,10 @@ from pathlib import Path
 from playwright.sync_api import expect
 import browser as base
 
+def clipboard_lf(raw):
+    """Existing Windows clipboard representation rule (USE106): replace CRLF pairs only."""
+    return raw.replace('\r\n','\n')
+
 APP=Path(__file__).resolve().parents[2]
 OBS=base.OUT/'hierarchy18-observations.jsonl'
 OBS.write_text('',encoding='utf-8')
@@ -82,12 +86,13 @@ class Area18(unittest.TestCase):
         self.equal('file export uses the actual open request',self.state()['currentTaskId'],tid)
         count=len(next(t for t in self.state()['tasks'] if t['id']==tid)['handoffs'])
         self.disclosure('file-return-options');self.page.locator('#copy-file-work').click()
-        expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사');text=self.page.evaluate('()=>navigator.clipboard.readText()');base.saved(self.page)
+        expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사');raw=self.page.evaluate('()=>navigator.clipboard.readText()')
+        self.record('raw','actual clipboard OS text before CRLF-pair comparison normalization',raw);text=clipboard_lf(raw);base.saved(self.page)
         handoffs=next(t for t in self.state()['tasks'] if t['id']==tid)['handoffs'];record=handoffs[-1]
         self.equal('explicit file-return export adds one stored handoff',len(handoffs),count+1)
         self.yes('file-return handoff has an actual return ID and anchor',bool(record['returnId']) and record['anchor'] is not None)
         actual=self.page.evaluate("t=>{let h=0x811c9dc5;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)}return {chars:t.length,digest:(h>>>0).toString(16).padStart(8,'0')}}",text)
-        self.equal('actual clipboard text matches stored handoff chars/digest',actual,{'chars':record['chars'],'digest':record['digest']})
+        self.equal('clipboard CRLF-pair comparison text matches stored handoff chars/digest',actual,{'chars':record['chars'],'digest':record['digest']})
         self.yes('actual copied text contains this file-return ID',record['returnId'] in text)
         return text,record
     def load(self,cid='powertoys',mode='normal'):
@@ -142,7 +147,7 @@ class Area18(unittest.TestCase):
         self.page.locator('#draft').fill(endpoint_body);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         endpoint_state=self.state();endpoint_task=next(t for t in endpoint_state['tasks'] if t['id']==endpoint_state['currentTaskId'])
         self.equal('relation route creates one real task',len(endpoint_state['tasks']),endpoint_count+1);self.equal('relation route task belongs to actual endpoint',endpoint_task['areaId'],real_to)
-        endpoint_text,endpoint_export=self.file_export(endpoint_task['id']);self.record('raw','actual relation endpoint handoff',endpoint_text)
+        endpoint_text,endpoint_export=self.file_export(endpoint_task['id']);self.record('comparison','relation endpoint handoff (clipboard; CRLF pairs normalized)',endpoint_text)
         self.yes('relation route copied actual new request',endpoint_body in endpoint_text)
         self.equal('relation route export anchor uses actual endpoint',endpoint_export['anchor']['areaId'],real_to)
         self.page.locator('#work-locate-return').click();expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id','@relations')
@@ -169,7 +174,7 @@ class Area18(unittest.TestCase):
         self.equal('new task is owned by actual leaf',task['areaId'],area)
         source=next(x for x in after['sources'] if x['id']==task['sourceIds'][0]);self.equal('new task source kind/body',[source['kind'],source['text']],['request',body])
         text,leaf_export=self.file_export(tid)
-        self.record('raw','actual copied descendant handoff',text);self.yes('handoff includes current child description',s['c']['summary'] in text)
+        self.record('comparison','descendant handoff (clipboard; CRLF pairs normalized)',text);self.yes('handoff includes current child description',s['c']['summary'] in text)
         self.yes('handoff limits parent context authority','포함 맥락 참고' in text and '자식의 명시 범위·조건을 조상 참고로 확대·축소·대체하지 않습니다' in text)
         self.equal('stored handoff anchor still points to exact leaf',leaf_export['anchor']['areaId'],area)
         self.page.locator('#work-locate-return').click();back=self.snap('explicit return after new task and handoff')
@@ -220,11 +225,21 @@ class Area18(unittest.TestCase):
         self.yes('A to B to A restores reading position',abs(again['scroll']-read['scroll'])<=2)
         self.yes('A to B to A restores explicit full-text disclosure','panel-idea-full' in again['open'])
         # Real list -> same saved entry: a hidden old panel must not overwrite the recalled reading memo.
-        entry=self.page.evaluate('()=>document.documentElement.dataset.entryId');self.page.locator('#nav-projects').click();expect(self.page.locator('#projects-view')).to_be_visible()
+        list_anchor=self.reading('panel-idea-full');entry=self.page.evaluate('()=>document.documentElement.dataset.entryId');self.page.locator('#nav-projects').click();expect(self.page.locator('#projects-view')).to_be_visible()
         self.page.locator(f'.project-card[data-entry-id="{entry}"] .project-open').click();expect(body).to_have_attribute('data-area-id',a)
         reopened=self.snap('project list to same area reading')
-        self.yes('project list roundtrip restores nonzero reading position',reopened['scroll']>50 and abs(reopened['scroll']-again['scroll'])<=2)
+        new_max=body.evaluate('(e)=>Math.max(0,e.scrollHeight-e.clientHeight)');expected_scroll=min(again['scroll'],new_max)
+        self.record('actual','project list reading clamped by new viewport',{'before':again['scroll'],'newMax':new_max,'expected':expected_scroll,'actual':reopened['scroll']})
+        self.yes('project list roundtrip restores nonzero reading position within the new scroll limit',reopened['scroll']>50 and abs(reopened['scroll']-expected_scroll)<=2)
+        self.reading_restored('project list retains the reading item with normal end clamp',list_anchor,self.reading('panel-idea-full'))
         self.yes('project list roundtrip preserves explicit full text','panel-idea-full' in reopened['open'])
+        self.equal('project list roundtrip preserves selected owner',reopened['selected'],a)
+        # A separate real, nonzero middle position must survive; an end clamp cannot conceal a reset to zero.
+        body.focus();body.press('Home');body.press('PageDown');middle=self.reading('panel-idea-full')
+        self.yes('setup has an actual middle reading position',middle['scroll']>50 and middle['scroll']<middle['max']-50)
+        self.page.locator('#nav-projects').click();expect(self.page.locator('#projects-view')).to_be_visible();self.page.locator(f'.project-card[data-entry-id="{entry}"] .project-open').click();expect(body).to_have_attribute('data-area-id',a)
+        middle_back=self.reading('panel-idea-full');self.reading_restored('project list restores the nonzero middle reading anchor',middle,middle_back)
+        self.yes('middle reading stays nonzero',middle_back['scroll']>50);expect(self.page.locator('#panel-idea-full')).to_have_attribute('open','')
         self.disclosure('panel-edit');self.page.locator('#panel-note').fill('[합성 미저장] 지우지 않을 입력')
         self.page.locator('#panel-note').press('Escape');expect(body).to_be_visible();expect(self.page.locator('#panel-note')).to_have_value('[합성 미저장] 지우지 않을 입력')
         # Context stays open when returning to the map; protected panel Escape must not bubble into its global closer.

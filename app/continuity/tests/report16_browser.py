@@ -137,14 +137,47 @@ class Report16(unittest.TestCase):
         hit=self.page.evaluate('([x,y])=>{const e=document.elementFromPoint(x,y);return e&&(e.id||e.className)}',[x,y])
         self.assertIn(hit,['space-map','space-plane','relation-layer'],f'the pan starts on the empty map ({hit})')
         self.page.mouse.move(x,y);self.page.mouse.down();self.page.mouse.move(x-70,y-35,steps=6);self.page.mouse.up()
+    def panel_task_probe(self,task):
+        return self.page.evaluate('''(id)=>{const e=document.getElementById(id),body=document.getElementById('area-panel-body');if(!e||!body)return null;
+          const r=e.getBoundingClientRect(),b=body.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
+          return {top:r.top,bottom:r.bottom,bodyTop:b.top,bodyBottom:b.bottom,bodyY:body.scrollTop,
+            fullyVisible:r.top>=Math.max(0,b.top)&&r.bottom<=Math.min(innerHeight,b.bottom)&&r.left>=Math.max(0,b.left)&&r.right<=Math.min(innerWidth,b.right),
+            hitIsControl:!!hit&&(hit===e||e.contains(hit))}}''',f'panel-task-{task}')
+    def wheel_panel(self,delta):
+        # Padding is deliberately the target: a long original can have its own inner scroller. This is native wheel,
+        # without assigning scrollTop or asking Playwright to scroll the caller into view on the product's behalf.
+        body=self.page.locator('#area-panel-body');expect(body).to_be_in_viewport();box=body.bounding_box()
+        x,y=box['x']+4,box['y']+box['height']/2
+        hit=self.page.evaluate('([x,y])=>document.elementFromPoint(x,y)===document.getElementById("area-panel-body")',[x,y])
+        self.record('condition','native wheel target is reading-body padding',hit,True);self.assertTrue(hit)
+        self.page.mouse.move(x,y);self.page.mouse.wheel(0,delta);self.page.wait_for_timeout(100)
+    def wheel_to_panel_task(self,task,step=200):
+        self.wheel_panel(step);wheels=1
+        while wheels<40:
+            probe=self.panel_task_probe(task)
+            if not probe:break
+            top,bottom=max(0,probe['bodyTop']),min(self.HEIGHT,probe['bodyBottom'])
+            padding=min(4,max(0,(bottom-top-(probe['bottom']-probe['top']))/2));top+=padding;bottom-=padding
+            needed=probe['top']-top if probe['top']<top else probe['bottom']-bottom if probe['bottom']>bottom else 0
+            if needed==0:break  # Remaining horizontal clipping or an overlay must fail the real visibility/hit checks.
+            delta=max(-step,min(step,needed))
+            self.record('actual','native body wheel measured distance',{'needed':needed,'delta':delta,'caller':probe})
+            self.wheel_panel(delta);wheels+=1
+        probe=self.panel_task_probe(task);self.record('actual','native reading-body wheel steps to task',{'steps':wheels,'caller':probe})
+        expect(self.page.locator(f'#panel-task-{task}')).to_be_in_viewport()
+        self.record('condition','depart: task fully inside body and hit-testable',probe,{'fullyVisible':True,'hitIsControl':True})
+        self.assertTrue(probe and probe['fullyVisible'] and probe['hitIsControl'],'native body wheel must expose an actually clickable task')
     def depart(self,area,task):
         """Whole space: select the area ('정보'), open its idea in full, zoom + pan, scroll with the wheel, then pick the task."""
         self.page.locator('#nav-space').click();expect(self.title()).to_have_text('전체 공간')
         self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible()
-        self.move_map();self.page.mouse.move(self.WIDTH-20,self.HEIGHT//2);self.page.mouse.wheel(0,140);self.page.wait_for_timeout(150)
+        self.move_map();self.wheel_to_panel_task(task,140)
         pick=self.page.locator(f'#panel-task-{task}');expect(pick).to_be_in_viewport()
         before=self.snap('depart',area);self.check_true('depart: map zoomed',' scale(1)' not in before['styleTransform'] and 'scale(1)' not in before['styleTransform'],before['styleTransform'])
-        self.check_true('depart: page scrolled by the wheel',before['windowY']>0,before['windowY'])
+        body=self.page.locator('#area-panel-body').evaluate('(e)=>({y:e.scrollTop,h:e.clientHeight,total:e.scrollHeight})')
+        self.record('actual','depart: reading-body scroll',body)
+        if body['total']>body['h']:self.check_true('depart: reading body scrolled by the wheel',body['y']>0,body)
+        else:self.check('depart: body without overflow stays at zero',body['y'],0)
         pick.click();expect(self.page.locator('#task-view')).to_be_visible()
         return before
     def assert_back(self,before,area,task):
