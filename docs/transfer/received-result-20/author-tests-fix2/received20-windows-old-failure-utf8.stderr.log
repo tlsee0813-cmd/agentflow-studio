@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product20-tests\evidence\windows-newline-proof.py", line 47, in <module>
+    assert actual_text==expected,'old pre-write LF expectation differs from actual Windows CRLF file'
+           ^^^^^^^^^^^^^^^^^^^^^
+AssertionError: old pre-write LF expectation differs from actual Windows CRLF file

@@ -1,0 +1,13 @@
+diff --git a/app/continuity/src/client/app.ts b/app/continuity/src/client/app.ts
+index a230948a74da7d8d56a68c792a1c734b4fa9a1c2..dbe2bf48810ab15d064edbf524d2021e3d25d39d 100644
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -954,7 +954,7 @@ function renderWork(t:Task|null) {
+   const fileActions=node('div','','actions');fileActions.append(btn('파일 결과용 작업문 복사',()=>{void exportWork(t.id,'clipboard',true);},'secondary','copy-file-work'),btn('파일 결과용 Markdown 저장',()=>{void exportWork(t.id,'download',true);},'quiet','download-file-work'));fileOptions.append(fileActions);
+   fileOptions.append(node('p','같은 작업에서 받은 결과 JSON은 ‘결과 파일로 가져오기’에서 선택하세요. 실행 권한은 늘어나지 않으며, 파일 생성 금지와 충돌하면 일반 보고로 반환합니다.','hint'));
+   if(lastFileExport?.taskId===t.id){const sent=details('이 탭에서 마지막으로 내보낸 파일용 전문','file-handoff-preview'),field=node('textarea');field.readOnly=true;field.rows=8;field.className='export-preview';field.value=lastFileExport.text;sent.append(field);fileOptions.append(sent);}
+-  foot.append(fileOptions);
++  actions.append(fileOptions);
+   const preview=details('실제로 전달할 전체 문맥 보기','handoff-preview');const txt=node('textarea');txt.id='handoff-text';txt.readOnly=true;txt.rows=14;txt.className='export-preview';
+   try{txt.value=handoffText(project,t.id);}catch{txt.value='문맥 크기 또는 데이터 오류로 자동 인계를 만들지 못했습니다. 복구 파일로 원문을 보존하세요.';}
+   preview.append(node('p','관련 입력 + 직전 작업 + 모든 보존 기준. AI가 관련으로 고르지 않은 기준도 뒤에 남습니다.','hint'),txt);card.append(preview);area.append(card);

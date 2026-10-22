@@ -1,0 +1,66 @@
+{
+  "kind": "cycle21 file-result handoff entry candidate A, frozen source",
+  "baseline": "df726e5898f24e23d69e47651d3bf6cbea302412",
+  "baselineTree": "b0284952107e3b853ca5f2440401a0c37fc239aa",
+  "worktree": "../product21-author",
+  "beforeSource": "source-before/",
+  "afterSource": "source-after/",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260706,
+      "sha256": "5370D0A6ACD3A1B60E3F5C81E8E3A4BE647665D23C18667F810B6DF7634F9F58",
+      "beforeBytes": 260703,
+      "beforeSha256": "3431CB1344E22C291EFD28334C76257B522325B61B037270AC9EF76CEEBA0151",
+      "changed": true,
+      "product20Unchanged": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38",
+      "beforeBytes": 72783,
+      "beforeSha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38",
+      "changed": false,
+      "product20Unchanged": true
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0",
+      "beforeBytes": 17960,
+      "beforeSha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0",
+      "changed": false,
+      "product20Unchanged": true
+    }
+  ],
+  "staticChecks": {
+    "exactOneLineReplacement": true,
+    "onlyAppChanged": true,
+    "product20ThreeFilesUnchanged": true,
+    "existingSelectors": true
+  },
+  "change": "Only existing native details file-return-options parent moved from work-footer to next-actions, after ordinary handoff action row",
+  "unchanged": [
+    "CSS/HTML bytes",
+    "ordinary copy and Markdown behavior",
+    "file buttons/selectors/listeners and exportWork(...,true)",
+    "H creation only on actual export",
+    "draft/current task/Origin/receipt/import domain and schema"
+  ],
+  "checks": {
+    "check": 0,
+    "build": 0,
+    "diff-check": 0
+  },
+  "runtime": "Existing Node24.19.0 and locked TypeScript5.8.3; author auxiliary checks, not Node22 CI evidence",
+  "notRun": [
+    "Local server/browser",
+    "visual hit/viewport and actual clipboard/download/import/return checks",
+    "new or edited browser test sources"
+  ],
+  "sourceStatus": "M app/continuity/src/client/app.ts",
+  "patch": "ui21-minimal.patch",
+  "testImpact": "Existing ID-based file export consumers retained. Flow049/connect039/static/report16/AREA17/AREA18/workspace19 file controls and reading-position regressions require actual execution; no test source edited.",
+  "review": "Candidate only; independent static/Cloud visual acceptance pending"
+}
