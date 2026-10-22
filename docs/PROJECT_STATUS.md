@@ -1,8 +1,8 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-16 보고·현재 구상 연결16 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-22 같은 영역의 현재 이해 갱신17 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint에 프로젝트 카드 홈·공간 탐색·현재 영역 구상과 명시 선택한 보고 읽기·입력 보호·출발 복귀를 반영했다.** [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7) · [연결16 결과·수용 경계](cycles/2026-10-16-report-area-16/RESULT.md). [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
+**제품 기준 checkpoint에 프로젝트 카드 홈·공간 탐색·보고 읽기와 함께, 같은 영역의 현재 설명 갱신·사용자 정정·다음 요청 인계·출발 복귀를 반영했다.** [PR #8](https://github.com/tlsee0813-cmd/agentflow-studio/pull/8) · [갱신17 결과·수용 범위](cycles/2026-10-22-area-update-17/RESULT.md). [PR #7](https://github.com/tlsee0813-cmd/agentflow-studio/pull/7) · [연결16 결과·수용 경계](cycles/2026-10-16-report-area-16/RESULT.md). [PR #6](https://github.com/tlsee0813-cmd/agentflow-studio/pull/6) · [홈15 결과](cycles/2026-10-16-project-home-15/RESULT.md). [PR #4](https://github.com/tlsee0813-cmd/agentflow-studio/pull/4) · [제품13 결과·검증·남은 조건](cycles/2026-10-16-pc-map-space-13/RESULT.md). 현재 공개 MOCK은 여전히 USE106이다. 제품 소스와 공개 배포를 혼동하지 않는다.
 
 ## 제품 목적과 현재 범위
 
@@ -14,7 +14,7 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합42519b1d](https://github.com/tlsee0813-cmd/agentflow-studio/commit/42519b1d76e36f7aca22931502d299a09f42732e), 제품소스 [a0f0ae78](https://github.com/tlsee0813-cmd/agentflow-studio/commit/a0f0ae786c580a8919cede07db48d4397b58b114) | 홈15 위 현재 구상·선택 보고 대조, 입력 종류/대상 보호, 명시 다음 행동·복귀. [결과·한계](cycles/2026-10-16-report-area-16/RESULT.md) |
+| 제품 기준 checkpoint | [병합 ac0358d](https://github.com/tlsee0813-cmd/agentflow-studio/commit/ac0358df301711221c9f720259d33368ddf64206), 제품 소스 [e17370e](https://github.com/tlsee0813-cmd/agentflow-studio/commit/e17370e83edccaf954b419054ee4748233752922) | 구조화된 결과 수신 한 번으로 같은 영역의 현재 설명을 갱신. 사용자 구상·정정·미채택 제안·근거를 구별하고 다음 요청 인계와 지도 복귀에 연결. [결과·한계](cycles/2026-10-22-area-update-17/RESULT.md) |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |
@@ -24,9 +24,15 @@
 
 USE106과 GUIDE107은 같은 이전 공개 소스에서 갈라진 병렬 작업이다. 문서 정리가 두 제품 소스를 합쳤다는 뜻은 아니다. main·gh-pages는 그대로 유지하고, 기존22개 브랜치는 [태그 보관·SHA 검증 후 정리](REPOSITORY_ARCHIVE.md)했다. PR #1·#2는 미병합으로 닫았다. 이전 인계 당시 사용자 개편안 대기 상태였으며, 이후 연구는 [ACTIVE](cycles/ACTIVE.md)에 기록한다.
 
+## 갱신17 검증과 수용 경계
+
+외부에서 대상·기준·의미를 정리한 return.2 입력을 받아 현재 설명을 별도로 반영한다. 사용자 구상은 유지하고 오류 정정과 미채택 제안은 구별한다. 실제 새 요청으로 유효한 설명을 출처 있는 참고로 넘기며, 명시 기준 변경 뒤 낡은 설명은 제외한다. [결과](cycles/2026-10-22-area-update-17/RESULT.md)에 작성자·독립 실행·최종 CI와 실패→수정 이력을 분리했다.
+
+자동 수집·의미 추출·자연어 모순 판정이나 실제 외부 세션 실행을 수용한 것이 아니다. 동일한 평면 Area를 대상으로 한 갱신이며 실제 포함 계층·혼합 깊이는 후속이다. 다른 탭 자동 갱신은 기존 미해결 범위다. 공개 MOCK은 USE106 그대로이며, 현재 미리보기 실행 여부는 [ACTIVE](cycles/ACTIVE.md)를 따른다.
+
 ## 연결16 검증과 수용 경계
 
-현재 Area.note와 명시 선택한 보고를 함께 읽고 새 요청 또는 기존 입력으로 이어가는 범위를 통합했다. 독립 검토에서 발견한 보고 전환 펼침 누출을 수정하고 동일 독립검사, 별도 PC 대상·저장·복귀·긴영역 왕복과 최종 양OS CI를 확인했다. [결과와 공유 원본](cycles/2026-10-16-report-area-16/RESULT.md)에 작성자·독립·시각·총괄 직접 확인을 분리했다. [현재 PC 체험](http://127.0.0.1:8765/product16-report-area-preview/runtime/index.html)은 공개배포가 아닌 정적 MOCK이다.
+현재 Area.note와 명시 선택한 보고를 함께 읽고 새 요청 또는 기존 입력으로 이어가는 범위를 통합했다. 독립 검토에서 발견한 보고 전환 펼침 누출을 수정하고 동일 독립검사, 별도 PC 대상·저장·복귀·긴영역 왕복과 최종 양OS CI를 확인했다. [결과와 공유 원본](cycles/2026-10-16-report-area-16/RESULT.md)에 작성자·독립·시각·총괄 직접 확인을 분리했다. [이전 연결16 PC 체험 경로](http://127.0.0.1:8765/product16-report-area-preview/runtime/index.html)는 당시 로컬 정적 MOCK이다. 10월22일 해당 서버 종료를 확인했으므로 현재 접속 가능한 체험 링크로 취급하지 않는다.
 
 다른 탭 저장을 현재 탭 화면에 즉시 반영하지 않는 기존 반례는 남아 있고, 해당 검사와 전체 수집기는exit1이다. 외부 저장을 오래된 탭이 덮어쓰지 못하는 충돌 보호는 확인했다. 출발 영역 소실 fallback 등 미검증 경로를 모두 통과했다고 하지 않는다. 자동 전달·자동 지도 갱신과 GUIDE107 실제AI 품질은 이번 수용 범위가 아니다.
 
@@ -74,7 +80,7 @@ C2는 해당 표본 통과, C1은 부분 개선이나 전체 흐름 미입증, C
 - 브라우저 로컬 저장·백업/복구는 있으나 계정 간 동기화는 없다. quota 오류 뒤 메모리에만 남은 변경을 영구 저장으로 약속하지 않는다.
 - MOCK의 의미 오해와 원문 조건·미정의 완전한 자동 추출은 해결됐다고 주장하지 않는다. 실제 AI 후보도 위 의미 품질 한계가 남았다.
 - 실제 고객의 시간 절감·효용, 일반 모델 정확도·운영 준비는 미검증이다. AI의 역할 수행 검사와 사람의 실제 개발 사용성 검사는 다르다.
-- PC 첫 화면 공간과 도구 접근은 제품13에서 한정 개선했다. 선택 카드의 화면 내 접근, 상세 읽기 부담, 새 외부 기록과 사용자 수정의 통합은 남아 있다. 현재 배정·진행 여부는 [ACTIVE](cycles/ACTIVE.md)를 본다. 이전 정지 문구와 별개로 사용자가 연구·개발 재개를 지시했다.
+- PC 첫 화면 공간과 도구 접근은 제품13에서 한정 개선했다. 명시 위치 찾기의 카드 접근과 같은 영역 설명 갱신은 갱신17에서 한정 보완했다. 임의 탐색 전반의 카드 접근, 상세 읽기 부담, 계층·자동 의미 정리의 일반화는 남아 있다. 현재 배정·진행 여부는 [ACTIVE](cycles/ACTIVE.md)를 본다. 이전 정지 문구와 별개로 사용자가 연구·개발 재개를 지시했다.
 
 ## 근거와 과거 기록
 
