@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_ef7fb3c5-8fe2-4ca9-9c69-5435d8db6176",
+  "taskId": "T_fff6e95b-9fce-45b3-a2ec-8eaa0bf3e023",
+  "returnId": "H_3eb496f7-0656-4d9d-ae30-3667a048af31",
+  "report": "[명시 합성 A1] 실제 구현·외부 검사 없음. 예약 가능 여부는 기존 예약을 확인해 중복 접수를 막는 부분이다. 동시 접수 기준은 아직 미확인이다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_4eb7708b-d840-4277-b85e-a5db273e90e6",
+    "basedOn": 0,
+    "summary": "예약 가능 여부는 기존 예약을 확인해 중복 접수를 막는 부분이다. 동시 접수 기준은 아직 미확인이다.",
+    "changes": [
+      "명시 합성 설명 A1"
+    ],
+    "proposal": null,
+    "origin": "독립 관측자의 템플릿 기반 합성 설명. AI 실행/사실 검증 없음."
+  }
+}

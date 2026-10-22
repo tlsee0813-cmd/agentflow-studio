@@ -1,0 +1,378 @@
+[
+  {
+    "viewport": [
+      1280,
+      720
+    ],
+    "fiveAreas": true,
+    "sameTreeAndRelations": true,
+    "ARevision": 2,
+    "AHeld": [
+      null,
+      null
+    ],
+    "BHeld": [
+      "plan-changed"
+    ],
+    "BNote": "예약 결과와 대기 상태를 이용자에게 알리는 문구를 준비한다. 발송 방식은 미정이다.",
+    "Q": {
+      "id": "T_aecaabb3-4b4e-4e07-8850-013817deb8a6",
+      "sourceIds": [
+        "S_6f4578dd-fc65-46c0-acf0-76fb8099a69e"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "예약이 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_6f4578dd-fc65-46c0-acf0-76fb8099a69e",
+              "revision": 15
+            }
+          ]
+        },
+        "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+          "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 15,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 14,
+        "brief": "도서 대출 예약 서비스. 중복 예약은 막고 예약 결과를 알린다.",
+        "area": {
+          "id": "A_6d263250-fe03-49c7-870d-754ebbf731dc",
+          "name": "예약 오류 확인",
+          "note": "예약 실패 원인은 아직 모른다. 실제 상황을 확인한다."
+        }
+      },
+      "areaId": "A_6d263250-fe03-49c7-870d-754ebbf731dc"
+    },
+    "currentTask": {
+      "id": "T_1bcafb61-3369-43e2-8605-a718a5a6f2a7",
+      "sourceIds": [
+        "S_fa1076b6-30b5-4657-bcc3-da47cd5d3cfe"
+      ],
+      "parentTaskId": "T_21d19190-3bac-48bf-b277-3498e252f36d",
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "separate",
+          "goal": "예약 가능 여부에서 동시 접수 시 중복 예약을 막는 우선순위 대안을 정리해 주세요. 알림 발송 방식은 이번 변경 범위가 아닙니다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D5",
+              "sourceId": "S_fa1076b6-30b5-4657-bcc3-da47cd5d3cfe",
+              "revision": 38
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 38,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-22T16:58:01.144Z",
+          "method": "clipboard",
+          "revision": 39,
+          "chars": 7579,
+          "digest": "c37246d7",
+          "work": {
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_58037bf8-8b30-47ba-82f0-e70aa74bcbc4",
+          "background": {
+            "version": "background.1",
+            "revision": 37,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막고 예약 결과를 알린다.",
+            "area": {
+              "id": "A_bcb763b3-d098-40f6-9ca8-a4b9d0c85620",
+              "name": "예약 가능 여부",
+              "note": "같은 도서의 기존 예약을 확인하여 중복 예약을 막는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_bcb763b3-d098-40f6-9ca8-a4b9d0c85620",
+            "understanding": 2,
+            "stamp": {
+              "name": "예약 가능 여부",
+              "note": "같은 도서의 기존 예약을 확인하여 중복 예약을 막는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_f8d59415-1d65-4615-b53d-a8b8d60b346d",
+                  "name": "예약",
+                  "note": "도서 예약을 받고 중복 예약을 막는다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 37,
+        "brief": "도서 대출 예약 서비스. 중복 예약은 막고 예약 결과를 알린다.",
+        "area": {
+          "id": "A_bcb763b3-d098-40f6-9ca8-a4b9d0c85620",
+          "name": "예약 가능 여부",
+          "note": "같은 도서의 기존 예약을 확인하여 중복 예약을 막는다."
+        }
+      },
+      "areaId": "A_bcb763b3-d098-40f6-9ca8-a4b9d0c85620"
+    },
+    "followupExactChild": true,
+    "clipboardHasCurrentA2": true,
+    "clipboardDoesNotUseHeldAsCurrent": true
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "fiveAreas": true,
+    "sameTreeAndRelations": true,
+    "ARevision": 2,
+    "AHeld": [
+      null,
+      null
+    ],
+    "BHeld": [
+      "plan-changed"
+    ],
+    "BNote": "예약 결과와 대기 상태를 이용자에게 알리는 문구를 준비한다. 발송 방식은 미정이다.",
+    "Q": {
+      "id": "T_6789e827-da4c-45bd-90ae-cb611eae3862",
+      "sourceIds": [
+        "S_8920c796-ab02-4801-9aa9-7b176c125267"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "예약이 실패하는 오류가 있는데 원인은 아직 모르겠어요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_8920c796-ab02-4801-9aa9-7b176c125267",
+              "revision": 15
+            }
+          ]
+        },
+        "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+          "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 15,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 14,
+        "brief": "도서 대출 예약 서비스. 중복 예약은 막고 예약 결과를 알린다.",
+        "area": {
+          "id": "A_bb65aefc-46e4-40e6-899d-ad9aee035292",
+          "name": "예약 오류 확인",
+          "note": "예약 실패 원인은 아직 모른다. 실제 상황을 확인한다."
+        }
+      },
+      "areaId": "A_bb65aefc-46e4-40e6-899d-ad9aee035292"
+    },
+    "currentTask": {
+      "id": "T_5a0bd5f3-ed5b-4ced-9655-73613f8b4b7a",
+      "sourceIds": [
+        "S_74c8a6c0-48f6-4e1a-b36c-593c22d5b642"
+      ],
+      "parentTaskId": "T_6366e929-1001-4332-be09-2f233ce3001a",
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "separate",
+          "goal": "예약 가능 여부에서 동시 접수 시 중복 예약을 막는 우선순위 대안을 정리해 주세요. 알림 발송 방식은 이번 변경 범위가 아닙니다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D5",
+              "sourceId": "S_74c8a6c0-48f6-4e1a-b36c-593c22d5b642",
+              "revision": 38
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 38,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-22T17:03:40.814Z",
+          "method": "clipboard",
+          "revision": 39,
+          "chars": 7579,
+          "digest": "9ccd0722",
+          "work": {
+            "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_85c9e96e-3770-43e6-80e6-e9dc267c48d5",
+          "background": {
+            "version": "background.1",
+            "revision": 37,
+            "brief": "도서 대출 예약 서비스. 중복 예약은 막고 예약 결과를 알린다.",
+            "area": {
+              "id": "A_4eb7708b-d840-4277-b85e-a5db273e90e6",
+              "name": "예약 가능 여부",
+              "note": "같은 도서의 기존 예약을 확인하여 중복 예약을 막는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_4eb7708b-d840-4277-b85e-a5db273e90e6",
+            "understanding": 2,
+            "stamp": {
+              "name": "예약 가능 여부",
+              "note": "같은 도서의 기존 예약을 확인하여 중복 예약을 막는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_e071d033-b4c3-4b0b-924d-c0a05c4e4833",
+                  "name": "예약",
+                  "note": "도서 예약을 받고 중복 예약을 막는다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 37,
+        "brief": "도서 대출 예약 서비스. 중복 예약은 막고 예약 결과를 알린다.",
+        "area": {
+          "id": "A_4eb7708b-d840-4277-b85e-a5db273e90e6",
+          "name": "예약 가능 여부",
+          "note": "같은 도서의 기존 예약을 확인하여 중복 예약을 막는다."
+        }
+      },
+      "areaId": "A_4eb7708b-d840-4277-b85e-a5db273e90e6"
+    },
+    "followupExactChild": true,
+    "clipboardHasCurrentA2": true,
+    "clipboardDoesNotUseHeldAsCurrent": true
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_1a540b06-b471-4ed2-92ea-5c23311ff3dc",
+  "taskId": "T_f3a7ee3b-2c52-43d4-afd1-d59e4ebc838c",
+  "returnId": "H_1f89acd2-73d0-468a-9a0f-cababa0f9ac1",
+  "report": "[명시 합성 B1] 실제 구현·외부 검사 없음. 예약 결과 알림은 예약 확정 문구만 전달하는 부분이다. 대기 상태는 다루지 않는다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_44ab04fb-b340-4eeb-9f3c-23b759d60861",
+    "basedOn": 0,
+    "summary": "예약 결과 알림은 예약 확정 문구만 전달하는 부분이다. 대기 상태는 다루지 않는다.",
+    "changes": [
+      "명시 합성 설명 B1"
+    ],
+    "proposal": null,
+    "origin": "독립 관측자의 템플릿 기반 합성 설명. AI 실행/사실 검증 없음."
+  }
+}

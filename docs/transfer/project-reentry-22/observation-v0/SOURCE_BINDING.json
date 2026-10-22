@@ -1,0 +1,32 @@
+{
+  "sourceCommit": "f7b25a586dca42466f07c7db2bedb9c59703deda",
+  "runtimeSourceCommit": "922848c0957992f84b8a0e2696a86b98d5f51c0d",
+  "productThreeFilesByteIdentical": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260706,
+      "sha256": "5370d0a6acd3a1b60e3f5c81e8e3a4be647665d23c18667f810b6df7634f9f58",
+      "pinnedEqual": true,
+      "beforeAfter": "unchanged versus existing cycle21 source binding; post-read checked"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "pinnedEqual": true,
+      "beforeAfter": "unchanged versus existing cycle21 source binding; post-read checked"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "pinnedEqual": true,
+      "beforeAfter": "unchanged versus existing cycle21 source binding; post-read checked"
+    }
+  ],
+  "contract": "3e9584d31604e5ae3665331fc5053ca00c9f510f",
+  "HTTP": "runtime/runtime.json response-body hash and disk-at-response/after",
+  "externalSession": 96975,
+  "actualOuterExit": 0,
+  "paidAI": 0
+}
