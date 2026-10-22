@@ -1,0 +1,32 @@
+diff --git a/../product20-author-evidence/candidate-v1-source/app.ts b/../product20-author-evidence/candidate-v2-final-source/app.ts
+index 214de58..a230948 100644
+--- a/../product20-author-evidence/candidate-v1-source/app.ts
++++ b/../product20-author-evidence/candidate-v2-final-source/app.ts
+@@ -2209,10 +2209,10 @@ function renderTaskView(root:HTMLElement,t:Task) {
+ /** REPORT16: the opening of a report as written: at most six lines and REPORT_LEAD characters, line breaks kept. */
+ const REPORT_LEAD=300;
+ const KIND_SHORT:Record<Source['kind'],string>={...sourceName,report:'구현자 보고',evidence:'관찰·검사 자료'};
+-function reportExportWork(r:Task):HTMLElement {
++function reportExportWork(r:Task):HTMLElement|null {
++  if(!r.resultFile)return null;
+   const box=details('이 결과를 요청할 때 내보낸 작업문','task-report-export-work');
+   const missing=()=>box.append(node('p','이 보고에는 정확한 내보내기 작업문 사본이 없어요. 현재 작업문으로 대신하지 않았어요.','hint'));
+-  if(!r.resultFile){missing();return box;}
+   const file=parseResultFile(r.resultFile.rawText),target=project.tasks.find(t=>t.id===file.taskId),record=target?.handoffs.find(h=>h.returnId===file.returnId);
+   box.dataset.handoffId=file.returnId;box.dataset.exportTaskId=file.taskId;
+   if(!record?.work){missing();return box;}
+@@ -2256,10 +2256,12 @@ function pointedSection(t:Task,returnId:string):HTMLElement {
+     box.append(part);
+   }
+   // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run, so the wording never infers one.
+-  box.append(reportExportWork(r));
++  const exported=reportExportWork(r);if(exported)box.append(exported);
+   const hops=path.map((x,i)=>i===0?`${no(x)} 요청`:i===path.length-1?`${no(x)} 이 보고`:`${no(x)} 보고`);
+   const link=details(`연결 경로 보기 · ${path.length>2?'이전 보고에 연결된 보고':'이 요청에 바로 연결된 보고'}`,'task-report-path');
+-  link.append(node('p',`연결: ${hops.join(' › ')}`,'hint'));box.append(link);
++  link.append(node('p',`연결: ${hops.join(' › ')}`,'hint'));
++  if(!r.resultFile){const note=node('p','이 보고와 정확히 연결된 당시 자료 사본은 없어요. 현재 내용으로 대신하지 않아요.','hint');note.id='task-report-context-missing';link.append(note);}
++  box.append(link);
+   return box;
+ }
+ function renderUnplaced(root:HTMLElement) {

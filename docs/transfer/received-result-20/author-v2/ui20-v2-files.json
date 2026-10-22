@@ -1,0 +1,17 @@
+[
+  {
+    "path": "app/continuity/src/client/app.ts",
+    "bytes": 260479,
+    "sha256": "A5D994665042FFB8F22E845A9AAAC254215D94A47EEF0E62BF1127500F53AF27"
+  },
+  {
+    "path": "app/continuity/public/styles.css",
+    "bytes": 72783,
+    "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38"
+  },
+  {
+    "path": "app/continuity/public/index.html",
+    "bytes": 17960,
+    "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0"
+  }
+]

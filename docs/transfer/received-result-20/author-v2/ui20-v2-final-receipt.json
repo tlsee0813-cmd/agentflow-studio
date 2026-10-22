@@ -1,0 +1,49 @@
+{
+  "kind": "cycle20 candidate-v2-final no-export report context fix",
+  "baseline": "da3b0171c807dc7241f5fff0ce4f19ba3f2ef463",
+  "previousAcceptedStaticSource": "candidate-v1-source/",
+  "beforeAppSha256": "564B5DCB45896D1543708D90514EDCDE9699B33AA997394A55047746B4DA3E9B",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260703,
+      "sha256": "3431CB1344E22C291EFD28334C76257B522325B61B037270AC9EF76CEEBA0151"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86DDA3C11A927D454A0086096B255271B70447BF6F9C354CA09060CD0373ED38"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "C3981C397BA764554DA7416F488443EA248E6C51C6891313D01B51B568E525D0"
+    }
+  ],
+  "source": "candidate-v2-final-source/",
+  "intermediate": "candidate-v2-source A5D99466 omission-only source and ui20-v2-* raw preserved before neutral context line",
+  "trigger": "Parent reported PR11 afc3fbe0 Ubuntu/Windows spatial102_browser.py test11 failure: pasted no-export chain was shown a heading presupposing an exported work text",
+  "change": [
+    "No resultFile: reportExportWork returns null, so no export-work block or four-value fallback is constructed",
+    "No resultFile: existing connection-path details contains one neutral missing exact-context sentence",
+    "Valid resultFile: exact export task/H lookup and four ExportRecord.work values unchanged"
+  ],
+  "neutralSelector": "task-report-path > #task-report-context-missing",
+  "neutralText": "이 보고와 정확히 연결된 당시 자료 사본은 없어요. 현재 내용으로 대신하지 않아요.",
+  "checks": {
+    "typeSyntaxBoundary": 0,
+    "diffCheck": 0,
+    "build": 0
+  },
+  "runtime": "Node24.19 author auxiliary; existing locked TypeScript5.8.3",
+  "browser": "NOT_RUN; actual CI/browser regression acceptance remains separate",
+  "preserved": [
+    "No test guard weakening",
+    "No validator, domain, schema, import target, receipt, Origin or snapshot-value changes",
+    "CSS86DDA3 and HTMLC3981C identical to v1",
+    "v0/v1/intermediate v2 source bytes remain in separate folders"
+  ],
+  "patch": "ui20-v1-to-v2-final-relative.patch",
+  "commands": "ui20-v2-final-{check,build,diff-check}.{stdout.log,stderr.log,exit.json}",
+  "review": "Exact frozen final source sent to Astra; independent result reported separately"
+}
