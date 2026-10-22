@@ -1,0 +1,13 @@
+diff --git a/work/product29-author-evidence/candidate-v0-source/styles.css b/work/product29-author-evidence/candidate-fix2-source/styles.css
+index 76530f7..f125211 100644
+--- a/work/product29-author-evidence/candidate-v0-source/styles.css
++++ b/work/product29-author-evidence/candidate-fix2-source/styles.css
+@@ -1155,7 +1155,7 @@ details[open]>summary {
+ .work-reference-caption>.hint{font-size:11px;line-height:1.5;margin:4px 0}
+ .work-reference-body{max-height:min(62vh,520px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;overflow-wrap:anywhere;padding:4px 3px;min-width:0}
+ .work-reference-body>.area-idea{margin-top:0}
+-.work-reference-body .source-raw{font-size:12px;line-height:1.6}
++.work-reference-body .source-raw{font-size:12px;line-height:1.6;max-height:none;overflow:visible}
+ .work-reference-body details>summary{font-size:12px;cursor:pointer;color:var(--accent-dark)}
+ .work-reference-body .hint,.work-reference-body .source-meta{font-size:11px;line-height:1.5}
+ @container (min-width:760px){

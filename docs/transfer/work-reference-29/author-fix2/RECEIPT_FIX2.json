@@ -1,0 +1,63 @@
+{
+  "baseline": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "prior": "RECEIPT_FIX1.json",
+  "status": "fix2 scoped CSS 단일화 동결 · 실제 Cloud 수용 대기",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "source": "candidate-fix1-source/app.ts",
+      "bytes": 273253,
+      "sha256": "34f3610faae32b01d22f8a3fc52467b4e0b5d0d9c30059c6b4d201e22edc9477",
+      "gitBlob": "27098b83d48cef4289da076c46f0e93011dbe4e0"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "source": "candidate-fix2-source/styles.css",
+      "bytes": 74227,
+      "sha256": "c7ff244982397a42fb3f0bb5133c9631892fc4efa96566d86718b10dd94bc8f2",
+      "gitBlob": "f125211146dcab15f3a86826ad4c2271194790ba"
+    }
+  ],
+  "commands": [
+    {
+      "record": "type-fix2.exit.json",
+      "exit": 0,
+      "runtime": "Node24.19.0 author auxiliary",
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p continuity/tsconfig.json"
+    },
+    {
+      "record": "build-fix2.exit.json",
+      "exit": 0,
+      "runtime": "Node24.19.0 author auxiliary",
+      "command": "node continuity/scripts/build.mjs"
+    },
+    {
+      "record": "diff-fix2.exit.json",
+      "exit": 0,
+      "command": "git diff --check"
+    }
+  ],
+  "change": "work-reference-body 안 source-raw만 max-height:none;overflow:visible. 바깥 body 제한/기억과 details는 유지. app.ts와 일반 source-raw 불변.",
+  "observedByCoordinator": "1440 same A1 + selected r2에서 다른 A2 exact H 보고수신 후 실제 summary.scrollTop275→0, body0→0. 작성자는 원시Cloud파일을 직접 읽기 전이며 제공값을 근거로 분리한다.",
+  "staticCause": "일반 source-raw max-height360/overflow:auto와 reference body max-height62vh/520·overflow:auto가 중첩. 기존 reading.y는 body만 저장했다.",
+  "alternatives": [
+    "채택: 이 새 참고 안 source-raw 자체 스크롤만 없애 기존 body 하나에서 위치를 기억한다. 페이지/바깥 body 제한은 제거하지 않는다.",
+    "미채택: 각 내부 요소의 identity/내용/스크롤 수명을 추가로 기억한다. 기존 내용배치는 유지하지만 이 새 영역에서는 불필요한 복잡성이 커진다."
+  ],
+  "remainingLimit": "rawFileDetails의 readonly textarea.export-preview는 source-raw가 아니므로 이 CSS 대상 밖이다. 그 내부 JSON 원문 스크롤까지 보존했다고 주장하지 않는다.",
+  "testContract": [
+    "SUMMARY 위 실제 wheel이 body를 스크롤하는지 확인; summary 자체 scroll range0와 body 실제비영점 위치를 구별",
+    "같은 project/task/area/pin에서 A2 exact H 수신 후 실제 body 읽기위치·선택 본문·펼침 보존",
+    "접힌 source-raw 원문을 열어 실제 읽고 같은pin재렌더 뒤 open/body위치 보존",
+    "첫U 입력 시 네 입력/본문 DOM·focus·selection·body위치 불변",
+    "명시닫기/재열기 및 task/project/area/선택revision 교체에는 이전 읽기위치 누출없음"
+  ],
+  "patches": [
+    "candidate-fix2-only.patch",
+    "candidate-fix2.patch"
+  ],
+  "notRun": [
+    "단위/브라우저/서버/Cloud/CI",
+    "설치/유료 호출/원격 쓰기"
+  ]
+}
