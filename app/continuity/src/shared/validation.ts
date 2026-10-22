@@ -169,8 +169,23 @@ function appFacts(v: unknown, req: {ticket:Ticket;sources:Source[];bases:Context
   // Current versions are present in full in this request, so their coverage can be checked exactly.
   for(const b of req.bases) if(inputIds.has(b.sourceId)) ensure(currentRecords.has(b.id));
 }
+/** Structural provenance only: neither these IDs nor source/origin/text authenticate the description's claims. */
+function contextAreaDescription(v:unknown,t:Ticket) {
+  if(v===null)return;
+  obj(v,['taskId','areaId','revision','by','corrects','source','text']);id(v.taskId);id(v.areaId);
+  ensure(v.taskId===t.taskId);integer(v.revision);ensure((v.revision as number)>0&&(v.revision as number)<=t.revision);
+  text(v.text,SUMMARY_LIMIT);ensure(v.by==='external'||v.by==='user');
+  if(v.by==='user') {
+    ensure(v.source===null);integer(v.corrects);ensure((v.corrects as number)>=1&&v.corrects===(v.revision as number)-1);
+  } else {
+    ensure(v.corrects===null);obj(v.source,['taskId','returnId','origin']);id(v.source.taskId);id(v.source.returnId);text(v.source.origin,200);
+  }
+}
 export function validateRequest(v: unknown): ContextRequest {
-  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts','previousIntent','purposeIntent','background']); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
+  // Earlier valid clients sent no description key. Keep their shape and bytes; never invent a null or current value.
+  const hasDescription=!!v&&typeof v==='object'&&Object.hasOwn(v,'currentAreaDescription');
+  obj(v,['schemaVersion','ticket','projectName','sources','bases','previousWork','appFacts','previousIntent','purposeIntent','background',...(hasDescription?['currentAreaDescription']:[])]); ensure(v.schemaVersion === API_SCHEMA); ticket(v.ticket); text(v.projectName,120);
+  if(hasDescription)contextAreaDescription(v.currentAreaDescription,v.ticket as Ticket);
   background(v.background,(v.ticket as Ticket).revision);
   list(v.sources); list(v.bases); for (const s of v.sources) source(s); for (const b of v.bases) contextBasis(b);
   ensure(v.sources.length > 0); unique(v.sources as Source[]); unique(v.bases as {id:string}[]);

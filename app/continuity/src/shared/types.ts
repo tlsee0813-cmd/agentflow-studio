@@ -164,6 +164,13 @@ export interface PlanFact {
 export interface AppFacts {
   taskId: string; inputs: { sourceId: string; kind: SourceKind }[]; records: PlanFact[];
 }
+/** A bounded reference for this task's current area, not a decision, instruction or verified fact.
+ * A user's description correction has no invented return/source; corrects names the prior local revision. */
+export interface ContextAreaDescription {
+  taskId: string; areaId: string; revision: number; by: 'external' | 'user'; corrects: number | null;
+  source: { taskId: string; returnId: string; origin: string } | null;
+  text: string;
+}
 export interface ContextRequest {
   schemaVersion: typeof API_SCHEMA; ticket: Ticket; projectName: string;
   sources: Source[]; bases: ContextBasis[]; appFacts: AppFacts; previousIntent: PreviousIntent|null;
@@ -172,6 +179,8 @@ export interface ContextRequest {
   previousWork: (WorkValues & { taskId: string; aiTextExcluded: boolean; manualConditionFields: ('scope' | 'checks')[] }) | null;
   /** FLOW091-C: this task's fixed plan copy, as separate material (not a source, basis or decision). */
   background: Background | null;
+  /** Optional for earlier valid context. Absence stays absent; never backfilled on the server. */
+  currentAreaDescription?: ContextAreaDescription | null;
 }
 export interface Envelope { mode: 'mock' | 'deepseek'; ticket: Ticket; advice: Advice }
 export const SOURCE_LABEL: Record<SourceKind, string> = {
