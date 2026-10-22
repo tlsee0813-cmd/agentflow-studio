@@ -1,0 +1,318 @@
+[
+  {
+    "scene": "author13.Pc13.test_01_default_and_selected_first_screen",
+    "viewport": [
+      1280,
+      720
+    ],
+    "windowY": 0,
+    "mapRect": {
+      "x": 264,
+      "y": 294.125,
+      "width": 974,
+      "height": 409.875,
+      "top": 294.125,
+      "right": 1238,
+      "bottom": 704,
+      "left": 264
+    },
+    "toolbarRect": {
+      "x": 264,
+      "y": 248.125,
+      "width": 974,
+      "height": 36,
+      "top": 248.125,
+      "right": 1238,
+      "bottom": 284.125,
+      "left": 264
+    },
+    "controlsRect": {
+      "x": 1015.4375,
+      "y": 305.125,
+      "width": 211.5625,
+      "height": 46,
+      "top": 305.125,
+      "right": 1227,
+      "bottom": 351.125,
+      "left": 1015.4375
+    },
+    "panelRect": null,
+    "firstInfoRect": {
+      "x": 1193.3609619140625,
+      "y": 327.67498779296875,
+      "width": 38.0889892578125,
+      "height": 24.70001220703125,
+      "top": 327.67498779296875,
+      "right": 1231.449951171875,
+      "bottom": 352.375,
+      "left": 1193.3609619140625
+    },
+    "fitRect": {
+      "x": 1148.46875,
+      "y": 310.125,
+      "width": 71.53125,
+      "height": 36,
+      "top": 310.125,
+      "right": 1220,
+      "bottom": 346.125,
+      "left": 1148.46875
+    },
+    "intersection": {
+      "left": 1193.3609619140625,
+      "right": 1220,
+      "top": 327.67498779296875,
+      "bottom": 346.125
+    },
+    "centreTopElement": {
+      "id": "map-fit",
+      "tag": "BUTTON",
+      "cls": "quiet",
+      "text": "전체 맞춤"
+    },
+    "threeHits": [
+      false,
+      false,
+      true
+    ],
+    "computedTransform": "matrix(0.95, 0, 0, 0.95, 424, -52)",
+    "worldCardHeightDerived": 180.0,
+    "diagnosticBoundary": "post original assertion/click timeout, before teardown; original click/expect unchanged; no correcting movements"
+  },
+  {
+    "scene": "author13.Pc13.test_02_one_normal_notice_stays_visible",
+    "viewport": [
+      1280,
+      720
+    ],
+    "windowY": 0,
+    "mapRect": {
+      "x": 264,
+      "y": 361.71875,
+      "width": 974,
+      "height": 342.28125,
+      "top": 361.71875,
+      "right": 1238,
+      "bottom": 704,
+      "left": 264
+    },
+    "toolbarRect": {
+      "x": 264,
+      "y": 315.71875,
+      "width": 974,
+      "height": 36,
+      "top": 315.71875,
+      "right": 1238,
+      "bottom": 351.71875,
+      "left": 264
+    },
+    "controlsRect": {
+      "x": 1015.4375,
+      "y": 372.71875,
+      "width": 211.5625,
+      "height": 46,
+      "top": 372.71875,
+      "right": 1227,
+      "bottom": 418.71875,
+      "left": 1015.4375
+    },
+    "panelRect": null,
+    "firstInfoRect": {
+      "x": 1193.3609619140625,
+      "y": 395.26873779296875,
+      "width": 38.0889892578125,
+      "height": 24.70001220703125,
+      "top": 395.26873779296875,
+      "right": 1231.449951171875,
+      "bottom": 419.96875,
+      "left": 1193.3609619140625
+    },
+    "fitRect": {
+      "x": 1148.46875,
+      "y": 377.71875,
+      "width": 71.53125,
+      "height": 36,
+      "top": 377.71875,
+      "right": 1220,
+      "bottom": 413.71875,
+      "left": 1148.46875
+    },
+    "intersection": {
+      "left": 1193.3609619140625,
+      "right": 1220,
+      "top": 395.26873779296875,
+      "bottom": 413.71875
+    },
+    "centreTopElement": {
+      "id": "map-fit",
+      "tag": "BUTTON",
+      "cls": "quiet",
+      "text": "전체 맞춤"
+    },
+    "threeHits": [
+      false,
+      false,
+      true
+    ],
+    "computedTransform": "matrix(0.95, 0, 0, 0.95, 424, -52)",
+    "worldCardHeightDerived": 180.0,
+    "diagnosticBoundary": "post original assertion/click timeout, before teardown; original click/expect unchanged; no correcting movements"
+  },
+  {
+    "scene": "author13.Pc13Boundaries.test_06_long_purpose_idea_and_title",
+    "viewport": [
+      1280,
+      720
+    ],
+    "windowY": 0,
+    "mapRect": {
+      "x": 264,
+      "y": 294.125,
+      "width": 974,
+      "height": 409.875,
+      "top": 294.125,
+      "right": 1238,
+      "bottom": 704,
+      "left": 264
+    },
+    "toolbarRect": {
+      "x": 264,
+      "y": 248.125,
+      "width": 974,
+      "height": 36,
+      "top": 248.125,
+      "right": 1238,
+      "bottom": 284.125,
+      "left": 264
+    },
+    "controlsRect": {
+      "x": 1015.4375,
+      "y": 305.125,
+      "width": 211.5625,
+      "height": 46,
+      "top": 305.125,
+      "right": 1227,
+      "bottom": 351.125,
+      "left": 1015.4375
+    },
+    "panelRect": null,
+    "firstInfoRect": {
+      "x": 1193.3609619140625,
+      "y": 327.67498779296875,
+      "width": 38.0889892578125,
+      "height": 24.70001220703125,
+      "top": 327.67498779296875,
+      "right": 1231.449951171875,
+      "bottom": 352.375,
+      "left": 1193.3609619140625
+    },
+    "fitRect": {
+      "x": 1148.46875,
+      "y": 310.125,
+      "width": 71.53125,
+      "height": 36,
+      "top": 310.125,
+      "right": 1220,
+      "bottom": 346.125,
+      "left": 1148.46875
+    },
+    "intersection": {
+      "left": 1193.3609619140625,
+      "right": 1220,
+      "top": 327.67498779296875,
+      "bottom": 346.125
+    },
+    "centreTopElement": {
+      "id": "map-fit",
+      "tag": "BUTTON",
+      "cls": "quiet",
+      "text": "전체 맞춤"
+    },
+    "threeHits": [
+      false,
+      false,
+      true
+    ],
+    "computedTransform": "matrix(0.95, 0, 0, 0.95, 424, -52)",
+    "worldCardHeightDerived": 180.0,
+    "diagnosticBoundary": "post original assertion/click timeout, before teardown; original click/expect unchanged; no correcting movements"
+  },
+  {
+    "scene": "author13.Pc13.test_08_map_tools_usable_in_the_first_screen",
+    "viewport": [
+      1280,
+      720
+    ],
+    "windowY": 0,
+    "mapRect": {
+      "x": 264,
+      "y": 294.125,
+      "width": 974,
+      "height": 409.875,
+      "top": 294.125,
+      "right": 1238,
+      "bottom": 704,
+      "left": 264
+    },
+    "toolbarRect": {
+      "x": 264,
+      "y": 248.125,
+      "width": 974,
+      "height": 36,
+      "top": 248.125,
+      "right": 1238,
+      "bottom": 284.125,
+      "left": 264
+    },
+    "controlsRect": {
+      "x": 1012.4375,
+      "y": 305.125,
+      "width": 211.5625,
+      "height": 46,
+      "top": 305.125,
+      "right": 1224,
+      "bottom": 351.125,
+      "left": 1012.4375
+    },
+    "panelRect": null,
+    "firstInfoRect": {
+      "x": 1190.3609619140625,
+      "y": 327.67498779296875,
+      "width": 38.0889892578125,
+      "height": 24.70001220703125,
+      "top": 327.67498779296875,
+      "right": 1228.449951171875,
+      "bottom": 352.375,
+      "left": 1190.3609619140625
+    },
+    "fitRect": {
+      "x": 1145.46875,
+      "y": 310.125,
+      "width": 71.53125,
+      "height": 36,
+      "top": 310.125,
+      "right": 1217,
+      "bottom": 346.125,
+      "left": 1145.46875
+    },
+    "intersection": {
+      "left": 1190.3609619140625,
+      "right": 1217,
+      "top": 327.67498779296875,
+      "bottom": 346.125
+    },
+    "centreTopElement": {
+      "id": "map-fit",
+      "tag": "BUTTON",
+      "cls": "quiet",
+      "text": "전체 맞춤"
+    },
+    "threeHits": [
+      false,
+      false,
+      true
+    ],
+    "computedTransform": "matrix(0.95, 0, 0, 0.95, 424, -52)",
+    "worldCardHeightDerived": 180.0,
+    "diagnosticBoundary": "post original assertion/click timeout, before teardown; original click/expect unchanged; no correcting movements"
+  }
+]

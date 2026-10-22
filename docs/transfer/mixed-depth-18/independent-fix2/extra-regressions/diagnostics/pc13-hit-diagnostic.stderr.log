@@ -1,0 +1,107 @@
+test_01_default_and_selected_first_screen (author13.Pc13.test_01_default_and_selected_first_screen) ... FAIL
+test_02_one_normal_notice_stays_visible (author13.Pc13.test_02_one_normal_notice_stays_visible) ... FAIL
+test_06_long_purpose_idea_and_title (author13.Pc13Boundaries.test_06_long_purpose_idea_and_title) ... FAIL
+test_08_map_tools_usable_in_the_first_screen (author13.Pc13.test_08_map_tools_usable_in_the_first_screen) ... ERROR
+
+======================================================================
+ERROR: test_08_map_tools_usable_in_the_first_screen (author13.Pc13.test_08_map_tools_usable_in_the_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 296, in test_08_map_tools_usable_in_the_first_screen
+    ids,Q,A,R=self.short_project();self.fresh_tab();self.tool_scenes(ids['예약'],'no notice: ');self.shot('07-tools')
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 290, in tool_scenes
+    self.page.locator(f'#node-info-{area}').click();expect(self.page.locator('#area-panel')).to_be_visible();self.assert_tools(f'{prefix}selected')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py", line 15637, in click
+    self._sync(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py", line 162, in click
+    return await self._frame._click(self._selector, strict=True, **params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py", line 566, in _click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.
+Call log:
+  - waiting for locator("#node-info-A_6a8f1d31-64dc-4c87-9e1b-7f9805fc751a")
+    - locator resolved to <button type="button" aria-pressed="false" class="quiet node-info" aria-label="예약 정보 (들어가지 않음)" id="node-info-A_6a8f1d31-64dc-4c87-9e1b-7f9805fc751a">정보</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <button id="map-fit" class="quiet" type="button">전체 맞춤</button> from <div class="map-controls">…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <button id="map-fit" class="quiet" type="button">전체 맞춤</button> from <div class="map-controls">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    11 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <button id="map-fit" class="quiet" type="button">전체 맞춤</button> from <div class="map-controls">…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+
+
+======================================================================
+FAIL: test_01_default_and_selected_first_screen (author13.Pc13.test_01_default_and_selected_first_screen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 110, in test_01_default_and_selected_first_screen
+    g=self.geom('default');self.assert_first_screen(g,'default')
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 105, in assert_first_screen
+    self.check(f'{label}: first card title reachable',g['firstTitleHit'],True);self.check(f'{label}: first card info reachable',g['firstInfoHit'],True)
+                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 64, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True : default: first card info reachable
+
+======================================================================
+FAIL: test_02_one_normal_notice_stays_visible (author13.Pc13.test_02_one_normal_notice_stays_visible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 152, in test_02_one_normal_notice_stays_visible
+    self.assert_first_screen(g,'notice');self.shot('03-notice')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 105, in assert_first_screen
+    self.check(f'{label}: first card title reachable',g['firstTitleHit'],True);self.check(f'{label}: first card info reachable',g['firstInfoHit'],True)
+                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 64, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True : notice: first card info reachable
+
+======================================================================
+FAIL: test_06_long_purpose_idea_and_title (author13.Pc13Boundaries.test_06_long_purpose_idea_and_title)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 323, in test_06_long_purpose_idea_and_title
+    g=self.geom('long');self.assert_first_screen(g,'long')
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 105, in assert_first_screen
+    self.check(f'{label}: first card title reachable',g['firstTitleHit'],True);self.check(f'{label}: first card info reachable',g['firstInfoHit'],True)
+                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/pc13_browser.py", line 64, in check
+    if delta is None:self.assertEqual(value,expected,name)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True : long: first card info reachable
+
+----------------------------------------------------------------------
+Ran 4 tests in 18.299s
+
+FAILED (failures=3, errors=1)
