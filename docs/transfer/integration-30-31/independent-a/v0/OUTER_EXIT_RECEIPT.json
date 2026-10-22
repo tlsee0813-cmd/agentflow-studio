@@ -1,0 +1,17 @@
+{
+  "scope": "tool completion metadata transcribed, not full transcript",
+  "build": {
+    "session": 31699,
+    "actualOuterExit": 0
+  },
+  "firstLoader": {
+    "chunk": "87fbf6",
+    "actualOuterExit": 1
+  },
+  "latestUI": {
+    "session": 8361,
+    "actualOuterExit": 0
+  },
+  "child": "process.json actualChildExit subprocess.run.returncode",
+  "server": "runtime.json actualServerExit"
+}

@@ -1,0 +1,66 @@
+[
+  {
+    "original": "1280-final.json",
+    "bytes": 49816,
+    "sha256": "c706b678d2e23cc22744584028682847ff964e4583e31428d7cdc2064794ef5c",
+    "gzip": "1280-final.json.gz",
+    "gzipSHA256": "12a8c81a66fa1fc246fa4a8d7bcc03beff592f96ba0eefdbbc1740a73346c5aa",
+    "roundTripEqual": true
+  },
+  {
+    "original": "1280-prepared.json",
+    "bytes": 49816,
+    "sha256": "c706b678d2e23cc22744584028682847ff964e4583e31428d7cdc2064794ef5c",
+    "gzip": "1280-prepared.json.gz",
+    "gzipSHA256": "12a8c81a66fa1fc246fa4a8d7bcc03beff592f96ba0eefdbbc1740a73346c5aa",
+    "roundTripEqual": true
+  },
+  {
+    "original": "1440-final.json",
+    "bytes": 49816,
+    "sha256": "1707999ba6ce7c162d77c4018407391ee4d5ae0ba8a746e6756e74b1410de660",
+    "gzip": "1440-final.json.gz",
+    "gzipSHA256": "4929e1f61a0779770eedf93f756571de294365bc23bea842d0b83b4c1782da11",
+    "roundTripEqual": true
+  },
+  {
+    "original": "1440-prepared.json",
+    "bytes": 49816,
+    "sha256": "1707999ba6ce7c162d77c4018407391ee4d5ae0ba8a746e6756e74b1410de660",
+    "gzip": "1440-prepared.json.gz",
+    "gzipSHA256": "4929e1f61a0779770eedf93f756571de294365bc23bea842d0b83b4c1782da11",
+    "roundTripEqual": true
+  },
+  {
+    "original": "SOURCE.before.json",
+    "bytes": 33557,
+    "sha256": "664178b4e726bbf976ded5ec9e08c3d83002e2c8387018330d92cccbb20cae1e",
+    "gzip": "SOURCE.before.json.gz",
+    "gzipSHA256": "183336370b6a2f6976b62fb586ecfc86125f204e245bb62fa39cfa28d8d5ee9e",
+    "roundTripEqual": true
+  },
+  {
+    "original": "normal-ui-6-card-backup.json",
+    "bytes": 25031,
+    "sha256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+    "gzip": "normal-ui-6-card-backup.json.gz",
+    "gzipSHA256": "705c69c140d396c27505eeb67d417c2f1c3cd6e2469d64bb8d884a5d9db32340",
+    "roundTripEqual": true
+  },
+  {
+    "original": "normal-ui-four-card-backup.json",
+    "bytes": 24373,
+    "sha256": "a62d6bcece8866c6e2a02da5fd16ad500ab810c33fcf0ddc7f5e74de484f22a9",
+    "gzip": "normal-ui-four-card-backup.json.gz",
+    "gzipSHA256": "8d7e6376bc410a00a6fefe1bd587211d1e55031aaffeca9caf78185f7f0797f7",
+    "roundTripEqual": true
+  },
+  {
+    "original": "ui.jsonl",
+    "bytes": 1267372,
+    "sha256": "7152415259bec1818e1cab4670f2bbffc2071d82ad4b8c5b2fdc70a57420073e",
+    "gzip": "ui.jsonl.gz",
+    "gzipSHA256": "2e9da62a86456e011e57c8f6f6b56f18f8f216023a58c4009430919fe4e51957",
+    "roundTripEqual": true
+  }
+]

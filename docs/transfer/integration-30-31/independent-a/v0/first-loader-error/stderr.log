@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/integration30-31/check.py", line 4, in <module>
+    exec(compile((R0/'base-definitions.py').read_text(),str(R0/'base-definitions.py'),'exec'))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/integration30-31/base-definitions.py", line 4
+    exec(compile((R0/'phase.py').read_text().rsplit('
+                                                    ^
+SyntaxError: unterminated string literal (detected at line 4)

@@ -1,0 +1,256 @@
+{
+  "source": "7c7bdfa8d244d83c2c776b91b6a3a669127ba2e9",
+  "expected": {
+    "PC": 2,
+    "flowsEach": 2
+  },
+  "completed": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "flows": 2,
+      "complete": true,
+      "P": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "Q": "A_e254f0c1-0100-462f-bb0a-e9864d0bb537",
+      "differentSameNameParent": "A_a00d9478-d810-4a27-84e5-d4f74a57b6c5",
+      "currentB": "T_a2d88475-ae20-4e71-a993-68bb6343cb4e"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "flows": 2,
+      "complete": true,
+      "P": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+      "Q": "A_e254f0c1-0100-462f-bb0a-e9864d0bb537",
+      "differentSameNameParent": "A_a00d9478-d810-4a27-84e5-d4f74a57b6c5",
+      "currentB": "T_4df5c1a2-784e-42e4-8408-a101bb2e3906"
+    }
+  ],
+  "checks": [
+    {
+      "pass": true,
+      "label": "exact P report, not other same-name branch general entry",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK exact P report, not other same-name branch general entry"
+    },
+    {
+      "pass": true,
+      "label": "general map entry map view",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK general map entry map view"
+    },
+    {
+      "pass": true,
+      "label": "general map entry map collapsed",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK general map entry map collapsed"
+    },
+    {
+      "pass": true,
+      "label": "general map entry map selected",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK general map entry map selected"
+    },
+    {
+      "pass": true,
+      "label": "general map entry panel disclosures and reading",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK general map entry panel disclosures and reading"
+    },
+    {
+      "pass": true,
+      "label": "general first synchronous map bottom16",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK general first synchronous map bottom16"
+    },
+    {
+      "pass": true,
+      "label": "flow1 full project snapshot unchanged",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK flow1 full project snapshot unchanged"
+    },
+    {
+      "pass": true,
+      "label": "general entry close returns normal info not old branch signal",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK general entry close returns normal info not old branch signal"
+    },
+    {
+      "pass": true,
+      "label": "flow2 real pageY120 before parent signal",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK flow2 real pageY120 before parent signal"
+    },
+    {
+      "pass": true,
+      "label": "exact P report, not other same-name branch explicit origin",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK exact P report, not other same-name branch explicit origin"
+    },
+    {
+      "pass": true,
+      "label": "explicit report origin map view",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK explicit report origin map view"
+    },
+    {
+      "pass": true,
+      "label": "explicit report origin map collapsed",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK explicit report origin map collapsed"
+    },
+    {
+      "pass": true,
+      "label": "explicit report origin map selected",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK explicit report origin map selected"
+    },
+    {
+      "pass": true,
+      "label": "explicit report origin panel disclosures and reading",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK explicit report origin panel disclosures and reading"
+    },
+    {
+      "pass": true,
+      "label": "explicit exact caller line position focus and hit",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK explicit exact caller line position focus and hit"
+    },
+    {
+      "pass": true,
+      "label": "explicit origin actual page memory preserved",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK explicit origin actual page memory preserved"
+    },
+    {
+      "pass": true,
+      "label": "flow2 full project including current B draft Q unchanged",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK flow2 full project including current B draft Q unchanged"
+    },
+    {
+      "pass": true,
+      "label": "close lifetime focus/camera explicit origin close retains actual parent signal lifetime",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK close lifetime focus/camera explicit origin close retains actual parent signal lifetime"
+    },
+    {
+      "pass": true,
+      "label": "exact P report, not other same-name branch general entry",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK exact P report, not other same-name branch general entry"
+    },
+    {
+      "pass": true,
+      "label": "general map entry map view",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK general map entry map view"
+    },
+    {
+      "pass": true,
+      "label": "general map entry map collapsed",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK general map entry map collapsed"
+    },
+    {
+      "pass": true,
+      "label": "general map entry map selected",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK general map entry map selected"
+    },
+    {
+      "pass": true,
+      "label": "general map entry panel disclosures and reading",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK general map entry panel disclosures and reading"
+    },
+    {
+      "pass": true,
+      "label": "general first synchronous map bottom16",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK general first synchronous map bottom16"
+    },
+    {
+      "pass": true,
+      "label": "flow1 full project snapshot unchanged",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK flow1 full project snapshot unchanged"
+    },
+    {
+      "pass": true,
+      "label": "general entry close returns normal info not old branch signal",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK general entry close returns normal info not old branch signal"
+    },
+    {
+      "pass": true,
+      "label": "flow2 real pageY120 before parent signal",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK flow2 real pageY120 before parent signal"
+    },
+    {
+      "pass": true,
+      "label": "exact P report, not other same-name branch explicit origin",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK exact P report, not other same-name branch explicit origin"
+    },
+    {
+      "pass": true,
+      "label": "explicit report origin map view",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK explicit report origin map view"
+    },
+    {
+      "pass": true,
+      "label": "explicit report origin map collapsed",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK explicit report origin map collapsed"
+    },
+    {
+      "pass": true,
+      "label": "explicit report origin map selected",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK explicit report origin map selected"
+    },
+    {
+      "pass": true,
+      "label": "explicit report origin panel disclosures and reading",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK explicit report origin panel disclosures and reading"
+    },
+    {
+      "pass": true,
+      "label": "explicit exact caller line position focus and hit",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK explicit exact caller line position focus and hit"
+    },
+    {
+      "pass": true,
+      "label": "explicit origin actual page memory preserved",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK explicit origin actual page memory preserved"
+    },
+    {
+      "pass": true,
+      "label": "flow2 full project including current B draft Q unchanged",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK flow2 full project including current B draft Q unchanged"
+    },
+    {
+      "pass": true,
+      "label": "close lifetime focus/camera explicit origin close retains actual parent signal lifetime",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK close lifetime focus/camera explicit origin close retains actual parent signal lifetime"
+    }
+  ],
+  "failedChecks": [],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "childExitDecision": 0
+}

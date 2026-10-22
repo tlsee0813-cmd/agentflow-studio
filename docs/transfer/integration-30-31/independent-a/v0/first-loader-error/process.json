@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/integration30-31/check.py"
+  ],
+  "sourceCommit": "7c7bdfa8d244d83c2c776b91b6a3a669127ba2e9",
+  "startUTC": "2026-10-22T21:48:05.836184+00:00",
+  "endUTC": "2026-10-22T21:48:05.867560+00:00",
+  "checkerSHA256": "aafdf6a5799df569b34f3ac2a05d970d747487fd057831931ad5385cadd1ab8d",
+  "checkerAfterSHA256": "aafdf6a5799df569b34f3ac2a05d970d747487fd057831931ad5385cadd1ab8d",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "dd44bc61cc17d0d3b0d02e7d0d120c18ed39bedb840028c7306e9a2001f9e536"
+}
