@@ -354,6 +354,9 @@ function continueTask(id:string) {
 }
 /** Explicit: write the next request for this area (null = no area). The only way, besides the composer's own choice, to set the target. */
 function writeInArea(id:string|null) {
+  // AREA17: '이 영역에 새 요청' for the located area, from its map panel or its own screens, continues that reading: the work view
+  // keeps the explicit way back to the view before locating. Writing anywhere else is a new start.
+  if(!(located&&located.area===id&&(view==='space'||(view==='area'||view==='task')&&viewArea===id)))located=null;
   // An unsent report or request keeps its kind and target: open it instead of relabelling or moving it.
   if(project.draft.trim()) {
     // REPORT16: null = follows the current work; {area:null} = explicitly no area. Never the same words.
@@ -1932,6 +1935,11 @@ function renderPlace(t:Task|null) {
   bar.append(node('span','›','crumb-sep'),node('strong',!t?'새 요청':receipt!==null?`${receipt>=0?`작업 ${pad(receipt+1)}의 보고 · `:''}후속 확인 작업문 초안`:'앱에서 이어갈 작업'),node('span','이어가는 작업','layer-chip'));
   // PC12: after reading a task from the map, the way back to that view (the edits made here stay).
   const back=originButton('work-return-origin');if(back)bar.append(back);
+  // AREA17: writing (and sending, copying) the located area's next request keeps the way back to the view before locating,
+  // only while that request or work is in the located area.
+  const l=located,target=project.space.draftTarget?project.space.draftTarget.area:t?areaOf(project,t):null;
+  if(l&&l.origin.project===project.id&&target===l.area&&!areaById(l.area)?.archived)
+    bar.append(btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`,returnFromLocate,'secondary origin-return','work-locate-return'));
 }
 /** The area the next request goes to: explicit, visible and changeable. Shown once areas exist. */
 function renderComposeArea(t:Task|null,returned:boolean) {

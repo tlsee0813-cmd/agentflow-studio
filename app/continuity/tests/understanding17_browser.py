@@ -202,7 +202,7 @@ class Area17(unittest.TestCase):
         self.page.locator('#locate-return').click();end2=self.snap('back to start view 2 (via area screen)',area)
         for k in ('styleTransform','computedTransform','scaleLabel','selected','openDetails','focusId'):self.check(f'[원래 배율·좌표 복귀] via area screen: {k}',end2[k],start2[k])
         self.check_true('[원래 배율·좌표 복귀] via area screen: page scroll',abs(end2['windowY']-start2['windowY'])<=2,[end2['windowY'],start2['windowY']])
-        # A different area is a new start: the way back is dropped (no confusion with an unrelated start).
+        # Plain navigation away (nav-work) and back (nav-space) is a new start: the way back is dropped.
         self.page.locator(f'#received-area-{area}').click();expect(self.page.locator('#located-note')).to_be_visible()
         self.page.locator('#nav-work').click();self.page.locator('#nav-space').click();expect(self.page.locator('#located-note')).to_have_count(0)
         self.check('[원래 배율·좌표 복귀] stored layout untouched by camera moves',self.state()['space']['layout'],kept['layout'])
@@ -313,8 +313,7 @@ def next_request(self,cid):
     path,f=self.result_file('next',self.state(),A,h['returnId'],c,area,h['anchor']['understanding']);self.import_file(path)
     # The user writes the next request in the same area from the located panel (idea and conditions unchanged), sends it, copies.
     self.page.locator('#result-show-area').click();self.page.locator('#panel-new-request').click()
-    self.page.locator('#draft').fill('[합성] 같은 영역의 다음 요청 · 구상과 조건은 그대로');self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
-    s=self.state();N=s['currentTaskId'];self.check('next request: written in the same area',self.task(N,s)['areaId'],area)
+    N=self.send_next(area,'[합성] 같은 영역의 다음 요청 · 구상과 조건은 그대로')
     self.page.locator('#nav-work').click();self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
     t=self.clipboard();self.record('raw','next request handoff (clipboard)',t);self.check_record('next request handoff',t,self.task(N)['handoffs'][-1])
     j=t.find('## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증')
@@ -327,6 +326,39 @@ def next_request(self,cid):
     t2=self.clipboard();self.record('raw','handoff after explicit idea change (clipboard)',t2)
     self.check_true('after explicit idea change: description text excluded and the exclusion stated',c['summary'] not in t2 and '현재 설명으로 쓰지 않습니다' in t2)
 Area17.next_request=next_request
+def send_next(self,area,body):
+    """Send the composer's request and prove it really became a new request task in the area (not ignored or refused)."""
+    before=self.state();self.page.locator('#draft').fill(body);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
+    s=self.state();N=s['currentTaskId'];t=self.task(N,s);src=next(x for x in s['sources'] if x['id']==t['sourceIds'][0])
+    self.check('next request: one new task',len(s['tasks']),len(before['tasks'])+1);self.check_true('next request: a new current task',N!=before['currentTaskId'] and N==s['tasks'][-1]['id'],[before['currentTaskId'],N])
+    self.check('next request: source kind and exact body',(src['kind'],src['text']),('request',body));self.check('next request: written in the same area',t.get('areaId'),area)
+    return N
+Area17.send_next=send_next
+def locate_new_request(self,cid):
+    """Whole path: receive -> explicit locate -> the panel's '이 영역에 새 요청' -> send -> copy -> explicit way back to the view before locating."""
+    c=CASES[cid];area,other=self.start(c);A=self.request_in(area,c['request']);text,h=self.file_export(A)
+    path,f=self.result_file('locate-next',self.state(),A,h['returnId'],c,area,h['anchor']['understanding']);self.import_file(path)
+    self.make_offscreen(area,other);self.page.locator(f'#received-area-{area}').focus();start=self.snap('locate-new-request: start view (before locating)',area)
+    self.page.locator(f'#received-area-{area}').click();self.located_ok('locate-new-request',self.snap('locate-new-request: located',area),area,start)
+    self.page.locator('#panel-new-request').click();N=self.send_next(area,'[합성] 위치를 찾은 영역의 다음 요청 · 구상과 조건은 그대로')
+    self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
+    t=self.clipboard();self.check_record('locate-new-request handoff',t,self.task(N)['handoffs'][-1])
+    self.check_true('locate-new-request handoff: valid description carried',c['summary'] in t and '## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증' in t)
+    back=self.page.locator('#work-locate-return');self.check('locate-new-request: explicit way back offered in the work view',back.count(),1)
+    self.readable('#work-locate-return','work view: way back before locating');self.shot(f'{cid}-07-locate-new-request-work')
+    back.click();end=self.snap('locate-new-request: back to start view',area)
+    for k in ('styleTransform','computedTransform','scaleLabel','selected','openDetails','focusId'):self.check(f'[원래 배율·좌표 복귀] after new request: {k}',end[k],start[k])
+    # Sending the request adds records above the map (real content change), so the existing return keeps the reading place
+    # (PC12 fix2 anchor) instead of the raw scroll value: same window scroll, or the same on-screen card position.
+    self.check_true('[원래 배율·좌표 복귀] after new request: reading place (scroll, or on-screen card y when content above grew)',
+        abs(end['windowY']-start['windowY'])<=2 or abs(end['card']['y']-start['card']['y'])<=2,
+        {'windowY':[end['windowY'],start['windowY']],'cardY':[end['card']['y'],start['card']['y']],'mapY':[end['map']['y'],start['map']['y']]})
+    expect(self.page.locator('#panel-note')).to_have_value(BUFFER);expect(self.page.locator('#located-note')).to_have_count(0)
+    # Another area is a new start: writing in it drops the way back.
+    self.page.locator(f'#received-area-{area}').click();self.page.locator(f'#node-info-{other}').evaluate('(e)=>e.click()');self.page.locator('#panel-new-request').click()
+    self.check('another area: no way back to the earlier locate',self.page.locator('#work-locate-return').count(),0)
+Area17.locate_new_request=locate_new_request
+Area17.test_06_locate_new_request_copy_and_return=lambda self:self.locate_new_request('product13')
 
 
 class Area17Wide(Area17):WIDTH,HEIGHT=1440,900
