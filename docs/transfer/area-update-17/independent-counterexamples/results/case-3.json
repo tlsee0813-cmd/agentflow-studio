@@ -1,0 +1,920 @@
+{
+  "case": "3",
+  "start": "2026-10-22T08:37:30.207Z",
+  "sourceApp": "/workspace/browser-env/cycle17-opus-original/app",
+  "fixtureSetup": "public domain APIs only; parseProject verifies each setup; case4 alone explicitly edits recovery JSON to test validator rejection",
+  "ids": {
+    "project": "P_3ea44096-091d-4d4a-8a78-179bb9ed6293",
+    "a": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+    "b": "A_d3199f19-8ec1-4873-bb3b-929da779107f",
+    "t": "T_8b8560c4-a61e-48c1-a54a-d736a0066877"
+  },
+  "raw": {
+    "record": {
+      "at": "2026-10-22T08:37:30.214Z",
+      "method": "clipboard",
+      "revision": 6,
+      "chars": 3778,
+      "digest": "3adf01dc",
+      "work": {
+        "understanding": "",
+        "scope": "",
+        "next": "",
+        "checks": ""
+      },
+      "aiExcluded": false,
+      "legacyText": null,
+      "returnId": "R_case3",
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "OLD_BRIEF_INDEPENDENT",
+        "area": {
+          "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+          "name": "A",
+          "note": "OLD_NOTE_INDEPENDENT"
+        }
+      },
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+        "understanding": 0,
+        "stamp": {
+          "note": "OLD_NOTE_INDEPENDENT",
+          "brief": 1,
+          "decisions": []
+        }
+      }
+    },
+    "steps": [
+      {
+        "summary": "FIRST_INTERPRETATION",
+        "state": {
+          "revision": 1,
+          "entries": [
+            {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.215Z",
+              "revision": 1,
+              "taskId": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "note": "OLD_NOTE_INDEPENDENT",
+                "brief": 1,
+                "decisions": []
+              },
+              "held": null
+            }
+          ]
+        },
+        "description": {
+          "current": {
+            "entry": {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.215Z",
+              "revision": 1,
+              "taskId": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "note": "OLD_NOTE_INDEPENDENT",
+                "brief": 1,
+                "decisions": []
+              },
+              "held": null
+            },
+            "summary": "FIRST_INTERPRETATION",
+            "changes": [
+              "[合成]説明の改訂"
+            ],
+            "proposal": null,
+            "origin": "independent synthetic external interpretation",
+            "returnTask": {
+              "id": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+              "sourceIds": [
+                "S_c02e92ad-da85-48d0-8320-70659be98d2d"
+              ],
+              "parentTaskId": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "R_case3",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_3ea44096-091d-4d4a-8a78-179bb9ed6293\",\"taskId\":\"T_8b8560c4-a61e-48c1-a54a-d736a0066877\",\"returnId\":\"R_case3\",\"report\":\"[独立合成報告] 実行成功を主張しない固定原文\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_f5b433ec-c00a-40c6-afd9-9c8040f09225\",\"basedOn\":0,\"summary\":\"FIRST_INTERPRETATION\",\"changes\":[\"[合成]説明の改訂\"],\"proposal\":null,\"origin\":\"independent synthetic external interpretation\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "OLD_BRIEF_INDEPENDENT",
+                "area": {
+                  "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                  "name": "A",
+                  "note": "OLD_NOTE_INDEPENDENT"
+                }
+              }
+            },
+            "requestTask": {
+              "id": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+              "sourceIds": [
+                "S_a3f140fd-434d-4ef7-959a-5fc8acf31fc9"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:37:30.214Z",
+                  "method": "clipboard",
+                  "revision": 6,
+                  "chars": 3778,
+                  "digest": "3adf01dc",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "R_case3",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "OLD_BRIEF_INDEPENDENT",
+                    "area": {
+                      "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                      "name": "A",
+                      "note": "OLD_NOTE_INDEPENDENT"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "understanding": 0,
+                    "stamp": {
+                      "note": "OLD_NOTE_INDEPENDENT",
+                      "brief": 1,
+                      "decisions": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "OLD_BRIEF_INDEPENDENT",
+                "area": {
+                  "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                  "name": "A",
+                  "note": "OLD_NOTE_INDEPENDENT"
+                }
+              },
+              "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225"
+            },
+            "valid": true
+          },
+          "previous": [],
+          "held": []
+        }
+      },
+      {
+        "summary": "FIRST_REVISION",
+        "state": {
+          "revision": 2,
+          "entries": [
+            {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.215Z",
+              "revision": 1,
+              "taskId": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "note": "OLD_NOTE_INDEPENDENT",
+                "brief": 1,
+                "decisions": []
+              },
+              "held": null
+            },
+            {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.217Z",
+              "revision": 2,
+              "taskId": "T_03287df7-a8f1-4ea5-aebc-b63c6730e105",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "note": "OLD_NOTE_INDEPENDENT",
+                "brief": 1,
+                "decisions": []
+              },
+              "held": null
+            }
+          ]
+        },
+        "description": {
+          "current": {
+            "entry": {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.217Z",
+              "revision": 2,
+              "taskId": "T_03287df7-a8f1-4ea5-aebc-b63c6730e105",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "note": "OLD_NOTE_INDEPENDENT",
+                "brief": 1,
+                "decisions": []
+              },
+              "held": null
+            },
+            "summary": "FIRST_REVISION",
+            "changes": [
+              "[合成]説明の改訂"
+            ],
+            "proposal": null,
+            "origin": "independent synthetic external interpretation",
+            "returnTask": {
+              "id": "T_03287df7-a8f1-4ea5-aebc-b63c6730e105",
+              "sourceIds": [
+                "S_20e1bc58-7be3-480d-9194-1f2d201ea333"
+              ],
+              "parentTaskId": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "R_case3",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_3ea44096-091d-4d4a-8a78-179bb9ed6293\",\"taskId\":\"T_8b8560c4-a61e-48c1-a54a-d736a0066877\",\"returnId\":\"R_case3\",\"report\":\"[独立合成報告] 実行成功を主張しない固定原文\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_f5b433ec-c00a-40c6-afd9-9c8040f09225\",\"basedOn\":0,\"summary\":\"FIRST_REVISION\",\"changes\":[\"[合成]説明の改訂\"],\"proposal\":null,\"origin\":\"independent synthetic external interpretation\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "OLD_BRIEF_INDEPENDENT",
+                "area": {
+                  "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                  "name": "A",
+                  "note": "OLD_NOTE_INDEPENDENT"
+                }
+              }
+            },
+            "requestTask": {
+              "id": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+              "sourceIds": [
+                "S_a3f140fd-434d-4ef7-959a-5fc8acf31fc9"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:37:30.214Z",
+                  "method": "clipboard",
+                  "revision": 6,
+                  "chars": 3778,
+                  "digest": "3adf01dc",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "R_case3",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "OLD_BRIEF_INDEPENDENT",
+                    "area": {
+                      "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                      "name": "A",
+                      "note": "OLD_NOTE_INDEPENDENT"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "understanding": 0,
+                    "stamp": {
+                      "note": "OLD_NOTE_INDEPENDENT",
+                      "brief": 1,
+                      "decisions": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "OLD_BRIEF_INDEPENDENT",
+                "area": {
+                  "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                  "name": "A",
+                  "note": "OLD_NOTE_INDEPENDENT"
+                }
+              },
+              "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225"
+            },
+            "valid": true
+          },
+          "previous": [
+            {
+              "entry": {
+                "by": "external",
+                "at": "2026-10-22T08:37:30.215Z",
+                "revision": 1,
+                "taskId": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+                "returnId": "R_case3",
+                "text": null,
+                "corrects": null,
+                "stamp": {
+                  "note": "OLD_NOTE_INDEPENDENT",
+                  "brief": 1,
+                  "decisions": []
+                },
+                "held": null
+              },
+              "summary": "FIRST_INTERPRETATION",
+              "changes": [
+                "[合成]説明の改訂"
+              ],
+              "proposal": null,
+              "origin": "independent synthetic external interpretation",
+              "returnTask": {
+                "id": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+                "sourceIds": [
+                  "S_c02e92ad-da85-48d0-8320-70659be98d2d"
+                ],
+                "parentTaskId": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+                "advice": null,
+                "adviceRevision": null,
+                "mode": null,
+                "manual": {
+                  "understanding": null,
+                  "scope": null,
+                  "next": null,
+                  "checks": null
+                },
+                "suggestions": null,
+                "handoffs": [],
+                "resultFile": {
+                  "returnId": "R_case3",
+                  "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_3ea44096-091d-4d4a-8a78-179bb9ed6293\",\"taskId\":\"T_8b8560c4-a61e-48c1-a54a-d736a0066877\",\"returnId\":\"R_case3\",\"report\":\"[独立合成報告] 実行成功を主張しない固定原文\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_f5b433ec-c00a-40c6-afd9-9c8040f09225\",\"basedOn\":0,\"summary\":\"FIRST_INTERPRETATION\",\"changes\":[\"[合成]説明の改訂\"],\"proposal\":null,\"origin\":\"independent synthetic external interpretation\"}}"
+                },
+                "background": {
+                  "version": "background.1",
+                  "revision": 5,
+                  "brief": "OLD_BRIEF_INDEPENDENT",
+                  "area": {
+                    "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "name": "A",
+                    "note": "OLD_NOTE_INDEPENDENT"
+                  }
+                }
+              },
+              "requestTask": {
+                "id": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+                "sourceIds": [
+                  "S_a3f140fd-434d-4ef7-959a-5fc8acf31fc9"
+                ],
+                "parentTaskId": null,
+                "advice": null,
+                "adviceRevision": null,
+                "mode": null,
+                "manual": {
+                  "understanding": null,
+                  "scope": null,
+                  "next": null,
+                  "checks": null
+                },
+                "suggestions": null,
+                "handoffs": [
+                  {
+                    "at": "2026-10-22T08:37:30.214Z",
+                    "method": "clipboard",
+                    "revision": 6,
+                    "chars": 3778,
+                    "digest": "3adf01dc",
+                    "work": {
+                      "understanding": "",
+                      "scope": "",
+                      "next": "",
+                      "checks": ""
+                    },
+                    "aiExcluded": false,
+                    "legacyText": null,
+                    "returnId": "R_case3",
+                    "background": {
+                      "version": "background.1",
+                      "revision": 5,
+                      "brief": "OLD_BRIEF_INDEPENDENT",
+                      "area": {
+                        "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                        "name": "A",
+                        "note": "OLD_NOTE_INDEPENDENT"
+                      }
+                    },
+                    "anchor": {
+                      "version": "anchor.1",
+                      "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                      "understanding": 0,
+                      "stamp": {
+                        "note": "OLD_NOTE_INDEPENDENT",
+                        "brief": 1,
+                        "decisions": []
+                      }
+                    }
+                  }
+                ],
+                "resultFile": null,
+                "background": {
+                  "version": "background.1",
+                  "revision": 5,
+                  "brief": "OLD_BRIEF_INDEPENDENT",
+                  "area": {
+                    "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "name": "A",
+                    "note": "OLD_NOTE_INDEPENDENT"
+                  }
+                },
+                "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225"
+              },
+              "valid": false
+            }
+          ],
+          "held": []
+        }
+      },
+      {
+        "summary": "SECOND_REVISION",
+        "state": {
+          "revision": 2,
+          "entries": [
+            {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.215Z",
+              "revision": 1,
+              "taskId": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "note": "OLD_NOTE_INDEPENDENT",
+                "brief": 1,
+                "decisions": []
+              },
+              "held": null
+            },
+            {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.217Z",
+              "revision": 2,
+              "taskId": "T_03287df7-a8f1-4ea5-aebc-b63c6730e105",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "note": "OLD_NOTE_INDEPENDENT",
+                "brief": 1,
+                "decisions": []
+              },
+              "held": null
+            },
+            {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.218Z",
+              "revision": null,
+              "taskId": "T_dc8fb844-fe78-4f38-a8e3-0b49911948fc",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": null,
+              "held": "superseded"
+            }
+          ]
+        },
+        "description": {
+          "current": {
+            "entry": {
+              "by": "external",
+              "at": "2026-10-22T08:37:30.217Z",
+              "revision": 2,
+              "taskId": "T_03287df7-a8f1-4ea5-aebc-b63c6730e105",
+              "returnId": "R_case3",
+              "text": null,
+              "corrects": null,
+              "stamp": {
+                "note": "OLD_NOTE_INDEPENDENT",
+                "brief": 1,
+                "decisions": []
+              },
+              "held": null
+            },
+            "summary": "FIRST_REVISION",
+            "changes": [
+              "[合成]説明の改訂"
+            ],
+            "proposal": null,
+            "origin": "independent synthetic external interpretation",
+            "returnTask": {
+              "id": "T_03287df7-a8f1-4ea5-aebc-b63c6730e105",
+              "sourceIds": [
+                "S_20e1bc58-7be3-480d-9194-1f2d201ea333"
+              ],
+              "parentTaskId": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "R_case3",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_3ea44096-091d-4d4a-8a78-179bb9ed6293\",\"taskId\":\"T_8b8560c4-a61e-48c1-a54a-d736a0066877\",\"returnId\":\"R_case3\",\"report\":\"[独立合成報告] 実行成功を主張しない固定原文\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_f5b433ec-c00a-40c6-afd9-9c8040f09225\",\"basedOn\":0,\"summary\":\"FIRST_REVISION\",\"changes\":[\"[合成]説明の改訂\"],\"proposal\":null,\"origin\":\"independent synthetic external interpretation\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "OLD_BRIEF_INDEPENDENT",
+                "area": {
+                  "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                  "name": "A",
+                  "note": "OLD_NOTE_INDEPENDENT"
+                }
+              }
+            },
+            "requestTask": {
+              "id": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+              "sourceIds": [
+                "S_a3f140fd-434d-4ef7-959a-5fc8acf31fc9"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:37:30.214Z",
+                  "method": "clipboard",
+                  "revision": 6,
+                  "chars": 3778,
+                  "digest": "3adf01dc",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "R_case3",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "OLD_BRIEF_INDEPENDENT",
+                    "area": {
+                      "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                      "name": "A",
+                      "note": "OLD_NOTE_INDEPENDENT"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "understanding": 0,
+                    "stamp": {
+                      "note": "OLD_NOTE_INDEPENDENT",
+                      "brief": 1,
+                      "decisions": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "OLD_BRIEF_INDEPENDENT",
+                "area": {
+                  "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                  "name": "A",
+                  "note": "OLD_NOTE_INDEPENDENT"
+                }
+              },
+              "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225"
+            },
+            "valid": true
+          },
+          "previous": [
+            {
+              "entry": {
+                "by": "external",
+                "at": "2026-10-22T08:37:30.215Z",
+                "revision": 1,
+                "taskId": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+                "returnId": "R_case3",
+                "text": null,
+                "corrects": null,
+                "stamp": {
+                  "note": "OLD_NOTE_INDEPENDENT",
+                  "brief": 1,
+                  "decisions": []
+                },
+                "held": null
+              },
+              "summary": "FIRST_INTERPRETATION",
+              "changes": [
+                "[合成]説明の改訂"
+              ],
+              "proposal": null,
+              "origin": "independent synthetic external interpretation",
+              "returnTask": {
+                "id": "T_dace0b39-08c3-4a7c-9f8f-03e8aa757a66",
+                "sourceIds": [
+                  "S_c02e92ad-da85-48d0-8320-70659be98d2d"
+                ],
+                "parentTaskId": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+                "advice": null,
+                "adviceRevision": null,
+                "mode": null,
+                "manual": {
+                  "understanding": null,
+                  "scope": null,
+                  "next": null,
+                  "checks": null
+                },
+                "suggestions": null,
+                "handoffs": [],
+                "resultFile": {
+                  "returnId": "R_case3",
+                  "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_3ea44096-091d-4d4a-8a78-179bb9ed6293\",\"taskId\":\"T_8b8560c4-a61e-48c1-a54a-d736a0066877\",\"returnId\":\"R_case3\",\"report\":\"[独立合成報告] 実行成功を主張しない固定原文\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_f5b433ec-c00a-40c6-afd9-9c8040f09225\",\"basedOn\":0,\"summary\":\"FIRST_INTERPRETATION\",\"changes\":[\"[合成]説明の改訂\"],\"proposal\":null,\"origin\":\"independent synthetic external interpretation\"}}"
+                },
+                "background": {
+                  "version": "background.1",
+                  "revision": 5,
+                  "brief": "OLD_BRIEF_INDEPENDENT",
+                  "area": {
+                    "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "name": "A",
+                    "note": "OLD_NOTE_INDEPENDENT"
+                  }
+                }
+              },
+              "requestTask": {
+                "id": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+                "sourceIds": [
+                  "S_a3f140fd-434d-4ef7-959a-5fc8acf31fc9"
+                ],
+                "parentTaskId": null,
+                "advice": null,
+                "adviceRevision": null,
+                "mode": null,
+                "manual": {
+                  "understanding": null,
+                  "scope": null,
+                  "next": null,
+                  "checks": null
+                },
+                "suggestions": null,
+                "handoffs": [
+                  {
+                    "at": "2026-10-22T08:37:30.214Z",
+                    "method": "clipboard",
+                    "revision": 6,
+                    "chars": 3778,
+                    "digest": "3adf01dc",
+                    "work": {
+                      "understanding": "",
+                      "scope": "",
+                      "next": "",
+                      "checks": ""
+                    },
+                    "aiExcluded": false,
+                    "legacyText": null,
+                    "returnId": "R_case3",
+                    "background": {
+                      "version": "background.1",
+                      "revision": 5,
+                      "brief": "OLD_BRIEF_INDEPENDENT",
+                      "area": {
+                        "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                        "name": "A",
+                        "note": "OLD_NOTE_INDEPENDENT"
+                      }
+                    },
+                    "anchor": {
+                      "version": "anchor.1",
+                      "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                      "understanding": 0,
+                      "stamp": {
+                        "note": "OLD_NOTE_INDEPENDENT",
+                        "brief": 1,
+                        "decisions": []
+                      }
+                    }
+                  }
+                ],
+                "resultFile": null,
+                "background": {
+                  "version": "background.1",
+                  "revision": 5,
+                  "brief": "OLD_BRIEF_INDEPENDENT",
+                  "area": {
+                    "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "name": "A",
+                    "note": "OLD_NOTE_INDEPENDENT"
+                  }
+                },
+                "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225"
+              },
+              "valid": false
+            }
+          ],
+          "held": [
+            {
+              "entry": {
+                "by": "external",
+                "at": "2026-10-22T08:37:30.218Z",
+                "revision": null,
+                "taskId": "T_dc8fb844-fe78-4f38-a8e3-0b49911948fc",
+                "returnId": "R_case3",
+                "text": null,
+                "corrects": null,
+                "stamp": null,
+                "held": "superseded"
+              },
+              "summary": "SECOND_REVISION",
+              "changes": [
+                "[合成]説明の改訂"
+              ],
+              "proposal": null,
+              "origin": "independent synthetic external interpretation",
+              "returnTask": {
+                "id": "T_dc8fb844-fe78-4f38-a8e3-0b49911948fc",
+                "sourceIds": [
+                  "S_b8cb1913-b4c6-49e8-ba89-6c4611f6afb1"
+                ],
+                "parentTaskId": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+                "advice": null,
+                "adviceRevision": null,
+                "mode": null,
+                "manual": {
+                  "understanding": null,
+                  "scope": null,
+                  "next": null,
+                  "checks": null
+                },
+                "suggestions": null,
+                "handoffs": [],
+                "resultFile": {
+                  "returnId": "R_case3",
+                  "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_3ea44096-091d-4d4a-8a78-179bb9ed6293\",\"taskId\":\"T_8b8560c4-a61e-48c1-a54a-d736a0066877\",\"returnId\":\"R_case3\",\"report\":\"[独立合成報告] 実行成功を主張しない固定原文\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_f5b433ec-c00a-40c6-afd9-9c8040f09225\",\"basedOn\":0,\"summary\":\"SECOND_REVISION\",\"changes\":[\"[合成]説明の改訂\"],\"proposal\":null,\"origin\":\"independent synthetic external interpretation\"}}"
+                },
+                "background": {
+                  "version": "background.1",
+                  "revision": 5,
+                  "brief": "OLD_BRIEF_INDEPENDENT",
+                  "area": {
+                    "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "name": "A",
+                    "note": "OLD_NOTE_INDEPENDENT"
+                  }
+                }
+              },
+              "requestTask": {
+                "id": "T_8b8560c4-a61e-48c1-a54a-d736a0066877",
+                "sourceIds": [
+                  "S_a3f140fd-434d-4ef7-959a-5fc8acf31fc9"
+                ],
+                "parentTaskId": null,
+                "advice": null,
+                "adviceRevision": null,
+                "mode": null,
+                "manual": {
+                  "understanding": null,
+                  "scope": null,
+                  "next": null,
+                  "checks": null
+                },
+                "suggestions": null,
+                "handoffs": [
+                  {
+                    "at": "2026-10-22T08:37:30.214Z",
+                    "method": "clipboard",
+                    "revision": 6,
+                    "chars": 3778,
+                    "digest": "3adf01dc",
+                    "work": {
+                      "understanding": "",
+                      "scope": "",
+                      "next": "",
+                      "checks": ""
+                    },
+                    "aiExcluded": false,
+                    "legacyText": null,
+                    "returnId": "R_case3",
+                    "background": {
+                      "version": "background.1",
+                      "revision": 5,
+                      "brief": "OLD_BRIEF_INDEPENDENT",
+                      "area": {
+                        "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                        "name": "A",
+                        "note": "OLD_NOTE_INDEPENDENT"
+                      }
+                    },
+                    "anchor": {
+                      "version": "anchor.1",
+                      "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                      "understanding": 0,
+                      "stamp": {
+                        "note": "OLD_NOTE_INDEPENDENT",
+                        "brief": 1,
+                        "decisions": []
+                      }
+                    }
+                  }
+                ],
+                "resultFile": null,
+                "background": {
+                  "version": "background.1",
+                  "revision": 5,
+                  "brief": "OLD_BRIEF_INDEPENDENT",
+                  "area": {
+                    "id": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225",
+                    "name": "A",
+                    "note": "OLD_NOTE_INDEPENDENT"
+                  }
+                },
+                "areaId": "A_f5b433ec-c00a-40c6-afd9-9c8040f09225"
+              },
+              "valid": false
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "status": "PRODUCT_COUNTEREXAMPLE",
+  "phase": "assert",
+  "error": {
+    "name": "ContractAssertionFailure",
+    "message": "all successive changed interpretations of same unchanged export basis must apply, not hold the third",
+    "stack": "ContractAssertionFailure: all successive changed interpretations of same unchanged export basis must apply, not hold the third\n    at assert (file:///workspace/browser-env/cycle17-counterexamples/check.mjs:10:39)\n    at file:///workspace/browser-env/cycle17-counterexamples/check.mjs:18:343"
+  },
+  "exit": 1,
+  "end": "2026-10-22T08:37:30.219Z"
+}

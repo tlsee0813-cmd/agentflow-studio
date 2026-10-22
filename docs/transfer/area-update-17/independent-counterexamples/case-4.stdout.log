@@ -1,0 +1,1 @@
+{"case":"4","status":"PRODUCT_COUNTEREXAMPLE","phase":"assert","exit":1,"error":"recovery must reject applied B record whose original task/export anchor belongs to A"}

@@ -1,0 +1,1 @@
+{"case":"2","status":"PRODUCT_COUNTEREXAMPLE","phase":"assert","exit":1,"error":"explicit intent correction must make old export-basis description ineligible as valid current"}

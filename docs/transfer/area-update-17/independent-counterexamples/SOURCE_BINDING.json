@@ -1,0 +1,29 @@
+{
+  "base": "77aed39a4e2e32be40c370772ab4e7d048a02240",
+  "overlay": "5feaeb5507102fb0815deb6106c49b316436de0c",
+  "files": [
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 64080,
+      "sha256": "9f8ecbed63041c37f491104cdc6ba189bf19b6ad3d19c0607455c24b4eb9fc5d"
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 14693,
+      "sha256": "20dac34978583f4e25278f737dfd1edc5d51b5e77643a1c4bf887905272082ce"
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "bytes": 37866,
+      "sha256": "112abf9ed32c23bd7ad6142dc6118f1fc26942479b1e677361de88c1e3cd60ce"
+    }
+  ],
+  "afterExecutionUnchanged": true,
+  "exactChangedSourcePaths": [
+    "app/continuity/src/shared/domain.ts",
+    "app/continuity/src/shared/types.ts",
+    "app/continuity/src/shared/validation.ts"
+  ],
+  "allOtherPinnedSourceFilesEqual": true,
+  "sourceFilesChecked": 179
+}

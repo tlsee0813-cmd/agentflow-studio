@@ -1,0 +1,57 @@
+{
+  "rows": [
+    {
+      "case": "1",
+      "command": [
+        "node",
+        "/workspace/browser-env/cycle17-counterexamples/check.mjs",
+        "1"
+      ],
+      "start": "2026-10-22T08:37:30.072423+00:00",
+      "end": "2026-10-22T08:37:30.127950+00:00",
+      "actualChildExit": 1,
+      "stdoutSHA256": "f1d20c455b9d513a6569c96d96b07b982c69a35bb8dfe8d3a87c1a7a5df3effa",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "2",
+      "command": [
+        "node",
+        "/workspace/browser-env/cycle17-counterexamples/check.mjs",
+        "2"
+      ],
+      "start": "2026-10-22T08:37:30.128035+00:00",
+      "end": "2026-10-22T08:37:30.176016+00:00",
+      "actualChildExit": 1,
+      "stdoutSHA256": "da161a3c8ab9f7e66e93163764592621343fc211ab2a27dc10d55a70c9fc84be",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "3",
+      "command": [
+        "node",
+        "/workspace/browser-env/cycle17-counterexamples/check.mjs",
+        "3"
+      ],
+      "start": "2026-10-22T08:37:30.176076+00:00",
+      "end": "2026-10-22T08:37:30.224253+00:00",
+      "actualChildExit": 1,
+      "stdoutSHA256": "038876ac86164480a53ac38d485d3b3cd18dd42d44dead4ecb5f91d352cf3ce7",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "case": "4",
+      "command": [
+        "node",
+        "/workspace/browser-env/cycle17-counterexamples/check.mjs",
+        "4"
+      ],
+      "start": "2026-10-22T08:37:30.224319+00:00",
+      "end": "2026-10-22T08:37:30.269495+00:00",
+      "actualChildExit": 1,
+      "stdoutSHA256": "ed25e5f15156d8ca52aa1b23dd4da7e5a5d99d4428d51e85ecd3ce0574407877",
+      "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "actualCollectorExitToPropagate": 1
+}

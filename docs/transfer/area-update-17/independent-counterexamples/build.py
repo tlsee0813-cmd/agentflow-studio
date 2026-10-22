@@ -1,0 +1,3 @@
+from pathlib import Path
+import subprocess,os,json,datetime,sys
+r=Path(__file__).parent;e={k:os.environ[k] for k in ['PATH','HOME','TMPDIR'] if k in os.environ};e['PATH']='/workspace/browser-env/tools/node_modules/.bin:'+e['PATH'];start=datetime.datetime.now(datetime.timezone.utc).isoformat();c=['node','continuity/scripts/build.mjs'];p=subprocess.run(c,cwd=r.parent/'cycle17-opus-original/app',env=e,capture_output=True);(r/'build.stdout.log').write_bytes(p.stdout);(r/'build.stderr.log').write_bytes(p.stderr);(r/'build-process.json').write_text(json.dumps({'command':c,'start':start,'end':datetime.datetime.now(datetime.timezone.utc).isoformat(),'child_exit':p.returncode,'collector_exit':p.returncode},indent=2));print(p.returncode);sys.exit(p.returncode)
