@@ -1,0 +1,1160 @@
+{
+  "caseCount": 15,
+  "safety": {
+    "originalProjectsMutated": false,
+    "existingCoordinatesChanged": false,
+    "otherFieldsChanged": false,
+    "allRoundtripsValid": true,
+    "totalNewCollisions": 0,
+    "newPositionOutsideLimit": false
+  },
+  "viewports": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "mapBorderBox": {
+        "x": 264,
+        "y": 224.890625,
+        "width": 660,
+        "height": 479.109375,
+        "top": 224.890625,
+        "right": 924,
+        "bottom": 704,
+        "left": 264
+      },
+      "clientWidth": 658,
+      "clientHeight": 477,
+      "controlOffsetTop": 10,
+      "controlOffsetHeight": 46,
+      "top": 40,
+      "fitWidth": 610,
+      "fitHeight": 389,
+      "derivation": "Saved actual24 border boxes; unchanged1px border and integer DOM sizing. No new browser measurement."
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "mapBorderBox": {
+        "x": 264,
+        "y": 224.890625,
+        "width": 820,
+        "height": 659.109375,
+        "top": 224.890625,
+        "right": 1084,
+        "bottom": 884,
+        "left": 264
+      },
+      "clientWidth": 818,
+      "clientHeight": 657,
+      "controlOffsetTop": 10,
+      "controlOffsetHeight": 46,
+      "top": 40,
+      "fitWidth": 770,
+      "fitHeight": 569,
+      "derivation": "Saved actual24 border boxes; unchanged1px border and integer DOM sizing. No new browser measurement."
+    }
+  ],
+  "cases": [
+    {
+      "label": "24 saved root coordinates 1280",
+      "old": {
+        "x": 640,
+        "y": 280
+      },
+      "candidate": {
+        "x": 340,
+        "y": 280
+      },
+      "beforeBox": {
+        "minX": -420,
+        "minY": 80,
+        "maxX": 880,
+        "maxY": 460,
+        "width": 1300,
+        "height": 380
+      },
+      "afterBox": {
+        "minX": -420,
+        "minY": 80,
+        "maxX": 580,
+        "maxY": 460,
+        "width": 1000,
+        "height": 380
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.46923076923076923,
+          "after": 0.61,
+          "ratio": 1.3,
+          "judgment": "larger"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.5923076923076923,
+          "after": 0.77,
+          "ratio": 1.3,
+          "judgment": "larger"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "예약",
+          "frame": {
+            "x": 326,
+            "y": 66,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "24 saved root coordinates 1440",
+      "old": {
+        "x": 720,
+        "y": 360
+      },
+      "candidate": {
+        "x": 420,
+        "y": 360
+      },
+      "beforeBox": {
+        "minX": -340,
+        "minY": 160,
+        "maxX": 960,
+        "maxY": 540,
+        "width": 1300,
+        "height": 380
+      },
+      "afterBox": {
+        "minX": -340,
+        "minY": 160,
+        "maxX": 660,
+        "maxY": 540,
+        "width": 1000,
+        "height": 380
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.46923076923076923,
+          "after": 0.61,
+          "ratio": 1.3,
+          "judgment": "larger"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.5923076923076923,
+          "after": 0.77,
+          "ratio": 1.3,
+          "judgment": "larger"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "예약",
+          "frame": {
+            "x": 406,
+            "y": 146,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "fixed short structure total4",
+      "old": {
+        "x": 640,
+        "y": 240
+      },
+      "candidate": {
+        "x": 40,
+        "y": 240
+      },
+      "beforeBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 880,
+        "maxY": 420,
+        "width": 840,
+        "height": 380
+      },
+      "afterBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 580,
+        "maxY": 420,
+        "width": 540,
+        "height": 380
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.7261904761904762,
+          "after": 1.0236842105263158,
+          "ratio": 1.4096635030198448,
+          "judgment": "larger"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.9166666666666666,
+          "after": 1.2,
+          "ratio": 1.309090909090909,
+          "judgment": "larger"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모0",
+          "frame": {
+            "x": 26,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "부모1",
+          "frame": {
+            "x": 326,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "fixed short structure total6",
+      "old": {
+        "x": 40,
+        "y": 240
+      },
+      "candidate": {
+        "x": 40,
+        "y": 240
+      },
+      "beforeBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 880,
+        "maxY": 420,
+        "width": 840,
+        "height": 380
+      },
+      "afterBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 880,
+        "maxY": 420,
+        "width": 840,
+        "height": 380
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.7261904761904762,
+          "after": 0.7261904761904762,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.9166666666666666,
+          "after": 0.9166666666666666,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모0",
+          "frame": {
+            "x": 26,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "부모1",
+          "frame": {
+            "x": 326,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "부모2",
+          "frame": {
+            "x": 626,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "fixed short structure total8",
+      "old": {
+        "x": 40,
+        "y": 240
+      },
+      "candidate": {
+        "x": 40,
+        "y": 240
+      },
+      "beforeBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 1180,
+        "maxY": 420,
+        "width": 1140,
+        "height": 380
+      },
+      "afterBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 1180,
+        "maxY": 420,
+        "width": 1140,
+        "height": 380
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.5350877192982456,
+          "after": 0.5350877192982456,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.6754385964912281,
+          "after": 0.6754385964912281,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모0",
+          "frame": {
+            "x": 26,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "부모1",
+          "frame": {
+            "x": 326,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "부모2",
+          "frame": {
+            "x": 626,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "부모3",
+          "frame": {
+            "x": 926,
+            "y": 26,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "fixed chain depth3",
+      "old": {
+        "x": 940,
+        "y": 640
+      },
+      "candidate": {
+        "x": 40,
+        "y": 640
+      },
+      "beforeBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 1180,
+        "maxY": 820,
+        "width": 1140,
+        "height": 780
+      },
+      "afterBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 280,
+        "maxY": 820,
+        "width": 240,
+        "height": 780
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.4987179487179487,
+          "after": 0.4987179487179487,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.6754385964912281,
+          "after": 0.7294871794871794,
+          "ratio": 1.08001998001998,
+          "judgment": "larger"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "깊이0",
+          "frame": {
+            "x": 26,
+            "y": 26,
+            "width": 268,
+            "height": 808
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "깊이1",
+          "frame": {
+            "x": 26,
+            "y": 226,
+            "width": 268,
+            "height": 608
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "깊이2",
+          "frame": {
+            "x": 26,
+            "y": 426,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "fixed chain depth4",
+      "old": {
+        "x": 1240,
+        "y": 840
+      },
+      "candidate": {
+        "x": 40,
+        "y": 840
+      },
+      "beforeBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 1480,
+        "maxY": 1020,
+        "width": 1440,
+        "height": 980
+      },
+      "afterBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 280,
+        "maxY": 1020,
+        "width": 240,
+        "height": 980
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.39693877551020407,
+          "after": 0.39693877551020407,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.5347222222222222,
+          "after": 0.5806122448979592,
+          "ratio": 1.0858203021468327,
+          "judgment": "larger"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "깊이0",
+          "frame": {
+            "x": 26,
+            "y": 26,
+            "width": 268,
+            "height": 1008
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "깊이1",
+          "frame": {
+            "x": 26,
+            "y": 226,
+            "width": 268,
+            "height": 808
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "깊이2",
+          "frame": {
+            "x": 26,
+            "y": 426,
+            "width": 268,
+            "height": 608
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "깊이3",
+          "frame": {
+            "x": 26,
+            "y": 626,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "archived card directly below parent",
+      "old": {
+        "x": 340,
+        "y": 240
+      },
+      "candidate": {
+        "x": 340,
+        "y": 240
+      },
+      "beforeBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 580,
+        "maxY": 420,
+        "width": 540,
+        "height": 380
+      },
+      "afterBox": {
+        "minX": 40,
+        "minY": 40,
+        "maxX": 580,
+        "maxY": 420,
+        "width": 540,
+        "height": 380
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 1.0236842105263158,
+          "after": 1.0236842105263158,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 1.2,
+          "after": 1.2,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모",
+          "frame": {
+            "x": 26,
+            "y": 26,
+            "width": 568,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "nearby other parent and reserved child; unfavorable left spill",
+      "old": {
+        "x": 600,
+        "y": 200
+      },
+      "candidate": {
+        "x": 600,
+        "y": 200
+      },
+      "beforeBox": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 840,
+        "maxY": 380,
+        "width": 840,
+        "height": 380
+      },
+      "afterBox": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 840,
+        "maxY": 380,
+        "width": 840,
+        "height": 380
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.7261904761904762,
+          "after": 0.7261904761904762,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.9166666666666666,
+          "after": 0.9166666666666666,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모A",
+          "frame": {
+            "x": -14,
+            "y": -14,
+            "width": 868,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [
+            "다른부모B",
+            "외곽foreign"
+          ],
+          "omitted": true,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "POSITION_LIMIT upper corner",
+      "old": {
+        "x": 199400,
+        "y": 200000
+      },
+      "candidate": {
+        "x": 199600,
+        "y": 200000
+      },
+      "beforeBox": {
+        "minX": 199400,
+        "minY": 199900,
+        "maxX": 200140,
+        "maxY": 200180,
+        "width": 740,
+        "height": 280
+      },
+      "afterBox": {
+        "minX": 199600,
+        "minY": 199900,
+        "maxX": 200140,
+        "maxY": 200180,
+        "width": 540,
+        "height": 280
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.8243243243243243,
+          "after": 1.1296296296296295,
+          "ratio": 1.3703703703703702,
+          "judgment": "larger"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 1.0405405405405406,
+          "after": 1.2,
+          "ratio": 1.1532467532467532,
+          "judgment": "larger"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모",
+          "frame": {
+            "x": 199586,
+            "y": 199886,
+            "width": 568,
+            "height": 308
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "explicit near far away remains legacy offset",
+      "old": {
+        "x": 12300,
+        "y": -15800
+      },
+      "candidate": {
+        "x": 12300,
+        "y": -15800
+      },
+      "beforeBox": {
+        "minX": 40,
+        "minY": -15800,
+        "maxX": 12540,
+        "maxY": 220,
+        "width": 12500,
+        "height": 16020
+      },
+      "afterBox": {
+        "minX": 40,
+        "minY": -15800,
+        "maxX": 12540,
+        "maxY": 220,
+        "width": 12500,
+        "height": 16020
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.024282147315855183,
+          "after": 0.024282147315855183,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.035518102372034954,
+          "after": 0.035518102372034954,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모",
+          "frame": {
+            "x": 26,
+            "y": -15814,
+            "width": 12528,
+            "height": 16048
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "previous manual coordinates preserved",
+      "old": {
+        "x": -420,
+        "y": 620
+      },
+      "candidate": {
+        "x": -420,
+        "y": 620
+      },
+      "beforeBox": {
+        "minX": -730,
+        "minY": -857,
+        "maxX": 1383,
+        "maxY": 800,
+        "width": 2113,
+        "height": 1657
+      },
+      "afterBox": {
+        "minX": -730,
+        "minY": -857,
+        "maxX": 1383,
+        "maxY": 800,
+        "width": 2113,
+        "height": 1657
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.2347616173808087,
+          "after": 0.2347616173808087,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.34339167169583584,
+          "after": 0.34339167169583584,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "수동부모",
+          "frame": {
+            "x": -744,
+            "y": 396,
+            "width": 578,
+            "height": 418
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "vertical tradeoff: narrower but taller below rejected",
+      "old": {
+        "x": 600,
+        "y": 200
+      },
+      "candidate": {
+        "x": 600,
+        "y": 200
+      },
+      "beforeBox": {
+        "minX": -300,
+        "minY": 0,
+        "maxX": 840,
+        "maxY": 380,
+        "width": 1140,
+        "height": 380
+      },
+      "afterBox": {
+        "minX": -300,
+        "minY": 0,
+        "maxX": 840,
+        "maxY": 380,
+        "width": 1140,
+        "height": 380
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.5350877192982456,
+          "after": 0.5350877192982456,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.6754385964912281,
+          "after": 0.6754385964912281,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모A",
+          "frame": {
+            "x": -14,
+            "y": -14,
+            "width": 868,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [
+            "아래점유",
+            "오른쪽점유"
+          ],
+          "omitted": true,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "equal whole bounds keep legacy",
+      "old": {
+        "x": 300,
+        "y": 200
+      },
+      "candidate": {
+        "x": 300,
+        "y": 200
+      },
+      "beforeBox": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 840,
+        "maxY": 780,
+        "width": 840,
+        "height": 780
+      },
+      "afterBox": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 840,
+        "maxY": 780,
+        "width": 840,
+        "height": 780
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.4987179487179487,
+          "after": 0.4987179487179487,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.7294871794871794,
+          "after": 0.7294871794871794,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모A",
+          "frame": {
+            "x": -14,
+            "y": -14,
+            "width": 568,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    },
+    {
+      "label": "below fits inside unrelated parent frame",
+      "old": {
+        "x": 300,
+        "y": 200
+      },
+      "candidate": {
+        "x": 0,
+        "y": 200
+      },
+      "beforeBox": {
+        "minX": -300,
+        "minY": 0,
+        "maxX": 540,
+        "maxY": 780,
+        "width": 840,
+        "height": 780
+      },
+      "afterBox": {
+        "minX": -300,
+        "minY": 0,
+        "maxX": 240,
+        "maxY": 780,
+        "width": 540,
+        "height": 780
+      },
+      "scales": [
+        {
+          "viewport": [
+            1280,
+            720
+          ],
+          "before": 0.4987179487179487,
+          "after": 0.4987179487179487,
+          "ratio": 1,
+          "judgment": "equal"
+        },
+        {
+          "viewport": [
+            1440,
+            900
+          ],
+          "before": 0.7294871794871794,
+          "after": 0.7294871794871794,
+          "ratio": 1,
+          "judgment": "equal"
+        }
+      ],
+      "frame": [
+        {
+          "parent": "부모A",
+          "frame": {
+            "x": -14,
+            "y": -14,
+            "width": 268,
+            "height": 408
+          },
+          "foreignCardsIntersecting": [],
+          "omitted": false,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        },
+        {
+          "parent": "무관부모B",
+          "frame": {
+            "x": -314,
+            "y": 186,
+            "width": 568,
+            "height": 608
+          },
+          "foreignCardsIntersecting": [
+            "새 child"
+          ],
+          "omitted": true,
+          "meaning": "Hypothetical projection of unchanged frame omission logic with fixed240x180 card boxes. No actual DOM/frame observation."
+        }
+      ]
+    }
+  ]
+}

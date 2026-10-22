@@ -1,0 +1,57 @@
+[
+  {
+    "path": "app/continuity/src/client/presentation.ts",
+    "sha": "a11e4e52c876ccde322ccba6faf3696ded09f8b6",
+    "size": 8406
+  },
+  {
+    "path": "app/continuity/src/shared/attention.ts",
+    "sha": "fffa5cafc552cbd765794d9ce654d1d1d0d2024a",
+    "size": 6051
+  },
+  {
+    "path": "app/continuity/src/shared/domain.ts",
+    "sha": "74a422ee6b4fdf8dc189469c5c5d6ec10766ec8f",
+    "size": 73179
+  },
+  {
+    "path": "app/continuity/src/shared/guidance.ts",
+    "sha": "5003772cb09c6110881014443ddfeb73cfd02b4f",
+    "size": 6903
+  },
+  {
+    "path": "app/continuity/src/shared/hierarchy.ts",
+    "sha": "3548ad1f1b6ab44742daad2ca0f5ea4a0354d6cd",
+    "size": 2591
+  },
+  {
+    "path": "app/continuity/src/shared/mock.ts",
+    "sha": "fede7bb924608c1a73eb5c97db63001b0ff12906",
+    "size": 17369
+  },
+  {
+    "path": "app/continuity/src/shared/outcome.ts",
+    "sha": "4d64d4ad7213b7aaff2adc9dfd9859835a961574",
+    "size": 4625
+  },
+  {
+    "path": "app/continuity/src/shared/plan-facts.ts",
+    "sha": "6766c24cae83a8b68417c06e61c3df95fb373f18",
+    "size": 4322
+  },
+  {
+    "path": "app/continuity/src/shared/storage.ts",
+    "sha": "f4b2607e70ad762e924539a34dd36f684003bca8",
+    "size": 11615
+  },
+  {
+    "path": "app/continuity/src/shared/types.ts",
+    "sha": "8ca513f5be7749d4962eaf80582f6c8273f0aad9",
+    "size": 16360
+  },
+  {
+    "path": "app/continuity/src/shared/validation.ts",
+    "sha": "1d784d254588c268fca4a4780b095ec78be7f3fc",
+    "size": 46546
+  }
+]

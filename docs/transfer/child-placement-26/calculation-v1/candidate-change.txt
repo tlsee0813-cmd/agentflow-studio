@@ -1,0 +1,12 @@
+  const at=near??areaPosition(p,parent);let target={x:at.x+GRID_X,y:at.y+GRID_Y};
+  if(near===undefined) {
+    // All-expanded visible card bounds only; archived cards still reserve slots in freeSlot.
+    const right=freeSlot(p,target),below=freeSlot(p,{x:at.x,y:at.y+GRID_Y});
+    const points=visibleAreas(p,new Set<string>()).map(a=>areaPosition(p,a));
+    const bounds=(point:Point)=>{const all=[...points,point];return {
+      w:Math.max(...all.map(a=>a.x+NODE_W))-Math.min(...all.map(a=>a.x)),
+      h:Math.max(...all.map(a=>a.y+PLACEMENT_H))-Math.min(...all.map(a=>a.y))};};
+    const r=bounds(right),b=bounds(below);
+    if(b.w<=r.w&&b.h<=r.h&&(b.w<r.w||b.h<r.h))target=below;
+  }
+  const n=addArea(p,name,note,target);

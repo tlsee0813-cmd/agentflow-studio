@@ -1,0 +1,33 @@
+diff --git a/../baseline-src/shared/domain.ts b/candidate-src/shared/domain.ts
+index 74a422e..366ce3e 100644
+--- a/../baseline-src/shared/domain.ts
++++ b/candidate-src/shared/domain.ts
+@@ -1,7 +1,7 @@
+ import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile } from './types.js';
+ import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
+ import { planFacts, planFactsText } from './plan-facts.js';
+-import { areaPath, childrenOf } from './hierarchy.js';
++import { areaPath, childrenOf, visibleAreas } from './hierarchy.js';
+ import type {ContextPlanStamp,ContextAreaDescription} from './types.js';
+ import { outcomeOf, contextLinks } from './outcome.js';
+ export { planFacts, planFactsText } from './plan-facts.js';
+@@ -643,7 +643,18 @@ export function setAreaParent(p:Project,id:string,parentId:string|null):Project
+ }
+ export function addChildArea(p:Project,parentId:string,name:string,note='',near?:Point):Project {
+   const parent=p.space.areas.find(a=>a.id===parentId);ensure(parent&&!parent.archived,'PARENT_MISSING');
+-  const at=near??areaPosition(p,parent),n=addArea(p,name,note,{x:at.x+GRID_X,y:at.y+GRID_Y});
++  const at=near??areaPosition(p,parent);let target={x:at.x+GRID_X,y:at.y+GRID_Y};
++  if(near===undefined) {
++    // All-expanded visible card bounds only; archived cards still reserve slots in freeSlot.
++    const right=freeSlot(p,target),below=freeSlot(p,{x:at.x,y:at.y+GRID_Y});
++    const points=visibleAreas(p,new Set<string>()).map(a=>areaPosition(p,a));
++    const bounds=(point:Point)=>{const all=[...points,point];return {
++      w:Math.max(...all.map(a=>a.x+NODE_W))-Math.min(...all.map(a=>a.x)),
++      h:Math.max(...all.map(a=>a.y+PLACEMENT_H))-Math.min(...all.map(a=>a.y))};};
++    const r=bounds(right),b=bounds(below);
++    if(b.w<=r.w&&b.h<=r.h&&(b.w<r.w||b.h<r.h))target=below;
++  }
++  const n=addArea(p,name,note,target);
+   return setAreaParent(n,n.space.areas.at(-1)!.id,parentId);
+ }
+ /** Areas are archived, never deleted: placed tasks and their reports stay where they are. */
