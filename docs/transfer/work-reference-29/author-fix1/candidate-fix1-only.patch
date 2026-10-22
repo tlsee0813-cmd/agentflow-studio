@@ -1,0 +1,13 @@
+diff --git a/work/product29-author-evidence/candidate-v0-source/app.ts b/work/product29-author-evidence/candidate-fix1-source/app.ts
+index ce3d1a5..27098b8 100644
+--- a/work/product29-author-evidence/candidate-v0-source/app.ts
++++ b/work/product29-author-evidence/candidate-fix1-source/app.ts
+@@ -901,7 +901,7 @@ function workReferenceState(pin:WorkReference):{kind:string;text:string;newer:bo
+   if(pin.area===null)return {kind:'unassigned',text:'이 작업은 소유 부분이 미지정이에요. 다른 부분의 설명을 대신 보여 주지 않아요.',newer:false};
+   if(!areaById(pin.area))return {kind:'missing',text:'이 작업의 소유 부분을 찾을 수 없어요.',newer:false};
+   const state=areaDescription(project,pin.area),selected=pickedWorkDescription(pin),newer=!!state.current&&(pin.revision===null||state.current.entry.revision!>pin.revision);
+-  if(pin.revision===null)return {kind:'none',text:'읽기 시작할 때 적용된 설명은 없었어요. 반영하지 않은 정리는 아래에서 따로 읽을 수 있어요.',newer};
++  if(pin.revision===null)return {kind:'none',text:'읽기 시작할 때 적용된 설명은 없었어요.'+(state.held.length?' 반영하지 않은 정리는 아래에서 따로 읽을 수 있어요.':''),newer};
+   if(!selected)return {kind:'missing',text:'읽던 설명이 지금 기록에 없어요. 다른 설명으로 바꾸지 않았어요. 닫고 다시 열어 확인하세요.',newer};
+   if(selected.valid)return {kind:'current',text:'현재 인계에 참고하는 설명이에요. 앱이 검증한 사실은 아니에요.',newer};
+   return {kind:newer?'previous':'stale',text:newer?'이후 새 설명이 있어 이전 기록을 읽고 있어요. 현재 인계 참고에는 포함되지 않아요.':'이전 기준의 설명 · 현재 인계 참고에는 포함되지 않아요. 구상·조건·직접 쓴 작업문 또는 포함 맥락의 기준이 바뀌었어요.',newer};

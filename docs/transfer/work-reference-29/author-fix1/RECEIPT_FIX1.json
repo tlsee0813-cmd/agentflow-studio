@@ -1,0 +1,51 @@
+{
+  "baseline": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "contract": "7d99679f97cc06b1f2e0a336054eedf3ce7aa6b2",
+  "status": "빈 상태 문구 fix1 동결 · 실제 UI 수용 미실행",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "source": "candidate-fix1-source/app.ts",
+      "bytes": 273253,
+      "sha256": "34f3610faae32b01d22f8a3fc52467b4e0b5d0d9c30059c6b4d201e22edc9477",
+      "gitBlob": "27098b83d48cef4289da076c46f0e93011dbe4e0"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "source": "candidate-v0-source/styles.css",
+      "bytes": 74194,
+      "sha256": "fb9192e07adb180e55530b3f489125861c542a61a53d7058fd24022b4715115f",
+      "gitBlob": "76530f773595c5712bf5e0b37b6285d060453e04"
+    }
+  ],
+  "commands": [
+    {
+      "record": "type-fix1.exit.json",
+      "runtime": "Node24.19.0 author auxiliary",
+      "exit": 0,
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p continuity/tsconfig.json"
+    },
+    {
+      "record": "build-fix1.exit.json",
+      "runtime": "Node24.19.0 author auxiliary",
+      "exit": 0,
+      "command": "node continuity/scripts/build.mjs"
+    },
+    {
+      "record": "diff-fix1.exit.json",
+      "exit": 0,
+      "command": "git diff --check"
+    }
+  ],
+  "change": "적용 설명 없음 안내에서 실제 held 기록이 있을 때만 아래 별도 읽기 문장을 추가한다. CSS/선택자/기하/입력/기록 선택·인계 정책은 v0 그대로다.",
+  "sourceBefore": "candidate-v0-source/app.ts 원바이트 보존",
+  "patches": [
+    "candidate-fix1-only.patch",
+    "candidate-fix1.patch"
+  ],
+  "priorEvidence": "RECEIPT_V0.json",
+  "notRun": [
+    "단위/브라우저/서버/Cloud/CI",
+    "설치/유료 호출/원격 쓰기"
+  ]
+}

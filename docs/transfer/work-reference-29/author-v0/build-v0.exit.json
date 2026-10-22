@@ -1,0 +1,5 @@
+{
+  "runtime": "Node24.19.0 author auxiliary",
+  "command": "node continuity/scripts/build.mjs",
+  "exit": 0
+}

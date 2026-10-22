@@ -1,0 +1,78 @@
+{
+  "baseline": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "contract": "7d99679f97cc06b1f2e0a336054eedf3ce7aa6b2",
+  "status": "작성자 최소 후보 v0 동결 · 독립 정적/실제 UI 수용 대기",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "source": "candidate-v0-source/app.ts",
+      "bytes": 273227,
+      "sha256": "ce93690bb33f5c834b01029f013ceddff834dba1a5d6ee0e7b04fbf6111e78ba",
+      "gitBlob": "ce3d1a5fccdc7dd90d80615fd3852be2e0257033"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "source": "candidate-v0-source/styles.css",
+      "bytes": 74194,
+      "sha256": "fb9192e07adb180e55530b3f489125861c542a61a53d7058fd24022b4715115f",
+      "gitBlob": "76530f773595c5712bf5e0b37b6285d060453e04"
+    }
+  ],
+  "commands": [
+    {
+      "record": "type-final.exit.json",
+      "runtime": "Node24.19.0 author auxiliary",
+      "exit": 0,
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p continuity/tsconfig.json"
+    },
+    {
+      "record": "build-final.exit.json",
+      "runtime": "Node24.19.0 author auxiliary",
+      "exit": 0,
+      "command": "node continuity/scripts/build.mjs"
+    },
+    {
+      "record": "diff-final.exit.json",
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "patch": {
+    "path": "candidate-v0.patch",
+    "bytes": 19345,
+    "sha256": "97a16c0d1183dbe0361ecef64ae28a6b166b63fcd573f708fa7c9f064242a673"
+  },
+  "selectors": {
+    "reference": ".work-reference",
+    "summary": ".work-reference > summary",
+    "caption": ".work-reference-caption",
+    "status": "[data-reference-status]",
+    "newDescription": "[data-reference-new]",
+    "body": ".work-reference-body",
+    "selectedText": ".work-reference-summary",
+    "fields": "#work-edit-fields",
+    "scope": "details/body data-project-id, data-task-id, data-area-id; body data-selected-revision, data-reference-state"
+  },
+  "behavior": [
+    "실제 summary 열기에서만 project/task/area/epoch/applied revision 선택",
+    "첫 U/N 입력은 현재성 caption만 갱신; 선택 본문/내부 펼침/스크롤/입력 DOM 유지",
+    "새 적용 설명 수신은 고정 본문 유지+새 설명 안내; 닫기/재열기만 재선택",
+    "현재 작업/실제 소유자/프로젝트 전환은 참고 reset; compose/map 선택은 참조 대상이 아님",
+    "held-only/미지정/보관/사라진 기록을 현재 본문으로 임의 승격하지 않음",
+    "내용폭760px 이상에만 열린 참고를 나란히 배치, 좁거나 CSS 미지원이면 한 열",
+    "상태 안내는 내부 스크롤 밖에 두고 본문은 키보드 접근 가능한 region으로 제한"
+  ],
+  "preserved": [
+    "domain/schema/인계 validity/AI 호출 정책",
+    "원 네 입력의 즉시 commit(false)+refreshPreview",
+    "기존 currentTaskId 변경 정책/과거 H/원보고",
+    "27/28 제품 및 증거"
+  ],
+  "notRun": [
+    "단위 검사",
+    "실제 브라우저/서버/Cloud/CI",
+    "설치/유료 호출/원격 쓰기"
+  ],
+  "intermediate": "type-v0/build-v0는 상태안내를 내부스크롤 밖으로 배치하기 전 보조 성공 로그. 최종 판정은 위 frozen source와 final 로그 기준이다. 이전 비동결 중간 소스 전체 사본은 별도 보존하지 않았다.",
+  "authoringIssue": "상태안내 위치 보완 중 apply_patch 1회가 잘못된 문맥 문자열로 검증 거절됨. 해당 시도는 파일을 변경하지 않았고 정확 문맥으로 다시 적용했다. 타입/빌드 실패는 없었다."
+}
