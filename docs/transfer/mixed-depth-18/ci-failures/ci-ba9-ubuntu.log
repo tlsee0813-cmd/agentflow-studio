@@ -1,0 +1,1482 @@
+X053 return work keeps its effective request and exclusion in current bases, not past-only references
+2026-10-22T11:16:32.4201418Z ok 83 - FIX053 return work keeps its effective request and exclusion in current bases, not past-only references
+2026-10-22T11:16:32.4201867Z   ---
+2026-10-22T11:16:32.4202041Z   duration_ms: 1.619011
+2026-10-22T11:16:32.4202245Z   type: 'test'
+2026-10-22T11:16:32.4202416Z   ...
+2026-10-22T11:16:32.4202865Z # Subtest: F083-S1 the old key is migrated once, never written; a valid workspace never re-imports it
+2026-10-22T11:16:32.4203541Z ok 84 - F083-S1 the old key is migrated once, never written; a valid workspace never re-imports it
+2026-10-22T11:16:32.4203947Z   ---
+2026-10-22T11:16:32.4204119Z   duration_ms: 4.970511
+2026-10-22T11:16:32.4204321Z   type: 'test'
+2026-10-22T11:16:32.4204498Z   ...
+2026-10-22T11:16:32.4205069Z # Subtest: F083-S2 an unreadable old value, or a migration that does not fit, stays as is: readable where possible, nothing written
+2026-10-22T11:16:32.4205954Z ok 85 - F083-S2 an unreadable old value, or a migration that does not fit, stays as is: readable where possible, nothing written
+2026-10-22T11:16:32.4206436Z   ---
+2026-10-22T11:16:32.4206607Z   duration_ms: 0.88608
+2026-10-22T11:16:32.4206805Z   type: 'test'
+2026-10-22T11:16:32.4206978Z   ...
+2026-10-22T11:16:32.4207334Z # Subtest: F083-S3 a damaged workspace is never overwritten with an empty one
+2026-10-22T11:16:32.4207858Z ok 86 - F083-S3 a damaged workspace is never overwritten with an empty one
+2026-10-22T11:16:32.4208187Z   ---
+2026-10-22T11:16:32.4208357Z   duration_ms: 0.709505
+2026-10-22T11:16:32.4208556Z   type: 'test'
+2026-10-22T11:16:32.4208733Z   ...
+2026-10-22T11:16:32.4209191Z # Subtest: F083-S4 without Web Locks nothing is written (no unprotected fallback); reading still works
+2026-10-22T11:16:32.4210108Z ok 87 - F083-S4 without Web Locks nothing is written (no unprotected fallback); reading still works
+2026-10-22T11:16:32.4210514Z   ---
+2026-10-22T11:16:32.4210698Z   duration_ms: 0.590677
+2026-10-22T11:16:32.4210899Z   type: 'test'
+2026-10-22T11:16:32.4211265Z   ...
+2026-10-22T11:16:32.4211724Z # Subtest: F083-S5 an imported copy gets only a new entryId; an exact result file matches inside that entry
+2026-10-22T11:16:32.4212422Z ok 88 - F083-S5 an imported copy gets only a new entryId; an exact result file matches inside that entry
+2026-10-22T11:16:32.4212821Z   ---
+2026-10-22T11:16:32.4212989Z   duration_ms: 2.552477
+2026-10-22T11:16:32.4213187Z   type: 'test'
+2026-10-22T11:16:32.4213355Z   ...
+2026-10-22T11:16:32.4213898Z # Subtest: F083-S6 autosave edits only its active entry in the lifecycle it opened; trash+restore elsewhere blocks a late save
+2026-10-22T11:16:32.4214749Z ok 89 - F083-S6 autosave edits only its active entry in the lifecycle it opened; trash+restore elsewhere blocks a late save
+2026-10-22T11:16:32.4215221Z   ---
+2026-10-22T11:16:32.4215397Z   duration_ms: 1.446401
+2026-10-22T11:16:32.4215596Z   type: 'test'
+2026-10-22T11:16:32.4215768Z   ...
+2026-10-22T11:16:32.4216295Z # Subtest: F083-S7 another tab's newer save of the same entry is not overwritten; concurrent trash and autosave serialise
+2026-10-22T11:16:32.4217260Z ok 90 - F083-S7 another tab's newer save of the same entry is not overwritten; concurrent trash and autosave serialise
+2026-10-22T11:16:32.4217705Z   ---
+2026-10-22T11:16:32.4217876Z   duration_ms: 0.688714
+2026-10-22T11:16:32.4218074Z   type: 'test'
+2026-10-22T11:16:32.4218244Z   ...
+2026-10-22T11:16:32.4218694Z # Subtest: F083-S8 a quota failure keeps the stored workspace and reports it; nothing is half-written
+2026-10-22T11:16:32.4219460Z ok 91 - F083-S8 a quota failure keeps the stored workspace and reports it; nothing is half-written
+2026-10-22T11:16:32.4219992Z   ---
+2026-10-22T11:16:32.4220168Z   duration_ms: 0.51954
+2026-10-22T11:16:32.4220366Z   type: 'test'
+2026-10-22T11:16:32.4220535Z   ...
+2026-10-22T11:16:32.4221006Z # Subtest: F083-S9 a refused storage read is not an empty workspace: no migration, no create, nothing written
+2026-10-22T11:16:32.4221735Z ok 92 - F083-S9 a refused storage read is not an empty workspace: no migration, no create, nothing written
+2026-10-22T11:16:32.4222156Z   ---
+2026-10-22T11:16:32.4222332Z   duration_ms: 1.475559
+2026-10-22T11:16:32.4243027Z   type: 'test'
+2026-10-22T11:16:32.4243225Z   ...
+2026-10-22T11:16:32.4243781Z # Subtest: F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import
+2026-10-22T11:16:32.4244343Z ok 93 - F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import
+2026-10-22T11:16:32.4244713Z   ---
+2026-10-22T11:16:32.4244840Z   duration_ms: 8.868131
+2026-10-22T11:16:32.4245019Z   type: 'test'
+2026-10-22T11:16:32.4245207Z   ...
+2026-10-22T11:16:32.4245751Z # Subtest: F090-2 areas: add (blank note = undecided), rename, archive/restore; typed relations, no self/duplicate links
+2026-10-22T11:16:32.4246512Z ok 94 - F090-2 areas: add (blank note = undecided), rename, archive/restore; typed relations, no self/duplicate links
+2026-10-22T11:16:32.4246964Z   ---
+2026-10-22T11:16:32.4247092Z   duration_ms: 1.053882
+2026-10-22T11:16:32.4247221Z   type: 'test'
+2026-10-22T11:16:32.4247334Z   ...
+2026-10-22T11:16:32.4247629Z # Subtest: F090-3 a request written for an area is placed there and continues that area, not the open work of another
+2026-10-22T11:16:32.4248080Z ok 95 - F090-3 a request written for an area is placed there and continues that area, not the open work of another
+2026-10-22T11:16:32.4248341Z   ---
+2026-10-22T11:16:32.4248449Z   duration_ms: 3.078681
+2026-10-22T11:16:32.4248576Z   type: 'test'
+2026-10-22T11:16:32.4248688Z   ...
+2026-10-22T11:16:32.4248986Z # Subtest: F090-4 reports follow their task; validation refuses areas on returns, unknown areas and broken relations
+2026-10-22T11:16:32.4249440Z ok 96 - F090-4 reports follow their task; validation refuses areas on returns, unknown areas and broken relations
+2026-10-22T11:16:32.4250000Z   ---
+2026-10-22T11:16:32.4250170Z   duration_ms: 1.305379
+2026-10-22T11:16:32.4250296Z   type: 'test'
+2026-10-22T11:16:32.4250544Z   ...
+2026-10-22T11:16:32.4250836Z # Subtest: F090-5 the purpose text is kept (with earlier wording) and is not sent as a request or work instruction
+2026-10-22T11:16:32.4251287Z ok 97 - F090-5 the purpose text is kept (with earlier wording) and is not sent as a request or work instruction
+2026-10-22T11:16:32.4251543Z   ---
+2026-10-22T11:16:32.4251651Z   duration_ms: 0.597377
+2026-10-22T11:16:32.4251776Z   type: 'test'
+2026-10-22T11:16:32.4251885Z   ...
+2026-10-22T11:16:32.4252155Z # Subtest: F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space
+2026-10-22T11:16:32.4252566Z ok 98 - F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space
+2026-10-22T11:16:32.4252808Z   ---
+2026-10-22T11:16:32.4252916Z   duration_ms: 1.514453
+2026-10-22T11:16:32.4253043Z   type: 'test'
+2026-10-22T11:16:32.4253151Z   ...
+2026-10-22T11:16:32.4253453Z # Subtest: F090-7 returning to an area continues its latest request (and that request's returns), not a late old report
+2026-10-22T11:16:32.4253917Z ok 99 - F090-7 returning to an area continues its latest request (and that request's returns), not a late old report
+2026-10-22T11:16:32.4254283Z   ---
+2026-10-22T11:16:32.4254394Z   duration_ms: 6.249661
+2026-10-22T11:16:32.4254519Z   type: 'test'
+2026-10-22T11:16:32.4254629Z   ...
+2026-10-22T11:16:32.4254918Z # Subtest: F090-8 the unsent request's area is saved with the draft; old formats default to following the current work
+2026-10-22T11:16:32.4255372Z ok 100 - F090-8 the unsent request's area is saved with the draft; old formats default to following the current work
+2026-10-22T11:16:32.4255635Z   ---
+2026-10-22T11:16:32.4255740Z   duration_ms: 2.314223
+2026-10-22T11:16:32.4255866Z   type: 'test'
+2026-10-22T11:16:32.4255974Z   ...
+2026-10-22T11:16:32.4256266Z # Subtest: F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo
+2026-10-22T11:16:32.4256707Z ok 101 - F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo
+2026-10-22T11:16:32.4256961Z   ---
+2026-10-22T11:16:32.4257072Z   duration_ms: 5.090661
+2026-10-22T11:16:32.4257193Z   type: 'test'
+2026-10-22T11:16:32.4257298Z   ...
+2026-10-22T11:16:32.4257570Z # Subtest: F090-10 automatic slots never land on an archived area or on another area at the coordinate limit
+2026-10-22T11:16:32.4257990Z ok 102 - F090-10 automatic slots never land on an archived area or on another area at the coordinate limit
+2026-10-22T11:16:32.4258236Z   ---
+2026-10-22T11:16:32.4258343Z   duration_ms: 1.182696
+2026-10-22T11:16:32.4258464Z   type: 'test'
+2026-10-22T11:16:32.4258570Z   ...
+2026-10-22T11:16:32.4258819Z # Subtest: F090-11 fit shows every measured card inside the map, however far apart (no 0.4 floor)
+2026-10-22T11:16:32.4259198Z ok 103 - F090-11 fit shows every measured card inside the map, however far apart (no 0.4 floor)
+2026-10-22T11:16:32.4259521Z   ---
+2026-10-22T11:16:32.4259822Z   duration_ms: 12.940754
+2026-10-22T11:16:32.4260023Z   type: 'test'
+2026-10-22T11:16:32.4260191Z   ...
+2026-10-22T11:16:32.4260788Z # Subtest: F091C-a the request's own area goes out the same way in the AI input, preview/Markdown and export record; other areas never
+2026-10-22T11:16:32.4261632Z ok 104 - F091C-a the request's own area goes out the same way in the AI input, preview/Markdown and export record; other areas never
+2026-10-22T11:16:32.4262097Z   ---
+2026-10-22T11:16:32.4262261Z   duration_ms: 9.97375
+2026-10-22T11:16:32.4262453Z   type: 'test'
+2026-10-22T11:16:32.4262619Z   ...
+2026-10-22T11:16:32.4263204Z # Subtest: F091C-b later plan edits, moves, re-organising and repeated exports never change A; only the next explicit request (B) is current
+2026-10-22T11:16:32.4264133Z ok 105 - F091C-b later plan edits, moves, re-organising and repeated exports never change A; only the next explicit request (B) is current
+2026-10-22T11:16:32.4264640Z   ---
+2026-10-22T11:16:32.4264749Z   duration_ms: 6.287577
+2026-10-22T11:16:32.4265055Z   type: 'test'
+2026-10-22T11:16:32.4265163Z   ...
+2026-10-22T11:16:32.4265475Z # Subtest: F091C-c A export -> B -> late A report (paste and exact file returnId): A's copy, B's focus/request/copy unchanged
+2026-10-22T11:16:32.4265963Z ok 106 - F091C-c A export -> B -> late A report (paste and exact file returnId): A's copy, B's focus/request/copy unchanged
+2026-10-22T11:16:32.4266236Z   ---
+2026-10-22T11:16:32.4266345Z   duration_ms: 9.867821
+2026-10-22T11:16:32.4266469Z   type: 'test'
+2026-10-22T11:16:32.4266576Z   ...
+2026-10-22T11:16:32.4266928Z # Subtest: F091C-d ideas and undecided points in the background never become bases, sources, intent or decisions; manual edits keep priority
+2026-10-22T11:16:32.4267481Z ok 107 - F091C-d ideas and undecided points in the background never become bases, sources, intent or decisions; manual edits keep priority
+2026-10-22T11:16:32.4267784Z   ---
+2026-10-22T11:16:32.4267890Z   duration_ms: 1.197137
+2026-10-22T11:16:32.4268016Z   type: 'test'
+2026-10-22T11:16:32.4268126Z   ...
+2026-10-22T11:16:32.4268449Z # Subtest: F091C-e old formats, reload, backup, empty values, maximum Unicode and byte limits: null, exact, refused (never cut)
+2026-10-22T11:16:32.4269034Z ok 108 - F091C-e old formats, reload, backup, empty values, maximum Unicode and byte limits: null, exact, refused (never cut)
+2026-10-22T11:16:32.4269314Z   ---
+2026-10-22T11:16:32.4269423Z   duration_ms: 1989.013961
+2026-10-22T11:16:32.4269682Z   type: 'test'
+2026-10-22T11:16:32.4269826Z   ...
+2026-10-22T11:16:32.4270135Z # Subtest: F091C-server MOCK and simulated provider receive background as its own field; old request shapes are refused
+2026-10-22T11:16:32.4270611Z ok 109 - F091C-server MOCK and simulated provider receive background as its own field; old request shapes are refused
+2026-10-22T11:16:32.4270881Z   ---
+2026-10-22T11:16:32.4270989Z   duration_ms: 33.440534
+2026-10-22T11:16:32.4271114Z   type: 'test'
+2026-10-22T11:16:32.4271222Z   ...
+2026-10-22T11:16:32.4271541Z # Subtest: F094-1 REUSE093 A/B and the four counterexamples: nothing added, no assumed incident, request and copies untouched
+2026-10-22T11:16:32.4272056Z ok 110 - F094-1 REUSE093 A/B and the four counterexamples: nothing added, no assumed incident, request and copies untouched
+2026-10-22T11:16:32.4272349Z   ---
+2026-10-22T11:16:32.4272455Z   duration_ms: 11.464138
+2026-10-22T11:16:32.4272580Z   type: 'test'
+2026-10-22T11:16:32.4272704Z   ...
+2026-10-22T11:16:32.4273008Z # Subtest: F094-2 explicit implementation, explicit reproduction and a partial ban are not cancelled or widened
+2026-10-22T11:16:32.4273475Z ok 111 - F094-2 explicit implementation, explicit reproduction and a partial ban are not cancelled or widened
+2026-10-22T11:16:32.4273757Z   ---
+2026-10-22T11:16:32.4273879Z   duration_ms: 1.021092
+2026-10-22T11:16:32.4274008Z   type: 'test'
+2026-10-22T11:16:32.4274115Z   ...
+2026-10-22T11:16:32.4274440Z # Subtest: F094-3 a stated unknown cause still gets the fact question (question features); no reproduction is added
+2026-10-22T11:16:32.4274912Z ok 112 - F094-3 a stated unknown cause still gets the fact question (question features); no reproduction is added
+2026-10-22T11:16:32.4275190Z   ---
+2026-10-22T11:16:32.4275326Z   duration_ms: 0.722134
+2026-10-22T11:16:32.4275449Z   type: 'test'
+2026-10-22T11:16:32.4275575Z   ...
+2026-10-22T11:16:32.4275831Z # Subtest: F094-4 a returned report is compared and sorted; no fixes or test runs are added
+2026-10-22T11:16:32.4276218Z ok 113 - F094-4 a returned report is compared and sorted; no fixes or test runs are added
+2026-10-22T11:16:32.4276458Z   ---
+2026-10-22T11:16:32.4276571Z   duration_ms: 1.779661
+2026-10-22T11:16:32.4276710Z   type: 'test'
+2026-10-22T11:16:32.4276822Z   ...
+2026-10-22T11:16:32.4277141Z # Subtest: F095-1 the same request sent twice (REUSE093 shape): one full copy, every entry keeps its ID, role and order
+2026-10-22T11:16:32.4277629Z ok 114 - F095-1 the same request sent twice (REUSE093 shape): one full copy, every entry keeps its ID, role and order
+2026-10-22T11:16:32.4277907Z   ---
+2026-10-22T11:16:32.4278131Z   duration_ms: 8.620429
+2026-10-22T11:16:32.4278259Z   type: 'test'
+2026-10-22T11:16:32.4278369Z   ...
+2026-10-22T11:16:32.4278678Z # Subtest: F095-2 no normalisation: a different space or line break is a different text and prints in full
+2026-10-22T11:16:32.4279171Z ok 115 - F095-2 no normalisation: a different space or line break is a different text and prints in full
+2026-10-22T11:16:32.4279458Z   ---
+2026-10-22T11:16:32.4279676Z   duration_ms: 3.915527
+2026-10-22T11:16:32.4279911Z   type: 'test'
+2026-10-22T11:16:32.4280038Z   ...
+2026-10-22T11:16:32.4280305Z # Subtest: F095-3 edits, corrections, reports and decisions are never folded into the request
+2026-10-22T11:16:32.4280711Z ok 116 - F095-3 edits, corrections, reports and decisions are never folded into the request
+2026-10-22T11:16:32.4280955Z   ---
+2026-10-22T11:16:32.4281062Z   duration_ms: 3.10441
+2026-10-22T11:16:32.4281198Z   type: 'test'
+2026-10-22T11:16:32.4281309Z   ...
+2026-10-22T11:16:32.4281577Z # Subtest: F033-1 relay exact stale choice cannot create a source/basis or enter the next request
+2026-10-22T11:16:32.4282000Z ok 117 - F033-1 relay exact stale choice cannot create a source/basis or enter the next request
+2026-10-22T11:16:32.4282363Z   ---
+2026-10-22T11:16:32.4282471Z   duration_ms: 8.455552
+2026-10-22T11:16:32.4282593Z   type: 'test'
+2026-10-22T11:16:32.4282700Z   ...
+2026-10-22T11:16:32.4282930Z # Subtest: F033-2 fresh replies and existing duplicate precedence survive bookkeeping
+2026-10-22T11:16:32.4283294Z ok 118 - F033-2 fresh replies and existing duplicate precedence survive bookkeeping
+2026-10-22T11:16:32.4283524Z   ---
+2026-10-22T11:16:32.4283629Z   duration_ms: 3.228256
+2026-10-22T11:16:32.4283750Z   type: 'test'
+2026-10-22T11:16:32.4283857Z   ...
+2026-10-22T11:16:32.4284222Z # Subtest: F033-3 all dispositions and synthetic paths reject stale without input mutation; refreshed questions work
+2026-10-22T11:16:32.4285014Z ok 119 - F033-3 all dispositions and synthetic paths reject stale without input mutation; refreshed questions work
+2026-10-22T11:16:32.4285428Z   ---
+2026-10-22T11:16:32.4285536Z   duration_ms: 2.310208
+2026-10-22T11:16:32.4285664Z   type: 'test'
+2026-10-22T11:16:32.4285773Z   ...
+2026-10-22T11:16:32.4286188Z # Subtest: F033-4 unknown advice revision and imported legacy remain read-only; current recovery preserves the boundary
+2026-10-22T11:16:32.4287056Z ok 120 - F033-4 unknown advice revision and imported legacy remain read-only; current recovery preserves the boundary
+2026-10-22T11:16:32.4287533Z   ---
+2026-10-22T11:16:32.4287692Z   duration_ms: 8.838587
+2026-10-22T11:16:32.4287876Z   type: 'test'
+2026-10-22T11:16:32.4288037Z   ...
+2026-10-22T11:16:32.4288510Z # Subtest: F033-5 rev1 history boundaries recover without repairs, while new same-task bases still reject old replies
+2026-10-22T11:16:32.4289278Z ok 121 - F033-5 rev1 history boundaries recover without repairs, while new same-task bases still reject old replies
+2026-10-22T11:16:32.4289838Z   ---
+2026-10-22T11:16:32.4290000Z   duration_ms: 2.492071
+2026-10-22T11:16:32.4290190Z   type: 'test'
+2026-10-22T11:16:32.4290374Z   ...
+2026-10-22T11:16:32.4290942Z # Subtest: G097-1 the same idea: one question, two answers give different scope and completion; unknown/deferred keep the choice open
+2026-10-22T11:16:32.4291800Z ok 122 - G097-1 the same idea: one question, two answers give different scope and completion; unknown/deferred keep the choice open
+2026-10-22T11:16:32.4292260Z   ---
+2026-10-22T11:16:32.4292420Z   duration_ms: 4.265522
+2026-10-22T11:16:32.4292603Z   type: 'test'
+2026-10-22T11:16:32.4292763Z   ...
+2026-10-22T11:16:32.4293286Z # Subtest: G097-2 enough existing information: note, a user decision or an earlier area request already answers it, so no question
+2026-10-22T11:16:32.4294103Z ok 123 - G097-2 enough existing information: note, a user decision or an earlier area request already answers it, so no question
+2026-10-22T11:16:32.4294555Z   ---
+2026-10-22T11:16:32.4294715Z   duration_ms: 6.839076
+2026-10-22T11:16:32.4295057Z   type: 'test'
+2026-10-22T11:16:32.4295224Z   ...
+2026-10-22T11:16:32.4295695Z # Subtest: G097-3 one question at most: after an answer only a proposal is accepted; exactly one of question/proposal
+2026-10-22T11:16:32.4296456Z ok 124 - G097-3 one question at most: after an answer only a proposal is accepted; exactly one of question/proposal
+2026-10-22T11:16:32.4296880Z   ---
+2026-10-22T11:16:32.4297043Z   duration_ms: 0.834192
+2026-10-22T11:16:32.4297232Z   type: 'test'
+2026-10-22T11:16:32.4297402Z   ...
+2026-10-22T11:16:32.4297920Z # Subtest: G097-4 nothing is written before adoption; adoption fills only the request draft and never replaces an unsent one
+2026-10-22T11:16:32.4298729Z ok 125 - G097-4 nothing is written before adoption; adoption fills only the request draft and never replaces an unsent one
+2026-10-22T11:16:32.4299177Z   ---
+2026-10-22T11:16:32.4299338Z   duration_ms: 7.290233
+2026-10-22T11:16:32.4299527Z   type: 'test'
+2026-10-22T11:16:32.4299810Z   ...
+2026-10-22T11:16:32.4300372Z # Subtest: G097-5 a reply is bound to its material and area: purpose/area/decision/answer changes invalidate it, typing a request does not
+2026-10-22T11:16:32.4301457Z ok 126 - G097-5 a reply is bound to its material and area: purpose/area/decision/answer changes invalidate it, typing a request does not
+2026-10-22T11:16:32.4301934Z   ---
+2026-10-22T11:16:32.4302097Z   duration_ms: 1.591799
+2026-10-22T11:16:32.4302324Z   type: 'test'
+2026-10-22T11:16:32.4302490Z   ...
+2026-10-22T11:16:32.4303003Z # Subtest: G097-6 HTTP: MOCK route, same origin checks; fake DeepSeek upstream gets the guidance prompt and the material only
+2026-10-22T11:16:32.4303813Z ok 127 - G097-6 HTTP: MOCK route, same origin checks; fake DeepSeek upstream gets the guidance prompt and the material only
+2026-10-22T11:16:32.4304267Z   ---
+2026-10-22T11:16:32.4304438Z   duration_ms: 54.065959
+2026-10-22T11:16:32.4304655Z   type: 'test'
+2026-10-22T11:16:32.4304828Z   ...
+2026-10-22T11:16:32.4305393Z # Subtest: G097-7 fake upstream failures map to fixed codes; a second question, extra keys or an echoed key are refused; paid off sends nothing
+2026-10-22T11:16:32.4306335Z ok 128 - G097-7 fake upstream failures map to fixed codes; a second question, extra keys or an echoed key are refused; paid off sends nothing
+2026-10-22T11:16:32.4306726Z   ---
+2026-10-22T11:16:32.4306835Z   duration_ms: 120.45064
+2026-10-22T11:16:32.4306965Z   type: 'test'
+2026-10-22T11:16:32.4307073Z   ...
+2026-10-22T11:16:32.4307400Z # Subtest: G097-8 (R2) MOCK never turns a ban, a deferral, a quote or a free answer into a positive choice; status and wording are kept
+2026-10-22T11:16:32.4307935Z ok 129 - G097-8 (R2) MOCK never turns a ban, a deferral, a quote or a free answer into a positive choice; status and wording are kept
+2026-10-22T11:16:32.4308229Z   ---
+2026-10-22T11:16:32.4308339Z   duration_ms: 1.501774
+2026-10-22T11:16:32.4308465Z   type: 'test'
+2026-10-22T11:16:32.4308572Z   ...
+2026-10-22T11:16:32.4308849Z # Subtest: G097-9 (R3) blank manual scope/checks are valid as in task edits; length and character checks stay
+2026-10-22T11:16:32.4309273Z ok 130 - G097-9 (R3) blank manual scope/checks are valid as in task edits; length and character checks stay
+2026-10-22T11:16:32.4309524Z   ---
+2026-10-22T11:16:32.4309787Z   duration_ms: 6.110147
+2026-10-22T11:16:32.4309911Z   type: 'test'
+2026-10-22T11:16:32.4310018Z   ...
+2026-10-22T11:16:32.4310335Z # Subtest: G097-10 (R2-1) many deferred confirmation decisions stay inside the reply contract (max 6 open) and all are named
+2026-10-22T11:16:32.4310908Z ok 131 - G097-10 (R2-1) many deferred confirmation decisions stay inside the reply contract (max 6 open) and all are named
+2026-10-22T11:16:32.4311361Z   ---
+2026-10-22T11:16:32.4311526Z   duration_ms: 6.475019
+2026-10-22T11:16:32.4311715Z   type: 'test'
+2026-10-22T11:16:32.4311882Z   ...
+2026-10-22T11:16:32.4312430Z # Subtest: G097-11 (R2-2) a long free answer is kept whole through draft, adoption, request and handoff; its closing ban is never cut
+2026-10-22T11:16:32.4313215Z ok 132 - G097-11 (R2-2) a long free answer is kept whole through draft, adoption, request and handoff; its closing ban is never cut
+2026-10-22T11:16:32.4313501Z   ---
+2026-10-22T11:16:32.4313608Z   duration_ms: 2.751339
+2026-10-22T11:16:32.4313730Z   type: 'test'
+2026-10-22T11:16:32.4313838Z   ...
+2026-10-22T11:16:32.4314195Z # Subtest: G098-1 strict reply contract: fact never has options (actual C2 content), defaults required and bounded, open/defaults never overlap
+2026-10-22T11:16:32.4314752Z ok 133 - G098-1 strict reply contract: fact never has options (actual C2 content), defaults required and bounded, open/defaults never overlap
+2026-10-22T11:16:32.4315057Z   ---
+2026-10-22T11:16:32.4315163Z   duration_ms: 0.834222
+2026-10-22T11:16:32.4315284Z   type: 'test'
+2026-10-22T11:16:32.4315395Z   ...
+2026-10-22T11:16:32.4315755Z # Subtest: G098-2 the draft shows AI defaults apart from user decisions (hidden when empty) and explains a changed basis without a re-approval step
+2026-10-22T11:16:32.4316326Z ok 134 - G098-2 the draft shows AI defaults apart from user decisions (hidden when empty) and explains a changed basis without a re-approval step
+2026-10-22T11:16:32.4316730Z   ---
+2026-10-22T11:16:32.4316835Z   duration_ms: 0.407552
+2026-10-22T11:16:32.4316963Z   type: 'test'
+2026-10-22T11:16:32.4317072Z   ...
+2026-10-22T11:16:32.4317370Z # Subtest: G098-3 the guidance prompt separates fact and choice examples and states the general rules (no case answers)
+2026-10-22T11:16:32.4317835Z ok 135 - G098-3 the guidance prompt separates fact and choice examples and states the general rules (no case answers)
+2026-10-22T11:16:32.4318101Z   ---
+2026-10-22T11:16:32.4318205Z   duration_ms: 0.174011
+2026-10-22T11:16:32.4318329Z   type: 'test'
+2026-10-22T11:16:32.4318437Z   ...
+2026-10-22T11:16:32.4318754Z # Subtest: G098-4 a stale guidance.1 request is refused plainly (400) instead of yielding a reply the old client cannot read
+2026-10-22T11:16:32.4319267Z ok 136 - G098-4 a stale guidance.1 request is refused plainly (400) instead of yielding a reply the old client cannot read
+2026-10-22T11:16:32.4319665Z   ---
+2026-10-22T11:16:32.4319788Z   duration_ms: 8.372196
+2026-10-22T11:16:32.4319914Z   type: 'test'
+2026-10-22T11:16:32.4320022Z   ...
+2026-10-22T11:16:32.4320388Z # Subtest: G098-5 free answers asking only for design or reading: original kept, MOCK checks add no implementation or run; option branches unchanged
+2026-10-22T11:16:32.4320961Z ok 137 - G098-5 free answers asking only for design or reading: original kept, MOCK checks add no implementation or run; option branches unchanged
+2026-10-22T11:16:32.4321274Z   ---
+2026-10-22T11:16:32.4321383Z   duration_ms: 1.048454
+2026-10-22T11:16:32.4321504Z   type: 'test'
+2026-10-22T11:16:32.4321613Z   ...
+2026-10-22T11:16:32.4321933Z # Subtest: G099-1 contract: currentInstruction is required and nullable, verbatim, same text limit, never cut; blank means none
+2026-10-22T11:16:32.4322437Z ok 138 - G099-1 contract: currentInstruction is required and nullable, verbatim, same text limit, never cut; blank means none
+2026-10-22T11:16:32.4322724Z   ---
+2026-10-22T11:16:32.4322831Z   duration_ms: 5.9422
+2026-10-22T11:16:32.4322954Z   type: 'test'
+2026-10-22T11:16:32.4323060Z   ...
+2026-10-22T11:16:32.4323415Z # Subtest: G099-2 empty input keeps the earlier path; a typed instruction gets a neutral MOCK draft with no question and no design of its own
+2026-10-22T11:16:32.4323962Z ok 139 - G099-2 empty input keeps the earlier path; a typed instruction gets a neutral MOCK draft with no question and no design of its own
+2026-10-22T11:16:32.4324269Z   ---
+2026-10-22T11:16:32.4324375Z   duration_ms: 0.548523
+2026-10-22T11:16:32.4324496Z   type: 'test'
+2026-10-22T11:16:32.4324603Z   ...
+2026-10-22T11:16:32.4324908Z # Subtest: G099-3 the draft carries the instruction whole in its own section; adoption makes it the request, never a decision
+2026-10-22T11:16:32.4325404Z ok 140 - G099-3 the draft carries the instruction whole in its own section; adoption makes it the request, never a decision
+2026-10-22T11:16:32.4325684Z   ---
+2026-10-22T11:16:32.4325885Z   duration_ms: 1.378409
+2026-10-22T11:16:32.4326010Z   type: 'test'
+2026-10-22T11:16:32.4326118Z   ...
+2026-10-22T11:16:32.4326436Z # Subtest: G099-4 a reply is bound to the instruction it was asked with; the prompt and the fake upstream carry it as its own field
+2026-10-22T11:16:32.4326934Z ok 141 - G099-4 a reply is bound to the instruction it was asked with; the prompt and the fake upstream carry it as its own field
+2026-10-22T11:16:32.4327212Z   ---
+2026-10-22T11:16:32.4327315Z   duration_ms: 8.373713
+2026-10-22T11:16:32.4327435Z   type: 'test'
+2026-10-22T11:16:32.4327541Z   ...
+2026-10-22T11:16:32.4327808Z # Subtest: H18 one inclusion forest is separate from Task continuation, relations and absolute positions
+2026-10-22T11:16:32.4328220Z ok 142 - H18 one inclusion forest is separate from Task continuation, relations and absolute positions
+2026-10-22T11:16:32.4328465Z   ---
+2026-10-22T11:16:32.4328570Z   duration_ms: 5.491417
+2026-10-22T11:16:32.4328690Z   type: 'test'
+2026-10-22T11:16:32.4328799Z   ...
+2026-10-22T11:16:32.4329168Z # Subtest: H18 self/cycle/missing/cross-project/archived parents are rejected atomically; archived history and active-child rule survive restore
+2026-10-22T11:16:32.4329989Z ok 143 - H18 self/cycle/missing/cross-project/archived parents are rejected atomically; archived history and active-child rule survive restore
+2026-10-22T11:16:32.4330406Z   ---
+2026-10-22T11:16:32.4330512Z   duration_ms: 3.106643
+2026-10-22T11:16:32.4330635Z   type: 'test'
+2026-10-22T11:16:32.4330742Z   ...
+2026-10-22T11:16:32.4330987Z # Subtest: H18 child creation is near its parent without moving any existing position or work
+2026-10-22T11:16:32.4331349Z ok 144 - H18 child creation is near its parent without moving any existing position or work
+2026-10-22T11:16:32.4331571Z   ---
+2026-10-22T11:16:32.4331676Z   duration_ms: 0.947392
+2026-10-22T11:16:32.4331797Z   type: 'test'
+2026-10-22T11:16:32.4331905Z   ...
+2026-10-22T11:16:32.4332181Z # Subtest: H18 branch fold uses the outermost representative and never mutates model, scale or actual edges
+2026-10-22T11:16:32.4332605Z ok 145 - H18 branch fold uses the outermost representative and never mutates model, scale or actual edges
+2026-10-22T11:16:32.4332855Z   ---
+2026-10-22T11:16:32.4332962Z   duration_ms: 1.038599
+2026-10-22T11:16:32.4333083Z   type: 'test'
+2026-10-22T11:16:32.4333194Z   ...
+2026-10-22T11:16:32.4333527Z # Subtest: H18 powertoys: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery
+2026-10-22T11:16:32.4334052Z ok 146 - H18 powertoys: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery
+2026-10-22T11:16:32.4334344Z   ---
+2026-10-22T11:16:32.4334450Z   duration_ms: 7.89449
+2026-10-22T11:16:32.4334578Z   type: 'test'
+2026-10-22T11:16:32.4334686Z   ...
+2026-10-22T11:16:32.4335013Z # Subtest: H18 product13: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery
+2026-10-22T11:16:32.4335536Z ok 147 - H18 product13: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery
+2026-10-22T11:16:32.4335829Z   ---
+2026-10-22T11:16:32.4335933Z   duration_ms: 6.624564
+2026-10-22T11:16:32.4336059Z   type: 'test'
+2026-10-22T11:16:32.4336166Z   ...
+2026-10-22T11:16:32.4336470Z # Subtest: H18 parent note: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4336938Z ok 148 - H18 parent note: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4337204Z   ---
+2026-10-22T11:16:32.4337310Z   duration_ms: 3.611781
+2026-10-22T11:16:32.4337435Z   type: 'test'
+2026-10-22T11:16:32.4337543Z   ...
+2026-10-22T11:16:32.4337839Z # Subtest: H18 parent name: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4338405Z ok 149 - H18 parent name: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4338672Z   ---
+2026-10-22T11:16:32.4338780Z   duration_ms: 2.660153
+2026-10-22T11:16:32.4338903Z   type: 'test'
+2026-10-22T11:16:32.4339009Z   ...
+2026-10-22T11:16:32.4339309Z # Subtest: H18 parent A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4339949Z ok 150 - H18 parent A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4340215Z   ---
+2026-10-22T11:16:32.4340322Z   duration_ms: 3.158411
+2026-10-22T11:16:32.4340442Z   type: 'test'
+2026-10-22T11:16:32.4340548Z   ...
+2026-10-22T11:16:32.4340860Z # Subtest: H18 parent note restore: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4341360Z ok 151 - H18 parent note restore: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4341643Z   ---
+2026-10-22T11:16:32.4341749Z   duration_ms: 2.569567
+2026-10-22T11:16:32.4341869Z   type: 'test'
+2026-10-22T11:16:32.4342064Z   ...
+2026-10-22T11:16:32.4342352Z # Subtest: H18 self A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4342806Z ok 152 - H18 self A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:16:32.4343073Z   ---
+2026-10-22T11:16:32.4343177Z   duration_ms: 2.684549
+2026-10-22T11:16:32.4343298Z   type: 'test'
+2026-10-22T11:16:32.4343406Z   ...
+2026-10-22T11:16:32.4343685Z # Subtest: H18 unrelated branches, layout and derived parent description do not change child reference basis
+2026-10-22T11:16:32.4344112Z ok 153 - H18 unrelated branches, layout and derived parent description do not change child reference basis
+2026-10-22T11:16:32.4344366Z   ---
+2026-10-22T11:16:32.4344470Z   duration_ms: 2.748415
+2026-10-22T11:16:32.4344590Z   type: 'test'
+2026-10-22T11:16:32.4344700Z   ...
+2026-10-22T11:16:32.4344996Z # Subtest: H18 legacy anchor.1/current root remain readable; adding then removing a parent never invents old ancestry
+2026-10-22T11:16:32.4345456Z ok 154 - H18 legacy anchor.1/current root remain readable; adding then removing a parent never invents old ancestry
+2026-10-22T11:16:32.4345719Z   ---
+2026-10-22T11:16:32.4345824Z   duration_ms: 1.482575
+2026-10-22T11:16:32.4345944Z   type: 'test'
+2026-10-22T11:16:32.4346050Z   ...
+2026-10-22T11:16:32.4346354Z # Subtest: H18 v6 migration preserves exact legacy stamps, raw return files, ids and positions without ancestor backfill
+2026-10-22T11:16:32.4346828Z ok 155 - H18 v6 migration preserves exact legacy stamps, raw return files, ids and positions without ancestor backfill
+2026-10-22T11:16:32.4347095Z   ---
+2026-10-22T11:16:32.4347199Z   duration_ms: 1.547783
+2026-10-22T11:16:32.4347320Z   type: 'test'
+2026-10-22T11:16:32.4347427Z   ...
+2026-10-22T11:16:32.4347750Z # Subtest: H18 recorded synthetic question/report/description signals retain exact area owners; relations never duplicate them
+2026-10-22T11:16:32.4348260Z ok 156 - H18 recorded synthetic question/report/description signals retain exact area owners; relations never duplicate them
+2026-10-22T11:16:32.4348549Z   ---
+2026-10-22T11:16:32.4348654Z   duration_ms: 4.802559
+2026-10-22T11:16:32.4348776Z   type: 'test'
+2026-10-22T11:16:32.4348881Z   ...
+2026-10-22T11:16:32.4349255Z # Subtest: H18 fixed actual project.6 state paths migrate without rewriting valid/held/user history, then parent attach-detach stays stale after reload
+2026-10-22T11:16:32.4350224Z ok 157 - H18 fixed actual project.6 state paths migrate without rewriting valid/held/user history, then parent attach-detach stays stale after reload
+2026-10-22T11:16:32.4350615Z   ---
+2026-10-22T11:16:32.4350719Z   duration_ms: 3.449748
+2026-10-22T11:16:32.4350840Z   type: 'test'
+2026-10-22T11:16:32.4350949Z   ...
+2026-10-22T11:16:32.4351327Z # Subtest: H18 project.5 export has no invented anchor: late return.2 report/raw kept and only description held
+2026-10-22T11:16:32.4351760Z ok 158 - H18 project.5 export has no invented anchor: late return.2 report/raw kept and only description held
+2026-10-22T11:16:32.4352015Z   ---
+2026-10-22T11:16:32.4352120Z   duration_ms: 2.07855
+2026-10-22T11:16:32.4352244Z   type: 'test'
+2026-10-22T11:16:32.4352356Z   ...
+2026-10-22T11:16:32.4352678Z # Subtest: H18 handoff never hides an active recorded question, and its later answer stays a reply record rather than an obligation
+2026-10-22T11:16:32.4353189Z ok 159 - H18 handoff never hides an active recorded question, and its later answer stays a reply record rather than an obligation
+2026-10-22T11:16:32.4353475Z   ---
+2026-10-22T11:16:32.4353578Z   duration_ms: 3.161005
+2026-10-22T11:16:32.4353702Z   type: 'test'
+2026-10-22T11:16:32.4353808Z   ...
+2026-10-22T11:16:32.4354034Z # Subtest: H18 test-only questions remain excluded from real recorded-question signals
+2026-10-22T11:16:32.4354376Z ok 160 - H18 test-only questions remain excluded from real recorded-question signals
+2026-10-22T11:16:32.4354588Z   ---
+2026-10-22T11:16:32.4354690Z   duration_ms: 1.514714
+2026-10-22T11:16:32.4354899Z   type: 'test'
+2026-10-22T11:16:32.4355007Z   ...
+2026-10-22T11:16:32.4355340Z # Subtest: H18 parent-recorded common and local decisions keep their authority and verbatim scope, without automatic child inheritance
+2026-10-22T11:16:32.4355871Z ok 161 - H18 parent-recorded common and local decisions keep their authority and verbatim scope, without automatic child inheritance
+2026-10-22T11:16:32.4356164Z   ---
+2026-10-22T11:16:32.4356267Z   duration_ms: 2.072771
+2026-10-22T11:16:32.4356389Z   type: 'test'
+2026-10-22T11:16:32.4356495Z   ...
+2026-10-22T11:16:32.4356768Z # Subtest: I15-H01 real local HTTP -> mock -> typed envelope, safe config and static entry, no external fetch
+2026-10-22T11:16:32.4357186Z ok 162 - I15-H01 real local HTTP -> mock -> typed envelope, safe config and static entry, no external fetch
+2026-10-22T11:16:32.4357433Z   ---
+2026-10-22T11:16:32.4357543Z   duration_ms: 36.492345
+2026-10-22T11:16:32.4357669Z   type: 'test'
+2026-10-22T11:16:32.4357775Z   ...
+2026-10-22T11:16:32.4358042Z # Subtest: I15-H02 invalid origin/host/content-type/body rejected without mock or provider invocation
+2026-10-22T11:16:32.4358448Z ok 163 - I15-H02 invalid origin/host/content-type/body rejected without mock or provider invocation
+2026-10-22T11:16:32.4358693Z   ---
+2026-10-22T11:16:32.4358805Z   duration_ms: 17.972756
+2026-10-22T11:16:32.4358933Z   type: 'test'
+2026-10-22T11:16:32.4359039Z   ...
+2026-10-22T11:16:32.4359331Z # Subtest: I15-H03 oversized input is rejected without truncating or invoking provider; static traversal denied
+2026-10-22T11:16:32.4359921Z ok 164 - I15-H03 oversized input is rejected without truncating or invoking provider; static traversal denied
+2026-10-22T11:16:32.4360175Z   ---
+2026-10-22T11:16:32.4360284Z   duration_ms: 8.618887
+2026-10-22T11:16:32.4360405Z   type: 'test'
+2026-10-22T11:16:32.4360512Z   ...
+2026-10-22T11:16:32.4360714Z # Subtest: I15-H04 missing key and paid opt-out prevent all outbound calls
+2026-10-22T11:16:32.4361010Z ok 165 - I15-H04 missing key and paid opt-out prevent all outbound calls
+2026-10-22T11:16:32.4361207Z   ---
+2026-10-22T11:16:32.4361316Z   duration_ms: 4.994606
+2026-10-22T11:16:32.4361440Z   type: 'test'
+2026-10-22T11:16:32.4361547Z   ...
+2026-10-22T11:16:32.4361813Z # Subtest: I15-H05 request IDs and process cap cannot be silently retried through old interview endpoint
+2026-10-22T11:16:32.4362223Z ok 166 - I15-H05 request IDs and process cap cannot be silently retried through old interview endpoint
+2026-10-22T11:16:32.4362469Z   ---
+2026-10-22T11:16:32.4362574Z   duration_ms: 7.776192
+2026-10-22T11:16:32.4362695Z   type: 'test'
+2026-10-22T11:16:32.4362803Z   ...
+2026-10-22T11:16:32.4363083Z # Subtest: I15-H06 malformed response over HTTP cannot patch a basis; response includes only fixed error code
+2026-10-22T11:16:32.4363516Z ok 167 - I15-H06 malformed response over HTTP cannot patch a basis; response includes only fixed error code
+2026-10-22T11:16:32.4363873Z   ---
+2026-10-22T11:16:32.4363980Z   duration_ms: 2.864309
+2026-10-22T11:16:32.4364103Z   type: 'test'
+2026-10-22T11:16:32.4364210Z   ...
+2026-10-22T11:16:32.4364485Z # Subtest: I15-P01 exact DeepSeek adapter request uses server endpoint, disabled thinking, JSON and no retry
+2026-10-22T11:16:32.4364910Z ok 168 - I15-P01 exact DeepSeek adapter request uses server endpoint, disabled thinking, JSON and no retry
+2026-10-22T11:16:32.4365162Z   ---
+2026-10-22T11:16:32.4365266Z   duration_ms: 5.239764
+2026-10-22T11:16:32.4365386Z   type: 'test'
+2026-10-22T11:16:32.4365493Z   ...
+2026-10-22T11:16:32.4365793Z # Subtest: I15-P02 empty/non-JSON/truncated/authority-injection responses fail once, preserve model errors as codes
+2026-10-22T11:16:32.4366267Z ok 169 - I15-P02 empty/non-JSON/truncated/authority-injection responses fail once, preserve model errors as codes
+2026-10-22T11:16:32.4366539Z   ---
+2026-10-22T11:16:32.4366645Z   duration_ms: 3.263789
+2026-10-22T11:16:32.4366768Z   type: 'test'
+2026-10-22T11:16:32.4366878Z   ...
+2026-10-22T11:16:32.4367110Z # Subtest: I15-P03 provider errors never expose raw body or credentials and never retry
+2026-10-22T11:16:32.4367542Z ok 170 - I15-P03 provider errors never expose raw body or credentials and never retry
+2026-10-22T11:16:32.4367760Z   ---
+2026-10-22T11:16:32.4367864Z   duration_ms: 1.979041
+2026-10-22T11:16:32.4367984Z   type: 'test'
+2026-10-22T11:16:32.4368091Z   ...
+2026-10-22T11:16:32.4368349Z # Subtest: I15-P04 timeout and cancelled requests work even with a transport that ignores AbortSignal
+2026-10-22T11:16:32.4368752Z ok 171 - I15-P04 timeout and cancelled requests work even with a transport that ignores AbortSignal
+2026-10-22T11:16:32.4368991Z   ---
+2026-10-22T11:16:32.4369097Z   duration_ms: 31.462535
+2026-10-22T11:16:32.4369222Z   type: 'test'
+2026-10-22T11:16:32.4369328Z   ...
+2026-10-22T11:16:32.4369769Z # Subtest: I15-P05 real local HTTP -> DeepSeek adapter -> injected fake upstream uses the same route as live mode
+2026-10-22T11:16:32.4370210Z ok 172 - I15-P05 real local HTTP -> DeepSeek adapter -> injected fake upstream uses the same route as live mode
+2026-10-22T11:16:32.4370464Z   ---
+2026-10-22T11:16:32.4370568Z   duration_ms: 3.679392
+2026-10-22T11:16:32.4370689Z   type: 'test'
+2026-10-22T11:16:32.4370798Z   ...
+2026-10-22T11:16:32.4371072Z # Subtest: I17-C03 lossy AI summary cannot remove original manual conditions from current handoff references
+2026-10-22T11:16:32.4371496Z ok 173 - I17-C03 lossy AI summary cannot remove original manual conditions from current handoff references
+2026-10-22T11:16:32.4371745Z   ---
+2026-10-22T11:16:32.4371851Z   duration_ms: 14.425162
+2026-10-22T11:16:32.4371974Z   type: 'test'
+2026-10-22T11:16:32.4372080Z   ...
+2026-10-22T11:16:32.4372346Z # Subtest: I17-C03 unrelated next work does not inherit manual values or recursively carry an older task
+2026-10-22T11:16:32.4372748Z ok 174 - I17-C03 unrelated next work does not inherit manual values or recursively carry an older task
+2026-10-22T11:16:32.4372987Z   ---
+2026-10-22T11:16:32.4373091Z   duration_ms: 3.229117
+2026-10-22T11:16:32.4373211Z   type: 'test'
+2026-10-22T11:16:32.4373320Z   ...
+2026-10-22T11:16:32.4373614Z # Subtest: I17-C03 explicit condition changes and current manual overrides take precedence without an approval path
+2026-10-22T11:16:32.4374073Z ok 175 - I17-C03 explicit condition changes and current manual overrides take precedence without an approval path
+2026-10-22T11:16:32.4374338Z   ---
+2026-10-22T11:16:32.4374442Z   duration_ms: 3.227955
+2026-10-22T11:16:32.4374564Z   type: 'test'
+2026-10-22T11:16:32.4374672Z   ...
+2026-10-22T11:16:32.4374923Z # Subtest: I17-C03 report wrapping uses the handed-off task but does not become a reuse request
+2026-10-22T11:16:32.4375297Z ok 176 - I17-C03 report wrapping uses the handed-off task but does not become a reuse request
+2026-10-22T11:16:32.4375524Z   ---
+2026-10-22T11:16:32.4375630Z   duration_ms: 4.120926
+2026-10-22T11:16:32.4375752Z   type: 'test'
+2026-10-22T11:16:32.4375862Z   ...
+2026-10-22T11:16:32.4376222Z # Subtest: I17-R5 stale previous AI stays excluded while manual provenance and legacy originals survive
+2026-10-22T11:16:32.4376627Z ok 177 - I17-R5 stale previous AI stays excluded while manual provenance and legacy originals survive
+2026-10-22T11:16:32.4376866Z   ---
+2026-10-22T11:16:32.4376971Z   duration_ms: 5.448699
+2026-10-22T11:16:32.4377092Z   type: 'test'
+2026-10-22T11:16:32.4377200Z   ...
+2026-10-22T11:16:32.4377460Z # Subtest: I17-C06 within-budget full original reaches the actual provider body on the third request
+2026-10-22T11:16:32.4377858Z ok 178 - I17-C06 within-budget full original reaches the actual provider body on the third request
+2026-10-22T11:16:32.4378099Z   ---
+2026-10-22T11:16:32.4378206Z   duration_ms: 1.038509
+2026-10-22T11:16:32.4378328Z   type: 'test'
+2026-10-22T11:16:32.4378438Z   ...
+2026-10-22T11:16:32.4378719Z # Subtest: I17-context only over-budget old untouched requests are excerpted; all IDs/local originals remain
+2026-10-22T11:16:32.4379152Z ok 179 - I17-context only over-budget old untouched requests are excerpted; all IDs/local originals remain
+2026-10-22T11:16:32.4379488Z   ---
+2026-10-22T11:16:32.4379728Z   duration_ms: 278.24644
+2026-10-22T11:16:32.4379856Z   type: 'test'
+2026-10-22T11:16:32.4379966Z   ...
+2026-10-22T11:16:32.4380219Z # Subtest: I17-context confirmed/answered/deferred/edited bases never take the excerpt fallback
+2026-10-22T11:16:32.4380605Z ok 180 - I17-context confirmed/answered/deferred/edited bases never take the excerpt fallback
+2026-10-22T11:16:32.4380837Z   ---
+2026-10-22T11:16:32.4380946Z   duration_ms: 140.542824
+2026-10-22T11:16:32.4381076Z   type: 'test'
+2026-10-22T11:16:32.4381184Z   ...
+2026-10-22T11:16:32.4381468Z # Subtest: I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8MB recovery/export independent
+2026-10-22T11:16:32.4381910Z ok 181 - I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8MB recovery/export independent
+2026-10-22T11:16:32.4382167Z   ---
+2026-10-22T11:16:32.4382275Z   duration_ms: 56.968025
+2026-10-22T11:16:32.4382402Z   type: 'test'
+2026-10-22T11:16:32.4382510Z   ...
+2026-10-22T11:16:32.4382783Z # Subtest: I17-contract manual provenance is input-only, narrow, versioned; advice parser is not relaxed
+2026-10-22T11:16:32.4383199Z ok 182 - I17-contract manual provenance is input-only, narrow, versioned; advice parser is not relaxed
+2026-10-22T11:16:32.4383444Z   ---
+2026-10-22T11:16:32.4383551Z   duration_ms: 2.254023
+2026-10-22T11:16:32.4383674Z   type: 'test'
+2026-10-22T11:16:32.4383782Z   ...
+2026-10-22T11:16:32.4384040Z # Subtest: I17-C05 supplied invalid array still fails once through real provider; raw never repaired
+2026-10-22T11:16:32.4384440Z ok 183 - I17-C05 supplied invalid array still fails once through real provider; raw never repaired
+2026-10-22T11:16:32.4384680Z   ---
+2026-10-22T11:16:32.4384790Z   duration_ms: 1.492531
+2026-10-22T11:16:32.4384911Z   type: 'test'
+2026-10-22T11:16:32.4384954Z   ...
+2026-10-22T11:16:32.4385171Z # Subtest: I17-C05 prompt example matches strict string schema; valid multi-line strings pass unchanged
+2026-10-22T11:16:32.4385376Z ok 184 - I17-C05 prompt example matches strict string schema; valid multi-line strings pass unchanged
+2026-10-22T11:16:32.4385420Z   ---
+2026-10-22T11:16:32.4385474Z   duration_ms: 1.084778
+2026-10-22T11:16:32.4385523Z   type: 'test'
+2026-10-22T11:16:32.4385565Z   ...
+2026-10-22T11:16:32.4385799Z # Subtest: I17-C02 prompt constrains shared comparison axis/timing without encoding case answers or new policies
+2026-10-22T11:16:32.4386026Z ok 185 - I17-C02 prompt constrains shared comparison axis/timing without encoding case answers or new policies
+2026-10-22T11:16:32.4386069Z   ---
+2026-10-22T11:16:32.4386122Z   duration_ms: 0.298438
+2026-10-22T11:16:32.4386169Z   type: 'test'
+2026-10-22T11:16:32.4386214Z   ...
+2026-10-22T11:16:32.4386428Z # Subtest: I22-C05 real narrow submit records 60 days before AI; status, history and manual checks survive
+2026-10-22T11:16:32.4386726Z ok 186 - I22-C05 real narrow submit records 60 days before AI; status, history and manual checks survive
+2026-10-22T11:16:32.4386773Z   ---
+2026-10-22T11:16:32.4386831Z   duration_ms: 10.281483
+2026-10-22T11:16:32.4386878Z   type: 'test'
+2026-10-22T11:16:32.4386924Z   ...
+2026-10-22T11:16:32.4387129Z # Subtest: I22-B05 supplied exact prose and domain assembly retain confirmed D1 r6 / requested D2 r9
+2026-10-22T11:16:32.4387322Z ok 187 - I22-B05 supplied exact prose and domain assembly retain confirmed D1 r6 / requested D2 r9
+2026-10-22T11:16:32.4387369Z   ---
+2026-10-22T11:16:32.4387420Z   duration_ms: 2.179401
+2026-10-22T11:16:32.4387472Z   type: 'test'
+2026-10-22T11:16:32.4387518Z   ...
+2026-10-22T11:16:32.4387709Z # Subtest: I22-B05 no-work next AND D1 review coexist; receive never promotes or replaces bases
+2026-10-22T11:16:32.4387893Z ok 188 - I22-B05 no-work next AND D1 review coexist; receive never promotes or replaces bases
+2026-10-22T11:16:32.4387940Z   ---
+2026-10-22T11:16:32.4387990Z   duration_ms: 1.637388
+2026-10-22T11:16:32.4388042Z   type: 'test'
+2026-10-22T11:16:32.4388087Z   ...
+2026-10-22T11:16:32.4388315Z # Subtest: I22-B03 matching current goal plus requested record is not an automatic incomplete/complete decision
+2026-10-22T11:16:32.4388617Z ok 189 - I22-B03 matching current goal plus requested record is not an automatic incomplete/complete decision
+2026-10-22T11:16:32.4388664Z   ---
+2026-10-22T11:16:32.4388715Z   duration_ms: 1.087042
+2026-10-22T11:16:32.4388764Z   type: 'test'
+2026-10-22T11:16:32.4388806Z   ...
+2026-10-22T11:16:32.4389061Z # Subtest: I22-partial composite request preserves other bases, full request and manual checks while only D1 is recorded
+2026-10-22T11:16:32.4389303Z ok 190 - I22-partial composite request preserves other bases, full request and manual checks while only D1 is recorded
+2026-10-22T11:16:32.4389347Z   ---
+2026-10-22T11:16:32.4389400Z   duration_ms: 1.907473
+2026-10-22T11:16:32.4389449Z   type: 'test'
+2026-10-22T11:16:32.4389493Z   ...
+2026-10-22T11:16:32.4389860Z # Subtest: I22-same-values/status-only recordings report actual fields, not semantic completion
+2026-10-22T11:16:32.4390052Z ok 191 - I22-same-values/status-only recordings report actual fields, not semantic completion
+2026-10-22T11:16:32.4390097Z   ---
+2026-10-22T11:16:32.4390150Z   duration_ms: 1.078208
+2026-10-22T11:16:32.4390196Z   type: 'test'
+2026-10-22T11:16:32.4390242Z   ...
+2026-10-22T11:16:32.4390443Z # Subtest: I22-new manual basis records a value without pretending there was a replaced predecessor
+2026-10-22T11:16:32.4390633Z ok 192 - I22-new manual basis records a value without pretending there was a replaced predecessor
+2026-10-22T11:16:32.4390680Z   ---
+2026-10-22T11:16:32.4390733Z   duration_ms: 0.857857
+2026-10-22T11:16:32.4390779Z   type: 'test'
+2026-10-22T11:16:32.4390824Z   ...
+2026-10-22T11:16:32.4391042Z # Subtest: I22-narrow modification of an answered record keeps the existing answered-to-requested rule
+2026-10-22T11:16:32.4391245Z ok 193 - I22-narrow modification of an answered record keeps the existing answered-to-requested rule
+2026-10-22T11:16:32.4391290Z   ---
+2026-10-22T11:16:32.4391343Z   duration_ms: 2.344609
+2026-10-22T11:16:32.4391392Z   type: 'test'
+2026-10-22T11:16:32.4391437Z   ...
+2026-10-22T11:16:32.4391625Z # Subtest: I22-old-task facts reference historical versions and cannot replace current bases
+2026-10-22T11:16:32.4391809Z ok 194 - I22-old-task facts reference historical versions and cannot replace current bases
+2026-10-22T11:16:32.4391856Z   ---
+2026-10-22T11:16:32.4391907Z   duration_ms: 1.031489
+2026-10-22T11:16:32.4391956Z   type: 'test'
+2026-10-22T11:16:32.4392001Z   ...
+2026-10-22T11:16:32.4392223Z # Subtest: I22-quoted wording change on requested basis keeps requested status, no inference of confirmation
+2026-10-22T11:16:32.4392438Z ok 195 - I22-quoted wording change on requested basis keeps requested status, no inference of confirmation
+2026-10-22T11:16:32.4392484Z   ---
+2026-10-22T11:16:32.4392534Z   duration_ms: 0.591388
+2026-10-22T11:16:32.4392584Z   type: 'test'
+2026-10-22T11:16:32.4392725Z   ...
+2026-10-22T11:16:32.4392963Z # Subtest: I22-missing or unordered history stays reference-only; absent provenance is not silently reconstructed
+2026-10-22T11:16:32.4393194Z ok 196 - I22-missing or unordered history stays reference-only; absent provenance is not silently reconstructed
+2026-10-22T11:16:32.4393238Z   ---
+2026-10-22T11:16:32.4393291Z   duration_ms: 1.320712
+2026-10-22T11:16:32.4393341Z   type: 'test'
+2026-10-22T11:16:32.4393384Z   ...
+2026-10-22T11:16:32.4393624Z # Subtest: I22-answer and test_answer retain their existing provenance; synthetic answers never become basis facts
+2026-10-22T11:16:32.4393853Z ok 197 - I22-answer and test_answer retain their existing provenance; synthetic answers never become basis facts
+2026-10-22T11:16:32.4393896Z   ---
+2026-10-22T11:16:32.4393949Z   duration_ms: 0.877487
+2026-10-22T11:16:32.4393998Z   type: 'test'
+2026-10-22T11:16:32.4394040Z   ...
+2026-10-22T11:16:32.4394280Z # Subtest: I22-report/evidence-only input is visible as input, never a record of external execution or a new basis
+2026-10-22T11:16:32.4394506Z ok 198 - I22-report/evidence-only input is visible as input, never a record of external execution or a new basis
+2026-10-22T11:16:32.4394670Z   ---
+2026-10-22T11:16:32.4394723Z   duration_ms: 2.549717
+2026-10-22T11:16:32.4394770Z   type: 'test'
+2026-10-22T11:16:32.4394816Z   ...
+2026-10-22T11:16:32.4395034Z # Subtest: I22-pure projection, handoff and request neither mutate nor share writable objects with project
+2026-10-22T11:16:32.4395242Z ok 199 - I22-pure projection, handoff and request neither mutate nor share writable objects with project
+2026-10-22T11:16:32.4395288Z   ---
+2026-10-22T11:16:32.4395341Z   duration_ms: 1.210867
+2026-10-22T11:16:32.4395386Z   type: 'test'
+2026-10-22T11:16:32.4395431Z   ...
+2026-10-22T11:16:32.4395667Z # Subtest: I22-write failure leaves current-memory facts separate from last persisted snapshot and recovery bytes
+2026-10-22T11:16:32.4395900Z ok 200 - I22-write failure leaves current-memory facts separate from last persisted snapshot and recovery bytes
+2026-10-22T11:16:32.4395945Z   ---
+2026-10-22T11:16:32.4395998Z   duration_ms: 1.433491
+2026-10-22T11:16:32.4396049Z   type: 'test'
+2026-10-22T11:16:32.4396095Z   ...
+2026-10-22T11:16:32.4396338Z # Subtest: I22-input API is strict, cross-linked, copy-safe and rejects old/missing/forged shape without repairing it
+2026-10-22T11:16:32.4396572Z ok 201 - I22-input API is strict, cross-linked, copy-safe and rejects old/missing/forged shape without repairing it
+2026-10-22T11:16:32.4396618Z   ---
+2026-10-22T11:16:32.4396670Z   duration_ms: 4.878312
+2026-10-22T11:16:32.4396720Z   type: 'test'
+2026-10-22T11:16:32.4396768Z   ...
+2026-10-22T11:16:32.4396975Z # Subtest: I22-reference validation is not authentication of imported history or semantic completion
+2026-10-22T11:16:32.4397176Z ok 202 - I22-reference validation is not authentication of imported history or semantic completion
+2026-10-22T11:16:32.4397222Z   ---
+2026-10-22T11:16:32.4397272Z   duration_ms: 1.604838
+2026-10-22T11:16:32.4397322Z   type: 'test'
+2026-10-22T11:16:32.4397365Z   ...
+2026-10-22T11:16:32.4397617Z # Subtest: I22-all facts count toward exact 128KiB; +1 fails, while marked excerpts and local 8MB boundary remain separate
+2026-10-22T11:16:32.4397859Z ok 203 - I22-all facts count toward exact 128KiB; +1 fails, while marked excerpts and local 8MB boundary remain separate
+2026-10-22T11:16:32.4397902Z   ---
+2026-10-22T11:16:32.4397957Z   duration_ms: 125.61929
+2026-10-22T11:16:32.4398008Z   type: 'test'
+2026-10-22T11:16:32.4398051Z   ...
+2026-10-22T11:16:32.4398251Z # Subtest: I22-projection works after legacy migration and never adds fields to stored projects
+2026-10-22T11:16:32.4398440Z ok 204 - I22-projection works after legacy migration and never adds fields to stored projects
+2026-10-22T11:16:32.4398483Z   ---
+2026-10-22T11:16:32.4398537Z   duration_ms: 3.587255
+2026-10-22T11:16:32.4398587Z   type: 'test'
+2026-10-22T11:16:32.4398630Z   ...
+2026-10-22T11:16:32.4398957Z # Subtest: I22-actual localhost HTTP -> provider body -> validation -> receive -> handoff shares identical app facts
+2026-10-22T11:16:32.4399184Z ok 205 - I22-actual localhost HTTP -> provider body -> validation -> receive -> handoff shares identical app facts
+2026-10-22T11:16:32.4399233Z   ---
+2026-10-22T11:16:32.4399287Z   duration_ms: 39.042532
+2026-10-22T11:16:32.4399334Z   type: 'test'
+2026-10-22T11:16:32.4399379Z   ...
+2026-10-22T11:16:32.4399840Z # Subtest: S035-1 explicit report/evidence parent equals preview; sources, bases, history and manual values survive JSON recovery
+2026-10-22T11:16:32.4400103Z ok 206 - S035-1 explicit report/evidence parent equals preview; sources, bases, history and manual values survive JSON recovery
+2026-10-22T11:16:32.4400154Z   ---
+2026-10-22T11:16:32.4400208Z   duration_ms: 11.495274
+2026-10-22T11:16:32.4400254Z   type: 'test'
+2026-10-22T11:16:32.4400300Z   ...
+2026-10-22T11:16:32.4400501Z # Subtest: S035-2 invalid, unexported and other-project IDs fail atomically in submit and preview
+2026-10-22T11:16:32.4400694Z ok 207 - S035-2 invalid, unexported and other-project IDs fail atomically in submit and preview
+2026-10-22T11:16:32.4400829Z   ---
+2026-10-22T11:16:32.4400879Z   duration_ms: 3.519563
+2026-10-22T11:16:32.4400929Z   type: 'test'
+2026-10-22T11:16:32.4400975Z   ...
+2026-10-22T11:16:32.4401207Z # Subtest: S035-3 omitted target preserves zero/single/multiple fallback and reverse task order, not export date
+2026-10-22T11:16:32.4401432Z ok 208 - S035-3 omitted target preserves zero/single/multiple fallback and reverse task order, not export date
+2026-10-22T11:16:32.4401478Z   ---
+2026-10-22T11:16:32.4401529Z   duration_ms: 1.923447
+2026-10-22T11:16:32.4401578Z   type: 'test'
+2026-10-22T11:16:32.4401623Z   ...
+2026-10-22T11:16:32.4401866Z # Subtest: S035-4 next B request context contains B return and excludes A return without removing global A request basis
+2026-10-22T11:16:32.4402105Z ok 209 - S035-4 next B request context contains B return and excludes A return without removing global A request basis
+2026-10-22T11:16:32.4402153Z   ---
+2026-10-22T11:16:32.4402203Z   duration_ms: 1.909286
+2026-10-22T11:16:32.4402255Z   type: 'test'
+2026-10-22T11:16:32.4402298Z   ...
+2026-10-22T11:16:32.4402515Z # Subtest: S102-1 nothing to check without evidence: no tasks, a kept input, a prepared or exported request
+2026-10-22T11:16:32.4402725Z ok 210 - S102-1 nothing to check without evidence: no tasks, a kept input, a prepared or exported request
+2026-10-22T11:16:32.4402769Z   ---
+2026-10-22T11:16:32.4402822Z   duration_ms: 7.610513
+2026-10-22T11:16:32.4402871Z   type: 'test'
+2026-10-22T11:16:32.4402913Z   ...
+2026-10-22T11:16:32.4403162Z # Subtest: S102-2 an open product choice waits for the user until answered, or until the user continues from that request
+2026-10-22T11:16:32.4403400Z ok 211 - S102-2 an open product choice waits for the user until answered, or until the user continues from that request
+2026-10-22T11:16:32.4403443Z   ---
+2026-10-22T11:16:32.4403496Z   duration_ms: 2.09182
+2026-10-22T11:16:32.4403545Z   type: 'test'
+2026-10-22T11:16:32.4403590Z   ...
+2026-10-22T11:16:32.4403825Z # Subtest: S102-3 a returned report is listed until the user acts on it (a follow-up request or a follow-up handoff)
+2026-10-22T11:16:32.4404048Z ok 212 - S102-3 a returned report is listed until the user acts on it (a follow-up request or a follow-up handoff)
+2026-10-22T11:16:32.4418624Z   ---
+2026-10-22T11:16:32.4418758Z   duration_ms: 3.649328
+2026-10-22T11:16:32.4418836Z   type: 'test'
+2026-10-22T11:16:32.4418900Z   ...
+2026-10-22T11:16:32.4419279Z # Subtest: S102-4 only the latest return of a task counts; an older report is never counted again
+2026-10-22T11:16:32.4419479Z ok 213 - S102-4 only the latest return of a task counts; an older report is never counted again
+2026-10-22T11:16:32.4419524Z   ---
+2026-10-22T11:16:32.4419731Z   duration_ms: 1.647683
+2026-10-22T11:16:32.4419788Z   type: 'test'
+2026-10-22T11:16:32.4419831Z   ...
+2026-10-22T11:16:32.4420245Z # Subtest: S102-5 a report returning to a follow-up handoff opens the original request; items keep their area; pure and unsaved
+2026-10-22T11:16:32.4420508Z ok 214 - S102-5 a report returning to a follow-up handoff opens the original request; items keep their area; pure and unsaved
+2026-10-22T11:16:32.4420555Z   ---
+2026-10-22T11:16:32.4420607Z   duration_ms: 2.472321
+2026-10-22T11:16:32.4420654Z   type: 'test'
+2026-10-22T11:16:32.4420699Z   ...
+2026-10-22T11:16:32.4421039Z # Subtest: S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report
+2026-10-22T11:16:32.4421359Z ok 215 - S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report
+2026-10-22T11:16:32.4421403Z   ---
+2026-10-22T11:16:32.4421456Z   duration_ms: 2.508475
+2026-10-22T11:16:32.4421502Z   type: 'test'
+2026-10-22T11:16:32.4421546Z   ...
+2026-10-22T11:16:32.4421826Z # Subtest: UI001-P1 stage labels distinguish source preservation, API response waiting and prepared work; none claims execution
+2026-10-22T11:16:32.4422090Z ok 216 - UI001-P1 stage labels distinguish source preservation, API response waiting and prepared work; none claims execution
+2026-10-22T11:16:32.4422219Z   ---
+2026-10-22T11:16:32.4422269Z   duration_ms: 4.005131
+2026-10-22T11:16:32.4422315Z   type: 'test'
+2026-10-22T11:16:32.4422359Z   ...
+2026-10-22T11:16:32.4422596Z # Subtest: UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy
+2026-10-22T11:16:32.4422823Z ok 217 - UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy
+2026-10-22T11:16:32.4422866Z   ---
+2026-10-22T11:16:32.4422917Z   duration_ms: 1.288634
+2026-10-22T11:16:32.4422964Z   type: 'test'
+2026-10-22T11:16:32.4423008Z   ...
+2026-10-22T11:16:32.4423288Z # Subtest: UI001-P3 real export metadata changes next action; editing a work field asks for recopy, typing a separate draft does not
+2026-10-22T11:16:32.4423559Z ok 218 - UI001-P3 real export metadata changes next action; editing a work field asks for recopy, typing a separate draft does not
+2026-10-22T11:16:32.4423604Z   ---
+2026-10-22T11:16:32.4423654Z   duration_ms: 5.539064
+2026-10-22T11:16:32.4423701Z   type: 'test'
+2026-10-22T11:16:32.4423744Z   ...
+2026-10-22T11:16:32.4423971Z # Subtest: UI001-P4 stale state remains explicit even with a saved handoff and a preserved manual instruction
+2026-10-22T11:16:32.4424190Z ok 219 - UI001-P4 stale state remains explicit even with a saved handoff and a preserved manual instruction
+2026-10-22T11:16:32.4424235Z   ---
+2026-10-22T11:16:32.4424285Z   duration_ms: 0.679019
+2026-10-22T11:16:32.4424333Z   type: 'test'
+2026-10-22T11:16:32.4424378Z   ...
+2026-10-22T11:16:32.4424643Z # Subtest: UI001-P5 report/source labels stay attributed and titles derive from actual source rather than invented task names
+2026-10-22T11:16:32.4424902Z ok 220 - UI001-P5 report/source labels stay attributed and titles derive from actual source rather than invented task names
+2026-10-22T11:16:32.4424945Z   ---
+2026-10-22T11:16:32.4424997Z   duration_ms: 0.942134
+2026-10-22T11:16:32.4425045Z   type: 'test'
+2026-10-22T11:16:32.4425087Z   ...
+2026-10-22T11:16:32.4425304Z # Subtest: UI001-P6 editing-draft indicators do not change confirmed values or mutate any project data
+2026-10-22T11:16:32.4425512Z ok 221 - UI001-P6 editing-draft indicators do not change confirmed values or mutate any project data
+2026-10-22T11:16:32.4425554Z   ---
+2026-10-22T11:16:32.4425606Z   duration_ms: 0.429605
+2026-10-22T11:16:32.4425652Z   type: 'test'
+2026-10-22T11:16:32.4425696Z   ...
+2026-10-22T11:16:32.4425941Z # Subtest: UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path
+2026-10-22T11:16:32.4426174Z ok 222 - UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path
+2026-10-22T11:16:32.4426217Z   ---
+2026-10-22T11:16:32.4426273Z   duration_ms: 53.760823
+2026-10-22T11:16:32.4426319Z   type: 'test'
+2026-10-22T11:16:32.4426425Z   ...
+2026-10-22T11:16:32.4426704Z # Subtest: UI001-P8 rev1 full handoff detects suggestion text/why and inclusion changes, clears on re-export, ignores equal content
+2026-10-22T11:16:32.4427022Z ok 223 - UI001-P8 rev1 full handoff detects suggestion text/why and inclusion changes, clears on re-export, ignores equal content
+2026-10-22T11:16:32.4427065Z   ---
+2026-10-22T11:16:32.4427117Z   duration_ms: 5.969039
+2026-10-22T11:16:32.4427163Z   type: 'test'
+2026-10-22T11:16:32.4427205Z   ...
+2026-10-22T11:16:32.4427481Z # Subtest: UI001-P9 rev1 compares other delivered context as well, keeps legacy conservative, uses the selected task without writes
+2026-10-22T11:16:32.4427750Z ok 224 - UI001-P9 rev1 compares other delivered context as well, keeps legacy conservative, uses the selected task without writes
+2026-10-22T11:16:32.4427793Z   ---
+2026-10-22T11:16:32.4427849Z   duration_ms: 3.733864
+2026-10-22T11:16:32.4427898Z   type: 'test'
+2026-10-22T11:16:32.4427940Z   ...
+2026-10-22T11:16:32.4428176Z # Subtest: RETURN032-R1 array order remains the parent contract, including a later re-export of an older task
+2026-10-22T11:16:32.4428461Z ok 225 - RETURN032-R1 array order remains the parent contract, including a later re-export of an older task
+2026-10-22T11:16:32.4428505Z   ---
+2026-10-22T11:16:32.4428558Z   duration_ms: 2.567394
+2026-10-22T11:16:32.4428605Z   type: 'test'
+2026-10-22T11:16:32.4428650Z   ...
+2026-10-22T11:16:32.4428855Z # Subtest: RETURN032-R2 no prior task and no export stay distinct without blocking returned sources
+2026-10-22T11:16:32.4429050Z ok 226 - RETURN032-R2 no prior task and no export stay distinct without blocking returned sources
+2026-10-22T11:16:32.4429097Z   ---
+2026-10-22T11:16:32.4429149Z   duration_ms: 0.428303
+2026-10-22T11:16:32.4429195Z   type: 'test'
+2026-10-22T11:16:32.4429239Z   ...
+2026-10-22T11:16:32.4429507Z # Subtest: RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries
+2026-10-22T11:16:32.4429873Z ok 227 - RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries
+2026-10-22T11:16:32.4429919Z   ---
+2026-10-22T11:16:32.4429974Z   duration_ms: 1.245289
+2026-10-22T11:16:32.4430021Z   type: 'test'
+2026-10-22T11:16:32.4430065Z   ...
+2026-10-22T11:16:32.4430306Z # Subtest: RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap
+2026-10-22T11:16:32.4430538Z ok 228 - RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap
+2026-10-22T11:16:32.4430586Z   ---
+2026-10-22T11:16:32.4430637Z   duration_ms: 1.494854
+2026-10-22T11:16:32.4430686Z   type: 'test'
+2026-10-22T11:16:32.4430732Z   ...
+2026-10-22T11:16:32.4430992Z # Subtest: RETURN032-R5 legacy, missing work, invalid export revisions and unordered basis histories are unknown, never zero
+2026-10-22T11:16:32.4431249Z ok 229 - RETURN032-R5 legacy, missing work, invalid export revisions and unordered basis histories are unknown, never zero
+2026-10-22T11:16:32.4431297Z   ---
+2026-10-22T11:16:32.4431350Z   duration_ms: 2.939121
+2026-10-22T11:16:32.4431399Z   type: 'test'
+2026-10-22T11:16:32.4431444Z   ...
+2026-10-22T11:16:32.4431679Z # Subtest: RETURN032-R6 projection leaves handoff text, manual values, source bytes and recovery data untouched
+2026-10-22T11:16:32.4431906Z ok 230 - RETURN032-R6 projection leaves handoff text, manual values, source bytes and recovery data untouched
+2026-10-22T11:16:32.4431950Z   ---
+2026-10-22T11:16:32.4432003Z   duration_ms: 1.851129
+2026-10-22T11:16:32.4432052Z   type: 'test'
+2026-10-22T11:16:32.4432095Z   ...
+2026-10-22T11:16:32.4432393Z # Subtest: AREA17 powertoys: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact
+2026-10-22T11:16:32.4432680Z ok 231 - AREA17 powertoys: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact
+2026-10-22T11:16:32.4432725Z   ---
+2026-10-22T11:16:32.4432873Z   duration_ms: 9.285467
+2026-10-22T11:16:32.4432925Z   type: 'test'
+2026-10-22T11:16:32.4432971Z   ...
+2026-10-22T11:16:32.4433259Z # Subtest: AREA17 product13: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact
+2026-10-22T11:16:32.4433539Z ok 232 - AREA17 product13: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact
+2026-10-22T11:16:32.4433584Z   ---
+2026-10-22T11:16:32.4433638Z   duration_ms: 2.146422
+2026-10-22T11:16:32.4433687Z   type: 'test'
+2026-10-22T11:16:32.4433730Z   ...
+2026-10-22T11:16:32.4433964Z # Subtest: AREA17 same returnId supports successive revised interpretations without dropping report history
+2026-10-22T11:16:32.4434187Z ok 233 - AREA17 same returnId supports successive revised interpretations without dropping report history
+2026-10-22T11:16:32.4434235Z   ---
+2026-10-22T11:16:32.4434288Z   duration_ms: 3.789938
+2026-10-22T11:16:32.4434336Z   type: 'test'
+2026-10-22T11:16:32.4434383Z   ...
+2026-10-22T11:16:32.4434626Z # Subtest: AREA17 an explicit same-text user correction owns a new revision; old/revised returns cannot overwrite it
+2026-10-22T11:16:32.4434940Z ok 234 - AREA17 an explicit same-text user correction owns a new revision; old/revised returns cannot overwrite it
+2026-10-22T11:16:32.4434987Z   ---
+2026-10-22T11:16:32.4435041Z   duration_ms: 1.981745
+2026-10-22T11:16:32.4435087Z   type: 'test'
+2026-10-22T11:16:32.4435132Z   ...
+2026-10-22T11:16:32.4435345Z # Subtest: AREA17 late description after name is held, report remains readable and user values survive
+2026-10-22T11:16:32.4435549Z ok 235 - AREA17 late description after name is held, report remains readable and user values survive
+2026-10-22T11:16:32.4435595Z   ---
+2026-10-22T11:16:32.4435646Z   duration_ms: 1.067272
+2026-10-22T11:16:32.4435695Z   type: 'test'
+2026-10-22T11:16:32.4435741Z   ...
+2026-10-22T11:16:32.4435949Z # Subtest: AREA17 late description after note is held, report remains readable and user values survive
+2026-10-22T11:16:32.4436152Z ok 236 - AREA17 late description after note is held, report remains readable and user values survive
+2026-10-22T11:16:32.4436199Z   ---
+2026-10-22T11:16:32.4436252Z   duration_ms: 0.76626
+2026-10-22T11:16:32.4436304Z   type: 'test'
+2026-10-22T11:16:32.4436350Z   ...
+2026-10-22T11:16:32.4436570Z # Subtest: AREA17 late description after purpose is held, report remains readable and user values survive
+2026-10-22T11:16:32.4436781Z ok 237 - AREA17 late description after purpose is held, report remains readable and user values survive
+2026-10-22T11:16:32.4436824Z   ---
+2026-10-22T11:16:32.4436878Z   duration_ms: 0.857948
+2026-10-22T11:16:32.4436927Z   type: 'test'
+2026-10-22T11:16:32.4436972Z   ...
+2026-10-22T11:16:32.4437226Z # Subtest: AREA17 late description after user intent correction is held, report remains readable and user values survive
+2026-10-22T11:16:32.4437471Z ok 238 - AREA17 late description after user intent correction is held, report remains readable and user values survive
+2026-10-22T11:16:32.4437515Z   ---
+2026-10-22T11:16:32.4437572Z   duration_ms: 1.710657
+2026-10-22T11:16:32.4437623Z   type: 'test'
+2026-10-22T11:16:32.4437667Z   ...
+2026-10-22T11:16:32.4437919Z # Subtest: AREA17 late description after manual work condition is held, report remains readable and user values survive
+2026-10-22T11:16:32.4438161Z ok 239 - AREA17 late description after manual work condition is held, report remains readable and user values survive
+2026-10-22T11:16:32.4438204Z   ---
+2026-10-22T11:16:32.4438256Z   duration_ms: 1.451839
+2026-10-22T11:16:32.4438302Z   type: 'test'
+2026-10-22T11:16:32.4438346Z   ...
+2026-10-22T11:16:32.4438587Z # Subtest: AREA17 late description after recorded decision is held, report remains readable and user values survive
+2026-10-22T11:16:32.4438816Z ok 240 - AREA17 late description after recorded decision is held, report remains readable and user values survive
+2026-10-22T11:16:32.4438862Z   ---
+2026-10-22T11:16:32.4438978Z   duration_ms: 1.029485
+2026-10-22T11:16:32.4439026Z   type: 'test'
+2026-10-22T11:16:32.4439072Z   ...
+2026-10-22T11:16:32.4439360Z # Subtest: AREA17 late description after explicit revision of the request basis is held, report remains readable and user values survive
+2026-10-22T11:16:32.4439747Z ok 241 - AREA17 late description after explicit revision of the request basis is held, report remains readable and user values survive
+2026-10-22T11:16:32.4439794Z   ---
+2026-10-22T11:16:32.4439848Z   duration_ms: 0.956375
+2026-10-22T11:16:32.4439895Z   type: 'test'
+2026-10-22T11:16:32.4439940Z   ...
+2026-10-22T11:16:32.4440161Z # Subtest: AREA17 unrelated work, unsent draft, layout and reading do not invalidate the target explanation
+2026-10-22T11:16:32.4440375Z ok 242 - AREA17 unrelated work, unsent draft, layout and reading do not invalidate the target explanation
+2026-10-22T11:16:32.4440421Z   ---
+2026-10-22T11:16:32.4440474Z   duration_ms: 1.45922
+2026-10-22T11:16:32.4440524Z   type: 'test'
+2026-10-22T11:16:32.4440571Z   ...
+2026-10-22T11:16:32.4440752Z # Subtest: AREA17 current user plan is sent separately while Background stays immutable
+2026-10-22T11:16:32.4441013Z ok 243 - AREA17 current user plan is sent separately while Background stays immutable
+2026-10-22T11:16:32.4441060Z   ---
+2026-10-22T11:16:32.4441112Z   duration_ms: 0.557097
+2026-10-22T11:16:32.4441162Z   type: 'test'
+2026-10-22T11:16:32.4441204Z   ...
+2026-10-22T11:16:32.4441437Z # Subtest: AREA17 plan change makes a previous explanation stale and excludes its text from the next handoff
+2026-10-22T11:16:32.4441657Z ok 244 - AREA17 plan change makes a previous explanation stale and excludes its text from the next handoff
+2026-10-22T11:16:32.4441700Z   ---
+2026-10-22T11:16:32.4441754Z   duration_ms: 0.813721
+2026-10-22T11:16:32.4441803Z   type: 'test'
+2026-10-22T11:16:32.4441846Z   ...
+2026-10-22T11:16:32.4442042Z # Subtest: AREA17 wrong area/basis and archived/moved work hold only the derived description
+2026-10-22T11:16:32.4442231Z ok 245 - AREA17 wrong area/basis and archived/moved work hold only the derived description
+2026-10-22T11:16:32.4442275Z   ---
+2026-10-22T11:16:32.4442330Z   duration_ms: 2.287133
+2026-10-22T11:16:32.4442379Z   type: 'test'
+2026-10-22T11:16:32.4442422Z   ...
+2026-10-22T11:16:32.4442661Z # Subtest: AREA17 syntactically valid wrong-area prose is not claimed as detected; user can correct it separately
+2026-10-22T11:16:32.4442890Z ok 246 - AREA17 syntactically valid wrong-area prose is not claimed as detected; user can correct it separately
+2026-10-22T11:16:32.4442937Z   ---
+2026-10-22T11:16:32.4442990Z   duration_ms: 0.680151
+2026-10-22T11:16:32.4443037Z   type: 'test'
+2026-10-22T11:16:32.4443083Z   ...
+2026-10-22T11:16:32.4443292Z # Subtest: AREA17 recovery cannot move a wrong-target held description into another area as applied
+2026-10-22T11:16:32.4443490Z ok 247 - AREA17 recovery cannot move a wrong-target held description into another area as applied
+2026-10-22T11:16:32.4443535Z   ---
+2026-10-22T11:16:32.4443588Z   duration_ms: 0.742725
+2026-10-22T11:16:32.4443634Z   type: 'test'
+2026-10-22T11:16:32.4443679Z   ...
+2026-10-22T11:16:32.4443820Z # Subtest: AREA17 strict return shapes and byte limits are retained
+2026-10-22T11:16:32.4443952Z ok 248 - AREA17 strict return shapes and byte limits are retained
+2026-10-22T11:16:32.4443998Z   ---
+2026-10-22T11:16:32.4444050Z   duration_ms: 0.903797
+2026-10-22T11:16:32.4444100Z   type: 'test'
+2026-10-22T11:16:32.4444146Z   ...
+2026-10-22T11:16:32.4444386Z # Subtest: AREA17 return.1 and project.1 through project.5 migrate without invented descriptions or export anchors
+2026-10-22T11:16:32.4444618Z ok 249 - AREA17 return.1 and project.1 through project.5 migrate without invented descriptions or export anchors
+2026-10-22T11:16:32.4444664Z   ---
+2026-10-22T11:16:32.4444714Z   duration_ms: 2.177629
+2026-10-22T11:16:32.4444763Z   type: 'test'
+2026-10-22T11:16:32.4444809Z   ...
+2026-10-22T11:16:32.4445104Z # Subtest: AREA17 cross-tab seq rejection preserves the external project including its description
+2026-10-22T11:16:32.4445308Z ok 250 - AREA17 cross-tab seq rejection preserves the external project including its description
+2026-10-22T11:16:32.4445354Z   ---
+2026-10-22T11:16:32.4445408Z   duration_ms: 1.866632
+2026-10-22T11:16:32.4445457Z   type: 'test'
+2026-10-22T11:16:32.4445502Z   ...
+2026-10-22T11:16:32.4445752Z # Subtest: AREA17 sha256 equals Node crypto on quote/backslash/emoji/unpaired-surrogate text and on block boundaries
+2026-10-22T11:16:32.4445989Z ok 251 - AREA17 sha256 equals Node crypto on quote/backslash/emoji/unpaired-surrogate text and on block boundaries
+2026-10-22T11:16:32.4446032Z   ---
+2026-10-22T11:16:32.4446089Z   duration_ms: 33.435446
+2026-10-22T11:16:32.4446139Z   type: 'test'
+2026-10-22T11:16:32.4446182Z   ...
+2026-10-22T11:16:32.4446526Z # Subtest: AREA17 plan stamp stays fixed-size and valid for maximal quote/backslash-heavy manual and intent values, and still detects a one-character change
+2026-10-22T11:16:32.4446859Z ok 252 - AREA17 plan stamp stays fixed-size and valid for maximal quote/backslash-heavy manual and intent values, and still detects a one-character change
+2026-10-22T11:16:32.4446964Z   ---
+2026-10-22T11:16:32.4447023Z   duration_ms: 141.431374
+2026-10-22T11:16:32.4447071Z   type: 'test'
+2026-10-22T11:16:32.4447117Z   ...
+2026-10-22T11:16:32.4447364Z # Subtest: AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives
+2026-10-22T11:16:32.4447598Z ok 253 - AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives
+2026-10-22T11:16:32.4447644Z   ---
+2026-10-22T11:16:32.4447697Z   duration_ms: 1.044267
+2026-10-22T11:16:32.4447745Z   type: 'test'
+2026-10-22T11:16:32.4447790Z   ...
+2026-10-22T11:16:32.4448070Z # Subtest: AREA17 current plan in the handoff: identical text points to the request-time copy, a different value is printed in full
+2026-10-22T11:16:32.4448340Z ok 254 - AREA17 current plan in the handoff: identical text points to the request-time copy, a different value is printed in full
+2026-10-22T11:16:32.4448386Z   ---
+2026-10-22T11:16:32.4448439Z   duration_ms: 0.491317
+2026-10-22T11:16:32.4448488Z   type: 'test'
+2026-10-22T11:16:32.4448534Z   ...
+2026-10-22T11:16:32.4448784Z # Subtest: AREA17 a description made before a plan change cannot be re-saved as a correction (no adopt-stale shortcut)
+2026-10-22T11:16:32.4449025Z ok 255 - AREA17 a description made before a plan change cannot be re-saved as a correction (no adopt-stale shortcut)
+2026-10-22T11:16:32.4449070Z   ---
+2026-10-22T11:16:32.4449121Z   duration_ms: 0.665239
+2026-10-22T11:16:32.4449171Z   type: 'test'
+2026-10-22T11:16:32.4449217Z   ...
+2026-10-22T11:16:32.4449479Z # Subtest: AREA17 next handoff: valid description attributed below the user plan, proposal unadopted, stale text never sent
+2026-10-22T11:16:32.4449819Z ok 256 - AREA17 next handoff: valid description attributed below the user plan, proposal unadopted, stale text never sent
+2026-10-22T11:16:32.4449865Z   ---
+2026-10-22T11:16:32.4449918Z   duration_ms: 1.93177
+2026-10-22T11:16:32.4449968Z   type: 'test'
+2026-10-22T11:16:32.4450013Z   ...
+2026-10-22T11:16:32.4450284Z # Subtest: AREA17 a plain new request in the same area keeps the description valid and the next handoff carries it attributed
+2026-10-22T11:16:32.4450541Z ok 257 - AREA17 a plain new request in the same area keeps the description valid and the next handoff carries it attributed
+2026-10-22T11:16:32.4450587Z   ---
+2026-10-22T11:16:32.4450639Z   duration_ms: 2.524479
+2026-10-22T11:16:32.4450688Z   type: 'test'
+2026-10-22T11:16:32.4450731Z   ...
+2026-10-22T11:16:32.4451014Z # Subtest: AREA17 a late description after a plain new request in the same area still applies; an explicit request revision holds it
+2026-10-22T11:16:32.4451288Z ok 258 - AREA17 a late description after a plain new request in the same area still applies; an explicit request revision holds it
+2026-10-22T11:16:32.4451332Z   ---
+2026-10-22T11:16:32.4451386Z   duration_ms: 1.144498
+2026-10-22T11:16:32.4451527Z   type: 'test'
+2026-10-22T11:16:32.4451572Z   ...
+2026-10-22T11:16:32.4451815Z # Subtest: AREA17 recovery refuses an applied external description that skips a user correction in its own history
+2026-10-22T11:16:32.4452051Z ok 259 - AREA17 recovery refuses an applied external description that skips a user correction in its own history
+2026-10-22T11:16:32.4452095Z   ---
+2026-10-22T11:16:32.4452148Z   duration_ms: 2.942267
+2026-10-22T11:16:32.4452197Z   type: 'test'
+2026-10-22T11:16:32.4452239Z   ...
+2026-10-22T11:16:32.4452290Z 1..259
+2026-10-22T11:16:32.4452338Z # tests 259
+2026-10-22T11:16:32.4452389Z # suites 0
+2026-10-22T11:16:32.4452437Z # pass 259
+2026-10-22T11:16:32.4452484Z # fail 0
+2026-10-22T11:16:32.4452535Z # cancelled 0
+2026-10-22T11:16:32.4452584Z # skipped 0
+2026-10-22T11:16:32.4452628Z # todo 0
+2026-10-22T11:16:32.4452693Z # duration_ms 9102.414898
+2026-10-22T11:16:32.4475880Z ##[group]Run node continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log
+2026-10-22T11:16:32.4476054Z [36;1mnode continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log[0m
+2026-10-22T11:16:32.4519632Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:16:32.4519682Z env:
+2026-10-22T11:16:32.4519736Z   AI_MODE: mock
+2026-10-22T11:16:32.4519789Z   ALLOW_PAID_AI: false
+2026-10-22T11:16:32.4519836Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:16:32.4519899Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:16:32.4519952Z   EVIDENCE_DIR: test-results
+2026-10-22T11:16:32.4520000Z   PYTHONUTF8: 1
+2026-10-22T11:16:32.4520056Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:16:32.4520143Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:32.4520250Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:16:32.4520331Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:32.4520526Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:32.4520603Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:32.4520689Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:16:32.4520739Z ##[endgroup]
+2026-10-22T11:16:34.4113498Z Explicit browser MOCK build: continuity/static-dist; no server adapter or provider files.
+2026-10-22T11:16:34.4113866Z app/node_modules (locked dependency)
+2026-10-22T11:16:34.4180951Z ##[group]Run python -m pip install -r tests/browser-requirements.txt
+2026-10-22T11:16:34.4181252Z [36;1mpython -m pip install -r tests/browser-requirements.txt[0m
+2026-10-22T11:16:34.4181489Z [36;1mpython -m playwright install --with-deps chromium[0m
+2026-10-22T11:16:34.4225082Z shell: /usr/bin/bash -e {0}
+2026-10-22T11:16:34.4225228Z env:
+2026-10-22T11:16:34.4225338Z   AI_MODE: mock
+2026-10-22T11:16:34.4225453Z   ALLOW_PAID_AI: false
+2026-10-22T11:16:34.4225575Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:16:34.4225704Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:16:34.4225849Z   EVIDENCE_DIR: test-results
+2026-10-22T11:16:34.4225978Z   PYTHONUTF8: 1
+2026-10-22T11:16:34.4226099Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:16:34.4226269Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:34.4226519Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:16:34.4226747Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:34.4226989Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:34.4227206Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:34.4227415Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:16:34.4227591Z ##[endgroup]
+2026-10-22T11:16:34.9839984Z Collecting playwright==1.57.0 (from -r tests/browser-requirements.txt (line 2))
+2026-10-22T11:16:35.0568998Z   Downloading playwright-1.57.0-py3-none-manylinux1_x86_64.whl.metadata (3.5 kB)
+2026-10-22T11:16:35.0767404Z Collecting pyee==13.0.1 (from -r tests/browser-requirements.txt (line 3))
+2026-10-22T11:16:35.0893779Z   Downloading pyee-13.0.1-py3-none-any.whl.metadata (3.0 kB)
+2026-10-22T11:16:35.1866605Z Collecting greenlet==3.5.1 (from -r tests/browser-requirements.txt (line 4))
+2026-10-22T11:16:35.1997541Z   Downloading greenlet-3.5.1-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-10-22T11:16:35.2218446Z Collecting typing-extensions (from pyee==13.0.1->-r tests/browser-requirements.txt (line 3))
+2026-10-22T11:16:35.2346427Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-22T11:16:35.2501845Z Downloading playwright-1.57.0-py3-none-manylinux1_x86_64.whl (46.0 MB)
+2026-10-22T11:16:35.6584134Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 46.0/46.0 MB 122.7 MB/s  0:00:00
+2026-10-22T11:16:35.6715651Z Downloading pyee-13.0.1-py3-none-any.whl (15 kB)
+2026-10-22T11:16:35.6860457Z Downloading greenlet-3.5.1-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (613 kB)
+2026-10-22T11:16:35.6902317Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 613.9/613.9 kB 162.5 MB/s  0:00:00
+2026-10-22T11:16:35.7027947Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-22T11:16:35.7513543Z Installing collected packages: typing-extensions, greenlet, pyee, playwright
+2026-10-22T11:16:36.3577621Z 
+2026-10-22T11:16:36.3587631Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0
+2026-10-22T11:16:36.5966450Z Installing dependencies...
+2026-10-22T11:16:36.6021372Z Switching to root user to install dependencies...
+2026-10-22T11:16:36.6644748Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-22T11:16:36.7057612Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-10-22T11:16:36.7141075Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-10-22T11:16:36.7154999Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-10-22T11:16:36.7220414Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-10-22T11:16:36.7247789Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-10-22T11:16:36.7704627Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [567 kB]
+2026-10-22T11:16:36.7866058Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [630 kB]
+2026-10-22T11:16:36.8658668Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1400 kB]
+2026-10-22T11:16:36.8731013Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1706 kB]
+2026-10-22T11:16:36.9534123Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1146 kB]
+2026-10-22T11:16:39.3874831Z Fetched 5831 kB in 1s (11.2 MB/s)
+2026-10-22T11:16:40.0653830Z Reading package lists...
+2026-10-22T11:16:40.0938093Z Reading package lists...
+2026-10-22T11:16:40.2767594Z Building dependency tree...
+2026-10-22T11:16:40.2773532Z Reading state information...
+2026-10-22T11:16:40.4108593Z libasound2t64 is already the newest version (1.2.11-1ubuntu0.3).
+2026-10-22T11:16:40.4109266Z libasound2t64 set to manually installed.
+2026-10-22T11:16:40.4110010Z libatk-bridge2.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T11:16:40.4110613Z libatk-bridge2.0-0t64 set to manually installed.
+2026-10-22T11:16:40.4111157Z libatk1.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T11:16:40.4111628Z libatk1.0-0t64 set to manually installed.
+2026-10-22T11:16:40.4112115Z libatspi2.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T11:16:40.4112536Z libatspi2.0-0t64 set to manually installed.
+2026-10-22T11:16:40.4112878Z libcairo2 is already the newest version (1.18.0-3build1).
+2026-10-22T11:16:40.4113196Z libcairo2 set to manually installed.
+2026-10-22T11:16:40.4113540Z libcups2t64 is already the newest version (2.4.7-1.2ubuntu7.14).
+2026-10-22T11:16:40.4113879Z libcups2t64 set to manually installed.
+2026-10-22T11:16:40.4114159Z libdbus-1-3 is already the newest version (1.14.10-4ubuntu4.1).
+2026-10-22T11:16:40.4114378Z libdbus-1-3 set to manually installed.
+2026-10-22T11:16:40.4114607Z libdrm2 is already the newest version (2.4.125-1ubuntu0.1~24.04.2).
+2026-10-22T11:16:40.4114833Z libdrm2 set to manually installed.
+2026-10-22T11:16:40.4115051Z libgbm1 is already the newest version (25.2.8-0ubuntu0.24.04.4).
+2026-10-22T11:16:40.4115271Z libgbm1 set to manually installed.
+2026-10-22T11:16:40.4115496Z libglib2.0-0t64 is already the newest version (2.80.0-6ubuntu3.10).
+2026-10-22T11:16:40.4115733Z libglib2.0-0t64 set to manually installed.
+2026-10-22T11:16:40.4115971Z libnspr4 is already the newest version (2:4.35-1.1build1).
+2026-10-22T11:16:40.4116180Z libnspr4 set to manually installed.
+2026-10-22T11:16:40.4116398Z libnss3 is already the newest version (2:3.98-1ubuntu0.3).
+2026-10-22T11:16:40.4116692Z libnss3 set to manually installed.
+2026-10-22T11:16:40.4117022Z libpango-1.0-0 is already the newest version (1.52.1+ds-1build1).
+2026-10-22T11:16:40.4117251Z libpango-1.0-0 set to manually installed.
+2026-10-22T11:16:40.4117480Z libx11-6 is already the newest version (2:1.8.7-1ubuntu0.1).
+2026-10-22T11:16:40.4117693Z libx11-6 set to manually installed.
+2026-10-22T11:16:40.4118278Z libxcb1 is already the newest version (1.15-1ubuntu2).
+2026-10-22T11:16:40.4118479Z libxcb1 set to manually installed.
+2026-10-22T11:16:40.4118706Z libxcomposite1 is already the newest version (1:0.4.5-1build3).
+2026-10-22T11:16:40.4118934Z libxcomposite1 set to manually installed.
+2026-10-22T11:16:40.4119158Z libxdamage1 is already the newest version (1:1.1.6-1build1).
+2026-10-22T11:16:40.4119447Z libxdamage1 set to manually installed.
+2026-10-22T11:16:40.4119866Z libxext6 is already the newest version (2:1.3.4-1build2).
+2026-10-22T11:16:40.4120070Z libxext6 set to manually installed.
+2026-10-22T11:16:40.4120284Z libxfixes3 is already the newest version (1:6.0.0-2build1).
+2026-10-22T11:16:40.4120493Z libxfixes3 set to manually installed.
+2026-10-22T11:16:40.4120710Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+2026-10-22T11:16:40.4120931Z libxkbcommon0 set to manually installed.
+2026-10-22T11:16:40.4121153Z libxrandr2 is already the newest version (2:1.5.2-2build1).
+2026-10-22T11:16:40.4121366Z libxrandr2 set to manually installed.
+2026-10-22T11:16:40.4121687Z xvfb is already the newest version (2:21.1.12-1ubuntu1.9).
+2026-10-22T11:16:40.4122363Z fonts-noto-color-emoji is already the newest version (2.047-0ubuntu0.24.04.1).
+2026-10-22T11:16:40.4122843Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+2026-10-22T11:16:40.4123210Z libfontconfig1 set to manually installed.
+2026-10-22T11:16:40.4123593Z libfreetype6 is already the newest version (2.13.2+dfsg-1ubuntu0.2).
+2026-10-22T11:16:40.4123950Z libfreetype6 set to manually installed.
+2026-10-22T11:16:40.4124313Z fonts-liberation is already the newest version (1:2.1.5-3).
+2026-10-22T11:16:40.4124574Z fonts-liberation set to manually installed.
+2026-10-22T11:16:40.4124803Z The following additional packages will be installed:
+2026-10-22T11:16:40.4125005Z   xfonts-encodings xfonts-utils
+2026-10-22T11:16:40.4125171Z Recommended packages:
+2026-10-22T11:16:40.4125329Z   fonts-ipafont-mincho fonts-tlwg-loma
+2026-10-22T11:16:40.4295281Z The following NEW packages will be installed:
+2026-10-22T11:16:40.4295969Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+2026-10-22T11:16:40.4301910Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+2026-10-22T11:16:40.4302347Z   xfonts-utils
+2026-10-22T11:16:40.4485945Z 0 upgraded, 9 newly installed, 0 to remove and 1 not upgraded.
+2026-10-22T11:16:40.4486396Z Need to get 21.1 MB of archives.
+2026-10-22T11:16:40.4486820Z After this operation, 79.5 MB of additional disk space will be used.
+2026-10-22T11:16:40.4487130Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-22T11:16:40.5144134Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1 [3513 kB]
+2026-10-22T11:16:40.5831417Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-freefont-ttf all 20211204+svn4273-2 [5641 kB]
+2026-10-22T11:16:40.6705274Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-tlwg-loma-otf all 1:0.7.3-1 [107 kB]
+2026-10-22T11:16:40.7038523Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-unifont all 1:15.1.01-1build1 [2993 kB]
+2026-10-22T11:16:40.7625581Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-wqy-zenhei all 0.9.45-8 [7472 kB]
+2026-10-22T11:16:40.8689838Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+2026-10-22T11:16:40.9062762Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+2026-10-22T11:16:40.9378294Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 xfonts-cyrillic all 1:1.0.5+nmu1 [384 kB]
+2026-10-22T11:16:40.9793381Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-scalable all 1:1.0.3-1.3 [304 kB]
+2026-10-22T11:16:41.1930092Z Fetched 21.1 MB in 1s (38.8 MB/s)
+2026-10-22T11:16:41.2126549Z Selecting previously unselected package fonts-ipafont-gothic.
+2026-10-22T11:16:41.2373749Z (Reading database ... 
+2026-10-22T11:16:41.2374005Z (Reading database ... 5%
+2026-10-22T11:16:41.2374241Z (Reading database ... 10%
+2026-10-22T11:16:41.2374480Z (Reading database ... 15%
+2026-10-22T11:16:41.2374695Z (Reading database ... 20%
+2026-10-22T11:16:41.2374904Z (Reading database ... 25%
+2026-10-22T11:16:41.2375077Z (Reading database ... 30%
+2026-10-22T11:16:41.2375208Z (Reading database ... 35%
+2026-10-22T11:16:41.2375340Z (Reading database ... 40%
+2026-10-22T11:16:41.2375479Z (Reading database ... 45%
+2026-10-22T11:16:41.2375611Z (Reading database ... 50%
+2026-10-22T11:16:41.2411241Z (Reading database ... 55%
+2026-10-22T11:16:41.3776255Z (Reading database ... 60%
+2026-10-22T11:16:41.5783275Z (Reading database ... 65%
+2026-10-22T11:16:41.6762672Z (Reading database ... 70%
+2026-10-22T11:16:41.8246684Z (Reading database ... 75%
+2026-10-22T11:16:42.0292499Z (Reading database ... 80%
+2026-10-22T11:16:42.2178568Z (Reading database ... 85%
+2026-10-22T11:16:42.4214867Z (Reading database ... 90%
+2026-10-22T11:16:42.6268955Z (Reading database ... 95%
+2026-10-22T11:16:42.6269300Z (Reading database ... 100%
+2026-10-22T11:16:42.6270194Z (Reading database ... 215505 files and directories currently installed.)
+2026-10-22T11:16:42.6307542Z Preparing to unpack .../0-fonts-ipafont-gothic_00303-21ubuntu1_all.deb ...
+2026-10-22T11:16:42.6382618Z Unpacking fonts-ipafont-gothic (00303-21ubuntu1) ...
+2026-10-22T11:16:42.8781636Z Selecting previously unselected package fonts-freefont-ttf.
+2026-10-22T11:16:42.8977601Z Preparing to unpack .../1-fonts-freefont-ttf_20211204+svn4273-2_all.deb ...
+2026-10-22T11:16:42.8989402Z Unpacking fonts-freefont-ttf (20211204+svn4273-2) ...
+2026-10-22T11:16:43.0096452Z Selecting previously unselected package fonts-tlwg-loma-otf.
+2026-10-22T11:16:43.0217070Z Preparing to unpack .../2-fonts-tlwg-loma-otf_1%3a0.7.3-1_all.deb ...
+2026-10-22T11:16:43.0231876Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1) ...
+2026-10-22T11:16:43.0466514Z Selecting previously unselected package fonts-unifont.
+2026-10-22T11:16:43.0580658Z Preparing to unpack .../3-fonts-unifont_1%3a15.1.01-1build1_all.deb ...
+2026-10-22T11:16:43.0587703Z Unpacking fonts-unifont (1:15.1.01-1build1) ...
+2026-10-22T11:16:43.2494790Z Selecting previously unselected package fonts-wqy-zenhei.
+2026-10-22T11:16:43.2607581Z Preparing to unpack .../4-fonts-wqy-zenhei_0.9.45-8_all.deb ...
+2026-10-22T11:16:43.2819889Z Unpacking fonts-wqy-zenhei (0.9.45-8) ...
+2026-10-22T11:16:43.7227438Z Selecting previously unselected package xfonts-encodings.
+2026-10-22T11:16:43.7342017Z Preparing to unpack .../5-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+2026-10-22T11:16:43.7347489Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+2026-10-22T11:16:43.7610073Z Selecting previously unselected package xfonts-utils.
+2026-10-22T11:16:43.7723671Z Preparing to unpack .../6-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+2026-10-22T11:16:43.7730027Z Unpacking xfonts-utils (1:7.7+6build3) ...
+2026-10-22T11:16:43.8167429Z Selecting previously unselected package xfonts-cyrillic.
+2026-10-22T11:16:43.8281526Z Preparing to unpack .../7-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+2026-10-22T11:16:43.8287478Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+2026-10-22T11:16:43.8578436Z Selecting previously unselected package xfonts-scalable.
+2026-10-22T11:16:43.8691639Z Preparing to unpack .../8-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+2026-10-22T11:16:43.8698714Z Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+2026-10-22T11:16:43.9077955Z Setting up fonts-wqy-zenhei (0.9.45-8) ...
+2026-10-22T11:16:43.9173341Z Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+2026-10-22T11:16:43.9187858Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+2026-10-22T11:16:43.9201474Z Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+2026-10-22T11:16:43.9215440Z Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+2026-10-22T11:16:43.9265744Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+2026-10-22T11:16:43.9278596Z Setting up fonts-unifont (1:15.1.01-1build1) ...
+2026-10-22T11:16:43.9292510Z Setting up xfonts-utils (1:7.7+6build3) ...
+2026-10-22T11:16:43.9326417Z Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+2026-10-22T11:16:43.9680507Z Setting up xfonts-scalable (1:1.0.3-1.3) ...
+2026-10-22T11:16:43.9910378Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-10-22T11:16:43.9929119Z Not building database; man-db/auto-update is not 'true'.
+2026-10-22T11:16:43.9942632Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+2026-10-22T11:16:44.8337737Z 
+2026-10-22T11:16:44.8338357Z Running kernel seems to be up-to-date.
+2026-10-22T11:16:44.8338631Z 
+2026-10-22T11:16:44.8338730Z No services need to be restarted.
+2026-10-22T11:16:44.8338838Z 
+2026-10-22T11:16:44.8338921Z No containers need to be restarted.
+2026-10-22T11:16:44.8339025Z 
+2026-10-22T11:16:44.8339129Z No user sessions are running outdated binaries.
+2026-10-22T11:16:44.8339279Z 
+2026-10-22T11:16:44.8339440Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-10-22T11:16:45.5847308Z Downloading Chromium 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-linux.zip
+2026-10-22T11:16:45.6514716Z (node:4328) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T11:16:45.6515700Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T11:16:45.7851739Z |                                                                                |   0% of 164.7 MiB
+2026-10-22T11:16:46.0646698Z |■■■■■■■■                                                                        |  10% of 164.7 MiB
+2026-10-22T11:16:46.1133950Z |■■■■■■■■■■■■■■■■                                                                |  20% of 164.7 MiB
+2026-10-22T11:16:46.1635256Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 164.7 MiB
+2026-10-22T11:16:46.2112341Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 164.7 MiB
+2026-10-22T11:16:46.2516963Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 164.7 MiB
+2026-10-22T11:16:46.2943325Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 164.7 MiB
+2026-10-22T11:16:46.3391603Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 164.7 MiB
+2026-10-22T11:16:46.3812801Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 164.7 MiB
+2026-10-22T11:16:46.4238001Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 164.7 MiB
+2026-10-22T11:16:46.4655717Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 164.7 MiB
+2026-10-22T11:16:48.0489153Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200
+2026-10-22T11:16:48.0492191Z Downloading FFMPEG playwright build v1011 from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+2026-10-22T11:16:48.1142385Z (node:4340) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T11:16:48.1143022Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T11:16:48.2624410Z |                                                                                |   0% of 2.3 MiB
+2026-10-22T11:16:48.3178227Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+2026-10-22T11:16:48.3408252Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+2026-10-22T11:16:48.3567725Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+2026-10-22T11:16:48.3653662Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+2026-10-22T11:16:48.3739450Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+2026-10-22T11:16:48.3809950Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+2026-10-22T11:16:48.3866638Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+2026-10-22T11:16:48.3910609Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+2026-10-22T11:16:48.3957304Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+2026-10-22T11:16:48.3990691Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+2026-10-22T11:16:48.4370532Z FFMPEG playwright build v1011 downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+2026-10-22T11:16:48.4372675Z Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux.zip
+2026-10-22T11:16:48.5023995Z (node:4351) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T11:16:48.5025040Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T11:16:48.6227062Z |                                                                                |   0% of 109.7 MiB
+2026-10-22T11:16:48.8644344Z |■■■■■■■■                                                                        |  10% of 109.7 MiB
+2026-10-22T11:16:48.9092217Z |■■■■■■■■■■■■■■■■                                                                |  20% of 109.7 MiB
+2026-10-22T11:16:48.9511426Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 109.7 MiB
+2026-10-22T11:16:48.9778040Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 109.7 MiB
+2026-10-22T11:16:49.0004655Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 109.7 MiB
+2026-10-22T11:16:49.0201301Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 109.7 MiB
+2026-10-22T11:16:49.0359314Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 109.7 MiB
+2026-10-22T11:16:49.0562316Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 109.7 MiB
+2026-10-22T11:16:49.0790421Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 109.7 MiB
+2026-10-22T11:16:49.1049709Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 109.7 MiB
+2026-10-22T11:16:50.3914241Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1200
+2026-10-22T11:16:50.4168564Z ##[group]Run python tests/browser.py 2>&1 | tee test-results/browser-direct.log
+2026-10-22T11:16:50.4168887Z [36;1mpython tests/browser.py 2>&1 | tee test-results/browser-direct.log[0m
+2026-10-22T11:16:50.4212535Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:16:50.4212722Z env:
+2026-10-22T11:16:50.4212835Z   AI_MODE: mock
+2026-10-22T11:16:50.4212952Z   ALLOW_PAID_AI: false
+2026-10-22T11:16:50.4213076Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:16:50.4213209Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:16:50.4213357Z   EVIDENCE_DIR: test-results
+2026-10-22T11:16:50.4213491Z   PYTHONUTF8: 1
+2026-10-22T11:16:50.4213610Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:16:50.4213788Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:50.4214021Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:16:50.4214252Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:50.4214489Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:50.4214691Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:16:50.4214898Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:16:50.4215076Z ##[endgroup]
+2026-10-22T11:16:53.6808324Z test_B01_real_mock_flow_browser_only_confirm_and_edit (__main__.BrowserTests.test_B01_real_mock_flow_browser_only_confirm_and_edit) ... ok
+2026-10-22T11:16:54.1006710Z test_B02_multi_device_changes_requirement_not_studio (__main__.BrowserTests.test_B02_multi_device_changes_requirement_not_studio) ... ok
+2026-10-22T11:16:54.5148681Z test_B03_unknown_is_deferred_not_confirmed (__main__.BrowserTests.test_B03_unknown_is_deferred_not_confirmed) ... ok
+2026-10-22T11:16:55.0679286Z test_B04_server_invalid_response_keeps_customer_answer_and_input (__main__.BrowserTests.test_B04_server_invalid_response_keeps_customer_answer_and_input) ... ok
+2026-10-22T11:16:55.4095969Z test_B05_missing_key_no_fallback (__main__.BrowserTests.test_B05_missing_key_no_fallback) ... ok
+2026-10-22T11:16:56.7816499Z test_B06_edit_during_pending_response_rejects_old_data (__main__.BrowserTests.test_B06_edit_during_pending_response_rejects_old_data) ... ok
+2026-10-22T11:16:57.1718222Z test_B07_mobile_custom_answer_and_text_rendering (__main__.BrowserTests.test_B07_mobile_custom_answer_and_text_rendering) ... ok
+2026-10-22T11:16:57.4736995Z test_B08_known_storage_is_not_asked_again_in_explicit_mock (__main__.BrowserTests.test_B08_known_storage_is_not_asked_again_in_explicit_mock) ... ok
+2026-10-22T11:16:59.7392127Z test_B09_manual_edit_buffer_survives_late_response (__main__.BrowserTests.test_B09_manual_edit_buffer_survives_late_response) ... ok
+2026-10-22T11:17:00.3341649Z test_B10_tool_reversion_and_undecided_current_requirement (__main__.BrowserTests.test_B10_tool_reversion_and_undecided_current_requirement) ... ok
+2026-10-22T11:17:00.7827192Z test_B11_generic_answer_refines_requirement_not_only_summary (__main__.BrowserTests.test_B11_generic_answer_refines_requirement_not_only_summary) ... ok
+2026-10-22T11:17:01.3678604Z test_B12_long_answer_failure_then_edit_and_retry_keeps_original (__main__.BrowserTests.test_B12_long_answer_failure_then_edit_and_retry_keeps_original) ... ok
+2026-10-22T11:17:01.7956556Z test_B13_invalid_custom_answer_is_editable_without_loss (__main__.BrowserTests.test_B13_invalid_custom_answer_is_editable_without_loss) ... ok
+2026-10-22T11:17:02.1526295Z test_B14_locked_tool_conflict_is_visible_and_cannot_be_dismissed_by_confirmation (__main__.BrowserTests.test_B14_locked_tool_conflict_is_visible_and_cannot_be_dismissed_by_confirmation) ... ok
+2026-10-22T11:17:02.4749103Z test_B15_direct_network_assets_and_request_no_fetch_replacement (__main__.BrowserTests.test_B15_direct_network_assets_and_request_no_fetch_replacement) ... ok
+2026-10-22T11:17:03.8381968Z test_B16_R5_apply_cancel_and_uncertain_paired_resolution (__main__.BrowserTests.test_B16_R5_apply_cancel_and_uncertain_paired_resolution) ... ok
+2026-10-22T11:17:04.8118670Z test_B17_R5_keep_cancel_and_repeat_summary_preserve_old_pair_and_new_answer (__main__.BrowserTests.test_B17_R5_keep_cancel_and_repeat_summary_preserve_old_pair_and_new_answer) ... ok
+2026-10-22T11:17:05.6398835Z test_B18_R5_resolving_storage_keeps_an_unrelated_locked_tool_conflict (__main__.BrowserTests.test_B18_R5_resolving_storage_keeps_an_unrelated_locked_tool_conflict) ... ok
+2026-10-22T11:17:05.7760118Z 
+2026-10-22T11:17:05.7760961Z ----------------------------------------------------------------------
+2026-10-22T11:17:05.7761375Z Ran 18 tests in 15.175s
+2026-10-22T11:17:05.7761514Z 
+2026-10-22T11:17:05.7761586Z OK
+2026-10-22T11:17:05.8055627Z ##[group]Run python continuity/tests/browser.py 2>&1 | tee test-results/continuity-browser-direct.log
+2026-10-22T11:17:05.8056055Z [36;1mpython continuity/tests/browser.py 2>&1 | tee test-results/continuity-browser-direct.log[0m
+2026-10-22T11:17:05.8098829Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:17:05.8099012Z env:
+2026-10-22T11:17:05.8099123Z   AI_MODE: mock
+2026-10-22T11:17:05.8099242Z   ALLOW_PAID_AI: false
+2026-10-22T11:17:05.8099364Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:17:05.8099491Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:17:05.8099790Z   EVIDENCE_DIR: test-results
+2026-10-22T11:17:05.8099922Z   PYTHONUTF8: 1
+2026-10-22T11:17:05.8100042Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:17:05.8100211Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:17:05.8100450Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:17:05.8100683Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:17:05.8100926Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:17:05.8101261Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:17:05.8101467Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:17:05.8101662Z   IDEA015_EVIDENCE_DIR: test-results/continuity
+2026-10-22T11:17:05.8101821Z ##[endgroup]
+2026-10-22T11:17:07.4436086Z test_01_end_to_end_second_change_and_reload (__main__.Browser.test_01_end_to_end_second_change_and_reload) ... ok
+2026-10-22T11:17:07.9347351Z test_02_fact_question_and_user_unknown (__main__.Browser.test_02_fact_question_and_user_unknown) ... ok
+2026-10-22T11:17:08.4876337Z test_03_choice_custom_answer_and_synthetic_source (__main__.Browser.test_03_choice_custom_answer_and_synthetic_source) ... ok
+2026-10-22T11:17:08.9093304Z test_04_invalid_response_and_retry_preserves_source (__main__.Browser.test_04_invalid_response_and_retry_preserves_source) ... ok
+2026-10-22T11:17:09.5257229Z test_05_edit_during_response_fault_injection (__main__.Browser.test_05_edit_during_response_fault_injection) ... ok
+2026-10-22T11:17:10.0688159Z test_06_storage_failure_backup_and_invalid_import (__main__.Browser.test_06_storage_failure_backup_and_invalid_import) ... ok
+2026-10-22T11:17:10.5639220Z test_07_valid_import_roundtrip_and_clipboard_failure (__main__.Browser.test_07_valid_import_roundtrip_and_clipboard_failure) ... ok
+2026-10-22T11:17:11.2311005Z test_08_cross_tab_conflict_no_overwrite_and_html_is_text (__main__.Browser.test_08_cross_tab_conflict_no_overwrite_and_html_is_text) ... ok
+2026-10-22T11:17:11.9004247Z test_09_basis_change_after_ai_text_is_not_exported_as_current_instruction (__main__.Browser.test_09_basis_change_after_ai_text_is_not_exported_as_current_instruction) ... ok
+2026-10-22T11:17:17.8783031Z test_10_long_use_fixtures_import_edit_export_backup_reimport (__main__.Browser.test_10_long_use_fixtures_import_edit_export_backup_reimport) ... FAIL
+2026-10-22T11:17:18.5232102Z test_11_failed_reorganisation_after_answer_does_not_duplicate_the_answer (__main__.Browser.test_11_failed_reorganisation_after_answer_does_not_duplicate_the_answer) ... ok
+2026-10-22T11:17:18.8140357Z test_12_unreadable_saved_data_keeps_its_specific_message_while_typing (__main__.Browser.test_12_unreadable_saved_data_keeps_its_specific_message_while_typing) ... ok
+2026-10-22T11:17:27.4196104Z test_13_more_than_1000_items_save_and_reopen_after_reload (__main__.Browser.test_13_more_than_1000_items_save_and_reopen_after_reload) ... ok
+2026-10-22T11:17:27.4660092Z 
+2026-10-22T11:17:27.4660627Z ======================================================================
+2026-10-22T11:17:27.4661162Z FAIL: test_10_long_use_fixtures_import_edit_export_backup_reimport (__main__.Browser.test_10_long_use_fixtures_import_edit_export_backup_reimport)
+2026-10-22T11:17:27.4661584Z ----------------------------------------------------------------------
+2026-10-22T11:17:27.4661818Z Traceback (most recent call last):
+2026-10-22T11:17:27.4662605Z   File "/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/browser.py", line 263, in test_10_long_use_fixtures_import_edit_export_backup_reimport
+2026-10-22T11:17:27.4663221Z     state=self.state();self.assertEqual(state['schemaVersion'],'idea015.project.6');self.assertEqual(state['sources'],source['sources'])
+2026-10-22T11:17:27.4663589Z                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-22T11:17:27.4663847Z AssertionError: 'idea015.project.7' != 'idea015.project.6'
+2026-10-22T11:17:27.4664048Z - idea015.project.7
+2026-10-22T11:17:27.4664177Z ?                 ^
+2026-10-22T11:17:27.4664302Z + idea015.project.6
+2026-10-22T11:17:27.4664421Z ?                 ^
+2026-10-22T11:17:27.4664489Z 
+2026-10-22T11:17:27.4664494Z 
+2026-10-22T11:17:27.4664623Z ----------------------------------------------------------------------
+2026-10-22T11:17:27.4664820Z Ran 13 tests in 21.571s
+2026-10-22T11:17:27.4664905Z 
+2026-10-22T11:17:27.4664961Z FAILED (failures=1)
+2026-10-22T11:17:27.5251272Z ##[error]Process completed with exit code 1.
+2026-10-22T11:17:27.5343625Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-22T11:17:27.5344035Z with:
+2026-10-22T11:17:27.5344167Z   name: agentflow-ubuntu-24.04-39769007720
+2026-10-22T11:17:27.5344336Z   path: app/test-results/
+2026-10-22T11:17:27.5344472Z   if-no-files-found: warn
+2026-10-22T11:17:27.5344602Z   retention-days: 7
+2026-10-22T11:17:27.5344721Z   compression-level: 6
+2026-10-22T11:17:27.5344844Z   overwrite: false
+2026-10-22T11:17:27.5344965Z   include-hidden-files: false
+2026-10-22T11:17:27.5345104Z env:
+2026-10-22T11:17:27.5345209Z   AI_MODE: mock
+2026-10-22T11:17:27.5345323Z   ALLOW_PAID_AI: false
+2026-10-22T11:17:27.5345443Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:17:27.5345570Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:17:27.5345712Z   EVIDENCE_DIR: test-results
+2026-10-22T11:17:27.5345841Z   PYTHONUTF8: 1
+2026-10-22T11:17:27.5345958Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:17:27.5346123Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:17:27.5346386Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:17:27.5346621Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:17:27.5346828Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:17:27.5347037Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:17:27.5347247Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:17:27.5347427Z ##[endgroup]
+2026-10-22T11:17:27.6690788Z (node:5056) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T11:17:27.6691279Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T11:17:27.6780839Z With the provided path, there will be 36 files uploaded
+2026-10-22T11:17:27.6781606Z Artifact name is valid!
+2026-10-22T11:17:27.6781977Z Root directory input is valid!
+2026-10-22T11:17:27.9954968Z Beginning upload of artifact content to blob storage
+2026-10-22T11:17:28.1078013Z (node:5056) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T11:17:28.4675007Z Uploaded bytes 2577978
+2026-10-22T11:17:28.5075362Z Finished uploading artifact content to blob storage!
+2026-10-22T11:17:28.5076131Z SHA256 digest of uploaded artifact zip is 1cc09cd16467468528c97c16378f5361afede3c7e12d9564068f63af87ae7921
+2026-10-22T11:17:28.5078420Z Finalizing artifact upload
+2026-10-22T11:17:29.0072943Z Artifact agentflow-ubuntu-24.04-39769007720.zip successfully finalized. Artifact ID 12421263437
+2026-10-22T11:17:29.0073581Z Artifact agentflow-ubuntu-24.04-39769007720 has been successfully uploaded! Final size is 2577978 bytes. Artifact ID is 12421263437
+2026-10-22T11:17:29.0078608Z Artifact download URL: https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39769007720/artifacts/12421263437
+2026-10-22T11:17:29.0288242Z Post job cleanup.
+2026-10-22T11:17:29.0841092Z [command]/usr/bin/git version
+2026-10-22T11:17:29.0876964Z git version 2.55.0
+2026-10-22T11:17:29.0904569Z Temporarily overriding HOME='/home/runner/work/_temp/efdd16b7-2dbe-4eb5-a489-158a19c68988' before making global git config changes
+2026-10-22T11:17:29.0905542Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T11:17:29.0906924Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agentflow-studio/agentflow-studio
+2026-10-22T11:17:29.0936852Z Removing SSH command configuration
+2026-10-22T11:17:29.0941463Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T11:17:29.0971817Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-22T11:17:29.1188351Z Removing HTTP extra header
+2026-10-22T11:17:29.1194026Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T11:17:29.1236073Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-22T11:17:29.1470455Z Removing includeIf entries pointing to credentials config files
+2026-10-22T11:17:29.1477406Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T11:17:29.1522942Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-22T11:17:29.1846295Z Cleaning up orphan processes
+2026-10-22T11:17:29.2057788Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

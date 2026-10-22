@@ -1,0 +1,1403 @@
+onstruction survives update, exact leaf request/handoff, collapse projection and recovery
+2026-10-22T11:22:43.6212203Z ok 146 - H18 powertoys: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery
+2026-10-22T11:22:43.6212497Z   ---
+2026-10-22T11:22:43.6212606Z   duration_ms: 7.962029
+2026-10-22T11:22:43.6212733Z   type: 'test'
+2026-10-22T11:22:43.6212842Z   ...
+2026-10-22T11:22:43.6213172Z # Subtest: H18 product13: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery
+2026-10-22T11:22:43.6213700Z ok 147 - H18 product13: real-source reconstruction survives update, exact leaf request/handoff, collapse projection and recovery
+2026-10-22T11:22:43.6214001Z   ---
+2026-10-22T11:22:43.6214108Z   duration_ms: 7.216242
+2026-10-22T11:22:43.6214234Z   type: 'test'
+2026-10-22T11:22:43.6214344Z   ...
+2026-10-22T11:22:43.6214652Z # Subtest: H18 parent note: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6215123Z ok 148 - H18 parent note: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6215393Z   ---
+2026-10-22T11:22:43.6215504Z   duration_ms: 3.787663
+2026-10-22T11:22:43.6215628Z   type: 'test'
+2026-10-22T11:22:43.6215738Z   ...
+2026-10-22T11:22:43.6216039Z # Subtest: H18 parent name: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6216608Z ok 149 - H18 parent name: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6216878Z   ---
+2026-10-22T11:22:43.6216993Z   duration_ms: 3.434418
+2026-10-22T11:22:43.6217117Z   type: 'test'
+2026-10-22T11:22:43.6217226Z   ...
+2026-10-22T11:22:43.6217534Z # Subtest: H18 parent A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6218006Z ok 150 - H18 parent A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6218279Z   ---
+2026-10-22T11:22:43.6218389Z   duration_ms: 3.395991
+2026-10-22T11:22:43.6218514Z   type: 'test'
+2026-10-22T11:22:43.6218624Z   ...
+2026-10-22T11:22:43.6218944Z # Subtest: H18 parent note restore: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6219450Z ok 151 - H18 parent note restore: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6219739Z   ---
+2026-10-22T11:22:43.6219851Z   duration_ms: 2.588681
+2026-10-22T11:22:43.6219975Z   type: 'test'
+2026-10-22T11:22:43.6220183Z   ...
+2026-10-22T11:22:43.6220479Z # Subtest: H18 self A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6221181Z ok 152 - H18 self A-B-A: reference changes hold late descriptions and stale current/correction/handoff consistently
+2026-10-22T11:22:43.6221450Z   ---
+2026-10-22T11:22:43.6221558Z   duration_ms: 4.629243
+2026-10-22T11:22:43.6221682Z   type: 'test'
+2026-10-22T11:22:43.6221792Z   ...
+2026-10-22T11:22:43.6222076Z # Subtest: H18 unrelated branches, layout and derived parent description do not change child reference basis
+2026-10-22T11:22:43.6222514Z ok 153 - H18 unrelated branches, layout and derived parent description do not change child reference basis
+2026-10-22T11:22:43.6222770Z   ---
+2026-10-22T11:22:43.6222881Z   duration_ms: 2.817807
+2026-10-22T11:22:43.6223004Z   type: 'test'
+2026-10-22T11:22:43.6223116Z   ...
+2026-10-22T11:22:43.6223419Z # Subtest: H18 legacy anchor.1/current root remain readable; adding then removing a parent never invents old ancestry
+2026-10-22T11:22:43.6223894Z ok 154 - H18 legacy anchor.1/current root remain readable; adding then removing a parent never invents old ancestry
+2026-10-22T11:22:43.6224161Z   ---
+2026-10-22T11:22:43.6224269Z   duration_ms: 1.634219
+2026-10-22T11:22:43.6224393Z   type: 'test'
+2026-10-22T11:22:43.6224503Z   ...
+2026-10-22T11:22:43.6224809Z # Subtest: H18 v6 migration preserves exact legacy stamps, raw return files, ids and positions without ancestor backfill
+2026-10-22T11:22:43.6225285Z ok 155 - H18 v6 migration preserves exact legacy stamps, raw return files, ids and positions without ancestor backfill
+2026-10-22T11:22:43.6225557Z   ---
+2026-10-22T11:22:43.6225666Z   duration_ms: 1.596983
+2026-10-22T11:22:43.6225789Z   type: 'test'
+2026-10-22T11:22:43.6225900Z   ...
+2026-10-22T11:22:43.6226233Z # Subtest: H18 recorded synthetic question/report/description signals retain exact area owners; relations never duplicate them
+2026-10-22T11:22:43.6226748Z ok 156 - H18 recorded synthetic question/report/description signals retain exact area owners; relations never duplicate them
+2026-10-22T11:22:43.6227045Z   ---
+2026-10-22T11:22:43.6227154Z   duration_ms: 4.477705
+2026-10-22T11:22:43.6227278Z   type: 'test'
+2026-10-22T11:22:43.6227389Z   ...
+2026-10-22T11:22:43.6227774Z # Subtest: H18 fixed actual project.6 state paths migrate without rewriting valid/held/user history, then parent attach-detach stays stale after reload
+2026-10-22T11:22:43.6228380Z ok 157 - H18 fixed actual project.6 state paths migrate without rewriting valid/held/user history, then parent attach-detach stays stale after reload
+2026-10-22T11:22:43.6228713Z   ---
+2026-10-22T11:22:43.6228820Z   duration_ms: 3.505557
+2026-10-22T11:22:43.6228944Z   type: 'test'
+2026-10-22T11:22:43.6229058Z   ...
+2026-10-22T11:22:43.6229444Z # Subtest: H18 project.5 export has no invented anchor: late return.2 report/raw kept and only description held
+2026-10-22T11:22:43.6229879Z ok 158 - H18 project.5 export has no invented anchor: late return.2 report/raw kept and only description held
+2026-10-22T11:22:43.6230136Z   ---
+2026-10-22T11:22:43.6230243Z   duration_ms: 2.031239
+2026-10-22T11:22:43.6230367Z   type: 'test'
+2026-10-22T11:22:43.6230480Z   ...
+2026-10-22T11:22:43.6230979Z # Subtest: H18 handoff never hides an active recorded question, and its later answer stays a reply record rather than an obligation
+2026-10-22T11:22:43.6231491Z ok 159 - H18 handoff never hides an active recorded question, and its later answer stays a reply record rather than an obligation
+2026-10-22T11:22:43.6231778Z   ---
+2026-10-22T11:22:43.6231885Z   duration_ms: 3.241657
+2026-10-22T11:22:43.6232010Z   type: 'test'
+2026-10-22T11:22:43.6232118Z   ...
+2026-10-22T11:22:43.6232354Z # Subtest: H18 test-only questions remain excluded from real recorded-question signals
+2026-10-22T11:22:43.6232707Z ok 160 - H18 test-only questions remain excluded from real recorded-question signals
+2026-10-22T11:22:43.6232923Z   ---
+2026-10-22T11:22:43.6233030Z   duration_ms: 1.593627
+2026-10-22T11:22:43.6233250Z   type: 'test'
+2026-10-22T11:22:43.6233360Z   ...
+2026-10-22T11:22:43.6233703Z # Subtest: H18 parent-recorded common and local decisions keep their authority and verbatim scope, without automatic child inheritance
+2026-10-22T11:22:43.6234240Z ok 161 - H18 parent-recorded common and local decisions keep their authority and verbatim scope, without automatic child inheritance
+2026-10-22T11:22:43.6234539Z   ---
+2026-10-22T11:22:43.6234647Z   duration_ms: 2.088916
+2026-10-22T11:22:43.6234773Z   type: 'test'
+2026-10-22T11:22:43.6234884Z   ...
+2026-10-22T11:22:43.6235161Z # Subtest: I15-H01 real local HTTP -> mock -> typed envelope, safe config and static entry, no external fetch
+2026-10-22T11:22:43.6235584Z ok 162 - I15-H01 real local HTTP -> mock -> typed envelope, safe config and static entry, no external fetch
+2026-10-22T11:22:43.6235831Z   ---
+2026-10-22T11:22:43.6235949Z   duration_ms: 34.499362
+2026-10-22T11:22:43.6236076Z   type: 'test'
+2026-10-22T11:22:43.6236187Z   ...
+2026-10-22T11:22:43.6236462Z # Subtest: I15-H02 invalid origin/host/content-type/body rejected without mock or provider invocation
+2026-10-22T11:22:43.6236872Z ok 163 - I15-H02 invalid origin/host/content-type/body rejected without mock or provider invocation
+2026-10-22T11:22:43.6237119Z   ---
+2026-10-22T11:22:43.6237232Z   duration_ms: 15.659939
+2026-10-22T11:22:43.6237359Z   type: 'test'
+2026-10-22T11:22:43.6237468Z   ...
+2026-10-22T11:22:43.6237757Z # Subtest: I15-H03 oversized input is rejected without truncating or invoking provider; static traversal denied
+2026-10-22T11:22:43.6238199Z ok 164 - I15-H03 oversized input is rejected without truncating or invoking provider; static traversal denied
+2026-10-22T11:22:43.6238457Z   ---
+2026-10-22T11:22:43.6238569Z   duration_ms: 8.605191
+2026-10-22T11:22:43.6238693Z   type: 'test'
+2026-10-22T11:22:43.6238802Z   ...
+2026-10-22T11:22:43.6239008Z # Subtest: I15-H04 missing key and paid opt-out prevent all outbound calls
+2026-10-22T11:22:43.6239306Z ok 165 - I15-H04 missing key and paid opt-out prevent all outbound calls
+2026-10-22T11:22:43.6239507Z   ---
+2026-10-22T11:22:43.6239617Z   duration_ms: 6.712051
+2026-10-22T11:22:43.6239742Z   type: 'test'
+2026-10-22T11:22:43.6239852Z   ...
+2026-10-22T11:22:43.6240119Z # Subtest: I15-H05 request IDs and process cap cannot be silently retried through old interview endpoint
+2026-10-22T11:22:43.6240527Z ok 166 - I15-H05 request IDs and process cap cannot be silently retried through old interview endpoint
+2026-10-22T11:22:43.6240937Z   ---
+2026-10-22T11:22:43.6241046Z   duration_ms: 10.041386
+2026-10-22T11:22:43.6241173Z   type: 'test'
+2026-10-22T11:22:43.6241284Z   ...
+2026-10-22T11:22:43.6241568Z # Subtest: I15-H06 malformed response over HTTP cannot patch a basis; response includes only fixed error code
+2026-10-22T11:22:43.6242007Z ok 167 - I15-H06 malformed response over HTTP cannot patch a basis; response includes only fixed error code
+2026-10-22T11:22:43.6242364Z   ---
+2026-10-22T11:22:43.6242473Z   duration_ms: 3.294999
+2026-10-22T11:22:43.6242602Z   type: 'test'
+2026-10-22T11:22:43.6242714Z   ...
+2026-10-22T11:22:43.6242993Z # Subtest: I15-P01 exact DeepSeek adapter request uses server endpoint, disabled thinking, JSON and no retry
+2026-10-22T11:22:43.6243427Z ok 168 - I15-P01 exact DeepSeek adapter request uses server endpoint, disabled thinking, JSON and no retry
+2026-10-22T11:22:43.6243682Z   ---
+2026-10-22T11:22:43.6243788Z   duration_ms: 5.13657
+2026-10-22T11:22:43.6243912Z   type: 'test'
+2026-10-22T11:22:43.6244022Z   ...
+2026-10-22T11:22:43.6244328Z # Subtest: I15-P02 empty/non-JSON/truncated/authority-injection responses fail once, preserve model errors as codes
+2026-10-22T11:22:43.6244811Z ok 169 - I15-P02 empty/non-JSON/truncated/authority-injection responses fail once, preserve model errors as codes
+2026-10-22T11:22:43.6245082Z   ---
+2026-10-22T11:22:43.6245192Z   duration_ms: 3.115116
+2026-10-22T11:22:43.6245317Z   type: 'test'
+2026-10-22T11:22:43.6245434Z   ...
+2026-10-22T11:22:43.6245667Z # Subtest: I15-P03 provider errors never expose raw body or credentials and never retry
+2026-10-22T11:22:43.6246112Z ok 170 - I15-P03 provider errors never expose raw body or credentials and never retry
+2026-10-22T11:22:43.6246330Z   ---
+2026-10-22T11:22:43.6246438Z   duration_ms: 2.187025
+2026-10-22T11:22:43.6246561Z   type: 'test'
+2026-10-22T11:22:43.6246672Z   ...
+2026-10-22T11:22:43.6246939Z # Subtest: I15-P04 timeout and cancelled requests work even with a transport that ignores AbortSignal
+2026-10-22T11:22:43.6247348Z ok 171 - I15-P04 timeout and cancelled requests work even with a transport that ignores AbortSignal
+2026-10-22T11:22:43.6247587Z   ---
+2026-10-22T11:22:43.6247696Z   duration_ms: 30.802421
+2026-10-22T11:22:43.6247821Z   type: 'test'
+2026-10-22T11:22:43.6247930Z   ...
+2026-10-22T11:22:43.6248223Z # Subtest: I15-P05 real local HTTP -> DeepSeek adapter -> injected fake upstream uses the same route as live mode
+2026-10-22T11:22:43.6248674Z ok 172 - I15-P05 real local HTTP -> DeepSeek adapter -> injected fake upstream uses the same route as live mode
+2026-10-22T11:22:43.6248934Z   ---
+2026-10-22T11:22:43.6249042Z   duration_ms: 5.446158
+2026-10-22T11:22:43.6249166Z   type: 'test'
+2026-10-22T11:22:43.6249277Z   ...
+2026-10-22T11:22:43.6249561Z # Subtest: I17-C03 lossy AI summary cannot remove original manual conditions from current handoff references
+2026-10-22T11:22:43.6250000Z ok 173 - I17-C03 lossy AI summary cannot remove original manual conditions from current handoff references
+2026-10-22T11:22:43.6250254Z   ---
+2026-10-22T11:22:43.6250364Z   duration_ms: 17.210431
+2026-10-22T11:22:43.6250489Z   type: 'test'
+2026-10-22T11:22:43.6250599Z   ...
+2026-10-22T11:22:43.6251034Z # Subtest: I17-C03 unrelated next work does not inherit manual values or recursively carry an older task
+2026-10-22T11:22:43.6251441Z ok 174 - I17-C03 unrelated next work does not inherit manual values or recursively carry an older task
+2026-10-22T11:22:43.6251686Z   ---
+2026-10-22T11:22:43.6251793Z   duration_ms: 3.007674
+2026-10-22T11:22:43.6251920Z   type: 'test'
+2026-10-22T11:22:43.6252030Z   ...
+2026-10-22T11:22:43.6252334Z # Subtest: I17-C03 explicit condition changes and current manual overrides take precedence without an approval path
+2026-10-22T11:22:43.6252797Z ok 175 - I17-C03 explicit condition changes and current manual overrides take precedence without an approval path
+2026-10-22T11:22:43.6253063Z   ---
+2026-10-22T11:22:43.6253171Z   duration_ms: 1.433316
+2026-10-22T11:22:43.6253297Z   type: 'test'
+2026-10-22T11:22:43.6253411Z   ...
+2026-10-22T11:22:43.6253663Z # Subtest: I17-C03 report wrapping uses the handed-off task but does not become a reuse request
+2026-10-22T11:22:43.6254041Z ok 176 - I17-C03 report wrapping uses the handed-off task but does not become a reuse request
+2026-10-22T11:22:43.6254271Z   ---
+2026-10-22T11:22:43.6254380Z   duration_ms: 7.732683
+2026-10-22T11:22:43.6254502Z   type: 'test'
+2026-10-22T11:22:43.6254614Z   ...
+2026-10-22T11:22:43.6254987Z # Subtest: I17-R5 stale previous AI stays excluded while manual provenance and legacy originals survive
+2026-10-22T11:22:43.6255398Z ok 177 - I17-R5 stale previous AI stays excluded while manual provenance and legacy originals survive
+2026-10-22T11:22:43.6255643Z   ---
+2026-10-22T11:22:43.6255750Z   duration_ms: 8.70364
+2026-10-22T11:22:43.6255873Z   type: 'test'
+2026-10-22T11:22:43.6255987Z   ...
+2026-10-22T11:22:43.6256255Z # Subtest: I17-C06 within-budget full original reaches the actual provider body on the third request
+2026-10-22T11:22:43.6256663Z ok 178 - I17-C06 within-budget full original reaches the actual provider body on the third request
+2026-10-22T11:22:43.6256905Z   ---
+2026-10-22T11:22:43.6257012Z   duration_ms: 1.205341
+2026-10-22T11:22:43.6257134Z   type: 'test'
+2026-10-22T11:22:43.6257247Z   ...
+2026-10-22T11:22:43.6257543Z # Subtest: I17-context only over-budget old untouched requests are excerpted; all IDs/local originals remain
+2026-10-22T11:22:43.6257989Z ok 179 - I17-context only over-budget old untouched requests are excerpted; all IDs/local originals remain
+2026-10-22T11:22:43.6258335Z   ---
+2026-10-22T11:22:43.6258445Z   duration_ms: 214.432144
+2026-10-22T11:22:43.6258578Z   type: 'test'
+2026-10-22T11:22:43.6258688Z   ...
+2026-10-22T11:22:43.6258947Z # Subtest: I17-context confirmed/answered/deferred/edited bases never take the excerpt fallback
+2026-10-22T11:22:43.6259340Z ok 180 - I17-context confirmed/answered/deferred/edited bases never take the excerpt fallback
+2026-10-22T11:22:43.6259579Z   ---
+2026-10-22T11:22:43.6259692Z   duration_ms: 91.392476
+2026-10-22T11:22:43.6259822Z   type: 'test'
+2026-10-22T11:22:43.6259932Z   ...
+2026-10-22T11:22:43.6260226Z # Subtest: I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8MB recovery/export independent
+2026-10-22T11:22:43.6260802Z ok 181 - I17-context exact 131072 UTF-8 bytes accepted; +1 blocked locally/HTTP, 8MB recovery/export independent
+2026-10-22T11:22:43.6261083Z   ---
+2026-10-22T11:22:43.6261198Z   duration_ms: 43.282612
+2026-10-22T11:22:43.6261327Z   type: 'test'
+2026-10-22T11:22:43.6261444Z   ...
+2026-10-22T11:22:43.6261724Z # Subtest: I17-contract manual provenance is input-only, narrow, versioned; advice parser is not relaxed
+2026-10-22T11:22:43.6262146Z ok 182 - I17-contract manual provenance is input-only, narrow, versioned; advice parser is not relaxed
+2026-10-22T11:22:43.6262394Z   ---
+2026-10-22T11:22:43.6262507Z   duration_ms: 1.362619
+2026-10-22T11:22:43.6262630Z   type: 'test'
+2026-10-22T11:22:43.6262741Z   ...
+2026-10-22T11:22:43.6263011Z # Subtest: I17-C05 supplied invalid array still fails once through real provider; raw never repaired
+2026-10-22T11:22:43.6263422Z ok 183 - I17-C05 supplied invalid array still fails once through real provider; raw never repaired
+2026-10-22T11:22:43.6263664Z   ---
+2026-10-22T11:22:43.6263776Z   duration_ms: 0.874911
+2026-10-22T11:22:43.6263900Z   type: 'test'
+2026-10-22T11:22:43.6263945Z   ...
+2026-10-22T11:22:43.6264170Z # Subtest: I17-C05 prompt example matches strict string schema; valid multi-line strings pass unchanged
+2026-10-22T11:22:43.6264380Z ok 184 - I17-C05 prompt example matches strict string schema; valid multi-line strings pass unchanged
+2026-10-22T11:22:43.6264425Z   ---
+2026-10-22T11:22:43.6264480Z   duration_ms: 0.858046
+2026-10-22T11:22:43.6264532Z   type: 'test'
+2026-10-22T11:22:43.6264579Z   ...
+2026-10-22T11:22:43.6264818Z # Subtest: I17-C02 prompt constrains shared comparison axis/timing without encoding case answers or new policies
+2026-10-22T11:22:43.6265049Z ok 185 - I17-C02 prompt constrains shared comparison axis/timing without encoding case answers or new policies
+2026-10-22T11:22:43.6265096Z   ---
+2026-10-22T11:22:43.6265151Z   duration_ms: 0.30454
+2026-10-22T11:22:43.6265199Z   type: 'test'
+2026-10-22T11:22:43.6265247Z   ...
+2026-10-22T11:22:43.6265485Z # Subtest: I22-C05 real narrow submit records 60 days before AI; status, history and manual checks survive
+2026-10-22T11:22:43.6265834Z ok 186 - I22-C05 real narrow submit records 60 days before AI; status, history and manual checks survive
+2026-10-22T11:22:43.6265888Z   ---
+2026-10-22T11:22:43.6265945Z   duration_ms: 11.221804
+2026-10-22T11:22:43.6265992Z   type: 'test'
+2026-10-22T11:22:43.6266042Z   ...
+2026-10-22T11:22:43.6266251Z # Subtest: I22-B05 supplied exact prose and domain assembly retain confirmed D1 r6 / requested D2 r9
+2026-10-22T11:22:43.6266450Z ok 187 - I22-B05 supplied exact prose and domain assembly retain confirmed D1 r6 / requested D2 r9
+2026-10-22T11:22:43.6266498Z   ---
+2026-10-22T11:22:43.6266552Z   duration_ms: 2.153784
+2026-10-22T11:22:43.6266601Z   type: 'test'
+2026-10-22T11:22:43.6266648Z   ...
+2026-10-22T11:22:43.6266840Z # Subtest: I22-B05 no-work next AND D1 review coexist; receive never promotes or replaces bases
+2026-10-22T11:22:43.6267030Z ok 188 - I22-B05 no-work next AND D1 review coexist; receive never promotes or replaces bases
+2026-10-22T11:22:43.6267079Z   ---
+2026-10-22T11:22:43.6267131Z   duration_ms: 1.430852
+2026-10-22T11:22:43.6267187Z   type: 'test'
+2026-10-22T11:22:43.6267235Z   ...
+2026-10-22T11:22:43.6267468Z # Subtest: I22-B03 matching current goal plus requested record is not an automatic incomplete/complete decision
+2026-10-22T11:22:43.6267779Z ok 189 - I22-B03 matching current goal plus requested record is not an automatic incomplete/complete decision
+2026-10-22T11:22:43.6267827Z   ---
+2026-10-22T11:22:43.6267881Z   duration_ms: 0.879388
+2026-10-22T11:22:43.6267932Z   type: 'test'
+2026-10-22T11:22:43.6267977Z   ...
+2026-10-22T11:22:43.6268237Z # Subtest: I22-partial composite request preserves other bases, full request and manual checks while only D1 is recorded
+2026-10-22T11:22:43.6268490Z ok 190 - I22-partial composite request preserves other bases, full request and manual checks while only D1 is recorded
+2026-10-22T11:22:43.6268534Z   ---
+2026-10-22T11:22:43.6268590Z   duration_ms: 1.580568
+2026-10-22T11:22:43.6268642Z   type: 'test'
+2026-10-22T11:22:43.6268687Z   ...
+2026-10-22T11:22:43.6268896Z # Subtest: I22-same-values/status-only recordings report actual fields, not semantic completion
+2026-10-22T11:22:43.6269096Z ok 191 - I22-same-values/status-only recordings report actual fields, not semantic completion
+2026-10-22T11:22:43.6269140Z   ---
+2026-10-22T11:22:43.6269196Z   duration_ms: 1.087863
+2026-10-22T11:22:43.6269247Z   type: 'test'
+2026-10-22T11:22:43.6269293Z   ...
+2026-10-22T11:22:43.6269500Z # Subtest: I22-new manual basis records a value without pretending there was a replaced predecessor
+2026-10-22T11:22:43.6269696Z ok 192 - I22-new manual basis records a value without pretending there was a replaced predecessor
+2026-10-22T11:22:43.6269743Z   ---
+2026-10-22T11:22:43.6269799Z   duration_ms: 1.07188
+2026-10-22T11:22:43.6269848Z   type: 'test'
+2026-10-22T11:22:43.6269895Z   ...
+2026-10-22T11:22:43.6270116Z # Subtest: I22-narrow modification of an answered record keeps the existing answered-to-requested rule
+2026-10-22T11:22:43.6270323Z ok 193 - I22-narrow modification of an answered record keeps the existing answered-to-requested rule
+2026-10-22T11:22:43.6270370Z   ---
+2026-10-22T11:22:43.6270424Z   duration_ms: 5.008307
+2026-10-22T11:22:43.6270475Z   type: 'test'
+2026-10-22T11:22:43.6270523Z   ...
+2026-10-22T11:22:43.6270924Z # Subtest: I22-old-task facts reference historical versions and cannot replace current bases
+2026-10-22T11:22:43.6271114Z ok 194 - I22-old-task facts reference historical versions and cannot replace current bases
+2026-10-22T11:22:43.6271162Z   ---
+2026-10-22T11:22:43.6271215Z   duration_ms: 2.996728
+2026-10-22T11:22:43.6271265Z   type: 'test'
+2026-10-22T11:22:43.6271313Z   ...
+2026-10-22T11:22:43.6271540Z # Subtest: I22-quoted wording change on requested basis keeps requested status, no inference of confirmation
+2026-10-22T11:22:43.6271760Z ok 195 - I22-quoted wording change on requested basis keeps requested status, no inference of confirmation
+2026-10-22T11:22:43.6271809Z   ---
+2026-10-22T11:22:43.6271860Z   duration_ms: 0.598404
+2026-10-22T11:22:43.6271912Z   type: 'test'
+2026-10-22T11:22:43.6271958Z   ...
+2026-10-22T11:22:43.6272294Z # Subtest: I22-missing or unordered history stays reference-only; absent provenance is not silently reconstructed
+2026-10-22T11:22:43.6272531Z ok 196 - I22-missing or unordered history stays reference-only; absent provenance is not silently reconstructed
+2026-10-22T11:22:43.6272576Z   ---
+2026-10-22T11:22:43.6272631Z   duration_ms: 1.516111
+2026-10-22T11:22:43.6272683Z   type: 'test'
+2026-10-22T11:22:43.6272728Z   ...
+2026-10-22T11:22:43.6272970Z # Subtest: I22-answer and test_answer retain their existing provenance; synthetic answers never become basis facts
+2026-10-22T11:22:43.6273204Z ok 197 - I22-answer and test_answer retain their existing provenance; synthetic answers never become basis facts
+2026-10-22T11:22:43.6273250Z   ---
+2026-10-22T11:22:43.6273309Z   duration_ms: 1.039781
+2026-10-22T11:22:43.6273365Z   type: 'test'
+2026-10-22T11:22:43.6273413Z   ...
+2026-10-22T11:22:43.6273657Z # Subtest: I22-report/evidence-only input is visible as input, never a record of external execution or a new basis
+2026-10-22T11:22:43.6273889Z ok 198 - I22-report/evidence-only input is visible as input, never a record of external execution or a new basis
+2026-10-22T11:22:43.6274017Z   ---
+2026-10-22T11:22:43.6274072Z   duration_ms: 2.880552
+2026-10-22T11:22:43.6274120Z   type: 'test'
+2026-10-22T11:22:43.6274168Z   ...
+2026-10-22T11:22:43.6274392Z # Subtest: I22-pure projection, handoff and request neither mutate nor share writable objects with project
+2026-10-22T11:22:43.6274606Z ok 199 - I22-pure projection, handoff and request neither mutate nor share writable objects with project
+2026-10-22T11:22:43.6274654Z   ---
+2026-10-22T11:22:43.6274709Z   duration_ms: 1.281766
+2026-10-22T11:22:43.6274759Z   type: 'test'
+2026-10-22T11:22:43.6274807Z   ...
+2026-10-22T11:22:43.6275051Z # Subtest: I22-write failure leaves current-memory facts separate from last persisted snapshot and recovery bytes
+2026-10-22T11:22:43.6275287Z ok 200 - I22-write failure leaves current-memory facts separate from last persisted snapshot and recovery bytes
+2026-10-22T11:22:43.6275335Z   ---
+2026-10-22T11:22:43.6275393Z   duration_ms: 1.513566
+2026-10-22T11:22:43.6275441Z   type: 'test'
+2026-10-22T11:22:43.6275491Z   ...
+2026-10-22T11:22:43.6275738Z # Subtest: I22-input API is strict, cross-linked, copy-safe and rejects old/missing/forged shape without repairing it
+2026-10-22T11:22:43.6275977Z ok 201 - I22-input API is strict, cross-linked, copy-safe and rejects old/missing/forged shape without repairing it
+2026-10-22T11:22:43.6276025Z   ---
+2026-10-22T11:22:43.6276078Z   duration_ms: 4.258394
+2026-10-22T11:22:43.6276131Z   type: 'test'
+2026-10-22T11:22:43.6276179Z   ...
+2026-10-22T11:22:43.6276392Z # Subtest: I22-reference validation is not authentication of imported history or semantic completion
+2026-10-22T11:22:43.6276596Z ok 202 - I22-reference validation is not authentication of imported history or semantic completion
+2026-10-22T11:22:43.6276644Z   ---
+2026-10-22T11:22:43.6276697Z   duration_ms: 0.704675
+2026-10-22T11:22:43.6276750Z   type: 'test'
+2026-10-22T11:22:43.6276795Z   ...
+2026-10-22T11:22:43.6277056Z # Subtest: I22-all facts count toward exact 128KiB; +1 fails, while marked excerpts and local 8MB boundary remain separate
+2026-10-22T11:22:43.6277299Z ok 203 - I22-all facts count toward exact 128KiB; +1 fails, while marked excerpts and local 8MB boundary remain separate
+2026-10-22T11:22:43.6277344Z   ---
+2026-10-22T11:22:43.6277403Z   duration_ms: 169.580358
+2026-10-22T11:22:43.6277454Z   type: 'test'
+2026-10-22T11:22:43.6277499Z   ...
+2026-10-22T11:22:43.6277703Z # Subtest: I22-projection works after legacy migration and never adds fields to stored projects
+2026-10-22T11:22:43.6277898Z ok 204 - I22-projection works after legacy migration and never adds fields to stored projects
+2026-10-22T11:22:43.6277942Z   ---
+2026-10-22T11:22:43.6277999Z   duration_ms: 4.888886
+2026-10-22T11:22:43.6278049Z   type: 'test'
+2026-10-22T11:22:43.6278094Z   ...
+2026-10-22T11:22:43.6278405Z # Subtest: I22-actual localhost HTTP -> provider body -> validation -> receive -> handoff shares identical app facts
+2026-10-22T11:22:43.6278641Z ok 205 - I22-actual localhost HTTP -> provider body -> validation -> receive -> handoff shares identical app facts
+2026-10-22T11:22:43.6278689Z   ---
+2026-10-22T11:22:43.6278746Z   duration_ms: 48.877087
+2026-10-22T11:22:43.6278794Z   type: 'test'
+2026-10-22T11:22:43.6278840Z   ...
+2026-10-22T11:22:43.6279119Z # Subtest: S035-1 explicit report/evidence parent equals preview; sources, bases, history and manual values survive JSON recovery
+2026-10-22T11:22:43.6279388Z ok 206 - S035-1 explicit report/evidence parent equals preview; sources, bases, history and manual values survive JSON recovery
+2026-10-22T11:22:43.6279436Z   ---
+2026-10-22T11:22:43.6279494Z   duration_ms: 10.276465
+2026-10-22T11:22:43.6279542Z   type: 'test'
+2026-10-22T11:22:43.6279591Z   ...
+2026-10-22T11:22:43.6279802Z # Subtest: S035-2 invalid, unexported and other-project IDs fail atomically in submit and preview
+2026-10-22T11:22:43.6279996Z ok 207 - S035-2 invalid, unexported and other-project IDs fail atomically in submit and preview
+2026-10-22T11:22:43.6280111Z   ---
+2026-10-22T11:22:43.6289685Z   duration_ms: 2.625256
+2026-10-22T11:22:43.6289759Z   type: 'test'
+2026-10-22T11:22:43.6289806Z   ...
+2026-10-22T11:22:43.6290061Z # Subtest: S035-3 omitted target preserves zero/single/multiple fallback and reverse task order, not export date
+2026-10-22T11:22:43.6290296Z ok 208 - S035-3 omitted target preserves zero/single/multiple fallback and reverse task order, not export date
+2026-10-22T11:22:43.6290343Z   ---
+2026-10-22T11:22:43.6290399Z   duration_ms: 1.109586
+2026-10-22T11:22:43.6290448Z   type: 'test'
+2026-10-22T11:22:43.6290495Z   ...
+2026-10-22T11:22:43.6290961Z # Subtest: S035-4 next B request context contains B return and excludes A return without removing global A request basis
+2026-10-22T11:22:43.6291210Z ok 209 - S035-4 next B request context contains B return and excludes A return without removing global A request basis
+2026-10-22T11:22:43.6291261Z   ---
+2026-10-22T11:22:43.6291314Z   duration_ms: 1.260364
+2026-10-22T11:22:43.6291365Z   type: 'test'
+2026-10-22T11:22:43.6291409Z   ...
+2026-10-22T11:22:43.6291632Z # Subtest: S102-1 nothing to check without evidence: no tasks, a kept input, a prepared or exported request
+2026-10-22T11:22:43.6291842Z ok 210 - S102-1 nothing to check without evidence: no tasks, a kept input, a prepared or exported request
+2026-10-22T11:22:43.6291885Z   ---
+2026-10-22T11:22:43.6291937Z   duration_ms: 6.068999
+2026-10-22T11:22:43.6291986Z   type: 'test'
+2026-10-22T11:22:43.6292033Z   ...
+2026-10-22T11:22:43.6292284Z # Subtest: S102-2 an open product choice waits for the user until answered, or until the user continues from that request
+2026-10-22T11:22:43.6292526Z ok 211 - S102-2 an open product choice waits for the user until answered, or until the user continues from that request
+2026-10-22T11:22:43.6292572Z   ---
+2026-10-22T11:22:43.6292626Z   duration_ms: 1.516661
+2026-10-22T11:22:43.6292677Z   type: 'test'
+2026-10-22T11:22:43.6292726Z   ...
+2026-10-22T11:22:43.6292967Z # Subtest: S102-3 a returned report is listed until the user acts on it (a follow-up request or a follow-up handoff)
+2026-10-22T11:22:43.6293197Z ok 212 - S102-3 a returned report is listed until the user acts on it (a follow-up request or a follow-up handoff)
+2026-10-22T11:22:43.6293243Z   ---
+2026-10-22T11:22:43.6293296Z   duration_ms: 2.844498
+2026-10-22T11:22:43.6293345Z   type: 'test'
+2026-10-22T11:22:43.6293388Z   ...
+2026-10-22T11:22:43.6293587Z # Subtest: S102-4 only the latest return of a task counts; an older report is never counted again
+2026-10-22T11:22:43.6293775Z ok 213 - S102-4 only the latest return of a task counts; an older report is never counted again
+2026-10-22T11:22:43.6293819Z   ---
+2026-10-22T11:22:43.6293873Z   duration_ms: 1.668531
+2026-10-22T11:22:43.6293923Z   type: 'test'
+2026-10-22T11:22:43.6293967Z   ...
+2026-10-22T11:22:43.6294363Z # Subtest: S102-5 a report returning to a follow-up handoff opens the original request; items keep their area; pure and unsaved
+2026-10-22T11:22:43.6294626Z ok 214 - S102-5 a report returning to a follow-up handoff opens the original request; items keep their area; pure and unsaved
+2026-10-22T11:22:43.6294673Z   ---
+2026-10-22T11:22:43.6294728Z   duration_ms: 1.862955
+2026-10-22T11:22:43.6294779Z   type: 'test'
+2026-10-22T11:22:43.6294823Z   ...
+2026-10-22T11:22:43.6295165Z # Subtest: S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report
+2026-10-22T11:22:43.6295486Z ok 215 - S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report
+2026-10-22T11:22:43.6295530Z   ---
+2026-10-22T11:22:43.6295585Z   duration_ms: 1.901002
+2026-10-22T11:22:43.6295634Z   type: 'test'
+2026-10-22T11:22:43.6295680Z   ...
+2026-10-22T11:22:43.6295961Z # Subtest: UI001-P1 stage labels distinguish source preservation, API response waiting and prepared work; none claims execution
+2026-10-22T11:22:43.6296228Z ok 216 - UI001-P1 stage labels distinguish source preservation, API response waiting and prepared work; none claims execution
+2026-10-22T11:22:43.6296366Z   ---
+2026-10-22T11:22:43.6296421Z   duration_ms: 5.387018
+2026-10-22T11:22:43.6296470Z   type: 'test'
+2026-10-22T11:22:43.6296517Z   ...
+2026-10-22T11:22:43.6296757Z # Subtest: UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy
+2026-10-22T11:22:43.6296983Z ok 217 - UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy
+2026-10-22T11:22:43.6297032Z   ---
+2026-10-22T11:22:43.6297086Z   duration_ms: 1.402259
+2026-10-22T11:22:43.6297134Z   type: 'test'
+2026-10-22T11:22:43.6297180Z   ...
+2026-10-22T11:22:43.6297462Z # Subtest: UI001-P3 real export metadata changes next action; editing a work field asks for recopy, typing a separate draft does not
+2026-10-22T11:22:43.6297740Z ok 218 - UI001-P3 real export metadata changes next action; editing a work field asks for recopy, typing a separate draft does not
+2026-10-22T11:22:43.6297790Z   ---
+2026-10-22T11:22:43.6297842Z   duration_ms: 5.456103
+2026-10-22T11:22:43.6297892Z   type: 'test'
+2026-10-22T11:22:43.6297941Z   ...
+2026-10-22T11:22:43.6298170Z # Subtest: UI001-P4 stale state remains explicit even with a saved handoff and a preserved manual instruction
+2026-10-22T11:22:43.6298393Z ok 219 - UI001-P4 stale state remains explicit even with a saved handoff and a preserved manual instruction
+2026-10-22T11:22:43.6298441Z   ---
+2026-10-22T11:22:43.6298492Z   duration_ms: 0.863195
+2026-10-22T11:22:43.6298545Z   type: 'test'
+2026-10-22T11:22:43.6298589Z   ...
+2026-10-22T11:22:43.6298855Z # Subtest: UI001-P5 report/source labels stay attributed and titles derive from actual source rather than invented task names
+2026-10-22T11:22:43.6299114Z ok 220 - UI001-P5 report/source labels stay attributed and titles derive from actual source rather than invented task names
+2026-10-22T11:22:43.6299161Z   ---
+2026-10-22T11:22:43.6299217Z   duration_ms: 1.372804
+2026-10-22T11:22:43.6299270Z   type: 'test'
+2026-10-22T11:22:43.6299315Z   ...
+2026-10-22T11:22:43.6299536Z # Subtest: UI001-P6 editing-draft indicators do not change confirmed values or mutate any project data
+2026-10-22T11:22:43.6299748Z ok 221 - UI001-P6 editing-draft indicators do not change confirmed values or mutate any project data
+2026-10-22T11:22:43.6299792Z   ---
+2026-10-22T11:22:43.6299847Z   duration_ms: 0.690964
+2026-10-22T11:22:43.6299898Z   type: 'test'
+2026-10-22T11:22:43.6299942Z   ...
+2026-10-22T11:22:43.6300189Z # Subtest: UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path
+2026-10-22T11:22:43.6300422Z ok 222 - UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path
+2026-10-22T11:22:43.6300467Z   ---
+2026-10-22T11:22:43.6300523Z   duration_ms: 75.426465
+2026-10-22T11:22:43.6300572Z   type: 'test'
+2026-10-22T11:22:43.6300825Z   ...
+2026-10-22T11:22:43.6301115Z # Subtest: UI001-P8 rev1 full handoff detects suggestion text/why and inclusion changes, clears on re-export, ignores equal content
+2026-10-22T11:22:43.6301384Z ok 223 - UI001-P8 rev1 full handoff detects suggestion text/why and inclusion changes, clears on re-export, ignores equal content
+2026-10-22T11:22:43.6301431Z   ---
+2026-10-22T11:22:43.6301485Z   duration_ms: 6.79817
+2026-10-22T11:22:43.6301532Z   type: 'test'
+2026-10-22T11:22:43.6301579Z   ...
+2026-10-22T11:22:43.6301859Z # Subtest: UI001-P9 rev1 compares other delivered context as well, keeps legacy conservative, uses the selected task without writes
+2026-10-22T11:22:43.6302129Z ok 224 - UI001-P9 rev1 compares other delivered context as well, keeps legacy conservative, uses the selected task without writes
+2026-10-22T11:22:43.6302176Z   ---
+2026-10-22T11:22:43.6302232Z   duration_ms: 11.196305
+2026-10-22T11:22:43.6302280Z   type: 'test'
+2026-10-22T11:22:43.6302326Z   ...
+2026-10-22T11:22:43.6302559Z # Subtest: RETURN032-R1 array order remains the parent contract, including a later re-export of an older task
+2026-10-22T11:22:43.6302869Z ok 225 - RETURN032-R1 array order remains the parent contract, including a later re-export of an older task
+2026-10-22T11:22:43.6302916Z   ---
+2026-10-22T11:22:43.6302968Z   duration_ms: 2.955525
+2026-10-22T11:22:43.6303018Z   type: 'test'
+2026-10-22T11:22:43.6303066Z   ...
+2026-10-22T11:22:43.6303268Z # Subtest: RETURN032-R2 no prior task and no export stay distinct without blocking returned sources
+2026-10-22T11:22:43.6303463Z ok 226 - RETURN032-R2 no prior task and no export stay distinct without blocking returned sources
+2026-10-22T11:22:43.6303510Z   ---
+2026-10-22T11:22:43.6303563Z   duration_ms: 0.423149
+2026-10-22T11:22:43.6303615Z   type: 'test'
+2026-10-22T11:22:43.6303658Z   ...
+2026-10-22T11:22:43.6303928Z # Subtest: RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries
+2026-10-22T11:22:43.6304187Z ok 227 - RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries
+2026-10-22T11:22:43.6304233Z   ---
+2026-10-22T11:22:43.6304288Z   duration_ms: 1.271001
+2026-10-22T11:22:43.6304337Z   type: 'test'
+2026-10-22T11:22:43.6304382Z   ...
+2026-10-22T11:22:43.6304623Z # Subtest: RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap
+2026-10-22T11:22:43.6304855Z ok 228 - RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap
+2026-10-22T11:22:43.6304900Z   ---
+2026-10-22T11:22:43.6304956Z   duration_ms: 1.518714
+2026-10-22T11:22:43.6305006Z   type: 'test'
+2026-10-22T11:22:43.6305050Z   ...
+2026-10-22T11:22:43.6305313Z # Subtest: RETURN032-R5 legacy, missing work, invalid export revisions and unordered basis histories are unknown, never zero
+2026-10-22T11:22:43.6305569Z ok 229 - RETURN032-R5 legacy, missing work, invalid export revisions and unordered basis histories are unknown, never zero
+2026-10-22T11:22:43.6305613Z   ---
+2026-10-22T11:22:43.6305672Z   duration_ms: 2.914102
+2026-10-22T11:22:43.6305719Z   type: 'test'
+2026-10-22T11:22:43.6305765Z   ...
+2026-10-22T11:22:43.6306001Z # Subtest: RETURN032-R6 projection leaves handoff text, manual values, source bytes and recovery data untouched
+2026-10-22T11:22:43.6306223Z ok 230 - RETURN032-R6 projection leaves handoff text, manual values, source bytes and recovery data untouched
+2026-10-22T11:22:43.6306270Z   ---
+2026-10-22T11:22:43.6306323Z   duration_ms: 1.831787
+2026-10-22T11:22:43.6306371Z   type: 'test'
+2026-10-22T11:22:43.6306418Z   ...
+2026-10-22T11:22:43.6306713Z # Subtest: AREA17 powertoys: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact
+2026-10-22T11:22:43.6306992Z ok 231 - AREA17 powertoys: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact
+2026-10-22T11:22:43.6307040Z   ---
+2026-10-22T11:22:43.6307184Z   duration_ms: 8.526432
+2026-10-22T11:22:43.6307234Z   type: 'test'
+2026-10-22T11:22:43.6307283Z   ...
+2026-10-22T11:22:43.6307575Z # Subtest: AREA17 product13: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact
+2026-10-22T11:22:43.6307865Z ok 232 - AREA17 product13: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact
+2026-10-22T11:22:43.6307911Z   ---
+2026-10-22T11:22:43.6307964Z   duration_ms: 3.923388
+2026-10-22T11:22:43.6308014Z   type: 'test'
+2026-10-22T11:22:43.6308060Z   ...
+2026-10-22T11:22:43.6308288Z # Subtest: AREA17 same returnId supports successive revised interpretations without dropping report history
+2026-10-22T11:22:43.6308513Z ok 233 - AREA17 same returnId supports successive revised interpretations without dropping report history
+2026-10-22T11:22:43.6308561Z   ---
+2026-10-22T11:22:43.6308612Z   duration_ms: 4.146274
+2026-10-22T11:22:43.6308662Z   type: 'test'
+2026-10-22T11:22:43.6308711Z   ...
+2026-10-22T11:22:43.6308959Z # Subtest: AREA17 an explicit same-text user correction owns a new revision; old/revised returns cannot overwrite it
+2026-10-22T11:22:43.6309263Z ok 234 - AREA17 an explicit same-text user correction owns a new revision; old/revised returns cannot overwrite it
+2026-10-22T11:22:43.6309307Z   ---
+2026-10-22T11:22:43.6309362Z   duration_ms: 2.371793
+2026-10-22T11:22:43.6309412Z   type: 'test'
+2026-10-22T11:22:43.6309456Z   ...
+2026-10-22T11:22:43.6309668Z # Subtest: AREA17 late description after name is held, report remains readable and user values survive
+2026-10-22T11:22:43.6309872Z ok 235 - AREA17 late description after name is held, report remains readable and user values survive
+2026-10-22T11:22:43.6309916Z   ---
+2026-10-22T11:22:43.6309971Z   duration_ms: 1.057007
+2026-10-22T11:22:43.6310022Z   type: 'test'
+2026-10-22T11:22:43.6310066Z   ...
+2026-10-22T11:22:43.6310278Z # Subtest: AREA17 late description after note is held, report remains readable and user values survive
+2026-10-22T11:22:43.6310481Z ok 236 - AREA17 late description after note is held, report remains readable and user values survive
+2026-10-22T11:22:43.6310529Z   ---
+2026-10-22T11:22:43.6310584Z   duration_ms: 0.809603
+2026-10-22T11:22:43.6310632Z   type: 'test'
+2026-10-22T11:22:43.6310866Z   ...
+2026-10-22T11:22:43.6311096Z # Subtest: AREA17 late description after purpose is held, report remains readable and user values survive
+2026-10-22T11:22:43.6311308Z ok 237 - AREA17 late description after purpose is held, report remains readable and user values survive
+2026-10-22T11:22:43.6311357Z   ---
+2026-10-22T11:22:43.6311412Z   duration_ms: 0.919329
+2026-10-22T11:22:43.6311460Z   type: 'test'
+2026-10-22T11:22:43.6311507Z   ...
+2026-10-22T11:22:43.6311762Z # Subtest: AREA17 late description after user intent correction is held, report remains readable and user values survive
+2026-10-22T11:22:43.6312006Z ok 238 - AREA17 late description after user intent correction is held, report remains readable and user values survive
+2026-10-22T11:22:43.6312053Z   ---
+2026-10-22T11:22:43.6312113Z   duration_ms: 1.775292
+2026-10-22T11:22:43.6312161Z   type: 'test'
+2026-10-22T11:22:43.6312207Z   ...
+2026-10-22T11:22:43.6312461Z # Subtest: AREA17 late description after manual work condition is held, report remains readable and user values survive
+2026-10-22T11:22:43.6312705Z ok 239 - AREA17 late description after manual work condition is held, report remains readable and user values survive
+2026-10-22T11:22:43.6312752Z   ---
+2026-10-22T11:22:43.6312804Z   duration_ms: 1.532625
+2026-10-22T11:22:43.6312854Z   type: 'test'
+2026-10-22T11:22:43.6312901Z   ...
+2026-10-22T11:22:43.6313139Z # Subtest: AREA17 late description after recorded decision is held, report remains readable and user values survive
+2026-10-22T11:22:43.6313371Z ok 240 - AREA17 late description after recorded decision is held, report remains readable and user values survive
+2026-10-22T11:22:43.6313418Z   ---
+2026-10-22T11:22:43.6313564Z   duration_ms: 1.121054
+2026-10-22T11:22:43.6313616Z   type: 'test'
+2026-10-22T11:22:43.6313662Z   ...
+2026-10-22T11:22:43.6313947Z # Subtest: AREA17 late description after explicit revision of the request basis is held, report remains readable and user values survive
+2026-10-22T11:22:43.6314226Z ok 241 - AREA17 late description after explicit revision of the request basis is held, report remains readable and user values survive
+2026-10-22T11:22:43.6314270Z   ---
+2026-10-22T11:22:43.6314325Z   duration_ms: 1.096657
+2026-10-22T11:22:43.6314376Z   type: 'test'
+2026-10-22T11:22:43.6314420Z   ...
+2026-10-22T11:22:43.6314657Z # Subtest: AREA17 unrelated work, unsent draft, layout and reading do not invalidate the target explanation
+2026-10-22T11:22:43.6314875Z ok 242 - AREA17 unrelated work, unsent draft, layout and reading do not invalidate the target explanation
+2026-10-22T11:22:43.6314919Z   ---
+2026-10-22T11:22:43.6314973Z   duration_ms: 1.881813
+2026-10-22T11:22:43.6315025Z   type: 'test'
+2026-10-22T11:22:43.6315072Z   ...
+2026-10-22T11:22:43.6315255Z # Subtest: AREA17 current user plan is sent separately while Background stays immutable
+2026-10-22T11:22:43.6315510Z ok 243 - AREA17 current user plan is sent separately while Background stays immutable
+2026-10-22T11:22:43.6315555Z   ---
+2026-10-22T11:22:43.6315610Z   duration_ms: 0.596361
+2026-10-22T11:22:43.6315657Z   type: 'test'
+2026-10-22T11:22:43.6315704Z   ...
+2026-10-22T11:22:43.6315936Z # Subtest: AREA17 plan change makes a previous explanation stale and excludes its text from the next handoff
+2026-10-22T11:22:43.6316160Z ok 244 - AREA17 plan change makes a previous explanation stale and excludes its text from the next handoff
+2026-10-22T11:22:43.6316208Z   ---
+2026-10-22T11:22:43.6316263Z   duration_ms: 0.95303
+2026-10-22T11:22:43.6316311Z   type: 'test'
+2026-10-22T11:22:43.6316357Z   ...
+2026-10-22T11:22:43.6316547Z # Subtest: AREA17 wrong area/basis and archived/moved work hold only the derived description
+2026-10-22T11:22:43.6316730Z ok 245 - AREA17 wrong area/basis and archived/moved work hold only the derived description
+2026-10-22T11:22:43.6316780Z   ---
+2026-10-22T11:22:43.6316832Z   duration_ms: 6.343945
+2026-10-22T11:22:43.6316882Z   type: 'test'
+2026-10-22T11:22:43.6316928Z   ...
+2026-10-22T11:22:43.6317164Z # Subtest: AREA17 syntactically valid wrong-area prose is not claimed as detected; user can correct it separately
+2026-10-22T11:22:43.6317393Z ok 246 - AREA17 syntactically valid wrong-area prose is not claimed as detected; user can correct it separately
+2026-10-22T11:22:43.6317439Z   ---
+2026-10-22T11:22:43.6317490Z   duration_ms: 1.358152
+2026-10-22T11:22:43.6317540Z   type: 'test'
+2026-10-22T11:22:43.6317586Z   ...
+2026-10-22T11:22:43.6317792Z # Subtest: AREA17 recovery cannot move a wrong-target held description into another area as applied
+2026-10-22T11:22:43.6317992Z ok 247 - AREA17 recovery cannot move a wrong-target held description into another area as applied
+2026-10-22T11:22:43.6318039Z   ---
+2026-10-22T11:22:43.6318093Z   duration_ms: 1.09868
+2026-10-22T11:22:43.6318143Z   type: 'test'
+2026-10-22T11:22:43.6318188Z   ...
+2026-10-22T11:22:43.6318334Z # Subtest: AREA17 strict return shapes and byte limits are retained
+2026-10-22T11:22:43.6318473Z ok 248 - AREA17 strict return shapes and byte limits are retained
+2026-10-22T11:22:43.6318519Z   ---
+2026-10-22T11:22:43.6318574Z   duration_ms: 1.301997
+2026-10-22T11:22:43.6318624Z   type: 'test'
+2026-10-22T11:22:43.6318669Z   ...
+2026-10-22T11:22:43.6318912Z # Subtest: AREA17 return.1 and project.1 through project.5 migrate without invented descriptions or export anchors
+2026-10-22T11:22:43.6319142Z ok 249 - AREA17 return.1 and project.1 through project.5 migrate without invented descriptions or export anchors
+2026-10-22T11:22:43.6319186Z   ---
+2026-10-22T11:22:43.6319241Z   duration_ms: 2.936837
+2026-10-22T11:22:43.6319289Z   type: 'test'
+2026-10-22T11:22:43.6319337Z   ...
+2026-10-22T11:22:43.6319543Z # Subtest: AREA17 cross-tab seq rejection preserves the external project including its description
+2026-10-22T11:22:43.6319802Z ok 250 - AREA17 cross-tab seq rejection preserves the external project including its description
+2026-10-22T11:22:43.6319853Z   ---
+2026-10-22T11:22:43.6319911Z   duration_ms: 3.441039
+2026-10-22T11:22:43.6319962Z   type: 'test'
+2026-10-22T11:22:43.6320011Z   ...
+2026-10-22T11:22:43.6320270Z # Subtest: AREA17 sha256 equals Node crypto on quote/backslash/emoji/unpaired-surrogate text and on block boundaries
+2026-10-22T11:22:43.6320505Z ok 251 - AREA17 sha256 equals Node crypto on quote/backslash/emoji/unpaired-surrogate text and on block boundaries
+2026-10-22T11:22:43.6320553Z   ---
+2026-10-22T11:22:43.6320608Z   duration_ms: 49.255916
+2026-10-22T11:22:43.6320657Z   type: 'test'
+2026-10-22T11:22:43.6320846Z   ...
+2026-10-22T11:22:43.6321204Z # Subtest: AREA17 plan stamp stays fixed-size and valid for maximal quote/backslash-heavy manual and intent values, and still detects a one-character change
+2026-10-22T11:22:43.6321539Z ok 252 - AREA17 plan stamp stays fixed-size and valid for maximal quote/backslash-heavy manual and intent values, and still detects a one-character change
+2026-10-22T11:22:43.6321710Z   ---
+2026-10-22T11:22:43.6321766Z   duration_ms: 204.188228
+2026-10-22T11:22:43.6321817Z   type: 'test'
+2026-10-22T11:22:43.6321864Z   ...
+2026-10-22T11:22:43.6322106Z # Subtest: AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives
+2026-10-22T11:22:43.6322344Z ok 253 - AREA17 an explicitly passed export anchor must be the one this project state gives, with the text it gives
+2026-10-22T11:22:43.6322392Z   ---
+2026-10-22T11:22:43.6322444Z   duration_ms: 1.133682
+2026-10-22T11:22:43.6322494Z   type: 'test'
+2026-10-22T11:22:43.6322540Z   ...
+2026-10-22T11:22:43.6322821Z # Subtest: AREA17 current plan in the handoff: identical text points to the request-time copy, a different value is printed in full
+2026-10-22T11:22:43.6323089Z ok 254 - AREA17 current plan in the handoff: identical text points to the request-time copy, a different value is printed in full
+2026-10-22T11:22:43.6323136Z   ---
+2026-10-22T11:22:43.6323194Z   duration_ms: 0.528628
+2026-10-22T11:22:43.6323244Z   type: 'test'
+2026-10-22T11:22:43.6323288Z   ...
+2026-10-22T11:22:43.6323540Z # Subtest: AREA17 a description made before a plan change cannot be re-saved as a correction (no adopt-stale shortcut)
+2026-10-22T11:22:43.6323787Z ok 255 - AREA17 a description made before a plan change cannot be re-saved as a correction (no adopt-stale shortcut)
+2026-10-22T11:22:43.6323833Z   ---
+2026-10-22T11:22:43.6323888Z   duration_ms: 0.706447
+2026-10-22T11:22:43.6323940Z   type: 'test'
+2026-10-22T11:22:43.6323984Z   ...
+2026-10-22T11:22:43.6324256Z # Subtest: AREA17 next handoff: valid description attributed below the user plan, proposal unadopted, stale text never sent
+2026-10-22T11:22:43.6324513Z ok 256 - AREA17 next handoff: valid description attributed below the user plan, proposal unadopted, stale text never sent
+2026-10-22T11:22:43.6324558Z   ---
+2026-10-22T11:22:43.6324613Z   duration_ms: 1.360285
+2026-10-22T11:22:43.6324660Z   type: 'test'
+2026-10-22T11:22:43.6324714Z   ...
+2026-10-22T11:22:43.6324973Z # Subtest: AREA17 a plain new request in the same area keeps the description valid and the next handoff carries it attributed
+2026-10-22T11:22:43.6325225Z ok 257 - AREA17 a plain new request in the same area keeps the description valid and the next handoff carries it attributed
+2026-10-22T11:22:43.6325270Z   ---
+2026-10-22T11:22:43.6325322Z   duration_ms: 2.685597
+2026-10-22T11:22:43.6325373Z   type: 'test'
+2026-10-22T11:22:43.6325419Z   ...
+2026-10-22T11:22:43.6325690Z # Subtest: AREA17 a late description after a plain new request in the same area still applies; an explicit request revision holds it
+2026-10-22T11:22:43.6325959Z ok 258 - AREA17 a late description after a plain new request in the same area still applies; an explicit request revision holds it
+2026-10-22T11:22:43.6326008Z   ---
+2026-10-22T11:22:43.6326059Z   duration_ms: 1.260935
+2026-10-22T11:22:43.6326108Z   type: 'test'
+2026-10-22T11:22:43.6326238Z   ...
+2026-10-22T11:22:43.6326479Z # Subtest: AREA17 recovery refuses an applied external description that skips a user correction in its own history
+2026-10-22T11:22:43.6326714Z ok 259 - AREA17 recovery refuses an applied external description that skips a user correction in its own history
+2026-10-22T11:22:43.6326758Z   ---
+2026-10-22T11:22:43.6326812Z   duration_ms: 3.761122
+2026-10-22T11:22:43.6326864Z   type: 'test'
+2026-10-22T11:22:43.6326907Z   ...
+2026-10-22T11:22:43.6326958Z 1..259
+2026-10-22T11:22:43.6327009Z # tests 259
+2026-10-22T11:22:43.6327056Z # suites 0
+2026-10-22T11:22:43.6327106Z # pass 259
+2026-10-22T11:22:43.6327151Z # fail 0
+2026-10-22T11:22:43.6327203Z # cancelled 0
+2026-10-22T11:22:43.6327253Z # skipped 0
+2026-10-22T11:22:43.6327297Z # todo 0
+2026-10-22T11:22:43.6327362Z # duration_ms 9617.624026
+2026-10-22T11:22:43.6349839Z ##[group]Run node continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log
+2026-10-22T11:22:43.6350016Z [36;1mnode continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log[0m
+2026-10-22T11:22:43.6394140Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:22:43.6394187Z env:
+2026-10-22T11:22:43.6394237Z   AI_MODE: mock
+2026-10-22T11:22:43.6394290Z   ALLOW_PAID_AI: false
+2026-10-22T11:22:43.6394337Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:22:43.6394398Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:22:43.6394450Z   EVIDENCE_DIR: test-results
+2026-10-22T11:22:43.6394499Z   PYTHONUTF8: 1
+2026-10-22T11:22:43.6394553Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:22:43.6394639Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:22:43.6394750Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:22:43.6394830Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:22:43.6394941Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:22:43.6395019Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:22:43.6395107Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:22:43.6395161Z ##[endgroup]
+2026-10-22T11:22:45.9619487Z Explicit browser MOCK build: continuity/static-dist; no server adapter or provider files.
+2026-10-22T11:22:45.9620399Z app/node_modules (locked dependency)
+2026-10-22T11:22:45.9708911Z ##[group]Run python -m pip install -r tests/browser-requirements.txt
+2026-10-22T11:22:45.9709385Z [36;1mpython -m pip install -r tests/browser-requirements.txt[0m
+2026-10-22T11:22:45.9709784Z [36;1mpython -m playwright install --with-deps chromium[0m
+2026-10-22T11:22:45.9764649Z shell: /usr/bin/bash -e {0}
+2026-10-22T11:22:45.9764821Z env:
+2026-10-22T11:22:45.9764944Z   AI_MODE: mock
+2026-10-22T11:22:45.9765066Z   ALLOW_PAID_AI: false
+2026-10-22T11:22:45.9765196Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:22:45.9765333Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:22:45.9765497Z   EVIDENCE_DIR: test-results
+2026-10-22T11:22:45.9765636Z   PYTHONUTF8: 1
+2026-10-22T11:22:45.9765765Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:22:45.9765946Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:22:45.9766218Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:22:45.9766457Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:22:45.9766717Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:22:45.9766926Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:22:45.9767144Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:22:45.9767338Z ##[endgroup]
+2026-10-22T11:22:46.8306803Z Collecting playwright==1.57.0 (from -r tests/browser-requirements.txt (line 2))
+2026-10-22T11:22:46.9172962Z   Downloading playwright-1.57.0-py3-none-manylinux1_x86_64.whl.metadata (3.5 kB)
+2026-10-22T11:22:46.9413054Z Collecting pyee==13.0.1 (from -r tests/browser-requirements.txt (line 3))
+2026-10-22T11:22:46.9567542Z   Downloading pyee-13.0.1-py3-none-any.whl.metadata (3.0 kB)
+2026-10-22T11:22:47.0739672Z Collecting greenlet==3.5.1 (from -r tests/browser-requirements.txt (line 4))
+2026-10-22T11:22:47.0925548Z   Downloading greenlet-3.5.1-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-10-22T11:22:47.1186524Z Collecting typing-extensions (from pyee==13.0.1->-r tests/browser-requirements.txt (line 3))
+2026-10-22T11:22:47.1340980Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-22T11:22:47.1563247Z Downloading playwright-1.57.0-py3-none-manylinux1_x86_64.whl (46.0 MB)
+2026-10-22T11:22:47.6347099Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 46.0/46.0 MB 104.1 MB/s  0:00:00
+2026-10-22T11:22:47.6502180Z Downloading pyee-13.0.1-py3-none-any.whl (15 kB)
+2026-10-22T11:22:47.6694388Z Downloading greenlet-3.5.1-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (613 kB)
+2026-10-22T11:22:47.6737513Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 613.9/613.9 kB 152.5 MB/s  0:00:00
+2026-10-22T11:22:47.6890407Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-22T11:22:47.7385914Z Installing collected packages: typing-extensions, greenlet, pyee, playwright
+2026-10-22T11:22:48.3254875Z 
+2026-10-22T11:22:48.3264668Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0
+2026-10-22T11:22:48.6085451Z Installing dependencies...
+2026-10-22T11:22:48.6179765Z Switching to root user to install dependencies...
+2026-10-22T11:22:48.7209570Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-22T11:22:48.7454335Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+2026-10-22T11:22:48.7670937Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+2026-10-22T11:22:48.7695264Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+2026-10-22T11:22:48.7792103Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+2026-10-22T11:22:48.7828169Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+2026-10-22T11:22:48.8623231Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [630 kB]
+2026-10-22T11:22:48.8915582Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [567 kB]
+2026-10-22T11:22:48.9776536Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1400 kB]
+2026-10-22T11:22:48.9841095Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1706 kB]
+2026-10-22T11:22:49.0628568Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1146 kB]
+2026-10-22T11:22:56.1142025Z Fetched 5831 kB in 1s (9990 kB/s)
+2026-10-22T11:22:56.8126330Z Reading package lists...
+2026-10-22T11:22:56.8411280Z Reading package lists...
+2026-10-22T11:22:57.0350110Z Building dependency tree...
+2026-10-22T11:22:57.0356141Z Reading state information...
+2026-10-22T11:22:57.1676713Z libasound2t64 is already the newest version (1.2.11-1ubuntu0.3).
+2026-10-22T11:22:57.1677163Z libasound2t64 set to manually installed.
+2026-10-22T11:22:57.1677581Z libatk-bridge2.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T11:22:57.1677974Z libatk-bridge2.0-0t64 set to manually installed.
+2026-10-22T11:22:57.1678364Z libatk1.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T11:22:57.1678702Z libatk1.0-0t64 set to manually installed.
+2026-10-22T11:22:57.1679053Z libatspi2.0-0t64 is already the newest version (2.52.0-1build1).
+2026-10-22T11:22:57.1679280Z libatspi2.0-0t64 set to manually installed.
+2026-10-22T11:22:57.1679500Z libcairo2 is already the newest version (1.18.0-3build1).
+2026-10-22T11:22:57.1679701Z libcairo2 set to manually installed.
+2026-10-22T11:22:57.1679921Z libcups2t64 is already the newest version (2.4.7-1.2ubuntu7.14).
+2026-10-22T11:22:57.1680131Z libcups2t64 set to manually installed.
+2026-10-22T11:22:57.1680345Z libdbus-1-3 is already the newest version (1.14.10-4ubuntu4.1).
+2026-10-22T11:22:57.1680586Z libdbus-1-3 set to manually installed.
+2026-10-22T11:22:57.1681057Z libdrm2 is already the newest version (2.4.125-1ubuntu0.1~24.04.2).
+2026-10-22T11:22:57.1681407Z libdrm2 set to manually installed.
+2026-10-22T11:22:57.1681744Z libgbm1 is already the newest version (25.2.8-0ubuntu0.24.04.4).
+2026-10-22T11:22:57.1682073Z libgbm1 set to manually installed.
+2026-10-22T11:22:57.1682425Z libglib2.0-0t64 is already the newest version (2.80.0-6ubuntu3.10).
+2026-10-22T11:22:57.1682776Z libglib2.0-0t64 set to manually installed.
+2026-10-22T11:22:57.1683128Z libnspr4 is already the newest version (2:4.35-1.1build1).
+2026-10-22T11:22:57.1683452Z libnspr4 set to manually installed.
+2026-10-22T11:22:57.1683775Z libnss3 is already the newest version (2:3.98-1ubuntu0.3).
+2026-10-22T11:22:57.1684040Z libnss3 set to manually installed.
+2026-10-22T11:22:57.1684252Z libpango-1.0-0 is already the newest version (1.52.1+ds-1build1).
+2026-10-22T11:22:57.1684465Z libpango-1.0-0 set to manually installed.
+2026-10-22T11:22:57.1684674Z libx11-6 is already the newest version (2:1.8.7-1ubuntu0.1).
+2026-10-22T11:22:57.1684873Z libx11-6 set to manually installed.
+2026-10-22T11:22:57.1685409Z libxcb1 is already the newest version (1.15-1ubuntu2).
+2026-10-22T11:22:57.1685595Z libxcb1 set to manually installed.
+2026-10-22T11:22:57.1685809Z libxcomposite1 is already the newest version (1:0.4.5-1build3).
+2026-10-22T11:22:57.1686021Z libxcomposite1 set to manually installed.
+2026-10-22T11:22:57.1686235Z libxdamage1 is already the newest version (1:1.1.6-1build1).
+2026-10-22T11:22:57.1686436Z libxdamage1 set to manually installed.
+2026-10-22T11:22:57.1686636Z libxext6 is already the newest version (2:1.3.4-1build2).
+2026-10-22T11:22:57.1686828Z libxext6 set to manually installed.
+2026-10-22T11:22:57.1687026Z libxfixes3 is already the newest version (1:6.0.0-2build1).
+2026-10-22T11:22:57.1687225Z libxfixes3 set to manually installed.
+2026-10-22T11:22:57.1687433Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+2026-10-22T11:22:57.1687635Z libxkbcommon0 set to manually installed.
+2026-10-22T11:22:57.1687841Z libxrandr2 is already the newest version (2:1.5.2-2build1).
+2026-10-22T11:22:57.1688044Z libxrandr2 set to manually installed.
+2026-10-22T11:22:57.1688249Z xvfb is already the newest version (2:21.1.12-1ubuntu1.9).
+2026-10-22T11:22:57.1688826Z fonts-noto-color-emoji is already the newest version (2.047-0ubuntu0.24.04.1).
+2026-10-22T11:22:57.1689121Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+2026-10-22T11:22:57.1689337Z libfontconfig1 set to manually installed.
+2026-10-22T11:22:57.1689568Z libfreetype6 is already the newest version (2.13.2+dfsg-1ubuntu0.2).
+2026-10-22T11:22:57.1689788Z libfreetype6 set to manually installed.
+2026-10-22T11:22:57.1690007Z fonts-liberation is already the newest version (1:2.1.5-3).
+2026-10-22T11:22:57.1690223Z fonts-liberation set to manually installed.
+2026-10-22T11:22:57.1690432Z The following additional packages will be installed:
+2026-10-22T11:22:57.1690621Z   xfonts-encodings xfonts-utils
+2026-10-22T11:22:57.1690967Z Recommended packages:
+2026-10-22T11:22:57.1691137Z   fonts-ipafont-mincho fonts-tlwg-loma
+2026-10-22T11:22:57.2035289Z The following NEW packages will be installed:
+2026-10-22T11:22:57.2035796Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+2026-10-22T11:22:57.2046803Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+2026-10-22T11:22:57.2047116Z   xfonts-utils
+2026-10-22T11:22:57.2230483Z 0 upgraded, 9 newly installed, 0 to remove and 1 not upgraded.
+2026-10-22T11:22:57.2231002Z Need to get 21.1 MB of archives.
+2026-10-22T11:22:57.2231358Z After this operation, 79.5 MB of additional disk space will be used.
+2026-10-22T11:22:57.2231779Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-22T11:22:57.2879480Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1 [3513 kB]
+2026-10-22T11:22:57.3778638Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-freefont-ttf all 20211204+svn4273-2 [5641 kB]
+2026-10-22T11:22:57.5176444Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-tlwg-loma-otf all 1:0.7.3-1 [107 kB]
+2026-10-22T11:22:57.5563600Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-unifont all 1:15.1.01-1build1 [2993 kB]
+2026-10-22T11:22:57.6299338Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-wqy-zenhei all 0.9.45-8 [7472 kB]
+2026-10-22T11:22:57.7405879Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+2026-10-22T11:22:57.7702534Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+2026-10-22T11:22:57.7980965Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 xfonts-cyrillic all 1:1.0.5+nmu1 [384 kB]
+2026-10-22T11:22:57.8272397Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-scalable all 1:1.0.3-1.3 [304 kB]
+2026-10-22T11:22:58.0922166Z Fetched 21.1 MB in 1s (34.2 MB/s)
+2026-10-22T11:22:58.1526647Z Selecting previously unselected package fonts-ipafont-gothic.
+2026-10-22T11:22:58.1954112Z (Reading database ... 
+2026-10-22T11:22:58.1954347Z (Reading database ... 5%
+2026-10-22T11:22:58.1954491Z (Reading database ... 10%
+2026-10-22T11:22:58.1954643Z (Reading database ... 15%
+2026-10-22T11:22:58.1954782Z (Reading database ... 20%
+2026-10-22T11:22:58.1954914Z (Reading database ... 25%
+2026-10-22T11:22:58.1955048Z (Reading database ... 30%
+2026-10-22T11:22:58.1955176Z (Reading database ... 35%
+2026-10-22T11:22:58.1955306Z (Reading database ... 40%
+2026-10-22T11:22:58.1955437Z (Reading database ... 45%
+2026-10-22T11:22:58.1955569Z (Reading database ... 50%
+2026-10-22T11:22:58.2247768Z (Reading database ... 55%
+2026-10-22T11:22:58.5671512Z (Reading database ... 60%
+2026-10-22T11:22:58.8423457Z (Reading database ... 65%
+2026-10-22T11:22:59.0684662Z (Reading database ... 70%
+2026-10-22T11:22:59.4586055Z (Reading database ... 75%
+2026-10-22T11:23:00.1785622Z (Reading database ... 80%
+2026-10-22T11:23:00.8491330Z (Reading database ... 85%
+2026-10-22T11:23:01.5747356Z (Reading database ... 90%
+2026-10-22T11:23:02.4319657Z (Reading database ... 95%
+2026-10-22T11:23:02.4319912Z (Reading database ... 100%
+2026-10-22T11:23:02.4320448Z (Reading database ... 215505 files and directories currently installed.)
+2026-10-22T11:23:02.4359490Z Preparing to unpack .../0-fonts-ipafont-gothic_00303-21ubuntu1_all.deb ...
+2026-10-22T11:23:02.4434729Z Unpacking fonts-ipafont-gothic (00303-21ubuntu1) ...
+2026-10-22T11:23:02.6694985Z Selecting previously unselected package fonts-freefont-ttf.
+2026-10-22T11:23:02.6819438Z Preparing to unpack .../1-fonts-freefont-ttf_20211204+svn4273-2_all.deb ...
+2026-10-22T11:23:02.6831403Z Unpacking fonts-freefont-ttf (20211204+svn4273-2) ...
+2026-10-22T11:23:02.7850605Z Selecting previously unselected package fonts-tlwg-loma-otf.
+2026-10-22T11:23:02.7964028Z Preparing to unpack .../2-fonts-tlwg-loma-otf_1%3a0.7.3-1_all.deb ...
+2026-10-22T11:23:02.7971638Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1) ...
+2026-10-22T11:23:02.8188998Z Selecting previously unselected package fonts-unifont.
+2026-10-22T11:23:02.8303923Z Preparing to unpack .../3-fonts-unifont_1%3a15.1.01-1build1_all.deb ...
+2026-10-22T11:23:02.8316918Z Unpacking fonts-unifont (1:15.1.01-1build1) ...
+2026-10-22T11:23:03.0200282Z Selecting previously unselected package fonts-wqy-zenhei.
+2026-10-22T11:23:03.0313822Z Preparing to unpack .../4-fonts-wqy-zenhei_0.9.45-8_all.deb ...
+2026-10-22T11:23:03.0667028Z Unpacking fonts-wqy-zenhei (0.9.45-8) ...
+2026-10-22T11:23:03.5384532Z Selecting previously unselected package xfonts-encodings.
+2026-10-22T11:23:03.5496645Z Preparing to unpack .../5-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+2026-10-22T11:23:03.5504347Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+2026-10-22T11:23:03.5767501Z Selecting previously unselected package xfonts-utils.
+2026-10-22T11:23:03.5887734Z Preparing to unpack .../6-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+2026-10-22T11:23:03.5898292Z Unpacking xfonts-utils (1:7.7+6build3) ...
+2026-10-22T11:23:03.6870029Z Selecting previously unselected package xfonts-cyrillic.
+2026-10-22T11:23:03.6980374Z Preparing to unpack .../7-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+2026-10-22T11:23:03.6995427Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+2026-10-22T11:23:03.7297798Z Selecting previously unselected package xfonts-scalable.
+2026-10-22T11:23:03.7411496Z Preparing to unpack .../8-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+2026-10-22T11:23:03.7416772Z Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+2026-10-22T11:23:03.7834708Z Setting up fonts-wqy-zenhei (0.9.45-8) ...
+2026-10-22T11:23:03.7937035Z Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+2026-10-22T11:23:03.7953256Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+2026-10-22T11:23:03.7969337Z Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+2026-10-22T11:23:03.7984424Z Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+2026-10-22T11:23:03.8044197Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+2026-10-22T11:23:03.8058184Z Setting up fonts-unifont (1:15.1.01-1build1) ...
+2026-10-22T11:23:03.8073318Z Setting up xfonts-utils (1:7.7+6build3) ...
+2026-10-22T11:23:03.8107979Z Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+2026-10-22T11:23:03.8656973Z Setting up xfonts-scalable (1:1.0.3-1.3) ...
+2026-10-22T11:23:03.8926075Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-10-22T11:23:03.8993137Z Not building database; man-db/auto-update is not 'true'.
+2026-10-22T11:23:03.9011966Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+2026-10-22T11:23:05.3777494Z 
+2026-10-22T11:23:05.3777992Z Running kernel seems to be up-to-date.
+2026-10-22T11:23:05.3778173Z 
+2026-10-22T11:23:05.3778263Z No services need to be restarted.
+2026-10-22T11:23:05.3778373Z 
+2026-10-22T11:23:05.3778459Z No containers need to be restarted.
+2026-10-22T11:23:05.3778557Z 
+2026-10-22T11:23:05.3781245Z No user sessions are running outdated binaries.
+2026-10-22T11:23:05.3781424Z 
+2026-10-22T11:23:05.3781582Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-10-22T11:23:06.1902271Z Downloading Chromium 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-linux.zip
+2026-10-22T11:23:06.2597858Z (node:4322) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T11:23:06.2598806Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T11:23:06.3847407Z |                                                                                |   0% of 164.7 MiB
+2026-10-22T11:23:06.5693175Z |■■■■■■■■                                                                        |  10% of 164.7 MiB
+2026-10-22T11:23:06.6200417Z |■■■■■■■■■■■■■■■■                                                                |  20% of 164.7 MiB
+2026-10-22T11:23:06.6559015Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 164.7 MiB
+2026-10-22T11:23:06.7080082Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 164.7 MiB
+2026-10-22T11:23:06.7482305Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 164.7 MiB
+2026-10-22T11:23:06.7898029Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 164.7 MiB
+2026-10-22T11:23:06.8383076Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 164.7 MiB
+2026-10-22T11:23:06.8764331Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 164.7 MiB
+2026-10-22T11:23:06.9313825Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 164.7 MiB
+2026-10-22T11:23:06.9686664Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 164.7 MiB
+2026-10-22T11:23:08.5169201Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200
+2026-10-22T11:23:08.5172790Z Downloading FFMPEG playwright build v1011 from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+2026-10-22T11:23:08.5847512Z (node:4334) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T11:23:08.5848509Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T11:23:08.6717578Z |                                                                                |   0% of 2.3 MiB
+2026-10-22T11:23:08.6927447Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+2026-10-22T11:23:08.7044202Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+2026-10-22T11:23:08.7065869Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+2026-10-22T11:23:08.7102848Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+2026-10-22T11:23:08.7147492Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+2026-10-22T11:23:08.7155591Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+2026-10-22T11:23:08.7169537Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+2026-10-22T11:23:08.7186430Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+2026-10-22T11:23:08.7216939Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+2026-10-22T11:23:08.7229948Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+2026-10-22T11:23:08.7586268Z FFMPEG playwright build v1011 downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+2026-10-22T11:23:08.7588519Z Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux.zip
+2026-10-22T11:23:08.8220518Z (node:4345) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T11:23:08.8221368Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T11:23:08.9229366Z |                                                                                |   0% of 109.7 MiB
+2026-10-22T11:23:09.0754232Z |■■■■■■■■                                                                        |  10% of 109.7 MiB
+2026-10-22T11:23:09.1117787Z |■■■■■■■■■■■■■■■■                                                                |  20% of 109.7 MiB
+2026-10-22T11:23:09.1505270Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 109.7 MiB
+2026-10-22T11:23:09.1927203Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 109.7 MiB
+2026-10-22T11:23:09.2293368Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 109.7 MiB
+2026-10-22T11:23:09.2747461Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 109.7 MiB
+2026-10-22T11:23:09.3105385Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 109.7 MiB
+2026-10-22T11:23:09.3597777Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 109.7 MiB
+2026-10-22T11:23:09.3963004Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 109.7 MiB
+2026-10-22T11:23:09.4399777Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 109.7 MiB
+2026-10-22T11:23:10.6606516Z Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1200
+2026-10-22T11:23:10.6803550Z ##[group]Run python tests/browser.py 2>&1 | tee test-results/browser-direct.log
+2026-10-22T11:23:10.6803892Z [36;1mpython tests/browser.py 2>&1 | tee test-results/browser-direct.log[0m
+2026-10-22T11:23:10.6848426Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:23:10.6848621Z env:
+2026-10-22T11:23:10.6848729Z   AI_MODE: mock
+2026-10-22T11:23:10.6848846Z   ALLOW_PAID_AI: false
+2026-10-22T11:23:10.6848969Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:23:10.6849100Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:23:10.6849244Z   EVIDENCE_DIR: test-results
+2026-10-22T11:23:10.6849376Z   PYTHONUTF8: 1
+2026-10-22T11:23:10.6849493Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:23:10.6849676Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:10.6849911Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:23:10.6850137Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:10.6850372Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:10.6850575Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:10.6850942Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:23:10.6851123Z ##[endgroup]
+2026-10-22T11:23:13.3664582Z test_B01_real_mock_flow_browser_only_confirm_and_edit (__main__.BrowserTests.test_B01_real_mock_flow_browser_only_confirm_and_edit) ... ok
+2026-10-22T11:23:13.8012215Z test_B02_multi_device_changes_requirement_not_studio (__main__.BrowserTests.test_B02_multi_device_changes_requirement_not_studio) ... ok
+2026-10-22T11:23:14.1991043Z test_B03_unknown_is_deferred_not_confirmed (__main__.BrowserTests.test_B03_unknown_is_deferred_not_confirmed) ... ok
+2026-10-22T11:23:14.7527067Z test_B04_server_invalid_response_keeps_customer_answer_and_input (__main__.BrowserTests.test_B04_server_invalid_response_keeps_customer_answer_and_input) ... ok
+2026-10-22T11:23:15.1455483Z test_B05_missing_key_no_fallback (__main__.BrowserTests.test_B05_missing_key_no_fallback) ... ok
+2026-10-22T11:23:16.5185526Z test_B06_edit_during_pending_response_rejects_old_data (__main__.BrowserTests.test_B06_edit_during_pending_response_rejects_old_data) ... ok
+2026-10-22T11:23:16.9245791Z test_B07_mobile_custom_answer_and_text_rendering (__main__.BrowserTests.test_B07_mobile_custom_answer_and_text_rendering) ... ok
+2026-10-22T11:23:17.2432547Z test_B08_known_storage_is_not_asked_again_in_explicit_mock (__main__.BrowserTests.test_B08_known_storage_is_not_asked_again_in_explicit_mock) ... ok
+2026-10-22T11:23:19.5497518Z test_B09_manual_edit_buffer_survives_late_response (__main__.BrowserTests.test_B09_manual_edit_buffer_survives_late_response) ... ok
+2026-10-22T11:23:20.1869189Z test_B10_tool_reversion_and_undecided_current_requirement (__main__.BrowserTests.test_B10_tool_reversion_and_undecided_current_requirement) ... ok
+2026-10-22T11:23:20.6686521Z test_B11_generic_answer_refines_requirement_not_only_summary (__main__.BrowserTests.test_B11_generic_answer_refines_requirement_not_only_summary) ... ok
+2026-10-22T11:23:21.3370549Z test_B12_long_answer_failure_then_edit_and_retry_keeps_original (__main__.BrowserTests.test_B12_long_answer_failure_then_edit_and_retry_keeps_original) ... ok
+2026-10-22T11:23:21.7810431Z test_B13_invalid_custom_answer_is_editable_without_loss (__main__.BrowserTests.test_B13_invalid_custom_answer_is_editable_without_loss) ... ok
+2026-10-22T11:23:22.1383408Z test_B14_locked_tool_conflict_is_visible_and_cannot_be_dismissed_by_confirmation (__main__.BrowserTests.test_B14_locked_tool_conflict_is_visible_and_cannot_be_dismissed_by_confirmation) ... ok
+2026-10-22T11:23:22.4596441Z test_B15_direct_network_assets_and_request_no_fetch_replacement (__main__.BrowserTests.test_B15_direct_network_assets_and_request_no_fetch_replacement) ... ok
+2026-10-22T11:23:23.8065401Z test_B16_R5_apply_cancel_and_uncertain_paired_resolution (__main__.BrowserTests.test_B16_R5_apply_cancel_and_uncertain_paired_resolution) ... ok
+2026-10-22T11:23:24.8140499Z test_B17_R5_keep_cancel_and_repeat_summary_preserve_old_pair_and_new_answer (__main__.BrowserTests.test_B17_R5_keep_cancel_and_repeat_summary_preserve_old_pair_and_new_answer) ... ok
+2026-10-22T11:23:25.6759836Z test_B18_R5_resolving_storage_keeps_an_unrelated_locked_tool_conflict (__main__.BrowserTests.test_B18_R5_resolving_storage_keeps_an_unrelated_locked_tool_conflict) ... ok
+2026-10-22T11:23:25.7093259Z 
+2026-10-22T11:23:25.7094010Z ----------------------------------------------------------------------
+2026-10-22T11:23:25.7094301Z Ran 18 tests in 14.844s
+2026-10-22T11:23:25.7094389Z 
+2026-10-22T11:23:25.7094450Z OK
+2026-10-22T11:23:25.7399128Z ##[group]Run python continuity/tests/browser.py 2>&1 | tee test-results/continuity-browser-direct.log
+2026-10-22T11:23:25.7399552Z [36;1mpython continuity/tests/browser.py 2>&1 | tee test-results/continuity-browser-direct.log[0m
+2026-10-22T11:23:25.7442874Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:23:25.7443066Z env:
+2026-10-22T11:23:25.7443175Z   AI_MODE: mock
+2026-10-22T11:23:25.7443290Z   ALLOW_PAID_AI: false
+2026-10-22T11:23:25.7443416Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:23:25.7443547Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:23:25.7443690Z   EVIDENCE_DIR: test-results
+2026-10-22T11:23:25.7443815Z   PYTHONUTF8: 1
+2026-10-22T11:23:25.7443933Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:23:25.7444100Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:25.7444329Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:23:25.7444552Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:25.7444776Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:25.7445110Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:25.7445317Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:23:25.7445512Z   IDEA015_EVIDENCE_DIR: test-results/continuity
+2026-10-22T11:23:25.7445671Z ##[endgroup]
+2026-10-22T11:23:27.4956072Z test_01_end_to_end_second_change_and_reload (__main__.Browser.test_01_end_to_end_second_change_and_reload) ... ok
+2026-10-22T11:23:27.8830421Z test_02_fact_question_and_user_unknown (__main__.Browser.test_02_fact_question_and_user_unknown) ... ok
+2026-10-22T11:23:28.5785098Z test_03_choice_custom_answer_and_synthetic_source (__main__.Browser.test_03_choice_custom_answer_and_synthetic_source) ... ok
+2026-10-22T11:23:29.0296744Z test_04_invalid_response_and_retry_preserves_source (__main__.Browser.test_04_invalid_response_and_retry_preserves_source) ... ok
+2026-10-22T11:23:29.6986498Z test_05_edit_during_response_fault_injection (__main__.Browser.test_05_edit_during_response_fault_injection) ... ok
+2026-10-22T11:23:30.2228757Z test_06_storage_failure_backup_and_invalid_import (__main__.Browser.test_06_storage_failure_backup_and_invalid_import) ... ok
+2026-10-22T11:23:30.7507707Z test_07_valid_import_roundtrip_and_clipboard_failure (__main__.Browser.test_07_valid_import_roundtrip_and_clipboard_failure) ... ok
+2026-10-22T11:23:31.4843357Z test_08_cross_tab_conflict_no_overwrite_and_html_is_text (__main__.Browser.test_08_cross_tab_conflict_no_overwrite_and_html_is_text) ... ok
+2026-10-22T11:23:32.2019169Z test_09_basis_change_after_ai_text_is_not_exported_as_current_instruction (__main__.Browser.test_09_basis_change_after_ai_text_is_not_exported_as_current_instruction) ... ok
+2026-10-22T11:23:42.3668565Z test_10_long_use_fixtures_import_edit_export_backup_reimport (__main__.Browser.test_10_long_use_fixtures_import_edit_export_backup_reimport) ... ok
+2026-10-22T11:23:42.9629208Z test_11_failed_reorganisation_after_answer_does_not_duplicate_the_answer (__main__.Browser.test_11_failed_reorganisation_after_answer_does_not_duplicate_the_answer) ... ok
+2026-10-22T11:23:43.2638750Z test_12_unreadable_saved_data_keeps_its_specific_message_while_typing (__main__.Browser.test_12_unreadable_saved_data_keeps_its_specific_message_while_typing) ... ok
+2026-10-22T11:23:51.4182773Z test_13_more_than_1000_items_save_and_reopen_after_reload (__main__.Browser.test_13_more_than_1000_items_save_and_reopen_after_reload) ... ok
+2026-10-22T11:23:51.4758066Z 
+2026-10-22T11:23:51.4758802Z ----------------------------------------------------------------------
+2026-10-22T11:23:51.4759114Z Ran 13 tests in 25.642s
+2026-10-22T11:23:51.4759210Z 
+2026-10-22T11:23:51.4759273Z OK
+2026-10-22T11:23:51.6148874Z ##[group]Run python continuity/tests/ui001_browser.py 2>&1 | tee test-results/continuity-ui.log
+2026-10-22T11:23:51.6149262Z [36;1mpython continuity/tests/ui001_browser.py 2>&1 | tee test-results/continuity-ui.log[0m
+2026-10-22T11:23:51.6194064Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:23:51.6194267Z env:
+2026-10-22T11:23:51.6194377Z   AI_MODE: mock
+2026-10-22T11:23:51.6194495Z   ALLOW_PAID_AI: false
+2026-10-22T11:23:51.6194621Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:23:51.6194753Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:23:51.6194903Z   EVIDENCE_DIR: test-results
+2026-10-22T11:23:51.6195033Z   PYTHONUTF8: 1
+2026-10-22T11:23:51.6195153Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:23:51.6195323Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:51.6195562Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:23:51.6195795Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:51.6196055Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:51.6196269Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:23:51.6196481Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:23:51.6196684Z   IDEA015_EVIDENCE_DIR: test-results/continuity-ui
+2026-10-22T11:23:51.6197053Z   UI001_SCREENSHOTS: test-results/continuity-ui/screenshots
+2026-10-22T11:23:51.6197240Z ##[endgroup]
+2026-10-22T11:23:52.9539891Z test_ui01_empty_examples_and_real_event_next_action (__main__.UI001.test_ui01_empty_examples_and_real_event_next_action) ... ok
+2026-10-22T11:23:53.9989670Z test_ui02_question_priority_and_pending_cancel_preserves_typing (__main__.UI001.test_ui02_question_priority_and_pending_cancel_preserves_typing) ... ok
+2026-10-22T11:23:54.8138502Z test_ui03_manual_live_preview_and_unapplied_basis_draft_reopen (__main__.UI001.test_ui03_manual_live_preview_and_unapplied_basis_draft_reopen) ... ok
+2026-10-22T11:23:55.5672100Z test_ui04_actual_roundtrip_keeps_drafts_and_restore_does_not_resend (__main__.UI001.test_ui04_actual_roundtrip_keeps_drafts_and_restore_does_not_resend) ... ok
+2026-10-22T11:23:56.2449357Z test_ui05_storage_error_labels_survive_import_and_input_stays_recoverable (__main__.UI001.test_ui05_storage_error_labels_survive_import_and_input_stays_recoverable) ... ok
+2026-10-22T11:23:57.0636831Z test_ui06_config_display_does_not_fake_connection_and_local_edit_needs_no_ai (__main__.UI001.test_ui06_config_display_does_not_fake_connection_and_local_edit_needs_no_ai) ... ok
+2026-10-22T11:23:58.3167090Z test_ui07_responsive_work_context_and_keyboard_no_horizontal_overflow (__main__.UI001.test_ui07_responsive_work_context_and_keyboard_no_horizontal_overflow) ... ok
+2026-10-22T11:23:58.8105452Z test_ui08_delayed_clipboard_and_return_cta_do_not_mislabel_unsent_draft (__main__.UI001.test_ui08_delayed_clipboard_and_return_cta_do_not_mislabel_unsent_draft) ... ok
+2026-10-22T11:23:59.4019950Z test_ui09_rev1_suggestion_changes_require_reexport_without_draft_false_positive (__main__.UI001.test_ui09_rev1_suggestion_changes_require_reexport_without_draft_false_positive) ... ok
+2026-10-22T11:24:01.1122471Z test_ui10_return032_recorded_bases_drafts_recovery_reexport_and_real_parent (__main__.UI001.test_ui10_return032_recorded_bases_drafts_recovery_reexport_and_real_parent) ... ok
+2026-10-22T11:24:01.9995156Z test_ui11_return032_no_target_no_export_and_legacy_remain_submittable (__main__.UI001.test_ui11_return032_no_target_no_export_and_legacy_remain_submittable) ... ok
+2026-10-22T11:24:02.0385127Z 
+2026-10-22T11:24:02.0385857Z ----------------------------------------------------------------------
+2026-10-22T11:24:02.0386148Z Ran 11 tests in 10.311s
+2026-10-22T11:24:02.0386236Z 
+2026-10-22T11:24:02.0386293Z OK
+2026-10-22T11:24:02.0712585Z ##[group]Run python continuity/tests/fresh033_browser.py 2>&1 | tee test-results/fresh033-browser.log
+2026-10-22T11:24:02.0712995Z [36;1mpython continuity/tests/fresh033_browser.py 2>&1 | tee test-results/fresh033-browser.log[0m
+2026-10-22T11:24:02.0756876Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:24:02.0757058Z env:
+2026-10-22T11:24:02.0757168Z   AI_MODE: mock
+2026-10-22T11:24:02.0757285Z   ALLOW_PAID_AI: false
+2026-10-22T11:24:02.0757406Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:24:02.0757533Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:24:02.0757689Z   EVIDENCE_DIR: test-results
+2026-10-22T11:24:02.0757818Z   PYTHONUTF8: 1
+2026-10-22T11:24:02.0757937Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:24:02.0758102Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:02.0758336Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:24:02.0758563Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:02.0758790Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:02.0758994Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:02.0759202Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:24:02.0759394Z   IDEA015_EVIDENCE_DIR: test-results/fresh033
+2026-10-22T11:24:02.0759560Z   FRESH033_EVIDENCE: test-results/fresh033
+2026-10-22T11:24:02.0759706Z ##[endgroup]
+2026-10-22T11:24:04.3943116Z test_f01_relay_stale_reply_never_enters_next_native_request (__main__.FRESH033.test_f01_relay_stale_reply_never_enters_next_native_request) ... ok
+2026-10-22T11:24:05.3296175Z test_f02_legacy_unknown_and_fact_question_keep_records_readonly (__main__.FRESH033.test_f02_legacy_unknown_and_fact_question_keep_records_readonly) ... ok
+2026-10-22T11:24:06.2957177Z test_f03_rev1_import_history_then_reorganise_and_answer (__main__.FRESH033.test_f03_rev1_import_history_then_reorganise_and_answer) ... ok
+2026-10-22T11:24:06.3329985Z 
+2026-10-22T11:24:06.3330889Z ----------------------------------------------------------------------
+2026-10-22T11:24:06.3331273Z Ran 3 tests in 4.165s
+2026-10-22T11:24:06.3331396Z 
+2026-10-22T11:24:06.3331477Z OK
+2026-10-22T11:24:06.3604218Z ##[group]Run set -o pipefail
+2026-10-22T11:24:06.3604408Z [36;1mset -o pipefail[0m
+2026-10-22T11:24:06.3604544Z [36;1mmkdir -p test-results[0m
+2026-10-22T11:24:06.3604795Z [36;1mpython continuity/tests/select035_browser.py 2>&1 | tee test-results/select035-browser.log[0m
+2026-10-22T11:24:06.3647806Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:24:06.3648001Z env:
+2026-10-22T11:24:06.3648107Z   AI_MODE: mock
+2026-10-22T11:24:06.3648223Z   ALLOW_PAID_AI: false
+2026-10-22T11:24:06.3648344Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:24:06.3648475Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:24:06.3648617Z   EVIDENCE_DIR: test-results
+2026-10-22T11:24:06.3648746Z   PYTHONUTF8: 1
+2026-10-22T11:24:06.3648863Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:24:06.3649029Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:06.3649261Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:24:06.3649504Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:06.3649711Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:06.3649910Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:06.3650117Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:24:06.3650326Z   SELECT035_MATERIALS: continuity/tests/fixtures/select035
+2026-10-22T11:24:06.3650614Z   SELECT035_MATERIALS_SOURCE: synthetic CI fixture created with public domain APIs; no coordinator reports
+2026-10-22T11:24:06.3651010Z   IDEA015_EVIDENCE_DIR: test-results/select035
+2026-10-22T11:24:06.3651168Z ##[endgroup]
+2026-10-22T11:24:08.3824073Z test_01_actual_A_B_replay (__main__.Selection.test_01_actual_A_B_replay) ... ok
+2026-10-22T11:24:09.0866829Z test_02_ephemeral_selection_and_handler_boundaries (__main__.Selection.test_02_ephemeral_selection_and_handler_boundaries) ... ok
+2026-10-22T11:24:09.9494476Z test_03_zero_and_single_automatic_paths (__main__.Selection.test_03_zero_and_single_automatic_paths) ... ok
+2026-10-22T11:24:09.9823683Z 
+2026-10-22T11:24:09.9824326Z ----------------------------------------------------------------------
+2026-10-22T11:24:09.9824617Z Ran 3 tests in 3.529s
+2026-10-22T11:24:09.9824709Z 
+2026-10-22T11:24:09.9824765Z OK
+2026-10-22T11:24:10.0156580Z ##[group]Run set -o pipefail
+2026-10-22T11:24:10.0156761Z [36;1mset -o pipefail[0m
+2026-10-22T11:24:10.0157018Z [36;1mpython continuity/tests/connect039_browser.py 2>&1 | tee test-results/connect039-browser.log[0m
+2026-10-22T11:24:10.0203852Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:24:10.0204035Z env:
+2026-10-22T11:24:10.0204139Z   AI_MODE: mock
+2026-10-22T11:24:10.0204253Z   ALLOW_PAID_AI: false
+2026-10-22T11:24:10.0204373Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:24:10.0204501Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:24:10.0204643Z   EVIDENCE_DIR: test-results
+2026-10-22T11:24:10.0204770Z   PYTHONUTF8: 1
+2026-10-22T11:24:10.0204887Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:24:10.0205050Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:10.0205277Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:24:10.0205504Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:10.0205723Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:10.0205926Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:10.0206259Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:24:10.0206453Z   IDEA015_EVIDENCE_DIR: test-results/connect039
+2026-10-22T11:24:10.0206608Z ##[endgroup]
+2026-10-22T11:24:12.3819789Z test_01_native_exact_export_preview_import_roundtrip_and_next_B (__main__.ResultFiles.test_01_native_exact_export_preview_import_roundtrip_and_next_B) ... ok
+2026-10-22T11:24:13.3136552Z test_02_native_invalid_atomic_and_v1_v2_originals (__main__.ResultFiles.test_02_native_invalid_atomic_and_v1_v2_originals) ... ok
+2026-10-22T11:24:13.7225211Z test_03_injected_read_generations_and_clipboard_import_boundary (__main__.ResultFiles.test_03_injected_read_generations_and_clipboard_import_boundary) ... ok
+2026-10-22T11:24:14.7042498Z test_04_injected_quota_and_native_other_tab_conflict (__main__.ResultFiles.test_04_injected_quota_and_native_other_tab_conflict) ... ok
+2026-10-22T11:24:15.3261947Z test_05_injected_backup_failure_and_late_AI (__main__.ResultFiles.test_05_injected_backup_failure_and_late_AI) ... ok
+2026-10-22T11:24:15.3607303Z 
+2026-10-22T11:24:15.3608149Z ----------------------------------------------------------------------
+2026-10-22T11:24:15.3608540Z Ran 5 tests in 5.226s
+2026-10-22T11:24:15.3608644Z 
+2026-10-22T11:24:15.3608701Z OK
+2026-10-22T11:24:15.3906459Z ##[group]Run set -o pipefail
+2026-10-22T11:24:15.3906746Z [36;1mset -o pipefail[0m
+2026-10-22T11:24:15.3907122Z [36;1mpython continuity/tests/flow049_browser.py 2>&1 | tee test-results/flow049-browser.log[0m
+2026-10-22T11:24:15.3951025Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:24:15.3951316Z env:
+2026-10-22T11:24:15.3951478Z   AI_MODE: mock
+2026-10-22T11:24:15.3951655Z   ALLOW_PAID_AI: false
+2026-10-22T11:24:15.3951865Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:24:15.3952065Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:24:15.3952289Z   EVIDENCE_DIR: test-results
+2026-10-22T11:24:15.3952494Z   PYTHONUTF8: 1
+2026-10-22T11:24:15.3952678Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:24:15.3952960Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:15.3953308Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:24:15.3953542Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:15.3953779Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:15.3953984Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:15.3954192Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:24:15.3954383Z   IDEA015_EVIDENCE_DIR: test-results/flow049
+2026-10-22T11:24:15.3954539Z ##[endgroup]
+2026-10-22T11:24:17.0771154Z test_01_idea_exact_return_changed_direction_and_recovery (__main__.OutcomeHome.test_01_idea_exact_return_changed_direction_and_recovery) ... ok
+2026-10-22T11:24:17.7157667Z test_02_clear_change_keeps_direct_handoff_and_manual_report (__main__.OutcomeHome.test_02_clear_change_keeps_direct_handoff_and_manual_report) ... ok
+2026-10-22T11:24:18.0287583Z test_03_performance_request_uses_same_home_without_a_screen_template (__main__.OutcomeHome.test_03_performance_request_uses_same_home_without_a_screen_template) ... ok
+2026-10-22T11:24:19.1175374Z test_04_direction_three_turns_correction_and_recovery (__main__.OutcomeHome.test_04_direction_three_turns_correction_and_recovery) ... ok
+2026-10-22T11:24:21.2937741Z test_05_long_requests_and_return_continuation (__main__.OutcomeHome.test_05_long_requests_and_return_continuation) ... ok
+2026-10-22T11:24:21.2938775Z test_06_late_report_keeps_the_current_request_and_never_becomes_the_goal (__main__.OutcomeHome.test_06_late_report_keeps_the_current_request_and_never_becomes_the_goal)
+2026-10-22T11:24:22.4515102Z FIX088: receiving a report for A is not choosing A. B (scope, goal, export) stays; the A result is findable. ... ok
+2026-10-22T11:24:22.6163528Z 
+2026-10-22T11:24:22.6165385Z ----------------------------------------------------------------------
+2026-10-22T11:24:22.6166942Z Ran 6 tests in 7.135s
+2026-10-22T11:24:22.6167393Z 
+2026-10-22T11:24:22.6168622Z OK
+2026-10-22T11:24:22.6561183Z ##[group]Run set -o pipefail
+2026-10-22T11:24:22.6561393Z [36;1mset -o pipefail[0m
+2026-10-22T11:24:22.6561629Z [36;1mpython continuity/tests/ai055_browser.py 2>&1 | tee test-results/ai055-browser.log[0m
+2026-10-22T11:24:22.6607649Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:24:22.6607839Z env:
+2026-10-22T11:24:22.6607950Z   AI_MODE: mock
+2026-10-22T11:24:22.6608072Z   ALLOW_PAID_AI: false
+2026-10-22T11:24:22.6608202Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:24:22.6608338Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:24:22.6608489Z   EVIDENCE_DIR: test-results
+2026-10-22T11:24:22.6608625Z   PYTHONUTF8: 1
+2026-10-22T11:24:22.6608748Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:24:22.6608920Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:22.6609156Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:24:22.6609391Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:22.6609635Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:22.6609849Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:22.6610059Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:24:22.6610257Z   IDEA015_EVIDENCE_DIR: test-results/ai055
+2026-10-22T11:24:22.6610412Z ##[endgroup]
+2026-10-22T11:24:24.9494616Z test_01_four_turns_correction_http_handoff_restore (__main__.IntentFlow.test_01_four_turns_correction_http_handoff_restore) ... ok
+2026-10-22T11:24:25.3967184Z test_02_explicit_discard_old_purpose_is_reference_not_valid (__main__.IntentFlow.test_02_explicit_discard_old_purpose_is_reference_not_valid) ... ok
+2026-10-22T11:24:26.0611236Z test_03_purpose_correction_without_own_work_explains_withheld_ai_text_until_regenerated (__main__.IntentFlow.test_03_purpose_correction_without_own_work_explains_withheld_ai_text_until_regenerated) ... ok
+2026-10-22T11:24:26.7992967Z test_04_purpose_correction_keeps_own_work_and_names_both_causes (__main__.IntentFlow.test_04_purpose_correction_keeps_own_work_and_names_both_causes) ... ok
+2026-10-22T11:24:26.8312307Z 
+2026-10-22T11:24:26.8313134Z ----------------------------------------------------------------------
+2026-10-22T11:24:26.8313599Z Ran 4 tests in 4.080s
+2026-10-22T11:24:26.8313783Z 
+2026-10-22T11:24:26.8313972Z OK
+2026-10-22T11:24:26.8611368Z ##[group]Run set -o pipefail
+2026-10-22T11:24:26.8611550Z [36;1mset -o pipefail[0m
+2026-10-22T11:24:26.8611782Z [36;1mpython continuity/tests/flow083_browser.py 2>&1 | tee test-results/flow083-browser.log[0m
+2026-10-22T11:24:26.8655142Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:24:26.8655334Z env:
+2026-10-22T11:24:26.8655441Z   AI_MODE: mock
+2026-10-22T11:24:26.8655554Z   ALLOW_PAID_AI: false
+2026-10-22T11:24:26.8655675Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:24:26.8655803Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:24:26.8655942Z   EVIDENCE_DIR: test-results
+2026-10-22T11:24:26.8656085Z   PYTHONUTF8: 1
+2026-10-22T11:24:26.8656203Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:24:26.8656366Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:26.8656594Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:24:26.8656823Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:26.8657047Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:26.8657252Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:26.8657457Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:24:26.8657648Z   IDEA015_EVIDENCE_DIR: test-results/flow083
+2026-10-22T11:24:26.8657800Z ##[endgroup]
+2026-10-22T11:24:28.2048790Z test_01_first_visit_starts_without_naming_and_the_example_is_never_saved (__main__.Flow083.test_01_first_visit_starts_without_naming_and_the_example_is_never_saved) ... ok
+2026-10-22T11:24:29.2592442Z test_02_revisit_lists_projects_switches_and_never_mixes_them (__main__.Flow083.test_02_revisit_lists_projects_switches_and_never_mixes_them) ... ok
+2026-10-22T11:24:36.8472780Z test_03_a_saved_older_project_is_migrated_once_and_its_key_is_never_written (__main__.Flow083.test_03_a_saved_older_project_is_migrated_once_and_its_key_is_never_written) ... ok
+2026-10-22T11:24:38.3865412Z test_04_trash_restore_and_backup_copy_keep_the_whole_project (__main__.Flow083.test_04_trash_restore_and_backup_copy_keep_the_whole_project) ... ok
+2026-10-22T11:24:39.4438927Z test_05_an_older_tab_cannot_save_into_a_project_trashed_or_restored_elsewhere (__main__.Flow083.test_05_an_older_tab_cannot_save_into_a_project_trashed_or_restored_elsewhere) ... ok
+2026-10-22T11:24:40.2670167Z test_06_request_input_stays_separate_and_each_handoff_step_says_what_happened (__main__.Flow083.test_06_request_input_stays_separate_and_each_handoff_step_says_what_happened) ... ok
+2026-10-22T11:24:41.1317834Z test_07_a_late_answer_after_switching_to_a_same_id_copy_changes_neither (__main__.Flow083.test_07_a_late_answer_after_switching_to_a_same_id_copy_changes_neither) ... ok
+2026-10-22T11:24:41.4493273Z test_08_without_web_locks_nothing_is_written_and_input_stays (__main__.Flow083.test_08_without_web_locks_nothing_is_written_and_input_stays) ... ok
+2026-10-22T11:24:43.7673124Z test_09_import_never_switches_over_input_that_failed_or_changed_while_saving (__main__.Flow083.test_09_import_never_switches_over_input_that_failed_or_changed_while_saving) ... ok
+2026-10-22T11:24:44.7486827Z test_10_a_normal_answer_survives_the_first_save_and_a_cancelled_import (__main__.Flow083.test_10_a_normal_answer_survives_the_first_save_and_a_cancelled_import) ... ok
+2026-10-22T11:24:45.2467452Z test_11_a_browser_that_refuses_storage_keeps_the_app_usable_and_says_so (__main__.Flow083.test_11_a_browser_that_refuses_storage_keeps_the_app_usable_and_says_so) ... ok
+2026-10-22T11:24:46.8495002Z test_12_consent_covers_only_the_input_shown_when_it_was_given (__main__.Flow083.test_12_consent_covers_only_the_input_shown_when_it_was_given) ... ok
+2026-10-22T11:24:46.8884086Z 
+2026-10-22T11:24:46.8884817Z ----------------------------------------------------------------------
+2026-10-22T11:24:46.8885271Z Ran 12 tests in 19.935s
+2026-10-22T11:24:46.8885439Z 
+2026-10-22T11:24:46.8885737Z OK
+2026-10-22T11:24:46.9212193Z ##[group]Run set -o pipefail
+2026-10-22T11:24:46.9212381Z [36;1mset -o pipefail[0m
+2026-10-22T11:24:46.9212612Z [36;1mpython continuity/tests/flow090_browser.py 2>&1 | tee test-results/flow090-browser.log[0m
+2026-10-22T11:24:46.9256048Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-22T11:24:46.9256233Z env:
+2026-10-22T11:24:46.9256340Z   AI_MODE: mock
+2026-10-22T11:24:46.9256453Z   ALLOW_PAID_AI: false
+2026-10-22T11:24:46.9256573Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:24:46.9256700Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:24:46.9256844Z   EVIDENCE_DIR: test-results
+2026-10-22T11:24:46.9256972Z   PYTHONUTF8: 1
+2026-10-22T11:24:46.9257088Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:24:46.9257269Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:46.9257494Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:24:46.9257722Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:46.9257939Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:46.9258146Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:24:46.9258349Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:24:46.9258538Z   IDEA015_EVIDENCE_DIR: test-results/flow090
+2026-10-22T11:24:46.9258690Z ##[endgroup]
+2026-10-22T11:24:49.1040822Z test_01_empty_start_areas_area_work_report_and_reload (__main__.SpatialWorkspace.test_01_empty_start_areas_area_work_report_and_reload) ... ok
+2026-10-22T11:24:49.8259621Z test_02_an_older_project_without_areas_opens_whole_and_can_be_placed (__main__.SpatialWorkspace.test_02_an_older_project_without_areas_opens_whole_and_can_be_placed) ... ok
+2026-10-22T11:24:51.3005038Z test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report (__main__.SpatialWorkspace.test_03_returning_to_an_area_continues_its_latest_request_not_a_late_old_report) ... ok
+2026-10-22T11:24:52.8339166Z test_04_an_unsent_report_or_request_keeps_its_kind_and_target (__main__.SpatialWorkspace.test_04_an_unsent_report_or_request_keeps_its_kind_and_target) ... ok
+2026-10-22T11:24:53.4651263Z test_05_area_edit_drafts_stay_with_their_area (__main__.SpatialWorkspace.test_05_area_edit_drafts_stay_with_their_area) ... ok
+2026-10-22T11:24:54.6626879Z test_06_a_backup_copy_keeps_the_unsent_requests_area (__main__.SpatialWorkspace.test_06_a_backup_copy_keeps_the_unsent_requests_area) ... ok
+2026-10-22T11:24:57.2692017Z test_07_map_select_move_open_zoom_fit_undo_and_restore (__main__.SpatialWorkspace.test_07_map_select_move_open_zoom_fit_undo_and_restore) ... ok
+2026-10-22T11:24:57.8147556Z test_08_narrow_screen_sheet_and_direct_open (__main__.SpatialWorkspace.test_08_narrow_screen_sheet_and_direct_open) ... ok
+2026-10-22T11:24:58.8688984Z test_09_fit_brings_every_card_into_view_at_any_spread (__main__.SpatialWorkspace.test_09_fit_brings_every_card_into_view_at_any_spread) ... ok
+2026-10-22T11:24:59.5279214Z test_10_a_saved_target_in_the_last_archived_area_stays_visible (__main__.SpatialWorkspace.test_10_a_saved_target_in_the_last_archived_area_stays_visible) ... ok
+2026-10-22T11:25:00.2397979Z test_11_task_goal_is_not_repeated_and_one_entry_each (__main__.SpatialWorkspace.test_11_task_goal_is_not_repeated_and_one_entry_each) ... ok
+2026-10-22T11:25:06.1479816Z test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft (__main__.SpatialWorkspace.test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft) ... FAIL
+2026-10-22T11:25:07.2961610Z test_13_bases_from_other_areas_are_not_called_common (__main__.SpatialWorkspace.test_13_bases_from_other_areas_are_not_called_common) ... ok
+2026-10-22T11:25:08.1797849Z test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming (__main__.SpatialWorkspace.test_14_narrow_screen_finds_and_opens_both_areas_without_scrolling_or_zooming) ... ok
+2026-10-22T11:25:08.8700128Z test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft (__main__.SpatialWorkspace.test_15_back_to_the_map_closes_the_sheet_and_keeps_an_unsaved_draft) ... ok
+2026-10-22T11:25:10.7597149Z test_16_background_copy_walkthrough (__main__.SpatialWorkspace.test_16_background_copy_walkthrough) ... ok
+2026-10-22T11:25:11.5038539Z test_17_narrow_sheet_fields_keep_their_height (__main__.SpatialWorkspace.test_17_narrow_sheet_fields_keep_their_height) ... FAIL
+2026-10-22T11:25:12.4751452Z test_18_repeated_request_shown_once_and_copy_markdown_preview_match (__main__.SpatialWorkspace.test_18_repeated_request_shown_once_and_copy_markdown_preview_match) ... ok
+2026-10-22T11:25:12.5141134Z 
+2026-10-22T11:25:12.5144412Z ======================================================================
+2026-10-22T11:25:12.5145497Z FAIL: test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft (__main__.SpatialWorkspace.test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft)
+2026-10-22T11:25:12.5146323Z ----------------------------------------------------------------------
+2026-10-22T11:25:12.5146678Z Traceback (most recent call last):
+2026-10-22T11:25:12.5147538Z   File "/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/flow090_browser.py", line 303, in test_12_a_received_report_is_kept_on_its_task_and_the_next_text_is_a_follow_up_draft
+2026-10-22T11:25:12.5148791Z     expect(self.page.locator('#area-panel')).to_contain_text('외부 도구에서 지금 실행 중이라는 뜻이 아니에요')
+2026-10-22T11:25:12.5149299Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-22T11:25:12.5150008Z   File "/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/playwright/sync_api/_generated.py", line 19319, in to_contain_text
+2026-10-22T11:25:12.5150934Z     self._sync(
+2026-10-22T11:25:12.5151103Z     ~~~~~~~~~~^
+2026-10-22T11:25:12.5151312Z         self._impl_obj.to_contain_text(
+2026-10-22T11:25:12.5151564Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-22T11:25:12.5151782Z     ...<4 lines>...
+2026-10-22T11:25:12.5151967Z         )
+2026-10-22T11:25:12.5152121Z         ^
+2026-10-22T11:25:12.5152273Z     )
+2026-10-22T11:25:12.5152425Z     ^
+2026-10-22T11:25:12.5152917Z   File "/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+2026-10-22T11:25:12.5153403Z     return task.result()
+2026-10-22T11:25:12.5153601Z            ~~~~~~~~~~~^^
+2026-10-22T11:25:12.5154136Z   File "/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+2026-10-22T11:25:12.5154657Z     await self._expect_impl(
+2026-10-22T11:25:12.5154856Z     ...<9 lines>...
+2026-10-22T11:25:12.5155020Z     )
+2026-10-22T11:25:12.5155537Z   File "/opt/hostedtoolcache/Python/3.13.5/x64/lib/python3.13/site-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+2026-10-22T11:25:12.5156062Z     raise AssertionError(
+2026-10-22T11:25:12.5156465Z         f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+2026-10-22T11:25:12.5156836Z     )
+2026-10-22T11:25:12.5157271Z AssertionError: Locator expected to contain text '외부 도구에서 지금 실행 중이라는 뜻이 아니에요'
+2026-10-22T11:25:12.5159861Z Actual value: 예약닫기예약행동으로 건너뛰기사용자 구상구상 미기재비어 있어요. 아이디어도, 아직 못 정한 점도 직접 적을 수 있어요.이 부분과 하위 기록 · 질문 0 · 설명 0앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.예약 · 후속 작업문 없는 보고예약 화면에서 날짜와 시간을 고르게 해줘소유 부분 찾기요청 1개 · 돌아온 결과 1개 · 앱 미검증이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소더보기 · 하위 부분과 소속하위 부분과 소속하위 부분 추가이 영역의 상위 부분독립 영역소속 반영카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.무엇을 요청할지 같이 정하기이 영역의 요청 1개 · 골라서 읽기예약 화면에서 날짜와 시간을 고르게 해줘 ↘작업 01 · 구현 보고 도착 · 앱 미검증앱에서 이어갈 작업읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.‘앱에서 이어갈 작업’은 앱 안의 표시이며, 외부 도구의 실행 상태는 아니에요.영역 열기 ↗이 영역에 새 요청 
+2026-10-22T11:25:12.5174020Z Call log:
+2026-10-22T11:25:12.5174320Z   - Expect "to_contain_text" with timeout 5000ms
+2026-10-22T11:25:12.5174619Z   - waiting for locator("#area-panel")
+2026-10-22T11:25:12.5175442Z     9 × locator resolved to <aside id="area-panel" aria-label="예약 속성" class="area-panel sheet-open">…</aside>
+2026-10-22T11:25:12.5177716Z       - unexpected value "예약닫기예약행동으로 건너뛰기사용자 구상구상 미기재비어 있어요. 아이디어도, 아직 못 정한 점도 직접 적을 수 있어요.이 부분과 하위 기록 · 질문 0 · 설명 0앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.예약 · 후속 작업문 없는 보고예약 화면에서 날짜와 시간을 고르게 해줘소유 부분 찾기요청 1개 · 돌아온 결과 1개 · 앱 미검증이름·구상 고치기이름한 줄 구상아이디어도, 아직 못 정한 점도 적을 수 있어요.반영취소더보기 · 하위 부분과 소속하위 부분과 소속하위 부분 추가이 영역의 상위 부분독립 영역소속 반영카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.무엇을 요청할지 같이 정하기이 영역의 요청 1개 · 골라서 읽기예약 화면에서 날짜와 시간을 고르게 해줘 ↘작업 01 · 구현 보고 도착 · 앱 미검증앱에서 이어갈 작업읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.‘앱에서 이어갈 작업’은 앱 안의 표시이며, 외부 도구의 실행 상태는 아니에요.영역 열기 ↗이 영역에 새 요청"
+2026-10-22T11:25:12.5178866Z 
+2026-10-22T11:25:12.5178875Z 
+2026-10-22T11:25:12.5179040Z ======================================================================
+2026-10-22T11:25:12.5179673Z FAIL: test_17_narrow_sheet_fields_keep_their_height (__main__.SpatialWorkspace.test_17_narrow_sheet_fields_keep_their_height)
+2026-10-22T11:25:12.5180268Z ----------------------------------------------------------------------
+2026-10-22T11:25:12.5180593Z Traceback (most recent call last):
+2026-10-22T11:25:12.5181388Z   File "/home/runner/work/agentflow-studio/agentflow-studio/app/continuity/tests/flow090_browser.py", line 409, in test_17_narrow_sheet_fields_keep_their_height
+2026-10-22T11:25:12.5182252Z     self.assertGreater(panel.evaluate('(e)=>e.scrollHeight-e.clientHeight'),0,'the panel content is taller than the sheet')
+2026-10-22T11:25:12.5182848Z     ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-22T11:25:12.5183343Z AssertionError: 0 not greater than 0 : the panel content is taller than the sheet
+2026-10-22T11:25:12.5183621Z 
+2026-10-22T11:25:12.5183810Z ----------------------------------------------------------------------
+2026-10-22T11:25:12.5184104Z Ran 18 tests in 25.498s
+2026-10-22T11:25:12.5184230Z 
+2026-10-22T11:25:12.5184325Z FAILED (failures=2)
+2026-10-22T11:25:12.5493803Z ##[error]Process completed with exit code 1.
+2026-10-22T11:25:12.5574945Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-22T11:25:12.5575182Z with:
+2026-10-22T11:25:12.5575314Z   name: agentflow-ubuntu-24.04-39769779405
+2026-10-22T11:25:12.5575482Z   path: app/test-results/
+2026-10-22T11:25:12.5575620Z   if-no-files-found: warn
+2026-10-22T11:25:12.5575749Z   retention-days: 7
+2026-10-22T11:25:12.5575876Z   compression-level: 6
+2026-10-22T11:25:12.5575999Z   overwrite: false
+2026-10-22T11:25:12.5576123Z   include-hidden-files: false
+2026-10-22T11:25:12.5576257Z env:
+2026-10-22T11:25:12.5576361Z   AI_MODE: mock
+2026-10-22T11:25:12.5576476Z   ALLOW_PAID_AI: false
+2026-10-22T11:25:12.5576615Z   DEEPSEEK_API_KEY: 
+2026-10-22T11:25:12.5576745Z   BROWSER_TRANSPORT: direct-http
+2026-10-22T11:25:12.5576897Z   EVIDENCE_DIR: test-results
+2026-10-22T11:25:12.5577028Z   PYTHONUTF8: 1
+2026-10-22T11:25:12.5577149Z   PYTHONIOENCODING: utf-8
+2026-10-22T11:25:12.5577314Z   pythonLocation: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:25:12.5577569Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib/pkgconfig
+2026-10-22T11:25:12.5577799Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:25:12.5578008Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:25:12.5578220Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.13.5/x64
+2026-10-22T11:25:12.5578430Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.13.5/x64/lib
+2026-10-22T11:25:12.5578611Z ##[endgroup]
+2026-10-22T11:25:12.6705462Z (node:6641) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T11:25:12.6705977Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T11:25:12.6935973Z With the provided path, there will be 199 files uploaded
+2026-10-22T11:25:12.7021440Z Artifact name is valid!
+2026-10-22T11:25:12.7031194Z Root directory input is valid!
+2026-10-22T11:25:12.9895274Z Beginning upload of artifact content to blob storage
+2026-10-22T11:25:13.2728443Z (node:6641) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T11:25:13.7723084Z Uploaded bytes 8388608
+2026-10-22T11:25:14.0313500Z Uploaded bytes 13986893
+2026-10-22T11:25:14.0687665Z Finished uploading artifact content to blob storage!
+2026-10-22T11:25:14.0688683Z SHA256 digest of uploaded artifact zip is 2dd9df8e3bb47f235570a2ce289bdbc73c3e0f1acbb00a09521607727ae2d758
+2026-10-22T11:25:14.0689759Z Finalizing artifact upload
+2026-10-22T11:25:14.4899494Z Artifact agentflow-ubuntu-24.04-39769779405.zip successfully finalized. Artifact ID 12422171911
+2026-10-22T11:25:14.4900215Z Artifact agentflow-ubuntu-24.04-39769779405 has been successfully uploaded! Final size is 13986893 bytes. Artifact ID is 12422171911
+2026-10-22T11:25:14.4904819Z Artifact download URL: https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39769779405/artifacts/12422171911
+2026-10-22T11:25:14.5108170Z Post job cleanup.
+2026-10-22T11:25:14.5663534Z [command]/usr/bin/git version
+2026-10-22T11:25:14.5697475Z git version 2.55.0
+2026-10-22T11:25:14.5724419Z Temporarily overriding HOME='/home/runner/work/_temp/2fcabfa0-41b2-4842-81bc-0d2779575298' before making global git config changes
+2026-10-22T11:25:14.5725039Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T11:25:14.5728098Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/agentflow-studio/agentflow-studio
+2026-10-22T11:25:14.5757994Z Removing SSH command configuration
+2026-10-22T11:25:14.5762892Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T11:25:14.5793554Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-22T11:25:14.6012452Z Removing HTTP extra header
+2026-10-22T11:25:14.6017979Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T11:25:14.6052809Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-22T11:25:14.6282136Z Removing includeIf entries pointing to credentials config files
+2026-10-22T11:25:14.6288690Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T11:25:14.6329744Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-22T11:25:14.6658168Z Cleaning up orphan processes
+2026-10-22T11:25:14.6871723Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

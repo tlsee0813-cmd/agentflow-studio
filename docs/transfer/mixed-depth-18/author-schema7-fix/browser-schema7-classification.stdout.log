@@ -1,0 +1,34 @@
+{
+  "report": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product18-author-evidence\\BROWSER_SCHEMA7_FIX.json",
+  "productFilesUnchanged": 7,
+  "changedFiles": [
+    {
+      "path": "app/continuity/tests/browser.py",
+      "lines": [
+        263
+      ],
+      "meaning": "Imported long/current/legacy state is normalized to current project7; source/history/legacyText assertions retained"
+    },
+    {
+      "path": "app/continuity/tests/connect039_browser.py",
+      "lines": [
+        96
+      ],
+      "meaning": "v1/v2 selected recovery becomes current7; raw original file, source/task, null returnId and browser backup absence assertions retained"
+    },
+    {
+      "path": "app/continuity/tests/flow090_browser.py",
+      "lines": [
+        96,
+        99,
+        396
+      ],
+      "meaning": "Older v3 after placement/save and current backups use7; old opening byte-equality, sources/bases/currentTaskId, space/area/background equality retained"
+    }
+  ],
+  "checks": {
+    "AST": 0,
+    "diff": 0,
+    "browser": "NOT RUN"
+  }
+}

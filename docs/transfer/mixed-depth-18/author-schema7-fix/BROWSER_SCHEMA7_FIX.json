@@ -1,0 +1,91 @@
+{
+  "candidateProduct": "ba9bf6e (root-reported PR9 candidate)",
+  "kind": "test-only expected current schema update; same product bytes",
+  "ciFailure": {
+    "run": "39769007720",
+    "job": "119791531347",
+    "location": "continuity/tests/browser.py:263"
+  },
+  "changed": [
+    {
+      "path": "app/continuity/tests/browser.py",
+      "lines": [
+        263
+      ],
+      "meaning": "Imported long/current/legacy state is normalized to current project7; source/history/legacyText assertions retained"
+    },
+    {
+      "path": "app/continuity/tests/connect039_browser.py",
+      "lines": [
+        96
+      ],
+      "meaning": "v1/v2 selected recovery becomes current7; raw original file, source/task, null returnId and browser backup absence assertions retained"
+    },
+    {
+      "path": "app/continuity/tests/flow090_browser.py",
+      "lines": [
+        96,
+        99,
+        396
+      ],
+      "meaning": "Older v3 after placement/save and current backups use7; old opening byte-equality, sources/bases/currentTaskId, space/area/background equality retained"
+    }
+  ],
+  "retainedLegacy": [
+    {
+      "path": "app/continuity/tests/flow090_browser.py",
+      "meaning": "Explicit project3 input and unchanged-on-open comparison"
+    },
+    {
+      "path": "app/continuity/tests/fresh033_browser.py",
+      "meaning": "Explicit project1 input"
+    },
+    {
+      "path": "app/continuity/tests/ui001_browser.py",
+      "meaning": "Explicit project1 input"
+    },
+    {
+      "path": "app/continuity/tests/fixtures/hierarchy18/project6-accepted.json",
+      "meaning": "Actual fixed old project6 bytes unchanged"
+    },
+    {
+      "path": "app/continuity/tests/hierarchy18.test.mjs",
+      "meaning": "project6 fixture assertion/input and exact migration checks unchanged"
+    }
+  ],
+  "productByteVerification": [
+    {
+      "path": "app/continuity/public/styles.css",
+      "sha256": "a427a2d4d52bc061d2d42d747a8dd30e09bd475df9860c66dce3f96bcc51431c"
+    },
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha256": "e9647a5d9b5c75ff901033eeb1d2bccb8214186bbc814a08bb1028caa5b736bf"
+    },
+    {
+      "path": "app/continuity/src/shared/attention.ts",
+      "sha256": "9c506ed0a3acdad68a49a16733f2f8984bbee9ee7681a7ec00c56fb1cfc743e2"
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "sha256": "b7218594345f34c4d9343b5cb75100da50acb0c650ac7370e8263984db5c3a43"
+    },
+    {
+      "path": "app/continuity/src/shared/hierarchy.ts",
+      "sha256": "c9e5a4d9679e6720bc5cd3b86e624904d17a5a7d22b8806d574640ddad605ffa"
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "sha256": "6b5865ab6e85ee19187bfe62748cd073cc90e3e7e96595da0423c46869180316"
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "sha256": "a6fa118a7ac14f286ddac9fad34cf8af7c65eb3bead451b7e2acd876ba242aa8"
+    }
+  ],
+  "pythonSearch": "app\\continuity\\tests\\browser.py:168:        bad=OUT/'invalid-import.json';bad.write_text('{\"schemaVersion\":\"future\"}',encoding='utf-8')\napp\\continuity\\tests\\browser.py:263:            state=self.state();self.assertEqual(state['schemaVersion'],'idea015.project.7');self.assertEqual(state['sources'],source['sources'])\napp\\continuity\\tests\\connect039_browser.py:96:            p=self.state();self.assertEqual(p['schemaVersion'],'idea015.project.7');self.assertTrue(all(h['returnId'] is None for t in p['tasks'] for h in t['handoffs']))\napp\\continuity\\tests\\flow049_browser.py:33:        raw=json.dumps({'schemaVersion':'agentflow.return.1','projectId':exported['id'],'taskId':task,'returnId':record['returnId'],'report':report,'evidence':None},ensure_ascii=False,indent=2)\napp\\continuity\\tests\\flow090_browser.py:84:        old=self.state();old['schemaVersion']='idea015.project.3';del old['space']\napp\\continuity\\tests\\flow090_browser.py:96:        s=self.state();self.assertEqual(s['schemaVersion'],'idea015.project.7');self.assertEqual(s['tasks'][0]['areaId'],self.area_id('확정 화면'))\napp\\continuity\\tests\\flow090_browser.py:99:        self.assertEqual(data['schemaVersion'],'idea015.project.7');self.assertEqual(data['space'],s['space']);self.assertEqual(data['tasks'][0]['areaId'],s['tasks'][0]['areaId'])\napp\\continuity\\tests\\flow090_browser.py:396:        self.assertEqual(backup['schemaVersion'],'idea015.project.7');self.assertEqual([t['background'] for t in backup['tasks']],[t['background'] for t in saved['tasks']])\napp\\continuity\\tests\\fresh033_browser.py:100:        current=self.state();legacy=json.loads(json.dumps(current));legacy['schemaVersion']='idea015.project.1';legacy.pop('space',None)  # project.1 predates the plan space\napp\\continuity\\tests\\report16_browser.py:112:        f={'schemaVersion':'agentflow.return.1','projectId':s['id'],'taskId':task,'returnId':h['returnId'],'report':report,'evidence':evidence}\napp\\continuity\\tests\\ui001_browser.py:311:        fixture=self.state();fixture['schemaVersion']='idea015.project.1';fixture.pop('space',None)  # project.1 predates the plan space\napp\\continuity\\tests\\understanding17_browser.py:109:        f={'schemaVersion':'agentflow.return.2','projectId':s['id'],'taskId':task,'returnId':returnId,'report':c['report'],'evidence':None,'understanding':u}\napp\\continuity\\tests\\understanding17_browser.py:140:        self.check_true('file export: return.2 template with the same anchor',all(x in text for x in ['\"schemaVersion\": \"agentflow.return.2\"',f'\"areaId\": \"{area}\"',f'\"basedOn\": {h[\"anchor\"][\"understanding\"]}','## 현재 사용자 구상']),h['anchor'])\n",
+  "ast": "3 changed files parsed; exact5 replacements-only compare PASS",
+  "diffCheck": "exit0",
+  "browser": "NOT RUN",
+  "commitPush": "NOT RUN"
+}

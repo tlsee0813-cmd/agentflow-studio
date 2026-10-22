@@ -1,0 +1,10 @@
+{
+  "head": "8001ccbe97132ae3203518300dfb30b20ffe0094",
+  "run": 39769779405,
+  "job": 119794119996,
+  "source": "Code Review pull_requests_checks",
+  "logTruncated": true,
+  "conclusion": "failure",
+  "meaning": "Obsolete panel phrase and outer-scroll assertion; repair pending",
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39769779405/job/119794119996"
+}

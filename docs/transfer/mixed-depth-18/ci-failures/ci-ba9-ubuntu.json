@@ -1,0 +1,10 @@
+{
+  "head": "ba9bf6e477f6cf36d1a056b3db218c98bf8bf26e",
+  "run": 39769007720,
+  "job": 119791531347,
+  "source": "Code Review pull_requests_checks",
+  "logTruncated": true,
+  "conclusion": "failure",
+  "meaning": "Current project schema expectation mismatch; test-only fix8001",
+  "url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39769007720/job/119791531347"
+}
