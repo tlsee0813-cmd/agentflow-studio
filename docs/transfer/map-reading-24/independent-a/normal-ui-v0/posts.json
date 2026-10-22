@@ -1,0 +1,148 @@
+[
+  {
+    "UTC": "2026-10-22T18:01:24.636913+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:36971/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_9b7c8c86-6c27-42ad-83b8-02668c6f41f4",
+        "revision": 12,
+        "requestId": "R_821cefa3-cc06-49d1-93dc-0aae8754aab9",
+        "taskId": "T_d6de8733-91c4-423e-a48a-992bbf8253c0"
+      },
+      "projectName": "[합성24] 도서 예약과 안내를 정리한다. 중복 예약을…",
+      "sources": [
+        {
+          "id": "S_a26e401f-a747-4f6a-9241-b73d7b6f600f",
+          "kind": "request",
+          "text": "[합성24] 예약 가능 여부의 현재 조건을 설명하고 중복 접수를 확인할 작은 작업문을 정리해 주세요.",
+          "at": "2026-10-22T18:01:24.584Z",
+          "taskId": "T_d6de8733-91c4-423e-a48a-992bbf8253c0",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성24] 예약 가능 여부의 현재 조건을 설명하고 중복 접수를 확인할 작은 작업문을 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_a26e401f-a747-4f6a-9241-b73d7b6f600f",
+          "revision": 12,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_d6de8733-91c4-423e-a48a-992bbf8253c0",
+        "inputs": [
+          {
+            "sourceId": "S_a26e401f-a747-4f6a-9241-b73d7b6f600f",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D1",
+            "sourceId": "S_a26e401f-a747-4f6a-9241-b73d7b6f600f",
+            "revision": 12,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 11,
+        "brief": "[합성24] 도서 예약과 안내를 정리한다. 중복 예약을 막고 결과를 알린다.",
+        "area": {
+          "id": "A_a24b220e-b338-4726-b4ca-109043143ab8",
+          "name": "예약 가능 여부",
+          "note": "같은 도서에 이미 예약이 있는지 확인한다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  },
+  {
+    "UTC": "2026-10-22T18:01:41.440182+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:36971/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_37b9c188-bd38-40ec-b29d-646774ae4d4c",
+        "revision": 12,
+        "requestId": "R_54714db5-67a9-4d3a-b5ff-d21e4e4cb727",
+        "taskId": "T_06027857-3efe-49d3-b615-f6c3d47264a7"
+      },
+      "projectName": "[합성24] 도서 예약과 안내를 정리한다. 중복 예약을…",
+      "sources": [
+        {
+          "id": "S_0c2d0cee-1576-4763-bfcc-2ed583be0028",
+          "kind": "request",
+          "text": "[합성24] 예약 가능 여부의 현재 조건을 설명하고 중복 접수를 확인할 작은 작업문을 정리해 주세요.",
+          "at": "2026-10-22T18:01:41.382Z",
+          "taskId": "T_06027857-3efe-49d3-b615-f6c3d47264a7",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "[합성24] 예약 가능 여부의 현재 조건을 설명하고 중복 접수를 확인할 작은 작업문을 정리해 주세요.",
+          "status": "requested",
+          "sourceId": "S_0c2d0cee-1576-4763-bfcc-2ed583be0028",
+          "revision": 12,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_06027857-3efe-49d3-b615-f6c3d47264a7",
+        "inputs": [
+          {
+            "sourceId": "S_0c2d0cee-1576-4763-bfcc-2ed583be0028",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D1",
+            "sourceId": "S_0c2d0cee-1576-4763-bfcc-2ed583be0028",
+            "revision": 12,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 11,
+        "brief": "[합성24] 도서 예약과 안내를 정리한다. 중복 예약을 막고 결과를 알린다.",
+        "area": {
+          "id": "A_63877c34-cd3a-4eda-85aa-25e97966ee87",
+          "name": "예약 가능 여부",
+          "note": "같은 도서에 이미 예약이 있는지 확인한다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "originalPath": "ui.jsonl",
+    "originalBytes": 8925961,
+    "originalSHA256": "f3a52700af4c939d3c65f3d363fb0233eb981577438ad4be30e0111c8f781fa6",
+    "storedPath": "ui.jsonl.gz",
+    "encoding": "gzip lossless, mtime0",
+    "decodedByteEqualVerified": true
+  },
+  {
+    "originalPath": "normalized-client-clips.json",
+    "originalBytes": 2613162,
+    "originalSHA256": "1d261af98101bbb1b70ada2f0114b380f1103f91c5d48503e69bb1db70076b0e",
+    "storedPath": "normalized-client-clips.json.gz",
+    "encoding": "gzip lossless, mtime0",
+    "decodedByteEqualVerified": true
+  },
+  {
+    "originalPath": "result.json",
+    "originalBytes": 7854348,
+    "originalSHA256": "aea794cdb0d24bd730274baf3507e03887980c2e17f6cdef5631111ecc8eaf58",
+    "storedPath": "result.json.gz",
+    "encoding": "gzip lossless, mtime0",
+    "decodedByteEqualVerified": true
+  },
+  {
+    "originalPath": "first-pass-coverage-and-metric-note/ui.jsonl",
+    "originalBytes": 7326369,
+    "originalSHA256": "439c88d8b16f4e4e390e828ef3638837e40fcb269e4bf543eb0ec69b4cc1a1a5",
+    "storedPath": "first-pass-coverage-and-metric-note/ui.jsonl.gz",
+    "encoding": "gzip lossless, mtime0",
+    "decodedByteEqualVerified": true
+  },
+  {
+    "originalPath": "first-pass-coverage-and-metric-note/result.json",
+    "originalBytes": 6142979,
+    "originalSHA256": "30c571cb03becaddcae153c3eec5407d07956a742b3ba257ddc55f157433776d",
+    "storedPath": "first-pass-coverage-and-metric-note/result.json.gz",
+    "encoding": "gzip lossless, mtime0",
+    "decodedByteEqualVerified": true
+  }
+]

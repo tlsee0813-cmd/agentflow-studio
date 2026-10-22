@@ -1,0 +1,27 @@
+{
+  "source": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+  "latestViewportsComplete": 2,
+  "latestFailures": [],
+  "child": 0,
+  "actualOuterCollector": 0,
+  "server": "cleanup terminate exit -15, not test failure",
+  "pageerrors": [],
+  "console": [],
+  "cleanupErrors": [],
+  "storedProjectBeforeAfterEqualExceptNotice": true,
+  "blockingNavigationCounterexampleFound": false,
+  "allGeneralPanPositionsVisibleRequired": false,
+  "firstPass": "coverage/metric gaps separately retained, not summed",
+  "fullOriginalResult": "result.json.gz decoded hash in RAW_INDEX.json",
+  "analysis": "analysis-summary.json; normalized-client-clips.json.gz offline corrected inherited scale, not a new UI run",
+  "representativePNG": [
+    "1280-01-whole.png",
+    "1280-02-right-panel.png",
+    "1280-03-panned.png",
+    "1280-04-fitted.png",
+    "1440-01-whole.png",
+    "1440-02-right-panel.png",
+    "1440-04-fitted.png",
+    "1440-05-folded-relations.png"
+  ]
+}

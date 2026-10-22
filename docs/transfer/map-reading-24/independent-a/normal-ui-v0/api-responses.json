@@ -1,0 +1,88 @@
+[
+  {
+    "UTC": "2026-10-22T18:01:24.671371+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:36971/api/continuity",
+    "status": 200,
+    "bytes": 1403,
+    "bodySHA256": "7ce6a7df227e7b913646d7f7b665955fa18c29961f97f2d90b560166690d29e6",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_9b7c8c86-6c27-42ad-83b8-02668c6f41f4",
+        "revision": 12,
+        "requestId": "R_821cefa3-cc06-49d1-93dc-0aae8754aab9",
+        "taskId": "T_d6de8733-91c4-423e-a48a-992bbf8253c0"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성24] 예약 가능 여부의 현재 조건을 설명하고 중복 접수를 확인할 작은 작업문을 정리해 주세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_a26e401f-a747-4f6a-9241-b73d7b6f600f",
+              "revision": 12
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  },
+  {
+    "UTC": "2026-10-22T18:01:41.479807+00:00",
+    "viewport": 1440,
+    "url": "http://127.0.0.1:36971/api/continuity",
+    "status": 200,
+    "bytes": 1403,
+    "bodySHA256": "ecaf3058caafef4b49b954ad8aa4fc9faecc9f698fedd7bf54662cd1845a450b",
+    "body": {
+      "mode": "mock",
+      "ticket": {
+        "projectId": "P_37b9c188-bd38-40ec-b29d-646774ae4d4c",
+        "revision": 12,
+        "requestId": "R_54714db5-67a9-4d3a-b5ff-d21e4e4cb727",
+        "taskId": "T_06027857-3efe-49d3-b615-f6c3d47264a7"
+      },
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[합성24] 예약 가능 여부의 현재 조건을 설명하고 중복 접수를 확인할 작은 작업문을 정리해 주세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_0c2d0cee-1576-4763-bfcc-2ed583be0028",
+              "revision": 12
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      }
+    }
+  }
+]

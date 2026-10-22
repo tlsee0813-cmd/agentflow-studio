@@ -1,0 +1,3 @@
+from pathlib import Path
+import subprocess,json,datetime,hashlib,sys
+R=Path(__file__).parent;cmd=['/workspace/browser-env/venv/bin/python',str(R/'observe.py')];s=datetime.datetime.now(datetime.timezone.utc).isoformat();p=subprocess.run(cmd,capture_output=True);(R/'ui.stdout.log').write_bytes(p.stdout);(R/'ui.stderr.log').write_bytes(p.stderr);(R/'ui-process.json').write_text(json.dumps({'command':cmd,'startUTC':s,'endUTC':datetime.datetime.now(datetime.timezone.utc).isoformat(),'actualChildExit':p.returncode,'stdoutSHA256':hashlib.sha256(p.stdout).hexdigest(),'stderrSHA256':hashlib.sha256(p.stderr).hexdigest(),'collectorPlannedExit':p.returncode},indent=2));print(p.stderr.decode()[-6000:]);sys.exit(p.returncode)
