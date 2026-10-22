@@ -1,0 +1,10 @@
+{
+  "collectorCommand": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle18-fix2-independent/extra-regressions.py"
+  ],
+  "actualToolSession": 7662,
+  "actualExitObservedAfterCompletion": 1,
+  "recordedUTC": "2026-10-22T11:48:59.736568+00:00",
+  "provenance": "exec/write_stdin completion reported exit_code=1; not the collector prediction written before sys.exit"
+}

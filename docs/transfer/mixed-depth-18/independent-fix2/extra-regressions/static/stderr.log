@@ -1,0 +1,15 @@
+test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation) ... FAIL
+
+======================================================================
+FAIL: test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/static_browser.py", line 80, in test_static_subpath_exchange_reload_and_isolation
+    self.assertEqual(files, expected_files, 'publish only UI/shared/browser-MOCK modules')
+AssertionError: Items in the first set but not the second:
+'shared/hierarchy.js' : publish only UI/shared/browser-MOCK modules
+
+----------------------------------------------------------------------
+Ran 1 test in 1.005s
+
+FAILED (failures=1)

@@ -1,0 +1,54 @@
+[
+  {
+    "name": "pc13",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/pc13_browser.py"
+    ],
+    "startUTC": "2026-10-22T11:45:38.153572+00:00",
+    "endUTC": "2026-10-22T11:46:34.159615+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "eb44138be307713028467ce182445c2cea4a785347cc004ab57c303a26cdafbb",
+    "logDirectory": "/workspace/browser-env/cycle18-fix2-independent/extra-regressions/pc13"
+  },
+  {
+    "name": "home15",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/home15_browser.py"
+    ],
+    "startUTC": "2026-10-22T11:46:34.159962+00:00",
+    "endUTC": "2026-10-22T11:47:08.243955+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "173aa2c7b138e13ed755989dbaac3baa1c1efce6d11172fd3ca30d72bc3edb3b",
+    "stderrSHA256": "cc37e6c248e4c5a3e7ac458e96a8e5105fa83401598da5823ad6ddebdb38258f",
+    "logDirectory": "/workspace/browser-env/cycle18-fix2-independent/extra-regressions/home15"
+  },
+  {
+    "name": "report16",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/report16_browser.py"
+    ],
+    "startUTC": "2026-10-22T11:47:08.244744+00:00",
+    "endUTC": "2026-10-22T11:48:08.011310+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "cc77c77e32a1144d14b1797eefe2b627530c5a51cd000b44adda7ff85cefbd7a",
+    "logDirectory": "/workspace/browser-env/cycle18-fix2-independent/extra-regressions/report16"
+  },
+  {
+    "name": "static",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/static_browser.py"
+    ],
+    "startUTC": "2026-10-22T11:48:08.012216+00:00",
+    "endUTC": "2026-10-22T11:48:09.182853+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "19cae5b741eee95e864e2ed6da304cec6634fad8ed4ee6fc16c018e3c5a2eb81",
+    "logDirectory": "/workspace/browser-env/cycle18-fix2-independent/extra-regressions/static"
+  }
+]

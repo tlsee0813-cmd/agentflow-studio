@@ -1,0 +1,47 @@
+{
+  "source": "9330fc3b19994dd5398d4373c1a3fc703bd28574",
+  "scripts": [
+    {
+      "name": "PC13",
+      "tests": 14,
+      "pass": 8,
+      "fail": 5,
+      "errors": 1,
+      "exit": 1,
+      "classification": "2 old page-wheel panel-task viewport assertions; 3 initial/notice/long first-info hit=false; 1 actual click intercepted by map-fit in 1280. Fixed-scene visibility failures preserved; not reclassified as setup failure."
+    },
+    {
+      "name": "HOME15",
+      "tests": 21,
+      "pass": 21,
+      "fail": 0,
+      "errors": 0,
+      "exit": 0
+    },
+    {
+      "name": "REPORT16",
+      "tests": 13,
+      "pass": 11,
+      "fail": 2,
+      "errors": 0,
+      "exit": 1,
+      "classification": "old depart page-wheel access then panel task viewport assertion; root-cause preparation versus product requires updated native body access comparison, original assertions/logs preserved."
+    },
+    {
+      "name": "static",
+      "tests": 1,
+      "pass": 0,
+      "fail": 1,
+      "errors": 0,
+      "exit": 1,
+      "classification": "exact built file set contains new shared/hierarchy.js absent from test expected_files; failure before UI journey. static build prerequisite exit0; downstream UI NOT_RUN."
+    }
+  ],
+  "allFourCommandsComplete": true,
+  "sourceFilesUnchanged": 188,
+  "noProductEdits": true,
+  "newInstalls": 0,
+  "paidCalls": 0,
+  "collectorActualExit": 1,
+  "publishedEvidenceUnchanged": "Existing 9bf35aff evidence immutable; this new local raw bundle reserved for next independent candidate evidence, not silently added under its exact-set manifest."
+}

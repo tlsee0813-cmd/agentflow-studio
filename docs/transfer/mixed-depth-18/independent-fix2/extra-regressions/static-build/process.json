@@ -1,0 +1,14 @@
+{
+  "source": "9330fc3b19994dd5398d4373c1a3fc703bd28574",
+  "reason": "Exact static_browser.py requires continuity/static-dist; normal native build does not create it. Existing pinned build-static prerequisite, no install/source edits. Separate target leaves native dist unchanged.",
+  "command": [
+    "node",
+    "continuity/scripts/build-static.mjs"
+  ],
+  "startUTC": "2026-10-22T11:46:22.642243+00:00",
+  "endUTC": "2026-10-22T11:46:25.340535+00:00",
+  "actualChildExit": 0,
+  "collectorExit": 0,
+  "stdoutSHA256": "6b8718a4113088a0555063b2effc42289ab7ffd69d16cb7c3763386531ae7cc4",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
