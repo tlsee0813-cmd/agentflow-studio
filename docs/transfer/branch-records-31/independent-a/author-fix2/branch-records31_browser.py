@@ -1,0 +1,275 @@
+"""BRANCH31: native signal -> exact subtree reader -> caller, on two PCs.
+
+Author-role regression, not an independent UI verdict. Synthetic public-domain-API
+fixture enters through the normal recovery chooser. No storage/DOM/product-state
+injection. The author runs only AST and the pure seed; Cloud/CI run HTTP Chromium.
+Signal disappearance during an unchanged caller session is NOT covered by navigation.
+"""
+import json, subprocess, unittest
+from pathlib import Path
+from playwright.sync_api import expect
+import browser as base
+import received20_browser as native
+
+APP=Path(__file__).resolve().parents[2]
+OBS=base.OUT/'branch-records31-observations.jsonl'
+OBS.write_text('',encoding='utf-8')
+SEED=r'''
+import * as D from './continuity/dist/public/shared/domain.js';
+import {mockAdvice} from './continuity/dist/public/shared/mock.js';
+import {subtreeSignals} from './continuity/dist/public/shared/attention.js';
+let p=D.rename(D.setBrief(D.createProject(),'[합성31] 기록의 실제 소유와 읽기 출발점을 보존한다.'),'합성31 동일 이름의 두 부모');
+const ids={};
+for(const [key,name]of [['P','같은 부모'],['M','중간 부분'],['L','질문과 현재 설명'],['H','보류 설명'],['S','이전 기준 설명'],['Q','같은 부모'],['B','다른 부모의 현재 작업']]){
+ p=D.addArea(p,name,'[합성31 구상] '+key+' 소유의 원문. 실행 권한을 추가하지 않는다.');ids[key]=p.space.areas.at(-1).id;
+}
+for(const [child,parent]of [['M','P'],['L','M'],['H','M'],['S','M'],['B','Q']])p=D.setAreaParent(p,ids[child],ids[parent]);
+for(const [key,x,y]of [['P',0,0],['Q',300,0],['M',0,200],['L',0,400],['H',300,400],['S',600,400],['B',600,0]])p=D.moveArea(p,ids[key],{x,y});
+p=D.addRelation(p,ids.L,ids.B,'flow','[합성31] 소유를 복제하지 않는 연결');
+function task(key,marker,question=false){p=D.submit(D.editDraft(p,'[합성31 요청] '+marker),undefined,ids[key]);const id=p.currentTaskId,s=D.begin(p,id),advice=mockAdvice(s.request);
+ advice.question=question?{kind:'fact',text:'[합성31 질문] L의 표시 조건을 확인했나요?',why:'실제 개발 미결이 아닌 합성 기록',options:[]}:null;
+ p=D.receive(s.project,s.request,{mode:'mock',ticket:s.request.ticket,advice});
+ for(const k of ['understanding','scope','next','checks'])p=D.editTask(p,id,k,'[합성31 '+marker+'] '+k+' · 배포하지 않는다.');return id;}
+const tasks={L:task('L','L',true),H:task('H','H'),S:task('S','S'),B0:task('B','B0'),B:task('B','B')},reports={};
+function exported(id,H){const a=D.exportAnchor(p,D.taskOf(p,id));p=D.markHandoff(p,id,D.handoffText(p,id,H),'clipboard',p.revision,H,a);return a;}
+function file(id,H,a,summary,held=false){return {schemaVersion:'agentflow.return.2',projectId:p.id,taskId:id,returnId:H,report:'[합성31 보고] '+H,evidence:null,
+ understanding:{version:'understanding.1',areaId:a.areaId,basedOn:held?99:a.understanding,summary,changes:[],proposal:null,origin:'합성31 검사 작성자 구성 · 앱/실행 검증 아님'}};}
+for(const key of ['L','H','S','B0']){const H='H31_'+key,a=exported(tasks[key],H),old=new Set(p.tasks.map(t=>t.id));
+ p=D.importResultFile(p,JSON.stringify(file(tasks[key],H,a,'[합성31 '+key+' 설명] 정확한 소유 부분에서 읽는다.',key==='H')));
+ const added=p.tasks.filter(t=>!old.has(t.id));if(added.length!==1)throw Error('exact new report');reports[key]=added[0].id;}
+p=D.editTask(p,tasks.S,'next','[합성31 명시 변경] 이전 설명을 현재로 재사용하지 않는다.');
+const anchor=exported(tasks.B0,'H31_B_LATE'),late=file(tasks.B0,'H31_B_LATE',anchor,'[합성31 B 새 설명] 이번 탭 수신으로 표시한다.');
+p=D.focusTask(p,tasks.B);p=D.editDraft(D.setDraftTarget(p,ids.L),'[합성31 미전송 L 입력] 현재 B와 읽기 P를 구별한다.');
+const project2=D.rename(D.createProject(),'합성31 다른 프로젝트');
+console.log(JSON.stringify({p,ids,tasks,reports,late,project2,signals:{P:subtreeSignals(p,ids.P),Q:subtreeSignals(p,ids.Q)},metadata:{
+ nature:'공개 domain API로 만든 합성 경계 자료; 정상 복구 가져오기로 준비',limits:'사람 사용성·실제 AI·모든 미결·신호 소멸·모든 배율을 검증하지 않음',
+ owners:'P > M > L/H/S; Q > B. P와 Q는 이름이 같고 ID는 다름. L 질문/현재, H 보류, S 이전 기준. 현재 작업 B, 미전송 대상 L.'}}));
+'''
+
+# Read-only geometry: full control clipping through every clipping ancestor, and actual centre hit.
+CLIP=r'''sel=>{const e=document.querySelector(sel);if(!e||!e.checkVisibility({visibilityProperty:true}))return null;
+ const r=e.getBoundingClientRect();let l=0,t=0,rr=innerWidth,b=innerHeight;
+ for(let p=e.parentElement;p;p=p.parentElement){const s=getComputedStyle(p),q=p.getBoundingClientRect(),sx=q.width/(p.offsetWidth||1),sy=q.height/(p.offsetHeight||1);
+  if(/auto|scroll|hidden|clip/.test(s.overflowX)){l=Math.max(l,q.left+p.clientLeft*sx);rr=Math.min(rr,q.left+(p.clientLeft+p.clientWidth)*sx)}
+  if(/auto|scroll|hidden|clip/.test(s.overflowY)){t=Math.max(t,q.top+p.clientTop*sy);b=Math.min(b,q.top+(p.clientTop+p.clientHeight)*sy)}}
+ const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+ return {rect:r.toJSON(),clip:{l,t,r:rr,b},inside:r.width>0&&r.height>0&&r.left>=l-.5&&r.right<=rr+.5&&r.top>=t-.5&&r.bottom<=b+.5,hit:!!h&&e.contains(h),cover:h?.id||h?.className||null}}'''
+MAP=r'''()=>({matrix:document.querySelector('#space-plane')?.style.transform,
+ folds:[...document.querySelectorAll('.branch-toggle')].map(e=>[e.id,e.getAttribute('aria-expanded')]),
+ selected:document.querySelector('.area-node.selected')?.dataset.areaId??null,mode:document.querySelector('#area-panel')?.dataset.panelMode??null,
+ owner:document.querySelector('#area-panel-body')?.dataset.areaId??null,body:document.querySelector('#area-panel-body')?.scrollTop??null,
+ page:scrollY,focus:document.activeElement?.id,entry:document.documentElement.dataset.entryId})'''
+
+# Same trusted click task and subsequent frames remain separate; no observer repairs layout.
+ENTRY_SNAP=r'''owner=>{const v=('''+MAP+r''')(),layout=document.querySelector('.map-layout'),map=document.getElementById('space-map');
+ const line='#subtree-records-'+owner+' .subtree-record .source-meta',first=document.querySelector(line),block=('''+CLIP+r''')(line);
+ let firstLine=null;if(first&&block){const walker=document.createTreeWalker(first,NodeFilter.SHOW_TEXT);let n;
+  while(n=walker.nextNode()){if(!n.data.trim())continue;const range=document.createRange();range.selectNodeContents(n);
+   const r=[...range.getClientRects()].find(r=>r.width>0&&r.height>0);if(!r)continue;
+   const c=block.clip,hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+   firstLine={rect:r.toJSON(),clip:c,inside:r.left>=c.l-.5&&r.right<=c.r+.5&&r.top>=c.t-.5&&r.bottom<=c.b+.5,hit:!!hit&&first.contains(hit)};break}}
+ return {...v,x:scrollX,maxY:document.documentElement.scrollHeight-innerHeight,viewport:[innerWidth,innerHeight],
+ layout:layout?.getBoundingClientRect().toJSON(),map:map?.getBoundingClientRect().toJSON(),subtreeOpen:document.getElementById('subtree-records-'+owner)?.open,
+ firstOwner:first?.closest('[data-owner-area]')?.dataset.ownerArea,firstLine}}'''
+ENTRY_ARM=r'''owner=>{const snap='''+ENTRY_SNAP+r''';let resolve,timer;const p={before:null,first:null,frames:[],done:null};
+ p.done=new Promise(r=>resolve=r);const match=e=>e.isTrusted&&e.target.closest('#branch-records-'+owner);
+ const finish=ok=>{clearTimeout(timer);document.removeEventListener('click',before,true);document.removeEventListener('click',after);resolve({ok,before:p.before,first:p.first,frames:p.frames})};
+ const before=e=>{if(match(e))p.before=snap(owner)};
+ const after=e=>{if(!match(e))return;p.first=snap(owner);document.removeEventListener('click',before,true);document.removeEventListener('click',after);
+ requestAnimationFrame(()=>{p.frames.push(snap(owner));requestAnimationFrame(()=>{p.frames.push(snap(owner));finish(true)})})};
+ document.addEventListener('click',before,true);document.addEventListener('click',after);timer=setTimeout(()=>finish(false),5000);window.__branch31Entry=p}'''
+
+class BranchRecords31(unittest.TestCase):
+    WIDTH,HEIGHT=1280,720
+    setUpClass=classmethod(base.Browser.setUpClass.__func__)
+    tearDownClass=classmethod(base.Browser.tearDownClass.__func__)
+    state=base.Browser.state
+    details=native.Received20.details
+    reach=native.Received20.reach
+    wheel=native.Received20.wheel
+    def setUp(self):
+        base.Browser.setUp(self);self.page.set_viewport_size({'width':self.WIDTH,'height':self.HEIGHT})
+        self.posts=[];self.page.on('request',lambda r:self.posts.append(r.url) if r.method=='POST' and r.url.endswith('/api/continuity') else None)
+    def tearDown(self):
+        try:
+            self.record('actual','최초 실패 또는 종료 직후',self.page.evaluate(MAP))
+            self.page.screenshot(path=str(base.OUT/f'branch31-{self.WIDTH}-{self._testMethodName}-last.png'))
+        finally:base.Browser.tearDown(self)
+    def record(self,kind,label,actual,expected=None):
+        with OBS.open('a',encoding='utf-8') as f:f.write(json.dumps({'test':self.id(),'pc':[self.WIDTH,self.HEIGHT],'kind':kind,'label':label,'actual':actual,'expected':expected},ensure_ascii=False)+'\n')
+    def equal(self,label,actual,expected):self.record('condition',label,actual,expected);self.assertEqual(actual,expected,label)
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+    def visible(self,sel,marker=None):
+        g=self.page.evaluate(CLIP,sel) if marker is None else self.page.evaluate(native.PROBE,[sel,marker])
+        self.yes('실제 clip/hit '+sel,bool(g and g['inside'] and g['hit']),g)
+    def click(self,sel):self.reach(sel);self.page.locator(sel).click()
+    def map_click(self,sel):self.visible(sel);self.page.locator(sel).click()
+    def snap(self,label):v=self.page.evaluate(MAP);self.record('actual',label,v);return v
+    def unchanged(self,before,data,label):
+        after=self.snap(label)
+        for key in ['matrix','folds']:self.equal(label+' '+key,after[key],before[key])
+        self.equal(label+' 저장 자료/current/draft/target 전체',self.state(),data)
+        self.equal(label+' 새 AI 요청 없음',self.posts,[])
+        return after
+    def import_project(self,p,label):
+        path=base.OUT/f'branch31-{self.WIDTH}-{self._testMethodName}-{label}.json';path.write_text(json.dumps(p,ensure_ascii=False),encoding='utf-8')
+        base.reveal_management(self.page,'#import')
+        with self.page.expect_file_chooser() as chooser:self.page.locator('#import').click()
+        self.page.once('dialog',lambda d:d.accept());chooser.value.set_files(str(path))
+        expect(self.page.locator('#notice')).to_contain_text('사본으로 불러왔어요');base.saved(self.page)
+    def load(self):
+        s=json.loads(subprocess.check_output(['node','--input-type=module','-e',SEED],cwd=APP,text=True,encoding='utf-8'));self.record('fixture',s['metadata']['nature'],s)
+        self.import_project(s['p'],'recovery');self.click('#nav-space');self.map_click('#map-fit')
+        # Explicit fixture preparation. These actions precede every preservation baseline.
+        for key in ['P','Q']:
+            self.map_click('#branch-toggle-'+s['ids'][key]);expect(self.page.locator('#branch-toggle-'+s['ids'][key])).to_have_attribute('aria-expanded','false')
+        self.map_click('#map-fit');self.map_click('#node-info-'+s['ids']['P']);self.map_click('#map-fit')
+        self.equal('실제 현재 B',self.state()['currentTaskId'],s['tasks']['B'])
+        self.yes('서로 다른 같은 이름 부모',s['ids']['P']!=s['ids']['Q'])
+        return s
+    def signal(self,id):
+        before=self.snap('신호 전');data=self.state();self.map_click('#branch-records-'+id)
+        expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',id)
+        expect(self.page.locator('#subtree-records-'+id)).to_have_js_property('open',True)
+        expect(self.page.locator('#subtree-records-heading-'+id)).to_be_focused()
+        self.visible('#subtree-records-heading-'+id)
+        self.unchanged(before,data,'신호 직후 보정 없이');return before,data
+    def close_to(self,id):
+        before=self.snap('닫기 전');data=self.state();self.map_click('#area-panel-close')
+        expect(self.page.locator('#'+id)).to_be_focused()
+        if id!='space-title':self.visible('#'+id)
+        self.unchanged(before,data,'닫기 직후 보정 없이')
+    def row_roundtrip(self,s,owner):
+        caller='#subtree-task-'+s['reports']['L'];self.reach(caller);before=self.snap('보고 호출 행');data=self.state()
+        r=self.page.locator(caller).bounding_box();self.page.locator(caller).click()
+        expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',s['reports']['L'])
+        self.equal('읽기 중 현재 B와 미전송 L 유지',self.state(),data)
+        self.click('#task-return-origin')
+        expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',owner)
+        self.visible(caller);expect(self.page.locator(caller)).to_be_focused()
+        self.unchanged(before,data,'정확 보고에서 원 부모 호출행 복귀')
+        rr=self.page.locator(caller).bounding_box();self.yes('원 호출행 세로 위치 복원',abs(rr['y']-r['y'])<=2,{'before':r,'after':rr})
+    def test_05_nonzero_page_signal_entry(self):
+        s=self.load();p=s['ids']['P'];signal='#branch-records-'+p
+        # Normal wheel preparation only. No fit/resize/save wait before the measured entry.
+        if self.page.evaluate('scrollY')>0:self.wheel('#space-view',-10000)
+        self.assertLessEqual(self.page.evaluate('scrollY'),1)
+        self.yes('실제 문서에 120px 이동 공간',self.page.evaluate('document.documentElement.scrollHeight-innerHeight')>=120)
+        self.wheel('#space-view',120)
+        before=self.page.evaluate(ENTRY_SNAP,p);data=self.state()
+        self.yes('native page wheel 비영점 준비',before['page']>=119,before)
+        self.visible(signal) # Viewport/ancestor/map clipping and actual centre hit before normal click.
+        self.page.evaluate(ENTRY_ARM,p)
+        try:
+            self.page.locator(signal).click()
+            first=self.page.evaluate('()=>window.__branch31Entry.first')
+            self.yes('click handler 뒤 같은 task 관측',first is not None,first)
+        finally:
+            later=self.page.evaluate('async()=>{const p=window.__branch31Entry;const r=await p.done;delete window.__branch31Entry;return r}')
+            self.record('actual','signal event and following frames; first failure not replaced',later)
+        self.yes('동일 클릭과 두 frame 수집',later['ok'] and len(later['frames'])==2,later)
+        stages=[('trusted capture before product',later['before']),('same click task after product',later['first'])]
+        stages.extend((f'following frame {i+1}',v) for i,v in enumerate(later['frames']))
+        for label,v in stages:
+            self.assertIsNotNone(v,label);self.record('actual',label,v)
+            self.assertAlmostEqual(v['page'],before['page'],delta=1,msg=label+' pageY preserved')
+            self.assertAlmostEqual(v['x'],before['x'],delta=1,msg=label+' pageX preserved')
+            for key in ['matrix','folds']:self.equal(label+' '+key,v[key],before[key])
+            if label=='trusted capture before product':continue
+            expected=max(240,v['viewport'][1]-max(0,v['layout']['top'])-16)
+            self.assertAlmostEqual(v['layout']['height'],expected,delta=1,msg=label+' final available height')
+            self.assertAlmostEqual(v['map']['height'],expected,delta=1)
+            self.assertLessEqual(v['map']['bottom'],v['viewport'][1]-.5)
+            self.equal(label+' exact owner',v['owner'],p);self.yes(label+' subtree open',v['subtreeOpen'])
+            self.equal(label+' exact first owner record',v['firstOwner'],s['ids']['L'])
+            self.yes(label+' first owner line full clip and hit',bool(v['firstLine'] and v['firstLine']['inside'] and v['firstLine']['hit']),v['firstLine'])
+        self.equal('신호진입 current/draft/target/원자료 전체 보존',self.state(),data)
+        self.equal('새 AI 요청 없음',self.posts,[])
+
+    def test_01_exact_subtree_old_memo_and_keyboard(self):
+        s=self.load();p=s['ids']['P'];q=s['ids']['Q'];signal='#branch-records-'+p
+        text=self.page.locator(signal).inner_text()
+        for word in ['기록된 질문 1','현재 설명 1','설명 보류 1','이전 기준 1']:self.yes('신호의 실제 종류 '+word,word in text,text)
+        self.signal(p)
+        owners=self.page.locator('#subtree-records-'+p+' [data-owner-area]').evaluate_all('(es)=>es.map(e=>e.dataset.ownerArea)')
+        for key in ['L','H','S']:self.yes('두 층 아래 실제 소유 '+key,s['ids'][key] in owners,owners)
+        self.yes('동명 다른 부모 B를 섞지 않음',s['ids']['B'] not in owners,owners)
+        self.details('subtree-records-'+p,False);self.details('panel-more');self.details('panel-edit')
+        # Native panel keyboard scroll: the body padding is the actual hit target, never a JS scroll assignment.
+        body=self.page.locator('#area-panel-body');g=body.bounding_box();point={'x':g['x']+3,'y':g['y']+g['height']/2}
+        self.yes('패널 빈 여백 hit',self.page.evaluate('p=>document.elementFromPoint(p.x,p.y)?.id',point)=='area-panel-body',point)
+        self.page.mouse.click(point['x'],point['y']);expect(body).to_be_focused();self.page.keyboard.press('End')
+        self.yes('과거 닫힌 기록과 깊은 패널 읽기 준비',body.evaluate('(e)=>e.scrollTop')>0)
+        self.map_click('#node-info-'+q);self.signal(p) # explicit open must override P's closed/deep memo
+        self.close_to('branch-records-'+p)
+        # Browser-native activation from the real returned focus; no locator.focus/DOM event injection.
+        for key in ['Enter','Space']:
+            before=self.snap('키보드 신호 전');data=self.state();self.page.keyboard.press(key)
+            expect(self.page.locator('#subtree-records-heading-'+p)).to_be_focused();self.visible('#subtree-records-heading-'+p)
+            self.unchanged(before,data,key+' 신호');self.page.keyboard.press('Escape')
+            expect(self.page.locator(signal)).to_be_focused();self.visible(signal);self.unchanged(before,data,'Escape 호출자 복귀')
+    def test_02_exact_report_return_and_input_escape(self):
+        s=self.load();p=s['ids']['P'];self.signal(p);self.row_roundtrip(s,p)
+        self.details('panel-edit');self.click('#panel-name');self.page.locator('#panel-name').fill('[합성31 미저장 이름]')
+        data=self.state();before=self.snap('입력 Escape 전');self.page.keyboard.press('Escape')
+        expect(self.page.locator('#panel-name')).to_be_focused();expect(self.page.locator('#panel-name')).to_have_value('[합성31 미저장 이름]')
+        expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',p);self.unchanged(before,data,'입력 Escape는 닫기를 소비하지 않음')
+        self.close_to('branch-records-'+p)
+        self.signal(p);self.details('panel-edit');expect(self.page.locator('#panel-name')).to_have_value('[합성31 미저장 이름]')
+    def test_03_old_work_and_records_origin_yield_to_new_parent(self):
+        s=self.load();p=s['ids']['P'];q=s['ids']['Q'];self.click('#nav-work')
+        raw=native.Received20.select(self,s,file=s['late']);before=self.state();native.Received20.accept(self);base.saved(self.page);after=self.state()
+        added=[t for t in after['tasks'] if t['id'] not in {x['id'] for x in before['tasks']}]
+        self.equal('정확 H에서 새 보고 한 개',len(added),1);ret=added[0]
+        self.equal('늦은 B0 보고는 실제 현재 B 유지',after['currentTaskId'],s['tasks']['B'])
+        self.equal('실제 선택 파일 원문 그대로',ret['resultFile']['rawText'],raw)
+        self.equal('실제 선택 H 그대로',ret['resultFile']['returnId'],s['late']['returnId'])
+        self.click('#received-result-open');expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',ret['id'])
+        self.click('#task-view-find-area');expect(self.page.locator('#locate-return')).to_have_count(1)
+        for origin_kind in ['work','records']:
+            if origin_kind=='records':
+                self.click('#nav-space');self.click('#check-summary');self.click('#check-area-'+ret['id'])
+                expect(self.page.locator('#locate-return')).to_have_count(1)
+            # Explicit normal fit/fold preparation, not a post-failure repair.
+            self.map_click('#map-fit')
+            if self.page.locator('#branch-toggle-'+q).get_attribute('aria-expanded')=='true':self.map_click('#branch-toggle-'+q)
+            self.map_click('#map-fit')
+            self.yes('정확한 B 수신이 Q의 이번 탭 갱신 신호에 포함됨','이번 탭 설명 갱신 1' in self.page.locator('#branch-records-'+q).inner_text())
+            self.signal(p)
+            expect(self.page.locator('#locate-return')).to_have_count(0)
+            self.row_roundtrip(s,p);self.close_to('branch-records-'+p)
+            self.record('coverage','이전 '+origin_kind+' 출발점 대신 명시 새 부모 읽기 왕복',True)
+    def test_04_caller_lifetime_modes_project_and_offscreen(self):
+        s=self.load();p=s['ids']['P'];q=s['ids']['Q'];self.signal(p);self.signal(q);self.close_to('branch-records-'+q)
+        self.signal(p);self.map_click('#node-info-'+p);self.close_to('node-info-'+p)
+        for control,mode,focus in [('#map-relations-open','relations','map-relations-open'),('#check-summary','records','check-summary')]:
+            self.signal(p);before=self.snap('다른 읽기 모드 전');data=self.state();self.click(control)
+            expect(self.page.locator('#area-panel')).to_have_attribute('data-panel-mode',mode)
+            self.unchanged(before,data,'모드 전환');self.close_to(focus)
+        self.signal(p);entry=self.page.evaluate('()=>document.documentElement.dataset.entryId');data=self.state()
+        self.click('#nav-projects');expect(self.page.locator('#projects-view')).to_be_visible()
+        self.click('#new-project');expect(self.page.locator('#work-view')).to_be_visible()
+        self.yes('새 프로젝트가 실제 다른 entry로 열림',self.page.evaluate('()=>document.documentElement.dataset.entryId')!=entry)
+        self.click('#nav-projects')
+        self.click('.project-card[data-entry-id="'+entry+'"] .project-open')
+        expect(self.page.locator('#area-panel')).to_have_attribute('data-panel-mode','area')
+        expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',p)
+        self.equal('프로젝트 재진입 원 데이터 보존',self.state(),data)
+        # Do not navigate or select info first: either would clear a leaked caller and hide the regression.
+        self.close_to('node-info-'+p)
+        self.signal(p)
+        # Actual background drags, never node moves or camera injection. Move both original fallback controls out of clip.
+        for _ in range(4):
+            point=self.page.evaluate('''()=>{const m=document.querySelector('#space-map'),r=m.getBoundingClientRect();for(let y=Math.max(0,r.top)+20;y<Math.min(innerHeight,r.bottom)-20;y+=30)for(let x=Math.min(innerWidth,r.right)-30;x>r.left+r.width*.6;x-=30){const h=document.elementFromPoint(x,y);if(h&&m.contains(h)&&!h.closest('.area-node,.map-controls,button,input,textarea,select,a'))return {x,y,dx:-Math.min(450,r.width*.55)}}return null}''')
+            self.yes('실제 지도 빈 배경에서 pan 준비',point is not None,point)
+            self.page.mouse.move(point['x'],point['y']);self.page.mouse.down();self.page.mouse.move(point['x']+point['dx'],point['y'],steps=12);self.page.mouse.up()
+        for sel in ['#branch-records-'+p,'#node-info-'+p]:
+            g=self.page.evaluate(CLIP,sel)
+            self.yes('원 호출자와 owner info가 DOM에 남음',g is not None,g)
+            r,c=g['rect'],g['clip'];empty=r['right']<=c['l'] or r['left']>=c['r'] or r['bottom']<=c['t'] or r['top']>=c['b']
+            self.yes('원 호출자와 owner info의 가시 교집합이 0',empty,g)
+        self.close_to('space-title') # title is intentionally sr-only; actual focus and no camera jump are checked.
+
+class BranchRecords31Wide(BranchRecords31):WIDTH,HEIGHT=1440,900
+
+if __name__=='__main__':unittest.main(verbosity=2)

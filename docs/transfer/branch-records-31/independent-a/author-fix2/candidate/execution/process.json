@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/branch31-author-fix2/runner.py"
+  ],
+  "cwd": "/workspace/browser-env/branch31-author-fix2/candidate/app",
+  "startUTC": "2026-10-22T22:07:06.608472+00:00",
+  "endUTC": "2026-10-22T22:07:36.436807+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "24e132879502e0cb2260aff626b6070e585b7a1d61ee9da7bd7d9c8a4a987f1d",
+  "testUnchanged": true,
+  "wrapper": "read-only response/console listeners; teardown return-code recording; no UI/action/assertion changes"
+}

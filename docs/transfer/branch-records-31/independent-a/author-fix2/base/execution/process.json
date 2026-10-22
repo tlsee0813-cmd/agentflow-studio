@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/branch31-author-fix2/runner.py",
+    "BranchRecords31.test_05_nonzero_page_signal_entry",
+    "BranchRecords31Wide.test_05_nonzero_page_signal_entry"
+  ],
+  "cwd": "/workspace/browser-env/branch31-author-fix2/base/app",
+  "startUTC": "2026-10-22T22:07:45.009567+00:00",
+  "endUTC": "2026-10-22T22:07:49.364328+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "91ab6d2fc197f0d8fb268e47d2be7fe7e0ae7d36458a2e2c1e2c0ebd7521ba3a",
+  "testUnchanged": true,
+  "wrapper": "read-only response/console listeners; teardown return-code recording; no UI/action/assertion changes"
+}

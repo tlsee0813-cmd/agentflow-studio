@@ -1,0 +1,17 @@
+{
+  "scope": "tool completion metadata transcribed, not full transcript",
+  "build": {
+    "session": 98147,
+    "actualOuterExit": 0
+  },
+  "candidate10": {
+    "session": 59128,
+    "actualOuterExit": 0
+  },
+  "base2": {
+    "session": 31834,
+    "actualOuterExit": 1
+  },
+  "child": "process.json subprocess.run actualChildExit; collector propagates it",
+  "server": "http-console.jsonl server-process actualReturnCode"
+}

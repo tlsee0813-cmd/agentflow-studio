@@ -1,0 +1,162 @@
+[
+  {
+    "original": "SOURCE.before.json",
+    "bytes": 71208,
+    "sha256": "7bb53226bd87ddc8ac14551e0ecd1b416b8cfd65670c8451c82acb5d14a57ebc",
+    "gzip": "SOURCE.before.json.gz",
+    "gzipSHA256": "15817f6e29fef0995d3243f866925a4c812d9737d1754e4dcec3b12ee8977db9",
+    "roundTripEqual": true
+  },
+  {
+    "original": "SUMMARY.json",
+    "bytes": 29695,
+    "sha256": "598b8aa9c26032cd10a5a88964450ada7fdf1c7ff37fd4f9d22badeb15d8b53a",
+    "gzip": "SUMMARY.json.gz",
+    "gzipSHA256": "b6546138a700691997ef795d00a52409fcc9240e24d7bd4750c44fd6acf87a1b",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch-records31-observations.jsonl",
+    "bytes": 6257225,
+    "sha256": "0f398dff4cd9354ad508e651994aff5db12ecc34bdcc38208620b0f9c77953c5",
+    "gzip": "candidate/execution/raw/branch-records31-observations.jsonl.gz",
+    "gzipSHA256": "984f3460027056702672c8187a3c4dba87b0cc16dbd75ef713de261920c71364",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1280-test_01_exact_subtree_old_memo_and_keyboard-recovery.json",
+    "bytes": 33748,
+    "sha256": "664f80bed8cb97fb26d90145ea4e805d627a518e5118676cbd86a9cd03eb428f",
+    "gzip": "candidate/execution/raw/branch31-1280-test_01_exact_subtree_old_memo_and_keyboard-recovery.json.gz",
+    "gzipSHA256": "4a85dfc791c11f2e3c07e88dcc9a4a270cf3cd7265f25a3a8a0de2f707e7e348",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1280-test_02_exact_report_return_and_input_escape-recovery.json",
+    "bytes": 33748,
+    "sha256": "11ca04df9db66e2c0359cd0fa36ef67e4821e127c38f8086a4c0ccab82a09cbe",
+    "gzip": "candidate/execution/raw/branch31-1280-test_02_exact_report_return_and_input_escape-recovery.json.gz",
+    "gzipSHA256": "d0d93bef95577b772a7e11e3c0c4916fc08cb68a00f44eca5e6cd622e3f09c32",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1280-test_03_old_work_and_records_origin_yield_to_new_parent-recovery.json",
+    "bytes": 33748,
+    "sha256": "f2669a90297319676b0f7af91bf6eaa275655ea55013ab7dccd12ff3937d3850",
+    "gzip": "candidate/execution/raw/branch31-1280-test_03_old_work_and_records_origin_yield_to_new_parent-recovery.json.gz",
+    "gzipSHA256": "3a1393449a83dbf7e948dea8be2d1225c1485d21fcfed30a74724191a05feea2",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1280-test_04_caller_lifetime_modes_project_and_offscreen-recovery.json",
+    "bytes": 33748,
+    "sha256": "6390f7e8e8b8b96c75e962626ab9526e6c48c84576fbf91849e8f4d7eb563997",
+    "gzip": "candidate/execution/raw/branch31-1280-test_04_caller_lifetime_modes_project_and_offscreen-recovery.json.gz",
+    "gzipSHA256": "9d15b1fd0d2d23ced0415d5aa0495b2cd2b0b2f378591623f01ffac1049bba9b",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1280-test_05_nonzero_page_signal_entry-recovery.json",
+    "bytes": 33748,
+    "sha256": "8ca482cfca3189b2cba38c942c71fca14833c1ed37004207a56a189f234d7fb8",
+    "gzip": "candidate/execution/raw/branch31-1280-test_05_nonzero_page_signal_entry-recovery.json.gz",
+    "gzipSHA256": "7c314871793d804ea1bd5640a8f6f9fc80774876b494e8b385a1d119d3a9d961",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1440-test_01_exact_subtree_old_memo_and_keyboard-recovery.json",
+    "bytes": 33748,
+    "sha256": "a02cf8d48de892c8ec2c8330bb690376c989a0ac0094dafe63759d00dfd3ee5d",
+    "gzip": "candidate/execution/raw/branch31-1440-test_01_exact_subtree_old_memo_and_keyboard-recovery.json.gz",
+    "gzipSHA256": "0bff99eceddbcfee5e793fe00fc014ffeb35b918d3ae451c49d056803d535c11",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1440-test_02_exact_report_return_and_input_escape-recovery.json",
+    "bytes": 33748,
+    "sha256": "f4940d559ac588d2ca5aa30adce208fbe34acb388cbd026f40d7c9d2f925575d",
+    "gzip": "candidate/execution/raw/branch31-1440-test_02_exact_report_return_and_input_escape-recovery.json.gz",
+    "gzipSHA256": "40b305e042cd526d9f9b03c5f241a46f8d2db52b3ee9ad998ea8cd568c8f37b2",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1440-test_03_old_work_and_records_origin_yield_to_new_parent-recovery.json",
+    "bytes": 33748,
+    "sha256": "433bda7423b52328dbb0b4250f1fee8ab3422b9da0dda33cdd90a43553192822",
+    "gzip": "candidate/execution/raw/branch31-1440-test_03_old_work_and_records_origin_yield_to_new_parent-recovery.json.gz",
+    "gzipSHA256": "40b914e2ef5cded0bb966c9389b4d237d9c96aac9db24c7e599b17ecaa158b3a",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1440-test_04_caller_lifetime_modes_project_and_offscreen-recovery.json",
+    "bytes": 33748,
+    "sha256": "864ed6e425c8483075c707ab90230b8ebbe64f87a6023fe325669b23727443d6",
+    "gzip": "candidate/execution/raw/branch31-1440-test_04_caller_lifetime_modes_project_and_offscreen-recovery.json.gz",
+    "gzipSHA256": "4f747a7c74ab04f93cedb5d201ff71a92bf5e0ee0836de9fee66106324936052",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/branch31-1440-test_05_nonzero_page_signal_entry-recovery.json",
+    "bytes": 33748,
+    "sha256": "a93bc8d2e53e9d505c71a871f32c1402d3b51edb01800f5dfe02e0651c0c9e12",
+    "gzip": "candidate/execution/raw/branch31-1440-test_05_nonzero_page_signal_entry-recovery.json.gz",
+    "gzipSHA256": "9bf9f3a156903d84bc5ccee368123770b66e64c5f45ec759135b2022056b81b8",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/http-console.jsonl",
+    "bytes": 11054,
+    "sha256": "400545e6eec20b4ad0f3f74a8786058efb19a4e4152bcb6a798505e3873553b0",
+    "gzip": "candidate/execution/raw/http-console.jsonl.gz",
+    "gzipSHA256": "a55f203afed4157bd83817d85936e381e078646cb6ad153882a2b8ee2368f71d",
+    "roundTripEqual": true
+  },
+  {
+    "original": "candidate/execution/raw/received20-observations.jsonl",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gzip": "candidate/execution/raw/received20-observations.jsonl.gz",
+    "gzipSHA256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+    "roundTripEqual": true
+  },
+  {
+    "original": "base/execution/raw/branch-records31-observations.jsonl",
+    "bytes": 166933,
+    "sha256": "395217b4a3ff0c42d87999ba73497a93e53c00c3247d598d4c70fd9e504ed34a",
+    "gzip": "base/execution/raw/branch-records31-observations.jsonl.gz",
+    "gzipSHA256": "fd4e672a1bfef66386e9a4f9afd7d07df670f596668a6e4700b11fc90923969c",
+    "roundTripEqual": true
+  },
+  {
+    "original": "base/execution/raw/branch31-1280-test_05_nonzero_page_signal_entry-recovery.json",
+    "bytes": 33748,
+    "sha256": "173249627219e86087ca8746e6f4012953efc98b05e34945ccf7e5278f36b0ce",
+    "gzip": "base/execution/raw/branch31-1280-test_05_nonzero_page_signal_entry-recovery.json.gz",
+    "gzipSHA256": "0ce5a913aff160d268fae1603caa8af5e37db2a01cbaef4daeade635ebf05258",
+    "roundTripEqual": true
+  },
+  {
+    "original": "base/execution/raw/branch31-1440-test_05_nonzero_page_signal_entry-recovery.json",
+    "bytes": 33748,
+    "sha256": "d647d51a9f376698843359ecf23ede9f7b7d69b7dcb9fa346fd8093a12921e05",
+    "gzip": "base/execution/raw/branch31-1440-test_05_nonzero_page_signal_entry-recovery.json.gz",
+    "gzipSHA256": "a0e9bbf1af8f8d0685b9b9fd50ab5049f3507fab73cbbda279e14eb0541555aa",
+    "roundTripEqual": true
+  },
+  {
+    "original": "base/execution/raw/http-console.jsonl",
+    "bytes": 2342,
+    "sha256": "5d09f39c598678744d44a38c15268c86b407c9e9f9a1bab9f45b8bbb2fc53534",
+    "gzip": "base/execution/raw/http-console.jsonl.gz",
+    "gzipSHA256": "8ad1b4ed2f4d428cae9dab8626787392a2676d17906c870391cdadf46f556d82",
+    "roundTripEqual": true
+  },
+  {
+    "original": "base/execution/raw/received20-observations.jsonl",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gzip": "base/execution/raw/received20-observations.jsonl.gz",
+    "gzipSHA256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+    "roundTripEqual": true
+  }
+]
