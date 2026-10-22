@@ -334,8 +334,10 @@ function openSpace() {
   // AREA17: back to the whole space from the located area's own screens keeps the way back to the view before 'where is it';
   // arriving from anywhere else (the work view, another area) is a new start.
   if(!(located&&(view==='space'||(view==='area'||view==='task')&&viewArea===located.area)))located=null;
-  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;render();
-  const from=layerMemo.from;window.scrollTo({top:layerMemo.space??0});
+  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;
+  render(true,true,()=>window.scrollTo({top:layerMemo.space??0}));
+  const plane=document.getElementById('space-plane');if(plane)markOffscreen(plane);
+  const from=layerMemo.from;
   if(!(from&&focusFirst(`node-enter-${from}`,`list-enter-${from}`)))$('space-title')?.focus({preventScroll:true});
 }
 function openArea(id:string) {
@@ -2425,7 +2427,7 @@ function renderComposeArea(t:Task|null,returned:boolean) {
   if(parked){const o=node('option',`보관된 영역: ${parked.name} · 되살리거나 다른 영역을 고르세요`);o.value=parked.id;sel.append(o);}
   sel.value=dt===null?'@follow':dt.area===null?'@none':dt.area;
 }
-function render(capturePanel=true,restoreReading=true) {
+function render(capturePanel=true,restoreReading=true,beforeWorkspaceSizing?:()=>void) {
   if(capturePanel)capturePanelReading();
   if(route==='projects'){renderProjects();renderStatus();displayView();return;}
   const open=new Map([...document.querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]));
@@ -2451,7 +2453,8 @@ function render(capturePanel=true,restoreReading=true) {
   // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
   const taskScreen=view==='task'?$('space-view'):null;
   for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&d.id!=='project-management'&&!taskScreen?.contains(d)&&!d.closest('#area-panel'))d.open=open.get(d.id)!;
-  sizeWorkspace();finishInitialMapFit();if(restoreReading)restorePanelReading();restoreWorkReferenceReading();
+  // A layer entry may restore page scroll after its final DOM/disclosures, before sizing or its first camera/reading restore.
+  beforeWorkspaceSizing?.();sizeWorkspace();finishInitialMapFit();if(restoreReading)restorePanelReading();restoreWorkReferenceReading();
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
 function submitInput(withAI:boolean) {
