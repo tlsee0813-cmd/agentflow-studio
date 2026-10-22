@@ -1,0 +1,75 @@
+{
+  "ref": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "commands": [
+    {
+      "args": [
+        "-C",
+        "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product21-author",
+        "-c",
+        "core.autocrlf=false",
+        "worktree",
+        "add",
+        "--no-checkout",
+        "--detach",
+        "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product28-reading-probe\\candidate",
+        "6b96543fdf980ff45f0e1b67f83e8a0a561a1542"
+      ],
+      "status": 0,
+      "stdout": "",
+      "stderr": "Preparing worktree (detached HEAD 6b96543)\n"
+    },
+    {
+      "args": [
+        "-C",
+        "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product28-reading-probe\\candidate",
+        "sparse-checkout",
+        "init",
+        "--cone"
+      ],
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "-C",
+        "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product28-reading-probe\\candidate",
+        "-c",
+        "core.autocrlf=false",
+        "sparse-checkout",
+        "set",
+        "app/continuity/src",
+        "app/continuity/public",
+        "app/continuity/scripts"
+      ],
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "-C",
+        "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product28-reading-probe\\candidate",
+        "-c",
+        "core.autocrlf=false",
+        "checkout",
+        "--detach",
+        "6b96543fdf980ff45f0e1b67f83e8a0a561a1542"
+      ],
+      "status": 0,
+      "stdout": "",
+      "stderr": "HEAD is now at 6b96543 Close description review state before restoring the task reader\n"
+    },
+    {
+      "args": [
+        "-C",
+        "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product28-reading-probe\\candidate",
+        "status",
+        "--short"
+      ],
+      "status": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

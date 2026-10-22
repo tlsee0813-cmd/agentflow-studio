@@ -1,0 +1,59 @@
+{
+  "baseline": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "status": "연구 후보 동결 · 브라우저 가독성 수용 미실행",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "source": "candidate/app/continuity/src/client/app.ts",
+      "bytes": 265039,
+      "sha256": "e1f9ffbb26afbbe7ad7df77b1c295d86a8c89b79a5dd044b78fa4f38b153a5a4",
+      "gitBlob": "bebc8fd0ff535a2759ce5e69a34c00a39233d3f6"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "source": "candidate/app/continuity/public/styles.css",
+      "bytes": 73524,
+      "sha256": "783860e056a7c6a07295cfd062473fb13732e71e2b5f9fffe3689e2a142e1b6f",
+      "gitBlob": "46f7feaea939ceb8b584eefac49fe9f66b490692"
+    }
+  ],
+  "commands": [
+    {
+      "record": "type.exit.json",
+      "runtime": "Node24.19.0 author auxiliary",
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p continuity/tsconfig.json",
+      "exit": 0
+    },
+    {
+      "record": "build.exit.json",
+      "runtime": "Node24.19.0 author auxiliary",
+      "command": "node continuity/scripts/build.mjs",
+      "exit": 0
+    },
+    {
+      "record": "diff-check.exit.json",
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "researchClass": "reading-probe-28",
+  "scope": [
+    "연구 복사본의 명시 상시 클래스만 적용, 자동 저배율 정책/저장 모드 없음",
+    "제목24px/행간27px·원문 순서 최대2줄",
+    "실제 직접 부모·깊은 경로 생략 사실을 별도 표시",
+    "구상문장/구상미기재/일반 요청·결과 집계만 숨김",
+    "카드/좌표/조작/fit/관계/기존 신호/키보드 이벤트 유지"
+  ],
+  "patch": {
+    "path": "candidate.patch",
+    "bytes": 4115,
+    "sha256": "7c28b0707ba55a148eae90e29fc2047bd67ac7465d96d3c49aebecfc094a7185"
+  },
+  "limitations": [
+    "브라우저/서버/네트워크/설치/단위 검사 미실행",
+    "Node24.19.0 보조 검사이며 Node22/Cloud 수용과 별도",
+    "모든 신호 동시 잘림은 실패 반례로 남기며 추가 보정 없음",
+    "정적 산술과 타입/빌드만으로 가독성 성공을 주장하지 않음"
+  ],
+  "evidencePathCorrection": "첫 타입/빌드 로그6개가 probe 한 단계 위에 새로 생성되었고 생성시각이 이 실행과 일치함을 확인한 뒤 덮어쓰기 없이 probe 안으로 옮겼다. 27 제품/증거 경로는 변경하지 않았다."
+}

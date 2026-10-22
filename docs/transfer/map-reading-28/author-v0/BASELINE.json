@@ -1,0 +1,30 @@
+{
+  "baseline": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "source": "existing local Git objects only",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "local": "baseline/app/continuity/src/client/app.ts",
+      "bytes": 264518,
+      "sha256": "55be6a0a47f4a116a3a19593320e09d3820bb5c46b07250dfda25efd78ccb691",
+      "gitBlob": "2fdc74d9451c550367f12fd79344e2ed510ba9fb"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "local": "baseline/app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "gitBlob": "c3f93975b3f67b7f94f3a2daa435cc4cc615217a"
+    }
+  ],
+  "readOnlyProbe": true,
+  "notRun": [
+    "implementation edits",
+    "type/build/unit",
+    "browser/server",
+    "network/download",
+    "installation",
+    "remote mutation"
+  ],
+  "notes": "Source copies only; no runtime/dependency copy or executable candidate. Product27 folders untouched."
+}
