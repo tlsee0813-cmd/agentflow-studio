@@ -1,0 +1,278 @@
+{
+  "status": "AUTHOR_WIP_CHECKPOINT_EVIDENCE_NOT_FINAL_ACCEPTANCE",
+  "sourceCandidate": "6ea2915e6483076710840883de8891a197464386",
+  "sourceCandidateBranch": "product/area-understanding-17",
+  "handoffSnapshotDate": "2026-10-22",
+  "continuedBy": "https://claude.ai/code/session_01PoKkMRHZyxYpyNNCrXruf5",
+  "description": "Frozen Sol author checkpoint evidence. Original stdout, stderr, exit records, source-file inventory and tracked patch are preserved byte-for-byte. This is a historical author checkpoint; Claude Code owns later product changes.",
+  "rawSourceFiles": 23,
+  "sanitizedFiles": 1,
+  "rawEvidenceBytes": 111355,
+  "originalHandoff": {
+    "path": "HANDOFF.md",
+    "bytes": 12019,
+    "sha256": "41757af9e6ae74d6e808e3bb5335725ccf8a8b006b6c034ba80cf693c584ab86",
+    "gitBlobSha1": "58034159ff994e570363850b6fc9e06446d6e882",
+    "publishedAs": "HANDOFF.sanitized.md",
+    "treatment": "Original remains local. Published copy replaces local absolute checkout path and adds historical incomplete-snapshot title/introduction; body details otherwise retained. Same sanitized content as sourceCandidate IMPLEMENTATION_HANDOFF.md."
+  },
+  "privacyScan": {
+    "credentialLikeMarkers": 0,
+    "scope": "All 24 selected original text files; common PAT/API/private-key patterns scanned, no credential-like matches; no environment dump included",
+    "absoluteLocalPaths": "Original exit cwd and failure stacks retain local username/workspace paths as part of unchanged raw logs. These are not credentials. Handoff absolute checkout path is sanitized."
+  },
+  "testPhases": {
+    "initial": "check-first/build-first exit0 at an intermediate revision; units-first exit1 with145 tests,129pass16fail. Parent app/dist had not been built; missing-module failures and old-schema/F095 failures remain in raw output. This was before new20 tests and final fixes.",
+    "finalCheckpoint": "checkpoint-build/checkpoint-check exit0; units17-checkpoint exit0 with20/20 new tests. The full regression suite was not rerun at the final frozen checkpoint.",
+    "runtime": "Node24.19.0 supplementary only; final Cloud/CI Node22 remains required. TypeScript5.8.3 restored from existing locked tarball with SHA512 verification; this is not npm ci evidence.",
+    "browser": "No browser script or browser execution by Sol. No persistent app server started.",
+    "missingOpusRawLog": "Earlier Opus198pass12fail claim remains a README claim; that raw failure log was absent from Opus ZIP and was not reconstructed."
+  },
+  "stages": [
+    {
+      "name": "check-first",
+      "node": "v24.19.0",
+      "start": "2026-10-22T08:34:37.576Z",
+      "end": "2026-10-22T08:34:45.899Z",
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "command": "node",
+      "args": [
+        "app/continuity/scripts/check.mjs"
+      ]
+    },
+    {
+      "name": "build-first",
+      "node": "v24.19.0",
+      "start": "2026-10-22T08:35:28.650Z",
+      "end": "2026-10-22T08:35:32.815Z",
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "command": "node",
+      "args": [
+        "app/continuity/scripts/build.mjs"
+      ]
+    },
+    {
+      "name": "units-first",
+      "node": "v24.19.0",
+      "start": "2026-10-22T08:35:39.286Z",
+      "end": "2026-10-22T08:35:59.465Z",
+      "status": 1,
+      "signal": null,
+      "error": null,
+      "command": "node",
+      "args": [
+        "--test",
+        "app/continuity/tests/*.test.mjs"
+      ]
+    },
+    {
+      "name": "setup-typescript",
+      "node": "v24.19.0",
+      "start": "2026-10-22T08:32:54.447Z",
+      "end": "2026-10-22T08:32:55.473Z",
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "command": "node",
+      "args": [
+        "../product17-author-evidence/setup-typescript.mjs"
+      ]
+    },
+    {
+      "name": "checkpoint-build",
+      "node": "v24.19.0",
+      "start": "2026-10-22T08:37:53.887Z",
+      "end": "2026-10-22T08:37:57.711Z",
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "command": "node",
+      "args": [
+        "app/continuity/scripts/build.mjs"
+      ]
+    },
+    {
+      "name": "units17-checkpoint",
+      "node": "v24.19.0",
+      "start": "2026-10-22T08:38:04.341Z",
+      "end": "2026-10-22T08:38:04.743Z",
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "command": "node",
+      "args": [
+        "--test",
+        "app/continuity/tests/understanding17.test.mjs"
+      ]
+    },
+    {
+      "name": "checkpoint-check",
+      "node": "v24.19.0",
+      "start": "2026-10-22T08:38:05.864Z",
+      "end": "2026-10-22T08:38:12.170Z",
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "command": "node",
+      "args": [
+        "app/continuity/scripts/check.mjs"
+      ]
+    }
+  ],
+  "limitations": [
+    "Unfinished product; self-checks are not independent final acceptance",
+    "Original failures and timing boundaries preserved; no all-pass regression claim",
+    "No product source tree, generated dist or node_modules copied here; tracked source patch is included as checkpoint evidence",
+    "Execution helper scripts are excluded; only actual logs/exit records, setup runtime records, inventory/patch and sanitized handoff included"
+  ],
+  "files": [
+    {
+      "path": "build-first.exit.json",
+      "bytes": 360,
+      "sha256": "a94b75d2d40e468a609557968961864796b285ac0022de6ca5a8ab81589db951",
+      "gitBlobSha1": "aa092b3a45c81ad43999be018377d4ff12913f08"
+    },
+    {
+      "path": "build-first.stderr.log",
+      "bytes": 264,
+      "sha256": "9f00b91d0e23a47a550f71b16157d94bf43d5e23e0967f8d8909047c046e18a4",
+      "gitBlobSha1": "be3943d98a11eb23ed893d40f795ec32278c13c4"
+    },
+    {
+      "path": "build-first.stdout.log",
+      "bytes": 111,
+      "sha256": "6c23cbd039418e3b87e704ed3285f0b9ae8eca75c4f8aa75e41954f97efc2492",
+      "gitBlobSha1": "7cbf5ebc7d923388bcf69955bf44b7003c2a03fb"
+    },
+    {
+      "path": "check-first.exit.json",
+      "bytes": 360,
+      "sha256": "70a619d9d3c4523b9ae0df0a7691c5969d5226c3a981349d33e1d4e6c8a06f0b",
+      "gitBlobSha1": "1cdc7100c49a62b964e4dd038143f455a6ac2458"
+    },
+    {
+      "path": "check-first.stderr.log",
+      "bytes": 264,
+      "sha256": "fd65670b517aa9c4ac30d5bfbaca7beb98264f82b2d6f6b962a448c972d2e858",
+      "gitBlobSha1": "888e714d5904d3bb83e3991c17298b06f12aa856"
+    },
+    {
+      "path": "check-first.stdout.log",
+      "bytes": 100,
+      "sha256": "33907ba4de34f410f7c9428d49b4c37d5550b88ac42f31d260175f576c3c9def",
+      "gitBlobSha1": "e9fcf1877fa729f51431da8607209bfd75dc8391"
+    },
+    {
+      "path": "checkpoint-build.exit.json",
+      "bytes": 360,
+      "sha256": "3f53f7a8d1aace684cc853cf33943273b79eb313386bafd6eb6c2dcef49b51b2",
+      "gitBlobSha1": "4abf272b13c4baa2cf57e6e75762899e2d2b5bb6"
+    },
+    {
+      "path": "checkpoint-build.stderr.log",
+      "bytes": 264,
+      "sha256": "d294ff5027d55eac35e41e87dfe4bc641f835d62dd4d17e849fea00f1a32b903",
+      "gitBlobSha1": "d5fc0e89deba0614c2a4d455dbe66092295c6a2b"
+    },
+    {
+      "path": "checkpoint-build.stdout.log",
+      "bytes": 111,
+      "sha256": "6c23cbd039418e3b87e704ed3285f0b9ae8eca75c4f8aa75e41954f97efc2492",
+      "gitBlobSha1": "7cbf5ebc7d923388bcf69955bf44b7003c2a03fb"
+    },
+    {
+      "path": "checkpoint-check.exit.json",
+      "bytes": 360,
+      "sha256": "d80d7951be8d8ffbbc80ec5b2cf8e9caf2a9c5dff37f3a112312d92ddf7f1519",
+      "gitBlobSha1": "e75cc487801bd17b4113aefe5c722b3ced25febe"
+    },
+    {
+      "path": "checkpoint-check.stderr.log",
+      "bytes": 264,
+      "sha256": "da8944dace8895376b520b4082589ca80aa7b6fe164470a0f9b87087b585f918",
+      "gitBlobSha1": "81fa6485fc337fc9b3ca041af4d3ccc4de927c1a"
+    },
+    {
+      "path": "checkpoint-check.stdout.log",
+      "bytes": 100,
+      "sha256": "33907ba4de34f410f7c9428d49b4c37d5550b88ac42f31d260175f576c3c9def",
+      "gitBlobSha1": "e9fcf1877fa729f51431da8607209bfd75dc8391"
+    },
+    {
+      "path": "checkpoint-files.json",
+      "bytes": 1187,
+      "sha256": "f20c5683b5775ffeb249bf96773d1994c809068db027e4f557812aef6d42de45",
+      "gitBlobSha1": "0a6123f341643399c21e94d1db86048f90ffbcde"
+    },
+    {
+      "path": "checkpoint-tracked.patch",
+      "bytes": 63140,
+      "sha256": "1f6b62e1dcfcd94f03c56805ce3920ba8f2267d2fd45b1b39c50ce6050ebfae3",
+      "gitBlobSha1": "95268d8569e9136a39b8002c44e933ba46a5e58e"
+    },
+    {
+      "path": "setup-typescript.exit.json",
+      "bytes": 377,
+      "sha256": "848c8cc9064b2eaccbe611b5fe40f346beabf087142a4569d150c721951f67ea",
+      "gitBlobSha1": "20eefc3c70d841e4cef8c8858558bd0e61b5f80c"
+    },
+    {
+      "path": "setup-typescript.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "setup-typescript.stdout.log",
+      "bytes": 123,
+      "sha256": "cd8e091f1d563ba91b66e53008e75cbfb1a7499ab07953562eed291832ff983a",
+      "gitBlobSha1": "e4eca81762aaec799d68747dfec7e943cd84269c"
+    },
+    {
+      "path": "units-first.exit.json",
+      "bytes": 373,
+      "sha256": "f08ea99eb4a0126f8d8c799fc9e0ad93819df3c73bbb4b23090958d6b011a240",
+      "gitBlobSha1": "f056e9e2abf906ce877e54ea01d03705268525dc"
+    },
+    {
+      "path": "units-first.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "units-first.stdout.log",
+      "bytes": 40472,
+      "sha256": "0b55fd657c3a6aac044af8756153c5a5df91addf763ad1ff4c47ccb3bafc164f",
+      "gitBlobSha1": "02a5b4e6419f71bb1050c4cee6e3fb450b343f57"
+    },
+    {
+      "path": "units17-checkpoint.exit.json",
+      "bytes": 387,
+      "sha256": "123eaa9e8634547e98850c2862360018d53a500b0c065e71432a417f49605c0d",
+      "gitBlobSha1": "6800d2b834b43355d2dee4e6950950ce7d920355"
+    },
+    {
+      "path": "units17-checkpoint.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "units17-checkpoint.stdout.log",
+      "bytes": 2378,
+      "sha256": "233449811d484144733c8bdaa6ad6b8016f363964eb916c4b874eb3b7ade3228",
+      "gitBlobSha1": "86e6bda269952776694925796866b0a4dec464a8"
+    },
+    {
+      "path": "HANDOFF.sanitized.md",
+      "bytes": 12212,
+      "sha256": "06097ba18b8fdc5891270ea156f65cc30d77740694f696cd64322b8894a9d3c7",
+      "gitBlobSha1": "ccaef2c91da79b207787be4efd58bc118f1982e7"
+    }
+  ]
+}

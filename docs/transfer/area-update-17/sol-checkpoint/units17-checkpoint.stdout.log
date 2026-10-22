@@ -1,0 +1,28 @@
+✔ AREA17 powertoys: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact (27.7933ms)
+✔ AREA17 product13: one receipt updates one part, preserves user values, proposal stays unadopted and backup roundtrip is exact (4.2964ms)
+✔ AREA17 same returnId supports successive revised interpretations without dropping report history (8.0231ms)
+✔ AREA17 an explicit same-text user correction owns a new revision; old/revised returns cannot overwrite it (4.535ms)
+✔ AREA17 late description after name is held, report remains readable and user values survive (2.0966ms)
+✔ AREA17 late description after note is held, report remains readable and user values survive (1.8295ms)
+✔ AREA17 late description after purpose is held, report remains readable and user values survive (2.5413ms)
+✔ AREA17 late description after user intent correction is held, report remains readable and user values survive (2.5791ms)
+✔ AREA17 late description after manual work condition is held, report remains readable and user values survive (1.7544ms)
+✔ AREA17 late description after recorded decision is held, report remains readable and user values survive (2.8767ms)
+✔ AREA17 late description after same-area user request is held, report remains readable and user values survive (2.6287ms)
+✔ AREA17 unrelated work, unsent draft, layout and reading do not invalidate the target explanation (2.3071ms)
+✔ AREA17 current user plan is sent separately while Background stays immutable (1.3402ms)
+✔ AREA17 plan change makes a previous explanation stale and excludes its text from the next handoff (1.2148ms)
+✔ AREA17 wrong area/basis and archived/moved work hold only the derived description (5.3782ms)
+✔ AREA17 syntactically valid wrong-area prose is not claimed as detected; user can correct it separately (1.5614ms)
+✔ AREA17 recovery cannot move a wrong-target held description into another area as applied (2.2635ms)
+✔ AREA17 strict return shapes and byte limits are retained (1.9894ms)
+✔ AREA17 return.1 and project.1 through project.5 migrate without invented descriptions or export anchors (5.2494ms)
+✔ AREA17 cross-tab seq rejection preserves the external project including its description (3.7792ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 272.0058

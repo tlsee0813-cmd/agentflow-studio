@@ -1,0 +1,480 @@
+✔ AI055 hand-authored four-turn interpretation reaches next HTTP input, home projection and handoff; raw user history untouched (44.3236ms)
+✔ AI055 invalid version/source/revision/current-input omission is rejected atomically; stored legacy eight-key advice still readable (8.6213ms)
+✔ AI055 separate purpose and uncertain interpretation do not turn parent linkage into a purpose or a decision (6.1976ms)
+✔ AI055 manual correction/undo values survive regeneration; stale response and changed source cannot replace them (5.9953ms)
+✔ AI055 exact late return preserves manual purpose, raw file and independent branch; no semantic promotion from report (6.2035ms)
+✔ C039 exact A/H1 return while current B; atomic source pair, drafts, provenance, recovery and B isolation (46.7255ms)
+✔ C039 dedup by decoded fields; partial reports append and external instructions never gain authority (7.3577ms)
+✔ C039 invalid file/reference/oversize rejects without mutation; restore checks generated prefix but permits real later decisions and answers (611.8851ms)
+✖ C039 v1/v2 migration preserves exact original bytes and null IDs; backup failure blocks save and replacement (7.3505ms)
+✔ C039 pending response cannot apply after import; quota/conflict preserve persisted project and in-memory raw result (17.9636ms)
+✔ C039 file footer stays optional; export freshness pins returnId and manual routes stay unchanged (3.4912ms)
+✖ C039 rev1 external v1/v2 recovery fits a v3-only quota and remains writable; stored legacy backup rules stay intact (6.1134ms)
+✔ I15-D01 exact free input preserved; immutable requested origin, not confirmed; small wording change no question (24.469ms)
+✔ I15-D02 meaningful choice and unknown technical fact use separate paths, no compulsory alternatives (3.1422ms)
+✔ I15-D03 actual answer attached to real question and no new forced confirmation (6.1369ms)
+✔ I15-D04 unknown/defer applies only to answer; untouched old bases survive, no repeat question (6.2176ms)
+✔ I15-D05 AI cannot set source kind/status or write a basis; whole malformed result refused (1.8712ms)
+✔ I15-D06 report claim and supplied evidence never become verified/customer requested bases (8.7013ms)
+✔ I15-D07 synthetic test answers stay test-only on initial and followup, including explicit looking changes (2.9476ms)
+✔ I15-D08 explicit unique scalar change updates only intended span, stable ID/history and no extra approval (3.4902ms)
+✔ I15-D09 exact quoted change preserved; ambiguous multi-value or quoted report cannot rewrite basis (1.205ms)
+✔ I15-D10 relevant set has no 2-item cap and omitted important bases remain in handoff/context (3.3534ms)
+✔ I15-D11 input edits arriving before response invalidate only that response, preserve draft/old advice (1.1169ms)
+✔ I15-D12 manual edits & suggestion edits survive stale response and a subsequent successful retry (2.201ms)
+✔ I15-D13 retry reuses sources; duplicate/stale ticket cannot overwrite new ticket (1.0237ms)
+✔ I15-D14 cancellation and reload preserve inputs, do not automatically dispatch (2.8928ms)
+✔ I15-D15 lossless JSON roundtrip includes history, manual fields, source kinds and export records (2.6474ms)
+✔ I15-D16 malformed/version/foreign refs/cycle/authority promotion import rejected without mutating old project (2.3131ms)
+✔ I15-D17 storage failure and cross-tab conflict leave memory and previous valid persisted data intact (3.0209ms)
+✔ I15-D18 corrupted stored file is not overwritten automatically; explicit replacement can recover (0.9912ms)
+✔ I15-D19 full unrelated chat is not sent; known bases and adjacent return group are retained (7.2675ms)
+✔ I15-D20 invalid reference, authority key or control character in AI text rejected (0.8903ms)
+✔ I15-D21 real choice/unknown answers remain available after several later changes without another confirmation (6.456ms)
+✔ I15-D22 after a pasted report, the next change still carries the handed-off work and its user-edited scope (4.2588ms)
+✔ I15-D23 explicit quoted change inserts the typed text literally ($$, $& are not replacement patterns) (0.9733ms)
+✔ I15-D24 AI text written before a basis change is withheld from the current handoff, also after reload; user text stays (5.1488ms)
+✔ I15-D25 previous work AI text is withheld after its basis changed; user-edited previous scope is still carried (2.8009ms)
+✖ I15-D26 project.1 files migrate without losing records; old AI text is treated as unknown-revision (17.0379ms)
+✔ I15-D27 68 report/export cycles and 54 long requests keep editing, export, AI context and backup->import working (3544.8956ms)
+✔ I15-D28 important confirmed/answered/edited bases are never shortened; within-budget old requests also stay full (IDEA017) (2.8483ms)
+✔ I15-D29 a reply is recorded once even when re-organisation fails and is retried (1.1798ms)
+✖ I15-D30 storage reports why it did not save; legacy browser data is kept before the first project.3 write (6.2239ms)
+✔ I15-D31 1001 short requests saved through the app reopen after save and after backup->import (12562.3661ms)
+✔ I15-D32 byte boundary: largest project under 8MB saves, reopens and imports; one step over is refused without touching storage (2696.9231ms)
+✔ I15-D33 item boundary: ITEM_LIMIT elements in one array are accepted, one more is refused by save and import alike (769.3355ms)
+✔ I15-D34 app-made elements stay above FILE_LIMIT/ITEM_LIMIT bytes, so the byte limit binds before the item cap (6.828ms)
+✔ F058-B1 editing this task's understanding/scope stays a work instruction; it never becomes the next turn's purpose (38.02ms)
+✔ F058-B2 purpose correction on a small task keeps that task narrow; stale AI action/question excluded; next turn carries the correction (9.4159ms)
+✔ F058-B2 a correction stays visible after the AI interpretation goes stale; regeneration cannot overwrite it (8.3198ms)
+✔ F058-N1 AI retired wording cannot cancel a confirmed decision; precedence is consistent and requests-only flows are unchanged (4.2965ms)
+✔ F058-N2 new responses reject separate+retired and the same sentence kept and retired; stored advice still loads (2.4626ms)
+✔ F058-N5 explicit MOCK handoff is not labelled as an AI interpretation (1.1849ms)
+✔ F058 intent-edit.1 from the earlier candidate stays readable with its original meaning (4.175ms)
+✔ F059 first task: correction plus a new confirmed basis both reach the next request without a made-up AI intent (2.4881ms)
+✔ F059 intent-edit.1 restore -> ordinary work edit leaves the converted correction, handoff and next request unchanged (14.8586ms)
+✔ F061 legacy intent-edit.1 without a non-blank goal keeps withholding old AI text, is never a purpose, and round-trips (17.7222ms)
+✔ F066-P1 a separate detail task no longer erases the earlier maintained/replaced reading from the next request (45.2181ms)
+✔ F066-P1 the purpose chain never jumps over a stale interpretation; the contract rejects inconsistent purposeIntent (16.0337ms)
+✔ F066-P2 a purpose correction is attributed to this task; its pre-correction request is not printed as a current value (11.3135ms)
+✔ F066-P2 regenerating a corrected follow-up task names this task even when the AI value comes from its predecessor (1.6325ms)
+✔ F066 prompt states the correction, preserve, continuing-purpose and no-invention rules (0.3871ms)
+✔ F069/F071 a separate small edit is printed next to the earlier purpose as a sourced reference; nothing is retired or invented (6.8808ms)
+✔ F069 no earlier-purpose line for continue, for a user correction, or across a stale interpretation (26.2737ms)
+✔ F069 prompt separates the purpose relation from the size of this edit (2.1821ms)
+✔ F071 an explicit discard with a separate reading and a fresh old interpretation: the old purpose is a sourced reference, never "still valid" (2.6898ms)
+✔ F088-1 MOCK keeps the request as the goal of a returned report; the report text never becomes the purpose (30.0435ms)
+✔ F088-2 a late A report stays with A; the current B request, its scope and its export are unchanged (12.5065ms)
+✔ F088-3 the same holds for an exact result file; duplicates still add nothing (35.0869ms)
+✔ F088-4 a report for the current work still continues it (normal flow), with sibling evidence (2.4357ms)
+✔ F088-5 opening A explicitly continues A; B stays visible as the latest request and can be resumed (4.9534ms)
+✔ F088-6 a basis recorded on the opened report task is cited, with earlier refs kept by basis ID (3.3241ms)
+✔ F088-7 a corrected condition list fits the response limits without loss or blank items (10.9528ms)
+✔ F088-8 a long continued goal is shortened visibly within the limit; the correction stays whole (1.7804ms)
+✔ F049 purpose identity survives handoff, exact return, changed direction and storage without a second state store (51.5557ms)
+✔ F049 revised origin basis is current, immutable origin stays attributed; home projection never mutates data (1.6124ms)
+✔ F049 late A return is scoped; latest B request is flagged and A report never leaks into B handoff (12.9261ms)
+✖ F049 empty/report-only/legacy projects do not acquire an invented goal; existing IDs survive migration (6.0529ms)
+✔ F049 sibling report and evidence match the existing adjacent return group, without unrelated B reports (4.0598ms)
+✔ F049 long chain retains old requests as bases, not duplicate sources; stale question rejection remains atomic (7.9093ms)
+✔ FIX051 direction remains visible through a small request; correction uses one basis and retains original history (2.2447ms)
+✔ FIX051 two 11000-character requests fit; no root duplication or invented global purpose for unrelated scope (7.8259ms)
+✔ FIX051 off-path B remains visible after late A return and next request, without report mixing (6.8687ms)
+✔ FIX053 return work keeps its effective request and exclusion in current bases, not past-only references (4.0348ms)
+✔ F083-S1 the old key is migrated once, never written; a valid workspace never re-imports it (23.0332ms)
+✔ F083-S2 an unreadable old value, or a migration that does not fit, stays as is: readable where possible, nothing written (3.5598ms)
+✔ F083-S3 a damaged workspace is never overwritten with an empty one (2.3105ms)
+✔ F083-S4 without Web Locks nothing is written (no unprotected fallback); reading still works (2.6026ms)
+✔ F083-S5 an imported copy gets only a new entryId; an exact result file matches inside that entry (16.8961ms)
+✔ F083-S6 autosave edits only its active entry in the lifecycle it opened; trash+restore elsewhere blocks a late save (4.6691ms)
+✔ F083-S7 another tab's newer save of the same entry is not overwritten; concurrent trash and autosave serialise (4.6733ms)
+✔ F083-S8 a quota failure keeps the stored workspace and reports it; nothing is half-written (4.9558ms)
+✔ F083-S9 a refused storage read is not an empty workspace: no migration, no create, nothing written (7.1024ms)
+✖ F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import (22.5683ms)
+✔ F090-2 areas: add (blank note = undecided), rename, archive/restore; typed relations, no self/duplicate links (3.95ms)
+✔ F090-3 a request written for an area is placed there and continues that area, not the open work of another (6.6598ms)
+✔ F090-4 reports follow their task; validation refuses areas on returns, unknown areas and broken relations (7.574ms)
+✔ F090-5 the purpose text is kept (with earlier wording) and is not sent as a request or work instruction (2.7081ms)
+✖ F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space (4.2769ms)
+✔ F090-7 returning to an area continues its latest request (and that request's returns), not a late old report (17.6608ms)
+✖ F090-8 the unsent request's area is saved with the draft; old formats default to following the current work (2.3697ms)
+✖ F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo (1.2185ms)
+✔ F090-10 automatic slots never land on an archived area or on another area at the coordinate limit (1.7769ms)
+✔ F090-11 fit shows every measured card inside the map, however far apart (no 0.4 floor) (3.7601ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\dist\public\shared\diagnostics.js' imported from C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\server\providers\deepseek.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:253:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/dist/public/shared/diagnostics.js'
+}
+
+Node.js v24.19.0
+✖ app\continuity\tests\flow091c.test.mjs (389.4786ms)
+✔ F094-1 REUSE093 A/B and the four counterexamples: nothing added, no assumed incident, request and copies untouched (51.1022ms)
+✔ F094-2 explicit implementation, explicit reproduction and a partial ban are not cancelled or widened (9.1432ms)
+✔ F094-3 a stated unknown cause still gets the fact question (question features); no reproduction is added (2.0925ms)
+✔ F094-4 a returned report is compared and sorted; no fixes or test runs are added (10.4792ms)
+✖ F095-1 the same request sent twice (REUSE093 shape): one full copy, every entry keeps its ID, role and order (34.1172ms)
+✔ F095-2 no normalisation: a different space or line break is a different text and prints in full (5.5459ms)
+✔ F095-3 edits, corrections, reports and decisions are never folded into the request (9.431ms)
+✔ F033-1 relay exact stale choice cannot create a source/basis or enter the next request (62.3885ms)
+✔ F033-2 fresh replies and existing duplicate precedence survive bookkeeping (14.4651ms)
+✔ F033-3 all dispositions and synthetic paths reject stale without input mutation; refreshed questions work (5.9853ms)
+✔ F033-4 unknown advice revision and imported legacy remain read-only; current recovery preserves the boundary (19.4362ms)
+✔ F033-5 rev1 history boundaries recover without repairs, while new same-task bases still reject old replies (5.6682ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\dist\public\shared\diagnostics.js' imported from C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\server\providers\deepseek.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:253:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/dist/public/shared/diagnostics.js'
+}
+
+Node.js v24.19.0
+✖ app\continuity\tests\guide097.test.mjs (418.4815ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\dist\public\shared\diagnostics.js' imported from C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\server\providers\deepseek.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:253:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/dist/public/shared/diagnostics.js'
+}
+
+Node.js v24.19.0
+✖ app\continuity\tests\http.test.mjs (341.85ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\dist\public\shared\diagnostics.js' imported from C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\server\providers\deepseek.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:253:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/dist/public/shared/diagnostics.js'
+}
+
+Node.js v24.19.0
+✖ app\continuity\tests\idea017.test.mjs (343.7717ms)
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\dist\public\shared\diagnostics.js' imported from C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\server\providers\deepseek.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+    at #resolve (node:internal/modules/esm/loader:683:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:253:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/dist/public/shared/diagnostics.js'
+}
+
+Node.js v24.19.0
+✖ app\continuity\tests\idea022.test.mjs (334.2358ms)
+✔ S035-1 explicit report/evidence parent equals preview; sources, bases, history and manual values survive JSON recovery (32.4283ms)
+✔ S035-2 invalid, unexported and other-project IDs fail atomically in submit and preview (5.9031ms)
+✔ S035-3 omitted target preserves zero/single/multiple fallback and reverse task order, not export date (3.443ms)
+✔ S035-4 next B request context contains B return and excludes A return without removing global A request basis (4.48ms)
+✔ S102-1 nothing to check without evidence: no tasks, a kept input, a prepared or exported request (19.6028ms)
+✔ S102-2 an open product choice waits for the user until answered, or until the user continues from that request (3.887ms)
+✔ S102-3 a returned report is listed until the user acts on it (a follow-up request or a follow-up handoff) (4.5265ms)
+✔ S102-4 only the latest return of a task counts; an older report is never counted again (2.8665ms)
+✔ S102-5 a report returning to a follow-up handoff opens the original request; items keep their area; pure and unsaved (5.3094ms)
+✔ S102-6 R1: the item points to R2 (a report to a follow-up handoff), which is not a direct return of A; pointedReturn finds it and never another report (4.8564ms)
+✔ UI001-P1 stage labels distinguish source preservation, API response waiting and prepared work; none claims execution (13.5194ms)
+✔ UI001-P2 an unanswered question is primary; recorded unknown is not a completion or confirmed policy (1.7581ms)
+✔ UI001-P3 real export metadata changes next action; editing a work field asks for recopy, typing a separate draft does not (4.9841ms)
+✔ UI001-P4 stale state remains explicit even with a saved handoff and a preserved manual instruction (1.2167ms)
+✔ UI001-P5 report/source labels stay attributed and titles derive from actual source rather than invented task names (1.8454ms)
+✔ UI001-P6 editing-draft indicators do not change confirmed values or mutate any project data (0.8114ms)
+✖ UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path (32.1962ms)
+✔ UI001-P8 rev1 full handoff detects suggestion text/why and inclusion changes, clears on re-export, ignores equal content (8.8321ms)
+✔ UI001-P9 rev1 compares other delivered context as well, keeps legacy conservative, uses the selected task without writes (2.9338ms)
+✔ RETURN032-R1 array order remains the parent contract, including a later re-export of an older task (3.9877ms)
+✔ RETURN032-R2 no prior task and no export stay distinct without blocking returned sources (0.5314ms)
+✔ RETURN032-R3 drafts and bookkeeping are not basis records; same-value recording and re-export have exact boundaries (1.3846ms)
+✔ RETURN032-R4 every basis status and all records are preserved without relevance selection or a small cap (2.5371ms)
+✔ RETURN032-R5 legacy, missing work, invalid export revisions and unordered basis histories are unknown, never zero (3.6651ms)
+✔ RETURN032-R6 projection leaves handoff text, manual values, source bytes and recovery data untouched (1.842ms)
+ℹ tests 145
+ℹ suites 0
+ℹ pass 129
+ℹ fail 16
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20049.8618
+
+✖ failing tests:
+
+test at app\continuity\tests\connect039.test.mjs:51:1
+✖ C039 v1/v2 migration preserves exact original bytes and null IDs; backup failure blocks save and replacement (7.3505ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'idea015.project.6'
+  - 'idea015.project.5'
+                     ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/connect039.test.mjs:55:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'idea015.project.6',
+    expected: 'idea015.project.5',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\connect039.test.mjs:79:1
+✖ C039 rev1 external v1/v2 recovery fits a v3-only quota and remains writable; stored legacy backup rules stay intact (6.1134ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:6:11)
+      at obj (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:9:5)
+      at file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:679:48
+      at Array.map (<anonymous>)
+      at file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:679:37
+      at Array.map (<anonymous>)
+      at migrateV2 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:676:27)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:749:96)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/connect039.test.mjs:82:56)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+
+test at app\continuity\tests\domain.test.mjs:175:1
+✖ I15-D26 project.1 files migrate without losing records; old AI text is treated as unknown-revision (17.0379ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'idea015.project.6'
+  - 'idea015.project.5'
+                     ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/domain.test.mjs:177:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'idea015.project.6',
+    expected: 'idea015.project.5',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\domain.test.mjs:211:1
+✖ I15-D30 storage reports why it did not save; legacy browser data is kept before the first project.3 write (6.2239ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'idea015.project.6'
+  - 'idea015.project.5'
+                     ^
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/domain.test.mjs:217:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'idea015.project.6',
+    expected: 'idea015.project.5',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\flow049.test.mjs:54:1
+✖ F049 empty/report-only/legacy projects do not acquire an invented goal; existing IDs survive migration (6.0529ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:6:11)
+      at obj (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:9:5)
+      at file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:679:48
+      at Array.map (<anonymous>)
+      at file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:679:37
+      at Array.map (<anonymous>)
+      at migrateV2 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:676:27)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:749:96)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/flow049.test.mjs:58:20)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+
+test at app\continuity\tests\flow090.test.mjs:18:1
+✖ F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import (22.5683ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:6:11)
+      at file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:722:62
+      at Array.map (<anonymous>)
+      at file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:722:51
+      at Array.map (<anonymous>)
+      at migrateV5 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:718:27)
+      at migrateV4 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:709:12)
+      at migrateV3 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:688:12)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:749:134)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/flow090.test.mjs:20:26)
+
+test at app\continuity\tests\flow090.test.mjs:76:1
+✖ F090-6 a stored project.3 entry opens through the workspace and the next save keeps its space (4.2769ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    {
+      areas: [],
+      brief: null,
+      draftTarget: null,
+      layout: {
+  ...
+      relations: [],
+  +   understanding: {}
+    }
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/flow090.test.mjs:82:33)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} }, understanding: {} },
+    expected: { brief: null, areas: [], relations: [], draftTarget: null, layout: { version: 'layout.1', positions: {} } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\flow090.test.mjs:104:1
+✖ F090-8 the unsent request's area is saved with the draft; old formats default to following the current work (2.3697ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:6:11)
+      at migrateV5 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:717:5)
+      at migrateV4 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:709:12)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:749:172)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/flow090.test.mjs:107:73)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+
+test at app\continuity\tests\flow090.test.mjs:117:1
+✖ F090-9 map positions: fixed defaults, free slots for new areas, one-field moves and a conditional undo (1.2185ms)
+  Error [ContextError]: INVALID_DATA
+      at ensure (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:6:11)
+      at migrateV5 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:717:5)
+      at migrateV4 (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:709:12)
+      at parseProject (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/dist/public/shared/validation.js:749:172)
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/flow090.test.mjs:121:13)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+
+test at app\continuity\tests\flow091c.test.mjs:1:1
+✖ app\continuity\tests\flow091c.test.mjs (389.4786ms)
+  'test failed'
+
+test at app\continuity\tests\flow095.test.mjs:19:1
+✖ F095-1 the same request sent twice (REUSE093 shape): one full copy, every entry keeps its ID, role and order (34.1172ms)
+  AssertionError [ERR_ASSERTION]: the background copy is untouched
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/continuity/tests/flow095.test.mjs:23:71)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at app\continuity\tests\guide097.test.mjs:1:1
+✖ app\continuity\tests\guide097.test.mjs (418.4815ms)
+  'test failed'
+
+test at app\continuity\tests\http.test.mjs:1:1
+✖ app\continuity\tests\http.test.mjs (341.85ms)
+  'test failed'
+
+test at app\continuity\tests\idea017.test.mjs:1:1
+✖ app\continuity\tests\idea017.test.mjs (343.7717ms)
+  'test failed'
+
+test at app\continuity\tests\idea022.test.mjs:1:1
+✖ app\continuity\tests\idea022.test.mjs (334.2358ms)
+  'test failed'
+
+test at app\continuity\tests\ui001.test.mjs:55:1
+✖ UI001-P7 changed HTML/CSS and the new presentation module are served by the existing real local HTTP path (32.1962ms)
+  Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\dist\public\shared\diagnostics.js' imported from C:\Users\이준혁\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product17-author\app\server\providers\deepseek.mjs
+      at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+      at moduleResolve (node:internal/modules/esm/resolve:865:10)
+      at defaultResolve (node:internal/modules/esm/resolve:992:11)
+      at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+      at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+      at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)
+      at #resolve (node:internal/modules/esm/loader:683:17)
+      at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)
+      at ModuleJob.syncLink (node:internal/modules/esm/module_job:163:33)
+      at ModuleJob.link (node:internal/modules/esm/module_job:253:17) {
+    code: 'ERR_MODULE_NOT_FOUND',
+    url: 'file:///C:/Users/%EC%9D%B4%EC%A4%80%ED%98%81/Documents/Codex/2026-10-15/github-plugin-github-openai-curated-remote-4/work/product17-author/app/dist/public/shared/diagnostics.js'
+  }
