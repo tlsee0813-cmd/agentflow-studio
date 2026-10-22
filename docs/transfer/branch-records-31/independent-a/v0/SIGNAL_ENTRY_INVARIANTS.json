@@ -1,0 +1,110 @@
+[
+  {
+    "run": "normal-ui-main",
+    "viewport": 1280,
+    "label": "CHECK signal first owner actual visible line Tab then Enter",
+    "firstOwner": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "자료 보관 안내를 함께 준비하는 전체 운영 흐름 · 후속 작업문 없는 보고",
+    "rawLine": 158,
+    "sameCameraAsPreTab": true,
+    "sameFoldsAsPreTab": true,
+    "sameComputedMatrixAsPreTab": true
+  },
+  {
+    "run": "normal-ui-main",
+    "viewport": 1280,
+    "label": "CHECK signal first owner actual visible line Space overrides prior closed/deep memo",
+    "firstOwner": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "자료 보관 안내를 함께 준비하는 전체 운영 흐름 · 후속 작업문 없는 보고",
+    "rawLine": 167,
+    "sameCameraAsPreTab": true,
+    "sameFoldsAsPreTab": true,
+    "sameComputedMatrixAsPreTab": true
+  },
+  {
+    "run": "normal-ui-main",
+    "viewport": 1280,
+    "label": "CHECK signal first owner actual visible line other same-name parent",
+    "firstOwner": "A_4333d5ce-93ec-4e24-913e-781e7089f5f2",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "다른 가지의 설명 소유 부분 · 후속 작업문 없는 보고",
+    "rawLine": 177,
+    "sameCameraAsPreTab": true,
+    "sameFoldsAsPreTab": true,
+    "sameComputedMatrixAsPreTab": true
+  },
+  {
+    "run": "normal-ui-main",
+    "viewport": 1440,
+    "label": "CHECK signal first owner actual visible line Tab then Enter",
+    "firstOwner": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "자료 보관 안내를 함께 준비하는 전체 운영 흐름 · 후속 작업문 없는 보고",
+    "rawLine": 284,
+    "sameCameraAsPreTab": true,
+    "sameFoldsAsPreTab": true,
+    "sameComputedMatrixAsPreTab": true
+  },
+  {
+    "run": "normal-ui-main",
+    "viewport": 1440,
+    "label": "CHECK signal first owner actual visible line Space overrides prior closed/deep memo",
+    "firstOwner": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "자료 보관 안내를 함께 준비하는 전체 운영 흐름 · 후속 작업문 없는 보고",
+    "rawLine": 293,
+    "sameCameraAsPreTab": true,
+    "sameFoldsAsPreTab": true,
+    "sameComputedMatrixAsPreTab": true
+  },
+  {
+    "run": "normal-ui-main",
+    "viewport": 1440,
+    "label": "CHECK signal first owner actual visible line other same-name parent",
+    "firstOwner": "A_3c49a788-3f32-4cac-9a95-1a2575a59bb0",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "다른 가지의 설명 소유 부분 · 후속 작업문 없는 보고",
+    "rawLine": 303,
+    "sameCameraAsPreTab": true,
+    "sameFoldsAsPreTab": true,
+    "sameComputedMatrixAsPreTab": true
+  },
+  {
+    "run": "owner-lines",
+    "viewport": 1280,
+    "label": "CHECK signal first owner actual visible line focused P first record before scrolling",
+    "firstOwner": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "자료 보관 안내를 함께 준비하는 전체 운영 흐름 · 후속 작업문 없는 보고",
+    "rawLine": 313
+  },
+  {
+    "run": "owner-lines",
+    "viewport": 1280,
+    "label": "CHECK signal first owner actual visible line focused other actual first child owner",
+    "firstOwner": "A_874f85ee-6ed8-4428-9ea3-d510f139d075",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "다른 가지의 설명 소유 부분 · 후속 작업문 없는 보고",
+    "rawLine": 330
+  },
+  {
+    "run": "owner-lines",
+    "viewport": 1440,
+    "label": "CHECK signal first owner actual visible line focused P first record before scrolling",
+    "firstOwner": "A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "자료 보관 안내를 함께 준비하는 전체 운영 흐름 · 후속 작업문 없는 보고",
+    "rawLine": 418
+  },
+  {
+    "run": "owner-lines",
+    "viewport": 1440,
+    "label": "CHECK signal first owner actual visible line focused other actual first child owner",
+    "firstOwner": "A_3d6ad30f-2204-408d-b04c-d3ff1808cfef",
+    "actualOwnerLinesAllFullHit": true,
+    "captionText": "다른 가지의 설명 소유 부분 · 후속 작업문 없는 보고",
+    "rawLine": 434
+  }
+]

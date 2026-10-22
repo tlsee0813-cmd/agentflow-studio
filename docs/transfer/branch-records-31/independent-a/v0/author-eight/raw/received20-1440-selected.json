@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_5742c252-f924-40de-a877-1909c676923f",
+  "taskId": "T_19c5bc49-109f-4ff0-8cea-0345ec133cd6",
+  "returnId": "H31_B_LATE",
+  "report": "[합성31 보고] H31_B_LATE",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_0aad9c83-1848-4c5a-a83c-32494b50d5ef",
+    "basedOn": 1,
+    "summary": "[합성31 B 새 설명] 이번 탭 수신으로 표시한다.",
+    "changes": [],
+    "proposal": null,
+    "origin": "합성31 검사 작성자 구성 · 앱/실행 검증 아님"
+  }
+}

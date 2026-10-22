@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+  "expectedPC": 2,
+  "completed": [],
+  "checks": [],
+  "failedChecks": [],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle31-ui/check.py\", line 76, in <module>\n    for w,h in [(1280,720),(1440,900)]:u.run(w,h)\n                                       ^^^^^^^^^^\n  File \"/workspace/browser-env/cycle31-ui/check.py\", line 49, in run\n    self.configure(w,h);sig='#branch-records-'+self.P;start=self.p.evaluate(SNAP);tabs=[]\n    ^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle31-ui/check.py\", line 29, in configure\n    self.map0();self.click(self.p.locator('#node-info-'+self.P),'P info before native preparation fit')\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle31-ui/support.py\", line 49, in click\n    before=self.reach(q);q.click();self.log('normal click '+label,{'before':before,'after':self.snap()})\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle31-ui/support.py\", line 46, in reach\n    r=g['rect'];c=g['clip'];dy=r['top']-c['top']-5 if r['top']<c['top'] else r['bottom']-c['bottom']+5;panel=q.locator('xpath=ancestor::*[@id=\"area-panel-body\"]');self.wheel(max(-400,min(400,dy)),panel if panel.count() else None)\n                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle31-ui/support.py\", line 40, in wheel\n    try:self.p.mouse.move(x,y);self.p.mouse.wheel(0,dy);v=self.p.evaluate('async()=>await window.__ind23Wheel.promise');self.log('native wheel',v);assert v['ok'],v\n                                                                                                                                                          ~^^^^^^\nAssertionError: {'ok': False, 'reason': 'native-scroll-deadline', 'events': [{'type': 'wheel', 'delta': -279.701904296875, 'target': 'main'}], 'y': 0}\n",
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 1,
+  "notRun": [
+    "same-session signal truly disappears through normal UI",
+    "actual OS IME",
+    "paid AI/human usability/full29 regression/30 fix injection"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle31-ui/owner-lines/check.py"
+  ],
+  "sourceCommit": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+  "startUTC": "2026-10-22T21:25:53.439810+00:00",
+  "endUTC": "2026-10-22T21:26:05.609786+00:00",
+  "checkerSHA256": "9e8ecd67bfae7f4c5eb72be6bc066dd81444cfde2bef685e9af75e36429755ac",
+  "checkerAfterSHA256": "9e8ecd67bfae7f4c5eb72be6bc066dd81444cfde2bef685e9af75e36429755ac",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "8cc5e6c301bdca5b0a69827bdc9db6b7650b9f3a88d31dc396fa7f4679e7d8ca"
+}

@@ -1,0 +1,40 @@
+[
+  {
+    "label": "typecheck",
+    "command": [
+      "tsc",
+      "--noEmit",
+      "-p",
+      "continuity/tsconfig.json"
+    ],
+    "startUTC": "2026-10-22T21:18:36.322936+00:00",
+    "endUTC": "2026-10-22T21:18:38.576361+00:00",
+    "exit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "build-root",
+    "command": [
+      "node",
+      "scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T21:18:38.576430+00:00",
+    "endUTC": "2026-10-22T21:18:39.935666+00:00",
+    "exit": 0,
+    "stdoutSHA256": "450914f0c3f2118a725a106715da4c6f4dcff695f625940e4627593a2d0d0697",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "build-continuity",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T21:18:39.935695+00:00",
+    "endUTC": "2026-10-22T21:18:42.635961+00:00",
+    "exit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

@@ -1,0 +1,13 @@
+test_01_exact_subtree_old_memo_and_keyboard (__main__.BranchRecords31.test_01_exact_subtree_old_memo_and_keyboard) ... ok
+test_02_exact_report_return_and_input_escape (__main__.BranchRecords31.test_02_exact_report_return_and_input_escape) ... ok
+test_03_old_work_and_records_origin_yield_to_new_parent (__main__.BranchRecords31.test_03_old_work_and_records_origin_yield_to_new_parent) ... ok
+test_04_caller_lifetime_modes_project_and_offscreen (__main__.BranchRecords31.test_04_caller_lifetime_modes_project_and_offscreen) ... ok
+test_01_exact_subtree_old_memo_and_keyboard (__main__.BranchRecords31Wide.test_01_exact_subtree_old_memo_and_keyboard) ... ok
+test_02_exact_report_return_and_input_escape (__main__.BranchRecords31Wide.test_02_exact_report_return_and_input_escape) ... ok
+test_03_old_work_and_records_origin_yield_to_new_parent (__main__.BranchRecords31Wide.test_03_old_work_and_records_origin_yield_to_new_parent) ... ok
+test_04_caller_lifetime_modes_project_and_offscreen (__main__.BranchRecords31Wide.test_04_caller_lifetime_modes_project_and_offscreen) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 25.982s
+
+OK

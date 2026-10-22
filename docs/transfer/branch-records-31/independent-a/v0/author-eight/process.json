@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "continuity/tests/branch-records31_browser.py"
+  ],
+  "sourceScriptHead": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+  "runtimeProductBase": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+  "startUTC": "2026-10-22T21:21:03.043020+00:00",
+  "endUTC": "2026-10-22T21:21:29.211570+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "1002cde09d29494104949a92c19f75779c6b4a18c9f71a170a3166a199b4977a",
+  "serverExit": "not separately captured by original author harness"
+}

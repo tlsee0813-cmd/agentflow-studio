@@ -1,0 +1,24 @@
+[
+  {
+    "run": "normal-ui-main",
+    "rawFile": "normal-ui-main/ui.jsonl",
+    "startUTC": "2026-10-22T21:23:43.935521+00:00",
+    "endUTC": "2026-10-22T21:24:04.310757+00:00",
+    "firstLine": 75,
+    "lastLine": 330,
+    "selectedRows": 256,
+    "allRows": 330,
+    "note": "append logger retains previous failed prefix; use this time/line range for this exact current execution"
+  },
+  {
+    "run": "owner-lines",
+    "rawFile": "owner-lines/ui.jsonl",
+    "startUTC": "2026-10-22T21:28:00.854566+00:00",
+    "endUTC": "2026-10-22T21:28:17.630611+00:00",
+    "firstLine": 231,
+    "lastLine": 443,
+    "selectedRows": 213,
+    "allRows": 443,
+    "note": "append logger retains previous failed prefix; use this time/line range for this exact current execution"
+  }
+]

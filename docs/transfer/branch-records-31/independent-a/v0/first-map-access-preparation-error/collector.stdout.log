@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle31-ui/check.py", line 76, in <module>
+    for w,h in [(1280,720),(1440,900)]:u.run(w,h)
+                                       ^^^^^^^^^^
+  File "/workspace/browser-env/cycle31-ui/check.py", line 49, in run
+    self.configure(w,h);sig='#branch-records-'+self.P;start=self.p.evaluate(SNAP);tabs=[]
+    ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle31-ui/check.py", line 29, in configure
+    self.map0();self.click(self.p.locator('#node-info-'+self.P),'P info before native preparation fit')
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle31-ui/support.py", line 49, in click
+    before=self.reach(q);q.click();self.log('normal click '+label,{'before':before,'after':self.snap()})
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle31-ui/support.py", line 46, in reach
+    r=g['rect'];c=g['clip'];dy=r['top']-c['top']-5 if r['top']<c['top'] else r['bottom']-c['bottom']+5;panel=q.locator('xpath=ancestor::*[@id="area-panel-body"]');self.wheel(max(-400,min(400,dy)),panel if panel.count() else None)
+                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle31-ui/support.py", line 40, in wheel
+    try:self.p.mouse.move(x,y);self.p.mouse.wheel(0,dy);v=self.p.evaluate('async()=>await window.__ind23Wheel.promise');self.log('native wheel',v);assert v['ok'],v
+                                                                                                                                                          ~^^^^^^
+AssertionError: {'ok': False, 'reason': 'native-scroll-deadline', 'events': [{'type': 'wheel', 'delta': -279.701904296875, 'target': 'main'}], 'y': 0}
+
+

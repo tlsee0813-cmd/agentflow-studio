@@ -1,0 +1,240 @@
+{
+  "sourceCommit": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+  "scope": "narrow actual owner/status lines and other same-name report return; not rerun full modes/project/fallback",
+  "expectedPC": 2,
+  "completed": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "complete": true,
+      "QquestionTwoLevels": "A_e254f0c1-0100-462f-bb0a-e9864d0bb537",
+      "D": "A_a00d9478-d810-4a27-84e5-d4f74a57b6c5",
+      "Lowner": "A_874f85ee-6ed8-4428-9ea3-d510f139d075",
+      "exactReport": "T_8adfa7e3-4907-44f9-84c1-6c94a81c0584"
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "complete": true,
+      "QquestionTwoLevels": "A_e254f0c1-0100-462f-bb0a-e9864d0bb537",
+      "D": "A_a00d9478-d810-4a27-84e5-d4f74a57b6c5",
+      "Lowner": "A_3d6ad30f-2204-408d-b04c-d3ff1808cfef",
+      "exactReport": "T_d63d37ac-ff66-4118-bb59-d593626d9c14"
+    }
+  ],
+  "checks": [
+    {
+      "pass": true,
+      "label": "signal first owner actual visible line focused P first record before scrolling",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK signal first owner actual visible line focused P first record before scrolling"
+    },
+    {
+      "pass": true,
+      "label": "signal read preserves current draft target and all project data focused P first record before scrolling",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK signal read preserves current draft target and all project data focused P first record before scrolling"
+    },
+    {
+      "pass": true,
+      "label": "two levels below P real Q owner line visible",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK two levels below P real Q owner line visible"
+    },
+    {
+      "pass": true,
+      "label": "Q actual recorded question answer-status line visible",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK Q actual recorded question answer-status line visible"
+    },
+    {
+      "pass": true,
+      "label": "two-level Q lineage remains exact IDs",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK two-level Q lineage remains exact IDs"
+    },
+    {
+      "pass": true,
+      "label": "actual description owner/status visible 현재 설명",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK actual description owner/status visible 현재 설명"
+    },
+    {
+      "pass": true,
+      "label": "actual prepared status wording 현재 설명",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK actual prepared status wording 현재 설명"
+    },
+    {
+      "pass": true,
+      "label": "actual description owner/status visible 이전 기준",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK actual description owner/status visible 이전 기준"
+    },
+    {
+      "pass": true,
+      "label": "actual prepared status wording 이전 기준",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK actual prepared status wording 이전 기준"
+    },
+    {
+      "pass": true,
+      "label": "actual description owner/status visible 보류",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK actual description owner/status visible 보류"
+    },
+    {
+      "pass": true,
+      "label": "actual prepared status wording 보류",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK actual prepared status wording 보류"
+    },
+    {
+      "pass": true,
+      "label": "close lifetime focus/camera focused P close",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK close lifetime focus/camera focused P close"
+    },
+    {
+      "pass": true,
+      "label": "signal first owner actual visible line focused other actual first child owner",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK signal first owner actual visible line focused other actual first child owner"
+    },
+    {
+      "pass": true,
+      "label": "signal read preserves current draft target and all project data focused other actual first child owner",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK signal read preserves current draft target and all project data focused other actual first child owner"
+    },
+    {
+      "pass": true,
+      "label": "other same-name parent exact actual-H child report selection",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK other same-name parent exact actual-H child report selection"
+    },
+    {
+      "pass": true,
+      "label": "other report returns own same-name parent not old P",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK other report returns own same-name parent not old P"
+    },
+    {
+      "pass": true,
+      "label": "close lifetime focus/camera other actual report then branch caller close",
+      "viewport": 1280,
+      "rawReference": "ui.jsonl CHECK close lifetime focus/camera other actual report then branch caller close"
+    },
+    {
+      "pass": true,
+      "label": "signal first owner actual visible line focused P first record before scrolling",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK signal first owner actual visible line focused P first record before scrolling"
+    },
+    {
+      "pass": true,
+      "label": "signal read preserves current draft target and all project data focused P first record before scrolling",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK signal read preserves current draft target and all project data focused P first record before scrolling"
+    },
+    {
+      "pass": true,
+      "label": "two levels below P real Q owner line visible",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK two levels below P real Q owner line visible"
+    },
+    {
+      "pass": true,
+      "label": "Q actual recorded question answer-status line visible",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK Q actual recorded question answer-status line visible"
+    },
+    {
+      "pass": true,
+      "label": "two-level Q lineage remains exact IDs",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK two-level Q lineage remains exact IDs"
+    },
+    {
+      "pass": true,
+      "label": "actual description owner/status visible 현재 설명",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK actual description owner/status visible 현재 설명"
+    },
+    {
+      "pass": true,
+      "label": "actual prepared status wording 현재 설명",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK actual prepared status wording 현재 설명"
+    },
+    {
+      "pass": true,
+      "label": "actual description owner/status visible 이전 기준",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK actual description owner/status visible 이전 기준"
+    },
+    {
+      "pass": true,
+      "label": "actual prepared status wording 이전 기준",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK actual prepared status wording 이전 기준"
+    },
+    {
+      "pass": true,
+      "label": "actual description owner/status visible 보류",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK actual description owner/status visible 보류"
+    },
+    {
+      "pass": true,
+      "label": "actual prepared status wording 보류",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK actual prepared status wording 보류"
+    },
+    {
+      "pass": true,
+      "label": "close lifetime focus/camera focused P close",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK close lifetime focus/camera focused P close"
+    },
+    {
+      "pass": true,
+      "label": "signal first owner actual visible line focused other actual first child owner",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK signal first owner actual visible line focused other actual first child owner"
+    },
+    {
+      "pass": true,
+      "label": "signal read preserves current draft target and all project data focused other actual first child owner",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK signal read preserves current draft target and all project data focused other actual first child owner"
+    },
+    {
+      "pass": true,
+      "label": "other same-name parent exact actual-H child report selection",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK other same-name parent exact actual-H child report selection"
+    },
+    {
+      "pass": true,
+      "label": "other report returns own same-name parent not old P",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK other report returns own same-name parent not old P"
+    },
+    {
+      "pass": true,
+      "label": "close lifetime focus/camera other actual report then branch caller close",
+      "viewport": 1440,
+      "rawReference": "ui.jsonl CHECK close lifetime focus/camera other actual report then branch caller close"
+    }
+  ],
+  "failedChecks": [],
+  "fatal": null,
+  "pageerrors": [],
+  "cleanup": [],
+  "plannedChildExit": 0
+}

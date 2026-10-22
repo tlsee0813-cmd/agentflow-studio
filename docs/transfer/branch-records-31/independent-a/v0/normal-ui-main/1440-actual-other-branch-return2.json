@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_9369fc80-5d53-4567-b826-1bdca9f28b5a",
+  "taskId": "T_73c53046-c7c9-4a50-a9dd-a26743d05f81",
+  "returnId": "H_f4b9a85e-25f5-47f1-aa55-e95e806ad887",
+  "report": "[명시 합성31 보고] 다른 가지의 소유 부분 안내를 읽었다. 실제 구현·AI 실행 기록이 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_3c49a788-3f32-4cac-9a95-1a2575a59bb0",
+    "basedOn": 0,
+    "summary": "[명시 합성31 다른 가지 설명] 같은 이름의 다른 부모 아래에서만 읽는 참고다. 실제 실행 결과나 확정 조건이 아니다.",
+    "changes": [
+      "받은 설명의 소유 부분을 구별한다."
+    ],
+    "proposal": null,
+    "origin": "독립 관측자가 실제 UI 파일용 H/template에 쓴 합성31"
+  }
+}

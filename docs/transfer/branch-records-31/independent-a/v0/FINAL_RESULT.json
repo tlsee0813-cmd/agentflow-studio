@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "0d9831b1141fe14ba0ce91dfc762ce9119041348",
+  "authorNewEight": {
+    "executed": 8,
+    "childExit": 0,
+    "fixture": "public domain API synthetic recovery, separate author role"
+  },
+  "independentMain": {
+    "completedPC": 2,
+    "childExit": 0,
+    "failedChecks": [],
+    "fatal": null
+  },
+  "independentOwnerLineSupplement": {
+    "completedPC": 2,
+    "childExit": 0,
+    "failedChecks": [],
+    "fatal": null
+  },
+  "preparationErrorsPreserved": [
+    "main first-map-access: P offscreen camera; page wheel cannot reveal map-local clipped card. Normal existing fit used only to prepare, before preservation baseline.",
+    "supplement first-inline-hit: inline multi-line bounding-box centre hit adjacent button; glyph Range based native reach used subsequently.",
+    "supplement second-task-field: attempted nonexistent Task.areaId after exact report opened; use visible area breadcrumb plus actual raw return understanding.areaId instead."
+  ],
+  "aggregateDecisionExit": 0,
+  "noProductFailureObservedWithinExecutedNarrowScenes": true,
+  "limitations": [
+    "same-session signal disappearance through normal UI NOT_RUN",
+    "relation panel mode lifetime checked with zero relation input; no nonempty relation endpoint claim",
+    "map CSS11px at observed54% is about5.9px; button/line visibility is not comfortable human reading proof",
+    "offscreen fallback focus is sr-only title, not visible emphasis",
+    "30 code excluded; preparation uses native work scroll0, no30 fix or deep30 acceptance",
+    "old work/records origin invalidation is author test03 coverage, not independent full matrix",
+    "no full29 regression/CI/paid AI/OS IME/human usability"
+  ]
+}

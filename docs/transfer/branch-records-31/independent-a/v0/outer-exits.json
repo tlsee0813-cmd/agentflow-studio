@@ -1,0 +1,50 @@
+{
+  "build": {
+    "session": 64782,
+    "completion": "e39891",
+    "actualCollectorExit": 0
+  },
+  "author-eight": {
+    "session": 3904,
+    "completion": "5117e2",
+    "actualCollectorExit": 0,
+    "childExit": 0,
+    "serverExit": "NOT_CAPTURED separately by original author harness"
+  },
+  "first-map-access-preparation-error": {
+    "session": 28453,
+    "completion": "7fbc2a",
+    "actualCollectorExit": 1,
+    "childExit": 1
+  },
+  "normal-ui-main": {
+    "session": 58294,
+    "completion": "e58b95",
+    "actualCollectorExit": 0,
+    "childExit": 0
+  },
+  "first-inline-hit-preparation-error": {
+    "session": 26318,
+    "completion": "b98c46",
+    "actualCollectorExit": 1,
+    "childExit": 1
+  },
+  "second-task-field-preparation-error": {
+    "session": 69688,
+    "completion": "709d73",
+    "actualCollectorExit": 1,
+    "childExit": 1
+  },
+  "owner-lines": {
+    "session": 35541,
+    "completion": "7746f4",
+    "actualCollectorExit": 0,
+    "childExit": 0
+  },
+  "offline-analysis": {
+    "completion": "c5969d",
+    "actualCollectorExit": 0,
+    "notAnotherUIRun": true
+  },
+  "independentServers": "Each explicitly terminated after execution, actual exit -15 distinct from child/collector"
+}
