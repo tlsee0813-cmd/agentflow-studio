@@ -1,0 +1,40 @@
+{
+  "kind": "Existing USE106 Windows clipboard representation rule applied to AREA17/18 tests; not a new product defect",
+  "normalization": "One-pass CRLF pairs only -> LF; lone CR, other whitespace and Unicode unchanged",
+  "execution": "AST-extracted pure helper only; test modules not imported",
+  "browser": "NOT_RUN",
+  "server": "NOT_RUN",
+  "productEdits": false,
+  "download": "unchanged; helper used only after clipboard read",
+  "diffCheck": 0,
+  "results": [
+    {
+      "path": "app/continuity/tests/understanding17_browser.py",
+      "sha256": "d82a4c6d923654d607c348d881b80a5ebc72fea1fde9e261e064ee4d535821bb",
+      "astExit": 0,
+      "pairOnlyProbe": "passed",
+      "raw": "A\r\nB\rC\nD\r\r\n\t  \ud55c\uae00\ud83d\ude00e\u0301\u00a0",
+      "expected": "A\nB\rC\nD\r\n\t  \ud55c\uae00\ud83d\ude00e\u0301\u00a0",
+      "actual": "A\nB\rC\nD\r\n\t  \ud55c\uae00\ud83d\ude00e\u0301\u00a0",
+      "linuxUnchanged": true,
+      "loneCRWhitespaceUnicodeUnchanged": true,
+      "utf16Units": 19
+    },
+    {
+      "path": "app/continuity/tests/hierarchy18_browser.py",
+      "sha256": "d875b5bdd1aeddbe25b336f47e7b69902713da2244511c32b47c8d55ce09c297",
+      "astExit": 0,
+      "pairOnlyProbe": "passed",
+      "raw": "A\r\nB\rC\nD\r\r\n\t  \ud55c\uae00\ud83d\ude00e\u0301\u00a0",
+      "expected": "A\nB\rC\nD\r\n\t  \ud55c\uae00\ud83d\ude00e\u0301\u00a0",
+      "actual": "A\nB\rC\nD\r\n\t  \ud55c\uae00\ud83d\ude00e\u0301\u00a0",
+      "linuxUnchanged": true,
+      "loneCRWhitespaceUnicodeUnchanged": true,
+      "utf16Units": 19
+    }
+  ],
+  "preliminaryProbeCorrections": [
+    "Terminal quoting SyntaxError; reran using stdin source.",
+    "Removed an invalid probe idempotence assumption: original CR+CRLF becomes CR+LF, preserving the original lone CR in this single pass. No test helper change was needed."
+  ]
+}

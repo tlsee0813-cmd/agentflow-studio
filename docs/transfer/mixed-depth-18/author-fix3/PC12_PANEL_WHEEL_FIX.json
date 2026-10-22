@@ -1,0 +1,45 @@
+{
+  "sourceChange": "NONE; only pc12_browser.py edited for this task",
+  "file": "app/continuity/tests/pc12_browser.py",
+  "oldSha256": "0efcea2c756e3e29b120b30e403bdc09f24f87c063606f98ef73e875718e2239",
+  "newSha256": "89ce4d43cd8461d278648692dabf16a962ff056f0c05c6a2390e5e2bcb7f821c",
+  "productAppSha256": "c777d4a7cddd1f3fb4d512689763e60507d461f2cfb789192c97a1c6a9e2dfe0",
+  "ci": {
+    "run": "39771749904",
+    "job": "119801149685",
+    "reported": "PC12 15 total/5 failed at panel-task viewport (test01/02/08 Pc12 and test09 Pc12/Pc12Wide)"
+  },
+  "diagnosis": {
+    "observedCode": "Old depart wheels WIDTH-20 at page coordinates once and requires windowY>0; long-idea helper wheels WIDTH-40 with a page-viewport-only stop. New panel outer overflow:hidden with pinned title/actions, body overflow:auto/overscroll contain, and tasks inside body.",
+    "classification": "Concrete harness/input-target mismatch matching all five reported failure locations; no independent local browser reproduction and no blanket product-correctness claim."
+  },
+  "changed": [
+    "Native wheel targets hit-tested body padding (not nested source text scrollers). Follow-up delta is measured from caller/body bounds and clamped to max step with up to4px available padding, preventing fixed-step overshoot loops.",
+    "Task must remain fully inside body AND viewport and center hit-testable; original to_be_in_viewport/click retained. No DOM visibility substitute or scrollTop assignment.",
+    "Panel reading scroll and relative caller anchor observed/checked on return; unchanged body geometry additionally preserves scrollTop. Existing map matrix/card rect/scale/selection/disclosure/windowY/focus/saved-state/unsent-draft/current-task/manual-edit assertions retained.",
+    "Area-screen page-wheel helper unchanged. Existing narrow390 path unchanged."
+  ],
+  "otherScripts": {
+    "highRisk": [
+      "pc13_browser.py:207 depart uses WIDTH-30 page wheel before panel task viewport",
+      "report16_browser.py:144 depart uses WIDTH-20 page wheel and asserts windowY>0"
+    ],
+    "differentPurpose": [
+      "flow090_browser.py:416 already targets #area-panel-body; panel actions pinned",
+      "hierarchy18_browser.py:216 already wheels reading body",
+      "home15_browser.py:211 list scrolling and234 project-read-body scrolling are separate surfaces",
+      "understanding17_browser.py:127/166 map/received-area positioning, not panel-task reach; inspect actual external results before changes",
+      "pc13_browser.py:149/301/328 page-to-top setup is separate from its panel-task helper",
+      "pc12_browser.py area_depart stays page scroll because it is the separate area screen"
+    ],
+    "edits": "NONE outside PC12"
+  },
+  "checks": {
+    "AST": "pc12-panel-wheel-final-ast exit0",
+    "diffCheck": "pc12-panel-wheel-final-diffcheck exit0",
+    "browser": "NOT RUN",
+    "server": "NOT STARTED",
+    "commitPush": "NOT RUN"
+  },
+  "limitation": "Runtime wheel hit/clip/caller restoration must still be independently executed; these assertions can expose a product issue rather than being relaxed if it remains."
+}

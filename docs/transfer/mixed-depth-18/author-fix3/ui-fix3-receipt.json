@@ -1,0 +1,32 @@
+{
+  "kind": "AREA18 explicit caller panel anchor fix",
+  "source": "app/continuity/src/client/app.ts",
+  "sha256": "C777D4A7CDDD1F3FB4D512689763E60507D461F2CFB789192C97A1C6A9E2DFE0",
+  "reason": "Cloud classified the original first-visible report-row anchor disappearing after a real child request; the surviving explicit caller was not restored.",
+  "changes": [
+    "capturePanelReading optionally prefers an actually displayed caller inside the current panel body.",
+    "markOrigin passes focus or active caller identity before cloning the panel memo.",
+    "Ordinary reading events retain their prior first-visible fallback.",
+    "Test-only: accept the new body max after the old import notice disappears, and independently check a native Home/PageDown middle reading anchor across the same-entry list roundtrip."
+  ],
+  "review": [
+    "Preferred anchor must be in the current body visible-item list; external, absent or hidden callers use fallback.",
+    "Origin clones its memo before subsequent general render captures.",
+    "Stored report/source and model semantics are not changed."
+  ],
+  "checks": {
+    "typeSyntaxBoundary": 0,
+    "diffCheck": 0,
+    "runtime": "Node24 author auxiliary",
+    "browser": "NOT_RUN",
+    "server": "NOT_RUN",
+    "build": 0,
+    "pythonAST": 0
+  },
+  "testFile": {
+    "state": "Original three caller-anchor failure assertions unchanged. Only new project-list roundtrip assertion accepts min(previousScroll,newMax); explicit reading-item and separate native nonzero middle-position roundtrips remain checked.",
+    "sha256": "92241F6D957E6A34F3853B9364B64E623187983B7511A5517B0A59ABED02DBCE",
+    "path": "app/continuity/tests/hierarchy18_browser.py"
+  },
+  "commitPush": "not performed by this author"
+}
