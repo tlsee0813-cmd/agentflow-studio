@@ -1,0 +1,29 @@
+[
+  {
+    "name": "root-build",
+    "command": [
+      "node",
+      "scripts/build.mjs"
+    ],
+    "cwd": "/workspace/browser-env/cycle23-candidate/app",
+    "startUTC": "2026-10-22T17:36:49.971149+00:00",
+    "endUTC": "2026-10-22T17:36:51.428209+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "450914f0c3f2118a725a106715da4c6f4dcff695f625940e4627593a2d0d0697",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "description23-unit-after-root-build",
+    "command": [
+      "node",
+      "--test",
+      "continuity/tests/description23.test.mjs"
+    ],
+    "cwd": "/workspace/browser-env/cycle23-candidate/app",
+    "startUTC": "2026-10-22T17:36:51.428310+00:00",
+    "endUTC": "2026-10-22T17:36:51.613101+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e2fbb13cac0fd6cbf94241afff453b81ed1fbb7e24418d0ff7d835973db78b95",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

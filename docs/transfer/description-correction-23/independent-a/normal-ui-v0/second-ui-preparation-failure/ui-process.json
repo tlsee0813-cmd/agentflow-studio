@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle23-independent/ui.py"
+  ],
+  "startUTC": "2026-10-22T17:40:22.267899+00:00",
+  "endUTC": "2026-10-22T17:40:26.275858+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "d225eb1fdfc9d45dc69937064fd93422b6856de6b3b9627457912b6dd31375d9",
+  "collectorPlannedExit": 1
+}

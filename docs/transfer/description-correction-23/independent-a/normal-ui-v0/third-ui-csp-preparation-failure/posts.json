@@ -1,0 +1,75 @@
+[
+  {
+    "UTC": "2026-10-22T17:40:56.353963+00:00",
+    "viewport": 1280,
+    "url": "http://127.0.0.1:43069/api/continuity",
+    "payload": {
+      "schemaVersion": "idea022.context.7",
+      "ticket": {
+        "projectId": "P_682c8959-b7fa-436b-8fe1-bfe9d6663a30",
+        "revision": 9,
+        "requestId": "R_ead28f59-79df-4606-9de8-e69da8dd94d7",
+        "taskId": "T_5544b6ca-51f7-45c3-b95a-b7583970110c"
+      },
+      "projectName": "[합성23] 자료 보관 안내를 정리하는 작은 서비스. …",
+      "sources": [
+        {
+          "id": "S_a74c612e-6753-42b7-9286-108dbbacd589",
+          "kind": "request",
+          "text": "자료 보관 안내문을 읽기 쉽게 정리해 주세요. 보관 동작과 배포는 범위 밖입니다.",
+          "at": "2026-10-22T17:40:56.311Z",
+          "taskId": "T_5544b6ca-51f7-45c3-b95a-b7583970110c",
+          "replyTo": null,
+          "disposition": "provided"
+        }
+      ],
+      "bases": [
+        {
+          "id": "D1",
+          "text": "자료 보관 안내문을 읽기 쉽게 정리해 주세요. 보관 동작과 배포는 범위 밖입니다.",
+          "status": "requested",
+          "sourceId": "S_a74c612e-6753-42b7-9286-108dbbacd589",
+          "revision": 9,
+          "previousVersions": 0,
+          "partial": false
+        }
+      ],
+      "appFacts": {
+        "taskId": "T_5544b6ca-51f7-45c3-b95a-b7583970110c",
+        "inputs": [
+          {
+            "sourceId": "S_a74c612e-6753-42b7-9286-108dbbacd589",
+            "kind": "request"
+          }
+        ],
+        "records": [
+          {
+            "basisId": "D1",
+            "sourceId": "S_a74c612e-6753-42b7-9286-108dbbacd589",
+            "revision": 9,
+            "status": "requested",
+            "versionIndex": 0,
+            "isCurrent": true,
+            "kind": "input-retained",
+            "previousRevision": null,
+            "changedFields": null
+          }
+        ]
+      },
+      "previousWork": null,
+      "previousIntent": null,
+      "purposeIntent": null,
+      "background": {
+        "version": "background.1",
+        "revision": 8,
+        "brief": "[합성23] 자료 보관 안내를 정리하는 작은 서비스. 보관 정책과 동작은 바꾸지 않는다.",
+        "area": {
+          "id": "A_9100947a-0112-4e12-ae61-9f970ad206c5",
+          "name": "보관 안내",
+          "note": "현재 자료 보관 안내문을 설명한다. 실제 보관 정책은 변경하지 않는다."
+        }
+      },
+      "currentAreaDescription": null
+    }
+  }
+]

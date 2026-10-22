@@ -1,0 +1,113 @@
+{
+  "sourceCommit": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+  "expectedViewports": 2,
+  "completedViewports": 2,
+  "rows": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "complete": true,
+      "Aarea": "A_6fd72ba2-4064-4977-91de-7609dfc66dda",
+      "Barea": "A_a5541fc7-142f-43d3-b659-f1d3ffe82266",
+      "Atask": "T_426ec517-9cd6-4cfc-8567-13e8f6b7444c",
+      "reportT": "T_5296245a-2da5-4f60-a7b7-afdcbf0d662e",
+      "Btask": "T_33f16705-3562-4206-972e-201538957ed6",
+      "newC": "T_f3393e20-0653-486e-8a16-b77d72bdb59a",
+      "firstH": "H_b0689528-7b48-476e-ab27-93df07127b11",
+      "finalH": "H_e165c323-d643-48d5-bbce-39d670ac5281",
+      "externalReference": {
+        "taskId": "T_426ec517-9cd6-4cfc-8567-13e8f6b7444c",
+        "areaId": "A_6fd72ba2-4064-4977-91de-7609dfc66dda",
+        "revision": 1,
+        "by": "external",
+        "corrects": null,
+        "source": {
+          "taskId": "T_5296245a-2da5-4f60-a7b7-afdcbf0d662e",
+          "returnId": "H_b0689528-7b48-476e-ab27-93df07127b11",
+          "origin": "독립 관측자가 실제 내보낸 템플릿에 작성한 합성 설명. AI 실행·사실 검증 없음."
+        },
+        "text": "[명시 합성 외부 설명] 현재 자료 보관 안내의 표시는 7일이다."
+      },
+      "correctedReference": {
+        "taskId": "T_426ec517-9cd6-4cfc-8567-13e8f6b7444c",
+        "areaId": "A_6fd72ba2-4064-4977-91de-7609dfc66dda",
+        "revision": 2,
+        "by": "user",
+        "corrects": 1,
+        "source": null,
+        "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다."
+      },
+      "newRequestReference": {
+        "taskId": "T_f3393e20-0653-486e-8a16-b77d72bdb59a",
+        "areaId": "A_6fd72ba2-4064-4977-91de-7609dfc66dda",
+        "revision": 2,
+        "by": "user",
+        "corrects": 1,
+        "source": null,
+        "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다."
+      },
+      "BReference": null,
+      "sameTaskManualPreserved": true,
+      "oldHAndReportPreserved": true,
+      "planAndRelationsUnchanged": true,
+      "finalTargetSelected": true
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "complete": true,
+      "Aarea": "A_a00ffa83-1270-44a5-99f4-8c7455940c44",
+      "Barea": "A_8de46285-196e-4993-9625-d863b51a4b31",
+      "Atask": "T_83e1effe-60fb-4dde-ae6e-46b95d79f0b3",
+      "reportT": "T_845f7ab0-2408-449c-9268-7a9462c42bb6",
+      "Btask": "T_4a968762-c4ad-42c0-84e2-232f6fee0389",
+      "newC": "T_bb852dc7-b17b-4640-b3bc-bfffa346d5b3",
+      "firstH": "H_f9225e45-9525-416a-9b37-2d95a3a151fe",
+      "finalH": "H_c3fc97f3-d39d-4300-b96d-d3870f3351ed",
+      "externalReference": {
+        "taskId": "T_83e1effe-60fb-4dde-ae6e-46b95d79f0b3",
+        "areaId": "A_a00ffa83-1270-44a5-99f4-8c7455940c44",
+        "revision": 1,
+        "by": "external",
+        "corrects": null,
+        "source": {
+          "taskId": "T_845f7ab0-2408-449c-9268-7a9462c42bb6",
+          "returnId": "H_f9225e45-9525-416a-9b37-2d95a3a151fe",
+          "origin": "독립 관측자가 실제 내보낸 템플릿에 작성한 합성 설명. AI 실행·사실 검증 없음."
+        },
+        "text": "[명시 합성 외부 설명] 현재 자료 보관 안내의 표시는 7일이다."
+      },
+      "correctedReference": {
+        "taskId": "T_83e1effe-60fb-4dde-ae6e-46b95d79f0b3",
+        "areaId": "A_a00ffa83-1270-44a5-99f4-8c7455940c44",
+        "revision": 2,
+        "by": "user",
+        "corrects": 1,
+        "source": null,
+        "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다."
+      },
+      "newRequestReference": {
+        "taskId": "T_bb852dc7-b17b-4640-b3bc-bfffa346d5b3",
+        "areaId": "A_a00ffa83-1270-44a5-99f4-8c7455940c44",
+        "revision": 2,
+        "by": "user",
+        "corrects": 1,
+        "source": null,
+        "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다."
+      },
+      "BReference": null,
+      "sameTaskManualPreserved": true,
+      "oldHAndReportPreserved": true,
+      "planAndRelationsUnchanged": true,
+      "finalTargetSelected": true
+    }
+  ],
+  "failures": [],
+  "pageErrors": [],
+  "cleanupErrors": [],
+  "plannedChildExit": 0
+}

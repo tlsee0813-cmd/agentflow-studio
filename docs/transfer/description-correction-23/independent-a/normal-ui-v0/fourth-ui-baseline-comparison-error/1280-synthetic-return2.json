@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_2a7c8b32-81e1-4910-97c5-bfe3a4ebb264",
+  "taskId": "T_9f8416c3-7b70-44d4-9d50-f5f52ac8208d",
+  "returnId": "H_1a14fd6f-1506-4bea-b786-d0ae0dd6c99f",
+  "report": "[명시 합성23 보고] 현재 안내문 표시를 7일이라고 읽은 보고. 실제 구현·실행·외부 검사 없음.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_64f1ffa7-74a4-4cef-80da-460cb171942e",
+    "basedOn": 0,
+    "summary": "[명시 합성 외부 설명] 현재 자료 보관 안내의 표시는 7일이다.",
+    "changes": [
+      "[합성] 안내 표시는 7일이라는 외부 설명"
+    ],
+    "proposal": null,
+    "origin": "독립 관측자가 실제 내보낸 템플릿에 작성한 합성 설명. AI 실행·사실 검증 없음."
+  }
+}

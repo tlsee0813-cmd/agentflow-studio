@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle23-independent/ui.py", line 106, in <module>
+    try:u.run(w,h)
+        ^^^^^^^^^^
+  File "/workspace/browser-env/cycle23-independent/ui.py", line 85, in run
+    assert {'areas':p['space']['areas'],'bases':p['bases'],'brief':p['space']['brief'],'relations':p['space']['relations']}==protected
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+

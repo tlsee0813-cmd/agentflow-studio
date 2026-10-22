@@ -1,0 +1,18 @@
+{
+  "sourceCommit": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+  "expectedViewports": 2,
+  "completedViewports": 0,
+  "rows": [],
+  "failures": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle23-independent/ui.py\", line 106, in <module>\n    try:u.run(w,h)\n        ^^^^^^^^^^\n  File \"/workspace/browser-env/cycle23-independent/ui.py\", line 85, in run\n    assert {'areas':p['space']['areas'],'bases':p['bases'],'brief':p['space']['brief'],'relations':p['space']['relations']}==protected\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+    }
+  ],
+  "pageErrors": [],
+  "cleanupErrors": [],
+  "plannedChildExit": 1
+}

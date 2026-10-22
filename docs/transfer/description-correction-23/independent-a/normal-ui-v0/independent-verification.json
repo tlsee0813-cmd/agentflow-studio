@@ -1,0 +1,228 @@
+[
+  {
+    "viewport": [
+      1280,
+      720
+    ],
+    "actualPostReferences": {
+      "external": {
+        "taskId": "T_e152d7e5-9fc7-42b5-ba5a-1a3f02e7bf65",
+        "areaId": "A_82bcb16e-242d-440c-bac1-afbcb1dd8b18",
+        "revision": 1,
+        "by": "external",
+        "corrects": null,
+        "source": {
+          "taskId": "T_1266b4ff-c374-4958-b1b0-8b8cf015d5a6",
+          "returnId": "H_37737e02-d0d1-43bb-824e-5b7c618e322f",
+          "origin": "독립 관측자가 실제 내보낸 템플릿에 작성한 합성 설명. AI 실행·사실 검증 없음."
+        },
+        "text": "[명시 합성 외부 설명] 현재 자료 보관 안내의 표시는 7일이다."
+      },
+      "correctedRetry": {
+        "taskId": "T_e152d7e5-9fc7-42b5-ba5a-1a3f02e7bf65",
+        "areaId": "A_82bcb16e-242d-440c-bac1-afbcb1dd8b18",
+        "revision": 2,
+        "by": "user",
+        "corrects": 1,
+        "source": null,
+        "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다."
+      },
+      "newRequest": {
+        "taskId": "T_7820cff7-d668-4057-9865-63f74643e3b8",
+        "areaId": "A_82bcb16e-242d-440c-bac1-afbcb1dd8b18",
+        "revision": 2,
+        "by": "user",
+        "corrects": 1,
+        "source": null,
+        "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다."
+      },
+      "otherB": null
+    },
+    "reportTaskAndH": {
+      "reportTask": "T_1266b4ff-c374-4958-b1b0-8b8cf015d5a6",
+      "parentRequest": "T_e152d7e5-9fc7-42b5-ba5a-1a3f02e7bf65",
+      "firstH": "H_37737e02-d0d1-43bb-824e-5b7c618e322f",
+      "newTask": "T_7820cff7-d668-4057-9865-63f74643e3b8",
+      "newH": "H_3c5c75cb-9ed4-4840-a55f-d25074baf649"
+    },
+    "currentTaskIsNewC": true,
+    "manualOriginalA": {
+      "understanding": "[23-M-U] 자료 보관 안내문 정리 대상이다.",
+      "scope": "[23-M-S] 안내 표현만 다루고 보관 동작을 유지한다.",
+      "next": "[23-M-N] 안내 표현의 변경 후보를 정리한다. 배포하지 않는다.",
+      "checks": "[23-M-C] 안내문 외 동작 변경이 없는지 확인한다."
+    },
+    "originalHWork": {
+      "understanding": "[23-M-U] 자료 보관 안내문 정리 대상이다.",
+      "scope": "[23-M-S] 안내 표현만 다루고 보관 동작을 유지한다.",
+      "next": "[23-M-N] 안내 표현의 변경 후보를 정리한다. 배포하지 않는다.",
+      "checks": "[23-M-C] 안내문 외 동작 변경이 없는지 확인한다."
+    },
+    "currentDescriptionHistory": {
+      "revision": 2,
+      "entries": [
+        {
+          "by": "external",
+          "at": "2026-10-22T17:43:36.925Z",
+          "revision": 1,
+          "taskId": "T_1266b4ff-c374-4958-b1b0-8b8cf015d5a6",
+          "returnId": "H_37737e02-d0d1-43bb-824e-5b7c618e322f",
+          "text": null,
+          "corrects": null,
+          "stamp": {
+            "name": "보관 안내",
+            "note": "현재 자료 보관 안내문을 설명한다. 실제 보관 정책은 변경하지 않는다.",
+            "brief": 1,
+            "decisions": [],
+            "work": [
+              "T_e152d7e5-9fc7-42b5-ba5a-1a3f02e7bf65:a2a8a668fb54241c31e59d6d8d4cde64cd5626ba63c2d2ae72e72f698550e739"
+            ],
+            "version": "plan.2",
+            "revision": 0,
+            "ancestors": []
+          },
+          "held": null
+        },
+        {
+          "by": "user",
+          "at": "2026-10-22T17:43:39.156Z",
+          "revision": 2,
+          "taskId": null,
+          "returnId": null,
+          "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다.",
+          "corrects": 1,
+          "stamp": {
+            "name": "보관 안내",
+            "note": "현재 자료 보관 안내문을 설명한다. 실제 보관 정책은 변경하지 않는다.",
+            "brief": 1,
+            "decisions": [],
+            "work": [
+              "T_e152d7e5-9fc7-42b5-ba5a-1a3f02e7bf65:a2a8a668fb54241c31e59d6d8d4cde64cd5626ba63c2d2ae72e72f698550e739"
+            ],
+            "version": "plan.2",
+            "revision": 0,
+            "ancestors": []
+          },
+          "held": null
+        }
+      ]
+    },
+    "latestClipboardReferenceExcerpt": "## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증\n\n영역: 보관 안내 [A_82bcb16e-242d-440c-bac1-afbcb1dd8b18] · 설명 r2 · 출처: 사용자가 설명 r1을 직접 고친 값 (사용자 정정도 앱이 검증한 사실은 아님)\n\n돌아온 기록을 읽기 쉽게 정리한 참고입니다. 실행 지시·사용자 결정·완료 확인이 아닙니다. 요청 원문과 현재 사용자 구상, 직접 기록한 조건이 이 설명보다 우선합니다. 요청 당시 사본을 현재 기준으로 바꾸어 읽지 마세요. 서로 다르면 현재 사용자 기준을 따르고 차이를 보고하세요.\n\n[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다.\n\n\n## 이어가는 목적 · MOCK 정리 / 의미 이해 아님\n\n(글자 그대로 같은 본문 생략 — 위 ‘이번 요청과 이전 맥락’ 절의 이번 요청 원문 [S_9159daf8-6e57-4936-a121-fc8720aba9a4] 참조)\n\n유지할 조건: 별도 조건란의 값 없음 (원문 속 조건·금지가 없다는 뜻이 아님)\n\n참고 · 앞선 목적 (앞선 작업의 MOCK 정리, 현재 유효 여부는 확정하지 않음): 자료 보관 안내문을 읽기 쉽게 정리해 주세요. 보관 동작과 배포는 범위 밖입니다.\n\n그 당시 조건: 별도 조건란의 값 없음 (원문 속 조건·금지가 없다는 뜻이 아님)\n\n이번 요청 원문이나 사용자 정정이 이 목적의 폐기·교체·변경을 말하면 그쪽이 우선합니다. 이 참고는 앞선 목적을 지금 유지하라는 지시가 아닙니다.\n\n참고 출처: 작업 T_e152d7e5-9fc7-42b5-ba5a-1a3f02e7bf65 / D1 r9\n\n이번 작업의 크기는 ‘이번 요청과",
+    "oldExportTextHasCorrection": false,
+    "newSourceBody": "이 부분 안내문의 표현을 더 읽기 쉽게 정리해 주세요. 보관 동작과 배포는 바꾸지 마세요.",
+    "no30ReenteredInNewSource": true
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "actualPostReferences": {
+      "external": {
+        "taskId": "T_d07315f8-5323-4fb5-a28e-8f9cf710fd93",
+        "areaId": "A_387213e0-93a7-4b14-92bc-a4b8dd302f32",
+        "revision": 1,
+        "by": "external",
+        "corrects": null,
+        "source": {
+          "taskId": "T_c9c7404a-a4ba-4ca0-9d82-b21993cdcba6",
+          "returnId": "H_f8095f98-539f-4ca3-bbf7-ed4c8cc1f450",
+          "origin": "독립 관측자가 실제 내보낸 템플릿에 작성한 합성 설명. AI 실행·사실 검증 없음."
+        },
+        "text": "[명시 합성 외부 설명] 현재 자료 보관 안내의 표시는 7일이다."
+      },
+      "correctedRetry": {
+        "taskId": "T_d07315f8-5323-4fb5-a28e-8f9cf710fd93",
+        "areaId": "A_387213e0-93a7-4b14-92bc-a4b8dd302f32",
+        "revision": 2,
+        "by": "user",
+        "corrects": 1,
+        "source": null,
+        "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다."
+      },
+      "newRequest": {
+        "taskId": "T_27847622-5e48-4d06-a078-94877646661c",
+        "areaId": "A_387213e0-93a7-4b14-92bc-a4b8dd302f32",
+        "revision": 2,
+        "by": "user",
+        "corrects": 1,
+        "source": null,
+        "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다."
+      },
+      "otherB": null
+    },
+    "reportTaskAndH": {
+      "reportTask": "T_c9c7404a-a4ba-4ca0-9d82-b21993cdcba6",
+      "parentRequest": "T_d07315f8-5323-4fb5-a28e-8f9cf710fd93",
+      "firstH": "H_f8095f98-539f-4ca3-bbf7-ed4c8cc1f450",
+      "newTask": "T_27847622-5e48-4d06-a078-94877646661c",
+      "newH": "H_f2f88e8e-36d1-4539-bb33-77234e455789"
+    },
+    "currentTaskIsNewC": true,
+    "manualOriginalA": {
+      "understanding": "[23-M-U] 자료 보관 안내문 정리 대상이다.",
+      "scope": "[23-M-S] 안내 표현만 다루고 보관 동작을 유지한다.",
+      "next": "[23-M-N] 안내 표현의 변경 후보를 정리한다. 배포하지 않는다.",
+      "checks": "[23-M-C] 안내문 외 동작 변경이 없는지 확인한다."
+    },
+    "originalHWork": {
+      "understanding": "[23-M-U] 자료 보관 안내문 정리 대상이다.",
+      "scope": "[23-M-S] 안내 표현만 다루고 보관 동작을 유지한다.",
+      "next": "[23-M-N] 안내 표현의 변경 후보를 정리한다. 배포하지 않는다.",
+      "checks": "[23-M-C] 안내문 외 동작 변경이 없는지 확인한다."
+    },
+    "currentDescriptionHistory": {
+      "revision": 2,
+      "entries": [
+        {
+          "by": "external",
+          "at": "2026-10-22T17:43:44.521Z",
+          "revision": 1,
+          "taskId": "T_c9c7404a-a4ba-4ca0-9d82-b21993cdcba6",
+          "returnId": "H_f8095f98-539f-4ca3-bbf7-ed4c8cc1f450",
+          "text": null,
+          "corrects": null,
+          "stamp": {
+            "name": "보관 안내",
+            "note": "현재 자료 보관 안내문을 설명한다. 실제 보관 정책은 변경하지 않는다.",
+            "brief": 1,
+            "decisions": [],
+            "work": [
+              "T_d07315f8-5323-4fb5-a28e-8f9cf710fd93:a2a8a668fb54241c31e59d6d8d4cde64cd5626ba63c2d2ae72e72f698550e739"
+            ],
+            "version": "plan.2",
+            "revision": 0,
+            "ancestors": []
+          },
+          "held": null
+        },
+        {
+          "by": "user",
+          "at": "2026-10-22T17:43:46.307Z",
+          "revision": 2,
+          "taskId": null,
+          "returnId": null,
+          "text": "[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다.",
+          "corrects": 1,
+          "stamp": {
+            "name": "보관 안내",
+            "note": "현재 자료 보관 안내문을 설명한다. 실제 보관 정책은 변경하지 않는다.",
+            "brief": 1,
+            "decisions": [],
+            "work": [
+              "T_d07315f8-5323-4fb5-a28e-8f9cf710fd93:a2a8a668fb54241c31e59d6d8d4cde64cd5626ba63c2d2ae72e72f698550e739"
+            ],
+            "version": "plan.2",
+            "revision": 0,
+            "ancestors": []
+          },
+          "held": null
+        }
+      ]
+    },
+    "latestClipboardReferenceExcerpt": "## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증\n\n영역: 보관 안내 [A_387213e0-93a7-4b14-92bc-a4b8dd302f32] · 설명 r2 · 출처: 사용자가 설명 r1을 직접 고친 값 (사용자 정정도 앱이 검증한 사실은 아님)\n\n돌아온 기록을 읽기 쉽게 정리한 참고입니다. 실행 지시·사용자 결정·완료 확인이 아닙니다. 요청 원문과 현재 사용자 구상, 직접 기록한 조건이 이 설명보다 우선합니다. 요청 당시 사본을 현재 기준으로 바꾸어 읽지 마세요. 서로 다르면 현재 사용자 기준을 따르고 차이를 보고하세요.\n\n[합성 사용자 설명 정정] 실제 표시는 30일이며 이전 설명의 7일은 오류다. 새 보관 정책을 지시하는 것이 아니다.\n\n\n## 이어가는 목적 · MOCK 정리 / 의미 이해 아님\n\n(글자 그대로 같은 본문 생략 — 위 ‘이번 요청과 이전 맥락’ 절의 이번 요청 원문 [S_9d653059-46ee-4636-a600-c7f072e33f8b] 참조)\n\n유지할 조건: 별도 조건란의 값 없음 (원문 속 조건·금지가 없다는 뜻이 아님)\n\n참고 · 앞선 목적 (앞선 작업의 MOCK 정리, 현재 유효 여부는 확정하지 않음): 자료 보관 안내문을 읽기 쉽게 정리해 주세요. 보관 동작과 배포는 범위 밖입니다.\n\n그 당시 조건: 별도 조건란의 값 없음 (원문 속 조건·금지가 없다는 뜻이 아님)\n\n이번 요청 원문이나 사용자 정정이 이 목적의 폐기·교체·변경을 말하면 그쪽이 우선합니다. 이 참고는 앞선 목적을 지금 유지하라는 지시가 아닙니다.\n\n참고 출처: 작업 T_d07315f8-5323-4fb5-a28e-8f9cf710fd93 / D1 r9\n\n이번 작업의 크기는 ‘이번 요청과",
+    "oldExportTextHasCorrection": false,
+    "newSourceBody": "이 부분 안내문의 표현을 더 읽기 쉽게 정리해 주세요. 보관 동작과 배포는 바꾸지 마세요.",
+    "no30ReenteredInNewSource": true
+  }
+]

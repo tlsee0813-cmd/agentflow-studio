@@ -1,0 +1,42 @@
+[
+  {
+    "name": "type-check",
+    "command": [
+      "node",
+      "continuity/scripts/check.mjs"
+    ],
+    "cwd": "/workspace/browser-env/cycle23-candidate/app",
+    "startUTC": "2026-10-22T17:36:08.326327+00:00",
+    "endUTC": "2026-10-22T17:36:11.651478+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "47570359043e5a8977f213754a6d0c4d741078ec28b6cbc31009801c909fc89f",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "build",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "cwd": "/workspace/browser-env/cycle23-candidate/app",
+    "startUTC": "2026-10-22T17:36:11.651798+00:00",
+    "endUTC": "2026-10-22T17:36:14.267584+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "description23-unit",
+    "command": [
+      "node",
+      "--test",
+      "continuity/tests/description23.test.mjs"
+    ],
+    "cwd": "/workspace/browser-env/cycle23-candidate/app",
+    "startUTC": "2026-10-22T17:36:14.267637+00:00",
+    "endUTC": "2026-10-22T17:36:14.369309+00:00",
+    "actualChildExit": 1,
+    "stdoutSHA256": "a27a0aa758e8d87db96940d60c148855dc6100fe9b96a09b3dd895f3d7f3db8c",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "sourceCommit": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+  "expectedViewports": 2,
+  "completedViewports": 0,
+  "rows": [],
+  "failures": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle23-independent/ui.py\", line 106, in <module>\n    try:u.run(w,h)\n        ^^^^^^^^^^\n  File \"/workspace/browser-env/cycle23-independent/ui.py\", line 69, in run\n    self.new(w,h);self.click(self.p.locator('#nav-projects'),'내 프로젝트');self.button('＋ 새 프로젝트');self.fill(self.p.get_by_role('textbox',name='프로젝트 이름',exact=True),f'[합성23] 자료 보관 안내 · {w}');self.fill(self.p.get_by_role('textbox',name='무엇을 만드나요? 프로젝트 목적 · 작업 요청과 따로 보관해요',exact=True),PURPOSE);self.button('영역 나누러 가기')\n                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle23-independent/ui.py\", line 50, in fill\n    def fill(self,q,value):self.reach(q);q.fill(value);self.log('normal input',{'id':q.get_attribute('id'),'value':value})\n                           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle23-independent/ui.py\", line 44, in reach\n    r=g['rect'];c=g['clip'];dy=r['top']-c['top']-5 if r['top']<c['top'] else r['bottom']-c['bottom']+5;panel=q.locator('xpath=ancestor::*[@id=\"area-panel-body\"]');self.wheel(max(-400,min(400,dy)),panel if panel.count() else None)\n                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle23-independent/ui.py\", line 38, in wheel\n    try:self.p.mouse.move(x,y);self.p.mouse.wheel(0,dy);v=self.p.evaluate('async()=>await window.__ind23Wheel.promise');self.log('native wheel',v);assert v['ok'],v\n                                                                                                                                                          ~^^^^^^\nAssertionError: {'ok': False, 'reason': 'native-scroll-deadline', 'events': [{'type': 'wheel', 'delta': -6, 'target': 'main'}], 'y': 0}\n"
+    }
+  ],
+  "pageErrors": [],
+  "cleanupErrors": [],
+  "plannedChildExit": 1
+}

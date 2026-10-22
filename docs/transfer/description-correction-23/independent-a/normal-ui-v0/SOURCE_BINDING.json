@@ -1,0 +1,32 @@
+{
+  "sourceCommit": "689c47888fb7ab5040d184c2d36f2adff8f2a575",
+  "sourceTree": "1afe2e7203913cede1f395fc8ec2f2bea6bc9ed3",
+  "contractCommit": "01aa3cbb80b44bca51e17301f6de6ecd7dae5513",
+  "contractSHA256": "6dbe4978045f92415c37714d31eca6a66c899aa5e0dd02f488d499d1c4db47d9",
+  "sourceExtract": "git archive exact commit app + experiments/idea016/cases.mjs; separate cycle23-candidate; no source edits",
+  "sourceFilesVerified": 194,
+  "sourceFileDetails": "SOURCE_FILES.json",
+  "servedResponseBinding": "runtime.json every captured response HTTPbodySHA256=diskAtResponse=diskAfter, 30responses both new contexts",
+  "builtOutputBinding": "runtime-manifest.tsv",
+  "actualEnvironment": {
+    "node": "v22.16.0",
+    "typescript": "Version 5.8.3",
+    "playwright": "1.57.0",
+    "actualBrowserVersion": "154.0.8037.57",
+    "browserPath": "/usr/bin/chromium",
+    "compilerReuse": "PATH TS5.8.3; no npm ci/install"
+  },
+  "actualOuterExits": {
+    "commands_first": 1,
+    "root_build_and_same_new_units": 0,
+    "latest_ui": 0,
+    "first_ui_prepare": 1,
+    "second_ui_prepare": 1,
+    "third_ui_prepare": 1,
+    "fourth_ui_wrong_baseline": 1,
+    "fifth_ui_without_status_gate": 0
+  },
+  "actualServerExit": -15,
+  "serverExitMeaning": "SIGTERM requested by cleanup; distinct from UI child0 / collector0",
+  "noPaidAI": true
+}

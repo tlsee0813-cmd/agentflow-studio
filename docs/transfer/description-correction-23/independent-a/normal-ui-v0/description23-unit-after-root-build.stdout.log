@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: DESC23 valid external description carries exact target and return attribution through strict request validation
+ok 1 - DESC23 valid external description carries exact target and return attribution through strict request validation
+  ---
+  duration_ms: 14.015864
+  type: 'test'
+  ...
+# Subtest: DESC23 synthetic7/30 correction reaches same-task retry and new same-area request without rewriting work or historical H
+ok 2 - DESC23 synthetic7/30 correction reaches same-task retry and new same-area request without rewriting work or historical H
+  ---
+  duration_ms: 4.921822
+  type: 'test'
+  ...
+# Subtest: DESC23 direct four values, user plan/conditions and old exports survive correction and normal retry
+ok 3 - DESC23 direct four values, user plan/conditions and old exports survive correction and normal retry
+  ---
+  duration_ms: 4.694955
+  type: 'test'
+  ...
+# Subtest: DESC23 held/stale references and other/global targets do not leak, while valid current survives a later held result
+ok 4 - DESC23 held/stale references and other/global targets do not leak, while valid current survives a later held result
+  ---
+  duration_ms: 7.019499
+  type: 'test'
+  ...
+# Subtest: DESC23 strict provenance, exact keys and existing2000-char limit; earlier requests keep their absent-key byte shape
+ok 5 - DESC23 strict provenance, exact keys and existing2000-char limit; earlier requests keep their absent-key byte shape
+  ---
+  duration_ms: 11.598704
+  type: 'test'
+  ...
+# Subtest: DESC23 provider receives the validated reference only as JSON data, including untrusted origin/text
+ok 6 - DESC23 provider receives the validated reference only as JSON data, including untrusted origin/text
+  ---
+  duration_ms: 23.929793
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 143.17388

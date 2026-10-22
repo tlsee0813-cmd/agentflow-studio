@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle23-independent/ui.py", line 106, in <module>
+    try:u.run(w,h)
+        ^^^^^^^^^^
+  File "/workspace/browser-env/cycle23-independent/ui.py", line 69, in run
+    self.new(w,h);self.click(self.p.locator('#nav-projects'),'내 프로젝트');self.button('＋ 새 프로젝트');self.fill(self.p.get_by_role('textbox',name='프로젝트 이름',exact=True),f'[합성23] 자료 보관 안내 · {w}');self.fill(self.p.get_by_role('textbox',name='무엇을 만드나요? 프로젝트 목적 · 작업 요청과 따로 보관해요',exact=True),PURPOSE);self.button('영역 나누러 가기')
+                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle23-independent/ui.py", line 50, in fill
+    def fill(self,q,value):self.reach(q);q.fill(value);self.log('normal input',{'id':q.get_attribute('id'),'value':value})
+                           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle23-independent/ui.py", line 44, in reach
+    r=g['rect'];c=g['clip'];dy=r['top']-c['top']-5 if r['top']<c['top'] else r['bottom']-c['bottom']+5;panel=q.locator('xpath=ancestor::*[@id="area-panel-body"]');self.wheel(max(-400,min(400,dy)),panel if panel.count() else None)
+                                                                                                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle23-independent/ui.py", line 38, in wheel
+    try:self.p.mouse.move(x,y);self.p.mouse.wheel(0,dy);v=self.p.evaluate('async()=>await window.__ind23Wheel.promise');self.log('native wheel',v);assert v['ok'],v
+                                                                                                                                                          ~^^^^^^
+AssertionError: {'ok': False, 'reason': 'native-scroll-deadline', 'events': [{'type': 'wheel', 'delta': -6, 'target': 'main'}], 'y': 0}
+
