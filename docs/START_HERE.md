@@ -16,7 +16,7 @@
 
 ## 다음 세션이 이어받을 때
 
-- 이 checkpoint의 코드는 [USE106 `618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/618d9bd2b99ad433df35107d8902b15f45e30000) 기준입니다. 공개 화면도 이 소스의 정적 MOCK이며 제품 소스는 유지하며 이후 연구 시안·판단·증거는 [ACTIVE](cycles/ACTIVE.md)에서 이어 읽습니다.
+- 공개 화면은 [USE106 `618d9bd2`](https://github.com/tlsee0813-cmd/agentflow-studio/tree/618d9bd2b99ad433df35107d8902b15f45e30000)의 정적 MOCK입니다. 이후 제품 변경은 checkpoint에 통합되어 공개 버전과 다릅니다. 수용된 제품 기준은 [PROJECT_STATUS](PROJECT_STATUS.md), 현재 후보·배정·다음 행동은 [ACTIVE](cycles/ACTIVE.md)를 따릅니다.
 - GUIDE107 실제 AI 평가는 별도 병렬 후보의 결과입니다. **HOLD·미통합**이며 공개 UI의 AI 품질 결과로 합치지 않습니다.
 - 소스 CI·정적 배포·공개 smoke·실제 AI 응답·사람 대상 사용성은 서로 다른 검증입니다. 정확한 SHA와 근거 링크는 PROJECT_STATUS에 있습니다.
 - 이전 개발 사이클의 ‘종료·정지·예약 PAUSED’는 인계 당시 기록입니다. 현재 연구와 다음 범위는 [ACTIVE](cycles/ACTIVE.md)를 먼저 확인하며, 이 안내를 새 중지 지시나 예약 설정 상태로 읽지 않습니다.
