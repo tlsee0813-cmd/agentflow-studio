@@ -4,7 +4,9 @@
 ## 진행 중 — 정확한 수신 결과 이어가기20
 [계약](2026-10-22-received-result-20/INPUT.md) · [조사와 선택](2026-10-22-received-result-20/RESEARCH.md). 출발제품은 아래19 병합본이다. 현재 작업B를 유지한 채 받은 A의 정확한 보고→당시 인계 조건/현재 구상→필요한 다음 요청→원래 보기의 흐름을 연결한다. 일반 return.1과 exactduplicate도 같은 입구를 사용한다. 과거 ExportRecord.work와 현재작업문을 구분한다. 새 inbox·자동판정·스키마/일반엔진은 범위밖이다.
 
-19 종료 후 범위와 코드 영향을 나누어 검토했다. Sol High 구현/검사, Astra High 판단·독립 정적 검토, 기존 Cloud 독립 실행을 분리한다. Web Pro 조사를 공식 원문과 대조했다. Sol 작성자는 분리된 작업공간에서 제품과 검사를 각각 구현 중이며 Astra는 정확한 대상·조건·복귀의 반례를 검토한다. 새 일반 수신 입구는 기존 work 파일입력부에만 두고 전역 알림함을 추가하지 않는다. 아직20 후보 동결·브라우저 수용은 없다.
+19 종료 후 범위와 코드 영향을 나누어 검토했다. Sol High 구현/검사, Astra High 판단·독립 정적 검토, 기존 Cloud 독립 실행을 분리한다. Web Pro 조사를 공식 원문과 대조했다. Sol 작성자는 분리된 작업공간에서 제품과 검사를 각각 구현 중이며 Astra는 정확한 대상·조건·복귀의 반례를 검토한다. 새 일반 수신 입구는 기존 work 파일입력부에만 두고 전역 알림함을 추가하지 않는다. 제품 v1 [0aafca27](https://github.com/tlsee0813-cmd/agentflow-studio/commit/0aafca2708863036055cbd3029521b4eb983d22e)를 동결했다. app564B5DCB…3E9B/CSS86DDA3…3ED38/HTMLC3981C…525D0 원격3파일이 작성 원문과 일치한다. 별도 Cloud에서 독립 흐름을 시작했고 작성자 신규검사·CI 연결은 마무리 중이다. **20은 미수용·미병합**이다.
+
+정적 검토에서 기존records→보고→소유부분찾기의 출발점 소실, 복귀h1 초점, 중복수신 저장실패 상태를 보완했다. v0는 located만 있던 출발점을 origin에도 복제해 복귀 버튼/안내가 남는 P2로 보류했고 v1은 실제 두 슬롯을 분리해 좁은 재검토를 통과했다. [작성 원문·명령별 종료·v0/v1 정적 기록](https://github.com/tlsee0813-cmd/agentflow-studio/tree/624c27e3a9707503fceb2ca63079c8e38cf96c67/docs/transfer/received-result-20). 초기CF38의 전체 원문 미회수는 명시했고 v0/v1 전체는 공유했다. 브라우저 통과를 뜻하지 않는다.
 
 ## 마지막 완료 — PC 지도와 기록 읽기19
 [결과·한계·공유 화면](2026-10-22-workspace-records-19/RESULT.md) · [PR10](https://github.com/tlsee0813-cmd/agentflow-studio/pull/10). 최종 acfafd2dd6426e3fa6fa5443bd2e67d8461608c9, checkpoint 병합41b6854e877d8cc4054dcf6af47b597602b7cf11. 지도 상단과 기록 패널의 공간 점유를 줄이고 정확한 기록→부분→요청/인계→복귀를 제한 통합했다.
