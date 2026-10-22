@@ -1,0 +1,144 @@
+{
+  "transport": "native Chromium -> static HTTP /agentflow-studio/; browser MOCK, AI0",
+  "playwright": "1.57.0",
+  "chromium": "154.0.8037.57",
+  "ordinaryRequests": [
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/styles.css"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/client/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/types.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/domain.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/validation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/guidance.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/storage.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/mock.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/client/presentation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/client/runtime.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/outcome.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/attention.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/hierarchy.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/plan-facts.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/styles.css"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/client/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/types.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/domain.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/validation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/guidance.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/storage.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/mock.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/client/presentation.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/client/runtime.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/outcome.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/attention.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/hierarchy.js"
+    },
+    {
+      "method": "GET",
+      "path": "/agentflow-studio/shared/plan-facts.js"
+    }
+  ],
+  "ordinaryAPIRequests": 0,
+  "serverAPIReceived": 0,
+  "syntheticProbes": [
+    "server/legacy-key sentinels",
+    "CSP-blocked fetch"
+  ],
+  "serverStorageUnchanged": true,
+  "importClosure": true,
+  "providerPromptFiles": false,
+  "exactResultParent": "T_128af74f-4784-4b8d-b939-4750687bba2b",
+  "rawResultSHA256": "40e4b5d99b6b867a267e1e44b4261028760b46e14526052775a553e92d1e544d",
+  "backupReloadImportEqual": true,
+  "viewportWidths": [
+    1440,
+    390
+  ],
+  "actualAI": 0
+}

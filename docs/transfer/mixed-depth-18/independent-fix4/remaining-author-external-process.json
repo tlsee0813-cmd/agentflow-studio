@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle18-fix4-independent/remaining-author-collector.py"
+  ],
+  "startUTC": "2026-10-22T12:28:49.074036+00:00",
+  "endUTC": "2026-10-22T12:30:59.560738+00:00",
+  "actualCollectorExit": 0,
+  "launcherWillPropagate": 0,
+  "stdoutSHA256": "a7f9dffcd0faa0717af4836dff6e6c0defaaf94a2fe3e563cd19c35c14584103",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,10 @@
+{
+  "recordedAfterCompletionUTC": "2026-10-22T12:33:52.577054+00:00",
+  "observedActualExit": {
+    "initialAuthorLauncherSession58102": 1,
+    "wideOnlyRectCollectorSession92329": 0,
+    "remainingAuthorLauncherSession46678": 0,
+    "independentLauncherSession71942": 0
+  },
+  "interpretation": "Initial exit1 is failure-only diagnostic teardown setup error; exact full PC13/H18 were already pass. Subsequent Wide-only diagnostic and remaining suites executed separately; do not present initial collector as exit0 or merge distinct phases into one run. Tool-service full raw transcript not included."
+}

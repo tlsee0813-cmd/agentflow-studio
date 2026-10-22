@@ -1,0 +1,85 @@
+{
+  "source": "73fd6ff82ca035dd9b2e74385ce9194db0b57791",
+  "tree": "a029049fdee6b060bd5d0a90ea1f9ff7f62fc37e",
+  "appTsSHA256": "b5a6fde628584d85097840b61ebf918f2e609ff08b060bc540f72a4ef2695c4a",
+  "scopeConclusion": "No product failure found in executed fixed scope; not a human/Windows/paid-AI acceptance claim. First diagnostic teardown setup error preserved separately.",
+  "exactAuthorSuites": [
+    {
+      "name": "PC13",
+      "tests": 14,
+      "exit": 0,
+      "process": "author-commands/process.json"
+    },
+    {
+      "name": "H18",
+      "tests": 12,
+      "exit": 0,
+      "process": "author-commands/process.json"
+    },
+    {
+      "name": "AREA17",
+      "tests": 12,
+      "exit": 0,
+      "process": "remaining-author-commands/process.json"
+    },
+    {
+      "name": "PC12",
+      "tests": 15,
+      "exit": 0,
+      "process": "remaining-author-commands/process.json"
+    },
+    {
+      "name": "HOME15",
+      "tests": 21,
+      "exit": 0,
+      "process": "remaining-author-commands/process.json"
+    },
+    {
+      "name": "REPORT16",
+      "tests": 13,
+      "exit": 0,
+      "process": "remaining-author-commands/process.json"
+    },
+    {
+      "name": "static",
+      "tests": 1,
+      "exit": 0,
+      "process": "remaining-author-commands/process.json"
+    }
+  ],
+  "typeBuildDomain": "all exit0; Node261/261",
+  "sameCallerComparison": {
+    "sameCaller": true,
+    "beforeScroll": 128,
+    "afterScroll": 128,
+    "beforeMax": 218,
+    "afterMax": 300,
+    "callerYDelta": 0.0,
+    "sameMatrix": true,
+    "afterFocusIsCaller": true,
+    "allThreeHitsBefore": true,
+    "allThreeHitsAfter": true,
+    "callerAboveFooter": true
+  },
+  "independentExpected": [
+    "ui",
+    "long-ui",
+    "extra-ui-key-observation",
+    "normal-escape",
+    "question-ui",
+    "initial-camera",
+    "view-protection",
+    "pc13-hit-diagnostic"
+  ],
+  "independentComplete": true,
+  "independentActualLauncherExit": 0,
+  "stages": {
+    "initialAuthorLauncherActualExit": 1,
+    "reason": "Product PC13/H18 passed, then old failure-only diagnostic attempted absent panel after test01 successfully closed it; setup measurement error, original data preserved.",
+    "wideOnlyDiagnosticActualExit": 0,
+    "remainingAuthorActualCollectorExit": 0,
+    "doNotTreatAsSingleOriginalCollectorExit0": true
+  },
+  "sourceFilesBeforeAfterEqual": 188,
+  "previousFailureEvidence": "ebcd3947032000bdce086469f695ec884a71db06 immutable; no old source failures overwritten"
+}

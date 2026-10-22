@@ -1,0 +1,24 @@
+{
+  "expected": [
+    "ui",
+    "long-ui",
+    "extra-ui-key-observation",
+    "normal-escape",
+    "question-ui",
+    "initial-camera",
+    "view-protection",
+    "pc13-hit-diagnostic"
+  ],
+  "executed": [
+    "ui",
+    "long-ui",
+    "extra-ui-key-observation",
+    "normal-escape",
+    "question-ui",
+    "initial-camera",
+    "view-protection",
+    "pc13-hit-diagnostic"
+  ],
+  "complete": true,
+  "launcherPlannedExit": 0
+}

@@ -1,0 +1,10 @@
+{
+  "source": "73fd6ff82ca035dd9b2e74385ce9194db0b57791",
+  "expected": 14,
+  "executed": 9,
+  "complete": false,
+  "priorityPassed": false,
+  "condition": "Remaining five suites execute only after exact PC13/H18 and same-caller diagnostic all pass. Within each stage independent tests do not fail-fast.",
+  "collectorPlannedExit": 1,
+  "boundary": "actual collector exit recorded by external launcher after completion"
+}

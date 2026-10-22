@@ -1,0 +1,98 @@
+[
+  {
+    "name": "ui",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix4-independent/ui-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:28:55.116139+00:00",
+    "endUTC": "2026-10-22T12:29:07.824272+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "long-ui",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix4-independent/long-ui-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:29:07.824808+00:00",
+    "endUTC": "2026-10-22T12:29:18.028088+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "extra-ui-key-observation",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix4-independent/extra-ui-key-observation-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:29:18.028969+00:00",
+    "endUTC": "2026-10-22T12:29:24.103418+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "normal-escape",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix4-independent/normal-escape-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:29:24.103662+00:00",
+    "endUTC": "2026-10-22T12:29:28.082458+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "question-ui",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix4-independent/question-ui-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:29:28.082727+00:00",
+    "endUTC": "2026-10-22T12:29:31.485504+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "initial-camera",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix4-independent/initial-camera-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:29:31.485852+00:00",
+    "endUTC": "2026-10-22T12:29:36.229971+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "view-protection",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix4-independent/view-protection-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:29:36.230221+00:00",
+    "endUTC": "2026-10-22T12:29:41.423041+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "pc13-hit-diagnostic",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "/workspace/browser-env/cycle18-fix4-independent/pc13-hit-diagnostic-collector.py"
+    ],
+    "startUTC": "2026-10-22T12:29:41.423445+00:00",
+    "endUTC": "2026-10-22T12:30:22.673021+00:00",
+    "actualCollectorExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]
