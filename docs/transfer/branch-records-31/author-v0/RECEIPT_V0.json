@@ -1,0 +1,39 @@
+{
+  "baseline": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "contract": "a177461049bf6a40a016cf3d915f54be46833a6d/docs/cycles/2026-10-23-branch-records-31/INPUT.md",
+  "status": "v0 source frozen; independent static/Cloud pending",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 275345,
+      "sha256": "8145817d8d09c5ec59fb2f86f214dd6657f8655730601e3eaaacc59fbd7dc610",
+      "gitBlob": "a95b7c2b1e2a61969397fbe9237c489987eed328",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+      "gitBlob": "3574c4d4e9baa295b101208a46e03e469b8afd30",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "commands": {
+    "type-v0": 0,
+    "build-v0": 0,
+    "diff-v0": 0
+  },
+  "scope": "Node24.19.0 auxiliary type/build/diff only; no UI/browser/server/install/remote writes/tests",
+  "selectors": {
+    "signal": "#branch-records-<owner>",
+    "disclosure": "#subtree-records-<owner>",
+    "heading": "#subtree-records-heading-<owner>",
+    "scroll": "#area-panel-body[data-area-id=<owner>]"
+  },
+  "state": "one tab-only project/epoch/owner/caller; not Origin/located, not saved project. reset on explicit info/mode/new navigation/project; actual task reader uses existing Origin.",
+  "limits": [
+    "native pointer/Enter/Space and low-zoom hit NOT_RUN",
+    "all-signals card overflow NOT_RUN; existing text/count preserved, no clipping workaround",
+    "source preparation failure described in BASELINE.json; frozen older folders unchanged"
+  ]
+}

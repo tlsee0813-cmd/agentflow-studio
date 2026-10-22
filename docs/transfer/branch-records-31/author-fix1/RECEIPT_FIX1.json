@@ -1,0 +1,39 @@
+{
+  "baseline": "aa0938ecbe96ec5fdb15eb4783e865bf7ab70c7b",
+  "prior": "RECEIPT_V0.json",
+  "status": "fix1 source frozen; Cloud native pan/close NOT_RUN",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 276349,
+      "sha256": "0d516dbda6bdc7569acad78bc4a55e47035cb4b8b99a2ffbdae3a1b54f28955d",
+      "gitBlob": "2a01e5118e866cdc30b4ecae2e7a40e4f679cb0b",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 74513,
+      "sha256": "6d8ddbb78d0f51b061ccaeaf8a939a4d07c558fc7ae7334a07fd106cf5b540f7",
+      "gitBlob": "3574c4d4e9baa295b101208a46e03e469b8afd30",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "commands": {
+    "type-fix1": 0,
+    "build-fix1": 0,
+    "diff-fix1": 0
+  },
+  "delta": "branchRecordCaller close path only: visible control∩viewport∩map client clip must have positive area and midpoint hit owned by control, then focus preventScroll. Try exact signal, exact owner info, then existing space-title. Global focusFirst/camera/coordinates/folds/source data untouched.",
+  "limits": [
+    "intersection point proves visible usable portion, not whole-text readability or minimum target size",
+    "space-title is existing sr-only heading; fallback is accessible focus, not visible highlight",
+    "native normalcaller and pan→close actual UI NOT_RUN"
+  ],
+  "notRun": [
+    "server",
+    "browser",
+    "unit",
+    "install",
+    "remote writes"
+  ]
+}

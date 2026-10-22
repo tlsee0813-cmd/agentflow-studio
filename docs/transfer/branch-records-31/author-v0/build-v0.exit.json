@@ -1,0 +1,8 @@
+{
+  "exit": 0,
+  "command": [
+    "continuity/scripts/build.mjs"
+  ],
+  "runtime": "Node24.19.0 author auxiliary",
+  "at": "2026-10-22T20:41:55.138252+00:00"
+}

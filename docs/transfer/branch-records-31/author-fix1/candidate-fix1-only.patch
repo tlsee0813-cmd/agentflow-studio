@@ -1,0 +1,29 @@
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -1363,6 +1363,17 @@
+   try {commit(undoMove(project,step.id,step.from,step.to));project={...project,notice:`‘${a?.name??'영역'}’의 위치를 되돌렸어요. 다른 내용은 바뀌지 않았어요.`};renderStatus();}
+   catch {posUndo=[];project={...project,notice:'그 뒤 위치가 다시 바뀌어(다른 이동이나 다른 탭) 되돌리지 않았어요. 지금 위치를 그대로 두었어요.'};render();}
+ }
++/** Only the branch-record close path: focus a control at a visible, unobscured point inside the map. */
++function focusBranchRecordControl(id:string):boolean {
++  const el=document.getElementById(id),map=document.getElementById('space-map');
++  if(!el||!map?.contains(el)||!el.checkVisibility({visibilityProperty:true}))return false;
++  const r=el.getBoundingClientRect(),m=map.getBoundingClientRect(),sx=m.width/(map.offsetWidth||1),sy=m.height/(map.offsetHeight||1);
++  const left=Math.max(0,r.left,m.left+map.clientLeft*sx),top=Math.max(0,r.top,m.top+map.clientTop*sy);
++  const right=Math.min(innerWidth,r.right,m.left+(map.clientLeft+map.clientWidth)*sx),bottom=Math.min(innerHeight,r.bottom,m.top+(map.clientTop+map.clientHeight)*sy);
++  if(right<=left||bottom<=top)return false;
++  const hit=document.elementFromPoint((left+right)/2,(top+bottom)/2);if(!hit||!el.contains(hit))return false;
++  el.focus({preventScroll:true});return document.activeElement===el;
++}
+ function openBranchRecords(id:string) {
+   const a=areaById(id);if(!a||a.archived||view!=='space')return;
+   capturePanelReading();
+@@ -1806,7 +1817,7 @@
+   if(branchRecordCaller&&(branchRecordCaller.project!==project.id||branchRecordCaller.epoch!==projectEpoch||branchRecordCaller.area!==a.id))branchRecordCaller=null;
+   const panel=node('aside','','area-panel');panel.id='area-panel';panel.dataset.panelMode='area';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
+   const close=()=>{capturePanelReading();const caller=branchRecordCaller;branchRecordCaller=null;mapSelected=null;sheetOpen=false;rememberMap();render();
+-    if(caller){if(caller.project===project.id&&caller.epoch===projectEpoch&&caller.area===a.id&&focusFirst(caller.id,`node-info-${a.id}`))return;$('space-title')?.focus({preventScroll:true});return;}
++    if(caller){if(caller.project===project.id&&caller.epoch===projectEpoch&&caller.area===a.id&&(focusBranchRecordControl(caller.id)||focusBranchRecordControl(`node-info-${a.id}`)))return;$('space-title')?.focus({preventScroll:true});return;}
+     if(!focusFirst(`node-info-${visibleRepresentative(project,a.id,collapsed)??a.id}`))$('space-title')?.focus({preventScroll:true});};
+   const head=node('div','','panel-top'),heading=node('strong',a.name);heading.id='area-panel-title';
+   heading.title=a.name;
