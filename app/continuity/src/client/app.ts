@@ -358,19 +358,20 @@ function restoreOrigin(o:Origin|null) {
   const area=o.area&&o.area!=='unassigned'?areaById(o.area):null;
   const areaGone=o.view==='area'&&o.area!=='unassigned'&&(!area||area.archived);
   const sel=o.selected?areaById(o.selected):null,selGone=!!o.selected&&(!sel||sel.archived);
+  const panels=structuredClone(o.panels);
   leaveLayer();
   view=areaGone?'space':o.view;viewArea=view==='area'?o.area:null;viewTask=null;viewReturn=null;
   if(o.map)mapView={...o.map};mapSelected=selGone?null:o.selected;sheetOpen=o.sheet&&!!mapSelected;
-  collapsed=new Set(o.collapsed);panelReadings=structuredClone(o.panels);relationReading=o.relations;
-  rememberMap();render(false);
+  collapsed=new Set(o.collapsed);panelReadings=structuredClone(panels);relationReading=o.relations;
+  render(false,false); // Reading waits until the original disclosures and final workspace height are restored.
   // fix1: disclosures that still exist get the open state they had; ones that are gone are skipped. Then the scroll.
   if(!areaGone)for(const [id,open] of Object.entries(o.open)){const d=document.getElementById(id);if(d instanceof HTMLDetailsElement&&$('space-view').contains(d))d.open=open;}
-  restorePanelReading();
   window.scrollTo({top:areaGone?0:o.y});
   // fix2: same content above the control = the scroll above is already the reading place. If the control moved on the page,
   // scroll so it is where it was in the viewport (the browser may clamp at the page end). Without the control: the plain scroll.
   const a=!areaGone?o.anchor:null,el=a?document.getElementById(a.id):null;
   if(a&&el&&el.getClientRects().length){const page=el.getBoundingClientRect().top+window.scrollY;if(Math.abs(page-a.page)>=1)window.scrollTo({top:page-a.top});}
+  sizeWorkspace();panelReadings=panels;restorePanelReading();rememberMap();
   if(areaGone||selGone){project={...project,notice:'출발한 영역이 보관되었거나 없어져 그 위의 보기로 돌아왔어요. 다른 영역이나 작업을 대신 고르지 않았어요.'};renderStatus();}
   if(areaGone||!(o.focus&&focusFirst(o.focus)))$('space-title')?.focus({preventScroll:true});
 }
@@ -2160,7 +2161,7 @@ function renderComposeArea(t:Task|null,returned:boolean) {
   if(parked){const o=node('option',`보관된 영역: ${parked.name} · 되살리거나 다른 영역을 고르세요`);o.value=parked.id;sel.append(o);}
   sel.value=dt===null?'@follow':dt.area===null?'@none':dt.area;
 }
-function render(capturePanel=true) {
+function render(capturePanel=true,restoreReading=true) {
   if(capturePanel)capturePanelReading();
   if(route==='projects'){renderProjects();renderStatus();displayView();return;}
   const open=new Map([...document.querySelectorAll<HTMLDetailsElement>('details[id]')].map(d=>[d.id,d.open]));
@@ -2186,7 +2187,7 @@ function render(capturePanel=true) {
   // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
   const taskScreen=view==='task'?$('space-view'):null;
   for(const d of document.querySelectorAll<HTMLDetailsElement>('details[id]'))if(open.has(d.id)&&!taskScreen?.contains(d)&&!d.closest('#area-panel'))d.open=open.get(d.id)!;
-  sizeWorkspace();finishInitialMapFit();restorePanelReading();
+  sizeWorkspace();finishInitialMapFit();if(restoreReading)restorePanelReading();
   if(focus){const target=document.getElementById(focus.id) as HTMLTextAreaElement|HTMLInputElement|null;if(target){target.focus({preventScroll:true});if(focus.start!=null&&focus.end!=null)try{target.setSelectionRange(focus.start,focus.end);}catch{/* A button has no selection range. */}}}
 }
 function submitInput(withAI:boolean) {

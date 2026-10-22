@@ -133,6 +133,7 @@ class Pc13(unittest.TestCase):
         self.check('selected: panel top aligned with the map',s['panel']['top'],s['map']['top'],delta=2)
         idea=self.page.locator('#panel-idea');tasks=self.page.locator('#panel-tasks')
         self.check_true('selected: idea above the requests',idea.bounding_box()['y']<tasks.bounding_box()['y'])
+        self.wheel_to_panel_task(A)
         expect(self.page.locator(f'#panel-task-{A}')).to_be_in_viewport();self.shot('02-selected')
         self.page.locator('#area-panel-close').click();expect(self.page.locator('#area-panel')).to_have_count(0)
         self.check('closed: no auto-fit when the detail closes',self.geom('closed')['styleTransform'],t0)
