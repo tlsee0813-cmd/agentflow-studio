@@ -1,0 +1,556 @@
+{
+  "source": "0aafca2708863036055cbd3029521b4eb983d22e",
+  "expectedRuns": 2,
+  "executedRuns": 2,
+  "runs": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "checks": [
+        {
+          "id": "four-distinct-exact-identities-nested-report",
+          "pass": true,
+          "raw": {
+            "receipt": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 3006,
+              "windowMax": 3006,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 300,
+                "y": 542.75,
+                "width": 104.25,
+                "height": 43,
+                "top": 542.75,
+                "right": 404.25,
+                "bottom": 585.75,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2717.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2717.625,
+                "right": 572.03125,
+                "bottom": -2686.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_fd1bbebe-c387-4310-84ec-85b9240e03f5",
+                "reportTaskId": "T_fd1bbebe-c387-4310-84ec-85b9240e03f5",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+                "handoffId": "H_independent20_nested_R0",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "actualNewReport": {
+              "id": "T_fd1bbebe-c387-4310-84ec-85b9240e03f5",
+              "sourceIds": [
+                "S_f330a91c-d5b2-4d77-9569-8b1dc71a898e"
+              ],
+              "parentTaskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_independent20_nested_R0",
+                "rawText": "{\n  \"schemaVersion\": \"agentflow.return.1\",\n  \"projectId\": \"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\n  \"taskId\": \"T_2e74b458-72e9-42f4-acf9-b5ccc84712ee\",\n  \"returnId\": \"H_independent20_nested_R0\",\n  \"report\": \"[독립20 중첩 합성 보고] root A 아래의 실제 R0 인계에 돌아온 보고이며 다른 보고로 대체하지 않는다.\",\n  \"evidence\": null\n}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 27,
+                "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                "area": {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "name": "검색 입력과 결과",
+                  "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                }
+              }
+            },
+            "expected": {
+              "root": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "R0": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+              "B": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+              "H": "H_independent20_nested_R0",
+              "work": {
+                "understanding": "[독립20 nested R0 exported understanding] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+                "scope": "[독립20 nested R0 exported scope] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+                "next": "[독립20 nested R0 exported next] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+                "checks": "[독립20 nested R0 exported checks] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다."
+              },
+              "file": {
+                "schemaVersion": "agentflow.return.1",
+                "projectId": "P_1facf9e3-f525-45e1-acf9-262d9a9dd65f",
+                "taskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+                "returnId": "H_independent20_nested_R0",
+                "report": "[독립20 중첩 합성 보고] root A 아래의 실제 R0 인계에 돌아온 보고이며 다른 보고로 대체하지 않는다.",
+                "evidence": null
+              },
+              "setup": "Offline public domain API nested report handoff fixture; all new records synthetic."
+            }
+          }
+        },
+        {
+          "id": "nested-snapshot-from-exact-exported-report-not-root",
+          "pass": true,
+          "raw": {
+            "table": {
+              "understanding": "[독립20 nested R0 exported understanding] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+              "scope": "[독립20 nested R0 exported scope] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+              "next": "[독립20 nested R0 exported next] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+              "checks": "[독립20 nested R0 exported checks] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다."
+            },
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 1084,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>이 결과를 요청할 때 내보낸 작업문</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_fd1bbebe-c387-4310-84ec-85b9240e03f5",
+                "reportTaskId": "T_fd1bbebe-c387-4310-84ec-85b9240e03f5",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+                "handoffId": "H_independent20_nested_R0",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_fd1bbebe-c387-4310-84ec-85b9240e03f5"
+              },
+              "open": [
+                "project-management",
+                "task-report-export-work",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1041.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1219,
+                    "bottom": 326.28125,
+                    "left": 1041.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "recorded-nested-path-not-flattened",
+          "pass": true,
+          "raw": {
+            "path": "연결 경로 보기 · 이전 보고에 연결된 보고\n\n연결: 작업 04 요청 › 작업 06 보고 › 작업 07 이 보고"
+          }
+        },
+        {
+          "id": "nested-read-B-draft-caller-return",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1280,
+              720
+            ],
+            "windowY": 3006,
+            "windowMax": 3006,
+            "docWidth": 1280,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "received-result-open",
+            "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+            "caller": {
+              "x": 300,
+              "y": 542.75,
+              "width": 104.25,
+              "height": 43,
+              "top": 542.75,
+              "right": 404.25,
+              "bottom": 585.75,
+              "left": 300
+            },
+            "contextTitle": {
+              "x": 264,
+              "y": -2717.625,
+              "width": 308.03125,
+              "height": 31.5,
+              "top": -2717.625,
+              "right": 572.03125,
+              "bottom": -2686.125,
+              "left": 264
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_fd1bbebe-c387-4310-84ec-85b9240e03f5",
+              "reportTaskId": "T_fd1bbebe-c387-4310-84ec-85b9240e03f5",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+              "handoffId": "H_independent20_nested_R0",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "checks": [
+        {
+          "id": "four-distinct-exact-identities-nested-report",
+          "pass": true,
+          "raw": {
+            "receipt": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 2826,
+              "windowMax": 2826,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 380,
+                "y": 722.75,
+                "width": 104.25,
+                "height": 43,
+                "top": 722.75,
+                "right": 484.25,
+                "bottom": 765.75,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2537.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2537.625,
+                "right": 572.03125,
+                "bottom": -2506.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_8c3b6f75-6479-43e4-b93a-f0ce11ee582f",
+                "reportTaskId": "T_8c3b6f75-6479-43e4-b93a-f0ce11ee582f",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+                "handoffId": "H_independent20_nested_R0",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "actualNewReport": {
+              "id": "T_8c3b6f75-6479-43e4-b93a-f0ce11ee582f",
+              "sourceIds": [
+                "S_ed9b39b9-98ce-429f-9930-e28b7202b710"
+              ],
+              "parentTaskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_independent20_nested_R0",
+                "rawText": "{\n  \"schemaVersion\": \"agentflow.return.1\",\n  \"projectId\": \"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\n  \"taskId\": \"T_2e74b458-72e9-42f4-acf9-b5ccc84712ee\",\n  \"returnId\": \"H_independent20_nested_R0\",\n  \"report\": \"[독립20 중첩 합성 보고] root A 아래의 실제 R0 인계에 돌아온 보고이며 다른 보고로 대체하지 않는다.\",\n  \"evidence\": null\n}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 27,
+                "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                "area": {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "name": "검색 입력과 결과",
+                  "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                }
+              }
+            },
+            "expected": {
+              "root": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "R0": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+              "B": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+              "H": "H_independent20_nested_R0",
+              "work": {
+                "understanding": "[독립20 nested R0 exported understanding] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+                "scope": "[독립20 nested R0 exported scope] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+                "next": "[독립20 nested R0 exported next] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+                "checks": "[독립20 nested R0 exported checks] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다."
+              },
+              "file": {
+                "schemaVersion": "agentflow.return.1",
+                "projectId": "P_1facf9e3-f525-45e1-acf9-262d9a9dd65f",
+                "taskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+                "returnId": "H_independent20_nested_R0",
+                "report": "[독립20 중첩 합성 보고] root A 아래의 실제 R0 인계에 돌아온 보고이며 다른 보고로 대체하지 않는다.",
+                "evidence": null
+              },
+              "setup": "Offline public domain API nested report handoff fixture; all new records synthetic."
+            }
+          }
+        },
+        {
+          "id": "nested-snapshot-from-exact-exported-report-not-root",
+          "pass": true,
+          "raw": {
+            "table": {
+              "understanding": "[독립20 nested R0 exported understanding] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+              "scope": "[독립20 nested R0 exported scope] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+              "next": "[독립20 nested R0 exported next] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다.",
+              "checks": "[독립20 nested R0 exported checks] 보고에 대한 후속 확인 작업문이며 현재 root A값이 아니다."
+            },
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 837,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>이 결과를 요청할 때 내보낸 작업문</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_8c3b6f75-6479-43e4-b93a-f0ce11ee582f",
+                "reportTaskId": "T_8c3b6f75-6479-43e4-b93a-f0ce11ee582f",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+                "handoffId": "H_independent20_nested_R0",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_8c3b6f75-6479-43e4-b93a-f0ce11ee582f"
+              },
+              "open": [
+                "project-management",
+                "task-report-export-work",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1201.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1379,
+                    "bottom": 326.28125,
+                    "left": 1201.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "recorded-nested-path-not-flattened",
+          "pass": true,
+          "raw": {
+            "path": "연결 경로 보기 · 이전 보고에 연결된 보고\n\n연결: 작업 04 요청 › 작업 06 보고 › 작업 07 이 보고"
+          }
+        },
+        {
+          "id": "nested-read-B-draft-caller-return",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1440,
+              900
+            ],
+            "windowY": 2826,
+            "windowMax": 2826,
+            "docWidth": 1440,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "received-result-open",
+            "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+            "caller": {
+              "x": 380,
+              "y": 722.75,
+              "width": 104.25,
+              "height": 43,
+              "top": 722.75,
+              "right": 484.25,
+              "bottom": 765.75,
+              "left": 380
+            },
+            "contextTitle": {
+              "x": 264,
+              "y": -2537.625,
+              "width": 308.03125,
+              "height": 31.5,
+              "top": -2537.625,
+              "right": 572.03125,
+              "bottom": -2506.125,
+              "left": 264
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_8c3b6f75-6479-43e4-b93a-f0ce11ee582f",
+              "reportTaskId": "T_8c3b6f75-6479-43e4-b93a-f0ce11ee582f",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_2e74b458-72e9-42f4-acf9-b5ccc84712ee",
+              "handoffId": "H_independent20_nested_R0",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        }
+      ],
+      "pageerrors": []
+    }
+  ],
+  "exit": 0
+}

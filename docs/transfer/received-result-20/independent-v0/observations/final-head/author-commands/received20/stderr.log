@@ -1,0 +1,125 @@
+test_01_two_inputs_exact_receipt_and_B_draft_readonly (__main__.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) ... 
+  test_01_two_inputs_exact_receipt_and_B_draft_readonly (__main__.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) (input='powertoys') ... FAIL
+  test_01_two_inputs_exact_receipt_and_B_draft_readonly (__main__.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) (input='product13') ... FAIL
+test_02_same_handoff_different_reports_and_exact_duplicate (__main__.Received20.test_02_same_handoff_different_reports_and_exact_duplicate) ... FAIL
+test_03_memory_only_archived_and_missing_snapshot (__main__.Received20.test_03_memory_only_archived_and_missing_snapshot) ... ok
+test_04_pending_save_navigation_and_records_origin_C (__main__.Received20.test_04_pending_save_navigation_and_records_origin_C) ... FAIL
+test_05_located_only_origin_is_not_duplicated_or_left_as_ghost (__main__.Received20.test_05_located_only_origin_is_not_duplicated_or_left_as_ghost) ... FAIL
+test_390_receipt_reader_close_minimum (__main__.Received20Narrow.test_390_receipt_reader_close_minimum) ... ok
+test_01_two_inputs_exact_receipt_and_B_draft_readonly (__main__.Received20Wide.test_01_two_inputs_exact_receipt_and_B_draft_readonly) ... ok
+test_02_same_handoff_different_reports_and_exact_duplicate (__main__.Received20Wide.test_02_same_handoff_different_reports_and_exact_duplicate) ... ok
+test_03_memory_only_archived_and_missing_snapshot (__main__.Received20Wide.test_03_memory_only_archived_and_missing_snapshot) ... ok
+test_04_pending_save_navigation_and_records_origin_C (__main__.Received20Wide.test_04_pending_save_navigation_and_records_origin_C) ... FAIL
+test_05_located_only_origin_is_not_duplicated_or_left_as_ghost (__main__.Received20Wide.test_05_located_only_origin_is_not_duplicated_or_left_as_ghost) ... ok
+
+======================================================================
+FAIL: test_01_two_inputs_exact_receipt_and_B_draft_readonly (__main__.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) (input='powertoys')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 133, in test_01_two_inputs_exact_receipt_and_B_draft_readonly
+    self.receipt(s,t['id']);departure=self.snap('immediately before explicit receipt open');self.open_received(s,t['id']);expect(self.page.locator('#task-next-action')).to_contain_text('작성 중인 요청 열기');self.snapshot_work(s)
+                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 105, in open_received
+    self.visible('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 44, in visible
+    v=self.page.evaluate(PROBE,[sel,marker] if marker else sel);self.yes('actual full clipping and hit '+sel,bool(v and v['inside'] and v['hit']),v)
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : actual full clipping and hit #task-next-action
+
+======================================================================
+FAIL: test_01_two_inputs_exact_receipt_and_B_draft_readonly (__main__.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) (input='product13')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 133, in test_01_two_inputs_exact_receipt_and_B_draft_readonly
+    self.receipt(s,t['id']);departure=self.snap('immediately before explicit receipt open');self.open_received(s,t['id']);expect(self.page.locator('#task-next-action')).to_contain_text('작성 중인 요청 열기');self.snapshot_work(s)
+                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 105, in open_received
+    self.visible('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 44, in visible
+    v=self.page.evaluate(PROBE,[sel,marker] if marker else sel);self.yes('actual full clipping and hit '+sel,bool(v and v['inside'] and v['hit']),v)
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : actual full clipping and hit #task-next-action
+
+======================================================================
+FAIL: test_02_same_handoff_different_reports_and_exact_duplicate (__main__.Received20.test_02_same_handoff_different_reports_and_exact_duplicate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 149, in test_02_same_handoff_different_reports_and_exact_duplicate
+    self.open_received(s,first['id']);self.snapshot_work(s);self.equal('duplicate reader still readonly',self.state(),two)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 105, in open_received
+    self.visible('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 44, in visible
+    v=self.page.evaluate(PROBE,[sel,marker] if marker else sel);self.yes('actual full clipping and hit '+sel,bool(v and v['inside'] and v['hit']),v)
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : actual full clipping and hit #task-next-action
+
+======================================================================
+FAIL: test_04_pending_save_navigation_and_records_origin_C (__main__.Received20.test_04_pending_save_navigation_and_records_origin_C)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 195, in test_04_pending_save_navigation_and_records_origin_C
+    self.page.locator('#nav-space').click();base.open_records(self.page);self.reach(r);self.page.locator(r).click();self.reach('#task-view-continue');self.page.locator('#task-view-continue').click();self.receipt(s,t['id']);self.open_received(s,t['id'])
+                                                                                                                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 105, in open_received
+    self.visible('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 44, in visible
+    v=self.page.evaluate(PROBE,[sel,marker] if marker else sel);self.yes('actual full clipping and hit '+sel,bool(v and v['inside'] and v['hit']),v)
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : actual full clipping and hit #task-next-action
+
+======================================================================
+FAIL: test_05_located_only_origin_is_not_duplicated_or_left_as_ghost (__main__.Received20.test_05_located_only_origin_is_not_duplicated_or_left_as_ghost)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 210, in test_05_located_only_origin_is_not_duplicated_or_left_as_ghost
+    self.receipt(s,t['id']);self.open_received(s,t['id']);self.reach('#task-return-origin');self.page.locator('#task-return-origin').click()
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 105, in open_received
+    self.visible('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 44, in visible
+    v=self.page.evaluate(PROBE,[sel,marker] if marker else sel);self.yes('actual full clipping and hit '+sel,bool(v and v['inside'] and v['hit']),v)
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : actual full clipping and hit #task-next-action
+
+======================================================================
+FAIL: test_04_pending_save_navigation_and_records_origin_C (__main__.Received20Wide.test_04_pending_save_navigation_and_records_origin_C)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 201, in test_04_pending_save_navigation_and_records_origin_C
+    self.reach('#received-result-open');self.page.locator('#received-result-open').click();expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',t['id']);self.page.locator('#task-return-origin').click();self.equal('reopening receipt keeps current C',self.state()['currentTaskId'],C);expect(self.page.locator('#received-result-open')).to_be_focused();self.visible('#received-result-open')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 71, in reach
+    self.wheel(sel,max(-220,min(220,delta)),marker)
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 59, in wheel
+    result=self.page.evaluate('async()=>await window.__received20Wheel.promise');self.yes('native scroll event completion',result['ok'],result)
+                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : native scroll event completion
+
+----------------------------------------------------------------------
+Ran 11 tests in 300.591s
+
+FAILED (failures=6)

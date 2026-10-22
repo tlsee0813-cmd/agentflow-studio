@@ -1,0 +1,71 @@
+test_01_two_inputs_exact_receipt_and_B_draft_readonly (received20_browser.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) ... 
+  test_01_two_inputs_exact_receipt_and_B_draft_readonly (received20_browser.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) (input='powertoys') ... FAIL
+  test_01_two_inputs_exact_receipt_and_B_draft_readonly (received20_browser.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) (input='product13') ... FAIL
+test_04_pending_save_navigation_and_records_origin_C (received20_browser.Received20Wide.test_04_pending_save_navigation_and_records_origin_C) ... FAIL
+
+======================================================================
+FAIL: test_01_two_inputs_exact_receipt_and_B_draft_readonly (received20_browser.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) (input='powertoys')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 133, in test_01_two_inputs_exact_receipt_and_B_draft_readonly
+    self.receipt(s,t['id']);departure=self.snap('immediately before explicit receipt open');self.open_received(s,t['id']);expect(self.page.locator('#task-next-action')).to_contain_text('작성 중인 요청 열기');self.snapshot_work(s)
+                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 105, in open_received
+    self.visible('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 44, in visible
+    v=self.page.evaluate(PROBE,[sel,marker] if marker else sel);self.yes('actual full clipping and hit '+sel,bool(v and v['inside'] and v['hit']),v)
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-independent/final-head/received20-failure-diagnostic.py", line 9, in yes
+    return old(self,label,ok,actual)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : actual full clipping and hit #task-next-action
+
+======================================================================
+FAIL: test_01_two_inputs_exact_receipt_and_B_draft_readonly (received20_browser.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly) (input='product13')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 133, in test_01_two_inputs_exact_receipt_and_B_draft_readonly
+    self.receipt(s,t['id']);departure=self.snap('immediately before explicit receipt open');self.open_received(s,t['id']);expect(self.page.locator('#task-next-action')).to_contain_text('작성 중인 요청 열기');self.snapshot_work(s)
+                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 105, in open_received
+    self.visible('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 44, in visible
+    v=self.page.evaluate(PROBE,[sel,marker] if marker else sel);self.yes('actual full clipping and hit '+sel,bool(v and v['inside'] and v['hit']),v)
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-independent/final-head/received20-failure-diagnostic.py", line 9, in yes
+    return old(self,label,ok,actual)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : actual full clipping and hit #task-next-action
+
+======================================================================
+FAIL: test_04_pending_save_navigation_and_records_origin_C (received20_browser.Received20Wide.test_04_pending_save_navigation_and_records_origin_C)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 201, in test_04_pending_save_navigation_and_records_origin_C
+    self.reach('#received-result-open');self.page.locator('#received-result-open').click();expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',t['id']);self.page.locator('#task-return-origin').click();self.equal('reopening receipt keeps current C',self.state()['currentTaskId'],C);expect(self.page.locator('#received-result-open')).to_be_focused();self.visible('#received-result-open')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 71, in reach
+    self.wheel(sel,max(-220,min(220,delta)),marker)
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 59, in wheel
+    result=self.page.evaluate('async()=>await window.__received20Wheel.promise');self.yes('native scroll event completion',result['ok'],result)
+                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-independent/final-head/received20-failure-diagnostic.py", line 9, in yes
+    return old(self,label,ok,actual)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-final-candidate/app/continuity/tests/received20_browser.py", line 37, in yes
+    def yes(self,label,ok,raw=None):self.record('condition',label,raw if raw is not None else bool(ok),True);self.assertTrue(ok,label)
+                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : native scroll event completion
+
+----------------------------------------------------------------------
+Ran 2 tests in 27.828s
+
+FAILED (failures=3)

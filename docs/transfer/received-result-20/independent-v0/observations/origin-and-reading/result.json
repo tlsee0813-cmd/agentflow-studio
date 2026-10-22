@@ -1,0 +1,5386 @@
+{
+  "source": "0aafca2708863036055cbd3029521b4eb983d22e",
+  "expectedRuns": 7,
+  "executedRuns": 7,
+  "runs": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "records-reader-owner-back",
+      "checks": [
+        {
+          "id": "report-explicit-owner-is-exact-A",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1280,
+              720
+            ],
+            "windowY": 78,
+            "windowMax": 691,
+            "docWidth": 1280,
+            "matrix": "matrix(0.677895, 0, 0, 0.677895, 346.137, 65.0842)",
+            "map": {
+              "x": 264,
+              "y": 265.484375,
+              "width": 660,
+              "height": 438.515625,
+              "top": 265.484375,
+              "right": 924,
+              "bottom": 704,
+              "left": 264
+            },
+            "mapScroll": {
+              "x": 0,
+              "y": 0
+            },
+            "panel": {
+              "x": 938,
+              "y": 265.484375,
+              "width": 300,
+              "height": 438.515625,
+              "top": 265.484375,
+              "right": 1238,
+              "bottom": 704,
+              "left": 938
+            },
+            "mode": "area",
+            "head": {
+              "x": 939,
+              "y": 266.484375,
+              "width": 298,
+              "height": 76.390625,
+              "top": 266.484375,
+              "right": 1237,
+              "bottom": 342.875,
+              "left": 939
+            },
+            "footer": {
+              "x": 939,
+              "y": 650,
+              "width": 298,
+              "height": 53,
+              "top": 650,
+              "right": 1237,
+              "bottom": 703,
+              "left": 939
+            },
+            "body": {
+              "x": 939,
+              "y": 342.875,
+              "width": 298,
+              "height": 307.125,
+              "top": 342.875,
+              "right": 1237,
+              "bottom": 650,
+              "left": 939
+            },
+            "bodyTop": 0,
+            "bodyMax": 546,
+            "bodyId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+            "focus": "area-panel",
+            "cards": [
+              {
+                "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                "rect": {
+                  "x": 638.2526245117188,
+                  "y": 358.68438720703125,
+                  "width": 162.69476318359375,
+                  "height": 122.02105712890625,
+                  "top": 358.68438720703125,
+                  "right": 800.9473876953125,
+                  "bottom": 480.7054443359375,
+                  "left": 638.2526245117188
+                },
+                "x": "40px",
+                "y": "40px",
+                "selected": false
+              },
+              {
+                "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                "rect": {
+                  "x": 841.6210327148438,
+                  "y": 358.68438720703125,
+                  "width": 162.69476318359375,
+                  "height": 122.02105712890625,
+                  "top": 358.68438720703125,
+                  "right": 1004.3157958984375,
+                  "bottom": 480.7054443359375,
+                  "left": 841.6210327148438
+                },
+                "x": "340px",
+                "y": "40px",
+                "selected": false
+              },
+              {
+                "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                "rect": {
+                  "x": 434.88421630859375,
+                  "y": 358.68438720703125,
+                  "width": 162.69476318359375,
+                  "height": 122.02105712890625,
+                  "top": 358.68438720703125,
+                  "right": 597.5789794921875,
+                  "bottom": 480.7054443359375,
+                  "left": 434.88421630859375
+                },
+                "x": "-260px",
+                "y": "40px",
+                "selected": true
+              },
+              {
+                "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                "rect": {
+                  "x": 638.2526245117188,
+                  "y": 494.2633056640625,
+                  "width": 162.69476318359375,
+                  "height": 122.02105712890625,
+                  "top": 494.2633056640625,
+                  "right": 800.9473876953125,
+                  "bottom": 616.2843627929688,
+                  "left": 638.2526245117188
+                },
+                "x": "40px",
+                "y": "240px",
+                "selected": false
+              },
+              {
+                "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                "rect": {
+                  "x": 841.6210327148438,
+                  "y": 494.2633056640625,
+                  "width": 162.69476318359375,
+                  "height": 122.02105712890625,
+                  "top": 494.2633056640625,
+                  "right": 1004.3157958984375,
+                  "bottom": 616.2843627929688,
+                  "left": 841.6210327148438
+                },
+                "x": "340px",
+                "y": "240px",
+                "selected": false
+              }
+            ],
+            "folds": [],
+            "paths": [
+              {
+                "from": null,
+                "to": null,
+                "kind": null,
+                "d": "M0,0L10,5L0,10z"
+              }
+            ],
+            "open": []
+          }
+        },
+        {
+          "id": "original-records-caller-camera-reading-back-before-help",
+          "pass": true,
+          "raw": {
+            "before": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1280,
+              "matrix": "matrix(0.677895, 0, 0, 0.677895, 346.137, 65.0842)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 660,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 938,
+                "y": 292.484375,
+                "width": 300,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "mode": "records",
+              "head": {
+                "x": 939,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1237,
+                "bottom": 350.484375,
+                "left": 939
+              },
+              "footer": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 350.484375,
+                "width": 298,
+                "height": 299.515625,
+                "top": 350.484375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyTop": 0,
+              "bodyMax": 12,
+              "bodyId": "@records",
+              "focus": "records-heading",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 638.2526245117188,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 800.9473876953125,
+                    "bottom": 507.7054443359375,
+                    "left": 638.2526245117188
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 841.6210327148438,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 1004.3157958984375,
+                    "bottom": 507.7054443359375,
+                    "left": 841.6210327148438
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 434.88421630859375,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 597.5789794921875,
+                    "bottom": 507.7054443359375,
+                    "left": 434.88421630859375
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 638.2526245117188,
+                    "y": 521.2633056640625,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 521.2633056640625,
+                    "right": 800.9473876953125,
+                    "bottom": 643.2843627929688,
+                    "left": 638.2526245117188
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 841.6210327148438,
+                    "y": 521.2633056640625,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 521.2633056640625,
+                    "right": 1004.3157958984375,
+                    "bottom": 643.2843627929688,
+                    "left": 841.6210327148438
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": true
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "callerBefore": {
+              "rect": {
+                "x": 951,
+                "y": 598.5,
+                "width": 46.09375,
+                "height": 36,
+                "top": 598.5,
+                "right": 997.09375,
+                "bottom": 634.5,
+                "left": 951
+              },
+              "relativeY": 248.015625
+            },
+            "after": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1280,
+              "matrix": "matrix(0.677895, 0, 0, 0.677895, 346.137, 65.0842)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 660,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 938,
+                "y": 292.484375,
+                "width": 300,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "mode": "records",
+              "head": {
+                "x": 939,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1237,
+                "bottom": 350.484375,
+                "left": 939
+              },
+              "footer": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 350.484375,
+                "width": 298,
+                "height": 299.515625,
+                "top": 350.484375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyTop": 0,
+              "bodyMax": 12,
+              "bodyId": "@records",
+              "focus": "check-open-T_d1e05291-4ce0-4bd9-8628-bcaa672e2595",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 638.2526245117188,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 800.9473876953125,
+                    "bottom": 507.7054443359375,
+                    "left": 638.2526245117188
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 841.6210327148438,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 1004.3157958984375,
+                    "bottom": 507.7054443359375,
+                    "left": 841.6210327148438
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 434.88421630859375,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 597.5789794921875,
+                    "bottom": 507.7054443359375,
+                    "left": 434.88421630859375
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 638.2526245117188,
+                    "y": 521.2633056640625,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 521.2633056640625,
+                    "right": 800.9473876953125,
+                    "bottom": 643.2843627929688,
+                    "left": 638.2526245117188
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 841.6210327148438,
+                    "y": 521.2633056640625,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 521.2633056640625,
+                    "right": 1004.3157958984375,
+                    "bottom": 643.2843627929688,
+                    "left": 841.6210327148438
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": true
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "callerAfter": {
+              "rect": {
+                "x": 951,
+                "y": 598.5,
+                "width": 46.09375,
+                "height": 36,
+                "top": 598.5,
+                "right": 997.09375,
+                "bottom": 634.5,
+                "left": 951
+              },
+              "relativeY": 248.015625
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "located-only-work-slot",
+      "checks": [
+        {
+          "id": "actual-located-only-slot-current-B-not-fake-new-task",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1280,
+              720
+            ],
+            "windowY": 2475,
+            "windowMax": 2773,
+            "docWidth": 1280,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "draft",
+            "active": "<textarea id=\"draft\" rows=\"5\" maxlength=\"12000\" placeholder=\"이번에 바꿀 부분만 적어 주세요. 앞에서 정한 기준은 함께 이어갑니다.\"></textarea>",
+            "caller": {
+              "x": 300,
+              "y": 841.125,
+              "width": 104.25,
+              "height": 43,
+              "top": 841.125,
+              "right": 404.25,
+              "bottom": 884.125,
+              "left": 300
+            },
+            "contextTitle": {
+              "x": 264,
+              "y": -2234.3125,
+              "width": 308.03125,
+              "height": 31.5,
+              "top": -2234.3125,
+              "right": 572.03125,
+              "bottom": -2202.8125,
+              "left": 264
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_3bc78a68-8e2a-47d6-9111-249e87b33aeb",
+              "reportTaskId": "T_3bc78a68-8e2a-47d6-9111-249e87b33aeb",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [
+              {
+                "id": "work-locate-return",
+                "text": "← 위치 찾기 전 보기로 · 전체 공간 · 연결",
+                "rect": {
+                  "x": 961.296875,
+                  "y": -2313.40625,
+                  "width": 276.703125,
+                  "height": 43,
+                  "top": -2313.40625,
+                  "right": 1238,
+                  "bottom": -2270.40625,
+                  "left": 961.296875
+                }
+              }
+            ],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        },
+        {
+          "id": "work-slot-restores-one-locate-no-self-return-ghost",
+          "pass": true,
+          "raw": {
+            "before": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 2475,
+              "windowMax": 2773,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "draft",
+              "active": "<textarea id=\"draft\" rows=\"5\" maxlength=\"12000\" placeholder=\"이번에 바꿀 부분만 적어 주세요. 앞에서 정한 기준은 함께 이어갑니다.\"></textarea>",
+              "caller": {
+                "x": 300,
+                "y": 841.125,
+                "width": 104.25,
+                "height": 43,
+                "top": 841.125,
+                "right": 404.25,
+                "bottom": 884.125,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2234.3125,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2234.3125,
+                "right": 572.03125,
+                "bottom": -2202.8125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_3bc78a68-8e2a-47d6-9111-249e87b33aeb",
+                "reportTaskId": "T_3bc78a68-8e2a-47d6-9111-249e87b33aeb",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "work-locate-return",
+                  "text": "← 위치 찾기 전 보기로 · 전체 공간 · 연결",
+                  "rect": {
+                    "x": 961.296875,
+                    "y": -2313.40625,
+                    "width": 276.703125,
+                    "height": 43,
+                    "top": -2313.40625,
+                    "right": 1238,
+                    "bottom": -2270.40625,
+                    "left": 961.296875
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "after": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 2652,
+              "windowMax": 2773,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "received-result-open",
+              "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+              "caller": {
+                "x": 300,
+                "y": 664.125,
+                "width": 104.25,
+                "height": 43,
+                "top": 664.125,
+                "right": 404.25,
+                "bottom": 707.125,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2411.3125,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2411.3125,
+                "right": 572.03125,
+                "bottom": -2379.8125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_3bc78a68-8e2a-47d6-9111-249e87b33aeb",
+                "reportTaskId": "T_3bc78a68-8e2a-47d6-9111-249e87b33aeb",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "work-locate-return",
+                  "text": "← 위치 찾기 전 보기로 · 전체 공간 · 연결",
+                  "rect": {
+                    "x": 961.296875,
+                    "y": -2490.40625,
+                    "width": 276.703125,
+                    "height": 43,
+                    "top": -2490.40625,
+                    "right": 1238,
+                    "bottom": -2447.40625,
+                    "left": 961.296875
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "one-locationback-restores-original-space-S",
+          "pass": true,
+          "raw": {
+            "S": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1280,
+              "matrix": "matrix(0.677895, 0, 0, 0.677895, 346.137, 65.0842)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 660,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 938,
+                "y": 292.484375,
+                "width": 300,
+                "height": 411.515625,
+                "top": 292.484375,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "mode": "relations",
+              "head": {
+                "x": 939,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1237,
+                "bottom": 350.484375,
+                "left": 939
+              },
+              "footer": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 350.484375,
+                "width": 298,
+                "height": 299.515625,
+                "top": 350.484375,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyTop": 280,
+              "bodyMax": 1980,
+              "bodyId": "@relations",
+              "focus": "area-panel-body",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 638.2526245117188,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 800.9473876953125,
+                    "bottom": 507.7054443359375,
+                    "left": 638.2526245117188
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 841.6210327148438,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 1004.3157958984375,
+                    "bottom": 507.7054443359375,
+                    "left": 841.6210327148438
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 434.88421630859375,
+                    "y": 385.68438720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 385.68438720703125,
+                    "right": 597.5789794921875,
+                    "bottom": 507.7054443359375,
+                    "left": 434.88421630859375
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 638.2526245117188,
+                    "y": 521.2633056640625,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 521.2633056640625,
+                    "right": 800.9473876953125,
+                    "bottom": 643.2843627929688,
+                    "left": 638.2526245117188
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 841.6210327148438,
+                    "y": 521.2633056640625,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 521.2633056640625,
+                    "right": 1004.3157958984375,
+                    "bottom": 643.2843627929688,
+                    "left": 841.6210327148438
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": true
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "back": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1280,
+              "matrix": "matrix(0.677895, 0, 0, 0.677895, 346.137, 65.0842)",
+              "map": {
+                "x": 264,
+                "y": 224.890625,
+                "width": 660,
+                "height": 479.109375,
+                "top": 224.890625,
+                "right": 924,
+                "bottom": 704,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 938,
+                "y": 224.890625,
+                "width": 300,
+                "height": 479.109375,
+                "top": 224.890625,
+                "right": 1238,
+                "bottom": 704,
+                "left": 938
+              },
+              "mode": "relations",
+              "head": {
+                "x": 939,
+                "y": 225.890625,
+                "width": 298,
+                "height": 57,
+                "top": 225.890625,
+                "right": 1237,
+                "bottom": 282.890625,
+                "left": 939
+              },
+              "footer": {
+                "x": 939,
+                "y": 650,
+                "width": 298,
+                "height": 53,
+                "top": 650,
+                "right": 1237,
+                "bottom": 703,
+                "left": 939
+              },
+              "body": {
+                "x": 939,
+                "y": 282.890625,
+                "width": 298,
+                "height": 367.109375,
+                "top": 282.890625,
+                "right": 1237,
+                "bottom": 650,
+                "left": 939
+              },
+              "bodyTop": 280,
+              "bodyMax": 1913,
+              "bodyId": "@relations",
+              "focus": "relation-from-L_e9efe62f-cdb2-46a6-bb15-f042b343f3c4",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 638.2526245117188,
+                    "y": 318.09063720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 318.09063720703125,
+                    "right": 800.9473876953125,
+                    "bottom": 440.1116943359375,
+                    "left": 638.2526245117188
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 841.6210327148438,
+                    "y": 318.09063720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 318.09063720703125,
+                    "right": 1004.3157958984375,
+                    "bottom": 440.1116943359375,
+                    "left": 841.6210327148438
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 434.88421630859375,
+                    "y": 318.09063720703125,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 318.09063720703125,
+                    "right": 597.5789794921875,
+                    "bottom": 440.1116943359375,
+                    "left": 434.88421630859375
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 638.2526245117188,
+                    "y": 453.6695556640625,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 453.6695556640625,
+                    "right": 800.9473876953125,
+                    "bottom": 575.6906127929688,
+                    "left": 638.2526245117188
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 841.6210327148438,
+                    "y": 453.6695556640625,
+                    "width": 162.69476318359375,
+                    "height": 122.02105712890625,
+                    "top": 453.6695556640625,
+                    "right": 1004.3157958984375,
+                    "bottom": 575.6906127929688,
+                    "left": 841.6210327148438
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": true
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "records-reader-owner-back",
+      "checks": [
+        {
+          "id": "report-explicit-owner-is-exact-A",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1440,
+              900
+            ],
+            "windowY": 0,
+            "windowMax": 613,
+            "docWidth": 1440,
+            "matrix": "matrix(0.96, 0, 0, 0.96, 381, 90.2)",
+            "map": {
+              "x": 264,
+              "y": 343.484375,
+              "width": 820,
+              "height": 540.515625,
+              "top": 343.484375,
+              "right": 1084,
+              "bottom": 884,
+              "left": 264
+            },
+            "mapScroll": {
+              "x": 0,
+              "y": 0
+            },
+            "panel": {
+              "x": 1098,
+              "y": 343.484375,
+              "width": 300,
+              "height": 540.515625,
+              "top": 343.484375,
+              "right": 1398,
+              "bottom": 884,
+              "left": 1098
+            },
+            "mode": "area",
+            "head": {
+              "x": 1099,
+              "y": 344.484375,
+              "width": 298,
+              "height": 76.390625,
+              "top": 344.484375,
+              "right": 1397,
+              "bottom": 420.875,
+              "left": 1099
+            },
+            "footer": {
+              "x": 1099,
+              "y": 830,
+              "width": 298,
+              "height": 53,
+              "top": 830,
+              "right": 1397,
+              "bottom": 883,
+              "left": 1099
+            },
+            "body": {
+              "x": 1099,
+              "y": 420.875,
+              "width": 298,
+              "height": 409.125,
+              "top": 420.875,
+              "right": 1397,
+              "bottom": 830,
+              "left": 1099
+            },
+            "bodyTop": 0,
+            "bodyMax": 444,
+            "bodyId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+            "focus": "area-panel",
+            "cards": [
+              {
+                "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                "rect": {
+                  "x": 684.4000244140625,
+                  "y": 473.0843505859375,
+                  "width": 230.39996337890625,
+                  "height": 172.800048828125,
+                  "top": 473.0843505859375,
+                  "right": 914.7999877929688,
+                  "bottom": 645.8843994140625,
+                  "left": 684.4000244140625
+                },
+                "x": "40px",
+                "y": "40px",
+                "selected": false
+              },
+              {
+                "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                "rect": {
+                  "x": 972.4000244140625,
+                  "y": 473.0843505859375,
+                  "width": 230.4000244140625,
+                  "height": 172.800048828125,
+                  "top": 473.0843505859375,
+                  "right": 1202.800048828125,
+                  "bottom": 645.8843994140625,
+                  "left": 972.4000244140625
+                },
+                "x": "340px",
+                "y": "40px",
+                "selected": false
+              },
+              {
+                "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                "rect": {
+                  "x": 396.4000244140625,
+                  "y": 473.0843505859375,
+                  "width": 230.39996337890625,
+                  "height": 172.800048828125,
+                  "top": 473.0843505859375,
+                  "right": 626.7999877929688,
+                  "bottom": 645.8843994140625,
+                  "left": 396.4000244140625
+                },
+                "x": "-260px",
+                "y": "40px",
+                "selected": true
+              },
+              {
+                "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                "rect": {
+                  "x": 684.4000244140625,
+                  "y": 665.0843505859375,
+                  "width": 230.39996337890625,
+                  "height": 172.79998779296875,
+                  "top": 665.0843505859375,
+                  "right": 914.7999877929688,
+                  "bottom": 837.8843383789062,
+                  "left": 684.4000244140625
+                },
+                "x": "40px",
+                "y": "240px",
+                "selected": false
+              },
+              {
+                "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                "rect": {
+                  "x": 972.4000244140625,
+                  "y": 665.0843505859375,
+                  "width": 230.4000244140625,
+                  "height": 172.79998779296875,
+                  "top": 665.0843505859375,
+                  "right": 1202.800048828125,
+                  "bottom": 837.8843383789062,
+                  "left": 972.4000244140625
+                },
+                "x": "340px",
+                "y": "240px",
+                "selected": false
+              }
+            ],
+            "folds": [],
+            "paths": [
+              {
+                "from": null,
+                "to": null,
+                "kind": null,
+                "d": "M0,0L10,5L0,10z"
+              }
+            ],
+            "open": []
+          }
+        },
+        {
+          "id": "original-records-caller-camera-reading-back-before-help",
+          "pass": true,
+          "raw": {
+            "before": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1440,
+              "matrix": "matrix(0.96, 0, 0, 0.96, 381, 90.2)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 820,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1084,
+                "bottom": 884,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 1098,
+                "y": 292.484375,
+                "width": 300,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 1098
+              },
+              "mode": "records",
+              "head": {
+                "x": 1099,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1397,
+                "bottom": 350.484375,
+                "left": 1099
+              },
+              "footer": {
+                "x": 1099,
+                "y": 830,
+                "width": 298,
+                "height": 53,
+                "top": 830,
+                "right": 1397,
+                "bottom": 883,
+                "left": 1099
+              },
+              "body": {
+                "x": 1099,
+                "y": 350.484375,
+                "width": 298,
+                "height": 479.515625,
+                "top": 350.484375,
+                "right": 1397,
+                "bottom": 830,
+                "left": 1099
+              },
+              "bodyTop": 0,
+              "bodyMax": 0,
+              "bodyId": "@records",
+              "focus": "records-heading",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 684.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 914.7999877929688,
+                    "bottom": 594.8843994140625,
+                    "left": 684.4000244140625
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 972.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.4000244140625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 1202.800048828125,
+                    "bottom": 594.8843994140625,
+                    "left": 972.4000244140625
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 396.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 626.7999877929688,
+                    "bottom": 594.8843994140625,
+                    "left": 396.4000244140625
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 684.4000244140625,
+                    "y": 614.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.79998779296875,
+                    "top": 614.0843505859375,
+                    "right": 914.7999877929688,
+                    "bottom": 786.8843383789062,
+                    "left": 684.4000244140625
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 972.4000244140625,
+                    "y": 614.0843505859375,
+                    "width": 230.4000244140625,
+                    "height": 172.79998779296875,
+                    "top": 614.0843505859375,
+                    "right": 1202.800048828125,
+                    "bottom": 786.8843383789062,
+                    "left": 972.4000244140625
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": true
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "callerBefore": {
+              "rect": {
+                "x": 1111,
+                "y": 598.5,
+                "width": 46.09375,
+                "height": 36,
+                "top": 598.5,
+                "right": 1157.09375,
+                "bottom": 634.5,
+                "left": 1111
+              },
+              "relativeY": 248.015625
+            },
+            "after": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1440,
+              "matrix": "matrix(0.96, 0, 0, 0.96, 381, 90.2)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 820,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1084,
+                "bottom": 884,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 1098,
+                "y": 292.484375,
+                "width": 300,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 1098
+              },
+              "mode": "records",
+              "head": {
+                "x": 1099,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1397,
+                "bottom": 350.484375,
+                "left": 1099
+              },
+              "footer": {
+                "x": 1099,
+                "y": 830,
+                "width": 298,
+                "height": 53,
+                "top": 830,
+                "right": 1397,
+                "bottom": 883,
+                "left": 1099
+              },
+              "body": {
+                "x": 1099,
+                "y": 350.484375,
+                "width": 298,
+                "height": 479.515625,
+                "top": 350.484375,
+                "right": 1397,
+                "bottom": 830,
+                "left": 1099
+              },
+              "bodyTop": 0,
+              "bodyMax": 0,
+              "bodyId": "@records",
+              "focus": "check-open-T_8cc330d6-9ef8-4cf4-b021-69ee1b345037",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 684.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 914.7999877929688,
+                    "bottom": 594.8843994140625,
+                    "left": 684.4000244140625
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 972.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.4000244140625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 1202.800048828125,
+                    "bottom": 594.8843994140625,
+                    "left": 972.4000244140625
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 396.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 626.7999877929688,
+                    "bottom": 594.8843994140625,
+                    "left": 396.4000244140625
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 684.4000244140625,
+                    "y": 614.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.79998779296875,
+                    "top": 614.0843505859375,
+                    "right": 914.7999877929688,
+                    "bottom": 786.8843383789062,
+                    "left": 684.4000244140625
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 972.4000244140625,
+                    "y": 614.0843505859375,
+                    "width": 230.4000244140625,
+                    "height": 172.79998779296875,
+                    "top": 614.0843505859375,
+                    "right": 1202.800048828125,
+                    "bottom": 786.8843383789062,
+                    "left": 972.4000244140625
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": true
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "callerAfter": {
+              "rect": {
+                "x": 1111,
+                "y": 598.5,
+                "width": 46.09375,
+                "height": 36,
+                "top": 598.5,
+                "right": 1157.09375,
+                "bottom": 634.5,
+                "left": 1111
+              },
+              "relativeY": 248.015625
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "located-only-work-slot",
+      "checks": [
+        {
+          "id": "actual-located-only-slot-current-B-not-fake-new-task",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1440,
+              900
+            ],
+            "windowY": 2385,
+            "windowMax": 2593,
+            "docWidth": 1440,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "draft",
+            "active": "<textarea id=\"draft\" rows=\"5\" maxlength=\"12000\" placeholder=\"이번에 바꿀 부분만 적어 주세요. 앞에서 정한 기준은 함께 이어갑니다.\"></textarea>",
+            "caller": {
+              "x": 380,
+              "y": 931.125,
+              "width": 104.25,
+              "height": 43,
+              "top": 931.125,
+              "right": 484.25,
+              "bottom": 974.125,
+              "left": 380
+            },
+            "contextTitle": {
+              "x": 264,
+              "y": -2144.3125,
+              "width": 308.03125,
+              "height": 31.5,
+              "top": -2144.3125,
+              "right": 572.03125,
+              "bottom": -2112.8125,
+              "left": 264
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_65351f37-dfbf-4b59-aca5-6e296adf8b37",
+              "reportTaskId": "T_65351f37-dfbf-4b59-aca5-6e296adf8b37",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [
+              {
+                "id": "work-locate-return",
+                "text": "← 위치 찾기 전 보기로 · 전체 공간 · 연결",
+                "rect": {
+                  "x": 1121.296875,
+                  "y": -2223.40625,
+                  "width": 276.703125,
+                  "height": 43,
+                  "top": -2223.40625,
+                  "right": 1398,
+                  "bottom": -2180.40625,
+                  "left": 1121.296875
+                }
+              }
+            ],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        },
+        {
+          "id": "work-slot-restores-one-locate-no-self-return-ghost",
+          "pass": true,
+          "raw": {
+            "before": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 2385,
+              "windowMax": 2593,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "draft",
+              "active": "<textarea id=\"draft\" rows=\"5\" maxlength=\"12000\" placeholder=\"이번에 바꿀 부분만 적어 주세요. 앞에서 정한 기준은 함께 이어갑니다.\"></textarea>",
+              "caller": {
+                "x": 380,
+                "y": 931.125,
+                "width": 104.25,
+                "height": 43,
+                "top": 931.125,
+                "right": 484.25,
+                "bottom": 974.125,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2144.3125,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2144.3125,
+                "right": 572.03125,
+                "bottom": -2112.8125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_65351f37-dfbf-4b59-aca5-6e296adf8b37",
+                "reportTaskId": "T_65351f37-dfbf-4b59-aca5-6e296adf8b37",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "work-locate-return",
+                  "text": "← 위치 찾기 전 보기로 · 전체 공간 · 연결",
+                  "rect": {
+                    "x": 1121.296875,
+                    "y": -2223.40625,
+                    "width": 276.703125,
+                    "height": 43,
+                    "top": -2223.40625,
+                    "right": 1398,
+                    "bottom": -2180.40625,
+                    "left": 1121.296875
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "after": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 2472,
+              "windowMax": 2593,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "received-result-open",
+              "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+              "caller": {
+                "x": 380,
+                "y": 844.125,
+                "width": 104.25,
+                "height": 43,
+                "top": 844.125,
+                "right": 484.25,
+                "bottom": 887.125,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2231.3125,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2231.3125,
+                "right": 572.03125,
+                "bottom": -2199.8125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_65351f37-dfbf-4b59-aca5-6e296adf8b37",
+                "reportTaskId": "T_65351f37-dfbf-4b59-aca5-6e296adf8b37",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "work-locate-return",
+                  "text": "← 위치 찾기 전 보기로 · 전체 공간 · 연결",
+                  "rect": {
+                    "x": 1121.296875,
+                    "y": -2310.40625,
+                    "width": 276.703125,
+                    "height": 43,
+                    "top": -2310.40625,
+                    "right": 1398,
+                    "bottom": -2267.40625,
+                    "left": 1121.296875
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "one-locationback-restores-original-space-S",
+          "pass": true,
+          "raw": {
+            "S": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1440,
+              "matrix": "matrix(0.96, 0, 0, 0.96, 381, 90.2)",
+              "map": {
+                "x": 264,
+                "y": 292.484375,
+                "width": 820,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1084,
+                "bottom": 884,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 1098,
+                "y": 292.484375,
+                "width": 300,
+                "height": 591.515625,
+                "top": 292.484375,
+                "right": 1398,
+                "bottom": 884,
+                "left": 1098
+              },
+              "mode": "relations",
+              "head": {
+                "x": 1099,
+                "y": 293.484375,
+                "width": 298,
+                "height": 57,
+                "top": 293.484375,
+                "right": 1397,
+                "bottom": 350.484375,
+                "left": 1099
+              },
+              "footer": {
+                "x": 1099,
+                "y": 830,
+                "width": 298,
+                "height": 53,
+                "top": 830,
+                "right": 1397,
+                "bottom": 883,
+                "left": 1099
+              },
+              "body": {
+                "x": 1099,
+                "y": 350.484375,
+                "width": 298,
+                "height": 479.515625,
+                "top": 350.484375,
+                "right": 1397,
+                "bottom": 830,
+                "left": 1099
+              },
+              "bodyTop": 100,
+              "bodyMax": 1800,
+              "bodyId": "@relations",
+              "focus": "area-panel-body",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 684.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 914.7999877929688,
+                    "bottom": 594.8843994140625,
+                    "left": 684.4000244140625
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 972.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.4000244140625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 1202.800048828125,
+                    "bottom": 594.8843994140625,
+                    "left": 972.4000244140625
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 396.4000244140625,
+                    "y": 422.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.800048828125,
+                    "top": 422.0843505859375,
+                    "right": 626.7999877929688,
+                    "bottom": 594.8843994140625,
+                    "left": 396.4000244140625
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 684.4000244140625,
+                    "y": 614.0843505859375,
+                    "width": 230.39996337890625,
+                    "height": 172.79998779296875,
+                    "top": 614.0843505859375,
+                    "right": 914.7999877929688,
+                    "bottom": 786.8843383789062,
+                    "left": 684.4000244140625
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 972.4000244140625,
+                    "y": 614.0843505859375,
+                    "width": 230.4000244140625,
+                    "height": 172.79998779296875,
+                    "top": 614.0843505859375,
+                    "right": 1202.800048828125,
+                    "bottom": 786.8843383789062,
+                    "left": 972.4000244140625
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": true
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            },
+            "back": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 613,
+              "docWidth": 1440,
+              "matrix": "matrix(0.96, 0, 0, 0.96, 381, 90.2)",
+              "map": {
+                "x": 264,
+                "y": 224.890625,
+                "width": 820,
+                "height": 659.109375,
+                "top": 224.890625,
+                "right": 1084,
+                "bottom": 884,
+                "left": 264
+              },
+              "mapScroll": {
+                "x": 0,
+                "y": 0
+              },
+              "panel": {
+                "x": 1098,
+                "y": 224.890625,
+                "width": 300,
+                "height": 659.109375,
+                "top": 224.890625,
+                "right": 1398,
+                "bottom": 884,
+                "left": 1098
+              },
+              "mode": "relations",
+              "head": {
+                "x": 1099,
+                "y": 225.890625,
+                "width": 298,
+                "height": 57,
+                "top": 225.890625,
+                "right": 1397,
+                "bottom": 282.890625,
+                "left": 1099
+              },
+              "footer": {
+                "x": 1099,
+                "y": 830,
+                "width": 298,
+                "height": 53,
+                "top": 830,
+                "right": 1397,
+                "bottom": 883,
+                "left": 1099
+              },
+              "body": {
+                "x": 1099,
+                "y": 282.890625,
+                "width": 298,
+                "height": 547.109375,
+                "top": 282.890625,
+                "right": 1397,
+                "bottom": 830,
+                "left": 1099
+              },
+              "bodyTop": 100,
+              "bodyMax": 1733,
+              "bodyId": "@relations",
+              "focus": "relation-from-L_e9efe62f-cdb2-46a6-bb15-f042b343f3c4",
+              "cards": [
+                {
+                  "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                  "rect": {
+                    "x": 684.4000244140625,
+                    "y": 354.4906005859375,
+                    "width": 230.39996337890625,
+                    "height": 172.800048828125,
+                    "top": 354.4906005859375,
+                    "right": 914.7999877929688,
+                    "bottom": 527.2906494140625,
+                    "left": 684.4000244140625
+                  },
+                  "x": "40px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                  "rect": {
+                    "x": 972.4000244140625,
+                    "y": 354.4906005859375,
+                    "width": 230.4000244140625,
+                    "height": 172.800048828125,
+                    "top": 354.4906005859375,
+                    "right": 1202.800048828125,
+                    "bottom": 527.2906494140625,
+                    "left": 972.4000244140625
+                  },
+                  "x": "340px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "rect": {
+                    "x": 396.4000244140625,
+                    "y": 354.4906005859375,
+                    "width": 230.39996337890625,
+                    "height": 172.800048828125,
+                    "top": 354.4906005859375,
+                    "right": 626.7999877929688,
+                    "bottom": 527.2906494140625,
+                    "left": 396.4000244140625
+                  },
+                  "x": "-260px",
+                  "y": "40px",
+                  "selected": false
+                },
+                {
+                  "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                  "rect": {
+                    "x": 684.4000244140625,
+                    "y": 546.4906005859375,
+                    "width": 230.39996337890625,
+                    "height": 172.79998779296875,
+                    "top": 546.4906005859375,
+                    "right": 914.7999877929688,
+                    "bottom": 719.2905883789062,
+                    "left": 684.4000244140625
+                  },
+                  "x": "40px",
+                  "y": "240px",
+                  "selected": false
+                },
+                {
+                  "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                  "rect": {
+                    "x": 972.4000244140625,
+                    "y": 546.4906005859375,
+                    "width": 230.4000244140625,
+                    "height": 172.79998779296875,
+                    "top": 546.4906005859375,
+                    "right": 1202.800048828125,
+                    "bottom": 719.2905883789062,
+                    "left": 972.4000244140625
+                  },
+                  "x": "340px",
+                  "y": "240px",
+                  "selected": true
+                }
+              ],
+              "folds": [],
+              "paths": [
+                {
+                  "from": null,
+                  "to": null,
+                  "kind": null,
+                  "d": "M0,0L10,5L0,10z"
+                }
+              ],
+              "open": []
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "long-report-and-mobile-minimum",
+      "checks": [
+        {
+          "id": "initial-reader-action-and-no-horizontal-overflow",
+          "pass": false,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 899,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "space-title",
+              "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_b224589a-b34e-437f-b4ec-b3d81270d25c",
+                "reportTaskId": "T_b224589a-b34e-437f-b4ec-b3d81270d25c",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_b224589a-b34e-437f-b4ec-b3d81270d25c"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1041.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1219,
+                    "bottom": 326.28125,
+                    "left": 1041.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "action": {
+              "rect": {
+                "x": 283,
+                "y": 827.46875,
+                "width": 156.8125,
+                "height": 45,
+                "top": 827.46875,
+                "right": 439.8125,
+                "bottom": 872.46875,
+                "left": 283
+              },
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 1280,
+                "b": 720
+              },
+              "parents": [
+                {
+                  "id": "task-next-action",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-next",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "main",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                }
+              ],
+              "hits": [
+                false,
+                false,
+                false
+              ],
+              "full": false
+            }
+          }
+        },
+        {
+          "id": "native-wheel-actual-long-source-tail",
+          "pass": false,
+          "raw": {
+            "tail": {
+              "found": true,
+              "rect": {
+                "x": 711.15625,
+                "y": 855.046875,
+                "width": 118.0625,
+                "height": 17,
+                "top": 855.046875,
+                "right": 829.21875,
+                "bottom": 872.046875,
+                "left": 711.15625
+              },
+              "hit": false,
+              "visible": true,
+              "text": "원문마지막조건-20-END"
+            },
+            "wheelObservations": [
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 1682.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1682.046875,
+                  "right": 829.21875,
+                  "bottom": 1699.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 1332.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1332.046875,
+                  "right": 829.21875,
+                  "bottom": 1349.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 982.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 982.046875,
+                  "right": 829.21875,
+                  "bottom": 999.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 632.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 632.046875,
+                  "right": 829.21875,
+                  "bottom": 649.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 882.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 882.046875,
+                  "right": 829.21875,
+                  "bottom": 899.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 605.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 605.046875,
+                  "right": 829.21875,
+                  "bottom": 622.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 855.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 855.046875,
+                  "right": 829.21875,
+                  "bottom": 872.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              }
+            ],
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 1077,
+              "windowMax": 1077,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>보고 전문 보기 · 2051자</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_b224589a-b34e-437f-b4ec-b3d81270d25c",
+                "reportTaskId": "T_b224589a-b34e-437f-b4ec-b3d81270d25c",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_b224589a-b34e-437f-b4ec-b3d81270d25c"
+              },
+              "open": [
+                "project-management",
+                "task-report-src-S_79596c4e-4215-4676-8875-d693980e6f3b",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1041.390625,
+                    "y": -793.71875,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": -793.71875,
+                    "right": 1219,
+                    "bottom": -750.71875,
+                    "left": 1041.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "closed-source-fold-really-hidden",
+          "pass": false,
+          "raw": {
+            "checkVisible": false,
+            "rects": 1,
+            "rect": {
+              "x": 698.15625,
+              "y": 399.1875,
+              "width": 520.84375,
+              "height": 360,
+              "top": 399.1875,
+              "right": 1219,
+              "bottom": 759.1875,
+              "left": 698.15625
+            }
+          }
+        },
+        {
+          "id": "reader-exits-DOM-and-B-draft-saved-preserved",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1280,
+              720
+            ],
+            "windowY": 2659,
+            "windowMax": 2659,
+            "docWidth": 1280,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "received-result-open",
+            "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+            "caller": {
+              "x": 300,
+              "y": 542.671875,
+              "width": 104.25,
+              "height": 43,
+              "top": 542.671875,
+              "right": 404.25,
+              "bottom": 585.671875,
+              "left": 300
+            },
+            "contextTitle": {
+              "x": 264,
+              "y": -2370.625,
+              "width": 308.03125,
+              "height": 31.5,
+              "top": -2370.625,
+              "right": 572.03125,
+              "bottom": -2339.125,
+              "left": 264
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_b224589a-b34e-437f-b4ec-b3d81270d25c",
+              "reportTaskId": "T_b224589a-b34e-437f-b4ec-b3d81270d25c",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "long-report-and-mobile-minimum",
+      "checks": [
+        {
+          "id": "initial-reader-action-and-no-horizontal-overflow",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 631,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "space-title",
+              "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_66d17f29-d659-4421-be28-372b930ae59f",
+                "reportTaskId": "T_66d17f29-d659-4421-be28-372b930ae59f",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_66d17f29-d659-4421-be28-372b930ae59f"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1201.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1379,
+                    "bottom": 326.28125,
+                    "left": 1201.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "action": {
+              "rect": {
+                "x": 283,
+                "y": 783.09375,
+                "width": 156.8125,
+                "height": 45,
+                "top": 783.09375,
+                "right": 439.8125,
+                "bottom": 828.09375,
+                "left": 283
+              },
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 1440,
+                "b": 900
+              },
+              "parents": [
+                {
+                  "id": "task-next-action",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-next",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "main",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                }
+              ],
+              "hits": [
+                true,
+                true,
+                true
+              ],
+              "full": true
+            }
+          }
+        },
+        {
+          "id": "native-wheel-actual-long-source-tail",
+          "pass": false,
+          "raw": {
+            "tail": {
+              "found": true,
+              "rect": {
+                "x": 777.828125,
+                "y": 1056.046875,
+                "width": 118.0625,
+                "height": 17,
+                "top": 1056.046875,
+                "right": 895.890625,
+                "bottom": 1073.046875,
+                "left": 777.828125
+              },
+              "hit": false,
+              "visible": true,
+              "text": "원문마지막조건-20-END"
+            },
+            "wheelObservations": [
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1682.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1682.046875,
+                  "right": 895.890625,
+                  "bottom": 1699.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1332.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1332.046875,
+                  "right": 895.890625,
+                  "bottom": 1349.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 982.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 982.046875,
+                  "right": 895.890625,
+                  "bottom": 999.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 806.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 806.046875,
+                  "right": 895.890625,
+                  "bottom": 823.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1056.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1056.046875,
+                  "right": 895.890625,
+                  "bottom": 1073.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              }
+            ],
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 876,
+              "windowMax": 876,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>보고 전문 보기 · 2051자</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_66d17f29-d659-4421-be28-372b930ae59f",
+                "reportTaskId": "T_66d17f29-d659-4421-be28-372b930ae59f",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_66d17f29-d659-4421-be28-372b930ae59f"
+              },
+              "open": [
+                "project-management",
+                "task-report-src-S_5b07acdc-473e-4db1-8258-56a4901d9cce",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1201.390625,
+                    "y": -592.71875,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": -592.71875,
+                    "right": 1379,
+                    "bottom": -549.71875,
+                    "left": 1201.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "closed-source-fold-really-hidden",
+          "pass": false,
+          "raw": {
+            "checkVisible": false,
+            "rects": 1,
+            "rect": {
+              "x": 764.828125,
+              "y": 399.1875,
+              "width": 614.15625,
+              "height": 360,
+              "top": 399.1875,
+              "right": 1378.984375,
+              "bottom": 759.1875,
+              "left": 764.828125
+            }
+          }
+        },
+        {
+          "id": "reader-exits-DOM-and-B-draft-saved-preserved",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1440,
+              900
+            ],
+            "windowY": 2479,
+            "windowMax": 2479,
+            "docWidth": 1440,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "received-result-open",
+            "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+            "caller": {
+              "x": 380,
+              "y": 722.671875,
+              "width": 104.25,
+              "height": 43,
+              "top": 722.671875,
+              "right": 484.25,
+              "bottom": 765.671875,
+              "left": 380
+            },
+            "contextTitle": {
+              "x": 264,
+              "y": -2190.625,
+              "width": 308.03125,
+              "height": 31.5,
+              "top": -2190.625,
+              "right": 572.03125,
+              "bottom": -2159.125,
+              "left": 264
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_66d17f29-d659-4421-be28-372b930ae59f",
+              "reportTaskId": "T_66d17f29-d659-4421-be28-372b930ae59f",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "scenario": "long-report-and-mobile-minimum",
+      "checks": [
+        {
+          "id": "initial-reader-action-and-no-horizontal-overflow",
+          "pass": false,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                390,
+                844
+              ],
+              "windowY": 0,
+              "windowMax": 1674,
+              "docWidth": 390,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "space-title",
+              "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_12807e1d-6e4d-4a0e-a7a7-b0b60aa09b62",
+                "reportTaskId": "T_12807e1d-6e4d-4a0e-a7a7-b0b60aa09b62",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_12807e1d-6e4d-4a0e-a7a7-b0b60aa09b62"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 177.390625,
+                    "y": 488.109375,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 488.109375,
+                    "right": 355,
+                    "bottom": 531.109375,
+                    "left": 177.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "action": {
+              "rect": {
+                "x": 35,
+                "y": 1080.328125,
+                "width": 156.8125,
+                "height": 45,
+                "top": 1080.328125,
+                "right": 191.8125,
+                "bottom": 1125.328125,
+                "left": 35
+              },
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              },
+              "parents": [
+                {
+                  "id": "task-next-action",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-next",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "main",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                }
+              ],
+              "hits": [
+                false,
+                false,
+                false
+              ],
+              "full": false
+            }
+          }
+        },
+        {
+          "id": "native-wheel-actual-long-source-tail",
+          "pass": false,
+          "raw": {
+            "tail": {
+              "found": true,
+              "rect": {
+                "x": 48,
+                "y": 1446.6875,
+                "width": 107.8125,
+                "height": 16,
+                "top": 1446.6875,
+                "right": 155.8125,
+                "bottom": 1462.6875,
+                "left": 48
+              },
+              "hit": false,
+              "visible": true,
+              "text": "원문마지막조건-20-END"
+            },
+            "wheelObservations": [
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 2733.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 2733.6875,
+                  "right": 155.8125,
+                  "bottom": 2749.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 2383.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 2383.6875,
+                  "right": 155.8125,
+                  "bottom": 2399.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 2033.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 2033.6875,
+                  "right": 155.8125,
+                  "bottom": 2049.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1683.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1683.6875,
+                  "right": 155.8125,
+                  "bottom": 1699.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1446.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1446.6875,
+                  "right": 155.8125,
+                  "bottom": 1462.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END"
+              }
+            ],
+            "snapshot": {
+              "viewport": [
+                390,
+                844
+              ],
+              "windowY": 2056,
+              "windowMax": 2056,
+              "docWidth": 390,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>보고 전문 보기 · 2051자</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_12807e1d-6e4d-4a0e-a7a7-b0b60aa09b62",
+                "reportTaskId": "T_12807e1d-6e4d-4a0e-a7a7-b0b60aa09b62",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_12807e1d-6e4d-4a0e-a7a7-b0b60aa09b62"
+              },
+              "open": [
+                "project-management",
+                "task-report-src-S_475a70ff-53cd-4a16-ae05-ad0f22860111",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 177.390625,
+                    "y": -1567.890625,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": -1567.890625,
+                    "right": 355,
+                    "bottom": -1524.890625,
+                    "left": 177.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "closed-source-fold-really-hidden",
+          "pass": false,
+          "raw": {
+            "checkVisible": false,
+            "rects": 1,
+            "rect": {
+              "x": 35,
+              "y": 398.53125,
+              "width": 320,
+              "height": 360,
+              "top": 398.53125,
+              "right": 355,
+              "bottom": 758.53125,
+              "left": 35
+            }
+          }
+        },
+        {
+          "id": "reader-exits-DOM-and-B-draft-saved-preserved",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              390,
+              844
+            ],
+            "windowY": 3303,
+            "windowMax": 3303,
+            "docWidth": 390,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "received-result-open",
+            "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+            "caller": {
+              "x": 35,
+              "y": 682.890625,
+              "width": 104.25,
+              "height": 43,
+              "top": 682.890625,
+              "right": 139.25,
+              "bottom": 725.890625,
+              "left": 35
+            },
+            "contextTitle": {
+              "x": 16,
+              "y": -2888.78125,
+              "width": 281.296875,
+              "height": 31.34375,
+              "top": -2888.78125,
+              "right": 297.296875,
+              "bottom": -2857.4375,
+              "left": 16
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_12807e1d-6e4d-4a0e-a7a7-b0b60aa09b62",
+              "reportTaskId": "T_12807e1d-6e4d-4a0e-a7a7-b0b60aa09b62",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        }
+      ],
+      "pageerrors": []
+    }
+  ],
+  "exit": 1
+}

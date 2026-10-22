@@ -1,0 +1,177 @@
+{
+  "source": "0aafca2708863036055cbd3029521b4eb983d22e",
+  "expectedRuns": 8,
+  "executedRuns": 8,
+  "complete": true,
+  "runs": [
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1280,
+        720
+      ],
+      "flow": "draft-read",
+      "checks": [],
+      "console": [],
+      "firstExplicitHTTP": {
+        "url": "http://127.0.0.1:35835/",
+        "status": 200,
+        "bytes": 17960,
+        "httpSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskBeforeSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle20-independent/core.py\", line 36, in <module>\n    p.locator('#import-file').set_input_files(str(R/f'fixtures/{cid}-'+('draft' if flow=='draft-read' else 'nodraft')+'.json'));expect(p.locator('#space-map')).to_be_visible();base.saved(p);p.locator('#map-fit').click();p.locator('#node-info-'+m['other']).click();edit=p.locator('#panel-edit');edit.locator('> summary').click() if not edit.evaluate('e=>e.open') else None\n                                                  ~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for +: 'PosixPath' and 'str'\n",
+      "pageerrors": [],
+      "externalRequests": []
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1280,
+        720
+      ],
+      "flow": "new-C",
+      "checks": [],
+      "console": [],
+      "firstExplicitHTTP": {
+        "url": "http://127.0.0.1:35835/",
+        "status": 200,
+        "bytes": 17960,
+        "httpSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskBeforeSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle20-independent/core.py\", line 36, in <module>\n    p.locator('#import-file').set_input_files(str(R/f'fixtures/{cid}-'+('draft' if flow=='draft-read' else 'nodraft')+'.json'));expect(p.locator('#space-map')).to_be_visible();base.saved(p);p.locator('#map-fit').click();p.locator('#node-info-'+m['other']).click();edit=p.locator('#panel-edit');edit.locator('> summary').click() if not edit.evaluate('e=>e.open') else None\n                                                  ~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for +: 'PosixPath' and 'str'\n",
+      "pageerrors": [],
+      "externalRequests": []
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1440,
+        900
+      ],
+      "flow": "draft-read",
+      "checks": [],
+      "console": [],
+      "firstExplicitHTTP": {
+        "url": "http://127.0.0.1:35835/",
+        "status": 200,
+        "bytes": 17960,
+        "httpSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskBeforeSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle20-independent/core.py\", line 36, in <module>\n    p.locator('#import-file').set_input_files(str(R/f'fixtures/{cid}-'+('draft' if flow=='draft-read' else 'nodraft')+'.json'));expect(p.locator('#space-map')).to_be_visible();base.saved(p);p.locator('#map-fit').click();p.locator('#node-info-'+m['other']).click();edit=p.locator('#panel-edit');edit.locator('> summary').click() if not edit.evaluate('e=>e.open') else None\n                                                  ~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for +: 'PosixPath' and 'str'\n",
+      "pageerrors": [],
+      "externalRequests": []
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1440,
+        900
+      ],
+      "flow": "new-C",
+      "checks": [],
+      "console": [],
+      "firstExplicitHTTP": {
+        "url": "http://127.0.0.1:35835/",
+        "status": 200,
+        "bytes": 17960,
+        "httpSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskBeforeSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle20-independent/core.py\", line 36, in <module>\n    p.locator('#import-file').set_input_files(str(R/f'fixtures/{cid}-'+('draft' if flow=='draft-read' else 'nodraft')+'.json'));expect(p.locator('#space-map')).to_be_visible();base.saved(p);p.locator('#map-fit').click();p.locator('#node-info-'+m['other']).click();edit=p.locator('#panel-edit');edit.locator('> summary').click() if not edit.evaluate('e=>e.open') else None\n                                                  ~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for +: 'PosixPath' and 'str'\n",
+      "pageerrors": [],
+      "externalRequests": []
+    },
+    {
+      "sample": "product13",
+      "viewport": [
+        1280,
+        720
+      ],
+      "flow": "draft-read",
+      "checks": [],
+      "console": [],
+      "firstExplicitHTTP": {
+        "url": "http://127.0.0.1:35835/",
+        "status": 200,
+        "bytes": 17960,
+        "httpSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskBeforeSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle20-independent/core.py\", line 36, in <module>\n    p.locator('#import-file').set_input_files(str(R/f'fixtures/{cid}-'+('draft' if flow=='draft-read' else 'nodraft')+'.json'));expect(p.locator('#space-map')).to_be_visible();base.saved(p);p.locator('#map-fit').click();p.locator('#node-info-'+m['other']).click();edit=p.locator('#panel-edit');edit.locator('> summary').click() if not edit.evaluate('e=>e.open') else None\n                                                  ~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for +: 'PosixPath' and 'str'\n",
+      "pageerrors": [],
+      "externalRequests": []
+    },
+    {
+      "sample": "product13",
+      "viewport": [
+        1280,
+        720
+      ],
+      "flow": "new-C",
+      "checks": [],
+      "console": [],
+      "firstExplicitHTTP": {
+        "url": "http://127.0.0.1:35835/",
+        "status": 200,
+        "bytes": 17960,
+        "httpSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskBeforeSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle20-independent/core.py\", line 36, in <module>\n    p.locator('#import-file').set_input_files(str(R/f'fixtures/{cid}-'+('draft' if flow=='draft-read' else 'nodraft')+'.json'));expect(p.locator('#space-map')).to_be_visible();base.saved(p);p.locator('#map-fit').click();p.locator('#node-info-'+m['other']).click();edit=p.locator('#panel-edit');edit.locator('> summary').click() if not edit.evaluate('e=>e.open') else None\n                                                  ~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for +: 'PosixPath' and 'str'\n",
+      "pageerrors": [],
+      "externalRequests": []
+    },
+    {
+      "sample": "product13",
+      "viewport": [
+        1440,
+        900
+      ],
+      "flow": "draft-read",
+      "checks": [],
+      "console": [],
+      "firstExplicitHTTP": {
+        "url": "http://127.0.0.1:35835/",
+        "status": 200,
+        "bytes": 17960,
+        "httpSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskBeforeSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle20-independent/core.py\", line 36, in <module>\n    p.locator('#import-file').set_input_files(str(R/f'fixtures/{cid}-'+('draft' if flow=='draft-read' else 'nodraft')+'.json'));expect(p.locator('#space-map')).to_be_visible();base.saved(p);p.locator('#map-fit').click();p.locator('#node-info-'+m['other']).click();edit=p.locator('#panel-edit');edit.locator('> summary').click() if not edit.evaluate('e=>e.open') else None\n                                                  ~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for +: 'PosixPath' and 'str'\n",
+      "pageerrors": [],
+      "externalRequests": []
+    },
+    {
+      "sample": "product13",
+      "viewport": [
+        1440,
+        900
+      ],
+      "flow": "new-C",
+      "checks": [],
+      "console": [],
+      "firstExplicitHTTP": {
+        "url": "http://127.0.0.1:35835/",
+        "status": 200,
+        "bytes": 17960,
+        "httpSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskBeforeSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+        "diskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle20-independent/core.py\", line 36, in <module>\n    p.locator('#import-file').set_input_files(str(R/f'fixtures/{cid}-'+('draft' if flow=='draft-read' else 'nodraft')+'.json'));expect(p.locator('#space-map')).to_be_visible();base.saved(p);p.locator('#map-fit').click();p.locator('#node-info-'+m['other']).click();edit=p.locator('#panel-edit');edit.locator('> summary').click() if not edit.evaluate('e=>e.open') else None\n                                                  ~~~~~~~~~~~~~~~~~~~~^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\nTypeError: unsupported operand type(s) for +: 'PosixPath' and 'str'\n",
+      "pageerrors": [],
+      "externalRequests": []
+    }
+  ],
+  "exit": 1
+}

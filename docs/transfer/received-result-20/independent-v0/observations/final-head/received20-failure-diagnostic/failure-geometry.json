@@ -1,0 +1,908 @@
+[
+  {
+    "test": "received20_browser.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly",
+    "label": "actual full clipping and hit #task-next-action",
+    "originalActual": {
+      "top": 686.546875,
+      "bottom": 731.546875,
+      "left": 283,
+      "right": 439.8125,
+      "clipTop": 0,
+      "clipBottom": 720,
+      "inside": false,
+      "hit": true,
+      "wheelX": 1260,
+      "wheelY": 360,
+      "host": "window"
+    },
+    "raw": {
+      "windowY": 0,
+      "maxY": 816,
+      "focus": "space-title",
+      "receipt": {
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "checkVisible": false,
+        "ancestors": [
+          {
+            "id": "received-result-open",
+            "tag": "BUTTON",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "received-result-receipt",
+            "tag": "SECTION",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "flex",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "received-result-host",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "result-file-panel",
+            "tag": "DETAILS",
+            "open": true,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "SECTION",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "compose-panel",
+            "tag": "DETAILS",
+            "open": true,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "workspace",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "grid",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "work-view",
+            "tag": "DIV",
+            "open": null,
+            "hidden": true,
+            "visibility": "visible",
+            "display": "none",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1463.53125,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1535.53125,
+              "left": 222
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1535.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1535.53125,
+              "left": 222
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "grid",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1535.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1535.53125,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1535.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1535.53125,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1535.53125,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1535.53125,
+              "left": 0
+            }
+          }
+        ]
+      },
+      "taskAction": {
+        "rect": {
+          "x": 283,
+          "y": 686.546875,
+          "width": 156.8125,
+          "height": 45,
+          "top": 686.546875,
+          "right": 439.8125,
+          "bottom": 731.546875,
+          "left": 283
+        },
+        "hit": true
+      },
+      "workVisible": false,
+      "taskVisible": true,
+      "docWidth": 1280
+    }
+  },
+  {
+    "test": "received20_browser.Received20.test_01_two_inputs_exact_receipt_and_B_draft_readonly",
+    "label": "actual full clipping and hit #task-next-action",
+    "originalActual": {
+      "top": 805.28125,
+      "bottom": 850.28125,
+      "left": 283,
+      "right": 439.8125,
+      "clipTop": 0,
+      "clipBottom": 720,
+      "inside": false,
+      "hit": false,
+      "wheelX": 1260,
+      "wheelY": 360,
+      "host": "window"
+    },
+    "raw": {
+      "windowY": 0,
+      "maxY": 871,
+      "focus": "space-title",
+      "receipt": {
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "checkVisible": false,
+        "ancestors": [
+          {
+            "id": "received-result-open",
+            "tag": "BUTTON",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "received-result-receipt",
+            "tag": "SECTION",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "flex",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "received-result-host",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "result-file-panel",
+            "tag": "DETAILS",
+            "open": true,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "SECTION",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "compose-panel",
+            "tag": "DETAILS",
+            "open": true,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "workspace",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "grid",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "work-view",
+            "tag": "DIV",
+            "open": null,
+            "hidden": true,
+            "visibility": "visible",
+            "display": "none",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 222,
+              "y": 72,
+              "width": 1058,
+              "height": 1519.109375,
+              "top": 72,
+              "right": 1280,
+              "bottom": 1591.109375,
+              "left": 222
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 1591.109375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1591.109375,
+              "left": 222
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "grid",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1591.109375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1591.109375,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1591.109375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1591.109375,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 1591.109375,
+              "top": 0,
+              "right": 1280,
+              "bottom": 1591.109375,
+              "left": 0
+            }
+          }
+        ]
+      },
+      "taskAction": {
+        "rect": {
+          "x": 283,
+          "y": 805.28125,
+          "width": 156.8125,
+          "height": 45,
+          "top": 805.28125,
+          "right": 439.8125,
+          "bottom": 850.28125,
+          "left": 283
+        },
+        "hit": false
+      },
+      "workVisible": false,
+      "taskVisible": true,
+      "docWidth": 1280
+    }
+  },
+  {
+    "test": "received20_browser.Received20Wide.test_04_pending_save_navigation_and_records_origin_C",
+    "label": "native scroll event completion",
+    "originalActual": {
+      "ok": false,
+      "reason": "native-scroll-timeout",
+      "events": [
+        {
+          "kind": "wheel",
+          "delta": 220,
+          "time": 17541.80000001192
+        }
+      ],
+      "y": 1679,
+      "host": "window"
+    },
+    "raw": {
+      "windowY": 1679,
+      "maxY": 1679,
+      "focus": "context-title",
+      "receipt": {
+        "rect": {
+          "x": 380,
+          "y": 1606.125,
+          "width": 104.25,
+          "height": 43,
+          "top": 1606.125,
+          "right": 484.25,
+          "bottom": 1649.125,
+          "left": 380
+        },
+        "checkVisible": false,
+        "ancestors": [
+          {
+            "id": "received-result-open",
+            "tag": "BUTTON",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 380,
+              "y": 1606.125,
+              "width": 104.25,
+              "height": 43,
+              "top": 1606.125,
+              "right": 484.25,
+              "bottom": 1649.125,
+              "left": 380
+            }
+          },
+          {
+            "id": "received-result-receipt",
+            "tag": "SECTION",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "flex",
+            "rect": {
+              "x": 380,
+              "y": 1573.546875,
+              "width": 902,
+              "height": 75.984375,
+              "top": 1573.546875,
+              "right": 1282,
+              "bottom": 1649.53125,
+              "left": 380
+            }
+          },
+          {
+            "id": "received-result-host",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 380,
+              "y": 1573.546875,
+              "width": 902,
+              "height": 75.984375,
+              "top": 1573.546875,
+              "right": 1282,
+              "bottom": 1649.53125,
+              "left": 380
+            }
+          },
+          {
+            "id": "result-file-panel",
+            "tag": "DETAILS",
+            "open": true,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 380,
+              "y": 1398.734375,
+              "width": 902,
+              "height": 260.796875,
+              "top": 1398.734375,
+              "right": 1282,
+              "bottom": 1659.53125,
+              "left": 380
+            }
+          },
+          {
+            "id": "",
+            "tag": "SECTION",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 352,
+              "y": 800.578125,
+              "width": 958,
+              "height": 882.953125,
+              "top": 800.578125,
+              "right": 1310,
+              "bottom": 1683.53125,
+              "left": 352
+            }
+          },
+          {
+            "id": "compose-panel",
+            "tag": "DETAILS",
+            "open": false,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 351,
+              "y": 745.78125,
+              "width": 960,
+              "height": 55.796875,
+              "top": 745.78125,
+              "right": 1311,
+              "bottom": 801.578125,
+              "left": 351
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 351,
+              "y": -25.6875,
+              "width": 960,
+              "height": 846.265625,
+              "top": -25.6875,
+              "right": 1311,
+              "bottom": 820.578125,
+              "left": 351
+            }
+          },
+          {
+            "id": "workspace",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "grid",
+            "rect": {
+              "x": 351,
+              "y": -25.6875,
+              "width": 960,
+              "height": 846.265625,
+              "top": -25.6875,
+              "right": 1311,
+              "bottom": 820.578125,
+              "left": 351
+            }
+          },
+          {
+            "id": "work-view",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 264,
+              "y": -1449.8125,
+              "width": 1134,
+              "height": 2270.390625,
+              "top": -1449.8125,
+              "right": 1398,
+              "bottom": 820.578125,
+              "left": 264
+            }
+          },
+          {
+            "id": "main",
+            "tag": "MAIN",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 222,
+              "y": -1607,
+              "width": 1218,
+              "height": 2507.421875,
+              "top": -1607,
+              "right": 1440,
+              "bottom": 900.421875,
+              "left": 222
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 222,
+              "y": -1679,
+              "width": 1218,
+              "height": 2579.421875,
+              "top": -1679,
+              "right": 1440,
+              "bottom": 900.421875,
+              "left": 222
+            }
+          },
+          {
+            "id": "",
+            "tag": "DIV",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "grid",
+            "rect": {
+              "x": 0,
+              "y": -1679,
+              "width": 1440,
+              "height": 2579.421875,
+              "top": -1679,
+              "right": 1440,
+              "bottom": 900.421875,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "BODY",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": -1679,
+              "width": 1440,
+              "height": 2579.421875,
+              "top": -1679,
+              "right": 1440,
+              "bottom": 900.421875,
+              "left": 0
+            }
+          },
+          {
+            "id": "",
+            "tag": "HTML",
+            "open": null,
+            "hidden": false,
+            "visibility": "visible",
+            "display": "block",
+            "rect": {
+              "x": 0,
+              "y": -1679,
+              "width": 1440,
+              "height": 2579.421875,
+              "top": -1679,
+              "right": 1440,
+              "bottom": 900.421875,
+              "left": 0
+            }
+          }
+        ]
+      },
+      "taskAction": {
+        "rect": null,
+        "hit": null
+      },
+      "workVisible": true,
+      "taskVisible": false,
+      "docWidth": 1440
+    }
+  }
+]

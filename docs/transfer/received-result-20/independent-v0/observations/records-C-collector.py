@@ -1,0 +1,3 @@
+from pathlib import Path
+import subprocess,os,json,datetime,sys
+R=Path(__file__).parent;e=os.environ.copy();e['PATH']='/workspace/browser-env/tools/node_modules/.bin:'+e['PATH'];start=datetime.datetime.now(datetime.timezone.utc).isoformat();p=subprocess.run(['/workspace/browser-env/venv/bin/python',str(R/'records-C.py')],env=e,capture_output=True);(R/'records-C.stdout.log').write_bytes(p.stdout);(R/'records-C.stderr.log').write_bytes(p.stderr);(R/'records-C-process.json').write_text(json.dumps({'start':start,'end':datetime.datetime.now(datetime.timezone.utc).isoformat(),'childExit':p.returncode,'collectorExit':p.returncode},indent=2));sys.exit(p.returncode)

@@ -1,0 +1,73 @@
+test_01_powertoys_full_flow (__main__.Area17.test_01_powertoys_full_flow) ... ok
+test_02_product13_full_flow (__main__.Area17.test_02_product13_full_flow) ... ok
+test_03_counterexamples_and_correction_draft (__main__.Area17.test_03_counterexamples_and_correction_draft) ... FAIL
+test_04_long_description_reading_load (__main__.Area17.test_04_long_description_reading_load) ... ok
+test_05_next_request_carries_valid_description (__main__.Area17.test_05_next_request_carries_valid_description) ... ok
+test_06_locate_new_request_copy_and_return (__main__.Area17.test_06_locate_new_request_copy_and_return) ... ok
+test_01_powertoys_full_flow (__main__.Area17Wide.test_01_powertoys_full_flow) ... ok
+test_02_product13_full_flow (__main__.Area17Wide.test_02_product13_full_flow) ... ok
+test_03_counterexamples_and_correction_draft (__main__.Area17Wide.test_03_counterexamples_and_correction_draft) ... FAIL
+test_04_long_description_reading_load (__main__.Area17Wide.test_04_long_description_reading_load) ... ok
+test_05_next_request_carries_valid_description (__main__.Area17Wide.test_05_next_request_carries_valid_description) ... ok
+test_06_locate_new_request_copy_and_return (__main__.Area17Wide.test_06_locate_new_request_copy_and_return) ... ok
+
+======================================================================
+FAIL: test_03_counterexamples_and_correction_draft (__main__.Area17.test_03_counterexamples_and_correction_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-candidate/app/continuity/tests/understanding17_browser.py", line 253, in test_03_counterexamples_and_correction_draft
+    n=len(self.state()['tasks']);self.import_file(p1,'새 기록은 추가하지 않았습니다');self.check('exact duplicate: no new record',len(self.state()['tasks']),n)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-candidate/app/continuity/tests/understanding17_browser.py", line 121, in import_file
+    expect(self.page.locator('#result-file-message')).to_contain_text(expect_text);base.saved(self.page)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py", line 19319, in to_contain_text
+    self._sync(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+AssertionError: Locator expected to contain text '새 기록은 추가하지 않았습니다'
+Actual value: 같은 보고의 기존 기록이에요. 새 기록을 추가하지 않았어요. 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#result-file-message")
+    9 × locator resolved to <p class="hint" role="status" id="result-file-message">같은 보고의 기존 기록이에요. 새 기록을 추가하지 않았어요.</p>
+      - unexpected value "같은 보고의 기존 기록이에요. 새 기록을 추가하지 않았어요."
+
+
+======================================================================
+FAIL: test_03_counterexamples_and_correction_draft (__main__.Area17Wide.test_03_counterexamples_and_correction_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle20-candidate/app/continuity/tests/understanding17_browser.py", line 253, in test_03_counterexamples_and_correction_draft
+    n=len(self.state()['tasks']);self.import_file(p1,'새 기록은 추가하지 않았습니다');self.check('exact duplicate: no new record',len(self.state()['tasks']),n)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle20-candidate/app/continuity/tests/understanding17_browser.py", line 121, in import_file
+    expect(self.page.locator('#result-file-message')).to_contain_text(expect_text);base.saved(self.page)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py", line 19319, in to_contain_text
+    self._sync(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+  File "/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+AssertionError: Locator expected to contain text '새 기록은 추가하지 않았습니다'
+Actual value: 같은 보고의 기존 기록이에요. 새 기록을 추가하지 않았어요. 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#result-file-message")
+    9 × locator resolved to <p class="hint" role="status" id="result-file-message">같은 보고의 기존 기록이에요. 새 기록을 추가하지 않았어요.</p>
+      - unexpected value "같은 보고의 기존 기록이에요. 새 기록을 추가하지 않았어요."
+
+
+----------------------------------------------------------------------
+Ran 12 tests in 52.886s
+
+FAILED (failures=2)

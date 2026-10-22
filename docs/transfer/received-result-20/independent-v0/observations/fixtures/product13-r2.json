@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "agentflow.return.1",
+  "projectId": "P_92dd032b-2c76-45b4-b801-1f140935e995",
+  "taskId": "T_71c364df-792c-48a9-8b4b-02ab36b93275",
+  "returnId": "H_independent20_product13_H1",
+  "report": "[제품13 fix1 고정 diff·작성자 반환 재서술] PC 폭의 지도 조작부를 아래 오른쪽에서 위 오른쪽으로 옮겼다. app.ts는 이 fix1 diff에서 바뀌지 않았으며 선택 카드 가림은 기존 한계로 남았다. 작성자 검사는 독립 판정과 구별한다. [독립20 같은 H1 다른 보고 R2 끝]",
+  "evidence": "[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다."
+}

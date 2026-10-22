@@ -1,0 +1,704 @@
+[
+  {
+    "path": "origin-and-reading/1440-one-locationback-space-S.png",
+    "bytes": 145619,
+    "sha256": "973fda66fc89fa3dd75eada281c87ece5ea814bfed335f30f3f1bb601e0c4d0d",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/received20-failure-diagnostic/1440-failure-3.png",
+    "bytes": 116814,
+    "sha256": "7b9f5d2f361f490d1468c59db99cf0d98d98a114e37105844959fc8f2637ce66",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/received20-failure-diagnostic/1280-failure-2.png",
+    "bytes": 156353,
+    "sha256": "ad1992ce605b024ec8b2caca31956ebf17aa2d98f8c6d9597acf38fcc37b83d1",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/received20-failure-diagnostic/1280-failure-1.png",
+    "bytes": 157735,
+    "sha256": "c997416f360aa8b7aadd328e7af796cccc489c81e5a07d2630b132874c7d0fc2",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/received20/raw/received20-390-390-minimum.png",
+    "bytes": 65672,
+    "sha256": "9ded3ef609aad8d621b5de46100c2eb9db487da95d77b8d648493515293dee38",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/received20/raw/received20-1440-powertoys-exact.png",
+    "bytes": 144989,
+    "sha256": "ce3ee811fdd2140006f344fac3fd9fb7050921883014d7e8401574da201a02ee",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/received20/raw/received20-1440-product13-exact.png",
+    "bytes": 161309,
+    "sha256": "0b71a6f14c7dadc4829211b336e89a5650e0ffd8ad6be6c5cee439e4182747e4",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1280-zero.png",
+    "bytes": 35308,
+    "sha256": "6961a82290d17a3536bec6f59e61b37ff572ed30d6233ec665751cb17583ec34",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-390-six.png",
+    "bytes": 87037,
+    "sha256": "611a2b56a5e493b274c4a9000a75928bfa69e94712aa6e74e14010d9f1ba9c22",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1440-one.png",
+    "bytes": 43124,
+    "sha256": "ea8134e063fd826fa6f603ba14b28895d1f880046c9a85b1d66498d20261da0a",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1440-six.png",
+    "bytes": 92332,
+    "sha256": "10dfeaa8a6d46b753a2c6d87d5064fcc54ca16bd85e9686ff809d86486093d6c",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1440-A-space.png",
+    "bytes": 75569,
+    "sha256": "9834ba456e4f68ddae1a546a6c490a4aeb8c8e22afe5fbb0d27b8ffb403c4315",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1440-zero.png",
+    "bytes": 37147,
+    "sha256": "7b21da9aa06e74ffcfda59e3f5f1f3e2c10e3a865f42917c639b2d52c96d4230",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1280-six.png",
+    "bytes": 86948,
+    "sha256": "1513b41b50e2f4d75d12a3d51d419f0a729bf66a162b26518b2a769132a34961",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1280-A-space.png",
+    "bytes": 70966,
+    "sha256": "244fb9a05f8aad04ed1e862300c06fe67531860cefb8fd8b71b6d6434bf6c197",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1280-one.png",
+    "bytes": 41411,
+    "sha256": "32fde70b822fcfe8faf0e874a56ad602592d052c9cee3dd091990cb39476ad66",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1280-read-open.png",
+    "bytes": 195301,
+    "sha256": "70c75c8bee04ddbc1bd84da30736873bad36b7a30aceeb82235734ecbd6ff972",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "final-head/author-commands/home15/raw/home15-1440-read-open.png",
+    "bytes": 240438,
+    "sha256": "27ea68b7e0ee8c7426caa5aa9baa92de0100907f6fd993f1e709b6ea3184336a",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1440x900-false-frame-fallback.png",
+    "bytes": 104814,
+    "sha256": "ace199f96bdecaa4aa4bff3fa00903ef113e43dd3823f2b5a3379e8e63d1d13e",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1280x720-long-body-fixed-actions.png",
+    "bytes": 136659,
+    "sha256": "17dba9f5bbd66ebdc60e7343e2b1c2ec822461e21e7acb2cd30d40c11fd9db63",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1440x900-powertoys-leaf.png",
+    "bytes": 172327,
+    "sha256": "6ff935cc89df45d179428496c71d3bd9af8c66e0568a665a1ef31c8c9d39c168",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1280x720-false-frame-fallback.png",
+    "bytes": 87050,
+    "sha256": "ea7a6937b178efa6967a62d4da29ee35313c2bb7488dda1424115025455fd3a4",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1440x900-long-body-fixed-actions.png",
+    "bytes": 170816,
+    "sha256": "9434e891b41e5d5102565a3332a4816d567a6f92667211542d175279182b8e22",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1280x720-powertoys-returned.png",
+    "bytes": 108049,
+    "sha256": "add314dba9decacc78f381fda9395b28c75f3b1cc566225feed6ef4fabecaa3f",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1440x900-product13-returned.png",
+    "bytes": 153414,
+    "sha256": "9c49a9f9f456a9c60e6d1426ba1a5fb847140a6aa6074fe8c97af49dac6e7172",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1280x720-product13-leaf.png",
+    "bytes": 145726,
+    "sha256": "6b102486b978fbbd745d56988d18dcd548d763634dde8ae58ecebe03b987989e",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1280x720-product13-returned.png",
+    "bytes": 128640,
+    "sha256": "27508ba722d8b013d7786b05c95eced855a6aa1b1a11c5484490044dde12fa57",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1440x900-product13-leaf.png",
+    "bytes": 177883,
+    "sha256": "accdc21a4a0962ff0526797538522bd4c36d8fbef4a0a426f4a59b4b47f895a2",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1440x900-powertoys-returned.png",
+    "bytes": 136527,
+    "sha256": "d60a2aa78bd12d56cb01b06eb0c7f5f76406decc97db53c2bc2f4aced9516853",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/hierarchy18/raw/area18-1280x720-powertoys-leaf.png",
+    "bytes": 141864,
+    "sha256": "1daa7e60085df8fae9838731606aa0cc266637d390ff409807dbcd6dbfe3b486",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-02-task-context.png",
+    "bytes": 159046,
+    "sha256": "54638a0b358a56a8a99dac2d2636ad62462f18173b073533bcbb34ec0df55eef",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-13-area-back-A.png",
+    "bytes": 180134,
+    "sha256": "eb87ecd22d9b9a92147878bc44ae982a1aa585814849b23bf21af3a8142014ad",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-06-back-after-edit.png",
+    "bytes": 129648,
+    "sha256": "41205bb1b75d903604dd599a2d327964d3003b92eaa9ba2d52dc3ac917df9c4c",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-11-idea-open-back.png",
+    "bytes": 120939,
+    "sha256": "140e4fc19560a0a974f0cf5e2b6ba51c7d68dfe451d183765f23b72caa49dc22",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-06-back-after-edit.png",
+    "bytes": 106832,
+    "sha256": "36d6fb4f263c3f88ff3783aa5dc1f611114d19d36be177c358cfb858de924020",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-12-area-back-R.png",
+    "bytes": 140957,
+    "sha256": "5f934e2c475747499dffc845a6b0e2f7b414342ced0b87bdc6c2061ba782e71c",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-10-long-fields-open.png",
+    "bytes": 128269,
+    "sha256": "d1d9d8fcb618b410e06309239d174ff2db241d49d834b4f2ac1c0264e29ef02a",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-10-long-fields-open.png",
+    "bytes": 95755,
+    "sha256": "7bb4b0fbc71ce7afbbff17d6b58000c1f7ba646feab3cfa9aba99f5e412b4e64",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-390-task.png",
+    "bytes": 68300,
+    "sha256": "65860f5a22dfa834ee53379c2bd883473e3bc7971c9bd3f3a194beb251f299f1",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-05-edit-A.png",
+    "bytes": 68960,
+    "sha256": "bfa812bf5b1aa3a2da01082497dcff988b96c890d49b7df3cdae484919d4437c",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-01-area-read.png",
+    "bytes": 97114,
+    "sha256": "f16de5b41803916fc5bc2d765391461d95d86d31044a767a803f8aa4e8d3f127",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-01-area-read.png",
+    "bytes": 121246,
+    "sha256": "e1f87a4be11e7d7a081ed488e511f0bed0a9091d932f21a5dcdfec75f9c3d8f1",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-04-edit-R.png",
+    "bytes": 82723,
+    "sha256": "0694a0055cba314f8e5895d16beddc6262537db946b573e8dcb022834a9b05e3",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-02-task-context.png",
+    "bytes": 133842,
+    "sha256": "791914f1e9e8ec26885ac35b76518cad56cc895e5c5f912140c180c60de42e1e",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-03-back-read.png",
+    "bytes": 133834,
+    "sha256": "099b8fc5ced3bc00a1b8e790afa9ce3d8c5e829faf9429e1490f864a167fe6ef",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-07-empty.png",
+    "bytes": 81755,
+    "sha256": "d22bf8ee71fc5bae80ea3ecc3a2c7f8ade5a4556761a0e88eb8841472ae0bbb5",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-08-stale.png",
+    "bytes": 95066,
+    "sha256": "48fd6f92806c0a9d23ae8896931d2fccf32d98447651f16f223608cae7edd4b7",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-04-edit-R.png",
+    "bytes": 68952,
+    "sha256": "3a492cc4a4074bea1499579c776c5d1cfc8d52733da63abaaeee037f60e1d5b4",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-05-edit-A.png",
+    "bytes": 87969,
+    "sha256": "950a42bc6f78e5fd709d825e3d9d891cd85f483809a5cad5c627982c72770cd7",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-13-area-back-A.png",
+    "bytes": 139679,
+    "sha256": "1082cc91ad32adbf5d1f6b733e1ccc8e2fbd38210394214e97ef87cde0b98205",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-11-idea-open-back.png",
+    "bytes": 92247,
+    "sha256": "76e77c2c1b7b6c268b3cbf5b277c98ee257f3a0247ed07e5d9381fe462ee1c2e",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-12-area-back-R.png",
+    "bytes": 180211,
+    "sha256": "e497f2ad3366fa7cc1e65ec3a940e050f7bdbe539a85e62b6c598d9646f8e2c6",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1440-03-back-read.png",
+    "bytes": 159022,
+    "sha256": "443b5a5b690593cdf12f0a39526b36e1fd8637ab974d7f3b6fbc2fae6f1c73b8",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc12/raw/pc12-1280-09-no-copy.png",
+    "bytes": 78082,
+    "sha256": "847cd5a373031c9bfd489724179ae8f1354d54498b197bf21852f6ab698fcb79",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1440-01-default.png",
+    "bytes": 85926,
+    "sha256": "7f335f4632b6a2d577018c944c07994e04581c4f80f300fe7953d2f2097716f3",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1280-07-tools.png",
+    "bytes": 79264,
+    "sha256": "857cf10cb03e8e79ae7c40d356ecafb3c724e4a6260b4f8084f0707b5d731061",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1440-02-selected.png",
+    "bytes": 115713,
+    "sha256": "e2a31cdd2fcc69b7e75e3ad9640db9c09e9bd6ed212925fcb1fac5b281fbd3bb",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1280-01-default.png",
+    "bytes": 78790,
+    "sha256": "8331b7f4fca39ca4a7076da12d43a598c60bede9c0103d23bfbb01832cf339ac",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1440-08-tools-notice.png",
+    "bytes": 94704,
+    "sha256": "c3b4bdb526095423a61cc908b58a6347cea25802c21263cbe596c0e5a1aeb251",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1440-03-notice.png",
+    "bytes": 97621,
+    "sha256": "c97c5eb93d9e0742783b596f86632bae45ee0b302a4eef47bb11dd392decb6c6",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1440-05-back-A-records-open.png",
+    "bytes": 111921,
+    "sha256": "1b109626781007c323f995bacb5116d598be81677d22560fa7042fa2029f7a19",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1440-04-back-R.png",
+    "bytes": 120226,
+    "sha256": "3176c2345d0a36241961f36423cdbdb4358a362e0fca65bcc88a0e9ecc2d7a6e",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1280-08-tools-notice.png",
+    "bytes": 87410,
+    "sha256": "84eadc5f17484bf706b0b3278d939028273c8778f20b6169e185b43e09cdc45b",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1280-03-notice.png",
+    "bytes": 90267,
+    "sha256": "edef643822db3babad79b1fc09aa4da6e0088c2551f19ad49ae96b03d338b6cc",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1280-04-back-R.png",
+    "bytes": 104991,
+    "sha256": "ce336709b1b111099515f8c9efe323d9b1af06ec1f6a6efcb39b140b5e284af8",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1280-02-selected.png",
+    "bytes": 101645,
+    "sha256": "c2f757db2bd0c6ebcf820477552389ab4f08ac0fd7521bd50cf56ed36c33e04f",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1440-07-tools.png",
+    "bytes": 86537,
+    "sha256": "0bd6e0a4305f09338ed679cd083307b795f38f0924190f2866bb14f98a1e9273",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1280-06-long.png",
+    "bytes": 125905,
+    "sha256": "4b8d1ec2be308d7c2d98d6b7bed3e7e1ba6ffd055eae55f518fbaa645b4d3efb",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/pc13/raw/pc13-1280-05-back-A-records-open.png",
+    "bytes": 99542,
+    "sha256": "e886fe297aa76d010240651989860bb8d5f4a62a9b0834f0aca10b8aa268ddff",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1280-03-r2-opening.png",
+    "bytes": 155770,
+    "sha256": "26ed0bb037abba11e3b3929ac6965dadc275a0770d847e758a1dae7bd9963fcf",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1280-01-before-pick.png",
+    "bytes": 149943,
+    "sha256": "19522dfd59da7bcf30bd4dcad5649bd36375aabd59220f34f2303da92c447f5c",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1440-05-unsent-opened.png",
+    "bytes": 116378,
+    "sha256": "901b796927256140050152eacf71b522a7cfc767019a8da1e427aad78bfc1040",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1280-09-redraw-kept.png",
+    "bytes": 155216,
+    "sha256": "abaa17a9661bf5680958412fedccfaf25d84ad42f5752331169af8c95cf624aa",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1280-02-f10-picked.png",
+    "bytes": 158300,
+    "sha256": "6e99a1d4594e551b80c3746eaaaf99d01d1472aefbdd6939bea1b8ad5b13d300",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1280-06-stale.png",
+    "bytes": 150314,
+    "sha256": "850efda3333fb7e6734a9bd1edd22e1e04a1dc4c4757dacb84b661faba290b75",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1440-04-r2-full.png",
+    "bytes": 269718,
+    "sha256": "92aa159f034ffceb88f2e1648878215aeb6d6683129c38b7961e2808b1bcb404",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1440-02-f10-picked.png",
+    "bytes": 199822,
+    "sha256": "a93f0105f5aabc58b7bde42055c05ce6bdc42a7e1c3240f06fb176a5dbe7a629",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1280-07-archived.png",
+    "bytes": 115474,
+    "sha256": "f41236ab09ff0330634b8af6b222504c4d869f814b6dc934084657604d6d8e3a",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1280-05-unsent-opened.png",
+    "bytes": 101140,
+    "sha256": "909a9a2ec5e0028e6810e2ec3dd3fdfd2a98cef46d61663b2f80624e4ba04243",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1440-03-r2-opening.png",
+    "bytes": 216517,
+    "sha256": "10821970ab9b7b39d20fdbcd89e48baf5f5cf344879efe67626cf18fb22b9978",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1440-01-before-pick.png",
+    "bytes": 174011,
+    "sha256": "cdf22fa08f85e122f26c9ca41b12a98b8a662222181c14a48f94c9a09cb78b38",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/report16/raw/report16-1280-04-r2-full.png",
+    "bytes": 160093,
+    "sha256": "6e58668f68527e222fc5945279024011dbcf21a9be3281b7941d2a16a8cf98b6",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/workspace19/raw/workspace19-1280-records-endpoint-return.png",
+    "bytes": 127539,
+    "sha256": "92f1a0b29609968fd31f2a0b7cb9a7eb444df631bdce06fa7428e8f8ce49e15b",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/workspace19/raw/workspace19-1280-long-originals-fallback.png",
+    "bytes": 139781,
+    "sha256": "ad5f00b5042a869343ceb7a2aa2ddfe914911bdafae6d4ce73a289b1dcc08b18",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/workspace19/raw/workspace19-1440-records-endpoint-return.png",
+    "bytes": 154607,
+    "sha256": "745a777fef3d2388cb3d4b47174777ee227f7a2800bb6efcb0f04a1c9ab6e0bf",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/workspace19/raw/workspace19-1280-records-growth.png",
+    "bytes": 124666,
+    "sha256": "d1fa46734eeb793adfd871860666da248cab8ec0af9023fab47d2913a884440f",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/workspace19/raw/workspace19-1440-records-growth.png",
+    "bytes": 146831,
+    "sha256": "d3aac13ba639e42ded1128bf386d5fb427830b04a299c9cf4b5c4dfd65a3f110",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/workspace19/raw/workspace19-1440-long-originals-fallback.png",
+    "bytes": 168318,
+    "sha256": "b4d92b55ab0072a8e356905c797ea50ad0fa9b05749ea0623e532f2adfc8447e",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1280-zero.png",
+    "bytes": 35332,
+    "sha256": "12dace270ba99ec5a6933135ba29b01c3758fc614a70867f331c12afbd3b5931",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-390-six.png",
+    "bytes": 87021,
+    "sha256": "f9971ed32c5d0771cf6871e11ba2c35d38c50504d87cbdb24669332f5581ea6d",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1440-one.png",
+    "bytes": 43124,
+    "sha256": "ea8134e063fd826fa6f603ba14b28895d1f880046c9a85b1d66498d20261da0a",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1440-six.png",
+    "bytes": 92340,
+    "sha256": "ac22b94c47778c8507149d53523183b8de2b44f9efb16473d05e0d9cb3c1e914",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1440-A-space.png",
+    "bytes": 75606,
+    "sha256": "89277d6cb166ba9f8cf08f8af79fec7289e15fb5035d58a6ab70e01b7f77adb7",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1440-zero.png",
+    "bytes": 37147,
+    "sha256": "7b21da9aa06e74ffcfda59e3f5f1f3e2c10e3a865f42917c639b2d52c96d4230",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1280-six.png",
+    "bytes": 86948,
+    "sha256": "1513b41b50e2f4d75d12a3d51d419f0a729bf66a162b26518b2a769132a34961",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1280-A-space.png",
+    "bytes": 70966,
+    "sha256": "244fb9a05f8aad04ed1e862300c06fe67531860cefb8fd8b71b6d6434bf6c197",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1280-one.png",
+    "bytes": 41403,
+    "sha256": "73ae5aab18e4616bd83ec81d41bcc0199622ea3716496394fe5287ece63ce292",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1280-read-open.png",
+    "bytes": 195301,
+    "sha256": "70c75c8bee04ddbc1bd84da30736873bad36b7a30aceeb82235734ecbd6ff972",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/home15/raw/home15-1440-read-open.png",
+    "bytes": 240438,
+    "sha256": "363f7def8a83b8a3aed5405dccd3dd822ea0bc7e1afb4ef5a57c42c6ec0b2f3b",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-product13-02-evidence.png",
+    "bytes": 163517,
+    "sha256": "d19b4df19675cb048c3fff1d113370408cbca95a3294ae46995e12f7f2163954",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-product13-01-located.png",
+    "bytes": 163848,
+    "sha256": "ba2394c983dab2c7a992e0c890198819b435503a78bd71e90e0721c79965b7db",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-powertoys-01-located.png",
+    "bytes": 133709,
+    "sha256": "2b7a805f3911049802d94e14614fbd0ecf7a5e3a224ccfddc1e3ef82de47bed3",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-06-long-area-screen.png",
+    "bytes": 134282,
+    "sha256": "d94fbdba56bccd5903d97213bbba4e88b2e5c979f3e11779e7975c23c7c23006",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-powertoys-02-evidence.png",
+    "bytes": 152640,
+    "sha256": "70def8b2d6e1bcbb3a7694877dc7ce0a7dd1f934e1b44ec5c2b4453213a7d470",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-powertoys-03-handoff-preview.png",
+    "bytes": 113451,
+    "sha256": "ab8967872eebeba8c9e4b2a14b0a3be6f1dea891751ce7244f8f9089e5246aed",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-05-long-panel.png",
+    "bytes": 135750,
+    "sha256": "4f459e21976cc93c26ae9d13b6166c1ea1fa0b50a81c1d0ed538cfd3d3f422e1",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-product13-03-handoff-preview.png",
+    "bytes": 112366,
+    "sha256": "9fd58a53fc3318f01973d36ba21838f6c6838a18bb10db544d679046200c0735",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-powertoys-03-handoff-preview.png",
+    "bytes": 142160,
+    "sha256": "efcc47ce908728480ace4edbd0ddde0d5cbccab4831843e2266edb2a74880ded",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-05-long-panel.png",
+    "bytes": 158109,
+    "sha256": "959fa4841cb4196c3fb50f828b39d57b39429d0df5a01f912a34b68cb7892ae1",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-powertoys-01-located.png",
+    "bytes": 153278,
+    "sha256": "5d6b15b135bcc0eceab5761c1e5c08d0ed5a962c1f84a7d1b23115b81ac5f9b4",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-powertoys-02-evidence.png",
+    "bytes": 131290,
+    "sha256": "f25b5d51ab32ce0896cf5296b0a9d1fdbf3b6a4aa4d4d1893c601ba1608fc68a",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-product13-01-located.png",
+    "bytes": 144000,
+    "sha256": "c6ef2e060782ad7ea0d02d9dcf959eadb826ef066e6767986fe033a37f569088",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-product13-07-locate-new-request-work.png",
+    "bytes": 154767,
+    "sha256": "e14dea4198a6b45dfc6d95d7b6fafb9e94a6ba9998a9c1fa4491aa0fceef4b5c",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-product13-02-evidence.png",
+    "bytes": 140222,
+    "sha256": "a2757c06504565d925854afba6ff4cd8b65349e494c5eebbaeb6dc1dee4bfcea",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-product13-03-handoff-preview.png",
+    "bytes": 142378,
+    "sha256": "87a4ab89c82cf2622a27a4bdd14f01d512725e95a885b03a7b333617378ad60e",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1440x900-06-long-area-screen.png",
+    "bytes": 153078,
+    "sha256": "5edc36076ee61252fec7007d60467e9e852979c93662cca6322df40cb222e631",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  },
+  {
+    "path": "regression-commands/understanding17/raw/area17-1280x720-product13-07-locate-new-request-work.png",
+    "bytes": 117456,
+    "sha256": "262ca2a6ba630338eb4092c5658ced3c8d28cb6c1492b734a055cb135e0c4b91",
+    "reason": "local original preserved; representative/failure PNG shared separately"
+  }
+]

@@ -1,0 +1,3518 @@
+{
+  "source": "0aafca2708863036055cbd3029521b4eb983d22e",
+  "expectedRuns": 3,
+  "executedRuns": 3,
+  "runs": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "long-report-and-mobile-minimum",
+      "checks": [
+        {
+          "id": "action-natively-reachable-no-horizontal-overflow",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 165,
+              "windowMax": 899,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "space-title",
+              "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_3bab8c72-33c6-41b8-93ee-7d39834bafc9",
+                "reportTaskId": "T_3bab8c72-33c6-41b8-93ee-7d39834bafc9",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_3bab8c72-33c6-41b8-93ee-7d39834bafc9"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1041.390625,
+                    "y": 118.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 118.28125,
+                    "right": 1219,
+                    "bottom": 161.28125,
+                    "left": 1041.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "action": {
+              "rect": {
+                "x": 283,
+                "y": 662.46875,
+                "width": 156.8125,
+                "height": 45,
+                "top": 662.46875,
+                "right": 439.8125,
+                "bottom": 707.46875,
+                "left": 283
+              },
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 1280,
+                "b": 720
+              },
+              "parents": [
+                {
+                  "id": "task-next-action",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-next",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "main",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                }
+              ],
+              "hits": [
+                true,
+                true,
+                true
+              ],
+              "full": true
+            }
+          }
+        },
+        {
+          "id": "native-wheel-actual-long-source-tail",
+          "pass": true,
+          "raw": {
+            "tail": {
+              "found": true,
+              "rect": {
+                "x": 711.15625,
+                "y": 673.046875,
+                "width": 118.0625,
+                "height": 17,
+                "top": 673.046875,
+                "right": 829.21875,
+                "bottom": 690.046875,
+                "left": 711.15625
+              },
+              "hit": true,
+              "visible": true,
+              "text": "원문마지막조건-20-END",
+              "sourceScroll": {
+                "top": 715,
+                "max": 715,
+                "clientHeight": 358,
+                "scrollHeight": 1073
+              },
+              "wholeSourceClip": {
+                "rect": {
+                  "x": 698.15625,
+                  "y": 347.1875,
+                  "width": 520.84375,
+                  "height": 360,
+                  "top": 347.1875,
+                  "right": 1219,
+                  "bottom": 707.1875,
+                  "left": 698.15625
+                },
+                "clip": {
+                  "l": 699.1559500959693,
+                  "t": 348.1875,
+                  "r": 1218.0002999040307,
+                  "b": 706.1875
+                },
+                "parents": [
+                  {
+                    "id": "",
+                    "ox": "auto",
+                    "oy": "auto"
+                  },
+                  {
+                    "id": "task-report-src-S_97d4ac24-328d-4f6c-aa03-2f472b281b08",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-pointed",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-reports",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": false
+              }
+            },
+            "wheelObservations": [
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 1388.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1388.046875,
+                  "right": 829.21875,
+                  "bottom": 1405.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 0,
+                  "max": 715,
+                  "clientHeight": 358,
+                  "scrollHeight": 1073
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 698.15625,
+                    "y": 347.1875,
+                    "width": 520.84375,
+                    "height": 360,
+                    "top": 347.1875,
+                    "right": 1219,
+                    "bottom": 707.1875,
+                    "left": 698.15625
+                  },
+                  "clip": {
+                    "l": 699.1559500959693,
+                    "t": 348.1875,
+                    "r": 1218.0002999040307,
+                    "b": 706.1875
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_97d4ac24-328d-4f6c-aa03-2f472b281b08",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 1088.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1088.046875,
+                  "right": 829.21875,
+                  "bottom": 1105.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 300,
+                  "max": 715,
+                  "clientHeight": 358,
+                  "scrollHeight": 1073
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 698.15625,
+                    "y": 347.1875,
+                    "width": 520.84375,
+                    "height": 360,
+                    "top": 347.1875,
+                    "right": 1219,
+                    "bottom": 707.1875,
+                    "left": 698.15625
+                  },
+                  "clip": {
+                    "l": 699.1559500959693,
+                    "t": 348.1875,
+                    "r": 1218.0002999040307,
+                    "b": 706.1875
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_97d4ac24-328d-4f6c-aa03-2f472b281b08",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 788.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 788.046875,
+                  "right": 829.21875,
+                  "bottom": 805.046875,
+                  "left": 711.15625
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 600,
+                  "max": 715,
+                  "clientHeight": 358,
+                  "scrollHeight": 1073
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 698.15625,
+                    "y": 347.1875,
+                    "width": 520.84375,
+                    "height": 360,
+                    "top": 347.1875,
+                    "right": 1219,
+                    "bottom": 707.1875,
+                    "left": 698.15625
+                  },
+                  "clip": {
+                    "l": 699.1559500959693,
+                    "t": 348.1875,
+                    "r": 1218.0002999040307,
+                    "b": 706.1875
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_97d4ac24-328d-4f6c-aa03-2f472b281b08",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 711.15625,
+                  "y": 673.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 673.046875,
+                  "right": 829.21875,
+                  "bottom": 690.046875,
+                  "left": 711.15625
+                },
+                "hit": true,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 715,
+                  "max": 715,
+                  "clientHeight": 358,
+                  "scrollHeight": 1073
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 698.15625,
+                    "y": 347.1875,
+                    "width": 520.84375,
+                    "height": 360,
+                    "top": 347.1875,
+                    "right": 1219,
+                    "bottom": 707.1875,
+                    "left": 698.15625
+                  },
+                  "clip": {
+                    "l": 699.1559500959693,
+                    "t": 348.1875,
+                    "r": 1218.0002999040307,
+                    "b": 706.1875
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_97d4ac24-328d-4f6c-aa03-2f472b281b08",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              }
+            ],
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 294,
+              "windowMax": 1077,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>보고 전문 보기 · 2051자</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_3bab8c72-33c6-41b8-93ee-7d39834bafc9",
+                "reportTaskId": "T_3bab8c72-33c6-41b8-93ee-7d39834bafc9",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_3bab8c72-33c6-41b8-93ee-7d39834bafc9"
+              },
+              "open": [
+                "project-management",
+                "task-report-src-S_97d4ac24-328d-4f6c-aa03-2f472b281b08",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1041.390625,
+                    "y": -10.71875,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": -10.71875,
+                    "right": 1219,
+                    "bottom": 32.28125,
+                    "left": 1041.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "closed-source-fold-really-hidden",
+          "pass": true,
+          "raw": {
+            "checkVisible": false,
+            "rects": 1,
+            "rect": {
+              "x": 698.15625,
+              "y": 347.1875,
+              "width": 520.84375,
+              "height": 360,
+              "top": 347.1875,
+              "right": 1219,
+              "bottom": 707.1875,
+              "left": 698.15625
+            }
+          }
+        },
+        {
+          "id": "reader-exits-DOM-and-B-draft-saved-preserved",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1280,
+              720
+            ],
+            "windowY": 2659,
+            "windowMax": 2659,
+            "docWidth": 1280,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "received-result-open",
+            "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+            "caller": {
+              "x": 300,
+              "y": 542.671875,
+              "width": 104.25,
+              "height": 43,
+              "top": 542.671875,
+              "right": 404.25,
+              "bottom": 585.671875,
+              "left": 300
+            },
+            "contextTitle": {
+              "x": 264,
+              "y": -2370.625,
+              "width": 308.03125,
+              "height": 31.5,
+              "top": -2370.625,
+              "right": 572.03125,
+              "bottom": -2339.125,
+              "left": 264
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_3bab8c72-33c6-41b8-93ee-7d39834bafc9",
+              "reportTaskId": "T_3bab8c72-33c6-41b8-93ee-7d39834bafc9",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        }
+      ],
+      "initialActionObservation": {
+        "snapshot": {
+          "viewport": [
+            1280,
+            720
+          ],
+          "windowY": 0,
+          "windowMax": 899,
+          "docWidth": 1280,
+          "route": "project",
+          "work": false,
+          "task": true,
+          "focus": "space-title",
+          "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+          "caller": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "contextTitle": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "receipt": {
+            "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_3bab8c72-33c6-41b8-93ee-7d39834bafc9",
+            "reportTaskId": "T_3bab8c72-33c6-41b8-93ee-7d39834bafc9",
+            "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+            "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+            "handoffId": "H_independent20_powertoys_H1",
+            "duplicate": "false",
+            "saveState": "saved"
+          },
+          "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+          "pointed": {
+            "reportTaskId": "T_3bab8c72-33c6-41b8-93ee-7d39834bafc9"
+          },
+          "open": [
+            "project-management",
+            "compose-panel",
+            "result-file-panel",
+            "history"
+          ],
+          "returnControls": [
+            {
+              "id": "task-return-origin",
+              "text": "← 검토 전 작업 화면으로",
+              "rect": {
+                "x": 1041.390625,
+                "y": 283.28125,
+                "width": 177.609375,
+                "height": 43,
+                "top": 283.28125,
+                "right": 1219,
+                "bottom": 326.28125,
+                "left": 1041.390625
+              }
+            }
+          ],
+          "saving": null,
+          "saved": "이 브라우저에 저장됨",
+          "storageError": null
+        },
+        "action": {
+          "rect": {
+            "x": 283,
+            "y": 827.46875,
+            "width": 156.8125,
+            "height": 45,
+            "top": 827.46875,
+            "right": 439.8125,
+            "bottom": 872.46875,
+            "left": 283
+          },
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1280,
+            "b": 720
+          },
+          "parents": [
+            {
+              "id": "task-next-action",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "task-next",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "task-view",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "space-view",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "main",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            }
+          ],
+          "hits": [
+            false,
+            false,
+            false
+          ],
+          "full": false
+        }
+      },
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "long-report-and-mobile-minimum",
+      "checks": [
+        {
+          "id": "action-natively-reachable-no-horizontal-overflow",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 631,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "space-title",
+              "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_8ce23b73-183a-4d40-b49c-21c3a3775129",
+                "reportTaskId": "T_8ce23b73-183a-4d40-b49c-21c3a3775129",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_8ce23b73-183a-4d40-b49c-21c3a3775129"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1201.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1379,
+                    "bottom": 326.28125,
+                    "left": 1201.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "action": {
+              "rect": {
+                "x": 283,
+                "y": 783.09375,
+                "width": 156.8125,
+                "height": 45,
+                "top": 783.09375,
+                "right": 439.8125,
+                "bottom": 828.09375,
+                "left": 283
+              },
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 1440,
+                "b": 900
+              },
+              "parents": [
+                {
+                  "id": "task-next-action",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-next",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "main",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                }
+              ],
+              "hits": [
+                true,
+                true,
+                true
+              ],
+              "full": true
+            }
+          }
+        },
+        {
+          "id": "native-wheel-actual-long-source-tail",
+          "pass": true,
+          "raw": {
+            "tail": {
+              "found": true,
+              "rect": {
+                "x": 777.828125,
+                "y": 853.046875,
+                "width": 118.0625,
+                "height": 17,
+                "top": 853.046875,
+                "right": 895.890625,
+                "bottom": 870.046875,
+                "left": 777.828125
+              },
+              "hit": true,
+              "visible": true,
+              "text": "원문마지막조건-20-END",
+              "sourceScroll": {
+                "top": 715,
+                "max": 715,
+                "clientHeight": 358,
+                "scrollHeight": 1073
+              },
+              "wholeSourceClip": {
+                "rect": {
+                  "x": 764.828125,
+                  "y": 527.1875,
+                  "width": 614.15625,
+                  "height": 360,
+                  "top": 527.1875,
+                  "right": 1378.984375,
+                  "bottom": 887.1875,
+                  "left": 764.828125
+                },
+                "clip": {
+                  "l": 765.8283794788274,
+                  "t": 528.1875,
+                  "r": 1377.9841205211726,
+                  "b": 886.1875
+                },
+                "parents": [
+                  {
+                    "id": "",
+                    "ox": "auto",
+                    "oy": "auto"
+                  },
+                  {
+                    "id": "task-report-src-S_37401a0a-b1cb-4fb7-b93c-4a9e595d1324",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-pointed",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-reports",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": false
+              }
+            },
+            "wheelObservations": [
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1568.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1568.046875,
+                  "right": 895.890625,
+                  "bottom": 1585.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 0,
+                  "max": 715,
+                  "clientHeight": 358,
+                  "scrollHeight": 1073
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 764.828125,
+                    "y": 527.1875,
+                    "width": 614.15625,
+                    "height": 360,
+                    "top": 527.1875,
+                    "right": 1378.984375,
+                    "bottom": 887.1875,
+                    "left": 764.828125
+                  },
+                  "clip": {
+                    "l": 765.8283794788274,
+                    "t": 528.1875,
+                    "r": 1377.9841205211726,
+                    "b": 886.1875
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_37401a0a-b1cb-4fb7-b93c-4a9e595d1324",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 1268.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 1268.046875,
+                  "right": 895.890625,
+                  "bottom": 1285.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 300,
+                  "max": 715,
+                  "clientHeight": 358,
+                  "scrollHeight": 1073
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 764.828125,
+                    "y": 527.1875,
+                    "width": 614.15625,
+                    "height": 360,
+                    "top": 527.1875,
+                    "right": 1378.984375,
+                    "bottom": 887.1875,
+                    "left": 764.828125
+                  },
+                  "clip": {
+                    "l": 765.8283794788274,
+                    "t": 528.1875,
+                    "r": 1377.9841205211726,
+                    "b": 886.1875
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_37401a0a-b1cb-4fb7-b93c-4a9e595d1324",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 968.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 968.046875,
+                  "right": 895.890625,
+                  "bottom": 985.046875,
+                  "left": 777.828125
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 600,
+                  "max": 715,
+                  "clientHeight": 358,
+                  "scrollHeight": 1073
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 764.828125,
+                    "y": 527.1875,
+                    "width": 614.15625,
+                    "height": 360,
+                    "top": 527.1875,
+                    "right": 1378.984375,
+                    "bottom": 887.1875,
+                    "left": 764.828125
+                  },
+                  "clip": {
+                    "l": 765.8283794788274,
+                    "t": 528.1875,
+                    "r": 1377.9841205211726,
+                    "b": 886.1875
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_37401a0a-b1cb-4fb7-b93c-4a9e595d1324",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 777.828125,
+                  "y": 853.046875,
+                  "width": 118.0625,
+                  "height": 17,
+                  "top": 853.046875,
+                  "right": 895.890625,
+                  "bottom": 870.046875,
+                  "left": 777.828125
+                },
+                "hit": true,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 715,
+                  "max": 715,
+                  "clientHeight": 358,
+                  "scrollHeight": 1073
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 764.828125,
+                    "y": 527.1875,
+                    "width": 614.15625,
+                    "height": 360,
+                    "top": 527.1875,
+                    "right": 1378.984375,
+                    "bottom": 887.1875,
+                    "left": 764.828125
+                  },
+                  "clip": {
+                    "l": 765.8283794788274,
+                    "t": 528.1875,
+                    "r": 1377.9841205211726,
+                    "b": 886.1875
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_37401a0a-b1cb-4fb7-b93c-4a9e595d1324",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              }
+            ],
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 114,
+              "windowMax": 876,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>보고 전문 보기 · 2051자</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_8ce23b73-183a-4d40-b49c-21c3a3775129",
+                "reportTaskId": "T_8ce23b73-183a-4d40-b49c-21c3a3775129",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_8ce23b73-183a-4d40-b49c-21c3a3775129"
+              },
+              "open": [
+                "project-management",
+                "task-report-src-S_37401a0a-b1cb-4fb7-b93c-4a9e595d1324",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1201.390625,
+                    "y": 169.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 169.28125,
+                    "right": 1379,
+                    "bottom": 212.28125,
+                    "left": 1201.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "closed-source-fold-really-hidden",
+          "pass": true,
+          "raw": {
+            "checkVisible": false,
+            "rects": 1,
+            "rect": {
+              "x": 764.828125,
+              "y": 527.1875,
+              "width": 614.15625,
+              "height": 360,
+              "top": 527.1875,
+              "right": 1378.984375,
+              "bottom": 887.1875,
+              "left": 764.828125
+            }
+          }
+        },
+        {
+          "id": "reader-exits-DOM-and-B-draft-saved-preserved",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1440,
+              900
+            ],
+            "windowY": 2479,
+            "windowMax": 2479,
+            "docWidth": 1440,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "received-result-open",
+            "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+            "caller": {
+              "x": 380,
+              "y": 722.671875,
+              "width": 104.25,
+              "height": 43,
+              "top": 722.671875,
+              "right": 484.25,
+              "bottom": 765.671875,
+              "left": 380
+            },
+            "contextTitle": {
+              "x": 264,
+              "y": -2190.625,
+              "width": 308.03125,
+              "height": 31.5,
+              "top": -2190.625,
+              "right": 572.03125,
+              "bottom": -2159.125,
+              "left": 264
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_8ce23b73-183a-4d40-b49c-21c3a3775129",
+              "reportTaskId": "T_8ce23b73-183a-4d40-b49c-21c3a3775129",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        }
+      ],
+      "initialActionObservation": {
+        "snapshot": {
+          "viewport": [
+            1440,
+            900
+          ],
+          "windowY": 0,
+          "windowMax": 631,
+          "docWidth": 1440,
+          "route": "project",
+          "work": false,
+          "task": true,
+          "focus": "space-title",
+          "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+          "caller": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "contextTitle": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "receipt": {
+            "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_8ce23b73-183a-4d40-b49c-21c3a3775129",
+            "reportTaskId": "T_8ce23b73-183a-4d40-b49c-21c3a3775129",
+            "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+            "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+            "handoffId": "H_independent20_powertoys_H1",
+            "duplicate": "false",
+            "saveState": "saved"
+          },
+          "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+          "pointed": {
+            "reportTaskId": "T_8ce23b73-183a-4d40-b49c-21c3a3775129"
+          },
+          "open": [
+            "project-management",
+            "compose-panel",
+            "result-file-panel",
+            "history"
+          ],
+          "returnControls": [
+            {
+              "id": "task-return-origin",
+              "text": "← 검토 전 작업 화면으로",
+              "rect": {
+                "x": 1201.390625,
+                "y": 283.28125,
+                "width": 177.609375,
+                "height": 43,
+                "top": 283.28125,
+                "right": 1379,
+                "bottom": 326.28125,
+                "left": 1201.390625
+              }
+            }
+          ],
+          "saving": null,
+          "saved": "이 브라우저에 저장됨",
+          "storageError": null
+        },
+        "action": {
+          "rect": {
+            "x": 283,
+            "y": 783.09375,
+            "width": 156.8125,
+            "height": 45,
+            "top": 783.09375,
+            "right": 439.8125,
+            "bottom": 828.09375,
+            "left": 283
+          },
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          },
+          "parents": [
+            {
+              "id": "task-next-action",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "task-next",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "task-view",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "space-view",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "main",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            }
+          ],
+          "hits": [
+            true,
+            true,
+            true
+          ],
+          "full": true
+        }
+      },
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "scenario": "long-report-and-mobile-minimum",
+      "checks": [
+        {
+          "id": "action-natively-reachable-no-horizontal-overflow",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                390,
+                844
+              ],
+              "windowY": 294,
+              "windowMax": 1674,
+              "docWidth": 390,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "space-title",
+              "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_ebe01419-4784-43d5-a492-aa67a1d654f2",
+                "reportTaskId": "T_ebe01419-4784-43d5-a492-aa67a1d654f2",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_ebe01419-4784-43d5-a492-aa67a1d654f2"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 177.390625,
+                    "y": 194.109375,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 194.109375,
+                    "right": 355,
+                    "bottom": 237.109375,
+                    "left": 177.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "action": {
+              "rect": {
+                "x": 35,
+                "y": 786.328125,
+                "width": 156.8125,
+                "height": 45,
+                "top": 786.328125,
+                "right": 191.8125,
+                "bottom": 831.328125,
+                "left": 35
+              },
+              "clip": {
+                "l": 0,
+                "t": 0,
+                "r": 390,
+                "b": 844
+              },
+              "parents": [
+                {
+                  "id": "task-next-action",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-next",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "task-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "space-view",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "main",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                },
+                {
+                  "id": "",
+                  "ox": "visible",
+                  "oy": "visible"
+                }
+              ],
+              "hits": [
+                true,
+                true,
+                true
+              ],
+              "full": true
+            }
+          }
+        },
+        {
+          "id": "native-wheel-actual-long-source-tail",
+          "pass": true,
+          "raw": {
+            "tail": {
+              "found": true,
+              "rect": {
+                "x": 48,
+                "y": 799.6875,
+                "width": 107.8125,
+                "height": 16,
+                "top": 799.6875,
+                "right": 155.8125,
+                "bottom": 815.6875,
+                "left": 48
+              },
+              "hit": true,
+              "visible": true,
+              "text": "원문마지막조건-20-END",
+              "sourceScroll": {
+                "top": 1567,
+                "max": 1567,
+                "clientHeight": 358,
+                "scrollHeight": 1925
+              },
+              "wholeSourceClip": {
+                "rect": {
+                  "x": 35,
+                  "y": 471.53125,
+                  "width": 320,
+                  "height": 360,
+                  "top": 471.53125,
+                  "right": 355,
+                  "bottom": 831.53125,
+                  "left": 35
+                },
+                "clip": {
+                  "l": 36,
+                  "t": 472.53125,
+                  "r": 354,
+                  "b": 830.53125
+                },
+                "parents": [
+                  {
+                    "id": "",
+                    "ox": "auto",
+                    "oy": "auto"
+                  },
+                  {
+                    "id": "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-pointed",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-reports",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "task-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "space-view",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "main",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  },
+                  {
+                    "id": "",
+                    "ox": "visible",
+                    "oy": "visible"
+                  }
+                ],
+                "hits": [
+                  true,
+                  true,
+                  true
+                ],
+                "full": false
+              }
+            },
+            "wheelObservations": [
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 2366.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 2366.6875,
+                  "right": 155.8125,
+                  "bottom": 2382.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 0,
+                  "max": 1567,
+                  "clientHeight": 358,
+                  "scrollHeight": 1925
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 35,
+                    "y": 471.53125,
+                    "width": 320,
+                    "height": 360,
+                    "top": 471.53125,
+                    "right": 355,
+                    "bottom": 831.53125,
+                    "left": 35
+                  },
+                  "clip": {
+                    "l": 36,
+                    "t": 472.53125,
+                    "r": 354,
+                    "b": 830.53125
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 2066.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 2066.6875,
+                  "right": 155.8125,
+                  "bottom": 2082.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 300,
+                  "max": 1567,
+                  "clientHeight": 358,
+                  "scrollHeight": 1925
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 35,
+                    "y": 471.53125,
+                    "width": 320,
+                    "height": 360,
+                    "top": 471.53125,
+                    "right": 355,
+                    "bottom": 831.53125,
+                    "left": 35
+                  },
+                  "clip": {
+                    "l": 36,
+                    "t": 472.53125,
+                    "r": 354,
+                    "b": 830.53125
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1766.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1766.6875,
+                  "right": 155.8125,
+                  "bottom": 1782.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 600,
+                  "max": 1567,
+                  "clientHeight": 358,
+                  "scrollHeight": 1925
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 35,
+                    "y": 471.53125,
+                    "width": 320,
+                    "height": 360,
+                    "top": 471.53125,
+                    "right": 355,
+                    "bottom": 831.53125,
+                    "left": 35
+                  },
+                  "clip": {
+                    "l": 36,
+                    "t": 472.53125,
+                    "r": 354,
+                    "b": 830.53125
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1466.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1466.6875,
+                  "right": 155.8125,
+                  "bottom": 1482.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 900,
+                  "max": 1567,
+                  "clientHeight": 358,
+                  "scrollHeight": 1925
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 35,
+                    "y": 471.53125,
+                    "width": 320,
+                    "height": 360,
+                    "top": 471.53125,
+                    "right": 355,
+                    "bottom": 831.53125,
+                    "left": 35
+                  },
+                  "clip": {
+                    "l": 36,
+                    "t": 472.53125,
+                    "r": 354,
+                    "b": 830.53125
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 1166.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 1166.6875,
+                  "right": 155.8125,
+                  "bottom": 1182.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 1200,
+                  "max": 1567,
+                  "clientHeight": 358,
+                  "scrollHeight": 1925
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 35,
+                    "y": 471.53125,
+                    "width": 320,
+                    "height": 360,
+                    "top": 471.53125,
+                    "right": 355,
+                    "bottom": 831.53125,
+                    "left": 35
+                  },
+                  "clip": {
+                    "l": 36,
+                    "t": 472.53125,
+                    "r": 354,
+                    "b": 830.53125
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 866.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 866.6875,
+                  "right": 155.8125,
+                  "bottom": 882.6875,
+                  "left": 48
+                },
+                "hit": false,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 1500,
+                  "max": 1567,
+                  "clientHeight": 358,
+                  "scrollHeight": 1925
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 35,
+                    "y": 471.53125,
+                    "width": 320,
+                    "height": 360,
+                    "top": 471.53125,
+                    "right": 355,
+                    "bottom": 831.53125,
+                    "left": 35
+                  },
+                  "clip": {
+                    "l": 36,
+                    "t": 472.53125,
+                    "r": 354,
+                    "b": 830.53125
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              },
+              {
+                "found": true,
+                "rect": {
+                  "x": 48,
+                  "y": 799.6875,
+                  "width": 107.8125,
+                  "height": 16,
+                  "top": 799.6875,
+                  "right": 155.8125,
+                  "bottom": 815.6875,
+                  "left": 48
+                },
+                "hit": true,
+                "visible": true,
+                "text": "원문마지막조건-20-END",
+                "sourceScroll": {
+                  "top": 1567,
+                  "max": 1567,
+                  "clientHeight": 358,
+                  "scrollHeight": 1925
+                },
+                "wholeSourceClip": {
+                  "rect": {
+                    "x": 35,
+                    "y": 471.53125,
+                    "width": 320,
+                    "height": 360,
+                    "top": 471.53125,
+                    "right": 355,
+                    "bottom": 831.53125,
+                    "left": 35
+                  },
+                  "clip": {
+                    "l": 36,
+                    "t": 472.53125,
+                    "r": 354,
+                    "b": 830.53125
+                  },
+                  "parents": [
+                    {
+                      "id": "",
+                      "ox": "auto",
+                      "oy": "auto"
+                    },
+                    {
+                      "id": "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-pointed",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-reports",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "task-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "space-view",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "main",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    },
+                    {
+                      "id": "",
+                      "ox": "visible",
+                      "oy": "visible"
+                    }
+                  ],
+                  "hits": [
+                    true,
+                    true,
+                    true
+                  ],
+                  "full": false
+                }
+              }
+            ],
+            "snapshot": {
+              "viewport": [
+                390,
+                844
+              ],
+              "windowY": 1136,
+              "windowMax": 2056,
+              "docWidth": 390,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>보고 전문 보기 · 2051자</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_ebe01419-4784-43d5-a492-aa67a1d654f2",
+                "reportTaskId": "T_ebe01419-4784-43d5-a492-aa67a1d654f2",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_ebe01419-4784-43d5-a492-aa67a1d654f2"
+              },
+              "open": [
+                "project-management",
+                "task-report-src-S_c4a4c58c-bb8f-4580-96cb-1ebd22c560c1",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 177.390625,
+                    "y": -647.890625,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": -647.890625,
+                    "right": 355,
+                    "bottom": -604.890625,
+                    "left": 177.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "closed-source-fold-really-hidden",
+          "pass": true,
+          "raw": {
+            "checkVisible": false,
+            "rects": 1,
+            "rect": {
+              "x": 35,
+              "y": 471.53125,
+              "width": 320,
+              "height": 360,
+              "top": 471.53125,
+              "right": 355,
+              "bottom": 831.53125,
+              "left": 35
+            }
+          }
+        },
+        {
+          "id": "reader-exits-DOM-and-B-draft-saved-preserved",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              390,
+              844
+            ],
+            "windowY": 3303,
+            "windowMax": 3303,
+            "docWidth": 390,
+            "route": "project",
+            "work": true,
+            "task": false,
+            "focus": "received-result-open",
+            "active": "<button class=\"secondary\" type=\"button\" id=\"received-result-open\">이 결과 검토</button>",
+            "caller": {
+              "x": 35,
+              "y": 682.890625,
+              "width": 104.25,
+              "height": 43,
+              "top": 682.890625,
+              "right": 139.25,
+              "bottom": 725.890625,
+              "left": 35
+            },
+            "contextTitle": {
+              "x": 16,
+              "y": -2888.78125,
+              "width": 281.296875,
+              "height": 31.34375,
+              "top": -2888.78125,
+              "right": 297.296875,
+              "bottom": -2857.4375,
+              "left": 16
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_ebe01419-4784-43d5-a492-aa67a1d654f2",
+              "reportTaskId": "T_ebe01419-4784-43d5-a492-aa67a1d654f2",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "false",
+              "saveState": "saved"
+            },
+            "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+            "pointed": null,
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        }
+      ],
+      "initialActionObservation": {
+        "snapshot": {
+          "viewport": [
+            390,
+            844
+          ],
+          "windowY": 0,
+          "windowMax": 1674,
+          "docWidth": 390,
+          "route": "project",
+          "work": false,
+          "task": true,
+          "focus": "space-title",
+          "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+          "caller": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "contextTitle": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "receipt": {
+            "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_ebe01419-4784-43d5-a492-aa67a1d654f2",
+            "reportTaskId": "T_ebe01419-4784-43d5-a492-aa67a1d654f2",
+            "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+            "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+            "handoffId": "H_independent20_powertoys_H1",
+            "duplicate": "false",
+            "saveState": "saved"
+          },
+          "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+          "pointed": {
+            "reportTaskId": "T_ebe01419-4784-43d5-a492-aa67a1d654f2"
+          },
+          "open": [
+            "project-management",
+            "compose-panel",
+            "result-file-panel",
+            "history"
+          ],
+          "returnControls": [
+            {
+              "id": "task-return-origin",
+              "text": "← 검토 전 작업 화면으로",
+              "rect": {
+                "x": 177.390625,
+                "y": 488.109375,
+                "width": 177.609375,
+                "height": 43,
+                "top": 488.109375,
+                "right": 355,
+                "bottom": 531.109375,
+                "left": 177.390625
+              }
+            }
+          ],
+          "saving": null,
+          "saved": "이 브라우저에 저장됨",
+          "storageError": null
+        },
+        "action": {
+          "rect": {
+            "x": 35,
+            "y": 1080.328125,
+            "width": 156.8125,
+            "height": 45,
+            "top": 1080.328125,
+            "right": 191.8125,
+            "bottom": 1125.328125,
+            "left": 35
+          },
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 390,
+            "b": 844
+          },
+          "parents": [
+            {
+              "id": "task-next-action",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "task-next",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "task-view",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "space-view",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "main",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            },
+            {
+              "id": "",
+              "ox": "visible",
+              "oy": "visible"
+            }
+          ],
+          "hits": [
+            false,
+            false,
+            false
+          ],
+          "full": false
+        }
+      },
+      "pageerrors": []
+    }
+  ],
+  "exit": 0
+}

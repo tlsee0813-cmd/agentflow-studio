@@ -1,0 +1,77 @@
+[
+  {
+    "name": "type",
+    "command": [
+      "npm",
+      "run",
+      "check"
+    ],
+    "startUTC": "2026-10-22T14:56:31.281904+00:00",
+    "endUTC": "2026-10-22T14:56:34.340665+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "7c8d8c81cc4f4c29bccece1524f09b6070f60f64ec0a6302f1cf649e969934cf",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "build",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "startUTC": "2026-10-22T14:56:34.341399+00:00",
+    "endUTC": "2026-10-22T14:56:36.065911+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "3336006047fb26f65b5e89c0048eac084c4b1d0ef082faa9f359a35939868e28",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "continuity-type",
+    "command": [
+      "node",
+      "continuity/scripts/check.mjs"
+    ],
+    "startUTC": "2026-10-22T14:56:36.066224+00:00",
+    "endUTC": "2026-10-22T14:56:39.149973+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "47570359043e5a8977f213754a6d0c4d741078ec28b6cbc31009801c909fc89f",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "continuity-build",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T14:56:39.150412+00:00",
+    "endUTC": "2026-10-22T14:56:41.684726+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "domain",
+    "command": [
+      "bash",
+      "-c",
+      "node --test continuity/tests/*.test.mjs"
+    ],
+    "startUTC": "2026-10-22T14:56:41.685092+00:00",
+    "endUTC": "2026-10-22T14:56:54.825673+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "8fd07a16fa60d251e5b4da289ff0b07e4ecd843a38988d446af89e6784cda9c0",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "static-build",
+    "command": [
+      "node",
+      "continuity/scripts/build-static.mjs"
+    ],
+    "startUTC": "2026-10-22T14:56:54.826249+00:00",
+    "endUTC": "2026-10-22T14:56:57.658538+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "6b8718a4113088a0555063b2effc42289ab7ffd69d16cb7c3763386531ae7cc4",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

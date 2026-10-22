@@ -1,0 +1,3212 @@
+{
+  "source": "0aafca2708863036055cbd3029521b4eb983d22e",
+  "expectedRuns": 8,
+  "executedRuns": 8,
+  "runs": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "same-H-and-origin-change",
+      "checks": [
+        {
+          "id": "exact-duplicate-keeps-full-project-and-original-T",
+          "pass": true,
+          "raw": {
+            "originalReceipt": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 2821,
+              "windowMax": 2821,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 300,
+                "y": 542.8125,
+                "width": 104.25,
+                "height": 43,
+                "top": 542.8125,
+                "right": 404.25,
+                "bottom": 585.8125,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2532.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2532.625,
+                "right": 572.03125,
+                "bottom": -2501.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                "reportTaskId": "T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "duplicateReceipt": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 3295,
+              "windowMax": 3592,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 300,
+                "y": 68.8125,
+                "width": 104.25,
+                "height": 43,
+                "top": 68.8125,
+                "right": 404.25,
+                "bottom": 111.8125,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -3006.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -3006.625,
+                "right": 572.03125,
+                "bottom": -2975.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                "reportTaskId": "T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "true",
+                "saveState": "saved"
+              },
+              "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "state": {
+              "schemaVersion": "idea015.project.7",
+              "id": "P_1facf9e3-f525-45e1-acf9-262d9a9dd65f",
+              "revision": 53,
+              "name": "나의 프로젝트",
+              "sources": [
+                {
+                  "id": "S_cee45c6a-203d-4088-bc1a-654cd6761ae3",
+                  "kind": "request",
+                  "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                  "at": "2026-10-22T11:23:16.785Z",
+                  "taskId": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_de3dfcf9-b586-4d2d-acdb-826472ab3417",
+                  "kind": "answer",
+                  "text": "[독립 합성 답변 기록] 자동 해결 판정은 아니다.",
+                  "at": "2026-10-22T11:23:16.790Z",
+                  "taskId": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "replyTo": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_d7374fd9-2aeb-4588-8333-68d65f2d497a",
+                  "kind": "report",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_6811f174-0320-4126-9c80-bd8771e66b34의 인계 H_independent18_powertoys / r16에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.",
+                  "at": "2026-10-22T11:23:16.792Z",
+                  "taskId": "T_2393153a-75bf-491f-93e0-108222a14b48",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_2ae4444f-c085-4466-8e6e-a6c6398edce6",
+                  "kind": "report",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_6811f174-0320-4126-9c80-bd8771e66b34의 인계 H_hierarchy_powertoys / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다. [합성 늦은 반환]",
+                  "at": "2026-10-22T11:23:16.794Z",
+                  "taskId": "T_79f52464-216d-4289-a242-9d785417f142",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_d6c1612a-492a-4ec8-b45b-2d4a7141899d",
+                  "kind": "request",
+                  "text": "[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                  "at": "2026-10-22T14:59:17.177Z",
+                  "taskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_529504a5-30a8-4f43-bc81-779823912692",
+                  "kind": "request",
+                  "text": "[독립20 합성 B] 수신과 다른 부분의 작업을 유지한다.",
+                  "at": "2026-10-22T14:59:17.194Z",
+                  "taskId": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_88391569-0bd4-48a3-bc6d-57a5675b689f",
+                  "kind": "report",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_d3c2b483-f526-49f1-9866-777b467d79ba의 인계 H_independent20_powertoys_H1 / r32에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 보고 R1 끝]",
+                  "at": "2026-10-22T15:06:54.516Z",
+                  "taskId": "T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_e734a0d3-d3d8-41ac-aa28-4fe1742cf499",
+                  "kind": "evidence",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_d3c2b483-f526-49f1-9866-777b467d79ba의 인계 H_independent20_powertoys_H1 / r32에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 evidence 원문]\n[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다.",
+                  "at": "2026-10-22T15:06:54.516Z",
+                  "taskId": "T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                  "replyTo": null,
+                  "disposition": "provided"
+                }
+              ],
+              "bases": [
+                {
+                  "id": "D1",
+                  "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                  "status": "requested",
+                  "sourceId": "S_cee45c6a-203d-4088-bc1a-654cd6761ae3",
+                  "revision": 13,
+                  "history": []
+                },
+                {
+                  "id": "D2",
+                  "text": "사실 확인 질문: [독립 합성 질문] 자료에 없는 소유자 배선 질문\n사용자 답변: [독립 합성 답변 기록] 자동 해결 판정은 아니다.",
+                  "status": "answered",
+                  "sourceId": "S_de3dfcf9-b586-4d2d-acdb-826472ab3417",
+                  "revision": 16,
+                  "history": []
+                },
+                {
+                  "id": "D3",
+                  "text": "[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                  "status": "requested",
+                  "sourceId": "S_d6c1612a-492a-4ec8-b45b-2d4a7141899d",
+                  "revision": 28,
+                  "history": []
+                },
+                {
+                  "id": "D4",
+                  "text": "[독립20 합성 B] 수신과 다른 부분의 작업을 유지한다.",
+                  "status": "requested",
+                  "sourceId": "S_529504a5-30a8-4f43-bc81-779823912692",
+                  "revision": 46,
+                  "history": []
+                }
+              ],
+              "tasks": [
+                {
+                  "id": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "sourceIds": [
+                    "S_cee45c6a-203d-4088-bc1a-654cd6761ae3",
+                    "S_de3dfcf9-b586-4d2d-acdb-826472ab3417"
+                  ],
+                  "parentTaskId": null,
+                  "advice": {
+                    "intent": {
+                      "version": "intent.1",
+                      "relation": "start",
+                      "goal": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                      "conditions": [],
+                      "retired": [],
+                      "basisRefs": [
+                        {
+                          "basisId": "D1",
+                          "sourceId": "S_cee45c6a-203d-4088-bc1a-654cd6761ae3",
+                          "revision": 13
+                        }
+                      ]
+                    },
+                    "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                    "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                    "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                    "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+                    "question": {
+                      "kind": "fact",
+                      "text": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+                      "why": "실제 미결이 아님",
+                      "options": []
+                    },
+                    "relatedBasisIds": [
+                      "D1"
+                    ],
+                    "reviewBasisIds": [],
+                    "suggestions": []
+                  },
+                  "adviceRevision": 14,
+                  "mode": "mock",
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [
+                    {
+                      "at": "2026-10-22T11:23:16.788Z",
+                      "method": "clipboard",
+                      "revision": 13,
+                      "chars": 4619,
+                      "digest": "0148133e",
+                      "work": {
+                        "understanding": "",
+                        "scope": "",
+                        "next": "",
+                        "checks": ""
+                      },
+                      "aiExcluded": false,
+                      "legacyText": null,
+                      "returnId": "H_hierarchy_powertoys",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 12,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                        "understanding": 0,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "at": "2026-10-22T11:23:16.791Z",
+                      "method": "download",
+                      "revision": 16,
+                      "chars": 5141,
+                      "digest": "38985432",
+                      "work": {
+                        "understanding": "",
+                        "scope": "",
+                        "next": "",
+                        "checks": ""
+                      },
+                      "aiExcluded": true,
+                      "legacyText": null,
+                      "returnId": "H_independent18_powertoys",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 12,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                        "understanding": 0,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "resultFile": null,
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  },
+                  "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a"
+                },
+                {
+                  "id": "T_2393153a-75bf-491f-93e0-108222a14b48",
+                  "sourceIds": [
+                    "S_d7374fd9-2aeb-4588-8333-68d65f2d497a"
+                  ],
+                  "parentTaskId": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": {
+                    "returnId": "H_independent18_powertoys",
+                    "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\"taskId\":\"T_6811f174-0320-4126-9c80-bd8771e66b34\",\"returnId\":\"H_independent18_powertoys\",\"report\":\"[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_a6d09d66-ad12-4884-99b6-f30b2960fe9a\",\"basedOn\":0,\"summary\":\"제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"changes\":[\"제출된 검색어를 기존 결과 목록 대신 선택 기준으로 쓴다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"PowerToys 공개 고정 소스 일부의 한국어 재서술 · 분석자 구성\"}}"
+                  },
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  }
+                },
+                {
+                  "id": "T_79f52464-216d-4289-a242-9d785417f142",
+                  "sourceIds": [
+                    "S_2ae4444f-c085-4466-8e6e-a6c6398edce6"
+                  ],
+                  "parentTaskId": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": {
+                    "returnId": "H_hierarchy_powertoys",
+                    "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\"taskId\":\"T_6811f174-0320-4126-9c80-bd8771e66b34\",\"returnId\":\"H_hierarchy_powertoys\",\"report\":\"[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다. [합성 늦은 반환]\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_a6d09d66-ad12-4884-99b6-f30b2960fe9a\",\"basedOn\":999,\"summary\":\"제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"changes\":[\"제출된 검색어를 기존 결과 목록 대신 선택 기준으로 쓴다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"PowerToys 공개 고정 소스 일부의 한국어 재서술 · 분석자 구성\"}}"
+                  },
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  }
+                },
+                {
+                  "id": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                  "sourceIds": [
+                    "S_d6c1612a-492a-4ec8-b45b-2d4a7141899d"
+                  ],
+                  "parentTaskId": "T_79f52464-216d-4289-a242-9d785417f142",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": "[powertoys CURRENT-A understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+                    "scope": "[powertoys CURRENT-A scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+                    "next": "[powertoys CURRENT-A next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                    "checks": "[powertoys CURRENT-A checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+                  },
+                  "suggestions": null,
+                  "handoffs": [
+                    {
+                      "at": "2026-10-22T14:59:17.188Z",
+                      "method": "download",
+                      "revision": 32,
+                      "chars": 6260,
+                      "digest": "90d6213a",
+                      "work": {
+                        "understanding": "[powertoys H1 understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+                        "scope": "[powertoys H1 scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+                        "next": "[powertoys H1 next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                        "checks": "[powertoys H1 checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+                      },
+                      "aiExcluded": false,
+                      "legacyText": null,
+                      "returnId": "H_independent20_powertoys_H1",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 27,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                        "understanding": 1,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [
+                            "T_d3c2b483-f526-49f1-9866-777b467d79ba:6c5a0e453ef132f4de730252535dd8ce91df20d409f1148c6984c00e7fcff99a"
+                          ],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "at": "2026-10-22T14:59:17.192Z",
+                      "method": "download",
+                      "revision": 37,
+                      "chars": 6260,
+                      "digest": "a0cbb709",
+                      "work": {
+                        "understanding": "[powertoys H2 understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+                        "scope": "[powertoys H2 scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+                        "next": "[powertoys H2 next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                        "checks": "[powertoys H2 checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+                      },
+                      "aiExcluded": false,
+                      "legacyText": null,
+                      "returnId": "H_independent20_powertoys_H2",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 27,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                        "understanding": 1,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [
+                            "T_d3c2b483-f526-49f1-9866-777b467d79ba:5d078ac1a0077e85c913fbd1190a0745c9f648940209f3e034921755a79837cb"
+                          ],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "resultFile": null,
+                  "background": {
+                    "version": "background.1",
+                    "revision": 27,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  },
+                  "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a"
+                },
+                {
+                  "id": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+                  "sourceIds": [
+                    "S_529504a5-30a8-4f43-bc81-779823912692"
+                  ],
+                  "parentTaskId": null,
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": "[powertoys B-understanding] 받은 A를 읽어도 이 값은 바뀌지 않는다.",
+                    "scope": "[powertoys B-scope] 받은 A를 읽어도 이 값은 바뀌지 않는다.",
+                    "next": "[powertoys B-next] 받은 A를 읽어도 이 값은 바뀌지 않는다.",
+                    "checks": "[powertoys B-checks] 받은 A를 읽어도 이 값은 바뀌지 않는다."
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": null,
+                  "background": {
+                    "version": "background.1",
+                    "revision": 45,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                      "name": "공통 입력 훅",
+                      "note": "여러 화면을 지원하는 별도 공통 부분이다."
+                    }
+                  },
+                  "areaId": "A_869f331a-1ce0-4189-be06-1d82a738327b"
+                },
+                {
+                  "id": "T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                  "sourceIds": [
+                    "S_88391569-0bd4-48a3-bc6d-57a5675b689f",
+                    "S_e734a0d3-d3d8-41ac-aa28-4fe1742cf499"
+                  ],
+                  "parentTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": {
+                    "returnId": "H_independent20_powertoys_H1",
+                    "rawText": "{\n  \"schemaVersion\": \"agentflow.return.1\",\n  \"projectId\": \"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\n  \"taskId\": \"T_d3c2b483-f526-49f1-9866-777b467d79ba\",\n  \"returnId\": \"H_independent20_powertoys_H1\",\n  \"report\": \"[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 보고 R1 끝]\",\n  \"evidence\": \"[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다.\"\n}"
+                  },
+                  "background": {
+                    "version": "background.1",
+                    "revision": 27,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  }
+                }
+              ],
+              "currentTaskId": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+              "draft": "[powertoys B 미전송 초안20] 지금 작성하던 본문과 대상은 유지한다.",
+              "answerDraft": "",
+              "basisDraft": "",
+              "basisEdits": {},
+              "draftKind": "request",
+              "pending": null,
+              "notice": "결과를 작업 4에 연결했어요 · 앱 미검증. 지금 이어가던 작업 5의 요청과 범위는 그대로예요. 받은 결과는 ‘다른 작업에 도착한 결과’에서 열 수 있어요.",
+              "space": {
+                "brief": {
+                  "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "at": "2026-10-22T11:23:16.783Z",
+                  "previous": []
+                },
+                "areas": [
+                  {
+                    "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                    "name": "키 매핑 편집기",
+                    "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.783Z"
+                  },
+                  {
+                    "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                    "name": "키 검색·선택",
+                    "note": "제출한 검색어로 필터링한 키를 고른다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.783Z"
+                  },
+                  {
+                    "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "name": "검색 입력과 결과",
+                    "note": "[독립20 현재 사용자 구상] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다. 지금 구상과 과거 내보낸 작업문은 별도다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.784Z"
+                  },
+                  {
+                    "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                    "name": "녹화 종료 판단",
+                    "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.784Z"
+                  },
+                  {
+                    "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "name": "공통 입력 훅",
+                    "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.784Z"
+                  }
+                ],
+                "relations": [
+                  {
+                    "id": "L_100e93d3-5977-4518-8646-451f22061ed0",
+                    "from": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "to": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                    "kind": "flow",
+                    "note": "고정 코드의 이벤트 종류 전달"
+                  },
+                  {
+                    "id": "L_530d78d6-588a-4317-958a-cf29d1c45ee9",
+                    "from": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                    "to": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "kind": "flow",
+                    "note": "[독립 합성 직접]"
+                  },
+                  {
+                    "id": "L_e9efe62f-cdb2-46a6-bb15-f042b343f3c4",
+                    "from": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "to": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "kind": "flow",
+                    "note": "[독립 합성 숨은1]"
+                  },
+                  {
+                    "id": "L_3c8b2bc7-e824-4f01-b0e5-bff8832fc1db",
+                    "from": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                    "to": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "kind": "flow",
+                    "note": "[독립 합성 숨은2]"
+                  },
+                  {
+                    "id": "L_eb77b90b-366f-4e5c-a1e1-23f5cc6b238a",
+                    "from": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "to": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "kind": "flow",
+                    "note": "[독립 합성 반대]"
+                  },
+                  {
+                    "id": "L_d8560191-b5f7-49e4-be48-9af003f4b7a9",
+                    "from": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "to": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "kind": "needs",
+                    "note": "[독립 합성 다른종류]"
+                  },
+                  {
+                    "id": "L_b0d596a5-0814-46da-85e5-6c7b1db68826",
+                    "from": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                    "to": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "kind": "related",
+                    "note": "[독립 합성 내부]"
+                  }
+                ],
+                "draftTarget": {
+                  "area": "A_869f331a-1ce0-4189-be06-1d82a738327b"
+                },
+                "layout": {
+                  "version": "layout.1",
+                  "positions": {
+                    "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf": {
+                      "x": 40,
+                      "y": 40
+                    },
+                    "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf": {
+                      "x": 340,
+                      "y": 40
+                    },
+                    "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a": {
+                      "x": -260,
+                      "y": 40
+                    },
+                    "A_61a6763a-7e76-4a17-939e-0538f910680b": {
+                      "x": 40,
+                      "y": 240
+                    },
+                    "A_869f331a-1ce0-4189-be06-1d82a738327b": {
+                      "x": 340,
+                      "y": 240
+                    }
+                  }
+                },
+                "understanding": {
+                  "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a": {
+                    "revision": 1,
+                    "entries": [
+                      {
+                        "by": "external",
+                        "at": "2026-10-22T11:23:16.792Z",
+                        "revision": 1,
+                        "taskId": "T_2393153a-75bf-491f-93e0-108222a14b48",
+                        "returnId": "H_independent18_powertoys",
+                        "text": null,
+                        "corrects": null,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        },
+                        "held": null
+                      },
+                      {
+                        "by": "external",
+                        "at": "2026-10-22T11:23:16.794Z",
+                        "revision": null,
+                        "taskId": "T_79f52464-216d-4289-a242-9d785417f142",
+                        "returnId": "H_hierarchy_powertoys",
+                        "text": null,
+                        "corrects": null,
+                        "stamp": null,
+                        "held": "file-basis"
+                      }
+                    ]
+                  }
+                },
+                "containment": {
+                  "version": "containment.1",
+                  "parents": {
+                    "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                    "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                    "A_61a6763a-7e76-4a17-939e-0538f910680b": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf"
+                  },
+                  "revisions": {
+                    "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf": 0,
+                    "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf": 1,
+                    "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a": 2,
+                    "A_61a6763a-7e76-4a17-939e-0538f910680b": 1,
+                    "A_869f331a-1ce0-4189-be06-1d82a738327b": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "same-H-different-report-is-distinct-T",
+          "pass": true,
+          "raw": {
+            "R1": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 2821,
+              "windowMax": 2821,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 300,
+                "y": 542.8125,
+                "width": 104.25,
+                "height": 43,
+                "top": 542.8125,
+                "right": 404.25,
+                "bottom": 585.8125,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2532.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2532.625,
+                "right": 572.03125,
+                "bottom": -2501.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                "reportTaskId": "T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "R2": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 3214,
+              "windowMax": 3214,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 300,
+                "y": 542.484375,
+                "width": 104.25,
+                "height": 43,
+                "top": 542.484375,
+                "right": 404.25,
+                "bottom": 585.484375,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2925.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2925.625,
+                "right": 572.03125,
+                "bottom": -2894.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_ade523a3-1a93-4a64-9fba-0dfe8816a825",
+                "reportTaskId": "T_ade523a3-1a93-4a64-9fba-0dfe8816a825",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "newTask": {
+              "id": "T_ade523a3-1a93-4a64-9fba-0dfe8816a825",
+              "sourceIds": [
+                "S_6f3c0262-54d7-4c88-8d45-8ef0067508cd",
+                "S_bc2be0b2-dc92-4472-95fa-673b4417130a"
+              ],
+              "parentTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_independent20_powertoys_H1",
+                "rawText": "{\n  \"schemaVersion\": \"agentflow.return.1\",\n  \"projectId\": \"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\n  \"taskId\": \"T_d3c2b483-f526-49f1-9866-777b467d79ba\",\n  \"returnId\": \"H_independent20_powertoys_H1\",\n  \"report\": \"[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 같은 H1 다른 보고 R2 끝]\",\n  \"evidence\": \"[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다.\"\n}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 27,
+                "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                "area": {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "name": "검색 입력과 결과",
+                  "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "duplicate-R1-not-latest-R2",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1280,
+              720
+            ],
+            "windowY": 0,
+            "windowMax": 899,
+            "docWidth": 1280,
+            "route": "project",
+            "work": false,
+            "task": true,
+            "focus": "space-title",
+            "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+            "caller": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "contextTitle": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+              "reportTaskId": "T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "true",
+              "saveState": "saved"
+            },
+            "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+            "pointed": {
+              "reportTaskId": "T_205233fc-1510-4b1b-b67d-01d11978e7fa"
+            },
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [
+              {
+                "id": "task-return-origin",
+                "text": "← 검토 전 작업 화면으로",
+                "rect": {
+                  "x": 1041.390625,
+                  "y": 283.28125,
+                  "width": 177.609375,
+                  "height": 43,
+                  "top": 283.28125,
+                  "right": 1219,
+                  "bottom": 326.28125,
+                  "left": 1041.390625
+                }
+              }
+            ],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        },
+        {
+          "id": "explicit-pick-R2-only",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 217,
+              "windowMax": 899,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "task-report-pick-T_ade523a3-1a93-4a64-9fba-0dfe8816a825",
+              "active": "<button class=\"report-pick\" type=\"button\" id=\"task-report-pick-T_ade523a3-1a93-4a64-9fba-0dfe8816a825\" aria-pressed=\"true\"><span class=\"report-pick-title\">[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText…</span><span class=\"report-pick-meta\">작업 07 · 구현자 보고 · 미검증 · 10월 22일 15:06</span></button>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                "reportTaskId": "T_205233fc-1510-4b1b-b67d-01d11978e7fa",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "true",
+                "saveState": "saved"
+              },
+              "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+              "pointed": {
+                "reportTaskId": "T_ade523a3-1a93-4a64-9fba-0dfe8816a825"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1041.390625,
+                    "y": 66.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 66.28125,
+                    "right": 1219,
+                    "bottom": 109.28125,
+                    "left": 1041.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "changed-receipt-never-focuses-same-id-as-old-R1",
+          "pass": true,
+          "raw": {
+            "before": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 3707,
+              "windowMax": 4004,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 300,
+                "y": 69.390625,
+                "width": 104.25,
+                "height": 43,
+                "top": 69.390625,
+                "right": 404.25,
+                "bottom": 112.390625,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -3398.71875,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -3398.71875,
+                "right": 572.03125,
+                "bottom": -3367.21875,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_ade523a3-1a93-4a64-9fba-0dfe8816a825",
+                "reportTaskId": "T_ade523a3-1a93-4a64-9fba-0dfe8816a825",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "true",
+                "saveState": "saved"
+              },
+              "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "work-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1060.390625,
+                    "y": -3477.8125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": -3477.8125,
+                    "right": 1238,
+                    "bottom": -3434.8125,
+                    "left": 1060.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "after": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 3687,
+              "windowMax": 3984,
+              "docWidth": 1280,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "result-file-message",
+              "active": "<p id=\"result-file-message\" class=\"hint\" role=\"status\" tabindex=\"-1\">출발한 수신 안내가 달라져 입력 위치로 돌아왔어요. 다른 보고를 대신 고르지 않았어요.</p>",
+              "caller": {
+                "x": 300,
+                "y": 69.484375,
+                "width": 104.25,
+                "height": 43,
+                "top": 69.484375,
+                "right": 404.25,
+                "bottom": 112.484375,
+                "left": 300
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -3398.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -3398.625,
+                "right": 572.03125,
+                "bottom": -3367.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_ade523a3-1a93-4a64-9fba-0dfe8816a825",
+                "reportTaskId": "T_ade523a3-1a93-4a64-9fba-0dfe8816a825",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "true",
+                "saveState": "saved"
+              },
+              "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "message": "출발한 수신 안내가 달라져 입력 위치로 돌아왔어요. 다른 보고를 대신 고르지 않았어요."
+          }
+        },
+        {
+          "id": "actual-H2-snapshot-separate-from-current-A",
+          "pass": true,
+          "raw": {
+            "table": {
+              "understanding": "[powertoys H2 understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+              "scope": "[powertoys H2 scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+              "next": "[powertoys H2 next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+              "checks": "[powertoys H2 checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+            },
+            "current": {
+              "understanding": "[powertoys CURRENT-A understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+              "scope": "[powertoys CURRENT-A scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+              "next": "[powertoys CURRENT-A next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+              "checks": "[powertoys CURRENT-A checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "legacy",
+      "checks": [
+        {
+          "id": "pasted-legacy-missing-snapshot-stated-no-current-substitute",
+          "pass": true,
+          "raw": {
+            "text": "이 결과를 요청할 때 내보낸 작업문\n\n이 보고에는 정확한 내보내기 작업문 사본이 없어요. 현재 작업문으로 대신하지 않았어요.",
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 871,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>이 결과를 요청할 때 내보낸 작업문</summary>",
+              "caller": null,
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": null,
+              "receiptStatus": null,
+              "pointed": {
+                "reportTaskId": "T_60a3ae13-1927-40d4-9612-86925fd29e87"
+              },
+              "open": [
+                "project-management",
+                "task-report-export-work",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 출발한 지도 보기로 · 전체 공간 · 검색 입력과 결과 정보",
+                  "rect": {
+                    "x": 844.296875,
+                    "y": 283.28125,
+                    "width": 374.703125,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1219,
+                    "bottom": 326.28125,
+                    "left": 844.296875
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "archived",
+      "checks": [
+        {
+          "id": "archived-exact-report-and-history-no-active-substitute",
+          "pass": true,
+          "raw": {
+            "idea": "지금의 영역 구상 · 검색 입력과 결과 (보관됨)\n\n[독립20 현재 사용자 구상] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다. 지금 구상과 과거 내보낸 작업문은 별도다.\n\n이 요청을 쓸 때의 구상 사본과 달라요. 당시 사본은 아래 배경에 그대로 있어요.\n\n전달 기록에서 정리한 설명 · 앱 미검증\n\n구상·조건 또는 포함 맥락의 참고 기준이 바뀌어 이전 설명은 현재 설명으로 쓰지 않아요.\n\n근거 보기\n이전 설명 · 반영하지 않은 정리",
+            "next": "보관된 영역이라 여기서 새 요청을 쓰지 않아요. 영역을 되살리면 쓸 수 있어요.",
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 1183,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>이 결과를 요청할 때 내보낸 작업문</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_e2418c0b-0c18-4c88-91e6-5bdeed2c8f24",
+                "reportTaskId": "T_e2418c0b-0c18-4c88-91e6-5bdeed2c8f24",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_e2418c0b-0c18-4c88-91e6-5bdeed2c8f24"
+              },
+              "open": [
+                "project-management",
+                "task-report-export-work",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1041.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1219,
+                    "bottom": 326.28125,
+                    "left": 1041.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "scenario": "held",
+      "checks": [
+        {
+          "id": "held-description-report-readable-not-applied",
+          "pass": true,
+          "raw": {
+            "entry": {
+              "by": "external",
+              "at": "2026-10-22T15:07:06.017Z",
+              "revision": null,
+              "taskId": "T_17824dee-1b96-4e64-90ed-c78e6b49f58a",
+              "returnId": "H_independent20_powertoys_H1",
+              "text": null,
+              "corrects": null,
+              "stamp": null,
+              "held": "area-mismatch"
+            },
+            "snapshot": {
+              "viewport": [
+                1280,
+                720
+              ],
+              "windowY": 0,
+              "windowMax": 871,
+              "docWidth": 1280,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "space-title",
+              "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_17824dee-1b96-4e64-90ed-c78e6b49f58a",
+                "reportTaskId": "T_17824dee-1b96-4e64-90ed-c78e6b49f58a",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_17824dee-1b96-4e64-90ed-c78e6b49f58a"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1041.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1219,
+                    "bottom": 326.28125,
+                    "left": 1041.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "text": "고른 보고 · 작업 06 · 10월 22일 15:07 · 외부 원문 · 앱 미검증\n\n설명은 현재 기준에 적용하지 않았어요.\n\n이 보고의 정리 설명\n\n구현자 보고\n\n[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 보고 R1 끝]\n\n관찰·검사 자료\n\n[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다.\n이 결과를 요청할 때 내보낸 작업문\n연결 경로 보기 · 이 요청에 바로 연결된 보고"
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "same-H-and-origin-change",
+      "checks": [
+        {
+          "id": "exact-duplicate-keeps-full-project-and-original-T",
+          "pass": true,
+          "raw": {
+            "originalReceipt": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 2641,
+              "windowMax": 2641,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 380,
+                "y": 722.8125,
+                "width": 104.25,
+                "height": 43,
+                "top": 722.8125,
+                "right": 484.25,
+                "bottom": 765.8125,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2352.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2352.625,
+                "right": 572.03125,
+                "bottom": -2321.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_f69974bd-b352-4662-bfac-58146376259b",
+                "reportTaskId": "T_f69974bd-b352-4662-bfac-58146376259b",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "duplicateReceipt": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 3115,
+              "windowMax": 3412,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 380,
+                "y": 248.8125,
+                "width": 104.25,
+                "height": 43,
+                "top": 248.8125,
+                "right": 484.25,
+                "bottom": 291.8125,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2826.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2826.625,
+                "right": 572.03125,
+                "bottom": -2795.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_f69974bd-b352-4662-bfac-58146376259b",
+                "reportTaskId": "T_f69974bd-b352-4662-bfac-58146376259b",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "true",
+                "saveState": "saved"
+              },
+              "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "state": {
+              "schemaVersion": "idea015.project.7",
+              "id": "P_1facf9e3-f525-45e1-acf9-262d9a9dd65f",
+              "revision": 53,
+              "name": "나의 프로젝트",
+              "sources": [
+                {
+                  "id": "S_cee45c6a-203d-4088-bc1a-654cd6761ae3",
+                  "kind": "request",
+                  "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                  "at": "2026-10-22T11:23:16.785Z",
+                  "taskId": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_de3dfcf9-b586-4d2d-acdb-826472ab3417",
+                  "kind": "answer",
+                  "text": "[독립 합성 답변 기록] 자동 해결 판정은 아니다.",
+                  "at": "2026-10-22T11:23:16.790Z",
+                  "taskId": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "replyTo": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_d7374fd9-2aeb-4588-8333-68d65f2d497a",
+                  "kind": "report",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_6811f174-0320-4126-9c80-bd8771e66b34의 인계 H_independent18_powertoys / r16에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.",
+                  "at": "2026-10-22T11:23:16.792Z",
+                  "taskId": "T_2393153a-75bf-491f-93e0-108222a14b48",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_2ae4444f-c085-4466-8e6e-a6c6398edce6",
+                  "kind": "report",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_6811f174-0320-4126-9c80-bd8771e66b34의 인계 H_hierarchy_powertoys / r13에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다. [합성 늦은 반환]",
+                  "at": "2026-10-22T11:23:16.794Z",
+                  "taskId": "T_79f52464-216d-4289-a242-9d785417f142",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_d6c1612a-492a-4ec8-b45b-2d4a7141899d",
+                  "kind": "request",
+                  "text": "[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                  "at": "2026-10-22T14:59:17.177Z",
+                  "taskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_529504a5-30a8-4f43-bc81-779823912692",
+                  "kind": "request",
+                  "text": "[독립20 합성 B] 수신과 다른 부분의 작업을 유지한다.",
+                  "at": "2026-10-22T14:59:17.194Z",
+                  "taskId": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_a0562858-afa5-4e75-92f3-9fc3cfa8f616",
+                  "kind": "report",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_d3c2b483-f526-49f1-9866-777b467d79ba의 인계 H_independent20_powertoys_H1 / r32에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 보고 R1 끝]",
+                  "at": "2026-10-22T15:07:08.131Z",
+                  "taskId": "T_f69974bd-b352-4662-bfac-58146376259b",
+                  "replyTo": null,
+                  "disposition": "provided"
+                },
+                {
+                  "id": "S_41df922a-8ab9-4cdb-9dd1-3549393a4bae",
+                  "kind": "evidence",
+                  "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_d3c2b483-f526-49f1-9866-777b467d79ba의 인계 H_independent20_powertoys_H1 / r32에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 evidence 원문]\n[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다.",
+                  "at": "2026-10-22T15:07:08.131Z",
+                  "taskId": "T_f69974bd-b352-4662-bfac-58146376259b",
+                  "replyTo": null,
+                  "disposition": "provided"
+                }
+              ],
+              "bases": [
+                {
+                  "id": "D1",
+                  "text": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                  "status": "requested",
+                  "sourceId": "S_cee45c6a-203d-4088-bc1a-654cd6761ae3",
+                  "revision": 13,
+                  "history": []
+                },
+                {
+                  "id": "D2",
+                  "text": "사실 확인 질문: [독립 합성 질문] 자료에 없는 소유자 배선 질문\n사용자 답변: [독립 합성 답변 기록] 자동 해결 판정은 아니다.",
+                  "status": "answered",
+                  "sourceId": "S_de3dfcf9-b586-4d2d-acdb-826472ab3417",
+                  "revision": 16,
+                  "history": []
+                },
+                {
+                  "id": "D3",
+                  "text": "[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                  "status": "requested",
+                  "sourceId": "S_d6c1612a-492a-4ec8-b45b-2d4a7141899d",
+                  "revision": 28,
+                  "history": []
+                },
+                {
+                  "id": "D4",
+                  "text": "[독립20 합성 B] 수신과 다른 부분의 작업을 유지한다.",
+                  "status": "requested",
+                  "sourceId": "S_529504a5-30a8-4f43-bc81-779823912692",
+                  "revision": 46,
+                  "history": []
+                }
+              ],
+              "tasks": [
+                {
+                  "id": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "sourceIds": [
+                    "S_cee45c6a-203d-4088-bc1a-654cd6761ae3",
+                    "S_de3dfcf9-b586-4d2d-acdb-826472ab3417"
+                  ],
+                  "parentTaskId": null,
+                  "advice": {
+                    "intent": {
+                      "version": "intent.1",
+                      "relation": "start",
+                      "goal": "[분석자 재서술 표본] 이 부분의 명시 범위만 확인한다. 조상 참고로 실행 범위를 확대하지 않는다.",
+                      "conditions": [],
+                      "retired": [],
+                      "basisRefs": [
+                        {
+                          "basisId": "D1",
+                          "sourceId": "S_cee45c6a-203d-4088-bc1a-654cd6761ae3",
+                          "revision": 13
+                        }
+                      ]
+                    },
+                    "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+                    "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+                    "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+                    "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+                    "question": {
+                      "kind": "fact",
+                      "text": "[독립 합성 질문] 자료에 없는 소유자 배선 질문",
+                      "why": "실제 미결이 아님",
+                      "options": []
+                    },
+                    "relatedBasisIds": [
+                      "D1"
+                    ],
+                    "reviewBasisIds": [],
+                    "suggestions": []
+                  },
+                  "adviceRevision": 14,
+                  "mode": "mock",
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [
+                    {
+                      "at": "2026-10-22T11:23:16.788Z",
+                      "method": "clipboard",
+                      "revision": 13,
+                      "chars": 4619,
+                      "digest": "0148133e",
+                      "work": {
+                        "understanding": "",
+                        "scope": "",
+                        "next": "",
+                        "checks": ""
+                      },
+                      "aiExcluded": false,
+                      "legacyText": null,
+                      "returnId": "H_hierarchy_powertoys",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 12,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                        "understanding": 0,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "at": "2026-10-22T11:23:16.791Z",
+                      "method": "download",
+                      "revision": 16,
+                      "chars": 5141,
+                      "digest": "38985432",
+                      "work": {
+                        "understanding": "",
+                        "scope": "",
+                        "next": "",
+                        "checks": ""
+                      },
+                      "aiExcluded": true,
+                      "legacyText": null,
+                      "returnId": "H_independent18_powertoys",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 12,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                        "understanding": 0,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "resultFile": null,
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  },
+                  "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a"
+                },
+                {
+                  "id": "T_2393153a-75bf-491f-93e0-108222a14b48",
+                  "sourceIds": [
+                    "S_d7374fd9-2aeb-4588-8333-68d65f2d497a"
+                  ],
+                  "parentTaskId": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": {
+                    "returnId": "H_independent18_powertoys",
+                    "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\"taskId\":\"T_6811f174-0320-4126-9c80-bd8771e66b34\",\"returnId\":\"H_independent18_powertoys\",\"report\":\"[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_a6d09d66-ad12-4884-99b6-f30b2960fe9a\",\"basedOn\":0,\"summary\":\"제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"changes\":[\"제출된 검색어를 기존 결과 목록 대신 선택 기준으로 쓴다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"PowerToys 공개 고정 소스 일부의 한국어 재서술 · 분석자 구성\"}}"
+                  },
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  }
+                },
+                {
+                  "id": "T_79f52464-216d-4289-a242-9d785417f142",
+                  "sourceIds": [
+                    "S_2ae4444f-c085-4466-8e6e-a6c6398edce6"
+                  ],
+                  "parentTaskId": "T_6811f174-0320-4126-9c80-bd8771e66b34",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": {
+                    "returnId": "H_hierarchy_powertoys",
+                    "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\"taskId\":\"T_6811f174-0320-4126-9c80-bd8771e66b34\",\"returnId\":\"H_hierarchy_powertoys\",\"report\":\"[고정자료 재서술] 제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다. [합성 늦은 반환]\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_a6d09d66-ad12-4884-99b6-f30b2960fe9a\",\"basedOn\":999,\"summary\":\"제출한 검색어로 목록을 동기 필터링해 선택한다. 녹화 종료 수정은 별도이며 a964 커밋이 두 리뷰 요구를 함께 다뤘다.\",\"changes\":[\"제출된 검색어를 기존 결과 목록 대신 선택 기준으로 쓴다.\"],\"proposal\":\"[합성 경계 · 실제 제안 아님] 조상 참고를 자식의 전체 구현 명령으로 바꾸자는 제안.\",\"origin\":\"PowerToys 공개 고정 소스 일부의 한국어 재서술 · 분석자 구성\"}}"
+                  },
+                  "background": {
+                    "version": "background.1",
+                    "revision": 12,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  }
+                },
+                {
+                  "id": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                  "sourceIds": [
+                    "S_d6c1612a-492a-4ec8-b45b-2d4a7141899d"
+                  ],
+                  "parentTaskId": "T_79f52464-216d-4289-a242-9d785417f142",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": "[powertoys CURRENT-A understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+                    "scope": "[powertoys CURRENT-A scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+                    "next": "[powertoys CURRENT-A next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                    "checks": "[powertoys CURRENT-A checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+                  },
+                  "suggestions": null,
+                  "handoffs": [
+                    {
+                      "at": "2026-10-22T14:59:17.188Z",
+                      "method": "download",
+                      "revision": 32,
+                      "chars": 6260,
+                      "digest": "90d6213a",
+                      "work": {
+                        "understanding": "[powertoys H1 understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+                        "scope": "[powertoys H1 scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+                        "next": "[powertoys H1 next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                        "checks": "[powertoys H1 checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+                      },
+                      "aiExcluded": false,
+                      "legacyText": null,
+                      "returnId": "H_independent20_powertoys_H1",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 27,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                        "understanding": 1,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [
+                            "T_d3c2b483-f526-49f1-9866-777b467d79ba:6c5a0e453ef132f4de730252535dd8ce91df20d409f1148c6984c00e7fcff99a"
+                          ],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "at": "2026-10-22T14:59:17.192Z",
+                      "method": "download",
+                      "revision": 37,
+                      "chars": 6260,
+                      "digest": "a0cbb709",
+                      "work": {
+                        "understanding": "[powertoys H2 understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+                        "scope": "[powertoys H2 scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+                        "next": "[powertoys H2 next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+                        "checks": "[powertoys H2 checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+                      },
+                      "aiExcluded": false,
+                      "legacyText": null,
+                      "returnId": "H_independent20_powertoys_H2",
+                      "background": {
+                        "version": "background.1",
+                        "revision": 27,
+                        "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                        "area": {
+                          "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                        }
+                      },
+                      "anchor": {
+                        "version": "anchor.2",
+                        "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                        "understanding": 1,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [
+                            "T_d3c2b483-f526-49f1-9866-777b467d79ba:5d078ac1a0077e85c913fbd1190a0745c9f648940209f3e034921755a79837cb"
+                          ],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "resultFile": null,
+                  "background": {
+                    "version": "background.1",
+                    "revision": 27,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  },
+                  "areaId": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a"
+                },
+                {
+                  "id": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+                  "sourceIds": [
+                    "S_529504a5-30a8-4f43-bc81-779823912692"
+                  ],
+                  "parentTaskId": null,
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": "[powertoys B-understanding] 받은 A를 읽어도 이 값은 바뀌지 않는다.",
+                    "scope": "[powertoys B-scope] 받은 A를 읽어도 이 값은 바뀌지 않는다.",
+                    "next": "[powertoys B-next] 받은 A를 읽어도 이 값은 바뀌지 않는다.",
+                    "checks": "[powertoys B-checks] 받은 A를 읽어도 이 값은 바뀌지 않는다."
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": null,
+                  "background": {
+                    "version": "background.1",
+                    "revision": 45,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                      "name": "공통 입력 훅",
+                      "note": "여러 화면을 지원하는 별도 공통 부분이다."
+                    }
+                  },
+                  "areaId": "A_869f331a-1ce0-4189-be06-1d82a738327b"
+                },
+                {
+                  "id": "T_f69974bd-b352-4662-bfac-58146376259b",
+                  "sourceIds": [
+                    "S_a0562858-afa5-4e75-92f3-9fc3cfa8f616",
+                    "S_41df922a-8ab9-4cdb-9dd1-3549393a4bae"
+                  ],
+                  "parentTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                  "advice": null,
+                  "adviceRevision": null,
+                  "mode": null,
+                  "manual": {
+                    "understanding": null,
+                    "scope": null,
+                    "next": null,
+                    "checks": null
+                  },
+                  "suggestions": null,
+                  "handoffs": [],
+                  "resultFile": {
+                    "returnId": "H_independent20_powertoys_H1",
+                    "rawText": "{\n  \"schemaVersion\": \"agentflow.return.1\",\n  \"projectId\": \"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\n  \"taskId\": \"T_d3c2b483-f526-49f1-9866-777b467d79ba\",\n  \"returnId\": \"H_independent20_powertoys_H1\",\n  \"report\": \"[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 보고 R1 끝]\",\n  \"evidence\": \"[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다.\"\n}"
+                  },
+                  "background": {
+                    "version": "background.1",
+                    "revision": 27,
+                    "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                    "area": {
+                      "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                      "name": "검색 입력과 결과",
+                      "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                    }
+                  }
+                }
+              ],
+              "currentTaskId": "T_ac3f76f5-1e03-496c-ab06-bf93f13767a4",
+              "draft": "[powertoys B 미전송 초안20] 지금 작성하던 본문과 대상은 유지한다.",
+              "answerDraft": "",
+              "basisDraft": "",
+              "basisEdits": {},
+              "draftKind": "request",
+              "pending": null,
+              "notice": "결과를 작업 4에 연결했어요 · 앱 미검증. 지금 이어가던 작업 5의 요청과 범위는 그대로예요. 받은 결과는 ‘다른 작업에 도착한 결과’에서 열 수 있어요.",
+              "space": {
+                "brief": {
+                  "text": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                  "at": "2026-10-22T11:23:16.783Z",
+                  "previous": []
+                },
+                "areas": [
+                  {
+                    "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                    "name": "키 매핑 편집기",
+                    "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.783Z"
+                  },
+                  {
+                    "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                    "name": "키 검색·선택",
+                    "note": "제출한 검색어로 필터링한 키를 고른다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.783Z"
+                  },
+                  {
+                    "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "name": "검색 입력과 결과",
+                    "note": "[독립20 현재 사용자 구상] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다. 지금 구상과 과거 내보낸 작업문은 별도다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.784Z"
+                  },
+                  {
+                    "id": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                    "name": "녹화 종료 판단",
+                    "note": "Tab 누름만 녹화를 종료하고 정상 key-up 처리는 보존한다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.784Z"
+                  },
+                  {
+                    "id": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "name": "공통 입력 훅",
+                    "note": "여러 화면을 지원하는 별도 공통 부분이다.",
+                    "archived": false,
+                    "createdAt": "2026-10-22T11:23:16.784Z"
+                  }
+                ],
+                "relations": [
+                  {
+                    "id": "L_100e93d3-5977-4518-8646-451f22061ed0",
+                    "from": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "to": "A_61a6763a-7e76-4a17-939e-0538f910680b",
+                    "kind": "flow",
+                    "note": "고정 코드의 이벤트 종류 전달"
+                  },
+                  {
+                    "id": "L_530d78d6-588a-4317-958a-cf29d1c45ee9",
+                    "from": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                    "to": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "kind": "flow",
+                    "note": "[독립 합성 직접]"
+                  },
+                  {
+                    "id": "L_e9efe62f-cdb2-46a6-bb15-f042b343f3c4",
+                    "from": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "to": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "kind": "flow",
+                    "note": "[독립 합성 숨은1]"
+                  },
+                  {
+                    "id": "L_3c8b2bc7-e824-4f01-b0e5-bff8832fc1db",
+                    "from": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                    "to": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "kind": "flow",
+                    "note": "[독립 합성 숨은2]"
+                  },
+                  {
+                    "id": "L_eb77b90b-366f-4e5c-a1e1-23f5cc6b238a",
+                    "from": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "to": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "kind": "flow",
+                    "note": "[독립 합성 반대]"
+                  },
+                  {
+                    "id": "L_d8560191-b5f7-49e4-be48-9af003f4b7a9",
+                    "from": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "to": "A_869f331a-1ce0-4189-be06-1d82a738327b",
+                    "kind": "needs",
+                    "note": "[독립 합성 다른종류]"
+                  },
+                  {
+                    "id": "L_b0d596a5-0814-46da-85e5-6c7b1db68826",
+                    "from": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                    "to": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                    "kind": "related",
+                    "note": "[독립 합성 내부]"
+                  }
+                ],
+                "draftTarget": {
+                  "area": "A_869f331a-1ce0-4189-be06-1d82a738327b"
+                },
+                "layout": {
+                  "version": "layout.1",
+                  "positions": {
+                    "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf": {
+                      "x": 40,
+                      "y": 40
+                    },
+                    "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf": {
+                      "x": 340,
+                      "y": 40
+                    },
+                    "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a": {
+                      "x": -260,
+                      "y": 40
+                    },
+                    "A_61a6763a-7e76-4a17-939e-0538f910680b": {
+                      "x": 40,
+                      "y": 240
+                    },
+                    "A_869f331a-1ce0-4189-be06-1d82a738327b": {
+                      "x": 340,
+                      "y": 240
+                    }
+                  }
+                },
+                "understanding": {
+                  "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a": {
+                    "revision": 1,
+                    "entries": [
+                      {
+                        "by": "external",
+                        "at": "2026-10-22T11:23:16.792Z",
+                        "revision": 1,
+                        "taskId": "T_2393153a-75bf-491f-93e0-108222a14b48",
+                        "returnId": "H_independent18_powertoys",
+                        "text": null,
+                        "corrects": null,
+                        "stamp": {
+                          "name": "검색 입력과 결과",
+                          "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다.",
+                          "brief": 1,
+                          "decisions": [
+                            "D2@16"
+                          ],
+                          "work": [],
+                          "version": "plan.2",
+                          "revision": 1,
+                          "ancestors": [
+                            {
+                              "id": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                              "name": "키 매핑 편집기",
+                              "note": "검색·선택과 녹화 종료를 다른 동작으로 다룬다.",
+                              "revision": 0
+                            },
+                            {
+                              "id": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                              "name": "키 검색·선택",
+                              "note": "제출한 검색어로 필터링한 키를 고른다.",
+                              "revision": 1
+                            }
+                          ]
+                        },
+                        "held": null
+                      },
+                      {
+                        "by": "external",
+                        "at": "2026-10-22T11:23:16.794Z",
+                        "revision": null,
+                        "taskId": "T_79f52464-216d-4289-a242-9d785417f142",
+                        "returnId": "H_hierarchy_powertoys",
+                        "text": null,
+                        "corrects": null,
+                        "stamp": null,
+                        "held": "file-basis"
+                      }
+                    ]
+                  }
+                },
+                "containment": {
+                  "version": "containment.1",
+                  "parents": {
+                    "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf",
+                    "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a": "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf",
+                    "A_61a6763a-7e76-4a17-939e-0538f910680b": "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf"
+                  },
+                  "revisions": {
+                    "A_373f8b06-f6e0-491a-adce-8aeb4e4499bf": 0,
+                    "A_ad3e5968-1cef-456a-b2c7-fa007a8c1cdf": 1,
+                    "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a": 2,
+                    "A_61a6763a-7e76-4a17-939e-0538f910680b": 1,
+                    "A_869f331a-1ce0-4189-be06-1d82a738327b": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "same-H-different-report-is-distinct-T",
+          "pass": true,
+          "raw": {
+            "R1": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 2641,
+              "windowMax": 2641,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 380,
+                "y": 722.8125,
+                "width": 104.25,
+                "height": 43,
+                "top": 722.8125,
+                "right": 484.25,
+                "bottom": 765.8125,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2352.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2352.625,
+                "right": 572.03125,
+                "bottom": -2321.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_f69974bd-b352-4662-bfac-58146376259b",
+                "reportTaskId": "T_f69974bd-b352-4662-bfac-58146376259b",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "R2": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 3034,
+              "windowMax": 3034,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 380,
+                "y": 722.484375,
+                "width": 104.25,
+                "height": 43,
+                "top": 722.484375,
+                "right": 484.25,
+                "bottom": 765.484375,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -2745.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -2745.625,
+                "right": 572.03125,
+                "bottom": -2714.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_7cb55311-edd4-4589-af5f-a797364e6fff",
+                "reportTaskId": "T_7cb55311-edd4-4589-af5f-a797364e6fff",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "newTask": {
+              "id": "T_7cb55311-edd4-4589-af5f-a797364e6fff",
+              "sourceIds": [
+                "S_1b9285d4-4d6c-4940-8c9d-3a33f38cf511",
+                "S_37c7780c-48fd-41db-8d08-97b5116ab2d2"
+              ],
+              "parentTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_independent20_powertoys_H1",
+                "rawText": "{\n  \"schemaVersion\": \"agentflow.return.1\",\n  \"projectId\": \"P_1facf9e3-f525-45e1-acf9-262d9a9dd65f\",\n  \"taskId\": \"T_d3c2b483-f526-49f1-9866-777b467d79ba\",\n  \"returnId\": \"H_independent20_powertoys_H1\",\n  \"report\": \"[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 같은 H1 다른 보고 R2 끝]\",\n  \"evidence\": \"[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다.\"\n}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 27,
+                "brief": "PowerToys 키 매핑 편집기의 제한된 구성 재서술",
+                "area": {
+                  "id": "A_a6d09d66-ad12-4884-99b6-f30b2960fe9a",
+                  "name": "검색 입력과 결과",
+                  "note": "검색 입력과 결과목록은 KeyDropDownButton 내부의 사용자 대면 구성이다."
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "duplicate-R1-not-latest-R2",
+          "pass": true,
+          "raw": {
+            "viewport": [
+              1440,
+              900
+            ],
+            "windowY": 0,
+            "windowMax": 631,
+            "docWidth": 1440,
+            "route": "project",
+            "work": false,
+            "task": true,
+            "focus": "space-title",
+            "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+            "caller": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "contextTitle": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0,
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            },
+            "receipt": {
+              "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_f69974bd-b352-4662-bfac-58146376259b",
+              "reportTaskId": "T_f69974bd-b352-4662-bfac-58146376259b",
+              "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+              "handoffId": "H_independent20_powertoys_H1",
+              "duplicate": "true",
+              "saveState": "saved"
+            },
+            "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+            "pointed": {
+              "reportTaskId": "T_f69974bd-b352-4662-bfac-58146376259b"
+            },
+            "open": [
+              "project-management",
+              "compose-panel",
+              "result-file-panel",
+              "history"
+            ],
+            "returnControls": [
+              {
+                "id": "task-return-origin",
+                "text": "← 검토 전 작업 화면으로",
+                "rect": {
+                  "x": 1201.390625,
+                  "y": 283.28125,
+                  "width": 177.609375,
+                  "height": 43,
+                  "top": 283.28125,
+                  "right": 1379,
+                  "bottom": 326.28125,
+                  "left": 1201.390625
+                }
+              }
+            ],
+            "saving": null,
+            "saved": "이 브라우저에 저장됨",
+            "storageError": null
+          }
+        },
+        {
+          "id": "explicit-pick-R2-only",
+          "pass": true,
+          "raw": {
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 15,
+              "windowMax": 631,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "task-report-pick-T_7cb55311-edd4-4589-af5f-a797364e6fff",
+              "active": "<button class=\"report-pick\" type=\"button\" id=\"task-report-pick-T_7cb55311-edd4-4589-af5f-a797364e6fff\" aria-pressed=\"true\"><span class=\"report-pick-title\">[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText…</span><span class=\"report-pick-meta\">작업 07 · 구현자 보고 · 미검증 · 10월 22일 15:07</span></button>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_f69974bd-b352-4662-bfac-58146376259b",
+                "reportTaskId": "T_f69974bd-b352-4662-bfac-58146376259b",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "true",
+                "saveState": "saved"
+              },
+              "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+              "pointed": {
+                "reportTaskId": "T_7cb55311-edd4-4589-af5f-a797364e6fff"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1201.390625,
+                    "y": 268.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 268.28125,
+                    "right": 1379,
+                    "bottom": 311.28125,
+                    "left": 1201.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        },
+        {
+          "id": "changed-receipt-never-focuses-same-id-as-old-R1",
+          "pass": true,
+          "raw": {
+            "before": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 3527,
+              "windowMax": 3824,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "",
+              "active": "<body data-route=\"project\" data-starting=\"false\" data-compact=\"true\" data-layer=\"work\" data-map-header=\"false\">\n  <a href=\"#main\" class=\"skip-link\">현재 작업으로 건너뛰기</a>\n  <div class=\"app-shell\">\n    <aside class=\"sidebar\" aria-label=\"작업 공간 탐색\">\n      <a class=\"brand\" href=\"./\" aria-label=\"AgentFlow Studio 홈\"><span class=\"brand-mark\" aria-hidden=\"true\"><svg viewBox=\"0 0 32 32\"><path d=\"M9 23 16 8l7 15M12 18h8\"></path><circle cx=\"9\" cy=\"23\" r=\"2\"></circle><circle cx=\"16\" cy=\"8\" r=\"2\"></circle><circle cx=\"23\" cy=\"23\" r=\"2\"></circle></svg></span><span>AgentFlow<small>STUDIO</small></span></a>\n      <d",
+              "caller": {
+                "x": 380,
+                "y": 249.390625,
+                "width": 104.25,
+                "height": 43,
+                "top": 249.390625,
+                "right": 484.25,
+                "bottom": 292.390625,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -3218.71875,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -3218.71875,
+                "right": 572.03125,
+                "bottom": -3187.21875,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_7cb55311-edd4-4589-af5f-a797364e6fff",
+                "reportTaskId": "T_7cb55311-edd4-4589-af5f-a797364e6fff",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "true",
+                "saveState": "saved"
+              },
+              "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "work-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1220.390625,
+                    "y": -3297.8125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": -3297.8125,
+                    "right": 1398,
+                    "bottom": -3254.8125,
+                    "left": 1220.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "after": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 3507,
+              "windowMax": 3804,
+              "docWidth": 1440,
+              "route": "project",
+              "work": true,
+              "task": false,
+              "focus": "result-file-message",
+              "active": "<p id=\"result-file-message\" class=\"hint\" role=\"status\" tabindex=\"-1\">출발한 수신 안내가 달라져 입력 위치로 돌아왔어요. 다른 보고를 대신 고르지 않았어요.</p>",
+              "caller": {
+                "x": 380,
+                "y": 249.484375,
+                "width": 104.25,
+                "height": 43,
+                "top": 249.484375,
+                "right": 484.25,
+                "bottom": 292.484375,
+                "left": 380
+              },
+              "contextTitle": {
+                "x": 264,
+                "y": -3218.625,
+                "width": 308.03125,
+                "height": 31.5,
+                "top": -3218.625,
+                "right": 572.03125,
+                "bottom": -3187.125,
+                "left": 264
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_7cb55311-edd4-4589-af5f-a797364e6fff",
+                "reportTaskId": "T_7cb55311-edd4-4589-af5f-a797364e6fff",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "true",
+                "saveState": "saved"
+              },
+              "receiptStatus": "이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.",
+              "pointed": null,
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "message": "출발한 수신 안내가 달라져 입력 위치로 돌아왔어요. 다른 보고를 대신 고르지 않았어요."
+          }
+        },
+        {
+          "id": "actual-H2-snapshot-separate-from-current-A",
+          "pass": true,
+          "raw": {
+            "table": {
+              "understanding": "[powertoys H2 understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+              "scope": "[powertoys H2 scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+              "next": "[powertoys H2 next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+              "checks": "[powertoys H2 checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+            },
+            "current": {
+              "understanding": "[powertoys CURRENT-A understanding] 검색·선택은 Enter로 제출한 검색어를 바로 필터링해 첫 결과를 고른다. 녹화 종료와 공통 입력 훅은 별도 부분이며, 이 설명은 코드 수정 기록을 정리한 것이다.",
+              "scope": "[powertoys CURRENT-A scope] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다.",
+              "next": "[powertoys CURRENT-A next] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지 조건도 보존한다.",
+              "checks": "[powertoys CURRENT-A checks] 정확 대상과 원문을 확인하며 실제 실행·승인을 주장하지 않는다."
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "legacy",
+      "checks": [
+        {
+          "id": "pasted-legacy-missing-snapshot-stated-no-current-substitute",
+          "pass": true,
+          "raw": {
+            "text": "이 결과를 요청할 때 내보낸 작업문\n\n이 보고에는 정확한 내보내기 작업문 사본이 없어요. 현재 작업문으로 대신하지 않았어요.",
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 603,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>이 결과를 요청할 때 내보낸 작업문</summary>",
+              "caller": null,
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": null,
+              "receiptStatus": null,
+              "pointed": {
+                "reportTaskId": "T_60a3ae13-1927-40d4-9612-86925fd29e87"
+              },
+              "open": [
+                "project-management",
+                "task-report-export-work",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 출발한 지도 보기로 · 전체 공간 · 검색 입력과 결과 정보",
+                  "rect": {
+                    "x": 1004.296875,
+                    "y": 283.28125,
+                    "width": 374.703125,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1379,
+                    "bottom": 326.28125,
+                    "left": 1004.296875
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "archived",
+      "checks": [
+        {
+          "id": "archived-exact-report-and-history-no-active-substitute",
+          "pass": true,
+          "raw": {
+            "idea": "지금의 영역 구상 · 검색 입력과 결과 (보관됨)\n\n[독립20 현재 사용자 구상] Enter를 누르면 제출한 검색어로 선택한다. 녹화 종료는 Tab 누름으로만 판단하고 정상 key-up 처리는 유지한다. 지금 구상과 과거 내보낸 작업문은 별도다.\n\n이 요청을 쓸 때의 구상 사본과 달라요. 당시 사본은 아래 배경에 그대로 있어요.\n\n전달 기록에서 정리한 설명 · 앱 미검증\n\n구상·조건 또는 포함 맥락의 참고 기준이 바뀌어 이전 설명은 현재 설명으로 쓰지 않아요.\n\n근거 보기\n이전 설명 · 반영하지 않은 정리",
+            "next": "보관된 영역이라 여기서 새 요청을 쓰지 않아요. 영역을 되살리면 쓸 수 있어요.",
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 959,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "",
+              "active": "<summary>이 결과를 요청할 때 내보낸 작업문</summary>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_c62bd190-c74a-479e-9948-13cd5c23c8f7",
+                "reportTaskId": "T_c62bd190-c74a-479e-9948-13cd5c23c8f7",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_c62bd190-c74a-479e-9948-13cd5c23c8f7"
+              },
+              "open": [
+                "project-management",
+                "task-report-export-work",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1201.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1379,
+                    "bottom": 326.28125,
+                    "left": 1201.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            }
+          }
+        }
+      ],
+      "pageerrors": []
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "scenario": "held",
+      "checks": [
+        {
+          "id": "held-description-report-readable-not-applied",
+          "pass": true,
+          "raw": {
+            "entry": {
+              "by": "external",
+              "at": "2026-10-22T15:07:20.532Z",
+              "revision": null,
+              "taskId": "T_7b55040d-f20f-4a49-9ff3-31dd8fe9d3b5",
+              "returnId": "H_independent20_powertoys_H1",
+              "text": null,
+              "corrects": null,
+              "stamp": null,
+              "held": "area-mismatch"
+            },
+            "snapshot": {
+              "viewport": [
+                1440,
+                900
+              ],
+              "windowY": 0,
+              "windowMax": 603,
+              "docWidth": 1440,
+              "route": "project",
+              "work": false,
+              "task": true,
+              "focus": "space-title",
+              "active": "<h1 id=\"space-title\" tabindex=\"-1\">[독립20 합성 A · 재서술 범위] [표본 재서술] 제출한 검색어로 키를 고르는 동작을 확인한다. 녹화 종료의 별도 유지…</h1>",
+              "caller": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "contextTitle": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              },
+              "receipt": {
+                "receiptKey": "2:P_1facf9e3-f525-45e1-acf9-262d9a9dd65f:T_7b55040d-f20f-4a49-9ff3-31dd8fe9d3b5",
+                "reportTaskId": "T_7b55040d-f20f-4a49-9ff3-31dd8fe9d3b5",
+                "requestTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "exportTaskId": "T_d3c2b483-f526-49f1-9866-777b467d79ba",
+                "handoffId": "H_independent20_powertoys_H1",
+                "duplicate": "false",
+                "saveState": "saved"
+              },
+              "receiptStatus": "보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증",
+              "pointed": {
+                "reportTaskId": "T_7b55040d-f20f-4a49-9ff3-31dd8fe9d3b5"
+              },
+              "open": [
+                "project-management",
+                "compose-panel",
+                "result-file-panel",
+                "history"
+              ],
+              "returnControls": [
+                {
+                  "id": "task-return-origin",
+                  "text": "← 검토 전 작업 화면으로",
+                  "rect": {
+                    "x": 1201.390625,
+                    "y": 283.28125,
+                    "width": 177.609375,
+                    "height": 43,
+                    "top": 283.28125,
+                    "right": 1379,
+                    "bottom": 326.28125,
+                    "left": 1201.390625
+                  }
+                }
+              ],
+              "saving": null,
+              "saved": "이 브라우저에 저장됨",
+              "storageError": null
+            },
+            "text": "고른 보고 · 작업 06 · 10월 22일 15:07 · 외부 원문 · 앱 미검증\n\n설명은 현재 기준에 적용하지 않았어요.\n\n이 보고의 정리 설명\n\n구현자 보고\n\n[공개 고정 코드의 재서술 · 실제 실행 미검증] a964f08은 QuerySubmitted에서 args.QueryText를 FilterKeyList로 전달한다. 녹화 종료에는 isKeyDown 조건을 추가하고 공통 훅은 이벤트 종류를 전달한다. 두 별도 리뷰 요구를 같은 수정에서 다뤘다. [독립20 보고 R1 끝]\n\n관찰·검사 자료\n\n[독립20 합성 관찰] 외부 실행 결과·수용을 검증한 자료가 아니다.\n이 결과를 요청할 때 내보낸 작업문\n연결 경로 보기 · 이 요청에 바로 연결된 보고"
+          }
+        }
+      ],
+      "pageerrors": []
+    }
+  ],
+  "exit": 0
+}
