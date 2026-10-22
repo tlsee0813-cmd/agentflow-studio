@@ -1,0 +1,43 @@
+{
+  "kind": "cycle19 status-only feedback height refresh fix1",
+  "source": "app/continuity/src/client/app.ts",
+  "beforeSha256": "C9DF96891429CE72B25B02684248828CE0C3D918ED7A6AAE61BF5F4C9BE5DDBB",
+  "afterSha256": "C3A8E77A96E58758D62EC6819CB902E9F9762362C48A9D60E22CEE00AF15773D",
+  "bytes": 250194,
+  "delta": "Exactly four added lines against C9DF; inverse-delta SHA verified in memory, no prior source file reconstructed",
+  "cause": "Native project-name input clears import notice through commit(rename,false) and renderStatus; old inline map height persisted until another render",
+  "observedByParentCloud": {
+    "closedHeight1280": 411.515625,
+    "difference": 67.59375,
+    "closedY": 224.890625,
+    "closedHeight1440": 591.515625,
+    "afterRecordsHeight1440": 659.109375,
+    "afterRecordsHeight1280": 479.109375
+  },
+  "behavior": "After renderStatus finishes DOM status updates, call existing sizeWorkspace only for a displayed PC whole-map view",
+  "guards": [
+    "route not projects",
+    "view space",
+    "PC width greater than760",
+    "displayed body layer space",
+    "space-view not hidden",
+    "map has client rects"
+  ],
+  "preserved": [
+    "No render, camera fit or current-task change",
+    "No panel reading capture, restore or memo serialization",
+    "No new observer or timer; no renderStatus recursion through sizeWorkspace",
+    "Existing render final size and Origin restoration order unchanged",
+    "Test03 details toggle path unchanged"
+  ],
+  "checks": {
+    "source_diff": 0,
+    "build": 0,
+    "exact_four_line_delta_to_C9DF": true,
+    "type_syntax_boundary": 0
+  },
+  "runtime": "Node24.19 author auxiliary; existing locked TypeScript5.8.3",
+  "browser": "NOT_RUN; Cloud before observations supplied by parent, corrected geometry and scroll clamping still require independent exact-candidate execution",
+  "unrelatedFiles": "CSS F97F and HTML190C unchanged; tests untouched",
+  "test03": "UNRESOLVED independently: native details toggle timing vs viewport/notice state requires raw diagnostic; no assertion relaxation"
+}

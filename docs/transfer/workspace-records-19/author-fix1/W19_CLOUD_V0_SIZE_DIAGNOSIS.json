@@ -1,0 +1,47 @@
+{
+  "scope": "Read-only static diagnosis after Cloud v0 9fb83ef5 failures; product/tests unchanged; no browser/server run",
+  "inspectedProduct": {
+    "appSha256": "C9DF96891429CE72B25B02684248828CE0C3D918ED7A6AAE61BF5F4C9BE5DDBB",
+    "path": "app/continuity/src/client/app.ts"
+  },
+  "cloudObservationsProvidedByRoot": {
+    "test01": {
+      "mapTopClosedAndOpen": 224.890625,
+      "1280x720": {"closedHeight":411.515625,"openHeight":479.109375},
+      "1440x900": {"closedHeight":591.515625,"openHeight":659.109375},
+      "openRemainedStableAtMs":[100,300,700]
+    },
+    "test03": "Immediate map40% assertion after brief-edit close failed at1440; later diagnostic had brief=false and mapheight591.515625. Separate purpose-dialog roundtrip passed."
+  },
+  "test01Finding": {
+    "classification": "Product stale explicit workspace height after notice clear; not evidence of delayed eventual sizing",
+    "arithmetic": [
+      "720 - 224.890625 - 16 = 479.109375, exactly open mapheight",
+      "900 - 224.890625 - 16 = 659.109375, exactly open mapheight",
+      "Both closed heights are67.59375 smaller; equivalently sized at previous top292.484375"
+    ],
+    "sourceEvidence": [
+      "domain.ts17,20: rename uses change(), setting notice:null",
+      "app.ts2261: project-name input calls commit(rename(project,value),false)",
+      "app.ts265: commit false calls renderStatus(), without render()",
+      "app.ts462-464: renderStatus updates notice.hidden/storage-error.hidden but does not call sizeWorkspace()",
+      "app.ts244: save-finally also calls only renderStatus()",
+      "app.ts1281-1288: explicit height calculated from current layout top; listeners only window resize or details toggle in space-view outside area-panel; no ResizeObserver or requestAnimationFrame scheduling",
+      "app.ts1698: openRecords calls render(); app.ts2232 recomputes sizeWorkspace()",
+      "workspace19_browser.py112-114: native name input clears notice, waits persistence then measures closed geometry; browser.py28-34 saved() only awaits saving flag"
+    ],
+    "inferenceLimit": "Previous notice height67.59375 is inferred from exact residual difference; no new browser measurement of the notice was performed here.",
+    "testJudgment": "Preserve closed/open height assertion. More sleeping cannot supply an absent sizing call. Do not open records before closed baseline to repair the product on its behalf. load() itself navigates through render; the relevant unsized mutation is the later inline name edit."
+  },
+  "test03Finding": {
+    "classification": "Likely native details-toggle readiness gap; distinct from test01 permanent stale path",
+    "sourceEvidence": [
+      "workspace19_browser.py41-43 disclosure() reads details.open and clicks summary; no wait for toggle-handler sizing completion",
+      "app.ts1288 captures native details toggle outside area-panel and synchronously calls sizeWorkspace() when that queued event is delivered",
+      "app.ts1284 sets minimum240px while an explicitly open purpose editor reduces remaining viewport"
+    ],
+    "inferenceLimit": "Static code plus later recovered geometry are consistent with the first measurement preceding queued toggle processing, but the original failure did not directly record listener delivery. No new browser execution was performed.",
+    "readinessCandidateNotImplemented": "Bounded poll of expected details.open=false plus actual layout.style.height matching its currently measured top and viewport remaining-space formula. This observes completed sizing, not an arbitrary sleep; existing map visibility/hit assertions must remain. The same condition should time out on uncorrected test01 stale sizing."
+  },
+  "preservation": "v0-pr10-9fb83ef5 archive, v1 frozen harness, original raw logs and current tests remain intact. This report creates only a local evidence file."
+}

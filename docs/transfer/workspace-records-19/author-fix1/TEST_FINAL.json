@@ -1,0 +1,683 @@
+{
+  "head": "54eb53a07fed415cb0cc730a9616e251f2b78f93",
+  "role": "test author; product source belongs to separate UI author",
+  "contract": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/3668f23a25bf055eb98f8512727ce7acb0945669/docs/cycles/2026-10-22-workspace-records-19/INPUT.md",
+  "testFiles": [
+    {
+      "path": ".github/workflows/verify.yml",
+      "bytes": 10906,
+      "sha256": "5F4443BAA730CA1ABBE11DBBD65F525C03601EF6560FD07F90A17E599F5451AD"
+    },
+    {
+      "path": "app/continuity/tests/ai055_browser.py",
+      "bytes": 12744,
+      "sha256": "82B0B95D856AAF1584F1BF69CAA2129F935CD3C29C80455F5E5F994F8846588A"
+    },
+    {
+      "path": "app/continuity/tests/browser.py",
+      "bytes": 26861,
+      "sha256": "D9B6348EEA92728F78F6DEEE0E60CF1BD590D6654855F01477B9FA7CA06D5E02"
+    },
+    {
+      "path": "app/continuity/tests/connect039_browser.py",
+      "bytes": 15603,
+      "sha256": "5A37D45618D4A92AB0A82C28AA3741AB3FDBC171471488B92DCB10570CD08B42"
+    },
+    {
+      "path": "app/continuity/tests/flow049_browser.py",
+      "bytes": 15987,
+      "sha256": "7A22352EEB7440F727F0390A1C38AAE6D040FF10CB2B993452383B9F5FD65C96"
+    },
+    {
+      "path": "app/continuity/tests/flow083_browser.py",
+      "bytes": 26106,
+      "sha256": "AC5F25CD42D1D96E2C1E12A27A563D0C367A85EDBB586D4435D3D49A572740B5"
+    },
+    {
+      "path": "app/continuity/tests/flow090_browser.py",
+      "bytes": 45688,
+      "sha256": "918DC21308CB42C0CD4CE5742F225A6FB54536F6D31FE2AFC14F1AB8783686DB"
+    },
+    {
+      "path": "app/continuity/tests/pc12_browser.py",
+      "bytes": 41508,
+      "sha256": "727D633AD589164215508B8AFE72FE29AB657429196F385F8F82976A2496B341"
+    },
+    {
+      "path": "app/continuity/tests/pc13_browser.py",
+      "bytes": 36314,
+      "sha256": "D8360FBF025A3D25F63B58881AF165ADCF4478E12D1D6DA60DC59382107C5EDD"
+    },
+    {
+      "path": "app/continuity/tests/select035_browser.py",
+      "bytes": 9297,
+      "sha256": "2046F8AD33636BE9F986D541B1A9DB324761040B6E28E8C4221D2FFF15ADB8E5"
+    },
+    {
+      "path": "app/continuity/tests/spatial102_browser.py",
+      "bytes": 21581,
+      "sha256": "FA72084B885160C74AB996644A1CB4A930C0463B92B892CB613B6EA2F17E0DE8"
+    },
+    {
+      "path": "app/continuity/tests/workspace19-fixtures.mjs",
+      "bytes": 2705,
+      "sha256": "1B7080CB07D89D0374349551EE8483BB37F5A06B619808A0D41DA62916F1FC9C"
+    },
+    {
+      "path": "app/continuity/tests/workspace19_browser.py",
+      "bytes": 27965,
+      "sha256": "E1FCE56C2509DAC4CB9667F411E78E8B63D5F2F8973110631087AFF5D2682328"
+    }
+  ],
+  "matchingFrozenProductSource": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha256": "C3A8E77A96E58758D62EC6819CB902E9F9762362C48A9D60E22CEE00AF15773D"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "sha256": "F97FED78D87FBD7EDF15E8556894BA023BA3B01463D54730796904E36C37408D"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "sha256": "190C02C6615901C84735AB7F8D6B2504FF9D8351BA5FD784F6B62BBCE16EC34C"
+    }
+  ],
+  "menuOnlyOriginalAST": [
+    {
+      "file": "app/continuity/tests/browser.py",
+      "originalASTAfterRemovingOnlyNamedMenuSetup": "EXACT"
+    },
+    {
+      "file": "app/continuity/tests/ai055_browser.py",
+      "originalASTAfterRemovingOnlyNamedMenuSetup": "EXACT"
+    },
+    {
+      "file": "app/continuity/tests/connect039_browser.py",
+      "originalASTAfterRemovingOnlyNamedMenuSetup": "EXACT"
+    },
+    {
+      "file": "app/continuity/tests/flow049_browser.py",
+      "originalASTAfterRemovingOnlyNamedMenuSetup": "EXACT"
+    },
+    {
+      "file": "app/continuity/tests/flow083_browser.py",
+      "originalASTAfterRemovingOnlyNamedMenuSetup": "EXACT"
+    },
+    {
+      "file": "app/continuity/tests/flow090_browser.py",
+      "originalASTAfterRemovingOnlyNamedMenuSetup": "EXACT"
+    },
+    {
+      "file": "app/continuity/tests/pc12_browser.py",
+      "originalASTAfterRemovingOnlyNamedMenuSetup": "EXACT"
+    },
+    {
+      "file": "app/continuity/tests/select035_browser.py",
+      "originalASTAfterRemovingOnlyNamedMenuSetup": "EXACT"
+    }
+  ],
+  "v1Test03Revision": {
+    "priorCandidate": "9fb83ef5",
+    "archive": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author-evidence\\v0-pr10-9fb83ef5",
+    "priorHarnessSha256": "4AF674FFF811645A3FD8D01310EA0C5071DCEC0961A6277E43804C10049D3288",
+    "v1HarnessSha256": "C855BAFDE1B4FAFE037E957D1A49D2D5A6FAF1A6E79FEE015884B966B7413A8E",
+    "allOtherPythonAST": "EXACT",
+    "scope": "Deep real records mode/selection/scroll/anchor survives purpose dialog; missing-row notice survives actual native branch-toggle render. Product source unchanged by test author; no browser execution."
+  },
+  "v2BriefToggleReadiness": {
+    "v1Archive": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author-evidence\\v1-C855-before-toggle-wait",
+    "v1HarnessSha256": "C855BAFDE1B4FAFE037E957D1A49D2D5A6FAF1A6E79FEE015884B966B7413A8E",
+    "currentHarnessSha256": "E1FCE56C2509DAC4CB9667F411E78E8B63D5F2F8973110631087AFF5D2682328",
+    "allOtherPythonAST": "EXACT",
+    "scope": "Only brief-edit native disclosure waits for on-target trusted toggle after preinstalled trusted click marker, same actual details and expected open/newState. App document capture sizing precedes target event. Stored Promise and five-second failure deadline, complete listener/timer cleanup plus raw diagnostics. No CSS formula, resize dispatch, sleep, product hook, or assertion relaxation. Other disclosures unchanged.",
+    "cloudSource": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/430f6aa3c3b47f06a640af63da171cd6247c1ec3/docs/transfer/workspace-records-19/independent-v0/failure-first/toggle-event-order-addendum/NOTE.md"
+  },
+  "workflow": {
+    "originalBytesPreserved": true,
+    "addedLines": 7,
+    "originalCRLF": 222,
+    "newStepSha256": "BD1FB120112DC035096969E9209ABCB7C41AE0C127CA1D5832E258FEC553FD59"
+  },
+  "structuralAdaptations": [
+    {
+      "files": [
+        "pc13_browser.py",
+        "spatial102_browser.py"
+      ],
+      "change": "Old check-list details became the same exact record identities in the existing bounded side reader. Open via native check-summary; assertions keep counts/types/exact report/task/current state/caller focus."
+    },
+    {
+      "files": [
+        "pc13_browser.py"
+      ],
+      "change": "Mutually exclusive area/records modes replace impossible simultaneous panes. Second RB-to-A departure names exact R and reads its root A, keeping original A/R/RB manual and unsent-target assertions. Native measured body wheel retains full clipping and elementFromPoint hit tests; returns do not repair scroll."
+    },
+    {
+      "files": [
+        "pc13_browser.py"
+      ],
+      "change": "Map tools are checked in selected-area, selected-records, area-after-records-close and closed modes; real zoom/fit and all prior geometry/card conditions remain."
+    }
+  ],
+  "newFlows": [
+    "1280x720 and 1440x900: normal import/receipt notices observed separately; identical absent-notice name condition for records1-to6 height; actual map zoom/fit/card hit; native wheel/key body; exact reading caller; no saved writes; unsaved A vs B records; same-entry Home reading memo.",
+    "Both PCs: first records caller -> exact owner -> relations -> actual stored endpoint -> actual new request/clipboard handoff -> explicit first records return. Verify raw clipboard/digest/UTF16/id/body/anchor, source prefix, areas, positions, camera/selection/folds/caller clip/anchor/current task. Re-enter the exact R1 owner to establish a live excursion, verify its records return control remains through explicit fit, then unrelated B info must end that origin and B task reading/return must restore its own actual caller, never R1.",
+    "Both PCs: complete long name and saved purpose read with native End from actual records mode with selected area, native scroll>0 and record anchor; exact source text, unsaved editor draft, readonly close focus/mode/selection/scroll/camera/anchor; deep report row legitimately consumed by next request returns to heading with visible reason, no fake/other report focus. Actual branch-toggle re-renders while records mode is retained and reason remains fully visible/hit with exact text."
+  ],
+  "fixtureBoundaries": "AREA18 bounded source-linked analyst reconstructions reused, not original users hierarchy plans. New tasks/reports/long strings are explicitly synthetic and claim no real external execution. Existing domain/import/export routes generate data; actual UI imports recovery/return files.",
+  "runtime": "Node v24.19.0 supplementary; TS5.8.3 locked existing dependencies. Browser runner is native HTTP Chromium + explicit MOCK only when separately run in Cloud/CI.",
+  "checks": [
+    {
+      "label": "continuity-build-ui19",
+      "rawReceipt": {
+        "finishedUtc": "2026-10-22T13:28:16.3038314Z",
+        "exitCode": 0,
+        "name": "continuity-build-ui19",
+        "scope": "UI owned source3 only for diff; continuity for check/build"
+      }
+    },
+    {
+      "label": "continuity-check-ui19",
+      "rawReceipt": {
+        "finishedUtc": "2026-10-22T13:28:14.0376315Z",
+        "exitCode": 0,
+        "name": "continuity-check-ui19",
+        "scope": "UI owned source3 only for diff; continuity for check/build"
+      }
+    },
+    {
+      "label": "managed-preconditions",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/update-managed-preconditions.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:25:35.782Z",
+        "end": "2026-10-22T13:25:35.911Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "status-height-fix1-build",
+      "rawReceipt": {
+        "finishedUtc": "2026-10-22T13:57:29.3805367Z",
+        "name": "status-height-fix1-build",
+        "exitCode": 0
+      }
+    },
+    {
+      "label": "status-height-fix1-check",
+      "rawReceipt": {
+        "finishedUtc": "2026-10-22T13:57:27.1067256Z",
+        "name": "status-height-fix1-check",
+        "exitCode": 0
+      }
+    },
+    {
+      "label": "status-height-fix1-diff-check",
+      "rawReceipt": {
+        "finishedUtc": "2026-10-22T13:57:29.4591647Z",
+        "name": "status-height-fix1-diff-check",
+        "exitCode": 0
+      }
+    },
+    {
+      "label": "ui19-diff-check",
+      "rawReceipt": {
+        "finishedUtc": "2026-10-22T13:28:16.3884487Z",
+        "exitCode": 0,
+        "name": "ui19-diff-check",
+        "scope": "UI owned source3 only for diff; continuity for check/build"
+      }
+    },
+    {
+      "label": "workspace19-build-final",
+      "rawReceipt": {
+        "command": "node",
+        "args": [
+          "app/continuity/scripts/build.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:37:59.894Z",
+        "end": "2026-10-22T13:38:02.062Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-build",
+      "rawReceipt": {
+        "command": "node",
+        "args": [
+          "app/continuity/scripts/build.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:30:16.465Z",
+        "end": "2026-10-22T13:30:18.667Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-check-final",
+      "rawReceipt": {
+        "command": "node",
+        "args": [
+          "app/continuity/scripts/check.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:37:48.159Z",
+        "end": "2026-10-22T13:37:52.202Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-check",
+      "rawReceipt": {
+        "command": "node",
+        "args": [
+          "app/continuity/scripts/check.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:30:12.372Z",
+        "end": "2026-10-22T13:30:16.380Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-diffcheck-final",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--check"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:37:48.148Z",
+        "end": "2026-10-22T13:37:48.273Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-diffcheck",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--check"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:30:12.189Z",
+        "end": "2026-10-22T13:30:12.296Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-fixture-smoke",
+      "rawReceipt": {
+        "command": "node",
+        "args": [
+          "--input-type=module",
+          "-e",
+          "import {workspace19Fixture} from './app/continuity/tests/workspace19-fixtures.mjs'; import {checkItems} from './app/continuity/dist/public/shared/attention.js'; import * as D from './app/continuity/dist/public/shared/domain.js'; import {parseProject} from './app/continuity/dist/public/shared/validation.js'; for(const id of ['powertoys','product13']){const s=workspace19Fixture(id,id==='product13');let p=parseProject(JSON.stringify(s.p));if(checkItems(p).length!==1)throw Error('initial count');for(const f of s.late)p=D.importResultFile(p,JSON.stringify(f));if(checkItems(p).length!==6||p.currentTaskId!==s.report)throw Error('growth/current');if(id==='product13'&&!p.name.endsWith('W19-NAME-END'))throw Error('long name marker');console.log(JSON.stringify({id,records:checkItems(p).length,currentStable:p.currentTaskId===s.report,nameLength:p.name.length,purposeLength:p.space.brief.text.length,roundtrip:JSON.stringify(parseProject(JSON.stringify(p)))===JSON.stringify(p)}));}"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:29:35.342Z",
+        "end": "2026-10-22T13:29:35.461Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-fixture-syntax",
+      "rawReceipt": {
+        "command": "node",
+        "args": [
+          "--check",
+          "app/continuity/tests/workspace19-fixtures.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:14:00.327Z",
+        "end": "2026-10-22T13:14:00.393Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-live-origin-ast",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/check-test-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:42:13.803Z",
+        "end": "2026-10-22T13:42:14.073Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-live-origin-diffcheck",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--check"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:42:14.149Z",
+        "end": "2026-10-22T13:42:14.253Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-live-origin-freeze",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/freeze-tests.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:42:14.334Z",
+        "end": "2026-10-22T13:42:15.526Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-static-final",
+      "rawReceipt": {
+        "command": "node",
+        "args": [
+          "app/continuity/scripts/build-static.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:38:11.464Z",
+        "end": "2026-10-22T13:38:13.584Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-static",
+      "rawReceipt": {
+        "command": "node",
+        "args": [
+          "app/continuity/scripts/build-static.mjs"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:30:18.746Z",
+        "end": "2026-10-22T13:30:20.958Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-test-freeze-final",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/freeze-tests.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:39:51.311Z",
+        "end": "2026-10-22T13:39:52.541Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-test-freeze",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/freeze-tests.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:39:34.513Z",
+        "end": "2026-10-22T13:39:35.570Z",
+        "status": 1,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-test-sources-final",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/check-test-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:37:48.125Z",
+        "end": "2026-10-22T13:37:48.477Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-test-sources",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/check-test-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:30:11.826Z",
+        "end": "2026-10-22T13:30:12.112Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-test03-v1-ast",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/check-test-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:48:14.730Z",
+        "end": "2026-10-22T13:48:15.028Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-test03-v1-diffcheck",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--check"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:48:15.675Z",
+        "end": "2026-10-22T13:48:15.783Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-test03-v1-freeze",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/freeze-tests.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:48:16.426Z",
+        "end": "2026-10-22T13:48:17.636Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-toggle-v2-ast",
+      "rawReceipt": {
+        "command": "C:\\Users\\이준혁\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "args": [
+          "../product19-author-evidence/check-test-sources.py"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:02:12.103Z",
+        "end": "2026-10-22T14:02:12.396Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-toggle-v2-diffcheck",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--check"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T14:02:12.103Z",
+        "end": "2026-10-22T14:02:12.212Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-workflow-diffcheck-final",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--check",
+          "--",
+          ".github/workflows/verify.yml"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:31:21.897Z",
+        "end": "2026-10-22T13:31:21.965Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-workflow-diffcheck",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--check",
+          "--",
+          ".github/workflows/verify.yml"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:30:58.779Z",
+        "end": "2026-10-22T13:30:58.849Z",
+        "status": 2,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-workflow-eol-final",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--numstat",
+          "--",
+          ".github/workflows/verify.yml"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:31:21.756Z",
+        "end": "2026-10-22T13:31:21.821Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    },
+    {
+      "label": "workspace19-workflow-eol",
+      "rawReceipt": {
+        "command": "git",
+        "args": [
+          "diff",
+          "--numstat",
+          "--",
+          ".github/workflows/verify.yml"
+        ],
+        "cwd": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product19-author",
+        "node": "v24.19.0",
+        "start": "2026-10-22T13:30:58.636Z",
+        "end": "2026-10-22T13:30:58.704Z",
+        "status": 0,
+        "signal": null,
+        "error": null
+      }
+    }
+  ],
+  "notRun": [
+    "browser tests",
+    "local server",
+    "paid provider",
+    "unit suite (shared domain unchanged)"
+  ],
+  "failureHistory": "workspace19-workflow-diffcheck exit1 was all-CRLF insertion trailing CR whitespace; raw logs retained. Final workflow preserves all original bytes, inserts seven LF lines, and diffcheck exit0. Initial receipt collector workspace19-test-freeze exit1 was a KeyError for another author receipt format; collector repaired and final exit0. No product/browser failure or pass is inferred from these tooling checks.",
+  "gitWrites": "No commit, push or index writes. Parent publishes frozen source + tests."
+}
