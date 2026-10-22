@@ -1,0 +1,39 @@
+{
+  "status": "PASS - Node24 auxiliary only",
+  "source": {
+    "fiveAPIModules": 5,
+    "schemaTypes": 1,
+    "extraDependencies": 2,
+    "exactSourceMatches": 8,
+    "productCommit": "7c7bdfa8d244d83c2c776b91b6a3a669127ba2e9"
+  },
+  "publicInputs": [
+    {
+      "publicPath": "docs/transfer/reentry-judgment-32/input-v0/generated-v0/observer-input/T0.json",
+      "bytes": 28977,
+      "sha256": "93bb9ad11ee21ffc2a27c8949e7465bc9a16e7beaa0b2b4275a4c4d14c009cbf",
+      "gitBlob": "78929a6370da8c8299b9e02a7ba6a756e18337cf"
+    },
+    {
+      "publicPath": "docs/transfer/reentry-judgment-32/input-v0/generated-v0/observer-input/T2.json",
+      "bytes": 41069,
+      "sha256": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7",
+      "gitBlob": "9d449c0e8468cb300c827664a5527f9bcb772d21"
+    }
+  ],
+  "reparseExit": 0,
+  "runtime": "v24.19.0",
+  "original40FilesUnchanged": true,
+  "noRegeneration": true,
+  "UI": "NOT_RUN",
+  "Node22": "NOT_RUN; separate Cloud integrated reparse pending",
+  "serverBrowserInstallRemoteWrite": "NOT_RUN",
+  "evidence": [
+    "SOURCE_MATCH.json",
+    "REPARSE_NODE24_RAW.json",
+    "reparse-node24.stdout.log",
+    "reparse-node24.stderr.log",
+    "reparse-node24.exit.json"
+  ],
+  "qualification": "Source equality and existing compiled-binding equality support this local reparse; this is not execution of a newly built integrated product or a UI acceptance result."
+}

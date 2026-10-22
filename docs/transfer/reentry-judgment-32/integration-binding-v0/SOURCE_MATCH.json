@@ -1,0 +1,137 @@
+{
+  "status": "PASS",
+  "scope": "Exact remote Git blob/size equals local source bytes; five public API modules + types/schema + plan-facts/outcome dependencies",
+  "productCommit": "7c7bdfa8d244d83c2c776b91b6a3a669127ba2e9",
+  "publicInputCommit": "24baf91fa2d519fd8cd33bb5ece28ec5b32323df",
+  "sourceMatches": [
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 75793,
+      "sha256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf",
+      "gitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e",
+      "remoteGitBlob": "71b7f4d027ac5f5c5615e4dcff4502496ab47b8e",
+      "remoteBytes": 75793,
+      "originalSourceBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "bytes": 46546,
+      "sha256": "cc958cf61b54aa9d552aab07ddaa8c7e6d60ec5e61f7218cf597dd608e9b94df",
+      "gitBlob": "1d784d254588c268fca4a4780b095ec78be7f3fc",
+      "remoteGitBlob": "1d784d254588c268fca4a4780b095ec78be7f3fc",
+      "remoteBytes": 46546,
+      "originalSourceBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/attention.ts",
+      "bytes": 6051,
+      "sha256": "affaa930475942a73535ee4c995931ae5853ef308423175cfbd3835489ff770d",
+      "gitBlob": "fffa5cafc552cbd765794d9ce654d1d1d0d2024a",
+      "remoteGitBlob": "fffa5cafc552cbd765794d9ce654d1d1d0d2024a",
+      "remoteBytes": 6051,
+      "originalSourceBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/hierarchy.ts",
+      "bytes": 2591,
+      "sha256": "c9e5a4d9679e6720bc5cd3b86e624904d17a5a7d22b8806d574640ddad605ffa",
+      "gitBlob": "3548ad1f1b6ab44742daad2ca0f5ea4a0354d6cd",
+      "remoteGitBlob": "3548ad1f1b6ab44742daad2ca0f5ea4a0354d6cd",
+      "remoteBytes": 2591,
+      "originalSourceBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/mock.ts",
+      "bytes": 17369,
+      "sha256": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+      "gitBlob": "fede7bb924608c1a73eb5c97db63001b0ff12906",
+      "remoteGitBlob": "fede7bb924608c1a73eb5c97db63001b0ff12906",
+      "remoteBytes": 17369,
+      "originalSourceBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 16360,
+      "sha256": "16202db1c238e917c548950543686046977c21c61de56b30d6f4140aad607d47",
+      "gitBlob": "8ca513f5be7749d4962eaf80582f6c8273f0aad9",
+      "remoteGitBlob": "8ca513f5be7749d4962eaf80582f6c8273f0aad9",
+      "remoteBytes": 16360,
+      "originalSourceBinding": true
+    },
+    {
+      "path": "app/continuity/src/shared/plan-facts.ts",
+      "bytes": 4322,
+      "sha256": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+      "gitBlob": "6766c24cae83a8b68417c06e61c3df95fb373f18",
+      "remoteGitBlob": "6766c24cae83a8b68417c06e61c3df95fb373f18",
+      "remoteBytes": 4322,
+      "originalSourceBinding": false
+    },
+    {
+      "path": "app/continuity/src/shared/outcome.ts",
+      "bytes": 4625,
+      "sha256": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+      "gitBlob": "4d64d4ad7213b7aaff2adc9dfd9859835a961574",
+      "remoteGitBlob": "4d64d4ad7213b7aaff2adc9dfd9859835a961574",
+      "remoteBytes": 4625,
+      "originalSourceBinding": false
+    }
+  ],
+  "inputMatches": [
+    {
+      "publicPath": "docs/transfer/reentry-judgment-32/input-v0/generated-v0/observer-input/T0.json",
+      "bytes": 28977,
+      "sha256": "93bb9ad11ee21ffc2a27c8949e7465bc9a16e7beaa0b2b4275a4c4d14c009cbf",
+      "gitBlob": "78929a6370da8c8299b9e02a7ba6a756e18337cf"
+    },
+    {
+      "publicPath": "docs/transfer/reentry-judgment-32/input-v0/generated-v0/observer-input/T2.json",
+      "bytes": 41069,
+      "sha256": "584bca013cdfcb3383a028b54dc5158ca438f8690e4a7e4420fe9a11a8b68fc7",
+      "gitBlob": "9d449c0e8468cb300c827664a5527f9bcb772d21"
+    }
+  ],
+  "compiledBinding": [
+    {
+      "file": "domain.js",
+      "bytes": 77648,
+      "sha256": "f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd"
+    },
+    {
+      "file": "validation.js",
+      "bytes": 50121,
+      "sha256": "5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4"
+    },
+    {
+      "file": "attention.js",
+      "bytes": 5422,
+      "sha256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072"
+    },
+    {
+      "file": "hierarchy.js",
+      "bytes": 2489,
+      "sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624"
+    },
+    {
+      "file": "mock.js",
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+    },
+    {
+      "file": "types.js",
+      "bytes": 2672,
+      "sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53"
+    },
+    {
+      "file": "plan-facts.js",
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+    },
+    {
+      "file": "outcome.js",
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+    }
+  ],
+  "qualification": "Existing compiled modules still match the input-generation binding; no new integrated build or Node22 execution is claimed."
+}
