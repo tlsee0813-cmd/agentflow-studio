@@ -1,0 +1,10 @@
+{
+ "command": "env IDEA015_EVIDENCE_DIR=/tmp/claude-0/final-browser-61 python3 continuity/tests/understanding17_browser.py",
+ "cwd": "app",
+ "exit": 0,
+ "start": "2026-10-22T09:56:56Z",
+ "end": "2026-10-22T09:57:39Z",
+ "head": "90ebf0ce12d0976e8fc73c1d6bcb2af1848972e9",
+ "dirtyFiles": 0,
+ "node": "v22.16.0"
+}

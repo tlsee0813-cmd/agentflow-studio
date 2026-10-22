@@ -1,0 +1,20 @@
+browser 2
+ui001 0
+fresh033 0
+select035 0
+connect039 1
+flow049 0
+ai055 0
+flow083 0
+flow090 0
+guide097 0
+spatial102 0
+use106 0
+pc12 1
+pc13 1
+home15 0
+report16 0
+static 0
+understanding17 0
+
+[exited with code 0]

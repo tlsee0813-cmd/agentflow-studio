@@ -1,0 +1,10 @@
+{
+ "command": "env IDEA015_EVIDENCE_DIR=/tmp/claude-0/final-browser-40/understanding17 FRESH033_EVIDENCE=/tmp/claude-0/final-browser-40/understanding17 UI001_SCREENSHOTS=/tmp/claude-0/final-browser-40/understanding17/screenshots SELECT035_MATERIALS=continuity/tests/fixtures/select035 SELECT035_MATERIALS_SOURCE=synthetic CI fixture created with public domain APIs; no coordinator reports python3 continuity/tests/understanding17_browser.py",
+ "cwd": "app",
+ "exit": 0,
+ "start": "2026-10-22T09:49:43Z",
+ "end": "2026-10-22T09:50:20Z",
+ "head": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+ "dirtyFiles": 0,
+ "node": "v22.16.0"
+}

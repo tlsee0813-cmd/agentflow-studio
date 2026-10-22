@@ -1,0 +1,19 @@
+test_01_default_and_selected_first_screen (__main__.Pc13.test_01_default_and_selected_first_screen) ... ok
+test_02_one_normal_notice_stays_visible (__main__.Pc13.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+test_08_map_tools_usable_in_the_first_screen (__main__.Pc13.test_08_map_tools_usable_in_the_first_screen) ... ok
+test_06_long_purpose_idea_and_title (__main__.Pc13Boundaries.test_06_long_purpose_idea_and_title) ... ok
+test_07_css_width_1024_and_narrow_390 (__main__.Pc13Boundaries.test_07_css_width_1024_and_narrow_390) ... ok
+test_01_default_and_selected_first_screen (__main__.Pc13Wide.test_01_default_and_selected_first_screen) ... ok
+test_02_one_normal_notice_stays_visible (__main__.Pc13Wide.test_02_one_normal_notice_stays_visible) ... ok
+test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft (__main__.Pc13Wide.test_03_area_add_is_an_explicit_disclosure_and_keeps_its_draft) ... ok
+test_04_records_counts_zero_each_both_and_opening (__main__.Pc13Wide.test_04_records_counts_zero_each_both_and_opening) ... ok
+test_05_R_edit_and_RB_to_A_from_the_new_layout (__main__.Pc13Wide.test_05_R_edit_and_RB_to_A_from_the_new_layout) ... ok
+test_08_map_tools_usable_in_the_first_screen (__main__.Pc13Wide.test_08_map_tools_usable_in_the_first_screen) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 44.643s
+
+OK

@@ -1,0 +1,63 @@
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12.test_01_read_only_round_trip_changes_nothing) ... FAIL
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... FAIL
+test_08_long_understanding_and_scope_open_in_full_read_only (__main__.Pc12.test_08_long_understanding_and_scope_open_in_full_read_only) ... ok
+test_09_long_idea_open_state_survives_read_and_edit_round_trips (__main__.Pc12.test_09_long_idea_open_state_survives_read_and_edit_round_trips) ... ok
+test_10_area_screen_departure_keeps_the_reading_place_after_edits (__main__.Pc12.test_10_area_screen_departure_keeps_the_reading_place_after_edits) ... ok
+test_03_empty_area_and_empty_idea_make_nothing_up (__main__.Pc12Boundaries.test_03_empty_area_and_empty_idea_make_nothing_up) ... ok
+test_04_stale_ai_text_is_named_and_kept_out (__main__.Pc12Boundaries.test_04_stale_ai_text_is_named_and_kept_out) ... ok
+test_05_no_plan_copy_no_text_and_changed_plan (__main__.Pc12Boundaries.test_05_no_plan_copy_no_text_and_changed_plan)
+Synthetic fixture: an exported backup with one task's plan copy and AI text removed, imported as a copy. ... ok
+test_06_starting_point_dropped_on_project_switch_and_reload (__main__.Pc12Boundaries.test_06_starting_point_dropped_on_project_switch_and_reload) ... ok
+test_07_narrow_390_minimum (__main__.Pc12Boundaries.test_07_narrow_390_minimum) ... ok
+test_01_read_only_round_trip_changes_nothing (__main__.Pc12Wide.test_01_read_only_round_trip_changes_nothing) ... ok
+test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12Wide.test_02_continue_keeps_R_then_switches_from_RB_to_A) ... ok
+test_08_long_understanding_and_scope_open_in_full_read_only (__main__.Pc12Wide.test_08_long_understanding_and_scope_open_in_full_read_only) ... ok
+test_09_long_idea_open_state_survives_read_and_edit_round_trips (__main__.Pc12Wide.test_09_long_idea_open_state_survives_read_and_edit_round_trips) ... ok
+test_10_area_screen_departure_keeps_the_reading_place_after_edits (__main__.Pc12Wide.test_10_area_screen_departure_keeps_the_reading_place_after_edits) ... ok
+
+======================================================================
+FAIL: test_01_read_only_round_trip_changes_nothing (__main__.Pc12.test_01_read_only_round_trip_changes_nothing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/user/agentflow-studio/app/continuity/tests/pc12_browser.py", line 160, in test_01_read_only_round_trip_changes_nothing
+    self.page.locator('#task-return-origin').click();self.assert_back(before,booking,A)
+                                                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/user/agentflow-studio/app/continuity/tests/pc12_browser.py", line 108, in assert_back
+    self.check_equal('back: selected card rect x/y/w',pos(after['cardRect']),pos(before['cardRect']))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/agentflow-studio/app/continuity/tests/pc12_browser.py", line 53, in check_equal
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'x': 1055.3, 'y': 184, 'w': 375} != {'x': 1055.3, 'y': 231, 'w': 375}
+- {'w': 375, 'x': 1055.3, 'y': 184}
+?                               --
+
++ {'w': 375, 'x': 1055.3, 'y': 231}
+?                              ++
+ : back: selected card rect x/y/w
+
+======================================================================
+FAIL: test_02_continue_keeps_R_then_switches_from_RB_to_A (__main__.Pc12.test_02_continue_keeps_R_then_switches_from_RB_to_A)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/user/agentflow-studio/app/continuity/tests/pc12_browser.py", line 179, in test_02_continue_keeps_R_then_switches_from_RB_to_A
+    self.page.locator('#work-return-origin').click();self.assert_back(before,booking,A)
+                                                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/user/agentflow-studio/app/continuity/tests/pc12_browser.py", line 108, in assert_back
+    self.check_equal('back: selected card rect x/y/w',pos(after['cardRect']),pos(before['cardRect']))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/agentflow-studio/app/continuity/tests/pc12_browser.py", line 53, in check_equal
+    if delta is None:self.assertEqual(value,expected,name)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'x': 1055.3, 'y': 184, 'w': 375} != {'x': 1055.3, 'y': 231, 'w': 375}
+- {'w': 375, 'x': 1055.3, 'y': 184}
+?                               --
+
++ {'w': 375, 'x': 1055.3, 'y': 231}
+?                              ++
+ : back: selected card rect x/y/w
+
+----------------------------------------------------------------------
+Ran 15 tests in 40.828s
+
+FAILED (failures=2)

@@ -1,0 +1,10 @@
+{
+ "command": "npm ci --ignore-scripts --no-audit --no-fund",
+ "cwd": "app",
+ "exit": 0,
+ "start": "2026-10-22T09:40:15Z",
+ "end": "2026-10-22T09:40:16Z",
+ "head": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+ "dirtyFiles": 0,
+ "node": "v22.16.0"
+}

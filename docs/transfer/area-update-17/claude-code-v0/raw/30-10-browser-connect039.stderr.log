@@ -1,0 +1,10 @@
+test_01_native_exact_export_preview_import_roundtrip_and_next_B (__main__.ResultFiles.test_01_native_exact_export_preview_import_roundtrip_and_next_B) ... ok
+test_02_native_invalid_atomic_and_v1_v2_originals (__main__.ResultFiles.test_02_native_invalid_atomic_and_v1_v2_originals) ... ok
+test_03_injected_read_generations_and_clipboard_import_boundary (__main__.ResultFiles.test_03_injected_read_generations_and_clipboard_import_boundary) ... ok
+test_04_injected_quota_and_native_other_tab_conflict (__main__.ResultFiles.test_04_injected_quota_and_native_other_tab_conflict) ... ok
+test_05_injected_backup_failure_and_late_AI (__main__.ResultFiles.test_05_injected_backup_failure_and_late_AI) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 8.885s
+
+OK

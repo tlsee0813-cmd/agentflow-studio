@@ -1,0 +1,24 @@
+test_01_native_exact_export_preview_import_roundtrip_and_next_B (__main__.ResultFiles.test_01_native_exact_export_preview_import_roundtrip_and_next_B) ... ok
+test_02_native_invalid_atomic_and_v1_v2_originals (__main__.ResultFiles.test_02_native_invalid_atomic_and_v1_v2_originals) ... FAIL
+test_03_injected_read_generations_and_clipboard_import_boundary (__main__.ResultFiles.test_03_injected_read_generations_and_clipboard_import_boundary) ... ok
+test_04_injected_quota_and_native_other_tab_conflict (__main__.ResultFiles.test_04_injected_quota_and_native_other_tab_conflict) ... ok
+test_05_injected_backup_failure_and_late_AI (__main__.ResultFiles.test_05_injected_backup_failure_and_late_AI) ... ok
+
+======================================================================
+FAIL: test_02_native_invalid_atomic_and_v1_v2_originals (__main__.ResultFiles.test_02_native_invalid_atomic_and_v1_v2_originals)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/user/agentflow-studio/app/continuity/tests/connect039_browser.py", line 96, in test_02_native_invalid_atomic_and_v1_v2_originals
+    p=self.state();self.assertEqual(p['schemaVersion'],'idea015.project.5');self.assertTrue(all(h['returnId'] is None for t in p['tasks'] for h in t['handoffs']))
+                   ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'idea015.project.6' != 'idea015.project.5'
+- idea015.project.6
+?                 ^
++ idea015.project.5
+?                 ^
+
+
+----------------------------------------------------------------------
+Ran 5 tests in 8.972s
+
+FAILED (failures=1)
