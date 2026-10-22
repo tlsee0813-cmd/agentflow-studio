@@ -190,6 +190,20 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/report16_browser.py 2>&1 | tee test-results/report16-browser.log
+      - name: AREA17 description receipt, exact-area request and explicit view return (native HTTP, labelled fixtures, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/area17
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/understanding17_browser.py 2>&1 | tee test-results/area17-browser.log
+      - name: AREA18 mixed depth, real endpoints and fixed reading workspace on two PCs (native HTTP, labelled reconstructions and synthetic boundaries, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/area18
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/hierarchy18_browser.py 2>&1 | tee test-results/area18-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
         env:

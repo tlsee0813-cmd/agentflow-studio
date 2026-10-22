@@ -1,6 +1,8 @@
 import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile } from './types.js';
 import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
+import { areaPath, childrenOf } from './hierarchy.js';
+import type {ContextPlanStamp} from './types.js';
 import { outcomeOf, contextLinks } from './outcome.js';
 export { planFacts, planFactsText } from './plan-facts.js';
 const uid = (prefix: string) => `${prefix}_${crypto.randomUUID()}`;
@@ -9,7 +11,7 @@ const copy = <T>(value: T): T => structuredClone(value);
 const WORK_KEYS = ['understanding','scope','next','checks'] as const;
 const CONDITION_KEYS = ['scope','checks'] as const;
 export function createProject(): Project {
-  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{}}};
+  return {schemaVersion:SCHEMA,id:uid('P'),revision:1,name:'나의 프로젝트',sources:[],bases:[],tasks:[],currentTaskId:null,draft:'',answerDraft:'',basisDraft:'',basisEdits:{},draftKind:'request',pending:null,notice:null,space:{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{},containment:{version:'containment.1',parents:{},revisions:{}}}};
 }
 export function taskOf(p: Project, id = p.currentTaskId): Task { const t=p.tasks.find(t=>t.id === id); ensure(t,'TASK_MISSING'); return t; }
 function change(p: Project): Project { return {...copy(p),revision:p.revision+1,notice:null}; }
@@ -443,7 +445,7 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
       shown(correction?.goal??ai!.goal),
       '유지할 조건: '+((correction?correction.conditions:ai!.conditions.join(' / '))||'별도 조건란의 값 없음 (원문 속 조건·금지가 없다는 뜻이 아님)'),
       ...(ai?.retired.length?[`대체된 지시 · 다시 실행하지 않음 (${interp} · 이전 요청 원문의 표현에만 적용, 사용자 결정 기준은 대체하지 않음): `+ai.retired.join(' / ')]:[]),
-      ...(decisions.length?[`사용자 결정 기준 ${decisions.map(b=>`${b.id}(${BASIS_LABEL[b.status]})`).join(', ')}은 이 ${interp}보다 우선하며 아래 현재 값 그대로 유효합니다. 이번 요청 원문이 그 결정을 명시적으로 바꾼 부분만 요청 원문을 따르고, ${interp}만으로 결정을 폐기하지 마세요.`]:[]),
+      ...(decisions.length?[`사용자 결정 기준 ${decisions.map(b=>`${b.id}(${BASIS_LABEL[b.status]})`).join(', ')}은 이 ${interp}보다 우선하며 각 원문이 명시한 범위에서 아래 현재 값 그대로 유효합니다. 이번 요청 원문이 그 결정을 명시적으로 바꾼 부분만 요청 원문을 따르고, ${interp}만으로 결정을 폐기하지 마세요. 기록 위치만으로 적용 범위를 판정하거나 이번 자식 실행 범위로 자동 상속하지 마세요.`]:[]),
       ...continuingLines(p,t,intent,ai,shown),
       ai?.relation==='uncertain'?'목적 관계 미정: 미정 선택에 의존하는 변경은 확정 범위가 아닙니다.':(req?`이번 작업의 크기는 ‘이번 요청과 이전 맥락’ 절의 이번 요청 원문 [${req.id}]이 정합니다.`:'이번 작업의 크기는 아래 현재 요청이 정합니다.')+' 목적 전체를 다시 구현하라는 지시가 아닙니다.',
       ...(intent?[(correction?`정정 전 ${interp} 근거: `:'해석 근거: ')+intent.value.basisRefs.map(ref=>`${ref.basisId} r${ref.revision} / ${ref.sourceId}`).join(', ')]:[]));
@@ -467,13 +469,23 @@ export function handoffText(p:Project,id=p.currentTaskId,returnId:string|null=nu
   const currentSources=new Set(t.sourceIds);
   // A return continues the effective request on its path; the report is not a replacement request.
   if(outcome.request)currentSources.add(outcome.request.id);
-  const earlierRequests=p.bases.filter(b=>b.status==='requested'&&!currentSources.has(b.sourceId));
+  // The source task locates a record; it does not determine the natural-language scope of the user's decision.
+  // Keep other-area decisions authoritative in their explicit scope without presenting them as this area's conditions.
+  const targetArea=areaOf(p,t),otherAreaBases=p.bases.flatMap(b=>{
+    const source=p.sources.find(s=>s.id===b.sourceId),owner=source?p.tasks.find(x=>x.id===source.taskId):undefined;
+    const ownerId=owner?areaOf(p,owner):null,area=ownerId?p.space.areas.find(a=>a.id===ownerId):undefined;
+    return targetArea&&area&&area.id!==targetArea?[{basis:b,area,recordTaskId:source!.taskId}]:[];
+  }),otherAreaIds=new Set(otherAreaBases.map(x=>x.basis.id));
+  const earlierRequests=p.bases.filter(b=>b.status==='requested'&&!currentSources.has(b.sourceId)&&!otherAreaIds.has(b.id));
   // After the user corrected this task's purpose, its own requested wording predates that correction: kept and
   // shown, but not as a current value. User decisions (confirmed/answered/deferred) are unaffected.
   const preCorrection=intentCorrection(t)?p.bases.filter(b=>b.status==='requested'&&currentSources.has(b.sourceId)):[];
   const earlierIds=new Set([...earlierRequests,...preCorrection].map(b=>b.id));
-  lines.push('\n## 이어갈 기준 — 직접 관련 (현재 값)',...p.bases.filter(b=>related.has(b.id)&&!earlierIds.has(b.id)).map(b=>basisLine(b,shown)));
-  lines.push('\n## 나머지 보존 기준 (현재 값) — 생략/무응답은 폐기가 아님',...p.bases.filter(b=>!related.has(b.id)&&!earlierIds.has(b.id)).map(b=>basisLine(b,shown)));
+  lines.push('\n## 이어갈 기준 — 직접 관련 (현재 값)',...p.bases.filter(b=>related.has(b.id)&&!earlierIds.has(b.id)&&!otherAreaIds.has(b.id)).map(b=>basisLine(b,shown)));
+  lines.push('\n## 나머지 보존 기준 (현재 값) — 생략/무응답은 폐기가 아님',...p.bases.filter(b=>!related.has(b.id)&&!earlierIds.has(b.id)&&!otherAreaIds.has(b.id)).map(b=>basisLine(b,shown)));
+  if(otherAreaBases.length)lines.push('\n## 다른 영역에서 기록한 사용자 기준 — 원문 범위에서 권위 유지',
+    '사용자의 직접 결정 권위는 유지되며 각 원문이 명시한 범위에서 유효합니다. 아래 영역·작업은 기록 위치입니다. source.taskId나 기록 위치로 실제 적용 범위를 판정하지 않으며 이 자식의 실행 범위로 자동 상속하지 않습니다. 원문이 명시한 공통 조건은 해당 범위에서 유지하세요. 관련 없는 이전 요청을 이번 작업에 추가하지 마세요.',
+    ...otherAreaBases.map(({basis,area,recordTaskId})=>`기록 소유 영역: ${area.name} [${area.id}] / 기록 작업: ${recordTaskId}\n${basisLine(basis)}`));
   if(preCorrection.length) lines.push('\n## 정정 전 이 작업의 요청 원문 — 사용자 정정과 양립하는 조건은 유지, 충돌하거나 유지 여부가 불명확하면 확정하지 말고 확인 (자동 폐기 아님)',...preCorrection.map(b=>basisLine(b,shown)));
   if(earlierRequests.length) lines.push('\n## 이전 요청 원문 참조 — 후속 변경이 우선, 이번 범위에 자동 추가하지 않음',...earlierRequests.map(b=>basisLine(b,shown)));
   lines.push('요청 원문에는 배경·인용도 포함될 수 있습니다. 전체를 확정 정책으로 읽지 마세요. 최신 명시 요청·답변은 그 범위에서만 적용하고, 관련 없는 기준은 유지하세요.');
@@ -510,14 +522,21 @@ export function backgroundLines(p:Project,t:Task):string[] {
  * A value exactly equal (same string) to the copy above points to it instead of printing the same prose twice. */
 function currentPlanLines(p:Project,t:Task,returnId:string|null):string[] {
   const areaId=areaOf(p,t),a=areaId?p.space.areas.find(x=>x.id===areaId):undefined;if(!a)return [];
-  if(returnId===null&&!areaDescription(p,a.id).current)return [];
+  if(returnId===null&&!areaDescription(p,a.id).current&&areaPath(p,a.id).length===1)return [];
   const b=t.background,same=(label:string)=>`(글자 그대로 같은 본문 생략 — 위 ‘프로젝트 배경·영역 구상’ 절의 요청 당시 ${label} 원문과 같고, 지금도 현재 값)`;
   const brief=p.space.brief?.text,note=a.note;
   return ['\n## 현재 사용자 구상 — 전달 시점의 기준',
     '위 요청 당시 사본과 구별되는 지금의 사용자 구상입니다. 이번 요청이 실행 범위를 정하며, 아래 외부 참고 설명이 사용자 구상이나 직접 기록한 조건을 바꾸지는 않습니다.',
     ...(brief!==undefined?[`현재 프로젝트 목적:\n${b?.brief===brief?same('프로젝트 목적'):brief}`]:[]),
     `현재 대상 영역: ${a.name} [${a.id}]`,
-    ...(note?[`현재 영역 구상:\n${b?.area?.note===note?same('영역 구상'):note}`]:[])];
+    ...(note?[`현재 영역 구상:\n${b?.area?.note===note?same('영역 구상'):note}`]:[]),
+    ...ancestorLines(p,a.id)];
+}
+function ancestorLines(p:Project,id:string):string[] {
+  const ancestors=areaPath(p,id).slice(0,-1);if(!ancestors.length)return [];
+  return ['\n### 포함 맥락 참고 — 자식 실행 범위로 자동 상속되지 않음',
+    '아래는 현재 포함 경로의 사용자 구상 원문입니다. 조상 작업의 개별 조건이나 전체 구상을 이 자식의 실행 명령으로 합치지 마세요. 자식의 명시 범위·조건을 조상 참고로 확대·축소·대체하지 않습니다. 실행 범위는 이번 요청이 정합니다.',
+    ...ancestors.map(a=>`포함 영역: ${a.name} [${a.id}] / 참고 기준 ${p.space.containment.revisions[a.id]}\n사용자 구상 원문: ${a.note||'(구상 미기재)'}`)];
 }
 function basisLine(b:Basis,shown:(text:string)=>string=x=>x):string {
   // Earlier values stay in the project (and recovery file); they are not repeated as instructions.
@@ -560,10 +579,13 @@ function areaName(name: string): string { const v=name.trim(); text(v,60); retur
 export function addArea(p: Project, name: string, note='', near?: Point): Project {
   const n=change(p);text(note,2000,true);const id=uid('A');
   n.space.layout.positions[id]=freeSlot(p,near);
+  n.space.containment.revisions[id]=0;
   n.space.areas.push({id,name:areaName(name),note:note.trim(),archived:false,createdAt:now()});return n;
 }
 /* ---------- FLOW090-B1: map positions (presentation data; never touches work records) ---------- */
 export const NODE_W=240, NODE_H=132, GRID_X=300, GRID_Y=200;
+// New slots account for AREA18's bounded card footprint; historical default/stored coordinates stay unchanged.
+const PLACEMENT_H=180;
 /** Stored position, else a fixed default from the area's place in the list (never recomputed from others). */
 export function areaPosition(p: Project, a: Area): Point {
   const stored=p.space.layout.positions[a.id];if(stored)return {...stored};
@@ -572,7 +594,7 @@ export function areaPosition(p: Project, a: Area): Point {
 function freeSlot(p: Project, near?: Point): Point {
   // Archived areas keep their place too: restoring one must not land it on an area added meanwhile.
   const taken=p.space.areas.map(a=>areaPosition(p,a));
-  const clash=(x:number,y:number)=>taken.some(t=>Math.abs(t.x-x)<NODE_W+20&&Math.abs(t.y-y)<NODE_H+20);
+  const clash=(x:number,y:number)=>taken.some(t=>Math.abs(t.x-x)<NODE_W+20&&Math.abs(t.y-y)<PLACEMENT_H+20);
   const start=clampPoint({x:near?Math.round(near.x/20)*20:40,y:near?Math.round(near.y/20)*20:40}),ox=start.x,oy=start.y;
   const inside=(x:number,y:number)=>Math.abs(x)<=POSITION_LIMIT&&Math.abs(y)<=POSITION_LIMIT;
   // Nearest free grid slot, trying right, then left, then below, then above (reading order) within each ring.
@@ -598,11 +620,29 @@ export function undoMove(p: Project, id: string, from: Point|null, expected: Poi
   const n=change(p);if(from)n.space.layout.positions[id]=clampPoint(from);else delete n.space.layout.positions[id];return n;
 }
 export function editArea(p: Project, id: string, name: string, note: string): Project {
-  text(note,2000,true);const n=change(p),a=n.space.areas.find(a=>a.id===id);ensure(a,'AREA_MISSING');a.name=areaName(name);a.note=note.trim();return n;
+  text(note,2000,true);const n=change(p),a=n.space.areas.find(a=>a.id===id);ensure(a,'AREA_MISSING');const nextName=areaName(name),nextNote=note.trim();
+  if(a.name!==nextName||a.note!==nextNote)n.space.containment.revisions[id]=(n.space.containment.revisions[id]??0)+1;
+  a.name=nextName;a.note=nextNote;return n;
+}
+/** Explicit inclusion change; positions, tasks, return links, descriptions and source records never move with it. */
+export function setAreaParent(p:Project,id:string,parentId:string|null):Project {
+  const a=p.space.areas.find(a=>a.id===id);ensure(a,'AREA_MISSING');
+  if(parentId!==null){const parent=p.space.areas.find(a=>a.id===parentId);ensure(parent&&!parent.archived,'PARENT_MISSING');ensure(parentId!==id&&!areaPath(p,parentId).some(a=>a.id===id),'CONTAINMENT_CYCLE');}
+  if((p.space.containment.parents[id]??null)===parentId)return p;
+  const n=change(p);if(parentId===null)delete n.space.containment.parents[id];else n.space.containment.parents[id]=parentId;
+  n.space.containment.revisions[id]=(n.space.containment.revisions[id]??0)+1;return n;
+}
+export function addChildArea(p:Project,parentId:string,name:string,note='',near?:Point):Project {
+  const parent=p.space.areas.find(a=>a.id===parentId);ensure(parent&&!parent.archived,'PARENT_MISSING');
+  const at=near??areaPosition(p,parent),n=addArea(p,name,note,{x:at.x+GRID_X,y:at.y+GRID_Y});
+  return setAreaParent(n,n.space.areas.at(-1)!.id,parentId);
 }
 /** Areas are archived, never deleted: placed tasks and their reports stay where they are. */
 export function setAreaArchived(p: Project, id: string, archived: boolean): Project {
-  const n=change(p),a=n.space.areas.find(a=>a.id===id);ensure(a,'AREA_MISSING');a.archived=archived;return n;
+  const n=change(p),a=n.space.areas.find(a=>a.id===id);ensure(a,'AREA_MISSING');
+  if(archived)ensure(!childrenOf(p,id).some(a=>!a.archived),'ACTIVE_CHILDREN');
+  else ensure(areaPath(p,id).slice(0,-1).every(a=>!a.archived),'PARENT_ARCHIVED');
+  a.archived=archived;return n;
 }
 export function addRelation(p: Project, from: string, to: string, kind: RelationKind, note=''): Project {
   ensure(from!==to&&p.space.areas.some(a=>a.id===from)&&p.space.areas.some(a=>a.id===to),'AREA_MISSING');
@@ -635,7 +675,7 @@ export function placeTask(p: Project, taskId: string, areaId: string|null): Proj
  * the current revision of each user decision (or explicitly revised request basis) from this area's or unplaced work, and a
  * fingerprint of each such task's own user-written work values and purpose correction. A new request alone is not included. Requests elsewhere and reports never
  * change it. A name change and direct user corrections are part of this explicit basis. */
-export function planStamp(p:Project,areaId:string):PlanStamp {
+export function planStamp(p:Project,areaId:string):ContextPlanStamp {
   const a=p.space.areas.find(x=>x.id===areaId);ensure(a,'AREA_MISSING');
   const tasks=new Map(p.tasks.map(t=>[t.id,t])),sources=new Map(p.sources.map(s=>[s.id,s]));
   // A new request's own wording (a 'requested' basis never revised since it was written) is the next work, not a change of the
@@ -648,10 +688,13 @@ export function planStamp(p:Project,areaId:string):PlanStamp {
   // Exact-equality fingerprint of the task's own user-written values (fixed key order); the values stay in the task only.
   const work=p.tasks.filter(t=>{const at=areaOf(p,t);return (at===null||at===areaId)&&(Object.values(t.manual).some(v=>v!==null)||t.intentEdit!==undefined);})
     .map(t=>`${t.id}:${sha256(JSON.stringify([t.manual.understanding,t.manual.scope,t.manual.next,t.manual.checks,t.intentEdit??null]))}`);
-  return {name:a.name,note:a.note,brief:p.space.brief?p.space.brief.previous.length+1:0,decisions,work};
+  return {name:a.name,note:a.note,brief:p.space.brief?p.space.brief.previous.length+1:0,decisions,work,version:'plan.2',revision:p.space.containment.revisions[areaId]!,
+    ancestors:areaPath(p,areaId).slice(0,-1).map(a=>({id:a.id,name:a.name,note:a.note,revision:p.space.containment.revisions[a.id]!}))};
 }
-function sameStamp(a:PlanStamp|null,b:PlanStamp):boolean {
-  return !!a&&a.name===b.name&&a.note===b.note&&a.brief===b.brief&&a.decisions.length===b.decisions.length&&a.decisions.every((d,i)=>d===b.decisions[i])
+function sameStamp(a:PlanStamp|null,b:ContextPlanStamp):boolean {
+  if(!a)return false;
+  const context='version' in a?a.version==='plan.2'&&a.revision===b.revision&&JSON.stringify(a.ancestors)===JSON.stringify(b.ancestors):b.revision===0&&b.ancestors.length===0;
+  return context&&a.name===b.name&&a.note===b.note&&a.brief===b.brief&&a.decisions.length===b.decisions.length&&a.decisions.every((d,i)=>d===b.decisions[i])
     &&a.work.length===b.work.length&&a.work.every((w,i)=>w===b.work[i]);
 }
 function sameInput(a:UnderstandingInput|null,b:UnderstandingInput|null):boolean {
@@ -663,7 +706,7 @@ export function areaState(p:Project,areaId:string){return p.space.understanding[
 /** Captured with a return-file export of a task placed in an area: what its description may build on. */
 export function exportAnchor(p:Project,t:Task):ExportAnchor|null {
   const areaId=areaOf(p,t),a=areaId?p.space.areas.find(x=>x.id===areaId):undefined;
-  return a?{version:'anchor.1',areaId:a.id,understanding:areaState(p,a.id).revision,stamp:planStamp(p,a.id)}:null;
+  return a?{version:'anchor.2',areaId:a.id,understanding:areaState(p,a.id).revision,stamp:planStamp(p,a.id)}:null;
 }
 /** Where a received description would be filed and whether it is held. areaId=null: the returned work has no area, so the
  * description is not filed anywhere (the report is kept as usual). Checked against the app's own export record and the
@@ -688,7 +731,7 @@ export function understandingVerdict(p:Project,task:Task,record:ExportRecord,u:U
 function fileUnderstanding(p:Project,n:Project,task:Task,record:ExportRecord,file:ResultFile,t:Task) {
   const {areaId,held}=understandingVerdict(p,task,record,file.understanding!);if(areaId===null)return;
   const st=copy(areaState(n,areaId));if(!held)st.revision++;
-  st.entries.push({by:'external',at:now(),revision:held?null:st.revision,taskId:t.id,returnId:file.returnId,text:null,corrects:null,stamp:held?null:planStamp(n,areaId),held});
+  st.entries.push({by:'external',at:now(),revision:held?null:st.revision,taskId:t.id,returnId:file.returnId,text:null,corrects:null,stamp:held?null:copy(record.anchor!.stamp),held});
   n.space.understanding[areaId]=st;
 }
 /** The user corrects the description itself (never the area idea). Kept with the earlier values; a late or resent older
@@ -711,7 +754,7 @@ export interface DescriptionView {
   /** Current revision AND made for the user's plan as it is now. */
   valid:boolean;
 }
-function describe(p:Project,areaId:string,e:UnderstandingEntry,stamp:PlanStamp,revision:number):DescriptionView|null {
+function describe(p:Project,areaId:string,e:UnderstandingEntry,stamp:ContextPlanStamp,revision:number):DescriptionView|null {
   const valid=e.revision!==null&&e.revision===revision&&sameStamp(e.stamp,stamp);
   if(e.by==='user')return {entry:e,summary:e.text!,changes:[],proposal:null,origin:'사용자 정정',returnTask:null,requestTask:null,valid};
   const t=p.tasks.find(x=>x.id===e.taskId),u=t?.resultFile?parseResultFile(t.resultFile.rawText).understanding:null;if(!t||!u)return null;

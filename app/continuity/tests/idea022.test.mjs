@@ -295,7 +295,7 @@ test('I22-projection works after legacy migration and never adds fields to store
   const c=cycles(2),legacy=JSON.stringify(toLegacy(c)),p=parseProject(legacy),snapshot=serializeProject(p);
   const f=facts(p);assert.deepEqual(facts(parseProject(snapshot)),f);validateRequest(D.begin(p).request);
   assert.deepEqual(p.tasks.flatMap(t=>t.handoffs.map(h=>h.legacyText)),c.texts);
-  assert.equal(serializeProject(p),snapshot);assert.equal(p.schemaVersion,'idea015.project.6');assert.ok(!snapshot.includes('appFacts'));
+  assert.equal(serializeProject(p),snapshot);assert.equal(p.schemaVersion,'idea015.project.7');assert.ok(!snapshot.includes('appFacts'));
 });
 
 function local(port,request) {

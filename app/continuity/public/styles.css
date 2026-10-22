@@ -2541,3 +2541,57 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .understanding-more{display:flex;flex-wrap:wrap;column-gap:16px;align-items:flex-start}
 .area-understanding .understanding-more>details{margin:0}
 .area-understanding .understanding-more>details[open]{flex-basis:100%}
+
+/* Mixed depths share the existing world coordinates. Transparent boundaries never receive card/pan events. */
+.containment-layer{position:absolute;left:0;top:0;pointer-events:none}
+.containment-frame{position:absolute;box-sizing:border-box;border:1px solid #989ab5;border-radius:20px;pointer-events:none}
+.containment-title{position:absolute;height:26px;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  border:1px solid #989ab5;border-radius:7px;background:var(--paper);color:var(--muted);font-size:12px;padding:2px 8px;pointer-events:auto;text-align:left}
+.containment-links{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
+.containment-links line{stroke:#989ab5;stroke-width:1;stroke-dasharray:2 5}
+.area-node{z-index:2;height:180px;min-height:180px;box-sizing:border-box;gap:3px;padding-top:8px;padding-bottom:8px}
+.area-node .node-enter{flex:1;min-height:0;overflow:hidden;gap:2px}
+.area-node .area-card-name{font-size:15px;line-height:18px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex-shrink:0}
+.area-node .area-card-note{-webkit-line-clamp:1;font-size:12px;line-height:15px;flex-shrink:0}
+.area-node .node-enter>.hint{font-size:11px;line-height:14px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.area-card-name,.area-card-path{overflow-wrap:anywhere;min-width:0;max-width:100%}
+.area-card-path{display:block;font-size:11px;color:var(--muted);line-height:14px;max-height:14px;overflow:hidden;flex-shrink:0}
+.branch-toggle{font-size:12px;padding:3px 7px;align-self:flex-start}
+.branch-signals{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.map-relation-list{margin-top:10px;font-size:13px}
+.map-relation-list summary{cursor:pointer}
+.relation-bundle{padding:8px 0;border-bottom:1px solid var(--line)}
+.relation-endpoints{display:flex;align-items:center;gap:5px;flex-wrap:wrap;overflow-wrap:anywhere}
+.relation-endpoints button{max-width:100%;overflow-wrap:anywhere;white-space:normal;text-align:left}
+.map-controls{z-index:4}
+/* The title and actions occupy real rows. Only the named reading region scrolls. */
+.area-panel{min-width:0;box-sizing:border-box;overflow:hidden;padding:0;gap:0}
+.area-panel .panel-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:4px 8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.panel-top>strong{overflow-wrap:anywhere;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.panel-path{grid-column:1/-1;margin:0;color:var(--muted);font-size:11px;line-height:1.4;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.panel-skip{grid-column:1/-1;position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.panel-skip:focus{position:static;width:auto;height:auto;clip-path:none}
+.area-panel .panel-body{flex:1 1 0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:10px 12px;scrollbar-gutter:stable;overflow-wrap:anywhere}
+.panel-body>*,.panel-body details{max-width:100%;min-width:0}
+.panel-body input,.panel-body textarea,.panel-body select{width:100%;max-width:100%;min-width:0;box-sizing:border-box;font:inherit}
+.panel-body select{white-space:normal}
+.panel-body .source-raw{overflow-wrap:anywhere;white-space:pre-wrap}
+.panel-body .panel-tasks,.panel-body #panel-more{margin-top:8px}
+.panel-body .subtree-records{font-size:12px;margin:8px 0}
+.subtree-record,.subtree-description{padding:6px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.subtree-record p{margin:3px 0}
+.relation-owner{padding:8px 0;border-top:1px solid var(--line)}
+.relation-owner h4{font-size:13px;margin:0 0 4px;overflow-wrap:anywhere}
+.relation-owner p{margin:3px 0}
+.hierarchy-editor h3{font-size:13px;margin-top:8px}
+.hierarchy-editor form{display:grid;gap:6px;margin-bottom:10px}
+.area-panel .panel-actions{flex:none;padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line);background:var(--paper)}
+.panel-actions button{flex:1;white-space:normal;font-size:12px;padding:7px 8px;min-height:36px}
+@media(min-width:761px){
+  .map-layout{align-items:stretch;min-height:0}
+  body[data-layer="space"] .space-map{height:100%;min-height:0}
+  .map-layout>.area-panel{height:100%;width:300px;max-width:32%}
+}
+@media(max-width:760px){
+  .area-panel{height:55dvh;max-height:55dvh;overflow:hidden}
+}

@@ -1,4 +1,5 @@
-export const SCHEMA = 'idea015.project.6' as const;
+export const SCHEMA = 'idea015.project.7' as const;
+export const V6_SCHEMA = 'idea015.project.6' as const;
 /** project.5 had no area understanding and no export anchors: every area reads none, every export anchor=null (no backfill). */
 export const V5_SCHEMA = 'idea015.project.5' as const;
 /** project.4 had no background snapshots: every task and export reads background=null (nothing is backfilled). */
@@ -29,10 +30,15 @@ export interface UnderstandingInput {
  * purpose was written, the current revision of each user decision from this area's or unplaced work ('D3@2'), and for each such
  * task with user-written work values or a purpose correction one '<task id>:<sha256>' of those values. The fingerprint keeps
  * the stamp small and valid for any allowed text; the values themselves stay only in the task. */
-export interface PlanStamp { name: string; note: string; brief: number; decisions: string[]; work: string[] }
+export interface LegacyPlanStamp { name: string; note: string; brief: number; decisions: string[]; work: string[] }
+export interface AncestorContext { id: string; name: string; note: string; revision: number }
+/** plan.2 records reference context, not inherited work instructions. Legacy stamps are never backfilled. */
+export interface ContextPlanStamp extends LegacyPlanStamp { version:'plan.2'; revision:number; ancestors:AncestorContext[] }
+export type PlanStamp = LegacyPlanStamp | ContextPlanStamp;
 /** AREA17: captured when a task is exported with a return file id: which area, which description revision went out, and the
  * user's plan at that moment. Older exports have none (null); nothing is estimated for them. */
-export interface ExportAnchor { version: 'anchor.1'; areaId: string; understanding: number; stamp: PlanStamp }
+export type ExportAnchor = { version: 'anchor.1'; areaId: string; understanding: number; stamp: LegacyPlanStamp }
+  | { version:'anchor.2'; areaId:string; understanding:number; stamp:ContextPlanStamp };
 export type HeldReason = 'no-anchor' | 'area-moved' | 'area-mismatch' | 'area-archived' | 'file-basis' | 'superseded' | 'plan-changed';
 /** AREA17: one received or corrected description of an area. External text stays in the return file (single source);
  * a user correction keeps its own text. revision=null: received but held (never the current description). */
@@ -131,8 +137,10 @@ export interface DraftTarget { area: string | null }
  * position use a fixed default from their place in the list, so adding or archiving never moves anyone else. */
 export interface Point { x: number; y: number }
 export interface Layout { version: 'layout.1'; positions: Record<string, Point> }
+/** Single parent hypothesis. Absent parent key = root; revision tracks explicit name/note/parent changes, not views. */
+export interface Containment { version:'containment.1'; parents:Record<string,string>; revisions:Record<string,number> }
 /** understanding (AREA17): derived descriptions per area ID, kept apart from Area.note (the user's words). */
-export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null; layout: Layout; understanding: Record<string, AreaUnderstanding> }
+export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null; layout: Layout; understanding: Record<string, AreaUnderstanding>; containment:Containment }
 export interface Ticket { projectId: string; revision: number; requestId: string; taskId: string }
 export interface Project {
   schemaVersion: typeof SCHEMA; id: string; revision: number; name: string;

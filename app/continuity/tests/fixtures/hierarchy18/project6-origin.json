@@ -1,0 +1,34 @@
+{
+  "sourceCommit": "7bea120983c3571b26164d6acd40f350611a7213",
+  "generatedBy": "unchanged shared source compiled from git show, not version relabeling",
+  "nature": "synthetic compatibility boundary; three actual v6 state paths",
+  "areaIds": {
+    "유효한 기존 설명": "A_11587983-ddf6-443d-b86c-604cbfd4831c",
+    "사용자 정정된 기존 설명": "A_3f3b5472-0120-4db0-acf8-53f90063f456",
+    "보류된 기존 설명": "A_8c7e2602-9bde-4362-882e-da6c3904449c"
+  },
+  "expected": {
+    "A_11587983-ddf6-443d-b86c-604cbfd4831c": {
+      "valid": true,
+      "summary": "유효한 기존 설명의 전달 설명",
+      "by": "external",
+      "held": []
+    },
+    "A_3f3b5472-0120-4db0-acf8-53f90063f456": {
+      "valid": true,
+      "summary": "이전 사용자가 정정한 설명",
+      "by": "user",
+      "held": []
+    },
+    "A_8c7e2602-9bde-4362-882e-da6c3904449c": {
+      "valid": null,
+      "summary": null,
+      "by": null,
+      "held": [
+        "plan-changed"
+      ]
+    }
+  },
+  "fixtureSha256": "dabe9c15d0782346df61591a6662d3f9719eea0f9083880fe54cb612d2c2c898",
+  "fixtureBytes": 18051
+}

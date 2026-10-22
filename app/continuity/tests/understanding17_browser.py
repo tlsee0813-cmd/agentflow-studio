@@ -16,6 +16,10 @@ from pathlib import Path
 from playwright.sync_api import expect
 import browser as base
 
+def clipboard_lf(raw):
+    """Existing Windows clipboard representation rule (USE106): replace CRLF pairs only."""
+    return raw.replace('\r\n','\n')
+
 APP=Path(__file__).resolve().parents[2]
 CASES={c['id']:c for c in json.loads(subprocess.check_output(['node','-e',"import('./continuity/tests/understanding17-fixtures.mjs').then(m=>console.log(JSON.stringify(m.cases)))"],cwd=APP,text=True))}
 OTHER,OTHER_NOTE='비교 영역 · 합성','변경이 번지지 않는지 확인하는 합성 영역'
@@ -76,7 +80,10 @@ class Area17(unittest.TestCase):
     def height(self,sel,name):v=self.page.evaluate(HEIGHT_JS,sel);self.record('actual',name,v);return v
     def shot(self,name):self.page.mouse.move(1,1);self.page.screenshot(path=str(base.OUT/f'area17-{self.WIDTH}x{self.HEIGHT}-{name}.png'))
     def task(self,tid,s=None):return next(t for t in (s or self.state())['tasks'] if t['id']==tid)
-    def clipboard(self):return self.page.evaluate('()=>navigator.clipboard.readText()')
+    def clipboard(self):
+        raw=self.page.evaluate('()=>navigator.clipboard.readText()')
+        self.record('raw','actual clipboard OS text before CRLF-pair comparison normalization',raw)
+        return clipboard_lf(raw)
 
     # ---------- fixture through the product UI ----------
     def start(self,c):
@@ -136,7 +143,7 @@ class Area17(unittest.TestCase):
     # ---------- the whole flow for one fixture ----------
     def flow(self,cid):
         c=CASES[cid];area,other=self.start(c);A=self.request_in(area,c['request'])
-        text,h=self.file_export(A);self.record('raw','file handoff text (clipboard)',text);self.check_record('file export',text,h)
+        text,h=self.file_export(A);self.record('comparison','file handoff text (clipboard; CRLF pairs normalized)',text);self.check_record('file export',text,h)
         self.check_true('file export: return.2 template with the same anchor',all(x in text for x in ['"schemaVersion": "agentflow.return.2"',f'"areaId": "{area}"',f'"basedOn": {h["anchor"]["understanding"]}','## 현재 사용자 구상']),h['anchor'])
         self.check('file export: identical idea printed once (the current-plan line points to the request-time copy)',text.count(c['note']),1)
         self.check('file export: anchor stamp = idea at export',h['anchor']['stamp']['note'],c['note'])
@@ -213,7 +220,7 @@ class Area17(unittest.TestCase):
         self.page.locator('#nav-work').click();prev=self.page.locator('#handoff-preview');prev.locator('> summary').click();expect(self.page.locator('#handoff-text')).to_be_visible()
         shown=self.page.locator('#handoff-text').input_value();self.shot(f'{cid}-03-handoff-preview');prev.locator('> summary').click();expect(self.page.locator('#handoff-text')).to_be_hidden()
         self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
-        nxt=self.clipboard();self.check('preview shown before copying = the copied text',shown,nxt);self.record('raw','next handoff text (clipboard)',nxt);hn=self.task(self.state()['currentTaskId'])['handoffs'][-1];self.check_record('next handoff',nxt,hn)
+        nxt=self.clipboard();self.check('preview shown before copying = the copied text',shown,nxt);self.record('comparison','next handoff text (clipboard; CRLF pairs normalized)',nxt);hn=self.task(self.state()['currentTaskId'])['handoffs'][-1];self.check_record('next handoff',nxt,hn)
         i,j=nxt.find('## 현재 사용자 구상'),nxt.find('## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증')
         self.check_true('next handoff: user plan first, then the attributed description',0<i<j,[i,j])
         self.check_true('next handoff: description text and its source',c['summary'] in nxt and c['origin'] in nxt)
@@ -317,7 +324,7 @@ def next_request(self,cid):
     self.page.locator('#result-show-area').click();self.page.locator('#panel-new-request').click()
     N=self.send_next(area,'[합성] 같은 영역의 다음 요청 · 구상과 조건은 그대로')
     self.page.locator('#nav-work').click();self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
-    t=self.clipboard();self.record('raw','next request handoff (clipboard)',t);self.check_record('next request handoff',t,self.task(N)['handoffs'][-1])
+    t=self.clipboard();self.record('comparison','next request handoff (clipboard; CRLF pairs normalized)',t);self.check_record('next request handoff',t,self.task(N)['handoffs'][-1])
     j=t.find('## 영역 현재 설명 — 전달 기록을 정리한 참고 설명 · 앱 미검증')
     self.check_true('next request handoff: valid description carried, attributed, after the user plan',j>0 and c['summary'] in t and c['origin'] in t and 0<t.find('## 현재 사용자 구상')<j,j)
     self.check_true('next request handoff: proposal only as unadopted reference',c['proposal'] not in t[:j] and '미채택 제안 · 사용자가 채택하지 않음' in t)
@@ -325,7 +332,7 @@ def next_request(self,cid):
     self.page.locator('#nav-space').click();self.page.locator(f'#node-info-{area}').click();self.page.locator('#panel-edit > summary').click()
     self.page.locator('#panel-note').fill('[합성] 사용자가 명시적으로 바꾼 구상');self.page.locator('#panel-save').click();base.saved(self.page)
     self.page.locator('#nav-work').click();self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
-    t2=self.clipboard();self.record('raw','handoff after explicit idea change (clipboard)',t2)
+    t2=self.clipboard();self.record('comparison','handoff after explicit idea change (clipboard; CRLF pairs normalized)',t2)
     self.check_true('after explicit idea change: description text excluded and the exclusion stated',c['summary'] not in t2 and '현재 설명으로 쓰지 않습니다' in t2)
 Area17.next_request=next_request
 def send_next(self,area,body):
