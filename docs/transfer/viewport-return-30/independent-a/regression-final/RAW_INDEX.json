@@ -1,0 +1,50 @@
+[
+  {
+    "originalPath": "base29/execution/raw/http-console.jsonl",
+    "originalBytes": 4510,
+    "originalSHA256": "86f7a3d5482caec19dc839f457e34541583196ea34c0e6d707b731b8f741f271",
+    "gzipPath": "base29/execution/raw/http-console.jsonl.gz",
+    "gzipSHA256": "339892153520096968b8d3ce610181fbc07f9fcd316735387942d0df78725c8b",
+    "roundTripByteEqual": true
+  },
+  {
+    "originalPath": "base29/execution/raw/received20-observations.jsonl",
+    "originalBytes": 0,
+    "originalSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gzipPath": "base29/execution/raw/received20-observations.jsonl.gz",
+    "gzipSHA256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+    "roundTripByteEqual": true
+  },
+  {
+    "originalPath": "base29/execution/raw/viewport30-observations.jsonl",
+    "originalBytes": 157198,
+    "originalSHA256": "470f925bfdada0e003886892b1657d19e6d689ccf68ae0c3a0e393e0e28bacba",
+    "gzipPath": "base29/execution/raw/viewport30-observations.jsonl.gz",
+    "gzipSHA256": "5682d6aee21c3f205544fcf6ee269ca0ddc79f6c3fad8c3f71a2e0ae39e0a4bd",
+    "roundTripByteEqual": true
+  },
+  {
+    "originalPath": "candidate30/execution/raw/http-console.jsonl",
+    "originalBytes": 4510,
+    "originalSHA256": "b4dda8b4a03684700cb3ed1f840f5f0848713a41a4a0bd6cc3c06c8242a3a6a0",
+    "gzipPath": "candidate30/execution/raw/http-console.jsonl.gz",
+    "gzipSHA256": "c6cf429805095246064511f349dbad309276383c5999e3388a4ec494b48a6a26",
+    "roundTripByteEqual": true
+  },
+  {
+    "originalPath": "candidate30/execution/raw/received20-observations.jsonl",
+    "originalBytes": 0,
+    "originalSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gzipPath": "candidate30/execution/raw/received20-observations.jsonl.gz",
+    "gzipSHA256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+    "roundTripByteEqual": true
+  },
+  {
+    "originalPath": "candidate30/execution/raw/viewport30-observations.jsonl",
+    "originalBytes": 165126,
+    "originalSHA256": "c8349fde4fecd68bde82fbda8ffeeac3ba453d800651c82687843cd9777b1bc0",
+    "gzipPath": "candidate30/execution/raw/viewport30-observations.jsonl.gz",
+    "gzipSHA256": "ea0333c3f3b5182ca78066b698ce87ee443384693976240c2bbcfc984a29f8cd",
+    "roundTripByteEqual": true
+  }
+]

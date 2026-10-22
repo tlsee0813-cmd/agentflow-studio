@@ -1,0 +1,174 @@
+[
+  {
+    "name": "base29",
+    "changedSourceFiles": [],
+    "compiledFiles": [
+      {
+        "path": "app/continuity/dist/public/client/app.js",
+        "bytes": 300741,
+        "sha256": "96dac6e825bb06b6563696b8132ec60194ee181f853ead53d0ea503f7914bca8"
+      },
+      {
+        "path": "app/continuity/dist/public/client/presentation.js",
+        "bytes": 7833,
+        "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+      },
+      {
+        "path": "app/continuity/dist/public/client/runtime-static.js",
+        "bytes": 1936,
+        "sha256": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+      },
+      {
+        "path": "app/continuity/dist/public/client/runtime.js",
+        "bytes": 2567,
+        "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336"
+      },
+      {
+        "path": "app/continuity/dist/public/index.html",
+        "bytes": 17960,
+        "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/attention.js",
+        "bytes": 5422,
+        "sha256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/domain.js",
+        "bytes": 77648,
+        "sha256": "f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/guidance.js",
+        "bytes": 6701,
+        "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/hierarchy.js",
+        "bytes": 2489,
+        "sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/mock.js",
+        "bytes": 18360,
+        "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/outcome.js",
+        "bytes": 4887,
+        "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/plan-facts.js",
+        "bytes": 4655,
+        "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/storage.js",
+        "bytes": 12708,
+        "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/types.js",
+        "bytes": 2672,
+        "sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/validation.js",
+        "bytes": 50121,
+        "sha256": "5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4"
+      },
+      {
+        "path": "app/continuity/dist/public/styles.css",
+        "bytes": 74233,
+        "sha256": "d32e770b0b8208d48b050250512a94b68d4f2342b7841a51e0280d1387a5fefc"
+      }
+    ]
+  },
+  {
+    "name": "candidate30",
+    "changedSourceFiles": [],
+    "compiledFiles": [
+      {
+        "path": "app/continuity/dist/public/client/app.js",
+        "bytes": 301039,
+        "sha256": "1c7a6cc6d00268e81757cedd582f882a0f748b7769f952f84cf538cd9195287d"
+      },
+      {
+        "path": "app/continuity/dist/public/client/presentation.js",
+        "bytes": 7833,
+        "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+      },
+      {
+        "path": "app/continuity/dist/public/client/runtime-static.js",
+        "bytes": 1936,
+        "sha256": "59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a"
+      },
+      {
+        "path": "app/continuity/dist/public/client/runtime.js",
+        "bytes": 2567,
+        "sha256": "7e17a22466b36de7095df73638ef76017239580bc3327a013551407446d82336"
+      },
+      {
+        "path": "app/continuity/dist/public/index.html",
+        "bytes": 17960,
+        "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/attention.js",
+        "bytes": 5422,
+        "sha256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/domain.js",
+        "bytes": 77648,
+        "sha256": "f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/guidance.js",
+        "bytes": 6701,
+        "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/hierarchy.js",
+        "bytes": 2489,
+        "sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/mock.js",
+        "bytes": 18360,
+        "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/outcome.js",
+        "bytes": 4887,
+        "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/plan-facts.js",
+        "bytes": 4655,
+        "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/storage.js",
+        "bytes": 12708,
+        "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/types.js",
+        "bytes": 2672,
+        "sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53"
+      },
+      {
+        "path": "app/continuity/dist/public/shared/validation.js",
+        "bytes": 50121,
+        "sha256": "5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4"
+      },
+      {
+        "path": "app/continuity/dist/public/styles.css",
+        "bytes": 74233,
+        "sha256": "d32e770b0b8208d48b050250512a94b68d4f2342b7841a51e0280d1387a5fefc"
+      }
+    ]
+  }
+]

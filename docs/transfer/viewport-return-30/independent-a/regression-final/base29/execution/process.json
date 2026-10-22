@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle30-regression-final/runner.py"
+  ],
+  "cwd": "/workspace/browser-env/cycle30-regression-final/base29/app",
+  "startUTC": "2026-10-22T21:43:42.631952+00:00",
+  "endUTC": "2026-10-22T21:43:48.919285+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "4ce7f6302f4ebc0ad06b595d319356594dc4b0c0f058d38daaca54a2b953edcd",
+  "testUnchanged": true,
+  "wrapper": "read-only response/console listeners; teardown return-code recording; no UI/action/assertion changes"
+}

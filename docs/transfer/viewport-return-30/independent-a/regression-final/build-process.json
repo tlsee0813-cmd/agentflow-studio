@@ -1,0 +1,84 @@
+[
+  {
+    "source": "base29",
+    "label": "typecheck",
+    "command": [
+      "tsc",
+      "--noEmit",
+      "-p",
+      "continuity/tsconfig.json"
+    ],
+    "startUTC": "2026-10-22T21:43:15.687601+00:00",
+    "endUTC": "2026-10-22T21:43:17.661653+00:00",
+    "exit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "base29",
+    "label": "build-root",
+    "command": [
+      "node",
+      "scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T21:43:17.661737+00:00",
+    "endUTC": "2026-10-22T21:43:18.948485+00:00",
+    "exit": 0,
+    "stdoutSHA256": "450914f0c3f2118a725a106715da4c6f4dcff695f625940e4627593a2d0d0697",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "base29",
+    "label": "build-continuity",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T21:43:18.948539+00:00",
+    "endUTC": "2026-10-22T21:43:21.434486+00:00",
+    "exit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "candidate30",
+    "label": "typecheck",
+    "command": [
+      "tsc",
+      "--noEmit",
+      "-p",
+      "continuity/tsconfig.json"
+    ],
+    "startUTC": "2026-10-22T21:43:21.434605+00:00",
+    "endUTC": "2026-10-22T21:43:23.632495+00:00",
+    "exit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "candidate30",
+    "label": "build-root",
+    "command": [
+      "node",
+      "scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T21:43:23.632548+00:00",
+    "endUTC": "2026-10-22T21:43:24.926064+00:00",
+    "exit": 0,
+    "stdoutSHA256": "450914f0c3f2118a725a106715da4c6f4dcff695f625940e4627593a2d0d0697",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "candidate30",
+    "label": "build-continuity",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T21:43:24.926122+00:00",
+    "endUTC": "2026-10-22T21:43:27.508964+00:00",
+    "exit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

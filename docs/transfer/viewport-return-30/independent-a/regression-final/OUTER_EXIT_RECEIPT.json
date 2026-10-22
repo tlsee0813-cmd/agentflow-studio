@@ -1,0 +1,17 @@
+{
+  "scope": "Transcribed exec_command/write_stdin completion metadata, not full tool transcript",
+  "buildCollector": {
+    "sessionId": 67746,
+    "observedExitCode": 0
+  },
+  "base29Collector": {
+    "sessionId": 21570,
+    "observedExitCode": 1
+  },
+  "candidate30Collector": {
+    "sessionId": 57032,
+    "observedExitCode": 0
+  },
+  "childExitOrigin": "Each process.json subprocess.run.returncode; collector sys.exit(childReturnCode).",
+  "serverExitOrigin": "Original tearDownClass terminate/wait, read-only poll recorded separately (-15)."
+}

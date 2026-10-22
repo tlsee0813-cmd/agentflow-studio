@@ -1,0 +1,35 @@
+test_01_zero_work_scroll_return (__main__.Viewport30.test_01_zero_work_scroll_return) ... ok
+test_02_deep_work_scroll_return (__main__.Viewport30.test_02_deep_work_scroll_return) ... FAIL
+test_01_zero_work_scroll_return (__main__.Viewport30Wide.test_01_zero_work_scroll_return) ... ok
+test_02_deep_work_scroll_return (__main__.Viewport30Wide.test_02_deep_work_scroll_return) ... FAIL
+
+======================================================================
+FAIL: test_02_deep_work_scroll_return (__main__.Viewport30.test_02_deep_work_scroll_return)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle30-regression-final/base29/app/continuity/tests/viewport30_browser.py", line 101, in test_02_deep_work_scroll_return
+    def test_02_deep_work_scroll_return(self):self.return_from_work(True)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle30-regression-final/base29/app/continuity/tests/viewport30_browser.py", line 93, in return_from_work
+    self.geometry('same native click task: first map geometry',first)
+  File "/workspace/browser-env/cycle30-regression-final/base29/app/continuity/tests/viewport30_browser.py", line 69, in geometry
+    self.assertAlmostEqual(v['layout']['height'],expected,delta=1,msg='final available height, before any repair')
+AssertionError: 704 != 479.109375 within 1 delta (224.890625 difference) : final available height, before any repair
+
+======================================================================
+FAIL: test_02_deep_work_scroll_return (__main__.Viewport30Wide.test_02_deep_work_scroll_return)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle30-regression-final/base29/app/continuity/tests/viewport30_browser.py", line 101, in test_02_deep_work_scroll_return
+    def test_02_deep_work_scroll_return(self):self.return_from_work(True)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle30-regression-final/base29/app/continuity/tests/viewport30_browser.py", line 93, in return_from_work
+    self.geometry('same native click task: first map geometry',first)
+  File "/workspace/browser-env/cycle30-regression-final/base29/app/continuity/tests/viewport30_browser.py", line 69, in geometry
+    self.assertAlmostEqual(v['layout']['height'],expected,delta=1,msg='final available height, before any repair')
+AssertionError: 884 != 659.109375 within 1 delta (224.890625 difference) : final available height, before any repair
+
+----------------------------------------------------------------------
+Ran 4 tests in 6.124s
+
+FAILED (failures=2)

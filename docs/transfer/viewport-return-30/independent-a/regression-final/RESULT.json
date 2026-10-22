@@ -1,0 +1,1156 @@
+{
+  "base29": {
+    "process": {
+      "command": [
+        "/workspace/browser-env/venv/bin/python",
+        "/workspace/browser-env/cycle30-regression-final/runner.py"
+      ],
+      "cwd": "/workspace/browser-env/cycle30-regression-final/base29/app",
+      "startUTC": "2026-10-22T21:43:42.631952+00:00",
+      "endUTC": "2026-10-22T21:43:48.919285+00:00",
+      "actualChildExit": 1,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "4ce7f6302f4ebc0ad06b595d319356594dc4b0c0f058d38daaca54a2b953edcd",
+      "testUnchanged": true,
+      "wrapper": "read-only response/console listeners; teardown return-code recording; no UI/action/assertion changes"
+    },
+    "environment": {
+      "node": "v22.16.0",
+      "playwright": "1.57.0",
+      "chromium": "154.0.8037.57",
+      "transport": "real browser -> real local HTTP -> mock; injected faults in named tests",
+      "paidCalls": 0
+    },
+    "scenes": {
+      "__main__.Viewport30.test_01_zero_work_scroll_return": {
+        "pc": [
+          1280,
+          720
+        ],
+        "departure": {
+          "y": 0,
+          "layer": "work",
+          "saving": null
+        },
+        "first": {
+          "y": 0,
+          "viewport": [
+            1280,
+            720
+          ],
+          "layer": "space",
+          "saving": null,
+          "layout": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 974,
+            "height": 479.109375,
+            "top": 224.890625,
+            "right": 1238,
+            "bottom": 704,
+            "left": 264
+          },
+          "map": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 974,
+            "height": 479.109375,
+            "top": 224.890625,
+            "right": 1238,
+            "bottom": 704,
+            "left": 264
+          },
+          "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+          "computedTransform": null,
+          "listOpen": false,
+          "selected": null,
+          "collapsed": [
+            "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+          ],
+          "offscreen": {
+            "hidden": true,
+            "text": "화면 밖 영역 0개 · 모두 보기"
+          }
+        },
+        "frames": [
+          {
+            "y": 0,
+            "viewport": [
+              1280,
+              720
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          },
+          {
+            "y": 0,
+            "viewport": [
+              1280,
+              720
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          }
+        ],
+        "framesCompleted": true
+      },
+      "__main__.Viewport30.test_02_deep_work_scroll_return": {
+        "pc": [
+          1280,
+          720
+        ],
+        "departure": {
+          "y": 1200,
+          "layer": "work",
+          "saving": null
+        },
+        "first": {
+          "y": 0,
+          "viewport": [
+            1280,
+            720
+          ],
+          "layer": "space",
+          "saving": null,
+          "layout": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 974,
+            "height": 704,
+            "top": 224.890625,
+            "right": 1238,
+            "bottom": 928.890625,
+            "left": 264
+          },
+          "map": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 974,
+            "height": 704,
+            "top": 224.890625,
+            "right": 1238,
+            "bottom": 928.890625,
+            "left": 264
+          },
+          "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+          "computedTransform": null,
+          "listOpen": false,
+          "selected": null,
+          "collapsed": [
+            "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+          ],
+          "offscreen": {
+            "hidden": true,
+            "text": "화면 밖 영역 0개 · 모두 보기"
+          }
+        },
+        "frames": [
+          {
+            "y": 0,
+            "viewport": [
+              1280,
+              720
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 704,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 928.890625,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 704,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 928.890625,
+              "left": 264
+            },
+            "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          },
+          {
+            "y": 0,
+            "viewport": [
+              1280,
+              720
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 704,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 928.890625,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 704,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 928.890625,
+              "left": 264
+            },
+            "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          }
+        ],
+        "framesCompleted": true
+      },
+      "__main__.Viewport30Wide.test_01_zero_work_scroll_return": {
+        "pc": [
+          1440,
+          900
+        ],
+        "departure": {
+          "y": 0,
+          "layer": "work",
+          "saving": null
+        },
+        "first": {
+          "y": 0,
+          "viewport": [
+            1440,
+            900
+          ],
+          "layer": "space",
+          "saving": null,
+          "layout": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 1134,
+            "height": 659.109375,
+            "top": 224.890625,
+            "right": 1398,
+            "bottom": 884,
+            "left": 264
+          },
+          "map": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 1134,
+            "height": 659.109375,
+            "top": 224.890625,
+            "right": 1398,
+            "bottom": 884,
+            "left": 264
+          },
+          "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+          "computedTransform": null,
+          "listOpen": false,
+          "selected": null,
+          "collapsed": [
+            "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+          ],
+          "offscreen": {
+            "hidden": true,
+            "text": "화면 밖 영역 0개 · 모두 보기"
+          }
+        },
+        "frames": [
+          {
+            "y": 0,
+            "viewport": [
+              1440,
+              900
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          },
+          {
+            "y": 0,
+            "viewport": [
+              1440,
+              900
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          }
+        ],
+        "framesCompleted": true
+      },
+      "__main__.Viewport30Wide.test_02_deep_work_scroll_return": {
+        "pc": [
+          1440,
+          900
+        ],
+        "departure": {
+          "y": 1200,
+          "layer": "work",
+          "saving": null
+        },
+        "first": {
+          "y": 0,
+          "viewport": [
+            1440,
+            900
+          ],
+          "layer": "space",
+          "saving": null,
+          "layout": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 1134,
+            "height": 884,
+            "top": 224.890625,
+            "right": 1398,
+            "bottom": 1108.890625,
+            "left": 264
+          },
+          "map": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 1134,
+            "height": 884,
+            "top": 224.890625,
+            "right": 1398,
+            "bottom": 1108.890625,
+            "left": 264
+          },
+          "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+          "computedTransform": null,
+          "listOpen": false,
+          "selected": null,
+          "collapsed": [
+            "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+          ],
+          "offscreen": {
+            "hidden": true,
+            "text": "화면 밖 영역 0개 · 모두 보기"
+          }
+        },
+        "frames": [
+          {
+            "y": 0,
+            "viewport": [
+              1440,
+              900
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 884,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 1108.890625,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 884,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 1108.890625,
+              "left": 264
+            },
+            "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          },
+          {
+            "y": 0,
+            "viewport": [
+              1440,
+              900
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 884,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 1108.890625,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 884,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 1108.890625,
+              "left": 264
+            },
+            "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          }
+        ],
+        "framesCompleted": true
+      }
+    },
+    "httpResponses": 12,
+    "httpBodyDiskAllEqual": true,
+    "pageerrors": [],
+    "captureErrors": [],
+    "serverExits": [
+      {
+        "kind": "server-process",
+        "class": "Viewport30",
+        "actualReturnCode": -15
+      },
+      {
+        "kind": "server-process",
+        "class": "Viewport30Wide",
+        "actualReturnCode": -15
+      }
+    ]
+  },
+  "candidate30": {
+    "process": {
+      "command": [
+        "/workspace/browser-env/venv/bin/python",
+        "/workspace/browser-env/cycle30-regression-final/runner.py"
+      ],
+      "cwd": "/workspace/browser-env/cycle30-regression-final/candidate30/app",
+      "startUTC": "2026-10-22T21:43:52.450465+00:00",
+      "endUTC": "2026-10-22T21:43:58.576031+00:00",
+      "actualChildExit": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSHA256": "fb3e075170db52c7c9519735186615d7562d92144f76af71c4588c285b620e07",
+      "testUnchanged": true,
+      "wrapper": "read-only response/console listeners; teardown return-code recording; no UI/action/assertion changes"
+    },
+    "environment": {
+      "node": "v22.16.0",
+      "playwright": "1.57.0",
+      "chromium": "154.0.8037.57",
+      "transport": "real browser -> real local HTTP -> mock; injected faults in named tests",
+      "paidCalls": 0
+    },
+    "scenes": {
+      "__main__.Viewport30.test_01_zero_work_scroll_return": {
+        "pc": [
+          1280,
+          720
+        ],
+        "departure": {
+          "y": 0,
+          "layer": "work",
+          "saving": null
+        },
+        "first": {
+          "y": 0,
+          "viewport": [
+            1280,
+            720
+          ],
+          "layer": "space",
+          "saving": null,
+          "layout": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 974,
+            "height": 479.109375,
+            "top": 224.890625,
+            "right": 1238,
+            "bottom": 704,
+            "left": 264
+          },
+          "map": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 974,
+            "height": 479.109375,
+            "top": 224.890625,
+            "right": 1238,
+            "bottom": 704,
+            "left": 264
+          },
+          "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+          "computedTransform": null,
+          "listOpen": false,
+          "selected": null,
+          "collapsed": [
+            "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+          ],
+          "offscreen": {
+            "hidden": true,
+            "text": "화면 밖 영역 0개 · 모두 보기"
+          }
+        },
+        "frames": [
+          {
+            "y": 0,
+            "viewport": [
+              1280,
+              720
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          },
+          {
+            "y": 0,
+            "viewport": [
+              1280,
+              720
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          }
+        ],
+        "framesCompleted": true
+      },
+      "__main__.Viewport30.test_02_deep_work_scroll_return": {
+        "pc": [
+          1280,
+          720
+        ],
+        "departure": {
+          "y": 1200,
+          "layer": "work",
+          "saving": null
+        },
+        "first": {
+          "y": 0,
+          "viewport": [
+            1280,
+            720
+          ],
+          "layer": "space",
+          "saving": null,
+          "layout": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 974,
+            "height": 479.109375,
+            "top": 224.890625,
+            "right": 1238,
+            "bottom": 704,
+            "left": 264
+          },
+          "map": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 974,
+            "height": 479.109375,
+            "top": 224.890625,
+            "right": 1238,
+            "bottom": 704,
+            "left": 264
+          },
+          "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+          "computedTransform": null,
+          "listOpen": false,
+          "selected": null,
+          "collapsed": [
+            "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+          ],
+          "offscreen": {
+            "hidden": true,
+            "text": "화면 밖 영역 0개 · 모두 보기"
+          }
+        },
+        "frames": [
+          {
+            "y": 0,
+            "viewport": [
+              1280,
+              720
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          },
+          {
+            "y": 0,
+            "viewport": [
+              1280,
+              720
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 974,
+              "height": 479.109375,
+              "top": 224.890625,
+              "right": 1238,
+              "bottom": 704,
+              "left": 264
+            },
+            "transform": "translate(-77.5px, 101.154px) scale(0.619231)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          }
+        ],
+        "framesCompleted": true
+      },
+      "__main__.Viewport30Wide.test_01_zero_work_scroll_return": {
+        "pc": [
+          1440,
+          900
+        ],
+        "departure": {
+          "y": 0,
+          "layer": "work",
+          "saving": null
+        },
+        "first": {
+          "y": 0,
+          "viewport": [
+            1440,
+            900
+          ],
+          "layer": "space",
+          "saving": null,
+          "layout": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 1134,
+            "height": 659.109375,
+            "top": 224.890625,
+            "right": 1398,
+            "bottom": 884,
+            "left": 264
+          },
+          "map": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 1134,
+            "height": 659.109375,
+            "top": 224.890625,
+            "right": 1398,
+            "bottom": 884,
+            "left": 264
+          },
+          "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+          "computedTransform": null,
+          "listOpen": false,
+          "selected": null,
+          "collapsed": [
+            "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+          ],
+          "offscreen": {
+            "hidden": true,
+            "text": "화면 밖 영역 0개 · 모두 보기"
+          }
+        },
+        "frames": [
+          {
+            "y": 0,
+            "viewport": [
+              1440,
+              900
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          },
+          {
+            "y": 0,
+            "viewport": [
+              1440,
+              900
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          }
+        ],
+        "framesCompleted": true
+      },
+      "__main__.Viewport30Wide.test_02_deep_work_scroll_return": {
+        "pc": [
+          1440,
+          900
+        ],
+        "departure": {
+          "y": 1200,
+          "layer": "work",
+          "saving": null
+        },
+        "first": {
+          "y": 0,
+          "viewport": [
+            1440,
+            900
+          ],
+          "layer": "space",
+          "saving": null,
+          "layout": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 1134,
+            "height": 659.109375,
+            "top": 224.890625,
+            "right": 1398,
+            "bottom": 884,
+            "left": 264
+          },
+          "map": {
+            "x": 264,
+            "y": 224.890625,
+            "width": 1134,
+            "height": 659.109375,
+            "top": 224.890625,
+            "right": 1398,
+            "bottom": 884,
+            "left": 264
+          },
+          "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+          "computedTransform": null,
+          "listOpen": false,
+          "selected": null,
+          "collapsed": [
+            "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+          ],
+          "offscreen": {
+            "hidden": true,
+            "text": "화면 밖 영역 0개 · 모두 보기"
+          }
+        },
+        "frames": [
+          {
+            "y": 0,
+            "viewport": [
+              1440,
+              900
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          },
+          {
+            "y": 0,
+            "viewport": [
+              1440,
+              900
+            ],
+            "layer": "space",
+            "saving": null,
+            "layout": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "map": {
+              "x": 264,
+              "y": 224.890625,
+              "width": 1134,
+              "height": 659.109375,
+              "top": 224.890625,
+              "right": 1398,
+              "bottom": 884,
+              "left": 264
+            },
+            "transform": "translate(-299.298px, 124.825px) scale(0.950877)",
+            "computedTransform": null,
+            "listOpen": false,
+            "selected": null,
+            "collapsed": [
+              "branch-toggle-A_0dc25aa4-51c7-4acf-9bde-3f77ab2d4dae"
+            ],
+            "offscreen": {
+              "hidden": true,
+              "text": "화면 밖 영역 0개 · 모두 보기"
+            }
+          }
+        ],
+        "framesCompleted": true
+      }
+    },
+    "httpResponses": 12,
+    "httpBodyDiskAllEqual": true,
+    "pageerrors": [],
+    "captureErrors": [],
+    "serverExits": [
+      {
+        "kind": "server-process",
+        "class": "Viewport30",
+        "actualReturnCode": -15
+      },
+      {
+        "kind": "server-process",
+        "class": "Viewport30Wide",
+        "actualReturnCode": -15
+      }
+    ]
+  }
+}
