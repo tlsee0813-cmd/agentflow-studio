@@ -178,6 +178,9 @@ function recallPlace(entryId:string) {
 let selectedReturnTaskId:string|undefined;
 // Local file reads/clipboard are not tickets or durable project data. Replacement invalidates both.
 let projectEpoch=0,resultRead=0,recoveryRead=0,resultMessage='';
+// Only the pending file read's automatic reveal is cancelled by leaving its work view.
+// The selected bytes and the existing read/import guards keep their separate lifetime.
+let resultRevealToken:{context:boolean}|null=null;
 let resultSelection:{rawText:string;projectId:string;revision:number;epoch:number}|null=null;
 let lastFileExport:{taskId:string;text:string}|null=null;
 function returnChoiceRequired():boolean {
@@ -282,6 +285,7 @@ function entryLimits():string {
 }
 function readyForAI():boolean {return !!config&&(route==='example'?config.mode==='mock':config.mode==='mock'||(config.configured&&config.paidEnabled&&$<HTMLInputElement>('consent').checked));}
 function displayView() {
+  if(view!=='work'||route==='projects'||resultRevealToken&&resultRevealToken.context!==contextOpen)resultRevealToken=null;
   const inProject=route!=='projects',starting=inProject&&!project.tasks.length;
   document.body.dataset.route=route;document.body.dataset.starting=String(starting);
   // FLOW091: inside a project (past the welcome) the head is one compact line so the map / next action come first.
@@ -2568,8 +2572,9 @@ $('result-file-input').addEventListener('change',async()=>{
   const input=$<HTMLInputElement>('result-file-input'),file=input.files?.[0];input.value='';if(!file)return;
   const read=++resultRead,epoch=projectEpoch,projectId=project.id,revision=project.revision,current=project.currentTaskId,from=view;
   const entry=target.kind==='entry'?target.ref.entryId:null;
+  const revealToken={context:contextOpen};resultRevealToken=revealToken;
   const reveal=()=>{
-    if(read!==resultRead||epoch!==projectEpoch||project.id!==projectId||entry!==(target.kind==='entry'?target.ref.entryId:null)||from!=='work'||view!=='work'||route==='projects'||revision!==project.revision||current!==project.currentTaskId)return;
+    if(resultRevealToken!==revealToken||read!==resultRead||epoch!==projectEpoch||project.id!==projectId||entry!==(target.kind==='entry'?target.ref.entryId:null)||from!=='work'||view!=='work'||route==='projects'||revision!==project.revision||current!==project.currentTaskId)return;
     const focus=document.getElementById('result-file-review-heading')??document.getElementById('result-file-error')??document.getElementById('result-file-message');if(!focus)return;
     $<HTMLDetailsElement>('compose-panel').open=true;$<HTMLDetailsElement>('result-file-panel').open=true;
     focus.tabIndex=-1;focus.scrollIntoView({block:'center'});focus.focus({preventScroll:true});
@@ -2583,6 +2588,7 @@ $('result-file-input').addEventListener('change',async()=>{
     resultSelection={rawText,projectId,revision:project.revision,epoch};resultMessage='원문과 연결 대상을 확인한 뒤 가져오세요.';renderResultFile();
     reveal();
   }catch(e){if(read!==resultRead||epoch!==projectEpoch)return;resultMessage=resultError(e)+' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';renderResultFile();reveal();}
+  finally{if(resultRevealToken===revealToken)resultRevealToken=null;}
 });
 $('import-file').addEventListener('change',async()=>{
   const input=$<HTMLInputElement>('import-file'),file=input.files?.[0];input.value='';if(!file)return;
