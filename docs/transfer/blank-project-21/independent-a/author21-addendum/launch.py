@@ -1,0 +1,3 @@
+from pathlib import Path
+import subprocess,json,datetime,sys
+R=Path(__file__).parent;s=datetime.datetime.now(datetime.timezone.utc).isoformat();p=subprocess.run(['/workspace/browser-env/venv/bin/python',str(R/'collector.py')],capture_output=True);(R/'collector.stdout.log').write_bytes(p.stdout);(R/'collector.stderr.log').write_bytes(p.stderr);(R/'external-process.json').write_text(json.dumps({'startUTC':s,'endUTC':datetime.datetime.now(datetime.timezone.utc).isoformat(),'actualCollectorExit':p.returncode,'launcherPlannedExit':p.returncode},indent=2));print(p.stdout.decode(),flush=True);sys.exit(p.returncode)

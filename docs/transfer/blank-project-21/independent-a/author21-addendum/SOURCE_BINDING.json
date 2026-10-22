@@ -1,0 +1,47 @@
+{
+  "sourceCommit": "15b60a10b34bb06c7c173d0eca5653faef8e2bb6",
+  "productRuntimeCommit": "922848c0957992f84b8a0e2696a86b98d5f51c0d",
+  "sourceTree": "48172ddeb20b269466dbcb8c3463270f4a971f9b",
+  "changedPaths": [
+    ".github/workflows/verify.yml",
+    "app/continuity/tests/blank21_browser.py"
+  ],
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 260706,
+      "sha256": "5370d0a6acd3a1b60e3f5c81e8e3a4be647665d23c18667f810b6df7634f9f58",
+      "oldNewLocalByteEqual": true,
+      "afterExecutionSHA256": "5370d0a6acd3a1b60e3f5c81e8e3a4be647665d23c18667f810b6df7634f9f58"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 72783,
+      "sha256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38",
+      "oldNewLocalByteEqual": true,
+      "afterExecutionSHA256": "86dda3c11a927d454a0086096b255271b70447bf6f9c354ca09060cd0373ed38"
+    },
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sha256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0",
+      "oldNewLocalByteEqual": true,
+      "afterExecutionSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    },
+    {
+      "path": "app/continuity/tests/received20_browser.py",
+      "bytes": 32681,
+      "sha256": "2f9fbf172a2cbeb08804e7bb08a8e63921420673a2c7a1639ea5f5b44f5499e8",
+      "oldNewLocalByteEqual": true,
+      "afterExecutionSHA256": "2f9fbf172a2cbeb08804e7bb08a8e63921420673a2c7a1639ea5f5b44f5499e8"
+    }
+  ],
+  "exactAuthorScript": {
+    "path": "app/continuity/tests/blank21_browser.py",
+    "bytes": 14808,
+    "sha256": "41c9f1b2eb71b55f1b468cfb3e0903c6f512394056cc2f1f1d5474f5815501e4"
+  },
+  "execution": "Exact new checker bytes staged outside product source; execute from current app cwd with PYTHONPATH pointing to same-byte current tests/helpers. Product/source/test assertions unmodified.",
+  "sourceAfterUnchanged": true,
+  "observedAfterUTC": "2026-10-22T16:28:49.045138+00:00"
+}
