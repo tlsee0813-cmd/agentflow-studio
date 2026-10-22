@@ -1,0 +1,46 @@
+{
+  "kind": "AREA18 UI fix2 local preflight receipt",
+  "parentReportedCommit": "9330fc3b19994dd5398d4373c1a3fc703bd28574",
+  "evidenceClass": "Local author static/type checks only; Cloud before evidence is separate",
+  "changes": [
+    "capturePanelReading ignores the project list, another project, and hidden old panel DOM.",
+    "Global Escape respects defaultPrevented, IME/keyCode229 and internal input controls.",
+    "AREA18 adds actual same-entry project-list reading roundtrip plus protected and normal Escape comparisons."
+  ],
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "sha256": "0960C84D1D6804660DB97F64B5D25E704FF73C9F3CD7CBE18C6E4BBB1D1327DC"
+    },
+    {
+      "path": "app/continuity/tests/hierarchy18_browser.py",
+      "sha256": "D6B36BEEF040F55A8442C20E529E56FBF4BF45C4A76A2E55B3394CF938FF8834"
+    }
+  ],
+  "checks": {
+    "browser": "NOT_RUN",
+    "pythonAST": {
+      "exit": 0,
+      "file": "app/continuity/tests/hierarchy18_browser.py",
+      "execution": "ast.parse only; test module not imported"
+    },
+    "gitDiffCheck": {
+      "exit": 0
+    },
+    "server": "NOT_RUN",
+    "typeSyntaxBoundary": {
+      "stdoutSummary": "IDEA015 type, syntax and client/server boundary checks passed. app/node_modules (locked dependency)",
+      "exit": 0,
+      "runtime": "Node24 author auxiliary",
+      "command": "node continuity/scripts/check.mjs"
+    }
+  },
+  "limitations": [
+    "No local UI/browser/server execution.",
+    "Cloud before measurements and independent reruns are not reproduced by this receipt.",
+    "The separate three post-request reading-anchor failures remain under investigation; their assertions and product behavior were not changed in this fix."
+  ],
+  "css": "unchanged",
+  "commitPush": "not performed by this author"
+}
+
