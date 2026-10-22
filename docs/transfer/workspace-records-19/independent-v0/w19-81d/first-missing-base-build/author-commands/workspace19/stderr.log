@@ -1,0 +1,25 @@
+setUpClass (__main__.Workspace19) ... ERROR
+setUpClass (__main__.Workspace19Wide) ... ERROR
+
+======================================================================
+ERROR: setUpClass (__main__.Workspace19)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle19-test-v1-candidate/app/continuity/tests/browser.py", line 54, in setUpClass
+    if not re.search(r'http://127\.0\.0\.1:\d+',line):raise RuntimeError('Mock server did not start: '+line)
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Mock server did not start: 
+
+======================================================================
+ERROR: setUpClass (__main__.Workspace19Wide)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle19-test-v1-candidate/app/continuity/tests/browser.py", line 54, in setUpClass
+    if not re.search(r'http://127\.0\.0\.1:\d+',line):raise RuntimeError('Mock server did not start: '+line)
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Mock server did not start: 
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.117s
+
+FAILED (errors=2)

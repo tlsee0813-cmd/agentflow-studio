@@ -1,0 +1,26 @@
+[
+  {
+    "name": "continuity-build",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-22T13:50:50.776037+00:00",
+    "endUTC": "2026-10-22T13:50:53.410064+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "6c1e6ff6b44e59136d3c6e980e5a33050f87b67de43b68bbfb013396a094f602",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "workspace19",
+    "command": [
+      "/workspace/browser-env/venv/bin/python",
+      "continuity/tests/workspace19_browser.py"
+    ],
+    "startUTC": "2026-10-22T13:50:53.416090+00:00",
+    "endUTC": "2026-10-22T13:50:53.688178+00:00",
+    "actualChildExit": 5,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "bde9e14cdb1c94e19fd22fb1018778ad42742f13d55449f9032a6458680dbbd7"
+  }
+]

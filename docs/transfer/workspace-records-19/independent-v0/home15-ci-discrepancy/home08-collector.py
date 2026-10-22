@@ -1,0 +1,6 @@
+from pathlib import Path
+import os,subprocess,datetime,json,sys,hashlib
+R=Path(__file__).parent;A=R.parent.parent/'cycle19-test-v1-candidate/app';O=R/'home08-exact';O.mkdir(exist_ok=True);env={k:os.environ[k] for k in ['PATH','HOME','TMPDIR'] if k in os.environ};env.update(PATH='/workspace/browser-env/tools/node_modules/.bin:'+env['PATH'],BROWSER_EXECUTABLE='/usr/bin/chromium',BROWSER_TRANSPORT='direct-http',AI_MODE='mock',ALLOW_PAID_AI='false');rows=[];now=lambda:datetime.datetime.now(datetime.timezone.utc).isoformat()
+for i in [1,2]:
+ out=O/str(i);out.mkdir(exist_ok=True);start=now();cmd=['/workspace/browser-env/venv/bin/python','continuity/tests/home15_browser.py','Home15.test_08_read_full_name_and_purpose_before_entering'];p=subprocess.run(cmd,cwd=A,env={**env,'IDEA015_EVIDENCE_DIR':str(out)},capture_output=True);(out/'stdout.log').write_bytes(p.stdout);(out/'stderr.log').write_bytes(p.stderr);rows.append({'iteration':i,'source':'81d50c72f6e4182b04d3b00576e9ae662c16cac2','command':cmd,'startUTC':start,'endUTC':now(),'actualChildExit':p.returncode,'stdoutSHA256':hashlib.sha256(p.stdout).hexdigest(),'stderrSHA256':hashlib.sha256(p.stderr).hexdigest()});(O/'process.json').write_text(json.dumps(rows,indent=2))
+code=int(any(r['actualChildExit'] for r in rows));sys.exit(code)

@@ -1,0 +1,584 @@
+[
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1440x900-false-frame-fallback.png",
+    "bytes": 104752,
+    "sha256": "ee513fe0ddc3c5fde778767de26b3342744b4c226da8f47903055e22c8c0ffa2",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1280x720-long-body-fixed-actions.png",
+    "bytes": 136653,
+    "sha256": "83ecbd73ac5da8f0781f98122d11621acd3aed4ded84b0a28cc2e52cc2f86b8c",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1440x900-powertoys-leaf.png",
+    "bytes": 172327,
+    "sha256": "6ff935cc89df45d179428496c71d3bd9af8c66e0568a665a1ef31c8c9d39c168",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1280x720-false-frame-fallback.png",
+    "bytes": 86944,
+    "sha256": "c67a6ea36301877d508b27d44b0a76164290fb2630e736c9f033f2fcccf2bdb0",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1440x900-long-body-fixed-actions.png",
+    "bytes": 170778,
+    "sha256": "b1e297a93e981eeb5798b785edb19e89fdcba8cd24233ad2bef16d2d62cc196f",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1280x720-powertoys-returned.png",
+    "bytes": 108049,
+    "sha256": "add314dba9decacc78f381fda9395b28c75f3b1cc566225feed6ef4fabecaa3f",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1440x900-product13-returned.png",
+    "bytes": 153414,
+    "sha256": "9c49a9f9f456a9c60e6d1426ba1a5fb847140a6aa6074fe8c97af49dac6e7172",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1280x720-product13-leaf.png",
+    "bytes": 145726,
+    "sha256": "6b102486b978fbbd745d56988d18dcd548d763634dde8ae58ecebe03b987989e",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1280x720-product13-returned.png",
+    "bytes": 128687,
+    "sha256": "b18859b25464d89eb1d8b6d96a0e1f832f4645a901a6ecb1c04c0f624ad77615",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1440x900-product13-leaf.png",
+    "bytes": 177883,
+    "sha256": "accdc21a4a0962ff0526797538522bd4c36d8fbef4a0a426f4a59b4b47f895a2",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1440x900-powertoys-returned.png",
+    "bytes": 136527,
+    "sha256": "d60a2aa78bd12d56cb01b06eb0c7f5f76406decc97db53c2bc2f4aced9516853",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/hierarchy18/raw/area18-1280x720-powertoys-leaf.png",
+    "bytes": 141864,
+    "sha256": "1daa7e60085df8fae9838731606aa0cc266637d390ff409807dbcd6dbfe3b486",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-02-task-context.png",
+    "bytes": 158980,
+    "sha256": "3ef1b4486fe5c62c3f3b5f1c6d57b1e1ad197f6f0f358b24058e1fdf9a969a97",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-13-area-back-A.png",
+    "bytes": 180128,
+    "sha256": "56de527a518c4b91622c83fda8ee78a43fdb843ac0b0b403f67a8f077739647c",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-06-back-after-edit.png",
+    "bytes": 129649,
+    "sha256": "7da3abc04c8ad4072c5b12ca5d42d26ac1d04d00b2795b8c1fd4e48b1dc51dcd",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-11-idea-open-back.png",
+    "bytes": 120946,
+    "sha256": "c4a651eb38f4b82bcac481ebd37333c1fa445fbdd8b14694a35b98884142ff3d",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-06-back-after-edit.png",
+    "bytes": 106832,
+    "sha256": "36d6fb4f263c3f88ff3783aa5dc1f611114d19d36be177c358cfb858de924020",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-12-area-back-R.png",
+    "bytes": 140883,
+    "sha256": "91852a6fba9c56519e1f5687cd4097015a273734cac321f94b76943e68e1306c",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-10-long-fields-open.png",
+    "bytes": 129945,
+    "sha256": "7cf100a1254c5d6de4392dc0e78e3aabf5dfffdf6742271ad5192fd7b4cbddd6",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-10-long-fields-open.png",
+    "bytes": 95253,
+    "sha256": "00ca75f57f2d6593ef55aca6aaf0e5cc9a7e1357802846c7a266bbf65097f9f9",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-390-task.png",
+    "bytes": 68285,
+    "sha256": "93745dedfeeaaa8cf6c065ae175eda640e47633c19a60c0dd6cf5d13a71f3393",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-05-edit-A.png",
+    "bytes": 69072,
+    "sha256": "2288ae42bd0f82e91809133a36c4aec7beec0929d4fa1d0108cfe7cfe90260f3",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-01-area-read.png",
+    "bytes": 97109,
+    "sha256": "d65c4ca85e8973ca725da3348d95994bc815b26d38ff1180fddf215dbbedd014",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-01-area-read.png",
+    "bytes": 121246,
+    "sha256": "e1f87a4be11e7d7a081ed488e511f0bed0a9091d932f21a5dcdfec75f9c3d8f1",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-04-edit-R.png",
+    "bytes": 82723,
+    "sha256": "0694a0055cba314f8e5895d16beddc6262537db946b573e8dcb022834a9b05e3",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-02-task-context.png",
+    "bytes": 133276,
+    "sha256": "4890d24045c70f8ab665e8226adde70d3435a47750d7c3c1176c0d881709fa43",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-03-back-read.png",
+    "bytes": 133267,
+    "sha256": "9ab38ad1db349b494d9d329e4e465c1068919ca666729e52929c00aa882039b9",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-07-empty.png",
+    "bytes": 81755,
+    "sha256": "d22bf8ee71fc5bae80ea3ecc3a2c7f8ade5a4556761a0e88eb8841472ae0bbb5",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-08-stale.png",
+    "bytes": 93962,
+    "sha256": "8b847baeae21679ca296e2fe29506dadbfbdd24ae7dbe383444dcc1381ae7b10",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-04-edit-R.png",
+    "bytes": 68952,
+    "sha256": "3a492cc4a4074bea1499579c776c5d1cfc8d52733da63abaaeee037f60e1d5b4",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-05-edit-A.png",
+    "bytes": 87977,
+    "sha256": "d0f10ca44c40ccd8a919ef4afa9fc9af25346367f0fa106b2d52074a7ad3f13d",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-13-area-back-A.png",
+    "bytes": 139513,
+    "sha256": "7d778c874beaa02e36ee47f843b3f54bc71f0407c0fb0e5ff019f05ca7671720",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-11-idea-open-back.png",
+    "bytes": 92247,
+    "sha256": "76e77c2c1b7b6c268b3cbf5b277c98ee257f3a0247ed07e5d9381fe462ee1c2e",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-12-area-back-R.png",
+    "bytes": 180275,
+    "sha256": "352dda412d83ed4bb13e86ebd051ae2d633077b7129a881237eacfda81103269",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1440-03-back-read.png",
+    "bytes": 158950,
+    "sha256": "42b40e74be54bf9bd5a9ee3265d0094730dee327bae3f997ad9fc6876dbcb5f7",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc12/raw/pc12-1280-09-no-copy.png",
+    "bytes": 77241,
+    "sha256": "4655ee5fad061de8b5e7545e736e5452673b930a3d8c9ec789f571eaf9b5f882",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1440-01-default.png",
+    "bytes": 85926,
+    "sha256": "7f335f4632b6a2d577018c944c07994e04581c4f80f300fe7953d2f2097716f3",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1280-07-tools.png",
+    "bytes": 79409,
+    "sha256": "cf0c4d45986603a079d8e3f455bcf0b5577a2fbb5535b4c660d2251f5e2eb72e",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1440-02-selected.png",
+    "bytes": 115713,
+    "sha256": "e2a31cdd2fcc69b7e75e3ad9640db9c09e9bd6ed212925fcb1fac5b281fbd3bb",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1280-01-default.png",
+    "bytes": 78790,
+    "sha256": "8331b7f4fca39ca4a7076da12d43a598c60bede9c0103d23bfbb01832cf339ac",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1440-08-tools-notice.png",
+    "bytes": 94689,
+    "sha256": "ffd90c2aaf2c6353e52553e8079a71c43bf5b916d2b2cfadd146b2b5a6f9ae30",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1440-03-notice.png",
+    "bytes": 97621,
+    "sha256": "c97c5eb93d9e0742783b596f86632bae45ee0b302a4eef47bb11dd392decb6c6",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1440-05-back-A-records-open.png",
+    "bytes": 111954,
+    "sha256": "43fb55ad5b62af192378c6c690ecb188b8f3fe75c85bb24b211ce7b7701efbb5",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1440-04-back-R.png",
+    "bytes": 119953,
+    "sha256": "f86865a885f140c2258094a0f36aa3c770a7d01242881b20f6f9385c39044161",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1280-08-tools-notice.png",
+    "bytes": 87416,
+    "sha256": "bda2f94c9fcfd42f678000ce14bf2ea77c4adc248a3ce816ac2bb979ffe23794",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1280-03-notice.png",
+    "bytes": 90267,
+    "sha256": "edef643822db3babad79b1fc09aa4da6e0088c2551f19ad49ae96b03d338b6cc",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1280-04-back-R.png",
+    "bytes": 105052,
+    "sha256": "a0dc9e0ea50ba8f35b1815a00240cfba24abf432c0217e5456d9703a1eba4b2a",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1280-02-selected.png",
+    "bytes": 101645,
+    "sha256": "c2f757db2bd0c6ebcf820477552389ab4f08ac0fd7521bd50cf56ed36c33e04f",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1440-07-tools.png",
+    "bytes": 86413,
+    "sha256": "fe49278a3c05832e82af0a49dc8afc5fce70077a2a1f04943546ab30fe3b2c41",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1280-06-long.png",
+    "bytes": 125905,
+    "sha256": "4b8d1ec2be308d7c2d98d6b7bed3e7e1ba6ffd055eae55f518fbaa645b4d3efb",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/pc13/raw/pc13-1280-05-back-A-records-open.png",
+    "bytes": 99728,
+    "sha256": "e1f6f28fbb1b5324ae2ee710d7b66cc48e12f4bf5048952df957a58a22a1dad2",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1280-03-r2-opening.png",
+    "bytes": 184083,
+    "sha256": "21e269175595c2cce789e92756e99613a81a1786495254f4a3b2851fd44e467b",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1280-01-before-pick.png",
+    "bytes": 150648,
+    "sha256": "207f39b962d271b9b6767839459da2b933c6a4608c0a1977387782a60a0cda7d",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1440-05-unsent-opened.png",
+    "bytes": 116378,
+    "sha256": "901b796927256140050152eacf71b522a7cfc767019a8da1e427aad78bfc1040",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1280-09-redraw-kept.png",
+    "bytes": 164515,
+    "sha256": "5e9a2d4a58112d7415001744a4045e5087b483552d8039598a76aeb734187c77",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1280-02-f10-picked.png",
+    "bytes": 159889,
+    "sha256": "e5b79c292be96d513894d6f28fb96702a97a1304827ef0e51f5ebcfff008ca86",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1280-06-stale.png",
+    "bytes": 153427,
+    "sha256": "b671f861f45d63afde2617f4a46ae737b8447bd454767c8266819cf8b2ccf9cb",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1440-04-r2-full.png",
+    "bytes": 268175,
+    "sha256": "e05f0d820e8f1760dc1be9d8016d60202acd2e67378041d95b9b2e458cfae0a6",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1440-02-f10-picked.png",
+    "bytes": 197060,
+    "sha256": "8dab53ed35a40833a16c2cf7be433511526c330ac61b20eaf046ad9bae4661cf",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1280-07-archived.png",
+    "bytes": 115477,
+    "sha256": "b587d1a723f14872f4b1f398fcc93538ebe70d51bfd4adfde2ef5207c9a36155",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1280-05-unsent-opened.png",
+    "bytes": 101159,
+    "sha256": "867de81e666e6b7ca61671233b4f23dffa434951570ccf79fe835494c6eec01a",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1440-03-r2-opening.png",
+    "bytes": 213370,
+    "sha256": "646dbe141a43ba70171e31c64def9a65d9d687a1df3b4044a70c2ffd36b69797",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1440-01-before-pick.png",
+    "bytes": 186837,
+    "sha256": "006f8fd17b92e185b367657551580d01556e56baf61902ed2be7aedb38aedb47",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/report16/raw/report16-1280-04-r2-full.png",
+    "bytes": 181423,
+    "sha256": "bd11cd6063de3788e6d503ff30f5507e58772e5c42411aa4abe13c10ad18dc9d",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1280-zero.png",
+    "bytes": 35302,
+    "sha256": "3c829019b3796020e770bd3d46b7791a75d1a45c24de4e0225e70b2e45f0cb26",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-390-six.png",
+    "bytes": 87037,
+    "sha256": "611a2b56a5e493b274c4a9000a75928bfa69e94712aa6e74e14010d9f1ba9c22",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1440-one.png",
+    "bytes": 43105,
+    "sha256": "e659b615766c2eb10a21dedc17d11f710fe71bcf1033137525ab1dee0f51f1c1",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1440-six.png",
+    "bytes": 92332,
+    "sha256": "10dfeaa8a6d46b753a2c6d87d5064fcc54ca16bd85e9686ff809d86486093d6c",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1440-A-space.png",
+    "bytes": 75606,
+    "sha256": "89277d6cb166ba9f8cf08f8af79fec7289e15fb5035d58a6ab70e01b7f77adb7",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1440-zero.png",
+    "bytes": 37151,
+    "sha256": "50057c8c8d8ea0f101e9f3c8645bf44a30bdae31bf545247f95c3c7067f8da77",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1280-six.png",
+    "bytes": 86926,
+    "sha256": "5aaa1931cda540ffd37ad3527560fb47df5324479a7caa8206dbf04d20a36a4f",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1280-A-space.png",
+    "bytes": 70966,
+    "sha256": "244fb9a05f8aad04ed1e862300c06fe67531860cefb8fd8b71b6d6434bf6c197",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1280-one.png",
+    "bytes": 41428,
+    "sha256": "e93faf3d8eb40188a496e336dd508c742625e95219957433f635cbe66bd0719f",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1280-read-open.png",
+    "bytes": 195308,
+    "sha256": "84aa58d175a1c7801da34f6653be989778e1763e957dfed68d05ba8df2b9ec86",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/home15/raw/home15-1440-read-open.png",
+    "bytes": 240438,
+    "sha256": "27ea68b7e0ee8c7426caa5aa9baa92de0100907f6fd993f1e709b6ea3184336a",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-product13-02-evidence.png",
+    "bytes": 163541,
+    "sha256": "fb5a2c27c669f04987c6b26c825fe7f99f6c6bb44de93d807d04771fe7b693b9",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-product13-01-located.png",
+    "bytes": 163869,
+    "sha256": "5d95354ac3ba4468003b39c9fe1e46506990b32f0e67af3b578308683f5f0e43",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-powertoys-01-located.png",
+    "bytes": 133708,
+    "sha256": "07667ae8617b415ad62cdadc2ddc7e31aee291fd1a826e772f8a45d9ead08813",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-03-stale-correction-draft.png",
+    "bytes": 99151,
+    "sha256": "05a9e94ca7294c3e060d6c1a786d2fb13aae29196389fb667aad55c329c6f87e",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-04-synthetic-conflict-history.png",
+    "bytes": 91509,
+    "sha256": "e7831f63c92701e4049964e77a2b65ed0d57bb9dc5783d211466d3ca3e747f42",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-06-long-area-screen.png",
+    "bytes": 134282,
+    "sha256": "d94fbdba56bccd5903d97213bbba4e88b2e5c979f3e11779e7975c23c7c23006",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-powertoys-02-evidence.png",
+    "bytes": 152664,
+    "sha256": "c0313535a63b57e732a990560c836ba3cf448bfe3005c06929c1f9a3d431ad24",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-powertoys-03-handoff-preview.png",
+    "bytes": 112744,
+    "sha256": "744638e828e354648f79219ff23aa143ecad45a2558da6327ae34779f92e77d7",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-05-long-panel.png",
+    "bytes": 135815,
+    "sha256": "f86d6f9705871970c836ad68a03876190de63d049d9c68555d28bfac2ca7dfc4",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-product13-03-handoff-preview.png",
+    "bytes": 113107,
+    "sha256": "fe87ab62c031971aa9571309cada1be864e2051ee5249c6ad82890026e403bc6",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-powertoys-03-handoff-preview.png",
+    "bytes": 142308,
+    "sha256": "5ca3858cfec4dfeec8a896be0fb185bb7aa2ca5f6fa16ab7c010210a6ffd045e",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-05-long-panel.png",
+    "bytes": 158093,
+    "sha256": "5e19190f6bd54b33c0ca1709f2ac7ac9d76905c3b08446368f8e65adea0910be",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-powertoys-01-located.png",
+    "bytes": 153303,
+    "sha256": "e4413ee16ae98409b028f9be06671229cb7c0637124b1d1287edbbc7c943f7be",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-powertoys-02-evidence.png",
+    "bytes": 131356,
+    "sha256": "f220cae0bd047198d143590c995d9f6da6a15ae17acfc6a0418e42559595da6f",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-04-synthetic-conflict-history.png",
+    "bytes": 110534,
+    "sha256": "ee9f5cc8969db33406bfcfe703ddf5fcfae3081149a4ddf961376a30acf56f97",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-product13-01-located.png",
+    "bytes": 143983,
+    "sha256": "19e80df8925642be09cc27f2e27cd9545ecab881ba9a4a6e101a6b17c4f0cfa9",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-product13-07-locate-new-request-work.png",
+    "bytes": 154970,
+    "sha256": "3d0d32d7b1c1083bb8934275cdb9e20e133c3ffa21c0f2258debcab4d86c511f",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-03-stale-correction-draft.png",
+    "bytes": 126738,
+    "sha256": "56d10421c34dbca95ea34863fb5d58f1d11b0f1773aa4dd68d946129a6ca3b3d",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-product13-02-evidence.png",
+    "bytes": 140219,
+    "sha256": "bf3afbb2ef1beca946514cf1e764f8b6bb3de70fd9b473b23ebead128c422b6a",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-product13-03-handoff-preview.png",
+    "bytes": 142806,
+    "sha256": "03dbaf927b8541ccdd9e23b05b35735a833d55510cd794b549c135817bf9afe9",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1440x900-06-long-area-screen.png",
+    "bytes": 153075,
+    "sha256": "ce008848f79e588b5239e9739f087e143c7a9501fc8f768e65e484db080ecbde",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  },
+  {
+    "path": "author-commands/understanding17/raw/area17-1280x720-product13-07-locate-new-request-work.png",
+    "bytes": 117512,
+    "sha256": "5e7ee25a2f3f2cbfd3b1257f9dcc675dfb1aec0ccfb1b98252dda85c65cf6333",
+    "reason": "nonrepresentative passing regression auto-capture; original retained locally; raw JSONL/input/log published"
+  }
+]

@@ -1,0 +1,7 @@
+from pathlib import Path
+import os,subprocess,sys,json,datetime,hashlib
+R=Path(__file__).parent;A=R.parent/'cycle19-candidate/app';O=R/'commands';O.mkdir(exist_ok=True);e={k:os.environ[k] for k in ['PATH','HOME','TMPDIR'] if k in os.environ};e.update(PATH='/workspace/browser-env/tools/node_modules/.bin:'+e['PATH'],AI_MODE='mock',ALLOW_PAID_AI='false',BROWSER_EXECUTABLE='/usr/bin/chromium',BROWSER_TRANSPORT='direct-http',IDEA015_EVIDENCE_DIR=str(O/'browser-outputs'));rows=[]
+for i,c in enumerate([['npm','run','check'],['npm','run','build'],['node','continuity/scripts/check.mjs'],['node','continuity/scripts/build.mjs']]):
+ start=datetime.datetime.now(datetime.timezone.utc).isoformat();p=subprocess.run(c,cwd=A,env=e,capture_output=True);log=O/f'{i+1}.log';log.write_bytes(p.stdout+p.stderr);rows.append({'command':c,'start':start,'end':datetime.datetime.now(datetime.timezone.utc).isoformat(),'actualreturncode':p.returncode,'log':log.name,'sha256':hashlib.sha256(log.read_bytes()).hexdigest()});(O/'process.json').write_text(json.dumps(rows,indent=2));print(i+1,p.returncode,flush=True)
+ if i==1:(R/'ready').write_text('ready')
+sys.exit(int(any(x['actualreturncode'] for x in rows)))
