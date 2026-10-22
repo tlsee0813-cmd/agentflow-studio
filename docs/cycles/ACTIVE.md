@@ -4,7 +4,7 @@
 ## 진행 중 — 정확한 수신 결과 이어가기20
 [계약](2026-10-22-received-result-20/INPUT.md) · [조사와 선택](2026-10-22-received-result-20/RESEARCH.md). 출발제품은 아래19 병합본이다. 현재 작업B를 유지한 채 받은 A의 정확한 보고→당시 인계 조건/현재 구상→필요한 다음 요청→원래 보기의 흐름을 연결한다. 일반 return.1과 exactduplicate도 같은 입구를 사용한다. 과거 ExportRecord.work와 현재작업문을 구분한다. 새 inbox·자동판정·스키마/일반엔진은 범위밖이다.
 
-19 종료 후 범위와 코드 영향을 나누어 검토했다. Sol High 구현/검사, Astra High 판단·독립 정적 검토, 기존 Cloud 독립 실행을 분리한다. Web Pro 조사를 공식 원문과 대조했다. 아직20 구현 후보·브라우저 수용은 없다.
+19 종료 후 범위와 코드 영향을 나누어 검토했다. Sol High 구현/검사, Astra High 판단·독립 정적 검토, 기존 Cloud 독립 실행을 분리한다. Web Pro 조사를 공식 원문과 대조했다. Sol 작성자는 분리된 작업공간에서 제품과 검사를 각각 구현 중이며 Astra는 정확한 대상·조건·복귀의 반례를 검토한다. 새 일반 수신 입구는 기존 work 파일입력부에만 두고 전역 알림함을 추가하지 않는다. 아직20 후보 동결·브라우저 수용은 없다.
 
 ## 마지막 완료 — PC 지도와 기록 읽기19
 [결과·한계·공유 화면](2026-10-22-workspace-records-19/RESULT.md) · [PR10](https://github.com/tlsee0813-cmd/agentflow-studio/pull/10). 최종 acfafd2dd6426e3fa6fa5443bd2e67d8461608c9, checkpoint 병합41b6854e877d8cc4054dcf6af47b597602b7cf11. 지도 상단과 기록 패널의 공간 점유를 줄이고 정확한 기록→부분→요청/인계→복귀를 제한 통합했다.
