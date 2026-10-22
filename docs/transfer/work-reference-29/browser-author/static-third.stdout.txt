@@ -1,0 +1,33 @@
+{
+  "kind": "AST 및 바이트 검사",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "methods": [
+    "test_01_actual_editor_B_not_compose_or_map_A",
+    "test_02_first_key_keeps_body_nodes_focus_selection_and_excludes_stale_reference",
+    "test_03_new_applied_revision_requires_explicit_reopen",
+    "test_04_task_project_lifecycle_and_held_only"
+  ],
+  "pcCases": 8,
+  "workflow": "기존 바이트를 유지하고 AREA17 뒤에 한 단계만 추가; timeout 25분 유지",
+  "notRun": [
+    "fixture 생성",
+    "제품 단위·타입·빌드",
+    "브라우저·서버",
+    "지원 Node22 실제 실행"
+  ],
+  "source": [
+    {
+      "path": "app\\continuity\\tests\\work-description29_browser.py",
+      "bytes": 18969,
+      "sha256": "419bee70d244a22fae64a843467b40b47a4fb3f74c6895f7c666ed3d7a0e25d9",
+      "gitBlob": "8953b14c8136e2fc00bf3bee006a077615225924"
+    },
+    {
+      "path": ".github\\workflows\\verify.yml",
+      "bytes": 11999,
+      "sha256": "e38dab9e764baeca926551689bb3ae4785c18fb4958386696953940ce1e881d5",
+      "gitBlob": "a47ad7fb1be8678d897acf3825cc2d48b3916954"
+    }
+  ],
+  "productChanged": false
+}

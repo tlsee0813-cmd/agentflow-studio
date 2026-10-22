@@ -1,0 +1,28 @@
+{
+  "kind": "순수 준비 전제 검사",
+  "currentB": "T_d0ac1fb0-79e8-410c-8672-d4c8dbcfd3a1",
+  "actualArea": "A_f94eaf25-e6aa-42ae-9322-291e05482ab8",
+  "composeArea": "A_dd7ac2dc-4881-4dc8-91d9-81d2e3ecf8fc",
+  "revision": 2,
+  "valid": true,
+  "by": "user",
+  "heldOnlyC": {
+    "area": "A_8037d0c5-bbf6-4e7c-9228-8bbfd95c74be",
+    "current": null,
+    "held": 1
+  },
+  "late": {
+    "taskId": "T_2ff9ccc1-cbe9-4611-9af7-00c3f271eaa9",
+    "returnId": "H29_B_NEXT",
+    "basedOn": 2,
+    "anchorArea": "A_f94eaf25-e6aa-42ae-9322-291e05482ab8"
+  },
+  "afterLate": {
+    "currentB": "T_d0ac1fb0-79e8-410c-8672-d4c8dbcfd3a1",
+    "revision": 3,
+    "valid": true
+  },
+  "oldTasksExact": true,
+  "serverStarted": false,
+  "browserRun": false
+}

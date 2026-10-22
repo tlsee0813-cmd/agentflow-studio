@@ -1,0 +1,59 @@
+{
+  "createdAt": "2026-10-22T19:43:53.592720+00:00",
+  "baseline": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "scope": "신규 브라우저 검사 1개와 기존 CI 단계 1개 추가; 제품 소스는 읽기만 함",
+  "files": [
+    {
+      "path": "app\\continuity\\tests\\work-description29_browser.py",
+      "bytes": 19527,
+      "sha256": "56cb414de680dc262dbfd74145b078309ac85134e0c7117369f48bea7e2e4082",
+      "gitBlob": "425dda8dd505946a5efe48f4482ebc826ce68782"
+    },
+    {
+      "path": ".github\\workflows\\verify.yml",
+      "bytes": 11999,
+      "sha256": "e38dab9e764baeca926551689bb3ae4785c18fb4958386696953940ce1e881d5",
+      "gitBlob": "a47ad7fb1be8678d897acf3825cc2d48b3916954"
+    }
+  ],
+  "productReadBindings": [
+    {
+      "path": "product29-author/app/continuity/src/client/app.ts",
+      "bytes": 273253,
+      "sha256": "34f3610faae32b01d22f8a3fc52467b4e0b5d0d9c30059c6b4d201e22edc9477",
+      "gitBlob": "27098b83d48cef4289da076c46f0e93011dbe4e0"
+    },
+    {
+      "path": "product29-author/app/continuity/public/styles.css",
+      "bytes": 74194,
+      "sha256": "fb9192e07adb180e55530b3f489125861c542a61a53d7058fd24022b4715115f",
+      "gitBlob": "76530f773595c5712bf5e0b37b6285d060453e04"
+    }
+  ],
+  "checks": {
+    "first": "AST 구문 통과 뒤 workflow 바이트 범위 검사 exit1; UTF8 전송 준비 실수를 수정함. 원시 stdout/stderr/exit 보존. 최초 잘못 준비된 workflow 바이트 자체는 동결하지 않았음.",
+    "second": "AST와 workflow 단일 단계 범위 검사 exit0",
+    "third": "마지막 화면 보존 추가 후 AST와 원본 Git blob·workflow 단일 단계 범위 검사 exit0",
+    "final": "나란히 읽기의 실제 글줄 clip·hit 측정 후 AST와 원본 Git blob·workflow 단일 단계 범위 검사 exit0",
+    "review": "독립 검토에서 글줄 대상이 BODY 전체여서 구상·출처만 보여도 통과할 공백 발견. 선택한 SUMMARY 본문 안 Range/hit로 한정한 뒤 AST와 동일 범위 검사 exit0"
+  },
+  "command": "Python 3.12.14로 evidence/static_check.py 실행. 각 회차 stdout/stderr/exit 파일을 분리 보존함. 테스트 모듈을 import하거나 실행하지 않음.",
+  "independentReview": {
+    "reviewer": "resume_product_judgment_astra",
+    "sourceSha256": "56cb414de680dc262dbfd74145b078309ac85134e0c7117369f48bea7e2e4082",
+    "result": "실제 파일 해시와 SUMMARY 한정 Range/hit 수정, 단일 workflow 단계, 첫 키 즉시 측정, B0 반환 준비를 정적으로 확인. 추가 수정 사항 없음. 브라우저/fixture 실행 통과 판정은 아님."
+  },
+  "notRun": [
+    "fixture 생성 및 유효 입력의 실제 수입",
+    "브라우저/서버",
+    "제품 단위·타입·빌드",
+    "Node22 실제 실행"
+  ],
+  "cases": "4개 행동 장면을 1280×720, 1440×900에서 각각 실행하도록 작성(예정 8개; 실행 통과 수가 아님)",
+  "handoffBoundary": "기존 인계의 현재 설명 구역만 검사함. 원보고에 남은 과거 문구는 금지하지 않음.",
+  "firstKey": "native 키 입력 직후 어떤 click/reach/focus 보정도 하기 전에 DOM·focus·selection·본문·scroll을 측정함.",
+  "fixtureBoundary": "공개 domain API로 생성한 합성 프로젝트를 정상 복구 파일로 가져옴. 실제 사용자 발언·자동 의미 추출이 아니며 저장소/제품 DOM 주입 없음.",
+  "helperBoundary": "received20의 native reach/clip/hit/wheel 메서드만 명시 재사용. 과거 검사 class를 상속하지 않음. import 시 빈 관측 파일 하나가 추가될 수 있으나 기존 suite를 실행하지 않음.",
+  "remoteWritten": false,
+  "productWritten": false
+}

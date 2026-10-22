@@ -1,0 +1,242 @@
+{
+  "prefix": "docs/transfer/work-reference-29/browser-author/",
+  "files": [
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/REPORT.md",
+      "bytes": 1623,
+      "sha256": "5418386c442ccbb09e3fb3ab079904ca09486c9fd128745a790ece4b92b63c95",
+      "gitBlob": "e78861ec54466e2f2095cd3bab1462a071d0fb4d"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/RECEIPT.json",
+      "bytes": 3756,
+      "sha256": "430803cc94d05c928a5bb0ef499822c062e3bb66c4aef49aa69fddeec8444396",
+      "gitBlob": "4601dcf47c274c9c31e9e0f0ec117fc483c860db"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/candidate-tests.patch",
+      "bytes": 20921,
+      "sha256": "1a49923f032cb5f0e427319257f03e7ee93a1326f757ed9ab56b9097ff073634",
+      "gitBlob": "187fb0bb33e2ab29de66f267e90548632c5d8731"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/TRANSFER_NOTE.md",
+      "bytes": 2377,
+      "sha256": "c7568a19310b02dfa53c05c5c114aed7a37c53e1d5e38c50de36933cbe32fb5b",
+      "gitBlob": "cd42119408d540675c54e63e62a1f7b39edce049"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/REVIEW_NOTE.md",
+      "bytes": 1132,
+      "sha256": "d0ba13040e410af19f1968cc0796c3b7b24b658d4633e4b98ec3fbfdab50bb0c",
+      "gitBlob": "f59b65e14a7a6463a84acd010daa6d6736c88140"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static_check.py",
+      "bytes": 2211,
+      "sha256": "6684dfbf2a2c510825bb6d520b971e8e0489fa3abf080410ef9b09f9b62ee5dc",
+      "gitBlob": "18b4e15a822e42f8c1fce6ac52091b45b2a8f4b4"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-first.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-first.stderr.txt",
+      "bytes": 384,
+      "sha256": "c484c771b28d1bb572840fe2d72ab620a1d71ad91aaaba395b833cdc95285611",
+      "gitBlob": "85d5da294573fdb2e3d09c1163c1e3995182f1fe"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-first.exit.txt",
+      "bytes": 1,
+      "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "gitBlob": "56a6051ca2b02b04ef92d5150c9ef600403cb1de"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-second.stdout.txt",
+      "bytes": 1211,
+      "sha256": "a3754462cc210b8989c1d38ba6f914b1ae700ca3d3085f8bff8999da64892f5c",
+      "gitBlob": "a55d044ddc95bac5cefca1c4490897289019ce0a"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-second.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-second.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-third.stdout.txt",
+      "bytes": 1211,
+      "sha256": "a71fe9569da939a0ac935b2e8555c52c46acb694482e1d5a4bba155cd69bc712",
+      "gitBlob": "3699c26204dee45ad657edf808d3cccbaeb8b9c6"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-third.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-third.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-final.stdout.txt",
+      "bytes": 1211,
+      "sha256": "ff4386a62964efaf651b8e8db4c8dce57ece3a4ef93b57c5919db6985014d3a1",
+      "gitBlob": "cbb6045c46977f1de642a7d538ec53415031d43c"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-final.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-final.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-review.stdout.txt",
+      "bytes": 1211,
+      "sha256": "559d6a79ed4d3437ba8335c59f183ceb8f6ae7c437d707e9669b7645f54fe521",
+      "gitBlob": "0a8a4b46a248ecd2c7b2b067474e53bb3e73a96c"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-review.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/static-review.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/FIXTURE_NOTE.md",
+      "bytes": 1366,
+      "sha256": "99daa53dfd00fa69cbe268b317a647ce90dd01deab1e4e8fa03494e56bd375e0",
+      "gitBlob": "277d57f95931dec1a6f6af1832b6280512ab2d1b"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/FIXTURE_RECEIPT.json",
+      "bytes": 496,
+      "sha256": "9f2308cb3cd479105817ab43e25026cb9102b7c3056825ffbef7704831d60f20",
+      "gitBlob": "0f99174629daabe3085fe84fc6418444b2828aef"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/probe_fixture.py",
+      "bytes": 4471,
+      "sha256": "68d5252e2710b35678611870140dda7e52b50a987508f2a731e504da03f72e3e",
+      "gitBlob": "f2f78a97089342bd5317b72a3ca0253b041a9f52"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-node-version.stdout.txt",
+      "bytes": 10,
+      "sha256": "bc697de995dc791df53d688ef69c08994cdffc8ce30c906b1ffc65b131ccd0eb",
+      "gitBlob": "764cde6852628e2a3a2127074e923be9c41cb06f"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-node-version.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-node-version.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-generate.stdout.txt",
+      "bytes": 29455,
+      "sha256": "2e3dbfedfe4cb46d4f59c53ebcc98d07f07c20cf6a9998f6054f0ce5f4ec55c0",
+      "gitBlob": "8e06ad270d3db3703501126e4bb5ff4460288381"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-generate.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-generate.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-check.stdout.txt",
+      "bytes": 749,
+      "sha256": "b8375951d57564a2dc47cbbf58532a5e342c7c79fdede41ecefc0eeb17c499c4",
+      "gitBlob": "cc2277eed4c03dbf33294ac8d889628e9efc63a3"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-check.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-check.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-probe.stdout.txt",
+      "bytes": 496,
+      "sha256": "9f2308cb3cd479105817ab43e25026cb9102b7c3056825ffbef7704831d60f20",
+      "gitBlob": "0f99174629daabe3085fe84fc6418444b2828aef"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-probe.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-probe.exit.txt",
+      "bytes": 1,
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "gitBlob": "c227083464fb9af8955c90d2924774ee50abb547"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-generate.command.json",
+      "bytes": 3355,
+      "sha256": "118ae4d91680dccdbaa134e47b0a1027eaaa30e0b44b7634f0b815ab12743aba",
+      "gitBlob": "7b4e7da12f7a21513f4d2d86e5e5564b807622b8"
+    },
+    {
+      "path": "docs/transfer/work-reference-29/browser-author/fixture-check.command.json",
+      "bytes": 2413,
+      "sha256": "28317c7ab6780592b6c33eed08b1b9438dbc10d824768ab65202c59ac2f70ffb",
+      "gitBlob": "08ba521dd49789ba665a19760d20d7056ee16903"
+    }
+  ],
+  "self": "SHARE_MANIFEST 자체 해시는 expected-blobs-browser-author29.json에 기록",
+  "sourcePayload": "upload-tree-source29.json",
+  "productCommitReportedByRoot": "2a7d078124e96243e949244bec945cc8da2c47ec",
+  "pureFixture": "Node24 생성0/검증0; UI 실행과 구별",
+  "notRun": [
+    "브라우저",
+    "서버",
+    "지원 Node22 실행"
+  ]
+}

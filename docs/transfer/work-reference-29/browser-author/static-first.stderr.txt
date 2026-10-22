@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\������\Documents\Codex\2026-10-15\github-plugin-github-openai-curated-remote-4\work\product29-tests\evidence\static_check.py", line 21, in <module>
+    assert current.count(added)==1 and current.replace(added,b'',1)==before
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

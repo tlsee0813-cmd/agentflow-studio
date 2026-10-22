@@ -1,0 +1,12 @@
+{
+  "testSha256": "56cb414de680dc262dbfd74145b078309ac85134e0c7117369f48bea7e2e4082",
+  "seedUtf8Sha256": "01feeb060336e6bca9f5862056597f8caa1f66a517710f5631a33e87902a3a52",
+  "node": "v24.19.0",
+  "generateExit": 0,
+  "checkExit": 0,
+  "scope": "Node24 보조 순수 domain fixture 생성·정확한 반환 연결 검사. 지원 Node22/정상 UI/브라우저 통과가 아님.",
+  "moduleImported": false,
+  "serverStarted": false,
+  "browserRun": false,
+  "productWritten": false
+}
