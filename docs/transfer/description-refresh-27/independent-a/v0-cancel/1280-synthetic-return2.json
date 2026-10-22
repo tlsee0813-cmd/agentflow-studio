@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_314a7e2e-746f-469a-a1f1-877c2f747aa7",
+  "taskId": "T_ff4d00db-a8a3-4952-aeb4-fa4b5ccdc589",
+  "returnId": "H_bd76e1df-2351-422d-b1fe-3bf3ed049476",
+  "report": "[명시 합성25 보고] 현재 안내 표시는 7일이라고 읽은 외부 보고. 실제 보관 정책 변경·구현·실행을 검증한 기록이 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_4f349242-e54a-4a52-828d-36b7a0fa8283",
+    "basedOn": 0,
+    "summary": "[명시 합성25 외부 설명] 현재 안내 표시는 7일이다. 실제 보관 동작 변경을 확인한 설명은 아니다.",
+    "changes": [
+      "[합성25] 안내 표시를 7일로 읽었다."
+    ],
+    "proposal": null,
+    "origin": "관측자가 실제 UI 내보내기 템플릿에 작성한 합성 설명. 실제 AI·구현·검사 없음."
+  }
+}

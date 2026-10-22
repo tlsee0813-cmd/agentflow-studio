@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "5dcf269bd7f25dec3f6432fb3386adb23c89d526",
+  "expectedScenario": 1,
+  "executed": false,
+  "complete": false,
+  "productExpectedCloseFailure": false,
+  "rows": [],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle27-v0-probe/check.py\", line 4, in <module>\n    u=Observation();u.prepare(1280,720)\n      ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle27-v0-probe/support.py\", line 18, in __init__\n    env=os.environ.copy();env.update(PORT='0',AI_MODE='mock',ALLOW_PAID_AI='false',AI_REQUESTS_PER_MINUTE='60',AI_PROCESS_CALL_CAP='100');self.server=subprocess.Popen([N,'continuity/server/index.mjs','--mock'],cwd=A,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);line=self.server.stdout.readline();self.url=re.search(r'http://127\\.0\\.0\\.1:\\d+',line).group();self.serverStart=line;self.pw=sync_playwright().start();self.browser=self.pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True);self.version=self.browser.version\n                                                                                                                                                                                                                                                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'group'\n",
+  "cleanup": [],
+  "pageerrors": [],
+  "plannedChildExit": 1
+}

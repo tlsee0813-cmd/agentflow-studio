@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/cycle27-v0-probe/check.py"
+  ],
+  "startUTC": "2026-10-22T18:57:11.530260+00:00",
+  "endUTC": "2026-10-22T18:57:18.386922+00:00",
+  "actualChildExit": 1,
+  "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "collectorPlannedExit": 1
+}

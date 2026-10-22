@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle27-v0-probe/check.py", line 4, in <module>
+    u=Observation();u.prepare(1280,720)
+      ^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle27-v0-probe/support.py", line 18, in __init__
+    env=os.environ.copy();env.update(PORT='0',AI_MODE='mock',ALLOW_PAID_AI='false',AI_REQUESTS_PER_MINUTE='60',AI_PROCESS_CALL_CAP='100');self.server=subprocess.Popen([N,'continuity/server/index.mjs','--mock'],cwd=A,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);line=self.server.stdout.readline();self.url=re.search(r'http://127\.0\.0\.1:\d+',line).group();self.serverStart=line;self.pw=sync_playwright().start();self.browser=self.pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True);self.version=self.browser.version
+                                                                                                                                                                                                                                                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'group'
+

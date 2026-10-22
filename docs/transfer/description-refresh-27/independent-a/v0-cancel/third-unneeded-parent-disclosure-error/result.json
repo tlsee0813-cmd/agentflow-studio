@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "5dcf269bd7f25dec3f6432fb3386adb23c89d526",
+  "expectedScenario": 1,
+  "executed": false,
+  "complete": false,
+  "productExpectedCloseFailure": false,
+  "rows": [],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle27-v0-probe/check.py\", line 10, in <module>\n    before=shot('before open');u.click(u.p.locator('#'+eid+' > summary'),'작업 읽기 설명 편집 열기');opened=shot('opened')\n    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/cycle27-v0-probe/support.py\", line 55, in detail\n    if not q.evaluate('e=>e.open'):self.click(q.locator(':scope > summary'),'open '+id)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 15843, in evaluate\n    self._sync(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 191, in evaluate\n    return await self._with_element(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 113, in _with_element\n    handle = await self.element_handle(timeout=timeout)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 319, in element_handle\n    handle = await self._frame.wait_for_selector(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 369, in wait_for_selector\n    await self._channel.send(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.evaluate: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"#task-understanding-more\")\n\n",
+  "cleanup": [],
+  "pageerrors": [],
+  "plannedChildExit": 1
+}
