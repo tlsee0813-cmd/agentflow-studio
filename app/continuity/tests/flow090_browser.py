@@ -300,7 +300,8 @@ class SpatialWorkspace(unittest.TestCase):
         expect(node).to_contain_text('앱에서 이어갈 작업');expect(self.page.locator('#space-view')).not_to_contain_text('지금 이어가는')
         # PC12: the panel no longer picks the latest report; the user picks the request and reads its report there (raw, unverified).
         self.page.locator(f'#node-info-{booking}').click();expect(self.page.locator('#panel-report')).to_have_count(0)
-        expect(self.page.locator('#area-panel')).to_contain_text('외부 도구에서 지금 실행 중이라는 뜻이 아니에요')
+        expect(self.page.locator('#area-panel')).to_contain_text('앱 안의 표시이며')
+        expect(self.page.locator('#area-panel')).to_contain_text('외부 도구의 실행 상태는 아니에요')
         # REPORT16: the report is read by the user's explicit pick on the task screen (not pre-picked); its full text opens on request.
         self.page.locator(f'#panel-task-{task}').click();expect(self.page.locator('#task-pointed')).to_have_count(0)
         self.page.locator(f"#task-report-pick-{rt['id']}").click();res=self.page.locator('#task-pointed')
@@ -395,7 +396,7 @@ class SpatialWorkspace(unittest.TestCase):
         backup=json.loads(self.download('#backup','flow091c-backup.json').read_text(encoding='utf-8'))
         self.assertEqual(backup['schemaVersion'],'idea015.project.7');self.assertEqual([t['background'] for t in backup['tasks']],[t['background'] for t in saved['tasks']])
 
-    # ---------- FLOW093-U: the narrow settings sheet scrolls; its fields keep their height (real HTTP) ----------
+    # ---------- FLOW093-U: the narrow sheet's body scrolls; header/actions and field heights remain (real HTTP) ----------
     def test_17_narrow_sheet_fields_keep_their_height(self):
         self.page.set_viewport_size({'width':390,'height':844})
         booking,notify=self.start(['예약','알림'])
@@ -406,10 +407,14 @@ class SpatialWorkspace(unittest.TestCase):
         size=lambda sel:self.page.locator(sel).bounding_box()['height']
         self.page.locator(f'#list-info-{booking}').click();panel=self.page.locator('#area-panel');expect(panel).to_be_visible()
         self.page.locator('#panel-edit > summary').click()  # PC12: editing name/idea is opened explicitly
-        self.assertGreater(panel.evaluate('(e)=>e.scrollHeight-e.clientHeight'),0,'the panel content is taller than the sheet')
+        body=self.page.locator('#area-panel-body');expect(body).to_be_visible()
+        self.assertGreater(body.evaluate('(e)=>e.scrollHeight-e.clientHeight'),0,'the reading body is taller than its scroll viewport')
+        for sel in ['#area-panel-close','#panel-open','#panel-new-request']:expect(self.page.locator(sel)).to_be_in_viewport()
         note0,name0=size('#panel-note'),size('#panel-name');self.assertGreaterEqual(note0,80);self.assertGreaterEqual(name0,36)
         long='날짜와 시간을 골라 예약 · 아직 못 정함: 결제 방식과 취소 규칙 '*12
         self.page.locator('#panel-note').fill(long);self.page.locator('#panel-note').focus();self.assertEqual(size('#panel-note'),note0,'focus and long text do not squeeze it')
+        body.hover();self.page.mouse.wheel(0,400)
+        for sel in ['#area-panel-close','#panel-open','#panel-new-request']:expect(self.page.locator(sel)).to_be_in_viewport()
         self.page.locator('#panel-open').click();self.page.locator('#nav-space').click();expect(panel).to_be_hidden()
         self.page.locator(f'#list-info-{booking}').click();expect(panel).to_be_visible()
         expect(self.page.locator('#panel-note')).to_have_value(long);self.assertEqual(size('#panel-note'),note0);self.assertEqual(size('#panel-name'),name0)

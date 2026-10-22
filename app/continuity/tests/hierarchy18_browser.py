@@ -77,6 +77,19 @@ class Area18(unittest.TestCase):
         expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',id)
     def open_relations(self):
         self.page.locator('#map-relations-open').click();expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id','@relations')
+    def file_export(self,tid):
+        # Stay in the located work view: nav-work is a new navigation and would discard its explicit return.
+        self.equal('file export uses the actual open request',self.state()['currentTaskId'],tid)
+        count=len(next(t for t in self.state()['tasks'] if t['id']==tid)['handoffs'])
+        self.disclosure('file-return-options');self.page.locator('#copy-file-work').click()
+        expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사');text=self.page.evaluate('()=>navigator.clipboard.readText()');base.saved(self.page)
+        handoffs=next(t for t in self.state()['tasks'] if t['id']==tid)['handoffs'];record=handoffs[-1]
+        self.equal('explicit file-return export adds one stored handoff',len(handoffs),count+1)
+        self.yes('file-return handoff has an actual return ID and anchor',bool(record['returnId']) and record['anchor'] is not None)
+        actual=self.page.evaluate("t=>{let h=0x811c9dc5;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)}return {chars:t.length,digest:(h>>>0).toString(16).padStart(8,'0')}}",text)
+        self.equal('actual clipboard text matches stored handoff chars/digest',actual,{'chars':record['chars'],'digest':record['digest']})
+        self.yes('actual copied text contains this file-return ID',record['returnId'] in text)
+        return text,record
     def load(self,cid='powertoys',mode='normal'):
         s=json.loads(subprocess.check_output(['node','--input-type=module','-e',SEED,cid,mode],cwd=APP,text=True,encoding='utf-8'))
         self.record('source','fixture provenance and synthetic boundary',{'metadata':s['metadata'],'synthetic':s['synthetic'],'mode':mode})
@@ -86,7 +99,7 @@ class Area18(unittest.TestCase):
         self.page.locator('#nav-space').click();self.page.locator('#map-fit').click();return s
     def receive(self,s):
         path=base.OUT/f'area18-{self.WIDTH}-{s["c"]["id"]}-return.json';path.write_text(json.dumps(s['file'],ensure_ascii=False),encoding='utf-8')
-        self.page.locator('#nav-work').click();self.disclosure('result-file-panel');self.page.locator('#result-file-input').set_input_files(str(path));self.page.locator('#accept-result-file').click()
+        self.page.locator('#nav-work').click();self.disclosure('compose-panel');self.disclosure('result-file-panel');self.page.locator('#result-file-input').set_input_files(str(path));self.page.locator('#accept-result-file').click()
         expect(self.page.locator('#result-file-message')).to_contain_text('앱 미검증');base.saved(self.page)
     def geometry_ok(self,name):
         g=self.snap(name)
@@ -129,10 +142,9 @@ class Area18(unittest.TestCase):
         self.page.locator('#draft').fill(endpoint_body);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         endpoint_state=self.state();endpoint_task=next(t for t in endpoint_state['tasks'] if t['id']==endpoint_state['currentTaskId'])
         self.equal('relation route creates one real task',len(endpoint_state['tasks']),endpoint_count+1);self.equal('relation route task belongs to actual endpoint',endpoint_task['areaId'],real_to)
-        self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사')
-        endpoint_text=self.page.evaluate('()=>navigator.clipboard.readText()');self.record('raw','actual relation endpoint handoff',endpoint_text)
+        endpoint_text,endpoint_export=self.file_export(endpoint_task['id']);self.record('raw','actual relation endpoint handoff',endpoint_text)
         self.yes('relation route copied actual new request',endpoint_body in endpoint_text)
-        self.equal('relation route export anchor uses actual endpoint',next(t for t in self.state()['tasks'] if t['id']==endpoint_task['id'])['handoffs'][-1]['anchor']['areaId'],real_to)
+        self.equal('relation route export anchor uses actual endpoint',endpoint_export['anchor']['areaId'],real_to)
         self.page.locator('#work-locate-return').click();expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id','@relations')
         rel_back=self.snap('back from real endpoint')
         for k in ['transform','collapsed','selected']:self.equal(f'endpoint explicit return restores {k}',rel_back[k],rel_start[k])
@@ -156,10 +168,10 @@ class Area18(unittest.TestCase):
         self.equal('new request really creates one task',len(after['tasks']),count+1);self.yes('new task has new identity',tid not in [t['id'] for t in s['p']['tasks']])
         self.equal('new task is owned by actual leaf',task['areaId'],area)
         source=next(x for x in after['sources'] if x['id']==task['sourceIds'][0]);self.equal('new task source kind/body',[source['kind'],source['text']],['request',body])
-        self.page.locator('#copy-work').click();expect(self.page.locator('#notice')).to_contain_text('클립보드에 복사');text=self.page.evaluate('()=>navigator.clipboard.readText()')
+        text,leaf_export=self.file_export(tid)
         self.record('raw','actual copied descendant handoff',text);self.yes('handoff includes current child description',s['c']['summary'] in text)
         self.yes('handoff limits parent context authority','포함 맥락 참고' in text and '자식의 명시 범위·조건을 조상 참고로 확대·축소·대체하지 않습니다' in text)
-        self.equal('stored handoff anchor still points to exact leaf',next(t for t in self.state()['tasks'] if t['id']==tid)['handoffs'][-1]['anchor']['areaId'],area)
+        self.equal('stored handoff anchor still points to exact leaf',leaf_export['anchor']['areaId'],area)
         self.page.locator('#work-locate-return').click();back=self.snap('explicit return after new task and handoff')
         for k in ['transform','collapsed','selected','open','focus']:self.equal(f'full flow restores {k}',back[k],start[k])
         self.reading_restored('full flow restores panel reading anchor after real new content',start_anchor,self.reading(caller))

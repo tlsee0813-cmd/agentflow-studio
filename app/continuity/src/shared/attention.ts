@@ -71,9 +71,14 @@ export function subtreeSignals(p:Project,id:string):AreaSignals[] {
     const own=items.filter(it=>it.areaId===a.id),questions:AreaSignals['questions']=[];
     // taskStatus is a work-view label: export/arrival can take precedence over a question there. A recorded question
     // keeps its own applicability and owner here even after exporting. This read-only projection creates no new task.
-    for(const task of p.tasks){if(isReturnTask(p,task)||!task.advice?.question||areaOf(p,task)!==a.id||taskStatus(p,task)==='시험 문맥 · 실제 요구 아님')continue;
+    for(const task of p.tasks){if(isReturnTask(p,task)||!task.advice?.question||areaOf(p,task)!==a.id)continue;
+      const sources=task.sourceIds.flatMap(id=>{const s=p.sources.find(s=>s.id===id);return s?[s]:[];}),trial=sources.filter(s=>s.kind==='test_answer');
+      // Exact reply provenance can preserve the original real-request question, but never a different question from
+      // test-context reorganisation. Same-text questions share the existing task+text identity; no generation time is inferred.
+      const syntheticReply=trial.length>0&&sources[0]?.kind==='request'&&trial.every(s=>s.replyTo===task.advice!.question!.text);
+      if(trial.length&&!syntheticReply)continue;
       const key=`${a.id}:${task.id}`;if(seen.has(key))continue;seen.add(key);
-      const applicability=questionApplicability(p,task),answered=questionAnswered(p,task),status=answered?'답변 기록 있음':applicability==='active'?(task.advice.question.kind==='fact'?'사실 확인 항목 있음':'제품 선택 항목 있음'):'이전 질문 · 참고 기록';
+      const applicability=questionApplicability(p,task),answered=questionAnswered(p,task),status=syntheticReply?'시험 답변 기록 · 실제 답변 아님':answered?'답변 기록 있음':applicability==='active'?(task.advice.question.kind==='fact'?'사실 확인 항목 있음':'제품 선택 항목 있음'):'이전 질문 · 참고 기록';
       questions.push({kind:'decision',taskId:task.id,returnId:null,areaId:a.id,status,answered,applicability});
     }
     const d=areaDescription(p,a.id);return {areaId:a.id,questions,reports:own.filter(it=>it.kind==='report'),description:{current:d.current,held:d.held}};
