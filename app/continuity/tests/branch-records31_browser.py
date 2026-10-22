@@ -60,6 +60,25 @@ MAP=r'''()=>({matrix:document.querySelector('#space-plane')?.style.transform,
  owner:document.querySelector('#area-panel-body')?.dataset.areaId??null,body:document.querySelector('#area-panel-body')?.scrollTop??null,
  page:scrollY,focus:document.activeElement?.id,entry:document.documentElement.dataset.entryId})'''
 
+# Same trusted click task and subsequent frames remain separate; no observer repairs layout.
+ENTRY_SNAP=r'''owner=>{const v=('''+MAP+r''')(),layout=document.querySelector('.map-layout'),map=document.getElementById('space-map');
+ const line='#subtree-records-'+owner+' .subtree-record .source-meta',first=document.querySelector(line),block=('''+CLIP+r''')(line);
+ let firstLine=null;if(first&&block){const walker=document.createTreeWalker(first,NodeFilter.SHOW_TEXT);let n;
+  while(n=walker.nextNode()){if(!n.data.trim())continue;const range=document.createRange();range.selectNodeContents(n);
+   const r=[...range.getClientRects()].find(r=>r.width>0&&r.height>0);if(!r)continue;
+   const c=block.clip,hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+   firstLine={rect:r.toJSON(),clip:c,inside:r.left>=c.l-.5&&r.right<=c.r+.5&&r.top>=c.t-.5&&r.bottom<=c.b+.5,hit:!!hit&&first.contains(hit)};break}}
+ return {...v,x:scrollX,maxY:document.documentElement.scrollHeight-innerHeight,viewport:[innerWidth,innerHeight],
+ layout:layout?.getBoundingClientRect().toJSON(),map:map?.getBoundingClientRect().toJSON(),subtreeOpen:document.getElementById('subtree-records-'+owner)?.open,
+ firstOwner:first?.closest('[data-owner-area]')?.dataset.ownerArea,firstLine}}'''
+ENTRY_ARM=r'''owner=>{const snap='''+ENTRY_SNAP+r''';let resolve,timer;const p={before:null,first:null,frames:[],done:null};
+ p.done=new Promise(r=>resolve=r);const match=e=>e.isTrusted&&e.target.closest('#branch-records-'+owner);
+ const finish=ok=>{clearTimeout(timer);document.removeEventListener('click',before,true);document.removeEventListener('click',after);resolve({ok,before:p.before,first:p.first,frames:p.frames})};
+ const before=e=>{if(match(e))p.before=snap(owner)};
+ const after=e=>{if(!match(e))return;p.first=snap(owner);document.removeEventListener('click',before,true);document.removeEventListener('click',after);
+ requestAnimationFrame(()=>{p.frames.push(snap(owner));requestAnimationFrame(()=>{p.frames.push(snap(owner));finish(true)})})};
+ document.addEventListener('click',before,true);document.addEventListener('click',after);timer=setTimeout(()=>finish(false),5000);window.__branch31Entry=p}'''
+
 class BranchRecords31(unittest.TestCase):
     WIDTH,HEIGHT=1280,720
     setUpClass=classmethod(base.Browser.setUpClass.__func__)
@@ -130,6 +149,43 @@ class BranchRecords31(unittest.TestCase):
         self.visible(caller);expect(self.page.locator(caller)).to_be_focused()
         self.unchanged(before,data,'정확 보고에서 원 부모 호출행 복귀')
         rr=self.page.locator(caller).bounding_box();self.yes('원 호출행 세로 위치 복원',abs(rr['y']-r['y'])<=2,{'before':r,'after':rr})
+    def test_05_nonzero_page_signal_entry(self):
+        s=self.load();p=s['ids']['P'];signal='#branch-records-'+p
+        # Normal wheel preparation only. No fit/resize/save wait before the measured entry.
+        if self.page.evaluate('scrollY')>0:self.wheel('#space-view',-10000)
+        self.assertLessEqual(self.page.evaluate('scrollY'),1)
+        self.yes('실제 문서에 120px 이동 공간',self.page.evaluate('document.documentElement.scrollHeight-innerHeight')>=120)
+        self.wheel('#space-view',120)
+        before=self.page.evaluate(ENTRY_SNAP,p);data=self.state()
+        self.yes('native page wheel 비영점 준비',before['page']>=119,before)
+        self.visible(signal) # Viewport/ancestor/map clipping and actual centre hit before normal click.
+        self.page.evaluate(ENTRY_ARM,p)
+        try:
+            self.page.locator(signal).click()
+            first=self.page.evaluate('()=>window.__branch31Entry.first')
+            self.yes('click handler 뒤 같은 task 관측',first is not None,first)
+        finally:
+            later=self.page.evaluate('async()=>{const p=window.__branch31Entry;const r=await p.done;delete window.__branch31Entry;return r}')
+            self.record('actual','signal event and following frames; first failure not replaced',later)
+        self.yes('동일 클릭과 두 frame 수집',later['ok'] and len(later['frames'])==2,later)
+        stages=[('trusted capture before product',later['before']),('same click task after product',later['first'])]
+        stages.extend((f'following frame {i+1}',v) for i,v in enumerate(later['frames']))
+        for label,v in stages:
+            self.assertIsNotNone(v,label);self.record('actual',label,v)
+            self.assertAlmostEqual(v['page'],before['page'],delta=1,msg=label+' pageY preserved')
+            self.assertAlmostEqual(v['x'],before['x'],delta=1,msg=label+' pageX preserved')
+            for key in ['matrix','folds']:self.equal(label+' '+key,v[key],before[key])
+            if label=='trusted capture before product':continue
+            expected=max(240,v['viewport'][1]-max(0,v['layout']['top'])-16)
+            self.assertAlmostEqual(v['layout']['height'],expected,delta=1,msg=label+' final available height')
+            self.assertAlmostEqual(v['map']['height'],expected,delta=1)
+            self.assertLessEqual(v['map']['bottom'],v['viewport'][1]-.5)
+            self.equal(label+' exact owner',v['owner'],p);self.yes(label+' subtree open',v['subtreeOpen'])
+            self.equal(label+' exact first owner record',v['firstOwner'],s['ids']['L'])
+            self.yes(label+' first owner line full clip and hit',bool(v['firstLine'] and v['firstLine']['inside'] and v['firstLine']['hit']),v['firstLine'])
+        self.equal('신호진입 current/draft/target/원자료 전체 보존',self.state(),data)
+        self.equal('새 AI 요청 없음',self.posts,[])
+
     def test_01_exact_subtree_old_memo_and_keyboard(self):
         s=self.load();p=s['ids']['P'];q=s['ids']['Q'];signal='#branch-records-'+p
         text=self.page.locator(signal).inner_text()
