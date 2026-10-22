@@ -1,0 +1,15 @@
+--- a/app/continuity/src/client/app.ts
++++ b/app/continuity/src/client/app.ts
+@@ -1378,10 +1378,11 @@
+ }
+ function openBranchRecords(id:string) {
+   const a=areaById(id);if(!a||a.archived||view!=='space')return;
++  const page={x:window.scrollX,y:window.scrollY};
+   capturePanelReading();
+   if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==id)endRecordsExcursion();
+   branchRecordCaller={project:project.id,epoch:projectEpoch,area:id,id:`branch-records-${id}`};
+-  mapSelected=id;sheetOpen=true;panelMode='area';rememberMap();render();
++  mapSelected=id;sheetOpen=true;panelMode='area';rememberMap();render(true,true,()=>window.scrollTo({left:page.x,top:page.y}));
+   // The explicit record entry wins only after render has restored the old panel reading.
+   const body=document.getElementById('area-panel-body'),box=document.getElementById(`subtree-records-${id}`) as HTMLDetailsElement|null;
+   const summary=document.getElementById(`subtree-records-heading-${id}`);

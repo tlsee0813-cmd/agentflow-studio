@@ -1,0 +1,88 @@
+{
+  "status": "candidate frozen; actual UI NOT_RUN",
+  "base": "7c7bdfa8d244d83c2c776b91b6a3a669127ba2e9",
+  "changedFiles": [
+    "app/continuity/src/client/app.ts",
+    "app/continuity/tests/branch-records31_browser.py"
+  ],
+  "checks": {
+    "type-fix2": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "<workspace>\\work\\product31-page-entry-fix2\\app\\node_modules\\typescript\\bin\\tsc",
+        "--noEmit",
+        "-p",
+        "continuity/tsconfig.json"
+      ],
+      "runtime": "Node24 author auxiliary; TS5.8.3 reused",
+      "startUTC": "2026-10-22T21:58:33.976726+00:00",
+      "endUTC": "2026-10-22T21:58:36.522661+00:00"
+    },
+    "build-fix2": {
+      "exit": 0,
+      "command": [
+        "<runtime>\\node\\bin\\node.exe",
+        "continuity/scripts/build.mjs"
+      ],
+      "runtime": "Node24 author auxiliary; TS5.8.3 reused",
+      "startUTC": "2026-10-22T21:58:36.523661+00:00",
+      "endUTC": "2026-10-22T21:58:38.890965+00:00"
+    },
+    "js-syntax-fix2": {
+      "exit": 0,
+      "command": [
+        "<existing Node24>",
+        "--check",
+        "--input-type=module"
+      ],
+      "runtime": "v24.19.0 auxiliary",
+      "scope": "final first glyph-line Range snapshot JS constants"
+    },
+    "diff-check-fix2": {
+      "exit": 0,
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "<workspace>/work/product31-page-entry-fix2/evidence/candidate-fix2.patch"
+      ],
+      "scope": "exact before source files; no index mutation"
+    }
+  },
+  "ast": {
+    "exit": 0,
+    "existingFourMethodsASTUnchanged": true,
+    "added": "test_05_nonzero_page_signal_entry inherited by1280/1440",
+    "newSnapshot": "first nonempty text Range first client rect; full ancestor clip and midpoint hit",
+    "JSConstantsChecked": [
+      "CLIP",
+      "MAP",
+      "ENTRY_SNAP",
+      "ENTRY_ARM"
+    ],
+    "browserExecution": "NOT_RUN"
+  },
+  "limits": [
+    "Node24 auxiliary only; Node22 Cloud/CI separate",
+    "Normal page120 fixture extent and first owner full clipping not run locally",
+    "Cause of native page movement not proven; callback can still clamp if maxScroll insufficient",
+    "No server/browser/install/GitHub writes"
+  ],
+  "preparationNotes": [
+    {
+      "kind": "tool command entry error before execution",
+      "message": "Python executable path initially mistyped; no source/test write."
+    },
+    {
+      "kind": "helper quote error before write",
+      "message": "NameError: name MAP is not defined. Corrected literal helper; final AST/JS syntax0."
+    },
+    {
+      "kind": "evidence packaging encoding error",
+      "message": "Default Windows cp949 read failed on UTF8 patch source. Retried explicit UTF8; no product/test change."
+    }
+  ],
+  "sourceBinding": "SOURCE_BINDING.json",
+  "staticReviewCorrection": "Only new first-owner observation changed from paragraph block to actual first text Range; original ac29 candidate preserved locally. App unchanged."
+}

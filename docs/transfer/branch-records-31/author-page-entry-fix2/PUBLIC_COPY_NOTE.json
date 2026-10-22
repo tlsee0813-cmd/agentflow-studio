@@ -1,0 +1,51 @@
+{
+  "scope": "Public evidence copies only; original local command logs and receipt retained byte-exact",
+  "rule": "Only absolute workspace/runtime path strings are represented as <workspace>/<runtime>. Results, failures, exit values and warnings unchanged.",
+  "files": [
+    {
+      "file": "RECEIPT.json",
+      "original": {
+        "path": "RECEIPT.json",
+        "bytes": 3218,
+        "sha256": "1ab086db64d9f4e87915c2c93059ada73e44b1bf1bdd01832d1cbb29caf775a8",
+        "gitBlob": "27288939ebd86d6b097d238c81bb87b591e12a80"
+      },
+      "public": {
+        "path": "RECEIPT.json",
+        "bytes": 3074,
+        "sha256": "3e7b166aef81f4233779176803949675d3f1ab52908bf2403559d79bb64334f6",
+        "gitBlob": "773cc69159333bbc2255a875aa79ec91c24d0fff"
+      }
+    },
+    {
+      "file": "type-fix2.exit.json",
+      "original": {
+        "path": "type-fix2.exit.json",
+        "bytes": 463,
+        "sha256": "faeaaee3b30b03ac9733d519186412ca86e9036afbba580fe2f237af17cac1e5",
+        "gitBlob": "214e97795d81c9d2c0dc808b11834c05e6fddfea"
+      },
+      "public": {
+        "path": "type-fix2.exit.json",
+        "bytes": 391,
+        "sha256": "99cf104a0f516b22e8e21e2b96eab4ef31d9a26cc0b44f474d20a4b78fca1500",
+        "gitBlob": "6cc4e31ac53a8fbabad5624ce7d84aed75899ced"
+      }
+    },
+    {
+      "file": "build-fix2.exit.json",
+      "original": {
+        "path": "build-fix2.exit.json",
+        "bytes": 345,
+        "sha256": "92e3dbe73734ee9b9c3cd5b3bfe5c4226be3496e1a95cc657700d6f8b1cc69f4",
+        "gitBlob": "0fb207570e86fbba95c6dfd8f3e21d9a69f43fe9"
+      },
+      "public": {
+        "path": "build-fix2.exit.json",
+        "bytes": 273,
+        "sha256": "f884b64c610aa29acdaa7dea54daed376697b111d60c8ace2df871f28309d0cb",
+        "gitBlob": "7a579466c12df852461341cc5fb02375ed1155a4"
+      }
+    }
+  ]
+}

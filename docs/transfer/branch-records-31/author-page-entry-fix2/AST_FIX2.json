@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "existingFourMethodsASTUnchanged": true,
+  "added": "test_05_nonzero_page_signal_entry inherited by1280/1440",
+  "newSnapshot": "first nonempty text Range first client rect; full ancestor clip and midpoint hit",
+  "JSConstantsChecked": [
+    "CLIP",
+    "MAP",
+    "ENTRY_SNAP",
+    "ENTRY_ARM"
+  ],
+  "browserExecution": "NOT_RUN"
+}

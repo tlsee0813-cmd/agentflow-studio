@@ -1,0 +1,10 @@
+{
+  "exit": 0,
+  "command": [
+    "<runtime>\\node\\bin\\node.exe",
+    "continuity/scripts/build.mjs"
+  ],
+  "runtime": "Node24 author auxiliary; TS5.8.3 reused",
+  "startUTC": "2026-10-22T21:58:36.523661+00:00",
+  "endUTC": "2026-10-22T21:58:38.890965+00:00"
+}

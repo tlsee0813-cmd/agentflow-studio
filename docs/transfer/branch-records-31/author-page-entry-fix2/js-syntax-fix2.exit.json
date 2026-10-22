@@ -1,0 +1,10 @@
+{
+  "exit": 0,
+  "command": [
+    "<existing Node24>",
+    "--check",
+    "--input-type=module"
+  ],
+  "runtime": "v24.19.0 auxiliary",
+  "scope": "final first glyph-line Range snapshot JS constants"
+}

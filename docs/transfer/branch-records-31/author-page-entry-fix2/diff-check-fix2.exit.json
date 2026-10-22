@@ -1,0 +1,10 @@
+{
+  "exit": 0,
+  "command": [
+    "git",
+    "apply",
+    "--check",
+    "<workspace>/work/product31-page-entry-fix2/evidence/candidate-fix2.patch"
+  ],
+  "scope": "exact before source files; no index mutation"
+}
