@@ -79,7 +79,9 @@ function safePanelReadings(raw:unknown):Record<string,PanelReading> {
 }
 const panelKey=(area:string)=>`${project.id}:${area}`;
 function capturePanelReading() {
-  const body=document.getElementById('area-panel-body'),id=body?.dataset.areaId;if(!body||!id)return;
+  const body=document.getElementById('area-panel-body'),id=body?.dataset.areaId;
+  // A previous project's hidden DOM can remain while the list/open-entry transition recalls its saved reading memo.
+  if(!body||!id||route==='projects'||body.dataset.projectId!==project.id||!body.getClientRects().length)return;
   const rect=body.getBoundingClientRect(),items=[...body.querySelectorAll<HTMLElement>('[id]')];
   const visible=items.filter(el=>el.getClientRects().length&&el.getBoundingClientRect().bottom>rect.top+1&&el.getBoundingClientRect().top<rect.bottom);
   const anchor=visible.find(el=>el.getBoundingClientRect().top>=rect.top)??visible.at(-1);
@@ -2317,9 +2319,10 @@ document.addEventListener('click',e=>{
   const t=e.target as HTMLElement;if(t.closest?.('.project-card')&&!t.closest('.project-more')){e.preventDefault();e.stopPropagation();}
 },true);
 // HOME15: Escape closes an open card menu wherever the focus is (e.g. after a click on the menu's own padding).
-document.addEventListener('keydown',e=>{if(e.key!=='Escape'||$<HTMLDialogElement>('project-read').open)return;const m=document.querySelector<HTMLDetailsElement>('.project-more[open]');if(!m)return;
+function protectedEscape(e:KeyboardEvent):boolean {return e.defaultPrevented||e.isComposing||e.keyCode===229||!!(e.target as HTMLElement|null)?.closest?.('input,textarea,select,[contenteditable="true"],[role="combobox"]');}
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||protectedEscape(e)||$<HTMLDialogElement>('project-read').open)return;const m=document.querySelector<HTMLDetailsElement>('.project-more[open]');if(!m)return;
   e.stopImmediatePropagation();m.open=false;m.querySelector('summary')?.focus({preventScroll:true});},true);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($<HTMLDetailsElement>('connection-details').open){$<HTMLDetailsElement>('connection-details').open=false;$('connection-details').querySelector('summary')!.focus();}else if(contextOpen)closeContext();}});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||protectedEscape(e))return;if($<HTMLDetailsElement>('connection-details').open){e.preventDefault();$<HTMLDetailsElement>('connection-details').open=false;$('connection-details').querySelector('summary')!.focus();}else if(contextOpen){e.preventDefault();closeContext();}});
 window.addEventListener('beforeunload',e=>{if(memoryDirty||pendingSave||draining){e.preventDefault();e.returnValue='';}});
 function restoreDraftPanels() {
   $<HTMLDetailsElement>('compose-panel').open=!project.tasks.length||!!project.draft.trim();
