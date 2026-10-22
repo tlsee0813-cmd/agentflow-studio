@@ -102,7 +102,10 @@ class Received20(unittest.TestCase):
     def open_received(self,s,report):
         self.page.locator('#received-result-open').click();expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',report)
         expect(self.page.locator('#task-pointed')).to_contain_text(s['file']['report'][:50]);expect(self.page.locator('#task-view-idea')).to_contain_text('W20-CURRENT-IDEA')
-        self.visible('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
+        self.record('actual','initial reader action before native reach (first-fold observation, not a visibility guarantee)',self.page.evaluate(PROBE,'#task-next-action'))
+        self.record('actual','initial reader geometry before any scrolling',self.page.evaluate('''()=>{const box=s=>{const e=document.querySelector(s);return e?.getClientRects().length?e.getBoundingClientRect().toJSON():null};
+          return {y:scrollY,vw:innerWidth,vh:innerHeight,title:box('#space-title'),idea:box('#task-view-idea .area-idea-text'),reportLead:box('#task-pointed .report-lead'),action:box('#task-next-action')}}'''))
+        self.reach('#task-next-action');self.equal('opening never chooses A as current',self.state()['currentTaskId'],s['B'])
     def snapshot_work(self,s):
         d=self.page.locator('#task-report-export-work');expect(d).to_have_attribute('data-handoff-id',s['H1']);self.equal('historical full work starts folded',d.evaluate('(e)=>e.open'),False)
         self.details('task-report-export-work')
@@ -170,7 +173,11 @@ class Received20(unittest.TestCase):
             self.equal('reading does not unarchive owner',next(a for a in memory['space']['areas'] if a['id']==s['area'])['archived'],True);self.equal('stored original still unchanged',self.state(),before)
             # Legal pasted report in the SAME root reader: no guessed H or snapshot, even though that report later exported work.
             self.reach('#task-report-pick-'+s['pasted']);self.page.locator('#task-report-pick-'+s['pasted']).click();expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',s['pasted'])
-            self.details('task-report-export-work');expect(self.page.locator('#task-report-export-work')).to_contain_text('정확한 내보내기 작업문 사본이 없어요');self.reach('#task-report-export-work > p');self.yes('no guessed historical H snapshot',not self.page.locator('#task-report-export-work').get_attribute('data-handoff-id'))
+            pasted_record=next(x for x in memory['tasks'] if x['id']==s['pasted']);self.equal('pasted report has no incoming resultFile',pasted_record['resultFile'],None)
+            self.yes('later outgoing H1/H2 exist but cannot become this report\'s incoming snapshot',all(h in [x['returnId'] for x in pasted_record['handoffs']] for h in [s['H1'],s['H2']]))
+            expect(self.page.locator('#task-report-export-work')).to_have_count(0);expect(self.page.locator('#task-report-export-proof')).to_have_count(0);expect(self.page.locator('#task-report-result-raw')).to_have_count(0)
+            expect(self.page.locator('#task-pointed [data-export-field]')).to_have_count(0);expect(self.page.locator('#task-pointed [data-handoff-id]')).to_have_count(0)
+            self.details('task-report-path');expect(self.page.locator('#task-report-context-missing')).to_have_text('이 보고와 정확히 연결된 당시 자료 사본은 없어요. 현재 내용으로 대신하지 않아요.');self.reach('#task-report-context-missing')
             self.equal('legacy report reading preserves stored original',self.state(),before)
             base.reveal_management(self.page,'#backup')
             with self.page.expect_download() as second_result:self.page.locator('#backup').click()
@@ -198,6 +205,7 @@ class Received20(unittest.TestCase):
         body='[합성20 실제 새C] 현재B 대신 자동선택이 아니라 사용자가 보낸 새요청';self.page.locator('#draft').fill(body);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('');base.saved(self.page);C=self.state()['currentTaskId'];self.yes('C is a real new task',C not in [s['A'],s['B'],t['id']])
         ctask=next(x for x in self.state()['tasks'] if x['id']==C);self.equal('actual C explicitly owns area A',ctask['areaId'],s['area']);self.equal('actual C original is the typed request',next(x for x in self.state()['sources'] if x['id']==ctask['sourceIds'][0])['text'],body)
         self.reach('#work-locate-return');self.page.locator('#work-locate-return').click();self.equal('work-origin return never rolls C back to B',self.state()['currentTaskId'],C);expect(self.page.locator('#work-view')).to_be_visible();expect(self.page.locator('#context-title')).to_be_focused();self.visible('#context-title')
+        self.record('actual','current C has its own disclosure state before explicit receipt reopening',self.snap('C before compose preparation'));self.details('compose-panel');self.details('result-file-panel')
         self.reach('#received-result-open');self.page.locator('#received-result-open').click();expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',t['id']);self.page.locator('#task-return-origin').click();self.equal('reopening receipt keeps current C',self.state()['currentTaskId'],C);expect(self.page.locator('#received-result-open')).to_be_focused();self.visible('#received-result-open')
         self.reach('#work-return-origin');self.page.locator('#work-return-origin').click();expect(self.page.locator('#area-panel')).to_have_attribute('data-panel-mode','records');expect(self.page.locator(r)).to_be_focused();self.visible(r);self.equal('parent records return also preserves C',self.state()['currentTaskId'],C);self.shot('records-parent-C')
 
