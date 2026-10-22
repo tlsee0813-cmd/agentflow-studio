@@ -1,0 +1,522 @@
+{
+  "pullRequest": "https://github.com/tlsee0813-cmd/agentflow-studio/pull/14",
+  "headRevision": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "runId": 39835847977,
+  "status": "양 OS completed/success",
+  "account": "명시 계정을 제공하지 않았고 응답도 계정을 반환하지 않았다. 모든 후속 요청은 같은 계정 선택 생략과 반환 head를 유지했다.",
+  "tool": "mcp__code_review__pull_requests_checks만 사용",
+  "finalStateQuery": {
+    "start": {
+      "current_time": "2026-10-22 19:13:38 UTC"
+    },
+    "end": {
+      "current_time": "2026-10-22 19:13:40 UTC"
+    }
+  },
+  "jobs": [
+    {
+      "os": "ubuntu",
+      "job": {
+        "id": 120023840316,
+        "head_sha": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "request": {
+        "jobId": 120023840316,
+        "headRevision": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542"
+      },
+      "requestedAt": "2026-10-22 19:08:25 UTC",
+      "returnedAt": "2026-10-22 19:08:28 UTC",
+      "logTruncated": true,
+      "returnedLogCharacters": 120000,
+      "firstReturnedLine": "59:48.7616393Z   ---",
+      "lastReturnedLine": "2026-10-22T19:06:49.3785325Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+      "continuityUnit": {
+        "tests": 275,
+        "pass": 275,
+        "fail": 0,
+        "raw": [
+          "2026-10-22T18:59:48.7637694Z # tests 275",
+          "2026-10-22T18:59:48.7637799Z # pass 275",
+          "2026-10-22T18:59:48.7637848Z # fail 0",
+          "2026-10-22T18:59:48.7638003Z # cancelled 0",
+          "2026-10-22T18:59:48.7638054Z # skipped 0"
+        ]
+      },
+      "refresh27": {
+        "individualLinesVisible": 0,
+        "expectedCases": 8,
+        "limit": "개별 8개 이름은 반환 tail 앞에서 잘렸다. 정확 후보의 검사 파일·기존 wildcard와 전체275 성공에 따른 포함 판단이며, 이 응답에서 8개 개별 로그를 읽었다는 뜻은 아니다."
+      },
+      "versions": {
+        "nodeExecution": "잘린 앞부분에 있어 직접 확인하지 못함",
+        "playwrightInstall": "2026-10-22T18:59:52.7863074Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "chromiumDownload": "2026-10-22T19:00:08.9638420Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200",
+        "browserRuntime": "browser.version() artifact를 회수하지 않았다. 설치 기록과 실제 runtime JSON은 구분한다."
+      },
+      "browserSuiteCount": 23,
+      "browserTestCount": 230,
+      "suites": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 13.653,
+          "ranLine": "2026-10-22T19:00:25.4464013Z Ran 18 tests in 13.653s",
+          "okLine": "2026-10-22T19:00:25.4464163Z OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 24.713,
+          "ranLine": "2026-10-22T19:00:50.2862775Z Ran 13 tests in 24.713s",
+          "okLine": "2026-10-22T19:00:50.2862959Z OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 10.135,
+          "ranLine": "2026-10-22T19:01:00.6492230Z Ran 11 tests in 10.135s",
+          "okLine": "2026-10-22T19:01:00.6492377Z OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 4.518,
+          "ranLine": "2026-10-22T19:01:05.3022225Z Ran 3 tests in 4.518s",
+          "okLine": "2026-10-22T19:01:05.3022684Z OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 3.663,
+          "ranLine": "2026-10-22T19:01:09.0948778Z Ran 3 tests in 3.663s",
+          "okLine": "2026-10-22T19:01:09.0948981Z OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 5.594,
+          "ranLine": "2026-10-22T19:01:14.8275132Z Ran 5 tests in 5.594s",
+          "okLine": "2026-10-22T19:01:14.8275341Z OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 7.576,
+          "ranLine": "2026-10-22T19:01:22.5443545Z Ran 6 tests in 7.576s",
+          "okLine": "2026-10-22T19:01:22.5444291Z OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 4.304,
+          "ranLine": "2026-10-22T19:01:26.9785923Z Ran 4 tests in 4.304s",
+          "okLine": "2026-10-22T19:01:26.9786303Z OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 20.181,
+          "ranLine": "2026-10-22T19:01:47.2965613Z Ran 12 tests in 20.181s",
+          "okLine": "2026-10-22T19:01:47.2965959Z OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 21.812,
+          "ranLine": "2026-10-22T19:02:09.2513658Z Ran 18 tests in 21.812s",
+          "okLine": "2026-10-22T19:02:09.2514164Z OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 10.411,
+          "ranLine": "2026-10-22T19:02:19.7938218Z Ran 8 tests in 10.411s",
+          "okLine": "2026-10-22T19:02:19.7938357Z OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 13.011,
+          "ranLine": "2026-10-22T19:02:32.9442888Z Ran 11 tests in 13.011s",
+          "okLine": "2026-10-22T19:02:32.9443320Z OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 6.084,
+          "ranLine": "2026-10-22T19:02:39.1645198Z Ran 11 tests in 6.084s",
+          "okLine": "2026-10-22T19:02:39.1645336Z OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 15,
+          "seconds": 30.296,
+          "ranLine": "2026-10-22T19:03:09.5896449Z Ran 15 tests in 30.296s",
+          "okLine": "2026-10-22T19:03:09.5896670Z OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 31.767,
+          "ranLine": "2026-10-22T19:03:41.4934439Z Ran 14 tests in 31.767s",
+          "okLine": "2026-10-22T19:03:41.4934650Z OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 23.076,
+          "ranLine": "2026-10-22T19:04:04.7326109Z Ran 21 tests in 23.076s",
+          "okLine": "2026-10-22T19:04:04.7326251Z OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 37.363,
+          "ranLine": "2026-10-22T19:04:42.2320906Z Ran 13 tests in 37.363s",
+          "okLine": "2026-10-22T19:04:42.2321220Z OK"
+        },
+        {
+          "script": "continuity/tests/understanding17_browser.py",
+          "tests": 12,
+          "seconds": 28.859,
+          "ranLine": "2026-10-22T19:05:11.2457158Z Ran 12 tests in 28.859s",
+          "okLine": "2026-10-22T19:05:11.2457362Z OK"
+        },
+        {
+          "script": "continuity/tests/hierarchy18_browser.py",
+          "tests": 12,
+          "seconds": 18.224,
+          "ranLine": "2026-10-22T19:05:29.5918035Z Ran 12 tests in 18.224s",
+          "okLine": "2026-10-22T19:05:29.5918247Z OK"
+        },
+        {
+          "script": "continuity/tests/workspace19_browser.py",
+          "tests": 6,
+          "seconds": 19.798,
+          "ranLine": "2026-10-22T19:05:49.5149565Z Ran 6 tests in 19.798s",
+          "okLine": "2026-10-22T19:05:49.5149707Z OK"
+        },
+        {
+          "script": "continuity/tests/received20_browser.py",
+          "tests": 11,
+          "seconds": 45.511,
+          "ranLine": "2026-10-22T19:06:35.1545221Z Ran 11 tests in 45.511s",
+          "okLine": "2026-10-22T19:06:35.1545408Z OK"
+        },
+        {
+          "script": "continuity/tests/blank21_browser.py",
+          "tests": 2,
+          "seconds": 8.341,
+          "ranLine": "2026-10-22T19:06:43.6198610Z Ran 2 tests in 8.341s",
+          "okLine": "2026-10-22T19:06:43.6198747Z OK"
+        },
+        {
+          "script": "continuity/tests/static_browser.py",
+          "tests": 1,
+          "seconds": 1.688,
+          "ranLine": "2026-10-22T19:06:45.4261186Z Ran 1 test in 1.688s",
+          "okLine": "2026-10-22T19:06:45.4262856Z OK"
+        }
+      ],
+      "modifiedUnderstanding17TestBothPC": [
+        "2026-10-22T19:04:51.8954051Z test_03_counterexamples_and_correction_draft (__main__.Area17.test_03_counterexamples_and_correction_draft) ... ok",
+        "2026-10-22T19:05:06.3473808Z test_03_counterexamples_and_correction_draft (__main__.Area17Wide.test_03_counterexamples_and_correction_draft) ... ok"
+      ]
+    },
+    {
+      "os": "windows",
+      "job": {
+        "id": 120023840962,
+        "head_sha": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "request": {
+        "jobId": 120023840962,
+        "headRevision": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542"
+      },
+      "requestedAt": "2026-10-22 19:13:40 UTC",
+      "returnedAt": "2026-10-22 19:13:44 UTC",
+      "logTruncated": true,
+      "returnedLogCharacters": 120000,
+      "firstReturnedLine": "   duration_ms: 1.5244",
+      "lastReturnedLine": "2026-10-22T19:11:17.3203430Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+      "continuityUnit": {
+        "tests": 275,
+        "pass": 275,
+        "fail": 0,
+        "raw": [
+          "2026-10-22T19:01:12.3429113Z # tests 275",
+          "2026-10-22T19:01:12.3429265Z # pass 275",
+          "2026-10-22T19:01:12.3429332Z # fail 0",
+          "2026-10-22T19:01:12.3429409Z # cancelled 0",
+          "2026-10-22T19:01:12.3429484Z # skipped 0"
+        ]
+      },
+      "refresh27": {
+        "individualLinesVisible": 0,
+        "expectedCases": 8,
+        "limit": "개별 8개 이름은 반환 tail 앞에서 잘렸다. 정확 후보의 검사 파일·기존 wildcard와 전체275 성공에 따른 포함 판단이며, 이 응답에서 8개 개별 로그를 읽었다는 뜻은 아니다."
+      },
+      "versions": {
+        "nodeExecution": "잘린 앞부분에 있어 직접 확인하지 못함",
+        "playwrightInstall": "2026-10-22T19:01:22.1239880Z Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "chromiumDownload": "2026-10-22T19:02:08.8258012Z Chromium 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium-1200",
+        "browserRuntime": "browser.version() artifact를 회수하지 않았다. 설치 기록과 실제 runtime JSON은 구분한다."
+      },
+      "browserSuiteCount": 23,
+      "browserTestCount": 230,
+      "suites": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 20.113,
+          "ranLine": "2026-10-22T19:02:35.0027719Z Ran 18 tests in 20.113s",
+          "okLine": "2026-10-22T19:02:35.0028014Z OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 50.885,
+          "ranLine": "2026-10-22T19:03:26.1857167Z Ran 13 tests in 50.885s",
+          "okLine": "2026-10-22T19:03:26.1857628Z OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 14.752,
+          "ranLine": "2026-10-22T19:03:41.3222986Z Ran 11 tests in 14.752s",
+          "okLine": "2026-10-22T19:03:41.3223421Z OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 5.866,
+          "ranLine": "2026-10-22T19:03:47.4944142Z Ran 3 tests in 5.866s",
+          "okLine": "2026-10-22T19:03:47.4944442Z OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 5.457,
+          "ranLine": "2026-10-22T19:03:53.2554089Z Ran 3 tests in 5.457s",
+          "okLine": "2026-10-22T19:03:53.2554336Z OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 8.339,
+          "ranLine": "2026-10-22T19:04:01.8543747Z Ran 5 tests in 8.339s",
+          "okLine": "2026-10-22T19:04:01.8544065Z OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 10.283,
+          "ranLine": "2026-10-22T19:04:12.4188454Z Ran 6 tests in 10.283s",
+          "okLine": "2026-10-22T19:04:12.4188739Z OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 5.952,
+          "ranLine": "2026-10-22T19:04:18.6377370Z Ran 4 tests in 5.952s",
+          "okLine": "2026-10-22T19:04:18.6377731Z OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 36.163,
+          "ranLine": "2026-10-22T19:04:55.0589902Z Ran 12 tests in 36.163s",
+          "okLine": "2026-10-22T19:04:55.0590217Z OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 27.9,
+          "ranLine": "2026-10-22T19:05:23.2801430Z Ran 18 tests in 27.900s",
+          "okLine": "2026-10-22T19:05:23.2801715Z OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 13.15,
+          "ranLine": "2026-10-22T19:05:36.7304958Z Ran 8 tests in 13.150s",
+          "okLine": "2026-10-22T19:05:36.7305287Z OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 16.618,
+          "ranLine": "2026-10-22T19:05:53.6157806Z Ran 11 tests in 16.618s",
+          "okLine": "2026-10-22T19:05:53.6158085Z OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 9.062,
+          "ranLine": "2026-10-22T19:06:03.0177862Z Ran 11 tests in 9.062s",
+          "okLine": "2026-10-22T19:06:03.0178377Z OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 15,
+          "seconds": 37.133,
+          "ranLine": "2026-10-22T19:06:40.4575352Z Ran 15 tests in 37.133s",
+          "okLine": "2026-10-22T19:06:40.4575800Z OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 39.529,
+          "ranLine": "2026-10-22T19:07:20.2658684Z Ran 14 tests in 39.529s",
+          "okLine": "2026-10-22T19:07:20.2659120Z OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 30.451,
+          "ranLine": "2026-10-22T19:07:51.1287723Z Ran 21 tests in 30.451s",
+          "okLine": "2026-10-22T19:07:51.1288152Z OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 45.007,
+          "ranLine": "2026-10-22T19:08:36.4372893Z Ran 13 tests in 45.007s",
+          "okLine": "2026-10-22T19:08:36.4373266Z OK"
+        },
+        {
+          "script": "continuity/tests/understanding17_browser.py",
+          "tests": 12,
+          "seconds": 36.837,
+          "ranLine": "2026-10-22T19:09:13.6337441Z Ran 12 tests in 36.837s",
+          "okLine": "2026-10-22T19:09:13.6337721Z OK"
+        },
+        {
+          "script": "continuity/tests/hierarchy18_browser.py",
+          "tests": 12,
+          "seconds": 24.429,
+          "ranLine": "2026-10-22T19:09:38.3471511Z Ran 12 tests in 24.429s",
+          "okLine": "2026-10-22T19:09:38.3471905Z OK"
+        },
+        {
+          "script": "continuity/tests/workspace19_browser.py",
+          "tests": 6,
+          "seconds": 25.737,
+          "ranLine": "2026-10-22T19:10:04.3859047Z Ran 6 tests in 25.737s",
+          "okLine": "2026-10-22T19:10:04.3859308Z OK"
+        },
+        {
+          "script": "continuity/tests/received20_browser.py",
+          "tests": 11,
+          "seconds": 53.47,
+          "ranLine": "2026-10-22T19:10:58.1455890Z Ran 11 tests in 53.470s",
+          "okLine": "2026-10-22T19:10:58.1456271Z OK"
+        },
+        {
+          "script": "continuity/tests/blank21_browser.py",
+          "tests": 2,
+          "seconds": 10.076,
+          "ranLine": "2026-10-22T19:11:08.5284449Z Ran 2 tests in 10.076s",
+          "okLine": "2026-10-22T19:11:08.5284857Z OK"
+        },
+        {
+          "script": "continuity/tests/static_browser.py",
+          "tests": 1,
+          "seconds": 3.042,
+          "ranLine": "2026-10-22T19:11:11.8492348Z Ran 1 test in 3.042s",
+          "okLine": "2026-10-22T19:11:11.8492665Z OK"
+        }
+      ],
+      "modifiedUnderstanding17TestBothPC": [
+        "2026-10-22T19:08:49.1132876Z test_03_counterexamples_and_correction_draft (__main__.Area17.test_03_counterexamples_and_correction_draft) ... ok",
+        "2026-10-22T19:09:07.5443383Z test_03_counterexamples_and_correction_draft (__main__.Area17Wide.test_03_counterexamples_and_correction_draft) ... ok"
+      ]
+    }
+  ],
+  "annotations": [
+    {
+      "source": "007-ubuntu-annotations.json",
+      "requestedAt": {
+        "current_time": "2026-10-22 19:16:18 UTC"
+      },
+      "returnedAt": {
+        "current_time": "2026-10-22 19:16:20 UTC"
+      },
+      "check": {
+        "id": 120023840316,
+        "name": "verify (ubuntu-24.04)",
+        "head_sha": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+        "status": "completed",
+        "conclusion": "success",
+        "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39835847977/job/120023840316",
+        "output": {
+          "title": null,
+          "summary": null,
+          "text": null,
+          "annotations_count": 1
+        }
+      },
+      "annotation": {
+        "path": ".github",
+        "start_line": 2,
+        "end_line": 2,
+        "annotation_level": "warning",
+        "message": "Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+        "title": "",
+        "raw_details": ""
+      }
+    },
+    {
+      "source": "008-windows-annotations.json",
+      "requestedAt": {
+        "current_time": "2026-10-22 19:16:20 UTC"
+      },
+      "returnedAt": {
+        "current_time": "2026-10-22 19:16:21 UTC"
+      },
+      "check": {
+        "id": 120023840962,
+        "name": "verify (windows-2022)",
+        "head_sha": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+        "status": "completed",
+        "conclusion": "success",
+        "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39835847977/job/120023840962",
+        "output": {
+          "title": null,
+          "summary": null,
+          "text": null,
+          "annotations_count": 1
+        }
+      },
+      "annotation": {
+        "path": ".github",
+        "start_line": 2,
+        "end_line": 2,
+        "annotation_level": "warning",
+        "message": "Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/",
+        "title": "",
+        "raw_details": ""
+      }
+    }
+  ],
+  "transientReadFailure": {
+    "file": "003-windows-log-attempt1.json",
+    "requestAt": {
+      "current_time": "2026-10-22 19:09:56 UTC"
+    },
+    "reason": "GitHub provider request failed (HTTP502)",
+    "followup": "3분 이상 backoff 후 같은 도구에서 최종 성공 상태와 Windows 로그 회수. 제품 실패나 rerun으로 세지 않는다. root가 앞서 본 두502는 이 agent가 회수한 원응답과 별개다."
+  },
+  "limitations": [
+    "양 OS 최종 로그는 각120000자 tail이며 앞부분이 잘렸다. 개별 REFRESH27 여덟 줄, 초기 check/build/approot unit 세부, 실제 Node 실행 버전은 직접 회수하지 못했다.",
+    "Node20 action 폐기 경고의 Node24는 upload-artifact action 실행 관련이며 제품 검사 Node 버전의 증거가 아니다.",
+    "새27 정상 UI 흐름은 별도 Cloud 검증이다. 이 CI 보고는 기존 browser군과 수정 understanding17 검사 결과를 확인한다. 실제 AI 의미 품질 수용이 아니다.",
+    "GitHub Actions API/CLI fallback, artifact 다운로드, server/browser, 제품 수정, remote write, rerun/merge는 하지 않았다."
+  ]
+}

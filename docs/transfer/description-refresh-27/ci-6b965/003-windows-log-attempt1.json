@@ -1,0 +1,21 @@
+{
+  "request": {
+    "jobId": 120023840962,
+    "headRevision": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542"
+  },
+  "start": {
+    "current_time": "2026-10-22 19:09:56 UTC"
+  },
+  "end": {
+    "current_time": "2026-10-22 19:09:59 UTC"
+  },
+  "response": {
+    "content": [
+      {
+        "type": "text",
+        "text": "GitHub provider request failed (HTTP 502)"
+      }
+    ],
+    "isError": true
+  }
+}

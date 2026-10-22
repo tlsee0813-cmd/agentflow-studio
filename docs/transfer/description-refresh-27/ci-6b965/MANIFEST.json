@@ -1,0 +1,77 @@
+{
+  "prefix": "docs/transfer/description-refresh-27/ci-6b965",
+  "head": "6b96543fdf980ff45f0e1b67f83e8a0a561a1542",
+  "runId": 39835847977,
+  "files": [
+    {
+      "path": "001-status.json",
+      "size": 1084,
+      "sha256": "a77d3e51bbcc9d7238f36fd6c54969960ebd9adad2723ae73ea9f801828f4f0f",
+      "gitBlob": "44279e8a86d7c51b9ead6ba51c9f9efb8ea408e2"
+    },
+    {
+      "path": "002-ubuntu-log-response.json",
+      "size": 125756,
+      "sha256": "14bb3e89510141dc2e7865a3ee20057bd9e12625977d5211681017a7bed07ac7",
+      "gitBlob": "026bc7fc3e7aee33cf5838fc2fd131881b8506e5"
+    },
+    {
+      "path": "003-windows-log-attempt1.json",
+      "size": 403,
+      "sha256": "f26bafc6e7e257b733d202f756849c4395690f34d14207d4f76fb2d8b228ce16",
+      "gitBlob": "db36a12686658199c7b18896016304ed57b0a998"
+    },
+    {
+      "path": "004-final-status.json",
+      "size": 1398,
+      "sha256": "611b60a4b0351aee7f90175aef2b11fdde91d162b951fcd18f843e67b2b1f3b4",
+      "gitBlob": "d8e82b0dc85816983f1e1d60149f6f02346bdb75"
+    },
+    {
+      "path": "005-windows-final-log-response.json",
+      "size": 128470,
+      "sha256": "ce84e6a18e57cebc26adf0c1da96cbce10f910fe8a48054f412b0088e498d044",
+      "gitBlob": "965a36a2a104f13d948c9cd25f1a9942af0fb605"
+    },
+    {
+      "path": "006-check-discovery.json",
+      "size": 1833,
+      "sha256": "9df235c6cb33bf666f86737c859f30ab21627abc21ef4756f4ec7e771c2648fa",
+      "gitBlob": "3d4b49913169f802c5d97bc7279baa190e17abcb"
+    },
+    {
+      "path": "007-ubuntu-annotations.json",
+      "size": 1965,
+      "sha256": "f427acc43893771156d79eca336e01cb9c1c972330c3384d7fc533564da6c4ba",
+      "gitBlob": "be896ed3cbbf488cd40a1de7eaba39dfa68109bc"
+    },
+    {
+      "path": "008-windows-annotations.json",
+      "size": 1965,
+      "sha256": "daedc4fe2bcb8965da3726b93a23a58ad8d78c5eaa6dd06f8ab481ccc2b2bd60",
+      "gitBlob": "c67bb2845d4d0dee13d9b9d599f6a90382c84758"
+    },
+    {
+      "path": "CI_FINAL.json",
+      "size": 21674,
+      "sha256": "5546e8e089f163366bdd1ceb34c190365c018908e158813eb24a9f3f48ef7019",
+      "gitBlob": "4f8913f24fc57fa70c9047909d7f1c2e59475b88"
+    },
+    {
+      "path": "REPORT.md",
+      "size": 3818,
+      "sha256": "6ce8a5d3ced6840de19be6fa8c729968eedc685c3471bd6d392f2400e3381c8c",
+      "gitBlob": "384a2faa504b10715b7d14c692093d32e5d44691"
+    },
+    {
+      "path": "summarize.mjs",
+      "size": 10404,
+      "sha256": "08e7b77d88b278b1c64182908fc12af16512023507b7e618442aeef3f2c5f1f8",
+      "gitBlob": "a688f32d90035573deef462e0dc042a08557a321"
+    }
+  ],
+  "rawLogDuplicationExcluded": [
+    "ubuntu-returned.log",
+    "windows-returned.log"
+  ]
+}
