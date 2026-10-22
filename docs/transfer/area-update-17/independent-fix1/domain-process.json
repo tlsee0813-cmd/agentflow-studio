@@ -1,0 +1,23 @@
+{
+  "rows": [
+    {
+      "script": "new-request-probe.mjs",
+      "actualChildExit": 0,
+      "start": "2026-10-22T09:42:37.509964+00:00",
+      "end": "2026-10-22T09:42:37.563339+00:00"
+    },
+    {
+      "script": "recovery-correction-probe.mjs",
+      "actualChildExit": 0,
+      "start": "2026-10-22T09:42:37.563429+00:00",
+      "end": "2026-10-22T09:42:37.617303+00:00"
+    },
+    {
+      "script": "state.mjs",
+      "actualChildExit": 0,
+      "start": "2026-10-22T09:42:37.617423+00:00",
+      "end": "2026-10-22T09:42:37.672960+00:00"
+    }
+  ],
+  "collectorExit": 0
+}

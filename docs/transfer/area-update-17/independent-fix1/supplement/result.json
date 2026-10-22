@@ -1,0 +1,685 @@
+{
+  "source": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+  "rows": [
+    {
+      "id": "current-description-exists-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+      "pass": true,
+      "raw": {
+        "text": "전달 기록에서 정리한 설명 · 앱 미검증\n\n[독립 합성 현재 긴 설명] NaN SUMMARY-TAIL-INDEPENDENT\n\n구상 변경 제안 · 미채택 [독립 합성 미채택] NaN PROPOSAL-TAIL-INDEPENDEN…\n\n사용자 구상은 그대로예요.\n\n설명 전체 보기\n근거 보기\n설명 오류 고치기\n이전 설명 · 반영하지 않은 정리"
+      }
+    },
+    {
+      "id": "current-description-exists-A_144ff014-6f44-41a0-8fe1-cb1057160b4b",
+      "pass": true,
+      "raw": {
+        "text": "전달 기록에서 정리한 설명 · 앱 미검증\n\n[독립 B 설명] A 내용과 섞이지 않는다.\n\n정리한 곳 보기\n근거 보기\n설명 오류 고치기"
+      }
+    },
+    {
+      "id": "native-tail-full",
+      "pass": true,
+      "raw": [
+        {
+          "glyph": {
+            "text": "PROPOSAL-TAIL-INDEPENDENT",
+            "rects": [
+              {
+                "x": 1085.328125,
+                "y": 794.859375,
+                "w": 89.03125,
+                "h": 17
+              },
+              {
+                "x": 968,
+                "y": 817.65625,
+                "w": 78.203125,
+                "h": 17
+              }
+            ],
+            "clip": {
+              "l": 0,
+              "t": 0,
+              "r": 1280,
+              "b": 720
+            },
+            "full": false,
+            "hits": [
+              false,
+              false
+            ],
+            "ancestors": [
+              {
+                "tag": "DETAILS",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-full",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "ASIDE",
+                "id": "area-panel",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "space-view",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "MAIN",
+                "id": "main",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "BODY",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "HTML",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              }
+            ]
+          },
+          "scroll": {
+            "top": 0,
+            "max": 0,
+            "rect": {
+              "x": 955,
+              "y": 779.859375,
+              "width": 266,
+              "height": 71.59375,
+              "top": 779.859375,
+              "right": 1221,
+              "bottom": 851.453125,
+              "left": 955
+            }
+          },
+          "windowY": 90
+        },
+        {
+          "glyph": {
+            "text": "PROPOSAL-TAIL-INDEPENDENT",
+            "rects": [
+              {
+                "x": 1085.328125,
+                "y": 704.859375,
+                "w": 89.03125,
+                "h": 17
+              },
+              {
+                "x": 968,
+                "y": 727.65625,
+                "w": 78.203125,
+                "h": 17
+              }
+            ],
+            "clip": {
+              "l": 0,
+              "t": 0,
+              "r": 1280,
+              "b": 720
+            },
+            "full": false,
+            "hits": [
+              true,
+              false
+            ],
+            "ancestors": [
+              {
+                "tag": "DETAILS",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-full",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "ASIDE",
+                "id": "area-panel",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "space-view",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "MAIN",
+                "id": "main",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "BODY",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "HTML",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              }
+            ]
+          },
+          "scroll": {
+            "top": 0,
+            "max": 0,
+            "rect": {
+              "x": 955,
+              "y": 689.859375,
+              "width": 266,
+              "height": 71.59375,
+              "top": 689.859375,
+              "right": 1221,
+              "bottom": 761.453125,
+              "left": 955
+            }
+          },
+          "windowY": 180
+        },
+        {
+          "glyph": {
+            "text": "PROPOSAL-TAIL-INDEPENDENT",
+            "rects": [
+              {
+                "x": 1085.328125,
+                "y": 614.859375,
+                "w": 89.03125,
+                "h": 17
+              },
+              {
+                "x": 968,
+                "y": 637.65625,
+                "w": 78.203125,
+                "h": 17
+              }
+            ],
+            "clip": {
+              "l": 0,
+              "t": 0,
+              "r": 1280,
+              "b": 720
+            },
+            "full": true,
+            "hits": [
+              true,
+              true
+            ],
+            "ancestors": [
+              {
+                "tag": "DETAILS",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-full",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "ASIDE",
+                "id": "area-panel",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "space-view",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "MAIN",
+                "id": "main",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "BODY",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "HTML",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              }
+            ]
+          },
+          "scroll": {
+            "top": 0,
+            "max": 0,
+            "rect": {
+              "x": 955,
+              "y": 599.859375,
+              "width": 266,
+              "height": 71.59375,
+              "top": 599.859375,
+              "right": 1221,
+              "bottom": 671.453125,
+              "left": 955
+            }
+          },
+          "windowY": 270
+        }
+      ]
+    },
+    {
+      "id": "closed-body-hidden-full",
+      "pass": true,
+      "raw": {
+        "visible": false,
+        "detailsRect": {
+          "x": 955,
+          "y": 450.328125,
+          "width": 90.015625,
+          "height": 31.4375
+        }
+      }
+    },
+    {
+      "id": "native-tail-evidence",
+      "pass": true,
+      "raw": [
+        {
+          "glyph": {
+            "text": "REPORT-TAIL-INDEPENDENT",
+            "rects": [
+              {
+                "x": 1088.34375,
+                "y": 591.890625,
+                "w": 73.953125,
+                "h": 17
+              },
+              {
+                "x": 968,
+                "y": 614.6875,
+                "w": 78.203125,
+                "h": 17
+              }
+            ],
+            "clip": {
+              "l": 0,
+              "t": 0,
+              "r": 1280,
+              "b": 720
+            },
+            "full": true,
+            "hits": [
+              true,
+              true
+            ],
+            "ancestors": [
+              {
+                "tag": "DETAILS",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-evidence",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "ASIDE",
+                "id": "area-panel",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "space-view",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "MAIN",
+                "id": "main",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "BODY",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "HTML",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              }
+            ]
+          },
+          "scroll": {
+            "top": 0,
+            "max": 0,
+            "rect": {
+              "x": 955,
+              "y": 576.890625,
+              "width": 266,
+              "height": 71.59375,
+              "top": 576.890625,
+              "right": 1221,
+              "bottom": 648.484375,
+              "left": 955
+            }
+          },
+          "windowY": 270
+        }
+      ]
+    },
+    {
+      "id": "closed-body-hidden-evidence",
+      "pass": true,
+      "raw": {
+        "visible": false,
+        "detailsRect": {
+          "x": 1061.015625,
+          "y": 450.328125,
+          "width": 63.5,
+          "height": 31.4375
+        }
+      }
+    },
+    {
+      "id": "native-tail-history",
+      "pass": true,
+      "raw": [
+        {
+          "glyph": {
+            "text": "HISTORY-TAIL-INDEPENDENT",
+            "rects": [
+              {
+                "x": 1112.734375,
+                "y": 592.140625,
+                "w": 76.6875,
+                "h": 17
+              },
+              {
+                "x": 968,
+                "y": 614.9375,
+                "w": 78.203125,
+                "h": 17
+              }
+            ],
+            "clip": {
+              "l": 0,
+              "t": 0,
+              "r": 1280,
+              "b": 720
+            },
+            "full": true,
+            "hits": [
+              true,
+              true
+            ],
+            "ancestors": [
+              {
+                "tag": "DETAILS",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-history",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "ASIDE",
+                "id": "area-panel",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "SECTION",
+                "id": "space-view",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "MAIN",
+                "id": "main",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "DIV",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "BODY",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              },
+              {
+                "tag": "HTML",
+                "id": "",
+                "overflowX": "visible",
+                "overflowY": "visible"
+              }
+            ]
+          },
+          "scroll": {
+            "top": 0,
+            "max": 0,
+            "rect": {
+              "x": 955,
+              "y": 577.140625,
+              "width": 266,
+              "height": 71.59375,
+              "top": 577.140625,
+              "right": 1221,
+              "bottom": 648.734375,
+              "left": 955
+            }
+          },
+          "windowY": 270
+        }
+      ]
+    },
+    {
+      "id": "closed-body-hidden-history",
+      "pass": true,
+      "raw": {
+        "visible": false,
+        "detailsRect": {
+          "x": 955,
+          "y": 513.203125,
+          "width": 176.203125,
+          "height": 31.4375
+        }
+      }
+    },
+    {
+      "id": "both-described-A-to-B-no-disclosure-leak",
+      "pass": true,
+      "raw": {
+        "AOpen": [
+          "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-full",
+          "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-evidence"
+        ],
+        "BOpen": [],
+        "BText": "전달 기록에서 정리한 설명 · 앱 미검증\n\n[독립 B 설명] A 내용과 섞이지 않는다.\n\n정리한 곳 보기\n근거 보기\n설명 오류 고치기"
+      }
+    }
+  ],
+  "fatal": null,
+  "exit": 0
+}

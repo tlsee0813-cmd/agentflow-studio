@@ -1,0 +1,899 @@
+{
+  "source": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+  "rows": [
+    {
+      "id": "powertoys-1280-both-role-actual-base-text-visible",
+      "pass": true,
+      "raw": {
+        "idea": {
+          "text": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다",
+          "rects": [
+            {
+              "x": 955,
+              "y": 458.21875,
+              "w": 255.1875,
+              "h": 20
+            },
+            {
+              "x": 955,
+              "y": 480.609375,
+              "w": 133.6875,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1280,
+            "b": 720
+          },
+          "full": true,
+          "hits": [
+            true,
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "SECTION",
+              "id": "panel-idea",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "ASIDE",
+              "id": "area-panel",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "space-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        },
+        "explanation": {
+          "text": "검색 선택은 제출한 검색어를 기준으로 처리한다",
+          "rects": [
+            {
+              "x": 955,
+              "y": 579.890625,
+              "w": 255.921875,
+              "h": 20
+            },
+            {
+              "x": 955,
+              "y": 601.578125,
+              "w": 12.53125,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1280,
+            "b": 720
+          },
+          "full": true,
+          "hits": [
+            true,
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "SECTION",
+              "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "ASIDE",
+              "id": "area-panel",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "space-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        },
+        "snapshot": {
+          "y": 0,
+          "focus": "node-info-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 114, 70.2)",
+          "cards": [
+            {
+              "id": "A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+              "rect": {
+                "x": 427,
+                "y": 480.91876220703125,
+                "width": 288,
+                "height": 207.73126220703125,
+                "top": 480.91876220703125,
+                "right": 715,
+                "bottom": 688.6500244140625,
+                "left": 427
+              },
+              "selected": true
+            },
+            {
+              "id": "A_144ff014-6f44-41a0-8fe1-cb1057160b4b",
+              "rect": {
+                "x": 787,
+                "y": 480.91876220703125,
+                "width": 288,
+                "height": 158.39996337890625,
+                "top": 480.91876220703125,
+                "right": 1075,
+                "bottom": 639.3187255859375,
+                "left": 787
+              },
+              "selected": false
+            }
+          ],
+          "locateReturn": false,
+          "title": "전체 공간"
+        }
+      }
+    },
+    {
+      "id": "powertoys-1440-both-role-actual-base-text-visible",
+      "pass": true,
+      "raw": {
+        "idea": {
+          "text": "Enter로 제출한 검색어를 선택하고, 녹화 종료는 Tab 누름만 사용한다",
+          "rects": [
+            {
+              "x": 1115,
+              "y": 458.21875,
+              "w": 255.1875,
+              "h": 20
+            },
+            {
+              "x": 1115,
+              "y": 480.609375,
+              "w": 133.6875,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          },
+          "full": true,
+          "hits": [
+            true,
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "SECTION",
+              "id": "panel-idea",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "ASIDE",
+              "id": "area-panel",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "space-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        },
+        "explanation": {
+          "text": "검색 선택은 제출한 검색어를 기준으로 처리한다",
+          "rects": [
+            {
+              "x": 1115,
+              "y": 579.890625,
+              "w": 255.921875,
+              "h": 20
+            },
+            {
+              "x": 1115,
+              "y": 601.578125,
+              "w": 12.53125,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          },
+          "full": true,
+          "hits": [
+            true,
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "SECTION",
+              "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "ASIDE",
+              "id": "area-panel",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "space-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        },
+        "snapshot": {
+          "y": 0,
+          "focus": "node-info-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 194, 126.2)",
+          "cards": [
+            {
+              "id": "A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+              "rect": {
+                "x": 507,
+                "y": 536.9187622070312,
+                "width": 288,
+                "height": 207.73126220703125,
+                "top": 536.9187622070312,
+                "right": 795,
+                "bottom": 744.6500244140625,
+                "left": 507
+              },
+              "selected": true
+            },
+            {
+              "id": "A_144ff014-6f44-41a0-8fe1-cb1057160b4b",
+              "rect": {
+                "x": 867,
+                "y": 536.9187622070312,
+                "width": 288,
+                "height": 158.39996337890625,
+                "top": 536.9187622070312,
+                "right": 1155,
+                "bottom": 695.3187255859375,
+                "left": 867
+              },
+              "selected": false
+            }
+          ],
+          "locateReturn": false,
+          "title": "전체 공간"
+        }
+      }
+    },
+    {
+      "id": "p13-1280-both-role-actual-base-text-visible",
+      "pass": true,
+      "raw": {
+        "idea": {
+          "text": "목적과 구상·안내·오류를 보존한다",
+          "rects": [
+            {
+              "x": 955,
+              "y": 458.21875,
+              "w": 197.578125,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1280,
+            "b": 720
+          },
+          "full": true,
+          "hits": [
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "SECTION",
+              "id": "panel-idea",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "ASIDE",
+              "id": "area-panel",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "space-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        },
+        "explanation": {
+          "text": "지도 도구는 위 오른쪽에 있고 기존 공간 읽기 기능은 유지된다",
+          "rects": [
+            {
+              "x": 955,
+              "y": 557.5,
+              "w": 250.53125,
+              "h": 20
+            },
+            {
+              "x": 1205.53125,
+              "y": 557.5,
+              "w": 3.578125,
+              "h": 20
+            },
+            {
+              "x": 955,
+              "y": 579.1875,
+              "w": 91.28125,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1280,
+            "b": 720
+          },
+          "full": true,
+          "hits": [
+            true,
+            true,
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "SECTION",
+              "id": "panel-understanding-A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "ASIDE",
+              "id": "area-panel",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "space-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        },
+        "snapshot": {
+          "y": 0,
+          "focus": "node-info-A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 114, 70.2)",
+          "cards": [
+            {
+              "id": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+              "rect": {
+                "x": 427,
+                "y": 480.91876220703125,
+                "width": 288,
+                "height": 207.73126220703125,
+                "top": 480.91876220703125,
+                "right": 715,
+                "bottom": 688.6500244140625,
+                "left": 427
+              },
+              "selected": true
+            },
+            {
+              "id": "A_9c3666a5-aa8a-4b98-a5f6-c58704b9e2fe",
+              "rect": {
+                "x": 787,
+                "y": 480.91876220703125,
+                "width": 288,
+                "height": 158.39996337890625,
+                "top": 480.91876220703125,
+                "right": 1075,
+                "bottom": 639.3187255859375,
+                "left": 787
+              },
+              "selected": false
+            }
+          ],
+          "locateReturn": false,
+          "title": "전체 공간"
+        }
+      }
+    },
+    {
+      "id": "p13-1440-both-role-actual-base-text-visible",
+      "pass": true,
+      "raw": {
+        "idea": {
+          "text": "목적과 구상·안내·오류를 보존한다",
+          "rects": [
+            {
+              "x": 1115,
+              "y": 458.21875,
+              "w": 197.578125,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          },
+          "full": true,
+          "hits": [
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "SECTION",
+              "id": "panel-idea",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "ASIDE",
+              "id": "area-panel",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "space-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        },
+        "explanation": {
+          "text": "지도 도구는 위 오른쪽에 있고 기존 공간 읽기 기능은 유지된다",
+          "rects": [
+            {
+              "x": 1115,
+              "y": 557.5,
+              "w": 250.53125,
+              "h": 20
+            },
+            {
+              "x": 1365.53125,
+              "y": 557.5,
+              "w": 3.578125,
+              "h": 20
+            },
+            {
+              "x": 1115,
+              "y": 579.1875,
+              "w": 91.28125,
+              "h": 20
+            }
+          ],
+          "clip": {
+            "l": 0,
+            "t": 0,
+            "r": 1440,
+            "b": 900
+          },
+          "full": true,
+          "hits": [
+            true,
+            true,
+            true
+          ],
+          "ancestors": [
+            {
+              "tag": "SECTION",
+              "id": "panel-understanding-A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "ASIDE",
+              "id": "area-panel",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "SECTION",
+              "id": "space-view",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "MAIN",
+              "id": "main",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "DIV",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "BODY",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            },
+            {
+              "tag": "HTML",
+              "id": "",
+              "overflowX": "visible",
+              "overflowY": "visible"
+            }
+          ]
+        },
+        "snapshot": {
+          "y": 0,
+          "focus": "node-info-A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 194, 126.2)",
+          "cards": [
+            {
+              "id": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+              "rect": {
+                "x": 507,
+                "y": 536.9187622070312,
+                "width": 288,
+                "height": 207.73126220703125,
+                "top": 536.9187622070312,
+                "right": 795,
+                "bottom": 744.6500244140625,
+                "left": 507
+              },
+              "selected": true
+            },
+            {
+              "id": "A_9c3666a5-aa8a-4b98-a5f6-c58704b9e2fe",
+              "rect": {
+                "x": 867,
+                "y": 536.9187622070312,
+                "width": 288,
+                "height": 158.39996337890625,
+                "top": 536.9187622070312,
+                "right": 1155,
+                "bottom": 695.3187255859375,
+                "left": 867
+              },
+              "selected": false
+            }
+          ],
+          "locateReturn": false,
+          "title": "전체 공간"
+        }
+      }
+    }
+  ],
+  "fatal": null,
+  "exit": 0
+}

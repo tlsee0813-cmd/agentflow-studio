@@ -1,0 +1,52 @@
+{
+  "source": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+  "rows": [
+    {
+      "id": "long-data-base-collapsed",
+      "pass": true,
+      "raw": {
+        "details": [
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-full",
+            "open": false
+          },
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-evidence",
+            "open": false
+          },
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-evidence-file",
+            "open": false
+          },
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-edit",
+            "open": false
+          },
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-history",
+            "open": false
+          },
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-history-T_b7a1ef69-4dc6-4dac-8f0c-10aa30451f1e",
+            "open": false
+          },
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-history-T_b7a1ef69-4dc6-4dac-8f0c-10aa30451f1e-file",
+            "open": false
+          },
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-history-T_82c471ee-c003-42b0-8589-670c09534c47",
+            "open": false
+          },
+          {
+            "id": "panel-understanding-A_d77a45e6-158f-4b34-b62d-4761b4d3ec58-history-T_82c471ee-c003-42b0-8589-670c09534c47-file",
+            "open": false
+          }
+        ],
+        "text": "전달 기록에서 정리한 설명 · 앱 미검증\n\n[독립 합성 현재 긴 설명] NaN SUMMARY-TAIL-INDEPENDENT\n\n구상 변경 제안 · 미채택 [독립 합성 미채택] NaN PROPOSAL-TAIL-INDEPENDEN…\n\n사용자 구상은 그대로예요.\n\n설명 전체 보기\n근거 보기\n설명 오류 고치기\n이전 설명 · 반영하지 않은 정리"
+      }
+    }
+  ],
+  "fatal": null,
+  "exit": 0
+}

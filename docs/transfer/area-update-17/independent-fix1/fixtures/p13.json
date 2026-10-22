@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "idea015.project.6",
+  "id": "P_31e4f7f8-d2ce-4ef1-885f-9f67e5d3a028",
+  "revision": 14,
+  "name": "나의 프로젝트",
+  "sources": [
+    {
+      "id": "S_cdf204ed-4046-4eaf-94fd-2d076e3983bd",
+      "kind": "request",
+      "text": "[분석자 재서술·합성 요청] 목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다.",
+      "at": "2026-10-22T09:42:37.474Z",
+      "taskId": "T_f5d13bde-d8a1-4ff7-83c7-408c7eccc8ee",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "[분석자 재서술·합성 요청] 목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다.",
+      "status": "requested",
+      "sourceId": "S_cdf204ed-4046-4eaf-94fd-2d076e3983bd",
+      "revision": 6,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_f5d13bde-d8a1-4ff7-83c7-408c7eccc8ee",
+      "sourceIds": [
+        "S_cdf204ed-4046-4eaf-94fd-2d076e3983bd"
+      ],
+      "parentTaskId": null,
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": "[독립 합성 understanding] 서로 다른 수동값 보존",
+        "scope": "[독립 합성 scope] 서로 다른 수동값 보존",
+        "next": "[독립 합성 next] 서로 다른 수동값 보존",
+        "checks": "[독립 합성 checks] 서로 다른 수동값 보존"
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 5,
+        "brief": "[합성 요청당시 목적] PC 지도 조작부",
+        "area": {
+          "id": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+          "name": "PC 지도 조작부",
+          "note": "[합성 요청당시 구상] 목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다."
+        }
+      },
+      "areaId": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df"
+    }
+  ],
+  "currentTaskId": "T_f5d13bde-d8a1-4ff7-83c7-408c7eccc8ee",
+  "draft": "[독립 합성 미전송 B] 대상과 내용을 유지한다.",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "[합성 현재 목적] PC 지도 조작부",
+      "at": "2026-10-22T09:42:37.475Z",
+      "previous": [
+        {
+          "text": "[합성 요청당시 목적] PC 지도 조작부",
+          "at": "2026-10-22T09:42:37.474Z"
+        }
+      ]
+    },
+    "areas": [
+      {
+        "id": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+        "name": "PC 지도 조작부",
+        "note": "목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다.",
+        "archived": false,
+        "createdAt": "2026-10-22T09:42:37.474Z"
+      },
+      {
+        "id": "A_9c3666a5-aa8a-4b98-a5f6-c58704b9e2fe",
+        "name": "다른 영역 B",
+        "note": "B 구상 불변",
+        "archived": false,
+        "createdAt": "2026-10-22T09:42:37.474Z"
+      }
+    ],
+    "relations": [],
+    "draftTarget": {
+      "area": "A_9c3666a5-aa8a-4b98-a5f6-c58704b9e2fe"
+    },
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_3fda438e-6c76-4b3e-8c11-d1d1304283df": {
+          "x": 40,
+          "y": 40
+        },
+        "A_9c3666a5-aa8a-4b98-a5f6-c58704b9e2fe": {
+          "x": 340,
+          "y": 40
+        }
+      }
+    },
+    "understanding": {}
+  }
+}

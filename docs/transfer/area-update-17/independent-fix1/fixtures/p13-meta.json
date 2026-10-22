@@ -1,0 +1,14 @@
+{
+  "id": "p13",
+  "name": "PC 지도 조작부",
+  "note": "목적과 구상·안내·오류를 보존한다. 상세 개폐로 자동 맞춤이나 재배치를 하지 않는다.",
+  "report": "[내부 AI 배정·fix1 diff 재서술] PC 지도 도구를 위 오른쪽으로 옮겼다. 선택 카드 가림은 기존 한계다. 실제 사용자 원발화가 아니다.",
+  "summary": "지도 도구는 위 오른쪽에 있고 기존 공간 읽기 기능은 유지된다. 선택 카드 가림의 기존 한계는 남는다.",
+  "proposal": "[명시 합성 제안] 목적과 안내를 숨겨 공간을 더 확보하자.",
+  "wrong": "[명시 합성 오해석] 목적과 안내를 숨긴 제품이다.",
+  "origin": "제품13 AI 배정·고정 diff 재서술 · 실제 사용자 발화 아님",
+  "link": "https://github.com/tlsee0813-cmd/agentflow-studio/blob/827f029e0dab79b48ebe8818fb15d32db7ed8d06/docs/transfer/pc-map-space-13/author-fix1/REPORT.md",
+  "a": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+  "b": "A_9c3666a5-aa8a-4b98-a5f6-c58704b9e2fe",
+  "task": "T_f5d13bde-d8a1-4ff7-83c7-408c7eccc8ee"
+}

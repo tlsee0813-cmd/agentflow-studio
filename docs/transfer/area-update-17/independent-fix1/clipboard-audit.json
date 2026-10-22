@@ -1,0 +1,221 @@
+{
+  "rows": [
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1280,
+        720
+      ],
+      "kind": "firstClipboard",
+      "actualUTF16Chars": 4215,
+      "actualFNV": "a685d18c",
+      "recordChars": 4215,
+      "recordDigest": "a685d18c",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+        "understanding": 0,
+        "stamp": {
+          "name": "\ud0a4 \uac80\uc0c9\uacfc \ub179\ud654",
+          "note": "Enter\ub85c \uc81c\ucd9c\ud55c \uac80\uc0c9\uc5b4\ub97c \uc120\ud0dd\ud558\uace0, \ub179\ud654 \uc885\ub8cc\ub294 Tab \ub204\ub984\ub9cc \uc0ac\uc6a9\ud55c\ub2e4. \uc815\uc0c1 key-up\uc740 \uc720\uc9c0\ud55c\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_8d01b3fd-67b8-4364-909c-af0d91c03088:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1280,
+        720
+      ],
+      "kind": "secondClipboard",
+      "actualUTF16Chars": 6918,
+      "actualFNV": "8099ca60",
+      "recordChars": 6918,
+      "recordDigest": "8099ca60",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+        "understanding": 3,
+        "stamp": {
+          "name": "\ud0a4 \uac80\uc0c9\uacfc \ub179\ud654",
+          "note": "Enter\ub85c \uc81c\ucd9c\ud55c \uac80\uc0c9\uc5b4\ub97c \uc120\ud0dd\ud558\uace0, \ub179\ud654 \uc885\ub8cc\ub294 Tab \ub204\ub984\ub9cc \uc0ac\uc6a9\ud55c\ub2e4. \uc815\uc0c1 key-up\uc740 \uc720\uc9c0\ud55c\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_8d01b3fd-67b8-4364-909c-af0d91c03088:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1440,
+        900
+      ],
+      "kind": "firstClipboard",
+      "actualUTF16Chars": 4215,
+      "actualFNV": "cce7b028",
+      "recordChars": 4215,
+      "recordDigest": "cce7b028",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+        "understanding": 0,
+        "stamp": {
+          "name": "\ud0a4 \uac80\uc0c9\uacfc \ub179\ud654",
+          "note": "Enter\ub85c \uc81c\ucd9c\ud55c \uac80\uc0c9\uc5b4\ub97c \uc120\ud0dd\ud558\uace0, \ub179\ud654 \uc885\ub8cc\ub294 Tab \ub204\ub984\ub9cc \uc0ac\uc6a9\ud55c\ub2e4. \uc815\uc0c1 key-up\uc740 \uc720\uc9c0\ud55c\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_8d01b3fd-67b8-4364-909c-af0d91c03088:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "powertoys",
+      "viewport": [
+        1440,
+        900
+      ],
+      "kind": "secondClipboard",
+      "actualUTF16Chars": 6918,
+      "actualFNV": "aa93b63b",
+      "recordChars": 6918,
+      "recordDigest": "aa93b63b",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_d77a45e6-158f-4b34-b62d-4761b4d3ec58",
+        "understanding": 3,
+        "stamp": {
+          "name": "\ud0a4 \uac80\uc0c9\uacfc \ub179\ud654",
+          "note": "Enter\ub85c \uc81c\ucd9c\ud55c \uac80\uc0c9\uc5b4\ub97c \uc120\ud0dd\ud558\uace0, \ub179\ud654 \uc885\ub8cc\ub294 Tab \ub204\ub984\ub9cc \uc0ac\uc6a9\ud55c\ub2e4. \uc815\uc0c1 key-up\uc740 \uc720\uc9c0\ud55c\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_8d01b3fd-67b8-4364-909c-af0d91c03088:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "p13",
+      "viewport": [
+        1280,
+        720
+      ],
+      "kind": "firstClipboard",
+      "actualUTF16Chars": 4184,
+      "actualFNV": "a3431d77",
+      "recordChars": 4184,
+      "recordDigest": "a3431d77",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+        "understanding": 0,
+        "stamp": {
+          "name": "PC \uc9c0\ub3c4 \uc870\uc791\ubd80",
+          "note": "\ubaa9\uc801\uacfc \uad6c\uc0c1\u00b7\uc548\ub0b4\u00b7\uc624\ub958\ub97c \ubcf4\uc874\ud55c\ub2e4. \uc0c1\uc138 \uac1c\ud3d0\ub85c \uc790\ub3d9 \ub9de\ucda4\uc774\ub098 \uc7ac\ubc30\uce58\ub97c \ud558\uc9c0 \uc54a\ub294\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_f5d13bde-d8a1-4ff7-83c7-408c7eccc8ee:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "p13",
+      "viewport": [
+        1280,
+        720
+      ],
+      "kind": "secondClipboard",
+      "actualUTF16Chars": 6843,
+      "actualFNV": "7cb7ef79",
+      "recordChars": 6843,
+      "recordDigest": "7cb7ef79",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+        "understanding": 3,
+        "stamp": {
+          "name": "PC \uc9c0\ub3c4 \uc870\uc791\ubd80",
+          "note": "\ubaa9\uc801\uacfc \uad6c\uc0c1\u00b7\uc548\ub0b4\u00b7\uc624\ub958\ub97c \ubcf4\uc874\ud55c\ub2e4. \uc0c1\uc138 \uac1c\ud3d0\ub85c \uc790\ub3d9 \ub9de\ucda4\uc774\ub098 \uc7ac\ubc30\uce58\ub97c \ud558\uc9c0 \uc54a\ub294\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_f5d13bde-d8a1-4ff7-83c7-408c7eccc8ee:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "p13",
+      "viewport": [
+        1440,
+        900
+      ],
+      "kind": "firstClipboard",
+      "actualUTF16Chars": 4184,
+      "actualFNV": "a003c67b",
+      "recordChars": 4184,
+      "recordDigest": "a003c67b",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+        "understanding": 0,
+        "stamp": {
+          "name": "PC \uc9c0\ub3c4 \uc870\uc791\ubd80",
+          "note": "\ubaa9\uc801\uacfc \uad6c\uc0c1\u00b7\uc548\ub0b4\u00b7\uc624\ub958\ub97c \ubcf4\uc874\ud55c\ub2e4. \uc0c1\uc138 \uac1c\ud3d0\ub85c \uc790\ub3d9 \ub9de\ucda4\uc774\ub098 \uc7ac\ubc30\uce58\ub97c \ud558\uc9c0 \uc54a\ub294\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_f5d13bde-d8a1-4ff7-83c7-408c7eccc8ee:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    },
+    {
+      "sample": "p13",
+      "viewport": [
+        1440,
+        900
+      ],
+      "kind": "secondClipboard",
+      "actualUTF16Chars": 6843,
+      "actualFNV": "8f5ffc75",
+      "recordChars": 6843,
+      "recordDigest": "8f5ffc75",
+      "match": true,
+      "anchor": {
+        "version": "anchor.1",
+        "areaId": "A_3fda438e-6c76-4b3e-8c11-d1d1304283df",
+        "understanding": 3,
+        "stamp": {
+          "name": "PC \uc9c0\ub3c4 \uc870\uc791\ubd80",
+          "note": "\ubaa9\uc801\uacfc \uad6c\uc0c1\u00b7\uc548\ub0b4\u00b7\uc624\ub958\ub97c \ubcf4\uc874\ud55c\ub2e4. \uc0c1\uc138 \uac1c\ud3d0\ub85c \uc790\ub3d9 \ub9de\ucda4\uc774\ub098 \uc7ac\ubc30\uce58\ub97c \ud558\uc9c0 \uc54a\ub294\ub2e4.",
+          "brief": 2,
+          "decisions": [],
+          "work": [
+            "T_f5d13bde-d8a1-4ff7-83c7-408c7eccc8ee:8a83af406de12d1be7ac2116584f2aaac0fa9fb9e9b5ed17031e1e3de533737c"
+          ]
+        }
+      }
+    }
+  ],
+  "concurrentEditDuringClipboard": "NOT_RUN"
+}

@@ -1,0 +1,15 @@
+import * as D from '../cycle17-fix1-candidate/app/continuity/dist/public/shared/domain.js';import {parseProject} from '../cycle17-fix1-candidate/app/continuity/dist/public/shared/validation.js';import {readFileSync,writeFileSync} from 'node:fs';
+const raw=JSON.parse(readFileSync(new URL('./new-request-domain.json',import.meta.url))).before,c=JSON.parse(readFileSync(new URL('./fixtures/powertoys-meta.json',import.meta.url)));const rows=[];let fatal=null;function ck(id,ok,v){rows.push({id,pass:!!ok,raw:v})}
+try{
+const rt=raw.tasks.find(t=>t.resultFile),f=JSON.parse(rt.resultFile.rawText);ck('exact-duplicate-object-unchanged',D.importResultFile(raw,rt.resultFile.rawText)===raw,{revisionBefore:raw.revision,revisionAfter:D.importResultFile(raw,rt.resultFile.rawText).revision});
+let changed=D.editArea(raw,c.a,c.name,'[명시 사용자 구상 수정] 이후 낡은 설명 제외');const s=structuredClone(f);s.understanding.summary='[독립 stale] 옛 기준 수정 설명';changed=D.importResultFile(changed,JSON.stringify(s));const view=D.areaDescription(changed,c.a);ck('stale-plan-report-retained-not-current',!view.current?.valid&&changed.tasks.at(-1).resultFile.rawText===JSON.stringify(s),{view,report:changed.tasks.at(-1),text:D.handoffText(changed)});
+let one=D.createProject();one=D.addArea(one,'단일 영역','기존 구상');one=D.submit(D.editDraft(one,'[독립 합성] 원문'),undefined,one.space.areas[0].id);const tid=one.currentTaskId;one=D.markHandoff(one,tid,D.handoffText(one,tid,'H_legacy_1'),'download',one.revision,'H_legacy_1',D.exportAnchor(one,D.taskOf(one,tid)));one=D.importResultFile(one,JSON.stringify({schemaVersion:'agentflow.return.1',projectId:one.id,taskId:tid,returnId:'H_legacy_1',report:'[합성 return1]',evidence:null}));ck('return1-compatible-no-understanding',!Object.keys(one.space.understanding).length,{one});
+for(let version=1;version<=5;version++){
+ let old=structuredClone(one);old.schemaVersion='idea015.project.'+version;
+ delete old.space.understanding;
+ for(const t of old.tasks){for(const h of t.handoffs)delete h.anchor;if(version<5){delete t.background;for(const h of t.handoffs)delete h.background;}if(version<4)delete t.areaId;if(version<3){delete t.resultFile;for(const h of t.handoffs)delete h.returnId;}if(version===1){delete t.adviceRevision;for(const h of t.handoffs){h.text='[독립 역사 형식 합성 인계]';for(const k of ['chars','digest','work','aiExcluded','legacyText'])delete h[k];}}}
+ if(version<4)delete old.space;if(version===1)for(const b of old.bases)b.locked=true;
+ const migrated=parseProject(JSON.stringify(old)),round=parseProject(JSON.stringify(migrated));ck('historical-v'+version+'-no-invented-state-roundtrip',migrated.schemaVersion==='idea015.project.6'&&Object.keys(migrated.space.understanding).length===0&&migrated.tasks.every(t=>t.handoffs.every(h=>h.anchor===null))&&JSON.stringify(migrated)===JSON.stringify(round),{old,migrated,round});
+}
+}catch(e){fatal={name:e.name,message:e.message,stack:e.stack}}
+const exit=fatal?2:rows.some(r=>!r.pass)?1:0;writeFileSync(new URL('./state.json',import.meta.url),JSON.stringify({rows,fatal,exit},null,2));console.log(JSON.stringify({exit,failed:rows.filter(x=>!x.pass).map(x=>x.id),fatal}));process.exitCode=exit;

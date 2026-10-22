@@ -1,0 +1,12 @@
+{
+  "source": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+  "command": "node continuity/scripts/build-static.mjs",
+  "exit": 0,
+  "overlay": "static MOCK client/app.js and styles.css over existing cycle16 static runtime; retain unchanged index/runtime/shared modules only if matching required module dependencies",
+  "warning": "candidate has reproduced failures; not approved preview or deployment",
+  "requiredChangedSharedOverlay": [
+    "shared/domain.js",
+    "shared/validation.js",
+    "shared/types.js"
+  ]
+}
