@@ -1,0 +1,12 @@
+test_01_idea_exact_return_changed_direction_and_recovery (__main__.OutcomeHome.test_01_idea_exact_return_changed_direction_and_recovery) ... ok
+test_02_clear_change_keeps_direct_handoff_and_manual_report (__main__.OutcomeHome.test_02_clear_change_keeps_direct_handoff_and_manual_report) ... ok
+test_03_performance_request_uses_same_home_without_a_screen_template (__main__.OutcomeHome.test_03_performance_request_uses_same_home_without_a_screen_template) ... ok
+test_04_direction_three_turns_correction_and_recovery (__main__.OutcomeHome.test_04_direction_three_turns_correction_and_recovery) ... ok
+test_05_long_requests_and_return_continuation (__main__.OutcomeHome.test_05_long_requests_and_return_continuation) ... ok
+test_06_late_report_keeps_the_current_request_and_never_becomes_the_goal (__main__.OutcomeHome.test_06_late_report_keeps_the_current_request_and_never_becomes_the_goal)
+FIX088: receiving a report for A is not choosing A. B (scope, goal, export) stays; the A result is findable. ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 11.571s
+
+OK

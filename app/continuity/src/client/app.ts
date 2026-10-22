@@ -1,7 +1,8 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, TEXT_LIMIT, type Basis, type Project, type Task, type Source, type Area, type RelationKind, type Point, type Question, type GuideAnswer, type GuideReply, type Proposal } from '../shared/types.js';
 import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion,
   currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask,
-  areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
+  areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask,
+  exportAnchor, areaDescription, returnUnderstanding, correctUnderstanding, type DescriptionView } from '../shared/domain.js';
 import { parseProject, parseResultFile, validateRequest, validateAdvice, validateGuideEnvelope } from '../shared/validation.js';
 import { buildGuideRequest, guideDigest, readOf, proposalText, adoptProposal, instructionOf } from '../shared/guidance.js';
 import { WorkspaceStore, serializeProject, storageErrorCode, type EntryRef, type WorkspaceEntry } from '../shared/storage.js';
@@ -45,6 +46,14 @@ let viewTask:string|null=null;
 // SPATIAL102-R1: the report a '확인할 일' item pointed to, shown on the task screen (may be a report to a follow-up handoff).
 // REPORT16: also the report the user picked on that screen. Never chosen for the user (no latest-report default).
 let viewReturn:string|null=null;
+// Received in this open project only; this is not tracking changes since a previous visit.
+const receivedAreas=new Set<string>();
+const understandingEditRevisions=new Map<string,number>();
+// AREA17: the last result file with an organised description imported in this tab (work view line with the location action).
+let lastReceipt:{taskId:string;areaId:string}|null=null;
+// AREA17: an explicit 'where is it' moved only the map viewport to this area's card. origin = the view before that move, kept
+// apart from the reading origin (reading a task from the located view and coming back must not lose it). Tab memory only.
+let located:{area:string;origin:Origin;moved?:boolean;scaled?:boolean}|null=null;
 // REPORT16: which disclosures of the task screen are open, for that request and that picked report only (tab memory).
 // Ids starting with 'task-report-' belong to the picked report and are dropped when another report is picked.
 let readOpen:{task:string;ret:string|null;open:Record<string,boolean>}|null=null;
@@ -132,6 +141,8 @@ function resetEphemeral() {
   $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
   resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
+  receivedAreas.clear();
+  understandingEditRevisions.clear();lastReceipt=null;located=null;
   mapView=null;mapSelected=null;sheetOpen=false;areaListOpen=null;backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
@@ -263,12 +274,17 @@ function focusFirst(...ids:string[]):boolean {
 /** Coming back restores this layer's scroll and the card the user entered; an ID that no longer exists is just skipped. */
 function openSpace() {
   // PC12: arriving at the map by any other way makes it the new starting point; the earlier one is dropped.
+  // AREA17: back to the whole space from the located area's own screens keeps the way back to the view before 'where is it';
+  // arriving from anywhere else (the work view, another area) is a new start.
+  if(!(located&&(view==='space'||(view==='area'||view==='task')&&viewArea===located.area)))located=null;
   origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;sheetOpen=false;render();
   const from=layerMemo.from;window.scrollTo({top:layerMemo.space??0});
   if(!(from&&focusFirst(`node-enter-${from}`,`list-enter-${from}`)))$('space-title')?.focus({preventScroll:true});
 }
 function openArea(id:string) {
   if(view==='space')layerMemo.from=id;
+  // AREA17: opening the located area itself (its panel's '영역 열기', its crumb) keeps the way back; any other area is a new start.
+  if(!(located&&located.area===id&&(view==='space'||viewArea===id)))located=null;
   origin=null;leaveLayer();view='area';viewArea=id;viewTask=null;viewReturn=null;render();
   const memo=layerMemo.areas[id];window.scrollTo({top:memo?.y??0});
   if(!(memo?.task&&focusFirst(`task-open-${memo.task}`)))$('space-title')?.focus({preventScroll:true});
@@ -294,8 +310,10 @@ function originButton(id:string):HTMLButtonElement|null {
 /** PC12: back to the view this reading started from. It restores only the view (layer, area, viewport, selection, scroll,
  * the control used); the continued work and saved edits stay as they are now. A starting point that no longer exists
  * (area archived/removed, another project) falls back to the whole space without choosing anything else. */
-function returnToOrigin() {
-  const o=origin;origin=null;
+function returnToOrigin() {const o=origin;origin=null;restoreOrigin(o);}
+/** AREA17: back to the view before an explicit 'where is it' moved the map (also after reading a task from there). */
+function returnFromLocate() {const o=located?.origin??null;located=null;origin=null;restoreOrigin(o);}
+function restoreOrigin(o:Origin|null) {
   if(!o||o.project!==project.id){openSpace();return;}
   const area=o.area&&o.area!=='unassigned'?areaById(o.area):null;
   const areaGone=o.view==='area'&&o.area!=='unassigned'&&(!area||area.archived);
@@ -336,6 +354,9 @@ function continueTask(id:string) {
 }
 /** Explicit: write the next request for this area (null = no area). The only way, besides the composer's own choice, to set the target. */
 function writeInArea(id:string|null) {
+  // AREA17: '이 영역에 새 요청' for the located area, from its map panel or its own screens, continues that reading: the work view
+  // keeps the explicit way back to the view before locating. Writing anywhere else is a new start.
+  if(!(located&&located.area===id&&(view==='space'||(view==='area'||view==='task')&&viewArea===id)))located=null;
   // An unsent report or request keeps its kind and target: open it instead of relabelling or moving it.
   if(project.draft.trim()) {
     // REPORT16: null = follows the current work; {area:null} = explicitly no area. Never the same words.
@@ -429,7 +450,9 @@ function renderOutcome(t:Task|null) {
   title.append(node('p','PROJECT OUTCOME','eyebrow'),node('h2','지금 이어갈 작업'));
   // FLOW091: the work text is reached from the '지금 할 일' row above; this head keeps only the next-request entry.
   const topActions=node('div','','outcome-actions');topActions.append(btn('방향 수정 / 다음 요청',()=>openComposer('request'),'secondary','change-direction'));
-  top.append(title,topActions);area.append(top,handoffReview(t));
+  top.append(title,topActions);area.append(top);
+  const receipt=receiptLine();if(receipt)area.append(receipt);
+  area.append(handoffReview(t));
   // FIX088: received results and the user's latest request are shown, never merged into or swapped with this flow.
   const latest=flow.otherLatestRequest;
   if(latest) {
@@ -576,14 +599,15 @@ function safeName(value:string){return value.replace(/[^a-zA-Z0-9가-힣_-]/g,'_
 async function exportWork(id:string,method:'clipboard'|'download',fileMode=false) {
   let text:string;const exportRevision=project.revision,exportProjectId=project.id,epoch=projectEpoch;
   const returnId=fileMode?`H_${crypto.randomUUID()}`:null;
+  const anchor=fileMode?exportAnchor(project,taskOf(project,id)):null;
   try {text=handoffText(project,id,returnId);}catch {project={...project,notice:'작업 문맥 데이터가 유효하지 않아 내보내지 않았습니다. 복구 파일로 내용을 보존하세요.'};renderStatus();return;}
-  if(method==='download'){download(`${safeName(project.name)}-${fileMode?'파일반환-':''}작업문.md`,text,'text/markdown;charset=utf-8');if(fileMode)lastFileExport={taskId:id,text};commit({...markHandoff(project,id,text,method,exportRevision,returnId),notice:'작업문을 Markdown 파일로 저장했어요. 그 파일을 개발 도구에 전달하는 건 직접 해 주세요. 전달·실행된 것은 아니에요.'});
+  if(method==='download'){download(`${safeName(project.name)}-${fileMode?'파일반환-':''}작업문.md`,text,'text/markdown;charset=utf-8');if(fileMode)lastFileExport={taskId:id,text};commit({...markHandoff(project,id,text,method,exportRevision,returnId,anchor),notice:'작업문을 Markdown 파일로 저장했어요. 그 파일을 개발 도구에 전달하는 건 직접 해 주세요. 전달·실행된 것은 아니에요.'});
     // Saves are asynchronous (locked): judge the save record only after it finished, for the same project view.
     await flushSaves();if(memoryDirty&&projectEpoch===epoch){project={...project,notice:'Markdown 파일은 저장했지만 저장 기록은 브라우저에 남기지 못했습니다. 닫기 전에 백업 파일을 저장하세요.'};renderStatus();}return;}
   try {await navigator.clipboard.writeText(text);
     if(project.id!==exportProjectId||project.revision!==exportRevision||projectEpoch!==epoch){project={...project,notice:'작업문은 복사됐지만 그 사이 입력이 바뀌었습니다. 현재 내용의 내보내기 기록으로 표시하지 않았습니다. 최신 작업문이 필요하면 다시 복사하세요.'};renderStatus();return;}
     if(fileMode)lastFileExport={taskId:id,text};
-    commit(markHandoff(project,id,text,method,exportRevision,returnId));await flushSaves();if(projectEpoch!==epoch)return;project={...project,notice:memoryDirty?'작업문은 복사됐지만 내보내기 기록은 브라우저에 저장되지 않았습니다. 닫기 전에 JSON 백업을 저장하세요.':'작업문을 클립보드에 복사했습니다. 실행 도구에 직접 붙여넣으세요. 전송·실행된 것은 아닙니다.'};renderStatus();}
+    commit(markHandoff(project,id,text,method,exportRevision,returnId,anchor));await flushSaves();if(projectEpoch!==epoch)return;project={...project,notice:memoryDirty?'작업문은 복사됐지만 내보내기 기록은 브라우저에 저장되지 않았습니다. 닫기 전에 JSON 백업을 저장하세요.':'작업문을 클립보드에 복사했습니다. 실행 도구에 직접 붙여넣으세요. 전송·실행된 것은 아닙니다.'};renderStatus();}
   catch {
     project={...project,notice:'클립보드를 사용할 수 없습니다. 아래 작업문을 직접 선택해 복사하거나 파일로 저장하세요.'};render();
     const d=$<HTMLDetailsElement>('handoff-preview');d.open=true;const field=$<HTMLTextAreaElement>('handoff-text');field.focus();field.select();
@@ -616,7 +640,8 @@ function renderResultFile() {
     area.append(bases,work,node('p','외부 보고 원문 · 앱 미검증','source-meta'),node('div',file.report,'source-raw'));
     if(file.evidence!==null)area.append(node('p','외부 관찰·검사 원문 · 앱 미검증','source-meta'),node('div',file.evidence,'source-raw'));
     area.append(node('p','파일은 실행 증명이 아닙니다. 가져와도 AI 정리·명령·링크를 실행하지 않습니다.','hint'));
-    if(duplicate)area.append(node('p','같은 인계의 같은 본문이 이미 있습니다. 다시 추가하지 않습니다.','hint'));
+    if(file.understanding){const u=details('함께 받은 영역 설명','result-understanding-preview');u.append(node('p',file.understanding.summary,'source-raw'),node('p',`외부 정리 · ${file.understanding.origin} · 앱 미검증`,'hint'));area.append(u);}
+    if(duplicate)area.append(node('p','같은 인계의 보고와 정리가 이미 있습니다. 다시 추가하지 않습니다.','hint'));
     area.append(btn(duplicate?'기존 기록 확인':'이 결과 가져오기',()=>void acceptResultFile(),'primary','accept-result-file'));
     area.append(rawFileDetails(resultSelection.rawText,file.returnId,'result-file-raw'));
   } catch(e) {
@@ -632,9 +657,13 @@ async function acceptResultFile() {
   try {
     const n=importResultFile(project,resultSelection.rawText);
     if(n===project){resultMessage=memoryDirty?'같은 본문은 이미 이 탭에 있습니다. 브라우저에는 저장되지 않았습니다. JSON 백업으로 보존하세요.':'같은 본문의 기존 기록을 확인했습니다. 새 기록은 추가하지 않았습니다.';renderResultFile();return;}
+    for(const a of n.space.areas)if(n.space.understanding[a.id]?.revision!==(project.space.understanding[a.id]?.revision??0)&&n.space.understanding[a.id]?.revision)receivedAreas.add(a.id);
     controller?.abort();controller=null;resultRead++;resultSelection=null;resultMessage='';
     commit(n);const epoch=projectEpoch;await flushSaves();if(epoch!==projectEpoch)return;resultMessage=memoryDirty?'결과는 이 탭에만 있습니다. 브라우저에 저장하지 못했습니다. 닫기 전에 JSON 백업을 저장하세요.':'보고를 가져왔습니다 · 앱 미검증. 작성 중인 입력은 그대로입니다.';
-    renderResultFile();showWork();
+    // Receiving never moves the map; the line below offers the explicit location action.
+    const added=n.tasks.at(-1),update=added?returnUnderstanding(n,added.id):null;
+    lastReceipt=update?.areaId?{taskId:added!.id,areaId:update.areaId}:null;
+    renderResultFile();showWork();render();
   }catch(e){resultMessage=resultError(e)+' 기존 붙여넣기도 계속 이용할 수 있습니다.';renderResultFile();}
 }
 function basisCard(b:Basis,focus=false):HTMLElement {
@@ -1099,6 +1128,8 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   const enter=node('button','','node-enter');enter.type='button';enter.id=`node-enter-${a.id}`;
   const name=node('strong',a.name,'area-card-name');name.append(node('span',' ↘','area-card-go'));
   enter.append(name,a.note?node('span',a.note,'area-card-note'):noNote(),node('span',areaSummary(a),'hint'));
+  if(receivedAreas.has(a.id))enter.append(node('span','설명 갱신','area-update-label'));
+  el.classList.toggle('located',located?.area===a.id&&view==='space');
   if(areaRequests(a.id).some(currentGroup))enter.append(appTag());
   enter.addEventListener('click',()=>guard(()=>openArea(a.id)));
   // Information shows the short properties; it never opens the area or changes the open work.
@@ -1228,6 +1259,133 @@ function areaIdea(a:Area,id:string,limit=NOTE_SHORT,label='사용자 구상'):HT
   box.append(node('p',shortText(a.note,limit),'area-idea-text'),full);return box;
 }
 const PANEL_TASKS=5;
+/** AREA17: the work view line for the result file just imported in this tab: which area's description it was, and the explicit
+ * location action. Not a count, not 'since the last visit'. */
+function receiptLine():HTMLElement|null {
+  const r=lastReceipt,a=r?areaById(r.areaId):null,u=r?returnUnderstanding(project,r.taskId):null;if(!r||!a||!u)return null;
+  const box=node('section','','outcome-received');box.id='outcome-received-area';
+  box.append(node('p',u.entry?.held?`받은 결과의 영역 설명 · ‘${a.name}’ · 현재 설명에는 반영하지 않았어요`:`받은 결과로 ‘${a.name}’의 현재 설명이 바뀌었어요 · 앱 미검증`,'hint'));
+  if(!a.archived)box.append(btn('지도에서 이 부분 보기',()=>showReceivedArea(a.id,'result-show-area'),'secondary','result-show-area'));
+  return box;
+}
+/** AREA17: explicit 'where is it'. Opens the whole space with this area selected and its panel open, and moves only the map
+ * viewport (the smallest pan; a zoom-out only when the card is larger than the free part) so the card is inside the part of
+ * the map the panel and tools do not cover. Never a whole-map fit. Stored
+ * positions and other areas never move, and receiving a description never does this. The view before it is kept: '← 위치 찾기
+ * 전 보기로' brings back its layer, viewport, selection, panel, open disclosures, scroll and focus. */
+function showReceivedArea(id:string,from:string|null=null) {
+  const a=areaById(id);if(!a||a.archived)return;
+  if(!located) {
+    if(view==='space'||view==='area')markOrigin(from);
+    else {
+      // From the work (or task) screen the starting point is the whole space as this tab would show it.
+      origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;render();window.scrollTo({top:layerMemo.space??0});markOrigin(null);
+    }
+    located={area:id,origin:origin!};
+  } else located.area=id;
+  origin=null;leaveLayer();view='space';viewArea=null;viewTask=null;viewReturn=null;mapSelected=id;sheetOpen=true;render();
+  revealCard(id);rememberMap();const line=locatedLine();if(line)document.getElementById('located-note')?.replaceWith(line);
+  const card=document.querySelector<HTMLElement>(`.area-node[data-area-id="${id}"]`);
+  if(card){const r=card.getBoundingClientRect(),note=document.getElementById('located-note'),top=(note??$('space-map')).getBoundingClientRect().top;
+    // Page scroll (never the map's own box): the card in the window, with the line that offers the way back above it when both fit.
+    if(r.top<0||r.bottom>innerHeight||top<0)window.scrollBy({top:r.bottom-top<=innerHeight-16?top-8:r.top-16});}
+  const panel=$('area-panel');panel.tabIndex=-1;panel.focus({preventScroll:true});
+}
+/** The smallest viewport pan that puts the card inside the map part not covered by the panel (a sheet on narrow screens)
+ * or the map tools. The scale stays unless the card cannot fit at it (then only as much zoom-out as it needs, around the
+ * card). No stored position changes; the starting viewport is restored by the explicit return. */
+function revealCard(id:string) {
+  const map=document.getElementById('space-map'),plane=document.getElementById('space-plane'),card=plane?.querySelector<HTMLElement>(`.area-node[data-area-id="${id}"]`);
+  if(!map||!plane||!card||!mapView)return;
+  const m=map.getBoundingClientRect();let free={left:0,top:0,right:map.clientWidth,bottom:map.clientHeight};
+  for(const el of [document.getElementById('area-panel'),map.querySelector('.map-controls')]) {
+    const r=el?.getBoundingClientRect();if(!r||!r.width||r.right<=m.left||r.left>=m.right||r.bottom<=m.top||r.top>=m.bottom)continue;
+    const l=r.left-m.left,t=r.top-m.top,rr=r.right-m.left,b=r.bottom-m.top,f=free;
+    // Drop the covered band on the side that keeps the largest free rectangle.
+    free=[{...f,bottom:Math.min(f.bottom,t)},{...f,top:Math.max(f.top,b)},{...f,right:Math.min(f.right,l)},{...f,left:Math.max(f.left,rr)}]
+      .reduce((x,y)=>(y.right-y.left)*(y.bottom-y.top)>(x.right-x.left)*(x.bottom-x.top)?y:x);
+  }
+  const pad=16,v0=mapView,cw=card.offsetWidth,ch=card.offsetHeight,cx=card.offsetLeft+cw/2,cy=card.offsetTop+ch/2;
+  // Same scale unless the card cannot fit in the free part at it; then zoom out around the card only as far as it needs.
+  const s=Math.max(FIT_MIN,Math.min(v0.s,(free.right-free.left-2*pad)/cw,(free.bottom-free.top-2*pad)/ch));
+  const v={x:cx*v0.s+v0.x-cx*s,y:cy*v0.s+v0.y-cy*s,s},x=card.offsetLeft*s+v.x,y=card.offsetTop*s+v.y,w=cw*s,h=ch*s;
+  const shift=(pos:number,size:number,lo:number,hi:number)=>size>hi-lo-2*pad?lo+pad-pos:pos<lo+pad?lo+pad-pos:pos+size>hi-pad?hi-pad-(pos+size):0;
+  const dx=shift(x,w,free.left,free.right),dy=shift(y,h,free.top,free.bottom),scaled=s!==v0.s;
+  if(dx||dy||scaled){mapView={x:v.x+dx,y:v.y+dy,s};applyView(plane);$('map-scale').textContent=scaleLabel(s);}
+  if(located){located.moved=located.moved||!!(dx||dy)||scaled;located.scaled=located.scaled||scaled;}
+}
+function locatedLine():HTMLElement|null {
+  const l=located;if(!l||l.origin.project!==project.id)return null;const a=areaById(l.area);if(!a||a.archived)return null;
+  if(view==='area'&&viewArea===l.area){const box=node('div','','located-note');box.id='located-note';
+    box.append(node('span','지도에서 위치를 찾아 연 영역이에요','hint'),btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`,returnFromLocate,'secondary origin-return','locate-return'));return box;}
+  if(view!=='space')return null;
+  const box=node('div','','located-note');box.id='located-note';
+  box.append(node('span',l.scaled?`‘${a.name}’ 카드가 다 보이도록 지도 보기를 옮기고 축소했어요 · 배치는 그대로예요`:l.moved?`‘${a.name}’ 카드가 보이도록 지도 보기만 옮겼어요 · 배치와 배율은 그대로예요`:`‘${a.name}’ 카드는 지금 지도에 보여요`,'hint'),
+    btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`,returnFromLocate,'secondary origin-return','locate-return'));
+  return box;
+}
+const heldMessage:Record<string,string>={
+  'no-anchor':'이전 인계에 설명 기준이 없어 현재 설명으로 쓰지 않았어요.',
+  'area-moved':'인계 뒤 작업의 영역이 달라져 현재 설명으로 쓰지 않았어요.',
+  'area-mismatch':'설명에 적힌 영역과 연결된 작업의 영역이 달라요.',
+  'area-archived':'보관된 영역이라 현재 설명으로 쓰지 않았어요.',
+  'file-basis':'파일의 설명 기준이 실제 인계 기록과 달라요.',
+  'superseded':'그 뒤 설명이나 사용자 정정이 있어 이전 입력을 적용하지 않았어요.',
+  'plan-changed':'인계 뒤 사용자 구상이나 조건이 바뀌어 적용하지 않았어요.'
+};
+/** Evidence opens here, without selecting a report or changing the work the user continues. */
+function descriptionEvidence(d:DescriptionView,id:string):HTMLElement {
+  const box=details('근거 보기',id);box.append(node('p',`${d.origin} · ${dateLabel(d.entry.at)} · 앱 미검증`,'hint'));
+  if(d.returnTask){for(const sid of d.returnTask.sourceIds){const s=project.sources.find(x=>x.id===sid);if(s)box.append(node('p',sourceName[s.kind],'source-meta'),node('div',reportBody(s),'source-raw'));}
+    if(d.returnTask.resultFile)box.append(rawFileDetails(d.returnTask.resultFile.rawText,d.returnTask.resultFile.returnId,`${id}-file`));
+  }else box.append(node('p','사용자가 이전 설명을 직접 정정했어요. 이전 설명과 근거는 아래 기록에 남아요.','hint'));
+  return box;
+}
+/** AREA17 default reading: a short current description, the first key change and the one judgement it may need (an
+ * unadopted proposal), each cut to its opening words; the whole description, every change, the proposal, its source, the
+ * evidence, the earlier descriptions and the correction are one disclosure away. Nothing stored is cut or changed.
+ * compact: the map's side panel and the task screen, where the user's idea and the requests share the space. */
+function understandingPanel(a:Area,id:string,compact=false):HTMLElement|null {
+  id=`${id}-${a.id}`; // Disclosure state belongs to this area, never to another selected area's panel.
+  const state=areaDescription(project,a.id),d=state.current;
+  // An area that never received an organised description shows nothing new (no empty-state line on every panel).
+  if(!d&&!state.previous.length&&!state.held.length)return null;
+  const box=node('section','','area-understanding');box.id=id;box.setAttribute('aria-label','영역 현재 설명');
+  // The disclosures share one wrapping row of links; an opened one takes the whole width below the short reading.
+  const more=node('div','','understanding-more');
+  box.append(node('p',d?.entry.by==='user'?'전달 기록에서 정리한 설명 · 사용자 정정':'전달 기록에서 정리한 설명 · 앱 미검증','source-meta'));
+  if(d?.valid){
+    const [S,C,P]=compact?[80,50,40]:[160,90,80],first=d.changes[0];
+    box.append(node('p',shortText(d.summary,S),'understanding-summary'));
+    if(first)box.append(node('p',`달라진 점 · ${shortText(first,C)}`,'understanding-change'));
+    if(d.proposal){const pr=node('p','','understanding-proposal');pr.append(node('strong','구상 변경 제안 · 미채택'),node('span',` ${shortText(d.proposal,P)}`));
+      box.append(pr,node('p',compact?'사용자 구상은 그대로예요.':'사용자 구상은 그대로예요. 받아들일 때만 구상을 직접 고치세요.','hint'));}
+    const cut=d.summary.length>S||d.changes.length>1||!!first&&first.length>C||!!d.proposal&&d.proposal.length>P;
+    const full=details(cut?'설명 전체 보기':'정리한 곳 보기',`${id}-full`);
+    if(cut){full.append(node('div',d.summary,'source-raw'));
+      if(d.changes.length){const changes=node('ul','','understanding-changes');for(const text of d.changes)changes.append(node('li',text));full.append(node('p','직전 정리에서 달라진 점','source-meta'),changes);}
+      if(d.proposal)full.append(node('p','구상 변경 제안 · 미채택 · 실행 지시 아님','source-meta'),node('div',d.proposal,'source-raw'));}
+    full.append(node('p',`정리: ${d.origin} · 앱 미검증`,'hint'));more.append(full);
+  }else box.append(node('p',d?'구상이나 조건이 바뀌어 이전 설명은 현재 설명으로 쓰지 않아요.':'아직 현재 설명은 없어요. 받은 정리는 아래 기록에 있어요.','hint'));
+  if(d){more.append(descriptionEvidence(d,`${id}-evidence`));
+    // Only the valid current description can be corrected (a stale one is never re-saved as current).
+    if(d.valid&&!a.archived){const key=`understanding-edit:${a.id}`,edit=details('설명 오류 고치기',`${id}-edit`);edit.open=spaceInputs[`${project.id}:${key}`]!==undefined;
+      const field=spaceInput(node('textarea'),`${id}-text`,d.summary,key);field.rows=3;field.maxLength=2000;field.setAttribute('aria-label','영역 설명 정정');
+      // The draft belongs to the description it was started from: a newer one arriving meanwhile is never 'corrected' by it.
+      field.addEventListener('input',()=>{if(!understandingEditRevisions.has(key))understandingEditRevisions.set(key,d.entry.revision!);});
+      const stale=understandingEditRevisions.has(key)&&understandingEditRevisions.get(key)!==d.entry.revision;
+      if(stale){const n=node('p','고치는 동안 새 설명이 왔어요. 이 초안은 보존했지만 새 설명의 정정으로 저장하지 않아요. 새 설명을 읽은 뒤 취소하고 다시 시작하세요.','alert warning');n.id=`${id}-stale`;edit.append(n);}
+      edit.append(field,node('p','사용자 구상을 바꾸지 않고 이 설명만 고쳐요. 이전 설명과 근거는 남아요.','hint'),btn('정정 저장',()=>guard(()=>{
+        if(understandingEditRevisions.has(key)&&understandingEditRevisions.get(key)!==areaDescription(project,a.id).current?.entry.revision){project={...project,notice:'정정 초안 뒤 새 설명이 도착해 저장하지 않았어요. 작성한 내용은 그대로예요.'};renderStatus();return;}
+        const n=correctUnderstanding(project,a.id,field.value);clearInputs(key);understandingEditRevisions.delete(key);commit(n);}),'secondary',`${id}-save`),
+        btn('취소',()=>{clearInputs(key);understandingEditRevisions.delete(key);render();},'quiet',`${id}-cancel`));more.append(edit);}
+  }
+  if(state.previous.length||state.held.length||d&&!d.valid){const history=details('이전 설명 · 반영하지 않은 정리',`${id}-history`);
+    for(const old of [...(d&&!d.valid?[d]:[]),...state.previous,...state.held]){const row=node('section','','understanding-record');row.append(node('p',old.entry.held?heldMessage[old.entry.held]!:old===d?'구상이나 조건이 바뀌기 전의 설명 · 지금은 현재 설명이 아니에요':old.entry.by==='user'?'사용자 정정 기록':'이전 정리 설명','source-meta'),node('div',old.summary,'source-raw'),descriptionEvidence(old,`${id}-history-${old.returnTask?.id??old.entry.revision}`));if(old.proposal)row.append(node('p',`미채택 제안: ${old.proposal}`,'source-raw'));history.append(row);}more.append(history);
+  }
+  if(more.childElementCount)box.append(more);
+  return box;
+}
 /** Short properties of the selected area, read first: name, the user's idea, and this area's requests for the user to pick.
  * Editing opens explicitly. No report is picked for the user; reports are read inside the task the user chose. */
 function areaPanel(a:Area):HTMLElement {
@@ -1243,7 +1401,7 @@ function areaPanel(a:Area):HTMLElement {
   edit.append(node('label','이름'),name,node('label','한 줄 구상'),note,node('p','아이디어도, 아직 못 정한 점도 적을 수 있어요.','hint'),row);
   const go=node('div','','row');go.append(btn('영역 열기 ↗',()=>openArea(a.id),'primary','panel-open'),btn('이 영역에 새 요청',()=>writeInArea(a.id),'quiet','panel-new-request'),
     btn('무엇을 요청할지 같이 정하기',()=>{guideOf(a.id);openArea(a.id);document.getElementById(`guide-${a.id}`)?.scrollIntoView({block:'start'});},'quiet','panel-guide'));
-  panel.append(head,areaIdea(a,'panel-idea'),edit,node('p',areaSummary(a),'hint'));
+  panel.append(head,areaIdea(a,'panel-idea'),...[understandingPanel(a,'panel-understanding',true)].filter(x=>!!x),edit,node('p',areaSummary(a),'hint'));
   const requests=areaRequests(a.id),list=node('section','','panel-tasks');list.id='panel-tasks';
   if(requests.length) {
     list.append(node('p',`이 영역의 요청 ${requests.length}개 · 골라서 읽기`,'source-meta'));
@@ -1323,6 +1481,8 @@ function renderOverview(root:HTMLElement) {
     start.append(btn('영역 추가',()=>{$<HTMLDetailsElement>('area-add-panel').open=true;$('area-name').focus();},'secondary','start-add-area'),btn('바로 첫 요청 쓰기 · 영역 없이',()=>writeInArea(null),'quiet','start-first-request'));
     root.append(start);
   }
+  if(receivedAreas.size){const recent=node('div','','received-areas');recent.id='received-areas';recent.append(node('span','이 탭에서 받은 설명 · 위치 보기'));for(const id of receivedAreas){const a=areaById(id);if(a&&!a.archived)recent.append(btn(a.name,()=>showReceivedArea(id,`received-area-${id}`),'quiet',`received-area-${id}`));}root.append(recent);}
+  const loc=locatedLine();if(loc)root.append(loc);
   const records=checkSection();renderMap(root,active,records?[records]:[]);
   if(active.length>1||project.space.relations.length) {
     const rel=node('section','','area-relations');rel.id='area-relations';rel.append(node('h2','영역 사이 관계'),node('p','실행 순서나 자동 연결이 아니라, 영역끼리 어떤 사이인지 적어 두는 메모예요.','hint'));
@@ -1512,7 +1672,8 @@ function renderArea(root:HTMLElement,a:Area) {
   const note=spaceInput(node('textarea'),'area-edit-note',a.note,noteKey);note.rows=2;note.maxLength=2000;note.setAttribute('aria-label','영역 설명');
   edit.append(name,note,btn('저장',()=>{if(!name.value.trim())return;commit(editArea(project,a.id,name.value,note.value));clearInputs(nameKey,noteKey);},'secondary','area-edit-save'),
     btn('취소',()=>{clearInputs(nameKey,noteKey);edit.open=false;render();},'quiet','area-edit-cancel'));
-  head.append(edit);root.append(head);
+  const back=locatedLine();if(back)root.append(back);
+  head.append(edit);root.append(head);const described=understandingPanel(a,'area-understanding');if(described)root.append(described);
   const checks=checkItems(project),here=checks.filter(c=>c.areaId===a.id).length,elsewhere=checks.length-here;
   if(here||elsewhere) {
     const line=node('p',`이어 볼 기록 · 이 영역 ${here}개${elsewhere?` · 다른 영역 ${elsewhere}개`:''} `,'hint area-checks');line.id='area-checks';
@@ -1618,6 +1779,7 @@ function currentIdea(t:Task,a:Area|null):HTMLElement {
   const box=areaIdea(a,'task-view-idea',NOTE_SHORT,`지금의 영역 구상 · ${a.name}${a.archived?' (보관됨)':''}`);box.classList.add('task-idea');
   const copy=t.background?.area;
   if(copy&&copy.id===a.id&&(copy.note??'')!==a.note)box.append(node('p','이 요청을 쓸 때의 구상 사본과 달라요. 당시 사본은 아래 배경에 그대로 있어요.','hint task-idea-changed'));
+  const described=understandingPanel(a,'task-understanding',true);if(described)box.append(described);
   return box;
 }
 const DRAFT_NAME:Record<Project['draftKind'],string>={request:'요청',report:'보고',evidence:'관찰',test_answer:'시험자료'};
@@ -1730,6 +1892,8 @@ function pointedSection(t:Task,returnId:string):HTMLElement {
   // One low-emphasis line, level with the idea's own label: which report, whose words, unverified.
   const one=r.sourceIds.length===1&&first?` · ${KIND_SHORT[first.kind]}`:'';
   box.append(node('p',`고른 보고 · ${no(r)}${one} · ${first?dateLabel(first.at):'시각 미확인'} · 외부 원문 · 앱 미검증`,'source-meta'));
+  const update=returnUnderstanding(project,r.id);
+  if(update){const status=update.entry?.held?'설명은 현재 기준에 적용하지 않았어요.':update.current?'이 보고의 정리가 현재 영역 설명에 반영됐어요.':'이 보고에 붙은 정리는 이전 기록으로 보관돼요.';box.append(node('p',status,'hint'));const detail=details('이 보고의 정리 설명','task-report-understanding');detail.append(node('p',update.input.summary,'source-raw'),node('p',`정리: ${update.input.origin} · 앱 미검증`,'hint'));if(update.input.proposal)detail.append(node('p','미채택 제안','source-meta'),node('p',update.input.proposal,'source-raw'));box.append(detail);}
   for(const id of r.sourceIds) {
     const src=project.sources.find(s=>s.id===id);
     if(!src){box.append(node('p',`이 보고의 원문 하나(${id})를 찾지 못했어요. 다른 원문으로 대신하지 않았어요.`,'alert warning'));continue;}
@@ -1771,6 +1935,11 @@ function renderPlace(t:Task|null) {
   bar.append(node('span','›','crumb-sep'),node('strong',!t?'새 요청':receipt!==null?`${receipt>=0?`작업 ${pad(receipt+1)}의 보고 · `:''}후속 확인 작업문 초안`:'앱에서 이어갈 작업'),node('span','이어가는 작업','layer-chip'));
   // PC12: after reading a task from the map, the way back to that view (the edits made here stay).
   const back=originButton('work-return-origin');if(back)bar.append(back);
+  // AREA17: writing (and sending, copying) the located area's next request keeps the way back to the view before locating,
+  // only while that request or work is in the located area.
+  const l=located,target=project.space.draftTarget?project.space.draftTarget.area:t?areaOf(project,t):null;
+  if(l&&l.origin.project===project.id&&target===l.area&&!areaById(l.area)?.archived)
+    bar.append(btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`,returnFromLocate,'secondary origin-return','work-locate-return'));
 }
 /** The area the next request goes to: explicit, visible and changeable. Shown once areas exist. */
 function renderComposeArea(t:Task|null,returned:boolean) {

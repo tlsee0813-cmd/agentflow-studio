@@ -1,0 +1,23 @@
+test_B01_real_mock_flow_browser_only_confirm_and_edit (__main__.BrowserTests.test_B01_real_mock_flow_browser_only_confirm_and_edit) ... ok
+test_B02_multi_device_changes_requirement_not_studio (__main__.BrowserTests.test_B02_multi_device_changes_requirement_not_studio) ... ok
+test_B03_unknown_is_deferred_not_confirmed (__main__.BrowserTests.test_B03_unknown_is_deferred_not_confirmed) ... ok
+test_B04_server_invalid_response_keeps_customer_answer_and_input (__main__.BrowserTests.test_B04_server_invalid_response_keeps_customer_answer_and_input) ... ok
+test_B05_missing_key_no_fallback (__main__.BrowserTests.test_B05_missing_key_no_fallback) ... ok
+test_B06_edit_during_pending_response_rejects_old_data (__main__.BrowserTests.test_B06_edit_during_pending_response_rejects_old_data) ... ok
+test_B07_mobile_custom_answer_and_text_rendering (__main__.BrowserTests.test_B07_mobile_custom_answer_and_text_rendering) ... ok
+test_B08_known_storage_is_not_asked_again_in_explicit_mock (__main__.BrowserTests.test_B08_known_storage_is_not_asked_again_in_explicit_mock) ... ok
+test_B09_manual_edit_buffer_survives_late_response (__main__.BrowserTests.test_B09_manual_edit_buffer_survives_late_response) ... ok
+test_B10_tool_reversion_and_undecided_current_requirement (__main__.BrowserTests.test_B10_tool_reversion_and_undecided_current_requirement) ... ok
+test_B11_generic_answer_refines_requirement_not_only_summary (__main__.BrowserTests.test_B11_generic_answer_refines_requirement_not_only_summary) ... ok
+test_B12_long_answer_failure_then_edit_and_retry_keeps_original (__main__.BrowserTests.test_B12_long_answer_failure_then_edit_and_retry_keeps_original) ... ok
+test_B13_invalid_custom_answer_is_editable_without_loss (__main__.BrowserTests.test_B13_invalid_custom_answer_is_editable_without_loss) ... ok
+test_B14_locked_tool_conflict_is_visible_and_cannot_be_dismissed_by_confirmation (__main__.BrowserTests.test_B14_locked_tool_conflict_is_visible_and_cannot_be_dismissed_by_confirmation) ... ok
+test_B15_direct_network_assets_and_request_no_fetch_replacement (__main__.BrowserTests.test_B15_direct_network_assets_and_request_no_fetch_replacement) ... ok
+test_B16_R5_apply_cancel_and_uncertain_paired_resolution (__main__.BrowserTests.test_B16_R5_apply_cancel_and_uncertain_paired_resolution) ... ok
+test_B17_R5_keep_cancel_and_repeat_summary_preserve_old_pair_and_new_answer (__main__.BrowserTests.test_B17_R5_keep_cancel_and_repeat_summary_preserve_old_pair_and_new_answer) ... ok
+test_B18_R5_resolving_storage_keeps_an_unrelated_locked_tool_conflict (__main__.BrowserTests.test_B18_R5_resolving_storage_keeps_an_unrelated_locked_tool_conflict) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 18.399s
+
+OK

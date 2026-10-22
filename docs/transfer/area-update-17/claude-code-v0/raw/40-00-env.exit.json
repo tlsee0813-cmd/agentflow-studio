@@ -1,0 +1,10 @@
+{
+ "command": "bash -c git rev-parse HEAD; node --version; npm --version; python3 --version; python3 -c \"from importlib.metadata import version;print(\\\"playwright\\\",version(\\\"playwright\\\"))\"; \"$BROWSER_EXECUTABLE\" --version",
+ "cwd": "app",
+ "exit": 0,
+ "start": "2026-10-22T09:40:15Z",
+ "end": "2026-10-22T09:40:15Z",
+ "head": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+ "dirtyFiles": 0,
+ "node": "v22.16.0"
+}

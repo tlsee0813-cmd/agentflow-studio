@@ -260,7 +260,7 @@ class Browser(unittest.TestCase):
         for name in ['cycles-68.json','legacy-68.json','long-54.json']:
             source=json.loads((OUT/name).read_text(encoding='utf-8'));self.import_file(OUT/name)
             expect(self.page.locator('#basis-count')).to_have_text(str(len(source['bases'])))
-            state=self.state();self.assertEqual(state['schemaVersion'],'idea015.project.5');self.assertEqual(state['sources'],source['sources'])
+            state=self.state();self.assertEqual(state['schemaVersion'],'idea015.project.6');self.assertEqual(state['sources'],source['sources'])
             self.assertEqual([b['history'] for b in state['bases']],[b['history'] for b in source['bases']])
             if name=='legacy-68.json':
                 expect(self.page.locator('#notice')).to_contain_text('project.1')

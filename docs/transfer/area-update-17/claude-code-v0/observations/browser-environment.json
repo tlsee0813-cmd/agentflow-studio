@@ -1,0 +1,7 @@
+{
+  "node": "v22.16.0",
+  "playwright": "1.57.0",
+  "chromium": "141.0.7390.37",
+  "transport": "real browser -> real local HTTP -> mock; injected faults in named tests",
+  "paidCalls": 0
+}

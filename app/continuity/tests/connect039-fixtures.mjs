@@ -21,7 +21,7 @@ export function fixture() {
 export function v2(p) {
   // project.2 predates the FLOW090 plan space and task areas.
   const old=structuredClone(p);old.schemaVersion='idea015.project.2';delete old.space;for(const t of old.tasks){delete t.areaId;delete t.background;for(const h of t.handoffs)delete h.background;}
-  for(const t of old.tasks){delete t.resultFile;for(const h of t.handoffs)delete h.returnId;}
+  for(const t of old.tasks){delete t.resultFile;for(const h of t.handoffs){delete h.returnId;delete h.anchor;}}
   return old;
 }
 export function v1(p) {

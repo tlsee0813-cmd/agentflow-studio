@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket } from './types.js';
+import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -18,11 +18,21 @@ export function parseResultFile(raw: string): ResultFile {
   ensure(typeof raw==='string' && new TextEncoder().encode(raw).length<=RESULT_BYTES,'RESULT_TOO_LARGE');
   ensure(!raw.startsWith('\uFEFF'),'INVALID_RESULT_FILE');
   const v:unknown=JSON.parse(raw);
-  obj(v,['schemaVersion','projectId','taskId','returnId','report','evidence']);
-  ensure(v.schemaVersion===RESULT_SCHEMA,'INVALID_RESULT_FILE');
+  // AREA17: return.2 = return.1 + one required 'understanding' key (null or an organised area description).
+  const two=!!v&&typeof v==='object'&&(v as {schemaVersion?:unknown}).schemaVersion===RESULT2_SCHEMA;
+  obj(v,['schemaVersion','projectId','taskId','returnId','report','evidence',...(two?['understanding']:[])]);
+  ensure(v.schemaVersion===RESULT_SCHEMA||two,'INVALID_RESULT_FILE');
+  if(two&&v.understanding!==null)understandingInput(v.understanding);
   id(v.projectId); id(v.taskId); id(v.returnId);
   text(v.report,RESULT_TEXT_LIMIT); if(v.evidence!==null)text(v.evidence,RESULT_TEXT_LIMIT);
   return v as unknown as ResultFile;
+}
+/** AREA17 limits: a short current description, at most three key changes, one optional proposal. Never repaired. */
+export const SUMMARY_LIMIT=2000, CHANGE_LIMIT=300, PROPOSAL_LIMIT=1000;
+function understandingInput(v:unknown): asserts v is UnderstandingInput {
+  obj(v,['version','areaId','basedOn','summary','changes','proposal','origin']);ensure(v.version==='understanding.1');
+  id(v.areaId);integer(v.basedOn);text(v.summary,SUMMARY_LIMIT);list(v.changes,3);for(const c of v.changes)text(c,CHANGE_LIMIT);
+  if(v.proposal!==null)text(v.proposal,PROPOSAL_LIMIT);text(v.origin,200);
 }
 /** Prefix is Studio metadata; the following external field remains character-for-character intact. */
 export function resultSourceText(f:ResultFile, revision:number, kind:'report'|'evidence'):string {
@@ -231,7 +241,8 @@ function assertProject(v: unknown): asserts v is Project {
     obj(t.manual,['understanding','scope','next','checks']); for(const k of Object.keys(t.manual)) if(t.manual[k] !== null) text(t.manual[k],6000,true);
     if(t.suggestions !== null) { list(t.suggestions,8); for(const s of t.suggestions) {obj(s,['text','why']);text(s.text,2000,true);text(s.why,2000,true);} }
     list(t.handoffs); for(const h of t.handoffs) {
-      obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText','returnId','background']); date(h.at);background(h.background,v.revision as number); ensure(['clipboard','download'].includes(h.method as string));
+      obj(h,['at','method','revision','chars','digest','work','aiExcluded','legacyText','returnId','background','anchor']); date(h.at);background(h.background,v.revision as number);
+      if(h.anchor!==null){ensure(h.returnId!==null);obj(h.anchor,['version','areaId','understanding','stamp']);ensure(h.anchor.version==='anchor.1');ensure(areaIds.has(h.anchor.areaId as string));integer(h.anchor.understanding);planStamp(h.anchor.stamp);} ensure(['clipboard','download'].includes(h.method as string));
       integer(h.revision); ensure((h.revision as number) <= (v.revision as number)); integer(h.chars); ensure(typeof h.digest === 'string' && /^[0-9a-f]{8}$/.test(h.digest)); ensure(typeof h.aiExcluded === 'boolean');
       if(h.work !== null) { obj(h.work,['understanding','scope','next','checks']); for(const k of Object.keys(h.work)) text(h.work[k],6000,true); }
       if(h.legacyText !== null) text(h.legacyText,250000);
@@ -254,6 +265,7 @@ function assertProject(v: unknown): asserts v is Project {
     ensure(!tasks.has(t.id as string)); tasks.add(t.id as string);
   }
   for(const s of sources.values()) ensure(tasks.has(s.taskId));
+  understandingRefs(v.space as Record<string,unknown>,v.tasks as Task[],sources);
   // Imported reports or synthetic answers cannot masquerade as an authoritative decision.
   for(const b of v.bases as Basis[]) {
     ensure(/^D[1-9]\d*$/.test(b.id));
@@ -270,7 +282,7 @@ function assertProject(v: unknown): asserts v is Project {
 }
 /** FLOW090 plan data: the user's purpose text, areas and typed relations. Returns the area IDs. */
 function space(v: unknown): Set<string> {
-  obj(v,['brief','areas','relations','draftTarget','layout']);
+  obj(v,['brief','areas','relations','draftTarget','layout','understanding']);
   if(v.brief!==null) {
     obj(v.brief,['text','at','previous']);text(v.brief.text,TEXT_LIMIT);date(v.brief.at);list(v.brief.previous,200);
     for(const old of v.brief.previous){obj(old,['text','at']);text(old.text,TEXT_LIMIT);date(old.at);}
@@ -290,14 +302,88 @@ function space(v: unknown): Set<string> {
     ensure(ids.has(key));obj(point,['x','y']);
     for(const n of [point.x,point.y])ensure(Number.isSafeInteger(n)&&Math.abs(n as number)<=POSITION_LIMIT);
   }
+  areaUnderstanding(v.understanding,ids);
   return ids;
 }
 export const POSITION_LIMIT=200000;
+function planStamp(v:unknown) {
+  obj(v,['name','note','brief','decisions','work']);text(v.name,60);text(v.note,2000,true);integer(v.brief);list(v.decisions,ITEM_LIMIT);list(v.work,ITEM_LIMIT);
+  // One fixed-length entry per task with user-written work values or a purpose correction: '<task id>:<sha256>'. Never the
+  // values themselves, so an allowed text (any quotes or backslashes, up to its own limit) cannot make the stamp invalid.
+  for(const w of v.work)ensure(typeof w==='string'&&/^[A-Za-z0-9_-]{1,100}:[0-9a-f]{64}$/.test(w));ensure(new Set(v.work).size===v.work.length);
+  for(const d of v.decisions)ensure(typeof d==='string'&&/^D[1-9]\d*@\d+$/.test(d));ensure(new Set(v.decisions).size===v.decisions.length);
+}
+const HELD=['no-anchor','area-moved','area-mismatch','area-archived','file-basis','superseded','plan-changed'];
+/** AREA17 shape: per area, a revision counter and its entries in arrival order. Exactly one entry holds each applied revision
+ * 1..revision, in increasing order; held entries have no revision and no stamp. References are checked after the tasks. */
+function areaUnderstanding(v:unknown,ids:Set<string>) {
+  ensure(!!v&&typeof v==='object'&&!Array.isArray(v));
+  for(const [areaId,state] of Object.entries(v as Record<string,unknown>)) {
+    ensure(ids.has(areaId));obj(state,['revision','entries']);integer(state.revision);list(state.entries,ITEM_LIMIT);
+    let last=0;
+    for(const e of state.entries) {
+      obj(e,['by','at','revision','taskId','returnId','text','corrects','stamp','held']);date(e.at);ensure(e.by==='external'||e.by==='user');
+      if(e.revision===null){ensure(e.by==='external'&&e.stamp===null&&HELD.includes(e.held as string));}
+      else {integer(e.revision);ensure((e.revision as number)===last+1&&e.held===null);last=e.revision as number;planStamp(e.stamp);}
+      if(e.by==='external'){id(e.taskId);id(e.returnId);ensure(e.text===null&&e.corrects===null);}
+      else {ensure(e.taskId===null&&e.returnId===null&&e.revision!==null);text(e.text,SUMMARY_LIMIT);integer(e.corrects);ensure((e.corrects as number)>=1&&(e.corrects as number)===(e.revision as number)-1);}
+    }
+    ensure(last===state.revision);
+  }
+}
+/** External entries point at a received return task whose own return.2 file carries an organised description. An applied
+ * one must describe the area it is filed under; one task is filed once. */
+function understandingRefs(space:Record<string,unknown>,tasks:Task[],sources:Map<string,Source>) {
+  const byId=new Map(tasks.map(t=>[t.id,t])),seen=new Set<string>();
+  const states=space.understanding as Project['space']['understanding'];
+  for(const t of tasks)for(const h of t.handoffs)if(h.anchor)ensure(h.anchor.understanding<=(states[h.anchor.areaId]?.revision??0));
+  for(const [areaId,state] of Object.entries(states)) {
+    for(const e of state.entries) {
+      if(e.by!=='external')continue;
+      const t=byId.get(e.taskId!);ensure(t&&t.resultFile&&!seen.has(t.id)&&['report','evidence'].includes(sources.get(t.sourceIds[0]!)?.kind??''));seen.add(t.id);
+      const f=parseResultFile(t.resultFile.rawText);ensure(f.returnId===e.returnId&&!!f.understanding);
+      if(e.revision!==null){
+        const parent=byId.get(t.parentTaskId!),record=parent?.handoffs.find(h=>h.returnId===f.returnId),anchor=record?.anchor;
+        ensure(f.understanding.areaId===areaId&&anchor&&anchor.areaId===areaId&&f.understanding.basedOn===anchor.understanding&&anchor.understanding<e.revision);
+        ensure(JSON.stringify(e.stamp)===JSON.stringify(anchor.stamp));
+        // History: an applied external description follows exactly the revision its export carried, or a revised interpretation of
+        // that same export (same returnId) directly before it. Anything in between (a user correction, another return) means it
+        // was never applicable; a file claiming otherwise contradicts its own history.
+        const prev=state.entries.find(x=>x.revision===e.revision!-1);
+        ensure(anchor.understanding===e.revision-1||!!prev&&prev.by==='external'&&prev.returnId===e.returnId);
+      }
+    }
+  }
+}
+/** The project.4/5 shape of an empty space (project.6 adds 'understanding' in migrateV5). */
 export const EMPTY_SPACE=()=>({brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1' as const,positions:{}}});
 export function validateProject(v: unknown): Project { assertProject(v); return structuredClone(v); }
 /** Identity check for an exported text (FNV-1a, 32 bit). Not a signature or security control. */
 export function digest(value: string): string {
   let h=0x811c9dc5; for(let i=0;i<value.length;i++){h^=value.charCodeAt(i);h=Math.imul(h,0x01000193);} return (h>>>0).toString(16).padStart(8,'0');
+}
+/** AREA17: SHA-256 (FIPS 180-4) of the UTF-8 bytes, hex. Synchronous and dependency-free so the shared code computes the same
+ * fixed-length fingerprint in the browser and in Node. Used where an exact-equality check must not grow with the text. */
+const K256=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+  0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+  0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+  0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+export function sha256(value:string):string {
+  const data=new TextEncoder().encode(value),n=((data.length+9+63)>>6)<<6,m=new Uint8Array(n);m.set(data);m[data.length]=0x80;
+  const bits=data.length*8;new DataView(m.buffer).setUint32(n-4,bits>>>0);new DataView(m.buffer).setUint32(n-8,Math.floor(bits/0x100000000));
+  const h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19],w=new Uint32Array(64),view=new DataView(m.buffer);
+  const r=(x:number,k:number)=>(x>>>k)|(x<<(32-k));
+  for(let off=0;off<n;off+=64) {
+    for(let i=0;i<16;i++)w[i]=view.getUint32(off+i*4);
+    for(let i=16;i<64;i++){const a=w[i-15]!,b=w[i-2]!;w[i]=(w[i-16]!+(r(a,7)^r(a,18)^(a>>>3))+w[i-7]!+(r(b,17)^r(b,19)^(b>>>10)))>>>0;}
+    let [a,b,c,d,e,f,g,k]=h as [number,number,number,number,number,number,number,number];
+    for(let i=0;i<64;i++){
+      const t1=(k+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K256[i]!+w[i]!)>>>0,t2=((r(a,2)^r(a,13)^r(a,22))+((a&b)^(a&c)^(b&c)))>>>0;
+      k=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;
+    }
+    [a,b,c,d,e,f,g,k].forEach((x,i)=>{h[i]=(h[i]!+x)>>>0;});
+  }
+  return h.map(x=>x.toString(16).padStart(8,'0')).join('');
 }
 export const MIGRATION_NOTICE='이전 형식(project.1)에서 변환했습니다. 기록은 지우지 않았습니다. 이전 AI 정리는 어느 기준 시점에 작성됐는지 알 수 없어 현재 작업문에서 제외합니다.';
 export const V2_MIGRATION_NOTICE='이전 형식(project.2)을 최신 형식으로 변환했습니다. 기록은 유지하며 과거 내보내기에 파일 식별자를 만들지 않습니다.';
@@ -341,7 +427,18 @@ function migrateV4(v:unknown):unknown {
     ensure(t!==null&&typeof t==='object'&&!Array.isArray(t)&&!Object.hasOwn(t,'background'));const task=t as Record<string,unknown>;list(task.handoffs);
     return {...task,background:null,handoffs:task.handoffs.map(h=>{ensure(h!==null&&typeof h==='object'&&!Array.isArray(h)&&!Object.hasOwn(h,'background'));return {...h as object,background:null};})};
   });
-  return {...p,schemaVersion:SCHEMA,tasks};
+  return migrateV5({...p,schemaVersion:V5_SCHEMA,tasks});
+}
+/** project.5 -> project.6 (AREA17): no area has a derived description and no export has an anchor. Nothing is backfilled:
+ * the plan at the time of an older export is unknown, so a later return.2 to it is held, never applied by estimate. */
+function migrateV5(v:unknown):unknown {
+  const p=v as {schemaVersion?:unknown;tasks?:unknown;space?:unknown};ensure(p&&p.schemaVersion===V5_SCHEMA);list(p.tasks);
+  ensure(!!p.space&&typeof p.space==='object'&&!Array.isArray(p.space)&&!Object.hasOwn(p.space,'understanding'));
+  const tasks=p.tasks.map(t=>{
+    ensure(t!==null&&typeof t==='object'&&!Array.isArray(t));const task=t as Record<string,unknown>;list(task.handoffs);
+    return {...task,handoffs:task.handoffs.map(h=>{ensure(h!==null&&typeof h==='object'&&!Array.isArray(h)&&!Object.hasOwn(h,'anchor'));return {...h as object,anchor:null};})};
+  });
+  return {...p,schemaVersion:SCHEMA,tasks,space:{...p.space as object,understanding:{}}};
 }
 /** The single acceptance test for persisted bytes: autosave, recovery-file download and import all use it. */
 /** intent-edit.1 (unreleased AI055 candidate) kept the correction in manual.*, where any later work edit
@@ -363,7 +460,7 @@ function convertIntentEdits(p:Project):Project {
 export function parseProject(raw: string): Project {
   ensure(new TextEncoder().encode(raw).length <= FILE_LIMIT,'FILE_TOO_LARGE'); const v: unknown=JSON.parse(raw);
   const schema=(v as {schemaVersion?:unknown})?.schemaVersion;
-  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : v;
+  const project=schema===LEGACY_SCHEMA ? migrateLegacy(v) : schema===PREVIOUS_SCHEMA ? migrateV2(v) : schema===V3_SCHEMA ? migrateV3(v) : schema===V4_SCHEMA ? migrateV4(v) : schema===V5_SCHEMA ? migrateV5(v) : v;
   assertProject(project); return convertIntentEdits(project); // Freshly parsed, not shared: no defensive copy needed.
 }
 

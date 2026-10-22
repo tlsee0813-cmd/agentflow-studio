@@ -1,0 +1,16 @@
+test_ui01_empty_examples_and_real_event_next_action (__main__.UI001.test_ui01_empty_examples_and_real_event_next_action) ... ok
+test_ui02_question_priority_and_pending_cancel_preserves_typing (__main__.UI001.test_ui02_question_priority_and_pending_cancel_preserves_typing) ... ok
+test_ui03_manual_live_preview_and_unapplied_basis_draft_reopen (__main__.UI001.test_ui03_manual_live_preview_and_unapplied_basis_draft_reopen) ... ok
+test_ui04_actual_roundtrip_keeps_drafts_and_restore_does_not_resend (__main__.UI001.test_ui04_actual_roundtrip_keeps_drafts_and_restore_does_not_resend) ... ok
+test_ui05_storage_error_labels_survive_import_and_input_stays_recoverable (__main__.UI001.test_ui05_storage_error_labels_survive_import_and_input_stays_recoverable) ... ok
+test_ui06_config_display_does_not_fake_connection_and_local_edit_needs_no_ai (__main__.UI001.test_ui06_config_display_does_not_fake_connection_and_local_edit_needs_no_ai) ... ok
+test_ui07_responsive_work_context_and_keyboard_no_horizontal_overflow (__main__.UI001.test_ui07_responsive_work_context_and_keyboard_no_horizontal_overflow) ... ok
+test_ui08_delayed_clipboard_and_return_cta_do_not_mislabel_unsent_draft (__main__.UI001.test_ui08_delayed_clipboard_and_return_cta_do_not_mislabel_unsent_draft) ... ok
+test_ui09_rev1_suggestion_changes_require_reexport_without_draft_false_positive (__main__.UI001.test_ui09_rev1_suggestion_changes_require_reexport_without_draft_false_positive) ... ok
+test_ui10_return032_recorded_bases_drafts_recovery_reexport_and_real_parent (__main__.UI001.test_ui10_return032_recorded_bases_drafts_recovery_reexport_and_real_parent) ... ok
+test_ui11_return032_no_target_no_export_and_legacy_remain_submittable (__main__.UI001.test_ui11_return032_no_target_no_export_and_legacy_remain_submittable) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 16.373s
+
+OK

@@ -1,0 +1,37 @@
+[
+  {
+    "path": "app/continuity/src/shared/types.ts",
+    "bytes": 14723,
+    "sha256": "81afb9c0ffcb8dc6d4e86e0dbe37307351515c68cbddd8410014b3358a121513"
+  },
+  {
+    "path": "app/continuity/src/shared/validation.ts",
+    "bytes": 38383,
+    "sha256": "28fca2ac6e62e4368d3f8ab8a77910723682277336ed458abfc585a0b656c6a4"
+  },
+  {
+    "path": "app/continuity/src/shared/domain.ts",
+    "bytes": 65408,
+    "sha256": "ee81d59bf39dc020609e12fedcbd63ed43c6b9b9d6d1d0d7f02fba1d66d68244"
+  },
+  {
+    "path": "app/continuity/src/client/app.ts",
+    "bytes": 207085,
+    "sha256": "a0e88dd35f48ba8052bf3eaf817f581751c49f76d9b3366d0f35fd40234b2d70"
+  },
+  {
+    "path": "app/continuity/public/styles.css",
+    "bytes": 64853,
+    "sha256": "ae13431dc7e937c26fa6c8d8a471122c7d04a4e019dd647d68307b93aca28a5d"
+  },
+  {
+    "path": "app/continuity/tests/understanding17-fixtures.mjs",
+    "bytes": 5554,
+    "sha256": "9a4756b39a66ad687b46deda9625afb5f76357a99f9744605c7534a3ca72a2f3"
+  },
+  {
+    "path": "app/continuity/tests/understanding17.test.mjs",
+    "bytes": 9648,
+    "sha256": "87f0382e5d77650d2d7bdc6b7058545d9387413cb105b6e5dad478a22298197b"
+  }
+]

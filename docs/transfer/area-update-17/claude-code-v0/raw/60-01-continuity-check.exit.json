@@ -1,0 +1,10 @@
+{
+ "command": "node continuity/scripts/check.mjs",
+ "cwd": "app",
+ "exit": 0,
+ "start": "2026-10-22T09:52:39Z",
+ "end": "2026-10-22T09:52:43Z",
+ "head": "e17370e83edccaf954b419054ee4748233752922",
+ "dirtyFiles": 0,
+ "node": "v22.16.0"
+}

@@ -1,0 +1,10 @@
+{
+ "command": "env EVIDENCE_DIR=/tmp/claude-0/final-browser-30/parent python3 tests/browser.py",
+ "cwd": "app",
+ "exit": 1,
+ "start": "2026-10-22T09:24:09Z",
+ "end": "2026-10-22T09:24:10Z",
+ "head": "98bc0097af132410f75734ac692f9b7d3b42edcb",
+ "dirtyFiles": 0,
+ "node": "v22.16.0"
+}

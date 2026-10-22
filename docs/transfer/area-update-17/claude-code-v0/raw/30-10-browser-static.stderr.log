@@ -1,0 +1,6 @@
+test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 3.070s
+
+OK

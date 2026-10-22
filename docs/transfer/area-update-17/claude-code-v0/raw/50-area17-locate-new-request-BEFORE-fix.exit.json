@@ -1,0 +1,10 @@
+{
+ "command": "python3 continuity/tests/understanding17_browser.py Area17.test_06_locate_new_request_copy_and_return Area17Wide.test_06_locate_new_request_copy_and_return Area17.test_05_next_request_carries_valid_description",
+ "cwd": "app",
+ "exit": 1,
+ "start": "2026-10-22T09:51:19Z",
+ "end": "2026-10-22T09:51:29Z",
+ "head": "d56eee9ac8233263d46a4e4c45755a80b471cc84",
+ "dirtyFiles": 1,
+ "node": "v22.16.0"
+}

@@ -1,0 +1,1694 @@
+
+> agentflow-studio@0.0.3 test
+> npm run build && node --test tests/*.test.mjs
+
+
+> agentflow-studio@0.0.3 build
+> node scripts/build.mjs
+
+Built TypeScript client/shared modules + static assets. Server remains native Node ESM.
+TAP version 13
+# Subtest: R5.1 exact old reproduction cannot confirm changed text with the stale browser-only acceptance
+ok 1 - R5.1 exact old reproduction cannot confirm changed text with the stale browser-only acceptance
+  ---
+  duration_ms: 8.150007
+  type: 'test'
+  ...
+# Subtest: R5.2 custom answer resolution pairs text with TBD, stays reviewable, attaches new and old provenance
+ok 2 - R5.2 custom answer resolution pairs text with TBD, stays reviewable, attaches new and old provenance
+  ---
+  duration_ms: 1.701423
+  type: 'test'
+  ...
+# Subtest: R5.3 canonical multi-device resolution changes the whole pair, confirms it and clears only its review
+ok 3 - R5.3 canonical multi-device resolution changes the whole pair, confirms it and clears only its review
+  ---
+  duration_ms: 2.093232
+  type: 'test'
+  ...
+# Subtest: R5.4 keep records an explicit rejection of the new selection without changing the saved answer
+ok 4 - R5.4 keep records an explicit rejection of the new selection without changing the saved answer
+  ---
+  duration_ms: 1.06715
+  type: 'test'
+  ...
+# Subtest: R5.5 preview/apply/keep cancellation is pure; later input and tampered pairs cannot use an old approval
+ok 5 - R5.5 preview/apply/keep cancellation is pure; later input and tampered pairs cannot use an old approval
+  ---
+  duration_ms: 2.487382
+  type: 'test'
+  ...
+# Subtest: R5.6 resolving storage preserves other requirements, manual values, conflicts, answers and all previous sources
+ok 6 - R5.6 resolving storage preserves other requirements, manual values, conflicts, answers and all previous sources
+  ---
+  duration_ms: 0.577132
+  type: 'test'
+  ...
+# Subtest: R5.7 keep tool selection survives repeat summaries; a different selection invalidates only that acknowledgement
+ok 7 - R5.7 keep tool selection survives repeat summaries; a different selection invalidates only that acknowledgement
+  ---
+  duration_ms: 1.425014
+  type: 'test'
+  ...
+# Subtest: R5.8 matching text/status with different completion criteria still protects the manual acceptance
+ok 8 - R5.8 matching text/status with different completion criteria still protects the manual acceptance
+  ---
+  duration_ms: 0.410318
+  type: 'test'
+  ...
+# Subtest: R5.9 deferred and unknown answers remain unconfirmed when selected for resolution
+ok 9 - R5.9 deferred and unknown answers remain unconfirmed when selected for resolution
+  ---
+  duration_ms: 2.119973
+  type: 'test'
+  ...
+# Subtest: I6D provider outer syntax
+ok 10 - I6D provider outer syntax
+  ---
+  duration_ms: 9.060629
+  type: 'test'
+  ...
+# Subtest: I6D provider inner syntax with HTTP200/stop
+ok 11 - I6D provider inner syntax with HTTP200/stop
+  ---
+  duration_ms: 1.584454
+  type: 'test'
+  ...
+# Subtest: I6D provider missing body
+ok 12 - I6D provider missing body
+  ---
+  duration_ms: 0.930804
+  type: 'test'
+  ...
+# Subtest: I6D provider body limit
+ok 13 - I6D provider body limit
+  ---
+  duration_ms: 1.408116
+  type: 'test'
+  ...
+# Subtest: I6D provider content shape
+ok 14 - I6D provider content shape
+  ---
+  duration_ms: 1.422988
+  type: 'test'
+  ...
+# Subtest: I6D provider blank content
+ok 15 - I6D provider blank content
+  ---
+  duration_ms: 3.872128
+  type: 'test'
+  ...
+# Subtest: I6D provider finish not stop
+ok 16 - I6D provider finish not stop
+  ---
+  duration_ms: 1.309712
+  type: 'test'
+  ...
+# Subtest: I6D provider tool call
+ok 17 - I6D provider tool call
+  ---
+  duration_ms: 1.202606
+  type: 'test'
+  ...
+# Subtest: I6D provider body reader fails
+ok 18 - I6D provider body reader fails
+  ---
+  duration_ms: 2.868079
+  type: 'test'
+  ...
+# Subtest: I6D contract project mismatch: precise diagnostic and atomic state rejection
+ok 19 - I6D contract project mismatch: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 4.34764
+  type: 'test'
+  ...
+# Subtest: I6D contract version mismatch: precise diagnostic and atomic state rejection
+ok 20 - I6D contract version mismatch: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.916735
+  type: 'test'
+  ...
+# Subtest: I6D contract request mismatch: precise diagnostic and atomic state rejection
+ok 21 - I6D contract request mismatch: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.396441
+  type: 'test'
+  ...
+# Subtest: I6D contract missing summary: precise diagnostic and atomic state rejection
+ok 22 - I6D contract missing summary: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.487729
+  type: 'test'
+  ...
+# Subtest: I6D contract unknown field name: precise diagnostic and atomic state rejection
+ok 23 - I6D contract unknown field name: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.414013
+  type: 'test'
+  ...
+# Subtest: I6D contract summary type: precise diagnostic and atomic state rejection
+ok 24 - I6D contract summary type: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.370972
+  type: 'test'
+  ...
+# Subtest: I6D contract summary length: precise diagnostic and atomic state rejection
+ok 25 - I6D contract summary length: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 3.015812
+  type: 'test'
+  ...
+# Subtest: I6D contract blank summary: precise diagnostic and atomic state rejection
+ok 26 - I6D contract blank summary: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.198487
+  type: 'test'
+  ...
+# Subtest: I6D contract missing example: precise diagnostic and atomic state rejection
+ok 27 - I6D contract missing example: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.092057
+  type: 'test'
+  ...
+# Subtest: I6D contract question ID format: precise diagnostic and atomic state rejection
+ok 28 - I6D contract question ID format: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.219306
+  type: 'test'
+  ...
+# Subtest: I6D contract question enum: precise diagnostic and atomic state rejection
+ok 29 - I6D contract question enum: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.759872
+  type: 'test'
+  ...
+# Subtest: I6D contract known tools: precise diagnostic and atomic state rejection
+ok 30 - I6D contract known tools: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.784044
+  type: 'test'
+  ...
+# Subtest: I6D contract option minimum: precise diagnostic and atomic state rejection
+ok 31 - I6D contract option minimum: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.853897
+  type: 'test'
+  ...
+# Subtest: I6D contract option maximum: precise diagnostic and atomic state rejection
+ok 32 - I6D contract option maximum: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.047484
+  type: 'test'
+  ...
+# Subtest: I6D contract duplicate option: precise diagnostic and atomic state rejection
+ok 33 - I6D contract duplicate option: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.009
+  type: 'test'
+  ...
+# Subtest: I6D contract option label length: precise diagnostic and atomic state rejection
+ok 34 - I6D contract option label length: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 2.19437
+  type: 'test'
+  ...
+# Subtest: I6D contract storage semantics: precise diagnostic and atomic state rejection
+ok 35 - I6D contract storage semantics: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.159608
+  type: 'test'
+  ...
+# Subtest: I6D contract unknown recommendation: precise diagnostic and atomic state rejection
+ok 36 - I6D contract unknown recommendation: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 2.002165
+  type: 'test'
+  ...
+# Subtest: I6D contract proposal shape: precise diagnostic and atomic state rejection
+ok 37 - I6D contract proposal shape: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.991075
+  type: 'test'
+  ...
+# Subtest: I6D contract proposal status smuggling: precise diagnostic and atomic state rejection
+ok 38 - I6D contract proposal status smuggling: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.09907
+  type: 'test'
+  ...
+# Subtest: I6D contract proposal count: precise diagnostic and atomic state rejection
+ok 39 - I6D contract proposal count: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.133514
+  type: 'test'
+  ...
+# Subtest: I6D contract proposal key: precise diagnostic and atomic state rejection
+ok 40 - I6D contract proposal key: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.045656
+  type: 'test'
+  ...
+# Subtest: I6D contract proposal duplicate: precise diagnostic and atomic state rejection
+ok 41 - I6D contract proposal duplicate: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 2.119177
+  type: 'test'
+  ...
+# Subtest: I6D contract proposal text length: precise diagnostic and atomic state rejection
+ok 42 - I6D contract proposal text length: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.071729
+  type: 'test'
+  ...
+# Subtest: I6D contract proposal acceptance: precise diagnostic and atomic state rejection
+ok 43 - I6D contract proposal acceptance: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.859948
+  type: 'test'
+  ...
+# Subtest: I6D contract foreign source: precise diagnostic and atomic state rejection
+ok 44 - I6D contract foreign source: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.873929
+  type: 'test'
+  ...
+# Subtest: I6D contract source minimum: precise diagnostic and atomic state rejection
+ok 45 - I6D contract source minimum: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.885258
+  type: 'test'
+  ...
+# Subtest: I6D contract source array type: precise diagnostic and atomic state rejection
+ok 46 - I6D contract source array type: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.872443
+  type: 'test'
+  ...
+# Subtest: I6D contract idea placement: precise diagnostic and atomic state rejection
+ok 47 - I6D contract idea placement: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 1.04274
+  type: 'test'
+  ...
+# Subtest: I6D contract open item type: precise diagnostic and atomic state rejection
+ok 48 - I6D contract open item type: precise diagnostic and atomic state rejection
+  ---
+  duration_ms: 0.983146
+  type: 'test'
+  ...
+# Subtest: I6D valid prefix plus invalid final proposal rejects the WHOLE change
+ok 49 - I6D valid prefix plus invalid final proposal rejects the WHOLE change
+  ---
+  duration_ms: 1.579575
+  type: 'test'
+  ...
+# Subtest: I6D summarize cannot re-open a question; no coercion to null
+ok 50 - I6D summarize cannot re-open a question; no coercion to null
+  ---
+  duration_ms: 1.093541
+  type: 'test'
+  ...
+# Subtest: I6D state envelope failure distinct from provider result contract
+ok 51 - I6D state envelope failure distinct from provider result contract
+  ---
+  duration_ms: 0.3426
+  type: 'test'
+  ...
+# Subtest: I6D stale project/version/request are ignored, with identical state reference
+ok 52 - I6D stale project/version/request are ignored, with identical state reference
+  ---
+  duration_ms: 0.576936
+  type: 'test'
+  ...
+# Subtest: I6D state application exception emits no partial output; caller retains original data
+ok 53 - I6D state application exception emits no partial output; caller retains original data
+  ---
+  duration_ms: 0.727349
+  type: 'test'
+  ...
+# Subtest: I6D valid response keeps fixed contract, canonical storage, confirmed locks, source IDs and values
+ok 54 - I6D valid response keeps fixed contract, canonical storage, confirmed locks, source IDs and values
+  ---
+  duration_ms: 1.639471
+  type: 'test'
+  ...
+# Subtest: I6D diagnostic allowlist rejects dynamic paths/rules, strips extras and limits numeric fields
+ok 55 - I6D diagnostic allowlist rejects dynamic paths/rules, strips extras and limits numeric fields
+  ---
+  duration_ms: 0.360406
+  type: 'test'
+  ...
+# Subtest: I6D throwing and async-rejecting observers cannot change success/failure or trigger retries
+ok 56 - I6D throwing and async-rejecting observers cannot change success/failure or trigger retries
+  ---
+  duration_ms: 27.608061
+  type: 'test'
+  ...
+# Subtest: I6D timeout is not relabelled as a parsing error; no late observer emissions
+ok 57 - I6D timeout is not relabelled as a parsing error; no late observer emissions
+  ---
+  duration_ms: 62.796541
+  type: 'test'
+  ...
+# Subtest: I6D actual local HTTP exposes ONLY original safe error, never internal diagnostic or canary
+ok 58 - I6D actual local HTTP exposes ONLY original safe error, never internal diagnostic or canary
+  ---
+  duration_ms: 22.892875
+  type: 'test'
+  ...
+# Subtest: D01 customer tool choice is confirmed; mock proposals are not
+ok 59 - D01 customer tool choice is confirmed; mock proposals are not
+  ---
+  duration_ms: 6.405959
+  type: 'test'
+  ...
+# Subtest: D02 local and multi-device answers change actual requirements and open decisions
+ok 60 - D02 local and multi-device answers change actual requirements and open decisions
+  ---
+  duration_ms: 2.26776
+  type: 'test'
+  ...
+# Subtest: D03 unknown does not silently choose local storage
+ok 61 - D03 unknown does not silently choose local storage
+  ---
+  duration_ms: 0.817444
+  type: 'test'
+  ...
+# Subtest: D03 deferred does not silently choose local storage
+ok 62 - D03 deferred does not silently choose local storage
+  ---
+  duration_ms: 0.675976
+  type: 'test'
+  ...
+# Subtest: D04 custom storage answer remains interpretation pending
+ok 63 - D04 custom storage answer remains interpretation pending
+  ---
+  duration_ms: 2.589707
+  type: 'test'
+  ...
+# Subtest: D05 confirmation is per requirement and keeps stable IDs and provenance
+ok 64 - D05 confirmation is per requirement and keeps stable IDs and provenance
+  ---
+  duration_ms: 0.590756
+  type: 'test'
+  ...
+# Subtest: D06 manual edits / ID / locked values survive another AI proposal with the same key
+ok 65 - D06 manual edits / ID / locked values survive another AI proposal with the same key
+  ---
+  duration_ms: 0.878103
+  type: 'test'
+  ...
+# Subtest: D07 malformed response is atomic: no inputs, answers or requirements lost
+ok 66 - D07 malformed response is atomic: no inputs, answers or requirements lost
+  ---
+  duration_ms: 1.803094
+  type: 'test'
+  ...
+# Subtest: D08 response after customer edits is ignored by request ID AND version
+ok 67 - D08 response after customer edits is ignored by request ID AND version
+  ---
+  duration_ms: 0.762892
+  type: 'test'
+  ...
+# Subtest: D09 old response cannot overwrite a newer in-flight request
+ok 68 - D09 old response cannot overwrite a newer in-flight request
+  ---
+  duration_ms: 0.687091
+  type: 'test'
+  ...
+# Subtest: D10 confirmation during a pending response invalidates the response
+ok 69 - D10 confirmation during a pending response invalidates the response
+  ---
+  duration_ms: 0.396746
+  type: 'test'
+  ...
+# Subtest: D11 proposal cannot smuggle confirmed status, foreign sources or project ID
+ok 70 - D11 proposal cannot smuggle confirmed status, foreign sources or project ID
+  ---
+  duration_ms: 0.703811
+  type: 'test'
+  ...
+# Subtest: D12 >3 ideas, duplicate keys, invalid options and repeated tool question rejected
+ok 71 - D12 >3 ideas, duplicate keys, invalid options and repeated tool question rejected
+  ---
+  duration_ms: 0.710083
+  type: 'test'
+  ...
+# Subtest: D13 second interview turn must summarize, not ask endlessly
+ok 72 - D13 second interview turn must summarize, not ask endlessly
+  ---
+  duration_ms: 0.64178
+  type: 'test'
+  ...
+# Subtest: D14 mock skips known storage input; unknown ideas do not all get technical storage questions
+ok 73 - D14 mock skips known storage input; unknown ideas do not all get technical storage questions
+  ---
+  duration_ms: 0.499402
+  type: 'test'
+  ...
+# Subtest: D15 AI data-scope suggestions cannot replace explicit storage choice
+ok 74 - D15 AI data-scope suggestions cannot replace explicit storage choice
+  ---
+  duration_ms: 0.471261
+  type: 'test'
+  ...
+# Subtest: D16 malformed client requests and duplicate source IDs are rejected
+ok 75 - D16 malformed client requests and duplicate source IDs are rejected
+  ---
+  duration_ms: 0.447631
+  type: 'test'
+  ...
+# Subtest: D17 AI cannot redefine canonical storage option consequences
+ok 76 - D17 AI cannot redefine canonical storage option consequences
+  ---
+  duration_ms: 0.341057
+  type: 'test'
+  ...
+# Subtest: D18 improvement proposals carry stable IDs, source, version and proposed state
+ok 77 - D18 improvement proposals carry stable IDs, source, version and proposed state
+  ---
+  duration_ms: 2.012846
+  type: 'test'
+  ...
+# Subtest: E01 all six fictional checkpoints conform to the real request and byte contracts
+ok 78 - E01 all six fictional checkpoints conform to the real request and byte contracts
+  ---
+  duration_ms: 12.592682
+  type: 'test'
+  ...
+# Subtest: E02 default mock and plan ignore ambient paid flags, key and global fetch
+ok 79 - E02 default mock and plan ignore ambient paid flags, key and global fetch
+  ---
+  duration_ms: 83.459989
+  type: 'test'
+  ...
+# Subtest: E03 six attempt cap, strictly sequential dispatch, no implicit retry
+ok 80 - E03 six attempt cap, strictly sequential dispatch, no implicit retry
+  ---
+  duration_ms: 85.911423
+  type: 'test'
+  ...
+# Subtest: E04 HTTP 401 records sanitized error and stops after one attempt
+ok 81 - E04 HTTP 401 records sanitized error and stops after one attempt
+  ---
+  duration_ms: 6.506765
+  type: 'test'
+  ...
+# Subtest: E04 HTTP 402 records sanitized error and stops after one attempt
+ok 82 - E04 HTTP 402 records sanitized error and stops after one attempt
+  ---
+  duration_ms: 5.496824
+  type: 'test'
+  ...
+# Subtest: E04 HTTP 429 records sanitized error and stops after one attempt
+ok 83 - E04 HTTP 429 records sanitized error and stops after one attempt
+  ---
+  duration_ms: 5.500505
+  type: 'test'
+  ...
+# Subtest: E04 HTTP 503 records sanitized error and stops after one attempt
+ok 84 - E04 HTTP 503 records sanitized error and stops after one attempt
+  ---
+  duration_ms: 6.361972
+  type: 'test'
+  ...
+# Subtest: E05 rejected response stops the batch and never replaces saved requirements
+ok 85 - E05 rejected response stops the batch and never replaces saved requirements
+  ---
+  duration_ms: 15.835245
+  type: 'test'
+  ...
+# Subtest: E06 explicit live gates cannot be replaced by an ambient API key or --live alone
+ok 86 - E06 explicit live gates cannot be replaced by an ambient API key or --live alone
+  ---
+  duration_ms: 0.435638
+  type: 'test'
+  ...
+# Subtest: E07 persistent exclusive claim blocks duplicate batches and does not auto-resume
+ok 87 - E07 persistent exclusive claim blocks duplicate batches and does not auto-resume
+  ---
+  duration_ms: 0.940831
+  type: 'test'
+  ...
+# Subtest: E08 preflight must match transport/runtime/host/recency and cannot claim authentication
+ok 88 - E08 preflight must match transport/runtime/host/recency and cannot claim authentication
+  ---
+  duration_ms: 7.483241
+  type: 'test'
+  ...
+# Subtest: E09 telemetry records returned model, tokens, finish reason and latency without changing result contract
+ok 89 - E09 telemetry records returned model, tokens, finish reason and latency without changing result contract
+  ---
+  duration_ms: 1.036617
+  type: 'test'
+  ...
+# Subtest: E10 telemetry is available for truncation errors and does not claim a configured model is the actual model
+ok 90 - E10 telemetry is available for truncation errors and does not claim a configured model is the actual model
+  ---
+  duration_ms: 2.104531
+  type: 'test'
+  ...
+# Subtest: E11 malicious model fields, error text and observer exceptions do not leak a key or cause retry
+ok 91 - E11 malicious model fields, error text and observer exceptions do not leak a key or cause retry
+  ---
+  duration_ms: 1.990273
+  type: 'test'
+  ...
+# Subtest: E12 timeout and cancellation preserve one safe telemetry record without retry
+ok 92 - E12 timeout and cancellation preserve one safe telemetry record without retry
+  ---
+  duration_ms: 20.783172
+  type: 'test'
+  ...
+# Subtest: E13 source/status injection is rejected by the actual adapter, not just a fixture string check
+ok 93 - E13 source/status injection is rejected by the actual adapter, not just a fixture string check
+  ---
+  duration_ms: 1.997176
+  type: 'test'
+  ...
+# Subtest: E14 valid JSON and preserved state are NOT a quality pass: long-answer mock retains TBD acceptance
+ok 94 - E14 valid JSON and preserved state are NOT a quality pass: long-answer mock retains TBD acceptance
+  ---
+  duration_ms: 0.456146
+  type: 'test'
+  ...
+# Subtest: E15 reserve uses peak/no-cache, rejects oversize complete bodies, includes output and six attempts
+ok 95 - E15 reserve uses peak/no-cache, rejects oversize complete bodies, includes output and six attempts
+  ---
+  duration_ms: 0.30293
+  type: 'test'
+  ...
+# Subtest: E16 safe files redact credentials, auth headers and bearer text; ignore unknown errors
+ok 96 - E16 safe files redact credentials, auth headers and bearer text; ignore unknown errors
+  ---
+  duration_ms: 2.089496
+  type: 'test'
+  ...
+# Subtest: E17 CLI rejects hidden transports, excessive calls and paid output-path reset
+ok 97 - E17 CLI rejects hidden transports, excessive calls and paid output-path reset
+  ---
+  duration_ms: 0.3718
+  type: 'test'
+  ...
+# Subtest: E18 HTTPS CONNECT rehearsal verifies TLS and exact Korean POST body without any API key
+ok 98 - E18 HTTPS CONNECT rehearsal verifies TLS and exact Korean POST body without any API key
+  ---
+  duration_ms: 395.057441
+  type: 'test'
+  ...
+# Subtest: E19 curl transport never follows a redirect to another host and rejects arbitrary production endpoints
+ok 99 - E19 curl transport never follows a redirect to another host and rejects arbitrary production endpoints
+  ---
+  duration_ms: 9.978204
+  type: 'test'
+  ...
+# Subtest: E20 live batch stops on missing telemetry, model mismatch or token reservation overrun
+ok 100 - E20 live batch stops on missing telemetry, model mismatch or token reservation overrun
+  ---
+  duration_ms: 0.350498
+  type: 'test'
+  ...
+# Subtest: E21 preflight rejects missing, non-string, malformed and normalized invalid timestamps
+ok 101 - E21 preflight rejects missing, non-string, malformed and normalized invalid timestamps
+  ---
+  duration_ms: 7.465629
+  type: 'test'
+  ...
+# Subtest: E22 preflight admits only a real UTC timestamp with age from zero through exactly 24 hours
+ok 102 - E22 preflight admits only a real UTC timestamp with age from zero through exactly 24 hours
+  ---
+  duration_ms: 12.025512
+  type: 'test'
+  ...
+# Subtest: E23 preflight does not accept a non-finite elapsed age
+ok 103 - E23 preflight does not accept a non-finite elapsed age
+  ---
+  duration_ms: 2.345495
+  type: 'test'
+  ...
+# Subtest: E24 local TLS uses its own public config even when OpenSSL default is unavailable; child env stays allowlisted
+ok 104 - E24 local TLS uses its own public config even when OpenSSL default is unavailable; child env stays allowlisted
+  ---
+  duration_ms: 221.735377
+  type: 'test'
+  ...
+# Subtest: I7A actual local HTTP: six fixed personas, same-state two-turn lifecycle (no real provider)
+    # Subtest: p01 초보의 막연한 아이디어
+    ok 1 - p01 초보의 막연한 아이디어
+      ---
+      duration_ms: 12030.074459
+      type: 'test'
+      ...
+    # Subtest: p02 구체적인 요구와 이미 제공한 저장 범위
+    ok 2 - p02 구체적인 요구와 이미 제공한 저장 범위
+      ---
+      duration_ms: 11997.405158
+      type: 'test'
+      ...
+    # Subtest: p03 모르겠음과 보류
+    ok 3 - p03 모르겠음과 보류
+      ---
+      duration_ms: 24017.325532
+      type: 'test'
+      ...
+    # Subtest: p04 확정·수동 잠금과 새 저장 답변 충돌
+    ok 4 - p04 확정·수동 잠금과 새 저장 답변 충돌
+      ---
+      duration_ms: 24007.89115
+      type: 'test'
+      ...
+    # Subtest: p05 지원 길이의 긴 직접 답변과 수정
+    ok 5 - p05 지원 길이의 긴 직접 답변과 수정
+      ---
+      duration_ms: 24011.752615
+      type: 'test'
+      ...
+    # Subtest: p06 입력 자료 속 악성 지시
+    ok 6 - p06 입력 자료 속 악성 지시
+      ---
+      duration_ms: 24002.436844
+      type: 'test'
+      ...
+    1..6
+ok 105 - I7A actual local HTTP: six fixed personas, same-state two-turn lifecycle (no real provider)
+  ---
+  duration_ms: 120082.377793
+  type: 'test'
+  ...
+# Subtest: I7A fixed personas distribute tools/storage without inventing quotas or Studio cloud
+ok 106 - I7A fixed personas distribute tools/storage without inventing quotas or Studio cloud
+  ---
+  duration_ms: 0.58799
+  type: 'test'
+  ...
+# Subtest: I7A rejected envelope is atomic and never persists provider raw/reasoning/headers (mock adapter double, not HTTP)
+ok 107 - I7A rejected envelope is atomic and never persists provider raw/reasoning/headers (mock adapter double, not HTTP)
+  ---
+  duration_ms: 9.698869
+  type: 'test'
+  ...
+# Subtest: I7A HTTP-error adapter double and thrown transport data are not logged or retried
+ok 108 - I7A HTTP-error adapter double and thrown transport data are not logged or retried
+  ---
+  duration_ms: 0.97865
+  type: 'test'
+  ...
+# Subtest: I7A pre-dispatch save failure and post-dispatch save failure never replay a generation
+ok 109 - I7A pre-dispatch save failure and post-dispatch save failure never replay a generation
+  ---
+  duration_ms: 1.095348
+  type: 'test'
+  ...
+# Subtest: I7A answer file validation is atomic across multiple rows, IDs/versions/facts and extra fields
+ok 110 - I7A answer file validation is atomic across multiple rows, IDs/versions/facts and extra fields
+  ---
+  duration_ms: 1.69441
+  type: 'test'
+  ...
+# Subtest: I7A wrong project/version/envelope mode rejection never becomes accepted mock content
+ok 111 - I7A wrong project/version/envelope mode rejection never becomes accepted mock content
+  ---
+  duration_ms: 0.975356
+  type: 'test'
+  ...
+# Subtest: I7A missing question marks unrelated storage/conflict as unevaluated (adapter double)
+ok 112 - I7A missing question marks unrelated storage/conflict as unevaluated (adapter double)
+  ---
+  duration_ms: 1.136125
+  type: 'test'
+  ...
+# Subtest: I7A CLI rejects live/bare invocation; evidence directory cannot be reused
+ok 113 - I7A CLI rejects live/bare invocation; evidence directory cannot be reused
+  ---
+  duration_ms: 111.927106
+  type: 'test'
+  ...
+# Subtest: B01 fixed commands reject out/id/limit/reset/retry/key/provider URL and duplicate switches
+ok 114 - B01 fixed commands reject out/id/limit/reset/retry/key/provider URL and duplicate switches
+  ---
+  duration_ms: 1.666226
+  type: 'test'
+  ...
+# Subtest: B02 plan ignores even a throwing credential environment; no live directory created
+ok 115 - B02 plan ignores even a throwing credential environment; no live directory created
+  ---
+  duration_ms: 9.355935
+  type: 'test'
+  ...
+# Subtest: B03 4096 experiment does not modify product default 2048; body reserve and exact pricing example
+ok 116 - B03 4096 experiment does not modify product default 2048; body reserve and exact pricing example
+  ---
+  duration_ms: 2.515587
+  type: 'test'
+  ...
+# Subtest: B04 fresh reviewed identity/price/support required; hashes, dates, changed pricing and insufficient budget fail closed
+ok 117 - B04 fresh reviewed identity/price/support required; hashes, dates, changed pricing and insufficient budget fail closed
+  ---
+  duration_ms: 1.693568
+  type: 'test'
+  ...
+# Subtest: B05 accepted INIT005 preflight date gate rejects missing, invalid, normalized, future and stale dates
+ok 118 - B05 accepted INIT005 preflight date gate rejects missing, invalid, normalized, future and stale dates
+  ---
+  duration_ms: 2.333244
+  type: 'test'
+  ...
+# Subtest: B06 synthetic legacy fixture is read-only; missing real history is not manufactured
+ok 119 - B06 synthetic legacy fixture is read-only; missing real history is not manufactured
+  ---
+  duration_ms: 3.771758
+  type: 'test'
+  ...
+# Subtest: B07 fixed budget/12-slot cap cannot be reset by counters in a new process
+ok 120 - B07 fixed budget/12-slot cap cannot be reset by counters in a new process
+  ---
+  duration_ms: 0.371691
+  type: 'test'
+  ...
+# Subtest: B08 persisted last start and rolling six/minute protect a new process and clock rollback
+ok 121 - B08 persisted last start and rolling six/minute protect a new process and clock rollback
+  ---
+  duration_ms: 0.232473
+  type: 'test'
+  ...
+# Subtest: B09 local lock blocks a competing native child process; no stale takeover option
+ok 122 - B09 local lock blocks a competing native child process; no stale takeover option
+  ---
+  duration_ms: 61.330198
+  type: 'test'
+  ...
+# Subtest: B10 source/fixture/run identity mismatch rejects an existing journal without writes
+ok 123 - B10 source/fixture/run identity mismatch rejects an existing journal without writes
+  ---
+  duration_ms: 10.773668
+  type: 'test'
+  ...
+# Subtest: B11 truncated or reordered journal fails, never reconstructs or resets
+ok 124 - B11 truncated or reordered journal fails, never reconstructs or resets
+  ---
+  duration_ms: 4.525584
+  type: 'test'
+  ...
+# Subtest: B12 persisted session digest/state version protects followups from edited first question
+ok 125 - B12 persisted session digest/state version protects followups from edited first question
+  ---
+  duration_ms: 169.699118
+  type: 'test'
+  ...
+# Subtest: B13 two-stage persistent SAME state; input correction, unknown/defer, preview cancel/confirm, explicit item decisions; transport/clock DOUBLE
+ok 126 - B13 two-stage persistent SAME state; input correction, unknown/defer, preview cancel/confirm, explicit item decisions; transport/clock DOUBLE
+  ---
+  duration_ms: 544.35985
+  type: 'test'
+  ...
+# Subtest: B14 completed firsts cannot silently start followups; actual question absence yields zero second generation
+ok 127 - B14 completed firsts cannot silently start followups; actual question absence yields zero second generation
+  ---
+  duration_ms: 197.501993
+  type: 'test'
+  ...
+# Subtest: B15 safe healthy contract rejection is case failed, skips followup, allows only remaining fixed independent cases
+ok 128 - B15 safe healthy contract rejection is case failed, skips followup, allows only remaining fixed independent cases
+  ---
+  duration_ms: 140.184229
+  type: 'test'
+  ...
+# Subtest: B16 global auth halts batch and persists consumed slot; DOUBLE
+ok 129 - B16 global auth halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 30.117274
+  type: 'test'
+  ...
+# Subtest: B16 global balance halts batch and persists consumed slot; DOUBLE
+ok 130 - B16 global balance halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 27.520675
+  type: 'test'
+  ...
+# Subtest: B16 global 429 halts batch and persists consumed slot; DOUBLE
+ok 131 - B16 global 429 halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 30.0715
+  type: 'test'
+  ...
+# Subtest: B16 global network halts batch and persists consumed slot; DOUBLE
+ok 132 - B16 global network halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 45.764138
+  type: 'test'
+  ...
+# Subtest: B16 global timeout halts batch and persists consumed slot; DOUBLE
+ok 133 - B16 global timeout halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 35.134533
+  type: 'test'
+  ...
+# Subtest: B16 global model halts batch and persists consumed slot; DOUBLE
+ok 134 - B16 global model halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 27.232945
+  type: 'test'
+  ...
+# Subtest: B16 global usage halts batch and persists consumed slot; DOUBLE
+ok 135 - B16 global usage halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 33.969311
+  type: 'test'
+  ...
+# Subtest: B16 global total halts batch and persists consumed slot; DOUBLE
+ok 136 - B16 global total halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 29.720136
+  type: 'test'
+  ...
+# Subtest: B16 global finish halts batch and persists consumed slot; DOUBLE
+ok 137 - B16 global finish halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 29.06469
+  type: 'test'
+  ...
+# Subtest: B16 global input over reservation halts batch and persists consumed slot; DOUBLE
+ok 138 - B16 global input over reservation halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 30.400675
+  type: 'test'
+  ...
+# Subtest: B16 global output over cap halts batch and persists consumed slot; DOUBLE
+ok 139 - B16 global output over cap halts batch and persists consumed slot; DOUBLE
+  ---
+  duration_ms: 32.360943
+  type: 'test'
+  ...
+# Subtest: B17 state application/guard rejection is global, unlike contract rejection
+ok 140 - B17 state application/guard rejection is global, unlike contract rejection
+  ---
+  duration_ms: 0.200467
+  type: 'test'
+  ...
+# Subtest: B18 durable reserved journal save failure: upstream send zero, no refund/replay; DOUBLE
+ok 141 - B18 durable reserved journal save failure: upstream send zero, no refund/replay; DOUBLE
+  ---
+  duration_ms: 19.066509
+  type: 'test'
+  ...
+# Subtest: B18 durable dispatched journal save failure: upstream send zero, no refund/replay; DOUBLE
+ok 142 - B18 durable dispatched journal save failure: upstream send zero, no refund/replay; DOUBLE
+  ---
+  duration_ms: 18.271099
+  type: 'test'
+  ...
+# Subtest: B19 real child-process termination reserved undispatched: never reclaims or retries; transport DOUBLE
+ok 143 - B19 real child-process termination reserved undispatched: never reclaims or retries; transport DOUBLE
+  ---
+  duration_ms: 77.110653
+  type: 'test'
+  ...
+# Subtest: B19 real child-process termination after dispatch record: never reclaims or retries; transport DOUBLE
+ok 144 - B19 real child-process termination after dispatch record: never reclaims or retries; transport DOUBLE
+  ---
+  duration_ms: 95.467827
+  type: 'test'
+  ...
+# Subtest: B20 malformed answer JSON preserves input bytes/state and only adds a safe digest; corrected uncalled input accepted
+ok 145 - B20 malformed answer JSON preserves input bytes/state and only adds a safe digest; corrected uncalled input accepted
+  ---
+  duration_ms: 183.777086
+  type: 'test'
+  ...
+# Subtest: B21 edited durable reservation/journal before dispatch cannot be acknowledged or sent
+ok 146 - B21 edited durable reservation/journal before dispatch cannot be acknowledged or sent
+  ---
+  duration_ms: 18.975519
+  type: 'test'
+  ...
+# Subtest: B22 unpaid live entry fails before credential access or creation of the fixed live ledger
+ok 147 - B22 unpaid live entry fails before credential access or creation of the fixed live ledger
+  ---
+  duration_ms: 4.408833
+  type: 'test'
+  ...
+# Subtest: B23 ledger rejects dynamic input/headers as metadata rather than allowing input to define run identity
+ok 148 - B23 ledger rejects dynamic input/headers as metadata rather than allowing input to define run identity
+  ---
+  duration_ms: 3.561211
+  type: 'test'
+  ...
+# Subtest: B24 persisted completion floor covers durable-dispatch fsync delay before actual upstream send
+ok 149 - B24 persisted completion floor covers durable-dispatch fsync delay before actual upstream send
+  ---
+  duration_ms: 0.235928
+  type: 'test'
+  ...
+# Subtest: I9.01 fixed purpose/run/four slots; p01/p03 facts and choices are original fixture bytes semantically
+ok 150 - I9.01 fixed purpose/run/four slots; p01/p03 facts and choices are original fixture bytes semantically
+  ---
+  duration_ms: 30.036072
+  type: 'test'
+  ...
+# Subtest: I9.02 absent synthetic ledger: plan/review are keyless and missing evidence rejects before credential or transport
+ok 151 - I9.02 absent synthetic ledger: plan/review are keyless and missing evidence rejects before credential or transport
+  ---
+  duration_ms: 12.983302
+  type: 'test'
+  ...
+# Subtest: I9.02 completed synthetic ledger: repeated firsts is unchanged generation-zero before any environment read
+ok 152 - I9.02 completed synthetic ledger: repeated firsts is unchanged generation-zero before any environment read
+  ---
+  duration_ms: 62.902391
+  type: 'test'
+  ...
+# Subtest: I9.03 CLI rejects arbitrary run/path/slots/key/transport/retry/reset; old gate rejects new identity without old CLI execution
+ok 153 - I9.03 CLI rejects arbitrary run/path/slots/key/transport/retry/reset; old gate rejects new identity without old CLI execution
+  ---
+  duration_ms: 0.765875
+  type: 'test'
+  ...
+# Subtest: I9.04 normal state functions prepare fresh project/source/request IDs and exact reviewed body; no copied old question
+ok 154 - I9.04 normal state functions prepare fresh project/source/request IDs and exact reviewed body; no copied old question
+  ---
+  duration_ms: 3.463103
+  type: 'test'
+  ...
+# Subtest: I9.05 four-slot mock workflow: durable predispatch, exact IDs, reopen, each duplicate stage generation zero
+ok 155 - I9.05 four-slot mock workflow: durable predispatch, exact IDs, reopen, each duplicate stage generation zero
+  ---
+  duration_ms: 106.522825
+  type: 'test'
+  ...
+# Subtest: I9.06 answer draft cannot authorize itself; p01 custom fact and p03 same AnswerID unknown->deferred preserve exact text/two sources
+ok 156 - I9.06 answer draft cannot authorize itself; p01 custom fact and p03 same AnswerID unknown->deferred preserve exact text/two sources
+  ---
+  duration_ms: 36.994527
+  type: 'test'
+  ...
+# Subtest: I9.07 no invented person/time/habit, wrong IDs, changed revisions or extra rows; all rejected without state mutation
+ok 157 - I9.07 no invented person/time/habit, wrong IDs, changed revisions or extra rows; all rejected without state mutation
+  ---
+  duration_ms: 41.815471
+  type: 'test'
+  ...
+# Subtest: I9.08 absent question skips both followups; unmatched actual topic skips without fabricated answers or count filling
+ok 158 - I9.08 absent question skips both followups; unmatched actual topic skips without fabricated answers or count filling
+  ---
+  duration_ms: 99.486157
+  type: 'test'
+  ...
+# Subtest: I9.09 only healthy known_source is case-scoped; other contract diagnostics and missing telemetry halt globally
+ok 159 - I9.09 only healthy known_source is case-scoped; other contract diagnostics and missing telemetry halt globally
+  ---
+  duration_ms: 0.842561
+  type: 'test'
+  ...
+# Subtest: I9.10 known_source failure preserves safe diagnostic, skips failed case followup, continues independent p03 only
+ok 160 - I9.10 known_source failure preserves safe diagnostic, skips failed case followup, continues independent p03 only
+  ---
+  duration_ms: 50.538563
+  type: 'test'
+  ...
+# Subtest: I9.11 global failure stops next independent case, keeps reservation/halt/lock and forbids re-entry
+ok 161 - I9.11 global failure stops next independent case, keeps reservation/halt/lock and forbids re-entry
+  ---
+  duration_ms: 24.875429
+  type: 'test'
+  ...
+# Subtest: I9.12 fsync/write uncertainty before dispatch leaves lock, sends zero, cannot reopen; damaged read also keeps lock
+ok 162 - I9.12 fsync/write uncertainty before dispatch leaves lock, sends zero, cannot reopen; damaged read also keeps lock
+  ---
+  duration_ms: 18.821893
+  type: 'test'
+  ...
+# Subtest: I9.13 unknown/current unsupported prices blocked; complete synthetic review checks exact body and source/fixture/review bindings
+ok 163 - I9.13 unknown/current unsupported prices blocked; complete synthetic review checks exact body and source/fixture/review bindings
+  ---
+  duration_ms: 6.909336
+  type: 'test'
+  ...
+# Subtest: I9.14 canonical UTC/finite current time/24h applies equally to review, official support and preflight
+ok 164 - I9.14 canonical UTC/finite current time/24h applies equally to review, official support and preflight
+  ---
+  duration_ms: 2.744689
+  type: 'test'
+  ...
+# Subtest: I9.15 final32KiB/input40000/output4096/4-slot total<=.12 budget; fresh prices never silently replaced by historical defaults
+ok 165 - I9.15 final32KiB/input40000/output4096/4-slot total<=.12 budget; fresh prices never silently replaced by historical defaults
+  ---
+  duration_ms: 3.757025
+  type: 'test'
+  ...
+# Subtest: I9.16 generation-free item recording needs separate hash/date/coordinator review; preserves pending quality and source semantics distinction
+ok 166 - I9.16 generation-free item recording needs separate hash/date/coordinator review; preserves pending quality and source semantics distinction
+  ---
+  duration_ms: 136.33305
+  type: 'test'
+  ...
+# Subtest: I9.17 all auth/balance/429/network/timeout telemetry failures halt independent cases; no reservation refund or retry
+ok 167 - I9.17 all auth/balance/429/network/timeout telemetry failures halt independent cases; no reservation refund or retry
+  ---
+  duration_ms: 118.834244
+  type: 'test'
+  ...
+# Subtest: I9.18 reviewed answer state cannot be edited into a false fact, different question, new AnswerID or unrelated tool choice
+ok 168 - I9.18 reviewed answer state cannot be edited into a false fact, different question, new AnswerID or unrelated tool choice
+  ---
+  duration_ms: 49.94783
+  type: 'test'
+  ...
+# Subtest: I9.19 predispatch fsync acknowledgement failure at dispatched write sends zero and preserves consumed reservation and lock
+ok 169 - I9.19 predispatch fsync acknowledgement failure at dispatched write sends zero and preserves consumed reservation and lock
+  ---
+  duration_ms: 15.494422
+  type: 'test'
+  ...
+# Subtest: BHTTP01 native createApp/provider-adapter HTTP p01 slot pair, reopen store/server, durable actual >=12s, 4096 observed; upstream MOCK
+ok 170 - BHTTP01 native createApp/provider-adapter HTTP p01 slot pair, reopen store/server, durable actual >=12s, 4096 observed; upstream MOCK
+  ---
+  duration_ms: 12104.376795
+  type: 'test'
+  ...
+# Subtest: BHTTP02 native HTTP dispatch journal failure produces upstream send zero and leaves poisoned lock
+ok 171 - BHTTP02 native HTTP dispatch journal failure produces upstream send zero and leaves poisoned lock
+  ---
+  duration_ms: 22.840918
+  type: 'test'
+  ...
+# Subtest: BHTTP03 healthy upstream 200 + malformed content is case failure; raw/reasoning/headers absent from every saved file
+ok 172 - BHTTP03 healthy upstream 200 + malformed content is case failure; raw/reasoning/headers absent from every saved file
+  ---
+  duration_ms: 30.946603
+  type: 'test'
+  ...
+# Subtest: BHTTP04 optional app telemetry observer exception is contained; response contract unchanged
+ok 173 - BHTTP04 optional app telemetry observer exception is contained; response contract unchanged
+  ---
+  duration_ms: 10.808579
+  type: 'test'
+  ...
+# Subtest: BHTTP05 actual body hash mismatch is blocked before dispatch callback/upstream IO
+ok 174 - BHTTP05 actual body hash mismatch is blocked before dispatch callback/upstream IO
+  ---
+  duration_ms: 7.37042
+  type: 'test'
+  ...
+# Subtest: I9.H1 actual native localhost createApp HTTP/adapter: four synthetic dispatches, durable onDispatch, reviewed IDs, duplicate zero
+ok 175 - I9.H1 actual native localhost createApp HTTP/adapter: four synthetic dispatches, durable onDispatch, reviewed IDs, duplicate zero
+  ---
+  duration_ms: 243.490867
+  type: 'test'
+  ...
+# Subtest: I9.H2 native HTTP healthy upstream200 known_source -> app502 preserves failure, p03 first still proceeds; no rejected raw
+ok 176 - I9.H2 native HTTP healthy upstream200 known_source -> app502 preserves failure, p03 first still proceeds; no rejected raw
+  ---
+  duration_ms: 53.342306
+  type: 'test'
+  ...
+# Subtest: I9.H global halt on content JSON syntax; one synthetic HTTP dispatch only, no second case/retry
+ok 177 - I9.H global halt on content JSON syntax; one synthetic HTTP dispatch only, no second case/retry
+  ---
+  duration_ms: 26.285409
+  type: 'test'
+  ...
+# Subtest: I9.H global halt on unknown usage; one synthetic HTTP dispatch only, no second case/retry
+ok 178 - I9.H global halt on unknown usage; one synthetic HTTP dispatch only, no second case/retry
+  ---
+  duration_ms: 28.094517
+  type: 'test'
+  ...
+# Subtest: I9.H global halt on unexpected model; one synthetic HTTP dispatch only, no second case/retry
+ok 179 - I9.H global halt on unexpected model; one synthetic HTTP dispatch only, no second case/retry
+  ---
+  duration_ms: 26.261819
+  type: 'test'
+  ...
+# Subtest: I9.H global halt on finish not stop; one synthetic HTTP dispatch only, no second case/retry
+ok 180 - I9.H global halt on finish not stop; one synthetic HTTP dispatch only, no second case/retry
+  ---
+  duration_ms: 31.552591
+  type: 'test'
+  ...
+# Subtest: H01 real local HTTP UI -> mock provider -> domain summary, both storage branches
+ok 181 - H01 real local HTTP UI -> mock provider -> domain summary, both storage branches
+  ---
+  duration_ms: 68.77863
+  type: 'test'
+  ...
+# Subtest: H02 missing key returns no fallback, no provider call and no secrets in config
+ok 182 - H02 missing key returns no fallback, no provider call and no secrets in config
+  ---
+  duration_ms: 19.918519
+  type: 'test'
+  ...
+# Subtest: H03 real local HTTP with simulated upstream reports deepseek mode (not live verification)
+ok 183 - H03 real local HTTP with simulated upstream reports deepseek mode (not live verification)
+  ---
+  duration_ms: 10.456241
+  type: 'test'
+  ...
+# Subtest: H04 cross-site, missing custom header, non-JSON and invalid input fail before provider
+ok 184 - H04 cross-site, missing custom header, non-JSON and invalid input fail before provider
+  ---
+  duration_ms: 16.134254
+  type: 'test'
+  ...
+# Subtest: H05 oversized body rejected; server sources, dotfiles and traversal not served
+ok 185 - H05 oversized body rejected; server sources, dotfiles and traversal not served
+  ---
+  duration_ms: 13.256262
+  type: 'test'
+  ...
+# Subtest: H06 duplicate and rate limit enforced by HTTP route
+ok 186 - H06 duplicate and rate limit enforced by HTTP route
+  ---
+  duration_ms: 8.702346
+  type: 'test'
+  ...
+# Subtest: H07 simulated upstream auth body never leaks through HTTP
+ok 187 - H07 simulated upstream auth body never leaks through HTTP
+  ---
+  duration_ms: 6.064671
+  type: 'test'
+  ...
+# Subtest: P01 MOCK TRANSPORT: correct server endpoint, model, JSON, disabled thinking; no API key in prompt/body
+ok 188 - P01 MOCK TRANSPORT: correct server endpoint, model, JSON, disabled thinking; no API key in prompt/body
+  ---
+  duration_ms: 22.360159
+  type: 'test'
+  ...
+# Subtest: P02 MOCK HTTP 401 -> AI_AUTH_FAILED, sanitized and no retry
+ok 189 - P02 MOCK HTTP 401 -> AI_AUTH_FAILED, sanitized and no retry
+  ---
+  duration_ms: 1.164194
+  type: 'test'
+  ...
+# Subtest: P02 MOCK HTTP 403 -> AI_AUTH_FAILED, sanitized and no retry
+ok 190 - P02 MOCK HTTP 403 -> AI_AUTH_FAILED, sanitized and no retry
+  ---
+  duration_ms: 0.69028
+  type: 'test'
+  ...
+# Subtest: P02 MOCK HTTP 402 -> AI_BALANCE_REQUIRED, sanitized and no retry
+ok 191 - P02 MOCK HTTP 402 -> AI_BALANCE_REQUIRED, sanitized and no retry
+  ---
+  duration_ms: 0.676342
+  type: 'test'
+  ...
+# Subtest: P02 MOCK HTTP 429 -> AI_RATE_LIMIT, sanitized and no retry
+ok 192 - P02 MOCK HTTP 429 -> AI_RATE_LIMIT, sanitized and no retry
+  ---
+  duration_ms: 0.463743
+  type: 'test'
+  ...
+# Subtest: P02 MOCK HTTP 400 -> AI_CONFIG_REJECTED, sanitized and no retry
+ok 193 - P02 MOCK HTTP 400 -> AI_CONFIG_REJECTED, sanitized and no retry
+  ---
+  duration_ms: 0.746029
+  type: 'test'
+  ...
+# Subtest: P02 MOCK HTTP 422 -> AI_CONFIG_REJECTED, sanitized and no retry
+ok 194 - P02 MOCK HTTP 422 -> AI_CONFIG_REJECTED, sanitized and no retry
+  ---
+  duration_ms: 0.662495
+  type: 'test'
+  ...
+# Subtest: P02 MOCK HTTP 500 -> AI_UNAVAILABLE, sanitized and no retry
+ok 195 - P02 MOCK HTTP 500 -> AI_UNAVAILABLE, sanitized and no retry
+  ---
+  duration_ms: 0.847801
+  type: 'test'
+  ...
+# Subtest: P02 MOCK HTTP 503 -> AI_UNAVAILABLE, sanitized and no retry
+ok 196 - P02 MOCK HTTP 503 -> AI_UNAVAILABLE, sanitized and no retry
+  ---
+  duration_ms: 1.270259
+  type: 'test'
+  ...
+# Subtest: P03 AI_NOT_CONFIGURED makes zero fetch calls
+ok 197 - P03 AI_NOT_CONFIGURED makes zero fetch calls
+  ---
+  duration_ms: 0.67421
+  type: 'test'
+  ...
+# Subtest: P03 PAID_CALLS_DISABLED makes zero fetch calls
+ok 198 - P03 PAID_CALLS_DISABLED makes zero fetch calls
+  ---
+  duration_ms: 0.2537
+  type: 'test'
+  ...
+# Subtest: P04 MOCK timeout covers fetch that ignores AbortSignal
+ok 199 - P04 MOCK timeout covers fetch that ignores AbortSignal
+  ---
+  duration_ms: 20.662079
+  type: 'test'
+  ...
+# Subtest: P05 MOCK timeout also covers a stalled response body
+ok 200 - P05 MOCK timeout also covers a stalled response body
+  ---
+  duration_ms: 20.888218
+  type: 'test'
+  ...
+# Subtest: P06 MOCK network errors cannot leak exception messages
+ok 201 - P06 MOCK network errors cannot leak exception messages
+  ---
+  duration_ms: 0.646651
+  type: 'test'
+  ...
+# Subtest: P07 client cancellation aborts the provider path
+ok 202 - P07 client cancellation aborts the provider path
+  ---
+  duration_ms: 0.294213
+  type: 'test'
+  ...
+# Subtest: P08 MOCK invalid-json rejected
+ok 203 - P08 MOCK invalid-json rejected
+  ---
+  duration_ms: 2.245463
+  type: 'test'
+  ...
+# Subtest: P08 MOCK empty-content rejected
+ok 204 - P08 MOCK empty-content rejected
+  ---
+  duration_ms: 0.987619
+  type: 'test'
+  ...
+# Subtest: P08 MOCK truncated rejected
+ok 205 - P08 MOCK truncated rejected
+  ---
+  duration_ms: 0.784994
+  type: 'test'
+  ...
+# Subtest: P08 MOCK unknown-source rejected
+ok 206 - P08 MOCK unknown-source rejected
+  ---
+  duration_ms: 1.124534
+  type: 'test'
+  ...
+# Subtest: P08 MOCK wrong-project rejected
+ok 207 - P08 MOCK wrong-project rejected
+  ---
+  duration_ms: 1.37746
+  type: 'test'
+  ...
+# Subtest: P08 MOCK huge-body rejected
+ok 208 - P08 MOCK huge-body rejected
+  ---
+  duration_ms: 0.761355
+  type: 'test'
+  ...
+# Subtest: P08 MOCK tool-call rejected
+ok 209 - P08 MOCK tool-call rejected
+  ---
+  duration_ms: 0.836969
+  type: 'test'
+  ...
+# Subtest: P09 endpoint override cannot exfiltrate key to an unapproved host
+ok 210 - P09 endpoint override cannot exfiltrate key to an unapproved host
+  ---
+  duration_ms: 0.379761
+  type: 'test'
+  ...
+# Subtest: P10 limiter enforces concurrency, duplicate ID, minute and process caps
+ok 211 - P10 limiter enforces concurrency, duplicate ID, minute and process caps
+  ---
+  duration_ms: 0.248861
+  type: 'test'
+  ...
+# Subtest: I8.1 reference guide retains exact request-local IDs, source kinds and current answer provenance
+ok 212 - I8.1 reference guide retains exact request-local IDs, source kinds and current answer provenance
+  ---
+  duration_ms: 4.808742
+  type: 'test'
+  ...
+# Subtest: I8.2 system guide never promotes source text to instructions; user JSON and request contract unchanged
+ok 213 - I8.2 system guide never promotes source text to instructions; user JSON and request contract unchanged
+  ---
+  duration_ms: 1.059391
+  type: 'test'
+  ...
+# Subtest: I8.3 guide does not reuse another project or an older version/current answer; no mapping namespace
+ok 214 - I8.3 guide does not reuse another project or an older version/current answer; no mapping namespace
+  ---
+  duration_ms: 1.315391
+  type: 'test'
+  ...
+# Subtest: I8.4 realistic-shaped provider200 success refines full answer to proposed requirement and observable acceptance (double, not live)
+ok 215 - I8.4 realistic-shaped provider200 success refines full answer to proposed requirement and observable acceptance (double, not live)
+  ---
+  duration_ms: 6.437021
+  type: 'test'
+  ...
+# Subtest: I8.5 unknown: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+ok 216 - I8.5 unknown: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+  ---
+  duration_ms: 3.658194
+  type: 'test'
+  ...
+# Subtest: I8.5 answer-id: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+ok 217 - I8.5 answer-id: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+  ---
+  duration_ms: 1.312614
+  type: 'test'
+  ...
+# Subtest: I8.5 question-id: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+ok 218 - I8.5 question-id: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+  ---
+  duration_ms: 1.04965
+  type: 'test'
+  ...
+# Subtest: I8.5 requirement-id: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+ok 219 - I8.5 requirement-id: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+  ---
+  duration_ms: 1.09406
+  type: 'test'
+  ...
+# Subtest: I8.5 example-placeholder: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+ok 220 - I8.5 example-placeholder: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+  ---
+  duration_ms: 1.363373
+  type: 'test'
+  ...
+# Subtest: I8.5 other-project-source: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+ok 221 - I8.5 other-project-source: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+  ---
+  duration_ms: 1.45117
+  type: 'test'
+  ...
+# Subtest: I8.5 future-source: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+ok 222 - I8.5 future-source: healthy provider200 still strict known_source rejection, no repair/fallback/retry
+  ---
+  duration_ms: 1.115914
+  type: 'test'
+  ...
+# Subtest: I8.6 project/version/requestId mismatch remains rejected; stale response cannot change current view
+ok 223 - I8.6 project/version/requestId mismatch remains rejected; stale response cannot change current view
+  ---
+  duration_ms: 0.768561
+  type: 'test'
+  ...
+# Subtest: I8.7 unknown -> deferred keeps same answer ID, two full sources, deferred/TBD while misleading AI prose stays non-authoritative
+ok 224 - I8.7 unknown -> deferred keeps same answer ID, two full sources, deferred/TBD while misleading AI prose stays non-authoritative
+  ---
+  duration_ms: 0.969924
+  type: 'test'
+  ...
+# Subtest: I8.8 current summary follows confirm/defer/reject and manual edits without a generation or source overwrite
+ok 225 - I8.8 current summary follows confirm/defer/reject and manual edits without a generation or source overwrite
+  ---
+  duration_ms: 0.811948
+  type: 'test'
+  ...
+# Subtest: I8.9 proposed summary cannot overwrite a protected requirement or paired completion criterion; review is visible
+ok 226 - I8.9 proposed summary cannot overwrite a protected requirement or paired completion criterion; review is visible
+  ---
+  duration_ms: 1.916797
+  type: 'test'
+  ...
+# Subtest: I8.10 locked storage conflict preview/cancel and TBD resolution preserve provenance and prevent confirmation
+ok 227 - I8.10 locked storage conflict preview/cancel and TBD resolution preserve provenance and prevent confirmation
+  ---
+  duration_ms: 1.023126
+  type: 'test'
+  ...
+# Subtest: I8.11 origin labels distinguish every status for customer/AI/mock without claiming a deferred confirmation
+ok 228 - I8.11 origin labels distinguish every status for customer/AI/mock without claiming a deferred confirmation
+  ---
+  duration_ms: 0.17393
+  type: 'test'
+  ...
+# Subtest: I8.12 runtime UI wiring: same groups/items, collapsed historical interpretation, no internal hash/ledger display
+ok 229 - I8.12 runtime UI wiring: same groups/items, collapsed historical interpretation, no internal hash/ledger display
+  ---
+  duration_ms: 0.526028
+  type: 'test'
+  ...
+# Subtest: I8.13 native local HTTP: provider200 -> app200 success / app502 known_source, answer and draft preserved (no live AI)
+ok 230 - I8.13 native local HTTP: provider200 -> app200 success / app502 known_source, answer and draft preserved (no live AI)
+  ---
+  duration_ms: 46.985315
+  type: 'test'
+  ...
+# Subtest: R1.1 Codex -> Claude -> Codex reuses provenance, preserves ID, applies current selection
+ok 231 - R1.1 Codex -> Claude -> Codex reuses provenance, preserves ID, applies current selection
+  ---
+  duration_ms: 4.94988
+  type: 'test'
+  ...
+# Subtest: R1.2 tool -> undecided invalidates old confirmation immediately and after request
+ok 232 - R1.2 tool -> undecided invalidates old confirmation immediately and after request
+  ---
+  duration_ms: 1.043011
+  type: 'test'
+  ...
+# Subtest: R1.3 conflicting locked tools remain preserved with explicit current selection and source
+ok 233 - R1.3 conflicting locked tools remain preserved with explicit current selection and source
+  ---
+  duration_ms: 1.543369
+  type: 'test'
+  ...
+# Subtest: R1.4 locked canonical choice returning to same choice resolves only that conflict
+ok 234 - R1.4 locked canonical choice returning to same choice resolves only that conflict
+  ---
+  duration_ms: 1.889375
+  type: 'test'
+  ...
+# Subtest: R2.1 new answer refines actual proposed requirement + acceptance + source, same ID
+ok 235 - R2.1 new answer refines actual proposed requirement + acceptance + source, same ID
+  ---
+  duration_ms: 1.16241
+  type: 'test'
+  ...
+# Subtest: R2.2 confirmed is not overwritten by answer refinement
+ok 236 - R2.2 confirmed is not overwritten by answer refinement
+  ---
+  duration_ms: 0.540946
+  type: 'test'
+  ...
+# Subtest: R2.2 deferred is not overwritten by answer refinement
+ok 237 - R2.2 deferred is not overwritten by answer refinement
+  ---
+  duration_ms: 0.425623
+  type: 'test'
+  ...
+# Subtest: R2.2 rejected is not overwritten by answer refinement
+ok 238 - R2.2 rejected is not overwritten by answer refinement
+  ---
+  duration_ms: 0.441708
+  type: 'test'
+  ...
+# Subtest: R2.3 even proposed drafts are protected when manually locked
+ok 239 - R2.3 even proposed drafts are protected when manually locked
+  ---
+  duration_ms: 0.978687
+  type: 'test'
+  ...
+# Subtest: R2.4 simulated DeepSeek uses matching prompt, validated JSON and same draft policy (NOT live AI)
+ok 240 - R2.4 simulated DeepSeek uses matching prompt, validated JSON and same draft policy (NOT live AI)
+  ---
+  duration_ms: 6.887365
+  type: 'test'
+  ...
+# Subtest: R2.5 same key with a different topic/kind is a review conflict, not a silent replacement
+ok 241 - R2.5 same key with a different topic/kind is a review conflict, not a silent replacement
+  ---
+  duration_ms: 0.656022
+  type: 'test'
+  ...
+# Subtest: R3.1 788 Korean chars retain full answer and valid next request
+ok 242 - R3.1 788 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 1.028429
+  type: 'test'
+  ...
+# Subtest: R3.1 789 Korean chars retain full answer and valid next request
+ok 243 - R3.1 789 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 0.500563
+  type: 'test'
+  ...
+# Subtest: R3.1 790 Korean chars retain full answer and valid next request
+ok 244 - R3.1 790 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 1.62968
+  type: 'test'
+  ...
+# Subtest: R3.1 799 Korean chars retain full answer and valid next request
+ok 245 - R3.1 799 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 0.674921
+  type: 'test'
+  ...
+# Subtest: R3.1 800 Korean chars retain full answer and valid next request
+ok 246 - R3.1 800 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 0.369246
+  type: 'test'
+  ...
+# Subtest: R3.1 801 Korean chars retain full answer and valid next request
+ok 247 - R3.1 801 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 0.317793
+  type: 'test'
+  ...
+# Subtest: R3.1 1000 Korean chars retain full answer and valid next request
+ok 248 - R3.1 1000 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 0.373834
+  type: 'test'
+  ...
+# Subtest: R3.1 1499 Korean chars retain full answer and valid next request
+ok 249 - R3.1 1499 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 0.365078
+  type: 'test'
+  ...
+# Subtest: R3.1 1500 Korean chars retain full answer and valid next request
+ok 250 - R3.1 1500 Korean chars retain full answer and valid next request
+  ---
+  duration_ms: 0.589684
+  type: 'test'
+  ...
+# Subtest: R3.2 1501 chars rejected atomically; leading/trailing whitespace in accepted raw is preserved
+ok 251 - R3.2 1501 chars rejected atomically; leading/trailing whitespace in accepted raw is preserved
+  ---
+  duration_ms: 1.333445
+  type: 'test'
+  ...
+# Subtest: R3.3 failed response -> edit saved answer -> successful retry; preserve prior source and answer ID
+ok 252 - R3.3 failed response -> edit saved answer -> successful retry; preserve prior source and answer ID
+  ---
+  duration_ms: 0.972659
+  type: 'test'
+  ...
+# Subtest: R3.4 invalid answer revision does not destroy last valid answer or sources
+ok 253 - R3.4 invalid answer revision does not destroy last valid answer or sources
+  ---
+  duration_ms: 0.653476
+  type: 'test'
+  ...
+# Subtest: R3.5 generic long answer remains bounded, sourced, proposed; does not fabricate a mock interpretation
+ok 254 - R3.5 generic long answer remains bounded, sourced, proposed; does not fabricate a mock interpretation
+  ---
+  duration_ms: 0.431265
+  type: 'test'
+  ...
+# Subtest: R3.6 real HTTP receives 1500 Korean chars; 32KiB UTF-8 byte limit accepted at boundary, rejected above
+ok 255 - R3.6 real HTTP receives 1500 Korean chars; 32KiB UTF-8 byte limit accepted at boundary, rejected above
+  ---
+  duration_ms: 47.091374
+  type: 'test'
+  ...
+# Subtest: R4.1 posix: exact path implementation accepts HTML/CSS/JS, including trailing separator
+ok 256 - R4.1 posix: exact path implementation accepts HTML/CSS/JS, including trailing separator
+  ---
+  duration_ms: 0.582056
+  type: 'test'
+  ...
+# Subtest: R4.2 posix: rejects traversal, sibling prefix, drive/UNC, dotfiles, server sources and double encoding
+ok 257 - R4.2 posix: rejects traversal, sibling prefix, drive/UNC, dotfiles, server sources and double encoding
+  ---
+  duration_ms: 0.636211
+  type: 'test'
+  ...
+# Subtest: R4.1 win32: exact path implementation accepts HTML/CSS/JS, including trailing separator
+ok 258 - R4.1 win32: exact path implementation accepts HTML/CSS/JS, including trailing separator
+  ---
+  duration_ms: 0.479409
+  type: 'test'
+  ...
+# Subtest: R4.2 win32: rejects traversal, sibling prefix, drive/UNC, dotfiles, server sources and double encoding
+ok 259 - R4.2 win32: rejects traversal, sibling prefix, drive/UNC, dotfiles, server sources and double encoding
+  ---
+  duration_ms: 0.407874
+  type: 'test'
+  ...
+# Subtest: R4.1 win32-UNC: exact path implementation accepts HTML/CSS/JS, including trailing separator
+ok 260 - R4.1 win32-UNC: exact path implementation accepts HTML/CSS/JS, including trailing separator
+  ---
+  duration_ms: 0.403122
+  type: 'test'
+  ...
+# Subtest: R4.2 win32-UNC: rejects traversal, sibling prefix, drive/UNC, dotfiles, server sources and double encoding
+ok 261 - R4.2 win32-UNC: rejects traversal, sibling prefix, drive/UNC, dotfiles, server sources and double encoding
+  ---
+  duration_ms: 0.279198
+  type: 'test'
+  ...
+# Subtest: R4.3 real HTTP GET and HEAD assets work, raw traversal and sensitive resources do not
+ok 262 - R4.3 real HTTP GET and HEAD assets work, raw traversal and sensitive resources do not
+  ---
+  duration_ms: 45.805349
+  type: 'test'
+  ...
+# Subtest: R4.4 symlink from public JS family cannot leak outside public root
+ok 263 - R4.4 symlink from public JS family cannot leak outside public root
+  ---
+  duration_ms: 8.128603
+  type: 'test'
+  ...
+# Subtest: I6R default plan and explicit mock ignore ambient secrets and global fetch
+ok 264 - I6R default plan and explicit mock ignore ambient secrets and global fetch
+  ---
+  duration_ms: 39.354023
+  type: 'test'
+  ...
+# Subtest: I6R only C2 dispatched once, and report contains no raw result/request/state/unknown model
+ok 265 - I6R only C2 dispatched once, and report contains no raw result/request/state/unknown model
+  ---
+  duration_ms: 7.942883
+  type: 'test'
+  ...
+# Subtest: I6R inner JSON and contract failures persist safe diagnostics, preservation, no retry or fallback
+ok 266 - I6R inner JSON and contract failures persist safe diagnostics, preservation, no retry or fallback
+  ---
+  duration_ms: 21.501767
+  type: 'test'
+  ...
+# Subtest: I6R invalid flags cannot widen case/call cap, change experiment ID, resume, or redirect paid output
+ok 267 - I6R invalid flags cannot widen case/call cap, change experiment ID, resume, or redirect paid output
+  ---
+  duration_ms: 1.082239
+  type: 'test'
+  ...
+# Subtest: I6R separate explicit authorization and reviewed source/runtime fingerprint required; no live invocation
+ok 268 - I6R separate explicit authorization and reviewed source/runtime fingerprint required; no live invocation
+  ---
+  duration_ms: 0.987706
+  type: 'test'
+  ...
+# Subtest: I6R exclusive persistent claim rejects a second process and preserves existing evidence
+ok 269 - I6R exclusive persistent claim rejects a second process and preserves existing evidence
+  ---
+  duration_ms: 36.144361
+  type: 'test'
+  ...
+# Subtest: I6R dispatch slot is not refunded on transport or pre-dispatch disk failure
+ok 270 - I6R dispatch slot is not refunded on transport or pre-dispatch disk failure
+  ---
+  duration_ms: 0.369178
+  type: 'test'
+  ...
+# Subtest: I6R same shared peak reservation fits narrower declared budget; invalid/nonfinite budgets fail
+ok 271 - I6R same shared peak reservation fits narrower declared budget; invalid/nonfinite budgets fail
+  ---
+  duration_ms: 0.376997
+  type: 'test'
+  ...
+# Subtest: I6R CLI errors print no raw flag or secret and do not execute a provider
+ok 272 - I6R CLI errors print no raw flag or secret and do not execute a provider
+  ---
+  duration_ms: 47.944076
+  type: 'test'
+  ...
+# Subtest: I6R two simultaneous processes compete for one persistent slot: exactly one wins
+ok 273 - I6R two simultaneous processes compete for one persistent slot: exactly one wins
+  ---
+  duration_ms: 32.602349
+  type: 'test'
+  ...
+1..273
+# tests 279
+# suites 0
+# pass 279
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 120444.854937

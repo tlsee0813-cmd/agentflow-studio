@@ -1,0 +1,17 @@
+test_01_powertoys_full_flow (__main__.Area17.test_01_powertoys_full_flow) ... ok
+test_02_product13_full_flow (__main__.Area17.test_02_product13_full_flow) ... ok
+test_03_counterexamples_and_correction_draft (__main__.Area17.test_03_counterexamples_and_correction_draft) ... ok
+test_04_long_description_reading_load (__main__.Area17.test_04_long_description_reading_load) ... ok
+test_05_next_request_carries_valid_description (__main__.Area17.test_05_next_request_carries_valid_description) ... ok
+test_06_locate_new_request_copy_and_return (__main__.Area17.test_06_locate_new_request_copy_and_return) ... ok
+test_01_powertoys_full_flow (__main__.Area17Wide.test_01_powertoys_full_flow) ... ok
+test_02_product13_full_flow (__main__.Area17Wide.test_02_product13_full_flow) ... ok
+test_03_counterexamples_and_correction_draft (__main__.Area17Wide.test_03_counterexamples_and_correction_draft) ... ok
+test_04_long_description_reading_load (__main__.Area17Wide.test_04_long_description_reading_load) ... ok
+test_05_next_request_carries_valid_description (__main__.Area17Wide.test_05_next_request_carries_valid_description) ... ok
+test_06_locate_new_request_copy_and_return (__main__.Area17Wide.test_06_locate_new_request_copy_and_return) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 42.737s
+
+OK

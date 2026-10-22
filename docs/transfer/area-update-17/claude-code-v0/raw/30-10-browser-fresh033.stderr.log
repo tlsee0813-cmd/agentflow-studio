@@ -1,0 +1,8 @@
+test_f01_relay_stale_reply_never_enters_next_native_request (__main__.FRESH033.test_f01_relay_stale_reply_never_enters_next_native_request) ... ok
+test_f02_legacy_unknown_and_fact_question_keep_records_readonly (__main__.FRESH033.test_f02_legacy_unknown_and_fact_question_keep_records_readonly) ... ok
+test_f03_rev1_import_history_then_reorganise_and_answer (__main__.FRESH033.test_f03_rev1_import_history_then_reorganise_and_answer) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 6.739s
+
+OK

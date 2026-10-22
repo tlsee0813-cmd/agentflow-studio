@@ -1,0 +1,10 @@
+{
+ "command": "env IDEA015_EVIDENCE_DIR=/tmp/claude-0/final-browser-30/ai055 FRESH033_EVIDENCE=/tmp/claude-0/final-browser-30/ai055 UI001_SCREENSHOTS=/tmp/claude-0/final-browser-30/ai055/screenshots SELECT035_MATERIALS=continuity/tests/fixtures/select035 SELECT035_MATERIALS_SOURCE=synthetic CI fixture created with public domain APIs; no coordinator reports python3 continuity/tests/ai055_browser.py",
+ "cwd": "app",
+ "exit": 0,
+ "start": "2026-10-22T09:25:46Z",
+ "end": "2026-10-22T09:25:54Z",
+ "head": "98bc0097af132410f75734ac692f9b7d3b42edcb",
+ "dirtyFiles": 0,
+ "node": "v22.16.0"
+}

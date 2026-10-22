@@ -1,0 +1,10 @@
+{
+ "command": "npm run check",
+ "cwd": "app",
+ "exit": 0,
+ "start": "2026-10-22T08:48:06Z",
+ "end": "2026-10-22T08:48:09Z",
+ "head": "6ea2915e6483076710840883de8891a197464386",
+ "dirtyFiles": 1,
+ "node": "v22.22.0"
+}

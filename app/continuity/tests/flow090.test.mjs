@@ -9,19 +9,20 @@ import {mockAdvice} from '../server/mock.mjs';
 const put=(p,text,kind='request',target,area)=>D.submit(D.editDraft(D.setKind(p,kind),text),target,area);
 const respond=p=>{const s=D.begin(p);return D.receive(s.project,s.request,{mode:'mock',ticket:s.request.ticket,advice:mockAdvice(s.request)});};
 const exported=p=>D.markHandoff(p,p.currentTaskId,D.handoffText(p),'download');
-const v3=p=>{const o=structuredClone(p);o.schemaVersion='idea015.project.3';delete o.space;for(const t of o.tasks){delete t.areaId;delete t.background;for(const h of t.handoffs)delete h.background;}return JSON.stringify(o);};
+const v3=p=>{const o=structuredClone(p);o.schemaVersion='idea015.project.3';delete o.space;for(const t of o.tasks){delete t.areaId;delete t.background;for(const h of t.handoffs){delete h.background;delete h.anchor;}}return JSON.stringify(o);};
 // FLOW091-C: the unreleased first project.4 candidate is a project.4 file (no background copies).
-const v4=p=>{const o=JSON.parse(serializeProject(p));o.schemaVersion='idea015.project.4';for(const t of o.tasks){delete t.background;for(const h of t.handoffs)delete h.background;}return o;};
+const v4=p=>{const o=JSON.parse(serializeProject(p));o.schemaVersion='idea015.project.4';delete o.space.understanding;for(const t of o.tasks){delete t.background;for(const h of t.handoffs){delete h.background;delete h.anchor;}}return o;};
 const planned=()=>{let p=D.setBrief(D.createProject(),'동네 미용실 예약 서비스');p=D.addArea(p,'예약','날짜와 시간을 골라 예약');p=D.addArea(p,'알림');
   const [booking,notify]=p.space.areas.map(a=>a.id);return {p,booking,notify};};
 
 test('F090-1 a project.3 save opens unchanged with an empty space; space and areas survive save, backup and import',()=>{
   let p=exported(respond(put(D.createProject(),'예약 화면 만들기')));p=put(p,'보고: 화면을 만들었다고 주장','report');
   const old=v3(p),opened=parseProject(old);
-  assert.equal(opened.schemaVersion,'idea015.project.5');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}}});
+  assert.equal(opened.schemaVersion,'idea015.project.6');assert.deepEqual(opened.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{}});
   for(const k of ['sources','bases','currentTaskId','draft'])assert.deepEqual(opened[k],JSON.parse(old)[k],k);
   // FLOW091-C: older work gets background=null (task and export), never the current plan; nothing else changes.
-  const strip=t=>{const {background,...rest}=t;assert.equal(background,null);return {...rest,handoffs:rest.handoffs.map(({background:b,...h})=>{assert.equal(b,null);return h;})};};
+  // AREA17: likewise every older export gets anchor=null (no plan or description revision is estimated for it).
+  const strip=t=>{const {background,...rest}=t;assert.equal(background,null);return {...rest,handoffs:rest.handoffs.map(({background:b,anchor:a,...h})=>{assert.equal(b,null);assert.equal(a,null);return h;})};};
   assert.deepEqual(opened.tasks.map(strip),JSON.parse(old).tasks,'tasks');
   let q=D.addArea(opened,'예약','');q=D.placeTask(q,q.tasks[0].id,q.space.areas[0].id);
   const again=parseProject(serializeProject(q));assert.deepEqual(again.space,q.space);assert.equal(again.tasks[0].areaId,q.space.areas[0].id);
@@ -79,9 +80,9 @@ test('F090-6 a stored project.3 entry opens through the workspace and the next s
   const old=JSON.parse(v3(respond(put(D.createProject(),'기존 요청')))),storage=new Memory();
   storage.setItem(WORKSPACE_KEY,JSON.stringify({version:'agentflow.workspace.1',migratedFromLegacy:true,entries:[{entryId:`E_${crypto.randomUUID()}`,state:'active',lifecycle:1,seq:1,createdAt:new Date().toISOString(),trashedAt:null,origin:'new',project:old}]}));
   const w=new WorkspaceStore(storage,new Locks());await w.init();assert.equal(w.readError,null);
-  const e=w.entries()[0];assert.deepEqual(e.project.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}}});assert.deepEqual(e.project.sources,old.sources);
+  const e=w.entries()[0];assert.deepEqual(e.project.space,{brief:null,areas:[],relations:[],draftTarget:null,layout:{version:'layout.1',positions:{}},understanding:{}});assert.deepEqual(e.project.sources,old.sources);
   await w.save({entryId:e.entryId,lifecycle:e.lifecycle,seq:e.seq},D.addArea(e.project,'예약'));
-  const saved=JSON.parse(storage.getItem(WORKSPACE_KEY)).entries[0].project;assert.equal(saved.schemaVersion,'idea015.project.5');assert.equal(saved.space.areas[0].name,'예약');
+  const saved=JSON.parse(storage.getItem(WORKSPACE_KEY)).entries[0].project;assert.equal(saved.schemaVersion,'idea015.project.6');assert.equal(saved.space.areas[0].name,'예약');
 });
 
 test('F090-7 returning to an area continues its latest request (and that request\'s returns), not a late old report',()=>{

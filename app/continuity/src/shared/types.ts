@@ -1,4 +1,6 @@
-export const SCHEMA = 'idea015.project.5' as const;
+export const SCHEMA = 'idea015.project.6' as const;
+/** project.5 had no area understanding and no export anchors: every area reads none, every export anchor=null (no backfill). */
+export const V5_SCHEMA = 'idea015.project.5' as const;
 /** project.4 had no background snapshots: every task and export reads background=null (nothing is backfilled). */
 export const V4_SCHEMA = 'idea015.project.4' as const;
 /** project.3 had no space; it is read as an empty one. */
@@ -8,10 +10,39 @@ export const LEGACY_SCHEMA = 'idea015.project.1' as const;
 export const RESULT_SCHEMA = 'agentflow.return.1' as const;
 export const RESULT_BYTES = 131072;
 export const RESULT_TEXT_LIMIT = 11000;
+/** AREA17: return.1 plus one optional, already organised description of the area the returned task belongs to. */
+export const RESULT2_SCHEMA = 'agentflow.return.2' as const;
 export interface ResultFile {
-  schemaVersion: typeof RESULT_SCHEMA; projectId: string; taskId: string; returnId: string;
+  schemaVersion: typeof RESULT_SCHEMA | typeof RESULT2_SCHEMA; projectId: string; taskId: string; returnId: string;
   report: string; evidence: string | null;
+  /** return.2 only (return.1 has no such key). */
+  understanding?: UnderstandingInput | null;
 }
+/** AREA17: the area's current description up to and including this return, as organised OUTSIDE the app (research premise).
+ * summary/changes are given as a description that does not change the user's intent; a change of intent goes in proposal only.
+ * The app checks target, basis and duplicates; it does not check that the wording is right or compatible. No status field. */
+export interface UnderstandingInput {
+  version: 'understanding.1'; areaId: string; basedOn: number;
+  summary: string; changes: string[]; proposal: string | null; origin: string;
+}
+/** AREA17: the user's own plan an area description is made for: the area name and idea text, how many times the project
+ * purpose was written, the current revision of each user decision from this area's or unplaced work ('D3@2'), and for each such
+ * task with user-written work values or a purpose correction one '<task id>:<sha256>' of those values. The fingerprint keeps
+ * the stamp small and valid for any allowed text; the values themselves stay only in the task. */
+export interface PlanStamp { name: string; note: string; brief: number; decisions: string[]; work: string[] }
+/** AREA17: captured when a task is exported with a return file id: which area, which description revision went out, and the
+ * user's plan at that moment. Older exports have none (null); nothing is estimated for them. */
+export interface ExportAnchor { version: 'anchor.1'; areaId: string; understanding: number; stamp: PlanStamp }
+export type HeldReason = 'no-anchor' | 'area-moved' | 'area-mismatch' | 'area-archived' | 'file-basis' | 'superseded' | 'plan-changed';
+/** AREA17: one received or corrected description of an area. External text stays in the return file (single source);
+ * a user correction keeps its own text. revision=null: received but held (never the current description). */
+export interface UnderstandingEntry {
+  by: 'external' | 'user'; at: string; revision: number | null;
+  taskId: string | null; returnId: string | null;
+  text: string | null; corrects: number | null;
+  stamp: PlanStamp | null; held: HeldReason | null;
+}
+export interface AreaUnderstanding { revision: number; entries: UnderstandingEntry[] }
 export const API_SCHEMA = 'idea022.context.7' as const;
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.
@@ -70,6 +101,8 @@ export interface ExportRecord {
   at: string; method: 'clipboard' | 'download'; revision: number; chars: number; digest: string;
   work: WorkValues | null; aiExcluded: boolean; legacyText: string | null;
   returnId: string | null; background: Background | null;
+  /** AREA17: only for a return-file export of a task in an area; null otherwise and for every older export. */
+  anchor: ExportAnchor | null;
 }
 export interface Task {
   /** Purpose correction, stored apart from this task's own work fields (manual.*). goal=null (with conditions=null)
@@ -98,7 +131,8 @@ export interface DraftTarget { area: string | null }
  * position use a fixed default from their place in the list, so adding or archiving never moves anyone else. */
 export interface Point { x: number; y: number }
 export interface Layout { version: 'layout.1'; positions: Record<string, Point> }
-export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null; layout: Layout }
+/** understanding (AREA17): derived descriptions per area ID, kept apart from Area.note (the user's words). */
+export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null; layout: Layout; understanding: Record<string, AreaUnderstanding> }
 export interface Ticket { projectId: string; revision: number; requestId: string; taskId: string }
 export interface Project {
   schemaVersion: typeof SCHEMA; id: string; revision: number; name: string;

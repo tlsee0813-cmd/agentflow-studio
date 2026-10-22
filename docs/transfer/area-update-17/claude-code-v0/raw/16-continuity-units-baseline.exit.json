@@ -1,0 +1,10 @@
+{
+ "command": "bash -c node --test continuity/tests/*.test.mjs",
+ "cwd": "app",
+ "exit": 1,
+ "start": "2026-10-22T08:52:52Z",
+ "end": "2026-10-22T08:53:07Z",
+ "head": "6ea2915e6483076710840883de8891a197464386",
+ "dirtyFiles": 1,
+ "node": "v22.16.0"
+}

@@ -1,0 +1,10 @@
+{
+ "command": "node continuity/scripts/build.mjs",
+ "cwd": "app",
+ "exit": 0,
+ "start": "2026-10-22T09:23:49Z",
+ "end": "2026-10-22T09:23:52Z",
+ "head": "98bc0097af132410f75734ac692f9b7d3b42edcb",
+ "dirtyFiles": 0,
+ "node": "v22.16.0"
+}

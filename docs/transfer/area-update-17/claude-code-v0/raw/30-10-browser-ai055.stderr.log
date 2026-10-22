@@ -1,0 +1,9 @@
+test_01_four_turns_correction_http_handoff_restore (__main__.IntentFlow.test_01_four_turns_correction_http_handoff_restore) ... ok
+test_02_explicit_discard_old_purpose_is_reference_not_valid (__main__.IntentFlow.test_02_explicit_discard_old_purpose_is_reference_not_valid) ... ok
+test_03_purpose_correction_without_own_work_explains_withheld_ai_text_until_regenerated (__main__.IntentFlow.test_03_purpose_correction_without_own_work_explains_withheld_ai_text_until_regenerated) ... ok
+test_04_purpose_correction_keeps_own_work_and_names_both_causes (__main__.IntentFlow.test_04_purpose_correction_keeps_own_work_and_names_both_causes) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 7.109s
+
+OK

@@ -2518,3 +2518,26 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .report-source details>summary,.task-pointed details>summary,#task-view-report-help>summary{cursor:pointer;color:var(--accent);font-size:13px}
 .task-more{display:flex;flex-direction:column;gap:8px}
 .task-more h2{font-size:16px;margin:0}
+/* AREA17: the user's idea and the organised description have separate, quiet reading blocks. */
+.area-understanding{margin:12px 0;padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere;min-width:0}
+.area-understanding>.source-meta{margin:0 0 6px}
+.understanding-summary{white-space:pre-wrap;line-height:1.55;margin:4px 0 8px}
+.understanding-changes{padding-left:20px;margin:4px 0 10px;font-size:13px;line-height:1.5}
+.understanding-proposal{border-left:3px solid var(--muted);padding-left:10px;margin:10px 0;font-size:13px}
+.understanding-proposal p{margin:4px 0}
+.area-understanding details{margin:6px 0}
+.area-understanding summary{font-size:13px;cursor:pointer;color:var(--accent);padding:5px 0}
+.area-understanding textarea{width:100%;min-height:96px;box-sizing:border-box}
+.understanding-record+.understanding-record{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.area-update-label{color:var(--accent);font-size:12px;font-weight:600}
+.received-areas{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 8px;font-size:13px}
+.understanding-change{font-size:13px;line-height:1.5;margin:0 0 6px}
+.understanding-proposal strong{font-weight:600;color:var(--muted)}
+/* An explicit 'where is it' outlines the located card (view state only; nothing moves but the viewport). */
+.area-node.located{outline:3px solid var(--accent);outline-offset:3px}
+.located-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}
+.outcome-received{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.outcome-received .hint{margin:0}
+.understanding-more{display:flex;flex-wrap:wrap;column-gap:16px;align-items:flex-start}
+.area-understanding .understanding-more>details{margin:0}
+.area-understanding .understanding-more>details[open]{flex-basis:100%}

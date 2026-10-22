@@ -1,0 +1,8 @@
+test_01_actual_A_B_replay (__main__.Selection.test_01_actual_A_B_replay) ... ok
+test_02_ephemeral_selection_and_handler_boundaries (__main__.Selection.test_02_ephemeral_selection_and_handler_boundaries) ... ok
+test_03_zero_and_single_automatic_paths (__main__.Selection.test_03_zero_and_single_automatic_paths) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 6.050s
+
+OK
