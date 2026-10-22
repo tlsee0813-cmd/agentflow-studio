@@ -1,0 +1,164 @@
+[
+  {
+    "width": 1280,
+    "scope": "post-hoc exact raw comparison at same post-receipt content, not a rerun or replacement of original failed assertion",
+    "beforeCTA": {
+      "y": 0,
+      "focus": "space-title",
+      "matrix": "matrix(1.2, 0, 0, 1.2, -786, 84)",
+      "cards": [
+        {
+          "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+          "rect": {
+            "x": -473,
+            "y": 538.71875,
+            "width": 288,
+            "height": 175.57501220703125,
+            "top": 538.71875,
+            "right": -185,
+            "bottom": 714.2937622070312,
+            "left": -473
+          },
+          "selected": false
+        },
+        {
+          "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+          "rect": {
+            "x": -112.99996948242188,
+            "y": 538.71875,
+            "width": 287.9999694824219,
+            "height": 180.01873779296875,
+            "top": 538.71875,
+            "right": 175,
+            "bottom": 718.7374877929688,
+            "left": -112.99996948242188
+          },
+          "selected": false
+        }
+      ],
+      "panel": null,
+      "open": []
+    },
+    "afterClose": {
+      "y": 0,
+      "focus": "",
+      "matrix": "matrix(1.2, 0, 0, 1.2, -786, 84)",
+      "cards": [
+        {
+          "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+          "rect": {
+            "x": -473,
+            "y": 538.71875,
+            "width": 288,
+            "height": 175.57501220703125,
+            "top": 538.71875,
+            "right": -185,
+            "bottom": 714.2937622070312,
+            "left": -473
+          },
+          "selected": false
+        },
+        {
+          "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+          "rect": {
+            "x": -112.99996948242188,
+            "y": 538.71875,
+            "width": 287.9999694824219,
+            "height": 180.01873779296875,
+            "top": 538.71875,
+            "right": 175,
+            "bottom": 718.7374877929688,
+            "left": -112.99996948242188
+          },
+          "selected": false
+        }
+      ],
+      "panel": null,
+      "open": []
+    },
+    "matrixEqual": true,
+    "cardRectsEqual": true,
+    "windowYEqual": true
+  },
+  {
+    "width": 1440,
+    "scope": "post-hoc exact raw comparison at same post-receipt content, not a rerun or replacement of original failed assertion",
+    "beforeCTA": {
+      "y": 0,
+      "focus": "space-title",
+      "matrix": "matrix(1.2, 0, 0, 1.2, -706, 140)",
+      "cards": [
+        {
+          "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+          "rect": {
+            "x": -393,
+            "y": 594.71875,
+            "width": 288,
+            "height": 175.57501220703125,
+            "top": 594.71875,
+            "right": -105,
+            "bottom": 770.2937622070312,
+            "left": -393
+          },
+          "selected": false
+        },
+        {
+          "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+          "rect": {
+            "x": -32.999969482421875,
+            "y": 594.71875,
+            "width": 287.9999694824219,
+            "height": 180.01873779296875,
+            "top": 594.71875,
+            "right": 255,
+            "bottom": 774.7374877929688,
+            "left": -32.999969482421875
+          },
+          "selected": false
+        }
+      ],
+      "panel": null,
+      "open": []
+    },
+    "afterClose": {
+      "y": 0,
+      "focus": "",
+      "matrix": "matrix(1.2, 0, 0, 1.2, -706, 140)",
+      "cards": [
+        {
+          "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+          "rect": {
+            "x": -393,
+            "y": 594.71875,
+            "width": 288,
+            "height": 175.57501220703125,
+            "top": 594.71875,
+            "right": -105,
+            "bottom": 770.2937622070312,
+            "left": -393
+          },
+          "selected": false
+        },
+        {
+          "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+          "rect": {
+            "x": -32.999969482421875,
+            "y": 594.71875,
+            "width": 287.9999694824219,
+            "height": 180.01873779296875,
+            "top": 594.71875,
+            "right": 255,
+            "bottom": 774.7374877929688,
+            "left": -32.999969482421875
+          },
+          "selected": false
+        }
+      ],
+      "panel": null,
+      "open": []
+    },
+    "matrixEqual": true,
+    "cardRectsEqual": true,
+    "windowYEqual": true
+  }
+]

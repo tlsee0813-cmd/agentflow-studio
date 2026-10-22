@@ -1,0 +1,2608 @@
+{
+  "source": "6ea2915e6483076710840883de8891a197464386",
+  "stage": "WIP preliminary only, not final approval",
+  "rows": [
+    {
+      "id": "1280-A-evidence-to-B-no-open-leak",
+      "pass": true,
+      "raw": {
+        "A": {
+          "y": 0,
+          "focus": "",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 114, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": 427,
+                "y": 494.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 494.71875,
+                "right": 715,
+                "bottom": 653.1187744140625,
+                "left": 427
+              },
+              "selected": true
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": 787,
+                "y": 494.71875,
+                "width": 288,
+                "height": 180.01873779296875,
+                "top": 494.71875,
+                "right": 1075,
+                "bottom": 674.7374877929688,
+                "left": 787
+              },
+              "selected": false
+            }
+          ],
+          "panel": {
+            "x": 938,
+            "y": 361.71875,
+            "width": 300,
+            "height": 912.25,
+            "top": 361.71875,
+            "right": 1238,
+            "bottom": 1273.96875,
+            "left": 938
+          },
+          "open": [
+            "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-evidence"
+          ]
+        },
+        "B": {
+          "y": 0,
+          "focus": "node-info-A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 114, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": 427,
+                "y": 494.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 494.71875,
+                "right": 715,
+                "bottom": 653.1187744140625,
+                "left": 427
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": 787,
+                "y": 494.71875,
+                "width": 288,
+                "height": 180.01873779296875,
+                "top": 494.71875,
+                "right": 1075,
+                "bottom": 674.7374877929688,
+                "left": 787
+              },
+              "selected": true
+            }
+          ],
+          "panel": {
+            "x": 938,
+            "y": 361.71875,
+            "width": 300,
+            "height": 841.203125,
+            "top": 361.71875,
+            "right": 1238,
+            "bottom": 1202.921875,
+            "left": 938
+          },
+          "open": []
+        },
+        "BVisibleText": "B 독립 영역\n닫기\n\n사용자 구상\n\nB 사용자 구상 유지\n\n전달 기록에서 정리한 설명 · 앱 미검증\n\nB_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\n\n직전 정리에서 달라진 점\n\nB_r1 설명 구체화\n근거 보기\n설명 오류 고치기\n이름·구상 고치기\n\n요청 1개 · 돌아온 결과 1개 · 앱 미검증\n\n이 영역의 요청 1개 · 골라서 읽기\n\n[독립 합성] B_r1 요청 ↘\n작업 03 · 구현 보고 도착 · 앱 미검증\n앱에서 이어갈 작업\n\n읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.\n\n‘앱에서 이어갈 작업’은 이 앱에서 열어 둔 작업이에요. 외부 도구에서 지금 실행 중이라는 뜻이 아니에요.\n\n영역 열기 ↗\n이 영역에 새 요청\n무엇을 요청할지 같이 정하기"
+      }
+    },
+    {
+      "id": "1280-change-location-opens-understanding",
+      "pass": true,
+      "raw": {
+        "preMap": {
+          "y": 0,
+          "focus": "main",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -786, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -473,
+                "y": 494.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 494.71875,
+                "right": -185,
+                "bottom": 653.1187744140625,
+                "left": -473
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -112.99996948242188,
+                "y": 494.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 494.71875,
+                "right": 175,
+                "bottom": 674.7374877929688,
+                "left": -112.99996948242188
+              },
+              "selected": false
+            }
+          ],
+          "panel": null,
+          "open": []
+        },
+        "beforeCTA": {
+          "y": 0,
+          "focus": "space-title",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -786, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -473,
+                "y": 538.71875,
+                "width": 288,
+                "height": 175.57501220703125,
+                "top": 538.71875,
+                "right": -185,
+                "bottom": 714.2937622070312,
+                "left": -473
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -112.99996948242188,
+                "y": 538.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 538.71875,
+                "right": 175,
+                "bottom": 718.7374877929688,
+                "left": -112.99996948242188
+              },
+              "selected": false
+            }
+          ],
+          "panel": null,
+          "open": []
+        },
+        "afterCTA": {
+          "y": 406,
+          "focus": "area-panel",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -786, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -473,
+                "y": 132.71875,
+                "width": 288,
+                "height": 175.57501220703125,
+                "top": 132.71875,
+                "right": -185,
+                "bottom": 308.29376220703125,
+                "left": -473
+              },
+              "selected": true
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -112.99996948242188,
+                "y": 132.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 132.71875,
+                "right": 175,
+                "bottom": 312.73748779296875,
+                "left": -112.99996948242188
+              },
+              "selected": false
+            }
+          ],
+          "panel": {
+            "x": 938,
+            "y": -0.28125,
+            "width": 300,
+            "height": 991.640625,
+            "top": -0.28125,
+            "right": 1238,
+            "bottom": 991.359375,
+            "left": 938
+          },
+          "open": [
+            "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-edit"
+          ]
+        },
+        "panelText": "A 독립 영역\n닫기\n\n사용자 구상\n\nA 사용자 구상 유지\n\n전달 기록에서 정리한 설명 · 앱 미검증\n\nA_r2 새 전달 기록 설명. 옛 정정 초안과 다름.\n\n직전 정리에서 달라진 점\n\nr2 도착\n근거 보기\n설명 오류 고치기\n\n고치는 동안 새 설명이 왔어요. 이 초안은 보존했지만 새 설명의 정정으로 저장하지 않아요. 취소 후 현재 설명에서 다시 시작할 수 있어요.\n\n정정 저장취소\n이전 설명 · 반영하지 않은 정리\n이름·구상 고치기\n\n요청 1개 · 돌아온 결과 2개 · 앱 미검증\n\n이 영역의 요청 1개 · 골라서 읽기\n\n[독립 합성] A_r1 요청 ↘\n작업 01 · 구현 보고 도착 · 앱 미검증\n\n읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.\n\n영역 열기 ↗\n이 영역에 새 요청\n무엇을 요청할지 같이 정하기",
+        "note": "card screen rect is recorded separately; opening a panel is not proof card itself is in view"
+      }
+    },
+    {
+      "id": "1280-stale-r1-draft-save-rejected-and-text-preserved",
+      "pass": true,
+      "raw": {
+        "fieldBefore": "[독립 합성 r1 정정 초안] r2 설명을 덮어쓰면 안 된다.",
+        "fieldAfter": "[독립 합성 r1 정정 초안] r2 설명을 덮어쓰면 안 된다.",
+        "notice": "정정 초안 뒤 새 설명이 도착해 저장하지 않았어요. 작성한 내용은 그대로예요.",
+        "before": {
+          "schemaVersion": "idea015.project.6",
+          "id": "P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84",
+          "revision": 15,
+          "name": "나의 프로젝트",
+          "sources": [
+            {
+              "id": "S_1eac5967-9bd9-4397-a393-a684fb6f9537",
+              "kind": "request",
+              "text": "[독립 합성] A_r1 요청",
+              "at": "2026-10-22T08:49:46.004Z",
+              "taskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_85ed7a09-e994-4737-a254-681ab38ef988",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_f31e9859-8933-4dd2-bc06-22f442798f73의 인계 H_A_r1 / r6에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] A_r1 보고. 실제 실행 주장 없음.",
+              "at": "2026-10-22T08:49:46.007Z",
+              "taskId": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_d4203b79-4794-4f67-b4f1-8094494fe970",
+              "kind": "request",
+              "text": "[독립 합성] B_r1 요청",
+              "at": "2026-10-22T08:49:46.009Z",
+              "taskId": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_256fbd9e-a3c9-4305-b368-9d225534c8a7",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_749aff25-6a54-4a2b-90b9-ac32cf1e976e의 인계 H_B_r1 / r10에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] B_r1 보고. 실제 실행 주장 없음.",
+              "at": "2026-10-22T08:49:46.011Z",
+              "taskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_577ce401-b287-404d-9bbe-a9b054d0ae08",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_f31e9859-8933-4dd2-bc06-22f442798f73의 인계 H_A_r2 / r12에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] A 두번째 보고.",
+              "at": "2026-10-22T08:51:37.641Z",
+              "taskId": "T_230cae9e-2a08-402c-934b-c932aeec4e16",
+              "replyTo": null,
+              "disposition": "provided"
+            }
+          ],
+          "bases": [
+            {
+              "id": "D1",
+              "text": "[독립 합성] A_r1 요청",
+              "status": "requested",
+              "sourceId": "S_1eac5967-9bd9-4397-a393-a684fb6f9537",
+              "revision": 6,
+              "history": []
+            },
+            {
+              "id": "D2",
+              "text": "[독립 합성] B_r1 요청",
+              "status": "requested",
+              "sourceId": "S_d4203b79-4794-4f67-b4f1-8094494fe970",
+              "revision": 10,
+              "history": []
+            }
+          ],
+          "tasks": [
+            {
+              "id": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "sourceIds": [
+                "S_1eac5967-9bd9-4397-a393-a684fb6f9537"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:49:46.006Z",
+                  "method": "clipboard",
+                  "revision": 6,
+                  "chars": 4021,
+                  "digest": "2992e913",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_A_r1",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                    "understanding": 0,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-22T08:49:46.013Z",
+                  "method": "clipboard",
+                  "revision": 12,
+                  "chars": 4516,
+                  "digest": "30110361",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_A_r2",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                    "understanding": 1,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              },
+              "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9"
+            },
+            {
+              "id": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+              "sourceIds": [
+                "S_85ed7a09-e994-4737-a254-681ab38ef988"
+              ],
+              "parentTaskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_A_r1",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\"taskId\":\"T_f31e9859-8933-4dd2-bc06-22f442798f73\",\"returnId\":\"H_A_r1\",\"report\":\"[독립 합성 원문] A_r1 보고. 실제 실행 주장 없음.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_585e1af1-293e-422f-8467-446c25c277f9\",\"basedOn\":0,\"summary\":\"A_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\",\"changes\":[\"A_r1 설명 구체화\"],\"proposal\":null,\"origin\":\"독립 합성 fixture\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              }
+            },
+            {
+              "id": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "sourceIds": [
+                "S_d4203b79-4794-4f67-b4f1-8094494fe970"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:49:46.010Z",
+                  "method": "clipboard",
+                  "revision": 10,
+                  "chars": 4155,
+                  "digest": "a107cf16",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_B_r1",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 9,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                    "understanding": 0,
+                    "stamp": {
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D2@10"
+                      ],
+                      "work": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 9,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                  "name": "B 독립 영역",
+                  "note": "B 사용자 구상 유지"
+                }
+              },
+              "areaId": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c"
+            },
+            {
+              "id": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+              "sourceIds": [
+                "S_256fbd9e-a3c9-4305-b368-9d225534c8a7"
+              ],
+              "parentTaskId": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_B_r1",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\"taskId\":\"T_749aff25-6a54-4a2b-90b9-ac32cf1e976e\",\"returnId\":\"H_B_r1\",\"report\":\"[독립 합성 원문] B_r1 보고. 실제 실행 주장 없음.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_b1fffce2-b9fe-4fab-99ac-220c4d33721c\",\"basedOn\":0,\"summary\":\"B_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\",\"changes\":[\"B_r1 설명 구체화\"],\"proposal\":null,\"origin\":\"독립 합성 fixture\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 9,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                  "name": "B 독립 영역",
+                  "note": "B 사용자 구상 유지"
+                }
+              }
+            },
+            {
+              "id": "T_230cae9e-2a08-402c-934b-c932aeec4e16",
+              "sourceIds": [
+                "S_577ce401-b287-404d-9bbe-a9b054d0ae08"
+              ],
+              "parentTaskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_A_r2",
+                "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\n  \"taskId\": \"T_f31e9859-8933-4dd2-bc06-22f442798f73\",\n  \"returnId\": \"H_A_r2\",\n  \"report\": \"[독립 합성 원문] A 두번째 보고.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_585e1af1-293e-422f-8467-446c25c277f9\",\n    \"basedOn\": 1,\n    \"summary\": \"A_r2 새 전달 기록 설명. 옛 정정 초안과 다름.\",\n    \"changes\": [\n      \"r2 도착\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"독립 합성 r2\"\n  }\n}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              }
+            }
+          ],
+          "currentTaskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+          "draft": "",
+          "answerDraft": "",
+          "basisDraft": "",
+          "basisEdits": {},
+          "draftKind": "report",
+          "pending": null,
+          "notice": "결과를 작업 1에 연결했어요 · 앱 미검증. 지금 이어가던 작업 4의 요청과 범위는 그대로예요. 받은 결과는 ‘다른 작업에 도착한 결과’에서 열 수 있어요.",
+          "space": {
+            "brief": {
+              "text": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+              "at": "2026-10-22T08:49:46.002Z",
+              "previous": []
+            },
+            "areas": [
+              {
+                "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                "name": "A 독립 영역",
+                "note": "A 사용자 구상 유지",
+                "archived": false,
+                "createdAt": "2026-10-22T08:49:46.003Z"
+              },
+              {
+                "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                "name": "B 독립 영역",
+                "note": "B 사용자 구상 유지",
+                "archived": false,
+                "createdAt": "2026-10-22T08:49:46.004Z"
+              }
+            ],
+            "relations": [],
+            "draftTarget": null,
+            "layout": {
+              "version": "layout.1",
+              "positions": {
+                "A_585e1af1-293e-422f-8467-446c25c277f9": {
+                  "x": 40,
+                  "y": 40
+                },
+                "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c": {
+                  "x": 340,
+                  "y": 40
+                }
+              }
+            },
+            "understanding": {
+              "A_585e1af1-293e-422f-8467-446c25c277f9": {
+                "revision": 2,
+                "entries": [
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:49:46.007Z",
+                    "revision": 1,
+                    "taskId": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+                    "returnId": "H_A_r1",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  },
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:51:37.641Z",
+                    "revision": 2,
+                    "taskId": "T_230cae9e-2a08-402c-934b-c932aeec4e16",
+                    "returnId": "H_A_r2",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  }
+                ]
+              },
+              "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c": {
+                "revision": 1,
+                "entries": [
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:49:46.011Z",
+                    "revision": 1,
+                    "taskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+                    "returnId": "H_B_r1",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D2@10"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "after": {
+          "schemaVersion": "idea015.project.6",
+          "id": "P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84",
+          "revision": 15,
+          "name": "나의 프로젝트",
+          "sources": [
+            {
+              "id": "S_1eac5967-9bd9-4397-a393-a684fb6f9537",
+              "kind": "request",
+              "text": "[독립 합성] A_r1 요청",
+              "at": "2026-10-22T08:49:46.004Z",
+              "taskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_85ed7a09-e994-4737-a254-681ab38ef988",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_f31e9859-8933-4dd2-bc06-22f442798f73의 인계 H_A_r1 / r6에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] A_r1 보고. 실제 실행 주장 없음.",
+              "at": "2026-10-22T08:49:46.007Z",
+              "taskId": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_d4203b79-4794-4f67-b4f1-8094494fe970",
+              "kind": "request",
+              "text": "[독립 합성] B_r1 요청",
+              "at": "2026-10-22T08:49:46.009Z",
+              "taskId": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_256fbd9e-a3c9-4305-b368-9d225534c8a7",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_749aff25-6a54-4a2b-90b9-ac32cf1e976e의 인계 H_B_r1 / r10에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] B_r1 보고. 실제 실행 주장 없음.",
+              "at": "2026-10-22T08:49:46.011Z",
+              "taskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_577ce401-b287-404d-9bbe-a9b054d0ae08",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_f31e9859-8933-4dd2-bc06-22f442798f73의 인계 H_A_r2 / r12에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] A 두번째 보고.",
+              "at": "2026-10-22T08:51:37.641Z",
+              "taskId": "T_230cae9e-2a08-402c-934b-c932aeec4e16",
+              "replyTo": null,
+              "disposition": "provided"
+            }
+          ],
+          "bases": [
+            {
+              "id": "D1",
+              "text": "[독립 합성] A_r1 요청",
+              "status": "requested",
+              "sourceId": "S_1eac5967-9bd9-4397-a393-a684fb6f9537",
+              "revision": 6,
+              "history": []
+            },
+            {
+              "id": "D2",
+              "text": "[독립 합성] B_r1 요청",
+              "status": "requested",
+              "sourceId": "S_d4203b79-4794-4f67-b4f1-8094494fe970",
+              "revision": 10,
+              "history": []
+            }
+          ],
+          "tasks": [
+            {
+              "id": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "sourceIds": [
+                "S_1eac5967-9bd9-4397-a393-a684fb6f9537"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:49:46.006Z",
+                  "method": "clipboard",
+                  "revision": 6,
+                  "chars": 4021,
+                  "digest": "2992e913",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_A_r1",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                    "understanding": 0,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-22T08:49:46.013Z",
+                  "method": "clipboard",
+                  "revision": 12,
+                  "chars": 4516,
+                  "digest": "30110361",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_A_r2",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                    "understanding": 1,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              },
+              "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9"
+            },
+            {
+              "id": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+              "sourceIds": [
+                "S_85ed7a09-e994-4737-a254-681ab38ef988"
+              ],
+              "parentTaskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_A_r1",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\"taskId\":\"T_f31e9859-8933-4dd2-bc06-22f442798f73\",\"returnId\":\"H_A_r1\",\"report\":\"[독립 합성 원문] A_r1 보고. 실제 실행 주장 없음.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_585e1af1-293e-422f-8467-446c25c277f9\",\"basedOn\":0,\"summary\":\"A_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\",\"changes\":[\"A_r1 설명 구체화\"],\"proposal\":null,\"origin\":\"독립 합성 fixture\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              }
+            },
+            {
+              "id": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "sourceIds": [
+                "S_d4203b79-4794-4f67-b4f1-8094494fe970"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:49:46.010Z",
+                  "method": "clipboard",
+                  "revision": 10,
+                  "chars": 4155,
+                  "digest": "a107cf16",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_B_r1",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 9,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                    "understanding": 0,
+                    "stamp": {
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D2@10"
+                      ],
+                      "work": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 9,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                  "name": "B 독립 영역",
+                  "note": "B 사용자 구상 유지"
+                }
+              },
+              "areaId": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c"
+            },
+            {
+              "id": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+              "sourceIds": [
+                "S_256fbd9e-a3c9-4305-b368-9d225534c8a7"
+              ],
+              "parentTaskId": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_B_r1",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\"taskId\":\"T_749aff25-6a54-4a2b-90b9-ac32cf1e976e\",\"returnId\":\"H_B_r1\",\"report\":\"[독립 합성 원문] B_r1 보고. 실제 실행 주장 없음.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_b1fffce2-b9fe-4fab-99ac-220c4d33721c\",\"basedOn\":0,\"summary\":\"B_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\",\"changes\":[\"B_r1 설명 구체화\"],\"proposal\":null,\"origin\":\"독립 합성 fixture\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 9,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                  "name": "B 독립 영역",
+                  "note": "B 사용자 구상 유지"
+                }
+              }
+            },
+            {
+              "id": "T_230cae9e-2a08-402c-934b-c932aeec4e16",
+              "sourceIds": [
+                "S_577ce401-b287-404d-9bbe-a9b054d0ae08"
+              ],
+              "parentTaskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_A_r2",
+                "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\n  \"taskId\": \"T_f31e9859-8933-4dd2-bc06-22f442798f73\",\n  \"returnId\": \"H_A_r2\",\n  \"report\": \"[독립 합성 원문] A 두번째 보고.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_585e1af1-293e-422f-8467-446c25c277f9\",\n    \"basedOn\": 1,\n    \"summary\": \"A_r2 새 전달 기록 설명. 옛 정정 초안과 다름.\",\n    \"changes\": [\n      \"r2 도착\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"독립 합성 r2\"\n  }\n}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              }
+            }
+          ],
+          "currentTaskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+          "draft": "",
+          "answerDraft": "",
+          "basisDraft": "",
+          "basisEdits": {},
+          "draftKind": "report",
+          "pending": null,
+          "notice": "결과를 작업 1에 연결했어요 · 앱 미검증. 지금 이어가던 작업 4의 요청과 범위는 그대로예요. 받은 결과는 ‘다른 작업에 도착한 결과’에서 열 수 있어요.",
+          "space": {
+            "brief": {
+              "text": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+              "at": "2026-10-22T08:49:46.002Z",
+              "previous": []
+            },
+            "areas": [
+              {
+                "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                "name": "A 독립 영역",
+                "note": "A 사용자 구상 유지",
+                "archived": false,
+                "createdAt": "2026-10-22T08:49:46.003Z"
+              },
+              {
+                "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                "name": "B 독립 영역",
+                "note": "B 사용자 구상 유지",
+                "archived": false,
+                "createdAt": "2026-10-22T08:49:46.004Z"
+              }
+            ],
+            "relations": [],
+            "draftTarget": null,
+            "layout": {
+              "version": "layout.1",
+              "positions": {
+                "A_585e1af1-293e-422f-8467-446c25c277f9": {
+                  "x": 40,
+                  "y": 40
+                },
+                "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c": {
+                  "x": 340,
+                  "y": 40
+                }
+              }
+            },
+            "understanding": {
+              "A_585e1af1-293e-422f-8467-446c25c277f9": {
+                "revision": 2,
+                "entries": [
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:49:46.007Z",
+                    "revision": 1,
+                    "taskId": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+                    "returnId": "H_A_r1",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  },
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:51:37.641Z",
+                    "revision": 2,
+                    "taskId": "T_230cae9e-2a08-402c-934b-c932aeec4e16",
+                    "returnId": "H_A_r2",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  }
+                ]
+              },
+              "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c": {
+                "revision": 1,
+                "entries": [
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:49:46.011Z",
+                    "revision": 1,
+                    "taskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+                    "returnId": "H_B_r1",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D2@10"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "state": {
+          "y": 406,
+          "focus": "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-save",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -786, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -473,
+                "y": 132.71875,
+                "width": 288,
+                "height": 175.57501220703125,
+                "top": 132.71875,
+                "right": -185,
+                "bottom": 308.29376220703125,
+                "left": -473
+              },
+              "selected": true
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -112.99996948242188,
+                "y": 132.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 132.71875,
+                "right": 175,
+                "bottom": 312.73748779296875,
+                "left": -112.99996948242188
+              },
+              "selected": false
+            }
+          ],
+          "panel": {
+            "x": 938,
+            "y": -0.28125,
+            "width": 300,
+            "height": 991.640625,
+            "top": -0.28125,
+            "right": 1238,
+            "bottom": 991.359375,
+            "left": 938
+          },
+          "open": [
+            "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-edit"
+          ]
+        }
+      }
+    },
+    {
+      "id": "1280-map-view-retained-after-explicit-CTA-close",
+      "pass": false,
+      "raw": {
+        "originalMap": {
+          "y": 0,
+          "focus": "main",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -786, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -473,
+                "y": 494.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 494.71875,
+                "right": -185,
+                "bottom": 653.1187744140625,
+                "left": -473
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -112.99996948242188,
+                "y": 494.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 494.71875,
+                "right": 175,
+                "bottom": 674.7374877929688,
+                "left": -112.99996948242188
+              },
+              "selected": false
+            }
+          ],
+          "panel": null,
+          "open": []
+        },
+        "afterClose": {
+          "y": 0,
+          "focus": "",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -786, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -473,
+                "y": 538.71875,
+                "width": 288,
+                "height": 175.57501220703125,
+                "top": 538.71875,
+                "right": -185,
+                "bottom": 714.2937622070312,
+                "left": -473
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -112.99996948242188,
+                "y": 538.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 538.71875,
+                "right": 175,
+                "bottom": 718.7374877929688,
+                "left": -112.99996948242188
+              },
+              "selected": false
+            }
+          ],
+          "panel": null,
+          "open": []
+        }
+      }
+    },
+    {
+      "id": "1440-A-evidence-to-B-no-open-leak",
+      "pass": true,
+      "raw": {
+        "A": {
+          "y": 0,
+          "focus": "",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 194, 140)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": 507,
+                "y": 550.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 550.71875,
+                "right": 795,
+                "bottom": 709.1187744140625,
+                "left": 507
+              },
+              "selected": true
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": 867,
+                "y": 550.71875,
+                "width": 288,
+                "height": 180.01873779296875,
+                "top": 550.71875,
+                "right": 1155,
+                "bottom": 730.7374877929688,
+                "left": 867
+              },
+              "selected": false
+            }
+          ],
+          "panel": {
+            "x": 1098,
+            "y": 361.71875,
+            "width": 300,
+            "height": 912.25,
+            "top": 361.71875,
+            "right": 1398,
+            "bottom": 1273.96875,
+            "left": 1098
+          },
+          "open": [
+            "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-evidence"
+          ]
+        },
+        "B": {
+          "y": 0,
+          "focus": "node-info-A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 194, 140)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": 507,
+                "y": 550.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 550.71875,
+                "right": 795,
+                "bottom": 709.1187744140625,
+                "left": 507
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": 867,
+                "y": 550.71875,
+                "width": 288,
+                "height": 180.01873779296875,
+                "top": 550.71875,
+                "right": 1155,
+                "bottom": 730.7374877929688,
+                "left": 867
+              },
+              "selected": true
+            }
+          ],
+          "panel": {
+            "x": 1098,
+            "y": 361.71875,
+            "width": 300,
+            "height": 841.203125,
+            "top": 361.71875,
+            "right": 1398,
+            "bottom": 1202.921875,
+            "left": 1098
+          },
+          "open": []
+        },
+        "BVisibleText": "B 독립 영역\n닫기\n\n사용자 구상\n\nB 사용자 구상 유지\n\n전달 기록에서 정리한 설명 · 앱 미검증\n\nB_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\n\n직전 정리에서 달라진 점\n\nB_r1 설명 구체화\n근거 보기\n설명 오류 고치기\n이름·구상 고치기\n\n요청 1개 · 돌아온 결과 1개 · 앱 미검증\n\n이 영역의 요청 1개 · 골라서 읽기\n\n[독립 합성] B_r1 요청 ↘\n작업 03 · 구현 보고 도착 · 앱 미검증\n앱에서 이어갈 작업\n\n읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.\n\n‘앱에서 이어갈 작업’은 이 앱에서 열어 둔 작업이에요. 외부 도구에서 지금 실행 중이라는 뜻이 아니에요.\n\n영역 열기 ↗\n이 영역에 새 요청\n무엇을 요청할지 같이 정하기"
+      }
+    },
+    {
+      "id": "1440-change-location-opens-understanding",
+      "pass": true,
+      "raw": {
+        "preMap": {
+          "y": 0,
+          "focus": "main",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -706, 140)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -393,
+                "y": 550.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 550.71875,
+                "right": -105,
+                "bottom": 709.1187744140625,
+                "left": -393
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -32.999969482421875,
+                "y": 550.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 550.71875,
+                "right": 255,
+                "bottom": 730.7374877929688,
+                "left": -32.999969482421875
+              },
+              "selected": false
+            }
+          ],
+          "panel": null,
+          "open": []
+        },
+        "beforeCTA": {
+          "y": 0,
+          "focus": "space-title",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -706, 140)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -393,
+                "y": 594.71875,
+                "width": 288,
+                "height": 175.57501220703125,
+                "top": 594.71875,
+                "right": -105,
+                "bottom": 770.2937622070312,
+                "left": -393
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -32.999969482421875,
+                "y": 594.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 594.71875,
+                "right": 255,
+                "bottom": 774.7374877929688,
+                "left": -32.999969482421875
+              },
+              "selected": false
+            }
+          ],
+          "panel": null,
+          "open": []
+        },
+        "afterCTA": {
+          "y": 406,
+          "focus": "area-panel",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -706, 140)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -393,
+                "y": 188.71875,
+                "width": 288,
+                "height": 175.57501220703125,
+                "top": 188.71875,
+                "right": -105,
+                "bottom": 364.29376220703125,
+                "left": -393
+              },
+              "selected": true
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -32.999969482421875,
+                "y": 188.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 188.71875,
+                "right": 255,
+                "bottom": 368.73748779296875,
+                "left": -32.999969482421875
+              },
+              "selected": false
+            }
+          ],
+          "panel": {
+            "x": 1098,
+            "y": -0.28125,
+            "width": 300,
+            "height": 991.640625,
+            "top": -0.28125,
+            "right": 1398,
+            "bottom": 991.359375,
+            "left": 1098
+          },
+          "open": [
+            "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-edit"
+          ]
+        },
+        "panelText": "A 독립 영역\n닫기\n\n사용자 구상\n\nA 사용자 구상 유지\n\n전달 기록에서 정리한 설명 · 앱 미검증\n\nA_r2 새 전달 기록 설명. 옛 정정 초안과 다름.\n\n직전 정리에서 달라진 점\n\nr2 도착\n근거 보기\n설명 오류 고치기\n\n고치는 동안 새 설명이 왔어요. 이 초안은 보존했지만 새 설명의 정정으로 저장하지 않아요. 취소 후 현재 설명에서 다시 시작할 수 있어요.\n\n정정 저장취소\n이전 설명 · 반영하지 않은 정리\n이름·구상 고치기\n\n요청 1개 · 돌아온 결과 2개 · 앱 미검증\n\n이 영역의 요청 1개 · 골라서 읽기\n\n[독립 합성] A_r1 요청 ↘\n작업 01 · 구현 보고 도착 · 앱 미검증\n\n읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.\n\n영역 열기 ↗\n이 영역에 새 요청\n무엇을 요청할지 같이 정하기",
+        "note": "card screen rect is recorded separately; opening a panel is not proof card itself is in view"
+      }
+    },
+    {
+      "id": "1440-stale-r1-draft-save-rejected-and-text-preserved",
+      "pass": true,
+      "raw": {
+        "fieldBefore": "[독립 합성 r1 정정 초안] r2 설명을 덮어쓰면 안 된다.",
+        "fieldAfter": "[독립 합성 r1 정정 초안] r2 설명을 덮어쓰면 안 된다.",
+        "notice": "정정 초안 뒤 새 설명이 도착해 저장하지 않았어요. 작성한 내용은 그대로예요.",
+        "before": {
+          "schemaVersion": "idea015.project.6",
+          "id": "P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84",
+          "revision": 15,
+          "name": "나의 프로젝트",
+          "sources": [
+            {
+              "id": "S_1eac5967-9bd9-4397-a393-a684fb6f9537",
+              "kind": "request",
+              "text": "[독립 합성] A_r1 요청",
+              "at": "2026-10-22T08:49:46.004Z",
+              "taskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_85ed7a09-e994-4737-a254-681ab38ef988",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_f31e9859-8933-4dd2-bc06-22f442798f73의 인계 H_A_r1 / r6에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] A_r1 보고. 실제 실행 주장 없음.",
+              "at": "2026-10-22T08:49:46.007Z",
+              "taskId": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_d4203b79-4794-4f67-b4f1-8094494fe970",
+              "kind": "request",
+              "text": "[독립 합성] B_r1 요청",
+              "at": "2026-10-22T08:49:46.009Z",
+              "taskId": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_256fbd9e-a3c9-4305-b368-9d225534c8a7",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_749aff25-6a54-4a2b-90b9-ac32cf1e976e의 인계 H_B_r1 / r10에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] B_r1 보고. 실제 실행 주장 없음.",
+              "at": "2026-10-22T08:49:46.011Z",
+              "taskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_a4676801-013c-452f-a533-3023b3e2c54e",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_f31e9859-8933-4dd2-bc06-22f442798f73의 인계 H_A_r2 / r12에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] A 두번째 보고.",
+              "at": "2026-10-22T08:51:39.498Z",
+              "taskId": "T_1cb0532c-5cc0-4bed-9bef-22f6a8a036b8",
+              "replyTo": null,
+              "disposition": "provided"
+            }
+          ],
+          "bases": [
+            {
+              "id": "D1",
+              "text": "[독립 합성] A_r1 요청",
+              "status": "requested",
+              "sourceId": "S_1eac5967-9bd9-4397-a393-a684fb6f9537",
+              "revision": 6,
+              "history": []
+            },
+            {
+              "id": "D2",
+              "text": "[독립 합성] B_r1 요청",
+              "status": "requested",
+              "sourceId": "S_d4203b79-4794-4f67-b4f1-8094494fe970",
+              "revision": 10,
+              "history": []
+            }
+          ],
+          "tasks": [
+            {
+              "id": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "sourceIds": [
+                "S_1eac5967-9bd9-4397-a393-a684fb6f9537"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:49:46.006Z",
+                  "method": "clipboard",
+                  "revision": 6,
+                  "chars": 4021,
+                  "digest": "2992e913",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_A_r1",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                    "understanding": 0,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-22T08:49:46.013Z",
+                  "method": "clipboard",
+                  "revision": 12,
+                  "chars": 4516,
+                  "digest": "30110361",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_A_r2",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                    "understanding": 1,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              },
+              "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9"
+            },
+            {
+              "id": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+              "sourceIds": [
+                "S_85ed7a09-e994-4737-a254-681ab38ef988"
+              ],
+              "parentTaskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_A_r1",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\"taskId\":\"T_f31e9859-8933-4dd2-bc06-22f442798f73\",\"returnId\":\"H_A_r1\",\"report\":\"[독립 합성 원문] A_r1 보고. 실제 실행 주장 없음.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_585e1af1-293e-422f-8467-446c25c277f9\",\"basedOn\":0,\"summary\":\"A_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\",\"changes\":[\"A_r1 설명 구체화\"],\"proposal\":null,\"origin\":\"독립 합성 fixture\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              }
+            },
+            {
+              "id": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "sourceIds": [
+                "S_d4203b79-4794-4f67-b4f1-8094494fe970"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:49:46.010Z",
+                  "method": "clipboard",
+                  "revision": 10,
+                  "chars": 4155,
+                  "digest": "a107cf16",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_B_r1",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 9,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                    "understanding": 0,
+                    "stamp": {
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D2@10"
+                      ],
+                      "work": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 9,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                  "name": "B 독립 영역",
+                  "note": "B 사용자 구상 유지"
+                }
+              },
+              "areaId": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c"
+            },
+            {
+              "id": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+              "sourceIds": [
+                "S_256fbd9e-a3c9-4305-b368-9d225534c8a7"
+              ],
+              "parentTaskId": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_B_r1",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\"taskId\":\"T_749aff25-6a54-4a2b-90b9-ac32cf1e976e\",\"returnId\":\"H_B_r1\",\"report\":\"[독립 합성 원문] B_r1 보고. 실제 실행 주장 없음.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_b1fffce2-b9fe-4fab-99ac-220c4d33721c\",\"basedOn\":0,\"summary\":\"B_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\",\"changes\":[\"B_r1 설명 구체화\"],\"proposal\":null,\"origin\":\"독립 합성 fixture\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 9,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                  "name": "B 독립 영역",
+                  "note": "B 사용자 구상 유지"
+                }
+              }
+            },
+            {
+              "id": "T_1cb0532c-5cc0-4bed-9bef-22f6a8a036b8",
+              "sourceIds": [
+                "S_a4676801-013c-452f-a533-3023b3e2c54e"
+              ],
+              "parentTaskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_A_r2",
+                "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\n  \"taskId\": \"T_f31e9859-8933-4dd2-bc06-22f442798f73\",\n  \"returnId\": \"H_A_r2\",\n  \"report\": \"[독립 합성 원문] A 두번째 보고.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_585e1af1-293e-422f-8467-446c25c277f9\",\n    \"basedOn\": 1,\n    \"summary\": \"A_r2 새 전달 기록 설명. 옛 정정 초안과 다름.\",\n    \"changes\": [\n      \"r2 도착\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"독립 합성 r2\"\n  }\n}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              }
+            }
+          ],
+          "currentTaskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+          "draft": "",
+          "answerDraft": "",
+          "basisDraft": "",
+          "basisEdits": {},
+          "draftKind": "report",
+          "pending": null,
+          "notice": "결과를 작업 1에 연결했어요 · 앱 미검증. 지금 이어가던 작업 4의 요청과 범위는 그대로예요. 받은 결과는 ‘다른 작업에 도착한 결과’에서 열 수 있어요.",
+          "space": {
+            "brief": {
+              "text": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+              "at": "2026-10-22T08:49:46.002Z",
+              "previous": []
+            },
+            "areas": [
+              {
+                "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                "name": "A 독립 영역",
+                "note": "A 사용자 구상 유지",
+                "archived": false,
+                "createdAt": "2026-10-22T08:49:46.003Z"
+              },
+              {
+                "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                "name": "B 독립 영역",
+                "note": "B 사용자 구상 유지",
+                "archived": false,
+                "createdAt": "2026-10-22T08:49:46.004Z"
+              }
+            ],
+            "relations": [],
+            "draftTarget": null,
+            "layout": {
+              "version": "layout.1",
+              "positions": {
+                "A_585e1af1-293e-422f-8467-446c25c277f9": {
+                  "x": 40,
+                  "y": 40
+                },
+                "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c": {
+                  "x": 340,
+                  "y": 40
+                }
+              }
+            },
+            "understanding": {
+              "A_585e1af1-293e-422f-8467-446c25c277f9": {
+                "revision": 2,
+                "entries": [
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:49:46.007Z",
+                    "revision": 1,
+                    "taskId": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+                    "returnId": "H_A_r1",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  },
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:51:39.499Z",
+                    "revision": 2,
+                    "taskId": "T_1cb0532c-5cc0-4bed-9bef-22f6a8a036b8",
+                    "returnId": "H_A_r2",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  }
+                ]
+              },
+              "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c": {
+                "revision": 1,
+                "entries": [
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:49:46.011Z",
+                    "revision": 1,
+                    "taskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+                    "returnId": "H_B_r1",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D2@10"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "after": {
+          "schemaVersion": "idea015.project.6",
+          "id": "P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84",
+          "revision": 15,
+          "name": "나의 프로젝트",
+          "sources": [
+            {
+              "id": "S_1eac5967-9bd9-4397-a393-a684fb6f9537",
+              "kind": "request",
+              "text": "[독립 합성] A_r1 요청",
+              "at": "2026-10-22T08:49:46.004Z",
+              "taskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_85ed7a09-e994-4737-a254-681ab38ef988",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_f31e9859-8933-4dd2-bc06-22f442798f73의 인계 H_A_r1 / r6에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] A_r1 보고. 실제 실행 주장 없음.",
+              "at": "2026-10-22T08:49:46.007Z",
+              "taskId": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_d4203b79-4794-4f67-b4f1-8094494fe970",
+              "kind": "request",
+              "text": "[독립 합성] B_r1 요청",
+              "at": "2026-10-22T08:49:46.009Z",
+              "taskId": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_256fbd9e-a3c9-4305-b368-9d225534c8a7",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_749aff25-6a54-4a2b-90b9-ac32cf1e976e의 인계 H_B_r1 / r10에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] B_r1 보고. 실제 실행 주장 없음.",
+              "at": "2026-10-22T08:49:46.011Z",
+              "taskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+              "replyTo": null,
+              "disposition": "provided"
+            },
+            {
+              "id": "S_a4676801-013c-452f-a533-3023b3e2c54e",
+              "kind": "report",
+              "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_f31e9859-8933-4dd2-bc06-22f442798f73의 인계 H_A_r2 / r12에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[독립 합성 원문] A 두번째 보고.",
+              "at": "2026-10-22T08:51:39.498Z",
+              "taskId": "T_1cb0532c-5cc0-4bed-9bef-22f6a8a036b8",
+              "replyTo": null,
+              "disposition": "provided"
+            }
+          ],
+          "bases": [
+            {
+              "id": "D1",
+              "text": "[독립 합성] A_r1 요청",
+              "status": "requested",
+              "sourceId": "S_1eac5967-9bd9-4397-a393-a684fb6f9537",
+              "revision": 6,
+              "history": []
+            },
+            {
+              "id": "D2",
+              "text": "[독립 합성] B_r1 요청",
+              "status": "requested",
+              "sourceId": "S_d4203b79-4794-4f67-b4f1-8094494fe970",
+              "revision": 10,
+              "history": []
+            }
+          ],
+          "tasks": [
+            {
+              "id": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "sourceIds": [
+                "S_1eac5967-9bd9-4397-a393-a684fb6f9537"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:49:46.006Z",
+                  "method": "clipboard",
+                  "revision": 6,
+                  "chars": 4021,
+                  "digest": "2992e913",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_A_r1",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                    "understanding": 0,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    }
+                  }
+                },
+                {
+                  "at": "2026-10-22T08:49:46.013Z",
+                  "method": "clipboard",
+                  "revision": 12,
+                  "chars": 4516,
+                  "digest": "30110361",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_A_r2",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 5,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                    "understanding": 1,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              },
+              "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9"
+            },
+            {
+              "id": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+              "sourceIds": [
+                "S_85ed7a09-e994-4737-a254-681ab38ef988"
+              ],
+              "parentTaskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_A_r1",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\"taskId\":\"T_f31e9859-8933-4dd2-bc06-22f442798f73\",\"returnId\":\"H_A_r1\",\"report\":\"[독립 합성 원문] A_r1 보고. 실제 실행 주장 없음.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_585e1af1-293e-422f-8467-446c25c277f9\",\"basedOn\":0,\"summary\":\"A_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\",\"changes\":[\"A_r1 설명 구체화\"],\"proposal\":null,\"origin\":\"독립 합성 fixture\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              }
+            },
+            {
+              "id": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "sourceIds": [
+                "S_d4203b79-4794-4f67-b4f1-8094494fe970"
+              ],
+              "parentTaskId": null,
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [
+                {
+                  "at": "2026-10-22T08:49:46.010Z",
+                  "method": "clipboard",
+                  "revision": 10,
+                  "chars": 4155,
+                  "digest": "a107cf16",
+                  "work": {
+                    "understanding": "",
+                    "scope": "",
+                    "next": "",
+                    "checks": ""
+                  },
+                  "aiExcluded": false,
+                  "legacyText": null,
+                  "returnId": "H_B_r1",
+                  "background": {
+                    "version": "background.1",
+                    "revision": 9,
+                    "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                    "area": {
+                      "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지"
+                    }
+                  },
+                  "anchor": {
+                    "version": "anchor.1",
+                    "areaId": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                    "understanding": 0,
+                    "stamp": {
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D2@10"
+                      ],
+                      "work": []
+                    }
+                  }
+                }
+              ],
+              "resultFile": null,
+              "background": {
+                "version": "background.1",
+                "revision": 9,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                  "name": "B 독립 영역",
+                  "note": "B 사용자 구상 유지"
+                }
+              },
+              "areaId": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c"
+            },
+            {
+              "id": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+              "sourceIds": [
+                "S_256fbd9e-a3c9-4305-b368-9d225534c8a7"
+              ],
+              "parentTaskId": "T_749aff25-6a54-4a2b-90b9-ac32cf1e976e",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_B_r1",
+                "rawText": "{\"schemaVersion\":\"agentflow.return.2\",\"projectId\":\"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\"taskId\":\"T_749aff25-6a54-4a2b-90b9-ac32cf1e976e\",\"returnId\":\"H_B_r1\",\"report\":\"[독립 합성 원문] B_r1 보고. 실제 실행 주장 없음.\",\"evidence\":null,\"understanding\":{\"version\":\"understanding.1\",\"areaId\":\"A_b1fffce2-b9fe-4fab-99ac-220c4d33721c\",\"basedOn\":0,\"summary\":\"B_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\",\"changes\":[\"B_r1 설명 구체화\"],\"proposal\":null,\"origin\":\"독립 합성 fixture\"}}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 9,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                  "name": "B 독립 영역",
+                  "note": "B 사용자 구상 유지"
+                }
+              }
+            },
+            {
+              "id": "T_1cb0532c-5cc0-4bed-9bef-22f6a8a036b8",
+              "sourceIds": [
+                "S_a4676801-013c-452f-a533-3023b3e2c54e"
+              ],
+              "parentTaskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+              "advice": null,
+              "adviceRevision": null,
+              "mode": null,
+              "manual": {
+                "understanding": null,
+                "scope": null,
+                "next": null,
+                "checks": null
+              },
+              "suggestions": null,
+              "handoffs": [],
+              "resultFile": {
+                "returnId": "H_A_r2",
+                "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84\",\n  \"taskId\": \"T_f31e9859-8933-4dd2-bc06-22f442798f73\",\n  \"returnId\": \"H_A_r2\",\n  \"report\": \"[독립 합성 원문] A 두번째 보고.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_585e1af1-293e-422f-8467-446c25c277f9\",\n    \"basedOn\": 1,\n    \"summary\": \"A_r2 새 전달 기록 설명. 옛 정정 초안과 다름.\",\n    \"changes\": [\n      \"r2 도착\"\n    ],\n    \"proposal\": null,\n    \"origin\": \"독립 합성 r2\"\n  }\n}"
+              },
+              "background": {
+                "version": "background.1",
+                "revision": 5,
+                "brief": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+                "area": {
+                  "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                  "name": "A 독립 영역",
+                  "note": "A 사용자 구상 유지"
+                }
+              }
+            }
+          ],
+          "currentTaskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+          "draft": "",
+          "answerDraft": "",
+          "basisDraft": "",
+          "basisEdits": {},
+          "draftKind": "report",
+          "pending": null,
+          "notice": "결과를 작업 1에 연결했어요 · 앱 미검증. 지금 이어가던 작업 4의 요청과 범위는 그대로예요. 받은 결과는 ‘다른 작업에 도착한 결과’에서 열 수 있어요.",
+          "space": {
+            "brief": {
+              "text": "[독립 합성] 설명 정정 보호와 화면 왕복만 확인",
+              "at": "2026-10-22T08:49:46.002Z",
+              "previous": []
+            },
+            "areas": [
+              {
+                "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+                "name": "A 독립 영역",
+                "note": "A 사용자 구상 유지",
+                "archived": false,
+                "createdAt": "2026-10-22T08:49:46.003Z"
+              },
+              {
+                "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+                "name": "B 독립 영역",
+                "note": "B 사용자 구상 유지",
+                "archived": false,
+                "createdAt": "2026-10-22T08:49:46.004Z"
+              }
+            ],
+            "relations": [],
+            "draftTarget": null,
+            "layout": {
+              "version": "layout.1",
+              "positions": {
+                "A_585e1af1-293e-422f-8467-446c25c277f9": {
+                  "x": 40,
+                  "y": 40
+                },
+                "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c": {
+                  "x": 340,
+                  "y": 40
+                }
+              }
+            },
+            "understanding": {
+              "A_585e1af1-293e-422f-8467-446c25c277f9": {
+                "revision": 2,
+                "entries": [
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:49:46.007Z",
+                    "revision": 1,
+                    "taskId": "T_3c0d099a-7a1c-4195-b141-13ca3cebfd57",
+                    "returnId": "H_A_r1",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  },
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:51:39.499Z",
+                    "revision": 2,
+                    "taskId": "T_1cb0532c-5cc0-4bed-9bef-22f6a8a036b8",
+                    "returnId": "H_A_r2",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "A 독립 영역",
+                      "note": "A 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D1@6"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  }
+                ]
+              },
+              "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c": {
+                "revision": 1,
+                "entries": [
+                  {
+                    "by": "external",
+                    "at": "2026-10-22T08:49:46.011Z",
+                    "revision": 1,
+                    "taskId": "T_bd2624c9-5e63-4d81-964c-cd10efbd1689",
+                    "returnId": "H_B_r1",
+                    "text": null,
+                    "corrects": null,
+                    "stamp": {
+                      "name": "B 독립 영역",
+                      "note": "B 사용자 구상 유지",
+                      "brief": 1,
+                      "decisions": [
+                        "D2@10"
+                      ],
+                      "work": []
+                    },
+                    "held": null
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "state": {
+          "y": 406,
+          "focus": "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-save",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -706, 140)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -393,
+                "y": 188.71875,
+                "width": 288,
+                "height": 175.57501220703125,
+                "top": 188.71875,
+                "right": -105,
+                "bottom": 364.29376220703125,
+                "left": -393
+              },
+              "selected": true
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -32.999969482421875,
+                "y": 188.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 188.71875,
+                "right": 255,
+                "bottom": 368.73748779296875,
+                "left": -32.999969482421875
+              },
+              "selected": false
+            }
+          ],
+          "panel": {
+            "x": 1098,
+            "y": -0.28125,
+            "width": 300,
+            "height": 991.640625,
+            "top": -0.28125,
+            "right": 1398,
+            "bottom": 991.359375,
+            "left": 1098
+          },
+          "open": [
+            "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-edit"
+          ]
+        }
+      }
+    },
+    {
+      "id": "1440-map-view-retained-after-explicit-CTA-close",
+      "pass": false,
+      "raw": {
+        "originalMap": {
+          "y": 0,
+          "focus": "main",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -706, 140)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -393,
+                "y": 550.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 550.71875,
+                "right": -105,
+                "bottom": 709.1187744140625,
+                "left": -393
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -32.999969482421875,
+                "y": 550.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 550.71875,
+                "right": 255,
+                "bottom": 730.7374877929688,
+                "left": -32.999969482421875
+              },
+              "selected": false
+            }
+          ],
+          "panel": null,
+          "open": []
+        },
+        "afterClose": {
+          "y": 0,
+          "focus": "",
+          "matrix": "matrix(1.2, 0, 0, 1.2, -706, 140)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": -393,
+                "y": 594.71875,
+                "width": 288,
+                "height": 175.57501220703125,
+                "top": 594.71875,
+                "right": -105,
+                "bottom": 770.2937622070312,
+                "left": -393
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": -32.999969482421875,
+                "y": 594.71875,
+                "width": 287.9999694824219,
+                "height": 180.01873779296875,
+                "top": 594.71875,
+                "right": 255,
+                "bottom": 774.7374877929688,
+                "left": -32.999969482421875
+              },
+              "selected": false
+            }
+          ],
+          "panel": null,
+          "open": []
+        }
+      }
+    }
+  ],
+  "fatal": null,
+  "exit": 1
+}

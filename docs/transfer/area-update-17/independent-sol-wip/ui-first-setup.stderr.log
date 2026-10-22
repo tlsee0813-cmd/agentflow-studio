@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle17-sol-wip-evidence/ui.py", line 7, in <module>
+    x=H();x.setUpClass();r={'source':'6ea2915e6483076710840883de8891a197464386','stage':'WIP preliminary only, not final approval','rows':[]};fatal=None
+          ^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle17-sol-wip/app/continuity/tests/browser.py", line 43, in setUpClass
+    if not re.search(r'http://127\.0\.0\.1:\d+',line):raise RuntimeError('Mock server did not start: '+line)
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Mock server did not start: 

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_019bdb58-6dd9-4daa-b1b4-f0cf9a199d84",
+  "taskId": "T_f31e9859-8933-4dd2-bc06-22f442798f73",
+  "returnId": "H_A_r2",
+  "report": "[독립 합성 원문] A 두번째 보고.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_585e1af1-293e-422f-8467-446c25c277f9",
+    "basedOn": 1,
+    "summary": "A_r2 새 전달 기록 설명. 옛 정정 초안과 다름.",
+    "changes": [
+      "r2 도착"
+    ],
+    "proposal": null,
+    "origin": "독립 합성 r2"
+  }
+}

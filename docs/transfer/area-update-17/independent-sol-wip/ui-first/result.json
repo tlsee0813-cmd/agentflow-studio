@@ -1,0 +1,109 @@
+{
+  "source": "6ea2915e6483076710840883de8891a197464386",
+  "stage": "WIP preliminary only, not final approval",
+  "rows": [
+    {
+      "id": "1280-A-evidence-to-B-no-open-leak",
+      "pass": true,
+      "raw": {
+        "A": {
+          "y": 0,
+          "focus": "",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 114, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": 427,
+                "y": 494.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 494.71875,
+                "right": 715,
+                "bottom": 653.1187744140625,
+                "left": 427
+              },
+              "selected": true
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": 787,
+                "y": 494.71875,
+                "width": 288,
+                "height": 180.01873779296875,
+                "top": 494.71875,
+                "right": 1075,
+                "bottom": 674.7374877929688,
+                "left": 787
+              },
+              "selected": false
+            }
+          ],
+          "panel": {
+            "x": 938,
+            "y": 361.71875,
+            "width": 300,
+            "height": 912.25,
+            "top": 361.71875,
+            "right": 1238,
+            "bottom": 1273.96875,
+            "left": 938
+          },
+          "open": [
+            "panel-understanding-A_585e1af1-293e-422f-8467-446c25c277f9-evidence"
+          ]
+        },
+        "B": {
+          "y": 0,
+          "focus": "node-info-A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+          "matrix": "matrix(1.2, 0, 0, 1.2, 114, 84)",
+          "cards": [
+            {
+              "id": "A_585e1af1-293e-422f-8467-446c25c277f9",
+              "rect": {
+                "x": 427,
+                "y": 494.71875,
+                "width": 288,
+                "height": 158.4000244140625,
+                "top": 494.71875,
+                "right": 715,
+                "bottom": 653.1187744140625,
+                "left": 427
+              },
+              "selected": false
+            },
+            {
+              "id": "A_b1fffce2-b9fe-4fab-99ac-220c4d33721c",
+              "rect": {
+                "x": 787,
+                "y": 494.71875,
+                "width": 288,
+                "height": 180.01873779296875,
+                "top": 494.71875,
+                "right": 1075,
+                "bottom": 674.7374877929688,
+                "left": 787
+              },
+              "selected": true
+            }
+          ],
+          "panel": {
+            "x": 938,
+            "y": 361.71875,
+            "width": 300,
+            "height": 841.203125,
+            "top": 361.71875,
+            "right": 1238,
+            "bottom": 1202.921875,
+            "left": 938
+          },
+          "open": []
+        },
+        "BVisibleText": "B 독립 영역\n닫기\n\n사용자 구상\n\nB 사용자 구상 유지\n\n전달 기록에서 정리한 설명 · 앱 미검증\n\nB_r1 전달 기록 설명. 사용자 구상을 바꾸지 않는다.\n\n직전 정리에서 달라진 점\n\nB_r1 설명 구체화\n근거 보기\n설명 오류 고치기\n이름·구상 고치기\n\n요청 1개 · 돌아온 결과 1개 · 앱 미검증\n\n이 영역의 요청 1개 · 골라서 읽기\n\n[독립 합성] B_r1 요청 ↘\n작업 03 · 구현 보고 도착 · 앱 미검증\n앱에서 이어갈 작업\n\n읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.\n\n‘앱에서 이어갈 작업’은 이 앱에서 열어 둔 작업이에요. 외부 도구에서 지금 실행 중이라는 뜻이 아니에요.\n\n영역 열기 ↗\n이 영역에 새 요청\n무엇을 요청할지 같이 정하기"
+      }
+    }
+  ],
+  "fatal": "Traceback (most recent call last):\n  File \"/workspace/browser-env/cycle17-sol-wip-evidence/ui.py\", line 19, in <module>\n    if not details.evaluate('(e)=>e.open'):p.locator('#result-file-panel > summary').click()\n                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/sync_api/_generated.py\", line 15637, in click\n    self._sync(\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_sync_base.py\", line 115, in _sync\n    return task.result()\n           ^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_locator.py\", line 162, in click\n    return await self._frame._click(self._selector, strict=True, **params)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_frame.py\", line 566, in _click\n    await self._channel.send(\"click\", self._timeout, locals_to_params(locals()))\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 69, in send\n    return await self._connection.wrap_api_call(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/browser-env/venv/lib/python3.12/site-packages/playwright/_impl/_connection.py\", line 559, in wrap_api_call\n    raise rewrite_error(error, f\"{parsed_st['apiName']}: {error}\") from None\nplaywright._impl._errors.TimeoutError: Locator.click: Timeout 6000ms exceeded.\nCall log:\n  - waiting for locator(\"#result-file-panel > summary\")\n    - locator resolved to <summary>결과 파일로 가져오기 · 선택</summary>\n  - attempting click action\n    - waiting for element to be visible, enabled and stable\n    - element is not stable\n  - retrying click action\n    - waiting for element to be visible, enabled and stable\n    - element is not visible\n  - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    11 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n\n",
+  "exit": 1
+}
