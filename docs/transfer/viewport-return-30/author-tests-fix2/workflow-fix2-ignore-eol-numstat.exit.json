@@ -1,0 +1,12 @@
+{
+  "exit": 0,
+  "command": [
+    "-c",
+    "core.autocrlf=false",
+    "diff",
+    "--ignore-space-at-eol",
+    "--numstat",
+    "--",
+    ".github/workflows/verify.yml"
+  ]
+}

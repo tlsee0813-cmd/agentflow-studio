@@ -1,0 +1,18 @@
+diff --git a/.github/workflows/verify.yml b/.github/workflows/verify.yml
+index a47ad7f..88b10af 100644
+--- a/.github/workflows/verify.yml
++++ b/.github/workflows/verify.yml
+@@ -232,6 +232,13 @@ jobs:
+         run: |
+           set -o pipefail
+           python continuity/tests/blank21_browser.py 2>&1 | tee test-results/blank21-browser.log
++      - name: VIEWPORT30 existing-camera map return after zero and deep work scroll on two PCs (native HTTP, normal UI backup, MOCK)
++        env:
++          IDEA015_EVIDENCE_DIR: test-results/viewport30
++        shell: bash
++        run: |
++          set -o pipefail
++          python continuity/tests/viewport30_browser.py 2>&1 | tee test-results/viewport30-browser.log
+       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
+       - name: Static subpath exchange and storage isolation (browser MOCK, no API)
+         env:

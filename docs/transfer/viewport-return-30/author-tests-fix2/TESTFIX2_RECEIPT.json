@@ -1,0 +1,46 @@
+{
+  "prior": "TESTFIX1_RECEIPT.json",
+  "status": "workflow-only testfix2 frozen; no native UI run",
+  "files": [
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 273592,
+      "sha256": "e52eb74e531302905d6e2c86e6be164425ea13d354f8db98007dfc45516748e8",
+      "gitBlob": "e045f45219fe38d4194dce7e9b076976c92c9410",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/tests/viewport30_browser.py",
+      "bytes": 9126,
+      "sha256": "43798ea3a9503690155cc461f0a2c2447f54fb2b635153460fc6696e0b8fcc4d",
+      "gitBlob": "d32dc320fa8c0f2e10b10fede5e64ba2fa411e9d",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": "app/continuity/tests/fixtures/viewport30-normal-ui-six.json",
+      "bytes": 25031,
+      "sha256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+      "gitBlob": "837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8",
+      "utf8RoundtripByteEqual": true
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "bytes": 12372,
+      "sha256": "3873c4c315fff14b038f0d643bbbdfae85230c78ab8cf22dc2db30744c8d5166",
+      "gitBlob": "88b10af5447bb08ebbfa2fb9cc40d627a77ea5ee",
+      "utf8RoundtripByteEqual": true
+    }
+  ],
+  "delta": "Restore exact baseline bytes outside new VIEWPORT30 seven lines; add those with neighboring CRLF. Baseline itself has236 CRLF and14 LF-only lines; preserve mixed original, no normalization.",
+  "unchangedTestSHA256": "43798ea3a9503690155cc461f0a2c2447f54fb2b635153460fc6696e0b8fcc4d",
+  "validation": {
+    "ordinaryDiffCheck": 2,
+    "reason": "new CRLF endings counted as whitespace; raw output preserved",
+    "crAtEolDiffCheck": 0,
+    "ignoreSpaceAtEolNumstat": "7 insertions,0 deletions",
+    "outsideInsertedLines": "byte-equal baseline",
+    "typeBuild": "not rerun; product unchanged",
+    "native": "NOT_RUN"
+  },
+  "priorNormalizedWorkflow": "C90D source remains preserved in earlier frozen-test-sources and remote author evidence; not relabeled as minimal diff"
+}

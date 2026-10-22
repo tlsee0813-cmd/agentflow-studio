@@ -1,0 +1,11 @@
+{
+  "exit": 2,
+  "command": [
+    "-c",
+    "core.autocrlf=false",
+    "diff",
+    "--check",
+    "--",
+    ".github/workflows/verify.yml"
+  ]
+}
