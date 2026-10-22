@@ -1,0 +1,284 @@
+{
+  "derivedOnlyFromSavedRaw": true,
+  "projectListFailures": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "authorAssertStillFailed": true,
+      "before": {
+        "map": {
+          "x": 264,
+          "y": 361.71875,
+          "w": 660,
+          "h": 342.28125,
+          "right": 924,
+          "bottom": 704
+        },
+        "panel": {
+          "x": 938,
+          "y": 361.71875,
+          "w": 300,
+          "h": 342.28125,
+          "right": 1238,
+          "bottom": 704
+        },
+        "head": {
+          "x": 939,
+          "y": 362.71875,
+          "w": 298,
+          "h": 93.5625,
+          "right": 1237,
+          "bottom": 456.28125
+        },
+        "actions": {
+          "x": 939,
+          "y": 650,
+          "w": 298,
+          "h": 53,
+          "right": 1237,
+          "bottom": 703
+        },
+        "body": {
+          "x": 939,
+          "y": 456.28125,
+          "w": 298,
+          "h": 193.71875,
+          "right": 1237,
+          "bottom": 650
+        },
+        "scroll": 1333,
+        "scrollHeight": 1527,
+        "windowY": 0,
+        "width": 1280,
+        "height": 720,
+        "docWidth": 1280,
+        "transform": "translate(212.81px, 2.97619px) scale(0.72619)",
+        "scale": "73%",
+        "visible": [
+          "A_675b1aec-9b9e-4106-9405-296358bb99ae",
+          "A_a01470ba-0d0d-4280-bf0a-03de261fa932",
+          "A_8605503b-9551-4bc4-a067-135be316eceb",
+          "A_55127d89-e7c6-4e85-9ea9-a9c1cffe16b7",
+          "A_ae5ddd99-66a1-4727-8043-c4662177093e"
+        ],
+        "selected": "A_8605503b-9551-4bc4-a067-135be316eceb",
+        "collapsed": [],
+        "open": [
+          "panel-idea-full",
+          "panel-tasks-more-A_8605503b-9551-4bc4-a067-135be316eceb"
+        ],
+        "focus": "node-info-A_8605503b-9551-4bc4-a067-135be316eceb"
+      },
+      "after": {
+        "map": {
+          "x": 264,
+          "y": 294.125,
+          "w": 660,
+          "h": 409.875,
+          "right": 924,
+          "bottom": 704
+        },
+        "panel": {
+          "x": 938,
+          "y": 294.125,
+          "w": 300,
+          "h": 409.875,
+          "right": 1238,
+          "bottom": 704
+        },
+        "head": {
+          "x": 939,
+          "y": 295.125,
+          "w": 298,
+          "h": 93.5625,
+          "right": 1237,
+          "bottom": 388.6875
+        },
+        "actions": {
+          "x": 939,
+          "y": 650,
+          "w": 298,
+          "h": 53,
+          "right": 1237,
+          "bottom": 703
+        },
+        "body": {
+          "x": 939,
+          "y": 388.6875,
+          "w": 298,
+          "h": 261.3125,
+          "right": 1237,
+          "bottom": 650
+        },
+        "scroll": 1266,
+        "scrollHeight": 1527,
+        "windowY": 0,
+        "width": 1280,
+        "height": 720,
+        "docWidth": 1280,
+        "transform": "translate(212.81px, 2.97619px) scale(0.72619)",
+        "scale": "73%",
+        "visible": [
+          "A_675b1aec-9b9e-4106-9405-296358bb99ae",
+          "A_a01470ba-0d0d-4280-bf0a-03de261fa932",
+          "A_8605503b-9551-4bc4-a067-135be316eceb",
+          "A_55127d89-e7c6-4e85-9ea9-a9c1cffe16b7",
+          "A_ae5ddd99-66a1-4727-8043-c4662177093e"
+        ],
+        "selected": "A_8605503b-9551-4bc4-a067-135be316eceb",
+        "collapsed": [],
+        "open": [
+          "panel-idea-full",
+          "panel-tasks-more-A_8605503b-9551-4bc4-a067-135be316eceb"
+        ],
+        "focus": "space-title"
+      },
+      "derivedAfterMax": 1265.6875,
+      "clampedOldScroll": 1265.6875,
+      "actualMinusClamped": 0.3125,
+      "interpretation": "raw absolute scroll equality fails; available body height changed by import notice removal; post is at new max. Does not replace original failure or prove all semantic anchors preserved."
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "authorAssertStillFailed": true,
+      "before": {
+        "map": {
+          "x": 264,
+          "y": 361.71875,
+          "w": 820,
+          "h": 522.28125,
+          "right": 1084,
+          "bottom": 884
+        },
+        "panel": {
+          "x": 1098,
+          "y": 361.71875,
+          "w": 300,
+          "h": 522.28125,
+          "right": 1398,
+          "bottom": 884
+        },
+        "head": {
+          "x": 1099,
+          "y": 362.71875,
+          "w": 298,
+          "h": 93.5625,
+          "right": 1397,
+          "bottom": 456.28125
+        },
+        "actions": {
+          "x": 1099,
+          "y": 830,
+          "w": 298,
+          "h": 53,
+          "right": 1397,
+          "bottom": 883
+        },
+        "body": {
+          "x": 1099,
+          "y": 456.28125,
+          "w": 298,
+          "h": 373.71875,
+          "right": 1397,
+          "bottom": 830
+        },
+        "scroll": 1153,
+        "scrollHeight": 1527,
+        "windowY": 0,
+        "width": 1440,
+        "height": 900,
+        "docWidth": 1440,
+        "transform": "translate(262.333px, 49.1667px) scale(0.916667)",
+        "scale": "92%",
+        "visible": [
+          "A_01995c02-b886-4252-9959-fd480533faf0",
+          "A_8ea1ae62-362e-40db-b88c-315192ac02de",
+          "A_8a166907-938c-46aa-a248-931810c342fe",
+          "A_b3ab05f5-544e-4419-9c93-3b3214defb7d",
+          "A_9069d12a-0e41-49f6-85a2-da458b86857b"
+        ],
+        "selected": "A_8a166907-938c-46aa-a248-931810c342fe",
+        "collapsed": [],
+        "open": [
+          "panel-idea-full",
+          "panel-tasks-more-A_8a166907-938c-46aa-a248-931810c342fe"
+        ],
+        "focus": "node-info-A_8a166907-938c-46aa-a248-931810c342fe"
+      },
+      "after": {
+        "map": {
+          "x": 264,
+          "y": 294.125,
+          "w": 820,
+          "h": 589.875,
+          "right": 1084,
+          "bottom": 884
+        },
+        "panel": {
+          "x": 1098,
+          "y": 294.125,
+          "w": 300,
+          "h": 589.875,
+          "right": 1398,
+          "bottom": 884
+        },
+        "head": {
+          "x": 1099,
+          "y": 295.125,
+          "w": 298,
+          "h": 93.5625,
+          "right": 1397,
+          "bottom": 388.6875
+        },
+        "actions": {
+          "x": 1099,
+          "y": 830,
+          "w": 298,
+          "h": 53,
+          "right": 1397,
+          "bottom": 883
+        },
+        "body": {
+          "x": 1099,
+          "y": 388.6875,
+          "w": 298,
+          "h": 441.3125,
+          "right": 1397,
+          "bottom": 830
+        },
+        "scroll": 1086,
+        "scrollHeight": 1527,
+        "windowY": 0,
+        "width": 1440,
+        "height": 900,
+        "docWidth": 1440,
+        "transform": "translate(262.333px, 49.1667px) scale(0.916667)",
+        "scale": "92%",
+        "visible": [
+          "A_01995c02-b886-4252-9959-fd480533faf0",
+          "A_8ea1ae62-362e-40db-b88c-315192ac02de",
+          "A_8a166907-938c-46aa-a248-931810c342fe",
+          "A_b3ab05f5-544e-4419-9c93-3b3214defb7d",
+          "A_9069d12a-0e41-49f6-85a2-da458b86857b"
+        ],
+        "selected": "A_8a166907-938c-46aa-a248-931810c342fe",
+        "collapsed": [],
+        "open": [
+          "panel-idea-full",
+          "panel-tasks-more-A_8a166907-938c-46aa-a248-931810c342fe"
+        ],
+        "focus": "space-title"
+      },
+      "derivedAfterMax": 1085.6875,
+      "clampedOldScroll": 1085.6875,
+      "actualMinusClamped": 0.3125,
+      "interpretation": "raw absolute scroll equality fails; available body height changed by import notice removal; post is at new max. Does not replace original failure or prove all semantic anchors preserved."
+    }
+  ],
+  "otherThreeFailures": "caller position remains displaced; original transient report anchor removed after real new child request; fix1 raw diagnostic preserved at dba09504."
+}

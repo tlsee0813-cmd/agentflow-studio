@@ -1,0 +1,52 @@
+{
+  "rows": [
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "pass": true,
+      "raw": {
+        "panelCount": 0,
+        "context": "true",
+        "focus": "node-info-A_a6d09d66-ad12-4884-99b6-f30b2960fe9a"
+      }
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "pass": true,
+      "raw": {
+        "context": "false",
+        "focus": "nav-context"
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "pass": true,
+      "raw": {
+        "panelCount": 0,
+        "context": "true",
+        "focus": "node-info-A_a6d09d66-ad12-4884-99b6-f30b2960fe9a"
+      }
+    },
+    {
+      "viewport": [
+        1440,
+        900
+      ],
+      "pass": true,
+      "raw": {
+        "context": "false",
+        "focus": "nav-context"
+      }
+    }
+  ],
+  "fatal": null,
+  "exit": 0
+}

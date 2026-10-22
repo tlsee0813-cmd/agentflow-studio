@@ -1,0 +1,81 @@
+test_01_powertoys_complete (author18.Area18.test_01_powertoys_complete) ... ok
+test_02_product13_complete (author18.Area18.test_02_product13_complete) ... FAIL
+test_05_long_panel_scroll_reading_and_ime_escape (author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape) ... FAIL
+test_01_powertoys_complete (author18.Area18Wide.test_01_powertoys_complete) ... FAIL
+test_02_product13_complete (author18.Area18Wide.test_02_product13_complete) ... FAIL
+test_05_long_panel_scroll_reading_and_ime_escape (author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape) ... FAIL
+
+======================================================================
+FAIL: test_02_product13_complete (author18.Area18.test_02_product13_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 184, in test_02_product13_complete
+    def test_02_product13_complete(self):self.flow('product13')
+                                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 177, in flow
+    self.reading_restored('full flow restores panel reading anchor after real new content',start_anchor,self.reading(caller))
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 69, in reading_restored
+    self.yes(name,abs(after['scroll']-expected)<=2)
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 60, in yes
+    def yes(self,name,value):self.record('condition',name,bool(value),True);self.assertTrue(value,name)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : full flow restores panel reading anchor after real new content
+
+======================================================================
+FAIL: test_05_long_panel_scroll_reading_and_ime_escape (author18.Area18.test_05_long_panel_scroll_reading_and_ime_escape)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 226, in test_05_long_panel_scroll_reading_and_ime_escape
+    self.yes('project list roundtrip restores nonzero reading position',reopened['scroll']>50 and abs(reopened['scroll']-again['scroll'])<=2)
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 60, in yes
+    def yes(self,name,value):self.record('condition',name,bool(value),True);self.assertTrue(value,name)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : project list roundtrip restores nonzero reading position
+
+======================================================================
+FAIL: test_01_powertoys_complete (author18.Area18Wide.test_01_powertoys_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 183, in test_01_powertoys_complete
+    def test_01_powertoys_complete(self):self.flow('powertoys')
+                                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 177, in flow
+    self.reading_restored('full flow restores panel reading anchor after real new content',start_anchor,self.reading(caller))
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 69, in reading_restored
+    self.yes(name,abs(after['scroll']-expected)<=2)
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 60, in yes
+    def yes(self,name,value):self.record('condition',name,bool(value),True);self.assertTrue(value,name)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : full flow restores panel reading anchor after real new content
+
+======================================================================
+FAIL: test_02_product13_complete (author18.Area18Wide.test_02_product13_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 184, in test_02_product13_complete
+    def test_02_product13_complete(self):self.flow('product13')
+                                         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 177, in flow
+    self.reading_restored('full flow restores panel reading anchor after real new content',start_anchor,self.reading(caller))
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 69, in reading_restored
+    self.yes(name,abs(after['scroll']-expected)<=2)
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 60, in yes
+    def yes(self,name,value):self.record('condition',name,bool(value),True);self.assertTrue(value,name)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : full flow restores panel reading anchor after real new content
+
+======================================================================
+FAIL: test_05_long_panel_scroll_reading_and_ime_escape (author18.Area18Wide.test_05_long_panel_scroll_reading_and_ime_escape)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 226, in test_05_long_panel_scroll_reading_and_ime_escape
+    self.yes('project list roundtrip restores nonzero reading position',reopened['scroll']>50 and abs(reopened['scroll']-again['scroll'])<=2)
+  File "/workspace/browser-env/cycle18-fix2-candidate/app/continuity/tests/hierarchy18_browser.py", line 60, in yes
+    def yes(self,name,value):self.record('condition',name,bool(value),True);self.assertTrue(value,name)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : project list roundtrip restores nonzero reading position
+
+----------------------------------------------------------------------
+Ran 6 tests in 15.553s
+
+FAILED (failures=5)
