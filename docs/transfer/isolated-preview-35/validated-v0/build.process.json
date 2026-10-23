@@ -1,0 +1,35 @@
+[
+  {
+    "name": "check",
+    "command": [
+      "tsc",
+      "--noEmit",
+      "-p",
+      "continuity/tsconfig.json"
+    ],
+    "startUTC": "2026-10-23T00:49:56.477965+00:00",
+    "endUTC": "2026-10-23T00:49:58.485098+00:00",
+    "actualChildExit": 0
+  },
+  {
+    "name": "demo",
+    "command": [
+      "node",
+      "continuity/scripts/build-static.mjs"
+    ],
+    "startUTC": "2026-10-23T00:49:58.485115+00:00",
+    "endUTC": "2026-10-23T00:50:00.877133+00:00",
+    "actualChildExit": 0
+  },
+  {
+    "name": "preview",
+    "command": [
+      "node",
+      "continuity/scripts/build-static.mjs",
+      "--preview"
+    ],
+    "startUTC": "2026-10-23T00:50:00.877147+00:00",
+    "endUTC": "2026-10-23T00:50:03.256844+00:00",
+    "actualChildExit": 0
+  }
+]

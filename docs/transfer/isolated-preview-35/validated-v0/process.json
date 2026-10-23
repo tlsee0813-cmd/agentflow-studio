@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/preview35/ui/controller.py"
+  ],
+  "startUTC": "2026-10-23T00:50:32.541289+00:00",
+  "endUTC": "2026-10-23T00:53:13.978212+00:00",
+  "actualChildExit": 0,
+  "combinedLogSHA256": "08a60e46a4c1566b26a7c99abe7adedaaf8553dcd34af95d3ff1ca2358959c76"
+}

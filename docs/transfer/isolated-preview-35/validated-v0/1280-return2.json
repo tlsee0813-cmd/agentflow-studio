@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+  "returnId": "H_5145bb6d-9489-44fe-89e5-eefb8bf7d258",
+  "report": "[명시 합성35] 정적 미리보기에서 정확한 파일 연결을 확인하기 위한 보고다. 오류행 중단/제외는 결정하지 않았으며 실제 AI·실행·구현·검증 완료가 아니다.",
+  "evidence": null,
+  "understanding": null
+}

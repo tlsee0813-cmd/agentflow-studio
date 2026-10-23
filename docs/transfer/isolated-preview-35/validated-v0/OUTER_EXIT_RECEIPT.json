@@ -1,0 +1,11 @@
+{
+  "UIControllerChild": 0,
+  "UIOuterExec": 0,
+  "semanticGateChild": 0,
+  "semanticGateOuterExec": 0,
+  "staticAuthorChild": 0,
+  "staticAuthorOuterCollector": 0,
+  "staticAuthorOuterExec": 0,
+  "UIStaticHTTPServerExit": -15,
+  "meaning": "server terminated intentionally after UI collection; first no-stdin run closed without actions and is not completion evidence"
+}

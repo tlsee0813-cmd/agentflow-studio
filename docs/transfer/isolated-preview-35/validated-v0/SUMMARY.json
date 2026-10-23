@@ -1,0 +1,203 @@
+{
+  "1280": {
+    "checks": {
+      "readingUnchanged": true,
+      "onlyNManualChange": true,
+      "otherTasksUnchanged": true,
+      "spaceBasesSourcesUnchangedBeforeH": true,
+      "separateDraftPreserved": true,
+      "regionDidNotCreateH": true,
+      "copyAddsExactlyOneH": true,
+      "HManualExact": true,
+      "exactFileH": true,
+      "fileSelectionDoesNotApply": true,
+      "oneNewExactReport": true,
+      "oldTasksAndHRemainAfterReceive": true,
+      "returnDoesNotRollback": true,
+      "sourcesPrefixPreserved": true,
+      "spacesBasesPreserved": true
+    },
+    "currentBefore": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+    "currentExplicitContinue": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+    "currentAfterReceiptAndReturn": "T_bcfb1ca0-27a6-4265-95cf-c0f2aa71c87b",
+    "newReport": "T_bcfb1ca0-27a6-4265-95cf-c0f2aa71c87b",
+    "actualH": "H_5145bb6d-9489-44fe-89e5-eefb8bf7d258",
+    "manualBefore": {
+      "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+      "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+      "next": "오류행 처리 방식을 사용자에게 확인한다.",
+      "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+    },
+    "manualAfter": {
+      "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+      "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+      "next": "[명시 합성35] 오류행 중단과 제외는 아직 선택하지 않았다. 두 선택의 차이와 다음 확인 안내만 구체화한다. 실제 처리·구현·배포는 하지 않는다.",
+      "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+    },
+    "originCallerBefore": {
+      "id": "subtree-task-T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+      "tag": "BUTTON",
+      "text": "[합성32·처음 남긴 요청] 오류행에서 중단할지 제외하고 계속할지 아직 정하지 않았어요. 먼저 물어봐 주세요.",
+      "rect": {
+        "x": 951,
+        "y": 467.796875,
+        "width": 259,
+        "height": 72,
+        "top": 467.796875,
+        "right": 1210,
+        "bottom": 539.796875,
+        "left": 951
+      },
+      "clip": {
+        "l": 939,
+        "t": 391.46875,
+        "r": 1222,
+        "b": 650
+      },
+      "full": true,
+      "positive": true,
+      "hit": true,
+      "expanded": null,
+      "open": null,
+      "value": null
+    },
+    "originCallerAfter": {
+      "id": "subtree-task-T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+      "tag": "BUTTON",
+      "text": "[합성32·처음 남긴 요청] 오류행에서 중단할지 제외하고 계속할지 아직 정하지 않았어요. 먼저 물어봐 주세요.",
+      "rect": {
+        "x": 951,
+        "y": 378.609375,
+        "width": 259,
+        "height": 72,
+        "top": 378.609375,
+        "right": 1210,
+        "bottom": 450.609375,
+        "left": 951
+      },
+      "clip": {
+        "l": 939,
+        "t": 302.28125,
+        "r": 1222,
+        "b": 650
+      },
+      "full": true,
+      "positive": true,
+      "hit": true,
+      "expanded": null,
+      "open": null,
+      "value": null
+    },
+    "pageBefore": [
+      0,
+      0
+    ],
+    "pageAfter": [
+      0,
+      0
+    ],
+    "cameraBefore": "matrix(0.681818, 0, 0, 0.681818, 97.3636, 64)",
+    "cameraAfter": "matrix(0.681818, 0, 0, 0.681818, 97.3636, 64)"
+  },
+  "1440": {
+    "checks": {
+      "readingUnchanged": true,
+      "onlyNManualChange": true,
+      "otherTasksUnchanged": true,
+      "spaceBasesSourcesUnchangedBeforeH": true,
+      "separateDraftPreserved": true,
+      "regionDidNotCreateH": true,
+      "copyAddsExactlyOneH": true,
+      "HManualExact": true,
+      "exactFileH": true,
+      "fileSelectionDoesNotApply": true,
+      "oneNewExactReport": true,
+      "oldTasksAndHRemainAfterReceive": true,
+      "returnDoesNotRollback": true,
+      "sourcesPrefixPreserved": true,
+      "spacesBasesPreserved": true
+    },
+    "currentBefore": "T_1ae272d0-ce1b-4680-a5dd-e1e526f4e7bf",
+    "currentExplicitContinue": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+    "currentAfterReceiptAndReturn": "T_56a4fa2c-e3cd-4881-86fa-7609bc47b93d",
+    "newReport": "T_56a4fa2c-e3cd-4881-86fa-7609bc47b93d",
+    "actualH": "H_5c4b586a-57fb-4fa7-a642-a0caf27f0dd1",
+    "manualBefore": {
+      "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+      "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+      "next": "오류행 처리 방식을 사용자에게 확인한다.",
+      "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+    },
+    "manualAfter": {
+      "understanding": "오류행의 처리 방식은 아직 사용자가 선택하지 않았다.",
+      "scope": "중단 또는 제외 중 어느 것도 임의로 적용하지 않는다.",
+      "next": "[명시 합성35 학습반복1440] 오류행 중단과 제외는 아직 선택하지 않았다. 두 선택의 차이와 다음 확인 안내만 구체화한다. 실제 처리·구현·배포는 하지 않는다.",
+      "checks": "답변하지 않은 선택을 완료·확정으로 표시하지 않는다."
+    },
+    "originCallerBefore": {
+      "id": "subtree-task-T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+      "tag": "BUTTON",
+      "text": "[합성32·처음 남긴 요청] 오류행에서 중단할지 제외하고 계속할지 아직 정하지 않았어요. 먼저 물어봐 주세요.",
+      "rect": {
+        "x": 1111,
+        "y": 378.609375,
+        "width": 259,
+        "height": 72,
+        "top": 378.609375,
+        "right": 1370,
+        "bottom": 450.609375,
+        "left": 1111
+      },
+      "clip": {
+        "l": 1099,
+        "t": 302.28125,
+        "r": 1382,
+        "b": 830
+      },
+      "full": true,
+      "positive": true,
+      "hit": true,
+      "expanded": null,
+      "open": null,
+      "value": null
+    },
+    "originCallerAfter": {
+      "id": "subtree-task-T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+      "tag": "BUTTON",
+      "text": "[합성32·처음 남긴 요청] 오류행에서 중단할지 제외하고 계속할지 아직 정하지 않았어요. 먼저 물어봐 주세요.",
+      "rect": {
+        "x": 1111,
+        "y": 378.609375,
+        "width": 259,
+        "height": 72,
+        "top": 378.609375,
+        "right": 1370,
+        "bottom": 450.609375,
+        "left": 1111
+      },
+      "clip": {
+        "l": 1099,
+        "t": 302.28125,
+        "r": 1382,
+        "b": 830
+      },
+      "full": true,
+      "positive": true,
+      "hit": true,
+      "expanded": null,
+      "open": null,
+      "value": null
+    },
+    "pageBefore": [
+      0,
+      0
+    ],
+    "pageAfter": [
+      0,
+      0
+    ],
+    "cameraBefore": "matrix(0.950877, 0, 0, 0.950877, 24, 94.807)",
+    "cameraAfter": "matrix(0.950877, 0, 0, 0.950877, 24, 94.807)"
+  },
+  "gateExit": 0
+}

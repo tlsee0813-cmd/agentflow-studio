@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_33df7a80-d848-40e1-a535-80e809d0f482",
+  "taskId": "T_5ff4c54d-e118-4174-90ba-1f222d8b03a4",
+  "returnId": "H_5c4b586a-57fb-4fa7-a642-a0caf27f0dd1",
+  "report": "[명시 합성35 학습반복1440] 정적 미리보기의 정확한 파일 연결만 확인한다. 오류행 방식은 미결이며 실제 AI·실행·개발·검증 완료가 아니다.",
+  "evidence": null,
+  "understanding": null
+}

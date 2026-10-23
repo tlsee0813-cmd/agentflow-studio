@@ -1,0 +1,112 @@
+{
+  "commit": "81f8a32dcd12a6004274d38bb6edf1ff9a5cdafb",
+  "tree": "dde75a037831fb59aeb90f650bca7a397765f316",
+  "files": [
+    {
+      "path": "continuity/scripts/build-static.mjs",
+      "bytes": 3601,
+      "sourceAndDiskSHA256": "703bde0b6dba726601618aa17490cce15e93777f38e97071a35eae20a765dc3a"
+    },
+    {
+      "path": "continuity/scripts/build.mjs",
+      "bytes": 1064,
+      "sourceAndDiskSHA256": "f369849e8bb4383052a67abe8b813c5d951a995fe784b9b6ea668356194cf8f0"
+    },
+    {
+      "path": "continuity/scripts/check.mjs",
+      "bytes": 1152,
+      "sourceAndDiskSHA256": "1c57db78d77ce90b69cc83278ded96ba6cf767a52a4f7516b25d2afd0316cf36"
+    },
+    {
+      "path": "continuity/scripts/compiler.mjs",
+      "bytes": 561,
+      "sourceAndDiskSHA256": "1c9b3dceb532fb94af6c50f3a1c4aeb6676f5783ef1994f8d2d39d379a5063e8"
+    },
+    {
+      "path": "continuity/src/client/app.ts",
+      "bytes": 280577,
+      "sourceAndDiskSHA256": "a104d3dc3210f841ac4275e8095b5a597a4d41e0d29809da338f672637bf6a09"
+    },
+    {
+      "path": "continuity/src/client/presentation.ts",
+      "bytes": 8406,
+      "sourceAndDiskSHA256": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639"
+    },
+    {
+      "path": "continuity/src/client/runtime-static.ts",
+      "bytes": 2101,
+      "sourceAndDiskSHA256": "e005abaa05cea399979f9b52e700e85544ec5afdadb71cf005185532ab1dcfdc"
+    },
+    {
+      "path": "continuity/src/client/runtime.ts",
+      "bytes": 2934,
+      "sourceAndDiskSHA256": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd"
+    },
+    {
+      "path": "continuity/src/client/static-target-preview.ts",
+      "bytes": 809,
+      "sourceAndDiskSHA256": "057f2c36e39bfb29e826f901bd05be797d328291b895514289fa5a6ae3c782b9"
+    },
+    {
+      "path": "continuity/src/client/static-target.ts",
+      "bytes": 699,
+      "sourceAndDiskSHA256": "a587ff5e5ed439d6f035a1cd76e139873df4b60a647d6ba93e1f09e44158913b"
+    },
+    {
+      "path": "continuity/src/shared/attention.ts",
+      "bytes": 6051,
+      "sourceAndDiskSHA256": "affaa930475942a73535ee4c995931ae5853ef308423175cfbd3835489ff770d"
+    },
+    {
+      "path": "continuity/src/shared/domain.ts",
+      "bytes": 75793,
+      "sourceAndDiskSHA256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf"
+    },
+    {
+      "path": "continuity/src/shared/guidance.ts",
+      "bytes": 6903,
+      "sourceAndDiskSHA256": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18"
+    },
+    {
+      "path": "continuity/src/shared/hierarchy.ts",
+      "bytes": 2591,
+      "sourceAndDiskSHA256": "c9e5a4d9679e6720bc5cd3b86e624904d17a5a7d22b8806d574640ddad605ffa"
+    },
+    {
+      "path": "continuity/src/shared/mock.ts",
+      "bytes": 17369,
+      "sourceAndDiskSHA256": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2"
+    },
+    {
+      "path": "continuity/src/shared/outcome.ts",
+      "bytes": 4625,
+      "sourceAndDiskSHA256": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd"
+    },
+    {
+      "path": "continuity/src/shared/plan-facts.ts",
+      "bytes": 4322,
+      "sourceAndDiskSHA256": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44"
+    },
+    {
+      "path": "continuity/src/shared/storage.ts",
+      "bytes": 11615,
+      "sourceAndDiskSHA256": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5"
+    },
+    {
+      "path": "continuity/src/shared/types.ts",
+      "bytes": 16360,
+      "sourceAndDiskSHA256": "16202db1c238e917c548950543686046977c21c61de56b30d6f4140aad607d47"
+    },
+    {
+      "path": "continuity/src/shared/validation.ts",
+      "bytes": 46546,
+      "sourceAndDiskSHA256": "cc958cf61b54aa9d552aab07ddaa8c7e6d60ec5e61f7218cf597dd608e9b94df"
+    },
+    {
+      "path": "continuity/tests/static_browser.py",
+      "bytes": 33974,
+      "sourceAndDiskSHA256": "339ffae8c756bd62fd6113420e8c35721eed3be5400cecab8fcf828e4b0b1b54"
+    }
+  ],
+  "method": "git archive exact commit; original source unchanged after build/UI; static served bytes verified in runtime.json"
+}

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "continuity/tests/static_browser.py"
+  ],
+  "startUTC": "2026-10-23T00:51:24.033951+00:00",
+  "endUTC": "2026-10-23T00:51:44.240295+00:00",
+  "actualChildExit": 0,
+  "outerExit": 0
+}
