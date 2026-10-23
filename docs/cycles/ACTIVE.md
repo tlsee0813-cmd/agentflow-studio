@@ -1,6 +1,6 @@
 # AgentFlow 현재 상태
 
-2026-10-24 KST. **새 단일 총괄이 인수를 완료하고36/37 연결 흐름을 진행 중이다. 수용·체험 기준은 아직35.** 인계 SHA4a9873a5와 원격 checkpoint·ACTIVE·QUESTIONS를 대조했고 이후 변경은 없었다. 현재 진행은 이 파일, 인계 시점의 정확한 기준·워커 회수·판단은 [새 총괄 시작 문서](../COORDINATOR_HANDOFF_2026-10-24_KO.md), 질문 축적은 [QUESTIONS](../QUESTIONS.md), 제품·배포 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)에 둔다. 과거 RESULT/AUTHOR는 당시 판단이며 이 파일을 대신하지 않는다.
+2026-10-24 KST. **새 단일 총괄이 인수를 완료하고36/37 연결 흐름을 진행 중이다. 제품36 좁은 수용·통합, 체험본은35.** 인계 SHA4a9873a5와 원격 checkpoint·ACTIVE·QUESTIONS를 대조했고 이후 변경은 없었다. 현재 진행은 이 파일, 인계 시점의 정확한 기준·워커 회수·판단은 [새 총괄 시작 문서](../COORDINATOR_HANDOFF_2026-10-24_KO.md), 질문 축적은 [QUESTIONS](../QUESTIONS.md), 제품·배포 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)에 둔다. 과거 RESULT/AUTHOR는 당시 판단이며 이 파일을 대신하지 않는다.
 
 ## 인수 후 접수·회수
 
@@ -16,7 +16,7 @@ GitHub 연결 오류는 사용자 확인 후 재조회로 해소했다. Code Rev
 ## 수용된 제품과 반환 후보
 
 - **35 수용·비공개 PC 체험본 게시 완료.** [결과](2026-10-23-isolated-preview-35/RESULT.md) · [체험본](https://agentflow-studio-pc-preview-20261023.eagerllama11.chatgpt.site). checkpoint의 app tree는 `775a33991c4b81104737ac1f0ec5b924c979a975`이며 MOCK·브라우저 저장이다. 36/37은 아직 여기에 없다.
-- **36 fix2 반환·양OS CI 통과·미병합.** `product/map-priority-36` head `38beb55922e3e982f0f32fddacd5e18a5e157a15`, [PR20](https://github.com/tlsee0813-cmd/agentflow-studio/pull/20) draft. 이유 줄의 항목별 줄바꿈 금지를 제거해 구상 잘림을 수정했다. 정확 head의 run39886454270 Ubuntu/Windows success를 Code Review로 확인했다. a17의 Ubuntu6실패는 과거 실패다. 기존 Cloud154 검증은 pre-fix2이고143 재현 시도는 다운로드/캐시 제한으로 NOT_RUN 반환이다. 최신 fix2의 최종 화면 판단·수용은 남았다.
+- **36 fix2 독립 검증·수용·통합.** `product/map-priority-36` head `38beb55922e3e982f0f32fddacd5e18a5e157a15`, [PR20](https://github.com/tlsee0813-cmd/agentflow-studio/pull/20) merged. 이유 줄의 항목별 줄바꿈 금지를 제거해 구상 잘림을 수정했다. 정확 head의 run39886454270 Ubuntu/Windows success를 Code Review로 확인했다. a17의 Ubuntu6실패는 과거 실패다. 기존 Cloud154 검증은 pre-fix2이고143 재현 시도는 다운로드/캐시 제한으로 NOT_RUN 반환이다. 최신 fix2는 별도Windows·양PC 실행/화면 검증 후 좁게 수용했다. merge0a8bb249·공유근거16b797e. [판단](2026-10-24-entry-integration-38/DECISION.md). 작은 글씨 한계는 유지.
 - **37 구현 반환·독립 결합 검증 전.** `product/project-entry-37` head `20bffe5fe33f11b29870a9025d2ac0089837abfb`. 첫 홈/비저장 공간 예제/부분·작업 왕복 후보. 36 fix2 미포함. 작성자 보고의 지도 복귀 안내가1280 가용 높이를 줄이는 장면을 먼저 확인·수정한다. author 통과를 최종 수용으로 읽지 않는다.
 - **34 후보 보류 종료.** [반례](2026-10-23-map-signals-34/RESULT.md). 26/28과 함께 가독성 판단 근거로 보존한다. GUIDE107 실제 AI 의미 품질 HOLD도 유지한다.
 
