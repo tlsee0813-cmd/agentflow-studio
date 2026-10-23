@@ -1,0 +1,91 @@
+{
+  "sha": "38beb55922e3e982f0f32fddacd5e18a5e157a15",
+  "pc": [
+    1440,
+    900
+  ],
+  "default": {
+    "scale": 0.8467742919921875,
+    "card": {
+      "x": 466.8870849609375,
+      "y": 333.890625,
+      "width": 203.225830078125,
+      "height": 152.41937255859375,
+      "bottom": 486.30999755859375
+    },
+    "body": {
+      "x": 496.5242004394531,
+      "y": 341.5115966796875,
+      "width": 162.58065795898438,
+      "height": 88.06451416015625,
+      "bottom": 429.57611083984375
+    },
+    "note": {
+      "x": 496.5242004394531,
+      "y": 400.7857971191406,
+      "width": 162.58065795898438,
+      "height": 25.403228759765625,
+      "bottom": 426.18902587890625
+    },
+    "reason": {
+      "x": 477.8951721191406,
+      "y": 431.2696533203125,
+      "width": 181.20968627929688,
+      "height": 23.709686279296875,
+      "bottom": 454.9793395996094
+    },
+    "reasonText": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+    "noteText": "[합성34 구상] P는 하위 기록을 모은다.",
+    "noteLayoutHeight": 30,
+    "reasonLayoutHeight": 28.000007207960472,
+    "bodyLayoutHeight": 103.99998558407906,
+    "noteClearance": 3.9999855840790572,
+    "reasonStyle": {
+      "wordBreak": "keep-all",
+      "whiteSpace": "normal"
+    },
+    "font": "Inter, Pretendard, \"Noto Sans KR\", \"Noto Sans CJK KR\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+  },
+  "zoomed": {
+    "scale": 1.0584676106770834,
+    "card": {
+      "x": 375.85888671875,
+      "y": 393.265625,
+      "width": 254.0322265625,
+      "height": 190.524169921875,
+      "bottom": 583.789794921875
+    },
+    "body": {
+      "x": 412.9052429199219,
+      "y": 402.7918395996094,
+      "width": 203.22579956054688,
+      "height": 110.08065795898438,
+      "bottom": 512.8724975585938
+    },
+    "note": {
+      "x": 412.9052429199219,
+      "y": 476.88458251953125,
+      "width": 203.22579956054688,
+      "height": 31.7540283203125,
+      "bottom": 508.63861083984375
+    },
+    "reason": {
+      "x": 389.61895751953125,
+      "y": 514.9893798828125,
+      "width": 226.5120849609375,
+      "height": 29.63714599609375,
+      "bottom": 544.6265258789062
+    },
+    "reasonText": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+    "noteText": "[합성34 구상] P는 하위 기록을 모은다.",
+    "noteLayoutHeight": 30,
+    "reasonLayoutHeight": 28.000049975204607,
+    "bodyLayoutHeight": 104.0000249876023,
+    "noteClearance": 4.000015376986034,
+    "reasonStyle": {
+      "wordBreak": "keep-all",
+      "whiteSpace": "normal"
+    },
+    "font": "Inter, Pretendard, \"Noto Sans KR\", \"Noto Sans CJK KR\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+  }
+}

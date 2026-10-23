@@ -1,0 +1,12 @@
+✔ MAP36 reasons are presence only, in a fixed order, for the owned set (51.0884ms)
+✔ MAP36 only an active question without a recorded reply is a current one; relations never widen a parent (26.5442ms)
+✔ MAP36 a this-tab update is only an arrival in this tab; older-basis means a description; reading writes nothing (53.0998ms)
+✔ MAP36 fix1 a part with only a report (no question, no description) still has a records entry (4.3069ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 281.2395

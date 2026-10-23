@@ -1,0 +1,17 @@
+test_01_open_work_in_leaf (__main__.MapPriority36.test_01_open_work_in_leaf) ... ok
+test_02_parent_own_work_and_update_with_idea (__main__.MapPriority36.test_02_parent_own_work_and_update_with_idea) ... ok
+test_03_parent_own_work_and_update_without_idea (__main__.MapPriority36.test_03_parent_own_work_and_update_without_idea) ... ok
+test_04_without_older_basis (__main__.MapPriority36.test_04_without_older_basis) ... ok
+test_05_exact_records_entry_and_return (__main__.MapPriority36.test_05_exact_records_entry_and_return) ... ok
+test_06_reports_only_leaf_and_parent_keep_the_records_entry (__main__.MapPriority36.test_06_reports_only_leaf_and_parent_keep_the_records_entry) ... ok
+test_01_open_work_in_leaf (__main__.MapPriority36Wide.test_01_open_work_in_leaf) ... ok
+test_02_parent_own_work_and_update_with_idea (__main__.MapPriority36Wide.test_02_parent_own_work_and_update_with_idea) ... ok
+test_03_parent_own_work_and_update_without_idea (__main__.MapPriority36Wide.test_03_parent_own_work_and_update_without_idea) ... ok
+test_04_without_older_basis (__main__.MapPriority36Wide.test_04_without_older_basis) ... ok
+test_05_exact_records_entry_and_return (__main__.MapPriority36Wide.test_05_exact_records_entry_and_return) ... ok
+test_06_reports_only_leaf_and_parent_keep_the_records_entry (__main__.MapPriority36Wide.test_06_reports_only_leaf_and_parent_keep_the_records_entry) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 43.752s
+
+OK

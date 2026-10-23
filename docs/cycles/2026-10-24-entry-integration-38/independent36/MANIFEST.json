@@ -1,0 +1,80 @@
+{
+  "sha": "38beb55922e3e982f0f32fddacd5e18a5e157a15",
+  "os": "Microsoft Windows NT 10.0.26200.0",
+  "node": "v24.19.0",
+  "python": "3.12.14",
+  "playwright": "1.57.0",
+  "chrome": "155.0.8059.85",
+  "files": [
+    {
+      "file": "branch31-browser.log",
+      "bytes": 1399,
+      "sha256": "000191af10d1abdf41348cd586bf9ae40a532d935d57e8a3b25eceb7dffa1318"
+    },
+    {
+      "file": "browser-environment.json",
+      "bytes": 195,
+      "sha256": "49e75e378d4c4cb2884c0bbb6f6c03c0b5ab267e1aed568e2a4cd61ecaaacf02"
+    },
+    {
+      "file": "hierarchy18-browser.log",
+      "bytes": 118,
+      "sha256": "952a80d73cfbe5b18b1e2518289354667ec67fdf7eb9ed5cc788a7fd99d744f3"
+    },
+    {
+      "file": "independent-1280-geometry.json",
+      "bytes": 2964,
+      "sha256": "e0f81e769bb443778d141bce5bdbe88f72a71454bfd33ab04fe1bcbf49eb64c9"
+    },
+    {
+      "file": "independent-1440-geometry.json",
+      "bytes": 2933,
+      "sha256": "81244bf67d52c0ec6e43a58a213365bd4bd52e04bdce371904c01b89ea75eded"
+    },
+    {
+      "file": "independent-probe-final.log",
+      "bytes": 249,
+      "sha256": "49075e375fc65321c49c6e74eae08eb77ac0d9c63e55e87ecfc5eadf7691165d"
+    },
+    {
+      "file": "independent-probe.py",
+      "bytes": 3053,
+      "sha256": "951099cada3976916a6d0e01b1878bf88c64031bffc0f30e2c31c558768ddb99"
+    },
+    {
+      "file": "map36-browser.log",
+      "bytes": 1509,
+      "sha256": "b9e97bba05df2840d69f1f8c52fcc537d220a5711eb41437e21468b5fe5156a6"
+    },
+    {
+      "file": "map36-node.log",
+      "bytes": 566,
+      "sha256": "ad5afa250cce9dee6e083f0aa1e144e2cab5d591960b5037ca1626b3c3d70955"
+    },
+    {
+      "file": "REPORT.md",
+      "bytes": 5545,
+      "sha256": "e5b7c8c41fbe347be62474363ee63f2010526fed0a1e5c2d231518f362050352"
+    },
+    {
+      "file": "selected-1280-default.png",
+      "bytes": 121118,
+      "sha256": "0419abeab75b717f4a8347011957cefd66288626fa8e1162fc1dbaa6c5dba756"
+    },
+    {
+      "file": "selected-1280-parent-zoomed.png",
+      "bytes": 15977,
+      "sha256": "ceedcf911e3078f9b7e8da8af6cc74dcc3e3c092294e78f1c78e939ee365d179"
+    },
+    {
+      "file": "selected-1440-default.png",
+      "bytes": 151462,
+      "sha256": "ede6ab6a305de0a3bf91682bf025575c996e4e431a2c22ae1d3f79efc246f0d5"
+    },
+    {
+      "file": "selected-1440-parent-zoomed.png",
+      "bytes": 20143,
+      "sha256": "449d422bee43f321cb5ea3069540d8df7555074eff336af33da2dcbb252dfa94"
+    }
+  ]
+}

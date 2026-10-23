@@ -1,0 +1,7 @@
+test_independent_scene (__main__.Probe.test_independent_scene) ... ok
+test_independent_scene (__main__.ProbeWide.test_independent_scene) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 7.573s
+
+OK
