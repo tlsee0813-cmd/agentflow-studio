@@ -39,6 +39,10 @@ let config:RuntimeConfig|null=null;
 let controller:AbortController|null=null;
 // View preferences are ephemeral. They never enter the persisted project or request schema.
 let view:'work'|'history'|'space'|'area'|'task'='work',contextOpen=false,hasSaved=false,memoryDirty=false;
+// ENTRY37-F1: the 'continue' notice explains the work view it was given on and ends when that view is left (map, part,
+// request, history, list), so it never takes room from the map, whose height follows what sits above it. Other notices
+// keep their own life; typing already ends any notice (domain change()). In memory only, like the notice itself.
+let workNotice:string|null=null;
 // FLOW090: where this tab looks in the plan space, and which area the next request is written for. Per tab, never
 // project data; looking around never changes currentTaskId (the work the user continues).
 let viewArea:string|null=null;
@@ -196,7 +200,7 @@ function resetEphemeral() {
   // USE106: this unsubmitted entry field belongs to the project being left, never to the next project.
   $<HTMLTextAreaElement>('brief-input').value='';$<HTMLButtonElement>('brief-start').disabled=true;
   controller?.abort();controller=null;for(const g of guides.values())g.pending?.controller.abort();guides.clear();selectedReturnTaskId=undefined;projectEpoch++;resultRead++;recoveryRead++;
-  resultSelection=null;resultMessage='';lastFileExport=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
+  resultSelection=null;resultMessage='';lastFileExport=null;workNotice=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
   receivedAreas.clear();
   understandingEdits.clear();workReference=null;lastReceipt=null;located=null;
   mapView=null;mapSelected=null;initialMapFitPending=false;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};panelMode='area';recordsReturnNotice='';backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
@@ -456,10 +460,13 @@ function continueTask(id:string) {
   if(!same)commit(focusTask(project,id));view='work';render();
   // PC12: say which record is now edited when it is not the request that was read.
   const read=project.tasks.find(x=>x.id===id),no=(x:Task)=>`작업 ${pad(project.tasks.findIndex(t=>t.id===x.id)+1)}`;
-  if(read&&current&&same&&current.id!==id){project={...project,notice:`${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.`};renderStatus();}
-  else if(read&&current&&!same){project={...project,notice:`${no(read)}로 이어가기 · 고치는 작업문은 ${no(read)}의 것이에요. 전에 이어가던 ${no(current)}은 그대로 남아요.`};renderStatus();}
-  const title=$('context-title');title.style.scrollMarginTop=`${(document.querySelector('.feedback-stack')?.getBoundingClientRect().height??0)+24}px`;
-  title.focus({preventScroll:true});title.scrollIntoView({block:'start'});
+  if(read&&current&&same&&current.id!==id){project={...project,notice:`${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.`};workNotice=project.notice;renderStatus();}
+  else if(read&&current&&!same){project={...project,notice:`${no(read)}로 이어가기 · 고치는 작업문은 ${no(read)}의 것이에요. 전에 이어가던 ${no(current)}은 그대로 남아요.`};workNotice=project.notice;renderStatus();}
+  // ENTRY37-F1: the work's place bar (its way back to the map) starts below the sticky notice instead of under it; the
+  // title keeps the focus. Without a place bar (no space yet) the title is the start, as before.
+  const title=$('context-title'),place=$('work-place'),start=place.hidden?title:place;
+  start.style.scrollMarginTop=`${(document.querySelector('.feedback-stack')?.getBoundingClientRect().height??0)+(start===title?24:12)}px`;
+  title.focus({preventScroll:true});start.scrollIntoView({block:'start'});
 }
 /** Explicit: write the next request for this area (null = no area). The only way, besides the composer's own choice, to set the target. */
 function writeInArea(id:string|null) {
@@ -510,6 +517,7 @@ function reportBody(source:Source):string {
   return source.text;
 }
 function renderStatus() {
+  if(workNotice!==null&&(route==='projects'||view!=='work')){if(project.notice===workNotice)project={...project,notice:null};workNotice=null;}
   $('notice').textContent=project.notice??'';$('notice').hidden=!project.notice;
   $('storage-error').textContent=storageError;$('storage-error').hidden=!storageError;
   $('saved').textContent=route==='example'?'예제 · 저장하지 않음':pendingSave||draining?'저장 중…':hasSaved?'이 브라우저에 저장됨':'이 브라우저에 자동 저장';

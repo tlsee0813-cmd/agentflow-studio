@@ -12,6 +12,29 @@ NO_LOCKS='Object.defineProperty(Navigator.prototype,"locks",{get(){return undefi
 # Test-only identifiers that must not reach the default screens of the example.
 TEST_IDS=re.compile(r'합성|E0\d|검사\s?\d|H_[0-9a-f]{8}|T_[0-9a-f]{8}|A_[0-9a-f]{8}|MOCK 규칙')
 subprocess.run(['node',str(base.ROOT/'tests/home15-fixtures.mjs'),str(base.OUT)],check=True)
+# ENTRY37-F1: the same card-geometry reader as map-priority36 (every box inside the card and its clips, controls hit).
+CARD=r'''id=>{const n=document.querySelector(`.area-node[data-area-id="${id}"]`);if(!n)return null;const c=n.getBoundingClientRect();
+ const box=e=>{const r=e.getBoundingClientRect();let l=0,t=0,rr=innerWidth,b=innerHeight;
+  for(let p=e.parentElement;p;p=p.parentElement){const s=getComputedStyle(p),q=p.getBoundingClientRect(),sx=q.width/(p.offsetWidth||1),sy=q.height/(p.offsetHeight||1);
+   if(/auto|scroll|hidden|clip/.test(s.overflowX)){l=Math.max(l,q.left+p.clientLeft*sx);rr=Math.min(rr,q.left+(p.clientLeft+p.clientWidth)*sx)}
+   if(/auto|scroll|hidden|clip/.test(s.overflowY)){t=Math.max(t,q.top+p.clientTop*sy);b=Math.min(b,q.top+(p.clientTop+p.clientHeight)*sy)}}
+  const inside=r.width>0&&r.height>0&&r.left>=Math.max(l,c.left)-.5&&r.right<=Math.min(rr,c.right)+.5&&r.top>=Math.max(t,c.top)-.5&&r.bottom<=Math.min(b,c.bottom)+.5;
+  const control=e.matches('button'),h=control?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
+  return {sel:e.id||e.className,text:(e.textContent||'').replace(/\s+/g,' ').trim().slice(0,60),inside,hit:control?!!h&&e.contains(h):null}};
+ const parts=[...n.querySelectorAll('.area-card-name,.area-card-path,.area-card-note,.tag,.node-info,.node-enter,.branch-toggle,.branch-signals,.branch-signals>span')];
+ const s=n.querySelector('.branch-signals'),k=c.height/n.offsetHeight,lines=e=>e?Math.round(e.getBoundingClientRect().height/k/parseFloat(getComputedStyle(e).lineHeight)):0;
+ return {height:n.offsetHeight,left:n.style.left,top:n.style.top,boxes:parts.map(box),text:n.textContent.replace(/\s+/g,' '),
+  signal:s?s.textContent.replace(/\s+/g,' ').trim():null,aria:s?.getAttribute('aria-label')??null,band:[...n.querySelectorAll('.area-node-foot>*')].map(e=>e.textContent.trim()),
+  nameLines:lines(n.querySelector('.area-card-name')),noteLines:lines(n.querySelector('.area-card-note'))}}'''
+# What the work view's notice covers right after continuing: the title must stay readable; text above it is recorded.
+COVER=r'''()=>{const n=document.getElementById('notice').getBoundingClientRect(),t=document.getElementById('context-title'),r=t.getBoundingClientRect();
+ const h=document.elementFromPoint(r.left+Math.min(r.width/2,40),r.top+r.height/2);
+ const under=[...document.querySelectorAll('#work-view p,#work-view h2,#work-view h3,#work-view span,#work-view button')].filter(e=>{const b=e.getBoundingClientRect();
+  return b.height>0&&b.bottom>n.top&&b.top<n.bottom&&b.right>n.left&&b.left<n.right&&e.textContent.trim()&&!e.closest('#notice')}).map(e=>e.textContent.trim().slice(0,40));
+ return {notice:{top:n.top,bottom:n.bottom},title:{top:r.top,bottom:r.bottom},titleHit:!!h&&t.contains(h),under}}'''
+SPACE=r'''()=>{const m=document.getElementById('space-map'),r=m.getBoundingClientRect(),n=document.getElementById('notice'),o=document.getElementById('map-offscreen');
+ return {map:{top:r.top,bottom:r.bottom,h:r.height},vh:innerHeight,notice:n.hidden?null:n.textContent,offscreen:!!o&&!o.hidden,
+  areas:[...document.querySelectorAll('.area-node')].map(e=>e.dataset.areaId),matrix:document.getElementById('space-plane').style.transform}}'''
 
 class Entry37(unittest.TestCase):
     WIDTH,HEIGHT=1280,720
@@ -166,6 +189,67 @@ class Entry37(unittest.TestCase):
                 expect(tab.locator('#projects-view')).to_be_visible();expect(tab.locator('.project-card[data-entry-id="legacy"]')).to_be_visible()
                 self.assertEqual(self.raw('agentflow.idea015.project.v1',tab),legacy);self.assertIsNone(self.raw(WORKSPACE,tab))
             ctx.close()
+
+    # ---------- ENTRY37-F1: the continue notice belongs to the work view it explained ----------
+    def space_state(self,label):
+        v=self.page.evaluate(SPACE);cards={a:self.page.evaluate(CARD,a) for a in v['areas']}
+        rec={'label':label,'width':self.WIDTH,**{k:v[k] for k in ['map','vh','notice','offscreen','matrix']},
+             'bad':{a:[b for b in c['boxes'] if not b['inside'] or b['hit'] is False] for a,c in cards.items()},
+             'names':{a:c['text'][:24] for a,c in cards.items()},'reasons':{a:c['signal'] for a,c in cards.items()}}
+        with open(base.OUT/'entry37-f1-observations.jsonl','a',encoding='utf-8') as fh:fh.write(json.dumps(rec,ensure_ascii=False)+'\n')
+        return rec
+    def record_cover(self,way,cover):
+        with open(base.OUT/'entry37-f1-observations.jsonl','a',encoding='utf-8') as fh:fh.write(json.dumps({'label':f'work-{way}','width':self.WIDTH,**cover},ensure_ascii=False)+'\n')
+    def assert_map_room(self,before,after,label):
+        self.assertIsNone(after['notice'],f'{label}: the continue notice is not carried onto the map')
+        self.assertLessEqual(abs(after['map']['h']-before['map']['h']),1,f'{label}: same available map height as before leaving')
+        self.assertLessEqual(after['map']['bottom'],after['vh']+.5,f'{label}: the map frame ends inside the window')
+        self.assertFalse(after['offscreen'],f'{label}: no part is pushed off the map')
+        self.assertEqual(after['bad'],{a:[] for a in after['bad']},f'{label}: every name, membership, idea, reason and control inside its card and the map clip')
+        self.assertEqual([after['names'],after['reasons']],[before['names'],before['reasons']],f'{label}: same names and reasons')
+        self.assertEqual(after['matrix'],before['matrix'],f'{label}: same camera (with the checks above, not alone)')
+    def continue_from_part(self):
+        p=self.page;p.locator('.node-enter[aria-label="시간 고르기 영역 열기"]').click();expect(p.locator('#area-tasks')).to_be_visible()
+        p.locator('#area-tasks .task-open-link').first.click();expect(p.locator('#task-view-continue')).to_be_visible()
+        p.locator('#task-view-continue').click();expect(p.locator('#current-work')).to_be_visible()
+        notice=p.locator('#notice');expect(notice).to_be_visible();expect(notice).to_contain_text('이어가기')
+        return notice.inner_text()
+
+    def test_05_the_continue_notice_ends_with_its_work_view_and_never_shrinks_the_map(self):
+        p=self.page;self.open_example();before=self.space_state('before')
+        self.assertIsNone(before['notice']);self.assertFalse(before['offscreen'])
+        self.assertEqual(before['bad'],{a:[] for a in before['bad']},'start: every card part inside');self.shot('11-f1-before')
+        # Three real ways back: the work-place crumb, the sidebar, and '출발한 지도 보기로' (back to the part it started from)
+        # followed by that screen's own '전체 공간' crumb.
+        for way,controls in [('crumb',['#place-space']),('sidebar',['#nav-space']),('origin',['#work-return-origin','#space-crumb-root'])]:
+            with self.subTest(way):
+                # An unsent draft typed in the work view first (typing ends any earlier notice: existing change() rule).
+                draft=f'지도 복귀 뒤에도 남는 초안 · {way}'
+                p.locator('#nav-work').click();expect(p.locator('#work-view')).to_be_visible()
+                p.locator('#compose-panel').evaluate('(e)=>e.open=true');p.locator('#draft').fill(draft)
+                p.locator('#nav-space').click();expect(p.locator('#space-map')).to_be_visible()
+                text=self.continue_from_part() # the work view shows its continue notice while it is open
+                expect(p.locator('#draft')).to_have_value(draft);self.shot(f'12-f1-work-{way}')
+                cover=p.evaluate(COVER);self.record_cover(way,cover)
+                with self.subTest(f'{way}: work view under the notice'):
+                    self.assertTrue(cover['titleHit'],'the continued work title is not covered by the notice')
+                    self.assertEqual(cover['under'],[],'no text or control of the work view (its way back included) under the notice')
+                for control in controls:
+                    expect(p.locator(control)).to_be_visible();p.locator(control).click()
+                    if control=='#work-return-origin':
+                        expect(p.locator('#space-view')).to_be_visible();expect(p.locator('#notice')).to_be_hidden() # left the work view
+                expect(p.locator('#space-view')).to_be_visible();expect(p.locator('#space-map')).to_be_visible();p.wait_for_timeout(50)
+                after=self.space_state(f'after-{way}');self.shot(f'13-f1-after-{way}')
+                with self.subTest(f'{way}: map room after the return'):
+                    self.assert_map_room(before,after,way);self.assertNotIn(text,p.locator('main').inner_text())
+                p.locator('#nav-work').click();expect(p.locator('#current-work')).to_be_visible()
+                expect(p.locator('#draft')).to_have_value(draft);expect(p.locator('#notice')).to_be_hidden()
+                self.assertEqual(self.keys(),[],'nothing from the example is written');self.assertIsNone(self.session(MAP_KEY))
+                p.locator('#nav-space').click();expect(p.locator('#space-map')).to_be_visible()
+        p.locator('#example-close').click();expect(p.locator('#projects-view')).to_be_visible()
+        expect(p.locator('#project-list .project-card')).to_have_count(0);self.assertEqual(self.keys(),[])
+        p.locator('#new-project').click();expect(p.locator('#empty')).to_be_visible();expect(p.locator('#draft')).to_have_value('')
+        expect(p.locator('#notice')).to_be_hidden();self.assertEqual(self.keys(),[])
 
 class Entry37Wide(Entry37):
     WIDTH,HEIGHT=1440,900
