@@ -1,0 +1,1 @@
+First exec attempt was blocked by platform: No usable execution environment is available. environment_status separately said connected/running. After the environment context became available, existing directories and Node v22.16.0 worked. No installation, new environment creation, policy changes, or product repair. This is not a browser/product failure.

@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/map34-baseline/ui/controller.py"
+  ],
+  "startUTC": "2026-10-23T00:15:16.353837+00:00",
+  "endUTC": "2026-10-23T00:23:30.862332+00:00",
+  "actualChildExit": 0,
+  "combinedLogSHA256": "e80381f25c9a04396d9d77baf106798a4a28a32271d1cafea91482f8003d2963"
+}

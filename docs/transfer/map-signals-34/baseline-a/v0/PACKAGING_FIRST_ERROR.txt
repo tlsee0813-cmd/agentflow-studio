@@ -1,0 +1,2 @@
+actual exit 1: AssertionError ('mixed-1280-parent-records-entry.png', [])
+Actual filename: mixed-1280-parent-exact-records.png. Filename-only correction; UI run unchanged. Subsequent packaging/gate exit0.

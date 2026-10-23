@@ -1,0 +1,61 @@
+{
+  "scope": "baseline only; no candidate comparison",
+  "checks": [
+    {
+      "scene": "T2-1280",
+      "readEnvelopeByteEqual": true,
+      "sha256": "da327d1cc685e9bf68f43cf426f1d811b6274e94116a65aaa8340f13650651ba"
+    },
+    {
+      "scene": "T2-1440",
+      "readEnvelopeByteEqual": true,
+      "sha256": "406b09e035de685485b2845ac505eec161228c7ca05d3f4adce620c0c64accb6"
+    },
+    {
+      "scene": "mixed-1280",
+      "readEnvelopeByteEqual": true,
+      "sha256": "ee55b1ececf6a01d426e4e95d50a0e8b15d7b7c88a874c71f010816aedcb9c35"
+    },
+    {
+      "scene": "mixed-1440",
+      "readEnvelopeByteEqual": true,
+      "sha256": "d7876643f793329c8ac60faaa4b0d4181ca5259012447e4755f3790627cef3eb"
+    },
+    {
+      "scene": "mixed-1280-real-receipt",
+      "newTaskCount": 1,
+      "currentAndDraftPreserved": true,
+      "oldTasksSourcesAndBasesPreserved": true,
+      "spaceOnlyUnderstandingChanged": true,
+      "exactH": "H_SYN34_P_CURRENT",
+      "exactParent": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "newTask": "T_83b14fbf-b089-41d7-b5e9-b3bad4a9cf06"
+    },
+    {
+      "scene": "mixed-1440-real-receipt",
+      "newTaskCount": 1,
+      "currentAndDraftPreserved": true,
+      "oldTasksSourcesAndBasesPreserved": true,
+      "spaceOnlyUnderstandingChanged": true,
+      "exactH": "H_SYN34_P_CURRENT",
+      "exactParent": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "newTask": "T_c98a5269-b1ed-41ea-9ac3-91aef43ca3dd"
+    }
+  ],
+  "semanticGateExit": 0,
+  "controllerChildExit": 0,
+  "externalTerminalExit": 0,
+  "serverExit": -15,
+  "pageerrors": [],
+  "knownNegativeObservations": [
+    "leaf record signal absent",
+    "long title clamp",
+    "receipt notice shifts map top +44px; camera unchanged"
+  ],
+  "notRun": [
+    "candidate34",
+    "all suites",
+    "32 whole workflow",
+    "human usability"
+  ]
+}
