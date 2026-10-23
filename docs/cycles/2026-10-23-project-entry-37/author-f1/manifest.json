@@ -1,0 +1,445 @@
+{
+ "note": "ENTRY37-F1 representative screens; Chromium 141.0.7390.37 headless, Playwright 1.57.0, Node v22.22.0, MOCK, example only (nothing saved). Not usability evidence.",
+ "files": [
+  {
+   "file": "f1-1280-before-map-return.png",
+   "state": "before",
+   "build": "app.js f81f7ed181b0 (merge 268a1c3 product)",
+   "viewport": "1280x720",
+   "scene": "test_05 crumb way, after returning to the whole space",
+   "bytes": 114664,
+   "sha256": "1524f5d9a173571fbaee9b53d60ebeb454f5d84ece087922400ec0d57cca9731"
+  },
+  {
+   "file": "f1-1280-after-map-return.png",
+   "state": "after",
+   "build": "app.js cd0f6a26ae69",
+   "viewport": "1280x720",
+   "scene": "test_05 crumb way, after returning to the whole space",
+   "bytes": 104722,
+   "sha256": "e4d321b510b323a749be9cd8292822f02845e284ba8b96dc4b578ddf94973498"
+  },
+  {
+   "file": "f1-1280-after-work-notice.png",
+   "state": "after",
+   "build": "app.js cd0f6a26ae69",
+   "viewport": "1280x720",
+   "scene": "test_05 crumb way, work view right after continuing (notice kept)",
+   "bytes": 114949,
+   "sha256": "7dc2c8a5fb07e30a4f32fa1757233c87cf32721727369bd6fdbefaab6e185e01"
+  },
+  {
+   "file": "f1-1440-after-origin-return.png",
+   "state": "after",
+   "build": "app.js cd0f6a26ae69",
+   "viewport": "1440x900",
+   "scene": "test_05 origin way, after 출발한 지도 보기로 then 전체 공간",
+   "bytes": 119878,
+   "sha256": "6c02d261069970c9439a26c08df05699c560bec1833de8df7d15ff2a5a3d6893"
+  }
+ ],
+ "observations": {
+  "before": [
+   {
+    "label": "before",
+    "width": 1280,
+    "map": {
+     "top": 317.7,
+     "bottom": 704,
+     "h": 386.3
+    },
+    "vh": 720,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "work-crumb",
+    "width": 1280,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 73.15625,
+     "bottom": 104.65625
+    },
+    "titleHit": true,
+    "under": [
+     "전체 공간",
+     "›",
+     "시간 고르기",
+     "›",
+     "이어가는 작업",
+     "← 출발한 지도 보기로 · 시간 고르기",
+     "작업 02 · 작업 01에 받은 보고 보관 · 후속 확인 작업문 초안"
+    ]
+   },
+   {
+    "label": "after-crumb",
+    "width": 1280,
+    "map": {
+     "top": 385.3,
+     "bottom": 704,
+     "h": 318.7
+    },
+    "vh": 720,
+    "noticeShown": true,
+    "offscreen": true,
+    "boxesOutside": 5
+   },
+   {
+    "label": "work-sidebar",
+    "width": 1280,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 73.15625,
+     "bottom": 104.65625
+    },
+    "titleHit": true,
+    "under": [
+     "전체 공간",
+     "›",
+     "시간 고르기",
+     "›",
+     "이어가는 작업",
+     "← 출발한 지도 보기로 · 시간 고르기",
+     "작업 02 · 작업 01에 받은 보고 보관 · 후속 확인 작업문 초안"
+    ]
+   },
+   {
+    "label": "after-sidebar",
+    "width": 1280,
+    "map": {
+     "top": 385.3,
+     "bottom": 704,
+     "h": 318.7
+    },
+    "vh": 720,
+    "noticeShown": true,
+    "offscreen": true,
+    "boxesOutside": 5
+   },
+   {
+    "label": "work-origin",
+    "width": 1280,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 73.15625,
+     "bottom": 104.65625
+    },
+    "titleHit": true,
+    "under": [
+     "전체 공간",
+     "›",
+     "시간 고르기",
+     "›",
+     "이어가는 작업",
+     "← 출발한 지도 보기로 · 시간 고르기",
+     "작업 02 · 작업 01에 받은 보고 보관 · 후속 확인 작업문 초안"
+    ]
+   },
+   {
+    "label": "before",
+    "width": 1440,
+    "map": {
+     "top": 312.9,
+     "bottom": 884,
+     "h": 571.1
+    },
+    "vh": 900,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "work-crumb",
+    "width": 1440,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 73.375,
+     "bottom": 104.875
+    },
+    "titleHit": true,
+    "under": [
+     "전체 공간",
+     "›",
+     "시간 고르기",
+     "›",
+     "이어가는 작업",
+     "← 출발한 지도 보기로 · 시간 고르기",
+     "작업 02 · 작업 01에 받은 보고 보관 · 후속 확인 작업문 초안"
+    ]
+   },
+   {
+    "label": "after-crumb",
+    "width": 1440,
+    "map": {
+     "top": 380.5,
+     "bottom": 884,
+     "h": 503.5
+    },
+    "vh": 900,
+    "noticeShown": true,
+    "offscreen": true,
+    "boxesOutside": 2
+   },
+   {
+    "label": "work-sidebar",
+    "width": 1440,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 73.375,
+     "bottom": 104.875
+    },
+    "titleHit": true,
+    "under": [
+     "전체 공간",
+     "›",
+     "시간 고르기",
+     "›",
+     "이어가는 작업",
+     "← 출발한 지도 보기로 · 시간 고르기",
+     "작업 02 · 작업 01에 받은 보고 보관 · 후속 확인 작업문 초안"
+    ]
+   },
+   {
+    "label": "after-sidebar",
+    "width": 1440,
+    "map": {
+     "top": 380.5,
+     "bottom": 884,
+     "h": 503.5
+    },
+    "vh": 900,
+    "noticeShown": true,
+    "offscreen": true,
+    "boxesOutside": 2
+   },
+   {
+    "label": "work-origin",
+    "width": 1440,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 73.375,
+     "bottom": 104.875
+    },
+    "titleHit": true,
+    "under": [
+     "전체 공간",
+     "›",
+     "시간 고르기",
+     "›",
+     "이어가는 작업",
+     "← 출발한 지도 보기로 · 시간 고르기",
+     "작업 02 · 작업 01에 받은 보고 보관 · 후속 확인 작업문 초안"
+    ]
+   }
+  ],
+  "after": [
+   {
+    "label": "before",
+    "width": 1280,
+    "map": {
+     "top": 317.7,
+     "bottom": 704,
+     "h": 386.3
+    },
+    "vh": 720,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "work-crumb",
+    "width": 1280,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 141.15625,
+     "bottom": 172.65625
+    },
+    "titleHit": true,
+    "under": []
+   },
+   {
+    "label": "after-crumb",
+    "width": 1280,
+    "map": {
+     "top": 317.7,
+     "bottom": 704,
+     "h": 386.3
+    },
+    "vh": 720,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "work-sidebar",
+    "width": 1280,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 141.15625,
+     "bottom": 172.65625
+    },
+    "titleHit": true,
+    "under": []
+   },
+   {
+    "label": "after-sidebar",
+    "width": 1280,
+    "map": {
+     "top": 317.7,
+     "bottom": 704,
+     "h": 386.3
+    },
+    "vh": 720,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "work-origin",
+    "width": 1280,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 141.15625,
+     "bottom": 172.65625
+    },
+    "titleHit": true,
+    "under": []
+   },
+   {
+    "label": "after-origin",
+    "width": 1280,
+    "map": {
+     "top": 317.7,
+     "bottom": 704,
+     "h": 386.3
+    },
+    "vh": 720,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "before",
+    "width": 1440,
+    "map": {
+     "top": 312.9,
+     "bottom": 884,
+     "h": 571.1
+    },
+    "vh": 900,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "work-crumb",
+    "width": 1440,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 140.375,
+     "bottom": 171.875
+    },
+    "titleHit": true,
+    "under": []
+   },
+   {
+    "label": "after-crumb",
+    "width": 1440,
+    "map": {
+     "top": 312.9,
+     "bottom": 884,
+     "h": 571.1
+    },
+    "vh": 900,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "work-sidebar",
+    "width": 1440,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 140.375,
+     "bottom": 171.875
+    },
+    "titleHit": true,
+    "under": []
+   },
+   {
+    "label": "after-sidebar",
+    "width": 1440,
+    "map": {
+     "top": 312.9,
+     "bottom": 884,
+     "h": 571.1
+    },
+    "vh": 900,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   },
+   {
+    "label": "work-origin",
+    "width": 1440,
+    "notice": {
+     "top": 10,
+     "bottom": 59.59375
+    },
+    "title": {
+     "top": 140.375,
+     "bottom": 171.875
+    },
+    "titleHit": true,
+    "under": []
+   },
+   {
+    "label": "after-origin",
+    "width": 1440,
+    "map": {
+     "top": 312.9,
+     "bottom": 884,
+     "h": 571.1
+    },
+    "vh": 900,
+    "noticeShown": false,
+    "offscreen": false,
+    "boxesOutside": 0
+   }
+  ]
+ }
+}

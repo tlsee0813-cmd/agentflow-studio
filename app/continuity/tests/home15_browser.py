@@ -107,8 +107,12 @@ class Home15(unittest.TestCase):
         expect(self.page.locator('.project-empty')).to_have_text('아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 아래에서 예제를 둘러보세요.')
         expect(self.page.locator('#trash-section')).to_be_visible();expect(self.page.locator('#projects-count')).to_have_text('')
         self.check('nothing written for the empty list',json.loads(self.envelope())['entries'][0]['state'],'trashed');self.shot('zero')
-        # A real empty workspace still starts at the existing new-project path; the list is reachable and stays empty.
-        self.page.evaluate('()=>{localStorage.clear();sessionStorage.clear()}');self.page.reload();expect(self.page.locator('#empty')).to_be_visible()
+        # ENTRY37: a real empty workspace now opens at this home (with the unsaved example apart from the list); its
+        # '새 프로젝트' is the existing new-project path, and the list is reachable again and stays empty.
+        self.page.evaluate('()=>{localStorage.clear();sessionStorage.clear()}');self.page.reload();expect(self.page.locator('#projects-view')).to_be_visible()
+        expect(self.page.locator('.project-empty')).to_be_visible();expect(self.page.locator('#project-list .project-card')).to_have_count(0)
+        expect(self.page.locator('#example-list .example-card')).to_have_count(1)
+        self.page.locator('#new-project').click();expect(self.page.locator('#empty')).to_be_visible()
         self.page.locator('#nav-projects').click();expect(self.page.locator('.project-empty')).to_be_visible()
         self.check('no placeholder project saved',self.page.evaluate('()=>localStorage.getItem("agentflow.idea015.workspace")'),None)
 

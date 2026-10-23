@@ -231,6 +231,7 @@ class EntryReview(unittest.TestCase):
         self.page.on('request', lambda r: calls.append(r.url) if r.method == 'POST' else None)
         self.page.reload()
         expect(self.page.locator('#mode')).to_contain_text('호출 꺼짐')
+        base.start_new(self.page) # ENTRY37: the fresh reload opens the home; its existing '새 프로젝트' is the earlier first screen
         self.page.locator('#brief-input').fill('동네 행사 안내 · 운영 방식은 미정')
         self.page.locator('#draft').fill('행사 시간 안내 문구를 검토해 주세요.')
         self.page.locator('#save-input').click()
