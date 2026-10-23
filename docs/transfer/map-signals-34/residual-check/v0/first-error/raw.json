@@ -1,0 +1,17 @@
+{
+  "sourceCandidate": "e059ec6d90e195263121c21817a39ea9ad0534a7",
+  "baseline": "575bb7452044e0d987453a24e31680d2d8077b6c",
+  "scenes": [],
+  "HTTP": [],
+  "errors": [],
+  "actions": [],
+  "browser": "154.0.8037.57",
+  "servers": [
+    {
+      "target": "baseline",
+      "exit": -15
+    }
+  ],
+  "executionExit": 1,
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/browser-env/map34-residual/check.py\", line 18, in <module>\n    fixture=json.loads(subprocess.check_output([node,'--input-type=module','-e',seed],cwd=C,text=True));tmp=R/(name+'.json');tmp.write_text(json.dumps(fixture['p'],ensure_ascii=False))\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 466, in check_output\n    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 571, in run\n    raise CalledProcessError(retcode, process.args,\nsubprocess.CalledProcessError: Command '['/workspace/browser-env/tools/node_modules/.bin/node', '--input-type=module', '-e', \"import {map34Fixture} from './continuity/tests/map-signals34-fixtures.mjs';console.log(JSON.stringify(map34Fixture({current:'P',stale:true,note:false})));\"]' returned non-zero exit status 1.\n"
+}

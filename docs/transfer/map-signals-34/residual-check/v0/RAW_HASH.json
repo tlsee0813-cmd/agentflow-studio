@@ -1,0 +1,6 @@
+{
+  "uncompressedBytes": 303030,
+  "uncompressedSHA256": "fc15ccde22f45bb85f178647ab77858155189d5004964af19a93a316d8627ac8",
+  "gzipSHA256": "835a3f45ea3f5c73ba86f84caa9fa92feb0e9f42d8218bc9599480a3b7484ab5",
+  "roundtripEqual": true
+}

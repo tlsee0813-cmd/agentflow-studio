@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/map34-residual/check.py"
+  ],
+  "startUTC": "2026-10-23T00:31:44.688829+00:00",
+  "endUTC": "2026-10-23T00:31:51.010560+00:00",
+  "actualChildExit": 0,
+  "outerExit": 0
+}

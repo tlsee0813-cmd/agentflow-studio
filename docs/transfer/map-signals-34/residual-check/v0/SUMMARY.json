@@ -1,0 +1,210 @@
+[
+  {
+    "scene": "baseline-no-note",
+    "countText": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+    "allAncestorClip": {
+      "left": 531.2015991210938,
+      "top": 383.1365966796875,
+      "right": 613.5564575195312,
+      "bottom": 390.9269104003906
+    },
+    "textRange": {
+      "x": 531.2015991210938,
+      "y": 382.58013916015625,
+      "width": 96.8399658203125,
+      "height": 8.903228759765625,
+      "top": 382.58013916015625,
+      "right": 628.0415649414062,
+      "bottom": 391.4833679199219,
+      "left": 531.2015991210938
+    },
+    "visibleRangeHeightScreenPx": 7.790313720703125,
+    "font": "11px / 14px Inter, Pretendard, \"Noto Sans KR\", \"Noto Sans CJK KR\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "authorInkMetric": [
+      {
+        "el": "hint",
+        "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+        "top": 88.5,
+        "bottom": 102.5,
+        "clipBottom": 102.7,
+        "lineboxHiddenPx": 0,
+        "lineboxFullyHidden": false,
+        "inkHiddenPx": null,
+        "inkTop": null,
+        "inkBottom": null,
+        "inkFullyHidden": null,
+        "ellipsis": true
+      },
+      {
+        "el": "area-update-label",
+        "text": "설명 갱신",
+        "top": 104.5,
+        "bottom": 124.3,
+        "clipBottom": 102.7,
+        "lineboxHiddenPx": 21.6,
+        "lineboxFullyHidden": true,
+        "inkHiddenPx": 17.8,
+        "inkTop": 107.5,
+        "inkBottom": 120.5,
+        "inkFullyHidden": true,
+        "ellipsis": false
+      },
+      {
+        "el": "tag purple",
+        "text": "앱에서 이어갈 작업",
+        "top": 126.3,
+        "bottom": 149.8,
+        "clipBottom": 102.7,
+        "lineboxHiddenPx": 47.1,
+        "lineboxFullyHidden": true,
+        "inkHiddenPx": 40.6,
+        "inkTop": 133.3,
+        "inkBottom": 143.3,
+        "inkFullyHidden": true,
+        "ellipsis": false
+      }
+    ]
+  },
+  {
+    "scene": "baseline-note",
+    "countText": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+    "allAncestorClip": {
+      "left": 531.2015991210938,
+      "top": 378.40673828125,
+      "right": 613.5564575195312,
+      "bottom": 386.19708251953125
+    },
+    "textRange": {
+      "x": 531.2015991210938,
+      "y": 377.8503112792969,
+      "width": 96.8399658203125,
+      "height": 8.903228759765625,
+      "top": 377.8503112792969,
+      "right": 628.0415649414062,
+      "bottom": 386.7535400390625,
+      "left": 531.2015991210938
+    },
+    "visibleRangeHeightScreenPx": 7.79034423828125,
+    "font": "11px / 14px Inter, Pretendard, \"Noto Sans KR\", \"Noto Sans CJK KR\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "authorInkMetric": [
+      {
+        "el": "hint",
+        "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+        "top": 80,
+        "bottom": 94,
+        "clipBottom": 102.7,
+        "lineboxHiddenPx": 0,
+        "lineboxFullyHidden": false,
+        "inkHiddenPx": null,
+        "inkTop": null,
+        "inkBottom": null,
+        "inkFullyHidden": null,
+        "ellipsis": true
+      },
+      {
+        "el": "area-update-label",
+        "text": "설명 갱신",
+        "top": 96,
+        "bottom": 115.8,
+        "clipBottom": 102.7,
+        "lineboxHiddenPx": 13.1,
+        "lineboxFullyHidden": false,
+        "inkHiddenPx": 9.3,
+        "inkTop": 99,
+        "inkBottom": 112,
+        "inkFullyHidden": false,
+        "ellipsis": false
+      },
+      {
+        "el": "tag purple",
+        "text": "앱에서 이어갈 작업",
+        "top": 117.8,
+        "bottom": 141.3,
+        "clipBottom": 102.7,
+        "lineboxHiddenPx": 38.6,
+        "lineboxFullyHidden": true,
+        "inkHiddenPx": 32.1,
+        "inkTop": 124.8,
+        "inkBottom": 134.8,
+        "inkFullyHidden": true,
+        "ellipsis": false
+      }
+    ]
+  },
+  {
+    "scene": "candidate-no-note",
+    "countText": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+    "allAncestorClip": {
+      "left": 531.2015991210938,
+      "top": 381.46722412109375,
+      "right": 628.0415649414062,
+      "bottom": 382.3019104003906
+    },
+    "textRange": {
+      "x": 531.2015991210938,
+      "y": 380.9107666015625,
+      "width": 96.8399658203125,
+      "height": 8.90325927734375,
+      "top": 380.9107666015625,
+      "right": 628.0415649414062,
+      "bottom": 389.81402587890625,
+      "left": 531.2015991210938
+    },
+    "visibleRangeHeightScreenPx": 0.834686279296875,
+    "font": "11px / 14px Inter, Pretendard, \"Noto Sans KR\", \"Noto Sans CJK KR\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "authorInkMetric": [
+      {
+        "el": "hint",
+        "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+        "top": 85.5,
+        "bottom": 99.5,
+        "clipBottom": 87,
+        "lineboxHiddenPx": 12.5,
+        "lineboxFullyHidden": false,
+        "inkHiddenPx": 10.5,
+        "inkTop": 86.5,
+        "inkBottom": 97.5,
+        "inkFullyHidden": true,
+        "ellipsis": false
+      }
+    ]
+  },
+  {
+    "scene": "candidate-note",
+    "countText": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+    "allAncestorClip": {
+      "left": 531.2015991210938,
+      "top": 376.7373962402344,
+      "right": 628.0415649414062,
+      "bottom": 382.3019104003906
+    },
+    "textRange": {
+      "x": 531.2015991210938,
+      "y": 376.1809387207031,
+      "width": 96.8399658203125,
+      "height": 8.903228759765625,
+      "top": 376.1809387207031,
+      "right": 628.0415649414062,
+      "bottom": 385.08416748046875,
+      "left": 531.2015991210938
+    },
+    "visibleRangeHeightScreenPx": 5.56451416015625,
+    "font": "11px / 14px Inter, Pretendard, \"Noto Sans KR\", \"Noto Sans CJK KR\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+    "authorInkMetric": [
+      {
+        "el": "hint",
+        "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+        "top": 77,
+        "bottom": 91,
+        "clipBottom": 87,
+        "lineboxHiddenPx": 4,
+        "lineboxFullyHidden": false,
+        "inkHiddenPx": 2,
+        "inkTop": 78,
+        "inkBottom": 89,
+        "inkFullyHidden": false,
+        "ellipsis": false
+      }
+    ]
+  }
+]

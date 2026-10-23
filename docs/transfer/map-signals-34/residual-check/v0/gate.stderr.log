@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/map34-residual/evidence/EXPECTED_FAILURE_GATE.py", line 6, in <module>
+    assert not h['inkFullyHidden'], 'required existing count ink fully clipped: '+str(h)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: required existing count ink fully clipped: {'el': 'hint', 'text': '요청 1개 · 돌아온 결과 1개 · 앱 미검증', 'top': 85.5, 'bottom': 99.5, 'clipBottom': 87, 'lineboxHiddenPx': 12.5, 'lineboxFullyHidden': False, 'inkHiddenPx': 10.5, 'inkTop': 86.5, 'inkBottom': 97.5, 'inkFullyHidden': True, 'ellipsis': False}

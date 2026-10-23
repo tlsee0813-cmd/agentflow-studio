@@ -1,0 +1,13 @@
+v22.16.0
+Name: playwright
+Version: 1.57.0
+Summary: A high-level API to automate web browsers
+Home-page: https://github.com/Microsoft/playwright-python
+Author: Microsoft Corporation
+Author-email: 
+License-Expression: Apache-2.0
+Location: /workspace/browser-env/venv/lib/python3.12/site-packages
+Requires: greenlet, pyee
+Required-by: 
+OpenAISans-Regular.woff2: "OpenAI Sans" "Regular"
+Linux 4b0466a36dd8 6.18.55 #1 SMP Wed Oct 14 19:45:18 UTC 2026 x86_64 GNU/Linux

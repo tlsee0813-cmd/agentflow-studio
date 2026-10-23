@@ -1,0 +1,28 @@
+node:internal/modules/esm/resolve:275
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/workspace/browser-env/map34-residual/candidate/app/continuity/dist/public/shared/domain.js' imported from /workspace/browser-env/map34-residual/candidate/app/continuity/tests/map-signals34-fixtures.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:860:10)
+    at defaultResolve (node:internal/modules/esm/resolve:984:11)
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:704:25)
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:687:38)
+    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:305:38)
+    at ModuleJob._link (node:internal/modules/esm/module_job:137:49) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///workspace/browser-env/map34-residual/candidate/app/continuity/dist/public/shared/domain.js'
+}
+
+Node.js v22.16.0
+Traceback (most recent call last):
+  File "/workspace/browser-env/map34-residual/check.py", line 18, in <module>
+    fixture=json.loads(subprocess.check_output([node,'--input-type=module','-e',seed],cwd=C,text=True));tmp=R/(name+'.json');tmp.write_text(json.dumps(fixture['p'],ensure_ascii=False))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/workspace/browser-env/tools/node_modules/.bin/node', '--input-type=module', '-e', "import {map34Fixture} from './continuity/tests/map-signals34-fixtures.mjs';console.log(JSON.stringify(map34Fixture({current:'P',stale:true,note:false})));"]' returned non-zero exit status 1.

@@ -1,0 +1,54 @@
+[
+  {
+    "label": "baseline",
+    "commit": "575bb7452044e0d987453a24e31680d2d8077b6c",
+    "path": "continuity/src/client/app.ts",
+    "bytes": 280577,
+    "remoteAndDiskAfterSHA": "a104d3dc3210f841ac4275e8095b5a597a4d41e0d29809da338f672637bf6a09"
+  },
+  {
+    "label": "baseline",
+    "commit": "575bb7452044e0d987453a24e31680d2d8077b6c",
+    "path": "continuity/public/styles.css",
+    "bytes": 74857,
+    "remoteAndDiskAfterSHA": "8e4c3847129348deffadbdd7e317a8af76f603b8b2b7020241508a25f8ff1084"
+  },
+  {
+    "label": "baseline",
+    "commit": "575bb7452044e0d987453a24e31680d2d8077b6c",
+    "path": "continuity/public/index.html",
+    "bytes": 17960,
+    "remoteAndDiskAfterSHA": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+  },
+  {
+    "label": "candidate",
+    "commit": "e059ec6d90e195263121c21817a39ea9ad0534a7",
+    "path": "continuity/src/client/app.ts",
+    "bytes": 281195,
+    "remoteAndDiskAfterSHA": "dece3c0ce507bfe4df3b76b0660d4b80b12c233868f7ce4f67b6cfa35f485b0d"
+  },
+  {
+    "label": "candidate",
+    "commit": "e059ec6d90e195263121c21817a39ea9ad0534a7",
+    "path": "continuity/public/styles.css",
+    "bytes": 75705,
+    "remoteAndDiskAfterSHA": "ec18950426cfc50395c9b59e1f7711dacd4f8d6956feaaf9964faa14ae17ef99"
+  },
+  {
+    "label": "candidate",
+    "commit": "e059ec6d90e195263121c21817a39ea9ad0534a7",
+    "path": "continuity/public/index.html",
+    "bytes": 17960,
+    "remoteAndDiskAfterSHA": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+  },
+  {
+    "candidateHelper": "continuity/tests/map-signals34-fixtures.mjs",
+    "bytes": 4529,
+    "sha256": "e705b80217cd694079a23b0665958087992095aa8705e30cc02b03644e8afcc3"
+  },
+  {
+    "candidateHelper": "continuity/tests/map-signals34_measure.py",
+    "bytes": 6618,
+    "sha256": "b8f1a7ee7a0cb0f0eb0c09c7b9c54e318c21d45674f96ecec46e9fe7c7246e91"
+  }
+]
