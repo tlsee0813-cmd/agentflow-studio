@@ -5,76 +5,153 @@
   "python": "3.12.14",
   "playwright": "1.57.0",
   "chrome": "155.0.8059.85",
+  "hash_basis": "files[].bytes and files[].sha256 refer to published Git blob bytes; raw_source preserves the original local capture bytes before Git newline normalization.",
+  "published_git_basis": {
+    "repository": "tlsee0813-cmd/agentflow-studio",
+    "commit": "16b797e2033b5529c94b34bb81dc54c1d871c61b",
+    "path": "docs/cycles/2026-10-24-entry-integration-38/independent36/",
+    "self_hash_excluded": true
+  },
   "files": [
     {
       "file": "branch31-browser.log",
-      "bytes": 1399,
-      "sha256": "000191af10d1abdf41348cd586bf9ae40a532d935d57e8a3b25eceb7dffa1318"
+      "bytes": 1384,
+      "sha256": "f12e6106e794ea38fed1c9142dac2f38e33fe3048efd3b8614c00dfde7c94db1",
+      "raw_source": {
+        "bytes": 1399,
+        "sha256": "000191af10d1abdf41348cd586bf9ae40a532d935d57e8a3b25eceb7dffa1318"
+      },
+      "publication_change": "CRLF-to-LF only"
     },
     {
       "file": "browser-environment.json",
-      "bytes": 195,
-      "sha256": "49e75e378d4c4cb2884c0bbb6f6c03c0b5ab267e1aed568e2a4cd61ecaaacf02"
+      "bytes": 189,
+      "sha256": "b0f4234e9444384f93bf724d1e9d301ce1e638081907adc92603d1848d0e2ab3",
+      "raw_source": {
+        "bytes": 195,
+        "sha256": "49e75e378d4c4cb2884c0bbb6f6c03c0b5ab267e1aed568e2a4cd61ecaaacf02"
+      },
+      "publication_change": "CRLF-to-LF only"
     },
     {
       "file": "hierarchy18-browser.log",
-      "bytes": 118,
-      "sha256": "952a80d73cfbe5b18b1e2518289354667ec67fdf7eb9ed5cc788a7fd99d744f3"
+      "bytes": 113,
+      "sha256": "15e1c62d112b62e2fbaa90a41345b77cd3acb20a440a590719a12e3cf15b7a37",
+      "raw_source": {
+        "bytes": 118,
+        "sha256": "952a80d73cfbe5b18b1e2518289354667ec67fdf7eb9ed5cc788a7fd99d744f3"
+      },
+      "publication_change": "CRLF-to-LF only"
     },
     {
       "file": "independent-1280-geometry.json",
-      "bytes": 2964,
-      "sha256": "e0f81e769bb443778d141bce5bdbe88f72a71454bfd33ab04fe1bcbf49eb64c9"
+      "bytes": 2874,
+      "sha256": "720c00bcf9dee09a1caf0c8c88483a27981f2456ef59c5228074d48f6af1f70b",
+      "raw_source": {
+        "bytes": 2964,
+        "sha256": "e0f81e769bb443778d141bce5bdbe88f72a71454bfd33ab04fe1bcbf49eb64c9"
+      },
+      "publication_change": "CRLF-to-LF only"
     },
     {
       "file": "independent-1440-geometry.json",
-      "bytes": 2933,
-      "sha256": "81244bf67d52c0ec6e43a58a213365bd4bd52e04bdce371904c01b89ea75eded"
+      "bytes": 2843,
+      "sha256": "ceabe263b7aaaacf4c13ebeac8ea1ae76aaef35d2937c2aacf7b1017841310e4",
+      "raw_source": {
+        "bytes": 2933,
+        "sha256": "81244bf67d52c0ec6e43a58a213365bd4bd52e04bdce371904c01b89ea75eded"
+      },
+      "publication_change": "CRLF-to-LF only"
     },
     {
       "file": "independent-probe-final.log",
-      "bytes": 249,
-      "sha256": "49075e375fc65321c49c6e74eae08eb77ac0d9c63e55e87ecfc5eadf7691165d"
+      "bytes": 242,
+      "sha256": "3e21cd6adf12bee0efb95ee9e81ed729daba6e2a641eee292930e01a13532133",
+      "raw_source": {
+        "bytes": 249,
+        "sha256": "49075e375fc65321c49c6e74eae08eb77ac0d9c63e55e87ecfc5eadf7691165d"
+      },
+      "publication_change": "CRLF-to-LF only"
     },
     {
       "file": "independent-probe.py",
       "bytes": 3053,
-      "sha256": "951099cada3976916a6d0e01b1878bf88c64031bffc0f30e2c31c558768ddb99"
+      "sha256": "951099cada3976916a6d0e01b1878bf88c64031bffc0f30e2c31c558768ddb99",
+      "raw_source": {
+        "bytes": 3053,
+        "sha256": "951099cada3976916a6d0e01b1878bf88c64031bffc0f30e2c31c558768ddb99"
+      },
+      "publication_change": "none"
     },
     {
       "file": "map36-browser.log",
-      "bytes": 1509,
-      "sha256": "b9e97bba05df2840d69f1f8c52fcc537d220a5711eb41437e21468b5fe5156a6"
+      "bytes": 1492,
+      "sha256": "44c5e2dddd6d97ad657494e4d501dfc456e3ac9fc8f07edb602815405870c66a",
+      "raw_source": {
+        "bytes": 1509,
+        "sha256": "b9e97bba05df2840d69f1f8c52fcc537d220a5711eb41437e21468b5fe5156a6"
+      },
+      "publication_change": "CRLF-to-LF only"
     },
     {
       "file": "map36-node.log",
-      "bytes": 566,
-      "sha256": "ad5afa250cce9dee6e083f0aa1e144e2cab5d591960b5037ca1626b3c3d70955"
+      "bytes": 554,
+      "sha256": "c97b5fceb6625f7ebb56c4adfb48d7ce97fd1eb888420f26335a4caa6996522d",
+      "raw_source": {
+        "bytes": 566,
+        "sha256": "ad5afa250cce9dee6e083f0aa1e144e2cab5d591960b5037ca1626b3c3d70955"
+      },
+      "publication_change": "CRLF-to-LF only"
     },
     {
       "file": "REPORT.md",
       "bytes": 5545,
-      "sha256": "e5b7c8c41fbe347be62474363ee63f2010526fed0a1e5c2d231518f362050352"
+      "sha256": "e5b7c8c41fbe347be62474363ee63f2010526fed0a1e5c2d231518f362050352",
+      "raw_source": {
+        "bytes": 5545,
+        "sha256": "e5b7c8c41fbe347be62474363ee63f2010526fed0a1e5c2d231518f362050352"
+      },
+      "publication_change": "none"
     },
     {
       "file": "selected-1280-default.png",
       "bytes": 121118,
-      "sha256": "0419abeab75b717f4a8347011957cefd66288626fa8e1162fc1dbaa6c5dba756"
+      "sha256": "0419abeab75b717f4a8347011957cefd66288626fa8e1162fc1dbaa6c5dba756",
+      "raw_source": {
+        "bytes": 121118,
+        "sha256": "0419abeab75b717f4a8347011957cefd66288626fa8e1162fc1dbaa6c5dba756"
+      },
+      "publication_change": "none"
     },
     {
       "file": "selected-1280-parent-zoomed.png",
       "bytes": 15977,
-      "sha256": "ceedcf911e3078f9b7e8da8af6cc74dcc3e3c092294e78f1c78e939ee365d179"
+      "sha256": "ceedcf911e3078f9b7e8da8af6cc74dcc3e3c092294e78f1c78e939ee365d179",
+      "raw_source": {
+        "bytes": 15977,
+        "sha256": "ceedcf911e3078f9b7e8da8af6cc74dcc3e3c092294e78f1c78e939ee365d179"
+      },
+      "publication_change": "none"
     },
     {
       "file": "selected-1440-default.png",
       "bytes": 151462,
-      "sha256": "ede6ab6a305de0a3bf91682bf025575c996e4e431a2c22ae1d3f79efc246f0d5"
+      "sha256": "ede6ab6a305de0a3bf91682bf025575c996e4e431a2c22ae1d3f79efc246f0d5",
+      "raw_source": {
+        "bytes": 151462,
+        "sha256": "ede6ab6a305de0a3bf91682bf025575c996e4e431a2c22ae1d3f79efc246f0d5"
+      },
+      "publication_change": "none"
     },
     {
       "file": "selected-1440-parent-zoomed.png",
       "bytes": 20143,
-      "sha256": "449d422bee43f321cb5ea3069540d8df7555074eff336af33da2dcbb252dfa94"
+      "sha256": "449d422bee43f321cb5ea3069540d8df7555074eff336af33da2dcbb252dfa94",
+      "raw_source": {
+        "bytes": 20143,
+        "sha256": "449d422bee43f321cb5ea3069540d8df7555074eff336af33da2dcbb252dfa94"
+      },
+      "publication_change": "none"
     }
   ]
 }
