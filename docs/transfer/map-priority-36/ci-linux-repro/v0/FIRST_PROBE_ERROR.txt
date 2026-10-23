@@ -1,0 +1,1 @@
+First availability probe: Python PermissionError [Errno13] /root/.cache/ms-playwright. No permission escalation; no further access attempted. Python step failed1; combined shell tool ended0 because a following cat printed old download-process.json. Corrected inventory catches permission denial and labels it uninspected; final inventory tool exit0. Product/test/source unchanged.

@@ -1,0 +1,41 @@
+{
+  "utc": "2026-10-23T01:47:44.577606+00:00",
+  "PW": "1.57.0",
+  "bundledExpectedPath": "/home/agent/.cache/ms-playwright/chromium-1200/chrome-linux64/chrome",
+  "bundledExpectedExists": false,
+  "cacheDirectories": [
+    {
+      "path": "/home/agent/.cache/ms-playwright",
+      "exists": false,
+      "entries": []
+    },
+    {
+      "path": "/root/.cache/ms-playwright",
+      "status": "permission denied; no escalation or further inspection"
+    },
+    {
+      "path": "/ms-playwright",
+      "exists": false,
+      "entries": []
+    },
+    {
+      "path": "/opt/ms-playwright",
+      "exists": false,
+      "entries": []
+    },
+    {
+      "path": "/workspace/browser-env/cycle21-version-match/bundled-cache",
+      "exists": true,
+      "entries": [
+        ".links"
+      ]
+    }
+  ],
+  "systemChromiumVersion": "Chromium 154.0.8037.57 built on Debian GNU/Linux 13 (trixie)",
+  "Node": "v22.16.0",
+  "143Executed": false,
+  "154ReexecutedTests": false,
+  "downloadRetried": false,
+  "reason": "Previous exact official Playwright1.57 build1200 download denied HTTP403 Domain forbidden; retained original logs, no bypass/retry",
+  "fontInfo": "OpenAISans-Regular.woff2: \"OpenAI Sans\" \"Regular\""
+}

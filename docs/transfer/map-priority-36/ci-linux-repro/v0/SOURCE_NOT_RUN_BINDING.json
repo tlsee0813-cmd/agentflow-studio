@@ -1,0 +1,32 @@
+{
+  "existingBuildExecutionSource": "65cd96d9da53753e70dba350bdf62c5d68474809",
+  "appEquivalentHead": "a17cbcf9804154b878ccf20dfa4d5155777ce7ca",
+  "appSubtree": "66d79f03d9884fa5d06252c7d9ad7fdc9322e231",
+  "previousEvidence": "15dbd3103c5d65f57408065d3213419acfd67b88",
+  "currentTaskBuiltOrExecutedProduct": false,
+  "cachedStaticFilesReadOnly": [
+    {
+      "path": "client/app.js",
+      "bytes": 309066,
+      "existingDiskSHA256": "89695dd58162ab27c018aa521870734eb08c5d5496e3f695ccd66d34bca1f762"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 75834,
+      "existingDiskSHA256": "2b0696c52e4698c96f1ed793ff552c8d9d328c6a8bb811b5faedd7a846486820"
+    },
+    {
+      "path": "index.html",
+      "bytes": 17972,
+      "existingDiskSHA256": "5f622d96851a402e209dbb4434d2d98eb6962ab6bd27747bb8c3e82d881205b9"
+    },
+    {
+      "path": "client/static-target.js",
+      "bytes": 751,
+      "existingDiskSHA256": "0d847d744ce6dd680cf0d601faf77789973907e89c288cbbe85f8061056ddac9"
+    }
+  ],
+  "test01TwoPC": "NOT_RUN",
+  "numericRectAndPNG": "NOT_COLLECTED; exact143 unavailable",
+  "CIInformation": "user supplied only; Actions/API not queried"
+}
