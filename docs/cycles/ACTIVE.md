@@ -1,51 +1,32 @@
 # AgentFlow 현재 상태
-2026-10-23 KST · 단일 총괄: 현재 Codex 대화. 사용자의 연속 진행 지시에 따라 사이클을 이어간다. 현재 배정은 이 파일, 과거 판단·실패는 각 결과에 둔다.
 
-## 현재 작업
-**30 지도 복귀 높이 — checkpoint 통합.** [결과·원본 실패·검증 한계](2026-10-23-viewport-return-30/RESULT.md). 최종e5a5bf40→병합425c3df4, app subtree 전체 동일. 깊은 작업에서 돌아올 때 복귀 페이지 위치를 반영한 뒤 가용 높이를 계산하며 카메라·부분 접힘을 유지한다. 독립 정상 UI 양PC·별도 원자료 대조·정확 신규 검사의 원본2실패/후보4통과·최종 양OS CI39856945223을 확인했다. 기존6개 버튼 clip/hit과 장면당 대표1개 클릭을 구분하며 가독성 개선이나 실제 최종clamp까지 수용하지 않는다.
+2026-10-23 KST · 단일 총괄: 현재 Codex 대화. 사용자의 연속 진행 지시에 따라 진행한다. **현재 배정은 이 파일**, 과거 판정은 각 RESULT, 제품/배포 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)를 따른다.
 
-**31 접힌 부분의 기록 진입 — checkpoint 통합.** [결과·원본 실패·검증 한계](2026-10-23-branch-records-31/RESULT.md) · [PR16](https://github.com/tlsee0813-cmd/agentflow-studio/pull/16). 최종72940a→병합75ed2ed7, app subtree 전체 동일·직전checkpoint 문서 모두 보존. 기존 신호에서 정확한 부모의 기록을 열고 호출 버튼으로 돌아온다. 통합 관측에서 발견한 pageY120→116/0 반례는 진입 한곳의 복원 순서로 보완했다. 동일 독립 checker와 두 교차흐름·작성자10개/원본새2실패·Astra 원자료 검토·정확 최종 양OS CI39862478703을 확인했다. 약6px 신호 가독성·sr-only 대체초점·신호 자체 소멸 미실행은 남는다.
+## 지금 진행하는 일
 
-**29 작업문 옆 소유 부분 설명 — checkpoint 통합.** [결과·원실패·검증 한계](2026-10-23-work-reference-29/RESULT.md). 최종 aa0938ec→병합5415b8aa, app 전체 subtree 동일. 선택적 참고를 곁에 읽으며, 명시 재열기는 처음부터·새 보고 수신은 읽던 본문 유지로 구분한다. 내부 스크롤 소실·복귀 버튼 밀림·재열기 초기화 누락을 원반례와 대조해 수정했다. 독립 양PC·원자료 별도 검토·총괄 대표 화면3장·정확 최종 양OS CI39849822053을 확인했다. 관계0개와 기준2→4의 경계, JSON 원문 내부 스크롤 미검증을 결과에 명시했다.
+**35 — 최신 PC 흐름의 독립 체험본 게시 완료.** [결과·공유 근거·한계](2026-10-23-isolated-preview-35/RESULT.md) · [PR19](https://github.com/tlsee0813-cmd/agentflow-studio/pull/19) · [PC 체험본](https://agentflow-studio-pc-preview-20261023.eagerllama11.chatgpt.site). Claude 별도 세션의 최종81f8a32를 양OS CI·독립 Cloud 양PC·Sol 코드/원자료 검토·총괄 대표 화면으로 대조하고 a6ea322에 병합했다. app 전체가 후보와 동일하고 직전 문서를 보존했다. 검증된 정적17개 파일의 길이/SHA256을 대조해 owner-private Sites에 게시했다. 실제 로그인·목록·예제 열기/닫기를 확인했다. main/기존 공개 gh-pages는 그대로다. MOCK·브라우저 저장이며 기존 공개 데이터 자동 이동은 없다. 로그인 이후 전체 흐름 재실행은 하지 않았다.
 
-**28 지도 이름·소속·기록 읽기 — 후보 보류로 관측 종료.** [결과·판단·공유 화면](2026-10-23-map-reading-28/RESULT.md). 같은 입력의4/6/8카드 양PC A/B에서 큰 두 줄 제목이 ‘질문·표시·요청’ 구별 정보를 숨겼다. 4카드에서 이미 보류 조건을 충족했으며6/8은 추가 반례 수집이다. 설명 갱신 노출의 부분 개선을 단독 변경 효과로 떼어 통합하지 않는다. 후보77c47af9는 연구 브랜치에만 있다. 기존 지도 높이 문제는30에서 별도로 다룬다.
+**36 — 기본 지도와 상세의 정보 우선순위 후보 구현 중.** [범위](2026-10-23-map-priority-36/INPUT.md). [Claude Code 지도 세션](https://claude.ai/code/session_01HYWug65yLyrGuGvjjLkAa5)에 product/map-priority-36(시작e445774d)만 FF게시를 위임했다. 기본에 이름·소속·짧은 목적과 읽을 이유를 두고 정확 수량/원문은 소유 상세로 옮긴다. 현재 미답·보류 설명·이전 설명 기준·이번 탭 갱신을 서로 섞지 않는다. 기존 크기/좌표를 유지한 한 후보와34 실패 장면 및T2/db5 양PC를 비교한다. 작성자 자체 구현/검사는 진행됐으나 정확 최종 SHA 회수·독립 검증·수용은 아직이다. 모든 기록 전체 ID 대조, 긴 이름/부모 구별과 실제 화면 가독성을 요청했다. 공간 부족을 새 줌/거대 배치 엔진으로 넓히지 않는다.
 
-**27 현재 설명 다시 기록 — checkpoint 통합.** [결과·원실패·검증 한계](2026-10-23-description-refresh-27/RESULT.md). 최종6b96543f→병합548cf480, app 전체 subtree 동일. 현재 상황을 대조해 새 사용자 판본을 남기되 편집 중 변경을 재검사한다. v0 취소 뒤 실제 재노출 결함을 고치고 독립 양PC·양OS CI39835847977·별도 원자료 검토를 통과했다. 설명 기록 행위가 수동 값을 보존하며 전체 관측의 N 명시 변경과 구분한다. 빈 관계·평면 표본을 다층 전체 UI 검증으로 확대하지 않는다.
+**34 — 후보 보류로 종료.** [결과·공유 반례](2026-10-23-map-signals-34/RESULT.md). e059ec6d는 기록 입구를 추가했지만 겹친 상태의 부모 카드에서 기존 수 줄이 가려졌다. Cloud1280 실제 반례와 소스 대조로 보류했다. 기준에도 다른 표지가 가렸다는 사실로 새 누락을 받아들이지 않았다.36은 모든 수량을 기본180px 카드에 넣으라는 요구를 명시적으로 바꾼 후속이며34를 몰래 통합하지 않는다.
 
-**26 자식 첫 배치 — 두 후보 보류로 종료, 제품 무변경.** [반례와 고정 근거](2026-10-23-child-placement-26/RESULT.md). 단순 아래 배치는 일부 지도 배율을 악화시켰고, 폭·높이 불악화 조건을 추가해도 무관 부모 프레임을 약화시키는 반례가 남았다. 더 큰 자동배치기로 확장하지 않는다. 28은 이 결론을 유지하면서 카드 읽기만 비교한다.
+## 다음 사용자 경험 관문
 
-**25 정정 읽기 — 직접 편집·인계 한정 수용.** [결과와 현재성 공백](2026-10-23-correction-reading-25/RESULT.md). 양 PC에서 U/N만 표시30으로 수정하고 S/C 동작7·과거H·원보고·B를 보존했다. 설명 참고의 자동 유지까지 성공으로 세지 않는다.
+36의 표시 후보는 독립 검증 뒤 판단한다. 다음 관측은 신호 개수/검사 수가 아니라 **프로젝트 재진입 → 무엇을 이어갈지 판단 → 필요한 한 부분만 읽고 편집·인계 → 돌아온 결과와 미결 확인 → 전체로 복귀**가 한 경험으로 작동하는지에 둔다. 실제 목적이 있는 짧은 사례로 목적만 제시하고, 기록을 찾는 순서를 정답처럼 미리 알려주지 않는다. 현재 작업과 별도 초안, 현재 설명과 원보고, 변경과 미결을 구별해야 한다. Dify와는 목적 차이를 유지하며 다음 행동의 명확성과 행동거리를 비교한다. 세부 관측 범위는36 결과 후 정하며 새 대규모 조사/엔진을 자동 시작하지 않는다.
 
-실행은 기존 [agentflow-studio 설정](codex://threads/01a13fcb-e7e5-73b9-b4a3-cf9a2b95b0bb) Cloud(durable), 독립 판단은 Astra High, 보조 구현·검사는6.1 Sol High다. 인계 권위 [Web Pro](https://chatgpt.com/c/6ad9e4e7-e8b4-83e8-b1f4-aebabc8d27b4)와 공간 탐색 [Web Pro](https://chatgpt.com/c/6ad9e588-d3e0-83e8-bdd6-660ab76650a7)를 나눠 쓴다. 총괄이 원문·화면과 대조하고 통합한다.
+## 최근 제품 기준
 
-**32 재진입 뒤 변화와 판단 — 관측 종료, 제품 무변경.** [결과와 경계](2026-10-23-reentry-judgment-32/RESULT.md). 최초 두PC의 한 작업 완주와 정답을 안 뒤1280 이력 읽기를 구분했다. N만 편집하고 정확H/별개draft/과거자료를 보존했지만 이어가기·편집·수신 확인을 찾는 부담이 남았다. 기존 이력으로10→20과20→20을 비교할 수 있으며 최초 발견성 성공이나 새last-read 필요로 확대하지 않는다.
+- **35 체험 배포**: 제품의 별도 출력·저장 접두사. 새 원격 UI나 AI 엔진을 만들지 않는다. [결과](2026-10-23-isolated-preview-35/RESULT.md).
+- **33 작업 대상·행동 연결**: 읽는 작업에서 명시 이어가기/편집/파일 검토로 연결하고 늦은 파일 안내의 초점 탈취를 막는다. [결과](2026-10-23-task-context-33/RESULT.md). 긴 T2 1280의 별개 초안 첫 화면 노출 한계는 남는다.
+- **31 접힌 부분 기록 /30 지도 복귀 /29 설명 참고**: 정확 소유 기록과 호출 복귀, 복귀 높이 계산, 명시 재열기와 새 수신의 읽기 위치를 구분한다. [31](2026-10-23-branch-records-31/RESULT.md) · [30](2026-10-23-viewport-return-30/RESULT.md) · [29](2026-10-23-work-reference-29/RESULT.md).
+- 앞선 제품 통합과 공개USE106 구분은 [PROJECT_STATUS](../PROJECT_STATUS.md)에 둔다. [32 재진입 관측](2026-10-23-reentry-judgment-32/RESULT.md), [28 지도 후보 보류](2026-10-23-map-reading-28/RESULT.md), [26 배치 후보 보류](2026-10-23-child-placement-26/RESULT.md), [24 지도 읽기 관측](2026-10-23-map-reading-24/RESULT.md)는 과거 판단이며 현재 작업 목록이 아니다.
 
-**33 작업 대상과 행동 연결 — checkpoint 통합.** [결과·원실패·한계](2026-10-23-task-context-33/RESULT.md) · [PR18](https://github.com/tlsee0813-cmd/agentflow-studio/pull/18). 최종bfa6591→병합0f8627ef. 원673의 초안 버튼 가림과 늦은 파일 읽기 초점 탈취를 수정했다. 독립 최종 양PC·파일 선택 겹침·원자료 검토·총괄 대표3화면과 정확 양OS CI39871706618을 대조했다. app subtree 동일, 변경 외 최신checkpoint1000blob 보존. 긴 T2 1280의 별개 초안 입구는 여전히 첫 화면 밖이며 모든 읽기 노출을 해결했다고 하지 않는다.
+## 역할과 경계
 
-**34 지도에서 읽을 부분 찾기 — 후보 보류로 종료, 제품 무변경.** [결과·공유 반례](2026-10-23-map-signals-34/RESULT.md). Claude 후보e059ec6d는 말단 기록 입구와 현재 미답 구별을 구현했지만, 상태가 겹친 부모의 기존 수 줄이 완전히 가려졌다. 총괄·Sol 코드 대조와 Cloud1280 실제 반례로 보류를 확정했다. 기준도 다른 표지가 가렸다는 사실로 새 누락을 수용하지 않는다. 후보1440/전체회귀/PR CI는 불필요하게 반복하지 않았다. 모든 정보를180px에 동시에 노출하는 요구를 재검토하며, 후속 표시 개선에서는 이름·소속/읽을 이유와 상세 수량의 우선순위를 명시한다. 집계 계산은 보존하되 이번에 별도 통합하지 않았다. 현재는35의 체험 흐름을 우선한다.
+Pro는 비교 조사와 기본/상세 정보 선택, Claude Code Opus는 주제별 구현과 작성자 검사,6.1 Sol High/Astra High는 보조 코드·원자료 검토와 독립 판단, Cloud는 실제 화면 검증을 맡는다. 총괄이 원문·화면과 대조하고 수용/보류·제품 통합을 결정한다. Claude의 예전 크레딧 한계는 재확인했고 현재 실제 사용 중이다. [지도 Claude](https://claude.ai/code/session_01HYWug65yLyrGuGvjjLkAa5) · [체험 배포 Claude](https://claude.ai/code/session_01NdSfw1rJtV9gxs8A1MEmPe) · [지도 Pro](https://chatgpt.com/c/6ada853c-ff1c-83ee-8258-965005014026). 서로 다른 주제를 한 세션에 계속 섞지 않는다.
 
-**35 최신 PC 흐름의 독립 미리보기 — 후보 독립 검증 중.** [범위](2026-10-23-isolated-preview-35/INPUT.md) · [PR19](https://github.com/tlsee0813-cmd/agentflow-studio/pull/19) · [작성자81f8a32](https://github.com/tlsee0813-cmd/agentflow-studio/blob/81f8a32dcd12a6004274d38bb6edf1ff9a5cdafb/docs/cycles/2026-10-23-isolated-preview-35/AUTHOR.md). 별도 [Claude Code Opus](https://claude.ai/code/session_01NdSfw1rJtV9gxs8A1MEmPe)가 같은 제품을 별도 출력/고정 저장 접두사로 만드는 빌드를 구현했다. Sol 정적 검토에서 중요한 문제는 찾지 못했다. 작성자 정상 격리·명시 백업·표적 저장 실패 검사를 확인했으며 큰 실제 용량 한도와 기존 일반 읽기전용 문구는 해결했다고 하지 않는다. 기존 Node22.22 환경의 루트 I6R 실패는 기준에도 같았고 정확22.16 양OS CI는 진행 중이다. Cloud는 정확후보의 정적 미리보기에서 양PC 한 흐름을 실제 조작하고 검증된17개 정적 파일을 GitHub delivery로 공유한다. main/gh-pages를 유지한 채 별도 owner-private Sites 체험 공간을 등록했으나 아직 저장 버전·배포는 없다. 검증된 산출물만 연결하며35를34/36 지도 표현 개선에 종속하지 않는다.
+GitHub checkpoint는 결정/제품 통합, delivery/ui02-fix3-evidence 새 접두사는 실행/화면 근거다. 로컬은 작고 필요한 포장/검증 중간물에 한정한다. 로컬 서버 실행은 앞선 자동 승인 검토에서 차단되어 재시도하지 않았고 Cloud에서 실제 실행한다. Sites 공식 정적 포장/게시와 로컬 서버 실행을 구분한다. 예약agentflow는 PAUSED 그대로다.
 
-**36 기본 지도와 상세의 정보 우선순위 — 한 후보 구현 배정.** [범위](2026-10-23-map-priority-36/INPUT.md). Pro의 기본/상세 분리 제안을 검토해 ‘이전 기준’은 설명으로 한정하고 현재 미답 조건과 부분의 짧은 목적을 보존하도록 수정했다. 기본을 경고 목록으로 만들지 않는다. 기존 수량의 기본 노출은 명시적으로 양보하되 정확한 소유 상세에서 읽을 수 있어야 한다. 같은 지도 주제 Claude 세션에 product/map-priority-36(시작e445774d)만 FF게시를 위임했다. 한 후보와 기존 실패 표본을 비교하며 새 줌/배치 엔진·전체조사로 넓히지 않는다. 기존 고정 크기에서 충족하지 못하면 반례를 공유한다. 구현/수용 완료는 아직 아니다.
+PC 중심이다. 사람 사용 기록 제출을 새 관문으로 요구하지 않으며 사용자의 Dify 비교 기준을 따른다. 비교·AI 역할 관측을 사람 대상 연구라고 부르지 않는다. 방향 문서 질문은 연구지도이며 일괄 개발 목록이 아니다. [질문별 탐색 고정본](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9df67057595ff85322c238de55ffe2f5d820d950/docs/cycles/ACTIVE.md#질문과-근거-연결).
 
-## 마지막 제품 통합
-- **33 작업 대상과 행동 연결 — 한정 수용.** [결과](2026-10-23-task-context-33/RESULT.md), [PR18](https://github.com/tlsee0813-cmd/agentflow-studio/pull/18). 최종bfa6591, 병합0f8627ef. 기존 편집·파일 검토로 연결하고 화면 이탈 뒤 늦은 안내를 막는다.
-- **31 접힌 부분의 기록 진입 — 한정 수용.** [결과](2026-10-23-branch-records-31/RESULT.md), [PR16](https://github.com/tlsee0813-cmd/agentflow-studio/pull/16). 최종72940a, 병합75ed2ed7. 정확한 하위 기록·원호출 복귀와 신호 진입 페이지 위치를 보존한다.
-- **30 지도 복귀 높이 — 한정 수용.** [결과](2026-10-23-viewport-return-30/RESULT.md), [PR17](https://github.com/tlsee0813-cmd/agentflow-studio/pull/17). 최종e5a5bf40, 병합425c3df4. 카메라를 유지하며 복귀 뒤 가용 높이를 계산한다.
-- **29 작업문 곁의 소유 부분 설명 — 한정 수용.** [결과](2026-10-23-work-reference-29/RESULT.md), [PR15](https://github.com/tlsee0813-cmd/agentflow-studio/pull/15). 최종aa0938ec, 병합5415b8aa. 명시 재열기와 자동 수신의 서로 다른 읽기 계약을 구분한다.
-- **27 현재 설명 다시 기록 — 한정 수용.** [결과](2026-10-23-description-refresh-27/RESULT.md), [PR14](https://github.com/tlsee0813-cmd/agentflow-studio/pull/14). 최종6b96543f, 병합548cf480. 위 현재 상태와 결과의 경계를 따른다.
-- **23 고친 설명의 다음 입력 연결 — 한정 수용.** [결과·실패·검증 한계](2026-10-23-correction-context-23/RESULT.md), [PR13](https://github.com/tlsee0813-cmd/agentflow-studio/pull/13). 최종689c4788, checkpoint병합04dd3301dcf87d73fdb8f4ce3b05036b68ee814d. 후보/병합 app subtree 전체 일치. 현재 대상의 유효 설명을 출처 있는 참고로 전달한다. 독립 두 PC의 실제 POST10건 HTTP200/MOCK, 같은A external r1→user r2→새C r2/Bnull, manual4·과거H·합성 원보고·구상 보존. 작성자·독립 코드/실제화면·최종 양OS CI39824210631을 분리했다. 429 원실패와 문서 ‘원template7일’ 정정도 결과에 남긴다. 의미 충돌 해결을 수용한 것은 아니다.
-- **21 첫 파일 인계 입구 — 한정 수용.** [결과·원실패와 검사 보완](2026-10-23-blank-project-21/RESULT.md), [PR12](https://github.com/tlsee0813-cmd/agentflow-studio/pull/12).799077→병합241cbd89. 파일 선택을 주 전달행 뒤로 옮겼다. 이전 Ubuntu/Cloud 원검사 실패를 보존하고 키 조작의 scrollend 완료를 기다리는 검사로 보완한 뒤 Cloud154와 양OS CI39823679426 성공. 정확 내부 이동 원인은 미확정이며 IO 오탐이나143만의 문제로 치부하지 않는다.
-- [수신 결과20](2026-10-22-received-result-20/RESULT.md), [지도/기록19](2026-10-22-workspace-records-19/RESULT.md), [실제 포함18](2026-10-22-mixed-depth-18/RESULT.md), [설명 갱신17](2026-10-22-area-update-17/RESULT.md), [보고 연결16](2026-10-16-report-area-16/RESULT.md), [프로젝트 홈15](2026-10-16-project-home-15/RESULT.md). 수용 제품과 공개 버전은 [PROJECT_STATUS](../PROJECT_STATUS.md)를 따른다.
-
-## 앞선 흐름 관측
-[지도 읽기24 결과](2026-10-23-map-reading-24/RESULT.md): 양PC 기존 모두보기/위치찾기/작업복귀를 한정 수용하고 제품 무변경으로 닫았다. gzip 원해시·복귀5쌍과 별도 배율보정을 대조했다. 선택 카드 가림과 작은 글자는 남는다. 총괄은4PNG를 직접 읽었으며 지도 전체 가독성 합격으로 확대하지 않는다.
-
-[재진입22 결과](2026-10-23-project-reentry-22/RESULT.md)는 홈 재진입→현재/보류/미답 소유 부분→정확한A 후속 인계→지도 복귀를 한정 확인했다. 최초 발견성·마지막 열람 이후 새로움·완전한 카메라 복원은 아니다. actionError4건과 초기 준비 실패를 종료0에 섞지 않는다. 패널 뒤 다음 대상의 접근 실패는24에서 기존 회복 흐름과 함께 재평가한다.
-
-## 남은 위험과 운영 경계
-1280 긴 보고의 다음 행동 노출, 패널로 좁아진 지도 clip과 추가 맞춤, 큰 카드의 밀도는 남는다. 이전19의81d Ubuntu HOME15 배경y272≠120 원인은 미상이다. 임의 pan/zoom·125%·큰 지도·실제 OS IME 일반화와 다른 탭 live는 미검증이다.23 새 선택 필드는 옛 strict 서버에서 거절되므로 같은 클라이언트/서버 번들을 사용한다. 기본 MOCK 한도에서 연속 사용/429 회복은 별도다.
-
-수신·원문 보존은 실제 실행/완료/채택의 증거가 아니다. ExportRecord.work는 당시 네 값 사본이지 모든 과거 지도/조건 재구성이 아니다. 자동 의미 추출·동일성·실시간 병합·GUIDE107 실제 AI HOLD는 별도다. 방향 문서 질문은 연구지도이며 일괄 개발 목록이 아니다. [질문별 탐색 이력 고정본](https://github.com/tlsee0813-cmd/agentflow-studio/blob/9df67057595ff85322c238de55ffe2f5d820d950/docs/cycles/ACTIVE.md#질문과-근거-연결).
-
-PC 중심, 사용자 평가 기준은 목적 차이를 구분한 Dify 비교다. 사람 자료 제출을 새 관문으로 요구하지 않으며 실제 사람 연구와 혼동하지 않는다. Claude Code의 이전 크레딧 제한은 다시 확인했다. 2026-10-23 KST에 Opus 새 세션이 실제 시작됐으며 [34 제품 관점 검토](https://claude.ai/code/session_01HYWug65yLyrGuGvjjLkAa5)를 맡겼다. Pro는 비교 조사, Opus는 전체 제품 흐름과 표시 후보, Sol은 구현·자료 대조, Cloud는 실제 화면 검증으로 역할을 나눈다. GitHub checkpoint는 결정·제품 통합, delivery 새 접두사는 원시 실행·화면 근거다. 로컬 서버 복구는 자동 승인 검토에서 차단되어 재시도하지 않았고 기존 Cloud에서 실행한다. 예약agentflow는 PAUSED 그대로다. main896dcf3848fec70357d0f9bd4fd6c09cab70db37·gh-pages63f5540d062861439f0932cd7311c6c5510e227c 유지.
+읽기·저장·원문 보존은 실제 실행/완료/AI 의미 품질 증거가 아니다. 작은 지도 글자·긴 소속 구별·첫 화면의 행동 노출·큰 지도/125%/실제 OS IME·다른 탭 live·기본MOCK 한도와429 회복은 미해결 또는 미검증이다.35의1280 안내 소멸 뒤 pageY 변화와 양PC 순서 차이를 정확 좌표/동일경로 성공으로 확대하지 않는다. GUIDE107 실제 AI HOLD는 유지한다. main896dcf3848fec70357d0f9bd4fd6c09cab70db37·기존 공개gh-pages63f5540d062861439f0932cd7311c6c5510e227c 유지.
