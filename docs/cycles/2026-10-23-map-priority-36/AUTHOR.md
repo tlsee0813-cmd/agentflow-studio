@@ -1,5 +1,5 @@
 # 36 기본 지도와 상세의 정보 우선순위 — 작성자 보고
-2026-10-23 KST · 작성자 역할(Claude Code). 독립 검증·통합 판단이 아니다. 원후보 `c0a7c91c` 뒤 [fix1](#fix1--보고만-있는-부분의-기록-입구)이 있다. 계약은 [INPUT](INPUT.md), 카드 측정 원자료는 [AUTHOR-cards.json](AUTHOR-cards.json).
+2026-10-23 KST · 작성자 역할(Claude Code). 독립 검증·통합 판단이 아니다. 원후보 `c0a7c91c` 뒤 [fix1](#fix1--보고만-있는-부분의-기록-입구), root의 35 통합 `a17cbcf9` 뒤 [fix2](#fix2--ci-ubuntu-글꼴에서-읽을-이유-줄이-3줄이-되어-본문이-잘림)가 있다. 계약은 [INPUT](INPUT.md), 카드 측정 원자료는 [AUTHOR-cards.json](AUTHOR-cards.json).
 
 ## 한 후보
 시작 `e445774dc817f8717dfcc0533b4c7969fe93886e`(app은 575bb745와 같음). 34 보류 배치는 가져오지 않았다. 34의 공개 fixture만 그대로 재사용했다. 카드 240×180·저장 좌표·포함관계·글자 크기는 그대로다.
@@ -90,3 +90,26 @@
   - L 보고 행은 정확한 보고를 read-only로 열고, 저장본 불변인 채 같은 행으로 돌아온다. 닫은 뒤 입구 초점·카메라·접힘·선택·저장본·POST 0이 유지된다.
 - **바뀐 기존 동작:** 보고만 있는 부모는 원래(575bb745) 부모 신호 조건(질문·설명)에도 걸리지 않아 입구가 없었다. 이제 `하위 포함 기록 읽기` 입구가 생긴다.
 - **미실행:** 나머지 브라우저 검사, 양OS CI, Cloud는 실행하지 않았다(총괄 계획대로 fix1 뒤 독립 Cloud).
+
+## fix2 — CI Ubuntu 글꼴에서 읽을 이유 줄이 3줄이 되어 본문이 잘림
+**기존 실패(root 회수, 작성자는 Actions/API를 다시 조회하지 않음):** run 39884071150 Ubuntu job 120188020215, head `a17cbcf9`(app `66d79f03`). MAP36 12개 중 test01/02/03이 1280·1440에서 6개 실패했다. 최초 실패는 test_01 P 카드 `.tag.area-undecided`(‘구상 미기재’) inside:false이고, test02/03은 P `area-card-note`가 inside:false다. 설치 로그는 Playwright 1.57.0 / bundled Chromium 143.0.7499.4이며 실제 실행 version은 확인되지 않았다.
+
+**재현 환경과 한계:** Chromium 143은 이 컨테이너 네트워크 정책이 `cdn.playwright.dev`·`playwright.download.prss.microsoft.com`을 막아(403) 받을 수 없었다. 대신 **Chromium 141.0.7390.37**(이 컨테이너 Playwright 실행 browser.version)에서 CI 글꼴을 흉내 냈다. 시스템 글꼴은 바꾸지 않고, 작업용 `FONTCONFIG_FILE`에서 Inter와 Noto CJK를 빼고 Playwright with-deps 계열 글꼴(DejaVu, Liberation, FreeFont, TLWG, IPA Gothic, WenQuanYi Zen Hei, Noto Color Emoji)만 보이게 했다. 이때 한글은 WenQuanYi Zen Hei, 라틴은 DejaVu Sans로 나온다. CI 이미지의 실제 글꼴 목록을 확인한 것은 아니다. 143 실행·Windows는 미확인이며, 154 통과로 대체하지 않는다.
+- 수정 전(styles.css `2b0696c5…`): 흉내 글꼴에서 CI와 같은 test01/02/03 × 1280/1440 6개 실패, 같은 첫 실패 요소(P ‘구상 미기재’). 시스템 글꼴(Noto CJK/Inter)에서는 12/12 통과.
+- **읽기 전용 원인 측정(1280, P 카드, 카드 layout px):**
+  - 이유 항목 폭이 넓어졌다. 예: ‘답변 기록 없는 현재 질문 ·’ 114.25→123.36px, ‘설명 보류 ·’ 47.39→51.33px, ‘이전 기준 설명 ·’ 69.67→75.34px, ‘이번 탭 설명 갱신’ 76.62→82.67px.
+  - 항목마다 `white-space:nowrap`이라 둘째 줄 ‘설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신’이 약 215px로 214px 폭을 넘었다. 그래서 이유 줄이 28→42px(3줄)가 됐다.
+  - 이유 줄과 하단 줄은 flex-shrink 0, 본문(진입 버튼)은 flex 1 1 0%·overflow hidden이다. 그래서 본문이 104→90px로 줄었다.
+  - 가려진 양: 구상 미기재 tag bottom 102.5 vs 본문 bottom 99(3.5px), 구상 두 줄 bottom 109 vs 99(10px).
+  - line-height(이름 18, 소속 14, 구상 15, 이유 14px)·글자 크기·padding은 두 글꼴에서 같았다. 차이는 글자 폭뿐이다.
+- **판단:** 측정 오류가 아니라 제품 결함이다. 카드 높이 계약이 글꼴 폭에 달려 있었다.
+
+**정확한 변경(CSS 한 규칙):** 이유 줄의 항목별 `white-space:nowrap`을 없애고 `.area-node .branch-signals`에 `word-break:keep-all`을 둔다. 한글 단어는 쪼개지 않고 단어 사이에서 줄을 바꾼다. 네 이유·순서·문구·글자 크기·카드 180px·좌표·상세는 그대로다.
+- 트레이드오프: 한 이유가 두 줄에 걸칠 수 있다(예: ‘설명 / 보류’). 숨김은 없다.
+- 줄 수는 여전히 글꼴 폭에 달려 있다. 다만 네 이유 전체 길이(흉내 글꼴 약 392px, Noto/Inter 약 364px)는 두 줄 용량 428px 안에 단어 단위로 들어간다.
+
+**수정 뒤(styles.css `0affbb51…`, app.js `89695dd5…`, attention.js `55182121…`):**
+- 흉내 글꼴에서 P 이유 줄 28px(2줄), 본문 104px, 잘림 없음. 구상 있음 여유 4px, 구상 미기재 10.5px(측정값일 뿐).
+- 두 글꼴 각각에서 통과: map-priority36 12/12, branch-records31 10/10, hierarchy18 12/12, static 3/3. static은 CI처럼 `build-static.mjs`와 `--preview`를 먼저 빌드했다. 처음 실행은 preview 미빌드 준비 오류였다.
+- check·build·continuity check/build 통과, node 279/279.
+- 미실행: Chromium 143(네트워크 차단), Windows, 양OS CI, Cloud, 나머지 browser 검사. 확대 crop에서 글자를 읽은 것은 기본 56~68% 배율의 가독성 증거가 아니다.
