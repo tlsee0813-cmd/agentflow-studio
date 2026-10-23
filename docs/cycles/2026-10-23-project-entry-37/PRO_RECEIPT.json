@@ -1,0 +1,18 @@
+{
+  "sessionUrl": "https://chatgpt.com/c/6adab66c-4428-83ee-aac8-dec9d0914941",
+  "browser": "IAB 2",
+  "ownNewTab": "1",
+  "modelObserved": "5.6 Pro",
+  "submissionObserved": true,
+  "completionObserved": true,
+  "processingTimeUI": "10m 12s",
+  "additionalPromptCount": 0,
+  "existingTabsTouched": false,
+  "subscriptionOrPaymentChanges": false,
+  "source": "Completed answer copied through the page's native response Copy button and clipboard.readText; Markdown links preserved.",
+  "copyCheck": {"utf16Length": 5398, "fnv1a32": "cd6bc573", "localUtf8Bytes": 10985, "localSha256": "c7de9c57e6302fccd90042c21c8f499659d34fbdb2588dcecfa81fc2312f46e4", "matchesClipboardLengthAndFNV": true},
+  "responseScope": "Document/code research; Pro explicitly did not independently operate the app or visually inspect the shared PNGs. Official sources cited in the response have not been separately re-audited by this helper.",
+  "tabRetention": "markHandoff",
+  "limits": "Pro conclusions remain advisory. Root's actual first-visit/empty-work/example observation is separate evidence. The response grouping of follow-up-less reports with actual unanswered questions must not be adopted as one unanswered-question count."
+}
+
