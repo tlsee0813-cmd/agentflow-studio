@@ -44,3 +44,12 @@ test('MAP36 a this-tab update is only an arrival in this tab; older-basis means 
   assert.deepEqual(readingReasons(n.p,n.ids.P,n.tab).reasons,['open-question','held','updated']);
   const e=D.addArea(D.createProject(),'빈 부분');assert.deepEqual(readingReasons(e,e.space.areas[0].id,new Set()),{reasons:[],records:false});
 });
+
+test('MAP36 fix1 a part with only a report (no question, no description) still has a records entry', async () => {
+  const {reportsOnlyFixture}=await import('./map-priority36-fixtures.mjs');const f=reportsOnlyFixture();
+  const L=subtreeSignals(f.p,f.ids.L)[0];
+  assert.deepEqual([L.questions.length,L.description.current,L.description.held.length],[0,null,0]);
+  assert.deepEqual(L.reports.map(r=>r.returnId),[f.report]);
+  assert.deepEqual(readingReasons(f.p,f.ids.L,new Set()),{reasons:[],records:true});
+  assert.deepEqual(readingReasons(f.p,f.ids.G,new Set()),{reasons:[],records:true});
+});

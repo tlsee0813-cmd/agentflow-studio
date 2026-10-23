@@ -16,6 +16,7 @@ import browser as base
 APP=Path(__file__).resolve().parents[2]
 OBS=base.OUT/'map-priority36-observations.jsonl'
 OBS.write_text('',encoding='utf-8')
+ONLY="import {reportsOnlyFixture} from './continuity/tests/map-priority36-fixtures.mjs';console.log(JSON.stringify(reportsOnlyFixture()));"
 SEED="import {map34Fixture} from './continuity/tests/map-signals34-fixtures.mjs';console.log(JSON.stringify(map34Fixture(JSON.parse(process.argv[1]))));"
 CARD=r'''id=>{const n=document.querySelector(`.area-node[data-area-id="${id}"]`);if(!n)return null;const c=n.getBoundingClientRect();
  const box=e=>{const r=e.getBoundingClientRect();let l=0,t=0,rr=innerWidth,b=innerHeight;
@@ -146,6 +147,36 @@ class MapPriority36(unittest.TestCase):
         expect(self.page.locator('#subtree-records-heading-'+b)).to_have_text('이 부분과 하위 기록 · 질문 1 · 설명 1')
         self.page.locator('#area-panel-close').click();expect(self.page.locator('#node-info-'+b)).to_be_focused()
         self.equal('정보 왕복 저장 자료 불변',self.state(),data);self.equal('정보 왕복 새 AI 요청 없음',self.posts,[])
+
+    # fix1: a part that owns only a report (an ordinary request without a question; understanding:null) and its parent.
+    def test_06_reports_only_leaf_and_parent_keep_the_records_entry(self):
+        f=json.loads(subprocess.check_output(['node','--input-type=module','-e',ONLY],cwd=APP,text=True,encoding='utf-8'));self.record('fixture',f['metadata']['nature'],f['metadata']['owners'])
+        path=base.OUT/f'map36-{self.WIDTH}-reports-only.json';path.write_text(json.dumps(f['p'],ensure_ascii=False),encoding='utf-8')
+        base.reveal_management(self.page,'#import')
+        with self.page.expect_file_chooser() as chooser:self.page.locator('#import').click()
+        self.page.once('dialog',lambda d:d.accept());chooser.value.set_files(str(path));expect(self.page.locator('#notice')).to_contain_text('사본으로 불러왔어요');base.saved(self.page)
+        self.page.locator('#nav-space').click();self.page.locator('#map-fit').click();self.posts.clear()
+        g,l=f['ids']['G'],f['ids']['L'];s={'ids':f['ids']}
+        for key,text,aria in [('L','기록 읽기','이 부분 기록 읽기'),('G','하위 포함 기록 읽기','이 부분과 하위 기록 읽기')]:
+            v=self.whole(s,key,'보고만');self.equal(f'보고만 {key} 기록 입구',v['signal'],text);self.yes(f'보고만 {key} 읽기 범위',v['aria'].endswith(aria),v['aria'])
+        for key,summary in [('L','요청 1개 · 돌아온 결과 1개 · 앱 미검증'),('G','아직 요청 없음')]:
+            id=f['ids'][key];before=self.page.evaluate(MAP);data=self.state()
+            self.page.locator('#branch-records-'+id).click()
+            expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',id);expect(self.page.locator('#subtree-records-heading-'+id)).to_be_focused()
+            expect(self.page.locator('#subtree-records-heading-'+id)).to_have_text('이 부분과 하위 기록 · 질문 0 · 설명 0')
+            rows=self.page.locator(f'#subtree-records-{id} .subtree-record [id^="subtree-task-"]').evaluate_all('es=>es.map(e=>e.id)')
+            self.equal(f'보고만 {key} 상세의 정확한 기록 id 집합',rows,['subtree-task-'+f['report']])
+            self.equal(f'보고만 {key} 상세의 정확한 소유',self.page.locator(f'#subtree-records-{id} [data-owner-area]').evaluate_all('es=>[...new Set(es.map(e=>e.dataset.ownerArea))]'),[l])
+            expect(self.page.locator('#area-panel-body')).to_contain_text(summary)
+            if key=='L':
+                # The report row opens the exact report read-only and returns to the same row; nothing is written.
+                row='#subtree-task-'+f['report'];self.page.locator(row).click()
+                expect(self.page.locator('#task-pointed')).to_have_attribute('data-report-task-id',f['report'])
+                self.equal('보고 원문 읽기 중 저장 자료 불변',self.state(),data)
+                self.page.locator('#task-return-origin').click();expect(self.page.locator('#area-panel-body')).to_have_attribute('data-area-id',l);expect(self.page.locator(row)).to_be_focused()
+            self.page.locator('#area-panel-close').click();expect(self.page.locator('#branch-records-'+id)).to_be_focused()
+            back=self.page.evaluate(MAP);self.equal(f'보고만 {key} 닫은 뒤 카메라·접힘·선택',[back['matrix'],back['folds'],back['selected']],[before['matrix'],before['folds'],before['selected']])
+            self.equal(f'보고만 {key} 저장 자료 불변',self.state(),data);self.equal(f'보고만 {key} 새 AI 요청 없음',self.posts,[])
 
 class MapPriority36Wide(MapPriority36):WIDTH,HEIGHT=1440,900
 

@@ -1,5 +1,5 @@
 # 36 기본 지도와 상세의 정보 우선순위 — 작성자 보고
-2026-10-23 KST · 작성자 역할(Claude Code). 독립 검증·통합 판단이 아니다. 계약은 [INPUT](INPUT.md), 카드 측정 원자료는 [AUTHOR-cards.json](AUTHOR-cards.json).
+2026-10-23 KST · 작성자 역할(Claude Code). 독립 검증·통합 판단이 아니다. 원후보 `c0a7c91c` 뒤 [fix1](#fix1--보고만-있는-부분의-기록-입구)이 있다. 계약은 [INPUT](INPUT.md), 카드 측정 원자료는 [AUTHOR-cards.json](AUTHOR-cards.json).
 
 ## 한 후보
 시작 `e445774dc817f8717dfcc0533b4c7969fe93886e`(app은 575bb745와 같음). 34 보류 배치는 가져오지 않았다. 34의 공개 fixture만 그대로 재사용했다. 카드 240×180·저장 좌표·포함관계·글자 크기는 그대로다.
@@ -75,3 +75,18 @@
   - 같은 앱 빌드·이전 검사 파일로 pc13 14, viewport30 4, workspace19 6, flow090 18, spatial102 11 OK
 - CI: `.github/workflows/verify.yml`에 MAP36 단계를 31 바로 뒤에 추가했다(기존 CRLF 유지, 7줄).
 - 미실행: 나머지 browser 검사, 양OS CI, Cloud 양PC 실제 조작, 사람 사용성, 모바일, 임의 배율, 35 체험본(별도 진행, 섞지 않음).
+
+## fix1 — 보고만 있는 부분의 기록 입구
+독립 코드 검토의 지적: `readingReasons.records`가 질문·현재 설명·이유만 보고 `subtreeSignals[].reports`를 빠뜨렸다. 그래서 정상 요청(advice.question=null)에 `understanding:null` 보고만 돌아온 부분은 상세에 ‘후속 작업문 없는 보고’가 있어도 카드에 기록 입구가 없었다. 이유가 없어도 기록이 있으면 ‘기록 읽기’를 준다는 계약 위반이다. ‘정보’ 우회는 남아 있었다.
+
+- **수정 범위:** `attention.ts`의 `records`에 `s.reports.length>0`을 더하는 한 줄과 주석. 네 이유는 바꾸지 않았다. 보고만으로는 이유 줄에 아무것도 더하지 않고 `기록 읽기`/`하위 포함 기록 읽기`만 생긴다. 배치·CSS·다른 문구는 그대로다.
+- **표본:** `tests/map-priority36-fixtures.mjs`의 `reportsOnlyFixture`. 공개 domain API만 쓴다. 부모 G ⊃ 말단 L, L은 질문 없는 요청 1개와 그 보고 1개(return.2, understanding:null)를 가지며 G는 자기 기록이 없다.
+- **원후보에서 실제 실패(수정 전 소스, attention.js `dc843c58…`):**
+  - node `map-priority36.test.mjs` 4번: `records: false` ≠ `true`.
+  - 브라우저 `test_06` 1280·1440: `None != '기록 읽기' : 보고만 L 기록 입구`.
+- **수정 뒤 통과(attention.js `55182121…`, app.js·styles.css 동일 `89695dd5…`/`2b0696c5…`):**
+  - node 279/279, map-priority36 브라우저 12/12(새 test_06 양PC 포함), branch-records31 10/10, hierarchy18 12/12, check·build 통과.
+  - test_06이 확인하는 것: L `기록 읽기`/G `하위 포함 기록 읽기` 입구, 카드 상자 전체 inside·hit·180px·좌표, L·G 상세의 정확한 기록 id 집합 `[subtree-task-<보고>]`와 소유 `[L]`, 제목 `질문 0 · 설명 0`, 요청/결과 수(L `요청 1개 · 돌아온 결과 1개 · 앱 미검증`, G `아직 요청 없음`).
+  - L 보고 행은 정확한 보고를 read-only로 열고, 저장본 불변인 채 같은 행으로 돌아온다. 닫은 뒤 입구 초점·카메라·접힘·선택·저장본·POST 0이 유지된다.
+- **바뀐 기존 동작:** 보고만 있는 부모는 원래(575bb745) 부모 신호 조건(질문·설명)에도 걸리지 않아 입구가 없었다. 이제 `하위 포함 기록 읽기` 입구가 생긴다.
+- **미실행:** 나머지 브라우저 검사, 양OS CI, Cloud는 실행하지 않았다(총괄 계획대로 fix1 뒤 독립 Cloud).
