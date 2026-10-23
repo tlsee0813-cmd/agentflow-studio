@@ -1,8 +1,10 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
-2026-10-23 작업 대상과 행동 연결33 통합 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
+2026-10-23 독립 체험본35 통합·게시 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
-**제품 기준 checkpoint는 읽는 작업에서 실제 편집·파일 검토로 이어지는33을 포함한다.** [33 결과·범위](cycles/2026-10-23-task-context-33/RESULT.md). 늦은 파일 읽기가 다른 화면을 보고 돌아온 위치를 빼앗지 않도록 보호했다. 긴 T2 1280의 별개 초안 첫 화면 노출은 남은 한계다.
+**최신 PC 체험본을 별도 비공개 주소에서 열 수 있다.** [PC 체험본](https://agentflow-studio-pc-preview-20261023.eagerllama11.chatgpt.site) · [35 결과·검증·한계](cycles/2026-10-23-isolated-preview-35/RESULT.md). 소유자 ChatGPT 로그인 후 사용하는 브라우저 MOCK이며 실제 AI와 계정 동기화는 없다. 프로젝트는 해당 브라우저에 저장되고 기존 공개 데이터는 명시 백업/가져오기로 옮긴다. 이 주소는 현재 사용자용 별도 체험본이며 아래 기존 공개 gh-pages와 구분한다.
+
+**제품 기준 checkpoint는 읽는 작업에서 실제 편집·파일 검토로 이어지는33과 별도 정적 체험 빌드35를 포함한다.** [33 결과·범위](cycles/2026-10-23-task-context-33/RESULT.md). 늦은 파일 읽기가 다른 화면을 보고 돌아온 위치를 빼앗지 않도록 보호했다. 긴 T2 1280의 별개 초안 첫 화면 노출은 남은 한계다.
 
 **앞선31은 접힌 부분의 신호에서 정확한 하위 기록으로 들어가고 원래 호출 지점으로 돌아오는31을 포함한다.** [31 결과·범위](cycles/2026-10-23-branch-records-31/RESULT.md). 신호를 열 때 바깥 페이지가 이동하던 반례를 보완했고, 현재 작업·미전송 입력을 보존한다. 질문 집계는 답변 기록도 포함하므로 미답/새 소식 수로 읽지 않는다.
 
@@ -28,7 +30,8 @@
 
 | 구분 | 정확한 기준 | 상태 |
 |---|---|---|
-| 제품 기준 checkpoint | [병합0f8627ef](https://github.com/tlsee0813-cmd/agentflow-studio/commit/0f8627ef53c85e979301a35420026ad305b56c35), 최종후보 [bfa6591](https://github.com/tlsee0813-cmd/agentflow-studio/commit/bfa6591fab4b04727f25de721a41f755a88b3205) | 33 작업 대상·행동 연결과 지연 안내 보호. [33 결과·한계](cycles/2026-10-23-task-context-33/RESULT.md) |
+| 제품 기준 checkpoint | [병합a6ea322](https://github.com/tlsee0813-cmd/agentflow-studio/commit/a6ea322a3147b0bee64e32752ec22bdcefcf6c82), 최종후보 [81f8a32](https://github.com/tlsee0813-cmd/agentflow-studio/commit/81f8a32dcd12a6004274d38bb6edf1ff9a5cdafb) | 33까지의 PC 흐름 +35 별도 정적 체험 빌드. [35 결과](cycles/2026-10-23-isolated-preview-35/RESULT.md) |
+| 최신 비공개 PC 체험본 | [Sites](https://agentflow-studio-pc-preview-20261023.eagerllama11.chatgpt.site), Sites 소스99d4502·제품81f8a32 | 35의 검증된17개 정적 자산. owner-private·브라우저 MOCK·실제 AI 없음.34/36 지도 후보 미포함 |
 | 현재 공개 MOCK | [gh-pages `63f5540d`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/63f5540d062861439f0932cd7311c6c5510e227c) · [BUILD.txt](https://github.com/tlsee0813-cmd/agentflow-studio/blob/63f5540d062861439f0932cd7311c6c5510e227c/BUILD.txt) | 위 USE106 소스의 정적 browser MOCK. 실제 AI 없음 |
 | 이전 공개 기준 | 소스 [`2931b509`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/2931b50938af037a43e20ed7aba69b96ab79843d) · 배포 [`d7b0bf85`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/d7b0bf8541ba0b5ecca914f8d6f412f44af24127) | 비교·되돌리기 기준이며 현재 공개 버전 아님 |
 | GUIDE107 병렬 후보 | [`3fd4b305`](https://github.com/tlsee0813-cmd/agentflow-studio/commit/3fd4b3055328862c8b8471b356ee5f3772a8deee), 부모 `2931b509` | 소스 검토·CI 통과, 실제 AI 의미 품질 **HOLD**. USE106·공개 소스에 미통합 |

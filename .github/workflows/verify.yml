@@ -70,6 +70,12 @@ jobs:
       - name: Build isolated static browser MOCK (no provider or prompt)
         shell: bash
         run: node continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log
+      # PREVIEW35: same modules, fixed preview-only storage prefix and label, separate output folder.
+      - name: Build static preview MOCK (separate folder and storage prefix)
+        shell: bash
+        run: |
+          set -o pipefail
+          node continuity/scripts/build-static.mjs --preview 2>&1 | tee test-results/static-preview-build.log
       - name: Install pinned browser verification tools
         run: |
           python -m pip install -r tests/browser-requirements.txt
@@ -254,7 +260,7 @@ jobs:
           set -o pipefail
           python continuity/tests/viewport30_browser.py 2>&1 | tee test-results/viewport30-browser.log
       # Sentinels and a CSP-blocked fetch are explicit probes; the product journey is native.
-      - name: Static subpath exchange and storage isolation (browser MOCK, no API)
+      - name: Static subpath exchange, demo/preview same-origin storage isolation (browser MOCK, no API)
         env:
           IDEA015_EVIDENCE_DIR: test-results/static-web
         shell: bash
