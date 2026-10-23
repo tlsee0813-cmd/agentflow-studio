@@ -1,0 +1,432 @@
+{
+  "head": "81f8a32dcd12a6004274d38bb6edf1ff9a5cdafb",
+  "run": 39880425557,
+  "account": "omitted throughout",
+  "platforms": {
+    "ubuntu": {
+      "rawFile": "009-ubuntu-log.json",
+      "job": {
+        "id": 120176226148,
+        "head_sha": "81f8a32dcd12a6004274d38bb6edf1ff9a5cdafb",
+        "name": "verify (ubuntu-24.04)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "logCharacters": 120000,
+      "logTruncated": true,
+      "groups": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 17.074,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 38.485,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 12.548,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 5.285,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 4.775,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 7.077,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 8.922,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 5.056,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 28.189,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 25.484,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 12.145,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 16.033,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 7.841,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 19,
+          "seconds": 44.246,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 36.234,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 27.412,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 43.009,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/understanding17_browser.py",
+          "tests": 12,
+          "seconds": 34.192,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/work-description29_browser.py",
+          "tests": 8,
+          "seconds": 22.65,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/branch-records31_browser.py",
+          "tests": 10,
+          "seconds": 23.914,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/hierarchy18_browser.py",
+          "tests": 12,
+          "seconds": 22.57,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/workspace19_browser.py",
+          "tests": 6,
+          "seconds": 24.084,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/received20_browser.py",
+          "tests": 11,
+          "seconds": 48.487,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/blank21_browser.py",
+          "tests": 2,
+          "seconds": 8.959,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/viewport30_browser.py",
+          "tests": 4,
+          "seconds": 4.821,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/static_browser.py",
+          "tests": 3,
+          "seconds": 6.552,
+          "status": "OK"
+        }
+      ],
+      "groupCount": 26,
+      "testCount": 258,
+      "individual": [
+        "test_preview_same_origin_storage_isolation (__main__.StaticWeb.test_preview_same_origin_storage_isolation)",
+        "PREVIEW35: demo and preview on one origin never read, write or swap each other's keys. ... ok",
+        "test_preview_write_failure_keeps_existing_values (__main__.StaticWeb.test_preview_write_failure_keeps_existing_values)",
+        "PREVIEW35 narrow labelled fault injection. The prefix separates keys, NOT the origin's one localStorage quota ... ok",
+        "test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation) ... ok"
+      ],
+      "selected": [
+        "\u001b[36;1mnode continuity/scripts/build-static.mjs --preview 2>&1 | tee test-results/static-preview-build.log\u001b[0m",
+        "Explicit browser MOCK build: continuity/static-preview-dist; no server adapter or provider files.",
+        "sha256 0d847d744ce6dd680cf0d601faf77789973907e89c288cbbe85f8061056ddac9  client/static-target.js",
+        "\u001b[36;1mpython -m playwright install --with-deps chromium\u001b[0m",
+        "Collecting playwright==1.57.0 (from -r tests/browser-requirements.txt (line 2))",
+        "  Downloading playwright-1.57.0-py3-none-manylinux1_x86_64.whl.metadata (3.5 kB)",
+        "Downloading playwright-1.57.0-py3-none-manylinux1_x86_64.whl (46.0 MB)",
+        "Installing collected packages: typing-extensions, greenlet, pyee, playwright",
+        "Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "Downloading Chromium 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-linux.zip",
+        "Chromium 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium-1200",
+        "Downloading FFMPEG playwright build v1011 from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip",
+        "FFMPEG playwright build v1011 downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011",
+        "Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200) from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-linux.zip",
+        "Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1200",
+        "\u001b[36;1mpython continuity/tests/static_browser.py 2>&1 | tee test-results/static-browser.log\u001b[0m",
+        "  IDEA015_EVIDENCE_DIR: test-results/static-web",
+        "test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation) ... ok",
+        "##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/"
+      ]
+    },
+    "windows": {
+      "rawFile": "013-windows-log.json",
+      "job": {
+        "id": 120176225980,
+        "head_sha": "81f8a32dcd12a6004274d38bb6edf1ff9a5cdafb",
+        "name": "verify (windows-2022)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      "logCharacters": 120000,
+      "logTruncated": true,
+      "groups": [
+        {
+          "script": "tests/browser.py",
+          "tests": 18,
+          "seconds": 21.478,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/browser.py",
+          "tests": 13,
+          "seconds": 50.33,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/ui001_browser.py",
+          "tests": 11,
+          "seconds": 14.361,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/fresh033_browser.py",
+          "tests": 3,
+          "seconds": 5.671,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/select035_browser.py",
+          "tests": 3,
+          "seconds": 5.438,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/connect039_browser.py",
+          "tests": 5,
+          "seconds": 8.588,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow049_browser.py",
+          "tests": 6,
+          "seconds": 10.004,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/ai055_browser.py",
+          "tests": 4,
+          "seconds": 5.82,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow083_browser.py",
+          "tests": 12,
+          "seconds": 35.609,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/flow090_browser.py",
+          "tests": 18,
+          "seconds": 27.581,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/guide097_browser.py",
+          "tests": 8,
+          "seconds": 12.91,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/spatial102_browser.py",
+          "tests": 11,
+          "seconds": 16.499,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/use106_browser.py",
+          "tests": 11,
+          "seconds": 8.798,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/pc12_browser.py",
+          "tests": 19,
+          "seconds": 46.076,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/pc13_browser.py",
+          "tests": 14,
+          "seconds": 38.949,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/home15_browser.py",
+          "tests": 21,
+          "seconds": 29.985,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/report16_browser.py",
+          "tests": 13,
+          "seconds": 44.855,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/understanding17_browser.py",
+          "tests": 12,
+          "seconds": 37.038,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/work-description29_browser.py",
+          "tests": 8,
+          "seconds": 24.087,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/branch-records31_browser.py",
+          "tests": 10,
+          "seconds": 25.797,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/hierarchy18_browser.py",
+          "tests": 12,
+          "seconds": 24.083,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/workspace19_browser.py",
+          "tests": 6,
+          "seconds": 25.496,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/received20_browser.py",
+          "tests": 11,
+          "seconds": 50.917,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/blank21_browser.py",
+          "tests": 2,
+          "seconds": 9.725,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/viewport30_browser.py",
+          "tests": 4,
+          "seconds": 5.645,
+          "status": "OK"
+        },
+        {
+          "script": "continuity/tests/static_browser.py",
+          "tests": 3,
+          "seconds": 7.528,
+          "status": "OK"
+        }
+      ],
+      "groupCount": 26,
+      "testCount": 258,
+      "individual": [
+        "test_preview_same_origin_storage_isolation (__main__.StaticWeb.test_preview_same_origin_storage_isolation)",
+        "PREVIEW35: demo and preview on one origin never read, write or swap each other's keys. ... ok",
+        "test_preview_write_failure_keeps_existing_values (__main__.StaticWeb.test_preview_write_failure_keeps_existing_values)",
+        "PREVIEW35 narrow labelled fault injection. The prefix separates keys, NOT the origin's one localStorage quota ... ok",
+        "test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation) ... ok"
+      ],
+      "selected": [
+        "# tests 275",
+        "# pass 275",
+        "# fail 0",
+        "##[group]Run node continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log",
+        "\u001b[36;1mnode continuity/scripts/build-static.mjs 2>&1 | tee test-results/static-build.log\u001b[0m",
+        "Explicit browser MOCK build: continuity/static-dist; no server adapter or provider files.",
+        "sha256 bded42aab4b5f5cee8df6fdd6b3c6f1cc9c200aa8071a146e1e6317a0a093657  client/static-target.js",
+        "\u001b[36;1mnode continuity/scripts/build-static.mjs --preview 2>&1 | tee test-results/static-preview-build.log\u001b[0m",
+        "Explicit browser MOCK build: continuity/static-preview-dist; no server adapter or provider files.",
+        "sha256 0d847d744ce6dd680cf0d601faf77789973907e89c288cbbe85f8061056ddac9  client/static-target.js",
+        "\u001b[36;1mpython -m playwright install --with-deps chromium\u001b[0m",
+        "Collecting playwright==1.57.0 (from -r tests/browser-requirements.txt (line 2))",
+        "  Downloading playwright-1.57.0-py3-none-win_amd64.whl.metadata (3.5 kB)",
+        "Downloading playwright-1.57.0-py3-none-win_amd64.whl (36.6 MB)",
+        "Installing collected packages: typing-extensions, greenlet, pyee, playwright",
+        "Successfully installed greenlet-3.5.1 playwright-1.57.0 pyee-13.0.1 typing-extensions-4.16.0",
+        "Downloading Chromium 143.0.7499.4 (playwright build v1200)\u001b[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-win64.zip\u001b[22m",
+        "Chromium 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium-1200",
+        "Downloading FFMPEG playwright build v1011\u001b[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-win64.zip\u001b[22m",
+        "FFMPEG playwright build v1011 downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\ffmpeg-1011",
+        "Downloading Chromium Headless Shell 143.0.7499.4 (playwright build v1200)\u001b[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1200/chromium-headless-shell-win64.zip\u001b[22m",
+        "Chromium Headless Shell 143.0.7499.4 (playwright build v1200) downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1200",
+        "Downloading Winldd playwright build v1007\u001b[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip\u001b[22m",
+        "Winldd playwright build v1007 downloaded to C:\\Users\\runneradmin\\AppData\\Local\\ms-playwright\\winldd-1007",
+        "\u001b[36;1mpython continuity/tests/static_browser.py 2>&1 | tee test-results/static-browser.log\u001b[0m",
+        "  IDEA015_EVIDENCE_DIR: test-results/static-web",
+        "test_static_subpath_exchange_reload_and_isolation (__main__.StaticWeb.test_static_subpath_exchange_reload_and_isolation) ... ok",
+        "##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/"
+      ]
+    }
+  },
+  "note": "Only Code Review tool diagnostics; no full artifact or replacement API. Runtime claims limited to returned log lines.",
+  "scopeLimit": {
+    "logLimit": 120000,
+    "typeAndNormalBuildExit": "not directly visible in truncated leading log",
+    "actualNodeVersion": "not directly visible",
+    "rootI6R": "individual result not visible; exact CI successful; no causal claim about Node22.22 vs22.16",
+    "artifactRetrieved": false
+  },
+  "visibleUnitSummary": {
+    "ubuntu": null,
+    "windows": {
+      "tests": 275,
+      "pass": 275,
+      "fail": 0
+    }
+  }
+}
