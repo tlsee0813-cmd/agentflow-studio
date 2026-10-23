@@ -1,0 +1,11 @@
+{
+  "script": "map-priority36_browser",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "continuity/tests/map-priority36_browser.py"
+  ],
+  "startUTC": "2026-10-23T01:24:51.858472+00:00",
+  "endUTC": "2026-10-23T01:25:15.020073+00:00",
+  "actualChildExit": 0,
+  "sourceSHA256": "ee8a3ad963524b8f0652ce453576d4d2821cfa6901909eff625031bffbe32c49"
+}

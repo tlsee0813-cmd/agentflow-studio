@@ -1,0 +1,471 @@
+{
+  "label": "explicit synthetic boundary; no UI comparison or actual AI",
+  "schema": "idea015.project.7",
+  "projectId": "P_4f0bd6d7-6738-43b4-8ede-fd8c557d8c96",
+  "ids": {
+    "P": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+    "Q": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+    "S": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+    "B": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+    "qRealAnswered": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+    "qExactTrial": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+    "qStaleOwn": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+    "qTrialContextExcluded": "T_bfe54565-1b4f-4e21-96d7-04daafec1c93",
+    "qActiveLeaf": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+    "qOutsideCurrent": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf"
+  },
+  "areas": [
+    {
+      "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+      "nameLength": 48,
+      "parent": null
+    },
+    {
+      "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+      "nameLength": 50,
+      "parent": "A_95bc324d-8373-4d38-9073-2f77156d69b7"
+    },
+    {
+      "id": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+      "name": "[합성34 공통머리말] 보류만 존재 · 실제 자식의 시험 문맥과 늦은 설명을 가진 긴 이름",
+      "nameLength": 50,
+      "parent": "A_95bc324d-8373-4d38-9073-2f77156d69b7"
+    },
+    {
+      "id": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+      "name": "[합성34 공통머리말] 관계만 존재 · 포함되지 않은 다른 부분의 현재 작업용 긴 이름",
+      "nameLength": 48,
+      "parent": null
+    }
+  ],
+  "currentTaskId": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+  "draftTarget": {
+    "area": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+  },
+  "expectedQuestions": [
+    {
+      "key": "qRealAnswered",
+      "id": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+      "owner": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "inN": true,
+      "inM": false,
+      "answered": true,
+      "applicability": "answered",
+      "meaning": "정확 실제답변 역할 기록; 구현/검증 성공 아님"
+    },
+    {
+      "key": "qExactTrial",
+      "id": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+      "owner": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "inN": true,
+      "inM": false,
+      "answered": true,
+      "applicability": "answered",
+      "meaning": "원실제request의 정확 test_answer: 전체 N 포함, 시험답변/실제답변 아님 표시"
+    },
+    {
+      "key": "qStaleOwn",
+      "id": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "owner": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "inN": true,
+      "inM": false,
+      "answered": false,
+      "applicability": "stale",
+      "meaning": "직접 요청 정정 뒤 옛 질문; 부모 자기 기록 N 포함"
+    },
+    {
+      "key": "qTrialContextExcluded",
+      "id": "T_bfe54565-1b4f-4e21-96d7-04daafec1c93",
+      "owner": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+      "inN": false,
+      "inM": false,
+      "answered": false,
+      "applicability": "active",
+      "meaning": "test_answer 시험문맥에서 새로 생성된 질문: 기존 제외 정책"
+    },
+    {
+      "key": "qActiveLeaf",
+      "id": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+      "owner": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "inN": true,
+      "inM": true,
+      "answered": false,
+      "applicability": "active",
+      "meaning": "말단 Q의 현재 답변 기록 없음"
+    },
+    {
+      "key": "qOutsideCurrent",
+      "id": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+      "owner": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+      "inN": true,
+      "inM": true,
+      "answered": false,
+      "applicability": "active",
+      "meaning": "관계만 있는 B의 현재 질문: P 집계에는 제외"
+    }
+  ],
+  "expectedAreas": [
+    {
+      "key": "P",
+      "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "owners": [
+        "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+        "A_af30ff68-199e-4029-a8b9-797469b0e066"
+      ],
+      "N": 4,
+      "M": 1,
+      "descriptions": {
+        "current": 1,
+        "stale": 1,
+        "held": 1
+      }
+    },
+    {
+      "key": "Q",
+      "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "owners": [
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+      ],
+      "N": 3,
+      "M": 1,
+      "descriptions": {
+        "current": 0,
+        "stale": 1,
+        "held": 0
+      }
+    },
+    {
+      "key": "S",
+      "id": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+      "owners": [
+        "A_af30ff68-199e-4029-a8b9-797469b0e066"
+      ],
+      "N": 0,
+      "M": 0,
+      "descriptions": {
+        "current": 0,
+        "stale": 0,
+        "held": 1
+      }
+    },
+    {
+      "key": "B",
+      "id": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+      "owners": [
+        "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40"
+      ],
+      "N": 1,
+      "M": 1,
+      "descriptions": {
+        "current": 0,
+        "stale": 0,
+        "held": 0
+      }
+    }
+  ],
+  "actual": [
+    {
+      "key": "P",
+      "owners": [
+        "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+        "A_af30ff68-199e-4029-a8b9-797469b0e066"
+      ],
+      "N": 4,
+      "M": 1,
+      "descriptions": {
+        "current": 1,
+        "stale": 1,
+        "held": 1
+      },
+      "questionIds": [
+        "T_d183ba43-f884-4eeb-9528-4c247025456b",
+        "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+        "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+        "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a"
+      ],
+      "questionRows": [
+        {
+          "kind": "decision",
+          "taskId": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+          "returnId": null,
+          "areaId": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+          "status": "이전 질문 · 참고 기록",
+          "answered": false,
+          "applicability": "stale"
+        },
+        {
+          "kind": "decision",
+          "taskId": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+          "returnId": null,
+          "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "status": "답변 기록 있음",
+          "answered": true,
+          "applicability": "answered"
+        },
+        {
+          "kind": "decision",
+          "taskId": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+          "returnId": null,
+          "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "status": "시험 답변 기록 · 실제 답변 아님",
+          "answered": true,
+          "applicability": "answered"
+        },
+        {
+          "kind": "decision",
+          "taskId": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+          "returnId": null,
+          "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "status": "사실 확인 항목 있음",
+          "answered": false,
+          "applicability": "active"
+        }
+      ]
+    },
+    {
+      "key": "Q",
+      "owners": [
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+      ],
+      "N": 3,
+      "M": 1,
+      "descriptions": {
+        "current": 0,
+        "stale": 1,
+        "held": 0
+      },
+      "questionIds": [
+        "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+        "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+        "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a"
+      ],
+      "questionRows": [
+        {
+          "kind": "decision",
+          "taskId": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+          "returnId": null,
+          "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "status": "답변 기록 있음",
+          "answered": true,
+          "applicability": "answered"
+        },
+        {
+          "kind": "decision",
+          "taskId": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+          "returnId": null,
+          "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "status": "시험 답변 기록 · 실제 답변 아님",
+          "answered": true,
+          "applicability": "answered"
+        },
+        {
+          "kind": "decision",
+          "taskId": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+          "returnId": null,
+          "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "status": "사실 확인 항목 있음",
+          "answered": false,
+          "applicability": "active"
+        }
+      ]
+    },
+    {
+      "key": "S",
+      "owners": [
+        "A_af30ff68-199e-4029-a8b9-797469b0e066"
+      ],
+      "N": 0,
+      "M": 0,
+      "descriptions": {
+        "current": 0,
+        "stale": 0,
+        "held": 1
+      },
+      "questionIds": [],
+      "questionRows": []
+    },
+    {
+      "key": "B",
+      "owners": [
+        "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40"
+      ],
+      "N": 1,
+      "M": 1,
+      "descriptions": {
+        "current": 0,
+        "stale": 0,
+        "held": 0
+      },
+      "questionIds": [
+        "T_22fc2640-945f-41a8-83be-1935dc9d9dcf"
+      ],
+      "questionRows": [
+        {
+          "kind": "decision",
+          "taskId": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+          "returnId": null,
+          "areaId": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+          "status": "사실 확인 항목 있음",
+          "answered": false,
+          "applicability": "active"
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "action": "public addArea/addChildArea",
+      "key": "P",
+      "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "parent": null,
+      "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름"
+    },
+    {
+      "action": "public addArea/addChildArea",
+      "key": "Q",
+      "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "parent": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름"
+    },
+    {
+      "action": "public addArea/addChildArea",
+      "key": "S",
+      "id": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+      "parent": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "name": "[합성34 공통머리말] 보류만 존재 · 실제 자식의 시험 문맥과 늦은 설명을 가진 긴 이름"
+    },
+    {
+      "action": "public addArea/addChildArea",
+      "key": "B",
+      "id": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+      "parent": null,
+      "name": "[합성34 공통머리말] 관계만 존재 · 포함되지 않은 다른 부분의 현재 작업용 긴 이름"
+    },
+    {
+      "action": "public addRelation",
+      "from": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "to": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+      "kind": "related"
+    },
+    {
+      "action": "public submit/begin/receive",
+      "key": "qRealAnswered",
+      "id": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+      "owner": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "sourceKind": "request",
+      "response": "existing deterministic mockAdvice"
+    },
+    {
+      "action": "public answer",
+      "taskId": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+      "testOnly": false
+    },
+    {
+      "action": "public submit/begin/receive",
+      "key": "qExactTrial",
+      "id": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+      "owner": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "sourceKind": "request",
+      "response": "existing deterministic mockAdvice"
+    },
+    {
+      "action": "public answer",
+      "taskId": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+      "testOnly": true,
+      "replyTo": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?"
+    },
+    {
+      "action": "public submit/begin/receive",
+      "key": "qStaleOwn",
+      "id": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "owner": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "sourceKind": "request",
+      "response": "existing deterministic mockAdvice"
+    },
+    {
+      "action": "public correctIntent",
+      "taskId": "T_d183ba43-f884-4eeb-9528-4c247025456b"
+    },
+    {
+      "action": "public submit/begin/receive",
+      "key": "qTrialContextExcluded",
+      "id": "T_bfe54565-1b4f-4e21-96d7-04daafec1c93",
+      "owner": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+      "sourceKind": "test_answer",
+      "response": "explicit synthetic provider-shaped question; not a mock algorithm result"
+    },
+    {
+      "action": "public submit/begin/receive",
+      "key": "qActiveLeaf",
+      "id": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+      "owner": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "sourceKind": "request",
+      "response": "existing deterministic mockAdvice"
+    },
+    {
+      "action": "public submit/begin/receive",
+      "key": "qOutsideCurrent",
+      "id": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+      "owner": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+      "sourceKind": "request",
+      "response": "existing deterministic mockAdvice"
+    },
+    {
+      "action": "public handoffText/markHandoff",
+      "key": "P_CURRENT",
+      "taskId": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "returnId": "H_SYN34_P_CURRENT",
+      "areaId": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "basedOn": 0
+    },
+    {
+      "action": "public importResultFile",
+      "key": "P_CURRENT",
+      "taskId": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "returnId": "H_SYN34_P_CURRENT",
+      "summary": "[합성 현재 설명] P 자기 질문과 실제 자식의 기록을 구별한다."
+    },
+    {
+      "action": "public handoffText/markHandoff",
+      "key": "Q_STALE",
+      "taskId": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+      "returnId": "H_SYN34_Q_STALE",
+      "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+      "basedOn": 0
+    },
+    {
+      "action": "public importResultFile",
+      "key": "Q_STALE",
+      "taskId": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+      "returnId": "H_SYN34_Q_STALE",
+      "summary": "[합성 이전 설명] Q의 이전 구상을 대상으로 정리한 설명이다."
+    },
+    {
+      "action": "public editArea invalidates previous Q stamp",
+      "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+    },
+    {
+      "action": "public handoffText/markHandoff",
+      "key": "S_HELD_ONLY",
+      "taskId": "T_bfe54565-1b4f-4e21-96d7-04daafec1c93",
+      "returnId": "H_SYN34_S_HELD_ONLY",
+      "areaId": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+      "basedOn": 0
+    },
+    {
+      "action": "public editArea before late return",
+      "areaId": "A_af30ff68-199e-4029-a8b9-797469b0e066"
+    },
+    {
+      "action": "public importResultFile",
+      "key": "S_HELD_ONLY",
+      "taskId": "T_bfe54565-1b4f-4e21-96d7-04daafec1c93",
+      "returnId": "H_SYN34_S_HELD_ONLY",
+      "summary": "[합성 늦은 설명] S의 수정 전 구상을 전제로 한 아직 반영하지 않은 설명이다."
+    }
+  ]
+}

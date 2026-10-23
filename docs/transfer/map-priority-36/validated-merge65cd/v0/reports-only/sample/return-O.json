@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_2104f6c9-f5ca-4ba1-97b6-0e1ed548c39a",
+  "taskId": "T_4c2a4b75-9c7f-4455-8985-59cfb72bc255",
+  "returnId": "H_SYN36_REPORT_ONLY_O",
+  "report": "[명시 합성36 O 보고원문 고유표지] 후속 작업문은 아직 없고 실제 실행·개발·검증을 뜻하지 않는다.",
+  "evidence": null,
+  "understanding": null
+}

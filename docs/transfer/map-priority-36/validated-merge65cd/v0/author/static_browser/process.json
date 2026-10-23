@@ -1,0 +1,11 @@
+{
+  "script": "static_browser",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "continuity/tests/static_browser.py"
+  ],
+  "startUTC": "2026-10-23T01:26:08.439997+00:00",
+  "endUTC": "2026-10-23T01:26:26.841918+00:00",
+  "actualChildExit": 0,
+  "sourceSHA256": "339ffae8c756bd62fd6113420e8c35721eed3be5400cecab8fcf828e4b0b1b54"
+}

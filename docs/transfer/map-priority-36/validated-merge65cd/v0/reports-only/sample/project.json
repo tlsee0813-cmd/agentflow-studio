@@ -1,0 +1,403 @@
+{
+  "schemaVersion": "idea015.project.7",
+  "id": "P_2104f6c9-f5ca-4ba1-97b6-0e1ed548c39a",
+  "revision": 34,
+  "name": "[합성36] 보고만 있는 기록",
+  "sources": [
+    {
+      "id": "S_afe0a4b8-c1f9-4f8b-beaf-4f8408243ed8",
+      "kind": "request",
+      "text": "[명시 합성36 L] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+      "at": "2026-10-23T01:17:59.850Z",
+      "taskId": "T_729160c8-583d-4310-bc83-fd2897630e72",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_a4f9efb3-941d-4b9d-b6a6-e9d15f8a205b",
+      "kind": "request",
+      "text": "[명시 합성36 O] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+      "at": "2026-10-23T01:17:59.852Z",
+      "taskId": "T_4c2a4b75-9c7f-4455-8985-59cfb72bc255",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_9cfa0ecd-1eda-4e5e-8805-7fb69dd077d5",
+      "kind": "request",
+      "text": "[명시 합성36 P] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+      "at": "2026-10-23T01:17:59.855Z",
+      "taskId": "T_5600f927-d961-488b-ba78-3508d7d13609",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "[명시 합성36 L] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+      "status": "requested",
+      "sourceId": "S_afe0a4b8-c1f9-4f8b-beaf-4f8408243ed8",
+      "revision": 13,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "[명시 합성36 O] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+      "status": "requested",
+      "sourceId": "S_a4f9efb3-941d-4b9d-b6a6-e9d15f8a205b",
+      "revision": 20,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "[명시 합성36 P] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+      "status": "requested",
+      "sourceId": "S_9cfa0ecd-1eda-4e5e-8805-7fb69dd077d5",
+      "revision": 27,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_729160c8-583d-4310-bc83-fd2897630e72",
+      "sourceIds": [
+        "S_afe0a4b8-c1f9-4f8b-beaf-4f8408243ed8"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성36 L] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_afe0a4b8-c1f9-4f8b-beaf-4f8408243ed8",
+              "revision": 13
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 13,
+      "mode": "mock",
+      "manual": {
+        "understanding": "[합성36 L/understanding] 원래 직접 입력값 · 배포 없음",
+        "scope": "[합성36 L/scope] 원래 직접 입력값 · 배포 없음",
+        "next": "[합성36 L/next] 원래 직접 입력값 · 배포 없음",
+        "checks": "[합성36 L/checks] 원래 직접 입력값 · 배포 없음"
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-23T01:17:59.861Z",
+          "method": "clipboard",
+          "revision": 32,
+          "chars": 5508,
+          "digest": "d503923e",
+          "work": {
+            "understanding": "[합성36 L/understanding] 원래 직접 입력값 · 배포 없음",
+            "scope": "[합성36 L/scope] 원래 직접 입력값 · 배포 없음",
+            "next": "[합성36 L/next] 원래 직접 입력값 · 배포 없음",
+            "checks": "[합성36 L/checks] 원래 직접 입력값 · 배포 없음"
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_SYN36_REPORT_ONLY_L",
+          "background": {
+            "version": "background.1",
+            "revision": 12,
+            "brief": "[명시 합성36] 질문·설명 없는 보고의 기록 입구만 확인한다. 실제 사용자·AI·개발 결과가 아니다.",
+            "area": {
+              "id": "A_fb2381fb-3a08-4344-af52-457c4899c7b7",
+              "name": "보고 소유 말단 L",
+              "note": "[합성] 질문과 설명 없이 보고만 받는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_fb2381fb-3a08-4344-af52-457c4899c7b7",
+            "understanding": 0,
+            "stamp": {
+              "name": "보고 소유 말단 L",
+              "note": "[합성] 질문과 설명 없이 보고만 받는다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_729160c8-583d-4310-bc83-fd2897630e72:cf7ba8e3c5c3d512af582842936ddfc781c37edc9cf364f66ae3c8a88e28ae3c"
+              ],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c",
+                  "name": "부모 P",
+                  "note": "[합성] 실제 자식 L의 기록만 포함한다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 12,
+        "brief": "[명시 합성36] 질문·설명 없는 보고의 기록 입구만 확인한다. 실제 사용자·AI·개발 결과가 아니다.",
+        "area": {
+          "id": "A_fb2381fb-3a08-4344-af52-457c4899c7b7",
+          "name": "보고 소유 말단 L",
+          "note": "[합성] 질문과 설명 없이 보고만 받는다."
+        }
+      },
+      "areaId": "A_fb2381fb-3a08-4344-af52-457c4899c7b7"
+    },
+    {
+      "id": "T_4c2a4b75-9c7f-4455-8985-59cfb72bc255",
+      "sourceIds": [
+        "S_a4f9efb3-941d-4b9d-b6a6-e9d15f8a205b"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성36 O] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D2",
+              "sourceId": "S_a4f9efb3-941d-4b9d-b6a6-e9d15f8a205b",
+              "revision": 20
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 20,
+      "mode": "mock",
+      "manual": {
+        "understanding": "[합성36 O/understanding] 원래 직접 입력값 · 배포 없음",
+        "scope": "[합성36 O/scope] 원래 직접 입력값 · 배포 없음",
+        "next": "[합성36 O/next] 원래 직접 입력값 · 배포 없음",
+        "checks": "[합성36 O/checks] 원래 직접 입력값 · 배포 없음"
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-23T01:17:59.863Z",
+          "method": "clipboard",
+          "revision": 33,
+          "chars": 5238,
+          "digest": "06fb441b",
+          "work": {
+            "understanding": "[합성36 O/understanding] 원래 직접 입력값 · 배포 없음",
+            "scope": "[합성36 O/scope] 원래 직접 입력값 · 배포 없음",
+            "next": "[합성36 O/next] 원래 직접 입력값 · 배포 없음",
+            "checks": "[합성36 O/checks] 원래 직접 입력값 · 배포 없음"
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_SYN36_REPORT_ONLY_O",
+          "background": {
+            "version": "background.1",
+            "revision": 19,
+            "brief": "[명시 합성36] 질문·설명 없는 보고의 기록 입구만 확인한다. 실제 사용자·AI·개발 결과가 아니다.",
+            "area": {
+              "id": "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e",
+              "name": "관계만 연결된 바깥 O",
+              "note": "[합성] P의 소유 범위 밖이다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e",
+            "understanding": 0,
+            "stamp": {
+              "name": "관계만 연결된 바깥 O",
+              "note": "[합성] P의 소유 범위 밖이다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_4c2a4b75-9c7f-4455-8985-59cfb72bc255:257aabaf40e66ad04ae6cc4a860eaeb29e754baf0e19085ba098387dc8937638"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 19,
+        "brief": "[명시 합성36] 질문·설명 없는 보고의 기록 입구만 확인한다. 실제 사용자·AI·개발 결과가 아니다.",
+        "area": {
+          "id": "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e",
+          "name": "관계만 연결된 바깥 O",
+          "note": "[합성] P의 소유 범위 밖이다."
+        }
+      },
+      "areaId": "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e"
+    },
+    {
+      "id": "T_5600f927-d961-488b-ba78-3508d7d13609",
+      "sourceIds": [
+        "S_9cfa0ecd-1eda-4e5e-8805-7fb69dd077d5"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성36 P] 표시 문장 한 줄을 읽기 자료로 정리해 주세요.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D3",
+              "sourceId": "S_9cfa0ecd-1eda-4e5e-8805-7fb69dd077d5",
+              "revision": 27
+            }
+          ]
+        },
+        "understanding": "입력한 요청을 원문 범위 그대로 이어갑니다. MOCK은 요청의 의미를 해석해 할 일을 정하지 않습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원문의 요청과 금지를 그대로 따르고, 나머지 저장 기준은 유지합니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": null,
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 27,
+      "mode": "mock",
+      "manual": {
+        "understanding": "[합성36 P/understanding] 원래 직접 입력값 · 배포 없음",
+        "scope": "[합성36 P/scope] 원래 직접 입력값 · 배포 없음",
+        "next": "[합성36 P/next] 원래 직접 입력값 · 배포 없음",
+        "checks": "[합성36 P/checks] 원래 직접 입력값 · 배포 없음"
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 26,
+        "brief": "[명시 합성36] 질문·설명 없는 보고의 기록 입구만 확인한다. 실제 사용자·AI·개발 결과가 아니다.",
+        "area": {
+          "id": "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c",
+          "name": "부모 P",
+          "note": "[합성] 실제 자식 L의 기록만 포함한다."
+        }
+      },
+      "areaId": "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c"
+    }
+  ],
+  "currentTaskId": "T_5600f927-d961-488b-ba78-3508d7d13609",
+  "draft": "",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "[명시 합성36] 질문·설명 없는 보고의 기록 입구만 확인한다. 실제 사용자·AI·개발 결과가 아니다.",
+      "at": "2026-10-23T01:17:59.848Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c",
+        "name": "부모 P",
+        "note": "[합성] 실제 자식 L의 기록만 포함한다.",
+        "archived": false,
+        "createdAt": "2026-10-23T01:17:59.849Z"
+      },
+      {
+        "id": "A_fb2381fb-3a08-4344-af52-457c4899c7b7",
+        "name": "보고 소유 말단 L",
+        "note": "[합성] 질문과 설명 없이 보고만 받는다.",
+        "archived": false,
+        "createdAt": "2026-10-23T01:17:59.849Z"
+      },
+      {
+        "id": "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e",
+        "name": "관계만 연결된 바깥 O",
+        "note": "[합성] P의 소유 범위 밖이다.",
+        "archived": false,
+        "createdAt": "2026-10-23T01:17:59.849Z"
+      }
+    ],
+    "relations": [
+      {
+        "id": "L_46d8394e-1022-402a-b28d-f3573576087b",
+        "from": "A_fb2381fb-3a08-4344-af52-457c4899c7b7",
+        "to": "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e",
+        "kind": "related",
+        "note": "포함이 아닌 관계만 연결"
+      }
+    ],
+    "draftTarget": null,
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c": {
+          "x": 0,
+          "y": 0
+        },
+        "A_fb2381fb-3a08-4344-af52-457c4899c7b7": {
+          "x": 0,
+          "y": 230
+        },
+        "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e": {
+          "x": 330,
+          "y": 0
+        }
+      }
+    },
+    "understanding": {},
+    "containment": {
+      "version": "containment.1",
+      "parents": {
+        "A_fb2381fb-3a08-4344-af52-457c4899c7b7": "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c"
+      },
+      "revisions": {
+        "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c": 0,
+        "A_fb2381fb-3a08-4344-af52-457c4899c7b7": 1,
+        "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e": 0
+      }
+    }
+  }
+}

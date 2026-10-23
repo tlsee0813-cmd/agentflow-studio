@@ -1,0 +1,11 @@
+{
+  "script": "hierarchy18_browser",
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "continuity/tests/hierarchy18_browser.py"
+  ],
+  "startUTC": "2026-10-23T01:25:41.546776+00:00",
+  "endUTC": "2026-10-23T01:26:08.439451+00:00",
+  "actualChildExit": 0,
+  "sourceSHA256": "f9ad5ecfe87a4ae068d57d454e044b7775a6f201bd41d25b31c302a9f174a82e"
+}

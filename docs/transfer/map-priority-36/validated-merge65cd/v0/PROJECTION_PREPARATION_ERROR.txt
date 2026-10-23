@@ -1,0 +1,3 @@
+Post-observation projection first run actual tool exit1 (UI was not rerun or changed):
+AssertionError: assert(after.current.revision>before.current.revision)
+The API returns current.entry.revision, so the checker read undefined values. The original projection-first-property-error.mjs is preserved. Correcting the property path to current.entry.revision produced actual exit0; no product/data/expected revision-increase change.

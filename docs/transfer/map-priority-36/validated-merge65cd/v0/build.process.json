@@ -1,0 +1,55 @@
+[
+  {
+    "name": "typecheck",
+    "command": [
+      "tsc",
+      "--noEmit",
+      "-p",
+      "continuity/tsconfig.json"
+    ],
+    "startUTC": "2026-10-23T01:24:21.578532+00:00",
+    "endUTC": "2026-10-23T01:24:23.803728+00:00",
+    "actualChildExit": 0
+  },
+  {
+    "name": "root-build",
+    "command": [
+      "node",
+      "scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-23T01:24:23.803746+00:00",
+    "endUTC": "2026-10-23T01:24:25.076626+00:00",
+    "actualChildExit": 0
+  },
+  {
+    "name": "continuity-build",
+    "command": [
+      "node",
+      "continuity/scripts/build.mjs"
+    ],
+    "startUTC": "2026-10-23T01:24:25.076644+00:00",
+    "endUTC": "2026-10-23T01:24:27.552586+00:00",
+    "actualChildExit": 0
+  },
+  {
+    "name": "demo",
+    "command": [
+      "node",
+      "continuity/scripts/build-static.mjs"
+    ],
+    "startUTC": "2026-10-23T01:24:27.552603+00:00",
+    "endUTC": "2026-10-23T01:24:30.132893+00:00",
+    "actualChildExit": 0
+  },
+  {
+    "name": "preview",
+    "command": [
+      "node",
+      "continuity/scripts/build-static.mjs",
+      "--preview"
+    ],
+    "startUTC": "2026-10-23T01:24:30.132910+00:00",
+    "endUTC": "2026-10-23T01:24:32.695840+00:00",
+    "actualChildExit": 0
+  }
+]

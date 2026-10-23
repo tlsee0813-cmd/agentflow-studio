@@ -1,0 +1,157 @@
+{
+  "executedSource": "65cd96d9da53753e70dba350bdf62c5d68474809",
+  "parents": [
+    "395df224b98c842c6fdf7e0d6e5903c6f1efd76e",
+    "c04c9d004bc5b2bf6aeaabfcd326f612c325813a"
+  ],
+  "appSubtree": "66d79f03d9884fa5d06252c7d9ad7fdc9322e231",
+  "equivalentHeadNotExecuted": "a17cbcf9804154b878ccf20dfa4d5155777ce7ca",
+  "wholeDiff65ToA17": "M\tdocs/cycles/ACTIVE.md\n",
+  "sourceFiles": [
+    {
+      "path": "app/continuity/public/index.html",
+      "bytes": 17960,
+      "sourceAndDiskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    },
+    {
+      "path": "app/continuity/public/styles.css",
+      "bytes": 75834,
+      "sourceAndDiskAfterSHA256": "2b0696c52e4698c96f1ed793ff552c8d9d328c6a8bb811b5faedd7a846486820"
+    },
+    {
+      "path": "app/continuity/scripts/build-static.mjs",
+      "bytes": 3601,
+      "sourceAndDiskAfterSHA256": "703bde0b6dba726601618aa17490cce15e93777f38e97071a35eae20a765dc3a"
+    },
+    {
+      "path": "app/continuity/scripts/build.mjs",
+      "bytes": 1064,
+      "sourceAndDiskAfterSHA256": "f369849e8bb4383052a67abe8b813c5d951a995fe784b9b6ea668356194cf8f0"
+    },
+    {
+      "path": "app/continuity/scripts/check.mjs",
+      "bytes": 1152,
+      "sourceAndDiskAfterSHA256": "1c57db78d77ce90b69cc83278ded96ba6cf767a52a4f7516b25d2afd0316cf36"
+    },
+    {
+      "path": "app/continuity/scripts/compiler.mjs",
+      "bytes": 561,
+      "sourceAndDiskAfterSHA256": "1c9b3dceb532fb94af6c50f3a1c4aeb6676f5783ef1994f8d2d39d379a5063e8"
+    },
+    {
+      "path": "app/continuity/src/client/app.ts",
+      "bytes": 280750,
+      "sourceAndDiskAfterSHA256": "2c3626849f3622558ce34e84a34648a9fc99bfb4aaa756cf8d4e5ae4b75db5ea"
+    },
+    {
+      "path": "app/continuity/src/client/presentation.ts",
+      "bytes": 8406,
+      "sourceAndDiskAfterSHA256": "50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639"
+    },
+    {
+      "path": "app/continuity/src/client/runtime-static.ts",
+      "bytes": 2101,
+      "sourceAndDiskAfterSHA256": "e005abaa05cea399979f9b52e700e85544ec5afdadb71cf005185532ab1dcfdc"
+    },
+    {
+      "path": "app/continuity/src/client/runtime.ts",
+      "bytes": 2934,
+      "sourceAndDiskAfterSHA256": "3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd"
+    },
+    {
+      "path": "app/continuity/src/client/static-target-preview.ts",
+      "bytes": 809,
+      "sourceAndDiskAfterSHA256": "057f2c36e39bfb29e826f901bd05be797d328291b895514289fa5a6ae3c782b9"
+    },
+    {
+      "path": "app/continuity/src/client/static-target.ts",
+      "bytes": 699,
+      "sourceAndDiskAfterSHA256": "a587ff5e5ed439d6f035a1cd76e139873df4b60a647d6ba93e1f09e44158913b"
+    },
+    {
+      "path": "app/continuity/src/shared/attention.ts",
+      "bytes": 7576,
+      "sourceAndDiskAfterSHA256": "8c137a370c6924d933a688b6636fa9d5129d43dc6303be92843047bbb3c8c001"
+    },
+    {
+      "path": "app/continuity/src/shared/domain.ts",
+      "bytes": 75793,
+      "sourceAndDiskAfterSHA256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf"
+    },
+    {
+      "path": "app/continuity/src/shared/guidance.ts",
+      "bytes": 6903,
+      "sourceAndDiskAfterSHA256": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18"
+    },
+    {
+      "path": "app/continuity/src/shared/hierarchy.ts",
+      "bytes": 2591,
+      "sourceAndDiskAfterSHA256": "c9e5a4d9679e6720bc5cd3b86e624904d17a5a7d22b8806d574640ddad605ffa"
+    },
+    {
+      "path": "app/continuity/src/shared/mock.ts",
+      "bytes": 17369,
+      "sourceAndDiskAfterSHA256": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2"
+    },
+    {
+      "path": "app/continuity/src/shared/outcome.ts",
+      "bytes": 4625,
+      "sourceAndDiskAfterSHA256": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd"
+    },
+    {
+      "path": "app/continuity/src/shared/plan-facts.ts",
+      "bytes": 4322,
+      "sourceAndDiskAfterSHA256": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44"
+    },
+    {
+      "path": "app/continuity/src/shared/storage.ts",
+      "bytes": 11615,
+      "sourceAndDiskAfterSHA256": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5"
+    },
+    {
+      "path": "app/continuity/src/shared/types.ts",
+      "bytes": 16360,
+      "sourceAndDiskAfterSHA256": "16202db1c238e917c548950543686046977c21c61de56b30d6f4140aad607d47"
+    },
+    {
+      "path": "app/continuity/src/shared/validation.ts",
+      "bytes": 46546,
+      "sourceAndDiskAfterSHA256": "cc958cf61b54aa9d552aab07ddaa8c7e6d60ec5e61f7218cf597dd608e9b94df"
+    },
+    {
+      "path": "app/continuity/tests/branch-records31_browser.py",
+      "bytes": 25326,
+      "sourceAndDiskAfterSHA256": "42131486cbd34aac69d76f4bdfa6244a88330e88f6b44b636a9c77ff5d50afbb"
+    },
+    {
+      "path": "app/continuity/tests/hierarchy18_browser.py",
+      "bytes": 32870,
+      "sourceAndDiskAfterSHA256": "f9ad5ecfe87a4ae068d57d454e044b7775a6f201bd41d25b31c302a9f174a82e"
+    },
+    {
+      "path": "app/continuity/tests/map-priority36_browser.py",
+      "bytes": 18582,
+      "sourceAndDiskAfterSHA256": "ee8a3ad963524b8f0652ce453576d4d2821cfa6901909eff625031bffbe32c49"
+    },
+    {
+      "path": "app/continuity/tests/static_browser.py",
+      "bytes": 33974,
+      "sourceAndDiskAfterSHA256": "339ffae8c756bd62fd6113420e8c35721eed3be5400cecab8fcf828e4b0b1b54"
+    }
+  ],
+  "artifact17": true,
+  "demoDifferenceOnly": "client/static-target.js",
+  "CSPConnectNone": true,
+  "Node": "22.16.0",
+  "TS": "5.8.3",
+  "Playwright": "1.57.0",
+  "Chromium": "154.0.8037.57",
+  "noFontInstall": true,
+  "UIHTTPbodyDiskBeforeAfterIn": "ui/raw-data.json.gz result.json",
+  "reportsOnlyBinding": {
+    "actualREPORT36_APP": "/workspace/browser-env/map36-merge/candidate/app",
+    "originalFrozenLiteralSourceLabel": "c0a7c91; not changed in frozen checker",
+    "checkerSHA256": "2963b6b4b47e621bac4bbed31cafdcddd1aa4fac3a8480e3412155f8980f4f66",
+    "actualSource": "65cd96d9da53753e70dba350bdf62c5d68474809"
+  }
+}

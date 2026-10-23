@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_4f0bd6d7-6738-43b4-8ede-fd8c557d8c96",
+  "taskId": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+  "returnId": "H_SYN34_P_CURRENT",
+  "report": "[명시 합성34 이번 탭 갱신] 같은 유효 인계의 설명을 다시 정리했다는 입력이다. 실제 AI·구현·검증 완료가 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+    "basedOn": 0,
+    "summary": "[명시 합성34 이번 탭 새 판본] P 자기 기록과 실제 자식 Q/S의 질문·설명 상태를 구별해 읽는다.",
+    "changes": [
+      "[합성] 화면 검증용으로 설명 판본을 새로 기록했다."
+    ],
+    "proposal": null,
+    "origin": "[명시 합성34] domain fixture 생성자가 구성한 외부 설명"
+  }
+}

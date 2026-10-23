@@ -1,0 +1,229 @@
+{
+  "executionSource": "65cd96d9da53753e70dba350bdf62c5d68474809",
+  "appEquivalentHeadNotExecuted": "a17cbcf9804154b878ccf20dfa4d5155777ce7ca",
+  "scenes": 12,
+  "core": {
+    "1280": {
+      "fullQuestionIDs": [
+        "T_d183ba43-f884-4eeb-9528-4c247025456b",
+        "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+        "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+        "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a"
+      ],
+      "fullReportIDs": [
+        "T_28fd3661-7e73-469c-a11b-9da0c7884dea",
+        "T_7cbe328b-648c-47c3-b3ff-aad0116cbb73"
+      ],
+      "descriptionOwners": [
+        "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+        "A_af30ff68-199e-4029-a8b9-797469b0e066"
+      ],
+      "currentTask": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+      "draftTarget": {
+        "area": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+      },
+      "sameProjectAcrossReaderAndOwnerSwitch": true,
+      "countLineFullyVisibleWindows": [
+        {
+          "text": "요청 1개 · 돌아온 결과 2개 · 앱 미검증",
+          "rect": {
+            "x": 951,
+            "y": 536.890625,
+            "width": 259,
+            "height": 22.1875,
+            "top": 536.890625,
+            "right": 1210,
+            "bottom": 559.078125,
+            "left": 951
+          }
+        }
+      ],
+      "closeOrigin": {
+        "before": {
+          "camera": "matrix(0.731579, 0, 0, 0.731579, 149.474, 34.7368)",
+          "folds": [
+            [
+              "branch-toggle-A_95bc324d-8373-4d38-9073-2f77156d69b7",
+              "false"
+            ]
+          ],
+          "selected": null,
+          "owner": null,
+          "panelScroll": null,
+          "page": [
+            0,
+            0
+          ],
+          "focus": "branch-toggle-A_95bc324d-8373-4d38-9073-2f77156d69b7",
+          "plane": {
+            "x": 414.47369384765625,
+            "y": 372.2212219238281,
+            "width": 0.7315673828125,
+            "height": 0.7315673828125,
+            "top": 372.2212219238281,
+            "right": 415.20526123046875,
+            "bottom": 372.9527893066406,
+            "left": 414.47369384765625
+          }
+        },
+        "after": {
+          "camera": "matrix(0.731579, 0, 0, 0.731579, 149.474, 34.7368)",
+          "folds": [
+            [
+              "branch-toggle-A_95bc324d-8373-4d38-9073-2f77156d69b7",
+              "false"
+            ]
+          ],
+          "selected": null,
+          "owner": null,
+          "panelScroll": null,
+          "page": [
+            0,
+            0
+          ],
+          "focus": "branch-records-A_95bc324d-8373-4d38-9073-2f77156d69b7",
+          "plane": {
+            "x": 414.47369384765625,
+            "y": 372.2212219238281,
+            "width": 0.7315673828125,
+            "height": 0.7315673828125,
+            "top": 372.2212219238281,
+            "right": 415.20526123046875,
+            "bottom": 372.9527893066406,
+            "left": 414.47369384765625
+          }
+        }
+      }
+    },
+    "1440": {
+      "fullQuestionIDs": [
+        "T_d183ba43-f884-4eeb-9528-4c247025456b",
+        "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+        "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+        "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a"
+      ],
+      "fullReportIDs": [
+        "T_9d631d43-88e3-4e16-8c5f-9c2c3f7a3612",
+        "T_7cbe328b-648c-47c3-b3ff-aad0116cbb73"
+      ],
+      "descriptionOwners": [
+        "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+        "A_af30ff68-199e-4029-a8b9-797469b0e066"
+      ],
+      "currentTask": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+      "draftTarget": {
+        "area": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+      },
+      "sameProjectAcrossReaderAndOwnerSwitch": true,
+      "countLineFullyVisibleWindows": [
+        {
+          "text": "요청 1개 · 돌아온 결과 2개 · 앱 미검증",
+          "rect": {
+            "x": 1111,
+            "y": 716.890625,
+            "width": 259,
+            "height": 22.1875,
+            "top": 716.890625,
+            "right": 1370,
+            "bottom": 739.078125,
+            "left": 1111
+          }
+        },
+        {
+          "text": "요청 1개 · 돌아온 결과 2개 · 앱 미검증",
+          "rect": {
+            "x": 1111,
+            "y": 536.890625,
+            "width": 259,
+            "height": 22.1875,
+            "top": 536.890625,
+            "right": 1370,
+            "bottom": 559.078125,
+            "left": 1111
+          }
+        },
+        {
+          "text": "요청 1개 · 돌아온 결과 2개 · 앱 미검증",
+          "rect": {
+            "x": 1111,
+            "y": 496.890625,
+            "width": 259,
+            "height": 22.1875,
+            "top": 496.890625,
+            "right": 1370,
+            "bottom": 519.078125,
+            "left": 1111
+          }
+        }
+      ],
+      "closeOrigin": {
+        "before": {
+          "camera": "matrix(1.2, 0, 0, 1.2, 14, 17)",
+          "folds": [
+            [
+              "branch-toggle-A_95bc324d-8373-4d38-9073-2f77156d69b7",
+              "false"
+            ]
+          ],
+          "selected": null,
+          "owner": null,
+          "panelScroll": null,
+          "page": [
+            0,
+            0
+          ],
+          "focus": "branch-toggle-A_95bc324d-8373-4d38-9073-2f77156d69b7",
+          "plane": {
+            "x": 279,
+            "y": 354.484375,
+            "width": 1.20001220703125,
+            "height": 1.20001220703125,
+            "top": 354.484375,
+            "right": 280.20001220703125,
+            "bottom": 355.68438720703125,
+            "left": 279
+          }
+        },
+        "after": {
+          "camera": "matrix(1.2, 0, 0, 1.2, 14, 17)",
+          "folds": [
+            [
+              "branch-toggle-A_95bc324d-8373-4d38-9073-2f77156d69b7",
+              "false"
+            ]
+          ],
+          "selected": null,
+          "owner": null,
+          "panelScroll": null,
+          "page": [
+            0,
+            0
+          ],
+          "focus": "branch-records-A_95bc324d-8373-4d38-9073-2f77156d69b7",
+          "plane": {
+            "x": 279,
+            "y": 354.484375,
+            "width": 1.20001220703125,
+            "height": 1.20001220703125,
+            "top": 354.484375,
+            "right": 280.20001220703125,
+            "bottom": 355.68438720703125,
+            "left": 279
+          }
+        }
+      }
+    }
+  },
+  "readerLimit": "Range line boxes extend above/below short line-height clips; full-char negative is not ink absence; screenshots used for actual text judgment",
+  "reportsOnly": {
+    "originalEvidence": "5f9da8d47f76084b3e7a3e14a9e7ad82841a6aae",
+    "originalGateExit": 1,
+    "mergeGateExit": 0,
+    "checkerByteEqual": true,
+    "sampleByteEqual": true,
+    "originalLiteralSourceLabelInRaw": "c0; actual REPORT36_APP points at merge65; source binding overrides old label without pretending raw was edited"
+  },
+  "gateExit": 0
+}

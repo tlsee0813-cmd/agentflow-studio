@@ -1,0 +1,16 @@
+{
+  "buildTypeAllChildren": 0,
+  "UIChild": 0,
+  "UIOuterCollector": 0,
+  "UIOuterExec": 0,
+  "reportsOnlyCollectionChild": 0,
+  "reportsOnlyCollectionOuter": 0,
+  "reportsOnlyGateChild": 0,
+  "reportsOnlyGateOuter": 0,
+  "postJudgeToolExit": 0,
+  "projectionFirstPropertyReadErrorExit": 1,
+  "projectionCorrectEntryPathExit": 0,
+  "staticHTTPServerExit": -15,
+  "newCIQueried": false,
+  "note": "reports-only frozen gate collector meaning text is old original-failure label; actual fix gate exit0. That label is not a new failure."
+}

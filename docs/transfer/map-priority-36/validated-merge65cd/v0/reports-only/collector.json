@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/map36-merge/reports-only/check.py"
+  ],
+  "startUTC": "2026-10-23T01:24:36.093459+00:00",
+  "endUTC": "2026-10-23T01:24:39.315307+00:00",
+  "actualChildExit": 0,
+  "outerExit": 0
+}
