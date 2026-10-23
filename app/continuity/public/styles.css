@@ -2586,16 +2586,17 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .branch-signals:hover:not(:disabled){background:transparent;color:var(--accent-dark);text-decoration:underline}
 /* MAP36: the card body is the part's name (up to three lines), membership and its idea (up to two lines); only the name and
    membership rows sit beside '정보'. Below the drag handle, the reading-reason line and the fold control with the current-work
-   label run across the card's inner width. Each reason stays whole; lines break only between reasons. Card size, coordinates
-   and font sizes are unchanged; only gaps are tightened. Request/result counts are read in the '정보' panel. */
+   label run across the card's inner width. The reason line wraps at word spaces (Korean words kept whole), not only between
+   reasons: whole-reason breaks made the line height depend on the font's width (a 3rd line with wider fallback fonts clipped
+   the card body). Card size, coordinates and font sizes are unchanged; only gaps are tightened. Request/result counts are
+   read in the '정보' panel. */
 .area-node{gap:2px}
 .area-node .node-enter{padding-right:0;gap:1px}
 .area-node .area-card-name{-webkit-line-clamp:3;padding-right:44px}
 .area-node .area-card-path{padding-right:44px}
 .area-node .area-card-note{-webkit-line-clamp:2}
 .area-node-foot{display:flex;flex-wrap:wrap;align-items:center;gap:3px 4px;flex-shrink:0;min-width:0;margin-left:-22px}
-.area-node .branch-signals{line-height:14px;flex-shrink:0;margin-left:-22px}
-.area-node .branch-signals>span{white-space:nowrap}
+.area-node .branch-signals{line-height:14px;flex-shrink:0;margin-left:-22px;word-break:keep-all}
 .map-relation-list{margin-top:10px;font-size:13px}
 .map-relation-list summary{cursor:pointer}
 .relation-bundle{padding:8px 0;border-bottom:1px solid var(--line)}
