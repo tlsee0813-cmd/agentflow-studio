@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/map36-reports/gate.py"
+  ],
+  "startUTC": "2026-10-23T01:21:38.501132+00:00",
+  "endUTC": "2026-10-23T01:21:38.528027+00:00",
+  "actualChildExit": 1,
+  "outerExit": 1,
+  "meaning": "intentional original-product failure, separate from successful collection"
+}

@@ -1,0 +1,43 @@
+{
+  "source": "c0a7c91c54d62166140081b149d94bc6efa9f1f9",
+  "tree": "cb2026ad15e2d8a15cfba516d152b98f79957f21",
+  "method": "exact git archive; existing TS5.8.3 PATH compiler root/continuity build; source unchanged after execution",
+  "files": [
+    {
+      "path": "continuity/src/client/app.ts",
+      "bytes": 280750,
+      "sourceAndDiskAfterSHA256": "2c3626849f3622558ce34e84a34648a9fc99bfb4aaa756cf8d4e5ae4b75db5ea"
+    },
+    {
+      "path": "continuity/src/shared/attention.ts",
+      "bytes": 7446,
+      "sourceAndDiskAfterSHA256": "96e0bd25c6d1991ec502a5c651287ba5f3cab4a319c46e80d10315160f1f36c7"
+    },
+    {
+      "path": "continuity/public/index.html",
+      "bytes": 17960,
+      "sourceAndDiskAfterSHA256": "c3981c397ba764554da7416f488443ea248e6c51c6891313d01b51b568e525d0"
+    },
+    {
+      "path": "continuity/public/styles.css",
+      "bytes": 75834,
+      "sourceAndDiskAfterSHA256": "2b0696c52e4698c96f1ed793ff552c8d9d328c6a8bb811b5faedd7a846486820"
+    }
+  ],
+  "runtime": {
+    "Node": "v22.16.0",
+    "Playwright": "1.57.0",
+    "Chromium": "154.0.8037.57"
+  },
+  "actualToolExitReceipts": {
+    "continuityBuild": 0,
+    "rootBuildAfterFirstPrepareFailure": 0,
+    "generator": 0,
+    "projectionReloadCheck": 0,
+    "UICollector": 0,
+    "UIOuter": 0,
+    "intentionalGateChild": 1,
+    "intentionalGateOuter": 1,
+    "server": -15
+  }
+}

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/map36-reports/gate.py", line 4, in <module>
+    assert d['cardsExpanded']['L']['recordButtonCount']>0 and d['cardsCollapsed']['P']['recordButtonCount']>0, 'Observed defect: reports exist in exact owned panels but leaf and collapsed-parent generic record entry are absent'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Observed defect: reports exist in exact owned panels but leaf and collapsed-parent generic record entry are absent

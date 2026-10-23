@@ -1,0 +1,10 @@
+{
+  "command": [
+    "/workspace/browser-env/venv/bin/python",
+    "/workspace/browser-env/map36-reports/check.py"
+  ],
+  "startUTC": "2026-10-23T01:19:05.253562+00:00",
+  "endUTC": "2026-10-23T01:19:05.456682+00:00",
+  "actualChildExit": 1,
+  "outerExit": 1
+}

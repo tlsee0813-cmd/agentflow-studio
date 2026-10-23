@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/browser-env/map36-reports/check.py", line 9, in <module>
+    server=subprocess.Popen(['/workspace/browser-env/tools/node_modules/.bin/node','continuity/server/index.mjs','--mock'],cwd=A,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);line=server.stdout.readline();url=re.search(r'http://127\.0\.0\.1:\d+',line).group()
+                                                                                                                                                                                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'group'

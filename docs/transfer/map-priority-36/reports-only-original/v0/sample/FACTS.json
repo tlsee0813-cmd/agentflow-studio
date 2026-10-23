@@ -1,0 +1,26 @@
+{
+  "nature": "public domain API fixture; original unmodified reports arrive only through native UI file import",
+  "ids": {
+    "P": "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c",
+    "L": "A_fb2381fb-3a08-4344-af52-457c4899c7b7",
+    "O": "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e"
+  },
+  "tasks": {
+    "L": "T_729160c8-583d-4310-bc83-fd2897630e72",
+    "O": "T_4c2a4b75-9c7f-4455-8985-59cfb72bc255",
+    "P": "T_5600f927-d961-488b-ba78-3508d7d13609"
+  },
+  "current": "T_5600f927-d961-488b-ba78-3508d7d13609",
+  "expected": {
+    "leafOwners": [
+      "A_fb2381fb-3a08-4344-af52-457c4899c7b7"
+    ],
+    "parentOwners": [
+      "A_4446f58e-884c-4bbd-b5f3-a8feea195f8c",
+      "A_fb2381fb-3a08-4344-af52-457c4899c7b7"
+    ],
+    "outsideExcluded": "A_386046e3-ae6f-4b69-9fb0-4d369ea7b56e",
+    "questions": 0,
+    "descriptions": 0
+  }
+}

@@ -1,0 +1,3 @@
+from pathlib import Path
+import subprocess,json,datetime,sys
+r=Path(__file__).parent;cmd=['/workspace/browser-env/venv/bin/python',str(r/'gate.py')];start=datetime.datetime.now(datetime.timezone.utc).isoformat();p=subprocess.run(cmd,capture_output=True);(r/'gate.stdout.log').write_bytes(p.stdout);(r/'gate.stderr.log').write_bytes(p.stderr);(r/'gate.exit.json').write_text(json.dumps({'command':cmd,'startUTC':start,'endUTC':datetime.datetime.now(datetime.timezone.utc).isoformat(),'actualChildExit':p.returncode,'outerExit':p.returncode,'meaning':'intentional original-product failure, separate from successful collection'},indent=2));sys.exit(p.returncode)
