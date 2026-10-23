@@ -1,6 +1,17 @@
 # AgentFlow 현재 상태
 
-2026-10-24 KST. **새 총괄 인수인계 준비 완료 상태. 제품 개발의 다음 실행은 새 총괄에서 이어간다.** 현재 진행은 이 파일, 인계 시점의 정확한 기준·워커 회수·판단은 [새 총괄 시작 문서](../COORDINATOR_HANDOFF_2026-10-24_KO.md), 질문 축적은 [QUESTIONS](../QUESTIONS.md), 제품·배포 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)에 둔다. 과거 RESULT/AUTHOR는 당시 판단이며 이 파일을 대신하지 않는다.
+2026-10-24 KST. **새 단일 총괄이 인수를 완료하고36/37 연결 흐름을 진행 중이다. 수용·체험 기준은 아직35.** 인계 SHA4a9873a5와 원격 checkpoint·ACTIVE·QUESTIONS를 대조했고 이후 변경은 없었다. 현재 진행은 이 파일, 인계 시점의 정확한 기준·워커 회수·판단은 [새 총괄 시작 문서](../COORDINATOR_HANDOFF_2026-10-24_KO.md), 질문 축적은 [QUESTIONS](../QUESTIONS.md), 제품·배포 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)에 둔다. 과거 RESULT/AUTHOR는 당시 판단이며 이 파일을 대신하지 않는다.
+
+## 인수 후 접수·회수
+
+| 담당/주제 | 기준/접수 | 현재 상태·다음 행동 |
+|---|---|---|
+| Claude37 결합·복귀 안내 | 기존 session_01KJRKarPuyzvnMWCkvYQbW1, 메시지2;20bffe5f+36fix2 38beb559 | 접수·실행 중. [좁은 작업 지시](2026-10-24-entry-integration-38/WORK_ORDER.md). 기존 반환/연구 회수 후 차이만 요청, 원본 세션과branch로 회수 |
+| 독립 Sol High36 검토·실행 준비 | 정확38beb559 | 작성자와 별도 checkout, 제품소스 변경 없음. 제품 Cloud durable 호스트 현재 접근 실패로 허용된 로컬 독립 검증 준비 |
+| Pro 기본fit 가독성 후보 비교 | Oracle af-map-readable-delta-20261024;공개4a9873a5/38beb559/20bffe5f | 접수·실행 중. 기존 홈 연구 반복 없이 최상위접힘1배율/저배율핵심표현 두 후보의 출처·반례만 조사 |
+| Sol High 정리v0 입력 준비 | 4a9873a5, 기존14 연구·로컬 보존자료 | 준비만.36/37 완료 뒤 실제JSONL1표본+project사본 관측. 원문 외부전송/제품코드 변경 없음 |
+
+GitHub 연결 오류는 사용자 확인 후 재조회로 해소했다. Code Review가 정확38beb559의 run39886454270 Ubuntu/Windows success를 재확인했다. 최종37 결합 SHA의CI는 아직 없으며 이 성공을 옮겨 쓰지 않는다.
 
 ## 수용된 제품과 반환 후보
 
