@@ -84,3 +84,18 @@ export function subtreeSignals(p:Project,id:string):AreaSignals[] {
     const d=areaDescription(p,a.id);return {areaId:a.id,questions,reports:own.filter(it=>it.kind==='report'),description:{current:d.current,held:d.held}};
   });
 }
+/** MAP36: why one map card's records may be worth reading, as presence only (exact counts and texts stay in the existing
+ * records reader of the same owner). The owned set is subtreeSignals' (a leaf itself; a parent itself and its contained
+ * descendants; relations never widen it). A current question is the existing active && !answered: older-basis or
+ * test-answered questions are never one. Held, older-basis (description) and this-tab updates stay apart; a this-tab update
+ * means only that a description arrived in this tab, not news, unread or done. records says the reader has anything to show:
+ * a question, a description or a report without a follow-up (a report alone is not one of the four reasons). */
+export type ReadingReason='open-question'|'held'|'stale'|'updated';
+export function readingReasons(p:Project,id:string,received:ReadonlySet<string>):{reasons:ReadingReason[];records:boolean} {
+  const signals=subtreeSignals(p,id),questions=signals.flatMap(s=>s.questions);
+  const present:Record<ReadingReason,boolean>={'open-question':questions.some(q=>q.applicability==='active'&&!q.answered),
+    held:signals.some(s=>s.description.held.length>0),stale:signals.some(s=>!!s.description.current&&!s.description.current.valid),
+    updated:signals.some(s=>received.has(s.areaId))};
+  const reasons=(['open-question','held','stale','updated'] as const).filter(k=>present[k]);
+  return {reasons,records:reasons.length>0||questions.length>0||signals.some(s=>!!s.description.current||s.reports.length>0)};
+}
