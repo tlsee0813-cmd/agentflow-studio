@@ -1,0 +1,17 @@
+{
+  "kind": "actual tool completion transcription; not full tool transcript",
+  "runs": [
+    {
+      "label": "typecheck+generate collector",
+      "session": 37991,
+      "actualOuterExit": 0
+    },
+    {
+      "label": "independent verify collector",
+      "chunk": "f0b554",
+      "actualOuterExit": 0
+    }
+  ],
+  "UI": "NOT_RUN",
+  "server": "NOT_STARTED"
+}

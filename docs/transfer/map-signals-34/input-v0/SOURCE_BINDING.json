@@ -1,0 +1,103 @@
+{
+  "baselineCommit": "575bb7452044e0d987453a24e31680d2d8077b6c",
+  "baselineAppSubtree": "adf88ae1d90bace46485175c531a46ab846a74d0",
+  "reusedBuildSource": "843ca3993615824452bfc80a6c0c4c65d35df376",
+  "compiledAppSubtreeSameAsBaseline": true,
+  "sourceFileChecksAfterRun": [
+    {
+      "sourcePath": "app/continuity/src/shared/attention.ts",
+      "sourceSHA256": "affaa930475942a73535ee4c995931ae5853ef308423175cfbd3835489ff770d",
+      "sourceBytes": 6051,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/attention.js",
+      "compiledSHA256": "6c3871cb2e2ec839e172747fbed4b9c6354868514c13c4ef1768822d4be8a072",
+      "compiledBytes": 5422
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/domain.ts",
+      "sourceSHA256": "98291a502fb90225b58286130336e8060130c56a45eda6e0ce7963bb594760bf",
+      "sourceBytes": 75793,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/domain.js",
+      "compiledSHA256": "f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd",
+      "compiledBytes": 77648
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/guidance.ts",
+      "sourceSHA256": "a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18",
+      "sourceBytes": 6903,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/guidance.js",
+      "compiledSHA256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5",
+      "compiledBytes": 6701
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/hierarchy.ts",
+      "sourceSHA256": "c9e5a4d9679e6720bc5cd3b86e624904d17a5a7d22b8806d574640ddad605ffa",
+      "sourceBytes": 2591,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/hierarchy.js",
+      "compiledSHA256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624",
+      "compiledBytes": 2489
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/mock.ts",
+      "sourceSHA256": "1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2",
+      "sourceBytes": 17369,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/mock.js",
+      "compiledSHA256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef",
+      "compiledBytes": 18360
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/outcome.ts",
+      "sourceSHA256": "f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd",
+      "sourceBytes": 4625,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/outcome.js",
+      "compiledSHA256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8",
+      "compiledBytes": 4887
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/plan-facts.ts",
+      "sourceSHA256": "6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44",
+      "sourceBytes": 4322,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/plan-facts.js",
+      "compiledSHA256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45",
+      "compiledBytes": 4655
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/storage.ts",
+      "sourceSHA256": "c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5",
+      "sourceBytes": 11615,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/storage.js",
+      "compiledSHA256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38",
+      "compiledBytes": 12708
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/types.ts",
+      "sourceSHA256": "16202db1c238e917c548950543686046977c21c61de56b30d6f4140aad607d47",
+      "sourceBytes": 16360,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/types.js",
+      "compiledSHA256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53",
+      "compiledBytes": 2672
+    },
+    {
+      "sourcePath": "app/continuity/src/shared/validation.ts",
+      "sourceSHA256": "cc958cf61b54aa9d552aab07ddaa8c7e6d60ec5e61f7218cf597dd608e9b94df",
+      "sourceBytes": 46546,
+      "sourceEqualsPinnedGitObject": true,
+      "compiledPath": "shared/validation.js",
+      "compiledSHA256": "5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4",
+      "compiledBytes": 50121
+    }
+  ],
+  "NodeActual": "v22.16.0",
+  "TSActual": "Version 5.8.3",
+  "browser": "NOT_RUN",
+  "server": "NOT_STARTED",
+  "sourceChanges": 0
+}

@@ -1,0 +1,9 @@
+{
+  "actualCollectorSHA256": "5416f27cc1906875ee1a2ea52c4d2987a543509fc598052e419e6e8a57110af0",
+  "publicCollectorSHA256": "dabad72f5c8138aeee59f93da4c91fb6e208819ddb26479809201bf84dd7f5b4",
+  "onlyPathBindingsReplaced": true,
+  "generatorByteUnchanged": true,
+  "verifierByteUnchanged": true,
+  "stdoutStderrRedaction": "none necessary; exact original bytes",
+  "executionMetadataPaths": "role aliases, not physical local paths"
+}

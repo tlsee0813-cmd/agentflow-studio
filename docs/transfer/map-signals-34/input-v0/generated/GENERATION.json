@@ -1,0 +1,15 @@
+{
+  "node": "v22.16.0",
+  "createdUTC": "2026-10-23T00:00:45.706Z",
+  "areas": 4,
+  "tasks": 9,
+  "questionTasks": 6,
+  "receivedSyntheticReports": 3,
+  "serializedBytes": 41767,
+  "serializedSHA256": "4790bcd16f5700b0a584a4d98d7f3e88f93e430d69c5ba01176ec656374f80cb",
+  "strictParseRoundtrip": true,
+  "readOnlyAggregationNoMutation": true,
+  "allLiteralExpectedChecks": true,
+  "UI": "NOT_RUN",
+  "providerCalls": 0
+}

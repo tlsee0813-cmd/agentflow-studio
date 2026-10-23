@@ -1,0 +1,921 @@
+{
+  "schemaVersion": "idea015.project.7",
+  "id": "P_4f0bd6d7-6738-43b4-8ede-fd8c557d8c96",
+  "revision": 48,
+  "name": "[명시 합성34] 긴 제목·소유·질문과 설명 상태",
+  "sources": [
+    {
+      "id": "S_ed24f725-7e11-433c-a5d6-26f99575941c",
+      "kind": "request",
+      "text": "[명시 합성34 qRealAnswered] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "at": "2026-10-23T00:00:45.676Z",
+      "taskId": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_c563a950-dd0d-4701-9798-478c8403494d",
+      "kind": "answer",
+      "text": "[합성 실제답변 역할] 기대와 관측을 비교해 확인한다.",
+      "at": "2026-10-23T00:00:45.679Z",
+      "taskId": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+      "replyTo": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+      "disposition": "provided"
+    },
+    {
+      "id": "S_4384e19f-7d52-4c2a-a51c-c40c7c603fe2",
+      "kind": "request",
+      "text": "[명시 합성34 qExactTrial] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "at": "2026-10-23T00:00:45.680Z",
+      "taskId": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_2bf099ae-2e3e-4811-b5d7-fd3513573836",
+      "kind": "test_answer",
+      "text": "[명시 합성 시험답변] 실제 답변으로 승격하지 않는다.",
+      "at": "2026-10-23T00:00:45.681Z",
+      "taskId": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+      "replyTo": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+      "disposition": "provided"
+    },
+    {
+      "id": "S_b89f9a41-1cea-4c9b-a00a-b79c021b5d72",
+      "kind": "request",
+      "text": "[명시 합성34 qStaleOwn] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "at": "2026-10-23T00:00:45.681Z",
+      "taskId": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_b9cbfb4a-f487-4e63-8d60-d9388743a537",
+      "kind": "test_answer",
+      "text": "[명시 합성34 qTrialContextExcluded] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "at": "2026-10-23T00:00:45.682Z",
+      "taskId": "T_bfe54565-1b4f-4e21-96d7-04daafec1c93",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_11293a72-abe5-4d28-ae97-5fe5921dd327",
+      "kind": "request",
+      "text": "[명시 합성34 qActiveLeaf] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "at": "2026-10-23T00:00:45.682Z",
+      "taskId": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_67d54e6f-e766-493b-b4a4-3905eceb2274",
+      "kind": "request",
+      "text": "[명시 합성34 qOutsideCurrent] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "at": "2026-10-23T00:00:45.684Z",
+      "taskId": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_abec25b1-36ef-4401-96cd-dd7a0d1b31b1",
+      "kind": "report",
+      "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_d183ba43-f884-4eeb-9528-4c247025456b의 인계 H_SYN34_P_CURRENT / r37에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성34 P_CURRENT] 입력 구성용 보고이며 실제 실행/검증/AI 결과가 아니다.",
+      "at": "2026-10-23T00:00:45.689Z",
+      "taskId": "T_405ec334-7ef6-4bf0-9f3b-b335f9356b83",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_a15754e2-e71d-4266-a19c-f79e8dc766ee",
+      "kind": "report",
+      "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_6c7a1fbe-fb30-4718-afa8-03f36c21767a의 인계 H_SYN34_Q_STALE / r39에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성34 Q_STALE] 입력 구성용 보고이며 실제 실행/검증/AI 결과가 아니다.",
+      "at": "2026-10-23T00:00:45.694Z",
+      "taskId": "T_7cbe328b-648c-47c3-b3ff-aad0116cbb73",
+      "replyTo": null,
+      "disposition": "provided"
+    },
+    {
+      "id": "S_328bdd16-de0a-4e31-bacf-7db26f5668c1",
+      "kind": "report",
+      "text": "[Studio 연결 표지 — 외부 파일의 주장과 구분]\n이 자료는 작업 T_bfe54565-1b4f-4e21-96d7-04daafec1c93의 인계 H_SYN34_S_HELD_ONLY / r42에 대한 반환이다. 현재 조건 충족·사용자 결정·실제 완료를 뜻하지 않는다.\n[외부 report 원문]\n[명시 합성34 S_HELD_ONLY] 입력 구성용 보고이며 실제 실행/검증/AI 결과가 아니다.",
+      "at": "2026-10-23T00:00:45.697Z",
+      "taskId": "T_57958419-516c-4db1-aa7b-c76dc641e3ad",
+      "replyTo": null,
+      "disposition": "provided"
+    }
+  ],
+  "bases": [
+    {
+      "id": "D1",
+      "text": "[명시 합성34 qRealAnswered] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "status": "requested",
+      "sourceId": "S_ed24f725-7e11-433c-a5d6-26f99575941c",
+      "revision": 13,
+      "history": []
+    },
+    {
+      "id": "D2",
+      "text": "사실 확인 질문: 문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?\n사용자 답변: [합성 실제답변 역할] 기대와 관측을 비교해 확인한다.",
+      "status": "answered",
+      "sourceId": "S_c563a950-dd0d-4701-9798-478c8403494d",
+      "revision": 15,
+      "history": []
+    },
+    {
+      "id": "D3",
+      "text": "[명시 합성34 qExactTrial] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "status": "requested",
+      "sourceId": "S_4384e19f-7d52-4c2a-a51c-c40c7c603fe2",
+      "revision": 18,
+      "history": []
+    },
+    {
+      "id": "D4",
+      "text": "[명시 합성34 qStaleOwn] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "status": "requested",
+      "sourceId": "S_b89f9a41-1cea-4c9b-a00a-b79c021b5d72",
+      "revision": 23,
+      "history": []
+    },
+    {
+      "id": "D5",
+      "text": "[명시 합성34 qActiveLeaf] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "status": "requested",
+      "sourceId": "S_11293a72-abe5-4d28-ae97-5fe5921dd327",
+      "revision": 32,
+      "history": []
+    },
+    {
+      "id": "D6",
+      "text": "[명시 합성34 qOutsideCurrent] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+      "status": "requested",
+      "sourceId": "S_67d54e6f-e766-493b-b4a4-3905eceb2274",
+      "revision": 36,
+      "history": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+      "sourceIds": [
+        "S_ed24f725-7e11-433c-a5d6-26f99575941c",
+        "S_c563a950-dd0d-4701-9798-478c8403494d"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성34 qRealAnswered] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D1",
+              "sourceId": "S_ed24f725-7e11-433c-a5d6-26f99575941c",
+              "revision": 13
+            }
+          ]
+        },
+        "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+          "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 13,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 12,
+        "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+        "area": {
+          "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+          "note": "[합성] 이전 구상: 오류행 안내의 질문 기록을 읽는다."
+        }
+      },
+      "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+    },
+    {
+      "id": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+      "sourceIds": [
+        "S_4384e19f-7d52-4c2a-a51c-c40c7c603fe2",
+        "S_2bf099ae-2e3e-4811-b5d7-fd3513573836"
+      ],
+      "parentTaskId": "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성34 qExactTrial] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D3",
+              "sourceId": "S_4384e19f-7d52-4c2a-a51c-c40c7c603fe2",
+              "revision": 18
+            }
+          ]
+        },
+        "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+          "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 18,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 17,
+        "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+        "area": {
+          "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+          "note": "[합성] 이전 구상: 오류행 안내의 질문 기록을 읽는다."
+        }
+      },
+      "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+    },
+    {
+      "id": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "sourceIds": [
+        "S_b89f9a41-1cea-4c9b-a00a-b79c021b5d72"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성34 qStaleOwn] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D4",
+              "sourceId": "S_b89f9a41-1cea-4c9b-a00a-b79c021b5d72",
+              "revision": 23
+            }
+          ]
+        },
+        "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+          "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 23,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-23T00:00:45.688Z",
+          "method": "clipboard",
+          "revision": 37,
+          "chars": 6563,
+          "digest": "8caef6e7",
+          "work": {
+            "understanding": "",
+            "scope": "",
+            "next": "",
+            "checks": ""
+          },
+          "aiExcluded": true,
+          "legacyText": null,
+          "returnId": "H_SYN34_P_CURRENT",
+          "background": {
+            "version": "background.1",
+            "revision": 22,
+            "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+            "area": {
+              "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+              "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+              "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+            "understanding": 0,
+            "stamp": {
+              "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+              "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_d183ba43-f884-4eeb-9528-4c247025456b:07bf540d58c3557ee1bcf7e61c339e7acb7440e2278dcd0b9602dc6a0bee3fc9"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 22,
+        "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+        "area": {
+          "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+          "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+          "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다."
+        }
+      },
+      "areaId": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+      "intentEdit": {
+        "version": "intent-edit.2",
+        "revision": 25,
+        "goal": "[합성 직접 정정] 이미 요청 범위를 바꿨으므로 옛 질문을 현재 질문으로 쓰지 않는다.",
+        "conditions": "실제 구현·배포는 범위 밖이다."
+      }
+    },
+    {
+      "id": "T_bfe54565-1b4f-4e21-96d7-04daafec1c93",
+      "sourceIds": [
+        "S_b9cbfb4a-f487-4e63-8d60-d9388743a537"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성34 qTrialContextExcluded] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": []
+        },
+        "understanding": "합성 시험답변을 별도 조건으로 보존했습니다. 실제 요구를 바꾸지 않습니다.",
+        "scope": "가정한 시험 장면만. 기존 확정 기준과 실제 구현 완료 상태는 유지합니다.",
+        "next": "시험 조건에서 다음 작업의 차이를 검토하세요. 실제 변경 승인으로 사용하지 마세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "[합성 시험문맥 생성 질문] 이 문맥의 가정은 무엇인가요?",
+          "why": "실제 요구가 아닌 시험문맥에서 생성된 질문의 제외 경계.",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 28,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-23T00:00:45.696Z",
+          "method": "clipboard",
+          "revision": 42,
+          "chars": 6130,
+          "digest": "27b42a1e",
+          "work": {
+            "understanding": "합성 시험답변을 별도 조건으로 보존했습니다. 실제 요구를 바꾸지 않습니다.",
+            "scope": "가정한 시험 장면만. 기존 확정 기준과 실제 구현 완료 상태는 유지합니다.",
+            "next": "시험 조건에서 다음 작업의 차이를 검토하세요. 실제 변경 승인으로 사용하지 마세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_SYN34_S_HELD_ONLY",
+          "background": null,
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+            "understanding": 0,
+            "stamp": {
+              "name": "[합성34 공통머리말] 보류만 존재 · 실제 자식의 시험 문맥과 늦은 설명을 가진 긴 이름",
+              "note": "[합성] 이전 구상: 늦은 설명은 현재 설명과 구별한다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+                  "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+                  "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": null,
+      "areaId": "A_af30ff68-199e-4029-a8b9-797469b0e066"
+    },
+    {
+      "id": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+      "sourceIds": [
+        "S_11293a72-abe5-4d28-ae97-5fe5921dd327"
+      ],
+      "parentTaskId": "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "separate",
+          "goal": "[명시 합성34 qActiveLeaf] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D5",
+              "sourceId": "S_11293a72-abe5-4d28-ae97-5fe5921dd327",
+              "revision": 32
+            }
+          ]
+        },
+        "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+          "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 32,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [
+        {
+          "at": "2026-10-23T00:00:45.693Z",
+          "method": "clipboard",
+          "revision": 39,
+          "chars": 7716,
+          "digest": "5fffebc2",
+          "work": {
+            "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+            "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+            "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+            "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요."
+          },
+          "aiExcluded": false,
+          "legacyText": null,
+          "returnId": "H_SYN34_Q_STALE",
+          "background": {
+            "version": "background.1",
+            "revision": 31,
+            "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+            "area": {
+              "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+              "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+              "note": "[합성] 이전 구상: 오류행 안내의 질문 기록을 읽는다."
+            }
+          },
+          "anchor": {
+            "version": "anchor.2",
+            "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+            "understanding": 0,
+            "stamp": {
+              "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+              "note": "[합성] 이전 구상: 오류행 안내의 질문 기록을 읽는다.",
+              "brief": 1,
+              "decisions": [
+                "D2@15"
+              ],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+                  "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+                  "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다.",
+                  "revision": 0
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 31,
+        "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+        "area": {
+          "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+          "note": "[합성] 이전 구상: 오류행 안내의 질문 기록을 읽는다."
+        }
+      },
+      "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+    },
+    {
+      "id": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+      "sourceIds": [
+        "S_67d54e6f-e766-493b-b4a4-3905eceb2274"
+      ],
+      "parentTaskId": null,
+      "advice": {
+        "intent": {
+          "version": "intent.1",
+          "relation": "start",
+          "goal": "[명시 합성34 qOutsideCurrent] 원인을 모른다. 사실을 단정하지 않고 질문 기록만 남긴다.",
+          "conditions": [],
+          "retired": [],
+          "basisRefs": [
+            {
+              "basisId": "D6",
+              "sourceId": "S_67d54e6f-e766-493b-b4a4-3905eceb2274",
+              "revision": 36
+            }
+          ]
+        },
+        "understanding": "문제 현상과 원인을 모른다는 점이 입력됐습니다. 원인은 확인되지 않았습니다.",
+        "scope": "요청 원문이 정한 행동과 범위만 다룹니다. 원인이나 운영 조치는 추정하지 않습니다.",
+        "next": "요청 원문이 요청한 행동만 하세요. 원문에 없는 코드 수정·명령 실행·재현·배포를 새로 더하지 말고, 새 정책이나 기술 선택도 임의로 추가하지 마세요. 모르는 값은 미확인으로 남기세요.",
+        "checks": "원문이 요청한 결과를 다뤘는지, 원문이 요청하지 않았거나 금지한 변경·실행을 하지 않았는지 확인하고, 실제로 확인한 것과 못 한 것을 구분해 보고하세요.",
+        "question": {
+          "kind": "fact",
+          "text": "문제가 생긴 한 번의 상황에서 기대한 결과와 실제로 보인 결과는 무엇인가요?",
+          "why": "원인을 단정하지 않고 확인 범위를 좁히기 위한 관찰 정보입니다. 모르면 확인 작업만 넘길 수 있습니다.",
+          "options": []
+        },
+        "relatedBasisIds": [
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6"
+        ],
+        "reviewBasisIds": [],
+        "suggestions": []
+      },
+      "adviceRevision": 36,
+      "mode": "mock",
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": null,
+      "background": {
+        "version": "background.1",
+        "revision": 35,
+        "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+        "area": {
+          "id": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+          "name": "[합성34 공통머리말] 관계만 존재 · 포함되지 않은 다른 부분의 현재 작업용 긴 이름",
+          "note": "[합성] 직접 관계는 있지만 상위 P의 자식이 아니다."
+        }
+      },
+      "areaId": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40"
+    },
+    {
+      "id": "T_405ec334-7ef6-4bf0-9f3b-b335f9356b83",
+      "sourceIds": [
+        "S_abec25b1-36ef-4401-96cd-dd7a0d1b31b1"
+      ],
+      "parentTaskId": "T_d183ba43-f884-4eeb-9528-4c247025456b",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": {
+        "returnId": "H_SYN34_P_CURRENT",
+        "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_4f0bd6d7-6738-43b4-8ede-fd8c557d8c96\",\n  \"taskId\": \"T_d183ba43-f884-4eeb-9528-4c247025456b\",\n  \"returnId\": \"H_SYN34_P_CURRENT\",\n  \"report\": \"[명시 합성34 P_CURRENT] 입력 구성용 보고이며 실제 실행/검증/AI 결과가 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_95bc324d-8373-4d38-9073-2f77156d69b7\",\n    \"basedOn\": 0,\n    \"summary\": \"[합성 현재 설명] P 자기 질문과 실제 자식의 기록을 구별한다.\",\n    \"changes\": [],\n    \"proposal\": null,\n    \"origin\": \"[명시 합성34] domain fixture 생성자가 구성한 외부 설명\"\n  }\n}\n"
+      },
+      "background": {
+        "version": "background.1",
+        "revision": 22,
+        "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+        "area": {
+          "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+          "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+          "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다."
+        }
+      }
+    },
+    {
+      "id": "T_7cbe328b-648c-47c3-b3ff-aad0116cbb73",
+      "sourceIds": [
+        "S_a15754e2-e71d-4266-a19c-f79e8dc766ee"
+      ],
+      "parentTaskId": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": {
+        "returnId": "H_SYN34_Q_STALE",
+        "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_4f0bd6d7-6738-43b4-8ede-fd8c557d8c96\",\n  \"taskId\": \"T_6c7a1fbe-fb30-4718-afa8-03f36c21767a\",\n  \"returnId\": \"H_SYN34_Q_STALE\",\n  \"report\": \"[명시 합성34 Q_STALE] 입력 구성용 보고이며 실제 실행/검증/AI 결과가 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4\",\n    \"basedOn\": 0,\n    \"summary\": \"[합성 이전 설명] Q의 이전 구상을 대상으로 정리한 설명이다.\",\n    \"changes\": [],\n    \"proposal\": null,\n    \"origin\": \"[명시 합성34] domain fixture 생성자가 구성한 외부 설명\"\n  }\n}\n"
+      },
+      "background": {
+        "version": "background.1",
+        "revision": 31,
+        "brief": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+        "area": {
+          "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+          "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+          "note": "[합성] 이전 구상: 오류행 안내의 질문 기록을 읽는다."
+        }
+      }
+    },
+    {
+      "id": "T_57958419-516c-4db1-aa7b-c76dc641e3ad",
+      "sourceIds": [
+        "S_328bdd16-de0a-4e31-bacf-7db26f5668c1"
+      ],
+      "parentTaskId": "T_bfe54565-1b4f-4e21-96d7-04daafec1c93",
+      "advice": null,
+      "adviceRevision": null,
+      "mode": null,
+      "manual": {
+        "understanding": null,
+        "scope": null,
+        "next": null,
+        "checks": null
+      },
+      "suggestions": null,
+      "handoffs": [],
+      "resultFile": {
+        "returnId": "H_SYN34_S_HELD_ONLY",
+        "rawText": "{\n  \"schemaVersion\": \"agentflow.return.2\",\n  \"projectId\": \"P_4f0bd6d7-6738-43b4-8ede-fd8c557d8c96\",\n  \"taskId\": \"T_bfe54565-1b4f-4e21-96d7-04daafec1c93\",\n  \"returnId\": \"H_SYN34_S_HELD_ONLY\",\n  \"report\": \"[명시 합성34 S_HELD_ONLY] 입력 구성용 보고이며 실제 실행/검증/AI 결과가 아니다.\",\n  \"evidence\": null,\n  \"understanding\": {\n    \"version\": \"understanding.1\",\n    \"areaId\": \"A_af30ff68-199e-4029-a8b9-797469b0e066\",\n    \"basedOn\": 0,\n    \"summary\": \"[합성 늦은 설명] S의 수정 전 구상을 전제로 한 아직 반영하지 않은 설명이다.\",\n    \"changes\": [],\n    \"proposal\": null,\n    \"origin\": \"[명시 합성34] domain fixture 생성자가 구성한 외부 설명\"\n  }\n}\n"
+      },
+      "background": null
+    }
+  ],
+  "currentTaskId": "T_22fc2640-945f-41a8-83be-1935dc9d9dcf",
+  "draft": "[명시 합성34 미전송] 다른 현재 작업 B를 유지하며 Q 기록을 읽는다. 아직 보내지 않는다.",
+  "answerDraft": "",
+  "basisDraft": "",
+  "basisEdits": {},
+  "draftKind": "request",
+  "pending": null,
+  "notice": null,
+  "space": {
+    "brief": {
+      "text": "[명시 합성34] 자료 검토의 질문·설명 기록을 읽는 경계 입력. 실제 사용자 발언·실행·완료 기록이 아니다.",
+      "at": "2026-10-23T00:00:45.674Z",
+      "previous": []
+    },
+    "areas": [
+      {
+        "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+        "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+        "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다.",
+        "archived": false,
+        "createdAt": "2026-10-23T00:00:45.675Z"
+      },
+      {
+        "id": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+        "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+        "note": "[합성 현재 사용자 구상] 이전 안내와 달리 오류행의 구분 표현을 대조한다.",
+        "archived": false,
+        "createdAt": "2026-10-23T00:00:45.675Z"
+      },
+      {
+        "id": "A_af30ff68-199e-4029-a8b9-797469b0e066",
+        "name": "[합성34 공통머리말] 보류만 존재 · 실제 자식의 시험 문맥과 늦은 설명을 가진 긴 이름",
+        "note": "[합성 현재 사용자 구상] 새 자료를 먼저 확인한다. 옛 인계 설명은 자동 적용하지 않는다.",
+        "archived": false,
+        "createdAt": "2026-10-23T00:00:45.676Z"
+      },
+      {
+        "id": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+        "name": "[합성34 공통머리말] 관계만 존재 · 포함되지 않은 다른 부분의 현재 작업용 긴 이름",
+        "note": "[합성] 직접 관계는 있지만 상위 P의 자식이 아니다.",
+        "archived": false,
+        "createdAt": "2026-10-23T00:00:45.676Z"
+      }
+    ],
+    "relations": [
+      {
+        "id": "L_7b3c21e6-7ebe-4c38-8472-3424bb540a49",
+        "from": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+        "to": "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40",
+        "kind": "related",
+        "note": "[합성] 직접 관계일 뿐 포함/질문 소유를 늘리지 않는다."
+      }
+    ],
+    "draftTarget": {
+      "area": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4"
+    },
+    "layout": {
+      "version": "layout.1",
+      "positions": {
+        "A_95bc324d-8373-4d38-9073-2f77156d69b7": {
+          "x": 40,
+          "y": 40
+        },
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4": {
+          "x": 340,
+          "y": 240
+        },
+        "A_af30ff68-199e-4029-a8b9-797469b0e066": {
+          "x": 640,
+          "y": 240
+        },
+        "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40": {
+          "x": 340,
+          "y": 40
+        }
+      }
+    },
+    "understanding": {
+      "A_95bc324d-8373-4d38-9073-2f77156d69b7": {
+        "revision": 1,
+        "entries": [
+          {
+            "by": "external",
+            "at": "2026-10-23T00:00:45.689Z",
+            "revision": 1,
+            "taskId": "T_405ec334-7ef6-4bf0-9f3b-b335f9356b83",
+            "returnId": "H_SYN34_P_CURRENT",
+            "text": null,
+            "corrects": null,
+            "stamp": {
+              "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+              "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다.",
+              "brief": 1,
+              "decisions": [],
+              "work": [
+                "T_d183ba43-f884-4eeb-9528-4c247025456b:07bf540d58c3557ee1bcf7e61c339e7acb7440e2278dcd0b9602dc6a0bee3fc9"
+              ],
+              "version": "plan.2",
+              "revision": 0,
+              "ancestors": []
+            },
+            "held": null
+          }
+        ]
+      },
+      "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4": {
+        "revision": 1,
+        "entries": [
+          {
+            "by": "external",
+            "at": "2026-10-23T00:00:45.694Z",
+            "revision": 1,
+            "taskId": "T_7cbe328b-648c-47c3-b3ff-aad0116cbb73",
+            "returnId": "H_SYN34_Q_STALE",
+            "text": null,
+            "corrects": null,
+            "stamp": {
+              "name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설명을 가진 긴 이름",
+              "note": "[합성] 이전 구상: 오류행 안내의 질문 기록을 읽는다.",
+              "brief": 1,
+              "decisions": [
+                "D2@15"
+              ],
+              "work": [],
+              "version": "plan.2",
+              "revision": 1,
+              "ancestors": [
+                {
+                  "id": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+                  "name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 검토의 긴 이름",
+                  "note": "[합성] 자기 기록과 두 실제 자식의 기록을 구별한다.",
+                  "revision": 0
+                }
+              ]
+            },
+            "held": null
+          }
+        ]
+      },
+      "A_af30ff68-199e-4029-a8b9-797469b0e066": {
+        "revision": 0,
+        "entries": [
+          {
+            "by": "external",
+            "at": "2026-10-23T00:00:45.697Z",
+            "revision": null,
+            "taskId": "T_57958419-516c-4db1-aa7b-c76dc641e3ad",
+            "returnId": "H_SYN34_S_HELD_ONLY",
+            "text": null,
+            "corrects": null,
+            "stamp": null,
+            "held": "plan-changed"
+          }
+        ]
+      }
+    },
+    "containment": {
+      "version": "containment.1",
+      "parents": {
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4": "A_95bc324d-8373-4d38-9073-2f77156d69b7",
+        "A_af30ff68-199e-4029-a8b9-797469b0e066": "A_95bc324d-8373-4d38-9073-2f77156d69b7"
+      },
+      "revisions": {
+        "A_95bc324d-8373-4d38-9073-2f77156d69b7": 0,
+        "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4": 2,
+        "A_af30ff68-199e-4029-a8b9-797469b0e066": 2,
+        "A_38e364d8-7fc3-4a33-a2da-f6ee4fcebd40": 0
+      }
+    }
+  }
+}

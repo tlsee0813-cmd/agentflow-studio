@@ -1,0 +1,84 @@
+{
+  "node": "v22.16.0",
+  "actualChecksPassed": true,
+  "strictReload": true,
+  "exactHAndRawReturns": true,
+  "rawIDsBeforeDedupVerified": true,
+  "inputFilesUnchanged": true,
+  "inputFiles": [
+    {
+      "name": "FACTS.json",
+      "sha256": "20e97ef3988b7b30f37bdbb1e61a17e2a12ed354d8c2a601dda500299217b4c8"
+    },
+    {
+      "name": "GENERATION.json",
+      "sha256": "1585bc079e2e338b6e0fae32b8b32fd0d997c2a22c47026613aa0dd38587eba1"
+    },
+    {
+      "name": "handoff-P_CURRENT.md",
+      "sha256": "cbec278ab8f0ee788829f168aa00f9acc5fa47c836a9b37a0a95e03f29bfb69f"
+    },
+    {
+      "name": "handoff-Q_STALE.md",
+      "sha256": "8db780b137f78a1f1f3696a7435cede7d3303ad131f965dc3bfe4150fb1f40c0"
+    },
+    {
+      "name": "handoff-S_HELD_ONLY.md",
+      "sha256": "3f05d02891584ab0930303fbb0f601c412748b30986db69a4ac136bf39caa7ba"
+    },
+    {
+      "name": "mixed-long-title.json",
+      "sha256": "4790bcd16f5700b0a584a4d98d7f3e88f93e430d69c5ba01176ec656374f80cb"
+    },
+    {
+      "name": "return-P_CURRENT.json",
+      "sha256": "873f1735c2a719789a0279c56f6893e0d76d4c1c39447c0f0913097318bd1c28"
+    },
+    {
+      "name": "return-Q_STALE.json",
+      "sha256": "2c68939955c24eaa407bd300e5e8ad97fc20fd3bab40853ea2cb9a5c9d6423fc"
+    },
+    {
+      "name": "return-S_HELD_ONLY.json",
+      "sha256": "e2b2d6b2fd200ccd08af93cdc16198e149dd2e0096b1d29eb22e43636a96af43"
+    }
+  ],
+  "observations": [
+    {
+      "key": "P",
+      "rawQuestionIds": [
+        "T_d183ba43-f884-4eeb-9528-4c247025456b",
+        "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+        "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+        "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a"
+      ],
+      "N": 4,
+      "M": 1
+    },
+    {
+      "key": "Q",
+      "rawQuestionIds": [
+        "T_e7addee0-d63c-4ae9-aa2a-0baa0e1d580b",
+        "T_e6ef49ac-0bc4-438d-9f7e-d9b16fbf99b2",
+        "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a"
+      ],
+      "N": 3,
+      "M": 1
+    },
+    {
+      "key": "S",
+      "rawQuestionIds": [],
+      "N": 0,
+      "M": 0
+    },
+    {
+      "key": "B",
+      "rawQuestionIds": [
+        "T_22fc2640-945f-41a8-83be-1935dc9d9dcf"
+      ],
+      "N": 1,
+      "M": 1
+    }
+  ],
+  "UI": "NOT_RUN"
+}

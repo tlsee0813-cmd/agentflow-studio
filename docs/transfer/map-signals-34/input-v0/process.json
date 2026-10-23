@@ -1,0 +1,34 @@
+[
+  {
+    "label": "typecheck",
+    "command": [
+      "tsc",
+      "--noEmit",
+      "-p",
+      "continuity/tsconfig.json"
+    ],
+    "cwd": "<baseline-app>",
+    "startUTC": "2026-10-23T00:00:43.232113+00:00",
+    "endUTC": "2026-10-23T00:00:45.623600+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "generate",
+    "command": [
+      "node",
+      "<scratch>/generate.mjs",
+      "--module-root",
+      "<baseline-app>/continuity/dist/public/shared",
+      "--outdir",
+      "<scratch>/generated"
+    ],
+    "cwd": "<scratch>",
+    "startUTC": "2026-10-23T00:00:45.623640+00:00",
+    "endUTC": "2026-10-23T00:00:45.711667+00:00",
+    "actualChildExit": 0,
+    "stdoutSHA256": "b92be4ff1ab8d21afc254224ec7288e16d48b7867edd71e10e3bee9d23f4a71c",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]

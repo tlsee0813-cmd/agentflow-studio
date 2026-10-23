@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "agentflow.return.2",
+  "projectId": "P_4f0bd6d7-6738-43b4-8ede-fd8c557d8c96",
+  "taskId": "T_6c7a1fbe-fb30-4718-afa8-03f36c21767a",
+  "returnId": "H_SYN34_Q_STALE",
+  "report": "[명시 합성34 Q_STALE] 입력 구성용 보고이며 실제 실행/검증/AI 결과가 아니다.",
+  "evidence": null,
+  "understanding": {
+    "version": "understanding.1",
+    "areaId": "A_f1afd7f5-19ea-475f-b7f0-1ad39bb289e4",
+    "basedOn": 0,
+    "summary": "[합성 이전 설명] Q의 이전 구상을 대상으로 정리한 설명이다.",
+    "changes": [],
+    "proposal": null,
+    "origin": "[명시 합성34] domain fixture 생성자가 구성한 외부 설명"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "node",
+    "verify.mjs",
+    "--module-root",
+    "<baseline-shared>",
+    "--input-root",
+    "generated",
+    "--receipt",
+    "verify-receipt.json"
+  ],
+  "startUTC": "2026-10-23T00:02:50.684978+00:00",
+  "endUTC": "2026-10-23T00:02:50.736931+00:00",
+  "actualChildExit": 0,
+  "stdoutSHA256": "5b61bf904641413298dd85593f4717ac9af9ca1d9a163099a446d9fd82f9e9ab",
+  "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

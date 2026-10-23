@@ -1,0 +1,9 @@
+{
+  "knownExpectedHead": "eac51d4b37076840d0c7ef4efbade180e38b0e5d",
+  "freshRemoteHead": "eac51d4b37076840d0c7ef4efbade180e38b0e5d",
+  "matchesKnownExpected": true,
+  "freshFetchMatches": true,
+  "prefix": "docs/transfer/map-signals-34/input-v0/",
+  "prefixDidNotExist": true,
+  "publicationWillRereadRemoteAndUseFreshParentNonforce": true
+}
