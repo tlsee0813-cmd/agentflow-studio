@@ -31,3 +31,17 @@
 runtime은 gh-pages 한곳, 코드·결정·대표4PNG와 환경/해시는 이 사이클 한곳에 둔다. 큰 원로그·중복ZIP·별도 저장소를 추가하지 않는다. 게시 byte 회수 후 이번 실행의 임시 checkout·raw·중복본을 정리하며 기존 미커밋 작업과 원래 JSONL/키/워커 환경은 보존한다.
 
 게시 commit `4ebf8fa39df1353f9853aa3819c6917a609aa74b`. [체험본](https://tlsee0813-cmd.github.io/agentflow-studio/) · [배포·파일해시](DEPLOYMENT.json). Git runtime17개와 실제 HTTP runtime16개 모두 원본해시 일치(.nojekyll은 Git marker로 확인), BUILD.txt의 source SHA도 일치했다. 총괄이 게시된 화면의 홈→예제→시간 고르기→작업→이어가기→출발 부분→전체 지도→예제 닫기를 직접 조작했고, 지도에 안내가 남지 않고 홈 목록에 예제가 추가되지 않음을 확인했다. 공개 origin에서 새 프로젝트 저장은 실행하지 않았고, 동일 runtime의 빈 시작/새 초안 복원은 독립 양PC 검증으로 구분한다.
+
+### 로컬 정리 결과
+
+GitHub connector로 86a3896의 독립36/38 manifest와 관측39 결과를 회수한 뒤 정리했다. 자동 승인 검토가 임시5폴더의 강제 일괄 삭제와 통합 브랜치 삭제를 포함한 명령을 blocked by policy로 거절했다(세부 사유 미제공). 우회하지 않았다. 강제 옵션 없는 Git worktree remove로 독립36/38 등록과 제거 가능한 파일을 정리했지만 Directory not empty로 잔여 파일은 남았다.
+
+파일 길이 합계 기준 202916084→150979084bytes, 51937000bytes(약49.5MiB)를 줄였다. 남은 약144MiB는 아래 이번 작업 생성물이며 완료 상태다. 실제 디스크 할당량 측정은 아니다. 기존 dirty 작업·원본 JSONL·키·워커 환경은 건드리지 않았다. product/entry-integration-38 완료 브랜치도 삭제하지 않았다.
+
+| workspace 상대 경로 | 잔여 bytes |
+|---|---:|
+| product36-independent-20261024 | 895227 |
+| product38-independent-20261024 | 3081061 |
+| product36-independent-evidence-20261024 | 123052245 |
+| product38-independent-evidence-20261024 | 23790814 |
+| product37-author-review | 159737 |
