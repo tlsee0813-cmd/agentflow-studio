@@ -2657,3 +2657,14 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .records-panel .check-item>.check-area,.records-panel .check-item>strong,.records-panel .check-item>.hint{flex:1 0 100%;min-width:0;max-width:100%}
 .records-panel .check-item button{font-size:12px;min-height:32px}
 #records-return-notice{grid-column:1/-1;border-left:3px solid var(--accent);padding-left:8px;margin:3px 0 0;font-size:11px;line-height:1.4}
+/* ENTRY37: the unsaved space example on the home, apart from the project list. Same card proportions as a project card,
+   own classes so it is never counted or focused as a project. */
+.projects-view .example-section{margin:0 0 20px}
+.projects-view .example-section h2{margin:0 0 10px;font-size:14px;font-weight:650;color:var(--ink)}
+.projects-view .example-section h2 small{margin-left:6px;font-size:12px;font-weight:400;color:var(--muted)}
+.projects-view .example-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(296px,1fr));gap:16px}
+.projects-view .example-card{position:relative;display:flex;flex-direction:column;gap:10px;min-height:176px;padding:18px;border-radius:12px;
+  background:var(--paper);border:1px dashed #c9c0f0;transition:border-color .12s,box-shadow .12s}
+.projects-view .example-card.openable{cursor:pointer}
+.projects-view .example-card.openable:hover{border-color:var(--accent);box-shadow:0 6px 22px #3023420f}
+.projects-view .example-card:has(.example-open:focus-visible){border-color:var(--accent);box-shadow:0 0 0 3px #6953d933}

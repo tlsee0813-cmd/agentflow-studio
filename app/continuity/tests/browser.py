@@ -17,7 +17,14 @@ KEY='agentflow.idea015.project.v1'
 WORKSPACE='agentflow.idea015.workspace'
 def open_listed(page,entry=None):
     if page.locator('#projects-view').is_visible():
+        # ENTRY37: a normal first visit lands on the (still empty) home; its '새 프로젝트' is the earlier first screen.
+        if entry is None and not page.locator('#project-list .project-open').count():start_new(page);return
         (page.locator(f'.project-card[data-entry-id="{entry}"] .project-open') if entry else page.locator('.project-open').first).click()
+def start_new(page):
+    """ENTRY37: a normal fresh visit opens the project home. Journeys that begin by writing start from its existing
+    '새 프로젝트' (the same in-memory start the first visit used to open); a home with real cards is left as it is."""
+    if page.locator('#projects-view').is_visible() and not page.locator('#project-list .project-open').count():
+        page.locator('#new-project').click();expect(page.locator('#projects-view')).to_be_hidden();expect(page.locator('#draft')).to_be_attached()
 # FLOW083: projects live in one workspace envelope written asynchronously under a Web Lock. Read the project this
 # tab has open once its queued save finished (the read-only older value is still read from its own key).
 STATE_JS="""([prefix,wk,key])=>{const id=document.documentElement.dataset.entryId;
@@ -75,6 +82,7 @@ class Browser(unittest.TestCase):
         if DOM:dom_harness.mount(self,self.page)
         else:self.page.goto(self.url)
         expect(self.page.locator('#mode')).to_contain_text('MOCK')
+        if not getattr(self,'start_at_home',False):start_new(self.page)
     def tearDown(self):
         self.assertEqual(self.external,[]);self.assertEqual(self.errors,[]);self.ctx.close()
     def state(self,page=None):return read_state(page or self.page)

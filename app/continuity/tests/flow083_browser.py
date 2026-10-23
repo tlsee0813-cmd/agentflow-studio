@@ -33,17 +33,23 @@ class Flow083(unittest.TestCase):
         self.page.evaluate('(ok)=>Object.defineProperty(navigator,"clipboard",{value:{writeText:t=>ok?(window.__copied=t,Promise.resolve()):Promise.reject(new Error("denied"))},configurable:true})',ok)
 
     def test_01_first_visit_starts_without_naming_and_the_example_is_never_saved(self):
+        # ENTRY37: the first visit opens the home; setUp took its existing '새 프로젝트'. The home itself is checked in entry37.
         expect(self.page.locator('#empty')).to_be_visible();expect(self.page.locator('#projects-view')).to_be_hidden()
         expect(self.page.locator('#entry-limits')).to_contain_text('AI 연결 없음');expect(self.page.locator('#entry-limits')).to_contain_text('이 브라우저에만')
         expect(self.page.locator('#draft')).to_be_visible();expect(self.page.locator('#nav-history')).to_be_hidden()
         self.fit('first-visit')
         self.page.locator('#open-example').click()
         expect(self.page.locator('#example-banner')).to_be_visible();expect(self.page.locator('#saved')).to_have_text('예제 · 저장하지 않음')
+        # ENTRY37: the example opens at its whole space; its work view is the same one as before.
+        expect(self.page.locator('#space-view')).to_be_visible();self.page.locator('#nav-work').click()
         expect(self.page.locator('#copy-work')).to_be_visible();self.page.locator('#edit-work').evaluate('(e)=>e.open=true')
         self.page.locator('#work-next').fill('예제 안에서 고친 문장');self.fit('example')
         self.assertEqual(self.keys(),[],'nothing from the example is written')
+        # ENTRY37: closing the example goes back to the home; its '새 프로젝트' is still the empty start.
         self.page.locator('#example-close').click();expect(self.page.locator('#example-banner')).to_be_hidden()
-        expect(self.page.locator('#empty')).to_be_visible();self.assertEqual(self.keys(),[])
+        expect(self.page.locator('#projects-view')).to_be_visible();expect(self.page.locator('#project-list .project-card')).to_have_count(0)
+        self.assertEqual(self.keys(),[])
+        self.page.locator('#new-project').click();expect(self.page.locator('#empty')).to_be_visible();self.assertEqual(self.keys(),[])
         self.page.locator('#draft').fill('동네 빵집 픽업 주문 사이트를 만들고 싶어요');self.page.locator('#send').click()
         expect(self.page.locator('#working')).to_have_text('');expect(self.page.locator('#current-work')).to_be_visible()
         expect(self.page.locator('#project-name')).to_have_value('동네 빵집 픽업 주문 사이트를 만들고 싶어요')

@@ -144,7 +144,8 @@ function mapMemos():Record<string,MapMemo> {
     if(typeof v.project==='string')others[v.project]={view:v.view??null,selected:v.selected??null,collapsed:(v as MapMemo).collapsed,panels:(v as MapMemo).panels,panel:(v as MapMemo).panel,relations:(v as MapMemo).relations};return others;
   } catch {return {};}
 }
-function rememberMap(){try{const others=Object.entries(mapMemos()).filter(([id])=>id!==project.id).slice(-11);
+function rememberMap(){if(target.kind==='example')return; // ENTRY37: the unsaved example never takes a real project's memo slot.
+  try{const others=Object.entries(mapMemos()).filter(([id])=>id!==project.id).slice(-11);
   session?.setItem(MAP_KEY,JSON.stringify({project:project.id,view:mapView,selected:mapSelected,collapsed:[...collapsed],panels:panelReadings,panel:panelMode,others:Object.fromEntries(others)}));}catch{/* Per-tab convenience only. */}}
 function recallMap() {
   try {const v=mapMemos()[project.id];
@@ -247,6 +248,9 @@ await workspace.init();
   else if(remembered==='legacy'&&workspace.legacy)openLegacy();
   else if(workspace.readError==='STORAGE_DENIED')startNew(); // nothing to list: keep working in memory, with the reason shown
   else if(workspace.entries().length||workspace.legacy||workspace.readError)route='projects';
+  // ENTRY37: a normal first visit starts at the project home (its space example included). Without Web Locks nothing can be
+  // saved, so the in-memory start stays as before instead of a home whose '새 프로젝트' is disabled.
+  else if(workspace.writable)route='projects';
   else startNew();
 }
 const saveMessage=(e:unknown)=>(e instanceof Error&&storageMessages[e.message])||storageMessages[storageErrorCode(e)]||storageMessages.WRITE_FAILED!;
@@ -307,7 +311,7 @@ function displayView() {
   document.querySelector<HTMLElement>('.project-head')!.hidden=!inProject;document.querySelector<HTMLElement>('.feedback-stack')!.hidden=!inProject;
   $('work-view').hidden=!inProject||view!=='work';$('history-view').hidden=!inProject||view!=='history';
   const spatial=view==='space'||view==='area'||view==='task';$('space-view').hidden=!inProject||!spatial;
-  $('nav-space').hidden=!inProject||route==='example'||(starting&&!hasSpace(project));
+  $('nav-space').hidden=!inProject||(starting&&!hasSpace(project));
   $('nav-space').classList.toggle('active',inProject&&spatial);if(inProject&&spatial)$('nav-space').setAttribute('aria-current','page');else $('nav-space').removeAttribute('aria-current');
   $('nav-area-count').textContent=String(project.space.areas.filter(a=>!a.archived).length);
   if(route!=='projects')rememberPlace();
@@ -1155,10 +1159,10 @@ function lastActivity(p:Project):string|null {
 /** HOME15: what a card says. Name and the user's own purpose (space.brief) first; a request is never shown as the purpose.
  * The time is lastActivity: request/result originals and work-text exports only, so it is not called 'last edit'. */
 const ACTIVITY_SCOPE='요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.';
-function projectSummary(li:HTMLElement,info:Project,open:(()=>void)|null,label:string) {
+function projectSummary(li:HTMLElement,info:Project,open:(()=>void)|null,label:string,openClass='project-open') {
   const head=node('div','','project-card-head'),mark=node('span',[...info.name.trim()][0]??'·','project-mark');mark.setAttribute('aria-hidden','true');
   // The name is the card's one open control (Enter/Space); the rest of the card opens on click. No control inside another.
-  const name=open?btn(info.name,open,'project-open project-card-name'):node('strong',info.name,'project-card-name');
+  const name=open?btn(info.name,open,`${openClass} project-card-name`):node('strong',info.name,'project-card-name');
   name.title=info.name;if(open)name.setAttribute('aria-label',`${info.name} · ${label}`);
   head.append(mark,name);li.append(head);
   const brief=info.space.brief?.text.trim();
@@ -1252,6 +1256,7 @@ function renderProjects() {
   const entries=workspace.entries(),active=entries.filter(e=>e.state==='active'),trashed=entries.filter(e=>e.state==='trashed');
   for(const e of [...active].sort((a,b)=>(lastActivity(b.project)??'').localeCompare(lastActivity(a.project)??'')))list.append(projectCard(e));
   if(workspace.legacy)list.append(legacyCard());
+  $('example-list').replaceChildren(exampleCard());
   // An empty list and a list that could not be read are different situations.
   if(!active.length&&!workspace.legacy&&!workspace.readError)list.append(node('li','아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 아래에서 예제를 둘러보세요.','hint project-empty'));
   $('projects-count').textContent=active.length?String(active.length):'';
@@ -1293,21 +1298,52 @@ async function restoreProject(entryId:string,undo=false) {
   undoEntry=null;render();
 }
 /** In-memory sample made with the normal domain path and the explicit MOCK rules; never persisted.
+ * ENTRY37: a purpose, two top parts (one with two inner parts) and one request in an inner part, handed off and answered
+ * by a written sample report through the normal result-file path. Nothing here is a real run or a real user's record.
  * Starting my own project from it starts empty: nothing from the sample becomes my record or result. */
 function exampleProject():Project {
-  let p=rename(createProject(),'예제 · 동네 미용실 예약 사이트');
-  p=submit(editDraft(p,'동네 미용실 예약 사이트를 만들고 싶어요. 손님이 휴대폰으로 날짜와 시간을 고르고, 예약하면 문자로 확인을 받게 해 주세요.'));
+  let p=rename(createProject(),'예제 · 동네 미용실 예약');
+  p=setBrief(p,'동네 미용실 손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약이 확정되면 문자로 안내받는 사이트.');
+  p=addArea(p,'예약하기','손님이 시술과 날짜·시간을 고르고 예약을 확정한다.');const book=p.space.areas.at(-1)!.id;
+  p=addArea(p,'알림','예약 확정과 변경을 손님에게 문자로 알린다.');const notify=p.space.areas.at(-1)!.id;
+  p=addChildArea(p,book,'시간 고르기','영업시간 안의 빈 시간만 고를 수 있게 보여 준다.');const slots=p.space.areas.at(-1)!.id;
+  p=addChildArea(p,book,'예약 확인','고른 시술·날짜·시간을 다시 보여 주고 확정 버튼을 둔다.');
+  p=addRelation(p,book,notify,'flow','예약이 확정되면 알림을 보낸다.');
+  p=submit(editDraft(p,'예약 화면에서 영업시간 안의 빈 시간만 고를 수 있게 해 주세요. 이미 예약된 시간은 흐리게 보여 주세요.'),undefined,slots);
   const started=begin(p,p.currentTaskId!),request=validateRequest(started.request);
-  return {...receive(started.project,started.request,{mode:'mock',ticket:request.ticket,advice:validateAdvice(mockAdvice(request),request.bases.map(b=>b.id))}),notice:null};
+  p=receive(started.project,started.request,{mode:'mock',ticket:request.ticket,advice:validateAdvice(mockAdvice(request),request.bases.map(b=>b.id))});
+  const task=p.currentTaskId!,returnId=`H_${crypto.randomUUID()}`,anchor=exportAnchor(p,taskOf(p,task));
+  p=markHandoff(p,task,handoffText(p,task,returnId),'clipboard',p.revision,returnId,anchor);
+  const summary='영업시간 안의 빈 시간만 목록에 보여 주고, 이미 예약된 시간은 흐리게 표시한다. 휴무일은 아직 따로 다루지 않는다.';
+  p=importResultFile(p,JSON.stringify({schemaVersion:'agentflow.return.2',projectId:p.id,taskId:task,returnId,
+    report:'예제 보고 · 실제로 실행한 결과가 아니에요.\n빈 시간 목록을 영업시간 기준으로 거르고, 예약된 시간은 흐리게 표시했어요. 휴무일 처리는 아직 하지 않았어요.',evidence:null,
+    understanding:{version:'understanding.1',areaId:slots,basedOn:anchor?.understanding??null,summary,changes:['예약된 시간은 고를 수 없게 흐리게 표시한다.'],proposal:null,origin:'예제 · 직접 쓴 보고'}}));
+  return {...p,notice:null};
+}
+let exampleInfo:Project|null=null;
+/** ENTRY37: the home's way into the sample, apart from the real list (own list and classes; same card reading order). */
+function exampleCard():HTMLElement {
+  const li=node('li','','example-card');
+  try {exampleInfo??=exampleProject();} catch {li.append(node('p','예제를 준비하지 못했어요.','hint project-card-note'));return li;}
+  const open=()=>void openExample();
+  projectSummary(li,exampleInfo,open,'공간 예제 열기 · 저장 안 됨','example-open');
+  // The name already says 예제; the meta line says what it is not (no head tag, so the name keeps its full width).
+  li.querySelector('.project-card-time')!.textContent='저장 안 됨 · 실제 실행 아님';
+  openOnClick(li,open);return li;
 }
 async function openExample() {
   if(!await leaveProject('예제로 가면'))return;
   resetEphemeral();route='example';target={kind:'example'};storageError='';memoryDirty=false;hasSaved=false;contextOpen=false;
   try {project=exampleProject();} catch {project=createProject();}
-  rememberOpen(null);render();
+  // ENTRY37: the sample opens at its whole space, like a project card does.
+  view=hasSpace(project)?'space':'work';
+  rememberOpen(null);render();window.scrollTo({top:0});
+  if(!(view==='space'&&focusFirst('space-title')))$('main').focus({preventScroll:true});
 }
 function closeExample(start:boolean) {
-  if(start||!(workspace.entries().length||workspace.legacy||workspace.readError)){startNew();render();restoreDraftPanels();$('draft').focus();}
+  // ENTRY37: closing goes back to the home; only a browser that cannot save at all keeps the in-memory start as before.
+  const home=workspace.writable||workspace.entries().length||workspace.legacy||workspace.readError;
+  if(start||!home){startNew();render();restoreDraftPanels();$('draft').focus();}
   else void showProjects();
 }
 /* ---------- FLOW090: the plan space (whole space -> one area). Reads the project; edits only plan data. ---------- */
@@ -2471,7 +2507,7 @@ function renderUnplaced(root:HTMLElement) {
 }
 /** Where the open work sits in the space; shown once the project has a space. */
 function renderPlace(t:Task|null) {
-  const bar=$('work-place');bar.replaceChildren();bar.hidden=!hasSpace(project)||route==='example';if(bar.hidden)return;
+  const bar=$('work-place');bar.replaceChildren();bar.hidden=!hasSpace(project);if(bar.hidden)return;
   const area=t?areaById(areaOf(project,t)):null;
   bar.append(btn('전체 공간',()=>{endRecordsExcursion();openSpace();},'crumb-link','place-space'));
   if(area)bar.append(node('span','›','crumb-sep'),btn(area.name,()=>openArea(area.id),'crumb-link','place-area'));
@@ -2635,7 +2671,7 @@ for(const id of ['new-project','new-project-top'])$(id).addEventListener('click'
 $('trash-current').addEventListener('click',()=>{if(target.kind==='entry')void trashProject(target.ref.entryId,project.name);});
 $('undo-trash').addEventListener('click',()=>{if(undoEntry!==null)void restoreProject(undoEntry,true);});
 $('list-import').addEventListener('click',()=>$<HTMLInputElement>('import-file').click());
-for(const id of ['list-example','open-example'])$(id).addEventListener('click',()=>void openExample());
+$('open-example').addEventListener('click',()=>void openExample());
 $('example-start').addEventListener('click',()=>closeExample(true));
 $('example-close').addEventListener('click',()=>closeExample(false));
 /** Explicit navigation starts a new excursion. Part/endpoint locators and same-part actions keep their first caller. */
