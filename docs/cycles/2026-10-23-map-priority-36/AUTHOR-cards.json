@@ -1,0 +1,1019 @@
+{
+"what": "MAP36 작성자 카드 측정(판정 아님). 기본 맞춤 직후 실제 DOM. 단위 카드 레이아웃 px/줄. nameLines/noteLines=보이는 줄 수, nameClamped=이름이 세 줄을 넘어 잘림(원문은 패널), reasonLines=읽을 이유 줄 수, enterSpare=본문 영역 남은 px, boxesOutside=카드·clip 밖 상자(모두 0이어야 함). scale은 그 화면의 지도 배율.",
+"runner": "작성자 원격 컨테이너 Node 22.22.0, Playwright 1.57.0, Chromium 141.0.7390.37, Noto Sans CJK KR/Inter. Cloud/CI 아님.",
+"inputs": {
+"T2": "reentry-judgment-32 T2.json @24baf91 sha256 584bca01…",
+"db5": "map-signals34 input-v0 mixed-long-title.json @db5be306 sha256 4790bcd1…",
+"f34": "tests/map-signals34-fixtures.mjs(34에서 그대로 재사용), 늦은 결과 B·P를 열린 탭에서 정상 파일 선택으로 수신"
+},
+"scenes": {
+"T2-1280-open": [
+{
+"name": "읽기·검토 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [
+"하위 접기"
+],
+"enterSpare": 54,
+"boxesOutside": 0
+},
+{
+"name": "출력 준비 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "하위 포함 · 설명 보류 · 이전 기준 설명",
+"reasonLines": 1,
+"band": [
+"하위 접기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 54,
+"boxesOutside": 0
+},
+{
+"name": "미리보기 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 82,
+"boxesOutside": 0
+},
+{
+"name": "오류행 처리 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 82,
+"boxesOutside": 0
+},
+{
+"name": "내보내기 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "설명 보류 · 이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 82,
+"boxesOutside": 0
+}
+],
+"T2-1440-open": [
+{
+"name": "읽기·검토 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [
+"하위 접기"
+],
+"enterSpare": 54,
+"boxesOutside": 0
+},
+{
+"name": "출력 준비 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "하위 포함 · 설명 보류 · 이전 기준 설명",
+"reasonLines": 1,
+"band": [
+"하위 접기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 54,
+"boxesOutside": 0
+},
+{
+"name": "미리보기 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 82,
+"boxesOutside": 0
+},
+{
+"name": "오류행 처리 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 82,
+"boxesOutside": 0
+},
+{
+"name": "내보내기 ↘",
+"nameLines": 1,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "설명 보류 · 이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 82,
+"boxesOutside": 0
+}
+],
+"db5-1280-open": [
+{
+"name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 ",
+"nameLines": 3,
+"nameClamped": true,
+"noteLines": 2,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명",
+"reasonLines": 2,
+"band": [
+"하위 접기"
+],
+"enterSpare": 4,
+"boxesOutside": 0
+},
+{
+"name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설",
+"nameLines": 3,
+"nameClamped": true,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문 · 이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 46,
+"boxesOutside": 0
+},
+{
+"name": "[합성34 공통머리말] 보류만 존재 · 실제 자식의 시험 문맥과 늦은 설",
+"nameLines": 3,
+"nameClamped": true,
+"noteLines": 2,
+"reason": "설명 보류",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 46,
+"boxesOutside": 0
+},
+{
+"name": "[합성34 공통머리말] 관계만 존재 · 포함되지 않은 다른 부분의 현재 ",
+"nameLines": 3,
+"nameClamped": true,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [
+"앱에서 이어갈 작업"
+],
+"enterSpare": 20.5,
+"boxesOutside": 0
+}
+],
+"db5-1440-open": [
+{
+"name": "[합성34 공통머리말] 상위 구성 · 질문과 설명을 함께 보존하는 자료 ",
+"nameLines": 3,
+"nameClamped": true,
+"noteLines": 2,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명",
+"reasonLines": 2,
+"band": [
+"하위 접기"
+],
+"enterSpare": 4,
+"boxesOutside": 0
+},
+{
+"name": "[합성34 공통머리말] 오류행 구분 · 실제 자식의 질문과 이전 기준 설",
+"nameLines": 3,
+"nameClamped": true,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문 · 이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 46,
+"boxesOutside": 0
+},
+{
+"name": "[합성34 공통머리말] 보류만 존재 · 실제 자식의 시험 문맥과 늦은 설",
+"nameLines": 3,
+"nameClamped": true,
+"noteLines": 2,
+"reason": "설명 보류",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 46,
+"boxesOutside": 0
+},
+{
+"name": "[합성34 공통머리말] 관계만 존재 · 포함되지 않은 다른 부분의 현재 ",
+"nameLines": 3,
+"nameClamped": true,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [
+"앱에서 이어갈 작업"
+],
+"enterSpare": 20.5,
+"boxesOutside": 0
+}
+],
+"f34-P-stale-note-1280-open": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 접기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 4,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 답변 기록 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [],
+"enterSpare": 38.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 이전 기준 질문과 설명 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 시험 답변 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-stale-note-1280-fold": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 4개 펼치기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 4,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-stale-note-1440-open": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 접기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 4,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 답변 기록 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [],
+"enterSpare": 38.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 이전 기준 질문과 설명 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 시험 답변 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-stale-note-1440-fold": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 4개 펼치기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 4,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-stale-nonote-1280-open": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 접기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 답변 기록 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [],
+"enterSpare": 38.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 이전 기준 질문과 설명 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 시험 답변 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-stale-nonote-1280-fold": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 4개 펼치기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-stale-nonote-1440-open": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 접기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 답변 기록 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [],
+"enterSpare": 38.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 이전 기준 질문과 설명 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 시험 답변 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-stale-nonote-1440-fold": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 4개 펼치기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-B-stale-nonote-1280-open": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 접기"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 답변 기록 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"앱에서 이어갈 작업"
+],
+"enterSpare": 13,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 이전 기준 질문과 설명 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 시험 답변 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-B-stale-nonote-1280-fold": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 4개 펼치기"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-B-stale-nonote-1440-open": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 접기"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 답변 기록 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"앱에서 이어갈 작업"
+],
+"enterSpare": 13,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 이전 기준 질문과 설명 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "이전 기준 설명",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 시험 답변 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-B-stale-nonote-1440-fold": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 4개 펼치기"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-nostale-nonote-1280-open": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 접기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 답변 기록 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [],
+"enterSpare": 38.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 이전 기준 질문과 설명 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 시험 답변 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-nostale-nonote-1280-fold": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 4개 펼치기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-nostale-nonote-1440-open": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 접기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 답변 기록 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [],
+"enterSpare": 38.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 이전 기준 질문과 설명 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 시험 답변 질문 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "기록 읽기",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+],
+"f34-P-nostale-nonote-1440-fold": [
+{
+"name": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계 ↘",
+"nameLines": 3,
+"nameClamped": false,
+"noteLines": 0,
+"reason": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+"reasonLines": 2,
+"band": [
+"하위 4개 펼치기",
+"앱에서 이어갈 작업"
+],
+"enterSpare": 10.5,
+"boxesOutside": 0
+},
+{
+"name": "[합성34] 연결만 받은 독립 부분 ↘",
+"nameLines": 2,
+"nameClamped": false,
+"noteLines": 2,
+"reason": "답변 기록 없는 현재 질문",
+"reasonLines": 1,
+"band": [],
+"enterSpare": 64,
+"boxesOutside": 0
+}
+]
+}
+}

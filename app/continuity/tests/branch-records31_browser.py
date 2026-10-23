@@ -189,8 +189,13 @@ class BranchRecords31(unittest.TestCase):
     def test_01_exact_subtree_old_memo_and_keyboard(self):
         s=self.load();p=s['ids']['P'];q=s['ids']['Q'];signal='#branch-records-'+p
         text=self.page.locator(signal).inner_text()
-        for word in ['기록된 질문 1','현재 설명 1','설명 보류 1','이전 기준 1']:self.yes('신호의 실제 종류 '+word,word in text,text)
+        # MAP36: the card shows which reasons exist (with '하위 포함'); the exact counts are read in the same owner's records reader.
+        for word in ['하위 포함','답변 기록 없는 현재 질문','설명 보류','이전 기준 설명']:self.yes('신호의 실제 종류 '+word,word in text,text)
         self.signal(p)
+        expect(self.page.locator('#subtree-records-heading-'+p)).to_contain_text('질문 1')
+        # Exact existing description rows (S's own name is also '이전 기준 설명', so the whole row text is compared).
+        for key,row in [('L','질문과 현재 설명 · 현재 설명 있음'),('H','보류 설명 · · 보류 1건'),('S','이전 기준 설명 · 이전 기준 설명')]:
+            expect(self.page.locator(f'#subtree-records-{p} .subtree-description[data-owner-area="{s["ids"][key]}"] > span')).to_have_text(row)
         owners=self.page.locator('#subtree-records-'+p+' [data-owner-area]').evaluate_all('(es)=>es.map(e=>e.dataset.ownerArea)')
         for key in ['L','H','S']:self.yes('두 층 아래 실제 소유 '+key,s['ids'][key] in owners,owners)
         self.yes('동명 다른 부모 B를 섞지 않음',s['ids']['B'] not in owners,owners)
@@ -234,7 +239,8 @@ class BranchRecords31(unittest.TestCase):
             self.map_click('#map-fit')
             if self.page.locator('#branch-toggle-'+q).get_attribute('aria-expanded')=='true':self.map_click('#branch-toggle-'+q)
             self.map_click('#map-fit')
-            self.yes('정확한 B 수신이 Q의 이번 탭 갱신 신호에 포함됨','이번 탭 설명 갱신 1' in self.page.locator('#branch-records-'+q).inner_text())
+            self.yes('정확한 B 수신이 Q의 이번 탭 갱신 신호에 포함됨','이번 탭 설명 갱신' in self.page.locator('#branch-records-'+q).inner_text())
+            expect(self.page.locator('#received-area-'+s['ids']['B'])).to_have_count(1)
             self.signal(p)
             expect(self.page.locator('#locate-return')).to_have_count(0)
             self.row_roundtrip(s,p);self.close_to('branch-records-'+p)

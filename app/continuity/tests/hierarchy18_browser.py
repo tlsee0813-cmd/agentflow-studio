@@ -130,7 +130,9 @@ class Area18(unittest.TestCase):
         received=self.snap('received while collapsed');self.equal('receiving preserves collapsed branch',received['collapsed'],closed['collapsed'])
         self.equal('receiving preserves camera',received['transform'],zoomed['transform'])
         self.yes('receiving does not silently reveal leaf',area not in received['visible'])
-        expect(self.page.locator(f'.area-node[data-area-id="{branch}"] .branch-signals')).to_contain_text('이번 탭 설명 갱신 1')
+        # MAP36: presence on the card; which areas received in this tab is the existing '이 탭에서 받은 설명' list.
+        expect(self.page.locator(f'.area-node[data-area-id="{branch}"] .branch-signals')).to_contain_text('이번 탭 설명 갱신')
+        expect(self.page.locator(f'#received-area-{area}')).to_have_count(1)
         # The actual source relation is retained: select its real endpoint from a projected bundle.
         self.open_relations();r=self.state()['space']['relations'][0];real_to=r['to']
         rel_start=self.snap('before real endpoint locate');rel_anchor=self.reading(f'relation-to-{r["id"]}')
@@ -287,7 +289,7 @@ class Area18(unittest.TestCase):
         self.equal('A to B to A keeps revision history',self.state()['space']['containment']['revisions'][a],revision+2)
         self.equal('identity survives explicit membership changes',next(x for x in self.state()['space']['areas'] if x['id']==a)['id'],a)
         expect(self.page.locator(f'#panel-understanding-{a}')).to_contain_text('현재 설명으로 쓰지 않아요')
-        self.page.locator('#map-fit').click();self.page.locator(f'#branch-toggle-{old}').click();expect(self.page.locator(f'.area-node[data-area-id="{old}"] .branch-signals')).to_contain_text('이전 기준 1')
+        self.page.locator('#map-fit').click();self.page.locator(f'#branch-toggle-{old}').click();expect(self.page.locator(f'.area-node[data-area-id="{old}"] .branch-signals')).to_contain_text('이전 기준 설명')
         self.page.locator(f'#branch-toggle-{old}').click();self.select(a)
         self.page.locator('#panel-open').click();self.page.locator('#area-archive').click();expect(self.page.locator('#notice')).to_contain_text('하위 부분이 남아')
         self.page.locator('#nav-space').click();self.select(other);self.page.locator('#panel-new-request').click();self.page.locator('#draft').fill('[합성 미전송] 다른 영역 입력')

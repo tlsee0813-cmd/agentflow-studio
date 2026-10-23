@@ -211,6 +211,13 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/branch-records31_browser.py 2>&1 | tee test-results/branch-records31-browser.log
+      - name: MAP36 card name/membership/idea first, reading-reason presence, exact records entry on two PCs (synthetic recovery, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/map-priority36
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/map-priority36_browser.py 2>&1 | tee test-results/map-priority36-browser.log
       - name: AREA18 mixed depth, real endpoints and fixed reading workspace on two PCs (native HTTP, labelled reconstructions and synthetic boundaries, mock AI)
         env:
           IDEA015_EVIDENCE_DIR: test-results/area18

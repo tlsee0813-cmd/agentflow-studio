@@ -10,7 +10,7 @@ import { mockAdvice } from '../shared/mock.js';
 import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview, fitViewport, FIT_MIN, ZOOM_MIN, ZOOM_MAX } from './presentation.js';
 import { loadConfig, requestAdvice, requestGuidance, runtimeStorage, runtimeFailure, type RuntimeConfig } from './runtime.js';
 import { outcomeOf } from '../shared/outcome.js';
-import { checkItems, pointedReturn, returnPath, rootRequest, subtreeSignals, type CheckItem } from '../shared/attention.js';
+import { checkItems, pointedReturn, readingReasons, returnPath, rootRequest, subtreeSignals, type CheckItem, type ReadingReason } from '../shared/attention.js';
 import { childrenOf, areaPath, descendantAreas, visibleAreas, visibleRepresentative, bundleRelations } from '../shared/hierarchy.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HTMLElementTagNameMap[K] {
@@ -1329,6 +1329,7 @@ const pad=(n:number)=>String(n).padStart(2,'0');
 function receiptOf(t:Task):number|null {return isReturnTask(project,t)?project.tasks.findIndex(x=>x.id===t.parentTaskId):null;}
 function appTag():HTMLElement {const el=tag('앱에서 이어갈 작업','purple');el.title='이 앱에서 열어 둔 작업이에요. 외부 도구의 실시간 실행 상태가 아니에요.';return el;}
 function noNote():HTMLElement {const el=tag('구상 미기재','area-undecided');el.title='설명이 비어 있어요. 아이디어도, 아직 못 정한 점도 적을 수 있어요.';return el;}
+const READING_LABEL:Record<ReadingReason,string>={'open-question':'답변 기록 없는 현재 질문',held:'설명 보류',stale:'이전 기준 설명',updated:'이번 탭 설명 갱신'};
 function areaSummary(a:Area):string {
   const tasks=areaRequests(a.id),results=tasks.flatMap(returnsOf).length;
   return tasks.length?`요청 ${tasks.length}개${results?` · 돌아온 결과 ${results}개 · 앱 미검증`:''}`:'아직 요청 없음';
@@ -1422,25 +1423,28 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   const enter=node('button','','node-enter');enter.type='button';enter.id=`node-enter-${a.id}`;
   enter.setAttribute('aria-label',`${a.name} 영역 열기`);
   const name=node('strong',a.name,'area-card-name');name.append(node('span',' ↘','area-card-go'));
-  enter.append(name,node('span',areaPath(project,a.id).length>1?`소속 · ${areaPath(project,a.id).slice(0,-1).map(x=>x.name).join(' › ')}`:'독립 영역','area-card-path'),a.note?node('span',a.note,'area-card-note'):noNote(),node('span',areaSummary(a),'hint'));
-  if(receivedAreas.has(a.id))enter.append(node('span','설명 갱신','area-update-label'));
+  // MAP36: the card body says which part this is and what it is for; request/result counts are read in the '정보' panel.
+  enter.append(name,node('span',areaPath(project,a.id).length>1?`소속 · ${areaPath(project,a.id).slice(0,-1).map(x=>x.name).join(' › ')}`:'독립 영역','area-card-path'),a.note?node('span',a.note,'area-card-note'):noNote());
   el.classList.toggle('located',located?.area===a.id&&view==='space');
-  if(areaRequests(a.id).some(currentGroup))enter.append(appTag());
   enter.addEventListener('click',()=>guard(()=>openArea(a.id)));
   // Information shows the short properties; it never opens the area or changes the open work.
   const info=node('button','정보','quiet node-info');info.type='button';info.id=`node-info-${a.id}`;info.setAttribute('aria-pressed',String(mapSelected===a.id));
   info.setAttribute('aria-label',`${a.name} 정보 (들어가지 않음)`);
   info.addEventListener('click',()=>{branchRecordCaller=null;capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();$(`node-info-${a.id}`)?.focus({preventScroll:true});});
   el.append(handle,enter,info);
-  const children=childrenOf(project,a.id).filter(x=>!x.archived);
+  const children=childrenOf(project,a.id).filter(x=>!x.archived),reading=readingReasons(project,a.id,receivedAreas);
+  // MAP36: why reading this part's records may help (presence only; the counts and texts are in the same owner's records reader).
+  if(reading.records){const parent=children.length>0,said=reading.reasons.map(r=>READING_LABEL[r]);
+    const text=parent?(said.length?['하위 포함',...said]:['하위 포함 기록 읽기']):(said.length?said:['기록 읽기']);
+    const signal=btn('',()=>openBranchRecords(a.id),'branch-signals',`branch-records-${a.id}`);
+    text.forEach((t,i)=>{if(i)signal.append(' ');signal.append(node('span',i<text.length-1?`${t} ·`:t));});
+    signal.title=text.join(' · ');signal.setAttribute('aria-label',`${a.name} · ${text.join(' · ')} · ${parent?'이 부분과 하위 기록 읽기':'이 부분 기록 읽기'}`);
+    signal.setAttribute('aria-controls','area-panel-body');el.append(signal);}
+  const foot=node('div','','area-node-foot');
   if(children.length){const folded=collapsed.has(a.id),toggle=btn(folded?`하위 ${descendantAreas(project,a.id).filter(x=>!x.archived).length}개 펼치기`:'하위 접기',()=>toggleBranch(a.id),'quiet branch-toggle',`branch-toggle-${a.id}`);
-    toggle.setAttribute('aria-expanded',String(!folded));el.append(toggle);
-    const signals=subtreeSignals(project,a.id),questions=signals.reduce((n,s)=>n+s.questions.length,0);
-    const current=signals.filter(s=>s.description.current?.valid).length,held=signals.reduce((n,s)=>n+s.description.held.length,0),stale=signals.filter(s=>s.description.current&&!s.description.current.valid).length;
-    const updated=signals.filter(s=>receivedAreas.has(s.areaId)&&s.description.current?.valid).length;
-    const bits=[`기록된 질문 ${questions}`,...(current?[`현재 설명 ${current}`]:[]),...(updated?[`이번 탭 설명 갱신 ${updated}`]:[]),...(held?[`설명 보류 ${held}`]:[]),...(stale?[`이전 기준 ${stale}`]:[])];
-    if(questions||current||held||stale){const signal=btn(bits.join(' · '),()=>openBranchRecords(a.id),'branch-signals',`branch-records-${a.id}`);signal.title=signal.textContent??'';signal.setAttribute('aria-label',`${a.name} · ${bits.join(' · ')} · 이 부분과 하위 기록 읽기`);signal.setAttribute('aria-controls','area-panel-body');el.append(signal);}
-  }
+    toggle.setAttribute('aria-expanded',String(!folded));foot.append(toggle);}
+  if(areaRequests(a.id).some(currentGroup))foot.append(appTag());
+  if(foot.childElementCount)el.append(foot);
   // Dragging uses only the handle (outside the enter button); a drag never ends as a click on enter or information.
   handle.addEventListener('pointerdown',e=>{
     if(e.button!==0)return;e.preventDefault();e.stopPropagation();handle.setPointerCapture(e.pointerId);
