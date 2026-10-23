@@ -1,0 +1,53 @@
+{
+  "schema": "organizer-observation-proposals.1",
+  "codeSha": "c7329aa8b941791633d5f22da4ca105188aab0be",
+  "status": "REVIEWED_SEPARATE_PROPOSALS_NOT_APPLIED",
+  "sourceNature": "actual user and coordinator/tool excerpts; grouping is reviewer proposal",
+  "candidates": [
+    {
+      "id": "C1",
+      "label": "사용자가 명시한 제품 방향",
+      "refs": [
+        "E01",
+        "E02",
+        "E05"
+      ],
+      "observed": "사용자는 Dify 참고·다른 제품 목적·세밀한 층위·반복 조사를 명시했다. 총괄은 조사 분할을 예고하고 도구 배정문에 목적을 재진술했다.",
+      "fidelity": "사용자 발화는 실제 기록이다. 합성인 것은 아니다. 제품 방향의 존재는 확인되지만 두 구현 부분의 변경은 미확인.",
+      "scope": "제품 방향 관측. 구현 기능 노드나 영역 소속으로 배치하지 않는다. 두 연구 축의 구체 분할은 C3/E06에만 둔다.",
+      "identity": "층위 지도는 요약 명칭이다. 기존 영역 이름 변경·동일성·별칭 근거 없음.",
+      "roleChange": "해당 없음. C2에서 별도 관측."
+    },
+    {
+      "id": "C2",
+      "label": "총괄 역할 조정 요청과 배정 예고",
+      "refs": [
+        "E03",
+        "E04"
+      ],
+      "observed": "사용자가 직접 작업 대신 외부 담당 활용을 요구했다. 총괄은 Pro 조사·Opus 시안 수정·Cloud 실행 검증과 자신의 판단·통합 역할을 예고했다.",
+      "fidelity": "역할 조정 요청과 배정 예고가 확인된다. 특정 작업의 실제 담당 교체·접수·성공은 미확인.",
+      "scope": "담당 역할의 관측이다. 프로그램 부분과 합치지 않는다. E06의 연구 중복 가능성은 이 후보의 사실로 쓰지 않는다.",
+      "identity": "Pro/Opus/Cloud는 발췌의 담당 표기다. 실제 세션 동일성·이름 변경 근거 없음.",
+      "roleChange": "requested_and_planned; receipt_and_completed_transfer_unknown"
+    },
+    {
+      "id": "C3",
+      "label": "연구 분할·재현 판단 요청·후보 판단",
+      "refs": [
+        "E06",
+        "E07",
+        "E08"
+      ],
+      "observed": "E06은 층위·왕복과 시각밀도·선택패널 연구를 나눈다. E07은 수정본 회수라는 진술과 브라우저 확인 전 재현·판단 요청이다. E08은 부분 펼침·집중 보기 조합의 후보 판단이다.",
+      "fidelity": "E07의 허용 발췌에는 명시적 수정 명령·경로 상세가 잘렸다. 실제 작업 수정·접수·diff·재현 성공·적용·E01과의 인과는 미확인.",
+      "scope": "세 사건의 순서만 보존한다. 한 작업 또는 두 부분 구현 변경으로 합치지 않는다. C1의 사용자 방향과 별도 층위다.",
+      "identity": "부분 펼침·집중 보기는 후보 동작 표현이다. 영역 개명·노드 병합 근거 없음.",
+      "roleChange": "E06의 다른 세션은 배정문 주장이다. E04 담당과 동일 세션인지, 실제 인계됐는지 미확인."
+    }
+  ],
+  "receiverDryRun": {
+    "status": "NOT_RUN",
+    "reason": "실제 JSONL과 고정 합성 project의 project/task/export 연결 근거 없음. 연결을 만들거나 수신 거절을 실행하지 않음."
+  }
+}

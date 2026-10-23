@@ -1,0 +1,52 @@
+{
+  "sha": "c7329aa8b941791633d5f22da4ca105188aab0be",
+  "appTree": "af4556e7463fa76ce36938220c52447bd539cd3f",
+  "hashBasis": "minimal local bytes; all text files written with LF; manifest self-hash excluded",
+  "files": [
+    {
+      "file": "execution.json",
+      "bytes": 5597,
+      "sha256": "08662a302076dcd16390c8f129d7e15e8550d856d43ddf7bed6a7da78d2e910e"
+    },
+    {
+      "file": "geometry.json",
+      "bytes": 4253,
+      "sha256": "4d71187f4e91aef8d7b62de29ca2bc117666c36d797c71887bc4d0c741b32d39"
+    },
+    {
+      "file": "independent-static-probe.py",
+      "bytes": 7298,
+      "sha256": "640636057623a014d5e2fa32f34b9f152dcaf1e5b0df3a55d536a2e1f359a919"
+    },
+    {
+      "file": "REPORT.md",
+      "bytes": 4888,
+      "sha256": "b51521e56fad9851f2225321da923fa58c27f70fccbf2bcec9ebdf66a096d46d"
+    },
+    {
+      "file": "selected-1280-continue.png",
+      "bytes": 116218,
+      "sha256": "702bf8ef0576c2746c8efe1bf8a11f57baba3c6582166812f591aac75650713c"
+    },
+    {
+      "file": "selected-1280-home.png",
+      "bytes": 54767,
+      "sha256": "1af4b3d5cbbd2d4eb958f7260059206e8f807b6b58f1c5c0a44536dc0f897ff2"
+    },
+    {
+      "file": "selected-1280-returned-map.png",
+      "bytes": 108288,
+      "sha256": "645d07e773e4193c6ca611f4f344760b6c95cd4a6176b86f1311a18537276cf7"
+    },
+    {
+      "file": "selected-1440-returned-map.png",
+      "bytes": 123622,
+      "sha256": "218743e47ea4b87cbf37f6e32c901c0d8c199c9a957dc1041b1fc8b12558855d"
+    },
+    {
+      "file": "source-integrity.json",
+      "bytes": 164,
+      "sha256": "a21cac3e5d7cccf72d3f2a42b4ba5c2a649e4eeae8295621fa438c8010e0961a"
+    }
+  ]
+}

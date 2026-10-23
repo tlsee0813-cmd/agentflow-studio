@@ -1,35 +1,29 @@
 # AgentFlow 현재 상태
 
-2026-10-24 KST. **새 단일 총괄이 인수를 완료하고36/37 연결 흐름을 진행 중이다. 제품36 좁은 수용·통합, 체험본은35.** 인계 SHA4a9873a5와 원격 checkpoint·ACTIVE·QUESTIONS를 대조했고 이후 변경은 없었다. 현재 진행은 이 파일, 인계 시점의 정확한 기준·워커 회수·판단은 [새 총괄 시작 문서](../COORDINATOR_HANDOFF_2026-10-24_KO.md), 질문 축적은 [QUESTIONS](../QUESTIONS.md), 제품·배포 기준은 [PROJECT_STATUS](../PROJECT_STATUS.md)에 둔다. 과거 RESULT/AUTHOR는 당시 판단이며 이 파일을 대신하지 않는다.
+2026-10-24 KST. **36/37 결합38 수용·기존 공개 GitHub Pages 게시 완료.** [PC 체험본](https://tlsee0813-cmd.github.io/agentflow-studio/) · [판단·검증·한계](2026-10-24-entry-integration-38/DECISION.md) · [제품/배포 기준](../PROJECT_STATUS.md) · [질문별 근거](../QUESTIONS.md). 인계4a9873a5와 원격 HEAD/ACTIVE/QUESTIONS를 대조한 뒤 기존 반환·연구를 회수하고 차이만 반영했다.
 
-## 인수 후 접수·회수
+## 현재 제품과 배포
 
-| 담당/주제 | 기준/접수 | 현재 상태·다음 행동 |
+- 수용 source `c7329aa8b941791633d5f22da4ca105188aab0be`, app tree `af4556e7463fa76ce36938220c52447bd539cd3f`.36fix2 포함, 최신 인계 문서 보존. checkpoint로 fast-forward. [PR21 merged](https://github.com/tlsee0813-cmd/agentflow-studio/pull/21).
+- 프로젝트 홈→비저장 예제 지도→부분/작업→이어가기→지도 복귀→예제 닫기→빈 내 프로젝트 시작.1280에서 복귀 안내가 지도 높이를 줄이던 반례를 수정했다. 초안·기존 프로젝트 bytes·지도 memo 보존과 예제 저장0을 독립 확인했다.
+- 정확 source의 [CI](2026-10-24-entry-integration-38/CI.md)는 양OS success. 첫 Windows main app 시작5000ms timeout은 기록하고 같은 SHA의 Windows를 한 번 재실행했다. skip을 통과로 세지 않는다. [독립 실행](2026-10-24-entry-integration-38/independent38/REPORT.md)은 별도 Windows Chrome155/Node24이며 CI143/Node22와 구별한다.
+- 공개 게시 `4ebf8fa39df1353f9853aa3819c6917a609aa74b`. Git runtime17개와 HTTP runtime16개 해시 일치, 공개 화면 예제 왕복 확인. [배포 manifest](2026-10-24-entry-integration-38/DEPLOYMENT.json). 실제 AI 없는 브라우저 MOCK, preview 저장 접두사로 옛 공개 demo 데이터와 분리한다. 기존 private Sites35는 그대로이며 최신 체험본이 아니다.
+- 1280 기본78% 작은 글씨·긴 동일접두어·큰지도·125%·IME·다른탭 live·실제AI 의미품질·사람 사용성은 해결/검증되지 않았다.34/26/28 반례와 GUIDE107 HOLD는 유지한다.
+
+## 접수와 반환 — 중복 제출 금지
+
+| 담당/주제 | 원본 접수·반환 | 상태 |
 |---|---|---|
-| Claude37 결합·복귀 안내 | 기존 session_01KJRKarPuyzvnMWCkvYQbW1, 메시지2;20bffe5f+36fix2 38beb559 | 접수·실행 중. [좁은 작업 지시](2026-10-24-entry-integration-38/WORK_ORDER.md). 기존 반환/연구 회수 후 차이만 요청, 원본 세션과branch로 회수 |
-| 독립 Sol High36 검토·실행 준비 | 정확38beb559 | 작성자와 별도 checkout, 제품소스 변경 없음. 제품 Cloud durable 호스트 현재 접근 실패로 허용된 로컬 독립 검증 준비 |
-| Pro 기본fit 가독성 후보 비교 | Oracle af-map-readable-delta-20261024;공개4a9873a5/38beb559/20bffe5f | 접수·실행 중. 기존 홈 연구 반복 없이 최상위접힘1배율/저배율핵심표현 두 후보의 출처·반례만 조사 |
-| Sol High 정리v0 입력 준비 | 4a9873a5, 기존14 연구·로컬 보존자료 | 준비만.36/37 완료 뒤 실제JSONL1표본+project사본 관측. 원문 외부전송/제품코드 변경 없음 |
+| Claude37 복귀 수정 | session_01KJRKarPuyzvnMWCkvYQbW1, 동일 문제 후속 메시지2/4; 반환0fa38e0 | 완료·app tree 동일하게 결합·수용. 남은 작성자 회귀도 회수 완료 |
+| 독립 Sol High36/38 | /root/verify36_prepare;38beb559/c7329aa | 완료. source/검사 수정 없음. 대표4PNG·환경/exit/해시만 cycle38에 공유 |
+| Pro 가독성 비교 | Oracle af-map-readable-delta-20261024, exec71068 | completed·exit0·원문3출처 대조. [결정](2026-10-24-entry-integration-38/READABILITY_DECISION.md): 구조/시야를 유지한 저배율 이름·이유 표현 B를 후속 단일장면 실험후보로만 선택 |
+| DeepSeek 정리v0 | session-a924bcea-2100-41b0-8112-474736972dd0, c7329aa·실제8사건 | completed·exit0·후보3개 반환. 원문/고정project 독립대조 후 보정 완료 |
+| 독립 Sol High 정리v0 | /root/organizer_inputs, 같은 실제표본과 고정project 사본 | 완료. 실제기록과 project handoff 연결 없음. 수신dry-run NOT_RUN. [관측39](2026-10-24-organizer-observation-39/RESULT.md) |
 
-GitHub 연결 오류는 사용자 확인 후 재조회로 해소했다. Code Review가 정확38beb559의 run39886454270 Ubuntu/Windows success를 재확인했다. 최종37 결합 SHA의CI는 아직 없으며 이 성공을 옮겨 쓰지 않는다.
+## 다음 범위와 운영
 
-## 수용된 제품과 반환 후보
+[정리v0 관측39](2026-10-24-organizer-observation-39/RESULT.md)를 근거로 **Q06의 출처 있는 연결 대기 제안 최소흐름**을 다음 제품 범위로 선택했다. Q02는 이름 후보·동일성 불명 상태를 보존하는 경계만 포함한다. 자동 동일성 병합·가짜 handoff/anchor·기존 return.2 확장은 선택하지 않았다. 구현은 아직 시작하지 않았다. 질문 목록 전체를 일괄 개발하지 않는다. Q13 가독성은 단일장면 후속 실험 근거로 남긴다.
 
-- **35 수용·비공개 PC 체험본 게시 완료.** [결과](2026-10-23-isolated-preview-35/RESULT.md) · [체험본](https://agentflow-studio-pc-preview-20261023.eagerllama11.chatgpt.site). checkpoint의 app tree는 `775a33991c4b81104737ac1f0ec5b924c979a975`이며 MOCK·브라우저 저장이다. 36/37은 아직 여기에 없다.
-- **36 fix2 독립 검증·수용·통합.** `product/map-priority-36` head `38beb55922e3e982f0f32fddacd5e18a5e157a15`, [PR20](https://github.com/tlsee0813-cmd/agentflow-studio/pull/20) merged. 이유 줄의 항목별 줄바꿈 금지를 제거해 구상 잘림을 수정했다. 정확 head의 run39886454270 Ubuntu/Windows success를 Code Review로 확인했다. a17의 Ubuntu6실패는 과거 실패다. 기존 Cloud154 검증은 pre-fix2이고143 재현 시도는 다운로드/캐시 제한으로 NOT_RUN 반환이다. 최신 fix2는 별도Windows·양PC 실행/화면 검증 후 좁게 수용했다. merge0a8bb249·공유근거16b797e. [판단](2026-10-24-entry-integration-38/DECISION.md). 작은 글씨 한계는 유지.
-- **37 구현 반환·독립 결합 검증 전.** `product/project-entry-37` head `20bffe5fe33f11b29870a9025d2ac0089837abfb`. 첫 홈/비저장 공간 예제/부분·작업 왕복 후보. 36 fix2 미포함. 작성자 보고의 지도 복귀 안내가1280 가용 높이를 줄이는 장면을 먼저 확인·수정한다. author 통과를 최종 수용으로 읽지 않는다.
-- **34 후보 보류 종료.** [반례](2026-10-23-map-signals-34/RESULT.md). 26/28과 함께 가독성 판단 근거로 보존한다. GUIDE107 실제 AI 의미 품질 HOLD도 유지한다.
+총괄만 agentflow-coordinator/Ops를 사용한다. Pro 비교, Claude 좁은 구현, 준비된 Cloud 또는 독립 로컬 실행, DeepSeek 출처 있는 좁은 분류, Sol High 보조를 쓴다. Cloud durable 호스트 접근 실패 때문에 이번 실행은 독립 로컬로 했다. GitHub 연결 재조회는 정상, 계정 전환/환경 재설치는 하지 않았다.
 
-## 다음 작은 완결 흐름
-
-기존 반환을 먼저 회수 → 36 fix2 코드/화면 판정 → 최신 문서 보존해 수용 여부 결정 → 37에36fix2 포함·복귀 반례 수정 → 독립 PC1280/1440에서 **홈→예제 지도→부분/작업→이어가기→지도 복귀→예제 닫기→내 프로젝트 시작** → 최종 결합 SHA 양OS CI → 수용본만 기존 비공개 체험본 반영. 좌표 보존뿐 아니라 실제 표시·가용 높이·초안·예제 비저장을 확인한다. main/기존 공개판 승격은 별개다.
-
-그 뒤 정리 담당v0: 허용된 실제 JSONL 한 표본+project 사본의 세 후보 관측. 기존 handoff/anchor 없음을 가짜 ID로 메우지 않고 거절/영역 미배치/설명 보류/적용 가능성을 분리한다. 자동 수집/UI/범용 엔진 없이 Q02/06 다음 범위를 판단한다. 지도 기본fit 제약 비교·증거 축소·CI 계층화는 [인계의 수용 판단](../COORDINATOR_HANDOFF_2026-10-24_KO.md) 범위 안에서 순서를 정한다.
-
-## 운영
-
-기존 Claude36/37은 반환됐고 제품 Cloud 최근 턴도 completed·idle이다. Pro36/37 답변도 이미 회수했다. 구체 URL/ID·입력 SHA·결과·다음 동작은 [인계 4절](../COORDINATOR_HANDOFF_2026-10-24_KO.md)에 모았다. 새 배정부터 이 파일에 채널/주제/기준/접수/반환/다음 회수를 기록하고 완료된 작업을 다시 전송하지 않는다.
-
-총괄만 `$agentflow-coordinator`와 기존 Ops 하네스를 적용한다. Pro 비교 조사, Claude 구현, 준비된 Cloud/독립 담당 실행, DeepSeek 좁은 텍스트 분류, Sol High 보조·Astra High 어려운 판단으로 나눈다. 주제가 바뀌거나 대화가 길어져 혼선이 생기면 새 주제 세션으로 인계하고 같은 문제의 짧은 후속은 기존 세션에서 한다. 계정 전환은 사용자의 최신 지시대로 이 제품 작업에서 다루지 않는다.
-
-PC 중심·Dify 메커니즘 비교를 유지한다. 사람 사용 기록 제출을 새 관문으로 요구하지 않는다. 질문은 연구 지도이며 일괄 개발 목록이 아니다. 원문 보존·작성자 검사·독립 실제 실행·이미지 검토·AI 관측·미실행을 구분한다. 저배율 가독성·큰 지도·브라우저125%·실제 IME·다른 탭 live·일반 기록 정리는 미해결/미검증이다. 이번 인계는 문서만 바꾸며 제품 소스·main·기존 공개 gh-pages·배포를 바꾸지 않는다.
+사용자 추가 결정: 공개 Pages 허용, DeepSeek 키 공개 금지, 로컬/저장소 정돈. 배포17파일과 인수 후 코드·증거71개 blob을 실제 키와 대조해 포함0건. runtime은 gh-pages, 결정·최소증거는 각 cycle 한곳에만 둔다. 큰 원로그/중복ZIP은 커밋하지 않으며 이번 임시생성물은 게시회수 후 정리한다. 기존 dirty checkout·원본 JSONL·키/워커 환경은 보존한다. 사람 사용 기록 제출을 진행 관문으로 만들지 않는다.

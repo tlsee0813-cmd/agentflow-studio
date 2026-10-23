@@ -1,0 +1,132 @@
+[
+  {
+    "viewport": [
+      1280,
+      720
+    ],
+    "before": {
+      "mapTop": 317.671875,
+      "mapHeight": 386.328125,
+      "mapBottom": 704,
+      "scale": "78%"
+    },
+    "returned": {
+      "mapTop": 317.671875,
+      "mapHeight": 386.328125,
+      "mapBottom": 704,
+      "scale": "78%",
+      "notice": null
+    },
+    "cards": [
+      {
+        "name": "예약하기 ↘",
+        "bottom": 522.8823852539062,
+        "insideMap": true,
+        "nameCenterHit": true,
+        "reason": "하위 포함 기록 읽기",
+        "note": "손님이 시술과 날짜·시간을 고르고 예약을 확정한다."
+      },
+      {
+        "name": "알림 ↘",
+        "bottom": 522.8823852539062,
+        "insideMap": true,
+        "nameCenterHit": true,
+        "reason": null,
+        "note": "예약 확정과 변경을 손님에게 문자로 알린다."
+      },
+      {
+        "name": "시간 고르기 ↘",
+        "bottom": 678.671875,
+        "insideMap": true,
+        "nameCenterHit": true,
+        "reason": "기록 읽기",
+        "note": "영업시간 안의 빈 시간만 고를 수 있게 보여 준다."
+      },
+      {
+        "name": "예약 확인 ↘",
+        "bottom": 678.671875,
+        "insideMap": true,
+        "nameCenterHit": true,
+        "reason": null,
+        "note": "고른 시술·날짜·시간을 다시 보여 주고 확정 버튼을 둔다."
+      }
+    ],
+    "work": {
+      "notice": "작업 01 요청에서 이어가기 · 이 요청에 받은 현재 보고 작업 02에서 계속해요. 고치는 작업문은 작업 02의 후속 확인 작업문이고, 작업 01의 작업문은 그대로예요.",
+      "place": "전체 공간\n›\n시간 고르기\n›\n작업 01의 보고 · 후속 확인 작업문 초안\n이어가는 작업\n← 출발한 지도 보기로 · 시간 고르기",
+      "title": "요청 원문은 남아 있어요."
+    },
+    "storage": {
+      "exampleKeysEmpty": true,
+      "exampleMapMemoAbsent": true,
+      "ownEmptyBeforeNewInput": true,
+      "ownRestoredAfterReload": true,
+      "onlyPrefixWritten": "agentflow.studio.preview:"
+    }
+  },
+  {
+    "viewport": [
+      1440,
+      900
+    ],
+    "before": {
+      "mapTop": 312.890625,
+      "mapHeight": 571.109375,
+      "mapBottom": 884,
+      "scale": "120%"
+    },
+    "returned": {
+      "mapTop": 312.890625,
+      "mapHeight": 571.109375,
+      "mapBottom": 884,
+      "scale": "120%",
+      "notice": null
+    },
+    "cards": [
+      {
+        "name": "예약하기 ↘",
+        "bottom": 606.390625,
+        "insideMap": true,
+        "nameCenterHit": true,
+        "reason": "하위 포함 기록 읽기",
+        "note": "손님이 시술과 날짜·시간을 고르고 예약을 확정한다."
+      },
+      {
+        "name": "알림 ↘",
+        "bottom": 606.390625,
+        "insideMap": true,
+        "nameCenterHit": true,
+        "reason": null,
+        "note": "예약 확정과 변경을 손님에게 문자로 알린다."
+      },
+      {
+        "name": "시간 고르기 ↘",
+        "bottom": 846.390625,
+        "insideMap": true,
+        "nameCenterHit": true,
+        "reason": "기록 읽기",
+        "note": "영업시간 안의 빈 시간만 고를 수 있게 보여 준다."
+      },
+      {
+        "name": "예약 확인 ↘",
+        "bottom": 846.390625,
+        "insideMap": true,
+        "nameCenterHit": true,
+        "reason": null,
+        "note": "고른 시술·날짜·시간을 다시 보여 주고 확정 버튼을 둔다."
+      }
+    ],
+    "work": {
+      "notice": "작업 01 요청에서 이어가기 · 이 요청에 받은 현재 보고 작업 02에서 계속해요. 고치는 작업문은 작업 02의 후속 확인 작업문이고, 작업 01의 작업문은 그대로예요.",
+      "place": "전체 공간\n›\n시간 고르기\n›\n작업 01의 보고 · 후속 확인 작업문 초안\n이어가는 작업\n← 출발한 지도 보기로 · 시간 고르기",
+      "title": "요청 원문은 남아 있어요."
+    },
+    "storage": {
+      "exampleKeysEmpty": true,
+      "exampleMapMemoAbsent": true,
+      "ownEmptyBeforeNewInput": true,
+      "ownRestoredAfterReload": true,
+      "onlyPrefixWritten": "agentflow.studio.preview:"
+    }
+  }
+]

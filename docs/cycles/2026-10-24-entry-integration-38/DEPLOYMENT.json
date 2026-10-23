@@ -1,0 +1,188 @@
+{
+  "source": "c7329aa8b941791633d5f22da4ca105188aab0be",
+  "appTree": "af4556e7463fa76ce36938220c52447bd539cd3f",
+  "deploymentCommit": "4ebf8fa39df1353f9853aa3819c6917a609aa74b",
+  "rollbackCommit": "63f5540d062861439f0932cd7311c6c5510e227c",
+  "url": "https://tlsee0813-cmd.github.io/agentflow-studio/",
+  "ciRun": 39990131583,
+  "ciJobs": {
+    "windows": 120546483335,
+    "ubuntu": 120546548316
+  },
+  "runtimeTree": "e324229569a990715686569c84ecd5bf74654e10",
+  "storagePrefix": "agentflow.studio.preview:",
+  "files": [
+    {
+      "path": ".nojekyll",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "client/app.js",
+      "bytes": 313822,
+      "sha256": "cd0f6a26ae6972d304032d299e8928b0ff885253604a94e4dbb929903fbf887e"
+    },
+    {
+      "path": "client/presentation.js",
+      "bytes": 7833,
+      "sha256": "4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d"
+    },
+    {
+      "path": "client/runtime.js",
+      "bytes": 1836,
+      "sha256": "d368c64b881ed766a2eba49d96ae40d92912008a8d6b37bb0660380e0492a092"
+    },
+    {
+      "path": "client/static-target.js",
+      "bytes": 751,
+      "sha256": "0d847d744ce6dd680cf0d601faf77789973907e89c288cbbe85f8061056ddac9"
+    },
+    {
+      "path": "index.html",
+      "bytes": 18180,
+      "sha256": "95cd6b21e9348e703acfea3e98d11ba4d4fd3f670e2014b7b0df0b380f672475"
+    },
+    {
+      "path": "shared/attention.js",
+      "bytes": 6116,
+      "sha256": "55182121cccdf9d54bd8bcb8626d559a199192501386a718a9adb3696198950c"
+    },
+    {
+      "path": "shared/domain.js",
+      "bytes": 77648,
+      "sha256": "f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd"
+    },
+    {
+      "path": "shared/guidance.js",
+      "bytes": 6701,
+      "sha256": "c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5"
+    },
+    {
+      "path": "shared/hierarchy.js",
+      "bytes": 2489,
+      "sha256": "5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624"
+    },
+    {
+      "path": "shared/mock.js",
+      "bytes": 18360,
+      "sha256": "c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef"
+    },
+    {
+      "path": "shared/outcome.js",
+      "bytes": 4887,
+      "sha256": "c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8"
+    },
+    {
+      "path": "shared/plan-facts.js",
+      "bytes": 4655,
+      "sha256": "33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45"
+    },
+    {
+      "path": "shared/storage.js",
+      "bytes": 12708,
+      "sha256": "0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38"
+    },
+    {
+      "path": "shared/types.js",
+      "bytes": 2672,
+      "sha256": "d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53"
+    },
+    {
+      "path": "shared/validation.js",
+      "bytes": 50121,
+      "sha256": "5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 77076,
+      "sha256": "e58ae9a6bec8a81565429d6e6e6110aa0ee9d2114449c3bd4e5adf363b927f1a"
+    }
+  ],
+  "publicHttpVerified": true,
+  "publicHttpVerifiedAt": "2026-10-23T17:26:24.928Z",
+  "publicHttpFiles": [
+    {
+      "path": "client/app.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "client/presentation.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "client/runtime.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "client/static-target.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "index.html",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/attention.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/domain.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/guidance.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/hierarchy.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/mock.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/outcome.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/plan-facts.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/storage.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/types.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "shared/validation.js",
+      "status": 200,
+      "hashMatches": true
+    },
+    {
+      "path": "styles.css",
+      "status": 200,
+      "hashMatches": true
+    }
+  ],
+  "gitRuntimeBlobMatches": 17,
+  "metadataSourceMatches": true,
+  "nojekyllVerification": "Git blob checked; hosting marker excluded from HTTP runtime requests"
+}

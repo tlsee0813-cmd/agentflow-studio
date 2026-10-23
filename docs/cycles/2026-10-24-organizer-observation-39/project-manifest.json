@@ -1,0 +1,48 @@
+{
+  "codeSha": "c7329aa8b941791633d5f22da4ca105188aab0be",
+  "preparationSha": "4a9873a5a78fe1cfe48646fc912796025b639440",
+  "repo": "tlsee0813-cmd/agentflow-studio",
+  "fixturePath": "app/continuity/tests/fixtures/viewport30-normal-ui-six.json",
+  "gitBlob": "837b4d3ee03ba8e3098b2c06c7ef84ce64154ba8",
+  "sha256": "c50eb43a7747e824a23ff8de87588e608dc5430046528d13878d15eb65239aaa",
+  "bytes": 25031,
+  "schema": "idea015.project.7",
+  "revision": 36,
+  "tasks": 6,
+  "areas": 6,
+  "provenance": "existing synthetic test fixture; stored exports are fixture data, not exports for the actual JSONL",
+  "handoffs": 3,
+  "anchors": 3,
+  "exportRevisions": [
+    18,
+    25,
+    32
+  ],
+  "actualLogLinkage": "NOT_ESTABLISHED",
+  "originalProjectMutation": false,
+  "receiverDryRun": "NOT_RUN",
+  "rejectionObserved": false,
+  "holdObserved": false,
+  "unplacedObserved": false,
+  "appliedObserved": false,
+  "staticCodeOnly": {
+    "file": "app/continuity/src/shared/domain.ts",
+    "inspectResultFile": 137,
+    "targetMissingGuard": 140,
+    "importResultFile": 150,
+    "understandingVerdict": 723,
+    "noAreaReturn": 724,
+    "noAnchorHold": 727,
+    "fileUnderstanding": 740
+  },
+  "validation": {
+    "file": "app/continuity/src/shared/validation.ts",
+    "parseResultFile": 18
+  },
+  "unchangedFilesFromPreparation": [
+    "domain.ts",
+    "validation.ts",
+    "viewport30-normal-ui-six.json"
+  ],
+  "contracts": "Static branches only: exact target missing -> RESULT_TARGET_MISSING; existing area/no anchor -> no-anchor; no area -> no description entry. These outcomes were not executed or measured."
+}

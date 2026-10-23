@@ -1,0 +1,228 @@
+{
+  "sha": "c7329aa8b941791633d5f22da4ca105188aab0be",
+  "appTree": "af4556e7463fa76ce36938220c52447bd539cd3f",
+  "environment": {
+    "os": "Windows NT 10.0.26200.0",
+    "node": "v24.19.0",
+    "python": "3.12.14",
+    "typescript": "5.8.3",
+    "pnpm": "11.25.0",
+    "playwright": "1.57.0",
+    "chrome": "155.0.8059.85",
+    "transport": "direct localhost HTTP + native storage, MOCK; static probe uses native static-preview runtime",
+    "install": "pnpm install --ignore-scripts --lockfile=false --no-frozen-lockfile (exit0); not npm ci"
+  },
+  "commands": [
+    {
+      "name": "root-type",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit"
+      ],
+      "exit": 0,
+      "seconds": 1.125
+    },
+    {
+      "name": "root-boundary",
+      "command": [
+        "node",
+        "scripts/check.mjs"
+      ],
+      "exit": 0,
+      "seconds": 3.484
+    },
+    {
+      "name": "root-build",
+      "command": [
+        "node",
+        "scripts/build.mjs"
+      ],
+      "exit": 0,
+      "seconds": 1.329
+    },
+    {
+      "name": "continuity-check",
+      "command": [
+        "node",
+        "continuity/scripts/check.mjs"
+      ],
+      "exit": 0,
+      "seconds": 4.531
+    },
+    {
+      "name": "continuity-build",
+      "command": [
+        "node",
+        "continuity/scripts/build.mjs"
+      ],
+      "exit": 0,
+      "seconds": 2.438
+    },
+    {
+      "name": "continuity-unit",
+      "command": [
+        "node",
+        "--test",
+        "continuity/tests/ai055.test.mjs",
+        "continuity/tests/connect039.test.mjs",
+        "continuity/tests/description-refresh27.test.mjs",
+        "continuity/tests/description23.test.mjs",
+        "continuity/tests/domain.test.mjs",
+        "continuity/tests/fix058.test.mjs",
+        "continuity/tests/fix066.test.mjs",
+        "continuity/tests/fix088.test.mjs",
+        "continuity/tests/flow049.test.mjs",
+        "continuity/tests/flow083.test.mjs",
+        "continuity/tests/flow090.test.mjs",
+        "continuity/tests/flow091c.test.mjs",
+        "continuity/tests/flow094.test.mjs",
+        "continuity/tests/flow095.test.mjs",
+        "continuity/tests/fresh033.test.mjs",
+        "continuity/tests/guide097.test.mjs",
+        "continuity/tests/hierarchy18.test.mjs",
+        "continuity/tests/http.test.mjs",
+        "continuity/tests/idea017.test.mjs",
+        "continuity/tests/idea022.test.mjs",
+        "continuity/tests/map-priority36.test.mjs",
+        "continuity/tests/select035.test.mjs",
+        "continuity/tests/spatial102.test.mjs",
+        "continuity/tests/ui001.test.mjs",
+        "continuity/tests/understanding17.test.mjs"
+      ],
+      "exit": 1,
+      "seconds": 14.766
+    },
+    {
+      "name": "continuity-unit-missing-fixtures",
+      "command": [
+        "node",
+        "--test",
+        "continuity/tests/idea017.test.mjs",
+        "continuity/tests/idea022.test.mjs"
+      ],
+      "exit": 0,
+      "seconds": 0.735
+    },
+    {
+      "name": "static-build",
+      "command": [
+        "node",
+        "continuity/scripts/build-static.mjs"
+      ],
+      "exit": 0,
+      "seconds": 2.593
+    },
+    {
+      "name": "static-preview-build",
+      "command": [
+        "node",
+        "continuity/scripts/build-static.mjs",
+        "--preview"
+      ],
+      "exit": 0,
+      "seconds": 2.516
+    },
+    {
+      "name": "entry37",
+      "command": [
+        "python",
+        "continuity/tests/entry37_browser.py"
+      ],
+      "exit": 0,
+      "seconds": 141.188
+    },
+    {
+      "name": "map-priority36",
+      "command": [
+        "python",
+        "continuity/tests/map-priority36_browser.py"
+      ],
+      "exit": 0,
+      "seconds": 119.125
+    },
+    {
+      "name": "viewport30",
+      "command": [
+        "python",
+        "continuity/tests/viewport30_browser.py"
+      ],
+      "exit": 0,
+      "seconds": 29.469
+    },
+    {
+      "name": "home15",
+      "command": [
+        "python",
+        "continuity/tests/home15_browser.py"
+      ],
+      "exit": 0,
+      "seconds": 127.453
+    },
+    {
+      "name": "flow083",
+      "command": [
+        "python",
+        "continuity/tests/flow083_browser.py"
+      ],
+      "exit": 0,
+      "seconds": 102.89
+    },
+    {
+      "name": "static",
+      "command": [
+        "python",
+        "continuity/tests/static_browser.py"
+      ],
+      "exit": 0,
+      "seconds": 74.187
+    },
+    {
+      "name": "independent-static",
+      "command": [
+        "python",
+        "independent-static-probe.py"
+      ],
+      "exit": 0,
+      "seconds": 7.625
+    },
+    {
+      "name": "main-browser",
+      "command": [
+        "python",
+        "tests/browser.py"
+      ],
+      "exit": 0,
+      "seconds": 22.25
+    }
+  ],
+  "counts": {
+    "continuity-unit-initial": {
+      "pass": 246,
+      "moduleLoadFailures": 2
+    },
+    "continuity-unit-fixture-recovery": {
+      "pass": 33,
+      "fail": 0
+    },
+    "entry37": 10,
+    "map-priority36": 12,
+    "viewport30": 4,
+    "home15": 21,
+    "flow083": 12,
+    "static": 3,
+    "independent-static": 2,
+    "main-browser": 18
+  },
+  "unitPreparationFailure": "Sparse checkout omitted experiments/idea016/cases.mjs; exact-commit fixture added and only the two unloaded files rerun. No product/test source edits.",
+  "mainBrowserAdditionalObservation": {
+    "runs": 1,
+    "B01": "test_B01_real_mock_flow_browser_only_confirm_and_edit: ok",
+    "pass": 18,
+    "fail": 0,
+    "timeoutUnchangedMs": 5000,
+    "transport": "native direct HTTP",
+    "browser": "Chrome 155.0.8059.85; not a CI Chromium143 reproduction",
+    "node": "v24.19.0"
+  }
+}
