@@ -1,5 +1,7 @@
 # AgentFlow Studio 새 총괄 시작 안내
 
+> **2026-10-24 이후 인계는 [새 총괄 인수인계](COORDINATOR_HANDOFF_2026-10-24_KO.md)부터 읽는다.** 설치된 `$agentflow-coordinator`와 기존 Ops 하네스를 쓰며, 제품35 수용·36fix2/37 반환 상태에서 이어간다. 아래 내용은 10월15일 초기 인계 기록으로 첫 사이클을 다시 실행하라는 지시가 아니다. 최신 배정은 [ACTIVE](cycles/ACTIVE.md), 질문 축적은 [QUESTIONS](QUESTIONS.md).
+
 2026-10-15 · 개정 3.1 인계 · 사용자가 여는 Work Astra High 세션용
 
 **이미 연구가 진행된 뒤 이어받는 경우 [현재 연구·배정·최신 결과](cycles/ACTIVE.md)를 먼저 읽는다. 제품 소스와 공개 배포의 최신 사실은 [PROJECT_STATUS](PROJECT_STATUS.md)에서 확인한다.** 아래 상태 표와 ‘첫 연구 사이클’은 초기 인계 시점의 기록이며, 완료한 연구를 다시 시작하는 지시가 아니다.

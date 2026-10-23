@@ -1,5 +1,7 @@
 # AgentFlow Studio 제품 기준과 공개 버전
 
+> **2026-10-24 인계 확인:** 수용·체험 기준은 여전히35다. 36fix2는 양OS CI 성공·미병합, 37은 구현 반환·36fix2 미포함·독립 결합 검증 전이다. 현재 상태는 [ACTIVE](cycles/ACTIVE.md), 정확 SHA·회수 세션·첫 완료 조건은 [인수인계](COORDINATOR_HANDOFF_2026-10-24_KO.md)를 따른다. 아래 제품 설명은35 수용 시점이며 새 후보가 이미 체험본에 반영됐다는 뜻이 아니다.
+
 2026-10-23 독립 체험본35 통합·게시 시점의 사실 기준. 현재 연구·배정은 [ACTIVE](cycles/ACTIVE.md) 한곳에서 갱신한다. 과거 종료·예약 PAUSED는 이전 인계 당시 기록이며 사용자의 이후 재개 지시를 대체하지 않는다.
 
 **최신 PC 체험본을 별도 비공개 주소에서 열 수 있다.** [PC 체험본](https://agentflow-studio-pc-preview-20261023.eagerllama11.chatgpt.site) · [35 결과·검증·한계](cycles/2026-10-23-isolated-preview-35/RESULT.md). 소유자 ChatGPT 로그인 후 사용하는 브라우저 MOCK이며 실제 AI와 계정 동기화는 없다. 프로젝트는 해당 브라우저에 저장되고 기존 공개 데이터는 명시 백업/가져오기로 옮긴다. 이 주소는 현재 사용자용 별도 체험본이며 아래 기존 공개 gh-pages와 구분한다.

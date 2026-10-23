@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "observedDateKST": "2026-10-24",
+  "purpose": "Read-only handoff snapshot; no new product execution.",
+  "refsBeforeHandoff": {
+    "checkpoint": "87c81748e1bf8a70e7262b518399ef52c08eb90d",
+    "acceptedAppTree": "775a33991c4b81104737ac1f0ec5b924c979a975",
+    "candidate36": "38beb55922e3e982f0f32fddacd5e18a5e157a15",
+    "candidate37": "20bffe5fe33f11b29870a9025d2ac0089837abfb",
+    "delivery": "fd79e7e74b0956bcb8eb9878cfdaa62254688c49",
+    "main": "896dcf3848fec70357d0f9bd4fd6c09cab70db37",
+    "ghPages": "63f5540d062861439f0932cd7311c6c5510e227c"
+  },
+  "acceptedCycle": 35,
+  "merged36": false,
+  "accepted37": false,
+  "ci36": {
+    "provider": "Code Review pull_requests_checks",
+    "headRevision": "38beb55922e3e982f0f32fddacd5e18a5e157a15",
+    "checks": [
+      {
+        "id": 120195641510,
+        "name": "verify (ubuntu-24.04)",
+        "head_sha": "38beb55922e3e982f0f32fddacd5e18a5e157a15",
+        "status": "completed",
+        "conclusion": "success",
+        "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39886454270/job/120195641510",
+        "output": {
+          "title": null,
+          "summary": null,
+          "text": null,
+          "annotations_count": 1
+        }
+      },
+      {
+        "id": 120195641377,
+        "name": "verify (windows-2022)",
+        "head_sha": "38beb55922e3e982f0f32fddacd5e18a5e157a15",
+        "status": "completed",
+        "conclusion": "success",
+        "details_url": "https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39886454270/job/120195641377",
+        "output": {
+          "title": null,
+          "summary": null,
+          "text": null,
+          "annotations_count": 1
+        }
+      }
+    ],
+    "statuses": [],
+    "annotations": [],
+    "hasMore": false,
+    "job": null,
+    "jobs": [],
+    "log": null,
+    "logTruncated": false,
+    "providerGuidance": "GitHub guidance for this response only: use checkRunId for output and annotations, runId from a GitHub Actions /runs/<id> link to list jobs, or jobId from a /jobs/<id> link for logs. page paginates checks, jobs or annotations. Keep the supplied account and returned headRevision on follow-up reads. Third-party CI exposes only the output reported to GitHub.",
+    "logInspection": {
+      "perJobMaxCharacters": 120000,
+      "truncated": true,
+      "observedEachJob": [
+        "MAP36 12 passed",
+        "static 3 passed"
+      ],
+      "limitation": "Full raw logs not recovered; Windows continuity TAP279 visible, Ubuntu early unit section outside tail. CI success is not final independent screenshot acceptance."
+    }
+  },
+  "independentProductCloud": {
+    "threadId": "01a13fcb-e7e5-73b9-b4a3-cf9a2b95b0bb",
+    "hostId": "durable",
+    "status": "idle",
+    "latestTurnStatus": "completed",
+    "testedPreFix2Revision": "65cd96d9da53753e70dba350bdf62c5d68474809",
+    "browserMajor": 154,
+    "evidenceCommit": "15dbd3103c5d65f57408065d3213419acfd67b88",
+    "exact143Reproduction": "NOT_RUN; cache absent and earlier official downloads policy denied",
+    "blockedReportCommit": "fd79e7e74b0956bcb8eb9878cfdaa62254688c49"
+  },
+  "candidate37": {
+    "base": "80d9d11f9aca473d2e45de8b96ab3dbebbe9299b",
+    "includes36Fix2": false,
+    "independentCombinedValidation": "NOT_RUN",
+    "authorReportedRisk": "Continue-task notice remains after map return; reduces 1280 available viewport and clips lower cards."
+  },
+  "deliveryTransferTree": {
+    "files": 8728,
+    "bytes": 319893736,
+    "method": "GitHub recursive tree blob sizes under docs/transfer at fixed delivery SHA",
+    "notVerified": [
+      "weekly growth 240MB",
+      "git pack 97MB"
+    ]
+  },
+  "opsDocumentationObservedCommit": "73454f5a27f1cc6ed1c430ff0141f85836586238",
+  "limitations": [
+    "No product code modified or executed during handoff.",
+    "Historical author/source checks remain separate from fresh CI metadata and UI conversation reading.",
+    "Claude36 attachments and some Claude37 raw logs are not all GitHub-hosted.",
+    "Separate 9.4kB review file unavailable; supplied pasted review evaluated."
+  ]
+}
