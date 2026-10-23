@@ -1,0 +1,48 @@
+{
+  "source": "Code Review pull_requests_checks only",
+  "rawFiles": [
+    {
+      "path": "001-discovery.tool-response.json",
+      "bytes": 1238,
+      "sha256": "2eeb6b4d8540c580082cb3790add511bc0638c78811fdbe00362b4ef4b6efd45",
+      "gitBlob": "08a90b0b265f48e1db1c7f03b5ae176342588115"
+    },
+    {
+      "path": "002-jobs.tool-response.json",
+      "bytes": 879,
+      "sha256": "8eb63dc4d78498ac9a94b17a93ccd8c941922ea8f973b4bc196442f76a44cf73",
+      "gitBlob": "12c5fa6290765eb335a17a9e1eb4710e86399ce7"
+    },
+    {
+      "path": "003-ubuntu-log.tool-response.json",
+      "bytes": 122358,
+      "sha256": "d6f4b7be60fb2f5c701c0ee8f2ffdf6b1deac63ccdc8626fa1cbd1a93a43d853",
+      "gitBlob": "c43ae7855afb50933cd81b63763bbde1414865ed"
+    },
+    {
+      "path": "004-jobs.tool-response.json",
+      "bytes": 882,
+      "sha256": "be9f90981ebb1af7a0ada793f178b5cc4127fe6021013a31735cc4578f8a1b1d",
+      "gitBlob": "d024f6cc59168adfd6dd01bfab6e7a24da14143b"
+    },
+    {
+      "path": "005-windows-log.tool-response.json",
+      "bytes": 141,
+      "sha256": "63da6b8e9c447751ad184be5044b94f2fe88e74901821edac89ce3209074d198",
+      "gitBlob": "e03d4f8c081087bc310e0658fb29ebefb83519b0"
+    },
+    {
+      "path": "OBSERVATIONS.jsonl",
+      "bytes": 894,
+      "sha256": "46fc8e39c10e655479f6b0fd59f2baa6ad0c12efa0c2f46bd60288c8b17bb647",
+      "gitBlob": "8a9d62ce3332e80fc91298b606b1f7cc405d8d6e"
+    }
+  ],
+  "archive": {
+    "utf8Bytes": 128583,
+    "utf8SHA256": "df5703a1aa116e5e039d780e3941bf9ec77580ed8a661b067a861666415c6472",
+    "gzipBytes": 25719,
+    "gzipSHA256": "70869ef28bc4a5d012bccd8ded1dafc8b84b16f3ac7b2cff62db57a526cc8ed6",
+    "roundtrip": true
+  }
+}

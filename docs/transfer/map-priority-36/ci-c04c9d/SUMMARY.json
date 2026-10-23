@@ -1,0 +1,40 @@
+{
+  "pullRequest": 20,
+  "headRevision": "c04c9d004bc5b2bf6aeaabfcd326f612c325813a",
+  "runId": 39883583618,
+  "finalObservedUTC": "2026-10-23T01:26:53Z",
+  "jobs": [
+    {
+      "id": 120186437834,
+      "os": "ubuntu-24.04",
+      "status": "completed",
+      "conclusion": "failure",
+      "logRecovered": true,
+      "logTruncated": true,
+      "logCharacters": 120000,
+      "actualNode": "v22.16.0",
+      "continuityUnit": {
+        "tests": 279,
+        "pass": 279,
+        "fail": 0,
+        "newMAP36Unit": 4
+      },
+      "failure": "build-static.mjs --preview rejects arguments (pre35 build script)",
+      "browserGroups": "NOT_RUN",
+      "MAP36Browser": "NOT_RUN",
+      "static35Browser": "NOT_RUN"
+    },
+    {
+      "id": 120186438098,
+      "os": "windows-2022",
+      "status": "completed",
+      "conclusion": "failure",
+      "logRecovered": false,
+      "logFailure": "HTTP409: pull request changed after new head; no fallback"
+    }
+  ],
+  "actualCheckoutSHA": "NOT_RECOVERED: checkout log outside returned tail",
+  "integrationCause": "Workflow uses pull_request.head.sha (root source review); base35 preview step combined with pre35 head code. New integrated head a17cbcf is separate.",
+  "rawSource": "Only mcp__code_review__pull_requests_checks; account omitted consistently.",
+  "rerunOrCancel": false
+}
