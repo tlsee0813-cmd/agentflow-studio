@@ -1,75 +1,34 @@
-AgentFlow Studio USE106 — STATIC BROWSER MOCK BUILD
-Built UTC: 2026-10-15T08:21:11.233116+00:00
-Repository: https://github.com/tlsee0813-cmd/agentflow-studio
-Branch: fix/use106-entry-review
-Source commit: 618d9bd2b99ad433df35107d8902b15f45e30000
-Accepted product implementation: a84f83a77a9115d45a2a38a77c5d10f018d05901
-618d9bd changes tests/evidence only; all 15 runtime hashes match accepted a84f83a output.
-Implementation baseline: 2931b50938af037a43e20ed7aba69b96ab79843d
-USE105 evidence: 0ddd582b61537ebbb24c8555973e95be7543ba78
-Rollback deployment: d7b0bf8541ba0b5ecca914f8d6f412f44af24127
-Public baseline BUILD SHA256: 53456b07d1b729369e8665ca84cd214b80a858a261644337b2a301aede979f47
-Build command (from app/): node continuity/scripts/build-static.mjs
-Build runtime: Node v22.16.0; locked TypeScript 5.8.3
-CI: https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38703882455
-CI head: 618d9bd2b99ad433df35107d8902b15f45e30000
-CI result: success; Ubuntu 24.04 + Windows 2022
-Previous source CI: https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/38702330366
-Previous CI result: a84f83a Ubuntu success; Windows USE106 test 07 failed on native clipboard CRLF vs textarea LF; static step skipped. Not published.
-Repair: normalize CRLF pairs to LF only, retain full clipboard text equality and Markdown/ID/authority checks; no product change.
-Repair record: https://github.com/tlsee0813-cmd/agentflow-studio/blob/618d9bd2b99ad433df35107d8902b15f45e30000/docs/reviews/use106/windows-ci-repair.md
-CI runtime pins: Node 22.16.0, Python 3.13.5, browser requirements from lock/pinned requirements
-Local: 210 Continuity Node tests; 66 existing browser tests; 11 USE106 tests passed.
-Local browser: Python 3.12 / Playwright 1.62.0 / Chromium 154.0.8037.57; native localhost HTTP.
-
-This preview is browser MOCK, not AI. No server/provider/prompt or paid calls.
-Copy/download do not run an external development tool. Synthetic test evidence is not human usability evidence.
-Unzip, then from the directory containing agentflow-studio-use106 run:
-  python -m http.server 8000 --bind 127.0.0.1
-Open http://127.0.0.1:8000/agentflow-studio-use106/ (HTTP, not file://).
-Use a fresh browser profile/origin for isolated synthetic preview data.
-
-SOURCE FILE SHA256 — repository-relative inputs; not shipped TypeScript source
-Includes compiler/check scripts and server-connected client runtime TS compiled by tsconfig; the static build selects browser runtime output.
-ef13135f29253d4d6a9d2e2dbb453a2f863b6854a24af4e9e077e70ae9a270d4  app/continuity/public/index.html
-87e41e81f05e87bc2f17ae447240aba0c2b573ea5768f10e812853d4dc178051  app/continuity/public/styles.css
-a8a6e7a9e6dbf394115d4c7cdda4fcae68297a033d4c456d1ad846f8e8a67970  app/continuity/scripts/build-static.mjs
-f369849e8bb4383052a67abe8b813c5d951a995fe784b9b6ea668356194cf8f0  app/continuity/scripts/build.mjs
-1c57db78d77ce90b69cc83278ded96ba6cf767a52a4f7516b25d2afd0316cf36  app/continuity/scripts/check.mjs
-1c9b3dceb532fb94af6c50f3a1c4aeb6676f5783ef1994f8d2d39d379a5063e8  app/continuity/scripts/compiler.mjs
-b299f60852c021954036d7f90ab45667403fe58e076647e00d768f63d5ade475  app/continuity/src/client/app.ts
-50fc2cf383fb2fdc858793f47a5b9a64209d0d9347813edbc321dfe9e0349639  app/continuity/src/client/presentation.ts
-7164e02c145857a23fd40416a936b007649009ebc25615f361256c98178fe589  app/continuity/src/client/runtime-static.ts
-3b7ee4f0e5e2ec91703691879a26d5cefc1ff7c12d5e295121f27236028e07dd  app/continuity/src/client/runtime.ts
-1dd7f306d8ef40c843093ac67586dc66905db1724bc5653b44b2906e3f0e5bed  app/continuity/src/shared/attention.ts
-703464b36e29460278c24657689520ba6e21dd9ad394d2786c0f9f226bcac43f  app/continuity/src/shared/domain.ts
-a4a1df36b009a5d9eafb95f8b3145ebf187b41fa8f296a5198fe1ba0433c4d18  app/continuity/src/shared/guidance.ts
-1ebc9a9b593b10af04a4c113282f2d509b926131f6be930c3a946cbdb052b0f2  app/continuity/src/shared/mock.ts
-f206df59ff9697368820ce99f74995e9b2e2467a523a7a0217e07dc2de29d5dd  app/continuity/src/shared/outcome.ts
-6ba83e873fc795c8e1ecd8e6ac82f334849e4c108ebf4149a870a0a554fd7c44  app/continuity/src/shared/plan-facts.ts
-c1c529ee281bfc5357fe63e3d14acdbea953a152f13f7527f6a118cce7a4c1d5  app/continuity/src/shared/storage.ts
-9c4ebea8c66b9fda5547d2908125d9f899b019a9ac86c2617a009ecb568186e1  app/continuity/src/shared/types.ts
-5c117e0f898b484e2a680e6607ec0624b375cb4933dd2324bdb075a400c358ce  app/continuity/src/shared/validation.ts
-1f5fe5a159c7d25421ee783ad375583bdc1a6c063ead8d0e055e0db983e167b3  app/continuity/tsconfig.json
-581964856607e459ce86b525c63bd9f0991d2625d1ec7f280d48926500ce2483  app/package-lock.json
-4016406d4f008c3bd9275df082ec17cdda667149c032ab378ad2e19da9c8a0d3  app/package.json
-3be26a30cfda09591a2caa51efea7f5c9d189904f3ad95e7de1bbab5916fe657  app/tsconfig.json
-
-RUNTIME FILE SHA256 — paths relative to archive top folder
+AgentFlow Studio PC preview38 — STATIC BROWSER MOCK
+Source commit: c7329aa8b941791633d5f22da4ca105188aab0be
+Source branch: checkpoint/2026-10-15
+App tree: af4556e7463fa76ce36938220c52447bd539cd3f
+Build target: node continuity/scripts/build-static.mjs --preview
+Local build: Node24.19.0 / TypeScript5.8.3; independent Windows Chrome155 tests
+Final exact-source CI: https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39990131583
+CI: Ubuntu24.04 success; Windows2022 success on one same-SHA retry
+First Windows attempt: initial main-app navigation5000ms timeout; retained in cycle38 CI.md
+CI pins: Node22.16.0 / Python3.13.5 / Playwright1.57.0 / Chromium143
+Public GitHub Pages publication explicitly authorized 2026-10-24 KST
+Browser storage prefix: agentflow.studio.preview: (old browser-demo data is separate)
+MOCK only. No API key, provider, server, real AI or account sync.
+Accepted scope and limitations: docs/cycles/2026-10-24-entry-integration-38/DECISION.md
+Rollback deployment: 63f5540d062861439f0932cd7311c6c5510e227c
+Runtime files:17; bytes:605855
+Runtime SHA256 (BUILD.txt excluded):
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  .nojekyll
-50195fee7bdb0e40726812fe02d6a459f45789ee40570567b7c86bb79cd9c13a  client/app.js
+cd0f6a26ae6972d304032d299e8928b0ff885253604a94e4dbb929903fbf887e  client/app.js
 4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d  client/presentation.js
-59bec0ed716ac1fa4ae20e6b1f63613186fc7e42726c8ca3c5e5be8fedaef89a  client/runtime.js
-b66b3fac3b445b9ac1b2ab187bceb8a492e8cc364d0efb531f20f7ec53bccee1  index.html
-5094cd4c719394a2dc0e7d3e7f9eaad7c5c1fd6ff60f1da7288a3ad0d3723ec1  shared/attention.js
-42261d1a048ab780b2239d95927fc340d485a74236a5cd90a9b37aba1586d452  shared/domain.js
+d368c64b881ed766a2eba49d96ae40d92912008a8d6b37bb0660380e0492a092  client/runtime.js
+0d847d744ce6dd680cf0d601faf77789973907e89c288cbbe85f8061056ddac9  client/static-target.js
+95cd6b21e9348e703acfea3e98d11ba4d4fd3f670e2014b7b0df0b380f672475  index.html
+55182121cccdf9d54bd8bcb8626d559a199192501386a718a9adb3696198950c  shared/attention.js
+f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd  shared/domain.js
 c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5  shared/guidance.js
+5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624  shared/hierarchy.js
 c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef  shared/mock.js
 c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8  shared/outcome.js
 33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45  shared/plan-facts.js
 0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38  shared/storage.js
-ef1e47d1c37dd30d0481351ce36a30001fc2b87d0d4ac7698beac9d0d253758d  shared/types.js
-b172bc493a50e94a7b0bff12263440f1abe3ef859ff6b46e80bfd469d4975385  shared/validation.js
-87e41e81f05e87bc2f17ae447240aba0c2b573ea5768f10e812853d4dc178051  styles.css
-
-BUILD.txt is metadata, excluded from its own hash list; its hash is in USE106-SHA256SUMS.txt.
+d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53  shared/types.js
+5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4  shared/validation.js
+e58ae9a6bec8a81565429d6e6e6110aa0ee9d2114449c3bd4e5adf363b927f1a  styles.css

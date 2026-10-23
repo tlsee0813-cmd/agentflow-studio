@@ -1,4 +1,5 @@
-import { areaOf, isReturnTask, taskStatus } from './domain.js';
+import { areaOf, isReturnTask, taskStatus, areaDescription, questionAnswered, questionApplicability } from './domain.js';
+import { descendantAreas } from './hierarchy.js';
 const DECISION = new Set(['사실 확인 항목 있음', '제품 선택 항목 있음']);
 const childOf = (p, id) => p.tasks.filter(x => x.parentTaskId === id);
 /** The user request a task belongs to (a return follows its parent; a follow-up return can return to a return). */
@@ -54,4 +55,42 @@ export function checkItems(p) {
             out.push({ kind: 'decision', taskId: t.id, returnId: null, areaId: areaOf(p, t), status });
     }
     return out;
+}
+/** Self and active descendants, each question owned once by its real area/task. Relations do not duplicate signals. */
+export function subtreeSignals(p, id) {
+    const root = p.space.areas.find(a => a.id === id);
+    if (!root)
+        return [];
+    const items = checkItems(p), seen = new Set();
+    return [root, ...descendantAreas(p, id)].filter(a => !a.archived).map(a => {
+        const own = items.filter(it => it.areaId === a.id), questions = [];
+        // taskStatus is a work-view label: export/arrival can take precedence over a question there. A recorded question
+        // keeps its own applicability and owner here even after exporting. This read-only projection creates no new task.
+        for (const task of p.tasks) {
+            if (isReturnTask(p, task) || !task.advice?.question || areaOf(p, task) !== a.id)
+                continue;
+            const sources = task.sourceIds.flatMap(id => { const s = p.sources.find(s => s.id === id); return s ? [s] : []; }), trial = sources.filter(s => s.kind === 'test_answer');
+            // Exact reply provenance can preserve the original real-request question, but never a different question from
+            // test-context reorganisation. Same-text questions share the existing task+text identity; no generation time is inferred.
+            const syntheticReply = trial.length > 0 && sources[0]?.kind === 'request' && trial.every(s => s.replyTo === task.advice.question.text);
+            if (trial.length && !syntheticReply)
+                continue;
+            const key = `${a.id}:${task.id}`;
+            if (seen.has(key))
+                continue;
+            seen.add(key);
+            const applicability = questionApplicability(p, task), answered = questionAnswered(p, task), status = syntheticReply ? '시험 답변 기록 · 실제 답변 아님' : answered ? '답변 기록 있음' : applicability === 'active' ? (task.advice.question.kind === 'fact' ? '사실 확인 항목 있음' : '제품 선택 항목 있음') : '이전 질문 · 참고 기록';
+            questions.push({ kind: 'decision', taskId: task.id, returnId: null, areaId: a.id, status, answered, applicability });
+        }
+        const d = areaDescription(p, a.id);
+        return { areaId: a.id, questions, reports: own.filter(it => it.kind === 'report'), description: { current: d.current, held: d.held } };
+    });
+}
+export function readingReasons(p, id, received) {
+    const signals = subtreeSignals(p, id), questions = signals.flatMap(s => s.questions);
+    const present = { 'open-question': questions.some(q => q.applicability === 'active' && !q.answered),
+        held: signals.some(s => s.description.held.length > 0), stale: signals.some(s => !!s.description.current && !s.description.current.valid),
+        updated: signals.some(s => received.has(s.areaId)) };
+    const reasons = ['open-question', 'held', 'stale', 'updated'].filter(k => present[k]);
+    return { reasons, records: reasons.length > 0 || questions.length > 0 || signals.some(s => !!s.description.current || s.reports.length > 0) };
 }

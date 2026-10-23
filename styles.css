@@ -526,6 +526,8 @@ small {
   justify-content:flex-end;
   margin-top:6px;
 }
+#project-management{margin:0;padding:0;border:0}
+#project-management>summary{display:none}
 .saved {
   font-size:10px;
   color:#868592;
@@ -1143,6 +1145,23 @@ details[open]>summary {
 .edit-area label {
   color:#8c6b9a;
   font-size:12px;
+}
+/* 실제 편집 작업의 읽기 참고. 닫혀 있으면 옆 열을 사용하지 않는다. */
+.work-reference-editor[open]{container-type:inline-size}
+.work-edit-layout{display:flex;flex-direction:column;gap:12px;min-width:0}
+.work-edit-fields,.work-reference{min-width:0;max-width:100%}
+.work-reference{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--paper)}
+.work-reference>summary{font-size:12px;color:var(--accent-dark);cursor:pointer;overflow-wrap:anywhere}
+.work-reference-caption>.hint{font-size:11px;line-height:1.5;margin:4px 0}
+.work-reference-body{max-height:min(62vh,520px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;overflow-wrap:anywhere;padding:4px 3px;min-width:0}
+.work-reference-body>.area-idea{margin-top:0}
+.work-reference-body .source-raw{font-size:12px;line-height:1.6;max-height:none;overflow:visible}
+.work-reference-body details>summary{font-size:12px;cursor:pointer;color:var(--accent-dark)}
+.work-reference-body .hint,.work-reference-body .source-meta{font-size:11px;line-height:1.5}
+@container (min-width:760px){
+  .work-edit-layout:has(>.work-reference[open]){display:grid;grid-template-columns:minmax(360px,1fr) minmax(260px,.72fr);align-items:start}
+  .work-edit-layout:has(>.work-reference[open])>.work-edit-fields{grid-column:1;grid-row:1}
+  .work-edit-layout:has(>.work-reference[open])>.work-reference{grid-column:2;grid-row:1;position:sticky;top:12px}
 }
 .manual-note {
   color:#9a7aa8;
@@ -2375,3 +2394,278 @@ body[data-compact="true"] .project-name{font-size:19px;line-height:1.35}
 .report-correction-help { margin-top:14px; padding:14px; border-left:3px solid var(--accent); background:var(--paper); font-size:13px; line-height:1.65; }
 .report-correction-help p { margin:6px 0 0; }
 @media(max-width:720px) { .review-grid { grid-template-columns:1fr; } .handoff-review { padding:14px; } }
+/* PC12: read first, edit on request; the chosen task's short context; the way back to the starting view. */
+.area-idea{display:flex;flex-direction:column;gap:4px;margin:2px 0}
+.area-idea-text{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.space-head .area-idea{max-width:760px}
+.panel-edit>summary{cursor:pointer;font-size:13px;color:var(--accent)}
+.panel-edit[open]{display:flex;flex-direction:column;gap:6px}
+.panel-tasks{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:flex;flex-direction:column;gap:4px}
+.panel-task-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.panel-task-list li{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0}
+.panel-task{text-align:left;white-space:normal;overflow-wrap:anywhere;max-width:100%}
+.task-context{display:flex;flex-direction:column;gap:4px}
+.task-context-grid{margin-top:6px}
+.field-origin{font-weight:600;color:var(--accent)}
+.field-origin.stale{color:var(--amber)}
+.task-view-target{margin:6px 0 0}
+.work-place .origin-return{margin-left:auto}
+/* PC13: the whole space reads purpose -> map first; adding an area and the records to look at again are one-line disclosures. */
+.space-head.overview-head{padding:8px 16px;margin-bottom:10px}
+.overview-head .space-head-line{flex-wrap:wrap;align-items:center;gap:4px 10px}
+.overview-head .brief-disclosure{margin:0;flex:none}
+.overview-head .brief-disclosure>summary{font-size:13px;margin:0;padding:4px 0}
+.overview-head .brief-disclosure[open]{flex-basis:100%}
+.map-toolbar{align-items:flex-start}
+.map-toolbar h2{line-height:36px}
+.map-toolbar .toolbar-disclosure{flex:none;margin:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:6px 12px}
+.map-toolbar .toolbar-disclosure>summary{margin:0;padding:0;line-height:22px;font-size:13px}
+.map-toolbar .toolbar-disclosure[open]{flex-basis:100%}
+.map-toolbar .toolbar-disclosure[open]>summary{margin-bottom:6px}
+/* An open '영역 추가' stays on the toolbar row (summary + fields side by side) instead of taking a row of its own. */
+.map-toolbar #area-add-panel[open]{flex:1 1 560px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.map-toolbar #area-add-panel[open]>summary{margin:0}
+.map-toolbar #area-add-panel .area-add{display:flex;flex-wrap:wrap;gap:6px;align-items:center;flex:1;min-width:300px}
+.map-toolbar #area-add-panel .area-add input{flex:1;min-width:140px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--paper);margin:0}
+.check-kind{color:#9a520f}
+body[data-layer="space"] .shell{padding-top:12px}
+body[data-layer="space"] .project-head{margin-bottom:8px}
+body[data-layer="space"] .space-crumb{margin-bottom:8px}
+/* The map keeps its rule (min(62vh,560px), at least 380px) but, on a PC-width whole space, also fits below the shortened top so
+   its own zoom/fit controls are in the first screen. Narrow screens keep their own rule. */
+@media(min-width:761px){body[data-layer="space"] .space-map{height:min(62vh,560px,calc(100vh - 290px))}}
+/* PC13-fix1: on PC widths the map's zoom/fit tools sit at the map's top-right, so they are in the first screen whenever the map
+   top is (a notice above or an opened records list moves only the map's lower edge out of view). The off-screen chip stays
+   top-left. Narrow screens keep the existing bottom placement. */
+@media(min-width:761px){.map-controls{top:10px;bottom:auto}}
+
+/* HOME15: the project list as the first screen. Scoped to the list route and its cards; project screens are unchanged. */
+body[data-route="projects"] .topbar{display:none}
+body[data-route="projects"] .sidebar-current,body[data-route="projects"] .sidebar-bottom,body[data-route="projects"] .nav-caption{display:none}
+body[data-route="projects"] .shell{max-width:none;margin:0;padding:32px 28px 20px}
+body[data-route="projects"] .projects-view,body[data-route="projects"] footer{max-width:1096px;margin-left:0}
+.home-heading{margin:0 0 32px;align-items:center;min-height:40px;flex-wrap:wrap}
+.home-heading h1{margin:0;font-size:20px;line-height:1.3;display:flex;align-items:center;gap:8px}
+.home-count{font-size:12px;font-weight:600;color:var(--muted);background:#eeedf3;border-radius:6px;padding:1px 7px;line-height:1.6}
+.home-count:empty{display:none}
+.home-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.home-actions .primary{padding:9px 16px;font-size:13px}
+.home-actions .connection-popover{top:38px}
+.projects-view .project-list{grid-template-columns:repeat(auto-fill,minmax(296px,1fr));gap:16px;margin:0 0 20px;align-items:stretch}
+.projects-view .project-card{position:relative;display:flex;flex-direction:column;gap:10px;min-height:176px;padding:18px;border-radius:12px;
+  transition:border-color .12s,box-shadow .12s}
+.projects-view .project-card.openable:hover{border-color:#c9c0f0;box-shadow:0 6px 22px #3023420f}
+.projects-view .project-card:has(.project-open:focus-visible){border-color:var(--accent);box-shadow:0 0 0 3px #6953d933}
+.project-card-head{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:start}
+.project-mark{width:36px;height:36px;border-radius:9px;background:var(--tint);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:15px;letter-spacing:0}
+.projects-view .project-card-name{font-size:16px;font-weight:650;line-height:1.4;color:var(--ink);margin:2px 0 0;overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.projects-view button.project-card-name{border:0;background:none;padding:0;text-align:left;cursor:pointer;border-radius:4px;box-shadow:none;min-height:0}
+.projects-view button.project-card-name:hover{background:none;color:var(--accent-dark)}
+.projects-view button.project-card-name:focus-visible{outline:none}
+.project-card-purpose{margin:0;font-size:13.5px;line-height:1.6;color:#4b4a5c;overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.project-card-purpose.missing{color:var(--muted)}
+.project-card-meta{margin:auto 0 0;display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12px;line-height:1.5;color:var(--muted)}
+.project-card-areas::before{content:"·";margin-right:8px;color:#a9a8b4}
+.project-card-note{margin:0;font-size:12px}
+.project-card-actions{margin-top:auto}
+.project-more{position:relative;margin:-4px -6px 0 0}
+.project-more-button{list-style:none;width:32px;height:32px;display:grid;place-items:center;border-radius:8px;color:#7b7a89;cursor:pointer;font-size:18px;line-height:1}
+.project-more-button::-webkit-details-marker{display:none}
+.project-more-button:hover,.project-more[open]>.project-more-button{background:#f1eff8;color:var(--ink)}
+.project-more-button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.project-more-menu{position:absolute;right:0;top:36px;z-index:4;min-width:168px;background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 12px 32px #3023421c;padding:6px}
+.project-more-menu button{width:100%;text-align:left;font-size:13px;padding:8px 10px;border-radius:7px}
+.projects-view .list-tools{margin:0 0 14px;align-items:center;gap:8px 10px;flex-wrap:wrap}
+.projects-view .list-tools button{font-size:12px}
+.projects-view .project-empty{grid-column:1/-1;margin:4px 0 8px;font-size:13px}
+.projects-view .trash-section .project-list{margin-top:8px}
+@media(min-width:1760px){body[data-route="projects"] .projects-view,body[data-route="projects"] footer{max-width:1480px}}
+@media(max-width:800px){
+  body[data-route="projects"] .shell{padding:18px 16px 16px}
+}
+@media(max-width:480px){.projects-view .project-list{grid-template-columns:minmax(0,1fr)}}
+/* HOME15 follow-up: read the full name and purpose before entering (native modal dialog, text only). */
+.project-read{width:min(640px,calc(100vw - 32px));max-height:min(72vh,600px);padding:0;border:1px solid var(--line);border-radius:14px;
+  background:var(--paper);color:var(--ink);box-shadow:0 24px 60px #2a1f4a2e;flex-direction:column;overflow:hidden}
+.project-read[open]{display:flex}
+.project-read::backdrop{background:#1d18302e}
+.project-read-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 12px;border-bottom:1px solid var(--line)}
+.project-read-head h2{margin:0;font-size:16px}
+.project-read-head button{padding:6px 12px;font-size:13px}
+.project-read-body{overflow:auto;overscroll-behavior:contain;padding:14px 20px 6px;min-height:0;flex:1 1 auto;outline-offset:-3px}
+.project-read-label{margin:0 0 4px;font-size:12px;color:var(--muted);font-weight:600}
+.project-read-text{margin:0 0 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.project-read-text.missing{color:var(--muted)}
+.project-read-note{margin:0;padding:8px 20px 14px;font-size:12px}
+/* REPORT16: the task screen reads the area's current idea and the picked report side by side; the next action sits under the
+ * idea, and this request's details follow. Same type sizes as the PC12 reading screen (nothing shrunk to fit). */
+.task-view-head-line{display:flex;align-items:center;justify-content:space-between;gap:6px 12px;flex-wrap:wrap}
+.task-view-head-line .eyebrow{margin:0}
+.space-head.task-view-head{padding:12px 18px;margin-bottom:12px}
+.task-view-head h1{font-size:19px;line-height:1.35;margin:4px 0 2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.task-view-status{margin:0}
+.task-read{display:grid;gap:16px;align-items:start}
+@media(min-width:1000px){.task-read{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}}
+.task-read-side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.task-idea,.task-next,.task-reports,.task-more{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:12px 18px;min-width:0}
+.task-idea{margin:0}
+.task-next .row{gap:8px;align-items:center;flex-wrap:wrap}
+.task-next .hint{margin:6px 0 0}
+.task-edit{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.task-view-head .task-continue-context{display:flex;align-items:center;gap:4px 10px;flex-wrap:wrap;min-width:0;max-width:100%}
+.task-view-head .task-continue-context>.hint{margin:0;min-width:0;overflow-wrap:anywhere}
+.task-view-head .task-continue-context>details{margin:0}
+.task-view-head .task-continue-context>details[open]{flex-basis:100%}
+.task-reports{display:flex;flex-direction:column;gap:10px}
+.task-reports .report-picker-head{font-size:14px;margin:0}
+.task-pointed+.report-picker{border-top:1px solid var(--line);padding-top:10px}
+.report-picker>.hint{margin:4px 0 0}
+.report-pick-list{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.report-pick{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;min-height:36px;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:7px 12px;cursor:pointer;color:var(--ink);font:inherit}
+.report-pick:hover,.report-pick:focus-visible{border-color:var(--accent)}
+.report-pick[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
+.report-pick-title{max-width:100%;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-weight:600}
+.report-pick-meta{font-size:12px;color:var(--muted)}
+.task-pointed{display:flex;flex-direction:column;gap:2px}
+.task-pointed>.source-meta{margin:2px 0}
+.task-pointed .alert{margin:4px 0 0}
+.task-pointed details{margin:2px 0 0}
+.task-pointed details>summary,#task-view-report-help>summary{padding:6px 0}
+.report-lead{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;margin:0}
+.report-source+.report-source{margin-top:8px}
+.report-lead:not(.whole){display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.report-lead-note{font-size:12px;color:var(--muted);margin:2px 0 4px}
+.report-source details>summary,.task-pointed details>summary,#task-view-report-help>summary{cursor:pointer;color:var(--accent);font-size:13px}
+.task-more{display:flex;flex-direction:column;gap:8px}
+.task-more h2{font-size:16px;margin:0}
+/* AREA17: the user's idea and the organised description have separate, quiet reading blocks. */
+.area-understanding{margin:12px 0;padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere;min-width:0}
+.area-understanding>.source-meta{margin:0 0 6px}
+.understanding-summary{white-space:pre-wrap;line-height:1.55;margin:4px 0 8px}
+.understanding-changes{padding-left:20px;margin:4px 0 10px;font-size:13px;line-height:1.5}
+.understanding-proposal{border-left:3px solid var(--muted);padding-left:10px;margin:10px 0;font-size:13px}
+.understanding-proposal p{margin:4px 0}
+.area-understanding details{margin:6px 0}
+.area-understanding summary{font-size:13px;cursor:pointer;color:var(--accent);padding:5px 0}
+.area-understanding textarea{width:100%;min-height:96px;box-sizing:border-box}
+.understanding-record+.understanding-record{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.area-update-label{color:var(--accent);font-size:12px;font-weight:600}
+.received-areas{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 8px;font-size:13px}
+.understanding-change{font-size:13px;line-height:1.5;margin:0 0 6px}
+.understanding-proposal strong{font-weight:600;color:var(--muted)}
+/* An explicit 'where is it' outlines the located card (view state only; nothing moves but the viewport). */
+.area-node.located{outline:3px solid var(--accent);outline-offset:3px}
+.located-note{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}
+.outcome-received{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 10px}
+.outcome-received .hint{margin:0}
+#received-result-receipt{min-width:0;max-width:100%;overflow-wrap:anywhere}
+#received-result-receipt>.hint{min-width:0;max-width:100%}
+.understanding-more{display:flex;flex-wrap:wrap;column-gap:16px;align-items:flex-start}
+.area-understanding .understanding-more>details{margin:0}
+.area-understanding .understanding-more>details[open]{flex-basis:100%}
+
+/* Mixed depths share the existing world coordinates. Transparent boundaries never receive card/pan events. */
+.containment-layer{position:absolute;left:0;top:0;pointer-events:none}
+.containment-frame{position:absolute;box-sizing:border-box;border:1px solid #989ab5;border-radius:20px;pointer-events:none}
+.containment-title{position:absolute;height:26px;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  border:1px solid #989ab5;border-radius:7px;background:var(--paper);color:var(--muted);font-size:12px;padding:2px 8px;pointer-events:auto;text-align:left}
+.containment-links{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
+.containment-links line{stroke:#989ab5;stroke-width:1;stroke-dasharray:2 5}
+.area-node{z-index:2;height:180px;min-height:180px;box-sizing:border-box;gap:3px;padding-top:8px;padding-bottom:8px}
+.area-node .node-enter{flex:1;min-height:0;overflow:hidden;gap:2px}
+.area-node .area-card-name{font-size:15px;line-height:18px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex-shrink:0}
+.area-node .area-card-note{-webkit-line-clamp:1;font-size:12px;line-height:15px;flex-shrink:0}
+.area-node .node-enter>.hint{font-size:11px;line-height:14px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.area-card-name,.area-card-path{overflow-wrap:anywhere;min-width:0;max-width:100%}
+.area-card-path{display:block;font-size:11px;color:var(--muted);line-height:14px;max-height:14px;overflow:hidden;flex-shrink:0}
+.branch-toggle{font-size:12px;padding:3px 7px;align-self:flex-start}
+.branch-signals{font:inherit;font-size:11px;line-height:inherit;font-weight:400;letter-spacing:inherit;color:var(--muted);overflow-wrap:anywhere;text-align:left;border:0;border-radius:0;padding:0;margin:0;min-height:0;background:transparent}
+.branch-signals:hover:not(:disabled){background:transparent;color:var(--accent-dark);text-decoration:underline}
+/* MAP36: the card body is the part's name (up to three lines), membership and its idea (up to two lines); only the name and
+   membership rows sit beside '정보'. Below the drag handle, the reading-reason line and the fold control with the current-work
+   label run across the card's inner width. The reason line wraps at word spaces (Korean words kept whole), not only between
+   reasons: whole-reason breaks made the line height depend on the font's width (a 3rd line with wider fallback fonts clipped
+   the card body). Card size, coordinates and font sizes are unchanged; only gaps are tightened. Request/result counts are
+   read in the '정보' panel. */
+.area-node{gap:2px}
+.area-node .node-enter{padding-right:0;gap:1px}
+.area-node .area-card-name{-webkit-line-clamp:3;padding-right:44px}
+.area-node .area-card-path{padding-right:44px}
+.area-node .area-card-note{-webkit-line-clamp:2}
+.area-node-foot{display:flex;flex-wrap:wrap;align-items:center;gap:3px 4px;flex-shrink:0;min-width:0;margin-left:-22px}
+.area-node .branch-signals{line-height:14px;flex-shrink:0;margin-left:-22px;word-break:keep-all}
+.map-relation-list{margin-top:10px;font-size:13px}
+.map-relation-list summary{cursor:pointer}
+.relation-bundle{padding:8px 0;border-bottom:1px solid var(--line)}
+.relation-endpoints{display:flex;align-items:center;gap:5px;flex-wrap:wrap;overflow-wrap:anywhere}
+.relation-endpoints button{max-width:100%;overflow-wrap:anywhere;white-space:normal;text-align:left}
+.map-controls{z-index:4}
+/* The title and actions occupy real rows. Only the named reading region scrolls. */
+.area-panel{min-width:0;box-sizing:border-box;overflow:hidden;padding:0;gap:0}
+.area-panel .panel-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:4px 8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.panel-top>strong{overflow-wrap:anywhere;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.panel-path{grid-column:1/-1;margin:0;color:var(--muted);font-size:11px;line-height:1.4;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.panel-skip{grid-column:1/-1;position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.panel-skip:focus{position:static;width:auto;height:auto;clip-path:none}
+.area-panel .panel-body{flex:1 1 0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:10px 12px;scrollbar-gutter:stable;overflow-wrap:anywhere}
+.panel-body>*,.panel-body details{max-width:100%;min-width:0}
+.panel-body input,.panel-body textarea,.panel-body select{width:100%;max-width:100%;min-width:0;box-sizing:border-box;font:inherit}
+.panel-body select{white-space:normal}
+.panel-body .source-raw{overflow-wrap:anywhere;white-space:pre-wrap}
+.panel-body .panel-tasks,.panel-body #panel-more{margin-top:8px}
+.panel-body .subtree-records{font-size:12px;margin:8px 0}
+.subtree-record,.subtree-description{padding:6px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.subtree-record p{margin:3px 0}
+.relation-owner{padding:8px 0;border-top:1px solid var(--line)}
+.relation-owner h4{font-size:13px;margin:0 0 4px;overflow-wrap:anywhere}
+.relation-owner p{margin:3px 0}
+.hierarchy-editor h3{font-size:13px;margin-top:8px}
+.hierarchy-editor form{display:grid;gap:6px;margin-bottom:10px}
+.area-panel .panel-actions{flex:none;padding:8px 10px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--line);background:var(--paper)}
+.panel-actions button{flex:1;white-space:normal;font-size:12px;padding:7px 8px;min-height:36px}
+@media(min-width:761px){
+  .map-layout{align-items:stretch;min-height:0}
+  body[data-layer="space"] .space-map{height:100%;min-height:0}
+  .map-layout>.area-panel{height:100%;width:300px;max-width:32%}
+}
+@media(max-width:760px){
+  .area-panel{height:55dvh;max-height:55dvh;overflow:hidden}
+}
+/* The map keeps one project heading and an explicit menu. Other layers retain their existing header. */
+@media(min-width:761px){
+  body[data-map-header="true"] .topbar{height:44px;padding:0 42px}
+  body[data-map-header="true"] #breadcrumb-project,body[data-map-header="true"] #breadcrumb-sep,
+  body[data-map-header="true"] #sidebar-project,body[data-map-header="true"] .sidebar-current>.small-label{display:none}
+  body[data-map-header="true"] .shell{padding-top:10px}
+  body[data-map-header="true"] .project-head{margin-bottom:6px;gap:12px}
+  body[data-map-header="true"] .project-name{font-size:17px;line-height:1.5;max-width:none}
+  body[data-map-header="true"] .project-tools{display:flex;align-items:center;gap:10px;min-width:0}
+  body[data-map-header="true"] #saved{max-width:190px;overflow-wrap:anywhere;text-align:left}
+  body[data-map-header="true"] #project-management{position:relative;flex:none}
+  body[data-map-header="true"] #project-management>summary{display:list-item;margin:0;padding:5px 8px;font-size:12px;white-space:nowrap;cursor:pointer}
+  body[data-map-header="true"] #project-management>.row{position:absolute;right:0;top:100%;z-index:20;display:flex;flex-direction:column;align-items:stretch;gap:5px;width:220px;max-width:calc(100vw - 30px);margin:5px 0 0;padding:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px #24203820}
+  body[data-map-header="true"] #project-management>.row button{width:100%;min-height:36px;text-align:left;white-space:normal}
+  body[data-map-header="true"] .space-crumb{margin-bottom:6px}
+  body[data-map-header="true"] .space-crumb>.layer-chip{display:none}
+  body[data-map-header="true"] .space-head.overview-head{padding:6px 10px;margin-bottom:6px}
+}
+.map-toolbar [aria-pressed="true"]{background:var(--tint);border-color:var(--accent);color:var(--accent)}
+.records-panel .check-items{display:flex;flex-direction:column;gap:10px;margin:8px 0;padding:0;list-style:none}
+.records-panel .check-item{display:flex;flex-wrap:wrap;gap:5px;padding:10px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.records-panel .check-item>.check-area,.records-panel .check-item>strong,.records-panel .check-item>.hint{flex:1 0 100%;min-width:0;max-width:100%}
+.records-panel .check-item button{font-size:12px;min-height:32px}
+#records-return-notice{grid-column:1/-1;border-left:3px solid var(--accent);padding-left:8px;margin:3px 0 0;font-size:11px;line-height:1.4}
+/* ENTRY37: the unsaved space example on the home, apart from the project list. Same card proportions as a project card,
+   own classes so it is never counted or focused as a project. */
+.projects-view .example-section{margin:0 0 20px}
+.projects-view .example-section h2{margin:0 0 10px;font-size:14px;font-weight:650;color:var(--ink)}
+.projects-view .example-section h2 small{margin-left:6px;font-size:12px;font-weight:400;color:var(--muted)}
+.projects-view .example-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(296px,1fr));gap:16px}
+.projects-view .example-card{position:relative;display:flex;flex-direction:column;gap:10px;min-height:176px;padding:18px;border-radius:12px;
+  background:var(--paper);border:1px dashed #c9c0f0;transition:border-color .12s,box-shadow .12s}
+.projects-view .example-card.openable{cursor:pointer}
+.projects-view .example-card.openable:hover{border-color:var(--accent);box-shadow:0 6px 22px #3023420f}
+.projects-view .example-card:has(.example-open:focus-visible){border-color:var(--accent);box-shadow:0 0 0 3px #6953d933}

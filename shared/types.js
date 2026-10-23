@@ -1,4 +1,7 @@
-export const SCHEMA = 'idea015.project.5';
+export const SCHEMA = 'idea015.project.7';
+export const V6_SCHEMA = 'idea015.project.6';
+/** project.5 had no area understanding and no export anchors: every area reads none, every export anchor=null (no backfill). */
+export const V5_SCHEMA = 'idea015.project.5';
 /** project.4 had no background snapshots: every task and export reads background=null (nothing is backfilled). */
 export const V4_SCHEMA = 'idea015.project.4';
 /** project.3 had no space; it is read as an empty one. */
@@ -8,6 +11,8 @@ export const LEGACY_SCHEMA = 'idea015.project.1';
 export const RESULT_SCHEMA = 'agentflow.return.1';
 export const RESULT_BYTES = 131072;
 export const RESULT_TEXT_LIMIT = 11000;
+/** AREA17: return.1 plus one optional, already organised description of the area the returned task belongs to. */
+export const RESULT2_SCHEMA = 'agentflow.return.2';
 export const API_SCHEMA = 'idea022.context.7';
 export const TEXT_LIMIT = 12000;
 // One limit for the same compact JSON bytes: autosave, recovery file download and import.

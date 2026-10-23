@@ -1,5 +1,5 @@
 import { BASIS_LABEL, SOURCE_LABEL, FILE_LIMIT, RESULT_BYTES, TEXT_LIMIT } from '../shared/types.js';
-import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion, currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask, areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, editArea, setAreaArchived, addRelation, removeRelation, placeTask } from '../shared/domain.js';
+import { createProject, restore, returnTargets, editDraft, editAuxDraft, editBasisDraft, setKind, rename, submit, recordBasis, editTask, editSuggestion, currentIntent, previousIntent, correctIntent, intentCorrection, continuingIntent, answer, begin, receive, failed, cancel, taskOf, taskSuggestions, relatedBases, taskStatus, handoffText, markHandoff, currentWork, questionApplicability, staleText, inspectResultFile, importResultFile, focusTask, areaOf, isReturnTask, setBrief, setDraftTarget, areaPosition, moveArea, undoMove, NODE_W, NODE_H, addArea, addChildArea, setAreaParent, editArea, setAreaArchived, addRelation, removeRelation, placeTask, exportAnchor, areaDescription, returnUnderstanding, planStamp, beginUnderstandingReview, understandingReviewMatches, recordUnderstandingReview, understandingReviewWork } from '../shared/domain.js';
 import { parseProject, parseResultFile, validateRequest, validateAdvice, validateGuideEnvelope } from '../shared/validation.js';
 import { buildGuideRequest, guideDigest, readOf, proposalText, adoptProposal, instructionOf } from '../shared/guidance.js';
 import { WorkspaceStore, serializeProject, storageErrorCode } from '../shared/storage.js';
@@ -7,7 +7,8 @@ import { mockAdvice } from '../shared/mock.js';
 import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview, fitViewport, FIT_MIN, ZOOM_MIN, ZOOM_MAX } from './presentation.js';
 import { loadConfig, requestAdvice, requestGuidance, runtimeStorage, runtimeFailure } from './runtime.js';
 import { outcomeOf } from '../shared/outcome.js';
-import { checkItems, pointedReturn, returnPath } from '../shared/attention.js';
+import { checkItems, pointedReturn, readingReasons, returnPath, rootRequest, subtreeSignals } from '../shared/attention.js';
+import { childrenOf, areaPath, descendantAreas, visibleAreas, visibleRepresentative, bundleRelations } from '../shared/hierarchy.js';
 const $ = (id) => document.getElementById(id);
 function node(tag, content = '', cls = '') {
     const e = document.createElement(tag);
@@ -56,33 +57,120 @@ let config = null;
 let controller = null;
 // View preferences are ephemeral. They never enter the persisted project or request schema.
 let view = 'work', contextOpen = false, hasSaved = false, memoryDirty = false;
+// ENTRY37-F1: the 'continue' notice explains the work view it was given on and ends when that view is left (map, part,
+// request, history, list), so it never takes room from the map, whose height follows what sits above it. Other notices
+// keep their own life; typing already ends any notice (domain change()). In memory only, like the notice itself.
+let workNotice = null;
 // FLOW090: where this tab looks in the plan space, and which area the next request is written for. Per tab, never
 // project data; looking around never changes currentTaskId (the work the user continues).
 let viewArea = null;
 // SPATIAL102: the request shown read-only (view 'task'). Looking at it never changes currentTaskId or the request target.
 let viewTask = null;
 // SPATIAL102-R1: the report a '확인할 일' item pointed to, shown on the task screen (may be a report to a follow-up handoff).
+// REPORT16: also the report the user picked on that screen. Never chosen for the user (no latest-report default).
 let viewReturn = null;
+// Received in this open project only; this is not tracking changes since a previous visit.
+const receivedAreas = new Set();
+const understandingEdits = new Map();
+let workReference = null;
+let lastReceipt = null;
+let located = null;
+// REPORT16: which disclosures of the task screen are open, for that request and that picked report only (tab memory).
+// Ids starting with 'task-report-' belong to the picked report and are dropped when another report is picked.
+let readOpen = null;
 let layerMemo = { space: null, from: null, areas: {} };
 let mapView = null, mapSelected = null, sheetOpen = false, areaListOpen = null;
+let initialMapFitPending = false;
+const MAP_CARD_HEIGHT = 180; // Matches the bounded card footprint in styles.css and new-slot collision checks.
+let collapsed = new Set();
+let panelMode = 'area', relationCaller = 'map-relations-open';
+let branchRecordCaller = null;
+let compactMapHeader = false;
+let recordsReturnNotice = '';
+let panelReadings = {};
+function safePanelReadings(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+        return {};
+    const out = {};
+    for (const [key, value] of Object.entries(raw).slice(-100)) {
+        if (!value || typeof value !== 'object')
+            continue;
+        const v = value;
+        if (typeof v.y !== 'number' || !Number.isFinite(v.y) || v.y < 0 || !v.open || typeof v.open !== 'object' || Array.isArray(v.open))
+            continue;
+        const anchor = v.anchor && typeof v.anchor.id === 'string' && typeof v.anchor.top === 'number' && Number.isFinite(v.anchor.top) ? { id: v.anchor.id, top: v.anchor.top } : null;
+        out[key] = { y: v.y, anchor, open: Object.fromEntries(Object.entries(v.open).filter(([id, on]) => id.length <= 250 && typeof on === 'boolean')) };
+    }
+    return out;
+}
+const panelKey = (area) => `${project.id}:${area}`;
+function capturePanelReading(preferredId = null) {
+    const body = document.getElementById('area-panel-body'), id = body?.dataset.areaId;
+    // A previous project's hidden DOM can remain while the list/open-entry transition recalls its saved reading memo.
+    if (!body || !id || route === 'projects' || body.dataset.projectId !== project.id || !body.getClientRects().length)
+        return;
+    const rect = body.getBoundingClientRect(), items = [...body.querySelectorAll('[id]')];
+    const visible = items.filter(el => el.getClientRects().length && el.getBoundingClientRect().bottom > rect.top + 1 && el.getBoundingClientRect().top < rect.bottom);
+    const preferred = preferredId ? document.getElementById(preferredId) : null;
+    // An explicit navigation returns to its surviving caller, even when an earlier report row legitimately disappears.
+    const anchor = preferred && visible.includes(preferred) && getComputedStyle(preferred).visibility === 'visible' ? preferred :
+        visible.find(el => el.getBoundingClientRect().top >= rect.top) ?? visible.at(-1);
+    panelReadings[`${body.dataset.projectId}:${id}`] = { y: body.scrollTop, anchor: anchor ? { id: anchor.id, top: anchor.getBoundingClientRect().top - rect.top } : null,
+        open: Object.fromEntries([...body.querySelectorAll('details[id]')].map(d => [d.id, d.open])) };
+}
+function restorePanelReading() {
+    const body = document.getElementById('area-panel-body'), id = body?.dataset.areaId, memo = id ? panelReadings[panelKey(id)] : null;
+    if (!body || !memo)
+        return;
+    for (const d of body.querySelectorAll('details[id]'))
+        if (d.id in memo.open)
+            d.open = memo.open[d.id];
+    body.scrollTop = memo.y;
+    const anchor = memo.anchor ? document.getElementById(memo.anchor.id) : null;
+    if (anchor && body.contains(anchor) && anchor.getClientRects().length)
+        body.scrollTop += anchor.getBoundingClientRect().top - body.getBoundingClientRect().top - memo.anchor.top;
+}
+let origin = null;
 const guides = new Map();
 /** FLOW091-C: the task whose background preview the user opened (survives redraws such as an autosave). */
 let backgroundOpen = null;
 // One move = one command. Undo re-applies only that position, only while it is still where the move put it.
 let posUndo = [];
 const MAP_KEY = 'agentflow.workspace.map';
-function rememberMap() { try {
-    session?.setItem(MAP_KEY, JSON.stringify({ project: project.id, view: mapView, selected: mapSelected }));
-}
-catch { /* Per-tab convenience only. */ } }
-function recallMap() {
+function mapMemos() {
     try {
         const v = JSON.parse(session?.getItem(MAP_KEY) || 'null');
-        if (!v || v.project !== project.id)
+        if (!v)
+            return {};
+        const others = v.others && typeof v.others === 'object' ? { ...v.others } : {};
+        if (typeof v.project === 'string')
+            others[v.project] = { view: v.view ?? null, selected: v.selected ?? null, collapsed: v.collapsed, panels: v.panels, panel: v.panel, relations: v.relations };
+        return others;
+    }
+    catch {
+        return {};
+    }
+}
+function rememberMap() {
+    if (target.kind === 'example')
+        return; // ENTRY37: the unsaved example never takes a real project's memo slot.
+    try {
+        const others = Object.entries(mapMemos()).filter(([id]) => id !== project.id).slice(-11);
+        session?.setItem(MAP_KEY, JSON.stringify({ project: project.id, view: mapView, selected: mapSelected, collapsed: [...collapsed], panels: panelReadings, panel: panelMode, others: Object.fromEntries(others) }));
+    }
+    catch { /* Per-tab convenience only. */ }
+}
+function recallMap() {
+    try {
+        const v = mapMemos()[project.id];
+        if (!v)
             return;
         const w = v.view;
         mapView = w && [w.x, w.y, w.s].every(n => typeof n === 'number' && Number.isFinite(n)) && w.s >= FIT_MIN && w.s <= ZOOM_MAX ? w : null;
         mapSelected = typeof v.selected === 'string' && project.space.areas.some(a => a.id === v.selected && !a.archived) ? v.selected : null;
+        collapsed = new Set(Array.isArray(v.collapsed) ? v.collapsed.filter((id) => typeof id === 'string' && project.space.areas.some(a => a.id === id && !a.archived)) : []);
+        panelReadings = safePanelReadings(v.panels);
+        panelMode = v.panel === 'records' || v.panel === 'relations' ? v.panel : v.relations === true ? 'relations' : 'area';
     }
     catch { /* none */ }
 }
@@ -117,6 +205,9 @@ function recallPlace(entryId) {
 let selectedReturnTaskId;
 // Local file reads/clipboard are not tickets or durable project data. Replacement invalidates both.
 let projectEpoch = 0, resultRead = 0, recoveryRead = 0, resultMessage = '';
+// Only the pending file read's automatic reveal is cancelled by leaving its work view.
+// The selected bytes and the existing read/import guards keep their separate lifetime.
+let resultRevealToken = null;
 let resultSelection = null;
 let lastFileExport = null;
 function returnChoiceRequired() {
@@ -127,6 +218,7 @@ function changeKind(kind) { selectedReturnTaskId = undefined; commit(setKind(pro
 let contextReturn = null;
 const unreadable = '기존 저장 내용을 읽지 못했습니다. 덮어쓰지 않습니다. 이 화면의 입력은 메모리에 남으며 복구 파일로 저장할 수 있습니다.';
 function resetEphemeral() {
+    branchRecordCaller = null;
     // USE106: this unsubmitted entry field belongs to the project being left, never to the next project.
     $('brief-input').value = '';
     $('brief-start').disabled = true;
@@ -142,21 +234,34 @@ function resetEphemeral() {
     resultSelection = null;
     resultMessage = '';
     lastFileExport = null;
+    workNotice = null;
     view = 'work';
     viewArea = null;
     viewTask = null;
     viewReturn = null;
     layerMemo = { space: null, from: null, areas: {} };
+    receivedAreas.clear();
+    understandingEdits.clear();
+    workReference = null;
+    lastReceipt = null;
+    located = null;
     mapView = null;
     mapSelected = null;
+    initialMapFitPending = false;
     sheetOpen = false;
     areaListOpen = null;
+    collapsed = new Set();
+    panelReadings = {};
+    panelMode = 'area';
+    recordsReturnNotice = '';
     backgroundOpen = null;
     posUndo = [];
+    origin = null;
+    readOpen = null;
     for (const k of Object.keys(spaceInputs))
         delete spaceInputs[k];
 }
-function openEntry(entry) {
+function openEntry(entry, fromList = false) {
     resetEphemeral();
     route = 'project';
     target = { kind: 'entry', ref: { entryId: entry.entryId, lifecycle: entry.lifecycle, seq: entry.seq } };
@@ -168,7 +273,8 @@ function openEntry(entry) {
     rememberOpen(entry.entryId);
     contextOpen = project.bases.some(b => basisDraftChanged(project, b)) || !!project.basisDraft.trim();
     // A reload keeps this tab's place; opening from the list starts at the space once the project has one.
-    const place = recallPlace(entry.entryId);
+    // HOME15: a card in the list is 'go to this project', not 'resume the last screen of this tab'. Only a reload keeps it.
+    const place = fromList ? null : recallPlace(entry.entryId);
     recallMap();
     if (place) {
         view = place.view;
@@ -227,6 +333,10 @@ await workspace.init();
     else if (workspace.readError === 'STORAGE_DENIED')
         startNew(); // nothing to list: keep working in memory, with the reason shown
     else if (workspace.entries().length || workspace.legacy || workspace.readError)
+        route = 'projects';
+    // ENTRY37: a normal first visit starts at the project home (its space example included). Without Web Locks nothing can be
+    // saved, so the in-memory start stays as before instead of a home whose '새 프로젝트' is disabled.
+    else if (workspace.writable)
         route = 'projects';
     else
         startNew();
@@ -307,11 +417,19 @@ function entryLimits() {
 }
 function readyForAI() { return !!config && (route === 'example' ? config.mode === 'mock' : config.mode === 'mock' || (config.configured && config.paidEnabled && $('consent').checked)); }
 function displayView() {
+    if (view !== 'work' || route === 'projects' || resultRevealToken && resultRevealToken.context !== contextOpen)
+        resultRevealToken = null;
     const inProject = route !== 'projects', starting = inProject && !project.tasks.length;
     document.body.dataset.route = route;
     document.body.dataset.starting = String(starting);
     // FLOW091: inside a project (past the welcome) the head is one compact line so the map / next action come first.
     document.body.dataset.compact = String(inProject && (view === 'space' || view === 'area' || view === 'task' || !starting));
+    // PC13: which layer is shown, so the whole space alone can use tighter spacing (other screens, notices and errors unchanged).
+    document.body.dataset.layer = inProject ? view : '';
+    syncProjectHeader();
+    const chip = $('connection-details'), host = $(inProject ? 'topbar-actions' : 'home-actions');
+    if (chip.parentElement !== host)
+        host.prepend(chip);
     $('projects-view').hidden = inProject;
     $('breadcrumb-project').hidden = !inProject;
     $('breadcrumb-sep').hidden = !inProject;
@@ -337,7 +455,7 @@ function displayView() {
     $('history-view').hidden = !inProject || view !== 'history';
     const spatial = view === 'space' || view === 'area' || view === 'task';
     $('space-view').hidden = !inProject || !spatial;
-    $('nav-space').hidden = !inProject || route === 'example' || (starting && !hasSpace(project));
+    $('nav-space').hidden = !inProject || (starting && !hasSpace(project));
     $('nav-space').classList.toggle('active', inProject && spatial);
     if (inProject && spatial)
         $('nav-space').setAttribute('aria-current', 'page');
@@ -357,7 +475,16 @@ function displayView() {
             $(id).removeAttribute('aria-current');
     }
 }
-function showWork() { view = 'work'; displayView(); }
+/** Only the PC whole-map header uses the explicit management menu; other layers keep their existing controls. */
+function syncProjectHeader() {
+    const compact = route !== 'projects' && view === 'space' && innerWidth > 760, menu = $('project-management');
+    if (compact !== compactMapHeader) {
+        menu.open = !compact;
+        compactMapHeader = compact;
+    }
+    document.body.dataset.mapHeader = String(compact);
+}
+function showWork() { view = 'work'; displayView(); refreshWorkReference(); restoreWorkReferenceReading(); }
 /** SPATIAL102: remember the layer being left (scroll; in an area also which request was opened). Tab memory only. */
 function leaveLayer() {
     if (view === 'space')
@@ -378,21 +505,35 @@ function focusFirst(...ids) {
 }
 /** Coming back restores this layer's scroll and the card the user entered; an ID that no longer exists is just skipped. */
 function openSpace() {
+    branchRecordCaller = null;
+    // PC12: arriving at the map by any other way makes it the new starting point; the earlier one is dropped.
+    // AREA17: back to the whole space from the located area's own screens keeps the way back to the view before 'where is it';
+    // arriving from anywhere else (the work view, another area) is a new start.
+    if (!(located && (view === 'space' || (view === 'area' || view === 'task') && viewArea === located.area)))
+        located = null;
+    origin = null;
     leaveLayer();
     view = 'space';
     viewArea = null;
     viewTask = null;
     viewReturn = null;
     sheetOpen = false;
-    render();
+    render(true, true, () => window.scrollTo({ top: layerMemo.space ?? 0 }));
+    const plane = document.getElementById('space-plane');
+    if (plane)
+        markOffscreen(plane);
     const from = layerMemo.from;
-    window.scrollTo({ top: layerMemo.space ?? 0 });
     if (!(from && focusFirst(`node-enter-${from}`, `list-enter-${from}`)))
         $('space-title')?.focus({ preventScroll: true });
 }
 function openArea(id) {
+    branchRecordCaller = null;
     if (view === 'space')
         layerMemo.from = id;
+    // AREA17: opening the located area itself (its panel's '영역 열기', its crumb) keeps the way back; any other area is a new start.
+    if (!(located && located.area === id && (view === 'space' || viewArea === id)))
+        located = null;
+    origin = null;
     leaveLayer();
     view = 'area';
     viewArea = id;
@@ -404,15 +545,177 @@ function openArea(id) {
     if (!(memo?.task && focusFirst(`task-open-${memo.task}`)))
         $('space-title')?.focus({ preventScroll: true });
 }
+/** PC12: leaving the map or an area screen to read (or continue) a task records where the user was. Tab memory only. */
+function markOrigin(focus = null) {
+    if (view !== 'space' && view !== 'area' && view !== 'work')
+        return;
+    if (view === 'work') {
+        const id = focus ?? document.activeElement?.id ?? null, el = id ? document.getElementById(id) : null, r = el?.getClientRects().length ? el.getBoundingClientRect() : null;
+        const upstream = origin?.view === 'work' ? origin.work.upstream : origin;
+        const priorLocation = located && located.origin.view !== 'work' ? { ...located, origin: located.origin } : null;
+        origin = { project: project.id, view: 'work', area: null, map: mapView ? { ...mapView } : null, selected: mapSelected, sheet: sheetOpen, y: window.scrollY, focus: id,
+            open: Object.fromEntries([...$('work-view').querySelectorAll('details[id]')].map(d => [d.id, d.open])), anchor: id && r ? { id, top: r.top, page: r.top + window.scrollY } : null,
+            collapsed: [...collapsed], panels: structuredClone(panelReadings), panel: panelMode, work: { taskId: project.currentTaskId, receiptId: lastReceipt?.taskId ?? null, context: contextOpen, upstream: upstream ? structuredClone(upstream) : null, located: priorLocation ? structuredClone(priorLocation) : null } };
+        located = null; // The one prior map excursion is held by value, not left as this new reading's active locator.
+        return;
+    }
+    if (located && (located.origin.view === 'work' || located.origin.panel === 'records')) {
+        origin = located.origin;
+        return;
+    }
+    const active = document.activeElement, used = active?.id && $('space-view').contains(active) ? active.id : null;
+    const id = focus ?? used;
+    capturePanelReading(id);
+    const open = Object.fromEntries([...$('space-view').querySelectorAll('details[id]')].map(d => [d.id, d.open]));
+    const el = id ? document.getElementById(id) : null, r = el && el.getClientRects().length ? el.getBoundingClientRect() : null;
+    origin = { project: project.id, view, area: view === 'area' ? viewArea : null, map: mapView ? { ...mapView } : null, selected: mapSelected, sheet: sheetOpen, y: window.scrollY, focus: id, open,
+        anchor: id && r && !el?.closest('#area-panel-body') ? { id, top: r.top, page: r.top + window.scrollY } : null, collapsed: [...collapsed], panels: structuredClone(panelReadings), panel: view === 'space' ? panelMode : 'area' };
+}
+function originLabel(o) {
+    if (o.view === 'work')
+        return '검토 전 작업 화면';
+    if (o.view === 'space' && o.panel === 'records')
+        return '전체 공간 · 이어 볼 기록';
+    if (o.view === 'space' && o.panel === 'relations')
+        return '전체 공간 · 연결';
+    if (o.view === 'area')
+        return o.area === 'unassigned' ? '영역 미지정 작업' : areaById(o.area)?.name ?? '영역';
+    const sel = o.selected ? areaById(o.selected) : null;
+    return sel ? `전체 공간 · ${sel.name} 정보` : '전체 공간';
+}
+function originButton(id) {
+    const o = origin;
+    if (!o || o.project !== project.id)
+        return null;
+    const b = btn(o.view === 'work' ? '← 검토 전 작업 화면으로' : `← 출발한 지도 보기로 · ${originLabel(o)}`, returnToOrigin, 'secondary origin-return', id);
+    b.title = '읽기를 시작한 보기·선택·위치로 돌아가요. 이어가는 작업과 저장한 수정은 그대로예요.';
+    return b;
+}
+/** PC12: back to the view this reading started from. It restores only the view (layer, area, viewport, selection, scroll,
+ * the control used); the continued work and saved edits stay as they are now. A starting point that no longer exists
+ * (area archived/removed, another project) falls back to the whole space without choosing anything else. */
+function returnToOrigin() { const o = origin; origin = null; if (o?.panel === 'records')
+    located = null; restoreOrigin(o); }
+/** AREA17: back to the view before an explicit 'where is it' moved the map (also after reading a task from there). */
+function returnFromLocate() { const o = located?.origin ?? null; located = null; origin = null; restoreOrigin(o); }
+function restoreOrigin(o) {
+    if (!o || o.project !== project.id) {
+        openSpace();
+        return;
+    }
+    if (o.view === 'work') {
+        const same = project.currentTaskId === o.work.taskId, sameReceipt = (lastReceipt?.taskId ?? null) === o.work.receiptId;
+        const upstream = o.work.upstream ?? (!same ? o.work.located?.origin ?? null : null);
+        origin = upstream ? structuredClone(upstream) : null;
+        located = same && o.work.located ? structuredClone(o.work.located) : null;
+        mapView = o.map ? { ...o.map } : null;
+        initialMapFitPending = false;
+        mapSelected = o.selected && areaById(o.selected) && !areaById(o.selected).archived ? o.selected : null;
+        sheetOpen = o.sheet && !!mapSelected;
+        collapsed = new Set(o.collapsed);
+        panelReadings = structuredClone(o.panels);
+        panelMode = o.panel;
+        rememberMap();
+        leaveLayer();
+        view = 'work';
+        viewArea = null;
+        viewTask = null;
+        viewReturn = null;
+        contextOpen = o.work.context;
+        render(false, false);
+        if (same)
+            for (const [id, open] of Object.entries(o.open)) {
+                const d = document.getElementById(id);
+                if (d instanceof HTMLDetailsElement && $('work-view').contains(d))
+                    d.open = open;
+            }
+        window.scrollTo({ top: same ? o.y : 0 });
+        const a = same && sameReceipt ? o.anchor : null, el = a ? document.getElementById(a.id) : null;
+        if (a && el?.getClientRects().length) {
+            const page = el.getBoundingClientRect().top + window.scrollY;
+            if (Math.abs(page - a.page) >= 1)
+                window.scrollTo({ top: page - a.top });
+        }
+        if (!same) {
+            project = { ...project, notice: '지금 이어가는 작업은 그대로 두고 작업 화면으로 돌아왔어요. 검토 전 작업으로 바꾸지 않았어요.' };
+            renderStatus();
+        }
+        if (same && !sameReceipt) {
+            resultMessage = '출발한 수신 안내가 달라져 입력 위치로 돌아왔어요. 다른 보고를 대신 고르지 않았어요.';
+            const message = $('result-file-message');
+            message.textContent = resultMessage;
+            message.tabIndex = -1;
+            message.focus({ preventScroll: true });
+        }
+        else if (!same || !(o.focus && focusFirst(o.focus)))
+            $('context-title').focus({ preventScroll: true });
+        return;
+    }
+    const area = o.area && o.area !== 'unassigned' ? areaById(o.area) : null;
+    const areaGone = o.view === 'area' && o.area !== 'unassigned' && (!area || area.archived);
+    const sel = o.selected ? areaById(o.selected) : null, selGone = !!o.selected && (!sel || sel.archived);
+    const panels = structuredClone(o.panels);
+    leaveLayer();
+    view = areaGone ? 'space' : o.view;
+    viewArea = view === 'area' ? o.area : null;
+    viewTask = null;
+    viewReturn = null;
+    if (o.map)
+        mapView = { ...o.map };
+    mapSelected = selGone ? null : o.selected;
+    sheetOpen = o.sheet && !!mapSelected;
+    collapsed = new Set(o.collapsed);
+    panelReadings = structuredClone(panels);
+    panelMode = o.panel;
+    recordsReturnNotice = '';
+    render(false, false); // Reading waits until the original disclosures and final workspace height are restored.
+    // fix1: disclosures that still exist get the open state they had; ones that are gone are skipped. Then the scroll.
+    if (!areaGone)
+        for (const [id, open] of Object.entries(o.open)) {
+            const d = document.getElementById(id);
+            if (d instanceof HTMLDetailsElement && $('space-view').contains(d))
+                d.open = open;
+        }
+    window.scrollTo({ top: areaGone ? 0 : o.y });
+    // fix2: same content above the control = the scroll above is already the reading place. If the control moved on the page,
+    // scroll so it is where it was in the viewport (the browser may clamp at the page end). Without the control: the plain scroll.
+    const a = !areaGone ? o.anchor : null, el = a ? document.getElementById(a.id) : null;
+    if (a && el && el.getClientRects().length) {
+        const page = el.getBoundingClientRect().top + window.scrollY;
+        if (Math.abs(page - a.page) >= 1)
+            window.scrollTo({ top: page - a.top });
+    }
+    const recordGone = o.view === 'space' && o.panel === 'records' && !!o.focus && !document.getElementById(o.focus);
+    if (recordGone) {
+        recordsReturnNotice = '출발한 버튼이 현재 목록에 없어 기록 머리로 돌아왔어요. 후속 요청 등으로 목록이 달라져도 원 기록은 지난 요청과 결과에 남아 있어요.';
+        const note = $('records-return-notice');
+        note.textContent = recordsReturnNotice;
+        note.hidden = false;
+    }
+    sizeWorkspace();
+    panelReadings = panels;
+    restorePanelReading();
+    rememberMap();
+    if (areaGone || selGone) {
+        project = { ...project, notice: '출발한 영역이 보관되었거나 없어져 그 위의 보기로 돌아왔어요. 다른 영역이나 작업을 대신 고르지 않았어요.' };
+        renderStatus();
+    }
+    if (recordGone)
+        $('records-heading')?.focus({ preventScroll: true });
+    else if (areaGone || !(o.focus && focusFirst(o.focus)))
+        $('space-title')?.focus({ preventScroll: true });
+}
 /** SPATIAL102: the read-only task screen. Opening it never changes the continued work or the request target.
  * returnId (SPATIAL102-R1): the report a check item points to, shown on that screen. */
-function openTaskView(id, returnId = null) {
+function openTaskView(id, returnId = null, focus = null) {
     const t = project.tasks.find(x => x.id === id);
     if (!t)
         return;
     const area = areaOf(project, t) ?? 'unassigned';
+    markOrigin(focus);
     leaveLayer();
     layerMemo.areas[area] = { y: layerMemo.areas[area]?.y ?? 0, task: id };
+    readOpen = null;
     view = 'task';
     viewArea = area;
     viewTask = id;
@@ -425,20 +728,42 @@ function openTaskView(id, returnId = null) {
 function continueTask(id) {
     if (project.pending)
         return;
+    markOrigin();
     const current = project.currentTaskId ? taskOf(project) : null, same = current && (current.id === id || isReturnTask(project, current) && current.parentTaskId === id);
     if (!same)
         commit(focusTask(project, id));
     view = 'work';
     render();
-    $('outcome-home').focus({ preventScroll: true });
-    $('outcome-home').scrollIntoView({ block: 'start' });
+    // PC12: say which record is now edited when it is not the request that was read.
+    const read = project.tasks.find(x => x.id === id), no = (x) => `작업 ${pad(project.tasks.findIndex(t => t.id === x.id) + 1)}`;
+    if (read && current && same && current.id !== id) {
+        project = { ...project, notice: `${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.` };
+        workNotice = project.notice;
+        renderStatus();
+    }
+    else if (read && current && !same) {
+        project = { ...project, notice: `${no(read)}로 이어가기 · 고치는 작업문은 ${no(read)}의 것이에요. 전에 이어가던 ${no(current)}은 그대로 남아요.` };
+        workNotice = project.notice;
+        renderStatus();
+    }
+    // ENTRY37-F1: the work's place bar (its way back to the map) starts below the sticky notice instead of under it; the
+    // title keeps the focus. Without a place bar (no space yet) the title is the start, as before.
+    const title = $('context-title'), place = $('work-place'), start = place.hidden ? title : place;
+    start.style.scrollMarginTop = `${(document.querySelector('.feedback-stack')?.getBoundingClientRect().height ?? 0) + (start === title ? 24 : 12)}px`;
+    title.focus({ preventScroll: true });
+    start.scrollIntoView({ block: 'start' });
 }
 /** Explicit: write the next request for this area (null = no area). The only way, besides the composer's own choice, to set the target. */
 function writeInArea(id) {
+    // AREA17: '이 영역에 새 요청' for the located area, from its map panel or its own screens, continues that reading: the work view
+    // keeps the explicit way back to the view before locating. Writing anywhere else is a new start.
+    if (!(located && located.area === id && (view === 'space' || (view === 'area' || view === 'task') && viewArea === id)))
+        located = null;
     // An unsent report or request keeps its kind and target: open it instead of relabelling or moving it.
     if (project.draft.trim()) {
-        const where = project.space.draftTarget?.area ? areaById(project.space.draftTarget.area)?.name : null;
-        const message = project.draftKind === 'request' ? `작성 중인 요청이 있어 먼저 열었어요. 이 요청의 영역(${where ?? '지금 작업을 따라감'})은 그대로예요. 다른 영역에 쓰려면 이 요청을 보내거나 비운 뒤 다시 누르세요.`
+        // REPORT16: null = follows the current work; {area:null} = explicitly no area. Never the same words.
+        const where = draftTargetLabel();
+        const message = project.draftKind === 'request' ? `작성 중인 요청이 있어 먼저 열었어요. 이 요청의 대상(${where})은 그대로예요. 다른 영역에 쓰려면 이 요청을 보내거나 비운 뒤 다시 누르세요.`
             : '작성 중인 결과가 있어 먼저 열었어요. 종류와 연결할 작업은 바꾸지 않았어요. 이 입력을 마친 뒤 새 요청을 쓰세요.';
         view = 'work';
         render();
@@ -456,6 +781,18 @@ function writeInArea(id) {
     }
     $('compose-panel').open = true;
     $('draft').focus();
+}
+/** REPORT16: where the unsent request goes, in the composer's own words (renderComposeArea). */
+function draftTargetLabel() {
+    const dt = project.space.draftTarget;
+    if (dt === null) {
+        const t = project.currentTaskId ? taskOf(project) : null, f = t ? areaById(areaOf(project, t)) : null;
+        return `지금 작업을 따라감 · ${f ? f.name : '영역 없음'}`;
+    }
+    if (dt.area === null)
+        return '영역 없이';
+    const a = areaById(dt.area);
+    return a ? `영역 ‘${a.name}’${a.archived ? ' · 보관됨' : ''}` : '없어진 영역';
 }
 /** Explicit navigation to another task (a received result, or back to the latest request). */
 function openTask(id) {
@@ -496,6 +833,11 @@ function reportBody(source) {
     return source.text;
 }
 function renderStatus() {
+    if (workNotice !== null && (route === 'projects' || view !== 'work')) {
+        if (project.notice === workNotice)
+            project = { ...project, notice: null };
+        workNotice = null;
+    }
     $('notice').textContent = project.notice ?? '';
     $('notice').hidden = !project.notice;
     $('storage-error').textContent = storageError;
@@ -564,6 +906,12 @@ function renderStatus() {
         copy.className = stage.kind === 'exported' || stage.kind === 'question' ? 'secondary' : 'primary';
         copy.textContent = t && exportNeedsRefresh(project, t) ? '수정한 작업문 복사' : '작업문 복사';
     }
+    renderResultReceipt();
+    // Status-only edits can remove an alert above the map without a render or a details toggle.
+    // Measure only the displayed PC map; do not capture/restore panel memo or refit its camera here.
+    const map = document.getElementById('space-map');
+    if (route !== 'projects' && view === 'space' && innerWidth > 760 && document.body.dataset.layer === 'space' && !$('space-view').hidden && map?.getClientRects().length)
+        sizeWorkspace();
 }
 function renderOutcome(t) {
     const area = $('outcome-home');
@@ -579,7 +927,11 @@ function renderOutcome(t) {
     const topActions = node('div', '', 'outcome-actions');
     topActions.append(btn('방향 수정 / 다음 요청', () => openComposer('request'), 'secondary', 'change-direction'));
     top.append(title, topActions);
-    area.append(top, handoffReview(t));
+    area.append(top);
+    const receipt = receiptLine();
+    if (receipt)
+        area.append(receipt);
+    area.append(handoffReview(t));
     // FIX088: received results and the user's latest request are shown, never merged into or swapped with this flow.
     const latest = flow.otherLatestRequest;
     if (latest) {
@@ -802,6 +1154,7 @@ async function exportWork(id, method, fileMode = false) {
     let text;
     const exportRevision = project.revision, exportProjectId = project.id, epoch = projectEpoch;
     const returnId = fileMode ? `H_${crypto.randomUUID()}` : null;
+    const anchor = fileMode ? exportAnchor(project, taskOf(project, id)) : null;
     try {
         text = handoffText(project, id, returnId);
     }
@@ -814,7 +1167,7 @@ async function exportWork(id, method, fileMode = false) {
         download(`${safeName(project.name)}-${fileMode ? '파일반환-' : ''}작업문.md`, text, 'text/markdown;charset=utf-8');
         if (fileMode)
             lastFileExport = { taskId: id, text };
-        commit({ ...markHandoff(project, id, text, method, exportRevision, returnId), notice: '작업문을 Markdown 파일로 저장했어요. 그 파일을 개발 도구에 전달하는 건 직접 해 주세요. 전달·실행된 것은 아니에요.' });
+        commit({ ...markHandoff(project, id, text, method, exportRevision, returnId, anchor), notice: '작업문을 Markdown 파일로 저장했어요. 그 파일을 개발 도구에 전달하는 건 직접 해 주세요. 전달·실행된 것은 아니에요.' });
         // Saves are asynchronous (locked): judge the save record only after it finished, for the same project view.
         await flushSaves();
         if (memoryDirty && projectEpoch === epoch) {
@@ -832,7 +1185,7 @@ async function exportWork(id, method, fileMode = false) {
         }
         if (fileMode)
             lastFileExport = { taskId: id, text };
-        commit(markHandoff(project, id, text, method, exportRevision, returnId));
+        commit(markHandoff(project, id, text, method, exportRevision, returnId, anchor));
         await flushSaves();
         if (projectEpoch !== epoch)
             return;
@@ -866,17 +1219,96 @@ function resultError(e) {
             code === 'RESULT_TOO_LARGE' ? '결과 파일은 128 KiB 이하이어야 합니다. 원문을 잘라 저장하지 않았습니다.' :
                 '결과 파일의 형식·버전·본문 길이를 확인할 수 없어 가져오지 않았습니다.';
 }
+/** One tab-local receipt, pinned to the actual return task as well as its exact export. Never a latest-report lookup. */
+function receivedReceiptTarget() {
+    const r = lastReceipt;
+    if (!r || r.project !== project.id || r.epoch !== projectEpoch)
+        return null;
+    const report = project.tasks.find(t => t.id === r.taskId), request = project.tasks.find(t => t.id === r.requestId), target = project.tasks.find(t => t.id === r.exportTaskId);
+    if (!report?.resultFile || !request || !target || report.parentTaskId !== target.id || !pointedReturn(project, request.id, report.id))
+        return null;
+    try {
+        const file = parseResultFile(report.resultFile.rawText), record = target.handoffs.find(h => h.returnId === r.handoffId);
+        if (file.projectId !== project.id || file.taskId !== target.id || file.returnId !== r.handoffId || !record)
+            return null;
+        return { receipt: r, report, request, target, file, record };
+    }
+    catch {
+        return null;
+    }
+}
+function renderResultReceipt() {
+    const host = document.getElementById('received-result-host');
+    if (!host)
+        return;
+    const value = receivedReceiptTarget();
+    if (!value) {
+        host.replaceChildren();
+        document.getElementById('outcome-received-area')?.remove();
+        return;
+    }
+    const { receipt: r, report, request, file } = value;
+    const description = document.getElementById('outcome-received-area');
+    if (description && description.dataset.reportTaskId !== report.id)
+        description.remove();
+    if (r.save === 'pending' && !pendingSave && !draining)
+        r.save = memoryDirty || !hasSaved ? 'memory' : 'saved';
+    else if (r.save === 'memory' && !pendingSave && !draining && !memoryDirty && hasSaved)
+        r.save = 'saved';
+    let box = host.firstElementChild;
+    const key = `${r.epoch}:${r.project}:${report.id}`;
+    if (box?.dataset.receiptKey !== key) {
+        box = node('section', '', 'outcome-received');
+        box.id = 'received-result-receipt';
+        box.dataset.receiptKey = key;
+        box.setAttribute('aria-label', '받은 결과');
+        const status = node('p', '', 'hint');
+        status.id = 'received-result-status';
+        status.setAttribute('role', 'status');
+        const label = node('p', `연결 요청 · ${taskTitle(project, request)}`, 'hint');
+        label.id = 'received-result-target';
+        const proof = details('연결 근거', 'received-result-identity');
+        proof.append(node('p', `요청 ${request.id}\n내보낸 작업 ${r.exportTaskId}\n인계 ${r.handoffId}\n받은 보고 ${report.id}`, 'source-id'));
+        box.append(status, label, btn('이 결과 검토', () => openReceivedReport(report.id), 'secondary', 'received-result-open'), proof);
+        host.replaceChildren(box);
+    }
+    box.dataset.reportTaskId = report.id;
+    box.dataset.requestTaskId = request.id;
+    box.dataset.exportTaskId = r.exportTaskId;
+    box.dataset.handoffId = file.returnId;
+    box.dataset.duplicate = String(r.duplicate);
+    box.dataset.saveState = r.save;
+    const status = $('received-result-status');
+    status.textContent = r.duplicate ? (r.save === 'memory' ? '이미 받은 같은 보고예요 · 현재 변경은 저장되지 않았어요.' : '이미 받은 같은 보고예요 · 새 기록을 추가하지 않았어요.') :
+        r.save === 'pending' ? '보고를 가져왔어요 · 저장 중 · 앱 미검증' : r.save === 'memory' ? '보고는 이 탭에만 있어요 · JSON 백업으로 보존하세요 · 앱 미검증' : '보고를 가져왔어요 · 이 브라우저에 저장됨 · 앱 미검증';
+}
+function openReceivedReport(reportId) {
+    const value = receivedReceiptTarget();
+    if (view !== 'work' || !value || value.report.id !== reportId) {
+        resultMessage = '이 수신 안내의 보고를 지금 열 수 없어요. 다른 보고를 대신 열지 않았어요.';
+        $('result-file-message').textContent = resultMessage;
+        return;
+    }
+    openTaskView(value.request.id, value.report.id, 'received-result-open');
+}
 function renderResultFile() {
+    renderResultReceipt();
     $('result-file-message').textContent = resultMessage;
     const area = $('result-file-preview');
     area.replaceChildren();
+    area.dataset.selectionState = 'none';
     if (!resultSelection)
         return;
     try {
         const { file, task, record, duplicate } = inspectResultFile(project, resultSelection.rawText), preview = exportPreview(project, task, record);
         resultSelection.revision = project.revision;
+        area.dataset.selectionState = 'review';
         area.dataset.targetTaskId = task.id;
         area.dataset.returnId = record.returnId;
+        const heading = node('h3', '선택한 결과 확인');
+        heading.id = 'result-file-review-heading';
+        heading.tabIndex = -1;
+        area.append(heading, node('p', duplicate ? '이미 가져온 결과입니다. 기존 기록을 확인할 수 있습니다.' : '아직 가져오지 않았습니다.', 'hint'));
         area.append(node('h3', `연결할 작업 · ${taskTitle(project, task)}`), node('p', `내보낸 시점 · ${dateLabel(record.at)} · 원래 버전 r${record.revision}`, 'hint'));
         if (task.handoffs.at(-1) !== record)
             area.append(node('p', '이전 내보내기에 대한 보고입니다. 더 최근 내보내기로 옮기지 않습니다.', 'alert warning'));
@@ -892,15 +1324,24 @@ function renderResultFile() {
         if (file.evidence !== null)
             area.append(node('p', '외부 관찰·검사 원문 · 앱 미검증', 'source-meta'), node('div', file.evidence, 'source-raw'));
         area.append(node('p', '파일은 실행 증명이 아닙니다. 가져와도 AI 정리·명령·링크를 실행하지 않습니다.', 'hint'));
+        if (file.understanding) {
+            const u = details('함께 받은 영역 설명', 'result-understanding-preview');
+            u.append(node('p', file.understanding.summary, 'source-raw'), node('p', `외부 정리 · ${file.understanding.origin} · 앱 미검증`, 'hint'));
+            area.append(u);
+        }
         if (duplicate)
-            area.append(node('p', '같은 인계의 같은 본문이 이미 있습니다. 다시 추가하지 않습니다.', 'hint'));
+            area.append(node('p', '같은 인계의 보고와 정리가 이미 있습니다. 다시 추가하지 않습니다.', 'hint'));
         area.append(btn(duplicate ? '기존 기록 확인' : '이 결과 가져오기', () => void acceptResultFile(), 'primary', 'accept-result-file'));
         area.append(rawFileDetails(resultSelection.rawText, file.returnId, 'result-file-raw'));
     }
     catch (e) {
+        area.dataset.selectionState = 'invalid';
         area.dataset.targetTaskId = '';
         area.dataset.returnId = '';
-        area.append(node('p', resultError(e), 'alert warning'));
+        const error = node('p', resultError(e), 'alert warning');
+        error.id = 'result-file-error';
+        error.tabIndex = -1;
+        area.append(error);
         const raw = details('선택 파일 원문 보기', 'result-file-raw'), field = node('textarea');
         field.readOnly = true;
         field.rows = 5;
@@ -925,25 +1366,40 @@ async function acceptResultFile() {
         return;
     }
     try {
+        const inspected = inspectResultFile(project, resultSelection.rawText), beforeIds = new Set(project.tasks.map(t => t.id));
         const n = importResultFile(project, resultSelection.rawText);
+        const added = n.tasks.filter(t => !beforeIds.has(t.id)), report = inspected.duplicate ?? (added.length === 1 ? added[0] : null);
+        if (!report?.resultFile || report.parentTaskId !== inspected.task.id)
+            throw new Error('RESULT_TARGET_MISSING');
+        const received = parseResultFile(report.resultFile.rawText), request = rootRequest(n, report);
+        if (received.taskId !== inspected.file.taskId || received.returnId !== inspected.file.returnId || !pointedReturn(n, request.id, report.id))
+            throw new Error('RESULT_TARGET_MISSING');
+        const receipt = { project: project.id, epoch: projectEpoch, taskId: report.id, requestId: request.id, exportTaskId: inspected.task.id, handoffId: inspected.file.returnId, duplicate: !!inspected.duplicate, save: n === project ? (memoryDirty ? 'memory' : pendingSave || draining ? 'pending' : 'saved') : 'pending' };
+        lastReceipt = receipt;
         if (n === project) {
-            resultMessage = memoryDirty ? '같은 본문은 이미 이 탭에 있습니다. 브라우저에는 저장되지 않았습니다. JSON 백업으로 보존하세요.' : '같은 본문의 기존 기록을 확인했습니다. 새 기록은 추가하지 않았습니다.';
+            resultMessage = '같은 보고의 기존 기록이에요. 새 기록을 추가하지 않았어요.';
             renderResultFile();
             return;
         }
+        for (const a of n.space.areas)
+            if (n.space.understanding[a.id]?.revision !== (project.space.understanding[a.id]?.revision ?? 0) && n.space.understanding[a.id]?.revision)
+                receivedAreas.add(a.id);
         controller?.abort();
         controller = null;
         resultRead++;
         resultSelection = null;
         resultMessage = '';
+        resultMessage = '보고를 이 탭에 가져왔어요 · 저장 중 · 앱 미검증. 작성 중인 입력은 그대로예요.';
         commit(n);
         const epoch = projectEpoch;
         await flushSaves();
-        if (epoch !== projectEpoch)
+        if (epoch !== projectEpoch || lastReceipt !== receipt)
             return;
+        receipt.save = memoryDirty ? 'memory' : 'saved';
         resultMessage = memoryDirty ? '결과는 이 탭에만 있습니다. 브라우저에 저장하지 못했습니다. 닫기 전에 JSON 백업을 저장하세요.' : '보고를 가져왔습니다 · 앱 미검증. 작성 중인 입력은 그대로입니다.';
-        renderResultFile();
-        showWork();
+        // A completed save updates the receipt, never the screen the user has since chosen.
+        $('result-file-message').textContent = resultMessage;
+        renderResultReceipt();
     }
     catch (e) {
         resultMessage = resultError(e) + ' 기존 붙여넣기도 계속 이용할 수 있습니다.';
@@ -1077,7 +1533,159 @@ function handoffReview(t) {
     box.append(grid);
     return box;
 }
+function referenceMatches(t, pin) {
+    return pin.project === project.id && pin.epoch === projectEpoch && pin.task === t.id && pin.area === areaOf(project, t);
+}
+function pickedWorkDescription(pin) {
+    if (pin.area === null || pin.revision === null || !areaById(pin.area))
+        return null;
+    const state = areaDescription(project, pin.area);
+    return [state.current, ...state.previous].find((d) => !!d && d.entry.revision === pin.revision) ?? null;
+}
+function workReferenceState(pin) {
+    if (pin.area === null)
+        return { kind: 'unassigned', text: '이 작업은 소유 부분이 미지정이에요. 다른 부분의 설명을 대신 보여 주지 않아요.', newer: false };
+    if (!areaById(pin.area))
+        return { kind: 'missing', text: '이 작업의 소유 부분을 찾을 수 없어요.', newer: false };
+    const state = areaDescription(project, pin.area), selected = pickedWorkDescription(pin), newer = !!state.current && (pin.revision === null || state.current.entry.revision > pin.revision);
+    if (pin.revision === null)
+        return { kind: 'none', text: '읽기 시작할 때 적용된 설명은 없었어요.' + (state.held.length ? ' 반영하지 않은 정리는 아래에서 따로 읽을 수 있어요.' : ''), newer };
+    if (!selected)
+        return { kind: 'missing', text: '읽던 설명이 지금 기록에 없어요. 다른 설명으로 바꾸지 않았어요. 닫고 다시 열어 확인하세요.', newer };
+    if (selected.valid)
+        return { kind: 'current', text: '현재 인계에 참고하는 설명이에요. 앱이 검증한 사실은 아니에요.', newer };
+    return { kind: newer ? 'previous' : 'stale', text: newer ? '이후 새 설명이 있어 이전 기록을 읽고 있어요. 현재 인계 참고에는 포함되지 않아요.' : '이전 기준의 설명 · 현재 인계 참고에는 포함되지 않아요. 구상·조건·직접 쓴 작업문 또는 포함 맥락의 기준이 바뀌었어요.', newer };
+}
+function captureWorkReferenceReading() {
+    const body = document.querySelector('.work-reference-body'), pin = workReference;
+    if (!pin || !body || body.dataset.taskId !== pin.task || body.dataset.projectId !== pin.project || !body.getClientRects().length)
+        return;
+    pin.reading = { y: body.scrollTop, open: Object.fromEntries([...body.querySelectorAll('details[id]')].map(d => [d.id, d.open])) };
+}
+function restoreWorkReferenceReading() {
+    const body = document.querySelector('.work-reference-body'), pin = workReference;
+    if (!pin?.restore || !body || body.dataset.taskId !== pin.task || body.dataset.projectId !== pin.project || !body.getClientRects().length)
+        return;
+    for (const d of body.querySelectorAll('details[id]'))
+        if (d.id in pin.reading.open)
+            d.open = pin.reading.open[d.id];
+    body.scrollTop = pin.reading.y;
+    pin.restore = false;
+}
+function fillWorkReference(body, pin) {
+    const id = body.id, a = areaById(pin.area), selected = pickedWorkDescription(pin);
+    body.replaceChildren();
+    body.dataset.selectedRevision = pin.revision === null ? '' : String(pin.revision);
+    body.dataset.entryPresent = String(!!selected);
+    if (a) {
+        body.append(areaIdea(a, `${id}-idea`, 120, `현재 사용자 구상 · ${a.name}${a.archived ? ' (보관된 부분)' : ''}`));
+    }
+    if (selected) {
+        body.append(node('p', `읽기 시작할 때의 설명 · ${dateLabel(pin.openedAt)} · ${selected.entry.by === 'user' ? '사용자 정정' : '외부 정리'} · 앱 미검증`, 'source-meta'), node('div', selected.summary, 'source-raw work-reference-summary'));
+        if (selected.changes.length || selected.proposal) {
+            const more = details('함께 남긴 변화·미채택 제안 읽기', `${id}-changes-${pin.revision}`);
+            for (const change of selected.changes)
+                more.append(node('p', change, 'source-raw'));
+            if (selected.proposal)
+                more.append(node('p', '구상 변경 제안 · 미채택 · 실행 지시 아님', 'source-meta'), node('div', selected.proposal, 'source-raw'));
+            body.append(more);
+        }
+        body.append(descriptionEvidence(selected, `${id}-evidence-${pin.revision}`));
+    }
+    if (a) {
+        const state = areaDescription(project, a.id), older = pin.revision === null ? [] : state.previous.filter(d => d.entry.revision < pin.revision);
+        if (older.length) {
+            const history = details('이전 설명 기록 읽기', `${id}-history`);
+            for (const d of older)
+                history.append(node('div', d.summary, 'source-raw'), descriptionEvidence(d, `${id}-old-${d.entry.revision}`));
+            body.append(history);
+        }
+        if (state.held.length) {
+            const held = details(`반영하지 않은 정리 ${state.held.length}개 읽기`, `${id}-held`);
+            for (const [i, d] of state.held.entries())
+                held.append(node('p', heldMessage[d.entry.held] ?? '현재 설명으로 반영하지 않은 기록이에요.', 'hint'), node('div', d.summary, 'source-raw'), descriptionEvidence(d, `${id}-held-${i}`));
+            body.append(held);
+        }
+    }
+    const live = workReferenceState(pin), ref = body.closest('.work-reference');
+    ref.querySelector('[data-reference-status]').textContent = live.text;
+    ref.querySelector('[data-reference-new]').hidden = !live.newer;
+    body.dataset.referenceState = live.kind;
+}
+/** Manual typing updates only the live caption. The chosen body, disclosures, reading scroll and all inputs stay in place. */
+function refreshWorkReference() {
+    const body = document.querySelector('.work-reference-body'), pin = workReference, t = project.currentTaskId ? taskOf(project) : null;
+    if (!body || !pin || !t || !referenceMatches(t, pin) || body.dataset.taskId !== t.id)
+        return;
+    if (body.dataset.entryPresent !== String(!!pickedWorkDescription(pin)))
+        fillWorkReference(body, pin);
+    const live = workReferenceState(pin), ref = body.closest('.work-reference'), status = ref.querySelector('[data-reference-status]'), newer = ref.querySelector('[data-reference-new]');
+    if (status && status.textContent !== live.text)
+        status.textContent = live.text;
+    if (newer && newer.hidden === live.newer)
+        newer.hidden = !live.newer;
+    if (body.dataset.referenceState !== live.kind)
+        body.dataset.referenceState = live.kind;
+}
+function workReferenceReader(t) {
+    const area = areaOf(project, t), owner = project.id, epoch = projectEpoch, id = `work-reference-${owner}-${t.id}-${area ?? 'unassigned'}-${epoch}`;
+    const ref = details('이 작업의 부분 구상·설명 읽기', id);
+    ref.className = 'work-reference';
+    ref.dataset.projectId = owner;
+    ref.dataset.taskId = t.id;
+    ref.dataset.areaId = area ?? '';
+    const caption = node('div', '', 'work-reference-caption'), status = node('p', '참고를 닫고 다시 열어 읽을 설명을 선택하세요.', 'hint'), newer = node('p', '새 설명이 있어요. 읽던 본문은 그대로예요. 닫고 다시 열면 새 설명을 읽을 수 있어요.', 'hint');
+    status.dataset.referenceStatus = '';
+    status.setAttribute('role', 'status');
+    newer.dataset.referenceNew = '';
+    newer.hidden = true;
+    caption.append(status, newer);
+    ref.append(caption);
+    const body = node('div', '', 'work-reference-body');
+    body.id = `${id}-body`;
+    body.tabIndex = 0;
+    body.setAttribute('role', 'region');
+    body.setAttribute('aria-label', '이 작업의 부분 구상과 선택한 설명 읽기');
+    body.dataset.projectId = owner;
+    body.dataset.taskId = t.id;
+    body.dataset.areaId = area ?? '';
+    ref.append(body);
+    if (workReference && referenceMatches(t, workReference)) {
+        ref.open = true;
+        fillWorkReference(body, workReference);
+        workReference.restore = true;
+    }
+    ref.querySelector('summary').addEventListener('click', e => {
+        if (!ref.isConnected || !ref.getClientRects().length || owner !== project.id || epoch !== projectEpoch || project.currentTaskId !== t.id || areaOf(project, taskOf(project)) !== area)
+            return;
+        if (ref.open) {
+            workReference = null;
+            return;
+        }
+        e.preventDefault();
+        ref.open = true;
+        const revision = area && areaById(area) ? areaDescription(project, area).current?.entry.revision ?? null : null;
+        workReference = { project: owner, epoch, task: t.id, area, revision, openedAt: new Date().toISOString(), reading: { y: 0, open: {} }, restore: false };
+        fillWorkReference(body, workReference);
+        body.scrollTop = 0;
+    });
+    body.addEventListener('scroll', captureWorkReferenceReading, { passive: true });
+    body.addEventListener('toggle', captureWorkReferenceReading, true);
+    return ref;
+}
+function jumpWorkControl(id, part) {
+    if (view !== 'work' || project.currentTaskId !== id || $('work-edit-fields')?.dataset.taskId !== id)
+        return;
+    const box = $(part === 'next' ? 'edit-work' : 'file-return-options');
+    box.open = true;
+    const control = part === 'next' ? $('work-next') : box.querySelector('summary');
+    control?.scrollIntoView({ block: 'center' });
+    control?.focus({ preventScroll: true });
+}
 function renderWork(t) {
+    captureWorkReferenceReading();
+    if (!t || workReference && !referenceMatches(t, workReference))
+        workReference = null;
     // FLOW083: the stage's actions live in the '지금 할 일' card; this card is the output and its editing.
     const area = $('work'), actions = $('next-actions');
     area.replaceChildren();
@@ -1088,6 +1696,12 @@ function renderWork(t) {
     const w = currentWork(project, t), v = w.values, card = node('div', '', 'card work-card');
     card.id = 'current-work';
     card.tabIndex = -1;
+    const jumps = node('div', '', 'actions');
+    jumps.id = 'work-context-jumps';
+    jumps.dataset.taskId = t.id;
+    const owner = areaById(areaOf(project, t));
+    jumps.append(node('span', `작업 ${pad(project.tasks.findIndex(x => x.id === t.id) + 1)} · ${owner?.name ?? '영역 미지정'}`, 'hint'), btn('다음 행동 고치기', () => jumpWorkControl(t.id, 'next'), 'secondary', 'work-edit-next'), btn('파일 결과용 작업문으로', () => jumpWorkControl(t.id, 'file'), 'quiet', 'work-file-handoff'));
+    actions.append(jumps);
     const local = project.sources.filter(s => t.sourceIds.includes(s.id));
     const heading = node('div', '', 'work-heading'), h = node('div');
     const receipt = receiptOf(t);
@@ -1177,7 +1791,12 @@ function renderWork(t) {
     letter.append(letterHead, instruction, checks);
     card.append(letter, backgroundPreview(t));
     const edit = details('범위 · 제안 · 작업문 직접 다듬기', 'edit-work');
-    edit.className = 'edit-area';
+    edit.className = 'edit-area work-reference-editor';
+    const layout = node('div', '', 'work-edit-layout'), fields = node('div', '', 'work-edit-fields');
+    fields.id = 'work-edit-fields';
+    fields.dataset.taskId = t.id;
+    layout.append(workReferenceReader(t), fields);
+    edit.append(layout);
     for (const [key, label] of [['understanding', '짧은 이해'], ['scope', '이번 범위와 유지할 것'], ['next', '실행 도구에 전달할 작업문'], ['checks', '확인할 동작 / 완료 조건']]) {
         const l = node('label', label);
         l.htmlFor = `work-${key}`;
@@ -1190,11 +1809,11 @@ function renderWork(t) {
         const old = t.manual[key] === null && w.aiStale ? t.advice?.[key] ?? '' : '';
         const marker = node('p', t.manual[key] !== null ? '직접 수정 · AI가 덮어쓰지 않음' : old ? '이전 AI 문구는 작업문에서 제외됨 · 직접 쓰면 그대로 들어갑니다' : '제안 · 실제 실행 결과 아님', 'manual-note');
         marker.id = `manual-${key}`;
-        edit.append(l, field, marker);
+        fields.append(l, field, marker);
         if (old) {
             const d = details('제외된 이전 AI 문구 보기 (현재 작업문 아님)', `stale-${key}`);
             d.append(node('div', old, 'source-raw'), btn('이 문구로 시작해 직접 고치기', () => commit(editTask(project, t.id, key, old)), 'quiet', `stale-use-${key}`));
-            edit.append(d);
+            fields.append(d);
         }
     }
     const suggestions = taskSuggestions(t);
@@ -1214,9 +1833,9 @@ function renderWork(t) {
         }
         box.append(btn('이 제안을 내 기준으로 기록', () => { const value = taskSuggestions(taskOf(project, t.id))[index]; if (value)
             commit(recordBasis(project, value.text)); }, 'secondary'));
-        edit.append(box);
+        fields.append(box);
     }
-    edit.append(node('p', '이 영역을 고쳐도 다른 기준·원문은 변하지 않습니다. AI 재정리 후에도 직접 쓴 값은 유지됩니다.', 'hint'));
+    fields.append(node('p', '이 영역을 고쳐도 다른 기준·원문은 변하지 않습니다. AI 재정리 후에도 직접 쓴 값은 유지됩니다.', 'hint'));
     const foot = node('div', '', 'work-footer'), row = node('div', '', 'actions');
     const retry = btn('이 입력 다시 정리', () => { void generate(t.id); }, 'quiet', 'retry-work');
     retry.dataset.aiAction = 'true';
@@ -1242,7 +1861,7 @@ function renderWork(t) {
         sent.append(field);
         fileOptions.append(sent);
     }
-    foot.append(fileOptions);
+    actions.append(fileOptions);
     const preview = details('실제로 전달할 전체 문맥 보기', 'handoff-preview');
     const txt = node('textarea');
     txt.id = 'handoff-text';
@@ -1260,12 +1879,15 @@ function renderWork(t) {
     area.append(card);
 }
 /** FLOW091-C: which plan copy goes out with this task. Fixed at the request; later plan edits are not applied to it. */
-function backgroundPreview(t) {
-    const b = t.background, own = !isReturnTask(project, t), box = details('', 'background-preview');
+/** PC12: the task reading screen shows the same copy under its own id (id); only the work card keeps its open state across views. */
+function backgroundPreview(t, id = 'background-preview') {
+    const b = t.background, own = !isReturnTask(project, t), box = details('', id);
     box.className = 'background-preview';
     const summary = box.querySelector('summary');
-    box.open = backgroundOpen === t.id;
-    box.addEventListener('toggle', () => { backgroundOpen = box.open ? t.id : null; });
+    if (id === 'background-preview') {
+        box.open = backgroundOpen === t.id;
+        box.addEventListener('toggle', () => { backgroundOpen = box.open ? t.id : null; });
+    }
     if (!b) {
         summary.textContent = '작업문에 넣을 프로젝트 배경 · 이 작업에는 없음';
         box.append(node('p', '이 작업에는 저장된 배경 사본이 없어요(배경을 저장하기 전에 쓴 작업이거나, 사본 없이 내보낸 작업에 돌아온 결과). 지금 전체 공간의 구상을 소급해 넣지 않아요.', 'hint'));
@@ -1291,7 +1913,7 @@ function backgroundPreview(t) {
         summary.append(node('span', ' · 그 뒤 구상이 바뀜 (이 사본은 그대로)', 'background-changed-tag'));
     if (changed) {
         const line = node('p', '전체 공간의 목적이나 이 영역의 이름·구상이 그 뒤 바뀌었어요. 이미 준비된 이 작업의 사본은 그대로이고, 다음에 쓰는 새 요청부터 최신 구상이 들어가요.', 'hint');
-        line.id = 'background-changed';
+        line.id = id === 'background-preview' ? 'background-changed' : `${id}-changed`;
         box.append(line);
     }
     return box;
@@ -1326,6 +1948,7 @@ function refreshPreview() {
     $('instruction-author').textContent = workAuthor(t, v.next);
     if ($('stale-advice'))
         showStaleNotice($('stale-advice'), t, w);
+    refreshWorkReference();
 }
 function renderReturnPreview() {
     const area = $('return-preview');
@@ -1389,60 +2012,171 @@ function lastActivity(p) {
     const times = [...p.sources.map(s => s.at), ...p.tasks.flatMap(t => t.handoffs.map(h => h.at))].filter(at => !Number.isNaN(new Date(at).getTime()));
     return times.sort().at(-1) ?? null;
 }
-function projectSummary(li, info) {
-    const requests = info.sources.filter(s => s.kind === 'request'), results = info.sources.filter(s => s.kind === 'report' || s.kind === 'evidence');
-    const last = requests.at(-1), at = lastActivity(info);
-    li.append(node('strong', info.name, 'project-card-name'), node('p', last ? `마지막 요청 · ${shortText(last.text, 80)}` : info.draft.trim() ? '아직 보낸 요청 없음 · 작성 중인 입력 있음' : '아직 보낸 요청 없음', 'project-card-summary'), node('p', `${at ? `최근 활동 · ${dateLabel(at)}` : '활동 기록 없음'} · ${info.space.areas.some(a => !a.archived) ? `영역 ${info.space.areas.filter(a => !a.archived).length}개 · ` : ''}요청 ${requests.length}개 · 가져온 결과 ${results.length}개`, 'hint'));
+/** HOME15: what a card says. Name and the user's own purpose (space.brief) first; a request is never shown as the purpose.
+ * The time is lastActivity: request/result originals and work-text exports only, so it is not called 'last edit'. */
+const ACTIVITY_SCOPE = '요청·가져온 결과 원문과 작업문 복사·저장 시각 기준이에요. 이름·목적·영역 수정은 포함하지 않아요.';
+function projectSummary(li, info, open, label, openClass = 'project-open') {
+    const head = node('div', '', 'project-card-head'), mark = node('span', [...info.name.trim()][0] ?? '·', 'project-mark');
+    mark.setAttribute('aria-hidden', 'true');
+    // The name is the card's one open control (Enter/Space); the rest of the card opens on click. No control inside another.
+    const name = open ? btn(info.name, open, `${openClass} project-card-name`) : node('strong', info.name, 'project-card-name');
+    name.title = info.name;
+    if (open)
+        name.setAttribute('aria-label', `${info.name} · ${label}`);
+    head.append(mark, name);
+    li.append(head);
+    const brief = info.space.brief?.text.trim();
+    const purpose = node('p', brief ?? '목적을 아직 적지 않았어요', 'project-card-purpose');
+    purpose.classList.toggle('missing', !brief);
+    if (brief)
+        purpose.title = brief;
+    li.append(purpose);
+    const meta = node('p', '', 'project-card-meta'), at = lastActivity(info), areas = info.space.areas.filter(a => !a.archived).length;
+    const time = node('span', at ? `작업 기록 · ${dateLabel(at)}` : '작업 기록 없음', 'project-card-time');
+    time.title = ACTIVITY_SCOPE;
+    meta.append(time);
+    if (areas)
+        meta.append(node('span', `영역 ${areas}개`, 'project-card-areas'));
+    li.append(meta);
 }
-/** SPATIAL102: a card opens when its body is clicked, like the space cards. Its own buttons (and selecting text) do not. */
+/** SPATIAL102: a card opens when its body is clicked, like the space cards. Its own buttons (and selecting text) do not.
+ * HOME15: neither does anything inside a part marked data-no-open (the card's '더보기' menu). */
 function openOnClick(card, open) {
     card.classList.add('openable');
-    card.addEventListener('click', e => { if (e.target.closest('button,a,input,select,textarea,summary'))
+    card.addEventListener('click', e => { if (e.target.closest('button,a,input,select,textarea,summary,[data-no-open]'))
         return; if (window.getSelection()?.toString())
         return; guard(open); });
 }
+/** HOME15: the card's secondary actions, apart from opening it. A disclosure, so the menu is never inside the open control. */
+function cardMenu(name, ...items) {
+    const menu = node('details', '', 'project-more');
+    menu.dataset.noOpen = '';
+    const summary = node('summary', '', 'project-more-button');
+    summary.setAttribute('aria-label', `‘${name}’ 더보기`);
+    summary.title = '더보기';
+    summary.append(node('span', '⋯', 'project-more-dots'));
+    summary.firstElementChild.setAttribute('aria-hidden', 'true');
+    const list = node('div', '', 'project-more-menu');
+    list.append(...items);
+    menu.append(summary, list);
+    // A chosen (or declined) action closes the menu and leaves the focus on its button, never on the card's open control.
+    for (const item of items)
+        item.addEventListener('click', () => { menu.open = false; if (summary.isConnected && !$('project-read').open)
+            summary.focus({ preventScroll: true }); });
+    menu.addEventListener('toggle', () => { if (menu.open)
+        for (const other of document.querySelectorAll('.project-more[open]'))
+            if (other !== menu)
+                other.open = false; });
+    return menu;
+}
+/** HOME15 follow-up: the full name and purpose before entering, read-only. Text only (never parsed as HTML), never saved.
+ * It shows the saved project read fresh at the moment it opens; one that another tab trashed or removed is not shown. */
+let reading = null;
+function readProject(entryId) {
+    const fresh = workspace.read()?.entries.find(e => e.entryId === entryId && e.state === 'active');
+    if (!fresh) {
+        listNotice = '다른 탭에서 바뀌어 이 프로젝트를 보여주지 않았어요. 목록을 새로 읽었어요.';
+        render();
+        focusListCard(null);
+        return;
+    }
+    const brief = fresh.project.space.brief?.text.trim();
+    $('project-read-name').textContent = fresh.project.name;
+    const purpose = $('project-read-purpose');
+    purpose.textContent = brief || '목적을 아직 적지 않았어요';
+    purpose.classList.toggle('missing', !brief);
+    reading = { kind: 'home', entryId, y: window.scrollY };
+    $('project-read-note').textContent = '읽기만 해요. 프로젝트를 열거나 바꾸지 않아요.';
+    // Order: close the card menu first, then open the window, so the menu neither keeps the first Escape nor takes the focus back.
+    for (const m of document.querySelectorAll('.project-more[open]'))
+        m.open = false;
+    const dialog = $('project-read');
+    dialog.showModal();
+    const body = $('project-read-body');
+    body.scrollTop = 0; // after showModal: a closed dialog is not laid out, so its old scroll would survive
+    // Focus starts at the top of the text (the name), so PageDown/End/arrow keys scroll it at once; Tab reaches '닫기'.
+    body.focus({ preventScroll: true });
+}
+/** A bounded read of the current project's text; an unsubmitted purpose editor remains a separate draft. */
+function readMapPurpose() {
+    $('project-read-name').textContent = project.name;
+    const purpose = $('project-read-purpose'), brief = project.space.brief?.text ?? '';
+    purpose.textContent = brief || '목적을 아직 적지 않았어요';
+    purpose.classList.toggle('missing', !brief);
+    $('project-read-note').textContent = '현재 프로젝트의 이름과 목적을 읽어요. ‘목적 고치기’에 작성 중인 초안은 바꾸지 않아요.';
+    reading = { kind: 'map', caller: 'brief-read', y: window.scrollY };
+    $('project-read').showModal();
+    const body = $('project-read-body');
+    body.scrollTop = 0;
+    body.focus({ preventScroll: true });
+}
+/** Back to the same card's '더보기' button and the same list position; nothing in the dialog is kept. */
+function closeReading() {
+    const back = reading;
+    reading = null;
+    $('project-read-name').textContent = '';
+    $('project-read-purpose').textContent = '';
+    if (!back)
+        return;
+    window.scrollTo({ top: back.y });
+    if (back.kind === 'map') {
+        document.getElementById(back.caller)?.focus({ preventScroll: true });
+        return;
+    }
+    const more = document.querySelector(`#project-list .project-card[data-entry-id="${CSS.escape(back.entryId)}"] .project-more-button`);
+    if (more)
+        more.focus({ preventScroll: true });
+    else
+        $('projects-title').focus({ preventScroll: true });
+}
+/** HOME15: where the list was when a project was opened from it, so coming back finds the same card. Tab memory only. */
+let listReturn = null;
 function projectCard(entry) {
     const li = node('li', '', 'project-card');
     li.dataset.entryId = entry.entryId;
-    projectSummary(li, entry.project);
-    const row = node('div', '', 'row');
     if (entry.state === 'trashed') {
-        li.querySelector('strong').append(' ', tag('휴지통'));
+        projectSummary(li, entry.project, null, '');
+        li.querySelector('.project-card-name').append(' ', tag('휴지통'));
+        const row = node('div', '', 'row project-card-actions');
         row.append(btn('되살리기', () => void restoreProject(entry.entryId), 'secondary project-restore'));
+        li.append(row);
+        return li;
     }
-    else {
-        const open = () => {
-            const fresh = workspace.read()?.entries.find(e => e.entryId === entry.entryId && e.state === 'active');
-            if (!fresh) {
-                listNotice = '다른 탭에서 바뀌어 이 프로젝트를 열지 않았어요. 목록을 새로 읽었어요.';
-                render();
-                return;
-            }
-            openEntry(fresh);
+    const open = () => {
+        const fresh = workspace.read()?.entries.find(e => e.entryId === entry.entryId && e.state === 'active');
+        if (!fresh) {
+            listNotice = '다른 탭에서 바뀌어 이 프로젝트를 열지 않았어요. 목록을 새로 읽었어요.';
             render();
-            restoreDraftPanels();
+            return;
+        }
+        listReturn = { entryId: entry.entryId, y: window.scrollY };
+        openEntry(fresh, true);
+        render();
+        restoreDraftPanels();
+        window.scrollTo({ top: 0 });
+        if (!(view === 'space' && focusFirst('space-title')))
             $('main').focus({ preventScroll: true });
-        };
-        row.append(btn('이어서 하기', open, 'primary project-open'), btn('휴지통으로', () => void trashProject(entry.entryId, entry.project.name), 'quiet project-trash'));
-        openOnClick(li, open);
-    }
-    li.append(row);
+    };
+    projectSummary(li, entry.project, open, hasSpace(entry.project) ? '프로젝트 공간 열기' : '프로젝트 열기');
+    li.querySelector('.project-card-head').append(cardMenu(entry.project.name, btn('이름·목적 전체 보기', () => readProject(entry.entryId), 'quiet project-read-open'), btn('휴지통으로 옮기기', () => void trashProject(entry.entryId, entry.project.name), 'quiet project-trash')));
+    openOnClick(li, open);
     return li;
 }
 function legacyCard() {
-    const legacy = workspace.legacy, li = node('li', '', 'project-card');
+    const legacy = workspace.legacy, li = node('li', '', 'project-card legacy-card');
     li.dataset.entryId = 'legacy';
+    const open = () => { listReturn = { entryId: 'legacy', y: window.scrollY }; openLegacy(); render(); restoreDraftPanels(); };
     if (legacy.project) {
-        projectSummary(li, legacy.project);
-        li.querySelector('strong').append(' ', tag('이전 저장 · 읽기 전용'));
+        projectSummary(li, legacy.project, open, '읽기 전용으로 열기');
+        li.querySelector('.project-card-head').append(tag('이전 저장 · 읽기 전용'));
     }
-    else
+    else {
         li.append(node('strong', '읽지 못한 이전 저장 내용', 'project-card-name'));
-    li.append(node('p', '이전 형식으로 이 브라우저에 남아 있는 내용이에요. 지우거나 덮어쓰지 않았고, 새 저장 형식으로 옮기지 않아 여기서는 저장되지 않아요.', 'hint'));
-    const open = () => { openLegacy(); render(); restoreDraftPanels(); };
-    const row = node('div', '', 'row');
-    row.append(btn('열어 보기', open, 'secondary project-open'));
-    li.append(row);
+        const row = node('div', '', 'row project-card-actions');
+        row.append(btn('열어 보기', open, 'secondary project-open'));
+        li.append(row);
+    }
+    li.append(node('p', '이전 형식으로 이 브라우저에 남아 있는 내용이에요. 지우거나 덮어쓰지 않았고, 새 저장 형식으로 옮기지 않아 여기서는 저장되지 않아요.', 'hint project-card-note'));
     openOnClick(li, open);
     return li;
 }
@@ -1456,9 +2190,11 @@ function renderProjects() {
         list.append(projectCard(e));
     if (workspace.legacy)
         list.append(legacyCard());
+    $('example-list').replaceChildren(exampleCard());
     // An empty list and a list that could not be read are different situations.
     if (!active.length && !workspace.legacy && !workspace.readError)
-        list.append(node('li', '아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 예제를 둘러보세요.', 'hint'));
+        list.append(node('li', '아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 아래에서 예제를 둘러보세요.', 'hint project-empty'));
+    $('projects-count').textContent = active.length ? String(active.length) : '';
     for (const e of trashed)
         trash.append(projectCard(e));
     $('trash-section').hidden = !trashed.length;
@@ -1475,6 +2211,8 @@ function renderProjects() {
 async function showProjects(message = '') {
     if (!await leaveProject('목록으로 가면'))
         return;
+    // HOME15: the project being left (however it was reached) is the card to come back to.
+    const left = route === 'project' ? target.kind === 'entry' ? target.ref.entryId : target.kind === 'legacy' ? 'legacy' : null : null;
     resetEphemeral();
     route = 'projects';
     listNotice = message;
@@ -1482,7 +2220,23 @@ async function showProjects(message = '') {
         undoEntry = null;
     rememberOpen(null);
     render();
-    $('projects-title').focus();
+    focusListCard(left);
+}
+function focusListCard(entryId) {
+    const back = listReturn && listReturn.entryId === entryId ? listReturn : null;
+    listReturn = null;
+    const card = entryId ? document.querySelector(`#project-list .project-card[data-entry-id="${CSS.escape(entryId)}"]`) : null;
+    const control = card?.querySelector('.project-open') ?? null;
+    if (!control) {
+        window.scrollTo({ top: 0 });
+        $('projects-title').focus();
+        return;
+    }
+    window.scrollTo({ top: back?.y ?? 0 });
+    control.focus({ preventScroll: true });
+    const r = card.getBoundingClientRect();
+    if (r.top < 0 || r.bottom > window.innerHeight)
+        card.scrollIntoView({ block: 'nearest' });
 }
 /** Completes only after the envelope is written; the open project's queued saves are flushed first. */
 async function trashProject(entryId, name) {
@@ -1527,12 +2281,48 @@ async function restoreProject(entryId, undo = false) {
     render();
 }
 /** In-memory sample made with the normal domain path and the explicit MOCK rules; never persisted.
+ * ENTRY37: a purpose, two top parts (one with two inner parts) and one request in an inner part, handed off and answered
+ * by a written sample report through the normal result-file path. Nothing here is a real run or a real user's record.
  * Starting my own project from it starts empty: nothing from the sample becomes my record or result. */
 function exampleProject() {
-    let p = rename(createProject(), '예제 · 동네 미용실 예약 사이트');
-    p = submit(editDraft(p, '동네 미용실 예약 사이트를 만들고 싶어요. 손님이 휴대폰으로 날짜와 시간을 고르고, 예약하면 문자로 확인을 받게 해 주세요.'));
+    let p = rename(createProject(), '예제 · 동네 미용실 예약');
+    p = setBrief(p, '동네 미용실 손님이 휴대폰으로 날짜와 시간을 골라 예약하고, 예약이 확정되면 문자로 안내받는 사이트.');
+    p = addArea(p, '예약하기', '손님이 시술과 날짜·시간을 고르고 예약을 확정한다.');
+    const book = p.space.areas.at(-1).id;
+    p = addArea(p, '알림', '예약 확정과 변경을 손님에게 문자로 알린다.');
+    const notify = p.space.areas.at(-1).id;
+    p = addChildArea(p, book, '시간 고르기', '영업시간 안의 빈 시간만 고를 수 있게 보여 준다.');
+    const slots = p.space.areas.at(-1).id;
+    p = addChildArea(p, book, '예약 확인', '고른 시술·날짜·시간을 다시 보여 주고 확정 버튼을 둔다.');
+    p = addRelation(p, book, notify, 'flow', '예약이 확정되면 알림을 보낸다.');
+    p = submit(editDraft(p, '예약 화면에서 영업시간 안의 빈 시간만 고를 수 있게 해 주세요. 이미 예약된 시간은 흐리게 보여 주세요.'), undefined, slots);
     const started = begin(p, p.currentTaskId), request = validateRequest(started.request);
-    return { ...receive(started.project, started.request, { mode: 'mock', ticket: request.ticket, advice: validateAdvice(mockAdvice(request), request.bases.map(b => b.id)) }), notice: null };
+    p = receive(started.project, started.request, { mode: 'mock', ticket: request.ticket, advice: validateAdvice(mockAdvice(request), request.bases.map(b => b.id)) });
+    const task = p.currentTaskId, returnId = `H_${crypto.randomUUID()}`, anchor = exportAnchor(p, taskOf(p, task));
+    p = markHandoff(p, task, handoffText(p, task, returnId), 'clipboard', p.revision, returnId, anchor);
+    const summary = '영업시간 안의 빈 시간만 목록에 보여 주고, 이미 예약된 시간은 흐리게 표시한다. 휴무일은 아직 따로 다루지 않는다.';
+    p = importResultFile(p, JSON.stringify({ schemaVersion: 'agentflow.return.2', projectId: p.id, taskId: task, returnId,
+        report: '예제 보고 · 실제로 실행한 결과가 아니에요.\n빈 시간 목록을 영업시간 기준으로 거르고, 예약된 시간은 흐리게 표시했어요. 휴무일 처리는 아직 하지 않았어요.', evidence: null,
+        understanding: { version: 'understanding.1', areaId: slots, basedOn: anchor?.understanding ?? null, summary, changes: ['예약된 시간은 고를 수 없게 흐리게 표시한다.'], proposal: null, origin: '예제 · 직접 쓴 보고' } }));
+    return { ...p, notice: null };
+}
+let exampleInfo = null;
+/** ENTRY37: the home's way into the sample, apart from the real list (own list and classes; same card reading order). */
+function exampleCard() {
+    const li = node('li', '', 'example-card');
+    try {
+        exampleInfo ??= exampleProject();
+    }
+    catch {
+        li.append(node('p', '예제를 준비하지 못했어요.', 'hint project-card-note'));
+        return li;
+    }
+    const open = () => void openExample();
+    projectSummary(li, exampleInfo, open, '공간 예제 열기 · 저장 안 됨', 'example-open');
+    // The name already says 예제; the meta line says what it is not (no head tag, so the name keeps its full width).
+    li.querySelector('.project-card-time').textContent = '저장 안 됨 · 실제 실행 아님';
+    openOnClick(li, open);
+    return li;
 }
 async function openExample() {
     if (!await leaveProject('예제로 가면'))
@@ -1550,11 +2340,18 @@ async function openExample() {
     catch {
         project = createProject();
     }
+    // ENTRY37: the sample opens at its whole space, like a project card does.
+    view = hasSpace(project) ? 'space' : 'work';
     rememberOpen(null);
     render();
+    window.scrollTo({ top: 0 });
+    if (!(view === 'space' && focusFirst('space-title')))
+        $('main').focus({ preventScroll: true });
 }
 function closeExample(start) {
-    if (start || !(workspace.entries().length || workspace.legacy || workspace.readError)) {
+    // ENTRY37: closing goes back to the home; only a browser that cannot save at all keeps the in-memory start as before.
+    const home = workspace.writable || workspace.entries().length || workspace.legacy || workspace.readError;
+    if (start || !home) {
         startNew();
         render();
         restoreDraftPanels();
@@ -1588,6 +2385,7 @@ const pad = (n) => String(n).padStart(2, '0');
 function receiptOf(t) { return isReturnTask(project, t) ? project.tasks.findIndex(x => x.id === t.parentTaskId) : null; }
 function appTag() { const el = tag('앱에서 이어갈 작업', 'purple'); el.title = '이 앱에서 열어 둔 작업이에요. 외부 도구의 실시간 실행 상태가 아니에요.'; return el; }
 function noNote() { const el = tag('구상 미기재', 'area-undecided'); el.title = '설명이 비어 있어요. 아이디어도, 아직 못 정한 점도 적을 수 있어요.'; return el; }
+const READING_LABEL = { 'open-question': '답변 기록 없는 현재 질문', held: '설명 보류', stale: '이전 기준 설명', updated: '이번 탭 설명 갱신' };
 function areaSummary(a) {
     const tasks = areaRequests(a.id), results = tasks.flatMap(returnsOf).length;
     return tasks.length ? `요청 ${tasks.length}개${results ? ` · 돌아온 결과 ${results}개 · 앱 미검증` : ''}` : '아직 요청 없음';
@@ -1616,9 +2414,32 @@ function fitView(map, active) {
     // Measured card sizes (long names/notes make cards taller), in plane units.
     const boxes = active.map(a => {
         const pt = areaPosition(project, a), el = map.querySelector(`.area-node[data-area-id="${a.id}"]`);
-        return { x: pt.x, y: pt.y, w: el?.offsetWidth || NODE_W, h: el?.offsetHeight || NODE_H };
+        return { x: pt.x, y: pt.y, w: el?.offsetWidth || NODE_W, h: el?.offsetHeight || MAP_CARD_HEIGHT };
     });
-    return fitViewport(map.clientWidth || 800, map.clientHeight || 480, boxes);
+    const controls = map.querySelector('.map-controls'), margin = 24;
+    // PC controls remain inside the map. Reserve only their measured top band beyond the existing fit margin.
+    const top = innerWidth > 760 && controls ? Math.max(0, controls.offsetTop + controls.offsetHeight + 8 - margin) : 0;
+    const fitted = fitViewport(map.clientWidth || 800, Math.max(1, (map.clientHeight || 480) - top), boxes, margin);
+    return { ...fitted, y: fitted.y + top };
+}
+function finishInitialMapFit() {
+    if (!initialMapFitPending)
+        return;
+    // A recalled/user/return viewport always wins. Only a genuinely missing initial viewport is fitted here.
+    if (mapView) {
+        initialMapFitPending = false;
+        return;
+    }
+    if (route === 'projects' || view !== 'space')
+        return;
+    const map = document.getElementById('space-map'), plane = document.getElementById('space-plane');
+    if (!map || !plane || !map.clientWidth || !map.clientHeight)
+        return;
+    mapView = fitView(map, visibleAreas(project, collapsed));
+    initialMapFitPending = false;
+    applyView(plane);
+    $('map-scale').textContent = scaleLabel(mapView.s);
+    rememberMap();
 }
 function zoom(map, plane, factor) {
     // Buttons stay within a comfortable range, but never force a smaller fitted scale back up to it.
@@ -1660,6 +2481,47 @@ function undoPosition() {
         render();
     }
 }
+/** Only the branch-record close path: focus a control at a visible, unobscured point inside the map. */
+function focusBranchRecordControl(id) {
+    const el = document.getElementById(id), map = document.getElementById('space-map');
+    if (!el || !map?.contains(el) || !el.checkVisibility({ visibilityProperty: true }))
+        return false;
+    const r = el.getBoundingClientRect(), m = map.getBoundingClientRect(), sx = m.width / (map.offsetWidth || 1), sy = m.height / (map.offsetHeight || 1);
+    const left = Math.max(0, r.left, m.left + map.clientLeft * sx), top = Math.max(0, r.top, m.top + map.clientTop * sy);
+    const right = Math.min(innerWidth, r.right, m.left + (map.clientLeft + map.clientWidth) * sx), bottom = Math.min(innerHeight, r.bottom, m.top + (map.clientTop + map.clientHeight) * sy);
+    if (right <= left || bottom <= top)
+        return false;
+    const hit = document.elementFromPoint((left + right) / 2, (top + bottom) / 2);
+    if (!hit || !el.contains(hit))
+        return false;
+    el.focus({ preventScroll: true });
+    return document.activeElement === el;
+}
+function openBranchRecords(id) {
+    const a = areaById(id);
+    if (!a || a.archived || view !== 'space')
+        return;
+    const page = { x: window.scrollX, y: window.scrollY };
+    capturePanelReading();
+    if (located && (located.origin.view === 'work' || located.origin.panel === 'records') && located.area !== id)
+        endRecordsExcursion();
+    branchRecordCaller = { project: project.id, epoch: projectEpoch, area: id, id: `branch-records-${id}` };
+    mapSelected = id;
+    sheetOpen = true;
+    panelMode = 'area';
+    rememberMap();
+    render(true, true, () => window.scrollTo({ left: page.x, top: page.y }));
+    // The explicit record entry wins only after render has restored the old panel reading.
+    const body = document.getElementById('area-panel-body'), box = document.getElementById(`subtree-records-${id}`);
+    const summary = document.getElementById(`subtree-records-heading-${id}`);
+    if (body?.dataset.areaId === id && box && summary && body.contains(box)) {
+        box.open = true;
+        summary.focus({ preventScroll: true });
+        body.scrollTop += summary.getBoundingClientRect().top - body.getBoundingClientRect().top;
+        capturePanelReading(summary.id);
+        rememberMap();
+    }
+}
 function areaNode(a, plane, redraw) {
     const pt = areaPosition(project, a), el = node('div', '', 'area-node');
     el.dataset.areaId = a.id;
@@ -1675,11 +2537,12 @@ function areaNode(a, plane, redraw) {
     const enter = node('button', '', 'node-enter');
     enter.type = 'button';
     enter.id = `node-enter-${a.id}`;
+    enter.setAttribute('aria-label', `${a.name} 영역 열기`);
     const name = node('strong', a.name, 'area-card-name');
     name.append(node('span', ' ↘', 'area-card-go'));
-    enter.append(name, a.note ? node('span', a.note, 'area-card-note') : noNote(), node('span', areaSummary(a), 'hint'));
-    if (areaRequests(a.id).some(currentGroup))
-        enter.append(appTag());
+    // MAP36: the card body says which part this is and what it is for; request/result counts are read in the '정보' panel.
+    enter.append(name, node('span', areaPath(project, a.id).length > 1 ? `소속 · ${areaPath(project, a.id).slice(0, -1).map(x => x.name).join(' › ')}` : '독립 영역', 'area-card-path'), a.note ? node('span', a.note, 'area-card-note') : noNote());
+    el.classList.toggle('located', located?.area === a.id && view === 'space');
     enter.addEventListener('click', () => guard(() => openArea(a.id)));
     // Information shows the short properties; it never opens the area or changes the open work.
     const info = node('button', '정보', 'quiet node-info');
@@ -1687,8 +2550,32 @@ function areaNode(a, plane, redraw) {
     info.id = `node-info-${a.id}`;
     info.setAttribute('aria-pressed', String(mapSelected === a.id));
     info.setAttribute('aria-label', `${a.name} 정보 (들어가지 않음)`);
-    info.addEventListener('click', () => { mapSelected = a.id; sheetOpen = true; rememberMap(); render(); $(`node-info-${a.id}`)?.focus({ preventScroll: true }); });
+    info.addEventListener('click', () => { branchRecordCaller = null; capturePanelReading(); if (located && (located.origin.view === 'work' || located.origin.panel === 'records') && located.area !== a.id)
+        endRecordsExcursion(); mapSelected = a.id; sheetOpen = true; panelMode = 'area'; rememberMap(); render(); $(`node-info-${a.id}`)?.focus({ preventScroll: true }); });
     el.append(handle, enter, info);
+    const children = childrenOf(project, a.id).filter(x => !x.archived), reading = readingReasons(project, a.id, receivedAreas);
+    // MAP36: why reading this part's records may help (presence only; the counts and texts are in the same owner's records reader).
+    if (reading.records) {
+        const parent = children.length > 0, said = reading.reasons.map(r => READING_LABEL[r]);
+        const text = parent ? (said.length ? ['하위 포함', ...said] : ['하위 포함 기록 읽기']) : (said.length ? said : ['기록 읽기']);
+        const signal = btn('', () => openBranchRecords(a.id), 'branch-signals', `branch-records-${a.id}`);
+        text.forEach((t, i) => { if (i)
+            signal.append(' '); signal.append(node('span', i < text.length - 1 ? `${t} ·` : t)); });
+        signal.title = text.join(' · ');
+        signal.setAttribute('aria-label', `${a.name} · ${text.join(' · ')} · ${parent ? '이 부분과 하위 기록 읽기' : '이 부분 기록 읽기'}`);
+        signal.setAttribute('aria-controls', 'area-panel-body');
+        el.append(signal);
+    }
+    const foot = node('div', '', 'area-node-foot');
+    if (children.length) {
+        const folded = collapsed.has(a.id), toggle = btn(folded ? `하위 ${descendantAreas(project, a.id).filter(x => !x.archived).length}개 펼치기` : '하위 접기', () => toggleBranch(a.id), 'quiet branch-toggle', `branch-toggle-${a.id}`);
+        toggle.setAttribute('aria-expanded', String(!folded));
+        foot.append(toggle);
+    }
+    if (areaRequests(a.id).some(currentGroup))
+        foot.append(appTag());
+    if (foot.childElementCount)
+        el.append(foot);
     // Dragging uses only the handle (outside the enter button); a drag never ends as a click on enter or information.
     handle.addEventListener('pointerdown', e => {
         if (e.button !== 0)
@@ -1731,6 +2618,163 @@ function areaNode(a, plane, redraw) {
     });
     return el;
 }
+function toggleBranch(id) {
+    capturePanelReading();
+    if (collapsed.has(id))
+        collapsed.delete(id);
+    else {
+        collapsed.add(id);
+        if (mapSelected && descendantAreas(project, id).some(a => a.id === mapSelected)) {
+            mapSelected = id;
+            sheetOpen = true;
+        }
+    }
+    rememberMap();
+    render();
+    $(`branch-toggle-${id}`)?.focus({ preventScroll: true });
+}
+/** Boundaries are derived view geometry. A boundary that would enclose/cross an unrelated card is omitted;
+ * explicit parent paths and thin parent-child links remain, rather than inventing membership by rectangle. */
+function drawContainment(layer, plane) {
+    layer.replaceChildren();
+    const cards = [...plane.querySelectorAll('.area-node')].map(el => ({ el, id: el.dataset.areaId, x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }));
+    const overlap = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+    const headers = [];
+    for (const parent of visibleAreas(project, collapsed)) {
+        const children = childrenOf(project, parent.id).filter(a => cards.some(c => c.id === a.id));
+        if (!children.length || collapsed.has(parent.id))
+            continue;
+        const members = new Set([parent.id, ...descendantAreas(project, parent.id).map(a => a.id)]), inside = cards.filter(c => members.has(c.id));
+        const x = Math.min(...inside.map(c => c.x)) - 14, y = Math.min(...inside.map(c => c.y)) - 14, right = Math.max(...inside.map(c => c.x + c.w)) + 14, bottom = Math.max(...inside.map(c => c.y + c.h)) + 14;
+        const box = { x, y, w: right - x, h: bottom - y }, ambiguous = cards.some(c => !members.has(c.id) && overlap(box, c));
+        const marker = node('div', '', 'containment-group');
+        marker.dataset.parentId = parent.id;
+        marker.dataset.frameOmitted = String(ambiguous);
+        if (!ambiguous) {
+            const frame = node('div', '', 'containment-frame');
+            Object.assign(frame.style, { left: `${x}px`, top: `${y}px`, width: `${box.w}px`, height: `${box.h}px` });
+            marker.append(frame);
+            const width = 240;
+            let titleBox = { x, y: y - 30, w: width, h: 26 };
+            while (cards.some(c => overlap(titleBox, c)) || headers.some(h => overlap(titleBox, h)))
+                titleBox = { ...titleBox, y: titleBox.y - 30 };
+            headers.push(titleBox);
+            const label = btn(`${parent.name} 안의 부분 · 접기`, () => toggleBranch(parent.id), 'containment-title', `frame-toggle-${parent.id}`);
+            label.title = areaPath(project, parent.id).map(a => a.name).join(' › ');
+            Object.assign(label.style, { left: `${titleBox.x}px`, top: `${titleBox.y}px`, width: `${width}px` });
+            marker.append(label);
+        }
+        else {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'containment-links');
+            const p = cards.find(c => c.id === parent.id);
+            for (const a of children) {
+                const c = cards.find(c => c.id === a.id), line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                for (const [k, v] of [['x1', p.x + p.w / 2], ['y1', p.y + p.h / 2], ['x2', c.x + c.w / 2], ['y2', c.y + c.h / 2]])
+                    line.setAttribute(k, String(v));
+                svg.append(line);
+            }
+            marker.append(svg);
+        }
+        layer.append(marker);
+    }
+}
+function sizeWorkspace() {
+    const layout = document.querySelector('.map-layout');
+    if (!layout)
+        return;
+    const map = document.getElementById('space-map');
+    if (innerWidth > 760) {
+        const top = layout.getBoundingClientRect().top;
+        layout.style.height = `${Math.max(240, innerHeight - Math.max(0, top) - 16)}px`;
+        if (map) {
+            map.style.height = '100%';
+            map.style.minHeight = '0';
+        }
+    }
+    else {
+        layout.style.removeProperty('height');
+        map?.style.removeProperty('height');
+        map?.style.removeProperty('min-height');
+    }
+}
+window.addEventListener('resize', () => { capturePanelReading(); syncProjectHeader(); sizeWorkspace(); restorePanelReading(); });
+document.addEventListener('toggle', e => { if (e.target instanceof HTMLDetailsElement && e.target.closest('#space-view') && !e.target.closest('#area-panel'))
+    sizeWorkspace(); }, true);
+function openRelations(from = 'map-relations-open') { branchRecordCaller = null; capturePanelReading(); relationCaller = from; panelMode = 'relations'; rememberMap(); render(); $('area-panel-body')?.focus({ preventScroll: true }); }
+function relationBrowser() {
+    const panel = node('aside', '', 'area-panel relation-panel sheet-open');
+    panel.id = 'area-panel';
+    panel.dataset.panelMode = 'relations';
+    panel.setAttribute('aria-label', '연결의 실제 부분과 기록 읽기');
+    const close = () => { capturePanelReading(); panelMode = 'area'; rememberMap(); render(); (document.getElementById(relationCaller) ?? $('map-relations-open'))?.focus({ preventScroll: true }); };
+    const head = node('div', '', 'panel-top');
+    head.append(node('strong', `연결 ${project.space.relations.length}건`), btn('닫기', close, 'quiet', 'area-panel-close'));
+    const body = node('div', '', 'panel-body');
+    body.id = 'area-panel-body';
+    body.dataset.areaId = '@relations';
+    body.dataset.projectId = project.id;
+    body.tabIndex = 0;
+    body.setAttribute('role', 'region');
+    body.setAttribute('aria-label', '연결과 소유 기록 읽기');
+    body.addEventListener('scroll', () => { capturePanelReading(); rememberMap(); }, { passive: true });
+    body.addEventListener('toggle', () => { capturePanelReading(); rememberMap(); }, true);
+    body.addEventListener('wheel', e => { e.stopPropagation(); if (e.deltaY < 0 && body.scrollTop <= 0 || e.deltaY > 0 && body.scrollTop + body.clientHeight >= body.scrollHeight - 1)
+        e.preventDefault(); }, { passive: false });
+    panel.addEventListener('keydown', e => { if (e.key !== 'Escape' || e.defaultPrevented || e.isComposing || e.keyCode === 229 || e.target.closest('input,textarea,select,[contenteditable="true"],[role="combobox"]'))
+        return; e.preventDefault(); e.stopPropagation(); close(); });
+    body.addEventListener('keydown', e => {
+        if (e.defaultPrevented || e.isComposing || e.target !== body)
+            return;
+        if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Home', 'End'].includes(e.key)) {
+            e.preventDefault();
+            body.scrollTop = e.key === 'Home' ? 0 : e.key === 'End' ? body.scrollHeight : body.scrollTop + (e.key === 'ArrowDown' ? 40 : e.key === 'ArrowUp' ? -40 : e.key === 'PageUp' || e.key === ' ' && e.shiftKey ? -body.clientHeight * .8 : body.clientHeight * .8);
+        }
+    });
+    const list = node('section', '', 'map-relation-list');
+    list.id = 'map-relation-list';
+    list.append(node('p', '화살표는 실제 관계, 점선은 포함이에요. 접힌 부분의 연결도 실제 출발·도착 부분으로 찾아갈 수 있어요.', 'hint'));
+    for (const [i, b] of bundleRelations(project, collapsed).entries()) {
+        const group = node('section', '', 'relation-bundle');
+        group.dataset.from = b.from;
+        group.dataset.to = b.to;
+        group.dataset.kind = b.kind;
+        group.append(node('p', `${areaById(b.from)?.name} ${b.internal ? '안의 연결' : '→ ' + (areaById(b.to)?.name ?? '')} · ${RELATION_LABEL[b.kind]} · ${b.relations.length}건`, 'source-meta'), node('p', `직접 연결 ${b.directIds.length} · 접힌 안쪽 연결 ${b.hiddenIds.length}`, 'hint'));
+        for (const r of b.relations) {
+            const row = node('div', '', 'relation-endpoints');
+            row.dataset.relationId = r.id;
+            row.append(btn(areaById(r.from)?.name ?? '출발 부분', () => showReceivedArea(r.from, `relation-from-${r.id}`, true), 'quiet', `relation-from-${r.id}`), node('span', '→'), btn(areaById(r.to)?.name ?? '도착 부분', () => showReceivedArea(r.to, `relation-to-${r.id}`, true), 'quiet', `relation-to-${r.id}`), node('span', `${RELATION_LABEL[r.kind]}${r.note ? ` · ${r.note}` : ''}`, 'hint'));
+            for (const [owner, label] of [[r.from, '출발 기록'], [r.to, '도착 기록']])
+                row.append(btn(label, () => { const el = $(`relation-owner-${owner}`); body.scrollTop += el.getBoundingClientRect().top - body.getBoundingClientRect().top; el.focus({ preventScroll: true }); }, 'quiet'));
+            group.append(row);
+        }
+        group.id = `relation-bundle-${i}`;
+        list.append(group);
+    }
+    const owners = [...new Set(project.space.relations.flatMap(r => [r.from, r.to]))], records = node('section', '', 'relation-owner-records');
+    records.append(node('h3', '실제 부분에 남은 기록'), node('p', '각 소유 부분을 한 번씩 표시해요. 질문 기록은 새로운 미결이나 개발 완료 수가 아니에요.', 'hint'));
+    for (const id of owners) {
+        const signal = subtreeSignals(project, id).find(s => s.areaId === id), owner = areaById(id);
+        if (!signal || !owner)
+            continue;
+        const row = node('section', '', 'relation-owner');
+        row.id = `relation-owner-${id}`;
+        row.dataset.ownerArea = id;
+        row.tabIndex = -1;
+        row.append(node('h4', owner.name), node('p', `기록된 질문 ${signal.questions.length} · 후속 작업문 없는 보고 ${signal.reports.length}`, 'hint'), node('p', `${signal.description.current?.valid ? '현재 설명 있음' : signal.description.current ? '이전 기준 설명 있음' : '현재 설명 없음'} · 보류 ${signal.description.held.length}건`, 'hint'), btn('소유 부분과 설명 찾기', () => showReceivedArea(id, `relation-owner-find-${id}`, true), 'quiet', `relation-owner-find-${id}`));
+        for (const q of signal.questions)
+            row.append(node('p', `${q.answered ? '질문에 답변 기록 있음' : '질문에 답변 기록 없음'} · ${q.status}`, 'hint'), btn('질문 기록 읽기', () => openTaskView(q.taskId, null, `relation-question-${q.taskId}`), 'quiet', `relation-question-${q.taskId}`));
+        for (const report of signal.reports)
+            row.append(btn('보고 기록 읽기', () => openTaskView(report.taskId, report.returnId, `relation-report-${report.returnId}`), 'quiet', `relation-report-${report.returnId}`));
+        records.append(row);
+    }
+    body.append(list, records);
+    const actions = node('div', '', 'panel-actions');
+    actions.id = 'panel-actions';
+    actions.append(btn('지도에서 계속 보기', close, 'secondary', 'relations-close'));
+    panel.append(head, body, actions);
+    return panel;
+}
 const RELATION_HINT = { flow: '이어서 사용(기능 흐름)', needs: '먼저 필요(기능 의존)', shares: '같은 요구 공유', related: '관련(참고)' };
 /** Read-only lines: what the user wrote about how areas relate. Not run order, messages or progress. */
 function drawRelations(svg, labels, plane) {
@@ -1738,32 +2782,64 @@ function drawRelations(svg, labels, plane) {
         const el = plane.querySelector(`.area-node[data-area-id="${id}"]`);
         if (!el)
             return null;
-        return { x: el.offsetLeft + el.offsetWidth / 2, y: el.offsetTop + el.offsetHeight / 2 };
+        return { x: el.offsetLeft + el.offsetWidth / 2, y: el.offsetTop + el.offsetHeight / 2, w: el.offsetWidth, h: el.offsetHeight };
     };
     svg.replaceChildren();
     labels.replaceChildren();
-    for (const r of project.space.relations) {
+    const chips = new Map();
+    for (const r of bundleRelations(project, collapsed)) {
+        if (r.internal)
+            continue;
         const a = center(r.from), b = center(r.to);
         if (!a || !b)
             continue;
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        for (const [k, v] of [['x1', a.x], ['y1', a.y], ['x2', b.x], ['y2', b.y]])
+        line.setAttribute('data-from', r.from);
+        line.setAttribute('data-to', r.to);
+        line.setAttribute('data-kind', r.kind);
+        const edge = (p, q) => { const dx = q.x - p.x, dy = q.y - p.y, t = Math.min(dx ? ((p.w / 2 + 8) / Math.abs(dx)) : Infinity, dy ? ((p.h / 2 + 8) / Math.abs(dy)) : Infinity); return { x: p.x + dx * Math.min(t, .49), y: p.y + dy * Math.min(t, .49) }; };
+        const start = edge(a, b), end = edge(b, a);
+        for (const [k, v] of [['x1', start.x], ['y1', start.y], ['x2', end.x], ['y2', end.y]])
             line.setAttribute(k, String(v));
         line.setAttribute('class', `relation-line ${r.kind}`);
         line.setAttribute('marker-end', 'url(#relation-end)');
         svg.append(line);
-        const chip = node('span', RELATION_LABEL[r.kind], 'relation-chip');
-        chip.title = `${areaById(r.from)?.name} → ${areaById(r.to)?.name} · ${RELATION_HINT[r.kind]}${r.note ? ` · ${r.note}` : ''}`;
-        chip.style.left = `${(a.x + b.x) / 2}px`;
-        chip.style.top = `${(a.y + b.y) / 2}px`;
+        const key = [r.from, r.to].sort().join(':');
+        const old = chips.get(key);
+        if (old)
+            old.count += r.relations.length;
+        else
+            chips.set(key, { from: r.from, to: r.to, count: r.relations.length });
+    }
+    const occupied = [];
+    const cardBoxes = [...plane.querySelectorAll('.area-node')].map(e => ({ x: e.offsetLeft, y: e.offsetTop, w: e.offsetWidth, h: e.offsetHeight }));
+    for (const [i, r] of [...chips.values()].entries()) {
+        const a = center(r.from), b = center(r.to);
+        const x = (a.x + b.x) / 2;
+        let y = (a.y + b.y) / 2;
+        let conflict;
+        while ((conflict = cardBoxes.find(c => x + 55 > c.x && x - 55 < c.x + c.w && y + 12 > c.y && y - 12 < c.y + c.h)) || occupied.some(c => Math.abs(c.x - x) < 110 && Math.abs(c.y - y) < 28))
+            y = conflict ? conflict.y + conflict.h + 16 : y + 28;
+        occupied.push({ x, y });
+        const id = `relation-chip-${i}`, chip = btn(`연결 ${r.count}건`, () => openRelations(id), 'relation-chip', id);
+        chip.title = '방향·종류와 실제 부분은 연결 목록에서 읽기';
+        chip.style.left = `${x}px`;
+        chip.style.top = `${y}px`;
         labels.append(chip);
     }
 }
-function renderMap(root, active) {
+function renderMap(root, active, extra = []) {
+    if (panelMode !== 'records')
+        recordsReturnNotice = '';
+    const shown = visibleAreas(project, collapsed);
     const section = node('section', '', 'area-map');
     section.setAttribute('aria-label', '영역 지도');
     const bar = node('div', '', 'map-toolbar');
     bar.append(node('h2', '영역'));
+    // PC13: adding an area is an explicit disclosure. It starts open when there is no area yet or an unsent name/idea is kept.
+    const addPanel = details('＋ 영역 추가', 'area-add-panel');
+    addPanel.classList.add('toolbar-disclosure');
+    addPanel.open = !active.length || !!(spaceInputs[`${project.id}:area-name`] || spaceInputs[`${project.id}:area-note`]);
     const add = node('form', '', 'area-add');
     add.id = 'area-add-form';
     add.setAttribute('aria-label', '영역 추가');
@@ -1779,7 +2855,14 @@ function renderMap(root, active) {
     submitArea.type = 'submit';
     submitArea.id = 'area-add';
     add.append(name, note, submitArea);
-    bar.append(add);
+    addPanel.append(add);
+    bar.append(addPanel, ...extra);
+    bar.append(btn(`연결 ${project.space.relations.length}건`, () => openRelations(), 'quiet', 'map-relations-open'));
+    const areaTab = btn('선택 부분', () => { branchRecordCaller = null; capturePanelReading(); panelMode = 'area'; sheetOpen = true; rememberMap(); render(); $('area-panel-body')?.focus({ preventScroll: true }); }, 'quiet', 'map-area-open');
+    areaTab.disabled = !mapSelected;
+    bar.append(areaTab);
+    for (const [id, mode] of [['check-summary', 'records'], ['map-relations-open', 'relations'], ['map-area-open', 'area']])
+        bar.querySelector(`#${id}`)?.setAttribute('aria-pressed', String(panelMode === mode));
     const unplaced = areaRequests(null);
     if (unplaced.length) {
         const b = btn(`영역 미지정 작업 · 요청 ${unplaced.length}개`, () => openArea('unassigned'), 'quiet', 'open-unplaced');
@@ -1801,9 +2884,11 @@ function renderMap(root, active) {
     const lines = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     svg.append(defs, lines);
     const labels = node('div', '', 'relation-labels');
-    plane.append(svg, labels);
-    const redraw = () => drawRelations(lines, labels, plane);
-    for (const a of active)
+    const containment = node('div', '', 'containment-layer');
+    containment.id = 'containment-layer';
+    plane.append(containment, svg, labels);
+    const redraw = () => { drawRelations(lines, labels, plane); drawContainment(containment, plane); };
+    for (const a of shown)
         plane.append(areaNode(a, plane, redraw));
     map.append(plane);
     if (!active.length)
@@ -1811,7 +2896,7 @@ function renderMap(root, active) {
     const controls = node('div', '', 'map-controls');
     const scale = node('span', '', 'map-scale');
     scale.id = 'map-scale';
-    controls.append(btn('－', () => zoom(map, plane, 1 / 1.25), 'quiet map-zoom-out', 'map-zoom-out'), scale, btn('＋', () => zoom(map, plane, 1.25), 'quiet map-zoom-in', 'map-zoom-in'), btn('전체 맞춤', () => { mapView = fitView(map, active); applyView(plane); rememberMap(); scale.textContent = scaleLabel(mapView.s); }, 'quiet', 'map-fit'));
+    controls.append(btn('－', () => zoom(map, plane, 1 / 1.25), 'quiet map-zoom-out', 'map-zoom-out'), scale, btn('＋', () => zoom(map, plane, 1.25), 'quiet map-zoom-in', 'map-zoom-in'), btn('전체 맞춤', () => { mapView = fitView(map, shown); applyView(plane); rememberMap(); scale.textContent = scaleLabel(mapView.s); }, 'quiet', 'map-fit'));
     const last = posUndo.at(-1);
     if (last)
         controls.append(btn(`위치 되돌리기 · ${areaById(last.id)?.name ?? ''}`, undoPosition, 'quiet', 'map-undo'));
@@ -1839,14 +2924,19 @@ function renderMap(root, active) {
         map.addEventListener('pointercancel', up);
     });
     const sel = mapSelected ? areaById(mapSelected) : null;
-    if (sel && !sel.archived)
+    if (panelMode === 'records')
+        layout.append(recordsBrowser());
+    else if (panelMode === 'relations')
+        layout.append(relationBrowser());
+    else if (sel && !sel.archived)
         layout.append(areaPanel(sel));
     section.append(layout);
     root.append(section);
+    sizeWorkspace();
     if (!mapView)
-        mapView = fitView(map, active);
+        initialMapFitPending = true;
     applyView(plane);
-    scale.textContent = scaleLabel(mapView.s);
+    scale.textContent = scaleLabel(mapView?.s ?? 1);
     redraw();
     add.addEventListener('submit', e => {
         e.preventDefault();
@@ -1889,7 +2979,8 @@ function areaList(active) {
         enter.append(node('strong', `${a.name} ↘`), node('span', a.note ? shortText(a.note, 40) : '구상 미기재', 'hint'));
         if (areaRequests(a.id).some(currentGroup))
             enter.append(appTag());
-        const info = btn('정보', () => { mapSelected = a.id; sheetOpen = true; rememberMap(); render(); }, 'secondary area-list-info', `list-info-${a.id}`);
+        const info = btn('정보', () => { branchRecordCaller = null; capturePanelReading(); if (located && (located.origin.view === 'work' || located.origin.panel === 'records') && located.area !== a.id)
+            endRecordsExcursion(); mapSelected = a.id; sheetOpen = true; panelMode = 'area'; rememberMap(); render(); }, 'secondary area-list-info', `list-info-${a.id}`);
         info.setAttribute('aria-pressed', String(mapSelected === a.id));
         info.setAttribute('aria-label', `${a.name} 정보 (들어가지 않음)`);
         row.append(enter, info);
@@ -1897,15 +2988,397 @@ function areaList(active) {
     }
     return box;
 }
-/** Short properties of the selected area: name and one-line idea. Long work and reports live in the area screen. */
+/** PC12: a user's idea longer than this is shown as its opening words, with the whole text one click away. */
+const NOTE_SHORT = 160;
+/** The user's own idea for an area, read first: an excerpt says so and links the whole text; an empty idea stays empty. */
+function areaIdea(a, id, limit = NOTE_SHORT, label = '사용자 구상') {
+    const box = node('section', '', 'area-idea');
+    box.id = id;
+    box.append(node('p', label, 'source-meta'));
+    if (!a.note) {
+        box.append(noNote(), node('p', '비어 있어요. 아이디어도, 아직 못 정한 점도 직접 적을 수 있어요.', 'hint'));
+        return box;
+    }
+    if (a.note.length <= limit) {
+        box.append(node('p', a.note, 'area-idea-text'));
+        return box;
+    }
+    const full = details(`구상 전체 보기 · 위는 앞부분 · ${a.note.length}자`, `${id}-full`);
+    full.append(node('div', a.note, 'source-raw'));
+    box.append(node('p', shortText(a.note, limit), 'area-idea-text'), full);
+    return box;
+}
+const PANEL_TASKS = 5;
+/** AREA17: the work view line for the result file just imported in this tab: which area's description it was, and the explicit
+ * location action. Not a count, not 'since the last visit'. */
+function receiptLine() {
+    const r = receivedReceiptTarget(), u = r ? returnUnderstanding(project, r.report.id) : null, a = u?.areaId ? areaById(u.areaId) : null;
+    if (!r || !a || !u)
+        return null;
+    const box = node('section', '', 'outcome-received');
+    box.id = 'outcome-received-area';
+    box.dataset.reportTaskId = r.report.id;
+    box.append(node('p', u.entry?.held ? `받은 결과의 영역 설명 · ‘${a.name}’ · 현재 설명에는 반영하지 않았어요` : `받은 결과로 ‘${a.name}’의 현재 설명이 바뀌었어요 · 앱 미검증`, 'hint'));
+    if (!a.archived)
+        box.append(btn('지도에서 이 부분 보기', () => { if (receivedReceiptTarget()?.report.id === r.report.id)
+            showReceivedArea(a.id, 'result-show-area'); }, 'secondary', 'result-show-area'));
+    return box;
+}
+/** AREA17: explicit 'where is it'. Opens the whole space with this area selected and its panel open, and moves only the map
+ * viewport (the smallest pan; a zoom-out only when the card is larger than the free part) so the card is inside the part of
+ * the map the panel and tools do not cover. Never a whole-map fit. Stored
+ * positions and other areas never move, and receiving a description never does this. The view before it is kept: '← 위치 찾기
+ * 전 보기로' brings back its layer, viewport, selection, panel, open disclosures, scroll and focus. */
+function showReceivedArea(id, from = null, keepScale = false) {
+    const a = areaById(id);
+    if (!a || a.archived)
+        return;
+    if (!located) {
+        if (origin) {
+            located = { area: id, origin: structuredClone(origin) };
+        }
+        else if (view === 'space' || view === 'area')
+            markOrigin(from);
+        else {
+            // From the work (or task) screen the starting point is the whole space as this tab would show it.
+            origin = null;
+            leaveLayer();
+            view = 'space';
+            viewArea = null;
+            viewTask = null;
+            viewReturn = null;
+            render();
+            window.scrollTo({ top: layerMemo.space ?? 0 });
+            markOrigin(null);
+        }
+        if (!located && origin)
+            located = { area: id, origin: structuredClone(origin) };
+    }
+    else
+        located.area = id;
+    for (const a of areaPath(project, id).slice(0, -1))
+        collapsed.delete(a.id);
+    origin = null;
+    leaveLayer();
+    view = 'space';
+    viewArea = null;
+    viewTask = null;
+    viewReturn = null;
+    mapSelected = id;
+    sheetOpen = true;
+    panelMode = 'area';
+    render();
+    revealCard(id, keepScale);
+    rememberMap();
+    const line = locatedLine();
+    if (line)
+        document.getElementById('located-note')?.replaceWith(line);
+    const card = document.querySelector(`.area-node[data-area-id="${id}"]`);
+    if (card) {
+        const r = card.getBoundingClientRect(), note = document.getElementById('located-note'), top = (note ?? $('space-map')).getBoundingClientRect().top;
+        // Page scroll (never the map's own box): the card in the window, with the line that offers the way back above it when both fit.
+        if (r.top < 0 || r.bottom > innerHeight || top < 0)
+            window.scrollBy({ top: r.bottom - top <= innerHeight - 16 ? top - 8 : r.top - 16 });
+    }
+    const panel = $('area-panel');
+    panel.tabIndex = -1;
+    panel.focus({ preventScroll: true });
+}
+/** The smallest viewport pan that puts the card inside the map part not covered by the panel (a sheet on narrow screens)
+ * or the map tools. The scale stays unless the card cannot fit at it (then only as much zoom-out as it needs, around the
+ * card). No stored position changes; the starting viewport is restored by the explicit return. */
+function revealCard(id, keepScale = false) {
+    const map = document.getElementById('space-map'), plane = document.getElementById('space-plane'), card = plane?.querySelector(`.area-node[data-area-id="${id}"]`);
+    if (!map || !plane || !card || !mapView)
+        return;
+    const m = map.getBoundingClientRect();
+    let free = { left: 0, top: 0, right: map.clientWidth, bottom: map.clientHeight };
+    for (const el of [document.getElementById('area-panel'), map.querySelector('.map-controls')]) {
+        const r = el?.getBoundingClientRect();
+        if (!r || !r.width || r.right <= m.left || r.left >= m.right || r.bottom <= m.top || r.top >= m.bottom)
+            continue;
+        const l = r.left - m.left, t = r.top - m.top, rr = r.right - m.left, b = r.bottom - m.top, f = free;
+        // Drop the covered band on the side that keeps the largest free rectangle.
+        free = [{ ...f, bottom: Math.min(f.bottom, t) }, { ...f, top: Math.max(f.top, b) }, { ...f, right: Math.min(f.right, l) }, { ...f, left: Math.max(f.left, rr) }]
+            .reduce((x, y) => (y.right - y.left) * (y.bottom - y.top) > (x.right - x.left) * (x.bottom - x.top) ? y : x);
+    }
+    const pad = 16, v0 = mapView, cw = card.offsetWidth, ch = card.offsetHeight, cx = card.offsetLeft + cw / 2, cy = card.offsetTop + ch / 2;
+    // Same scale unless the card cannot fit in the free part at it; then zoom out around the card only as far as it needs.
+    const s = keepScale ? v0.s : Math.max(FIT_MIN, Math.min(v0.s, (free.right - free.left - 2 * pad) / cw, (free.bottom - free.top - 2 * pad) / ch));
+    const v = { x: cx * v0.s + v0.x - cx * s, y: cy * v0.s + v0.y - cy * s, s }, x = card.offsetLeft * s + v.x, y = card.offsetTop * s + v.y, w = cw * s, h = ch * s;
+    const shift = (pos, size, lo, hi) => size > hi - lo - 2 * pad ? lo + pad - pos : pos < lo + pad ? lo + pad - pos : pos + size > hi - pad ? hi - pad - (pos + size) : 0;
+    const dx = shift(x, w, free.left, free.right), dy = shift(y, h, free.top, free.bottom), scaled = s !== v0.s;
+    if (dx || dy || scaled) {
+        mapView = { x: v.x + dx, y: v.y + dy, s };
+        applyView(plane);
+        $('map-scale').textContent = scaleLabel(s);
+    }
+    if (located) {
+        located.moved = located.moved || !!(dx || dy) || scaled;
+        located.scaled = located.scaled || scaled;
+    }
+}
+function locatedLine() {
+    const l = located;
+    if (!l || l.origin.project !== project.id)
+        return null;
+    const a = areaById(l.area);
+    if (!a || a.archived)
+        return null;
+    if (view === 'area' && viewArea === l.area) {
+        const box = node('div', '', 'located-note');
+        box.id = 'located-note';
+        box.append(node('span', '지도에서 위치를 찾아 연 영역이에요', 'hint'), btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`, returnFromLocate, 'secondary origin-return', 'locate-return'));
+        return box;
+    }
+    if (view !== 'space')
+        return null;
+    const box = node('div', '', 'located-note');
+    box.id = 'located-note';
+    box.append(node('span', l.scaled ? `‘${a.name}’ 카드가 다 보이도록 지도 보기를 옮기고 축소했어요 · 배치는 그대로예요` : l.moved ? `‘${a.name}’ 카드가 보이도록 지도 보기만 옮겼어요 · 배치와 배율은 그대로예요` : `‘${a.name}’ 카드는 지금 지도에 보여요`, 'hint'), btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`, returnFromLocate, 'secondary origin-return', 'locate-return'));
+    return box;
+}
+const heldMessage = {
+    'no-anchor': '이전 인계에 설명 기준이 없어 현재 설명으로 쓰지 않았어요.',
+    'area-moved': '인계 뒤 작업의 영역이 달라져 현재 설명으로 쓰지 않았어요.',
+    'area-mismatch': '설명에 적힌 영역과 연결된 작업의 영역이 달라요.',
+    'area-archived': '보관된 영역이라 현재 설명으로 쓰지 않았어요.',
+    'file-basis': '파일의 설명 기준이 실제 인계 기록과 달라요.',
+    'superseded': '그 뒤 설명이나 사용자 정정이 있어 이전 입력을 적용하지 않았어요.',
+    'plan-changed': '인계 뒤 구상·조건·직접 쓴 작업문 또는 포함 맥락의 참고 기준이 바뀌어 적용하지 않았어요.'
+};
+/** Evidence opens here, without selecting a report or changing the work the user continues. */
+function descriptionEvidence(d, id) {
+    const box = details('근거 보기', id);
+    box.append(node('p', `${d.origin} · ${dateLabel(d.entry.at)} · 앱 미검증`, 'hint'));
+    if (d.returnTask) {
+        for (const sid of d.returnTask.sourceIds) {
+            const s = project.sources.find(x => x.id === sid);
+            if (s)
+                box.append(node('p', sourceName[s.kind], 'source-meta'), node('div', reportBody(s), 'source-raw'));
+        }
+        if (d.returnTask.resultFile)
+            box.append(rawFileDetails(d.returnTask.resultFile.rawText, d.returnTask.resultFile.returnId, `${id}-file`));
+    }
+    else
+        box.append(node('p', '사용자가 이전 설명을 직접 정정했어요. 이전 설명과 근거는 아래 기록에 남아요.', 'hint'));
+    return box;
+}
+/** Current read-only comparison material, only inside the explicitly opened stale-description editor. */
+function understandingReviewContext(a, id) {
+    const box = node('div'), context = details('현재 구상·조건 보기', `${id}-context`);
+    context.append(node('p', '현재 기록을 읽어 설명과 대조하세요. 앱이 차이의 의미를 판단하지 않아요.', 'hint'));
+    if (project.space.brief)
+        context.append(node('p', '프로젝트 목적', 'source-meta'), node('div', project.space.brief.text, 'source-raw'));
+    for (const part of areaPath(project, a.id))
+        context.append(node('p', `${part.id === a.id ? '이 부분' : '상위 부분의 참고 구상'} · ${part.name}`, 'source-meta'), node('div', part.note || '아직 구상이 적혀 있지 않아요.', 'source-raw'));
+    const ids = new Set(planStamp(project, a.id).decisions.map(x => x.slice(0, x.lastIndexOf('@'))));
+    for (const basis of project.bases.filter(b => ids.has(b.id)))
+        context.append(node('p', BASIS_LABEL[basis.status], 'source-meta'), node('div', basis.text, 'source-raw'));
+    const work = details('관련 작업문 보기', `${id}-work`), related = understandingReviewWork(project, a.id);
+    work.append(node('p', '현재 작업문을 읽고 설명과 대조하세요.', 'hint'));
+    for (const { task, changed } of related) {
+        const owner = areaById(areaOf(project, task)), place = owner ? `부분 · ${owner.name}${owner.archived ? ' (보관됨)' : ''}` : '부분 미지정 · 함께 참고하는 작업';
+        const row = related.length > 1 ? details(`${taskTitle(project, task)} · ${place}`, `${id}-task-${task.id}`) : node('section');
+        row.dataset.taskId = task.id;
+        row.dataset.changed = String(changed);
+        if (related.length === 1)
+            row.append(node('p', taskTitle(project, task), 'source-meta'), node('p', place, 'hint'));
+        const grid = node('dl', '', 'review-grid task-context-grid');
+        if (fieldRows(task, currentWork(project, task), grid, [['understanding', '짧은 이해'], ['scope', '이번 범위와 유지할 것'], ['next', '실행 도구에 전달할 작업문'], ['checks', '확인할 동작 / 완료 조건']], null, `${id}-${task.id}`))
+            row.append(grid);
+        else
+            row.append(node('p', '아직 적힌 작업문이 없어요.', 'hint'));
+        const correction = intentCorrection(task);
+        if (correction)
+            row.append(node('p', '사용자 직접 정정한 작업 목적·유지 조건', 'source-meta'), node('div', correction.goal, 'source-raw'), node('div', correction.conditions || '(조건을 직접 비워 둠)', 'source-raw'));
+        work.append(row);
+    }
+    if (!related.length)
+        work.append(node('p', '관련된 직접 작성 작업문이 없어요.', 'hint'));
+    box.append(context, work);
+    return box;
+}
+/** AREA17 default reading: a short current description, the first key change and the one judgement it may need (an
+ * unadopted proposal), each cut to its opening words; the whole description, every change, the proposal, its source, the
+ * evidence, the earlier descriptions and the correction are one disclosure away. Nothing stored is cut or changed.
+ * compact: the map's side panel and the task screen, where the user's idea and the requests share the space. */
+function understandingPanel(a, id, compact = false) {
+    id = `${id}-${a.id}`; // Disclosure state belongs to this area, never to another selected area's panel.
+    const state = areaDescription(project, a.id), d = state.current;
+    // An area that never received an organised description shows nothing new (no empty-state line on every panel).
+    if (!d && !state.previous.length && !state.held.length)
+        return null;
+    const box = node('section', '', 'area-understanding');
+    box.id = id;
+    box.setAttribute('aria-label', '영역 현재 설명');
+    // The disclosures share one wrapping row of links; an opened one takes the whole width below the short reading.
+    const more = node('div', '', 'understanding-more');
+    box.append(node('p', d?.entry.by === 'user' ? '전달 기록에서 정리한 설명 · 사용자 정정' : '전달 기록에서 정리한 설명 · 앱 미검증', 'source-meta'));
+    if (d?.valid) {
+        const [S, C, P] = compact ? [80, 50, 40] : [160, 90, 80], first = d.changes[0];
+        box.append(node('p', shortText(d.summary, S), 'understanding-summary'));
+        if (first)
+            box.append(node('p', `달라진 점 · ${shortText(first, C)}`, 'understanding-change'));
+        if (d.proposal) {
+            const pr = node('p', '', 'understanding-proposal');
+            pr.append(node('strong', '구상 변경 제안 · 미채택'), node('span', ` ${shortText(d.proposal, P)}`));
+            box.append(pr, node('p', compact ? '사용자 구상은 그대로예요.' : '사용자 구상은 그대로예요. 받아들일 때만 구상을 직접 고치세요.', 'hint'));
+        }
+        const cut = d.summary.length > S || d.changes.length > 1 || !!first && first.length > C || !!d.proposal && d.proposal.length > P;
+        const full = details(cut ? '설명 전체 보기' : '정리한 곳 보기', `${id}-full`);
+        if (cut) {
+            full.append(node('div', d.summary, 'source-raw'));
+            if (d.changes.length) {
+                const changes = node('ul', '', 'understanding-changes');
+                for (const text of d.changes)
+                    changes.append(node('li', text));
+                full.append(node('p', '직전 정리에서 달라진 점', 'source-meta'), changes);
+            }
+            if (d.proposal)
+                full.append(node('p', '구상 변경 제안 · 미채택 · 실행 지시 아님', 'source-meta'), node('div', d.proposal, 'source-raw'));
+        }
+        full.append(node('p', `정리: ${d.origin} · 앱 미검증`, 'hint'));
+        more.append(full);
+    }
+    else
+        box.append(node('p', d ? '구상·조건·직접 쓴 작업문 또는 포함 맥락의 참고 기준이 바뀌어 이전 설명은 현재 설명으로 쓰지 않아요.' : '아직 현재 설명은 없어요. 받은 정리는 아래 기록에 있어요.', 'hint'));
+    if (d) {
+        more.append(descriptionEvidence(d, `${id}-evidence`));
+        if (!a.archived) {
+            const key = `understanding-edit:${a.id}`, sessionKey = `${project.id}:${key}`, epoch = projectEpoch, owner = project.id;
+            const edit = details(d.valid ? '설명 오류 고치기' : '현재 상황과 대조해 설명 고치기', `${id}-edit`);
+            edit.open = understandingEdits.has(sessionKey);
+            const field = spaceInput(node('textarea'), `${id}-text`, d.summary, key);
+            field.rows = 3;
+            field.maxLength = 2000;
+            field.setAttribute('aria-label', '영역 설명 정정');
+            const warning = node('p', '편집을 연 뒤 설명이나 구상·조건·작업문 등의 기준이 바뀌었어요. 초안은 남겼지만 저장하지 않아요. 취소한 뒤 최신 내용을 읽고 다시 열어 주세요.', 'alert warning');
+            warning.id = `${id}-stale`;
+            warning.setAttribute('role', 'status');
+            const matches = () => { const session = understandingEdits.get(sessionKey); return !!session && owner === project.id && epoch === projectEpoch && session.epoch === projectEpoch && understandingReviewMatches(project, a.id, session.token); };
+            warning.hidden = !understandingEdits.has(sessionKey) || matches();
+            // Only native summary activation starts a review. Render/restored disclosures and typing cannot refresh its token.
+            edit.querySelector('summary').addEventListener('click', () => {
+                if (edit.open || understandingEdits.has(sessionKey) || !edit.isConnected || !edit.getClientRects().length || owner !== project.id || epoch !== projectEpoch)
+                    return;
+                const token = beginUnderstandingReview(project, a.id);
+                understandingEdits.set(sessionKey, { token, epoch });
+                field.value = areaDescription(project, a.id).current.summary;
+                spaceInputs[sessionKey] = field.value;
+            });
+            edit.append(field, node('p', '이전 설명은 남습니다. 작업문과 조건은 바뀌지 않으며, 앱이 사실을 검증한 것은 아닙니다.', 'hint'));
+            if (!d.valid)
+                edit.append(understandingReviewContext(a, `${id}-review`));
+            const endEdit = () => {
+                edit.open = false;
+                // Native toggle is asynchronous; the task reader must not restore the just-ended editor as still open.
+                if (view === 'task' && readOpen?.task === viewTask && readOpen.ret === viewReturn)
+                    readOpen.open[edit.id] = false;
+                clearInputs(key);
+                understandingEdits.delete(sessionKey);
+            };
+            edit.append(warning, btn(d.valid ? '정정 저장' : '현재 설명으로 기록', () => {
+                if (owner !== project.id || epoch !== projectEpoch || !edit.isConnected)
+                    return;
+                if (!matches()) {
+                    spaceInputs[sessionKey] = field.value;
+                    warning.hidden = false;
+                    return;
+                }
+                const n = recordUnderstandingReview(project, a.id, field.value, understandingEdits.get(sessionKey).token);
+                endEdit();
+                commit(n);
+            }, 'secondary', `${id}-save`), btn('취소', () => {
+                if (owner !== project.id || epoch !== projectEpoch || !edit.isConnected)
+                    return;
+                endEdit();
+                render();
+            }, 'quiet', `${id}-cancel`));
+            more.append(edit);
+        }
+    }
+    if (state.previous.length || state.held.length || d && !d.valid) {
+        const history = details('이전 설명 · 반영하지 않은 정리', `${id}-history`);
+        for (const old of [...(d && !d.valid ? [d] : []), ...state.previous, ...state.held]) {
+            const row = node('section', '', 'understanding-record');
+            row.append(node('p', old.entry.held ? heldMessage[old.entry.held] : old === d ? '구상·조건·직접 쓴 작업문 등의 이전 기준 설명 · 지금은 현재 설명이 아니에요' : old.entry.by === 'user' ? '사용자 정정 기록' : '이전 정리 설명', 'source-meta'), node('div', old.summary, 'source-raw'), descriptionEvidence(old, `${id}-history-${old.returnTask?.id ?? old.entry.revision}`));
+            if (old.proposal)
+                row.append(node('p', `미채택 제안: ${old.proposal}`, 'source-raw'));
+            history.append(row);
+        }
+        more.append(history);
+    }
+    if (more.childElementCount)
+        box.append(more);
+    return box;
+}
+/** Short properties of the selected area, read first: name, the user's idea, and this area's requests for the user to pick.
+ * Editing opens explicitly. No report is picked for the user; reports are read inside the task the user chose. */
 function areaPanel(a) {
+    if (branchRecordCaller && (branchRecordCaller.project !== project.id || branchRecordCaller.epoch !== projectEpoch || branchRecordCaller.area !== a.id))
+        branchRecordCaller = null;
     const panel = node('aside', '', 'area-panel');
     panel.id = 'area-panel';
+    panel.dataset.panelMode = 'area';
     panel.setAttribute('aria-label', `${a.name} 속성`);
     panel.classList.toggle('sheet-open', sheetOpen);
-    const head = node('div', '', 'panel-top');
-    head.append(node('strong', a.name), btn('닫기', () => { mapSelected = null; sheetOpen = false; rememberMap(); render(); }, 'quiet', 'area-panel-close'));
+    const close = () => {
+        capturePanelReading();
+        const caller = branchRecordCaller;
+        branchRecordCaller = null;
+        mapSelected = null;
+        sheetOpen = false;
+        rememberMap();
+        render();
+        if (caller) {
+            if (caller.project === project.id && caller.epoch === projectEpoch && caller.area === a.id && (focusBranchRecordControl(caller.id) || focusBranchRecordControl(`node-info-${a.id}`)))
+                return;
+            $('space-title')?.focus({ preventScroll: true });
+            return;
+        }
+        if (!focusFirst(`node-info-${visibleRepresentative(project, a.id, collapsed) ?? a.id}`))
+            $('space-title')?.focus({ preventScroll: true });
+    };
+    const head = node('div', '', 'panel-top'), heading = node('strong', a.name);
+    heading.id = 'area-panel-title';
+    heading.title = a.name;
+    const path = node('p', areaPath(project, a.id).map(x => x.name).join(' › '), 'panel-path');
+    path.id = 'panel-path';
+    path.title = path.textContent ?? '';
+    head.append(heading, btn('닫기', close, 'quiet', 'area-panel-close'), path, btn('행동으로 건너뛰기', () => { const b = $('panel-open'); b.focus({ preventScroll: true }); }, 'panel-skip', 'panel-skip-actions'));
+    const body = node('div', '', 'panel-body');
+    body.id = 'area-panel-body';
+    body.dataset.areaId = a.id;
+    body.dataset.projectId = project.id;
+    body.tabIndex = 0;
+    body.setAttribute('role', 'region');
+    body.setAttribute('aria-label', `${a.name} 내용 읽기`);
+    body.addEventListener('scroll', () => { capturePanelReading(); rememberMap(); }, { passive: true });
+    body.addEventListener('toggle', () => { capturePanelReading(); rememberMap(); }, true);
+    body.addEventListener('wheel', e => { e.stopPropagation(); if ((e.deltaY < 0 && body.scrollTop <= 0) || (e.deltaY > 0 && body.scrollTop + body.clientHeight >= body.scrollHeight - 1))
+        e.preventDefault(); }, { passive: false });
+    body.addEventListener('keydown', e => {
+        if (e.target.closest('input,textarea,select,button,summary,[contenteditable="true"]'))
+            return;
+        const n = { ArrowDown: 40, ArrowUp: -40, PageDown: body.clientHeight * .8, PageUp: -body.clientHeight * .8, ' ': body.clientHeight * .8 }[e.key];
+        if (n !== undefined) {
+            e.preventDefault();
+            e.stopPropagation();
+            body.scrollTop += e.shiftKey && e.key === ' ' ? -n : n;
+        }
+        else if (e.key === 'Home' || e.key === 'End') {
+            e.preventDefault();
+            e.stopPropagation();
+            body.scrollTop = e.key === 'Home' ? 0 : body.scrollHeight;
+        }
+    });
+    panel.addEventListener('keydown', e => { if (e.key !== 'Escape' || e.defaultPrevented || e.isComposing || e.keyCode === 229 || e.target.closest('input,textarea,select,[contenteditable="true"],[role="combobox"]'))
+        return; e.preventDefault(); e.stopPropagation(); close(); });
     const nameKey = `area-edit-name:${a.id}`, noteKey = `area-edit-note:${a.id}`;
+    const edit = details('이름·구상 고치기', 'panel-edit');
+    edit.classList.add('panel-edit');
+    edit.open = panelDirty(a);
     const name = spaceInput(node('input'), 'panel-name', a.name, nameKey);
     name.maxLength = 60;
     name.setAttribute('aria-label', '영역 이름');
@@ -1915,29 +3388,127 @@ function areaPanel(a) {
     note.setAttribute('aria-label', '한 줄 구상');
     const row = node('div', '', 'row');
     row.append(btn('반영', () => { if (!name.value.trim())
-        return; commit(editArea(project, a.id, name.value, note.value)); clearInputs(nameKey, noteKey); }, 'secondary', 'panel-save'), btn('취소', () => { clearInputs(nameKey, noteKey); render(); }, 'quiet', 'panel-cancel'));
-    const go = node('div', '', 'row');
-    go.append(btn('영역 열기 ↗', () => openArea(a.id), 'primary', 'panel-open'), btn('이 영역에 새 요청', () => writeInArea(a.id), 'quiet', 'panel-new-request'), btn('무엇을 요청할지 같이 정하기', () => { guideOf(a.id); openArea(a.id); document.getElementById(`guide-${a.id}`)?.scrollIntoView({ block: 'start' }); }, 'quiet', 'panel-guide'));
-    panel.append(head, node('label', '이름'), name, node('label', '한 줄 구상'), note, node('p', '아이디어도, 아직 못 정한 점도 적을 수 있어요.', 'hint'), row, node('p', areaSummary(a), 'hint'));
-    const requests = areaRequests(a.id);
-    if (requests.some(currentGroup))
-        panel.append(node('p', '‘앱에서 이어갈 작업’은 이 앱에서 열어 둔 작업이에요. 외부 도구에서 지금 실행 중이라는 뜻이 아니에요.', 'hint'));
-    const rt = requests.flatMap(returnsOf).sort((x, y) => project.tasks.indexOf(y) - project.tasks.indexOf(x))[0], src = rt ? project.sources.find(s => s.id === rt.sourceIds[0]) : undefined;
-    if (rt && src) {
-        // Raw text only: no summary, no classification of what the report says; the full report stays in the area screen.
-        const box = node('section', '', 'panel-report'), parent = rt.parentTaskId;
-        box.id = 'panel-report';
-        box.append(node('p', `최근 돌아온 ${sourceName[src.kind]} · 원문 앞부분 · ${dateLabel(src.at)} · 작업 ${project.tasks.findIndex(x => x.id === parent) + 1}에 연결${sourceName[src.kind].includes('미검증') ? '' : ' · 앱 미검증'}`, 'hint'), node('p', shortText(reportBody(src), 140), 'source-raw panel-excerpt'));
-        const links = node('div', '', 'row');
-        links.append(btn('자세히 보기', () => { openArea(a.id); const d = document.getElementById(`raw-${parent}`); if (d) {
-            d.open = true;
-            d.scrollIntoView({ block: 'start' });
-        } }, 'quiet', 'panel-report-more'), btn(project.currentTaskId === rt.id ? '작업 화면으로' : '이 보고에서 이어가기', () => continueTask(rt.id), 'quiet', 'panel-report-continue'));
-        box.append(links);
-        panel.append(box);
+        return; const next = editArea(project, a.id, name.value, note.value); edit.open = false; clearInputs(nameKey, noteKey); commit(next); }, 'secondary', 'panel-save'), btn('취소', () => { clearInputs(nameKey, noteKey); render(); }, 'quiet', 'panel-cancel'));
+    edit.append(node('label', '이름'), name, node('label', '한 줄 구상'), note, node('p', '아이디어도, 아직 못 정한 점도 적을 수 있어요.', 'hint'), row);
+    const go = node('div', '', 'row panel-actions');
+    go.id = 'panel-actions';
+    go.setAttribute('role', 'group');
+    go.setAttribute('aria-label', '선택한 영역의 행동');
+    go.append(btn('영역 열기 ↗', () => openArea(a.id), 'primary', 'panel-open'), btn('이 영역에 새 요청', () => writeInArea(a.id), 'quiet', 'panel-new-request'));
+    if (a.name.length > 24) {
+        const full = details('영역 이름 전체 보기', `panel-name-full-${a.id}`);
+        full.append(node('p', a.name));
+        body.append(full);
     }
-    panel.append(go);
+    body.append(areaIdea(a, 'panel-idea', 100), ...[understandingPanel(a, 'panel-understanding', true)].filter(x => !!x), subtreePanel(a), node('p', areaSummary(a), 'hint'));
+    const more = details('더보기 · 하위 부분과 소속', 'panel-more');
+    more.append(hierarchyEditor(a), btn('무엇을 요청할지 같이 정하기', () => { guideOf(a.id); openArea(a.id); document.getElementById(`guide-${a.id}`)?.scrollIntoView({ block: 'start' }); }, 'quiet', 'panel-guide'));
+    // Keep direct edit access (including its old id) without letting the expanded form displace the pinned actions.
+    body.append(edit, more);
+    const requests = areaRequests(a.id), list = node('section', '', 'panel-tasks');
+    list.id = 'panel-tasks';
+    if (requests.length) {
+        list.append(node('p', `이 영역의 요청 ${requests.length}개 · 골라서 읽기`, 'source-meta'));
+        const ul = node('ul', '', 'panel-task-list');
+        for (const t of requests.slice(0, 2)) {
+            const li = node('li'), open = btn(`${taskTitle(project, t)} ↘`, () => openTaskView(t.id, null, `panel-task-${t.id}`), 'quiet panel-task', `panel-task-${t.id}`);
+            li.append(open, node('span', `작업 ${pad(project.tasks.indexOf(t) + 1)} · ${taskStatus(project, t)}`, 'hint'));
+            if (currentGroup(t))
+                li.append(appTag());
+            ul.append(li);
+        }
+        list.append(ul);
+        if (requests.length > 2) {
+            const rest = details(`요청 ${requests.length - 2}개 더 보기`, `panel-tasks-more-${a.id}`);
+            for (const t of requests.slice(2))
+                rest.append(btn(`${taskTitle(project, t)} ↘`, () => openTaskView(t.id, null, `panel-task-${t.id}`), 'quiet panel-task', `panel-task-${t.id}`));
+            list.append(rest);
+        }
+        list.append(node('p', '읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.', 'hint'));
+    }
+    else
+        list.append(node('p', '아직 이 영역의 요청이 없어요.', 'hint'));
+    body.append(list);
+    if (requests.some(currentGroup))
+        body.append(node('p', '‘앱에서 이어갈 작업’은 앱 안의 표시이며, 외부 도구의 실행 상태는 아니에요.', 'hint'));
+    panel.append(head, body, go);
     return panel;
+}
+function hierarchyEditor(a) {
+    const box = node('section', '', 'hierarchy-editor'), form = node('form');
+    form.id = 'child-add-form';
+    const name = spaceInput(node('input'), 'child-name', '', `child-name:${a.id}`), note = spaceInput(node('textarea'), 'child-note', '', `child-note:${a.id}`);
+    name.maxLength = 60;
+    note.maxLength = 2000;
+    note.rows = 2;
+    name.placeholder = '새 하위 부분 이름';
+    name.setAttribute('aria-label', '새 하위 부분 이름');
+    note.placeholder = '하위 부분의 구상 (선택)';
+    note.setAttribute('aria-label', '하위 부분의 구상');
+    const add = node('button', '하위 부분 추가', 'secondary');
+    add.type = 'submit';
+    add.id = 'child-add';
+    form.append(name, note, add);
+    form.addEventListener('submit', e => { e.preventDefault(); if (!name.value.trim())
+        return; guard(() => { const next = addChildArea(project, a.id, name.value, note.value), created = next.space.areas.at(-1); collapsed.delete(a.id); clearInputs(`child-name:${a.id}`, `child-note:${a.id}`); mapSelected = created.id; sheetOpen = true; commit(next); revealCard(created.id); rememberMap(); }); });
+    const select = node('select');
+    select.id = 'area-parent';
+    select.setAttribute('aria-label', '이 영역의 상위 부분');
+    const no = node('option', '독립 영역');
+    no.value = '';
+    select.append(no);
+    const blocked = new Set([a.id, ...descendantAreas(project, a.id).map(x => x.id)]);
+    for (const candidate of project.space.areas.filter(x => !x.archived && !blocked.has(x.id))) {
+        const op = node('option', areaPath(project, candidate.id).map(x => x.name).join(' › '));
+        op.value = candidate.id;
+        select.append(op);
+    }
+    const key = `parent-choice:${a.id}`, stored = spaceInputs[`${project.id}:${key}`];
+    select.value = stored ?? project.space.containment.parents[a.id] ?? '';
+    select.addEventListener('change', () => { spaceInputs[`${project.id}:${key}`] = select.value; });
+    const error = node('p', '', 'hint');
+    error.id = 'area-parent-message';
+    error.setAttribute('role', 'status');
+    box.append(node('h3', '하위 부분과 소속'), form, node('label', '이 영역의 상위 부분'), select, btn('소속 반영', () => { try {
+        const next = setAreaParent(project, a.id, select.value || null);
+        for (const parent of areaPath(next, a.id).slice(0, -1))
+            collapsed.delete(parent.id);
+        clearInputs(key);
+        commit(next);
+        revealCard(a.id, true);
+        rememberMap();
+    }
+    catch {
+        error.textContent = '소속을 바꾸지 않았어요. 자기 자신·하위 부분·보관된 영역은 상위 부분으로 고를 수 없어요.';
+    } }, 'secondary', 'area-parent-save'), error, node('p', '카드를 옮겨도 소속은 바뀌지 않아요. 공유하는 부분은 복제하지 않고 연결로 나타내세요.', 'hint'));
+    return box;
+}
+function subtreePanel(a) {
+    const signals = subtreeSignals(project, a.id), items = signals.flatMap(s => [...s.questions, ...s.reports]);
+    const descriptions = signals.map(s => ({ id: s.areaId, state: s.description })).filter(x => x.state.current || x.state.held.length);
+    const box = details(`이 부분과 하위 기록 · 질문 ${items.filter(it => it.kind === 'decision').length} · 설명 ${descriptions.length}`, `subtree-records-${a.id}`);
+    box.className = 'subtree-records';
+    box.querySelector('summary').id = `subtree-records-heading-${a.id}`;
+    box.append(node('p', '앱에 기록된 질문·보고·설명이에요. 답변 기록이 있는 질문도 포함하며, 개발의 모든 미결이나 완료 수는 아니에요.', 'hint'));
+    for (const it of items) {
+        const task = project.tasks.find(t => t.id === it.taskId), owner = areaById(it.areaId), row = node('div', '', 'subtree-record');
+        row.dataset.ownerArea = it.areaId ?? '';
+        row.append(node('p', `${owner?.name ?? '영역 미지정'} · ${it.kind === 'decision' ? '기록된 질문' : '후속 작업문 없는 보고'}`, 'source-meta'), btn(task ? taskTitle(project, task) : '기록 보기', () => openTaskView(it.taskId, it.returnId, `subtree-task-${it.returnId ?? it.taskId}`), 'quiet', `subtree-task-${it.returnId ?? it.taskId}`));
+        if (it.kind === 'decision')
+            row.append(node('p', `${'answered' in it && it.answered ? '답변 기록 있음' : '답변 기록 없음'} · ${it.status}`, 'hint'));
+        if (owner)
+            row.append(btn('소유 부분 찾기', () => showReceivedArea(owner.id, `subtree-owner-${it.returnId ?? it.taskId}`, true), 'quiet', `subtree-owner-${it.returnId ?? it.taskId}`));
+        box.append(row);
+    }
+    for (const { id, state } of descriptions) {
+        const row = node('div', '', 'subtree-description');
+        row.dataset.ownerArea = id;
+        row.append(node('span', `${areaById(id)?.name} · ${state.current?.valid ? '현재 설명 있음' : state.current ? '이전 기준 설명' : ''}${state.held.length ? ` · 보류 ${state.held.length}건` : ''}`), btn('설명 읽을 부분 찾기', () => showReceivedArea(id, `subtree-description-${id}`, true), 'quiet', `subtree-description-${id}`));
+        box.append(row);
+    }
+    if (!items.length && !descriptions.length)
+        box.append(node('p', '이 범위에 해당하는 앱 기록이 없어요. 일반적인 개발 미결이 없다는 뜻은 아니에요.', 'hint'));
+    return box;
 }
 function renderSpace() {
     const root = $('space-view');
@@ -1979,43 +3550,81 @@ function renderSpace() {
         renderUnplaced(root);
 }
 /* ---------- SPATIAL102: '확인할 일' (read-only, from existing records) ---------- */
-const CHECK_SHOWN = 4;
 function checkRow(it) {
     const li = node('li', '', 'check-item');
     li.dataset.kind = it.kind;
     const t = project.tasks.find(x => x.id === it.taskId), a = areaById(it.areaId);
     li.append(node('span', `${a ? a.name : '영역 미지정'}${a?.archived ? ' · 보관됨' : ''}`, 'check-area'), node('strong', t ? taskTitle(project, t) : ''), node('span', it.kind === 'decision' ? `${it.status} · 답을 기다려요` : `${it.status} · 아직 다음 요청이나 확인 작업문 없음`, 'hint'));
-    li.append(btn('보기', () => openTaskView(it.taskId, it.returnId), 'quiet', `check-open-${it.returnId ?? it.taskId}`));
+    li.append(btn('보기', () => openTaskView(it.taskId, it.returnId, `check-open-${it.returnId ?? it.taskId}`), 'quiet', `check-open-${it.returnId ?? it.taskId}`));
+    if (a && !a.archived)
+        li.append(btn('소유 부분 보기', () => showReceivedArea(a.id, `check-area-${it.returnId ?? it.taskId}`, true), 'quiet', `check-area-${it.returnId ?? it.taskId}`));
     return li;
 }
 /** Shown once the project has requests. Items with evidence only: an open question, a report nothing was done with yet. */
+const CHECK_KIND = { decision: '답 기다림', report: '후속 작업문 없는 보고' };
+/** Records reuse the existing task/report identities; only their reading container is different. */
 function checkSection() {
     if (!project.tasks.length)
         return null;
-    const items = checkItems(project), box = node('section', '', 'check-list');
-    box.id = 'check-list';
-    box.append(node('h2', items.length ? `확인할 일 ${items.length}건` : '확인할 일'));
-    if (!items.length) {
-        box.append(node('p', '지금 앱 기록으로는 확인할 일이 없어요.', 'hint'));
-        return box;
-    }
-    box.append(node('p', '답을 기다리는 질문과, 받은 뒤 아직 손대지 않은 보고예요. 앱 기록 기준이며 개발 도구의 실행 상태는 아니에요.', 'hint'));
-    const list = node('ul', '', 'check-items');
-    for (const it of items.slice(0, CHECK_SHOWN))
-        list.append(checkRow(it));
-    box.append(list);
-    if (items.length > CHECK_SHOWN) {
-        const more = details(`나머지 ${items.length - CHECK_SHOWN}건`, 'check-more'), rest = node('ul', '', 'check-items');
-        for (const it of items.slice(CHECK_SHOWN))
-            rest.append(checkRow(it));
-        more.append(rest);
-        box.append(more);
-    }
+    const items = checkItems(project), box = btn('', openRecords, 'quiet records-open', 'check-summary');
+    const kinds = ['decision', 'report'].map(k => [k, items.filter(i => i.kind === k).length]).filter(([, n]) => n > 0);
+    box.append(node('span', `이어 볼 기록 ${items.length}개`, 'check-count'), ...kinds.map(([k, n]) => node('span', ` · ${CHECK_KIND[k]} ${n}`, 'check-kind')));
+    box.setAttribute('aria-controls', 'area-panel');
+    box.setAttribute('aria-pressed', String(panelMode === 'records'));
     return box;
+}
+function openRecords() { branchRecordCaller = null; capturePanelReading(); located = null; origin = null; panelMode = 'records'; recordsReturnNotice = ''; rememberMap(); render(); $('records-heading')?.focus({ preventScroll: true }); }
+function recordsBrowser() {
+    const panel = node('aside', '', 'area-panel records-panel sheet-open');
+    panel.id = 'area-panel';
+    panel.dataset.panelMode = 'records';
+    panel.setAttribute('aria-label', '이어 볼 기록 읽기');
+    const close = () => { capturePanelReading(); panelMode = 'area'; rememberMap(); render(); $('check-summary')?.focus({ preventScroll: true }); };
+    const items = checkItems(project), head = node('div', '', 'panel-top'), heading = node('strong', `이어 볼 기록 ${items.length}개`);
+    heading.id = 'records-heading';
+    heading.tabIndex = -1;
+    head.append(heading, btn('닫기', close, 'quiet', 'area-panel-close'));
+    const notice = node('p', recordsReturnNotice, 'hint records-return-notice');
+    notice.id = 'records-return-notice';
+    notice.hidden = !recordsReturnNotice;
+    notice.setAttribute('role', 'status');
+    head.append(notice);
+    const body = node('div', '', 'panel-body');
+    body.id = 'area-panel-body';
+    body.dataset.areaId = '@records';
+    body.dataset.projectId = project.id;
+    body.tabIndex = 0;
+    body.setAttribute('role', 'region');
+    body.setAttribute('aria-label', '이어 볼 기록 목록');
+    body.append(node('p', items.length ? '답을 기다리는 질문과, 받은 뒤 아직 다음 요청이나 확인 작업문이 없는 보고예요. 앱 기록 기준이며 개발 도구의 실행 상태나 완료 여부는 아니에요.' : '이어 볼 질문이나 보고가 지금은 없어요. 원래 요청과 보고는 지난 요청과 결과에서 볼 수 있어요.', 'hint'));
+    const list = node('ul', '', 'check-items');
+    list.id = 'check-list';
+    for (const it of items)
+        list.append(checkRow(it));
+    body.append(list);
+    body.addEventListener('scroll', () => { capturePanelReading(); rememberMap(); }, { passive: true });
+    body.addEventListener('toggle', () => { capturePanelReading(); rememberMap(); }, true);
+    body.addEventListener('wheel', e => { e.stopPropagation(); if (e.deltaY < 0 && body.scrollTop <= 0 || e.deltaY > 0 && body.scrollTop + body.clientHeight >= body.scrollHeight - 1)
+        e.preventDefault(); }, { passive: false });
+    body.addEventListener('keydown', e => { if (e.defaultPrevented || e.isComposing || e.keyCode === 229 || e.target.closest('input,textarea,select,[contenteditable="true"]') || e.key === ' ' && e.target !== body)
+        return; if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' ', 'Home', 'End'].includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        body.scrollTop = e.key === 'Home' ? 0 : e.key === 'End' ? body.scrollHeight : body.scrollTop + (e.key === 'ArrowDown' ? 40 : e.key === 'ArrowUp' ? -40 : e.key === 'PageUp' || e.key === ' ' && e.shiftKey ? -body.clientHeight * .8 : body.clientHeight * .8);
+    } });
+    panel.addEventListener('keydown', e => { if (e.key !== 'Escape' || protectedEscape(e))
+        return; e.preventDefault(); e.stopPropagation(); close(); });
+    const actions = node('div', '', 'panel-actions');
+    actions.id = 'panel-actions';
+    actions.append(btn('지도에서 계속 보기', close, 'secondary', 'records-close'));
+    panel.append(head, body, actions);
+    return panel;
 }
 function renderOverview(root) {
     const active = project.space.areas.filter(a => !a.archived), archived = project.space.areas.filter(a => a.archived), brief = project.space.brief;
-    const head = node('div', '', 'space-head compact'), title = node('h1', '전체 공간');
+    // PC13: the path above already names this layer, so the overview's own title is kept for focus and screen readers only;
+    // the program's purpose (one line) and its full text/edit stay on the first line.
+    const head = node('div', '', 'space-head compact overview-head'), title = node('h1', '전체 공간', 'sr-only');
     title.id = 'space-title';
     title.tabIndex = -1;
     const line = node('div', '', 'space-head-line');
@@ -2026,7 +3635,9 @@ function renderOverview(root) {
         line.append(node('span', '프로젝트 목적', 'space-brief-label'));
     line.append(purpose);
     head.append(line);
-    const edit = details(brief ? '목적 전체 보기 · 고치기' : '목적 적기', 'brief-edit'), field = spaceInput(node('textarea'), 'brief-edit-text', brief?.text ?? '');
+    if (brief)
+        line.append(btn('목적 전체 보기', readMapPurpose, 'quiet', 'brief-read'));
+    const edit = details(brief ? '목적 고치기' : '목적 적기', 'brief-edit'), field = spaceInput(node('textarea'), 'brief-edit-text', brief?.text ?? '');
     field.rows = 4;
     field.maxLength = 12000;
     field.setAttribute('aria-label', '프로젝트 목적');
@@ -2034,18 +3645,31 @@ function renderOverview(root) {
         return; commit(setBrief(project, field.value.trim())); clearInputs('brief-edit-text'); }, 'secondary', 'brief-save'));
     if (brief?.previous.length)
         edit.append(node('p', `이전에 적은 목적 ${brief.previous.length}개는 그대로 보관돼요.`, 'hint'));
-    head.append(edit);
+    edit.classList.add('brief-disclosure');
+    line.append(edit);
     root.append(head);
-    const checks = checkSection();
-    if (checks)
-        root.append(checks);
     if (!active.length && route !== 'example') {
         const start = node('div', '', 'row space-start');
         start.id = 'space-start';
-        start.append(btn('영역 추가', () => $('area-name').focus(), 'secondary', 'start-add-area'), btn('바로 첫 요청 쓰기 · 영역 없이', () => writeInArea(null), 'quiet', 'start-first-request'));
+        start.append(btn('영역 추가', () => { $('area-add-panel').open = true; $('area-name').focus(); }, 'secondary', 'start-add-area'), btn('바로 첫 요청 쓰기 · 영역 없이', () => writeInArea(null), 'quiet', 'start-first-request'));
         root.append(start);
     }
-    renderMap(root, active);
+    if (receivedAreas.size) {
+        const recent = node('div', '', 'received-areas');
+        recent.id = 'received-areas';
+        recent.append(node('span', '이 탭에서 받은 설명 · 위치 보기'));
+        for (const id of receivedAreas) {
+            const a = areaById(id);
+            if (a && !a.archived)
+                recent.append(btn(a.name, () => showReceivedArea(id, `received-area-${id}`), 'quiet', `received-area-${id}`));
+        }
+        root.append(recent);
+    }
+    const loc = locatedLine();
+    if (loc)
+        root.append(loc);
+    const records = checkSection();
+    renderMap(root, active, records ? [records] : []);
     if (active.length > 1 || project.space.relations.length) {
         const rel = node('section', '', 'area-relations');
         rel.id = 'area-relations';
@@ -2098,7 +3722,7 @@ function taskEntry(t, placing) {
     const first = sourceOf(project, t), results = returnsOf(t);
     // SPATIAL102: the title enters the read-only task screen; continuing stays the explicit button below.
     const title = node('h3');
-    title.append(btn(`${taskTitle(project, t)} ↘`, () => openTaskView(t.id), 'task-open-link', `task-open-${t.id}`));
+    title.append(btn(`${taskTitle(project, t)} ↘`, () => openTaskView(t.id, null, `task-open-${t.id}`), 'task-open-link', `task-open-${t.id}`));
     item.append(title, node('p', `${first ? dateLabel(first.at) : ''} · ${taskStatus(project, t)}`, 'hint'));
     if (results.length) {
         const last = results.at(-1), src = project.sources.find(s => s.id === last.sourceIds[0]);
@@ -2428,11 +4052,16 @@ function renderArea(root, a) {
     const head = node('div', '', 'space-head'), title = node('h1', a.name);
     title.id = 'space-title';
     title.tabIndex = -1;
-    head.append(node('p', a.archived ? 'AREA · 보관됨' : 'AREA', 'eyebrow'), title, a.note ? node('p', a.note, 'space-brief') : noNote());
+    // PC12: the user's idea is read first; a long one shows its opening words and says where the whole text is.
+    head.append(node('p', a.archived ? 'AREA · 보관됨' : 'AREA', 'eyebrow'), title, !a.note ? noNote() : a.note.length <= NOTE_SHORT * 2 ? node('p', a.note, 'space-brief') : areaIdea(a, 'area-idea', NOTE_SHORT * 2));
     const actions = node('div', '', 'row');
     if (!a.archived)
         actions.append(btn('＋ 이 영역에 새 요청', () => writeInArea(a.id), 'primary', 'area-new-request'));
-    actions.append(btn(a.archived ? '영역 되살리기' : '영역 보관', () => { commit(setAreaArchived(project, a.id, !a.archived)); if (!a.archived) {
+    actions.append(btn(a.archived ? '영역 되살리기' : '영역 보관', () => { if (!a.archived && childrenOf(project, a.id).some(x => !x.archived)) {
+        project = { ...project, notice: '하위 부분이 남아 있어 보관하지 않았어요. 먼저 하위 부분의 소속을 바꾸거나 하위 부분부터 보관하세요.' };
+        renderStatus();
+        return;
+    } commit(setAreaArchived(project, a.id, !a.archived)); if (!a.archived) {
         project = { ...project, notice: `‘${a.name}’ 영역을 보관했어요. 연결된 요청과 결과는 그대로이며 ‘보관한 영역’에서 되살릴 수 있어요.` };
         openSpace();
     } }, 'quiet', 'area-archive'));
@@ -2447,13 +4076,19 @@ function renderArea(root, a) {
     note.setAttribute('aria-label', '영역 설명');
     edit.append(name, note, btn('저장', () => { if (!name.value.trim())
         return; commit(editArea(project, a.id, name.value, note.value)); clearInputs(nameKey, noteKey); }, 'secondary', 'area-edit-save'), btn('취소', () => { clearInputs(nameKey, noteKey); edit.open = false; render(); }, 'quiet', 'area-edit-cancel'));
+    const back = locatedLine();
+    if (back)
+        root.append(back);
     head.append(edit);
     root.append(head);
+    const described = understandingPanel(a, 'area-understanding');
+    if (described)
+        root.append(described);
     const checks = checkItems(project), here = checks.filter(c => c.areaId === a.id).length, elsewhere = checks.length - here;
     if (here || elsewhere) {
-        const line = node('p', `확인할 일 · 이 영역 ${here}건${elsewhere ? ` · 다른 영역 ${elsewhere}건` : ''} `, 'hint area-checks');
+        const line = node('p', `이어 볼 기록 · 이 영역 ${here}개${elsewhere ? ` · 다른 영역 ${elsewhere}개` : ''} `, 'hint area-checks');
         line.id = 'area-checks';
-        line.append(btn('전체 공간에서 보기', () => { openSpace(); $('check-list')?.scrollIntoView({ block: 'start' }); }, 'crumb-link', 'area-checks-open'));
+        line.append(btn('전체 공간에서 보기', () => { openSpace(); openRecords(); }, 'crumb-link', 'area-checks-open'));
         root.append(line);
     }
     const tasks = areaRequests(a.id), list = node('section', '', 'area-tasks');
@@ -2481,45 +4116,285 @@ function renderArea(root, a) {
     box.append(node('p', '다른 영역·미분류 기준은 다른 영역의 요청에서 나왔거나 어느 영역에서 나왔는지 기록이 없는 기준이에요. 모두가 합의한 공통 기준이라는 뜻은 아니에요. 이 영역에 복사하지 않고, 기준 전체가 지금처럼 모든 작업문에 함께 들어가요.', 'hint'), btn('기준 · 출처 전체 보기', showContext, 'quiet'));
     root.append(box);
 }
-/** SPATIAL102: one request, read-only: its words, status, returned results and the bases that came from it. */
+/** PC12: which record an explicit continue would edit. Mirrors continueTask: a current report of this request stays current;
+ * otherwise the request itself becomes current (never one of its older reports). */
+function continueTarget(t) {
+    const cur = project.currentTaskId ? project.tasks.find(x => x.id === project.currentTaskId) ?? null : null, no = (x) => `작업 ${pad(project.tasks.indexOf(x) + 1)}`;
+    if (cur?.id === t.id)
+        return { button: '작업 화면으로', text: `지금 이어가는 작업이에요. 고치면 이 요청(${no(t)})의 작업문이 바뀌어요.` };
+    if (cur && isReturnTask(project, cur) && cur.parentTaskId === t.id)
+        return { button: '작업 화면으로', text: `이어가면 이 요청에 받은 현재 보고(${no(cur)})에서 계속해요. 고치는 대상은 ${no(cur)}의 후속 확인 작업문이고, 읽고 있는 ${no(t)}의 작업문은 바뀌지 않아요.` };
+    return { button: '이 작업 이어서 하기', text: `이어가면 이 요청(${no(t)})으로 바꾸고 ${no(t)}의 작업문을 고쳐요.${cur ? ` 지금 이어가는 ${no(cur)}은 그대로 남아요.` : ''}${returnsOf(t).length ? ' 이 요청에 돌아온 이전 보고를 대신 고르지 않아요.' : ''}` };
+}
+/** PC12: one field of the task being read (never the current task), with where it comes from. Stale AI text is named, not shown as current. */
+function fieldOf(t, w, key) {
+    const manual = t.manual[key], ai = t.advice?.[key] ?? '', who = t.mode === 'mock' ? 'MOCK' : 'AI';
+    if (manual !== null)
+        return { text: manual, label: '사용자 직접 수정', state: 'manual' };
+    if (ai && !w.aiStale)
+        return { text: ai, label: `${who} 제안 · 원문과 다를 수 있음`, state: 'ai' };
+    if (ai)
+        return { text: ai, label: `이전 ${who} 문구 · ${staleCause(w)}이라 작업문에서 제외됨`, state: 'stale' };
+    return { text: '', label: '', state: 'empty' };
+}
+function fieldRows(t, w, grid, keys, limit, prefix = 'task-view') {
+    let shown = 0;
+    for (const [key, label] of keys) {
+        const f = fieldOf(t, w, key);
+        if (f.state === 'empty')
+            continue;
+        shown++;
+        const cell = node('div');
+        cell.dataset.field = key;
+        cell.dataset.origin = f.state;
+        const dt = node('dt', `${label} · `);
+        dt.append(node('span', f.label, `field-origin ${f.state}`));
+        cell.append(dt);
+        if (f.state === 'stale') {
+            const old = details('제외된 이전 문구 보기 (현재 작업문 아님)', `${prefix}-stale-${key}`);
+            old.append(node('div', f.text, 'source-raw'));
+            cell.append(node('dd', '지금 작업문에는 들어가지 않아요.'), old);
+        }
+        else if (limit !== null && f.text.length > limit) {
+            // fix1: a long field shows its opening words, and its whole text (with the same origin) one explicit click away. Read-only.
+            const whole = details(`${label} 전문 보기 · ${f.text.length}자 · ${f.label}`, `${prefix}-full-${key}`);
+            whole.append(node('div', f.text, 'source-raw'));
+            cell.append(node('dd', `${shortText(f.text, limit)} · 앞부분`), whole);
+        }
+        else
+            cell.append(node('dd', !f.text ? '(직접 비워 둠)' : f.text));
+        grid.append(cell);
+    }
+    return shown;
+}
+/** PC12: what this request is and its existing short understanding/scope. Nothing is generated when they are empty. */
+function taskContext(t) {
+    const w = currentWork(project, t), area = areaById(areaOf(project, t)), box = node('section', '', 'task-context');
+    box.id = 'task-view-context';
+    box.append(node('p', `요청 · 작업 ${pad(project.tasks.indexOf(t) + 1)} · ${area ? `영역 ‘${area.name}’${area.archived ? ' (보관됨)' : ''}` : '영역 미지정'}`, 'source-meta'));
+    const grid = node('dl', '', 'review-grid task-context-grid');
+    if (fieldRows(t, w, grid, [['understanding', '짧은 이해'], ['scope', '이번 범위와 유지할 것']], 200))
+        box.append(grid);
+    else
+        box.append(node('p', '이 작업에는 아직 짧은 이해·범위 기록이 없어요. 만들어 넣지 않았어요. 필요하면 아래 요청 원문을 열어 보세요.', 'hint'));
+    return box;
+}
+/** PC12: the work text, completion conditions and kept conditions, opened when needed. Labels say whose words they are. */
+function taskWorkDetails(t) {
+    const w = currentWork(project, t), box = details('현재 작업문 · 완료 조건 · 유지할 조건 보기', 'task-view-work'), grid = node('dl', '', 'review-grid task-context-grid');
+    let shown = fieldRows(t, w, grid, [['next', '실행 도구에 전달할 작업문'], ['checks', '확인할 동작 / 완료 조건']], null);
+    const correction = intentCorrection(t), intent = currentIntent(project, t), conditions = correction?.conditions ?? intent?.value.conditions.join(' / ') ?? '';
+    if (conditions) {
+        shown++;
+        const cell = node('div');
+        const dt = node('dt', '현재 기록의 유지할 조건 · ');
+        dt.append(node('span', correction ? '사용자 직접 정정' : `${t.mode === 'mock' ? 'MOCK' : 'AI'} 정리 · 원문과 다를 수 있음`, `field-origin ${correction ? 'manual' : 'ai'}`));
+        cell.append(dt, node('dd', conditions));
+        grid.append(cell);
+    }
+    if (shown)
+        box.append(grid);
+    else
+        box.append(node('p', '작성된 작업문·완료 조건·유지할 조건 값이 없어요. 원문 속 조건이나 금지가 없다는 뜻은 아니니 요청 원문을 확인하세요.', 'hint'));
+    return box;
+}
+/** REPORT16: the reports on this request's return path (direct, or through follow-up handoffs), in record order.
+ * Same membership rule as pointedReturn, so the list offers exactly the reports a pointed id may name. */
+function reportsOf(t) { return project.tasks.filter(x => isReturnTask(project, x) && pointedReturn(project, t.id, x.id) !== null); }
+/** REPORT16: the user picks which report of this request to read. Looking only: no project data, current work, unsent
+ * input or starting point changes. Disclosures of the previously picked report do not carry over to this one. */
+function pickReport(id) {
+    if (view !== 'task' || !viewTask)
+        return;
+    // fix1: the same report picked again keeps all of its open parts; another report keeps only the request-wide ones.
+    const same = readOpen && readOpen.task === viewTask && readOpen.ret === id;
+    const keep = same ? { ...readOpen.open } : readOpen && readOpen.task === viewTask ? Object.fromEntries(Object.entries(readOpen.open).filter(([k]) => !k.startsWith('task-report-'))) : {};
+    viewReturn = id;
+    readOpen = { task: viewTask, ret: id, open: keep };
+    const y = window.scrollY;
+    render();
+    window.scrollTo({ top: y });
+    focusFirst(`task-report-pick-${id}`);
+}
+/** REPORT16: disclosures of the task screen keep their open state across redraws of the same request and the same picked
+ * report; a different request starts closed, and a different report starts with its own parts closed. Tab memory only. */
+function keepReadOpen(root, t) {
+    if (!readOpen || readOpen.task !== t.id || readOpen.ret !== viewReturn)
+        readOpen = { task: t.id, ret: viewReturn, open: readOpen && readOpen.task === t.id ? Object.fromEntries(Object.entries(readOpen.open).filter(([k]) => !k.startsWith('task-report-'))) : {} };
+    const memo = readOpen;
+    for (const d of root.querySelectorAll('details[id]')) {
+        const open = memo.open[d.id];
+        if (open !== undefined)
+            d.open = open;
+        d.addEventListener('toggle', () => { if (readOpen === memo)
+            memo.open[d.id] = d.open; });
+    }
+}
+/** REPORT16: the area's idea as it is now (Area.note, the user's words), not the copy saved with the request. */
+function currentIdea(t, a) {
+    if (!a) {
+        const box = node('section', '', 'area-idea task-idea');
+        box.id = 'task-view-idea';
+        box.append(node('p', '지금의 영역 구상', 'source-meta'), node('p', '영역 미지정 요청이라 영역 구상이 없어요.', 'hint'));
+        return box;
+    }
+    const box = areaIdea(a, 'task-view-idea', NOTE_SHORT, `지금의 영역 구상 · ${a.name}${a.archived ? ' (보관됨)' : ''}`);
+    box.classList.add('task-idea');
+    const copy = t.background?.area;
+    if (copy && copy.id === a.id && (copy.note ?? '') !== a.note)
+        box.append(node('p', '이 요청을 쓸 때의 구상 사본과 달라요. 당시 사본은 아래 배경에 그대로 있어요.', 'hint task-idea-changed'));
+    const described = understandingPanel(a, 'task-understanding', true);
+    if (described)
+        box.append(described);
+    if (!a.archived)
+        box.append(btn('지도에서 소유 부분 보기', () => showReceivedArea(a.id, 'task-view-find-area', true), 'quiet', 'task-view-find-area'));
+    return box;
+}
+const DRAFT_NAME = { request: '요청', report: '보고', evidence: '관찰', test_answer: '시험자료' };
+/** REPORT16: what the unsent input keeps, said before the click (the composer's own target/return rules). */
+function unsentTarget() {
+    const kind = project.draftKind;
+    if (kind === 'request')
+        return `대상 그대로 · ${draftTargetLabel()}`;
+    if (kind === 'report' || kind === 'evidence') {
+        if (returnChoiceRequired())
+            return '연결할 작업은 입력칸에서 아직 고르지 않았어요';
+        const p = returnPreview(project, returnTargets(project).length > 1 ? selectedReturnTaskId : undefined);
+        return p.targetTitle ? `연결 예정 그대로 · ${p.targetTitle}` : '연결할 이전 작업 없음';
+    }
+    return '종류·내용 그대로';
+}
+/** REPORT16: open the unsent input exactly as it is (kind, text, target, chosen return task). Never relabels or retargets it. */
+function openUnsent() {
+    if (!project.draft.trim()) {
+        render();
+        project = { ...project, notice: '작성 중인 입력이 없어져 아무것도 열지 않았어요. 다시 골라 주세요.' };
+        renderStatus();
+        return;
+    }
+    writeInArea(null); // with an unsent input this only opens it; the id is not used
+}
+/** REPORT16: the one next action of this screen, named by what it really does, and the existing continue kept apart. */
+function nextAction(t, a) {
+    const box = node('section', '', 'task-next');
+    box.id = 'task-next';
+    box.setAttribute('aria-label', '다음 동작');
+    const draft = project.draft.trim(), row = node('div', '', 'row'), what = node('p', '', 'hint');
+    what.id = 'task-next-target';
+    if (draft) {
+        row.append(btn(`작성 중인 ${DRAFT_NAME[project.draftKind]} 열기`, openUnsent, 'primary', 'task-next-action'));
+        what.textContent = `‘${shortText(draft, 48)}’ · ${unsentTarget()}`;
+        box.append(row, what);
+        if (a && !a.archived)
+            box.append(node('p', '이 영역의 새 요청은 이 입력을 보내거나 비운 뒤에 쓸 수 있어요.', 'hint'));
+    }
+    else if (a && !a.archived) {
+        row.append(btn('이 영역에 새 요청', () => writeInArea(a.id), 'primary', 'task-next-action'));
+        what.textContent = `영역 ‘${a.name}’에 쓸 빈 요청 입력칸을 열어요. 보내기 전에는 작업이 생기지 않아요.`;
+        box.append(row, what);
+    }
+    else {
+        const b = btn('이 영역에 새 요청', () => { }, 'primary', 'task-next-action');
+        b.disabled = true;
+        b.setAttribute('aria-describedby', 'task-next-target');
+        what.textContent = a ? '보관된 영역이라 여기서 새 요청을 쓰지 않아요. 영역을 되살리면 쓸 수 있어요.' : '영역 미지정 요청이라 이 화면에서는 영역 새 요청을 쓰지 않아요.';
+        row.append(b);
+        box.append(row, what);
+    }
+    return box;
+}
+/** The existing explicit continue stays separate from the unsent draft and names the record actually edited. */
+function taskContinueAction(t) {
+    const target = continueTarget(t), edit = node('div', '', 'task-continue-context');
+    const cur = project.currentTaskId ? project.tasks.find(x => x.id === project.currentTaskId) : null;
+    const edited = cur && isReturnTask(project, cur) && cur.parentTaskId === t.id ? cur : t, owner = areaById(areaOf(project, edited));
+    edit.id = 'task-continue-context';
+    edit.dataset.taskId = edited.id;
+    const current = cur && cur.id !== edited.id ? `현재 작업 ${pad(project.tasks.findIndex(x => x.id === cur.id) + 1)}에서 바꿀 대상 · ` : '고칠 대상 · ';
+    const label = node('span', `${current}작업 ${pad(project.tasks.findIndex(x => x.id === edited.id) + 1)} · ${owner?.name ?? '영역 미지정'}${edited.id !== t.id ? ' · 현재 보고의 후속 작업문' : ''}`, 'hint');
+    label.id = 'task-continue-label';
+    edit.append(label);
+    if (currentGroup(t))
+        edit.append(appTag());
+    edit.append(btn(target.button, () => continueTask(t.id), 'secondary', 'task-view-continue'));
+    const detail = details('이어갈 대상 확인', 'task-continue-details'), which = node('p', target.text, 'hint task-view-target');
+    which.id = 'task-view-target';
+    detail.append(which);
+    edit.append(detail);
+    return edit;
+}
+/** REPORT16: the picked report's own words first, level with the current idea beside it; then this request's reports as a
+ * short pick list (existing title, source kind, time). Nothing is picked for the user; no unpicked report's text is listed. */
+function reportsSection(t, reports) {
+    const box = node('section', '', 'task-reports');
+    box.id = 'task-reports';
+    box.setAttribute('aria-label', '돌아온 보고');
+    if (viewReturn !== null)
+        box.append(pointedSection(t, viewReturn));
+    const picker = node('div', '', 'report-picker');
+    picker.append(node('h2', `돌아온 결과 ${reports.length}개${reports.length ? ' · 외부 원문 · 앱 미검증' : ''}`, 'report-picker-head'));
+    if (!reports.length)
+        picker.append(node('p', t.handoffs.length ? '작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.' : '아직 돌아온 결과가 없어요.', 'hint'));
+    else {
+        if (viewReturn === null) {
+            const none = node('p', reports.length > 1 ? '읽을 보고를 골라 주세요. 최신 보고를 대신 고르지 않아요.' : '읽을 보고를 골라 주세요.', 'hint');
+            none.id = 'task-report-none';
+            picker.append(none);
+        }
+        const list = node('ul', '', 'report-pick-list');
+        list.id = 'task-report-list';
+        list.setAttribute('aria-label', '읽을 보고 고르기');
+        for (const r of reports) {
+            const src = project.sources.find(s => s.id === r.sourceIds[0]), path = returnPath(project, r), li = node('li');
+            const b = btn('', () => pickReport(r.id), 'report-pick', `task-report-pick-${r.id}`);
+            b.setAttribute('aria-pressed', String(r.id === viewReturn));
+            b.append(node('span', taskTitle(project, r), 'report-pick-title'), node('span', `작업 ${pad(project.tasks.indexOf(r) + 1)} · ${src ? sourceName[src.kind] : '원문 없음'} · ${src ? dateLabel(src.at) : '시각 미확인'}${path.length > 2 ? ' · 이전 보고에 연결' : ''}`, 'report-pick-meta'));
+            li.append(b);
+            list.append(li);
+        }
+        picker.append(list);
+    }
+    box.append(picker);
+    if (viewReturn !== null && pointedReturn(project, t.id, viewReturn)) {
+        const help = details('잘못 가져온 보고라면', 'task-view-report-help');
+        help.append(reportCorrectionHelp());
+        box.append(help);
+    }
+    return box;
+}
+/** SPATIAL102 + REPORT16: one request, read-only. First: the area's current idea and the next action beside the report the user
+ * picks. Editing this task stays the separate continue. Short context, original, work text, background copy and bases follow. */
 function renderTaskView(root, t) {
-    const area = areaById(areaOf(project, t)), first = sourceOf(project, t), results = returnsOf(t);
-    const head = node('div', '', 'space-head'), title = node('h1', taskTitle(project, t));
+    const area = areaById(areaOf(project, t)), first = sourceOf(project, t), reports = reportsOf(t);
+    const head = node('div', '', 'space-head task-view-head'), title = node('h1', taskTitle(project, t));
     title.id = 'space-title';
     title.tabIndex = -1;
-    head.append(node('p', `TASK · 작업 ${pad(project.tasks.indexOf(t) + 1)}${area?.archived ? ' · 보관된 영역' : ''}`, 'eyebrow'), title, node('p', taskStatus(project, t), 'hint task-view-status'));
-    const actions = node('div', '', 'row');
-    if (currentGroup(t))
-        actions.append(appTag(), btn('작업 화면으로', () => continueTask(t.id), 'primary', 'task-view-continue'));
-    else
-        actions.append(btn('이 작업 이어서 하기', () => continueTask(t.id), 'primary', 'task-view-continue'));
-    head.append(actions);
-    if (!currentGroup(t))
-        head.append(node('p', '이 화면을 보는 것만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.', 'hint'));
+    const top = node('div', '', 'task-view-head-line');
+    top.append(node('p', `요청 · ${area ? `영역 ‘${area.name}’${area.archived ? ' · 보관됨' : ''}` : '영역 미지정'}`, 'eyebrow'));
+    // PC12: back to the view the reading started from; without one (e.g. after a reload) only a plain way to the whole space.
+    top.append(originButton('task-return-origin') ?? btn('전체 공간으로', openSpace, 'secondary', 'task-to-space'));
+    const context = node('div', '', 'task-view-head-line');
+    context.append(node('p', `작업 ${pad(project.tasks.indexOf(t) + 1)} · ${taskStatus(project, t)}`, 'hint task-view-status'), taskContinueAction(t));
+    head.append(top, title, context);
     root.append(head);
-    if (viewReturn !== null) {
-        root.append(pointedSection(t, viewReturn));
-        if (pointedReturn(project, t.id, viewReturn))
-            root.append(reportCorrectionHelp());
-    }
     const body = node('section', '', 'area-tasks task-view');
     body.id = 'task-view';
-    body.append(node('h2', '요청 원문'));
+    const read = node('div', '', 'task-read'), side = node('div', '', 'task-read-side');
+    side.append(currentIdea(t, area), nextAction(t, area));
+    read.append(side, reportsSection(t, reports));
+    body.append(read);
+    // PC12: this request's short context (each line says where it comes from); the original and conditions open when needed.
+    const more = node('section', '', 'task-more');
+    more.append(node('h2', '이 요청 자세히'), taskContext(t));
+    const original = details(`요청 원문 보기 · 사용자 원문${first ? ` · ${first.text.length}자` : ''}`, 'task-view-request');
     if (first)
-        body.append(node('p', `${sourceName[first.kind]} · ${dateLabel(first.at)}`, 'source-id'), node('div', first.text, 'source-raw'));
-    body.append(node('h2', `돌아온 결과 ${results.length}개`));
-    if (!results.length)
-        body.append(node('p', t.handoffs.length ? '작업문을 내보낸 기록은 있지만 돌아온 결과는 아직 없어요. 개발 도구에서 실행됐는지는 앱이 알 수 없어요.' : '아직 돌아온 결과가 없어요.', 'hint'));
-    for (const r of results)
-        for (const id of r.sourceIds) {
-            const src = project.sources.find(s => s.id === id);
-            if (src)
-                body.append(node('p', `${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`, 'source-id'), node('div', reportBody(src), 'source-raw'));
-        }
-    if (results.length)
-        body.append(reportCorrectionHelp());
+        original.append(node('p', `${sourceName[first.kind]} · ${dateLabel(first.at)}`, 'source-id'), node('div', first.text, 'source-raw'));
+    else
+        original.append(node('p', '이 작업의 원문을 찾지 못했어요.', 'hint'));
+    more.append(original, taskWorkDetails(t), backgroundPreview(t, 'task-view-background'));
+    body.append(more);
     root.append(body);
-    const own = new Set([t.id, ...results.map(r => r.id)]), bases = project.bases.filter(b => own.has(project.sources.find(s => s.id === b.sourceId)?.taskId ?? ''));
+    const own = new Set([t.id, ...returnsOf(t).map(r => r.id)]), bases = project.bases.filter(b => own.has(project.sources.find(s => s.id === b.sourceId)?.taskId ?? ''));
     const box = details(`이 작업의 기준 ${bases.length}개`, 'task-view-bases');
     for (const b of bases)
         box.append(node('p', `${BASIS_LABEL[b.status]} · ${shortText(b.text, 90)}`, 'source-raw'));
@@ -2527,22 +4402,103 @@ function renderTaskView(root, t) {
         box.append(node('p', '이 작업에서 나온 기준이 없어요.', 'hint'));
     box.append(btn('기준 · 출처 전체 보기', showContext, 'quiet'));
     root.append(box);
+    keepReadOpen(root, t);
 }
-/** SPATIAL102-R1: the report the check item pointed to, with where it belongs. A stale or foreign id is said so plainly. */
-function pointedSection(t, returnId) {
-    const box = node('section', '', 'area-tasks task-pointed');
-    box.id = 'task-pointed';
-    box.append(node('h2', '확인할 일에서 연 보고'));
-    const r = pointedReturn(project, t.id, returnId), src = r ? project.sources.find(s => s.id === r.sourceIds[0]) : undefined;
-    if (!r || !src) {
-        box.append(node('p', '가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 작업의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래는 이 작업의 기록이에요.', 'alert warning'));
+/** REPORT16: the opening of a report as written: at most six lines and REPORT_LEAD characters, line breaks kept. */
+const REPORT_LEAD = 300;
+const KIND_SHORT = { ...sourceName, report: '구현자 보고', evidence: '관찰·검사 자료' };
+function reportExportWork(r) {
+    if (!r.resultFile)
+        return null;
+    const box = details('이 결과를 요청할 때 내보낸 작업문', 'task-report-export-work');
+    const missing = () => box.append(node('p', '이 보고에는 정확한 내보내기 작업문 사본이 없어요. 현재 작업문으로 대신하지 않았어요.', 'hint'));
+    const file = parseResultFile(r.resultFile.rawText), target = project.tasks.find(t => t.id === file.taskId), record = target?.handoffs.find(h => h.returnId === file.returnId);
+    box.dataset.handoffId = file.returnId;
+    box.dataset.exportTaskId = file.taskId;
+    if (!record?.work) {
+        missing();
         return box;
     }
-    const no = (x) => `작업 ${pad(project.tasks.indexOf(x) + 1)}`, path = returnPath(project, r);
-    // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run (a report can be pasted onto the
-    // current work with nothing exported), so the wording never infers one.
+    box.append(node('p', `${dateLabel(record.at)}에 내보낸 작업문이에요. 지금의 작업문이나 현재 기준과는 다를 수 있어요.`, 'hint'));
+    const labels = [['understanding', '짧은 이해'], ['scope', '이번 범위와 유지할 것'], ['next', '실행 도구에 전달할 작업문'], ['checks', '확인할 동작 / 완료 조건']];
+    for (const [key, label] of labels) {
+        const row = node('section');
+        row.dataset.exportField = key;
+        row.append(node('p', label, 'source-meta'), node('div', record.work[key] || '(비어 있음)', 'source-raw'));
+        box.append(row);
+    }
+    const proof = details('인계 연결 · 수신 원문', 'task-report-export-proof');
+    proof.append(node('p', `내보낸 작업 ${file.taskId}\n인계 ${file.returnId}\n받은 보고 ${r.id}\n내보낸 버전 r${record.revision}`, 'source-id'), rawFileDetails(r.resultFile.rawText, file.returnId, 'task-report-result-raw'));
+    box.append(proof);
+    return box;
+}
+function leadOf(text) {
+    const lines = text.split('\n');
+    let lead = lines.slice(0, 6).join('\n');
+    if (lead.length > REPORT_LEAD)
+        lead = lead.slice(0, REPORT_LEAD);
+    return lead.length < text.length ? `${lead.trimEnd()}…` : text;
+}
+/** SPATIAL102-R1 + REPORT16: the picked report (or the one a check item pointed to). Every source of that report task is reachable
+ * in full; a missing source is said, never replaced or skipped. A stale or foreign id is said plainly, never swapped. */
+function pointedSection(t, returnId) {
+    const box = node('section', '', 'task-pointed');
+    box.id = 'task-pointed';
+    const r = pointedReturn(project, t.id, returnId);
+    if (!r) {
+        box.append(node('p', '고른 보고', 'source-meta'), node('p', '가리킨 보고를 찾을 수 없어요. 지워졌거나(다른 탭·백업 복원) 이 요청의 보고가 아니에요. 다른 보고로 대신 보여 주지 않았어요. 아래에서 직접 고를 수 있어요.', 'alert warning'));
+        return box;
+    }
+    box.dataset.reportTaskId = r.id;
+    const no = (x) => `작업 ${pad(project.tasks.indexOf(x) + 1)}`, path = returnPath(project, r), first = project.sources.find(s => s.id === r.sourceIds[0]);
+    // One low-emphasis line, level with the idea's own label: which report, whose words, unverified.
+    const one = r.sourceIds.length === 1 && first ? ` · ${KIND_SHORT[first.kind]}` : '';
+    box.append(node('p', `고른 보고 · ${no(r)}${one} · ${first ? dateLabel(first.at) : '시각 미확인'} · 외부 원문 · 앱 미검증`, 'source-meta'));
+    const update = returnUnderstanding(project, r.id);
+    if (update) {
+        const status = update.entry?.held ? '설명은 현재 기준에 적용하지 않았어요.' : update.current ? '이 보고의 정리가 현재 영역 설명에 반영됐어요.' : '이 보고에 붙은 정리는 이전 기록으로 보관돼요.';
+        box.append(node('p', status, 'hint'));
+        const detail = details('이 보고의 정리 설명', 'task-report-understanding');
+        detail.append(node('p', update.input.summary, 'source-raw'), node('p', `정리: ${update.input.origin} · 앱 미검증`, 'hint'));
+        if (update.input.proposal)
+            detail.append(node('p', '미채택 제안', 'source-meta'), node('p', update.input.proposal, 'source-raw'));
+        box.append(detail);
+    }
+    for (const id of r.sourceIds) {
+        const src = project.sources.find(s => s.id === id);
+        if (!src) {
+            box.append(node('p', `이 보고의 원문 하나(${id})를 찾지 못했어요. 다른 원문으로 대신하지 않았어요.`, 'alert warning'));
+            continue;
+        }
+        const text = reportBody(src), part = node('div', '', 'report-source');
+        part.dataset.sourceId = src.id;
+        if (r.sourceIds.length > 1)
+            part.append(node('p', KIND_SHORT[src.kind], 'source-meta'));
+        // Read with the idea beside it: a short report is shown whole; a long one shows its opening lines as written (not a
+        // summary), says so, and the whole text is one explicit click away.
+        const lead = leadOf(text);
+        if (lead === text)
+            part.append(node('div', text, 'report-lead whole'));
+        else {
+            const full = details(`${src.kind === 'evidence' ? '관찰·검사 자료' : '보고'} 전문 보기 · ${text.length}자`, `task-report-src-${src.id}`);
+            full.append(node('div', text, 'source-raw'));
+            part.append(node('div', lead, 'report-lead'), node('p', '위는 앞부분이에요 · 요약이 아니에요', 'report-lead-note'), full);
+        }
+        box.append(part);
+    }
+    // SPATIAL102-R2: only the recorded links. A link is not an export, a delivery or a run, so the wording never infers one.
+    const exported = reportExportWork(r);
+    if (exported)
+        box.append(exported);
     const hops = path.map((x, i) => i === 0 ? `${no(x)} 요청` : i === path.length - 1 ? `${no(x)} 이 보고` : `${no(x)} 보고`);
-    box.append(node('p', `연결: ${hops.join(' › ')} (${path.length > 2 ? '이전 보고에 연결된 보고' : '이 요청에 바로 연결된 보고'})`, 'hint'), node('p', `${sourceName[src.kind]} · ${dateLabel(src.at)} · 앱 미검증`, 'source-id'), node('div', reportBody(src), 'source-raw'));
+    const link = details(`연결 경로 보기 · ${path.length > 2 ? '이전 보고에 연결된 보고' : '이 요청에 바로 연결된 보고'}`, 'task-report-path');
+    link.append(node('p', `연결: ${hops.join(' › ')}`, 'hint'));
+    if (!r.resultFile) {
+        const note = node('p', '이 보고와 정확히 연결된 당시 자료 사본은 없어요. 현재 내용으로 대신하지 않아요.', 'hint');
+        note.id = 'task-report-context-missing';
+        link.append(note);
+    }
+    box.append(link);
     return box;
 }
 function renderUnplaced(root) {
@@ -2565,15 +4521,24 @@ function renderUnplaced(root) {
 function renderPlace(t) {
     const bar = $('work-place');
     bar.replaceChildren();
-    bar.hidden = !hasSpace(project) || route === 'example';
+    bar.hidden = !hasSpace(project);
     if (bar.hidden)
         return;
     const area = t ? areaById(areaOf(project, t)) : null;
-    bar.append(btn('전체 공간', openSpace, 'crumb-link', 'place-space'));
+    bar.append(btn('전체 공간', () => { endRecordsExcursion(); openSpace(); }, 'crumb-link', 'place-space'));
     if (area)
         bar.append(node('span', '›', 'crumb-sep'), btn(area.name, () => openArea(area.id), 'crumb-link', 'place-area'));
     const receipt = t ? receiptOf(t) : null;
     bar.append(node('span', '›', 'crumb-sep'), node('strong', !t ? '새 요청' : receipt !== null ? `${receipt >= 0 ? `작업 ${pad(receipt + 1)}의 보고 · ` : ''}후속 확인 작업문 초안` : '앱에서 이어갈 작업'), node('span', '이어가는 작업', 'layer-chip'));
+    // PC12: after reading a task from the map, the way back to that view (the edits made here stay).
+    const back = originButton('work-return-origin');
+    if (back)
+        bar.append(back);
+    // AREA17: writing (and sending, copying) the located area's next request keeps the way back to the view before locating,
+    // only while that request or work is in the located area.
+    const l = located, target = project.space.draftTarget ? project.space.draftTarget.area : t ? areaOf(project, t) : null;
+    if (l && l.origin.project === project.id && target === l.area && !areaById(l.area)?.archived)
+        bar.append(btn(`← 위치 찾기 전 보기로 · ${originLabel(l.origin)}`, returnFromLocate, 'secondary origin-return', 'work-locate-return'));
 }
 /** The area the next request goes to: explicit, visible and changeable. Shown once areas exist. */
 function renderComposeArea(t, returned) {
@@ -2594,7 +4559,9 @@ function renderComposeArea(t, returned) {
     }
     sel.value = dt === null ? '@follow' : dt.area === null ? '@none' : dt.area;
 }
-function render() {
+function render(capturePanel = true, restoreReading = true, beforeWorkspaceSizing) {
+    if (capturePanel)
+        capturePanelReading();
     if (route === 'projects') {
         renderProjects();
         renderStatus();
@@ -2635,9 +4602,19 @@ function render() {
     renderComposeArea(t, returned);
     renderStatus();
     displayView();
+    // REPORT16-fix1: on the task screen, readOpen alone decides its disclosures (per request; a picked report's own parts per report).
+    // Restoring them from the old DOM by id would carry one report's open part (e.g. task-report-path) over to another report.
+    const taskScreen = view === 'task' ? $('space-view') : null;
     for (const d of document.querySelectorAll('details[id]'))
-        if (open.has(d.id))
+        if (open.has(d.id) && d.id !== 'project-management' && !taskScreen?.contains(d) && !d.closest('#area-panel'))
             d.open = open.get(d.id);
+    // A layer entry may restore page scroll after its final DOM/disclosures, before sizing or its first camera/reading restore.
+    beforeWorkspaceSizing?.();
+    sizeWorkspace();
+    finishInitialMapFit();
+    if (restoreReading)
+        restorePanelReading();
+    restoreWorkReferenceReading();
     if (focus) {
         const target = document.getElementById(focus.id);
         if (target) {
@@ -2730,7 +4707,23 @@ $('result-file-input').addEventListener('change', async () => {
     input.value = '';
     if (!file)
         return;
-    const read = ++resultRead, epoch = projectEpoch, projectId = project.id;
+    const read = ++resultRead, epoch = projectEpoch, projectId = project.id, revision = project.revision, current = project.currentTaskId, from = view;
+    const entry = target.kind === 'entry' ? target.ref.entryId : null;
+    const revealToken = { context: contextOpen };
+    resultRevealToken = revealToken;
+    const reveal = () => {
+        if (resultRevealToken !== revealToken || read !== resultRead || epoch !== projectEpoch || project.id !== projectId || entry !== (target.kind === 'entry' ? target.ref.entryId : null) || from !== 'work' || view !== 'work' || route === 'projects' || revision !== project.revision || current !== project.currentTaskId)
+            return;
+        const focus = document.getElementById('result-file-review-heading') ?? document.getElementById('result-file-error') ?? document.getElementById('result-file-message');
+        if (!focus)
+            return;
+        $('compose-panel').open = true;
+        $('result-file-panel').open = true;
+        focus.tabIndex = -1;
+        focus.scrollIntoView({ block: 'center' });
+        focus.focus({ preventScroll: true });
+    };
+    lastReceipt = null;
     resultSelection = null;
     resultMessage = '선택한 파일을 읽는 중입니다. 아직 가져오지 않았습니다.';
     renderResultFile();
@@ -2738,18 +4731,24 @@ $('result-file-input').addEventListener('change', async () => {
         if (file.size > RESULT_BYTES)
             throw new Error('RESULT_TOO_LARGE');
         const bytes = await file.arrayBuffer();
-        if (read !== resultRead || epoch !== projectEpoch || project.id !== projectId)
+        if (read !== resultRead || epoch !== projectEpoch || project.id !== projectId || entry !== (target.kind === 'entry' ? target.ref.entryId : null))
             return;
         const rawText = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
         resultSelection = { rawText, projectId, revision: project.revision, epoch };
         resultMessage = '원문과 연결 대상을 확인한 뒤 가져오세요.';
         renderResultFile();
+        reveal();
     }
     catch (e) {
         if (read !== resultRead || epoch !== projectEpoch)
             return;
         resultMessage = resultError(e) + ' 파일 수리나 재실행 없이 기존 붙여넣기를 이용할 수 있습니다.';
         renderResultFile();
+        reveal();
+    }
+    finally {
+        if (resultRevealToken === revealToken)
+            resultRevealToken = null;
     }
 });
 $('import-file').addEventListener('change', async () => {
@@ -2835,11 +4834,34 @@ $('trash-current').addEventListener('click', () => { if (target.kind === 'entry'
 $('undo-trash').addEventListener('click', () => { if (undoEntry !== null)
     void restoreProject(undoEntry, true); });
 $('list-import').addEventListener('click', () => $('import-file').click());
-for (const id of ['list-example', 'open-example'])
-    $(id).addEventListener('click', () => void openExample());
+$('open-example').addEventListener('click', () => void openExample());
 $('example-start').addEventListener('click', () => closeExample(true));
 $('example-close').addEventListener('click', () => closeExample(false));
-$('nav-space').addEventListener('click', openSpace);
+/** Explicit navigation starts a new excursion. Part/endpoint locators and same-part actions keep their first caller. */
+function endRecordsExcursion() {
+    branchRecordCaller = null;
+    let ended = false;
+    if (origin?.view === 'work') {
+        origin = origin.work.upstream;
+        ended = true;
+    }
+    if (located?.origin.view === 'work') {
+        located = null;
+        ended = true;
+    }
+    if (located?.origin.panel === 'records') {
+        located = null;
+        ended = true;
+    }
+    if (origin?.panel === 'records') {
+        origin = null;
+        ended = true;
+    }
+    recordsReturnNotice = '';
+    if (ended)
+        renderPlace(project.currentTaskId ? taskOf(project) : null);
+}
+$('nav-space').addEventListener('click', () => { endRecordsExcursion(); openSpace(); });
 document.addEventListener('keydown', e => {
     if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.key.toLowerCase() !== 'z')
         return;
@@ -2868,23 +4890,95 @@ $('brief-form').addEventListener('submit', e => {
         $('area-name')?.focus();
     });
 });
-$('nav-work').addEventListener('click', () => { contextOpen = false; showWork(); $('context-title').scrollIntoView({ block: 'nearest' }); });
+$('nav-work').addEventListener('click', () => { endRecordsExcursion(); contextOpen = false; showWork(); $('context-title').scrollIntoView({ block: 'nearest' }); });
 $('nav-context').addEventListener('click', () => { if (contextOpen && view === 'work')
     closeContext();
 else
     showContext(); });
 $('close-context').addEventListener('click', closeContext);
-$('nav-history').addEventListener('click', () => { view = 'history'; displayView(); $('history').open = true; $('history-title').focus(); });
+$('nav-history').addEventListener('click', () => { endRecordsExcursion(); view = 'history'; displayView(); $('history').open = true; $('history-title').focus(); });
 $('back-to-work').addEventListener('click', () => { showWork(); $('nav-work').focus(); });
 for (const example of document.querySelectorAll('[data-example]'))
     example.addEventListener('click', () => guard(() => { commit(editDraft(project, example.dataset.example)); $('draft').focus(); }));
-document.addEventListener('keydown', e => { if (e.key === 'Escape') {
-    if ($('connection-details').open) {
-        $('connection-details').open = false;
-        $('connection-details').querySelector('summary').focus();
+{
+    const dialog = $('project-read');
+    $('project-read-close').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', closeReading);
+    dialog.addEventListener('click', e => { if (e.target === dialog)
+        dialog.close(); }); // the backdrop
+    // The list behind stays where it was: the wheel scrolls only the text (which does not hand its overscroll to the page).
+    dialog.addEventListener('wheel', e => { if (!$('project-read-body').contains(e.target))
+        e.preventDefault(); }, { passive: false });
+    dialog.addEventListener('keydown', e => {
+        if (e.defaultPrevented)
+            return;
+        if (e.key === 'Escape' && (e.isComposing || e.keyCode === 229)) {
+            e.preventDefault();
+            return;
+        }
+        // Keyboard scrolling is not stopped by overscroll-behavior: a scroll key would scroll the list behind. In the text it scrolls
+        // the text and is stopped only at its end (or top); anywhere else in the window (e.g. on '닫기') it scrolls nothing.
+        // Space/Enter on a button keep their own action (close).
+        const body = $('project-read-body');
+        if (['PageDown', 'PageUp', 'End', 'Home', 'ArrowDown', 'ArrowUp', ' '].includes(e.key)) {
+            if (e.target === body) {
+                const down = ['PageDown', 'End', 'ArrowDown'].includes(e.key) || (e.key === ' ' && !e.shiftKey);
+                if (down ? body.scrollTop + body.clientHeight >= body.scrollHeight - 1 : body.scrollTop <= 0)
+                    e.preventDefault();
+            }
+            else if (!(e.key === ' ' && e.target.closest('button')))
+                e.preventDefault();
+            return;
+        }
+        if (e.key !== 'Tab')
+            return;
+        const stops = [$('project-read-close'), $('project-read-body')];
+        const i = stops.indexOf(document.activeElement);
+        e.preventDefault();
+        stops[(i < 0 ? 0 : i + (e.shiftKey ? stops.length - 1 : 1)) % stops.length].focus();
+    });
+}
+// HOME15: a click elsewhere closes an open card menu. On a card that click only closes the menu; it does not open a project.
+document.addEventListener('click', e => {
+    const open = [...document.querySelectorAll('.project-more[open]')].filter(m => !m.contains(e.target));
+    if (!open.length)
+        return;
+    for (const m of open)
+        m.open = false;
+    const t = e.target;
+    if (t.closest?.('.project-card') && !t.closest('.project-more')) {
+        e.preventDefault();
+        e.stopPropagation();
     }
-    else if (contextOpen)
-        closeContext();
+}, true);
+// HOME15: Escape closes an open card menu wherever the focus is (e.g. after a click on the menu's own padding).
+function protectedEscape(e) { return e.defaultPrevented || e.isComposing || e.keyCode === 229 || !!e.target?.closest?.('input,textarea,select,[contenteditable="true"],[role="combobox"]'); }
+document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || protectedEscape(e) || $('project-read').open)
+        return;
+    const m = document.querySelector('.project-more[open]');
+    if (!m)
+        return;
+    e.stopImmediatePropagation();
+    m.open = false;
+    m.querySelector('summary')?.focus({ preventScroll: true });
+}, true);
+document.addEventListener('click', e => { const menu = $('project-management'); if (compactMapHeader && menu.open && !menu.contains(e.target))
+    menu.open = false; });
+document.addEventListener('keydown', e => { if (e.key !== 'Escape' || protectedEscape(e) || $('project-read').open)
+    return; const menu = $('project-management'); if (compactMapHeader && menu.open) {
+    e.preventDefault();
+    menu.open = false;
+    $('project-management-toggle').focus({ preventScroll: true });
+}
+else if ($('connection-details').open) {
+    e.preventDefault();
+    $('connection-details').open = false;
+    $('connection-details').querySelector('summary').focus();
+}
+else if (contextOpen) {
+    e.preventDefault();
+    closeContext();
 } });
 window.addEventListener('beforeunload', e => { if (memoryDirty || pendingSave || draining) {
     e.preventDefault();
