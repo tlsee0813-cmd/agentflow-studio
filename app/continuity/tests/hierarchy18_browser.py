@@ -287,7 +287,7 @@ class Area18(unittest.TestCase):
         self.equal('A to B to A keeps revision history',self.state()['space']['containment']['revisions'][a],revision+2)
         self.equal('identity survives explicit membership changes',next(x for x in self.state()['space']['areas'] if x['id']==a)['id'],a)
         expect(self.page.locator(f'#panel-understanding-{a}')).to_contain_text('현재 설명으로 쓰지 않아요')
-        self.page.locator('#map-fit').click();self.page.locator(f'#branch-toggle-{old}').click();expect(self.page.locator(f'.area-node[data-area-id="{old}"] .branch-signals')).to_contain_text('이전 기준 1')
+        self.page.locator('#map-fit').click();self.page.locator(f'#branch-toggle-{old}').click();expect(self.page.locator(f'.area-node[data-area-id="{old}"] .branch-signals')).to_contain_text('이전 기준 설명 1')
         self.page.locator(f'#branch-toggle-{old}').click();self.select(a)
         self.page.locator('#panel-open').click();self.page.locator('#area-archive').click();expect(self.page.locator('#notice')).to_contain_text('하위 부분이 남아')
         self.page.locator('#nav-space').click();self.select(other);self.page.locator('#panel-new-request').click();self.page.locator('#draft').fill('[합성 미전송] 다른 영역 입력')

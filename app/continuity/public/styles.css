@@ -2584,6 +2584,16 @@ body[data-route="projects"] .projects-view,body[data-route="projects"] footer{ma
 .branch-toggle{font-size:12px;padding:3px 7px;align-self:flex-start}
 .branch-signals{font:inherit;font-size:11px;line-height:inherit;font-weight:400;letter-spacing:inherit;color:var(--muted);overflow-wrap:anywhere;text-align:left;border:0;border-radius:0;padding:0;margin:0;min-height:0;background:transparent}
 .branch-signals:hover:not(:disabled){background:transparent;color:var(--accent-dark);text-decoration:underline}
+/* MAP34: only the name/path rows sit beside the '정보' button. Below the drag handle, the fold control with the current-work label
+   and the record line form a bottom band across the card's inner width; each record fact stays whole and lines break only between
+   facts (same 11px, the card hint line height). Gaps and the fold control's vertical padding are tightened, never font sizes. */
+.area-node{gap:2px}
+.area-node .node-enter{padding-right:0;gap:1px}
+.area-node .branch-toggle{padding-top:2px;padding-bottom:2px}
+.area-node .area-card-name,.area-node .area-card-path{padding-right:44px}
+.area-node-foot{display:flex;flex-wrap:wrap;align-items:center;gap:3px 4px;flex-shrink:0;min-width:0;margin-left:-22px}
+.area-node .branch-signals{line-height:14px;flex-shrink:0;margin-left:-22px}
+.area-node .branch-signals>span{white-space:nowrap}
 .map-relation-list{margin-top:10px;font-size:13px}
 .map-relation-list summary{cursor:pointer}
 .relation-bundle{padding:8px 0;border-bottom:1px solid var(--line)}

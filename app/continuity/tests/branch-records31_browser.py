@@ -189,7 +189,7 @@ class BranchRecords31(unittest.TestCase):
     def test_01_exact_subtree_old_memo_and_keyboard(self):
         s=self.load();p=s['ids']['P'];q=s['ids']['Q'];signal='#branch-records-'+p
         text=self.page.locator(signal).inner_text()
-        for word in ['기록된 질문 1','현재 설명 1','설명 보류 1','이전 기준 1']:self.yes('신호의 실제 종류 '+word,word in text,text)
+        for word in ['기록된 질문 1','현재 설명 1','설명 보류 1','이전 기준 설명 1']:self.yes('신호의 실제 종류 '+word,word in text,text)
         self.signal(p)
         owners=self.page.locator('#subtree-records-'+p+' [data-owner-area]').evaluate_all('(es)=>es.map(e=>e.dataset.ownerArea)')
         for key in ['L','H','S']:self.yes('두 층 아래 실제 소유 '+key,s['ids'][key] in owners,owners)

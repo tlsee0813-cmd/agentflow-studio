@@ -1,0 +1,537 @@
+{
+ "what": "MAP34 작성자 경계 측정(합격/불합격 판정 아님). 같은 장면을 575bb745와 후보에서 map-signals34_measure.py로 측정. 단위는 카드 레이아웃 px. linebox=줄 상자가 가장 가까운 clip(진입 버튼)/카드 밖으로 나간 px, ink=캔버스 actualBoundingBox 기준 글자 잉크가 나간 px, ellipsis=말줄임 발생. 숨김 없는 항목은 생략.",
+ "runner": "작성자 원격 컨테이너, Node 22.22.0, Playwright 1.57.0, Chromium 141.0.7390.37, Noto Sans CJK KR/Inter 설치. Cloud/CI 실행 아님.",
+ "scenes": "P(긴 두 줄 이름) 아래 A/B/S/T, R은 B와 연결만. current=열린 작업 위치, stale=S 설명 이전 기준, note=P 구상 유무. B와 P의 늦은 결과는 열린 탭에서 정상 파일 선택으로 수신.",
+ "versions": {
+  "575bb7452044e0d987453a24e31680d2d8077b6c": {
+   "scenes_1280": [
+    {
+     "current": "P",
+     "stale": true,
+     "note": true,
+     "folded": false,
+     "P_signal": "기록된 질문 4 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "P",
+       "el": "area-update-label",
+       "text": "설명 갱신",
+       "lineboxHiddenPx": 13.1,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": 9.3,
+       "inkFullyHidden": false,
+       "ellipsis": false
+      },
+      {
+       "card": "P",
+       "el": "tag purple",
+       "text": "앱에서 이어갈 작업",
+       "lineboxHiddenPx": 38.6,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 30.1,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      },
+      {
+       "card": "A",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "B",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 2개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "S",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": true,
+     "note": true,
+     "folded": true,
+     "P_signal": "기록된 질문 4 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "P",
+       "el": "area-update-label",
+       "text": "설명 갱신",
+       "lineboxHiddenPx": 13.1,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": 9.3,
+       "inkFullyHidden": false,
+       "ellipsis": false
+      },
+      {
+       "card": "P",
+       "el": "tag purple",
+       "text": "앱에서 이어갈 작업",
+       "lineboxHiddenPx": 38.6,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 30.1,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": true,
+     "note": false,
+     "folded": false,
+     "P_signal": "기록된 질문 4 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "P",
+       "el": "area-update-label",
+       "text": "설명 갱신",
+       "lineboxHiddenPx": 21.6,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 17.8,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      },
+      {
+       "card": "P",
+       "el": "tag purple",
+       "text": "앱에서 이어갈 작업",
+       "lineboxHiddenPx": 47.1,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 38.6,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      },
+      {
+       "card": "A",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "B",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 2개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "S",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": true,
+     "note": false,
+     "folded": true,
+     "P_signal": "기록된 질문 4 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "P",
+       "el": "area-update-label",
+       "text": "설명 갱신",
+       "lineboxHiddenPx": 21.6,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 17.8,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      },
+      {
+       "card": "P",
+       "el": "tag purple",
+       "text": "앱에서 이어갈 작업",
+       "lineboxHiddenPx": 47.1,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 38.6,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": false,
+     "note": false,
+     "folded": false,
+     "P_signal": "기록된 질문 4 · 현재 설명 4 · 이번 탭 설명 갱신 2 · 설명 보류 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "P",
+       "el": "area-update-label",
+       "text": "설명 갱신",
+       "lineboxHiddenPx": 21.6,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 17.8,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      },
+      {
+       "card": "P",
+       "el": "tag purple",
+       "text": "앱에서 이어갈 작업",
+       "lineboxHiddenPx": 47.1,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 38.6,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      },
+      {
+       "card": "A",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "B",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 2개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "S",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": false,
+     "note": false,
+     "folded": true,
+     "P_signal": "기록된 질문 4 · 현재 설명 4 · 이번 탭 설명 갱신 2 · 설명 보류 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "P",
+       "el": "area-update-label",
+       "text": "설명 갱신",
+       "lineboxHiddenPx": 21.6,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 17.8,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      },
+      {
+       "card": "P",
+       "el": "tag purple",
+       "text": "앱에서 이어갈 작업",
+       "lineboxHiddenPx": 47.1,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 38.6,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      }
+     ]
+    },
+    {
+     "current": "B",
+     "stale": true,
+     "note": false,
+     "folded": false,
+     "P_signal": "기록된 질문 4 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "P",
+       "el": "area-update-label",
+       "text": "설명 갱신",
+       "lineboxHiddenPx": 21.6,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 17.8,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      },
+      {
+       "card": "A",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "B",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 2개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "S",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      }
+     ]
+    },
+    {
+     "current": "B",
+     "stale": true,
+     "note": false,
+     "folded": true,
+     "P_signal": "기록된 질문 4 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 0,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": null,
+       "inkFullyHidden": null,
+       "ellipsis": true
+      },
+      {
+       "card": "P",
+       "el": "area-update-label",
+       "text": "설명 갱신",
+       "lineboxHiddenPx": 21.6,
+       "lineboxFullyHidden": true,
+       "inkHiddenPx": 17.8,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      }
+     ]
+    }
+   ],
+   "pc1440_same_hidden_set_and_px": true
+  },
+  "candidate": {
+   "scenes_1280": [
+    {
+     "current": "P",
+     "stale": true,
+     "note": true,
+     "folded": false,
+     "P_signal": "설명 갱신 기록된 질문 4 · 현재 답변 기록 없음 1 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 설명 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 4,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": 2,
+       "inkFullyHidden": false,
+       "ellipsis": false
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": true,
+     "note": true,
+     "folded": true,
+     "P_signal": "설명 갱신 기록된 질문 4 · 현재 답변 기록 없음 1 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 설명 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 4,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": 2,
+       "inkFullyHidden": false,
+       "ellipsis": false
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": true,
+     "note": false,
+     "folded": false,
+     "P_signal": "설명 갱신 기록된 질문 4 · 현재 답변 기록 없음 1 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 설명 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 12.5,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": 10.5,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": true,
+     "note": false,
+     "folded": true,
+     "P_signal": "설명 갱신 기록된 질문 4 · 현재 답변 기록 없음 1 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 설명 1",
+     "hidden": [
+      {
+       "card": "P",
+       "el": "hint",
+       "text": "요청 1개 · 돌아온 결과 1개 · 앱 미검증",
+       "lineboxHiddenPx": 12.5,
+       "lineboxFullyHidden": false,
+       "inkHiddenPx": 10.5,
+       "inkFullyHidden": true,
+       "ellipsis": false
+      }
+     ]
+    },
+    {
+     "current": "P",
+     "stale": false,
+     "note": false,
+     "folded": false,
+     "P_signal": "설명 갱신 기록된 질문 4 · 현재 답변 기록 없음 1 · 현재 설명 4 · 이번 탭 설명 갱신 2 · 설명 보류 1",
+     "hidden": []
+    },
+    {
+     "current": "P",
+     "stale": false,
+     "note": false,
+     "folded": true,
+     "P_signal": "설명 갱신 기록된 질문 4 · 현재 답변 기록 없음 1 · 현재 설명 4 · 이번 탭 설명 갱신 2 · 설명 보류 1",
+     "hidden": []
+    },
+    {
+     "current": "B",
+     "stale": true,
+     "note": false,
+     "folded": false,
+     "P_signal": "기록된 질문 4 · 현재 답변 기록 없음 1 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 설명 1",
+     "hidden": []
+    },
+    {
+     "current": "B",
+     "stale": true,
+     "note": false,
+     "folded": true,
+     "P_signal": "기록된 질문 4 · 현재 답변 기록 없음 1 · 현재 설명 3 · 이번 탭 설명 갱신 2 · 설명 보류 1 · 이전 기준 설명 1",
+     "hidden": []
+    }
+   ],
+   "pc1440_same_hidden_set_and_px": true
+  }
+ }
+}

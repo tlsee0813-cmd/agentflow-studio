@@ -211,6 +211,15 @@ jobs:
         run: |
           set -o pipefail
           python continuity/tests/branch-records31_browser.py 2>&1 | tee test-results/branch-records31-browser.log
+      # test_04/05 block only on preparation/measurement; the known clipped px are an unresolved, non-blocking characterization (log line
+      # 'MAP34 KNOWN RESIDUAL'), not a clip-free pass. See docs/cycles/2026-10-23-map-signals-34/AUTHOR.md.
+      - name: MAP34 card record line, fixed card box and exact records entry on two PCs (synthetic recovery, mock AI)
+        env:
+          IDEA015_EVIDENCE_DIR: test-results/map-signals34
+        shell: bash
+        run: |
+          set -o pipefail
+          python continuity/tests/map-signals34_browser.py 2>&1 | tee test-results/map-signals34-browser.log
       - name: AREA18 mixed depth, real endpoints and fixed reading workspace on two PCs (native HTTP, labelled reconstructions and synthetic boundaries, mock AI)
         env:
           IDEA015_EVIDENCE_DIR: test-results/area18

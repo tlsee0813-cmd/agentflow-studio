@@ -84,3 +84,17 @@ export function subtreeSignals(p:Project,id:string):AreaSignals[] {
     const d=areaDescription(p,a.id);return {areaId:a.id,questions,reports:own.filter(it=>it.kind==='report'),description:{current:d.current,held:d.held}};
   });
 }
+/** MAP34: the facts one map card's record line shows, in a fixed order (never a priority). The owned set is subtreeSignals'
+ * (a leaf itself; a parent itself and its contained descendants; relations never widen it). The question total is the existing
+ * one; only a question that is current (active) with no recorded reply is told apart. Descriptions keep current, older-basis and
+ * held apart. 'This tab' updates are counted on a parent only (a leaf shows its own label). Empty when nothing is recorded. */
+export function recordFacts(p:Project,id:string,received:ReadonlySet<string>,parent:boolean):string[] {
+  const signals=subtreeSignals(p,id),questions=signals.flatMap(s=>s.questions);
+  const open=questions.filter(q=>q.applicability==='active'&&!q.answered).length;
+  const current=signals.filter(s=>s.description.current?.valid).length,held=signals.reduce((n,s)=>n+s.description.held.length,0);
+  const stale=signals.filter(s=>s.description.current&&!s.description.current.valid).length;
+  const updated=parent?signals.filter(s=>received.has(s.areaId)&&s.description.current?.valid).length:0;
+  if(!questions.length&&!current&&!held&&!stale)return [];
+  return [`기록된 질문 ${questions.length}`,...(open?[`현재 답변 기록 없음 ${open}`]:[]),...(current?[`현재 설명 ${current}`]:[]),
+    ...(updated?[`이번 탭 설명 갱신 ${updated}`]:[]),...(held?[`설명 보류 ${held}`]:[]),...(stale?[`이전 기준 설명 ${stale}`]:[])];
+}

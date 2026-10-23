@@ -10,7 +10,7 @@ import { mockAdvice } from '../shared/mock.js';
 import { sourceName, sourceOf, taskTitle, shortText, dateLabel, basisDraftChanged, stageOf, exportNeedsRefresh, workOrigin, returnPreview, exportPreview, fitViewport, FIT_MIN, ZOOM_MIN, ZOOM_MAX } from './presentation.js';
 import { loadConfig, requestAdvice, requestGuidance, runtimeStorage, runtimeFailure, type RuntimeConfig } from './runtime.js';
 import { outcomeOf } from '../shared/outcome.js';
-import { checkItems, pointedReturn, returnPath, rootRequest, subtreeSignals, type CheckItem } from '../shared/attention.js';
+import { checkItems, pointedReturn, recordFacts, returnPath, rootRequest, subtreeSignals, type CheckItem } from '../shared/attention.js';
 import { childrenOf, areaPath, descendantAreas, visibleAreas, visibleRepresentative, bundleRelations } from '../shared/hierarchy.js';
 const $=<T extends HTMLElement>(id:string)=>document.getElementById(id) as T;
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,content='',cls=''):HTMLElementTagNameMap[K] {
@@ -1413,6 +1413,17 @@ function openBranchRecords(id:string) {
     capturePanelReading(summary.id);rememberMap();
   }
 }
+/** MAP34: a card's own record line (facts from the shared recordFacts), entering the existing records reader. */
+function recordSignal(a:Area,parent:boolean,lead:boolean):HTMLButtonElement|null {
+  const bits=recordFacts(project,a.id,receivedAreas,parent);if(!bits.length)return null;
+  const signal=btn('',()=>openBranchRecords(a.id),'branch-signals',`branch-records-${a.id}`),here=lead&&receivedAreas.has(a.id);
+  if(here)signal.append(node('span','설명 갱신','area-update-label'),' ');
+  // Each fact stays whole; a line may break only between facts, never into an ellipsis.
+  bits.forEach((b,i)=>{if(i)signal.append(' ');signal.append(node('span',i<bits.length-1?`${b} ·`:b));});
+  const said=[...(here?['설명 갱신']:[]),...bits].join(' · ');
+  signal.title=said;signal.setAttribute('aria-label',`${a.name} · ${said} · ${parent?'이 부분과 하위 기록 읽기':'이 부분 기록 읽기'}`);signal.setAttribute('aria-controls','area-panel-body');
+  return signal;
+}
 function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   const pt=areaPosition(project,a),el=node('div','','area-node');el.dataset.areaId=a.id;
   el.style.left=`${pt.x}px`;el.style.top=`${pt.y}px`;el.classList.toggle('selected',mapSelected===a.id);
@@ -1423,9 +1434,7 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   enter.setAttribute('aria-label',`${a.name} 영역 열기`);
   const name=node('strong',a.name,'area-card-name');name.append(node('span',' ↘','area-card-go'));
   enter.append(name,node('span',areaPath(project,a.id).length>1?`소속 · ${areaPath(project,a.id).slice(0,-1).map(x=>x.name).join(' › ')}`:'독립 영역','area-card-path'),a.note?node('span',a.note,'area-card-note'):noNote(),node('span',areaSummary(a),'hint'));
-  if(receivedAreas.has(a.id))enter.append(node('span','설명 갱신','area-update-label'));
   el.classList.toggle('located',located?.area===a.id&&view==='space');
-  if(areaRequests(a.id).some(currentGroup))enter.append(appTag());
   enter.addEventListener('click',()=>guard(()=>openArea(a.id)));
   // Information shows the short properties; it never opens the area or changes the open work.
   const info=node('button','정보','quiet node-info');info.type='button';info.id=`node-info-${a.id}`;info.setAttribute('aria-pressed',String(mapSelected===a.id));
@@ -1433,14 +1442,18 @@ function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   info.addEventListener('click',()=>{branchRecordCaller=null;capturePanelReading();if(located&&(located.origin.view==='work'||located.origin.panel==='records')&&located.area!==a.id)endRecordsExcursion();mapSelected=a.id;sheetOpen=true;panelMode='area';rememberMap();render();$(`node-info-${a.id}`)?.focus({preventScroll:true});});
   el.append(handle,enter,info);
   const children=childrenOf(project,a.id).filter(x=>!x.archived);
+  // MAP34: the fold control and the card's labels share one row below the entry; nothing leaves the card or changes meaning.
+  const foot=node('div','','area-node-foot');
   if(children.length){const folded=collapsed.has(a.id),toggle=btn(folded?`하위 ${descendantAreas(project,a.id).filter(x=>!x.archived).length}개 펼치기`:'하위 접기',()=>toggleBranch(a.id),'quiet branch-toggle',`branch-toggle-${a.id}`);
-    toggle.setAttribute('aria-expanded',String(!folded));el.append(toggle);
-    const signals=subtreeSignals(project,a.id),questions=signals.reduce((n,s)=>n+s.questions.length,0);
-    const current=signals.filter(s=>s.description.current?.valid).length,held=signals.reduce((n,s)=>n+s.description.held.length,0),stale=signals.filter(s=>s.description.current&&!s.description.current.valid).length;
-    const updated=signals.filter(s=>receivedAreas.has(s.areaId)&&s.description.current?.valid).length;
-    const bits=[`기록된 질문 ${questions}`,...(current?[`현재 설명 ${current}`]:[]),...(updated?[`이번 탭 설명 갱신 ${updated}`]:[]),...(held?[`설명 보류 ${held}`]:[]),...(stale?[`이전 기준 ${stale}`]:[])];
-    if(questions||current||held||stale){const signal=btn(bits.join(' · '),()=>openBranchRecords(a.id),'branch-signals',`branch-records-${a.id}`);signal.title=signal.textContent??'';signal.setAttribute('aria-label',`${a.name} · ${bits.join(' · ')} · 이 부분과 하위 기록 읽기`);signal.setAttribute('aria-controls','area-panel-body');el.append(signal);}
-  }
+    toggle.setAttribute('aria-expanded',String(!folded));foot.append(toggle);}
+  // The '설명 갱신' label stays in this row unless the fold control and the current-work label already fill it; then it leads the
+  // card's own record line (it is a description fact of this card). A fixed rule, not a measured fit.
+  const current=areaRequests(a.id).some(currentGroup),lead=receivedAreas.has(a.id)&&children.length>0&&current;
+  const signal=recordSignal(a,children.length>0,lead);
+  if(receivedAreas.has(a.id)&&!(lead&&signal))foot.append(node('span','설명 갱신','area-update-label'));
+  if(current)foot.append(appTag());
+  if(foot.childElementCount)el.append(foot);
+  if(signal)el.append(signal);
   // Dragging uses only the handle (outside the enter button); a drag never ends as a click on enter or information.
   handle.addEventListener('pointerdown',e=>{
     if(e.button!==0)return;e.preventDefault();e.stopPropagation();handle.setPointerCapture(e.pointerId);
