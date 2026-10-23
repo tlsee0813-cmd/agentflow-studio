@@ -24,6 +24,8 @@
 
 **34 지도에서 읽을 부분 찾기 — 한 후보 구현 중.** [범위와 수용 계약](2026-10-23-map-signals-34/INPUT.md). [사실표](https://github.com/tlsee0813-cmd/agentflow-studio/blob/b44a3e8b7386b17c300704205e30e2082c61d022/docs/transfer/scan-research-34/source-audit-v0/FACTS.md). 말단 카드에 질문·설명의 상태가 없어 선택 전 구별할 수 없는 문제를 좁힌다. [새 Claude Code Opus](https://claude.ai/code/session_01HYWug65yLyrGuGvjjLkAa5)는 실제 대표 화면·코드·T2를 대조해 자기 카드의 기록 입구를 제안했다. 총괄은 전체 질문 존재를 보존하면서 현재 기준의 답변 없는 질문을 구별하고, 완료/의무로 오해시키지 않는 짧은 후보로 수정 요청했다. Opus는 별도 product/map-signals-34(시작575bb745)에서 카드 내부 정보 배치를 포함한 한 후보를 구현한다. 이 브랜치만 fast-forward 커밋/게시를 위임했고 제품 통합은 총괄이 담당한다. 알려진 긴 제목+배지 잘림 계산을 그대로 구현하지 않고 정보/동작을 보존하는 배치를 요구했다. Cloud는 원본 재실행 없이 독립 검증 장면을 준비하고, Sol은 기존 집계/시험 질문 경계를 대조한다. Pro의 Dify·React Flow·tldraw 비교는 [고정 소스 대조](https://github.com/tlsee0813-cmd/agentflow-studio/tree/a1a785a793105bc634b8c5c8b8fffd2d95faa504/docs/transfer/scan-research-34/source-audit-v0)에 남겼다. 기존32 관측을 재사용하고 새 줌 모드나 반복 대규모 기초조사를 추가하지 않는다.
 
+**35 최신 PC 흐름의 독립 미리보기 — 준비 시작.** [범위](2026-10-23-isolated-preview-35/INPUT.md). 수용된 제품을 직접 체험할 수 있는 정적 MOCK 빌드를 별도 출력/고정 저장 접두사로 준비한다. 같은 origin의 기존 데모와 자료가 섞이지 않는지 확인한다. 34의 작은 가림 판단에 전체 진전을 묶지 않으며, 공개 배포는 아직 결정하지 않았다. 다른 Claude Code 세션으로 빌드/저장 격리 작업을 분리한다.
+
 ## 마지막 제품 통합
 - **33 작업 대상과 행동 연결 — 한정 수용.** [결과](2026-10-23-task-context-33/RESULT.md), [PR18](https://github.com/tlsee0813-cmd/agentflow-studio/pull/18). 최종bfa6591, 병합0f8627ef. 기존 편집·파일 검토로 연결하고 화면 이탈 뒤 늦은 안내를 막는다.
 - **31 접힌 부분의 기록 진입 — 한정 수용.** [결과](2026-10-23-branch-records-31/RESULT.md), [PR16](https://github.com/tlsee0813-cmd/agentflow-studio/pull/16). 최종72940a, 병합75ed2ed7. 정확한 하위 기록·원호출 복귀와 신호 진입 페이지 위치를 보존한다.
