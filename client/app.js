@@ -62,6 +62,8 @@ let view = 'work', contextOpen = false, hasSaved = false, memoryDirty = false;
 // request, history, list), so it never takes room from the map, whose height follows what sits above it. Other notices
 // keep their own life; typing already ends any notice (domain change()). In memory only, like the notice itself.
 let workNotice = null;
+// VISUAL42: the continue notice's short first line (which work text is edited); the exact sentence stays one click away.
+let workNoticeLead = '';
 // WORK41: where the work view was left (scroll, open disclosures, the field and caret). Tab memory only; restored only for the
 // same project, activation and current task.
 let lastWorkField = null;
@@ -483,6 +485,7 @@ function displayView() {
     $('context-panel').hidden = !contextOpen;
     $('workspace').classList.toggle('details-open', contextOpen);
     $('nav-context').setAttribute('aria-expanded', String(contextOpen));
+    fitNameField();
     for (const [id, active] of [['nav-work', inProject && view === 'work' && !contextOpen], ['nav-context', inProject && view === 'work' && contextOpen], ['nav-history', inProject && view === 'history']]) {
         $(id).classList.toggle('active', active);
         if (active)
@@ -491,11 +494,28 @@ function displayView() {
             $(id).removeAttribute('aria-current');
     }
 }
-/** Only the PC whole-map header uses the explicit management menu; other layers keep their existing controls. */
-function syncProjectHeader() {
-    const compact = route !== 'projects' && view === 'space' && innerWidth > 760, menu = $('project-management');
+/** VISUAL42: the header's name field is as wide as its text (measured with its own computed font, plus a small margin for
+ * caret and rounding), up to the CSS max-width; a longer name scrolls inside the field. View only, nothing is stored. */
+let nameMeasure = null;
+function fitNameField() {
+    const field = $('project-name'), cs = getComputedStyle(field);
+    nameMeasure ??= document.createElement('canvas').getContext('2d');
+    if (!nameMeasure)
+        return;
+    nameMeasure.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    if ('letterSpacing' in nameMeasure)
+        nameMeasure.letterSpacing = cs.letterSpacing === 'normal' ? '0px' : cs.letterSpacing;
+    const edges = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'].reduce((n, k) => n + (parseFloat(cs[k]) || 0), 0);
+    field.style.width = `${Math.ceil(nameMeasure.measureText(field.value || field.placeholder).width + edges + 6)}px`;
+}
+/** VISUAL42: on PC every project layer shares the one header row, so project management is its menu there; narrow screens keep the inline buttons. */
+function syncProjectHeader(resized = false) {
+    const compact = route !== 'projects' && innerWidth > 760, menu = $('project-management');
+    // A window widened past the narrow layout keeps an open menu open (its inline buttons become the dropdown), so a control
+    // already reached is not hidden under the pointer; the dropdown then closes like any menu, on a click outside it.
     if (compact !== compactMapHeader) {
-        menu.open = !compact;
+        if (!(resized && compact && menu.open))
+            menu.open = !compact;
         compactMapHeader = compact;
     }
     document.body.dataset.mapHeader = String(compact);
@@ -774,11 +794,13 @@ function continueTask(id) {
     if (read && current && same && current.id !== id) {
         project = { ...project, notice: `${no(read)} 요청에서 이어가기 · 이 요청에 받은 현재 보고 ${no(current)}에서 계속해요. 고치는 작업문은 ${no(current)}의 후속 확인 작업문이고, ${no(read)}의 작업문은 그대로예요.` };
         workNotice = project.notice;
+        workNoticeLead = `${no(current)}의 후속 확인 작업문을 고쳐요 · ${no(read)}의 작업문은 그대로`;
         renderStatus();
     }
     else if (read && current && !same) {
         project = { ...project, notice: `${no(read)}로 이어가기 · 고치는 작업문은 ${no(read)}의 것이에요. 전에 이어가던 ${no(current)}은 그대로 남아요.` };
         workNotice = project.notice;
+        workNoticeLead = `${no(read)}의 작업문을 고쳐요 · ${no(current)}은 그대로`;
         renderStatus();
     }
     // ENTRY37-F1: the work's place bar (its way back to the map) starts below the sticky notice instead of under it; the
@@ -922,8 +944,19 @@ function renderStatus() {
             project = { ...project, notice: null };
         workNotice = null;
     }
-    $('notice').textContent = project.notice ?? '';
-    $('notice').hidden = !project.notice;
+    const notice = $('notice');
+    notice.hidden = !project.notice;
+    if (project.notice && project.notice === workNotice && workNoticeLead) {
+        // Rebuilt only when the notice changes, so an opened '자세히' stays open across status updates.
+        if (notice.dataset.text !== project.notice || !notice.querySelector('.notice-more')) {
+            const more = node('details', '', 'notice-more');
+            more.append(node('summary', '자세히'), node('p', project.notice));
+            notice.replaceChildren(node('span', workNoticeLead, 'notice-lead'), more);
+        }
+    }
+    else
+        notice.textContent = project.notice ?? '';
+    notice.dataset.text = project.notice ?? '';
     $('storage-error').textContent = storageError;
     $('storage-error').hidden = !storageError;
     $('saved').textContent = route === 'example' ? '예제 · 저장하지 않음' : pendingSave || draining ? '저장 중…' : hasSaved ? '이 브라우저에 저장됨' : '이 브라우저에 자동 저장';
@@ -1880,13 +1913,18 @@ function renderWork(t) {
     const row = node('div', '', 'actions work-actions');
     const retry = btn('이 입력 다시 정리', () => { void generate(t.id); }, 'quiet', 'retry-work');
     retry.dataset.aiAction = 'true';
-    row.append(btn('작업문 복사', () => { void exportWork(t.id, 'clipboard'); }, 'primary', 'copy-work'), btn('Markdown 저장', () => { void exportWork(t.id, 'download'); }, 'secondary', 'download-work'), retry, btn('전달할 작업문 전체 보기', () => { const d = $('handoff-preview'); d.open = true; d.scrollIntoView({ block: 'nearest' }); $('handoff-text').focus({ preventScroll: true }); }, 'quiet', 'next-preview'));
+    // VISUAL42: copy/save are the principal group; re-organising, reading the whole text and the file-result option are a
+    // separate quiet group; who wrote the text sits beside the text's own label below.
+    row.append(btn('작업문 복사', () => { void exportWork(t.id, 'clipboard'); }, 'primary', 'copy-work'), btn('Markdown 저장', () => { void exportWork(t.id, 'download'); }, 'secondary', 'download-work'));
     if (questionApplicability(project, t) === 'active')
         row.prepend(btn('질문에 답하기', () => { $('question-box').scrollIntoView({ block: 'center' }); $('answer-draft')?.focus({ preventScroll: true }); }, 'primary', 'next-answer'));
+    const tools = node('div', '', 'work-tools');
+    tools.setAttribute('role', 'group');
+    tools.setAttribute('aria-label', '작업문 보조 행동');
+    tools.append(retry, btn('전달할 작업문 전체 보기', () => { const d = $('handoff-preview'); d.open = true; d.scrollIntoView({ block: 'nearest' }); $('handoff-text').focus({ preventScroll: true }); }, 'quiet', 'next-preview'));
     const author = tag(workAuthor(t, v.next));
     author.id = 'instruction-author';
-    row.append(author);
-    actions.append(row);
+    actions.append(row, tools);
     const next = node('div', '', 'handoff-ready');
     next.id = 'handoff-ready';
     const exported = t.handoffs.at(-1), nextText = node('div');
@@ -1906,6 +1944,9 @@ function renderWork(t) {
         const l = node('label', label);
         l.htmlFor = `work-${key}`;
         const field = node('textarea');
+        const head = key === 'next' ? node('div', '', 'work-field-head') : null;
+        if (head)
+            head.append(l, author);
         field.id = `work-${key}`;
         field.rows = key === 'next' ? 9 : 2;
         field.maxLength = 6000;
@@ -1916,7 +1957,7 @@ function renderWork(t) {
         const old = t.manual[key] === null && w.aiStale ? t.advice?.[key] ?? '' : '';
         const marker = node('p', t.manual[key] !== null ? '직접 수정 · AI가 덮어쓰지 않음' : old ? '이전 AI 문구는 작업문에서 제외됨 · 직접 쓰면 그대로 들어갑니다' : '제안 · 실제 실행 결과 아님', 'manual-note');
         marker.id = `manual-${key}`;
-        fields.append(l, field, marker);
+        fields.append(head ?? l, field, marker);
         if (old) {
             const d = details('제외된 이전 AI 문구 보기 (현재 작업문 아님)', `stale-${key}`);
             d.append(node('div', old, 'source-raw'), btn('이 문구로 시작해 직접 고치기', () => commit(editTask(project, t.id, key, old)), 'quiet', `stale-use-${key}`));
@@ -1975,7 +2016,7 @@ function renderWork(t) {
     }
     preview.append(node('p', '관련 입력 + 직전 작업 + 모든 보존 기준. AI가 관련으로 고르지 않은 기준도 뒤에 남습니다.', 'hint'), txt);
     // The optional file-return choice stays a folded line in the action row, as on the first prepared screen before (BLANK21).
-    actions.append(fileOptions);
+    tools.append(fileOptions);
     more.append(backgroundPreview(t), preview);
     card.append(more);
     area.append(card);
@@ -2291,8 +2332,22 @@ function renderProjects() {
         list.append(legacyCard());
     $('example-list').replaceChildren(exampleCard());
     // An empty list and a list that could not be read are different situations.
-    if (!active.length && !workspace.legacy && !workspace.readError)
-        list.append(node('li', '아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 아래에서 예제를 둘러보세요.', 'hint project-empty'));
+    // VISUAL42: an empty list is one compact start group: a short title and line, then two aligned start rows (a new project,
+    // the unsaved example), with restoring a backup as the secondary action below. '새 프로젝트' in the header stays the same path.
+    const empty = !active.length && !workspace.legacy && !workspace.readError;
+    $('projects-view').classList.toggle('empty-home', empty);
+    if (empty) {
+        const title = node('li', '', 'start-heading');
+        title.append(node('h2', '첫 프로젝트 시작하기'));
+        const row = node('li', '', 'start-row'), start = btn('', () => $('new-project').click(), 'start-option', 'start-new-project');
+        start.disabled = !workspace.writable;
+        start.setAttribute('aria-label', '새 프로젝트 만들기');
+        const text = node('span', '', 'start-text');
+        text.append(node('strong', '새 프로젝트'), node('span', '무엇을 만들지 적고, 영역으로 나눠 첫 작업문을 준비해요.'));
+        start.append(node('span', '', 'start-icon'), text);
+        row.append(start);
+        list.append(title, node('li', '아직 프로젝트가 없어요. ‘새 프로젝트’로 바로 시작하거나 아래에서 예제를 둘러보세요.', 'hint project-empty'), row);
+    }
     $('projects-count').textContent = active.length ? String(active.length) : '';
     for (const e of trashed)
         trash.append(projectCard(e));
@@ -2929,7 +2984,7 @@ function sizeWorkspace() {
         map?.style.removeProperty('min-height');
     }
 }
-window.addEventListener('resize', () => { capturePanelReading(); syncProjectHeader(); sizeWorkspace(); restorePanelReading(); });
+window.addEventListener('resize', () => { capturePanelReading(); syncProjectHeader(true); sizeWorkspace(); restorePanelReading(); });
 document.addEventListener('toggle', e => { if (e.target instanceof HTMLDetailsElement && e.target.closest('#space-view') && !e.target.closest('#area-panel'))
     sizeWorkspace(); }, true);
 function openRelations(from = 'map-relations-open') { branchRecordCaller = null; capturePanelReading(); relationCaller = from; panelMode = 'relations'; rememberMap(); render(); $('area-panel-body')?.focus({ preventScroll: true }); }
@@ -3068,7 +3123,7 @@ function renderMap(root, active, extra = []) {
     const bar = node('div', '', 'map-toolbar');
     bar.append(node('h2', '영역'));
     // PC13: adding an area is an explicit disclosure. It starts open when there is no area yet or an unsent name/idea is kept.
-    const addPanel = details('＋ 영역 추가', 'area-add-panel');
+    const addPanel = details('영역 추가', 'area-add-panel');
     addPanel.classList.add('toolbar-disclosure');
     addPanel.open = !active.length || !!(spaceInputs[`${project.id}:area-name`] || spaceInputs[`${project.id}:area-note`]);
     const add = node('form', '', 'area-add');
@@ -3082,7 +3137,7 @@ function renderMap(root, active, extra = []) {
     note.maxLength = 2000;
     note.placeholder = '한 줄 구상 · 아이디어나 아직 못 정한 점 (선택)';
     note.setAttribute('aria-label', '영역 설명');
-    const submitArea = node('button', '＋ 영역 추가', 'secondary');
+    const submitArea = node('button', '추가', 'secondary');
     submitArea.type = 'submit';
     submitArea.id = 'area-add';
     add.append(name, note, submitArea);
@@ -3104,7 +3159,7 @@ function renderMap(root, active, extra = []) {
         section.append(areaList(active));
     const layout = node('div', '', 'map-layout'), map = node('div', '', 'space-map');
     map.id = 'space-map';
-    map.setAttribute('aria-label', '영역 지도 · 빈 곳을 끌어 이동, 카드의 ⠿를 끌어 위치 이동');
+    map.setAttribute('aria-label', '영역 지도 · 빈 곳을 끌어 이동, 카드 오른쪽 위 손잡이를 끌어 위치 이동');
     const plane = node('div', '', 'space-plane');
     plane.id = 'space-plane';
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -3657,7 +3712,7 @@ function areaPanel(a) {
     go.setAttribute('role', 'group');
     go.setAttribute('aria-label', '선택한 영역의 행동');
     const continued = areaRequests(a.id).some(currentGroup);
-    go.append(btn('부분 열기 ↗', () => openArea(a.id), continued ? 'secondary' : 'primary', 'panel-open'), btn('새 요청', () => writeInArea(a.id), 'quiet', 'panel-new-request'));
+    go.append(btn('부분 열기', () => openArea(a.id), continued ? 'secondary' : 'primary', 'panel-open'), btn('새 요청', () => writeInArea(a.id), 'quiet', 'panel-new-request'));
     go.querySelector('#panel-new-request').setAttribute('aria-label', '이 부분에 새 요청');
     if (a.name.length > 24) {
         const full = details('영역 이름 전체 보기', `panel-name-full-${a.id}`);
@@ -3678,12 +3733,17 @@ function areaPanel(a) {
         gist.id = 'panel-continue-gist';
         // Same rule as continueTarget: a current report of this request stays the edited record; the request's own text stays.
         const edited = `작업 ${pad(project.tasks.indexOf(curTask) + 1)}`, own = `작업 ${pad(project.tasks.indexOf(cur) + 1)}`;
-        const why = node('p', curTask.id === cur.id ? `고치는 대상 · ${edited}의 작업문` : `고치는 대상 · ${edited} (${own}에 받은 보고의 후속 확인 작업문) · ${own}의 작업문은 그대로`, 'hint');
+        // VISUAL42: the edited record in one short visible line (which text changes, which stays); the exact sentence and the
+        // continue rule open from the same line (keyboard reachable), so the ownership is never only in a tooltip.
+        const why = node('details', '', 'panel-continue-target');
         why.id = 'panel-continue-target';
         why.title = target.text;
-        work.append(what, appTag(), gist, why);
+        why.append(node('summary', curTask.id === cur.id ? `${edited} 편집` : `${edited} 편집 · ${own} 원문 유지`), node('p', curTask.id === cur.id ? `고치는 대상 · ${edited}의 작업문` : `고치는 대상 · ${edited} (${own}에 받은 보고의 후속 확인 작업문) · ${own}의 작업문은 그대로`, 'hint'), node('p', target.text, 'hint'));
+        const head = node('div', '', 'panel-continue-head');
+        head.append(what, appTag());
+        work.append(head, gist, why);
         body.append(work);
-        go.prepend(btn('이어가기 →', () => { if (workMemo?.task === project.currentTaskId)
+        go.prepend(btn('이어가기', () => { if (workMemo?.task === project.currentTaskId)
             resumeWork(true, true);
         else
             continueTask(cur.id); }, 'primary', 'panel-continue'));
@@ -3704,7 +3764,7 @@ function areaPanel(a) {
         list.append(node('p', `이 영역의 요청 ${requests.length}개 · 골라서 읽기`, 'source-meta'));
         const ul = node('ul', '', 'panel-task-list');
         for (const t of requests.slice(0, 2)) {
-            const li = node('li'), open = btn(`${taskTitle(project, t)} ↘`, () => openTaskView(t.id, null, `panel-task-${t.id}`), 'quiet panel-task', `panel-task-${t.id}`);
+            const li = node('li'), open = btn(taskTitle(project, t), () => openTaskView(t.id, null, `panel-task-${t.id}`), 'quiet panel-task', `panel-task-${t.id}`);
             li.append(open, node('span', `작업 ${pad(project.tasks.indexOf(t) + 1)} · ${taskStatus(project, t)}`, 'hint'));
             if (currentGroup(t))
                 li.append(appTag());
@@ -3714,7 +3774,7 @@ function areaPanel(a) {
         if (requests.length > 2) {
             const rest = details(`요청 ${requests.length - 2}개 더 보기`, `panel-tasks-more-${a.id}`);
             for (const t of requests.slice(2))
-                rest.append(btn(`${taskTitle(project, t)} ↘`, () => openTaskView(t.id, null, `panel-task-${t.id}`), 'quiet panel-task', `panel-task-${t.id}`));
+                rest.append(btn(taskTitle(project, t), () => openTaskView(t.id, null, `panel-task-${t.id}`), 'quiet panel-task', `panel-task-${t.id}`));
             list.append(rest);
         }
         list.append(node('p', '읽기만으로는 이어가는 작업이나 새 요청의 영역이 바뀌지 않아요.', 'hint'));
@@ -4022,7 +4082,7 @@ function taskEntry(t, placing) {
     const first = sourceOf(project, t), results = returnsOf(t);
     // SPATIAL102: the title enters the read-only task screen; continuing stays the explicit button below.
     const title = node('h3');
-    title.append(btn(`${taskTitle(project, t)} ↘`, () => openTaskView(t.id, null, `task-open-${t.id}`), 'task-open-link', `task-open-${t.id}`));
+    title.append(btn(taskTitle(project, t), () => openTaskView(t.id, null, `task-open-${t.id}`), 'task-open-link', `task-open-${t.id}`));
     item.append(title, node('p', `${first ? dateLabel(first.at) : ''} · ${taskStatus(project, t)}`, 'hint'));
     if (results.length) {
         const last = results.at(-1), src = project.sources.find(s => s.id === last.sourceIds[0]);
@@ -4353,10 +4413,10 @@ function renderArea(root, a) {
     title.id = 'space-title';
     title.tabIndex = -1;
     // PC12: the user's idea is read first; a long one shows its opening words and says where the whole text is.
-    head.append(node('p', a.archived ? 'AREA · 보관됨' : 'AREA', 'eyebrow'), title, !a.note ? noNote() : a.note.length <= NOTE_SHORT * 2 ? node('p', a.note, 'space-brief') : areaIdea(a, 'area-idea', NOTE_SHORT * 2));
+    head.append(node('p', a.archived ? '영역 · 보관됨' : '영역', 'eyebrow'), title, !a.note ? noNote() : a.note.length <= NOTE_SHORT * 2 ? node('p', a.note, 'space-brief') : areaIdea(a, 'area-idea', NOTE_SHORT * 2));
     const actions = node('div', '', 'row');
     if (!a.archived)
-        actions.append(btn('＋ 이 영역에 새 요청', () => writeInArea(a.id), 'primary', 'area-new-request'));
+        actions.append(btn('이 영역에 새 요청', () => writeInArea(a.id), 'primary', 'area-new-request'));
     actions.append(btn(a.archived ? '영역 되살리기' : '영역 보관', () => { if (!a.archived && childrenOf(project, a.id).some(x => !x.archived)) {
         project = { ...project, notice: '하위 부분이 남아 있어 보관하지 않았어요. 먼저 하위 부분의 소속을 바꾸거나 하위 부분부터 보관하세요.' };
         renderStatus();
@@ -4890,7 +4950,7 @@ function render(capturePanel = true, restoreReading = true, beforeWorkspaceSizin
     $('compose-eyebrow').textContent = returned ? 'CONTINUE WITH RESULTS' : project.tasks.length ? 'NEXT REQUEST' : "LET’S START";
     $('input-hint').textContent = returned ? '받은 보고를 그대로 붙여넣고 연결할 작업을 확인하세요. 검증 완료로 바꾸지 않습니다.' : project.draftKind === 'test_answer' ? '합성 시험자료로만 보관합니다. 실제 요청과 확정 기준은 바꾸지 않습니다.' : config?.mode === 'mock' ? 'MOCK은 정해진 규칙으로 작업문을 준비해요. 요청의 의미를 이해해 요약하거나 필요한 질문을 모두 찾아 주지는 않아요.' : '필요한 질문만 받고, 바로 전달할 작업문을 준비해요.';
     $('draft').placeholder = returned ? '받은 결과 요약이나 변경 내용, 실행한 검사와 남은 일을 그대로 붙여넣으세요. 정해진 양식은 없어요.' : project.tasks.length ? '이번에 바꿀 부분만 적어 주세요. 앞에서 정한 기준은 함께 이어갑니다.' : '무엇을 만들고 싶나요? 이미 작업 중이라면, 지금 바꾸고 싶은 부분만 알려주세요.';
-    $('send').replaceChildren(document.createTextNode(returned ? '결과에서 이어가기' : '작업문 준비하기'), node('span', ' ↗'));
+    $('send').replaceChildren(document.createTextNode(returned ? '결과에서 이어가기' : '작업문 준비하기'), node('span', ''));
     $('starter-examples').hidden = !!project.tasks.length || returned;
     $('brief-form').hidden = !!project.space.brief || route === 'example';
     $('compose-panel').classList.toggle('initial', !project.tasks.length);
@@ -4978,9 +5038,10 @@ function submitInput(withAI) {
 $('compose').addEventListener('submit', e => { e.preventDefault(); submitInput(true); });
 $('save-input').addEventListener('click', () => submitInput(false));
 $('draft').addEventListener('input', () => guard(() => commit(editDraft(project, $('draft').value), false)));
-$('project-name').addEventListener('input', () => { const value = $('project-name').value; if (value.trim())
+$('project-name').addEventListener('input', () => { fitNameField(); const value = $('project-name').value; if (value.trim())
     guard(() => commit(rename(project, value), false)); });
-$('project-name').addEventListener('blur', () => { $('project-name').value = project.name; });
+$('project-name').addEventListener('blur', () => { $('project-name').value = project.name; fitNameField(); });
+void document.fonts?.ready.then(fitNameField);
 $('request-tab').addEventListener('click', () => { if (project.draftKind !== 'request')
     changeKind('request'); });
 $('report-tab').addEventListener('click', () => { if (project.draftKind !== 'report')
