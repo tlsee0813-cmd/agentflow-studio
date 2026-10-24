@@ -324,19 +324,21 @@ svg.dl{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .env i:first-child{border-radius:7px 0 0 7px}.env i:last-child{border-radius:0 7px 7px 0}.env i+i{border-left:0}
 
 /* 인스펙터 · 확대 */
-.insp{position:absolute;left:16px;right:180px;bottom:16px;display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--shell-b);border-radius:14px;box-shadow:0 14px 32px -14px rgba(16,24,40,.25),0 2px 6px rgba(16,24,40,.06);padding:10px 10px 10px 12px;z-index:4}
+.insp{position:absolute;left:16px;right:180px;bottom:16px;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--shell-b);border-radius:14px;box-shadow:0 14px 32px -14px rgba(16,24,40,.25),0 2px 6px rgba(16,24,40,.06);padding:10px 10px 10px 12px;z-index:4}
 .iic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--core);color:var(--core-ic)}
 .iic.hub{background:var(--hub-bg);color:var(--hub)} .iic.ext{background:var(--ext-bg);color:var(--ext)}
 .iic svg{width:19px;height:19px}
 .im{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .ihr{display:flex;align-items:center;gap:10px;min-width:0}
+.ihr2{display:flex;align-items:center;gap:10px;min-width:0}
+.isp{flex:1}
 .ihr h3{margin:0;font-size:16.5px;font-weight:700;color:var(--ink-d);letter-spacing:-.01em;white-space:nowrap}
 .ik{font-size:12.5px;color:var(--ink-d3);white-space:nowrap}
-.irl{font-size:12px;color:var(--ink-d3);margin-left:8px;padding-left:12px;border-left:1px solid var(--shell-b);white-space:nowrap}
-.insp p{margin:0;font-size:14px;line-height:1.45;color:var(--ink-d2)}
+.irl{font-size:12px;color:var(--ink-d3);white-space:nowrap;flex:none}
+.insp p{flex:1;min-width:0;margin:0;font-size:14px;line-height:1.45;color:var(--ink-d2)}
 .iw{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-size:12.5px;color:var(--ink-d3);white-space:nowrap}
 .iw svg{width:13px;height:13px}
-.ir{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden}
+.ir{display:flex;align-items:center;gap:6px;flex:none}
 .rc{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px 0 8px;border-radius:14px;flex:none;font-size:13.5px;color:var(--ink-d);border:1px solid var(--shell-b);background:#fff;white-space:nowrap}
 .rc:hover{border-color:#bfc2cc}
 .rc svg{width:15px;height:15px;color:var(--core-ic);flex:none}
@@ -405,6 +407,32 @@ svg.dl{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
 .vc.ok{background:var(--hub-bg);border-color:var(--hub-b);color:var(--hub-ink);font-weight:600}
 .vc.bad{background:var(--amber);border-color:var(--amber);color:#fff;font-weight:650}
 .vc svg{width:14px;height:14px}
+.nd .cnt{font-size:11.5px;font-weight:650;color:var(--hub-ink);background:rgba(14,122,109,.12);border-radius:8px;padding:0 6px;line-height:18px;margin-left:1px}
+.card .deep{color:var(--hub-ink);font-weight:600}
+.dl text.st2{fill:var(--ink-d2);font-weight:500}
+.dl .rej{stroke:var(--amber);stroke-width:1.5}
+.dl .hl{stroke:var(--ind);stroke-width:3.2;opacity:.9}
+.cond{position:absolute;display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 10px;border-radius:15px;background:var(--amber-bg);border:1px solid var(--amber-b);font-size:13.5px;font-weight:600;color:#7a4505;white-space:nowrap}
+.cond small{font-size:11.5px;font-weight:500;color:var(--amber)}
+.stl{font-size:11.5px;font-weight:600;color:var(--hub-ink);background:rgba(14,122,109,.12);border-radius:8px;padding:0 6px;margin-left:auto}
+.nd.data{background:#fbfdfc;border-style:solid;border-color:var(--hub-b)}
+.dtag{font-size:11.5px;color:var(--hub-ink);margin-left:auto;padding-left:6px}
+.tbtn.ghost{background:#f6f6f3}
+.tbtn .bk{font-size:12px;color:var(--ink-d3);margin-right:2px}
+.rmore{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 8px 0 10px;border-radius:14px;font-size:13px;color:var(--ind-ink);background:#eef0fb;white-space:nowrap;flex:none}
+.rmore svg{width:13px;height:13px}
+.rmore.on svg{transform:rotate(180deg)}
+.rlist{position:absolute;right:10px;bottom:calc(100% + 8px);width:440px;max-height:330px;overflow:auto;background:#fff;border:1px solid var(--shell-b);border-radius:12px;box-shadow:0 16px 36px -12px rgba(16,24,40,.25);padding:8px}
+.rlh{font-size:14px;font-weight:700;color:var(--ink-d);padding:4px 8px 6px;display:flex;align-items:baseline;gap:8px}
+.rlh small{font-size:12px;font-weight:500;color:var(--ink-d3)}
+.rlg{font-size:12px;color:var(--ink-d3);padding:6px 8px 2px}
+.rrow{display:flex;align-items:center;gap:6px;width:100%;padding:6px 8px;border-radius:8px;font-size:13.5px;color:var(--ink-d)}
+.rrow:hover{background:#f3f4fb}
+.rrow .re{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.rrow .re svg{width:14px;height:14px;color:var(--core-ic)}
+.rrow .re.hub svg{color:var(--hub)} .rrow .re.ext svg{color:var(--ext)}
+.rrow .ra{color:var(--ink-d3)}
+.rrow em{font-style:normal;margin-left:auto;font-size:12.5px;color:var(--ind-ink);white-space:nowrap}
 .rulel{position:absolute;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-d)}
 .rulel i{width:8px;height:8px;border-radius:50%;background:var(--amber)}
 .rulel small{font-size:12px;color:var(--ink-d3);border:1px solid var(--shell-b);border-radius:9px;padding:0 7px;background:#fff}
@@ -469,6 +497,9 @@ const N={
  'state.version':{name:'문서 버전',parent:'state',st:'reported',desc:'문서가 바뀔 때마다 올라가는 버전.'},
  'state.apply':{name:'변경 반영',parent:'state',st:'design',rule:'r1',desc:'들어온 변경을 현재 문서 버전에 반영한다.'},
  'state.views':{name:'표현 연결',parent:'state',st:'design',desc:'한 문서를 두 편집창에서 볼 때 대상은 하나이고 표현이 둘이다. 창마다 문서를 복제하지 않는다.'},
+ 'state.apply.check':{name:'변경 검사',parent:'state.apply',deep:1,desc:'들어온 변경이 지금 문서 버전을 기준으로 만들어졌는지 확인한다.'},
+ 'state.apply.update':{name:'문서 갱신',parent:'state.apply',deep:1,desc:'검사를 통과한 변경을 문서 내용에 적용하고 버전을 올린다.'},
+ 'state.apply.notify':{name:'변경 알림',parent:'state.apply',deep:1,desc:'문서가 바뀐 사실을 그 문서를 보여 주는 곳에 알린다.'},
  collab:{name:'함께 편집하기',parent:'root',st:'idea',desc:'여러 사람이 같은 문서를 동시에 고치는 구상. 아직 부분으로 나뉘지 않았다.'}
 };
 const TOP=['doc','edit','undo','ext','state','collab'];
@@ -510,7 +541,7 @@ const STX={idea:'구상만 있음',design:'설계 논의만 있고 구현 기록
 
 /* ---------- 도우미 ---------- */
 const $=s=>document.querySelector(s);
-const kids=id=>Object.keys(N).filter(k=>N[k].parent===id);
+const kids=id=>Object.keys(N).filter(k=>N[k].parent===id&&(!N[k].deep||S.alt==='D'));
 const under=(id,a)=>{for(let x=id;x;x=N[x].parent)if(x===a)return true;return false};
 const topOf=id=>{let x=id;while(N[x].parent&&N[x].parent!=='root')x=N[x].parent;return x};
 const nm=id=>id==='writer'?'글쓴이':N[id].name;
@@ -527,8 +558,8 @@ const kindLabel=id=>id==='root'?'프로젝트':N[id].shared?'공유 대상 · '+
 const S={alt:'D',A:{v:'root',sel:null,h:[]},B:{v:'root',sel:null,h:[]},C:{v:'root',q:'q0',sel:null,h:[]},flip:null};
 try{const a=location.hash.slice(1);if(/^[ABCD]$/.test(a))S.alt=a}catch(e){}
 const cur=()=>S[S.alt];
-function push(v,sel,flip){const s=cur();s.h.push({v:s.v,sel:s.sel});s.v=v;s.sel=sel||null;S.flip=flip||null;render()}
-function back(){const s=cur();if(!s.h.length)return;const p=s.h.pop();S.flip=s.v;s.v=p.v;s.sel=p.sel;render()}
+function push(v,sel,flip){const s=cur();if(s.list!==undefined){s.list=false;s.hl=null}s.h.push({v:s.v,sel:s.sel});s.v=v;s.sel=sel||null;S.flip=flip||null;render()}
+function back(){const s=cur();if(!s.h.length)return;if(s.list!==undefined){s.list=false;s.hl=null}const p=s.h.pop();S.flip=s.v;s.v=p.v;s.sel=p.sel;render()}
 function home(){if(cur().v!=='root')push('root',null)}
 function setSel(id){cur().sel=id;render()}
 
@@ -663,7 +694,7 @@ function renderB(){const s=S.B,F=s.v,sel=s.sel;bar(F);
  const{inc,out}=nbB(F);const k=F==='root'?TOP:kids(F);const wu=WR.uses.filter(u=>under(u,F));
  const vis=new Set([F]);for(let y=N[F].parent;y;y=N[y].parent)vis.add(y);k.forEach(x=>vis.add(x));
  let vr=0;[inc,out].forEach(g=>Object.entries(g).forEach(([key,rs])=>{vis.add(key);rs.forEach(r=>{vis.add(r.f);vis.add(r.t);vr++})}));
- const total=Object.keys(N).length-1;const shown=[...vis].filter(x=>x!=='root').length;
+ const total=Object.keys(N).filter(k=>!N[k].deep).length-1;const shown=[...vis].filter(x=>x!=='root').length;
  const selRels=sel?(inc[sel]||out[sel]||[]):[];const hitK=new Set();selRels.forEach(r=>k.forEach(x=>{if(under(r.f,x)||under(r.t,x))hitK.add(x)}));
  if(sel==='writer')wu.forEach(u=>k.forEach(x=>{if(under(u,x))hitK.add(x)}));
  const chip=(key,rs,dir)=>`<div class="chip ${sel===key?'on':''}" data-id="g:${key}" data-flip="${key}" data-act="selB" data-arg="${key}" data-dbl="${key}" role="button" tabindex="0">
@@ -805,6 +836,9 @@ const ICON={
  'state.version':'<path d="M2.5 2.5h5.3l5.7 5.7-5.3 5.3-5.7-5.7z"/><circle cx="5.6" cy="5.6" r="1" fill="currentColor" stroke="none"/>',
  'state.apply':'<path d="M3 2.5v3.3A3.2 3.2 0 0 0 6.2 9H13M10.5 6.5 13 9l-2.5 2.5M3 13.5v-3"/>',
  'state.views':'<rect x="1.8" y="3.3" width="7.2" height="7" rx="1.2"/><path d="M11 6h2a1.2 1.2 0 0 1 1.2 1.2v4.6a1.2 1.2 0 0 1-1.2 1.2H8.2A1.2 1.2 0 0 1 7 11.8v-1.2"/>',
+ 'state.apply.check':'<circle cx="7" cy="7" r="4.4"/><path d="M10.3 10.3 13.6 13.6M5.1 7.1l1.3 1.3 2.5-2.6"/>',
+ 'state.apply.update':'<path d="M13.2 8.2A5.2 5.2 0 1 1 11.6 4.4"/><path d="M13.3 2.4v3.2h-3.2"/>',
+ 'state.apply.notify':'<path d="M4 11.4V7.6a4 4 0 0 1 8 0v3.8l1.1 1.3H2.9z"/><path d="M6.6 14.2a1.5 1.5 0 0 0 2.8 0"/>',
  collab:'<circle cx="5.6" cy="5.5" r="2.2"/><circle cx="11.2" cy="6.4" r="1.8"/><path d="M1.8 13.5c.5-2.4 2-3.6 3.8-3.6s3.3 1.2 3.8 3.6M10 10.2c.4-.2.8-.2 1.2-.2 1.5 0 2.6 1 3 3"/>',
  writer:'<circle cx="8" cy="5" r="2.6"/><path d="M3 14c.7-3 2.6-4.5 5-4.5s4.3 1.5 5 4.5"/>',
  win:'<rect x="2" y="3" width="12" height="10" rx="1.6"/><path d="M2 6h12"/>',
@@ -826,12 +860,19 @@ const POS={'doc.open':[44,170],'doc.save':[44,226],'doc.dirty':[100,282],'edit.t
 const TONE={doc:'core',edit:'core',undo:'core',ext:'ext',state:'hub',collab:'idea'};
 const tone=id=>id==='writer'?'core':TONE[topOf(id)];
 const VERB={'사용':'쓴다','제공':'제공한다','만듦':'만든다','실행 위치':'실행한다'};
-const ROLE={'doc.open':'파일을 열어 문서로 등록','doc.save':'현재 버전을 파일에 쓴다','doc.dirty':'저장 뒤 바뀐 것을 알린다','edit.text':'글자 단위로 고친다','edit.visual':'표·그림을 보이는 대로 고친다','edit.cmd':'이름 붙은 명령으로 고친다','undo.unit':'되돌릴 수 있는 한 번의 변경','undo.multi':'여러 문서의 변경을 한 번에','undo.cursor':'되돌린 뒤 커서를 제자리로','ext.reg':'확장이 명령을 더한다','ext.host':'확장마다 한 곳에서 돈다','state.version':'바뀔 때마다 올라가는 버전','state.apply':'변경을 현재 버전에 반영','state.views':'한 문서를 여러 창에 보인다'};
+const ROLE={'doc.open':'파일을 열어 문서로 등록','doc.save':'현재 버전을 파일에 쓴다','doc.dirty':'저장 뒤 바뀐 것을 알린다','edit.text':'글자 단위로 고친다','edit.visual':'표·그림을 보이는 대로 고친다','edit.cmd':'이름 붙은 명령으로 고친다','undo.unit':'되돌릴 수 있는 한 번의 변경','undo.multi':'여러 문서의 변경을 한 번에','undo.cursor':'되돌린 뒤 커서를 제자리로','ext.reg':'확장이 명령을 더한다','ext.host':'확장마다 한 곳에서 돈다','state.version':'바뀔 때마다 올라가는 버전','state.apply':'변경을 현재 버전에 반영','state.views':'한 문서를 여러 창에 보인다','state.apply.check':'요청 버전과 지금 버전을 맞춰 본다','state.apply.update':'내용을 바꾸고 버전을 올린다','state.apply.notify':'보여 주는 곳에 바뀐 것을 알린다'};
+const DR=[['edit.text','state.apply.check','보낸다',1,1],['edit.visual','state.apply.check','보낸다',0,1],['undo.unit','state.apply.check','보낸다',1,1],
+ ['state.apply.check','state.apply.update','넘긴다',1],['state.apply.update','state.apply.notify','이어 받는다',1],
+ ['state.apply.check','state.version','읽는다',1],['state.apply.update','state.version','올린다',1],['state.apply.notify','state.views','알린다',1]].map(([f,t,v,sure,dup])=>({f,t,v,sure:!!sure,dup:!!dup}));
+function relsFor(id){if(id==='writer')return[];const g=kids(id).length>0;const q=r=>g?under(r.f,id)!==under(r.t,id):(r.f===id||r.t===id);
+ const base=R.map(r=>({...r,v:VERB[r.k]})).concat(DR.filter(r=>!r.dup)).filter(q);
+ DR.filter(r=>r.dup&&q(r)&&!base.some(b=>b.f===r.f&&under(r.t,b.t))).forEach(r=>base.push(r));return base}
+const otherEnd=(r,id)=>kids(id).length?(under(r.f,id)?r.t:r.f):(r.f===id?r.t:r.f);
 const QS={q1:{name:'저장하면?',sub:'저장이 문서 상태와 두 편집창에 이어지는 흐름',ids:['doc.save','doc.dirty','state.version','state.views']},
  q2:{name:'여러 문서를 되돌리면?',sub:'여러 문서의 변경을 한 묶음으로 되돌리기',ids:['edit.cmd','undo.unit','undo.multi','undo.cursor','state.apply']},
- q3:{name:'확장 응답이 늦으면?',sub:'요청한 버전과 지금 버전이 다를 때',ids:['ext.reg','ext.host','edit.cmd','edit.text','state.apply','state.version']}};
+ q3:{name:'확장 응답이 늦으면?',sub:'요청한 버전과 지금 버전이 다를 때',ids:['ext.reg','ext.host','edit.cmd','edit.text','state.apply','state.version','state.apply.check']}};
 const first=t=>t.split(/(?<=다\.)\s/)[0];
-S.D={v:'map',sel:null,h:[],cam:{},shift:null};
+S.D={v:'map',sel:null,h:[],cam:{},shift:null,list:false,hl:null};
 S.menu=null;
 if(S.alt!=='A'&&S.alt!=='B'&&S.alt!=='C')S.alt='D';
 
@@ -864,7 +905,7 @@ const DEF=[[[258,342],[258,404]],[[470,260],[470,404]],[[906,384],[906,432],[850
 
 /* --- 카메라 --- */
 function viewSize(){const v=S.D.v;if(v==='map')return[DW,DH];const w=$('#world');return w?[w.offsetWidth,w.offsetHeight]:[DW,DH]}
-function fitCam(W,H){const cv=$('#dcv');const cw=cv.clientWidth,ch=cv.clientHeight;const k=Math.max(1,Math.min(1.15,(cw-28)/W,(ch-28)/H));return{k,x:Math.round((cw-W*k)/2),y:Math.round(Math.max(14,Math.min(36,(ch-H*k)/2))),fit:true}}
+function fitCam(W,H,res=0){const cv=$('#dcv');const cw=cv.clientWidth,ch=cv.clientHeight-res;const k=Math.max(res?.9:1,Math.min(1.15,(cw-28)/W,(ch-28)/H));return{k,x:Math.round((cw-W*k)/2),y:Math.round(Math.max(14,Math.min(36,(ch-H*k)/2))),fit:true}}
 function camT(){const s=S.D,c=s.cam[s.v];const sh=s.shift||{dx:0,dy:0};return`translate(${c.x+sh.dx}px,${c.y+sh.dy}px) scale(${c.k})`}
 let lastT=null;
 function applyCam(anim){const w=$('#world');if(!w)return;const t=camT();if(anim&&lastT&&lastT!==t){w.style.transform=lastT;w.getBoundingClientRect();w.classList.add('tr');w.style.transform=t;setTimeout(()=>{w.classList.remove('tr');drawD()},330)}else{w.style.transform=t}lastT=t;const z=$('#zl');if(z)z.textContent=Math.round(S.D.cam[S.D.v].k*100)+'%'}
@@ -872,55 +913,59 @@ function zoomBy(f,px,py){const s=S.D,c=s.cam[s.v],cv=$('#dcv');if(px==null){px=c
 
 /* --- 렌더 --- */
 function renderD(){const s=S.D;topbarD();
- const V=s.v==='map'?mapView():s.v.startsWith('in:')?inView(s.v.slice(3)):sceneView(s.v.slice(2));
+ const V=s.v==='map'?mapView():s.v==='in:state.apply'?deepView('state.apply'):s.v.startsWith('in:')?inView(s.v.slice(3)):sceneView(s.v.slice(2));
  $('#main').innerHTML=`<div class="dcv" id="dcv"><div class="world" id="world" style="width:${V.W}px;height:${V.H}px">${V.under}<svg class="dl" id="dl" width="${V.W}" height="${V.H}"></svg>${V.over}</div>${inspector()}<div class="zm"><button data-act="zoom" data-arg="out" title="축소" aria-label="축소">${ic('minus')}</button><span id="zl">100%</span><button data-act="zoom" data-arg="in" title="확대" aria-label="확대">${ic('plus')}</button><i></i><button data-act="fit" title="화면에 맞춤" aria-label="화면에 맞춤">${ic('fit')}</button></div></div>`;
  S.D.lines=V.lines;
- if(!s.cam[s.v]||s.cam[s.v].fit)s.cam[s.v]=fitCam(V.W,V.H);
+ if(!s.cam[s.v]||s.cam[s.v].fit)s.cam[s.v]=fitCam(V.W,V.H,s.v.startsWith('in:')?96:0);
  avoidPanel();applyCam(true);requestAnimationFrame(drawD)}
-function drawD(){const svg=$('#dl');if(!svg||!S.D.lines)return;const L=S.D.lines();let o=`<defs>${['hi','flow','def'].map(t=>`<marker id="d-${t}" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M1,1.2 L9,5 L1,8.8z" fill="${t==='hi'?'var(--ind)':t==='flow'?'#8e94a3':'var(--line0)'}"/></marker>`).join('')}</defs>`;const top=[];
- L.forEach(e=>{if(!e.pts)return;o+=`<path class="${e.cls}" d="${orth(e.pts,e.rad||9)}" ${e.dash?'stroke-dasharray="5 4"':''} ${e.arrow?`marker-end="url(#d-${e.cls.includes('hi')?'hi':e.cls.includes('flow')?'flow':'def'})"`:''}/>`;
+function drawD(){const svg=$('#dl');if(!svg||!S.D.lines)return;const L=S.D.lines();let o=`<defs>${['hi','flow','def','rej'].map(t=>`<marker id="d-${t}" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M1,1.2 L9,5 L1,8.8z" fill="${t==='hi'?'var(--ind)':t==='flow'?'#8e94a3':t==='rej'?'var(--amber)':'var(--line0)'}"/></marker>`).join('')}</defs>`;const top=[];
+ L.forEach(e=>{if(!e.pts)return;if(e.key&&S.D.hl===e.key)e.cls+=' hl';o+=`<path class="${e.cls}" d="${orth(e.pts,e.rad||9)}" ${e.dash?'stroke-dasharray="5 4"':''} ${e.arrow?`marker-end="url(#d-${e.cls.includes('hi')||e.cls.includes('hl')?'hi':e.cls.includes('flow')?'flow':e.cls.includes('rej')?'rej':'def'})"`:''}/>`;
   if(e.label||e.num){const[a,b]=e.at||longest(e.pts);const hz=a[1]===b[1];const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;top.push({hz,mx,my,e})}});
  top.forEach(({hz,mx,my,e})=>{let x=hz?mx:mx+8,y=hz?my-8:my+4;const anchor=hz?'middle':'start';
   if(e.num){const tw=e.label?e.label.length*13.5:0;const cx=hz?mx-(tw/2)-4:mx+16;const cy=hz?my-16:my;o+=`<circle class="num" cx="${cx}" cy="${cy}" r="9.5"/><text class="numt" x="${cx}" y="${cy+4}" text-anchor="middle">${e.num}</text>`;
    if(e.label)o+=`<text class="st" x="${cx+15}" y="${cy+4.5}">${e.label}</text>`}
-  else o+=`<text x="${x}" y="${y}" text-anchor="${anchor}">${e.label}</text>`});
+  else o+=`<text class="${e.cls.includes('hi')||e.cls.includes('hl')?'':'st2'}" x="${x}" y="${y}" text-anchor="${anchor}">${e.label}</text>`});
  svg.innerHTML=o}
-function hot(sel){const h=new Set();if(!sel)return h;R.forEach(r=>{if(under(r.f,sel)&&!under(r.t,sel))h.add(r.t);if(under(r.t,sel)&&!under(r.f,sel))h.add(r.f)});return h}
+function hot(sel){const h=new Set();if(!sel||sel==='writer')return h;relsFor(sel).forEach(r=>h.add(otherEnd(r,sel)));return h}
 
 function mapView(){const s=S.D,sel=s.sel,H=hot(sel);
  const under0=TOP.map(id=>{const r=REG[id];return`<div class="rg ${TONE[id]} ${sel===id?'on':''}" data-id="${id}" data-act="dsel" data-arg="${id}" style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px"><button class="rt" data-act="dsel" data-arg="${id}">${ic(id)}<span>${N[id].name}</span>${id==='state'?'<span class="rtag">공유</span>':id==='collab'?'<span class="rtag idea">구상</span>':''}</button></div>`}).join('');
- const over=Object.entries(POS).map(([id,[x,y]])=>`<button class="nd ${tone(id)} ${id==='undo.multi'?'stack':''} ${sel===id?'on':''} ${H.has(id)?'near':''}" data-id="${id}" data-act="dsel" data-arg="${id}" style="left:${x}px;top:${y}px">${ic(id)}<span>${N[id].name}</span></button>`).join('')+`<div class="env" style="left:1040px;top:124px"><i>로컬</i><i>웹</i><i>원격</i></div>`;
+ const over=Object.entries(POS).map(([id,[x,y]])=>`<button class="nd ${tone(id)} ${id==='undo.multi'?'stack':''} ${sel===id?'on':''} ${H.has(id)?'near':''}" data-id="${id}" data-act="dsel" data-arg="${id}" style="left:${x}px;top:${y}px">${ic(id)}<span>${N[id].name}</span>${kids(id).length?`<span class="cnt" title="세부 ${kids(id).length}">${kids(id).length}</span>`:''}</button>`).join('')+`<div class="env" style="left:1040px;top:124px"><i>로컬</i><i>웹</i><i>원격</i></div>`;
  return{W:DW,H:DH,under:under0,over,lines:()=>{const sel=S.D.sel,out=DEF.map(p=>({pts:p.filter(q=>q!=='dash'),dash:p.includes('dash'),cls:sel?'def dim':'def'}));
   if(sel){const seen=new Set();R.filter(r=>under(r.f,sel)||under(r.t,sel)).forEach(r=>{const f=ROUTE[r.f+'>'+r.t];if(!f)return;const lab=VERB[r.k];const key=topOf(r.f)+'>'+topOf(r.t)+lab;const show=!seen.has(key);seen.add(key);
-   out.push({pts:f(nrect),cls:'hi',dash:!r.sure,arrow:true,label:show?lab:null})})}return out}}}
+   out.push({key:r.f+'>'+r.t,pts:f(nrect),cls:'hi',dash:!r.sure,arrow:true,label:show?lab:null})})}return out}}}
 
 /* --- 인스펙터 --- */
-function relatedOf(id){if(id.indexOf('.')<0&&kids(id).length||id==='collab'){const c={};R.forEach(r=>{const a=topOf(r.f),b=topOf(r.t);if(a===b)return;if(a===id)c[b]=(c[b]||0)+1;if(b===id)c[a]=(c[a]||0)+1});
-  return Object.entries(c).sort((x,y)=>y[1]-x[1]).slice(0,3).map(([t,n])=>({id:t,em:`관계 ${n}`}))}
- return R.filter(r=>r.f===id||r.t===id).slice(0,3).map(r=>r.f===id?{id:r.t,em:VERB[r.k]+' →'}:{id:r.f,em:'← '+VERB[r.k]})}
+function relatedOf(id){const rs=relsFor(id);if(N[id].parent==='root'&&kids(id).length||id==='collab'){const c={};rs.forEach(r=>{const t=topOf(otherEnd(r,id));c[t]=(c[t]||0)+1});
+  return Object.entries(c).sort((x,y)=>y[1]-x[1]).map(([t,n])=>({id:t,em:`관계 ${n}`}))}
+ const seen=new Set(),out=[];rs.forEach(r=>{const o=otherEnd(r,id);if(!seen.has(o)){seen.add(o);out.push({id:o,em:(r.f===o?'← ':'')+r.v+(r.f===o?'':' →')})}});return out}
+function relList(id){const rs=relsFor(id);const inn=rs.filter(r=>!under(r.f,id)),out=rs.filter(r=>under(r.f,id));
+ const row=r=>{const o=otherEnd(r,id);return`<button class="rrow" data-act="dgo" data-arg="${o}" data-key="${r.f}>${r.t}" title="${nm(o)}(으)로 이동"><span class="re ${tone(r.f)}">${ic(r.f)}${nm(r.f)}</span><span class="ra">→</span><span class="re ${tone(r.t)}">${ic(r.t)}${nm(r.t)}</span><em>${r.v}${r.sure?'':' · 가정'}</em></button>`};
+ return`<div class="rlist" id="rlist" role="dialog" aria-label="전체 연결"><div class="rlh">전체 연결 ${rs.length}<small>미리 보기 · 이름을 누르면 그곳으로 이동</small></div>${inn.length?`<div class="rlg">들어오는 연결 ${inn.length}</div>${inn.map(row).join('')}`:''}${out.length?`<div class="rlg">나가는 연결 ${out.length}</div>${out.map(row).join('')}`:''}</div>`}
 function qsFor(id){return Object.entries(QS).filter(([k,q])=>q.ids.some(x=>under(x,id))).map(([k])=>k)}
 function inspector(){const s=S.D,id=s.sel;if(!id||s.v.startsWith('q:'))return'';const n=N[id],t=tone(id),isTop=n.parent==='root';
- const rel=relatedOf(id),q=qsFor(id)[0],wu=WR.uses.some(u=>under(u,id));
+ const rel=relatedOf(id),allN=relsFor(id).length,q=qsFor(id)[0],wu=WR.uses.some(u=>under(u,id));
  const where=isTop?(n.shared?'공유 구성':'구성'):N[n.parent].name+' 안';
  let acts='';if(isTop&&kids(id).length&&s.v==='map')acts+=`<button class="tbtn pri" data-act="denter" data-arg="${id}">${ic('enter')}안으로</button>`;
  if(!isTop&&s.v==='map')acts+=`<button class="tbtn" data-act="denter" data-arg="${n.parent}" data-sel="${id}">${ic('enter')}${N[n.parent].name} 안으로</button>`;
+ if(!isTop&&kids(id).length&&s.v==='in:'+n.parent)acts+=`<button class="tbtn pri" data-act="denter" data-arg="${id}">${ic('enter')}안으로 · 세부 ${kids(id).length}</button>`;
  if(q)acts+=`<button class="tbtn" data-act="dq" data-arg="${q}">${ic('play')}${QS[q].name}</button>`;
  return`<div class="insp" id="insp" role="region" aria-label="선택: ${n.name}"><span class="iic ${t}">${ic(id)}</span>
- <div class="im"><div class="ihr"><h3>${n.name}</h3><span class="ik">${where}</span>${rel.length?`<span class="irl">이어진 곳</span><div class="ir">${rel.map(r=>`<button class="rc ${tone(r.id)}" data-act="dgo" data-arg="${r.id}" title="${r.em}">${ic(r.id)}${N[r.id].name}</button>`).join('')}</div>`:''}</div>
- <p>${first(n.desc)}${wu?`<span class="iw">${ic('writer')}글쓴이가 직접 씀</span>`:''}</p></div>
- <div class="ia">${acts}<button class="ix" data-act="dclear" aria-label="선택 해제" title="선택 해제 (Esc)">${ic('close')}</button></div></div>`}
+ <div class="im"><div class="ihr"><h3>${n.name}</h3><span class="ik">${where}</span><span class="isp"></span><div class="ia">${acts}<button class="ix" data-act="dclear" aria-label="선택 해제" title="선택 해제 (Esc)">${ic('close')}</button></div></div>
+ <div class="ihr2"><p>${first(n.desc)}${wu?`<span class="iw">${ic('writer')}글쓴이가 직접 씀</span>`:''}</p>${rel.length?`<span class="irl">이어진 곳</span><div class="ir">${rel.slice(0,3).map(r=>`<button class="rc ${tone(r.id)}" data-act="dgo" data-arg="${r.id}" title="${r.em}">${ic(r.id)}${N[r.id].name}</button>`).join('')}${allN>3?`<button class="rmore ${s.list?'on':''}" id="rmore" data-act="dlist" aria-expanded="${s.list}" title="연결을 모두 미리 보기">전체 연결 ${allN}${ic('chev')}</button>`:''}</div>`:''}</div></div>
+ ${s.list&&allN>3?relList(id):''}</div>`}
 function avoidPanel(){const s=S.D;s.shift=null;const ins=$('#insp');if(!ins)return;const cv=$('#dcv'),c=s.cam[s.v];const top=cv.clientHeight-16-ins.offsetHeight-10;
  const R0=nrect(s.sel);if(!R0)return;const prot=[R0,...[...hot(s.sel)].map(x=>nrect(x)||nrect('o:'+x)||nrect('o:'+topOf(x))).filter(Boolean)];
  let need=0;prot.forEach(q=>{const b=c.y+q.b*c.k;if(b>top)need=Math.max(need,b-top)});
- if(need>0){const room=c.y+R0.t*c.k-8;const dy=-Math.min(need,Math.max(0,room));if(dy<0)s.shift={dx:0,dy}}}
+ if(need>0){const room=c.y-8;const dy=-Math.min(need,Math.max(0,room));if(dy<0)s.shift={dx:0,dy}}}
 /* --- 안으로 --- */
 const INL={doc:{'doc.open':[0,0],'doc.save':[0,1],'doc.dirty':[1,1]},edit:{'edit.text':[0,0],'edit.visual':[1,0],'edit.cmd':[2,1]},undo:{'undo.cursor':[1,0],'undo.unit':[0,1],'undo.multi':[1,1]},ext:{'ext.reg':[0,0],'ext.host':[1,0]},state:{'state.version':[0,0],'state.apply':[1,0],'state.views':[2,0]}};
 function inView(X){const s=S.D,sel=s.sel,H=hot(sel),L=INL[X],ps=Object.values(L);const cols=Math.max(...ps.map(p=>p[0]))+1,rows=Math.max(...ps.map(p=>p[1]))+1;
- const CW=212,CH=112,GX=30,GY=34,PADX=26,TOPP=106;const fw=cols*CW+(cols-1)*GX+PADX*2,fh=rows*CH+(rows-1)*GY+TOPP+30;
+ const CW=212,CH=112,GX=30,GY=34,PADX=26,TOPP=118;const fw=cols*CW+(cols-1)*GX+PADX*2,fh=rows*CH+(rows-1)*GY+TOPP+30;
  const outs={};R.forEach(r=>{const fi=under(r.f,X),ti=under(r.t,X);const add=(t,e)=>{(outs[t]=outs[t]||new Set()).add(e)};if(fi&&!ti)add(topOf(r.t),r.t);if(ti&&!fi)add(topOf(r.f),r.f)});
  const side={l:[],r:[],t:[],b:[]},c0=REG[X];Object.keys(outs).forEach(t=>{const c=REG[t];const dx=c.x+c.w/2-(c0.x+c0.w/2),dy=c.y+c.h/2-(c0.y+c0.h/2);if(Math.abs(dx)>Math.abs(dy)*1.2)side[dx<0?'l':'r'].push(t);else side[dy<0?'t':'b'].push(t)});
- const SW=172,SG=52,sh=t=>46+[...outs[t]].filter(e=>e!==t).length*38;
- const tH=side.t.length?Math.max(...side.t.map(sh))+SG:10,bH=side.b.length?Math.max(...side.b.map(sh))+SG:10;
+ const SW=172,SG=52,SV=40,sh=t=>46+[...outs[t]].filter(e=>e!==t).length*38;
+ const tH=side.t.length?Math.max(...side.t.map(sh))+SV:10,bH=side.b.length?Math.max(...side.b.map(sh))+SV:10;
  const lW=side.l.length?SW+SG:10,rW=side.r.length?SW+SG:10;
  const colH=a=>a.reduce((m,t)=>m+sh(t)+16,-16);
  const W=lW+fw+rW,Hh=Math.max(tH+fh+bH,tH+Math.max(colH(side.l),colH(side.r))+bH);const fx=lW,fy=tH+Math.max(0,(Math.max(colH(side.l),colH(side.r))-fh)/2);
@@ -930,17 +975,17 @@ function inView(X){const s=S.D,sel=s.sel,H=hot(sel),L=INL[X],ps=Object.values(L)
  const stackV=(a,x)=>{let y=fy+fh/2-colH(a)/2;a.forEach(t=>{over+=stub(t,x,Math.max(4,y));y+=sh(t)+16})};
  stackV(side.l,0);stackV(side.r,lW+fw+SG);
  const rowH=(a,y)=>{const tw=a.length*SW+(a.length-1)*20;let x=fx+fw/2-tw/2;a.forEach(t=>{over+=stub(t,x,y);x+=SW+20})};
- rowH(side.t,0);rowH(side.b,fy+fh+SG);
+ rowH(side.t,0);rowH(side.b,fy+fh+SV);
  Object.entries(L).forEach(([id,[c,r]])=>{const m=N[id];const x=fx+PADX+c*(CW+GX),y=fy+TOPP+r*(CH+GY);
   let ex='';if(m.vars)ex=`<div class="cx2"><span class="env"><i>로컬</i><i>웹</i><i>원격</i></span></div>`;
   if(id==='state.views')ex=`<div class="cx2"><span class="vw"><b>문서 1</b>→<b>창 1</b><b>창 2</b></span></div>`;
-  if(m.rule)ex=`<div class="cx2 rule">옛 버전 기준 응답은 반영 안 함</div>`;
+  if(kids(id).length)ex=`<div class="cx2 deep">세부 ${kids(id).length} · ${kids(id).map(k=>N[k].name.split(' ').pop()).join(' · ')}</div>`;
   if(id==='undo.multi')ex=`<div class="cx2">변경 단위 여러 개 → 묶음 하나</div>`;
   over+=`<button class="card ${TONE[X]} ${id==='undo.multi'?'stack':''} ${sel===id?'on':''} ${H.has(id)?'near':''}" data-id="${id}" data-act="dsel" data-arg="${id}" style="left:${x}px;top:${y}px"><span class="ct">${ic(id)}${m.name}</span><span class="cd">${ROLE[id]}</span>${ex}</button>`});
  const grid=L,frameR=fx+fw,frameB=fy+fh;
  const lines=()=>{const sel=S.D.sel,out=[];R.forEach(r=>{const fi=under(r.f,X),ti=under(r.t,X);if(!fi&&!ti)return;
    const on=sel&&(r.f===sel||r.t===sel);const cls=on?'hi':sel?'def dim':'def';
-   if(fi&&ti){const a=nrect(r.f),b=nrect(r.t);out.push({pts:[[a.r,a.cy],[b.l,b.cy]],cls,arrow:true,dash:!r.sure,label:on?VERB[r.k]:null});return}
+   if(fi&&ti){const a=nrect(r.f),b=nrect(r.t);out.push({key:r.f+'>'+r.t,pts:[[a.r,a.cy],[b.l,b.cy]],cls,arrow:true,dash:!r.sure,label:on?VERB[r.k]:null});return}
    const inId=fi?r.f:r.t,ex=fi?r.t:r.f;const a=nrect(inId);const b=nrect('o:'+ex)||nrect('o:'+topOf(ex));if(!a||!b)return;
    const t=topOf(ex);const sd=side.l.includes(t)?'l':side.r.includes(t)?'r':side.t.includes(t)?'t':'b';const[c,rw]=grid[inId];
    const blockedR=Object.values(grid).some(([cc,rr])=>rr===rw&&cc>c),blockedL=Object.values(grid).some(([cc,rr])=>rr===rw&&cc<c);
@@ -949,11 +994,32 @@ function inView(X){const s=S.D,sel=s.sel,H=hot(sel),L=INL[X],ps=Object.values(L)
    if(sd==='r'||sd==='l'){const chx=sd==='r'?frameR+SG/2:fx-SG/2;const end=sd==='r'?b.l:b.r;
     if((sd==='r'&&!blockedR)||(sd==='l'&&!blockedL))P=[[sd==='r'?a.r:a.l,a.cy],[chx,a.cy],[chx,b.cy],[end,b.cy]];
     else{const ly=a.t-GY/2;P=[[a.cx,a.t],[a.cx,ly],[chx,ly],[chx,b.cy],[end,b.cy]]}}
-   else{const chy=sd==='b'?frameB+SG/2:fy-SG/2;const end=sd==='b'?b.t:b.b;
+   else{const chy=sd==='b'?frameB+SV/2:fy-SV/2;const end=sd==='b'?b.t:b.b;
     if((sd==='b'&&!blockedB)||(sd==='t'&&!blockedT))P=[[a.cx,sd==='b'?a.b:a.t],[a.cx,chy],[b.cx,chy],[b.cx,end]];
     else{const lx=a.r+GX/2;P=[[a.r,a.cy],[lx,a.cy],[lx,chy],[b.cx,chy],[b.cx,end]]}}
-   if(!fi)P=P.reverse();out.push({pts:P,cls,arrow:true,dash:!r.sure,label:on?VERB[r.k]:null})});return out};
+   if(!fi)P=P.reverse();out.push({key:r.f+'>'+r.t,pts:P,cls,arrow:true,dash:!r.sure,label:on?VERB[r.k]:null})});return out};
  return{W,H:Hh,under:under0,over,lines}}
+
+/* --- 한 층 더: 변경 반영의 세부 책임 (합성 설계 분해) --- */
+function deepView(X){const s=S.D,sel=s.sel,H=hot(sel),ks=kids(X);
+ const FX=224,FW=740,FH=334,CW=176,CY=112,GX=80,cx0=FX+26;
+ const under0=`<div class="frame hub deepf" style="left:${FX}px;top:0;width:${FW}px;height:${FH}px"><div class="fh">${ic(X)}<h2>${N[X].name}</h2><span class="rtag">세부 책임 ${ks.length}</span></div><p class="fl">들어온 변경을 검사하고, 문서를 갱신한 뒤, 바뀐 것을 알린다</p></div>`;
+ const stub=(t,ids,x,y,lab)=>`<div class="stub ${TONE[t]}" style="left:${x}px;top:${y}px"><button class="sth" data-act="dgo" data-arg="${t}">${ic(t)}${N[t].name}${lab?`<span class="stl">${lab}</span>`:''}</button>${ids.map(e=>`<button class="nd mn ${TONE[t]} ${H.has(e)?'near':''} ${e==='state.version'?'data':''}" data-id="o:${e}" data-act="dgo" data-arg="${e}">${ic(e)}<span>${N[e].name}</span>${e==='state.version'?'<span class="dtag">자료</span>':''}</button>`).join('')}</div>`;
+ let over=stub('edit',['edit.text','edit.visual'],0,60)+stub('undo',['undo.unit'],0,198)
+  +stub('state',['state.version'],420,400)+stub('state',['state.views'],1008,128);
+ ks.forEach((id,i)=>{over+=`<button class="card hub ${sel===id?'on':''} ${H.has(id)?'near':''}" data-id="${id}" data-act="dsel" data-arg="${id}" style="left:${cx0+i*(CW+GX)}px;top:${CY}px;width:${CW}px"><span class="ct">${ic(id)}${N[id].name}</span><span class="cd">${ROLE[id]}</span></button>`});
+ over+=`<span class="cond" data-id="cond" style="left:${cx0}px;top:270px">다르면 반영 안 함<small>규칙 · 설계 가정</small></span>`;
+ const lines=()=>{const sel=S.D.sel,o=[];const C=nrect('state.apply.check'),U=nrect('state.apply.update'),Nn=nrect('state.apply.notify'),V=nrect('o:state.version'),W=nrect('o:state.views'),cd=nrect('cond');if(!C)return o;
+  const st=(f,t)=>{const on=sel&&(sel===f||sel===t);return on?'hi':sel?'def dim':'def'};
+  ['edit.text','edit.visual','undo.unit'].forEach((e,i)=>{const b=nrect('o:'+e);const r=DR.find(x=>x.f===e);const y=C.cy+(i-1)*14;o.push({key:e+'>state.apply.check',pts:[[b.r,b.cy],[200,b.cy],[200,y],[C.l,y]],cls:st(e,'state.apply.check'),dash:!r.sure,arrow:true,label:i===0?'보낸다':null,at:i===0?[[200,y],[C.l,y]]:null})});
+  o.push({key:'state.apply.check>state.apply.update',pts:[[C.r,C.cy],[U.l,U.cy]],cls:st('state.apply.check','state.apply.update'),arrow:true,label:'같으면'});
+  o.push({key:'state.apply.update>state.apply.notify',pts:[[U.r,U.cy],[Nn.l,Nn.cy]],cls:st('state.apply.update','state.apply.notify'),arrow:true,label:'바뀐 뒤'});
+  o.push({pts:[[C.l+36,C.b],[C.l+36,cd.t]],cls:'rej',arrow:true});
+  o.push({key:'state.apply.check>state.version',pts:[[C.r-18,C.b],[C.r-18,362],[V.cx-18,362],[V.cx-18,V.t]],cls:st('state.apply.check','state.version'),arrow:true,label:'읽는다',at:[[C.r-18,362],[V.cx-18,362]]});
+  o.push({key:'state.apply.update>state.version',pts:[[U.cx,U.b],[U.cx,376],[V.cx+18,376],[V.cx+18,V.t]],cls:st('state.apply.update','state.version'),arrow:true,label:'올린다',at:[[U.cx,376],[V.cx+18,376]]});
+  o.push({key:'state.apply.notify>state.views',pts:[[Nn.r,Nn.cy],[W.l,Nn.cy]],cls:st('state.apply.notify','state.views'),arrow:true,label:'알린다'});
+  return o};
+ return{W:1180,H:486,under:under0,over,lines}}
 
 /* --- 질문 장면 --- */
 const nd=(id,x,y,o={})=>{const tag=id==='writer'||o.nogo?'span':'button';return`<${tag} class="nd ${o.cls||tone(id)} cx ${o.extra||''}" data-id="${o.key||id}" ${tag==='button'?`data-act="dgo" data-arg="${id}" title="구성에서 보기"`:''} style="left:${x}px;top:${y}px">${ic(o.icon||id)}<span>${o.name||(id==='writer'?'글쓴이':N[id].name)}</span></${tag}>`};
@@ -1005,13 +1071,16 @@ function sceneView(q){
 function fixAt(e){if(!e.pts)return e;const P=e.pts;if(e.at==='last')e.at=[P[P.length-2],P[P.length-1]];else if(e.at==='first')e.at=[P[0],P[1]];else if(e.at==='mid'){e.at=null}return e}
 
 /* --- 상단 --- */
+function vname(p){return p==='map'?'구성':p.startsWith('in:')?N[p.slice(3)].name:QS[p.slice(2)].name}
 function topbarD(){const s=S.D,v=s.v;let crumb='';
  const here=x=>`<span class="sep">›</span><span class="here">${x}</span>`;
  if(v==='map')crumb=`<span class="here">구성</span>`;
- else if(v.startsWith('in:'))crumb=`<button data-act="dhome">구성</button>${here(N[v.slice(3)].name)}`;
- else{const from=s.h.length?s.h[s.h.length-1].v:'map';crumb=`<button data-act="dhome">구성</button>${from.startsWith('in:')?`<span class="sep">›</span><button data-act="dback">${N[from.slice(3)].name}</button>`:''}${here(QS[v.slice(2)].name)}`}
- $('#bar').innerHTML=`<div class="tb"><span class="pn">문서 편집기</span><span class="pt">설계용 합성 사례 · 디자인 보드</span><span class="tdiv"></span><nav class="crumb">${crumb}</nav>
- <div class="tb-r">${v.startsWith('q:')?`<button class="tbtn" data-act="dback">${ic('back')}구성으로</button>`:''}<button class="tbtn" data-act="menu" data-arg="q" id="qbtn" aria-haspopup="menu" aria-expanded="${S.menu==='q'}">${ic('play')}${v.startsWith('q:')?'다른 동작':'동작 보기'}${ic('chev')}</button></div></div>`}
+ else if(v.startsWith('in:')){const ch=[];for(let x=v.slice(3);x&&x!=='root';x=N[x].parent)ch.unshift(x);
+  crumb=`<button data-act="dhome">구성</button>${ch.map((x,i)=>i===ch.length-1?here(N[x].name):`<span class="sep">›</span><button data-act="dnav" data-arg="${x}">${N[x].name}</button>`).join('')}`}
+ else crumb=`<button data-act="dhome">구성</button>${here(QS[v.slice(2)].name)}`;
+ const prev=s.h.length?s.h[s.h.length-1].v:null;
+ $('#bar').innerHTML=`<div class="tb"><span class="pn">문서 편집기</span><span class="pt">설계용 합성 사례 · 디자인 보드</span><span class="tdiv"></span><nav class="crumb" aria-label="구조 위치">${crumb}</nav>
+ <div class="tb-r">${prev?`<button class="tbtn ghost" data-act="dback" title="방문한 곳으로 돌아가기 (Esc)">${ic('back')}<span class="bk">돌아가기</span>${vname(prev)}</button>`:''}<button class="tbtn" data-act="menu" data-arg="q" id="qbtn" aria-haspopup="menu" aria-expanded="${S.menu==='q'}">${ic('play')}${v.startsWith('q:')?'다른 동작':'동작 보기'}${ic('chev')}</button></div></div>`}
 function menus(){const p=$('#pop');if(!S.menu){p.innerHTML='';return}
  if(S.menu==='q'){const b=$('#qbtn');if(!b){S.menu=null;p.innerHTML='';return}const r=b.getBoundingClientRect();const cur=S.D.v.startsWith('q:')?S.D.v.slice(2):null;
   p.innerHTML=`<div class="pop" role="menu" style="top:${r.bottom+6}px;right:${innerWidth-r.right}px"><div class="ph2">동작 보기</div>${Object.entries(QS).map(([k,q])=>`<button class="mi ${cur===k?'on':''}" role="menuitem" data-act="dq" data-arg="${k}">${ic('play')}<span><b>${q.name}</b><small>${q.sub}</small></span></button>`).join('')}</div>`}
@@ -1021,12 +1090,15 @@ function railSync(){document.querySelectorAll('.rail [data-rail]').forEach(b=>b.
 
 /* --- 동작 --- */
 function dact(a,arg,el){const s=S.D;switch(a){
- case'dsel':s.sel=arg;renderD();return true;
- case'dclear':if(s.sel){s.sel=null;renderD()}return true;
+ case'dsel':s.sel=arg;s.list=false;s.hl=null;renderD();return true;
+ case'dclear':if(s.sel){s.sel=null;s.list=false;s.hl=null;renderD()}return true;
+ case'dlist':s.list=!s.list;s.hl=null;renderD();return true;
+ case'dnav':if(s.v!=='in:'+arg)push('in:'+arg,null);return true;
  case'denter':{const sel=el&&el.dataset.sel||null;if(kids(arg).length)push('in:'+arg,sel);return true}
- case'dgo':{if(!arg)return true;const t=topOf(arg);if(s.v==='map'){s.sel=arg;renderD();return true}
-  if(s.v==='in:'+t){s.sel=arg;renderD();return true}
-  if(kids(t).length)push('in:'+t,arg===t?null:arg);else push('map',arg);return true}
+ case'dgo':{if(!arg)return true;s.list=false;s.hl=null;const t=topOf(arg),deep=N[arg].parent&&N[arg].parent!=='root'&&N[N[arg].parent].parent!=='root';const home=deep?'in:'+N[arg].parent:'in:'+t;
+  if(s.v==='map'&&!deep){s.sel=arg;renderD();return true}
+  if(s.v===home){s.sel=arg;renderD();return true}
+  if(deep||kids(t).length)push(home,arg===t?null:arg);else push('map',arg);return true}
  case'dq':S.menu=null;if(s.v!=='q:'+arg)push('q:'+arg,null);else renderD();return true;
  case'dhome':if(s.v!=='map')push('map',null);return true;
  case'dback':back();return true;
@@ -1053,13 +1125,15 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');
  act(t.dataset.act,t.dataset.arg,t)});
 document.addEventListener('dblclick',e=>{if(S.alt!=='D')return;const t=e.target.closest('.rg[data-arg]');if(t&&kids(t.dataset.arg).length)act('denter',t.dataset.arg)});
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'){e.preventDefault();if(S.menu){S.menu=null;menus();railSync();return}if(!$('#info').hidden){toggleInfo(false);railSync();return}const s=cur();if(s.sel){s.sel=null;render()}else back();return}
+ if(e.key==='Escape'){e.preventDefault();if(S.menu){S.menu=null;menus();railSync();return}if(S.alt==='D'&&S.D.list){S.D.list=false;S.D.hl=null;renderD();return}if(!$('#info').hidden){toggleInfo(false);railSync();return}const s=cur();if(s.sel){s.sel=null;render()}else back();return}
  if((e.key==='Enter'||e.key===' ')&&e.target.matches('[role=button][data-act]')){e.preventDefault();act(e.target.dataset.act,e.target.dataset.arg,e.target)}});
 document.addEventListener('mousedown',e=>{if(S.menu&&!e.target.closest('.pop,#qbtn,#railcmp')){S.menu=null;menus();railSync()}
+ if(S.alt==='D'&&S.D.list&&!e.target.closest('#rlist,#rmore')){S.D.list=false;S.D.hl=null;setTimeout(renderD,0)}
  if(!$('#info').hidden&&!e.target.closest('#info')&&!e.target.closest('.info-btn')){toggleInfo(false);railSync()}});
 function toggleInfo(f){const el=$('#info');const open=f===undefined?el.hidden:f;el.hidden=!open;document.querySelector('.info-btn').setAttribute('aria-expanded',open)}
 let rsT=0;new ResizeObserver(()=>{clearTimeout(rsT);rsT=setTimeout(()=>{if(S.alt==='D'){const s=S.D;Object.keys(s.cam).forEach(k=>{if(s.cam[k]&&s.cam[k].fit)s.cam[k]=null});if($('#dcv'))renderD()}else requestAnimationFrame(drawLines);menus()},80)}).observe(document.body);
 document.querySelectorAll('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
+document.addEventListener('mouseover',e=>{const r=e.target.closest('.rrow');const k=r?r.dataset.key:null;if(S.alt==='D'&&S.D.list&&S.D.hl!==k){S.D.hl=k;drawD()}});
 render();
 </script>
 </body>
