@@ -345,6 +345,7 @@ function fitNameField() {
   const field=$<HTMLInputElement>('project-name'),cs=getComputedStyle(field);
   nameMeasure??=document.createElement('canvas').getContext('2d');if(!nameMeasure)return;
   nameMeasure.font=`${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  if('letterSpacing' in nameMeasure)nameMeasure.letterSpacing=cs.letterSpacing==='normal'?'0px':cs.letterSpacing;
   const edges=['paddingLeft','paddingRight','borderLeftWidth','borderRightWidth'].reduce((n,k)=>n+(parseFloat(cs[k as 'paddingLeft'])||0),0);
   field.style.width=`${Math.ceil(nameMeasure.measureText(field.value||field.placeholder).width+edges+6)}px`;
 }

@@ -199,7 +199,7 @@ body[data-route="projects"] .topbar {display:none}
 body:not([data-route="projects"]) #breadcrumb-project {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 /* The header wraps instead of overlapping: the name keeps its full width, the example group stays together, and on a narrow
    PC the example group or the mode moves to the next line (the same width gives the same layout on entry and return). */
-.project-head {display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);flex:1 1 0;min-width:0;margin:0}
+.project-head {display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s3);flex:1 1 360px;min-width:0;margin:0}
 .project-heading {display:flex;align-items:center;flex:none;max-width:100%}
 .project-heading .eyebrow,.project-heading .subtitle {display:none}
 .project-title {display:flex;align-items:center;gap:var(--s1);min-width:0;position:relative}
@@ -213,7 +213,8 @@ body:not([data-route="projects"]) #breadcrumb-project {position:absolute;width:1
 .pencil {display:none}
 body[data-starting="true"] .project-name {color:var(--text-2)}
 /* The unsaved example: a small labelled note with its two actions, never a banner that leads the screen. */
-.example-banner {display:flex;align-items:center;gap:6px;flex:none;margin:0;padding:0;border:0;background:none}
+/* The example group never grows past the head: when its fonts are wider, its buttons wrap inside it (never under the mode). */
+.example-banner {display:flex;flex-wrap:wrap;align-items:center;gap:6px;flex:0 1 auto;max-width:100%;min-width:0;margin:0;padding:0;border:0;background:none}
 .example-banner strong {flex:none;display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:var(--r-small);background:var(--warning-bg);border:1px solid var(--warning-border);color:var(--warning-text);font-size:12px;font-weight:600;white-space:nowrap}
 .example-banner button {flex:none;min-height:var(--h-sm);padding:3px 10px;font-size:13px;white-space:nowrap}
 /* The full unsaved/list-separation sentence: a help disclosure next to the badge (keyboard reachable, read by screen readers). */
@@ -1042,7 +1043,7 @@ html.source-review-open {overflow:hidden}
   .project-tools {flex:1 1 auto;flex-wrap:wrap;margin-left:0}
   /* Narrow screens: the example group may wrap inside the header width; its help opens from the group's left edge. */
   .project-name {max-width:100%}
-  .example-banner {flex:0 1 auto;flex-wrap:wrap;max-width:100%;position:relative}
+  .example-banner {position:relative}
   .example-help {position:static}
   .example-help>p {width:min(280px,calc(100vw - 32px))}
 }
@@ -1055,7 +1056,12 @@ html.source-review-open {overflow:hidden}
   .nav-item {width:auto;flex:0 0 auto;justify-content:center;white-space:nowrap;font-size:13px;padding:0 10px;gap:6px;min-height:40px}
   .nav-count {margin-left:0}
   .topbar {padding:var(--s2) var(--s4);gap:var(--s2)}
-  .connection-popover {width:min(320px,calc(100vw - 32px))}
+  /* The mode popover anchors to its full-width row (home heading or header) and aligns right inside it, so a longer mode label
+     (the static preview's) or a chip placed anywhere on the row never pushes it past the screen edge. */
+  .connection-details {position:static}
+  .home-heading,.topbar {position:relative}
+  .connection-popover,.home-actions .connection-popover {left:0;right:0;top:calc(100% + 6px);width:auto;max-width:320px;margin-left:auto}
+  .topbar .connection-popover {left:var(--s4);right:var(--s4);top:calc(100% - 4px)}
   .shell {padding:var(--s4)}
   body[data-route="projects"] .shell {padding:20px var(--s4) var(--s4)}
   .work-card,.compose-card {padding:var(--s4)}
