@@ -176,7 +176,9 @@ class BranchRecords31(unittest.TestCase):
             self.assertAlmostEqual(v['x'],before['x'],delta=1,msg=label+' pageX preserved')
             for key in ['matrix','folds']:self.equal(label+' '+key,v[key],before[key])
             if label=='trusted capture before product':continue
-            expected=max(240,v['viewport'][1]-max(0,v['layout']['top'])-16)
+            # WORK41 (coordinator decision): the map height follows the layout's place in the document (top + pageY), so a
+            # page scrolled with the wheel no longer regrows the map to the window bottom on a redraw. Same as before at pageY 0.
+            expected=max(240,v['viewport'][1]-max(0,v['layout']['top']+v['page'])-16)
             self.assertAlmostEqual(v['layout']['height'],expected,delta=1,msg=label+' final available height')
             self.assertAlmostEqual(v['map']['height'],expected,delta=1)
             self.assertLessEqual(v['map']['bottom'],v['viewport'][1]-.5)
