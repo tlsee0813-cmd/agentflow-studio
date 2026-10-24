@@ -1,6 +1,6 @@
 # AgentFlow 소프트웨어 지도 설계
 
-> 연구46 · v0.1 · 2026-10-24 · **조사와 대안 설계 중 — 최종안 아님**
+> 연구46 · v0.2 · 2026-10-24 · **원출처와 반례 통합, 시각 대안 비교 중 — 최종안 아님**
 > 제품 기준: c3cd45b43adabdb73937237261260ae0beab3df8 / 수용45. 제품 코드는 바꾸지 않는다.
 
 이 문서는 사용자가 만들고 있는 소프트웨어의 서로 다른 성질과 여러 층위를 어떻게 아름답고 직관적으로 표현할지 결정하는 단일 설계 원본이다. 조사 결과를 이어 붙이는 보고서가 아니라, 근거와 반례를 통과한 선택을 지속해서 고친다. [기존 제품 방향](PRODUCT_DIRECTION_AND_RESEARCH_PLAN_KO.md)을 계승하며, 질문 정의는 [QUESTIONS](QUESTIONS.md)에 둔다.
@@ -46,14 +46,15 @@
 
 | ID | 범위 | 원본 세션 | 상태 |
 |---|---|---|---|
-| R1 | 게임 실제 요소/관계 | af-design46-r1-games-20261024 | 접수·슬롯 대기 |
-| R2 | 웹 실제 요소/관계 | af-design46-r2-web-20261024 | 접수·슬롯 대기 |
-| R3 | 데스크톱 실제 요소/관계 | af-design46-r3-desktop-20261024 | 실행 중 |
-| R4 | 현대 소프트웨어 구조 표현 | af-design46-r4-architectu-20261024 | 실행 중 |
-| R5 | 노드 편집기의 의미와 조작 | af-design46-r5-node-editors | 접수·슬롯 대기 |
-| R6 | 타 분야 구조 탐색 경험 | af-design46-r6-cross-domain | 실행 중 |
-| R7 | 정보 시각화/HCI 원연구 | af-design46-r7-hci-20261024 | 접수·슬롯 대기 |
-| R8 | 불완전함과 변화의 표현 | af-design46-r8-evolution-20261024 | 접수·슬롯 대기 |
+| R1 | 게임 실제 요소/관계 | af-design46-r1-games-20261024 | 실행 중 |
+| R2 | 웹 실제 요소/관계 | af-design46-r2-web-20261024 | 전체 반환·통합 |
+| R3 | 데스크톱 실제 요소/관계 | af-design46-r3-desktop-20261024 | 전체 반환·통합 |
+| R4 | 현대 소프트웨어 구조 표현 | af-design46-r4-architectu-20261024 | 전체 반환·통합 |
+| R5 | 노드 편집기의 의미와 조작 | af-design46-r5-node-editors | 전체 반환·통합 |
+| R6 | 타 분야 구조 탐색 경험 | af-design46-r6-cross-domain | 전체 반환·통합 |
+| R7 | 정보 시각화/HCI 원연구 | af-design46-r7-hci-20261024 | 전체 반환·통합 |
+| R8 | 불완전함과 변화의 표현 | af-design46-r8-evolution-20261024 | 전체 반환·통합 |
+| R9 | Felt·Kumu 등 실제 시각 구성 보강 | af-design46-r9-visual | 실행 중 |
 
 Opus5.5 High는 전체 설계를 한 번에 맡지 않는다. O1은 의미 단위/역할, O2는 탐색/층위, O3는 시각 문법을 독립적으로 발산한다. 이후 실제 사례와 원출처를 넣어 교차 보정한다. 최종 선택과 충돌 해결, 이 문서 작성은 총괄이 맡는다.
 
@@ -75,3 +76,132 @@ Opus5.5 High는 전체 설계를 한 번에 맡지 않는다. O1은 의미 단�
 ## 8. 선택 기록과 다음 개정
 
 v0.1: 연구 분해·공통 반례·비교 기준만 확정. 최종 객체 체계와 화면 모델은 미선정. 다음 개정에서 출처 기반 사례/메커니즘을 넣고, 발산안을 비교해 버린 이유까지 남긴다.
+
+v0.2: 실제 웹/데스크톱 표본, 원출처 대조, Dify/Ilograph/LikeC4 직접 관찰, 초기안의 동일성·공유·고정 층위 오류를 반영했다. 시각 보드 수용 전이며 제품 설계 완료로 부르지 않는다.
+
+## 9. 원출처가 실제로 바꾼 설계 판단
+
+아래는 2026-10-24 조사에서 얻은 사실과 총괄의 설계 판단을 분리한 표다. 공식 문서를 읽은 것, 소스를 대조한 것, 실제 화면을 조작한 것을 같은 검증으로 세지 않는다. 자료를 많이 읽었다는 사실은 AgentFlow의 미감이나 이해도 검증이 아니다.
+
+| 원출처 | 확인한 사실 | AgentFlow에서 택할 원리 / 버릴 해석 |
+|---|---|---|
+| [VS Code Custom Editor](https://code.visualstudio.com/api/extension-guides/custom-editors#custom-editor-api-basics) | 같은 리소스의 CustomTextEditor를 나누면 문서 하나와 webview 둘이 된다. Pro 조사 뒤 Sol이 본문을 직접 대조했다. | **자료의 동일성과 표현의 개수는 다르다.** 두 view의 커서·시야·상태까지 같다는 뜻은 아니다. |
+| [Blender Object 복제 소스](https://github.com/blender/blender/blob/8cb6b388974a817afedf1317ce26f0c75aa5f181/source/blender/blenkernel/intern/object.cc) | Object ID 복제와 Mesh 복제는 별도 처리다. Sol이 고정 소스의 분기를 대조했다. | **별개 대상의 공유 사용**을 같은 대상의 두 표현과 구별한다. Data-Blocks 문서는 402였으므로 직접 열람했다고 하지 않는다. |
+| [LikeC4 관계 집약](https://likec4.dev/dsl/views/predicates/#relationship-customization) | 중첩 요소의 관계를 상위 연결로 집약할 수 있다. 제목을 합칠 수 없을 때 `[...]`, `multiple true`로 개별 선을 사용한다. | 접힌 연결의 실제 끝점을 되찾게 한다. 상위 관계를 모든 자식의 관계로 내려 추정하지 않는다. |
+| [Ilograph 탐색](https://www.ilograph.com/docs/getting-started/browsing-diagrams/) · [contexts의 도입 이유](https://www.ilograph.com/blog/posts/why-ilograph-added-contexts/) | 선택한 resource를 유지한 perspective 전환과, 관계를 바꾸지 않는 주변 묶음 변경을 구별한다. | 대상·관계·표시 묶음을 분리한다. 모든 조합을 별도 탭으로 늘리지 않는다. |
+| [C4 추상화](https://c4model.com/abstractions) · [Structurizr DSL](https://docs.structurizr.com/dsl/language) | 구현 구조의 층과 동작 장면·배포 보기를 구별한다. | C4의 고정 층을 코드 전 아이디어의 필수 양식으로 삼지 않는다. 동작 장면과 개발 변경 이력도 구별한다. |
+| [Dify Snippets](https://docs.dify.ai/en/cloud/use-dify/build/snippet) | 삽입한 snippet은 복사본이며 원본 수정이 자동 전파되지 않는다. 문서 조사, 직접 실행 미검증. | 재사용처럼 보이는 동작도 **복사와 공유는 다르다.** 공통 부분에는 snippet 복사 의미를 적용하지 않는다. |
+| [Node-RED Subflows](https://nodered.org/docs/user-guide/editor/workspace/subflows) · [nodes/config](https://nodered.org/docs/user-guide/editor/workspace/nodes) | 재사용 정의와 인스턴스, 여러 노드가 참조하는 설정을 구별한다. | 안으로 들어가기와 정의 재사용은 참고한다. 단순 접기를 모듈 추출로 바꾸지 않는다. |
+| [Unreal Reference Viewer](https://dev.epicgames.com/documentation/en-us/unreal-engine/reference-viewer-in-unreal-engine) | 필터에서 빠진 중간 참조를 작게 남겨 관계 경로를 보존한다. 문서 판본 UE5.8, 직접 실행 미검증. | 중간을 숨기고 양끝을 직접 연결하는 가짜 경로를 만들지 않는다. |
+| [Ableton 그룹/Return Track](https://www.ableton.com/en/manual/mixing/#group-tracks) · [두 보기](https://www.ableton.com/en/manual/live-concepts/#arrangement-and-session) | Arrangement의 접힌 그룹은 내부 clip 개요를 남긴다. Session/Arrangement는 같은 track 집합이지만 clip 집합은 다르다. Sol 원문 대조. | **공통 기반을 쓴다고 내용까지 같은 것은 아니다.** 보기 변경과 실제 처리·재생 변경을 혼동하지 않는다. |
+| [Figma main component](https://help.figma.com/hc/en-us/articles/360038665934-Edit-main-components) | 다른 파일의 instance에서 main으로 간 뒤 Return to instance가 제공된다. Sol 원문 대조. | 사용 지점→공통 정의→출발점 복귀. 정확한 카메라 복원은 이 출처로 입증되지 않았다. |
+| [QGIS map themes](https://docs.qgis.org/3.44/en/docs/user_manual/introduction/general_tools.html#configuring-map-themes) · [Revit view templates](https://help.autodesk.com/cloudhelp/2026/ENU/Revit-HaveYouTried/files/GUID-DD1AF833-EAA0-4C91-8CF3-EA8BB8B5C3D5.htm) | 같은 자료의 표시 선택과 실제 모델을 분리하는 사례다. 문서 조사만 했다. | 보기 설정을 프로그램 구조 수정으로 해석하지 않는다. 오래된 삽입 영상은 현행 UI 증거가 아니다. |
+| [Archi 사용자 안내 5.10](https://www.archimatetool.com/downloads/archi/Archi%20User%20Guide.pdf) · [PROV-DM](https://www.w3.org/TR/2013/REC-prov-dm-20130430/) | 개념의 여러 view 참조, 시각적 그룹과 의미적 그룹, 대상·활동·책임 주체를 각각 구별한다. | 대상·화면 출현·개발 활동·출처는 분리한다. 출처가 있다는 사실을 진실/완료 판정으로 승격하지 않는다. |
+
+### 총괄이 직접 조작한 범위
+
+- **Dify 기존 편집기:** 노드 탐색기를 열어 종류별 그룹·검색·Nodes/Tools/Start/Snippets의 분리를 확인했다. 노드 추가·실행·게시하지 않았다. 좁은 사이드 패널 화면 관찰이며 1280 가독성 증거로 세지 않는다.
+- **[Ilograph 공개 예제](https://app.ilograph.com/demo.ilograph.Ilograph/Request):** `handleDiagram` 선택→Code 관점→Request 관점을 왕복했다. 같은 대상의 연속성은 유용했다. 선택 카드의 큰 확대와 주변 재배치는 공간 기억의 대가가 있었다. 문서의 장점을 그대로 시각 수용으로 바꾸지 않는다.
+- **[LikeC4 공개 Big Bank](https://playground.likec4.dev/w/bigbank/):** 시스템 선택→내부 Containers 보기 이동을 했다. 바깥 사용자·메일·메인프레임이 남는 점은 채택 후보다. 편집 영역을 줄여도 전체 맞춤에서 글자가 작았다. 이 예제는 가상의 은행이며 실제 소프트웨어 표본으로 세지 않는다.
+
+### 연구 논문을 쓰는 범위
+
+[Pad++ 원논문](https://www.cs.columbia.edu/graphics/courses/csw4170/resources/bedersonHollanUIST94.pdf)은 배율에 따라 같은 대상의 표현을 바꾸는 아이디어다. 이를 하위 구성 자동 펼침 의무로 읽지 않는다. [Overview+Detail/Zoom/Focus+Context 리뷰](https://www.microsoft.com/en-us/research/wp-content/uploads/2008/01/cockburn-ComputingSurveys09.pdf)는 전체·상세를 동시에 두는 방식과 시간적으로 교체하는 방식을 비교할 어휘를 준다.
+
+[Plumlee/Ware의 비교 실험](https://vislab-ccom.unh.edu/pdfs/PlumleeWareZoom.pdf)은 떨어진 대상을 기억으로 왕복 비교하는 비용을 검토할 근거다. 추상 도형 실험의 개수를 노드 상한으로 옮기지 않는다. [Node-link/Matrix 비교](https://mohammad.ghoniem.info/research/ivs-usability-2005.pdf)와 [NodeTrix](https://profs.etsmtl.ca/mmcguffin/research/nodetrix/nodetrix.pdf)는 질문에 따라 관계표가 나을 가능성을 준다. 임의의 혼합 깊이를 해결했다는 근거는 아니다.
+
+[GraphTrail](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/graphtrail_chi2012.pdf)은 여러 기준의 탐색 가능성과 함께 pivot의 이해 부담도 보고한다. [정신지도 보존 연구](https://link.springer.com/chapter/10.1007/978-3-642-36763-2_42)의 재식별 이점을 좌표 영구 고정·사용자 이해 완료로 확대하지 않는다. Pro R7은 저자 업로드 전문, R8은 출판사 초록과 별도 2014 논문을 확인했다. 총괄이 모든 논문 실험을 재현한 것은 아니다.
+
+## 10. 실제 소프트웨어에서 추출한 시험 재료
+
+자료가 프로그램 내부에서 쓰는 객체라는 이유만으로 AgentFlow 노드 타입이 되지는 않는다. 아래 표는 **표현이 잃으면 안 되는 차이**를 얻기 위한 것이다. 개발 기능으로 재구성한 시안은 별도로 합성 사례라고 표시한다.
+
+| 고정 표본 | 대표 요소와 관계 | 설계가 견뎌야 할 질문 |
+|---|---|---|
+| **Actual Budget v26.10.0** · [SHA 2bebdbaa](https://github.com/actualbudget/actual/commit/2bebdbaae0b701120a8cad9d56aafd64fa04c577) | 목적: 지출 가능 판단. 기능: 예산 편성·은행 가져오기·규칙 적용·거래 대조. 자료: 계좌·거래·분류·월별 배분. 공통 처리: 기기 간 변경 동기화. 권한: 전역 Basic/Admin과 예산별 접근/소유. | 은행 가져오기와 기기 동기화를 같은 ‘동기화’로 합치지 않는가? 권한이 사람의 고정 종류로 굳지 않는가? |
+| **과거 Cal.com v6.1.16** · [SHA 68663231](https://github.com/calcom/cal.diy/commit/68663231d84686a58ce8dd21a00ea5c520fde5f8) | 예약자·호스트·팀 관리자, 예약 유형·공유 일정·실제 예약·참석자, 배정·가용성·확인 정책, 외부 캘린더, 알림 정의와 특정 예약의 알림 발생. | 같은 일정을 쓰는 예약 유형은 무엇인가? 일정 변경이 이미 생성된 예약까지 바꾼다는 근거가 있는가? |
+| **Blender 4.5.0** · [SHA 8cb6b388](https://github.com/blender/blender/commit/8cb6b388974a817afedf1317ce26f0c75aa5f181) | Scene·Collection·Object·Mesh·Material, ViewLayer, Modifier·평가 결과, RenderEngine, Operator·UndoStep. | 원본과 계산 결과, 대상과 공유 자료, 명령과 복구 단위를 구별하는가? |
+| **VS Code 개발 소스** · [SHA 784ce221](https://github.com/microsoft/vscode/commit/784ce2212c21959ae8078d2fab304ecbf1f305a8) | Workspace·URI·TextDocument·TextEditor·Selection, Command·Extension·ExtensionHost, Undo element·Task·TaskExecution·DebugSession. 정식 배포판과의 대응은 미확인. | 기능·그 표현·공유 상태·실행 장소·한 번의 실행이 같은 계층으로 섞이지 않는가? |
+
+Actual의 [클라이언트 조정](https://github.com/actualbudget/actual/blob/2bebdbaae0b701120a8cad9d56aafd64fa04c577/packages/desktop-client/src/accounts/mutations.ts)과 [거래 처리](https://github.com/actualbudget/actual/blob/2bebdbaae0b701120a8cad9d56aafd64fa04c577/packages/loot-core/src/server/accounts/sync.ts)는 한 기능이 여러 기술 영역을 가로지르는 구체 사례다. 폴더를 부모로 정하면 사용자 기능이 잘린다. [은행 문서](https://github.com/actualbudget/actual/blob/2bebdbaae0b701120a8cad9d56aafd64fa04c577/packages/docs/docs/advanced/bank-sync.md)의 은행 토큰은 예산 E2EE의 보호 범위와 다르다. ‘보안 적용’ 배지를 부모 전체에 전파하면 틀린다.
+
+Cal.com 표본은 특히 판본을 섞지 않는다. 현재 `calcom/cal.com`은 Cal.diy로 리디렉션되며 [현행 README](https://github.com/calcom/cal.diy)는 Teams·Organizations·Workflows 등 제거를 설명한다. Sol이 릴리스–SHA 및 리디렉션을 독립 대조했다. [과거 schema](https://github.com/calcom/cal.diy/blob/68663231d84686a58ce8dd21a00ea5c520fde5f8/packages/prisma/schema.prisma)와 [예약 처리](https://github.com/calcom/cal.diy/blob/68663231d84686a58ce8dd21a00ea5c520fde5f8/packages/features/bookings/lib/service/RegularBookingService.ts)를 현행 상용 SaaS 배포 구조로 단정하지 않는다.
+
+게임 표본 R1은 회수 후 같은 기준으로 추가한다. 출처를 확인하지 않은 이름만으로 표를 채우지 않는다.
+
+## 11. 의미 설계의 잠정 결론
+
+### 11.1 한 종류의 카드가 한 종류의 실체를 뜻하지 않는다
+
+사용자는 ‘부분’을 누르지만, 그 이름이 가리키는 대상은 서로 다를 수 있다. 다음 구별은 고정 팔레트 목록이 아니라 **정보를 합치면 틀리는 경계**다.
+
+| 서로 구별할 것 | 왜 따로 남겨야 하는가 | 기본 화면에서의 표현 후보 |
+|---|---|---|
+| 할 수 있게 만들 일 / 그것을 맡는 구현 | 기능은 유지하고 구현만 교체할 수 있다. 대응은 다대다다. | 이름을 유지하고 선택하면 ‘이를 맡는 구성’으로 연결 |
+| 규칙 / 규칙을 검사하는 처리 | 같은 규칙이 여러 행동에 적용되고 검사 위치는 바뀔 수 있다. | 관련 행동의 짧은 조건, 필요할 때 독립 규칙 상세 |
+| 다루는 자료 / 저장·동기화 수단 | 자료의 의미가 같아도 저장 방식은 바뀐다. | 자료 이름과 이를 읽고 바꾸는 관계 |
+| 같은 대상의 다른 표현 / 별개 대상의 공유 사용 | 문서 하나의 두 view와 Object 둘의 Mesh 공유는 다르다. | ‘같은 대상’ 표지와 ‘사용’ 관계를 서로 구별 |
+| 제품의 사용자 역할 / 개발 담당 | 손님·관리자와 Claude·Codex 세션은 다른 세계다. | 전자는 사용 장면, 후자는 선택 상세의 개발 맥락 |
+| 구성 / 특정 실행의 발생 / 그에 관한 증거 | 실행 순서와 개발 이력을 구조에 섞으면 노드가 폭증한다. | 구성은 지도, 발생은 장면, 증거는 해당 주장에 연결 |
+| 실제 포함 / 이 질문에서 함께 보는 묶음 | 분류·권한·배포 장소는 구성 소유와 다를 수 있다. | 경계 스타일과 제목을 구별하고 보기 전환을 명시 |
+
+독립적으로 바뀌거나 다른 적용 범위를 갖는 것이 확인되면 구별한다. 반대로 자료가 성기면 ‘저장’이라는 넓은 부분을 남길 수 있다. **정보를 아직 모아서 보여주는 것과 실제로 같은 것이라고 합치는 것은 다르다.** 예를 들어 로컬/클라우드 저장을 하나의 개요에 접을 수는 있지만 동일한 대상으로 확정해서는 안 된다.
+
+O1 후속의 ‘슬롯 화면과 HUD가 같은 상태를 보여주므로 화면 자체도 같은 대상’이라는 식의 독해는 채택하지 않는다. 두 화면은 별개이고, 그 화면이 가리키는 상태가 같다는 근거만 있다. ‘한쪽을 고치면 모두 바뀐다’도 어떤 대상을 수정했는지 없으면 거짓이다. 관계 문장은 반드시 목적어를 가진다.
+
+### 11.2 관계는 문장으로 확인하고 필요할 때만 선으로 보인다
+
+- 포함: ‘예약에 시간 선택이 포함된다.’
+- 사용: ‘시간 선택이 가용시간 일정을 참조한다.’
+- 실현: ‘예약 처리기가 예약 생성을 맡는다.’
+- 제약: ‘최소 사전 통지가 시간 선택을 제한한다.’
+- 표시: ‘시각 편집기가 문서 내용을 보여준다.’
+- 발생 순서: ‘이 요청에서 검사 뒤 예약이 생성됐다.’ 구성 관계와 다른 장면이다.
+- 미확정: ‘예약과 알림의 관련성은 언급됐으나 세부 끝점은 확인되지 않았다.’
+
+이 문장들을 모두 항상 지도에 적지 않는다. 이름과 공간으로 전체를 읽고, 선택하면 해당 관계의 동사·끝점·조건이 보인다. 데이터가 없는 관계를 맞는 문장으로 꾸며 채우지 않는다. ‘관련’은 임시 표현으로 허용하지만 정확한 영향 분석인 척하지 않는다.
+
+### 11.3 단일 전역 부모는 아직 채택하지 않는다
+
+기준 구성의 포함 관계를 공간으로 표현하는 것은 유력하다. 하지만 기능 분해·구현 소유·사용 시나리오·실행 위치를 하나의 부모 필드로 환원하지 않는다. 특정 보기의 묶음은 그 보기의 배치일 수 있다. 같은 이름만으로 병합하지 않고, 사용처 수가 늘었다고 ‘기반’이라는 새 정체성을 계산하거나 자동 이동시키지 않는다.
+
+## 12. 세 대안의 실제 경쟁
+
+| 대안 | 잘 답하는 질문 | 구조적 약점 | 이번 비교에서의 위치 |
+|---|---|---|---|
+| **A. 기준 구성 공간** | 무엇을 만들고 있고 어디에 어떤 부분이 있는가? | 조건별 경로·공통 사용처·구현 대응을 전부 선으로 넣으면 무너진다. | 기본 입구의 유력 후보 |
+| **B. 선택 중심 관계 화면** | 이 대상은 무엇을 쓰고 어디에 쓰이는가? | 매 선택마다 다시 배치하면 전체 형상과 사용자가 기억한 위치를 잃는다. | 관계 탐색의 강한 대조안 |
+| **C. 질문에 맞춘 단면** | 같은 행동이 왜 조건마다 달라지는가? 어떤 구현이 여러 기능을 맡는가? | 전환과 대응 이해 비용. 여러 보기를 직접 관리하게 하면 실패. | A가 답하지 못하는 질문의 독립 후보 |
+
+잠정 조합은 **‘기준 공간 + 필요한 순간의 설명 장면’**이다. 아직 시각 보드를 보지 않고 확정하지 않는다. 기본 화면에 A/B/C 탭과 모든 필터를 나열하자는 뜻도 아니다.
+
+기준 공간에서 가벼운 선택·원문 참고 때문에 지도를 재배치하지 않는다. 반면 조건·시간·다대다 대응을 비교할 때는 기존 배치를 억지로 유지하지 않고, 현재 질문을 제목으로 가진 별도 장면을 열 수 있다. 이 장면은 원래 공간을 고쳐 쓰는 행위가 아니며, 닫으면 출발 맥락으로 돌아간다.
+
+**조립하지 않을 것:** 기준 공간 위에 방사형 관계 고리를 자동으로 펼쳐 전체 노드를 밀기, 하단 200px 비교 띠를 모든 상황에 고정하기, 구성/경로/구현 세 지도 관리를 기본 의무로 만들기, 타임라인의 실행 발생을 구성 노드로 저장하기.
+
+## 13. 반례로 설계를 깨는 방법
+
+아래는 실제 저장소에서 발생했다고 주장하지 않는 설계용 합성 장면이다.
+
+1. **예약 취소의 차이:** 관리자 취소와 손님 취소에서 환불 결과가 다르다. 같은 결제·권한·시간 규칙을 쓴다는 선만으로는 이유를 알 수 없다. 두 조건의 단계와 첫 차이를 나란히 읽어야 한다. 원인 근거가 없다면 ‘부분환불 미구현’처럼 자동 진단하지 않는다.
+2. **Undo와 늦은 응답:** 명령 두 번이 한 이력 묶음이고, 플러그인 요청 때와 응답 적용 때 문서 버전이 다르다. 명령 처리·이력 관리·문서라는 구성과 특정 실행의 순서를 구별한다. 구성 지도만으로 실패 원인을 말하지 않는다.
+3. **공유 저장의 일부 교체:** 인벤토리만 새 저장으로 전환하고 거래·제작은 기존 저장을 쓴다. ‘저장 완료’ 하나로 요약하지 않는다. 사용처별 현재/계획과 확인 범위를 나란히 읽는다. 기능의 정체성과 구현체 교체를 구별한다.
+4. **집약된 가짜 경로:** 실제 관계는 a→b₁, b₂→c다. b₁·b₂를 B로 접으면 a→B→c처럼 보일 수 있다. 집약선만으로 a가 c에 영향을 준다고 결론 내리지 않는다.
+5. **그저 아직 모르는 것:** 선택한 공통 시스템과 관련성이 기록된 것만 남겼다고 다른 부분에 영향이 없는 것은 아니다. 필터로 숨김, 아직 조사되지 않음, 없음이 확인됨은 서로 다르다.
+6. **계속 커지는 구조:** 기존 자리에 자식을 계속 넣다가 글자가 겹치면 좌표 보존을 성공이라고 하지 않는다. 국소 정돈이나 별도 집중이 필요하다. 전체를 자동 축소해 읽기 크기를 포기하지 않는다.
+
+## 14. 미정·변화·판단거리의 표현
+
+기본 지도는 감사 보고서가 아니다. 출처·확인 한계·상태 문장을 모든 카드에 반복하지 않는다. 반대로 사용자가 다음 행동을 잘못 선택할 차이는 숨기지 않는다.
+
+판단거리로 올릴 조건은 다음 세 가지 중 하나다. **다음 행동을 바꾸는가, 공유 대상의 해석/영향 범위를 바꾸는가, 현재 의도와 들어온 설명이 실제로 충돌하는가.** 단순히 미래 계획이 아직 구체적이지 않다는 이유는 경고가 아니다.
+
+예를 들어 ‘함께 편집하기’가 이름만 있는 것은 정상적인 구상이다. ‘현재는 한 사람의 편집만 설명되는데 협업까지 완료됐다고 보고됨’은 범위 차이다. ‘저장 방식 결정 필요’는 실제로 다음 작업의 선택을 막을 때만 짧은 이유로 올린다. 부모를 접어도 그 판단거리가 있음을 남기되, 모든 미정을 합산한 빨간 숫자를 달지 않는다.
+
+개명은 같은 대상을 이어 찾게 한다. 일부 분리는 기존 대상의 존속 여부를 보존한다. 대체는 책임 유지와 구현체 변경을 따로 말한다. 늦게 알려진 관계를 새로 구현된 관계로 읽히게 하지 않는다. [ADR의 결정 상태](https://www.cognitect.com/blog/2011/11/15/documenting-architecture-decisions)와 실제 구현·검사 상태는 다르며, [불일치의 유예](https://www.cs.toronto.edu/~sme/papers/2000/IEEEComputer2000.pdf)는 모든 문제를 즉시 승인 대기열로 만들지 않을 근거다.
+
+## 15. 시각 보드와 다음 판정
+
+O3는 같은 문서 편집기 합성 사례로 A/B/C를 비교할 작은 독립 HTML을 작성 중이다. 실제 VS Code 의미 구별에서 영감을 얻되 VS Code 제품 복제나 실제 현재 상태라고 주장하지 않는다. 제품 코드·배포는 변경하지 않는다.
+
+최소 장면은 전체, 부분 선택, 부분 안, 공통 대상 확인, 출발점 복귀다. 글자 크기와 노드 개수의 임의 숫자로 합격시키지 않는다. **선택 전후 지도 면적, 이름을 읽을 수 있는지, 무엇이 같은 대상인지, 지금 보는 경계가 무엇을 뜻하는지**를 실제 화면에서 판단한다. 세련됨은 색 수를 줄인 결과가 아니라 이 우선순위가 하나의 장면으로 읽히는 결과여야 한다.
