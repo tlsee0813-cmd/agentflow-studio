@@ -50,10 +50,10 @@ async function admit(load:()=>ProposalSample|Promise<ProposalSample>,origin:'exa
     const same=result.outcome==='reused'&&openKey===result.open;
     reviews=result.reviews;openKey=result.open;splitting=null;
     if(!same)screen={kind:'item',key:reviewItems(current()!)[0]!.key}; // The same review stays where it was read.
-    const what=origin==='example'?'검토 예제':'가져온 파일';
+    const what=origin==='example'?'검토 예제를':'가져온 파일을';
     notice={text:result.outcome==='reused'?`같은 출처·범위·제안의 입력이 이미 이 탭에서 검토 중이에요. 새로 만들지 않고 그 검토(제외·분리 표시 포함)를 그대로 보여 드려요.`
-      :result.changedIds.length?`${what}을 열었어요. 같은 출처 ID·제안 ID(${result.changedIds.join(', ')})가 다른 내용으로 이미 검토 중이에요. 원문·근거·해석이 달라 이전 제외·분리 표시를 이어받지 않았어요.`
-      :`${what}을 열었어요. 발췌 문자열 해시를 다시 계산해 기록값과 맞는지 확인했어요.`,undo:null};
+      :result.changedIds.length?`${what} 열었어요. 같은 출처 ID·제안 ID(${result.changedIds.join(', ')})가 다른 내용으로 이미 검토 중이에요. 원문·근거·해석이 달라 이전 제외·분리 표시를 이어받지 않았어요.`
+      :`${what} 열었어요. 발췌 문자열 해시를 다시 계산해 기록값과 맞는지 확인했어요.`,undo:null};
   } catch(e) {
     notice=null;error=`${e instanceof ProposalFileError?e.message:'파일을 읽지 못했어요.'} 지금 검토는 바뀌지 않았어요.`;
   } finally {busy=false;render();focusAfterLoad();}
@@ -224,7 +224,7 @@ function splitForm(review:ProposalReview,item:ReviewItem,index:number):HTMLEleme
     try {const next=splitGroup(review,item.proposal.id,index,[...splitting!.moving]);replace(next);
       const moved=[...splitting!.moving];splitting=null;
       const part=reviewItems(next).find(i=>i.proposal.id===item.proposal.id&&moved.every(r=>i.refs.includes(r))&&i.refs.length===moved.length)!;
-      screen={kind:'item',key:part.key};notice={text:`${item.proposal.id}에서 ${moved.join('·')}를 별도 묶음으로 나눴어요. 원래 해석은 참고로만 보여요.`,undo:null};
+      screen={kind:'item',key:part.key};notice={text:`${item.proposal.id}에서 ${moved.join('·')}을(를) 별도 묶음으로 나눴어요. 원래 해석은 참고로만 보여요.`,undo:null};
     } catch(e){error=e instanceof ProposalFileError?e.message:'분리하지 못했어요.';}
     render();$('sr-main-title').focus();
   },'primary','sr-split-go');go.disabled=!splitting!.moving.size||splitting!.moving.size>=item.refs.length;
@@ -237,7 +237,7 @@ function excerptReader(review:ProposalReview,e:ProposalExcerpt,from:string):HTML
   const back=()=>{const ret=itemReturn;screen={kind:'item',key:from};render();
     if(ret&&ret.key===from){scroller().scrollTop=ret.y;const c=document.getElementById(ret.control);if(c){c.focus({preventScroll:true});return;}}
     $('sr-main-title').focus();};
-  const backLabel=`← ${item?itemLabel(item):'제안'}으로 돌아가기`;
+  const backLabel=`← ${item?`${itemLabel(item)} `:''}제안으로 돌아가기`;
   box.append(button(backLabel,back,'quiet sr-back','sr-back'));
   const h=el('h3',`${e.ref} 원문 · 행 ${e.line.toLocaleString('ko-KR')}`,'sr-main-title');h.id='sr-main-title';h.tabIndex=-1;box.append(h);
   const meta=el('div','','sr-reader-tags');meta.append(chip(ROLE_LABEL[e.role],`role-${e.role}`),chip(`원래 분류 ${e.kind}`));if(e.truncated)meta.append(chip('발췌 잘림','amber'));box.append(meta);

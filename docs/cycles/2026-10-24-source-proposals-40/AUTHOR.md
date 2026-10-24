@@ -93,7 +93,39 @@
 
 ## 실행한 검사 (작성자 환경)
 
-RESULTS_PLACEHOLDER
+환경: Linux 컨테이너, Node v22.22.0(CI 기준 22.16.0과 다름), npm ci 잠금 TypeScript 5.8.3, Python 3.13, Playwright 1.57.0.
+브라우저는 사전 설치 Chromium 153.0.8010.12(`BROWSER_EXECUTABLE`), 실제 local HTTP, AI_MODE=mock, 유료 호출0.
+아래는 최종 소스 트리(이 문서만 다른 커밋)에서 실행한 결과다.
+
+| 검사 | exit | 결과 |
+|---|---:|---|
+| `node continuity/scripts/check.mjs` | 0 | type/syntax/client boundary 통과 |
+| `node continuity/scripts/build.mjs` | 0 | |
+| `node --test continuity/tests/*.test.mjs` | 0 | 287/287. 새 source-proposals40 8개 포함 |
+| `node continuity/scripts/build-static.mjs` / `--preview` | 0 / 0 | |
+| `python continuity/tests/source-proposals40_browser.py` | 0 | 6/6. 1280×720·1440×900, 소창 900×560·760×520 |
+| `python continuity/tests/entry37_browser.py` | 0 | 10/10 |
+| `python continuity/tests/map-priority36_browser.py` | 0 | 12/12 |
+| `python continuity/tests/home15_browser.py` | 0 | 21/21 |
+| `python continuity/tests/static_browser.py` | 0 | 4/4. 새 정적 CSP 예제 검사 포함 |
+| root `npm run check` | 0 | 이 작업 전 단계(SOURCE40 소스 포함, root 무변경)에서 실행 |
+| root `npm test` | 1 | 278/279. 실패1 `retest-init006` I6R은 `process.version==='v22.16.0'`을 요구한다. 이 환경은 v22.22.0이다. root 코드는 바꾸지 않았다. 성공으로 세지 않는다 |
+
+SOURCE40 브라우저가 실제로 실행한 흐름:
+
+- 홈 → 진입 → 빈 화면(예제 자동 열림 없음) → `검토 예제 열기` → C1 → E01 원문(정확 quote, 16px, 배율 없음, 가로 넘침 없음, 두 해시) → C1(초점 복귀).
+- 제외 → 알림 되돌리기 → C2 제외 → 목록 되돌리기.
+- C3 다시 검토 → E07 분리(나뉜 묶음에 표시 미복사, 해석 dl 없음, 원래 해석 접힘, E07 누락 유지) → E07 원문 → 아래 돌아가기.
+- Esc 닫기 → 진입 버튼 초점, 홈 scrollY 동일 → local/session storage 전체 바이트 동일.
+- 다시 열면 상태 유지 → 닫기 → 실제 프로젝트 지도 transform 동일 → 다른 프로젝트 초안·revision·작업 수 동일.
+- 가져오기: 정상, 순서만 바뀐 같은 입력과 예제 재열기는 재사용(제외·분리 유지).
+  - 거절: 없는 ref, 중복 refs, 중복 발췌 ref, 70KB, BOM, 프로젝트 백업 schema, 제안4개, 한 글자 변조+옛 해시. 거절마다 검토·storage 불변.
+  - 같은 ID·다른 해석은 새 검토(표시 미상속, 알림). 임의 rawSha256은 받아들이고 "확인하지 않았어요"로 표시. 4번째 표본은 거절.
+- HTML label/quote가 글자로 보임(img/script/b 요소0, title 변화 없음).
+- 6000자 무공백 원문의 마지막 글자까지 스크롤, 닫기 버튼 상시 보임, 작업 버튼 접근, Enter 열기/Esc 닫기 초점 복귀, 새로고침 후 검토 비어 있음.
+
+실행하지 않은 것: CI(Ubuntu/Windows), 다른 기존 브라우저 suite 전체(FLOW·REPORT16·VIEWPORT30 등), Node 22.16.0 정확 버전 실행.
+대표 화면은 총괄 반환으로만 전달하고 저장소에는 커밋하지 않았다(1280 제안·1280 분리·1440 원문).
 
 ## 미검증·남은 한계
 
