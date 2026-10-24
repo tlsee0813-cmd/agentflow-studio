@@ -114,6 +114,8 @@ def map_flow(browser, base):
     page.mouse.wheel(0, -240)
     expect(page.locator("#zoom-level")).not_to_have_text("100%")
     zoom = page.locator("#zoom-level").inner_text()
+    book_head = page.locator(".frame-head", has_text="예약하기")
+    place = book_head.bounding_box()
     # Inside and back: scope bar and path say where; the parent view comes back as it was.
     page.locator(".frame-head", has_text="예약하기").locator(".enter").click()
     expect(page.locator("#scope-bar")).to_contain_text("예약하기 안")
@@ -127,6 +129,11 @@ def map_flow(browser, base):
     page.keyboard.press("Escape")  # nothing selected: Esc goes up one level
     expect(page.locator("#scope-bar")).to_be_hidden()
     expect(page.locator("#zoom-level")).to_have_text(zoom)
+    back = book_head.bounding_box()
+    assert abs(back["x"] - place["x"]) < 2 and abs(back["y"] - place["y"]) < 2, (place, back)  # same camera, same place
+    # The cursor zoom above pushed 관리자 화면 off the left edge under the recent list; a person would use 전체 보기 first.
+    page.locator("#zoom-fit").click()
+    page.wait_for_timeout(350)
     # Double-click also goes inside; the panel offers it too.
     page.locator(".frame-head", has_text="관리자 화면").locator(".frame-name").dblclick()
     expect(page.locator("#scope-bar")).to_contain_text("관리자 화면 안")
