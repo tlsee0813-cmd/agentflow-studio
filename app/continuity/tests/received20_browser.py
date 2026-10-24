@@ -43,9 +43,12 @@ class Received20(unittest.TestCase):
     def visible(self,sel,marker=None):
         v=self.page.evaluate(PROBE,[sel,marker] if marker else sel);self.yes('actual full clipping and hit '+sel,bool(v and v['inside'] and v['hit']),v)
         if not marker:expect(self.page.locator(sel)).to_be_in_viewport()
-    def wheel(self,sel,delta,marker=None):
+    def wheel(self,sel,delta,marker=None,point=None):
         # Observe the actual native wheel and scrollend; no fixed sleeps, DOM scrolling or product resize hooks.
+        # point: an explicit native wheel position (x,y) chosen by the caller on a real surface; the scroll host is still
+        # derived from what is actually under it.
         p=self.page.evaluate(PROBE,[sel,marker] if marker else sel)
+        if point:p={**p,'wheelX':point[0],'wheelY':point[1]}
         self.page.evaluate(r'''([x,y])=>{const hit=document.elementFromPoint(x,y);let host=hit;
           while(host&&!(host.scrollHeight>host.clientHeight+1&&/auto|scroll/.test(getComputedStyle(host).overflowY)))host=host.parentElement;
           const target=host??document,events=[],p={promise:null,cancel:null,result:null};let resolve,timer,activated=false;

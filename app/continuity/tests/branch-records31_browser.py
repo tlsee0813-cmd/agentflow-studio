@@ -155,7 +155,13 @@ class BranchRecords31(unittest.TestCase):
         if self.page.evaluate('scrollY')>0:self.wheel('#space-view',-10000)
         self.assertLessEqual(self.page.evaluate('scrollY'),1)
         self.yes('실제 문서에 120px 이동 공간',self.page.evaluate('document.documentElement.scrollHeight-innerHeight')>=120)
-        self.wheel('#space-view',120)
+        # VISUAL42: the map and its selection panel now reach the window's right edge, so the shared page-wheel x (innerWidth-20,
+        # formerly the shell's 42px padding) lands on the panel's own contained reader. The page wheel is made over a real
+        # document surface instead: the empty right end of the map toolbar band (no control, reader or map under it).
+        at=self.page.evaluate('''()=>{const b=document.querySelector('.map-toolbar').getBoundingClientRect(),x=b.right-16,y=b.top+b.height/2,h=document.elementFromPoint(x,y);
+          return {x,y,hit:h&&(h.id||h.className),bar:h===document.querySelector('.map-toolbar')}}''')
+        self.yes('page wheel point is the toolbar band itself',at['bar'],at)
+        self.wheel('#space-view',120,point=(at['x'],at['y']))
         before=self.page.evaluate(ENTRY_SNAP,p);data=self.state()
         self.yes('native page wheel 비영점 준비',before['page']>=119,before)
         self.visible(signal) # Viewport/ancestor/map clipping and actual centre hit before normal click.
