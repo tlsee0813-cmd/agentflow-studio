@@ -1,0 +1,22 @@
+{
+  "headRevision": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+  "runId": 40066138381,
+  "jobs": [
+    {
+      "id": 120789685141,
+      "head_sha": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+      "name": "verify (ubuntu-24.04)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 120789685300,
+      "head_sha": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+      "name": "verify (windows-2022)",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "source": "Codex Code Review backend",
+  "checkedAt": "2026-10-24 05:42:46 UTC"
+}

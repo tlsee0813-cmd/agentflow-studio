@@ -1,0 +1,62 @@
+{
+  "source": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+  "url": "https://tlsee0813-cmd.github.io/agentflow-studio/",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "cache": "Existing tab initially mixed cached prior assets; Page.reload(ignoreCache:true) refreshed before this flow.",
+  "before": {
+    "button": {
+      "bottom": 773.2000122070312,
+      "height": 36,
+      "left": 961.6000366210938,
+      "right": 1065.5250396728516,
+      "top": 737.2000122070312,
+      "width": 103.9250030517578,
+      "x": 961.6000366210938,
+      "y": 737.2000122070312
+    },
+    "map": {
+      "bottom": 783.2000274658203,
+      "height": 630.4000244140625,
+      "left": 222,
+      "right": 944.7999877929688,
+      "top": 152.8000030517578,
+      "width": 722.7999877929688,
+      "x": 222,
+      "y": 152.8000030517578
+    },
+    "scrollY": 0
+  },
+  "returned": {
+    "map": {
+      "bottom": 783.2000274658203,
+      "height": 630.4000244140625,
+      "left": 222,
+      "right": 944.7999877929688,
+      "top": 152.8000030517578,
+      "width": 722.7999877929688,
+      "x": 222,
+      "y": 152.8000030517578
+    },
+    "scrollY": 0
+  },
+  "draftBefore": {
+    "end": 44,
+    "start": 44,
+    "value": "공개 화면에서 작성한 확인 초안입니다.\n지도에 다녀와도 이 두 줄을 유지합니다."
+  },
+  "draftAfter": {
+    "end": 44,
+    "focused": true,
+    "start": 44,
+    "value": "공개 화면에서 작성한 확인 초안입니다.\n지도에 다녀와도 이 두 줄을 유지합니다."
+  },
+  "homeAfterExampleClose": "No projects visible",
+  "newProject": {
+    "purpose": "",
+    "request": ""
+  },
+  "storageInspection": "Not read in root IAB; independent storage check in independent/RESULT.json"
+}

@@ -1,0 +1,1550 @@
+{
+  "source": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+  "appTree": "9ba47af6a58cf97d717e743a862553ea2cf1053d",
+  "target": "static preview",
+  "url": "http://127.0.0.1:60414",
+  "checks": [
+    {
+      "label": "served CSS equals current caf build",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "representative zero departure recorded",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "label": "caf 1280 origin page/header/map/camera delta0",
+      "pass": true,
+      "value": {
+        "departure": {
+          "scroll": 0,
+          "header": {
+            "x": 222,
+            "y": 0,
+            "width": 1058,
+            "height": 56,
+            "top": 0,
+            "right": 1280,
+            "bottom": 56,
+            "left": 222
+          },
+          "map": {
+            "x": 222,
+            "y": 153,
+            "width": 738,
+            "height": 630,
+            "top": 153,
+            "right": 960,
+            "bottom": 783,
+            "left": 222
+          },
+          "plane": "translate(-23px, 55px) scale(1.2)",
+          "selected": "A_d503713e-f991-45b4-bdde-5333758b4fce"
+        },
+        "returns": [
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 56,
+              "top": 0,
+              "right": 1280,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 738,
+              "height": 630,
+              "top": 153,
+              "right": 960,
+              "bottom": 783,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_d503713e-f991-45b4-bdde-5333758b4fce"
+          },
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 56,
+              "top": 0,
+              "right": 1280,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 738,
+              "height": 630,
+              "top": 153,
+              "right": 960,
+              "bottom": 783,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_d503713e-f991-45b4-bdde-5333758b4fce"
+          },
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 56,
+              "top": 0,
+              "right": 1280,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 738,
+              "height": 630,
+              "top": 153,
+              "right": 960,
+              "bottom": 783,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_d503713e-f991-45b4-bdde-5333758b4fce"
+          }
+        ]
+      }
+    },
+    {
+      "label": "caf 1280 typed draft/caret preserved",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "caf example writes0",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "representative pageerror/external0",
+      "pass": true,
+      "value": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "visible MAP36 names and short independent-membership glyphs wholly inside clips",
+      "pass": true,
+      "value": {
+        "nameCount": 6,
+        "independentCount": 2,
+        "bad": []
+      }
+    },
+    {
+      "label": "all visible MAP36 membership glyphs have no vertical clipping",
+      "pass": true,
+      "value": []
+    }
+  ],
+  "bundle": {
+    "path": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\agentflow-ops-assembly\\.ops\\visual42-finalcaf-preview.zip",
+    "sha256": "f4d5d4e9c702e94e0372334d59e68bc1e6b14e910c5f93d4769f7c206bd61939",
+    "bytes": 205687,
+    "runtimeFiles": 20,
+    "entries": 22,
+    "manifestHashesVerified": true,
+    "build": {
+      "source": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+      "appTree": "9ba47af6a58cf97d717e743a862553ea2cf1053d",
+      "target": "preview",
+      "buildScript": "app/continuity/scripts/build-static.mjs --preview",
+      "compiler": "TypeScript 5.8.3 reused; no npm ci",
+      "runtimeOnly": true,
+      "manifest": "MANIFEST.json",
+      "acceptance": "Candidate; CI/overall acceptance root responsibility"
+    },
+    "versus6cf": {
+      "different": [
+        "styles.css"
+      ],
+      "identical": [
+        ".nojekyll",
+        "client/app.js",
+        "client/presentation.js",
+        "client/runtime.js",
+        "client/source-review.js",
+        "client/static-target.js",
+        "index.html",
+        "shared/attention.js",
+        "shared/domain.js",
+        "shared/guidance.js",
+        "shared/hierarchy.js",
+        "shared/mock.js",
+        "shared/outcome.js",
+        "shared/plan-facts.js",
+        "shared/source-proposals-example.js",
+        "shared/source-proposals.js",
+        "shared/storage.js",
+        "shared/types.js",
+        "shared/validation.js"
+      ]
+    }
+  },
+  "servedCSSSHA256": "ec8cb2f03bb391f2747e1cb460f0979470eba64f2d7a7f22a8ce6c1b00d4e141",
+  "chrome": "155.0.8059.85",
+  "selected": {
+    "scroll": 0,
+    "header": {
+      "x": 222,
+      "y": 0,
+      "width": 1058,
+      "height": 56,
+      "top": 0,
+      "right": 1280,
+      "bottom": 56,
+      "left": 222
+    },
+    "items": [
+      {
+        "id": "#to-projects",
+        "rect": {
+          "x": 246,
+          "y": 17.5,
+          "width": 73.359375,
+          "height": 20,
+          "top": 17.5,
+          "right": 319.359375,
+          "bottom": 37.5,
+          "left": 246
+        },
+        "visible": true,
+        "value": "",
+        "text": "내 프로젝트"
+      },
+      {
+        "id": "#project-name",
+        "rect": {
+          "x": 347.359375,
+          "y": 12.5,
+          "width": 183,
+          "height": 30,
+          "top": 12.5,
+          "right": 530.359375,
+          "bottom": 42.5,
+          "left": 347.359375
+        },
+        "visible": true,
+        "value": "예제 · 동네 미용실 예약",
+        "text": ""
+      },
+      {
+        "id": "#example-banner strong",
+        "rect": {
+          "x": 542.359375,
+          "y": 15.5,
+          "width": 105.171875,
+          "height": 24,
+          "top": 15.5,
+          "right": 647.53125,
+          "bottom": 39.5,
+          "left": 542.359375
+        },
+        "visible": true,
+        "value": null,
+        "text": "예제 · 저장 안 됨"
+      },
+      {
+        "id": ".example-help>summary",
+        "rect": {
+          "x": 653.53125,
+          "y": 15.5,
+          "width": 24,
+          "height": 24,
+          "top": 15.5,
+          "right": 677.53125,
+          "bottom": 39.5,
+          "left": 653.53125
+        },
+        "visible": true,
+        "value": null,
+        "text": "예제 안내"
+      },
+      {
+        "id": "#example-start",
+        "rect": {
+          "x": 687.53125,
+          "y": 13.5,
+          "width": 119.40625,
+          "height": 28,
+          "top": 13.5,
+          "right": 806.9375,
+          "bottom": 41.5,
+          "left": 687.53125
+        },
+        "visible": true,
+        "value": "",
+        "text": "내 프로젝트 시작"
+      },
+      {
+        "id": "#example-close",
+        "rect": {
+          "x": 812.9375,
+          "y": 13.5,
+          "width": 77.15625,
+          "height": 28,
+          "top": 13.5,
+          "right": 890.09375,
+          "bottom": 41.5,
+          "left": 812.9375
+        },
+        "visible": true,
+        "value": "",
+        "text": "예제 닫기"
+      },
+      {
+        "id": "#connection-details>summary",
+        "rect": {
+          "x": 1015.921875,
+          "y": 13.5,
+          "width": 240.078125,
+          "height": 28,
+          "top": 13.5,
+          "right": 1256,
+          "bottom": 41.5,
+          "left": 1015.921875
+        },
+        "visible": true,
+        "value": null,
+        "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+      }
+    ],
+    "overlaps": [],
+    "overflow": false,
+    "name": {
+      "value": "예제 · 동네 미용실 예약",
+      "len": 14,
+      "measure": 165.453125,
+      "clientWidth": 181,
+      "padding": 12,
+      "scrollLeft": 0,
+      "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+    },
+    "map": {
+      "x": 222,
+      "y": 153,
+      "width": 738,
+      "height": 630,
+      "top": 153,
+      "right": 960,
+      "bottom": 783,
+      "left": 222
+    },
+    "plane": "translate(-23px, 55px) scale(1.2)",
+    "selected": "A_d503713e-f991-45b4-bdde-5333758b4fce"
+  },
+  "workField": {
+    "x": 316,
+    "y": 372,
+    "width": 870,
+    "height": 208
+  },
+  "map36Static": [
+    {
+      "id": "A_7377edf4-0492-48bd-a6ed-b562d4232c77",
+      "card": {
+        "x": 402.8387145996094,
+        "y": 257,
+        "width": 194.32260131835938,
+        "height": 145.741943359375,
+        "top": 257,
+        "right": 597.1613159179688,
+        "bottom": 402.741943359375,
+        "left": 402.8387145996094
+      },
+      "signal": "하위 포함 · 답변 기록 없는 현재 질문 · 설명 보류 · 이전 기준 설명 · 이번 탭 설명 갱신",
+      "parts": [
+        {
+          "class": "area-card-name",
+          "text": "[합성34] … 채우는 경계",
+          "full": "[합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "box": {
+            "x": 414.98388671875,
+            "y": 267.52581787109375,
+            "width": 171.651611328125,
+            "height": 20.30517578125,
+            "top": 267.52581787109375,
+            "right": 586.635498046875,
+            "bottom": 287.83099365234375,
+            "left": 414.98388671875
+          },
+          "clip": {
+            "left": 414.98388671875,
+            "top": 267.52581787109375,
+            "right": 586.635498046875,
+            "bottom": 308.25006103515625
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 267.52581787109375,
+                "width": 153.07958984375,
+                "height": 20.241943359375,
+                "top": 267.52581787109375,
+                "right": 568.0634765625,
+                "bottom": 287.76776123046875,
+                "left": 414.98388671875
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 25,
+          "clientHeight": 25
+        },
+        {
+          "class": "area-card-path",
+          "text": "독립 영역",
+          "full": null,
+          "box": {
+            "x": 414.98388671875,
+            "y": 289.4503479003906,
+            "width": 171.651611328125,
+            "height": 16.611053466796875,
+            "top": 289.4503479003906,
+            "right": 586.635498046875,
+            "bottom": 306.0614013671875,
+            "left": 414.98388671875
+          },
+          "clip": {
+            "left": 414.98388671875,
+            "top": 289.4503479003906,
+            "right": 586.635498046875,
+            "bottom": 306.0614013671875
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 289.4503479003906,
+                "width": 50.9464111328125,
+                "height": 16.193572998046875,
+                "top": 289.4503479003906,
+                "right": 465.9302978515625,
+                "bottom": 305.6439208984375,
+                "left": 414.98388671875
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 21,
+          "clientHeight": 21
+        }
+      ]
+    },
+    {
+      "id": "A_a808d5b3-360d-448d-8547-419b4e480159",
+      "card": {
+        "x": 402.8387145996094,
+        "y": 435.1290283203125,
+        "width": 194.32260131835938,
+        "height": 145.741943359375,
+        "top": 435.1290283203125,
+        "right": 597.1613159179688,
+        "bottom": 580.8709716796875,
+        "left": 402.8387145996094
+      },
+      "signal": "기록 읽기",
+      "parts": [
+        {
+          "class": "area-card-name",
+          "text": "[합성34] 답변 기록 질문",
+          "full": "[합성34] 답변 기록 질문",
+          "box": {
+            "x": 414.98388671875,
+            "y": 445.65484619140625,
+            "width": 171.651611328125,
+            "height": 44.00091552734375,
+            "top": 445.65484619140625,
+            "right": 586.635498046875,
+            "bottom": 489.65576171875,
+            "left": 414.98388671875
+          },
+          "clip": {
+            "left": 414.98388671875,
+            "top": 445.65484619140625,
+            "right": 586.635498046875,
+            "bottom": 532.4801025390625
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 445.65484619140625,
+                "width": 132.711181640625,
+                "height": 21.051605224609375,
+                "top": 445.65484619140625,
+                "right": 547.695068359375,
+                "bottom": 466.7064514160156,
+                "left": 414.98388671875
+              },
+              "inside": true
+            },
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 467.6552734375,
+                "width": 31.868377685546875,
+                "height": 21.0516357421875,
+                "top": 467.6552734375,
+                "right": 446.8522644042969,
+                "bottom": 488.7069091796875,
+                "left": 414.98388671875
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 54,
+          "clientHeight": 54
+        },
+        {
+          "class": "area-card-path",
+          "text": "소속 · [합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "full": null,
+          "box": {
+            "x": 414.98388671875,
+            "y": 491.27508544921875,
+            "width": 171.651611328125,
+            "height": 17.99005126953125,
+            "top": 491.27508544921875,
+            "right": 586.635498046875,
+            "bottom": 509.26513671875,
+            "left": 414.98388671875
+          },
+          "clip": {
+            "left": 414.98388671875,
+            "top": 491.27508544921875,
+            "right": 586.635498046875,
+            "bottom": 509.26513671875
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 491.27508544921875,
+                "width": 376.4873046875,
+                "height": 17.00323486328125,
+                "top": 491.27508544921875,
+                "right": 791.47119140625,
+                "bottom": 508.2783203125,
+                "left": 414.98388671875
+              },
+              "inside": false
+            },
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 491.27508544921875,
+                "width": 161.6318359375,
+                "height": 17.00323486328125,
+                "top": 491.27508544921875,
+                "right": 576.61572265625,
+                "bottom": 508.2783203125,
+                "left": 414.98388671875
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 22,
+          "clientHeight": 22
+        }
+      ]
+    },
+    {
+      "id": "A_3aa1f351-1f23-4fd1-9e85-5752414f1028",
+      "card": {
+        "x": 629.5484008789062,
+        "y": 435.1290283203125,
+        "width": 194.32257080078125,
+        "height": 145.741943359375,
+        "top": 435.1290283203125,
+        "right": 823.8709716796875,
+        "bottom": 580.8709716796875,
+        "left": 629.5484008789062
+      },
+      "signal": "답변 기록 없는 현재 질문 · 설명 보류 · 이번 탭 설명 갱신",
+      "parts": [
+        {
+          "class": "area-card-name",
+          "text": "[합성34] 긴 이름의 말단 부분 … 탭 갱신",
+          "full": "[합성34] 긴 이름의 말단 부분 · 현재 작업과 이번 탭 갱신",
+          "box": {
+            "x": 641.6935424804688,
+            "y": 445.65484619140625,
+            "width": 171.651611328125,
+            "height": 44.00091552734375,
+            "top": 445.65484619140625,
+            "right": 813.3451538085938,
+            "bottom": 489.65576171875,
+            "left": 641.6935424804688
+          },
+          "clip": {
+            "left": 641.6935424804688,
+            "top": 445.65484619140625,
+            "right": 813.3451538085938,
+            "bottom": 516.476318359375
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 445.65484619140625,
+                "width": 132.71124267578125,
+                "height": 21.051605224609375,
+                "top": 445.65484619140625,
+                "right": 774.40478515625,
+                "bottom": 466.7064514160156,
+                "left": 641.6935424804688
+              },
+              "inside": true
+            },
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 467.6552734375,
+                "width": 141.79473876953125,
+                "height": 21.0516357421875,
+                "top": 467.6552734375,
+                "right": 783.48828125,
+                "bottom": 488.7069091796875,
+                "left": 641.6935424804688
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 54,
+          "clientHeight": 54
+        },
+        {
+          "class": "area-card-path",
+          "text": "소속 · [합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "full": null,
+          "box": {
+            "x": 641.6935424804688,
+            "y": 491.27508544921875,
+            "width": 171.651611328125,
+            "height": 17.99005126953125,
+            "top": 491.27508544921875,
+            "right": 813.3451538085938,
+            "bottom": 509.26513671875,
+            "left": 641.6935424804688
+          },
+          "clip": {
+            "left": 641.6935424804688,
+            "top": 491.27508544921875,
+            "right": 813.3451538085938,
+            "bottom": 509.26513671875
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 491.27508544921875,
+                "width": 376.48736572265625,
+                "height": 17.00323486328125,
+                "top": 491.27508544921875,
+                "right": 1018.180908203125,
+                "bottom": 508.2783203125,
+                "left": 641.6935424804688
+              },
+              "inside": false
+            },
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 491.27508544921875,
+                "width": 161.63189697265625,
+                "height": 17.00323486328125,
+                "top": 491.27508544921875,
+                "right": 803.325439453125,
+                "bottom": 508.2783203125,
+                "left": 641.6935424804688
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 22,
+          "clientHeight": 22
+        }
+      ]
+    },
+    {
+      "id": "A_230c4316-b5d7-48e4-9443-29eb54df0549",
+      "card": {
+        "x": 402.8387145996094,
+        "y": 613.258056640625,
+        "width": 194.32260131835938,
+        "height": 145.741943359375,
+        "top": 613.258056640625,
+        "right": 597.1613159179688,
+        "bottom": 759,
+        "left": 402.8387145996094
+      },
+      "signal": "이전 기준 설명",
+      "parts": [
+        {
+          "class": "area-card-name",
+          "text": "[합성34] 이전 기준 질문과 설명",
+          "full": "[합성34] 이전 기준 질문과 설명",
+          "box": {
+            "x": 414.98388671875,
+            "y": 623.7838745117188,
+            "width": 171.651611328125,
+            "height": 44.00091552734375,
+            "top": 623.7838745117188,
+            "right": 586.635498046875,
+            "bottom": 667.7847900390625,
+            "left": 414.98388671875
+          },
+          "clip": {
+            "left": 414.98388671875,
+            "top": 623.7838745117188,
+            "right": 586.635498046875,
+            "bottom": 710.609130859375
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 623.7838745117188,
+                "width": 132.711181640625,
+                "height": 21.05157470703125,
+                "top": 623.7838745117188,
+                "right": 547.695068359375,
+                "bottom": 644.83544921875,
+                "left": 414.98388671875
+              },
+              "inside": true
+            },
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 645.7843017578125,
+                "width": 83.99136352539062,
+                "height": 21.0516357421875,
+                "top": 645.7843017578125,
+                "right": 498.9752502441406,
+                "bottom": 666.8359375,
+                "left": 414.98388671875
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 54,
+          "clientHeight": 54
+        },
+        {
+          "class": "area-card-path",
+          "text": "소속 · [합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "full": null,
+          "box": {
+            "x": 414.98388671875,
+            "y": 669.4041748046875,
+            "width": 171.651611328125,
+            "height": 17.989990234375,
+            "top": 669.4041748046875,
+            "right": 586.635498046875,
+            "bottom": 687.3941650390625,
+            "left": 414.98388671875
+          },
+          "clip": {
+            "left": 414.98388671875,
+            "top": 669.4041748046875,
+            "right": 586.635498046875,
+            "bottom": 687.3941650390625
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 669.4041748046875,
+                "width": 376.4873046875,
+                "height": 17.003173828125,
+                "top": 669.4041748046875,
+                "right": 791.47119140625,
+                "bottom": 686.4073486328125,
+                "left": 414.98388671875
+              },
+              "inside": false
+            },
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 669.4041748046875,
+                "width": 161.6318359375,
+                "height": 17.003173828125,
+                "top": 669.4041748046875,
+                "right": 576.61572265625,
+                "bottom": 686.4073486328125,
+                "left": 414.98388671875
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 22,
+          "clientHeight": 22
+        }
+      ]
+    },
+    {
+      "id": "A_1f5909f9-22fa-473e-8e3d-16141ebc170d",
+      "card": {
+        "x": 629.5484008789062,
+        "y": 613.258056640625,
+        "width": 194.32257080078125,
+        "height": 145.741943359375,
+        "top": 613.258056640625,
+        "right": 823.8709716796875,
+        "bottom": 759,
+        "left": 629.5484008789062
+      },
+      "signal": "기록 읽기",
+      "parts": [
+        {
+          "class": "area-card-name",
+          "text": "[합성34] 시험 답변 질문",
+          "full": "[합성34] 시험 답변 질문",
+          "box": {
+            "x": 641.6935424804688,
+            "y": 623.7838745117188,
+            "width": 171.651611328125,
+            "height": 44.00091552734375,
+            "top": 623.7838745117188,
+            "right": 813.3451538085938,
+            "bottom": 667.7847900390625,
+            "left": 641.6935424804688
+          },
+          "clip": {
+            "left": 641.6935424804688,
+            "top": 623.7838745117188,
+            "right": 813.3451538085938,
+            "bottom": 710.609130859375
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 623.7838745117188,
+                "width": 132.71124267578125,
+                "height": 21.05157470703125,
+                "top": 623.7838745117188,
+                "right": 774.40478515625,
+                "bottom": 644.83544921875,
+                "left": 641.6935424804688
+              },
+              "inside": true
+            },
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 645.7843017578125,
+                "width": 31.868408203125,
+                "height": 21.0516357421875,
+                "top": 645.7843017578125,
+                "right": 673.5619506835938,
+                "bottom": 666.8359375,
+                "left": 641.6935424804688
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 54,
+          "clientHeight": 54
+        },
+        {
+          "class": "area-card-path",
+          "text": "소속 · [합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "full": null,
+          "box": {
+            "x": 641.6935424804688,
+            "y": 669.4041748046875,
+            "width": 171.651611328125,
+            "height": 17.989990234375,
+            "top": 669.4041748046875,
+            "right": 813.3451538085938,
+            "bottom": 687.3941650390625,
+            "left": 641.6935424804688
+          },
+          "clip": {
+            "left": 641.6935424804688,
+            "top": 669.4041748046875,
+            "right": 813.3451538085938,
+            "bottom": 687.3941650390625
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 669.4041748046875,
+                "width": 376.48736572265625,
+                "height": 17.003173828125,
+                "top": 669.4041748046875,
+                "right": 1018.180908203125,
+                "bottom": 686.4073486328125,
+                "left": 641.6935424804688
+              },
+              "inside": false
+            },
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 669.4041748046875,
+                "width": 161.63189697265625,
+                "height": 17.003173828125,
+                "top": 669.4041748046875,
+                "right": 803.325439453125,
+                "bottom": 686.4073486328125,
+                "left": 641.6935424804688
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 22,
+          "clientHeight": 22
+        }
+      ]
+    },
+    {
+      "id": "A_e4a42ce4-b8ff-4905-bc21-2a298dc52836",
+      "card": {
+        "x": 904.8387451171875,
+        "y": 435.1290283203125,
+        "width": 194.322509765625,
+        "height": 145.741943359375,
+        "top": 435.1290283203125,
+        "right": 1099.1612548828125,
+        "bottom": 580.8709716796875,
+        "left": 904.8387451171875
+      },
+      "signal": "답변 기록 없는 현재 질문",
+      "parts": [
+        {
+          "class": "area-card-name",
+          "text": "[합성34] 연결만 받은 독립 부분",
+          "full": "[합성34] 연결만 받은 독립 부분",
+          "box": {
+            "x": 916.98388671875,
+            "y": 445.65484619140625,
+            "width": 171.651611328125,
+            "height": 44.00091552734375,
+            "top": 445.65484619140625,
+            "right": 1088.635498046875,
+            "bottom": 489.65576171875,
+            "left": 916.98388671875
+          },
+          "clip": {
+            "left": 916.98388671875,
+            "top": 445.65484619140625,
+            "right": 1088.635498046875,
+            "bottom": 532.4801025390625
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 916.98388671875,
+                "y": 445.65484619140625,
+                "width": 148.6390380859375,
+                "height": 21.051605224609375,
+                "top": 445.65484619140625,
+                "right": 1065.6229248046875,
+                "bottom": 466.7064514160156,
+                "left": 916.98388671875
+              },
+              "inside": true
+            },
+            {
+              "rect": {
+                "x": 916.98388671875,
+                "y": 467.6552734375,
+                "width": 68.0634765625,
+                "height": 21.0516357421875,
+                "top": 467.6552734375,
+                "right": 985.04736328125,
+                "bottom": 488.7069091796875,
+                "left": 916.98388671875
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 54,
+          "clientHeight": 54
+        },
+        {
+          "class": "area-card-path",
+          "text": "독립 영역",
+          "full": null,
+          "box": {
+            "x": 916.98388671875,
+            "y": 491.27508544921875,
+            "width": 171.651611328125,
+            "height": 17.99005126953125,
+            "top": 491.27508544921875,
+            "right": 1088.635498046875,
+            "bottom": 509.26513671875,
+            "left": 916.98388671875
+          },
+          "clip": {
+            "left": 916.98388671875,
+            "top": 491.27508544921875,
+            "right": 1088.635498046875,
+            "bottom": 509.26513671875
+          },
+          "glyphs": [
+            {
+              "rect": {
+                "x": 916.98388671875,
+                "y": 491.27508544921875,
+                "width": 55.2098388671875,
+                "height": 17.00323486328125,
+                "top": 491.27508544921875,
+                "right": 972.1937255859375,
+                "bottom": 508.2783203125,
+                "left": 916.98388671875
+              },
+              "inside": true
+            }
+          ],
+          "scrollHeight": 22,
+          "clientHeight": 22
+        }
+      ]
+    }
+  ],
+  "map36Fixture": {
+    "path": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\visual42-independent-evidence\\finalcaf\\map36-fixture.json",
+    "sha256": "263db1fceaf83eb4e1ee231b52381080e8f5ae9617417b1695059320fe4f4398",
+    "current": "P",
+    "stale": true,
+    "note": true,
+    "lateOrder": [
+      "B",
+      "P"
+    ],
+    "normalImportOnly": true,
+    "explicitFit": "Same original MAP36 load preparation, no manually assigned camera values"
+  },
+  "map36VisibleCards": 6,
+  "map36UnpaintedRangeDiagnostic": {
+    "observation": {
+      "label": "visible MAP36 name and membership actual glyphs within ancestor clips",
+      "pass": false,
+      "value": [
+        {
+          "id": "A_a808d5b3-360d-448d-8547-419b4e480159",
+          "part": "area-card-path",
+          "text": "소속 · [합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "badGlyphs": [
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 491.27508544921875,
+                "width": 376.4873046875,
+                "height": 17.00323486328125,
+                "top": 491.27508544921875,
+                "right": 791.47119140625,
+                "bottom": 508.2783203125,
+                "left": 414.98388671875
+              },
+              "inside": false
+            }
+          ]
+        },
+        {
+          "id": "A_3aa1f351-1f23-4fd1-9e85-5752414f1028",
+          "part": "area-card-path",
+          "text": "소속 · [합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "badGlyphs": [
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 491.27508544921875,
+                "width": 376.48736572265625,
+                "height": 17.00323486328125,
+                "top": 491.27508544921875,
+                "right": 1018.180908203125,
+                "bottom": 508.2783203125,
+                "left": 641.6935424804688
+              },
+              "inside": false
+            }
+          ]
+        },
+        {
+          "id": "A_230c4316-b5d7-48e4-9443-29eb54df0549",
+          "part": "area-card-path",
+          "text": "소속 · [합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "badGlyphs": [
+            {
+              "rect": {
+                "x": 414.98388671875,
+                "y": 669.4041748046875,
+                "width": 376.4873046875,
+                "height": 17.003173828125,
+                "top": 669.4041748046875,
+                "right": 791.47119140625,
+                "bottom": 686.4073486328125,
+                "left": 414.98388671875
+              },
+              "inside": false
+            }
+          ]
+        },
+        {
+          "id": "A_1f5909f9-22fa-473e-8e3d-16141ebc170d",
+          "part": "area-card-path",
+          "text": "소속 · [합성34] 아주 긴 상위 부분 이름이 카드 두 줄을 채우는 경계",
+          "badGlyphs": [
+            {
+              "rect": {
+                "x": 641.6935424804688,
+                "y": 669.4041748046875,
+                "width": 376.48736572265625,
+                "height": 17.003173828125,
+                "top": 669.4041748046875,
+                "right": 1018.180908203125,
+                "bottom": 686.4073486328125,
+                "left": 641.6935424804688
+              },
+              "inside": false
+            }
+          ]
+        }
+      ]
+    },
+    "interpretation": "Four long parent-membership strings use the existing one-line CSS text-overflow ellipsis; Range reports the unpainted full source text beyond that horizontal clip. This is not the name or short independent-membership clipping contract. Raw observation retained."
+  },
+  "panBeforeAfter": {
+    "setup": "Built-in salon example; time part selected; normal panel-edit open with unsaved idea; three native zoom-in button clicks; no direct fixture/camera writes",
+    "requestedDelta": [
+      -260,
+      -10
+    ],
+    "stepsPerDrag": 6,
+    "viewport": [
+      1440,
+      900
+    ],
+    "before": {
+      "source": "6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0",
+      "deltas": [
+        [
+          -260.0003,
+          -9.999970000000001
+        ],
+        [
+          -43.33300000000003,
+          -1.6666800000000004
+        ],
+        [
+          -43.33300000000003,
+          -1.66669
+        ],
+        [
+          -43.333999999999946,
+          -1.6666899999999996
+        ],
+        [
+          -43.33300000000003,
+          -1.6666800000000002
+        ]
+      ],
+      "dragstartCounts": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "pointercancelCounts": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "observedNativeDragSelection": {
+        "text": "화면 밖 영역 2개 · 모두 보기\n",
+        "len": 19,
+        "type": "Range",
+        "anchor": {
+          "tag": "BUTTON",
+          "id": "map-zoom-out",
+          "cls": "quiet map-zoom-out",
+          "area": null,
+          "draggable": false
+        },
+        "focus": {
+          "tag": "BUTTON",
+          "id": "map-offscreen",
+          "cls": "secondary map-offscreen",
+          "area": null,
+          "draggable": false
+        }
+      }
+    },
+    "after": {
+      "source": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+      "deltas": [
+        [
+          -260.0003,
+          -9.999970000000001
+        ],
+        [
+          -260.00000000000006,
+          -10.0
+        ],
+        [
+          -260.0,
+          -10.00003
+        ],
+        [
+          -260.00300000000004,
+          -9.999999999999998
+        ],
+        [
+          -260.0,
+          -10.0
+        ]
+      ],
+      "dragstartCounts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pointercancelCounts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pointermoveCounts": [
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      "allStartsActualEmptyMap": true,
+      "keys": [],
+      "bufferSame": true,
+      "selectionAfter": {
+        "text": "",
+        "len": 0,
+        "type": "Caret"
+      },
+      "pageErrors": [],
+      "userSelect": {
+        "mapUserSelect": "none",
+        "planeUserSelect": "none"
+      },
+      "pass": true
+    }
+  },
+  "suites": [
+    {
+      "name": "BRANCH31",
+      "tests": 10,
+      "failures": 0,
+      "exitCode": 0,
+      "seconds": 124.607,
+      "source": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\branch-records31_browser.py",
+      "sourceSHA256": "06a3976d2bd266f01343fceeb2207196d1e56416beb43c7e3291efe8683a62e1",
+      "command": "python continuity/tests/branch-records31_browser.py",
+      "target": "normal HTTP MOCK; original unchanged caf test source",
+      "viewports": [
+        "1280x720",
+        "1440x900"
+      ]
+    },
+    {
+      "name": "AREA17",
+      "tests": 12,
+      "failures": 0,
+      "exitCode": 0,
+      "seconds": 110.078,
+      "source": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\understanding17_browser.py",
+      "sourceSHA256": "455fdf36fab594c22665d5577b4d809720bd9600c2b6ac9533660d51dae7ede7",
+      "command": "python continuity/tests/understanding17_browser.py",
+      "target": "normal HTTP MOCK; original unchanged caf test source",
+      "viewports": [
+        "1280x720",
+        "1440x900"
+      ]
+    },
+    {
+      "name": "MAP36",
+      "tests": 12,
+      "failures": 0,
+      "exitCode": 0,
+      "seconds": 122.772,
+      "source": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\tests\\map-priority36_browser.py",
+      "sourceSHA256": "375465ab7b375407c67c47bec2a15a673735806822a179bc6377e44580730fef",
+      "command": "python continuity/tests/map-priority36_browser.py",
+      "target": "normal HTTP MOCK; original unchanged caf test source",
+      "viewports": [
+        "1280x720",
+        "1440x900"
+      ]
+    }
+  ],
+  "sharedNativeHelper": {
+    "source": "app/continuity/tests/received20_browser.py",
+    "sha256": "8a74e40889ee5a089081f916502d4f230696a3e71ab283b1c2a6828ccff6ec9d"
+  },
+  "environmentAdjustment": {
+    "AREA17FirstAttempt": "Fixture import failed before tests because Windows subprocess default cp949 could not decode Node UTF-8 output. No test failed in that attempt.",
+    "finalAttempt": "Same product/tests, PYTHONUTF8=1; 12 tests completed success",
+    "dependenciesInstalled": 0,
+    "productSourceEditsByVerifier": 0
+  },
+  "prior6cfEvidence": {
+    "source": "6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0",
+    "appTree": "1ce4d91c5f549e8f3aec712a07292bb614bbff71",
+    "target": "static preview with full actual mode label",
+    "checks": 58,
+    "failures": 0,
+    "scope": "Actual preview header/popovers/representative1280+1440 zero and nonzero page/map/caret/example0. Not rerun on caf. Open unsaved panel repeated-pan failure was a separate later diagnosis.",
+    "shaBoundHistory": [
+      {
+        "source": "50006905aac57e7739540cee7378153571f6cf92",
+        "target": "normal server MOCK",
+        "checks": 38,
+        "failures": 0,
+        "separateFindings": [
+          {
+            "issue": "901 close occluded by mode",
+            "button": [
+              678.984375,
+              13.5,
+              77.15625,
+              28
+            ],
+            "modeLeft": 732.265625,
+            "right5Hit": "connection summary"
+          },
+          {
+            "issue": "default example name clipped",
+            "textMeasure": 165.453125,
+            "inputContentWidth": 163
+          }
+        ]
+      },
+      {
+        "source": "43fa911398052dc4fbb7c3aff3641755d09b37a2",
+        "target": "normal server MOCK",
+        "checks": 90,
+        "failures": 0,
+        "separateFindings": [
+          {
+            "issue": "360 example banner horizontal overflow",
+            "scrollWidth": 364,
+            "viewport": 360,
+            "bannerRight": 363.734375
+          }
+        ]
+      },
+      {
+        "source": "7a471de8ea42385bab6d05ff96e69d4865cd1152",
+        "target": "normal server MOCK",
+        "checks": 49,
+        "failures": 0,
+        "suites": [
+          {
+            "name": "WORK29",
+            "command": "python continuity/tests/work-description29_browser.py",
+            "tests": 8,
+            "failures": 0,
+            "exitCode": 0,
+            "seconds": 33.115,
+            "viewports": [
+              "1280x720",
+              "1440x900"
+            ],
+            "sourceSHA256": "9713415a8acb0b6b700ab460119d6b8dbd666bad0dc6c4106a99d3164be4f4bf"
+          },
+          {
+            "name": "WORK41",
+            "command": "python continuity/tests/workspace41_browser.py",
+            "tests": 15,
+            "failures": 0,
+            "exitCode": 0,
+            "seconds": 44.353,
+            "viewports": [
+              "1280x720",
+              "1440x900",
+              "1024x576 CSS + DPR1.25 (layout simulation, not browser UI zoom)"
+            ],
+            "sourceSHA256": "51d22979ecc1b365b4819ae8b463c7804670317cd18e13c0aadf0e2037b126ac"
+          }
+        ],
+        "reader": {
+          "reference": {
+            "x": 839.828125,
+            "y": 310,
+            "width": 333.15625,
+            "height": 496,
+            "top": 310,
+            "right": 1172.984375,
+            "bottom": 806,
+            "left": 839.828125
+          },
+          "field": {
+            "x": 316,
+            "y": 259,
+            "width": 498.828125,
+            "height": 320,
+            "top": 259,
+            "right": 814.828125,
+            "bottom": 579,
+            "left": 316
+          },
+          "value": "N_B: 직접 쓴 값 · 배포하지 않는다.",
+          "sideBySide": true,
+          "sharedVisibleHeight": 269,
+          "scrollY": 181
+        },
+        "boundary": "Mobile unsaved example help/group passed; home mode popover and long static mode label were not covered by these 49 checks"
+      },
+      {
+        "source": "2aec20e95b4ad1574b100a8ade97749097c64a83",
+        "target": "normal server menu delta; separate static boundary reproduction",
+        "menuChecks": 8,
+        "menuFailures": 0,
+        "suite": {
+          "source": "2aec20e95b4ad1574b100a8ade97749097c64a83",
+          "module": "continuity/tests/ui001_browser.py",
+          "methods": [
+            "test_ui07_responsive_work_context_and_keyboard_no_horizontal_overflow",
+            "test_ui10_return032_recorded_bases_drafts_recovery_reexport_and_real_parent"
+          ],
+          "tests": 2,
+          "failures": 0,
+          "exitCode": 0,
+          "seconds": 6.634
+        },
+        "staticFindings": {
+          "901PreviewCloseModeOverlap": [
+            64.171875,
+            13
+          ],
+          "901NormalOverlapWidth": 0,
+          "modeSummaryWidths": {
+            "normal": 144.734375,
+            "preview": 240.078125
+          },
+          "1000PreviewOverlapWidth": 0,
+          "homePreviewPopoverLeft360And390": -63.921875,
+          "homeNormalPopoverLeft360And390": -159.265625
+        }
+      },
+      {
+        "source": "6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0",
+        "target": "static preview with full actual mode label",
+        "checks": 58,
+        "failures": 0,
+        "fixes": "Actual preview header and both mobile help types verified; no cross-SHA aggregate test claim"
+      }
+    ],
+    "headerPopoverReuse": "caf product CSS delta changes canvas user-select and card bottom/signal dimensions only; header/popover rules unchanged."
+  },
+  "gitVerification": {
+    "head": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+    "appTree": "9ba47af6a58cf97d717e743a862553ea2cf1053d",
+    "appWorkingDiff": [],
+    "appStagedDiff": [],
+    "docsStatusPreserved": [
+      " M docs/cycles/2026-10-24-visual-design-42/AUTHOR.md",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate1-1280x800-home.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate1-1280x800-map-selected.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate1-1280x800-work.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate2-1280x800-map-selected.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate2-header-1280.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate2-header-901.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate3-1280x800-map-selected.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate3-1280x800-work.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate3-header-360.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate4-preview-header-901.png",
+      "D  docs/cycles/2026-10-24-visual-design-42/candidate4-preview-home-popover-360.png",
+      "?? docs/cycles/2026-10-24-visual-design-42/BASELINE_VIEW.json",
+      "?? docs/cycles/2026-10-24-visual-design-42/DECISION.md",
+      "?? docs/cycles/2026-10-24-visual-design-42/DEPLOYMENT.json",
+      "?? docs/cycles/2026-10-24-visual-design-42/DESIGN_DECISION_KO.md",
+      "?? docs/cycles/2026-10-24-visual-design-42/before-home-1280.png",
+      "?? docs/cycles/2026-10-24-visual-design-42/before-map-1280.png",
+      "?? docs/cycles/2026-10-24-visual-design-42/before-work-1280.png",
+      "?? docs/cycles/2026-10-24-visual-design-42/independent/"
+    ]
+  },
+  "sourceTreeIdenticalVersus6cf": {
+    "app/continuity/src": true,
+    "app/continuity/server": true,
+    "app/continuity/public/index.html": true
+  },
+  "imageProvenance": {
+    "source": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+    "target": "static preview",
+    "viewport": [
+      1280,
+      800
+    ],
+    "freshBuiltInExample": true,
+    "noDecorativeCameraOrDataChanges": true,
+    "directlyViewedByVerifier": true,
+    "files": {
+      "static-home-1280.png": "a05a71661071bac56b91a32f50db04879c773ba0da48039feafd2336cf86d21d",
+      "static-map-1280.png": "30606525b8cafebc6de0ae57dd3265d40362fe2281e84aabc4a8c1e5cf6c3b43",
+      "static-work-1280.png": "dbe9adf964d7d1763d9fd3af69b0405baed6ac3075896d3889c79117c1d5228a"
+    },
+    "additionalMAP36": {
+      "path": "map36-static-multisignal-1280.png",
+      "source": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+      "directlyViewedByVerifier": true,
+      "optionalForSharing": true,
+      "sha256": "d2c63d76864619b9130d3abca469c23ee6f288911b64b2390e912a7e0007964a"
+    }
+  },
+  "server": {
+    "url": "http://127.0.0.1:60414",
+    "source": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+    "pid": 24656,
+    "execSession": 89373,
+    "sameURLAsPrior6cf": true,
+    "old6cfServerTerminated": true,
+    "keptForRootReview": true
+  },
+  "minimumShareFiles": [
+    "static-home-1280.png",
+    "static-map-1280.png",
+    "static-work-1280.png",
+    "RESULT.json",
+    "RESULT_KO.md",
+    "BUNDLE.json"
+  ],
+  "optionalShareFiles": [
+    "map36-static-multisignal-1280.png"
+  ],
+  "allTemporaryFilesOwnedByVerifierRoot": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\visual42-independent-evidence",
+  "cleanupAfterGitHubEvidenceConfirmationOnly": true,
+  "ownershipReturnedToRootAfterReport": true
+}

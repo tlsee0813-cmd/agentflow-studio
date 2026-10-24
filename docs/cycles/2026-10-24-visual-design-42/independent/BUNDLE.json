@@ -1,0 +1,44 @@
+{
+  "path": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\agentflow-ops-assembly\\.ops\\visual42-finalcaf-preview.zip",
+  "sha256": "f4d5d4e9c702e94e0372334d59e68bc1e6b14e910c5f93d4769f7c206bd61939",
+  "bytes": 205687,
+  "runtimeFiles": 20,
+  "entries": 22,
+  "manifestHashesVerified": true,
+  "build": {
+    "source": "caf6126a4a2e592dc4f17626f0440d13a1d4c188",
+    "appTree": "9ba47af6a58cf97d717e743a862553ea2cf1053d",
+    "target": "preview",
+    "buildScript": "app/continuity/scripts/build-static.mjs --preview",
+    "compiler": "TypeScript 5.8.3 reused; no npm ci",
+    "runtimeOnly": true,
+    "manifest": "MANIFEST.json",
+    "acceptance": "Candidate; CI/overall acceptance root responsibility"
+  },
+  "versus6cf": {
+    "different": [
+      "styles.css"
+    ],
+    "identical": [
+      ".nojekyll",
+      "client/app.js",
+      "client/presentation.js",
+      "client/runtime.js",
+      "client/source-review.js",
+      "client/static-target.js",
+      "index.html",
+      "shared/attention.js",
+      "shared/domain.js",
+      "shared/guidance.js",
+      "shared/hierarchy.js",
+      "shared/mock.js",
+      "shared/outcome.js",
+      "shared/plan-facts.js",
+      "shared/source-proposals-example.js",
+      "shared/source-proposals.js",
+      "shared/storage.js",
+      "shared/types.js",
+      "shared/validation.js"
+    ]
+  }
+}

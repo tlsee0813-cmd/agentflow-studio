@@ -1,0 +1,3205 @@
+{
+  "source": "6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0",
+  "appTree": "1ce4d91c5f549e8f3aec712a07292bb614bbff71",
+  "url": "http://127.0.0.1:60414",
+  "target": "static preview with full actual mode label",
+  "checks": [
+    {
+      "label": "901 actual preview header overlap0/overflow0",
+      "pass": true,
+      "value": []
+    },
+    {
+      "label": "901 example name full with letterSpacing",
+      "pass": true,
+      "value": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 181,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      }
+    },
+    {
+      "label": "901 close both sides native hit",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "901 example unsaved help inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 464.53125,
+          "y": 82,
+          "width": 280,
+          "height": 82,
+          "top": 82,
+          "right": 744.53125,
+          "bottom": 164,
+          "left": 464.53125
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 901,
+        "pageWidth": 901
+      }
+    },
+    {
+      "label": "901 long value60 retained and header overlap0",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "901 long value end editable",
+      "pass": true,
+      "value": {
+        "end": 60,
+        "scroll": 710
+      }
+    },
+    {
+      "label": "901 pageerror/external0",
+      "pass": true,
+      "value": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "1000 actual preview header overlap0/overflow0",
+      "pass": true,
+      "value": []
+    },
+    {
+      "label": "1000 example name full with letterSpacing",
+      "pass": true,
+      "value": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 181,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      }
+    },
+    {
+      "label": "1000 close both sides native hit",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1000 example unsaved help inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 464.53125,
+          "y": 82,
+          "width": 280,
+          "height": 82,
+          "top": 82,
+          "right": 744.53125,
+          "bottom": 164,
+          "left": 464.53125
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 1000,
+        "pageWidth": 1000
+      }
+    },
+    {
+      "label": "1000 long value60 retained and header overlap0",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1000 long value end editable",
+      "pass": true,
+      "value": {
+        "end": 60,
+        "scroll": 682
+      }
+    },
+    {
+      "label": "1000 pageerror/external0",
+      "pass": true,
+      "value": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "1280 actual preview header overlap0/overflow0",
+      "pass": true,
+      "value": []
+    },
+    {
+      "label": "1280 example name full with letterSpacing",
+      "pass": true,
+      "value": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 181,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      }
+    },
+    {
+      "label": "1280 close both sides native hit",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1280 example unsaved help inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 653.53125,
+          "y": 47.5,
+          "width": 280,
+          "height": 82,
+          "top": 47.5,
+          "right": 933.53125,
+          "bottom": 129.5,
+          "left": 653.53125
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 1280,
+        "pageWidth": 1280
+      }
+    },
+    {
+      "label": "1280 zero actual departure",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "label": "1280 zero return page/map/header/camera delta0",
+      "pass": true,
+      "value": {
+        "departure": {
+          "scroll": 0,
+          "header": {
+            "x": 222,
+            "y": 0,
+            "width": 1058,
+            "height": 56,
+            "top": 0,
+            "right": 1280,
+            "bottom": 56,
+            "left": 222
+          },
+          "map": {
+            "x": 222,
+            "y": 153,
+            "width": 738,
+            "height": 630,
+            "top": 153,
+            "right": 960,
+            "bottom": 783,
+            "left": 222
+          },
+          "plane": "translate(-23px, 55px) scale(1.2)",
+          "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+        },
+        "returns": [
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 56,
+              "top": 0,
+              "right": 1280,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 738,
+              "height": 630,
+              "top": 153,
+              "right": 960,
+              "bottom": 783,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+          },
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 56,
+              "top": 0,
+              "right": 1280,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 738,
+              "height": 630,
+              "top": 153,
+              "right": 960,
+              "bottom": 783,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+          },
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1058,
+              "height": 56,
+              "top": 0,
+              "right": 1280,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 738,
+              "height": 630,
+              "top": 153,
+              "right": 960,
+              "bottom": 783,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+          }
+        ]
+      }
+    },
+    {
+      "label": "1280 zero typed draft/caret",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1280 nonzero actual departure",
+      "pass": true,
+      "value": 120
+    },
+    {
+      "label": "1280 nonzero return page/map/header/camera delta0",
+      "pass": true,
+      "value": {
+        "departure": {
+          "scroll": 120,
+          "header": {
+            "x": 222,
+            "y": -120,
+            "width": 1058,
+            "height": 56,
+            "top": -120,
+            "right": 1280,
+            "bottom": -64,
+            "left": 222
+          },
+          "map": {
+            "x": 222,
+            "y": 33,
+            "width": 738,
+            "height": 630,
+            "top": 33,
+            "right": 960,
+            "bottom": 663,
+            "left": 222
+          },
+          "plane": "translate(-23px, 55px) scale(1.2)",
+          "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+        },
+        "returns": [
+          {
+            "scroll": 120,
+            "header": {
+              "x": 222,
+              "y": -120,
+              "width": 1058,
+              "height": 56,
+              "top": -120,
+              "right": 1280,
+              "bottom": -64,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 33,
+              "width": 738,
+              "height": 630,
+              "top": 33,
+              "right": 960,
+              "bottom": 663,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+          },
+          {
+            "scroll": 120,
+            "header": {
+              "x": 222,
+              "y": -120,
+              "width": 1058,
+              "height": 56,
+              "top": -120,
+              "right": 1280,
+              "bottom": -64,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 33,
+              "width": 738,
+              "height": 630,
+              "top": 33,
+              "right": 960,
+              "bottom": 663,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+          },
+          {
+            "scroll": 120,
+            "header": {
+              "x": 222,
+              "y": -120,
+              "width": 1058,
+              "height": 56,
+              "top": -120,
+              "right": 1280,
+              "bottom": -64,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 33,
+              "width": 738,
+              "height": 630,
+              "top": 33,
+              "right": 960,
+              "bottom": 663,
+              "left": 222
+            },
+            "plane": "translate(-23px, 55px) scale(1.2)",
+            "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+          }
+        ]
+      }
+    },
+    {
+      "label": "1280 nonzero typed draft/caret",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1280 example localStorage writes0",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1280 close then own empty top/focus",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1280 long value60 retained and header overlap0",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1280 long value end editable",
+      "pass": true,
+      "value": {
+        "end": 60,
+        "scroll": 552
+      }
+    },
+    {
+      "label": "1280 pageerror/external0",
+      "pass": true,
+      "value": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "1440 actual preview header overlap0/overflow0",
+      "pass": true,
+      "value": []
+    },
+    {
+      "label": "1440 example name full with letterSpacing",
+      "pass": true,
+      "value": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 181,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      }
+    },
+    {
+      "label": "1440 close both sides native hit",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1440 example unsaved help inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 653.53125,
+          "y": 47.5,
+          "width": 280,
+          "height": 82,
+          "top": 47.5,
+          "right": 933.53125,
+          "bottom": 129.5,
+          "left": 653.53125
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 1440,
+        "pageWidth": 1440
+      }
+    },
+    {
+      "label": "1440 zero actual departure",
+      "pass": true,
+      "value": 0
+    },
+    {
+      "label": "1440 zero return page/map/header/camera delta0",
+      "pass": true,
+      "value": {
+        "departure": {
+          "scroll": 0,
+          "header": {
+            "x": 222,
+            "y": 0,
+            "width": 1218,
+            "height": 56,
+            "top": 0,
+            "right": 1440,
+            "bottom": 56,
+            "left": 222
+          },
+          "map": {
+            "x": 222,
+            "y": 153,
+            "width": 898,
+            "height": 730,
+            "top": 153,
+            "right": 1120,
+            "bottom": 883,
+            "left": 222
+          },
+          "plane": "translate(57px, 105px) scale(1.2)",
+          "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+        },
+        "returns": [
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1218,
+              "height": 56,
+              "top": 0,
+              "right": 1440,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 898,
+              "height": 730,
+              "top": 153,
+              "right": 1120,
+              "bottom": 883,
+              "left": 222
+            },
+            "plane": "translate(57px, 105px) scale(1.2)",
+            "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+          },
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1218,
+              "height": 56,
+              "top": 0,
+              "right": 1440,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 898,
+              "height": 730,
+              "top": 153,
+              "right": 1120,
+              "bottom": 883,
+              "left": 222
+            },
+            "plane": "translate(57px, 105px) scale(1.2)",
+            "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+          },
+          {
+            "scroll": 0,
+            "header": {
+              "x": 222,
+              "y": 0,
+              "width": 1218,
+              "height": 56,
+              "top": 0,
+              "right": 1440,
+              "bottom": 56,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 153,
+              "width": 898,
+              "height": 730,
+              "top": 153,
+              "right": 1120,
+              "bottom": 883,
+              "left": 222
+            },
+            "plane": "translate(57px, 105px) scale(1.2)",
+            "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+          }
+        ]
+      }
+    },
+    {
+      "label": "1440 zero typed draft/caret",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1440 nonzero actual departure",
+      "pass": true,
+      "value": 120
+    },
+    {
+      "label": "1440 nonzero return page/map/header/camera delta0",
+      "pass": true,
+      "value": {
+        "departure": {
+          "scroll": 120,
+          "header": {
+            "x": 222,
+            "y": -120,
+            "width": 1218,
+            "height": 56,
+            "top": -120,
+            "right": 1440,
+            "bottom": -64,
+            "left": 222
+          },
+          "map": {
+            "x": 222,
+            "y": 33,
+            "width": 898,
+            "height": 730,
+            "top": 33,
+            "right": 1120,
+            "bottom": 763,
+            "left": 222
+          },
+          "plane": "translate(57px, 105px) scale(1.2)",
+          "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+        },
+        "returns": [
+          {
+            "scroll": 120,
+            "header": {
+              "x": 222,
+              "y": -120,
+              "width": 1218,
+              "height": 56,
+              "top": -120,
+              "right": 1440,
+              "bottom": -64,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 33,
+              "width": 898,
+              "height": 730,
+              "top": 33,
+              "right": 1120,
+              "bottom": 763,
+              "left": 222
+            },
+            "plane": "translate(57px, 105px) scale(1.2)",
+            "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+          },
+          {
+            "scroll": 120,
+            "header": {
+              "x": 222,
+              "y": -120,
+              "width": 1218,
+              "height": 56,
+              "top": -120,
+              "right": 1440,
+              "bottom": -64,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 33,
+              "width": 898,
+              "height": 730,
+              "top": 33,
+              "right": 1120,
+              "bottom": 763,
+              "left": 222
+            },
+            "plane": "translate(57px, 105px) scale(1.2)",
+            "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+          },
+          {
+            "scroll": 120,
+            "header": {
+              "x": 222,
+              "y": -120,
+              "width": 1218,
+              "height": 56,
+              "top": -120,
+              "right": 1440,
+              "bottom": -64,
+              "left": 222
+            },
+            "map": {
+              "x": 222,
+              "y": 33,
+              "width": 898,
+              "height": 730,
+              "top": 33,
+              "right": 1120,
+              "bottom": 763,
+              "left": 222
+            },
+            "plane": "translate(57px, 105px) scale(1.2)",
+            "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+          }
+        ]
+      }
+    },
+    {
+      "label": "1440 nonzero typed draft/caret",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1440 example localStorage writes0",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1440 close then own empty top/focus",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1440 long value60 retained and header overlap0",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "1440 long value end editable",
+      "pass": true,
+      "value": {
+        "end": 60,
+        "scroll": 542
+      }
+    },
+    {
+      "label": "1440 pageerror/external0",
+      "pass": true,
+      "value": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "360 home actual mode popover inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 24,
+          "y": 283,
+          "width": 320,
+          "height": 238,
+          "top": 283,
+          "right": 344,
+          "bottom": 521,
+          "left": 24
+        },
+        "text": "작업문 정리 방식\n\n최신 흐름을 미리 보는 규칙 기반 체험입니다. 실제 AI나 서버 실행이 아니므로 작업문을 직접 확인·수정하세요. 입력은 이 브라우저의 미리보기 전용 저장 공간에만 남고 기존 데모·서버 개발 모드의 기록과 섞이지 않습니다. 자료를 옮기려면 백업 파일을 직접 불러오세요.\n\n외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.",
+        "width": 360,
+        "pageWidth": 360
+      }
+    },
+    {
+      "label": "360 actual preview header overlap0/overflow0",
+      "pass": true,
+      "value": []
+    },
+    {
+      "label": "360 example name full with letterSpacing",
+      "pass": true,
+      "value": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 175,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      }
+    },
+    {
+      "label": "360 close both sides native hit",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "360 example unsaved help inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 16,
+          "y": 283,
+          "width": 280,
+          "height": 82,
+          "top": 283,
+          "right": 296,
+          "bottom": 365,
+          "left": 16
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 360,
+        "pageWidth": 360
+      }
+    },
+    {
+      "label": "360 project actual mode popover inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 24,
+          "y": 293,
+          "width": 320,
+          "height": 250,
+          "top": 293,
+          "right": 344,
+          "bottom": 543,
+          "left": 24
+        },
+        "text": "작업문 정리 방식\n\n최신 흐름을 미리 보는 규칙 기반 체험입니다. 실제 AI나 서버 실행이 아니므로 작업문을 직접 확인·수정하세요. 입력은 이 브라우저의 미리보기 전용 저장 공간에만 남고 기존 데모·서버 개발 모드의 기록과 섞이지 않습니다. 자료를 옮기려면 백업 파일을 직접 불러오세요.\n\n외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.",
+        "width": 360,
+        "pageWidth": 360
+      }
+    },
+    {
+      "label": "360 pageerror/external0",
+      "pass": true,
+      "value": [
+        [],
+        []
+      ]
+    },
+    {
+      "label": "390 home actual mode popover inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 54,
+          "y": 283,
+          "width": 320,
+          "height": 238,
+          "top": 283,
+          "right": 374,
+          "bottom": 521,
+          "left": 54
+        },
+        "text": "작업문 정리 방식\n\n최신 흐름을 미리 보는 규칙 기반 체험입니다. 실제 AI나 서버 실행이 아니므로 작업문을 직접 확인·수정하세요. 입력은 이 브라우저의 미리보기 전용 저장 공간에만 남고 기존 데모·서버 개발 모드의 기록과 섞이지 않습니다. 자료를 옮기려면 백업 파일을 직접 불러오세요.\n\n외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.",
+        "width": 390,
+        "pageWidth": 390
+      }
+    },
+    {
+      "label": "390 actual preview header overlap0/overflow0",
+      "pass": true,
+      "value": []
+    },
+    {
+      "label": "390 example name full with letterSpacing",
+      "pass": true,
+      "value": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 175,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      }
+    },
+    {
+      "label": "390 close both sides native hit",
+      "pass": true,
+      "value": null
+    },
+    {
+      "label": "390 example unsaved help inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 16,
+          "y": 221,
+          "width": 280,
+          "height": 82,
+          "top": 221,
+          "right": 296,
+          "bottom": 303,
+          "left": 16
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 390,
+        "pageWidth": 390
+      }
+    },
+    {
+      "label": "390 project actual mode popover inside viewport",
+      "pass": true,
+      "value": {
+        "rect": {
+          "x": 54,
+          "y": 231,
+          "width": 320,
+          "height": 250,
+          "top": 231,
+          "right": 374,
+          "bottom": 481,
+          "left": 54
+        },
+        "text": "작업문 정리 방식\n\n최신 흐름을 미리 보는 규칙 기반 체험입니다. 실제 AI나 서버 실행이 아니므로 작업문을 직접 확인·수정하세요. 입력은 이 브라우저의 미리보기 전용 저장 공간에만 남고 기존 데모·서버 개발 모드의 기록과 섞이지 않습니다. 자료를 옮기려면 백업 파일을 직접 불러오세요.\n\n외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.",
+        "width": 390,
+        "pageWidth": 390
+      }
+    },
+    {
+      "label": "390 pageerror/external0",
+      "pass": true,
+      "value": [
+        [],
+        []
+      ]
+    }
+  ],
+  "cases": {
+    "901": {
+      "actualMode": "미리보기 · 브라우저 MOCK · AI 아님",
+      "header": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 679,
+          "height": 123,
+          "top": 0,
+          "right": 901,
+          "bottom": 123,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 33,
+              "width": 73.359375,
+              "height": 20,
+              "top": 33,
+              "right": 319.359375,
+              "bottom": 53,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 10,
+              "width": 183,
+              "height": 30,
+              "top": 10,
+              "right": 530.359375,
+              "bottom": 40,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "예제 · 동네 미용실 예약",
+            "text": ""
+          },
+          {
+            "id": "#example-banner strong",
+            "rect": {
+              "x": 353.359375,
+              "y": 50,
+              "width": 105.171875,
+              "height": 24,
+              "top": 50,
+              "right": 458.53125,
+              "bottom": 74,
+              "left": 353.359375
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 · 저장 안 됨"
+          },
+          {
+            "id": ".example-help>summary",
+            "rect": {
+              "x": 464.53125,
+              "y": 50,
+              "width": 24,
+              "height": 24,
+              "top": 50,
+              "right": 488.53125,
+              "bottom": 74,
+              "left": 464.53125
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 안내"
+          },
+          {
+            "id": "#example-start",
+            "rect": {
+              "x": 498.53125,
+              "y": 48,
+              "width": 119.40625,
+              "height": 28,
+              "top": 48,
+              "right": 617.9375,
+              "bottom": 76,
+              "left": 498.53125
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트 시작"
+          },
+          {
+            "id": "#example-close",
+            "rect": {
+              "x": 623.9375,
+              "y": 48,
+              "width": 77.15625,
+              "height": 28,
+              "top": 48,
+              "right": 701.09375,
+              "bottom": 76,
+              "left": 623.9375
+            },
+            "visible": true,
+            "value": "",
+            "text": "예제 닫기"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 636.921875,
+              "y": 84,
+              "width": 240.078125,
+              "height": 28,
+              "top": 84,
+              "right": 877,
+              "bottom": 112,
+              "left": 636.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "예제 · 동네 미용실 예약",
+          "len": 14,
+          "measure": 165.453125,
+          "clientWidth": 181,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 220,
+          "width": 679,
+          "height": 563,
+          "top": 220,
+          "right": 901,
+          "bottom": 783,
+          "left": 222
+        },
+        "plane": "translate(-6.04762px, 124.726px) scale(0.75119)",
+        "selected": null
+      },
+      "nameFit": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 181,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      },
+      "exampleHelp": {
+        "rect": {
+          "x": 464.53125,
+          "y": 82,
+          "width": 280,
+          "height": 82,
+          "top": 82,
+          "right": 744.53125,
+          "bottom": 164,
+          "left": 464.53125
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 901,
+        "pageWidth": 901
+      },
+      "longNameHeader": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 679,
+          "height": 89,
+          "top": 0,
+          "right": 901,
+          "bottom": 89,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 16,
+              "width": 73.359375,
+              "height": 20,
+              "top": 16,
+              "right": 319.359375,
+              "bottom": 36,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 11,
+              "width": 252.265625,
+              "height": 30,
+              "top": 11,
+              "right": 599.625,
+              "bottom": 41,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+            "text": ""
+          },
+          {
+            "id": "#saved",
+            "rect": {
+              "x": 622.34375,
+              "y": 17,
+              "width": 125.65625,
+              "height": 18,
+              "top": 17,
+              "right": 748,
+              "bottom": 35,
+              "left": 622.34375
+            },
+            "visible": true,
+            "value": null,
+            "text": "이 브라우저에 저장됨"
+          },
+          {
+            "id": "#project-management>summary",
+            "rect": {
+              "x": 756,
+              "y": 10,
+              "width": 121,
+              "height": 32,
+              "top": 10,
+              "right": 877,
+              "bottom": 42,
+              "left": 756
+            },
+            "visible": true,
+            "value": null,
+            "text": "프로젝트 관리"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 636.921875,
+              "y": 50,
+              "width": 240.078125,
+              "height": 28,
+              "top": 50,
+              "right": 877,
+              "bottom": 78,
+              "left": 636.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+          "len": 60,
+          "measure": 960,
+          "clientWidth": 250,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 276,
+          "width": 679,
+          "height": 507,
+          "top": 276,
+          "right": 901,
+          "bottom": 783,
+          "left": 222
+        },
+        "plane": "translate(219.31px, 171.845px) scale(0.75119)",
+        "selected": null
+      },
+      "longNameFit": {
+        "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+        "len": 60,
+        "measure": 948.4808349609375,
+        "client": 250,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "969px",
+        "scrollLeft": 0
+      }
+    },
+    "1000": {
+      "actualMode": "미리보기 · 브라우저 MOCK · AI 아님",
+      "header": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 778,
+          "height": 87,
+          "top": 0,
+          "right": 1000,
+          "bottom": 87,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 33,
+              "width": 73.359375,
+              "height": 20,
+              "top": 33,
+              "right": 319.359375,
+              "bottom": 53,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 10,
+              "width": 183,
+              "height": 30,
+              "top": 10,
+              "right": 530.359375,
+              "bottom": 40,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "예제 · 동네 미용실 예약",
+            "text": ""
+          },
+          {
+            "id": "#example-banner strong",
+            "rect": {
+              "x": 353.359375,
+              "y": 50,
+              "width": 105.171875,
+              "height": 24,
+              "top": 50,
+              "right": 458.53125,
+              "bottom": 74,
+              "left": 353.359375
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 · 저장 안 됨"
+          },
+          {
+            "id": ".example-help>summary",
+            "rect": {
+              "x": 464.53125,
+              "y": 50,
+              "width": 24,
+              "height": 24,
+              "top": 50,
+              "right": 488.53125,
+              "bottom": 74,
+              "left": 464.53125
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 안내"
+          },
+          {
+            "id": "#example-start",
+            "rect": {
+              "x": 498.53125,
+              "y": 48,
+              "width": 119.40625,
+              "height": 28,
+              "top": 48,
+              "right": 617.9375,
+              "bottom": 76,
+              "left": 498.53125
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트 시작"
+          },
+          {
+            "id": "#example-close",
+            "rect": {
+              "x": 623.9375,
+              "y": 48,
+              "width": 77.15625,
+              "height": 28,
+              "top": 48,
+              "right": 701.09375,
+              "bottom": 76,
+              "left": 623.9375
+            },
+            "visible": true,
+            "value": "",
+            "text": "예제 닫기"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 735.921875,
+              "y": 29,
+              "width": 240.078125,
+              "height": 28,
+              "top": 29,
+              "right": 976,
+              "bottom": 57,
+              "left": 735.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "예제 · 동네 미용실 예약",
+          "len": 14,
+          "measure": 165.453125,
+          "clientWidth": 181,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 184,
+          "width": 778,
+          "height": 599,
+          "top": 184,
+          "right": 1000,
+          "bottom": 783,
+          "left": 222
+        },
+        "plane": "translate(-10.7619px, 115.619px) scale(0.869048)",
+        "selected": null
+      },
+      "nameFit": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 181,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      },
+      "exampleHelp": {
+        "rect": {
+          "x": 464.53125,
+          "y": 82,
+          "width": 280,
+          "height": 82,
+          "top": 82,
+          "right": 744.53125,
+          "bottom": 164,
+          "left": 464.53125
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 1000,
+        "pageWidth": 1000
+      },
+      "longNameHeader": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 778,
+          "height": 91,
+          "top": 0,
+          "right": 1000,
+          "bottom": 91,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 35,
+              "width": 73.359375,
+              "height": 20,
+              "top": 35,
+              "right": 319.359375,
+              "bottom": 55,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 10,
+              "width": 280,
+              "height": 30,
+              "top": 10,
+              "right": 627.359375,
+              "bottom": 40,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+            "text": ""
+          },
+          {
+            "id": "#saved",
+            "rect": {
+              "x": 469.265625,
+              "y": 55,
+              "width": 125.65625,
+              "height": 18,
+              "top": 55,
+              "right": 594.921875,
+              "bottom": 73,
+              "left": 469.265625
+            },
+            "visible": true,
+            "value": null,
+            "text": "이 브라우저에 저장됨"
+          },
+          {
+            "id": "#project-management>summary",
+            "rect": {
+              "x": 602.921875,
+              "y": 48,
+              "width": 121,
+              "height": 32,
+              "top": 48,
+              "right": 723.921875,
+              "bottom": 80,
+              "left": 602.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "프로젝트 관리"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 735.921875,
+              "y": 31,
+              "width": 240.078125,
+              "height": 28,
+              "top": 31,
+              "right": 976,
+              "bottom": 59,
+              "left": 735.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+          "len": 60,
+          "measure": 960,
+          "clientWidth": 278,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 258,
+          "width": 778,
+          "height": 525,
+          "top": 258,
+          "right": 1000,
+          "bottom": 783,
+          "left": 222
+        },
+        "plane": "translate(249.952px, 165.524px) scale(0.869048)",
+        "selected": null
+      },
+      "longNameFit": {
+        "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+        "len": 60,
+        "measure": 948.4808349609375,
+        "client": 278,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "969px",
+        "scrollLeft": 0
+      }
+    },
+    "1280": {
+      "actualMode": "미리보기 · 브라우저 MOCK · AI 아님",
+      "header": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 1058,
+          "height": 56,
+          "top": 0,
+          "right": 1280,
+          "bottom": 56,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 17.5,
+              "width": 73.359375,
+              "height": 20,
+              "top": 17.5,
+              "right": 319.359375,
+              "bottom": 37.5,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 12.5,
+              "width": 183,
+              "height": 30,
+              "top": 12.5,
+              "right": 530.359375,
+              "bottom": 42.5,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "예제 · 동네 미용실 예약",
+            "text": ""
+          },
+          {
+            "id": "#example-banner strong",
+            "rect": {
+              "x": 542.359375,
+              "y": 15.5,
+              "width": 105.171875,
+              "height": 24,
+              "top": 15.5,
+              "right": 647.53125,
+              "bottom": 39.5,
+              "left": 542.359375
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 · 저장 안 됨"
+          },
+          {
+            "id": ".example-help>summary",
+            "rect": {
+              "x": 653.53125,
+              "y": 15.5,
+              "width": 24,
+              "height": 24,
+              "top": 15.5,
+              "right": 677.53125,
+              "bottom": 39.5,
+              "left": 653.53125
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 안내"
+          },
+          {
+            "id": "#example-start",
+            "rect": {
+              "x": 687.53125,
+              "y": 13.5,
+              "width": 119.40625,
+              "height": 28,
+              "top": 13.5,
+              "right": 806.9375,
+              "bottom": 41.5,
+              "left": 687.53125
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트 시작"
+          },
+          {
+            "id": "#example-close",
+            "rect": {
+              "x": 812.9375,
+              "y": 13.5,
+              "width": 77.15625,
+              "height": 28,
+              "top": 13.5,
+              "right": 890.09375,
+              "bottom": 41.5,
+              "left": 812.9375
+            },
+            "visible": true,
+            "value": "",
+            "text": "예제 닫기"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 1015.921875,
+              "y": 13.5,
+              "width": 240.078125,
+              "height": 28,
+              "top": 13.5,
+              "right": 1256,
+              "bottom": 41.5,
+              "left": 1015.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "예제 · 동네 미용실 예약",
+          "len": 14,
+          "measure": 165.453125,
+          "clientWidth": 181,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 153,
+          "width": 1058,
+          "height": 630,
+          "top": 153,
+          "right": 1280,
+          "bottom": 783,
+          "left": 222
+        },
+        "plane": "translate(-23px, 55px) scale(1.2)",
+        "selected": null
+      },
+      "nameFit": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 181,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      },
+      "exampleHelp": {
+        "rect": {
+          "x": 653.53125,
+          "y": 47.5,
+          "width": 280,
+          "height": 82,
+          "top": 47.5,
+          "right": 933.53125,
+          "bottom": 129.5,
+          "left": 653.53125
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 1280,
+        "pageWidth": 1280
+      },
+      "selected": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 1058,
+          "height": 56,
+          "top": 0,
+          "right": 1280,
+          "bottom": 56,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 17.5,
+              "width": 73.359375,
+              "height": 20,
+              "top": 17.5,
+              "right": 319.359375,
+              "bottom": 37.5,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 12.5,
+              "width": 183,
+              "height": 30,
+              "top": 12.5,
+              "right": 530.359375,
+              "bottom": 42.5,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "예제 · 동네 미용실 예약",
+            "text": ""
+          },
+          {
+            "id": "#example-banner strong",
+            "rect": {
+              "x": 542.359375,
+              "y": 15.5,
+              "width": 105.171875,
+              "height": 24,
+              "top": 15.5,
+              "right": 647.53125,
+              "bottom": 39.5,
+              "left": 542.359375
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 · 저장 안 됨"
+          },
+          {
+            "id": ".example-help>summary",
+            "rect": {
+              "x": 653.53125,
+              "y": 15.5,
+              "width": 24,
+              "height": 24,
+              "top": 15.5,
+              "right": 677.53125,
+              "bottom": 39.5,
+              "left": 653.53125
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 안내"
+          },
+          {
+            "id": "#example-start",
+            "rect": {
+              "x": 687.53125,
+              "y": 13.5,
+              "width": 119.40625,
+              "height": 28,
+              "top": 13.5,
+              "right": 806.9375,
+              "bottom": 41.5,
+              "left": 687.53125
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트 시작"
+          },
+          {
+            "id": "#example-close",
+            "rect": {
+              "x": 812.9375,
+              "y": 13.5,
+              "width": 77.15625,
+              "height": 28,
+              "top": 13.5,
+              "right": 890.09375,
+              "bottom": 41.5,
+              "left": 812.9375
+            },
+            "visible": true,
+            "value": "",
+            "text": "예제 닫기"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 1015.921875,
+              "y": 13.5,
+              "width": 240.078125,
+              "height": 28,
+              "top": 13.5,
+              "right": 1256,
+              "bottom": 41.5,
+              "left": 1015.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "예제 · 동네 미용실 예약",
+          "len": 14,
+          "measure": 165.453125,
+          "clientWidth": 181,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 153,
+          "width": 738,
+          "height": 630,
+          "top": 153,
+          "right": 960,
+          "bottom": 783,
+          "left": 222
+        },
+        "plane": "translate(-23px, 55px) scale(1.2)",
+        "selected": "A_84642557-7fe5-4c27-a02b-7d1bc4a6aa28"
+      },
+      "workUI": {
+        "x": 316,
+        "y": 372,
+        "width": 870,
+        "height": 208
+      },
+      "longNameHeader": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 1058,
+          "height": 91,
+          "top": 0,
+          "right": 1280,
+          "bottom": 91,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 35,
+              "width": 73.359375,
+              "height": 20,
+              "top": 35,
+              "right": 319.359375,
+              "bottom": 55,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 10,
+              "width": 409.59375,
+              "height": 30,
+              "top": 10,
+              "right": 756.953125,
+              "bottom": 40,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+            "text": ""
+          },
+          {
+            "id": "#saved",
+            "rect": {
+              "x": 749.265625,
+              "y": 55,
+              "width": 125.65625,
+              "height": 18,
+              "top": 55,
+              "right": 874.921875,
+              "bottom": 73,
+              "left": 749.265625
+            },
+            "visible": true,
+            "value": null,
+            "text": "이 브라우저에 저장됨"
+          },
+          {
+            "id": "#project-management>summary",
+            "rect": {
+              "x": 882.921875,
+              "y": 48,
+              "width": 121,
+              "height": 32,
+              "top": 48,
+              "right": 1003.921875,
+              "bottom": 80,
+              "left": 882.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "프로젝트 관리"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 1015.921875,
+              "y": 31,
+              "width": 240.078125,
+              "height": 28,
+              "top": 31,
+              "right": 1256,
+              "bottom": 59,
+              "left": 1015.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+          "len": 60,
+          "measure": 960,
+          "clientWidth": 408,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 258,
+          "width": 1058,
+          "height": 525,
+          "top": 258,
+          "right": 1280,
+          "bottom": 783,
+          "left": 222
+        },
+        "plane": "translate(337px, 122.5px) scale(1.2)",
+        "selected": null
+      },
+      "longNameFit": {
+        "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+        "len": 60,
+        "measure": 948.4808349609375,
+        "client": 408,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "969px",
+        "scrollLeft": 0
+      }
+    },
+    "1440": {
+      "actualMode": "미리보기 · 브라우저 MOCK · AI 아님",
+      "header": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 1218,
+          "height": 56,
+          "top": 0,
+          "right": 1440,
+          "bottom": 56,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 17.5,
+              "width": 73.359375,
+              "height": 20,
+              "top": 17.5,
+              "right": 319.359375,
+              "bottom": 37.5,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 12.5,
+              "width": 183,
+              "height": 30,
+              "top": 12.5,
+              "right": 530.359375,
+              "bottom": 42.5,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "예제 · 동네 미용실 예약",
+            "text": ""
+          },
+          {
+            "id": "#example-banner strong",
+            "rect": {
+              "x": 542.359375,
+              "y": 15.5,
+              "width": 105.171875,
+              "height": 24,
+              "top": 15.5,
+              "right": 647.53125,
+              "bottom": 39.5,
+              "left": 542.359375
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 · 저장 안 됨"
+          },
+          {
+            "id": ".example-help>summary",
+            "rect": {
+              "x": 653.53125,
+              "y": 15.5,
+              "width": 24,
+              "height": 24,
+              "top": 15.5,
+              "right": 677.53125,
+              "bottom": 39.5,
+              "left": 653.53125
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 안내"
+          },
+          {
+            "id": "#example-start",
+            "rect": {
+              "x": 687.53125,
+              "y": 13.5,
+              "width": 119.40625,
+              "height": 28,
+              "top": 13.5,
+              "right": 806.9375,
+              "bottom": 41.5,
+              "left": 687.53125
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트 시작"
+          },
+          {
+            "id": "#example-close",
+            "rect": {
+              "x": 812.9375,
+              "y": 13.5,
+              "width": 77.15625,
+              "height": 28,
+              "top": 13.5,
+              "right": 890.09375,
+              "bottom": 41.5,
+              "left": 812.9375
+            },
+            "visible": true,
+            "value": "",
+            "text": "예제 닫기"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 1175.921875,
+              "y": 13.5,
+              "width": 240.078125,
+              "height": 28,
+              "top": 13.5,
+              "right": 1416,
+              "bottom": 41.5,
+              "left": 1175.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "예제 · 동네 미용실 예약",
+          "len": 14,
+          "measure": 165.453125,
+          "clientWidth": 181,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 153,
+          "width": 1218,
+          "height": 730,
+          "top": 153,
+          "right": 1440,
+          "bottom": 883,
+          "left": 222
+        },
+        "plane": "translate(57px, 105px) scale(1.2)",
+        "selected": null
+      },
+      "nameFit": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 181,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      },
+      "exampleHelp": {
+        "rect": {
+          "x": 653.53125,
+          "y": 47.5,
+          "width": 280,
+          "height": 82,
+          "top": 47.5,
+          "right": 933.53125,
+          "bottom": 129.5,
+          "left": 653.53125
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 1440,
+        "pageWidth": 1440
+      },
+      "selected": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 1218,
+          "height": 56,
+          "top": 0,
+          "right": 1440,
+          "bottom": 56,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 17.5,
+              "width": 73.359375,
+              "height": 20,
+              "top": 17.5,
+              "right": 319.359375,
+              "bottom": 37.5,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 12.5,
+              "width": 183,
+              "height": 30,
+              "top": 12.5,
+              "right": 530.359375,
+              "bottom": 42.5,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "예제 · 동네 미용실 예약",
+            "text": ""
+          },
+          {
+            "id": "#example-banner strong",
+            "rect": {
+              "x": 542.359375,
+              "y": 15.5,
+              "width": 105.171875,
+              "height": 24,
+              "top": 15.5,
+              "right": 647.53125,
+              "bottom": 39.5,
+              "left": 542.359375
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 · 저장 안 됨"
+          },
+          {
+            "id": ".example-help>summary",
+            "rect": {
+              "x": 653.53125,
+              "y": 15.5,
+              "width": 24,
+              "height": 24,
+              "top": 15.5,
+              "right": 677.53125,
+              "bottom": 39.5,
+              "left": 653.53125
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 안내"
+          },
+          {
+            "id": "#example-start",
+            "rect": {
+              "x": 687.53125,
+              "y": 13.5,
+              "width": 119.40625,
+              "height": 28,
+              "top": 13.5,
+              "right": 806.9375,
+              "bottom": 41.5,
+              "left": 687.53125
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트 시작"
+          },
+          {
+            "id": "#example-close",
+            "rect": {
+              "x": 812.9375,
+              "y": 13.5,
+              "width": 77.15625,
+              "height": 28,
+              "top": 13.5,
+              "right": 890.09375,
+              "bottom": 41.5,
+              "left": 812.9375
+            },
+            "visible": true,
+            "value": "",
+            "text": "예제 닫기"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 1175.921875,
+              "y": 13.5,
+              "width": 240.078125,
+              "height": 28,
+              "top": 13.5,
+              "right": 1416,
+              "bottom": 41.5,
+              "left": 1175.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "예제 · 동네 미용실 예약",
+          "len": 14,
+          "measure": 165.453125,
+          "clientWidth": 181,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 153,
+          "width": 898,
+          "height": 730,
+          "top": 153,
+          "right": 1120,
+          "bottom": 883,
+          "left": 222
+        },
+        "plane": "translate(57px, 105px) scale(1.2)",
+        "selected": "A_b2f5d392-6c07-4ac1-9306-ebcdc99a65a4"
+      },
+      "workUI": {
+        "x": 396,
+        "y": 372,
+        "width": 870,
+        "height": 208
+      },
+      "longNameHeader": {
+        "scroll": 0,
+        "header": {
+          "x": 222,
+          "y": 0,
+          "width": 1218,
+          "height": 56,
+          "top": 0,
+          "right": 1440,
+          "bottom": 56,
+          "left": 222
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 246,
+              "y": 17.5,
+              "width": 73.359375,
+              "height": 20,
+              "top": 17.5,
+              "right": 319.359375,
+              "bottom": 37.5,
+              "left": 246
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 347.359375,
+              "y": 12.5,
+              "width": 420,
+              "height": 30,
+              "top": 12.5,
+              "right": 767.359375,
+              "bottom": 42.5,
+              "left": 347.359375
+            },
+            "visible": true,
+            "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+            "text": ""
+          },
+          {
+            "id": "#saved",
+            "rect": {
+              "x": 909.265625,
+              "y": 18.5,
+              "width": 125.65625,
+              "height": 18,
+              "top": 18.5,
+              "right": 1034.921875,
+              "bottom": 36.5,
+              "left": 909.265625
+            },
+            "visible": true,
+            "value": null,
+            "text": "이 브라우저에 저장됨"
+          },
+          {
+            "id": "#project-management>summary",
+            "rect": {
+              "x": 1042.921875,
+              "y": 11.5,
+              "width": 121,
+              "height": 32,
+              "top": 11.5,
+              "right": 1163.921875,
+              "bottom": 43.5,
+              "left": 1042.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "프로젝트 관리"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 1175.921875,
+              "y": 13.5,
+              "width": 240.078125,
+              "height": 28,
+              "top": 13.5,
+              "right": 1416,
+              "bottom": 41.5,
+              "left": 1175.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+          "len": 60,
+          "measure": 960,
+          "clientWidth": 418,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 222,
+          "y": 223,
+          "width": 1218,
+          "height": 660,
+          "top": 223,
+          "right": 1440,
+          "bottom": 883,
+          "left": 222
+        },
+        "plane": "translate(417px, 190px) scale(1.2)",
+        "selected": null
+      },
+      "longNameFit": {
+        "value": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가예약변경",
+        "len": 60,
+        "measure": 948.4808349609375,
+        "client": 418,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "969px",
+        "scrollLeft": 0
+      }
+    },
+    "360": {
+      "actualMode": "미리보기 · 브라우저 MOCK · AI 아님",
+      "homeModePopover": {
+        "rect": {
+          "x": 24,
+          "y": 283,
+          "width": 320,
+          "height": 238,
+          "top": 283,
+          "right": 344,
+          "bottom": 521,
+          "left": 24
+        },
+        "text": "작업문 정리 방식\n\n최신 흐름을 미리 보는 규칙 기반 체험입니다. 실제 AI나 서버 실행이 아니므로 작업문을 직접 확인·수정하세요. 입력은 이 브라우저의 미리보기 전용 저장 공간에만 남고 기존 데모·서버 개발 모드의 기록과 섞이지 않습니다. 자료를 옮기려면 백업 파일을 직접 불러오세요.\n\n외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.",
+        "width": 360,
+        "pageWidth": 360
+      },
+      "header": {
+        "scroll": 0,
+        "header": {
+          "x": 0,
+          "y": 105,
+          "width": 360,
+          "height": 189,
+          "top": 105,
+          "right": 360,
+          "bottom": 294,
+          "left": 0
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 16,
+              "y": 113,
+              "width": 73.359375,
+              "height": 20,
+              "top": 113,
+              "right": 89.359375,
+              "bottom": 133,
+              "left": 16
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 10,
+              "y": 177,
+              "width": 177,
+              "height": 30,
+              "top": 177,
+              "right": 187,
+              "bottom": 207,
+              "left": 10
+            },
+            "visible": true,
+            "value": "예제 · 동네 미용실 예약",
+            "text": ""
+          },
+          {
+            "id": "#example-banner strong",
+            "rect": {
+              "x": 16,
+              "y": 217,
+              "width": 105.171875,
+              "height": 24,
+              "top": 217,
+              "right": 121.171875,
+              "bottom": 241,
+              "left": 16
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 · 저장 안 됨"
+          },
+          {
+            "id": ".example-help>summary",
+            "rect": {
+              "x": 127.171875,
+              "y": 217,
+              "width": 24,
+              "height": 24,
+              "top": 217,
+              "right": 151.171875,
+              "bottom": 241,
+              "left": 127.171875
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 안내"
+          },
+          {
+            "id": "#example-start",
+            "rect": {
+              "x": 161.171875,
+              "y": 215,
+              "width": 119.40625,
+              "height": 28,
+              "top": 215,
+              "right": 280.578125,
+              "bottom": 243,
+              "left": 161.171875
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트 시작"
+          },
+          {
+            "id": "#example-close",
+            "rect": {
+              "x": 16,
+              "y": 249,
+              "width": 77.15625,
+              "height": 28,
+              "top": 249,
+              "right": 93.15625,
+              "bottom": 277,
+              "left": 16
+            },
+            "visible": true,
+            "value": "",
+            "text": "예제 닫기"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 103.921875,
+              "y": 141,
+              "width": 240.078125,
+              "height": 28,
+              "top": 141,
+              "right": 344,
+              "bottom": 169,
+              "left": 103.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "예제 · 동네 미용실 예약",
+          "len": 14,
+          "measure": 165.453125,
+          "clientWidth": 175,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 0,
+          "y": 995,
+          "width": 360,
+          "height": 496,
+          "top": 995,
+          "right": 360,
+          "bottom": 1491,
+          "left": 0
+        },
+        "plane": "translate(9.14286px, 162.571px) scale(0.371429)",
+        "selected": null
+      },
+      "nameFit": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 175,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      },
+      "exampleHelp": {
+        "rect": {
+          "x": 16,
+          "y": 283,
+          "width": 280,
+          "height": 82,
+          "top": 283,
+          "right": 296,
+          "bottom": 365,
+          "left": 16
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 360,
+        "pageWidth": 360
+      },
+      "projectModePopover": {
+        "rect": {
+          "x": 24,
+          "y": 293,
+          "width": 320,
+          "height": 250,
+          "top": 293,
+          "right": 344,
+          "bottom": 543,
+          "left": 24
+        },
+        "text": "작업문 정리 방식\n\n최신 흐름을 미리 보는 규칙 기반 체험입니다. 실제 AI나 서버 실행이 아니므로 작업문을 직접 확인·수정하세요. 입력은 이 브라우저의 미리보기 전용 저장 공간에만 남고 기존 데모·서버 개발 모드의 기록과 섞이지 않습니다. 자료를 옮기려면 백업 파일을 직접 불러오세요.\n\n외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.",
+        "width": 360,
+        "pageWidth": 360
+      }
+    },
+    "390": {
+      "actualMode": "미리보기 · 브라우저 MOCK · AI 아님",
+      "homeModePopover": {
+        "rect": {
+          "x": 54,
+          "y": 283,
+          "width": 320,
+          "height": 238,
+          "top": 283,
+          "right": 374,
+          "bottom": 521,
+          "left": 54
+        },
+        "text": "작업문 정리 방식\n\n최신 흐름을 미리 보는 규칙 기반 체험입니다. 실제 AI나 서버 실행이 아니므로 작업문을 직접 확인·수정하세요. 입력은 이 브라우저의 미리보기 전용 저장 공간에만 남고 기존 데모·서버 개발 모드의 기록과 섞이지 않습니다. 자료를 옮기려면 백업 파일을 직접 불러오세요.\n\n외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.",
+        "width": 390,
+        "pageWidth": 390
+      },
+      "header": {
+        "scroll": 0,
+        "header": {
+          "x": 0,
+          "y": 105,
+          "width": 390,
+          "height": 127,
+          "top": 105,
+          "right": 390,
+          "bottom": 232,
+          "left": 0
+        },
+        "items": [
+          {
+            "id": "#to-projects",
+            "rect": {
+              "x": 16,
+              "y": 117,
+              "width": 73.359375,
+              "height": 20,
+              "top": 117,
+              "right": 89.359375,
+              "bottom": 137,
+              "left": 16
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트"
+          },
+          {
+            "id": "#project-name",
+            "rect": {
+              "x": 10,
+              "y": 149,
+              "width": 177,
+              "height": 30,
+              "top": 149,
+              "right": 187,
+              "bottom": 179,
+              "left": 10
+            },
+            "visible": true,
+            "value": "예제 · 동네 미용실 예약",
+            "text": ""
+          },
+          {
+            "id": "#example-banner strong",
+            "rect": {
+              "x": 16,
+              "y": 189,
+              "width": 105.171875,
+              "height": 24,
+              "top": 189,
+              "right": 121.171875,
+              "bottom": 213,
+              "left": 16
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 · 저장 안 됨"
+          },
+          {
+            "id": ".example-help>summary",
+            "rect": {
+              "x": 127.171875,
+              "y": 189,
+              "width": 24,
+              "height": 24,
+              "top": 189,
+              "right": 151.171875,
+              "bottom": 213,
+              "left": 127.171875
+            },
+            "visible": true,
+            "value": null,
+            "text": "예제 안내"
+          },
+          {
+            "id": "#example-start",
+            "rect": {
+              "x": 161.171875,
+              "y": 187,
+              "width": 119.40625,
+              "height": 28,
+              "top": 187,
+              "right": 280.578125,
+              "bottom": 215,
+              "left": 161.171875
+            },
+            "visible": true,
+            "value": "",
+            "text": "내 프로젝트 시작"
+          },
+          {
+            "id": "#example-close",
+            "rect": {
+              "x": 286.578125,
+              "y": 187,
+              "width": 77.15625,
+              "height": 28,
+              "top": 187,
+              "right": 363.734375,
+              "bottom": 215,
+              "left": 286.578125
+            },
+            "visible": true,
+            "value": "",
+            "text": "예제 닫기"
+          },
+          {
+            "id": "#connection-details>summary",
+            "rect": {
+              "x": 133.921875,
+              "y": 113,
+              "width": 240.078125,
+              "height": 28,
+              "top": 113,
+              "right": 374,
+              "bottom": 141,
+              "left": 133.921875
+            },
+            "visible": true,
+            "value": null,
+            "text": "미리보기 · 브라우저 MOCK · AI 아님\n⌄"
+          }
+        ],
+        "overlaps": [],
+        "overflow": false,
+        "name": {
+          "value": "예제 · 동네 미용실 예약",
+          "len": 14,
+          "measure": 165.453125,
+          "clientWidth": 175,
+          "padding": 12,
+          "scrollLeft": 0,
+          "font": "600 16px / 24px -apple-system, BlinkMacSystemFont, \"Segoe UI\", Inter, \"Apple SD Gothic Neo\", \"Malgun Gothic\", \"Noto Sans KR\", \"Noto Sans CJK KR\", sans-serif"
+        },
+        "map": {
+          "x": 0,
+          "y": 913,
+          "width": 390,
+          "height": 496,
+          "top": 913,
+          "right": 390,
+          "bottom": 1409,
+          "left": 0
+        },
+        "plane": "translate(7.71429px, 154.357px) scale(0.407143)",
+        "selected": null
+      },
+      "nameFit": {
+        "value": "예제 · 동네 미용실 예약",
+        "len": 14,
+        "measure": 162.76531982421875,
+        "client": 175,
+        "padding": 12,
+        "letterSpacing": "-0.192px",
+        "canvasLetterSpacing": "-0.192px",
+        "styleWidth": "183px",
+        "scrollLeft": 0
+      },
+      "exampleHelp": {
+        "rect": {
+          "x": 16,
+          "y": 221,
+          "width": 280,
+          "height": 82,
+          "top": 221,
+          "right": 296,
+          "bottom": 303,
+          "left": 16
+        },
+        "text": "저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.",
+        "width": 390,
+        "pageWidth": 390
+      },
+      "projectModePopover": {
+        "rect": {
+          "x": 54,
+          "y": 231,
+          "width": 320,
+          "height": 250,
+          "top": 231,
+          "right": 374,
+          "bottom": 481,
+          "left": 54
+        },
+        "text": "작업문 정리 방식\n\n최신 흐름을 미리 보는 규칙 기반 체험입니다. 실제 AI나 서버 실행이 아니므로 작업문을 직접 확인·수정하세요. 입력은 이 브라우저의 미리보기 전용 저장 공간에만 남고 기존 데모·서버 개발 모드의 기록과 섞이지 않습니다. 자료를 옮기려면 백업 파일을 직접 불러오세요.\n\n외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.",
+        "width": 390,
+        "pageWidth": 390
+      }
+    }
+  },
+  "bundle": {
+    "path": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\agentflow-ops-assembly\\.ops\\visual42-final6cf-preview.zip",
+    "sha256": "9d36a2213e767a81cf3f0bdc2795e99097cb07b9c70dae4d9ebfea1b5ad57dae",
+    "bytes": 205498,
+    "runtimeFiles": 20,
+    "entries": 22,
+    "manifestHashesVerified": true,
+    "build": {
+      "source": "6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0",
+      "appTree": "1ce4d91c5f549e8f3aec712a07292bb614bbff71",
+      "target": "preview",
+      "buildScript": "app/continuity/scripts/build-static.mjs --preview",
+      "compiler": "TypeScript 5.8.3 reused; no npm ci",
+      "runtimeOnly": true,
+      "manifest": "MANIFEST.json",
+      "acceptance": "Candidate; CI/overall acceptance root responsibility"
+    },
+    "versus2ae": {
+      "different": [
+        "client/app.js",
+        "styles.css"
+      ],
+      "identical": [
+        ".nojekyll",
+        "client/presentation.js",
+        "client/runtime.js",
+        "client/source-review.js",
+        "client/static-target.js",
+        "index.html",
+        "shared/attention.js",
+        "shared/domain.js",
+        "shared/guidance.js",
+        "shared/hierarchy.js",
+        "shared/mock.js",
+        "shared/outcome.js",
+        "shared/plan-facts.js",
+        "shared/source-proposals-example.js",
+        "shared/source-proposals.js",
+        "shared/storage.js",
+        "shared/types.js",
+        "shared/validation.js"
+      ]
+    }
+  },
+  "environment": {
+    "chrome": "155.0.8059.85",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "newDependencies": false,
+    "mock": "Browser static MOCK; connect-src none"
+  },
+  "fixture": {
+    "path": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\visual42-independent-evidence\\final6cf\\header60-fixture.json",
+    "sha256": "606d5d72743ea3216beea9a972679760f6ffce79ccd261fce488b4fe79e7a8e7",
+    "synthetic": true,
+    "import": "normal backup import, static preview storage only"
+  },
+  "gitVerification": {
+    "head": "6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0",
+    "appTree": "1ce4d91c5f549e8f3aec712a07292bb614bbff71",
+    "trackedDiffExitCode": 0,
+    "status": [
+      "?? docs/cycles/2026-10-24-visual-design-42/BASELINE_VIEW.json",
+      "?? docs/cycles/2026-10-24-visual-design-42/DECISION.md",
+      "?? docs/cycles/2026-10-24-visual-design-42/DEPLOYMENT.json",
+      "?? docs/cycles/2026-10-24-visual-design-42/DESIGN_DECISION_KO.md",
+      "?? docs/cycles/2026-10-24-visual-design-42/before-home-1280.png",
+      "?? docs/cycles/2026-10-24-visual-design-42/before-map-1280.png",
+      "?? docs/cycles/2026-10-24-visual-design-42/before-work-1280.png"
+    ]
+  },
+  "shaBoundHistory": [
+    {
+      "source": "50006905aac57e7739540cee7378153571f6cf92",
+      "target": "normal server MOCK",
+      "checks": 38,
+      "failures": 0,
+      "separateFindings": [
+        {
+          "issue": "901 close occluded by mode",
+          "button": [
+            678.984375,
+            13.5,
+            77.15625,
+            28
+          ],
+          "modeLeft": 732.265625,
+          "right5Hit": "connection summary"
+        },
+        {
+          "issue": "default example name clipped",
+          "textMeasure": 165.453125,
+          "inputContentWidth": 163
+        }
+      ]
+    },
+    {
+      "source": "43fa911398052dc4fbb7c3aff3641755d09b37a2",
+      "target": "normal server MOCK",
+      "checks": 90,
+      "failures": 0,
+      "separateFindings": [
+        {
+          "issue": "360 example banner horizontal overflow",
+          "scrollWidth": 364,
+          "viewport": 360,
+          "bannerRight": 363.734375
+        }
+      ]
+    },
+    {
+      "source": "7a471de8ea42385bab6d05ff96e69d4865cd1152",
+      "target": "normal server MOCK",
+      "checks": 49,
+      "failures": 0,
+      "suites": [
+        {
+          "name": "WORK29",
+          "command": "python continuity/tests/work-description29_browser.py",
+          "tests": 8,
+          "failures": 0,
+          "exitCode": 0,
+          "seconds": 33.115,
+          "viewports": [
+            "1280x720",
+            "1440x900"
+          ],
+          "sourceSHA256": "9713415a8acb0b6b700ab460119d6b8dbd666bad0dc6c4106a99d3164be4f4bf"
+        },
+        {
+          "name": "WORK41",
+          "command": "python continuity/tests/workspace41_browser.py",
+          "tests": 15,
+          "failures": 0,
+          "exitCode": 0,
+          "seconds": 44.353,
+          "viewports": [
+            "1280x720",
+            "1440x900",
+            "1024x576 CSS + DPR1.25 (layout simulation, not browser UI zoom)"
+          ],
+          "sourceSHA256": "51d22979ecc1b365b4819ae8b463c7804670317cd18e13c0aadf0e2037b126ac"
+        }
+      ],
+      "reader": {
+        "reference": {
+          "x": 839.828125,
+          "y": 310,
+          "width": 333.15625,
+          "height": 496,
+          "top": 310,
+          "right": 1172.984375,
+          "bottom": 806,
+          "left": 839.828125
+        },
+        "field": {
+          "x": 316,
+          "y": 259,
+          "width": 498.828125,
+          "height": 320,
+          "top": 259,
+          "right": 814.828125,
+          "bottom": 579,
+          "left": 316
+        },
+        "value": "N_B: 직접 쓴 값 · 배포하지 않는다.",
+        "sideBySide": true,
+        "sharedVisibleHeight": 269,
+        "scrollY": 181
+      },
+      "boundary": "Mobile unsaved example help/group passed; home mode popover and long static mode label were not covered by these 49 checks"
+    },
+    {
+      "source": "2aec20e95b4ad1574b100a8ade97749097c64a83",
+      "target": "normal server menu delta; separate static boundary reproduction",
+      "menuChecks": 8,
+      "menuFailures": 0,
+      "suite": {
+        "source": "2aec20e95b4ad1574b100a8ade97749097c64a83",
+        "module": "continuity/tests/ui001_browser.py",
+        "methods": [
+          "test_ui07_responsive_work_context_and_keyboard_no_horizontal_overflow",
+          "test_ui10_return032_recorded_bases_drafts_recovery_reexport_and_real_parent"
+        ],
+        "tests": 2,
+        "failures": 0,
+        "exitCode": 0,
+        "seconds": 6.634
+      },
+      "staticFindings": {
+        "901PreviewCloseModeOverlap": [
+          64.171875,
+          13
+        ],
+        "901NormalOverlapWidth": 0,
+        "modeSummaryWidths": {
+          "normal": 144.734375,
+          "preview": 240.078125
+        },
+        "1000PreviewOverlapWidth": 0,
+        "homePreviewPopoverLeft360And390": -63.921875,
+        "homeNormalPopoverLeft360And390": -159.265625
+      }
+    },
+    {
+      "source": "6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0",
+      "target": "static preview with full actual mode label",
+      "checks": 58,
+      "failures": 0,
+      "fixes": "Actual preview header and both mobile help types verified; no cross-SHA aggregate test claim"
+    }
+  ],
+  "menu2aeSourceIdentical": true,
+  "menuRelatedTestsRerunOn6cf": false,
+  "imageProvenance": {
+    "source": "6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0",
+    "target": "static preview",
+    "viewport": [
+      1280,
+      800
+    ],
+    "fixture": "fresh built-in salon example, select time part, continue without editing before capture",
+    "manualCameraChange": false,
+    "files": {
+      "static-home-1280.png": "a05a71661071bac56b91a32f50db04879c773ba0da48039feafd2336cf86d21d",
+      "static-map-1280.png": "11b50e853ead9ccc6fee3c03bc3a7c318d599680182faeb44da32011b33b33d5",
+      "static-work-1280.png": "498d39d13e8aa65cfc86db2aab0622ada8d44671457b955135f15d6ddfccce73"
+    },
+    "directlyViewedByVerifier": true,
+    "rootDirectReviewConfirmed": true
+  },
+  "resolvedStaticIssues": {
+    "901HeaderOverlaps": [],
+    "360HomeModePopoverRect": {
+      "x": 24,
+      "y": 283,
+      "width": 320,
+      "height": 238,
+      "top": 283,
+      "right": 344,
+      "bottom": 521,
+      "left": 24
+    },
+    "390HomeModePopoverRect": {
+      "x": 54,
+      "y": 283,
+      "width": 320,
+      "height": 238,
+      "top": 283,
+      "right": 374,
+      "bottom": 521,
+      "left": 54
+    }
+  },
+  "server": {
+    "target": "static preview",
+    "url": "http://127.0.0.1:60414",
+    "pid": 15716,
+    "execSession": 53323,
+    "keptForRootReview": true,
+    "normalServerRunning": false
+  },
+  "scopeLimits": [
+    "58 checks were run on exact 6cf static preview; 38/90/49/2/8 and WORK29/WORK41 remain bound to their original SHAs",
+    "Mobile checks cover header/popover bounds, not the entire mobile map flow",
+    "No real browser UI zoom or human usability study",
+    "CI/overall acceptance/deployment remain root responsibility",
+    "No new dependency install, dependency copy, paid calls or product-source edits"
+  ],
+  "minimumShareFiles": [
+    "static-home-1280.png",
+    "static-map-1280.png",
+    "static-work-1280.png",
+    "RESULT.json",
+    "RESULT_KO.md",
+    "header60-fixture.json"
+  ],
+  "optionalEarlierReaderImage": {
+    "path": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\visual42-independent-evidence\\final7a\\reader-1280.png",
+    "source": "7a471de8ea42385bab6d05ff96e69d4865cd1152",
+    "target": "normal server",
+    "copyRequired": false
+  },
+  "cleanup": {
+    "ownTemporaryRoot": "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\visual42-independent-evidence",
+    "minimumKeep": [
+      "static-home-1280.png",
+      "static-map-1280.png",
+      "static-work-1280.png",
+      "RESULT.json",
+      "RESULT_KO.md",
+      "header60-fixture.json"
+    ],
+    "waitForGitHubEvidenceConfirmation": true,
+    "neverDeleteRootDesignBaselineDecisionFiles": true,
+    "generatedOutputs": [
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\dist",
+      "C:\\Users\\이준혁\\Documents\\Codex\\2026-10-15\\github-plugin-github-openai-curated-remote-4\\work\\product-handoff-20261024\\app\\continuity\\static-preview-dist"
+    ],
+    "serverOutputMustRemainWhileServerNeeded": true
+  },
+  "ownershipReturnedToRootAfterReport": true
+}

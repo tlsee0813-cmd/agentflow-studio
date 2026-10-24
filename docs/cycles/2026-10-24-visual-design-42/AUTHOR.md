@@ -1,5 +1,7 @@
 # VISUAL42 작성자 기록
 
+총괄 정리: 아래는 작성자가 각 후보에서 반환한 기록이다. 중간 `candidate*.png` 11장은 [최종 코드 커밋의 원본 폴더](https://github.com/tlsee0813-cmd/agentflow-studio/tree/6cfbaf6fe35b26f3813f903c5bd75034e7b8b4c0/docs/cycles/2026-10-24-visual-design-42)에 보존하며 현재 tree에는 중복 보관하지 않는다. 최종 독립 화면은 [independent](independent/RESULT_KO.md), 최종 수용·CI는 [DECISION](DECISION.md)을 따른다.
+
 기준 `b4566599e89412dfadb5041047729a759bb358b3` (app tree `5f42a2c6…`). 변경 범위는 `app/continuity`의 CSS·HTML·렌더 마크업과 테스트 한 줄이다. domain/storage/server/수신 형식은 바꾸지 않았다.
 
 ## 선택한 시각 변경 (첫 후보)
@@ -59,3 +61,15 @@
 - 실제 `build-static --preview` 산출물을 `/agentflow-studio/preview/`로 서비스해 측정했다. 예제 헤더는 901/950/1000/1024/1100/1280/1440에서 겹침 0, 이름 잘림 0, 문서 가로 넘침 0이다. 헤더 높이는 901: 123px(3줄), 950–1100: 87px, 1280/1440: 56px이다. 홈·프로젝트 모드 popover는 360에서 24–344, 390에서 54–374, 800에서 464–784로 열린다. 예제 안내는 360/390에서 16–296이다. 일반 서버에서도 기본 글꼴과 DejaVu/Liberation 강제, letter-spacing +0.05em 조건으로 901–1440 겹침 0이다.
 - 이 수정 뒤 STATIC, HIERARCHY18, HOME15, ENTRY37, WORK41, UI001 통과. `2aec20e` 전체 회귀는 앞 15개 suite(browser~HOME15)가 통과한 상태에서 중단했다(이 수정 SHA로 대체).
 - 화면: `candidate4-preview-header-901.png`, `candidate4-preview-home-popover-360.png`.
+
+## 후속9~11: 전체 회귀가 발견한 세 경계 — caf6126
+
+총괄이 Claude 메시지24의 반환을 정리했다. 정확 `6cfbaf6`의 격리 전체29 suite는26통과·3실패로 끝났다. 통과는 browser, UI001, FRESH033, SELECT035, CONNECT039, FLOW049, AI055, FLOW083, FLOW090, GUIDE097, SPATIAL102, USE106, PC12, PC13, HOME15, ENTRY37, WORK41, SOURCE40, REPORT16, WORK29, HIERARCHY18, WORKSPACE19, RECEIVED20, BLANK21, VIEWPORT30, STATIC이다. AREA17 Wide3건(화면 밖 준비), BRANCH31 2건(native page wheel 준비), MAP36 4건(독립 영역 clip)은 실패했다.
+
+- BRANCH31: 이전 셸 여백 x1260/1420이 새 패널 내부가 됐다.1280에서 패널82px/page0,1440은 스크롤이 없었다. 빈 도구행 자체 hit를 확인하는 x1264/1424,y180.5 native wheel120으로 준비를 바꿔 양폭 page120·native scrollend를 확인했다. 문서120여유·page≥119·원클릭/두frame/카메라/상태 단언은 유지했다.
+- AREA17: zoom만으로 offscreen이 되던 baseline과 달리 새 지도에서 후속 pan이 실제 실행돼 native text drag 취소가 드러났다. 수정 전후 비교는 작성자 주장이고, 현재6cf의 동일 기전은 별도 Windows 독립 실행도 확인했다. canvas user-select:none으로 고쳤다. 수정 뒤 두 번째 pan도260px(camera x−491→−751),카드x207<map left222다. 기존 AREA17 검사 그대로 통과했다.
+- MAP36:68%에서 소속 line bottom294가clip bottom291을3px 넘었다. reading reason13/18과두꺼운foot이 원인이라12/16·20px controls·작은foot여백으로 고쳤다. 기존 가독성 검사·240×180카드·좌표·카메라는 그대로다.
+
+수정은 `caf6126a4a2e592dc4f17626f0440d13a1d4c188` / app tree `9ba47af6a58cf97d717e743a862553ea2cf1053d`에 고정했다. 변경 파일은 styles.css와 테스트 helper/호출부 두 파일뿐이다. 변경 직전 working tree에서 BRANCH31, AREA17, MAP36, WORK41, RECEIVED20, PC13, HIERARCHY18, VIEWPORT30, SPATIAL102, ENTRY37, PC12, REPORT16, FLOW090, WORKSPACE19가 통과했고 그대로 commit했다. clean caf의 check·continuity check·Node287/287·static/preview build도 통과했다. caf 전체29 suite와 양OS CI는 이 반환 시점에 진행 중이며 완료 결과는 DECISION에 별도로 기록한다. 이전 실행/waiter는 모두 종료하고 caf 한 실행/waiter만 유지했다.
+
+최종 caf 전체 회귀 반환: 격리된 정확 SHA checkout/build에서29 browser suite 모두통과. 컨테이너재시작 전10개(browser,UI001,FRESH033,SELECT035,CONNECT039,FLOW049,AI055,FLOW083,FLOW090,GUIDE097)와 같은checkout/build에서 재개한19개(SPATIAL102,USE106,PC12,PC13,HOME15,ENTRY37,WORK41,SOURCE40,REPORT16,AREA17,WORK29,BRANCH31,MAP36,HIERARCHY18,WORKSPACE19,RECEIVED20,BLANK21,VIEWPORT30,STATIC)를구분한다. 앞10개를반복하지않았다. 원래app npm test는작성자에서실행하지않고CI에맡겼다. 전체수행은작성자반환이며독립Windows/Cloud/CI와구분한다.
