@@ -9,6 +9,7 @@ import { loadConfig, requestAdvice, requestGuidance, runtimeStorage, runtimeFail
 import { outcomeOf } from '../shared/outcome.js';
 import { checkItems, pointedReturn, readingReasons, returnPath, rootRequest, subtreeSignals } from '../shared/attention.js';
 import { childrenOf, areaPath, descendantAreas, visibleAreas, visibleRepresentative, bundleRelations } from '../shared/hierarchy.js';
+import { initSourceReview } from './source-review.js';
 const $ = (id) => document.getElementById(id);
 function node(tag, content = '', cls = '') {
     const e = document.createElement(tag);
@@ -4837,6 +4838,8 @@ $('list-import').addEventListener('click', () => $('import-file').click());
 $('open-example').addEventListener('click', () => void openExample());
 $('example-start').addEventListener('click', () => closeExample(true));
 $('example-close').addEventListener('click', () => closeExample(false));
+// SOURCE40: the home's separate proposal review (tab memory only; never the project, its draft or the map memo).
+initSourceReview();
 /** Explicit navigation starts a new excursion. Part/endpoint locators and same-part actions keep their first caller. */
 function endRecordsExcursion() {
     branchRecordCaller = null;

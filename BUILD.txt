@@ -1,34 +1,6 @@
-AgentFlow Studio PC preview38 — STATIC BROWSER MOCK
-Source commit: c7329aa8b941791633d5f22da4ca105188aab0be
-Source branch: checkpoint/2026-10-15
-App tree: af4556e7463fa76ce36938220c52447bd539cd3f
-Build target: node continuity/scripts/build-static.mjs --preview
-Local build: Node24.19.0 / TypeScript5.8.3; independent Windows Chrome155 tests
-Final exact-source CI: https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/39990131583
-CI: Ubuntu24.04 success; Windows2022 success on one same-SHA retry
-First Windows attempt: initial main-app navigation5000ms timeout; retained in cycle38 CI.md
-CI pins: Node22.16.0 / Python3.13.5 / Playwright1.57.0 / Chromium143
-Public GitHub Pages publication explicitly authorized 2026-10-24 KST
-Browser storage prefix: agentflow.studio.preview: (old browser-demo data is separate)
-MOCK only. No API key, provider, server, real AI or account sync.
-Accepted scope and limitations: docs/cycles/2026-10-24-entry-integration-38/DECISION.md
-Rollback deployment: 63f5540d062861439f0932cd7311c6c5510e227c
-Runtime files:17; bytes:605855
-Runtime SHA256 (BUILD.txt excluded):
-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  .nojekyll
-cd0f6a26ae6972d304032d299e8928b0ff885253604a94e4dbb929903fbf887e  client/app.js
-4c874b471b1c782c18d6d4870455b2474308e180ed302f22bdc37b338828f88d  client/presentation.js
-d368c64b881ed766a2eba49d96ae40d92912008a8d6b37bb0660380e0492a092  client/runtime.js
-0d847d744ce6dd680cf0d601faf77789973907e89c288cbbe85f8061056ddac9  client/static-target.js
-95cd6b21e9348e703acfea3e98d11ba4d4fd3f670e2014b7b0df0b380f672475  index.html
-55182121cccdf9d54bd8bcb8626d559a199192501386a718a9adb3696198950c  shared/attention.js
-f8559b0a01a633385bea417ae76f797f9051b109e300a43b6becc3c9cd1bdcbd  shared/domain.js
-c5286ea81a5878635a931bb2cc459925991085113ca99fa6603cfcf906cf08c5  shared/guidance.js
-5d09d7c3eac8e75b012eb69c086dfdd84db645c9318140b5e82b883b9d919624  shared/hierarchy.js
-c1504250a298a86efcbab8de932218cd38e2772d79a0759403dc497f829bc9ef  shared/mock.js
-c230973c7021a31ffd27d0a0a389cf978e3df501ba6f98817a14bd27f8c100e8  shared/outcome.js
-33f23f4ef8ed4009d6f2b64e30e26e367b83302146cedbc85ae910b5ca889c45  shared/plan-facts.js
-0e93961873c3df88cbb0e37ca23cce7d4592bb40bd7b2a1ff38da4e49e136f38  shared/storage.js
-d1dd2c914e0332a57bb6875e4cbd660d95ec529e2038e04a2e69c585c4deaf53  shared/types.js
-5c1c5f2ed79435a3250fe31fa3d8c43442f080d757368b157da97b22572960b4  shared/validation.js
-e58ae9a6bec8a81565429d6e6e6110aa0ee9d2114449c3bd4e5adf363b927f1a  styles.css
+AgentFlow Studio PC preview40
+source 44cfc9ade567b3b7cfe66af57d9762d5bf1ead39
+app-tree c6172dd71c592ae331931b5d9e5ca5b60b0e77d0
+runtime-tree 81ba7c3787c4f3655aaf55a4d1e027ac46098838
+CI https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40047073004 (both OS success)
+Browser MOCK; no API calls or credentials; preview storage prefix.
