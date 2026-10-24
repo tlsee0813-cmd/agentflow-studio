@@ -299,11 +299,13 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit') {
           h('span', { class: 'frame-meta' }, recentAt(latest) ? h('i', { class: 'new-dot', title: '최근 기록' }) : null, latest ? ago(latest) : STATUS_LABEL[p.status]),
           enterButton(p))));
     } else {
-      world.append(h('div', { class: `node s-${p.status}${recentAt(p.lastAt) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
+      // A folded part reads its inside: latest record anywhere under it.
+      const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt;
+      world.append(h('div', { class: `node s-${p.status}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
         title: `${p.name}${p.note ? ` — ${p.note}` : ''}`, onkeydown: keySelect(p.id) },
         b.kids ? toggleButton(p, false) : null,
         h('span', { class: 'node-text' }, h('span', { class: 'node-name' }, p.name),
-          h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), STATUS_LABEL[p.status], p.lastAt ? ` · ${ago(p.lastAt)}` : '')),
+          h('span', { class: 'node-meta' }, h('i', { class: 'dot', 'aria-hidden': 'true' }), STATUS_LABEL[p.status], last ? ` · ${ago(last)}` : '')),
         b.kids ? enterButton(p) : null));
     }
   }
