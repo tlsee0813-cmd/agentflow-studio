@@ -349,9 +349,11 @@ function fitNameField() {
   field.style.width=`${Math.ceil(nameMeasure.measureText(field.value||field.placeholder).width+edges+6)}px`;
 }
 /** VISUAL42: on PC every project layer shares the one header row, so project management is its menu there; narrow screens keep the inline buttons. */
-function syncProjectHeader() {
+function syncProjectHeader(resized=false) {
   const compact=route!=='projects'&&innerWidth>760,menu=$<HTMLDetailsElement>('project-management');
-  if(compact!==compactMapHeader){menu.open=!compact;compactMapHeader=compact;}
+  // A window widened past the narrow layout keeps an open menu open (its inline buttons become the dropdown), so a control
+  // already reached is not hidden under the pointer; the dropdown then closes like any menu, on a click outside it.
+  if(compact!==compactMapHeader){if(!(resized&&compact&&menu.open))menu.open=!compact;compactMapHeader=compact;}
   document.body.dataset.mapHeader=String(compact);
 }
 function showWork() {view='work';displayView();refreshWorkReference();restoreWorkReferenceReading();}
@@ -1718,7 +1720,7 @@ function sizeWorkspace() {
   if(innerWidth>760){const top=layout.getBoundingClientRect().top+window.scrollY;layout.style.height=`${Math.max(240,innerHeight-Math.max(0,top)-16)}px`;if(map){map.style.height='100%';map.style.minHeight='0';}}
   else {layout.style.removeProperty('height');map?.style.removeProperty('height');map?.style.removeProperty('min-height');}
 }
-window.addEventListener('resize',()=>{capturePanelReading();syncProjectHeader();sizeWorkspace();restorePanelReading();});
+window.addEventListener('resize',()=>{capturePanelReading();syncProjectHeader(true);sizeWorkspace();restorePanelReading();});
 document.addEventListener('toggle',e=>{if(e.target instanceof HTMLDetailsElement&&e.target.closest('#space-view')&&!e.target.closest('#area-panel'))sizeWorkspace();},true);
 function openRelations(from='map-relations-open') {branchRecordCaller=null;capturePanelReading();relationCaller=from;panelMode='relations';rememberMap();render();$('area-panel-body')?.focus({preventScroll:true});}
 function relationBrowser():HTMLElement {
