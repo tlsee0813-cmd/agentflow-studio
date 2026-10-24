@@ -72,7 +72,11 @@ class Entry37(unittest.TestCase):
         expect(card.locator('.project-card-meta')).to_contain_text('저장 안 됨 · 실제 실행 아님');expect(card.locator('.project-card-meta')).to_contain_text('영역 4개')
         self.assertEqual(card.locator('.project-more,.project-open').count(),0,'the example has no project menu or project open control')
         name=p.locator('#example-list .project-card-name').evaluate('(e)=>Math.round(e.getBoundingClientRect().height/parseFloat(getComputedStyle(e).lineHeight))')
-        self.assertEqual(name,1,'the example name reads on one line');c=self.box('#example-list .example-card');self.assertLessEqual(c['bottom'],self.HEIGHT,'example card in the first screen');self.assertGreaterEqual(c['h'],170)
+        self.assertEqual(name,1,'the example name reads on one line');c=self.box('#example-list .example-card');self.assertLessEqual(c['bottom'],self.HEIGHT,'example card in the first screen')
+        # VISUAL42 (coordinator's choice): the empty home is one start group whose rows share a grid, so the example is a start row
+        # (name, its whole purpose in two lines, the unsaved fact) aligned with the new-project row, not a 170px card.
+        s=self.box('#start-new-project');self.assertGreaterEqual(c['h'],96,'name, purpose and the unsaved fact fit the row')
+        self.assertLessEqual(abs(c['x']-s['x']),1,'the example row starts where the new-project row starts');self.assertLessEqual(abs(c['w']-s['w']),1,'same row width')
         self.assertEqual(self.keys(),[],'the home wrote nothing');self.fits();self.shot('1-home')
 
         self.open_example();self.assertEqual(self.keys(),[])
