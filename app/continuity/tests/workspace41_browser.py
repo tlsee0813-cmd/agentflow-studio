@@ -1,6 +1,7 @@
 """WORK41 map selection and focused continue: home -> example map -> select a part (side panel, no data change) -> continue its
 work (text and copy/save together) -> map -> another part -> back to the same work and edit place. Long same-prefix names, a long
-report, an unsent request for another part and a 125% page zoom. Real Chromium -> real local HTTP -> explicit MOCK.
+report, an unsent request for another part, and a 1024x576 CSS-pixel viewport at device scale factor 1.25 (the CSS size of
+1280x720 at 125%; not the browser's own UI zoom). Real Chromium -> real local HTTP -> explicit MOCK.
 Geometry, wiring and storage-boundary checks; not evidence that people find it easier.
 """
 import json, subprocess, unittest
@@ -9,6 +10,7 @@ import browser as base
 
 WORKSPACE='agentflow.idea015.workspace';MAP_KEY='agentflow.workspace.map'
 subprocess.run(['node',str(base.ROOT/'tests/workspace41-fixtures.mjs'),str(base.OUT)],check=True)
+subprocess.run(['node',str(base.ROOT/'tests/workspace41-fixtures.mjs'),str(base.OUT),'nospace'],check=True)
 IDS=json.loads((base.OUT/'workspace41-ids.json').read_text(encoding='utf-8'))
 FX=json.loads((base.OUT/'workspace41.json').read_text(encoding='utf-8'))['entries'][0]['project']
 PREFIX='예약 화면에서 손님이 휴대폰으로 이미 잡아 둔 예약을 직접 바꾸거나 없애는 흐름의 마지막 단계인'
@@ -59,8 +61,7 @@ class Work41(unittest.TestCase):
         for c in r['cards']:
             self.assertTrue(c['textsInCard'],f'{where}: texts stay inside their card · {c["name"][:20]}')
             self.assertTrue(c['nameWhole'],f'{where}: the shown name is not clipped · {c["name"][:20]}')
-            end=' '.join(c['full'].split()[-2:])
-            self.assertTrue(c['name']==c['full'] or (c['name'].endswith(end) and ' … ' in c['name']),f'{where}: whole name, or its start and distinguishing end · {c["name"]}')
+            self.assertTrue(c['name']==c['full'] or (c['name'].endswith(c['full'][-4:]) and '…' in c['name']),f'{where}: whole name, or its start and distinguishing end · {c["name"]}')
             for o in r['cards']:
                 if o is c:continue
                 b,n=o['box'],c['nameBox'];self.assertFalse(n['left']<b['right'] and b['left']<n['right'] and n['top']<b['bottom'] and b['top']<n['bottom'],f'{where}: name not over another card')
@@ -98,7 +99,9 @@ class Work41(unittest.TestCase):
         expect(p.locator('#current-work')).to_be_visible();self.shot('4-work')
         for sel_ in ['#work-place','#work-next','#copy-work','#download-work']:
             b=p.locator(sel_).bounding_box();self.record('work first screen '+sel_,b)
-            self.assertLess(b['y'],self.HEIGHT,f'{sel_} starts on the first screen')
+            self.assertGreaterEqual(b['y'],0,f'{sel_} below the top');self.assertLessEqual(b['y']+b['height'],self.HEIGHT,f'{sel_} wholly on the first screen')
+        ed=p.locator('#work-next').bounding_box();seen=min(ed['y']+ed['height'],self.HEIGHT)-max(ed['y'],0)
+        self.assertGreaterEqual(seen,160,'the work text field is readable and writable on the first screen (>= 160 CSS px)')
         expect(p.locator('#outcome-context')).not_to_have_attribute('open','');expect(p.locator('#work-source')).to_contain_text('외부 원문')
         expect(p.locator('#current-source > summary')).to_contain_text('미검증');expect(p.locator('#work-place')).to_contain_text('예제 · 저장 안 됨')
         expect(p.locator('#compose-panel')).not_to_have_attribute('open','')
@@ -117,11 +120,13 @@ class Work41(unittest.TestCase):
         p.locator('#nav-projects').click();p.locator('#example-list .example-open').click();p.locator('#example-start').click()
         expect(p.locator('#brief-input')).to_be_focused();self.assertEqual(p.evaluate('scrollY'),0);self.assertEqual(self.keys(),[])
 
-    def test_02_real_project_long_names_report_and_other_part_draft(self):
-        p=self.page;raw=json.dumps({'version':'agentflow.workspace.1','migratedFromLegacy':True,'entries':[]})
-        raw=(base.OUT/'workspace41.json').read_text(encoding='utf-8')
+    def install(self,file):
+        p=self.page;raw=(base.OUT/file).read_text(encoding='utf-8')
         p.evaluate('(raw)=>{localStorage.clear();sessionStorage.clear();localStorage.setItem("agentflow.idea015.workspace",raw)}',raw);p.reload()
         expect(p.locator('#projects-view')).to_be_visible();p.locator('#project-list .project-open').first.click();expect(p.locator('#space-map')).to_be_visible()
+        return raw
+    def test_02_real_project_long_names_report_and_other_part_draft(self):
+        p=self.page;raw=self.install('workspace41.json')
         r=self.read('long names first view');self.shot('6-long-names');self.fits()
         self.readable(r,'long names');self.no_collisions(r,'long names')
         names=[c['full'] for c in r['cards']];self.assertIn(CHANGE,names);self.assertIn(CANCEL,names)
@@ -148,7 +153,25 @@ class Work41(unittest.TestCase):
         p.locator('#place-space').click();self.select('알림');p.locator('#panel-records').scroll_into_view_if_needed()
         p.locator('#nav-work').click();expect(field).to_be_focused();self.assertEqual(field.evaluate('(e)=>[e.selectionStart,e.selectionEnd]'),[6,9])
         s2=self.state();self.assertEqual([s2['draft'],s2['space']['draftTarget'],s2['currentTaskId'],s2['tasks']],[DRAFT,{'area':IDS['notify']},IDS['ret'],s['tasks']])
+        # The same panel continues and returns again and again: every continue from the map offers the way back to it, and the
+        # edit place survives each round trip.
+        p.locator('#place-space').click();self.select(CHANGE);cam=p.locator('#space-plane').evaluate('(e)=>e.style.transform')
+        for i in range(3):
+            p.locator('#panel-continue').click();expect(p.locator('#work-return-origin')).to_be_visible()
+            expect(field).to_be_focused();self.assertEqual(field.evaluate('(e)=>[e.selectionStart,e.selectionEnd]'),[6,9],f'round trip {i+1}: caret kept')
+            p.locator('#work-return-origin').click();expect(p.locator('#area-panel-title')).to_have_text(CHANGE)
+            self.assertEqual(p.locator('#space-plane').evaluate('(e)=>e.style.transform'),cam,f'round trip {i+1}: same map view')
         self.assertEqual(self.raw(),raw,'the round trip changed no saved bytes')
+
+    def test_03_legal_long_names_without_spaces(self):
+        raw=self.install('workspace41-nospace.json');r=self.read('no-space names first view');self.shot('10-no-space-names')
+        self.readable(r,'no-space names');self.no_collisions(r,'no-space names')
+        shown={c['full']:c['name'] for c in r['cards']};a,b=[k for k in shown if k.startswith('가가가')]
+        self.assertNotEqual(shown[a],shown[b],'the two names read differently on the map')
+        self.select(a);self.readable(self.read('no-space selected'),'no-space selected')
+        title=self.page.locator('#area-panel-title');expect(title).to_have_text(a)
+        self.assertTrue(title.evaluate('(e)=>e.scrollHeight<=e.clientHeight+1'),'the panel title shows the whole name')
+        self.assertEqual(self.raw(),raw,'reading changes no saved bytes')
 
 class Work41Wide(Work41):WIDTH,HEIGHT=1440,900
 class Work41Zoom125(Work41):WIDTH,HEIGHT,ZOOM=1024,576,1.25

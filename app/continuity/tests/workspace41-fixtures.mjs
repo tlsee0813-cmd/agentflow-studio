@@ -1,7 +1,7 @@
 // WORK41: one isolated synthetic project (never user data) for the map -> part -> work -> map round trip. Built with the app's
 // own domain code: a parent with two children whose long names share a prefix and differ only at the end, a relation, a request
 // with an export and a long pasted report (its follow-up draft edited by hand), and an unsent request kept for another part.
-// Usage (from app/): node continuity/tests/workspace41-fixtures.mjs <out-dir>
+// Usage (from app/): node continuity/tests/workspace41-fixtures.mjs <out-dir> [nospace]
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { createProject, rename, setBrief, addArea, addChildArea, addRelation, editDraft, setKind, submit, editTask, begin, receive,
   taskOf, handoffText, markHandoff, setDraftTarget } from '../dist/public/shared/domain.js';
@@ -10,7 +10,9 @@ import { mockAdvice } from '../dist/public/shared/mock.js';
 const out=process.argv[2];if(!out)throw new Error('out dir required');mkdirSync(out,{recursive:true});
 // 60 characters, the area-name limit: the names differ only in their last word.
 export const PREFIX='예약 화면에서 손님이 휴대폰으로 이미 잡아 둔 예약을 직접 바꾸거나 없애는 흐름의 마지막 단계인';
-export const CHANGE=`${PREFIX} 예약 변경`,CANCEL=`${PREFIX} 예약 취소`;
+const nospace=process.argv[3]==='nospace';
+// nospace: the same project with legal 60-character names that have no spaces at all.
+export const CHANGE=nospace?`${'가'.repeat(56)}예약변경`:`${PREFIX} 예약 변경`,CANCEL=nospace?`${'가'.repeat(56)}예약취소`:`${PREFIX} 예약 취소`;
 export const MANUAL='[합성41] 변경 가능 시간만 보여 주고, 취소 흐름은 건드리지 않는다.';
 export const DRAFT='[합성41 미전송] 알림 문자에 변경된 시간을 함께 적어 주세요.';
 export const REPORT=['[합성41 보고 · 실제 실행 아님]','변경 화면에서 바꿀 수 있는 시간만 목록에 보이게 했어요.',
@@ -32,6 +34,6 @@ p=editTask(p,ret,'next',MANUAL);
 p=editDraft(setDraftTarget(setKind(p,'request'),notify),DRAFT);
 parseProject(JSON.stringify(p));
 const entry={entryId:'E_work41-0001',state:'active',lifecycle:1,seq:1,createdAt:'2026-10-24T00:00:00.000Z',trashedAt:null,origin:'new',project:p};
-writeFileSync(`${out}/workspace41.json`,JSON.stringify({version:'agentflow.workspace.1',migratedFromLegacy:true,entries:[entry]}),'utf8');
-writeFileSync(`${out}/workspace41-ids.json`,JSON.stringify({book,notify,change,cancel,task,ret}),'utf8');
+writeFileSync(`${out}/workspace41${nospace?'-nospace':''}.json`,JSON.stringify({version:'agentflow.workspace.1',migratedFromLegacy:true,entries:[entry]}),'utf8');
+writeFileSync(`${out}/workspace41${nospace?'-nospace':''}-ids.json`,JSON.stringify({book,notify,change,cancel,task,ret}),'utf8');
 console.log('workspace41 fixture written');

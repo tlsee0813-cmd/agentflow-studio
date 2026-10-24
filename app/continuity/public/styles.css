@@ -2850,10 +2850,10 @@ body:not([data-route="projects"]) .sidebar-bottom{display:none}
 .area-node .node-select .area-card-note{font-size:calc(12.5px * var(--read,1));line-height:calc(16px * var(--read,1));-webkit-line-clamp:3;flex-shrink:0}
 .area-node[data-note="2"] .node-select .area-card-note{-webkit-line-clamp:2}
 .area-node[data-note="1"] .node-select .area-card-note{-webkit-line-clamp:1}
-.area-node[data-note="hidden"] .node-select .area-card-note{display:none}
+.area-node[data-note="hidden"] .node-select .area-card-note,.area-node[data-note="hidden"] .node-select .area-undecided{display:none}
 .area-node .branch-signals{font-size:calc(12px * var(--read,1));line-height:calc(15px * var(--read,1))}
 /* The bottom row's controls grow less (they are labels, not the part's reading) so the row stays one line. */
-.area-node .area-node-foot{flex-wrap:nowrap}
+.area-node .area-node-foot{flex-wrap:wrap}
 .area-node .area-node-foot .tag,.area-node .area-node-foot .branch-toggle{font-size:calc(11px * min(var(--read,1),1.25));white-space:nowrap}
 .area-node .node-enter{font-size:calc(12px * min(var(--read,1),1.25))}
 .map-read{font-size:11px;color:var(--accent-dark);background:var(--tint);border-radius:6px;padding:2px 6px;white-space:nowrap}

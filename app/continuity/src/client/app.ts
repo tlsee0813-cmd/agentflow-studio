@@ -80,6 +80,9 @@ let layerMemo:LayerMemo={space:null,from:null,areas:{}};
 // FLOW090-B1: map viewport and selection are this tab's view of one project; positions are project data.
 type MapView={x:number;y:number;s:number};
 let mapView:MapView|null=null,mapSelected:string|null=null,sheetOpen=false,areaListOpen:boolean|null=null;
+/** The automatic pan of a selection is undone when its panel closes, unless the user moved the map since. Tab memory only. */
+let autoPan:{from:MapView;to:MapView}|null=null;
+const sameView=(a:MapView|null,b:MapView|null)=>!!a&&!!b&&Math.abs(a.x-b.x)<.5&&Math.abs(a.y-b.y)<.5&&a.s===b.s;
 let initialMapFitPending=false;
 const MAP_CARD_HEIGHT=180; // Matches the bounded card footprint in styles.css and new-slot collision checks.
 let collapsed=new Set<string>();
@@ -209,7 +212,7 @@ function resetEphemeral() {
   resultSelection=null;resultMessage='';lastFileExport=null;workNotice=null;view='work';viewArea=null;viewTask=null;viewReturn=null;layerMemo={space:null,from:null,areas:{}};
   receivedAreas.clear();
   understandingEdits.clear();workReference=null;workMemo=null;lastWorkField=null;lastReceipt=null;located=null;
-  mapView=null;mapSelected=null;initialMapFitPending=false;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};panelMode='area';recordsReturnNotice='';backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
+  mapView=null;autoPan=null;mapSelected=null;initialMapFitPending=false;sheetOpen=false;areaListOpen=null;collapsed=new Set();panelReadings={};panelMode='area';recordsReturnNotice='';backgroundOpen=null;posUndo=[];origin=null;readOpen=null;
   for(const k of Object.keys(spaceInputs))delete spaceInputs[k];
 }
 function openEntry(entry:WorkspaceEntry,fromList=false) {
@@ -325,6 +328,8 @@ function displayView() {
   $('nav-space').classList.toggle('active',inProject&&spatial);if(inProject&&spatial)$('nav-space').setAttribute('aria-current','page');else $('nav-space').removeAttribute('aria-current');
   $('nav-area-count').textContent=String(project.space.areas.filter(a=>!a.archived).length);
   if(route!=='projects')rememberPlace();
+  // WORK41: the edit-place memo serves one return; once the work view is shown again it is spent (never replayed later).
+  if(inProject&&view==='work')workMemo=null;
   $('context-panel').hidden=!contextOpen;$('workspace').classList.toggle('details-open',contextOpen);
   $('nav-context').setAttribute('aria-expanded',String(contextOpen));
   for(const [id,active] of [['nav-work',inProject&&view==='work'&&!contextOpen],['nav-context',inProject&&view==='work'&&contextOpen],['nav-history',inProject&&view==='history']] as const){
@@ -488,9 +493,12 @@ function continueTask(id:string) {
 }
 /** WORK41: back to the work being continued, at the place it was left (scroll, the field and caret being edited). Nothing is
  * retargeted: the same current task, its draft and the unsent input stay as they are. */
-function resumeWork(focusTitle=true) {
+function resumeWork(focusTitle=true,fromMap=false) {
   if(!project.currentTaskId)return;const memo=workMemo;
-  endRecordsExcursion();contextOpen=false;showWork();
+  // From the map panel the map view is the new starting point (the way back is offered on the work); from the side navigation
+  // the earlier excursion ends as before. Either way the edit place below is restored, never the target.
+  if(fromMap){markOrigin();leaveLayer();}else endRecordsExcursion();
+  contextOpen=false;view='work';render(false,false);refreshWorkReference();
   if(memo&&memo.project===project.id&&memo.epoch===projectEpoch&&memo.task===project.currentTaskId){
     for(const [id,open] of Object.entries(memo.open)){const d=document.getElementById(id);if(d instanceof HTMLDetailsElement&&$('work-view').contains(d))d.open=open;}
     window.scrollTo({top:memo.y});
@@ -1439,15 +1447,18 @@ function applyView(plane:HTMLElement){if(mapView){plane.style.transform=`transla
  * its fixed footprint first shortens or leaves out its idea on the card (the whole idea is in the panel), then takes a smaller
  * boost; a name is never cut. View-only: nothing is stored, and the zoom never folds, unfolds or regroups anything. */
 const READ_MAX=1.6;
-/** The end kept whole: the last two words (more when they are very short), where sibling names usually differ. */
+/** The end kept whole: the last two words (more when they are very short; the last six characters when they are long or there
+ * are no spaces), where sibling names usually differ. */
 function nameEnd(full:string):string {
   const words=full.trim().split(/\s+/);let n=Math.min(2,words.length),end=words.slice(-n).join(' ');
   while(end.length<4&&n<words.length){n++;end=words.slice(-n).join(' ');}
-  return end;
+  // A name without usable spaces (or with very long last words) keeps a fixed number of its last characters.
+  return end.length>16?full.trim().slice(-6):end;
 }
 function shortenName(name:HTMLElement,full:string,over:()=>boolean,card:HTMLElement) {
   const end=nameEnd(full),room=full.length-end.length;if(room<6)return;
-  for(let head=room-3;head>=4;head-=3){name.textContent=`${full.slice(0,head).trimEnd()} … ${end}`;if(!over())break;}
+  const sep=full.trim().endsWith(` ${end}`)?' … ':'…';
+  for(let head=room-3;head>=4;head-=3){name.textContent=`${full.slice(0,head).trimEnd()}${sep}${end}`;if(!over())break;}
   card.dataset.cut='1';name.title=full;
 }
 function fitReading(plane:HTMLElement) {
@@ -1460,7 +1471,8 @@ function fitReading(plane:HTMLElement) {
     card.dataset.readFor=key;card.style.removeProperty('--read');delete card.dataset.note;delete card.dataset.cut;
     const pick=card.querySelector<HTMLElement>('.node-select'),name=card.querySelector<HTMLElement>('.area-card-name');if(!pick||!name)continue;
     const full=name.dataset.full??name.textContent??'';name.dataset.full=full;name.textContent=full;name.removeAttribute('title');
-    const over=()=>pick.scrollHeight>pick.clientHeight+1;
+    // Overflow by layout boxes (scrollHeight rounds to whole pixels and can hide a part-line cut at the bottom).
+    const over=()=>{const pr=pick.getBoundingClientRect();return pick.scrollHeight>pick.clientHeight+1||[...pick.children].some(c=>c instanceof HTMLElement&&getComputedStyle(c).display!=='none'&&c.getBoundingClientRect().bottom>pr.bottom+0.25);};
     // The name comes first: a long idea gives way (fewer lines, then left to the panel, where it is whole).
     for(const lines of ['2','1','hidden']){if(!over())break;card.dataset.note=lines;}
     // A name still too long for a readable size keeps its start and its distinguishing end ('… 예약 취소'); only the middle
@@ -1576,7 +1588,7 @@ function revealNeighbours(id:string) {
     if((u.r-u.l)*v.s<=W-2*pad&&(u.b-u.t)*v.s<=H-top-pad)want=u;}
   const shift=(lo:number,hi:number,min:number,max:number)=>hi-lo>max-min?min-lo:lo<min?min-lo:hi>max?max-hi:0;
   const dx=shift(want.l*v.s+v.x,want.r*v.s+v.x,pad,W-pad),dy=shift(want.t*v.s+v.y,want.b*v.s+v.y,top,H-pad);
-  if(dx||dy){mapView={x:v.x+dx,y:v.y+dy,s:v.s};applyView(plane);}
+  if(dx||dy){const to={x:v.x+dx,y:v.y+dy,s:v.s};autoPan={from:autoPan&&sameView(autoPan.to,v)?autoPan.from:{...v},to};mapView={...to};applyView(plane);}
 }
 function areaNode(a:Area,plane:HTMLElement,redraw:()=>void):HTMLElement {
   const pt=areaPosition(project,a),el=node('div','','area-node');el.dataset.areaId=a.id;
@@ -2022,7 +2034,8 @@ function panelPlace(a:Area):HTMLElement {
 function areaPanel(a:Area):HTMLElement {
   if(branchRecordCaller&&(branchRecordCaller.project!==project.id||branchRecordCaller.epoch!==projectEpoch||branchRecordCaller.area!==a.id))branchRecordCaller=null;
   const panel=node('aside','','area-panel');panel.id='area-panel';panel.dataset.panelMode='area';panel.setAttribute('aria-label',`${a.name} 속성`);panel.classList.toggle('sheet-open',sheetOpen);
-  const close=()=>{capturePanelReading();const caller=branchRecordCaller;branchRecordCaller=null;mapSelected=null;sheetOpen=false;rememberMap();render();
+  const close=()=>{capturePanelReading();const caller=branchRecordCaller;branchRecordCaller=null;mapSelected=null;sheetOpen=false;
+    if(autoPan&&sameView(autoPan.to,mapView))mapView={...autoPan.from};autoPan=null;rememberMap();render();
     if(caller){if(caller.project===project.id&&caller.epoch===projectEpoch&&caller.area===a.id&&(focusBranchRecordControl(caller.id)||focusBranchRecordControl(`node-info-${a.id}`)))return;$('space-title')?.focus({preventScroll:true});return;}
     if(!focusFirst(`node-info-${visibleRepresentative(project,a.id,collapsed)??a.id}`))$('space-title')?.focus({preventScroll:true});};
   const head=node('div','','panel-top'),heading=node('strong',a.name);heading.id='area-panel-title';
@@ -2064,7 +2077,7 @@ function areaPanel(a:Area):HTMLElement {
     const edited=`작업 ${pad(project.tasks.indexOf(curTask)+1)}`,own=`작업 ${pad(project.tasks.indexOf(cur)+1)}`;
     const why=node('p',curTask.id===cur.id?`고치는 대상 · ${edited}의 작업문`:`고치는 대상 · ${edited} (${own}에 받은 보고의 후속 확인 작업문) · ${own}의 작업문은 그대로`,'hint');why.id='panel-continue-target';why.title=target.text;
     work.append(what,appTag(),gist,why);body.append(work);
-    go.prepend(btn('이어가기 →',()=>{if(workMemo?.task===project.currentTaskId)resumeWork();else continueTask(cur.id);},'primary','panel-continue'));
+    go.prepend(btn('이어가기 →',()=>{if(workMemo?.task===project.currentTaskId)resumeWork(true,true);else continueTask(cur.id);},'primary','panel-continue'));
   }
   const meaning=node('section','','panel-section');meaning.id='panel-meaning';meaning.append(node('h3','이 부분','panel-section-title'),areaIdea(a,'panel-idea',100),...[understandingPanel(a,'panel-understanding',true)].filter(x=>!!x));
   body.append(meaning,panelPlace(a));

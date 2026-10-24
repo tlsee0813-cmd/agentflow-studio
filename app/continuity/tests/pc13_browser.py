@@ -75,7 +75,12 @@ class Pc13(unittest.TestCase):
             expect(self.page.locator('.area-node',has_text=name)).to_be_visible()
         return {a['name']:a['id'] for a in self.state()['space']['areas']}
     def request_in(self,area,text):
-        self.page.locator('#nav-space').click();self.page.locator(f'#node-enter-{area}').click();self.page.locator('#area-new-request').click()
+        self.page.locator('#nav-space').click()
+        # WORK41: '열기' is a small button in the card's bottom row (the card body selects). When that row is cut off at the map
+        # edge (the open panel narrows the map), the user first uses the map's own '전체 맞춤', then opens the part.
+        inside=self.page.evaluate('(id)=>{const b=document.getElementById(id).getBoundingClientRect(),m=document.getElementById("space-map").getBoundingClientRect();return b.left>=m.left&&b.right<=m.right&&b.top>=m.top&&b.bottom<=m.bottom}',f'node-enter-{area}')
+        if not inside:self.page.locator('#map-fit').click()
+        self.page.locator(f'#node-enter-{area}').click();self.page.locator('#area-new-request').click()
         self.page.locator('#draft').fill(text);self.page.locator('#send').click();expect(self.page.locator('#working')).to_have_text('')
         return self.state()['currentTaskId']
     def export_current(self):
@@ -128,7 +133,11 @@ class Pc13(unittest.TestCase):
         self.record('actual','selected: first card title reachable (not required)',s['firstTitleHit'])
         if not s['firstTitleHit']:
             chip=self.page.locator('#map-offscreen');expect(chip).to_be_visible();self.record('actual','selected: off-screen chip',chip.inner_text())
-        self.check('selected: no auto-fit when the detail opens',s['styleTransform'],t0)
+        # WORK41: opening the detail may pan the view so the selected card stays beside the panel, but never zooms or fits.
+        scale=lambda t:t.split('scale(')[1]
+        self.check('selected: no auto-fit when the detail opens (same scale)',scale(s['styleTransform']),scale(t0))
+        card=self.page.locator(f'.area-node[data-area-id="{ids["예약"]}"]').bounding_box()
+        self.check_true('selected: the selected card stays inside the map beside the panel',card['x']>=s['map']['left']-1 and card['x']+card['width']<=s['map']['right']+1,{'card':card,'map':s['map']})
         self.check_true('selected: panel beside the map',s['panel']['left']>=s['map']['right'],{'panel':s['panel'],'map':s['map']})
         self.check('selected: panel top aligned with the map',s['panel']['top'],s['map']['top'],delta=2)
         idea=self.page.locator('#panel-idea');tasks=self.page.locator('#panel-tasks')

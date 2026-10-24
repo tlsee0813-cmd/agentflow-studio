@@ -21,9 +21,10 @@ CARD=r'''id=>{const n=document.querySelector(`.area-node[data-area-id="${id}"]`)
   const inside=r.width>0&&r.height>0&&r.left>=Math.max(l,c.left)-.5&&r.right<=Math.min(rr,c.right)+.5&&r.top>=Math.max(t,c.top)-.5&&r.bottom<=Math.min(b,c.bottom)+.5;
   const control=e.matches('button'),h=control?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
   return {sel:e.id||e.className,text:(e.textContent||'').replace(/\s+/g,' ').trim().slice(0,60),inside,hit:control?!!h&&e.contains(h):null}};
- const parts=[...n.querySelectorAll('.area-card-name,.area-card-path,.area-card-note,.tag,.node-info,.node-enter,.branch-toggle,.branch-signals,.branch-signals>span')];
+ // WORK41: an idea the card leaves to the panel (data-note=hidden, to keep a long name whole) is skipped here and recorded.
+ const parts=[...n.querySelectorAll('.area-card-name,.area-card-path,.area-card-note,.tag,.node-info,.node-enter,.branch-toggle,.branch-signals,.branch-signals>span')].filter(e=>getComputedStyle(e).display!=='none');
  const s=n.querySelector('.branch-signals'),k=c.height/n.offsetHeight,lines=e=>e?Math.round(e.getBoundingClientRect().height/k/parseFloat(getComputedStyle(e).lineHeight)):0;
- return {height:n.offsetHeight,left:n.style.left,top:n.style.top,boxes:parts.map(box),text:n.textContent.replace(/\s+/g,' '),
+ return {noteLeftToPanel:n.dataset.note==='hidden',height:n.offsetHeight,left:n.style.left,top:n.style.top,boxes:parts.map(box),text:n.textContent.replace(/\s+/g,' '),
   signal:s?s.textContent.replace(/\s+/g,' ').trim():null,aria:s?.getAttribute('aria-label')??null,band:[...n.querySelectorAll('.area-node-foot>*')].map(e=>e.textContent.trim()),
   nameLines:lines(n.querySelector('.area-card-name')),noteLines:lines(n.querySelector('.area-card-note'))}}'''
 # What the work view's notice covers right after continuing: the title must stay readable; text above it is recorded.

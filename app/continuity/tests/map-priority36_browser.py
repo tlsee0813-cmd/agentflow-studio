@@ -26,9 +26,10 @@ CARD=r'''id=>{const n=document.querySelector(`.area-node[data-area-id="${id}"]`)
   const inside=r.width>0&&r.height>0&&r.left>=Math.max(l,c.left)-.5&&r.right<=Math.min(rr,c.right)+.5&&r.top>=Math.max(t,c.top)-.5&&r.bottom<=Math.min(b,c.bottom)+.5;
   const control=e.matches('button'),h=control?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
   return {sel:e.id||e.className,text:(e.textContent||'').replace(/\s+/g,' ').trim().slice(0,60),inside,hit:control?!!h&&e.contains(h):null}};
- const parts=[...n.querySelectorAll('.area-card-name,.area-card-path,.area-card-note,.tag,.node-info,.node-enter,.branch-toggle,.branch-signals,.branch-signals>span')];
+ // WORK41: an idea the card leaves to the panel (data-note=hidden, to keep a long name whole) is skipped here and recorded.
+ const parts=[...n.querySelectorAll('.area-card-name,.area-card-path,.area-card-note,.tag,.node-info,.node-enter,.branch-toggle,.branch-signals,.branch-signals>span')].filter(e=>getComputedStyle(e).display!=='none');
  const s=n.querySelector('.branch-signals'),k=c.height/n.offsetHeight,lines=e=>e?Math.round(e.getBoundingClientRect().height/k/parseFloat(getComputedStyle(e).lineHeight)):0;
- return {height:n.offsetHeight,left:n.style.left,top:n.style.top,boxes:parts.map(box),text:n.textContent.replace(/\s+/g,' '),
+ return {noteLeftToPanel:n.dataset.note==='hidden',height:n.offsetHeight,left:n.style.left,top:n.style.top,boxes:parts.map(box),text:n.textContent.replace(/\s+/g,' '),
   signal:s?s.textContent.replace(/\s+/g,' ').trim():null,aria:s?.getAttribute('aria-label')??null,band:[...n.querySelectorAll('.area-node-foot>*')].map(e=>e.textContent.trim()),
   nameLines:lines(n.querySelector('.area-card-name')),noteLines:lines(n.querySelector('.area-card-note'))}}'''
 MAP=r'''()=>({matrix:document.querySelector('#space-plane')?.style.transform,folds:[...document.querySelectorAll('.branch-toggle')].map(e=>[e.id,e.getAttribute('aria-expanded')]),
@@ -90,9 +91,14 @@ class MapPriority36(unittest.TestCase):
         for key in ['P','A','B','S','T','R']:
             v=self.whole(s,key,label);self.equal(f'{label} {key} 읽을 이유',v['signal'],reasons[key])
             self.yes(f'{label} {key} 읽기 범위 이름',v['aria'].endswith('이 부분과 하위 기록 읽기' if key=='P' else '이 부분 기록 읽기'),v['aria'])
-        for key in ['P','B']:self.equal(f'{label} {key} 이름 세 줄 경계',self.card(s,key)['nameLines'],3)
-        self.equal(f'{label} P 하단 띠',self.card(s,'P')['band'],['하위 접기','앱에서 이어갈 작업'] if current=='P' else ['하위 접기'])
-        self.equal(f'{label} B 하단 띠',self.card(s,'B')['band'],[] if current=='P' else ['앱에서 이어갈 작업'])
+        # WORK41: a name is no longer clamped to three lines; it is shown whole, or as its start and distinguishing end.
+        for key in ['P','B']:
+            n=self.page.evaluate('(id)=>{const e=document.querySelector(`.area-node[data-area-id="${id}"] .area-card-name`);return {clip:e.scrollHeight>e.clientHeight+1,text:e.textContent,full:e.dataset.full}}',s['ids'][key])
+            self.record('actual',f'{label} {key} name',n)
+            self.yes(f'{label} {key} 이름이 잘리지 않음(전체 또는 앞부분 … 구별 끝)',not n['clip'] and (n['text']==n['full'] or n['text'].endswith(' '.join(n['full'].split()[-2:]))),n)
+        # WORK41: the bottom row ends with the explicit '열기' (the card body selects).
+        self.equal(f'{label} P 하단 띠',self.card(s,'P')['band'],['하위 접기','앱에서 이어갈 작업','열기'] if current=='P' else ['하위 접기','열기'])
+        self.equal(f'{label} B 하단 띠',self.card(s,'B')['band'],['열기'] if current=='P' else ['앱에서 이어갈 작업','열기'])
         self.page.locator('#branch-toggle-'+s['ids']['P']).click();expect(self.page.locator('#branch-toggle-'+s['ids']['P'])).to_have_attribute('aria-expanded','false')
         self.page.locator('#map-fit').click();v=self.whole(s,'P',label+' 접힘');self.equal(f'{label} 접힌 P 읽을 이유',v['signal'],reasons['P'])
         self.equal(f'{label} 접힌 P 펼치기',v['band'][0],'하위 4개 펼치기')
