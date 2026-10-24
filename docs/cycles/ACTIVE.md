@@ -1,8 +1,12 @@
 # AgentFlow 현재 상태
 
-2026-10-24 KST. **시각 재설계42 수용·기존 공개 GitHub Pages 갱신 완료.** [PC 체험본](https://tlsee0813-cmd.github.io/agentflow-studio/) · [판단·최소 증거·한계](2026-10-24-visual-design-42/DECISION.md) · [제품 기준](../PROJECT_STATUS.md) · [질문별 근거](../QUESTIONS.md).
+2026-10-24 KST. **사용자가42의 시각·사용 경험을 반려했다. Studio43을 구현 중이며 아직 수용하지 않았다.** [기존 공개 체험본](https://tlsee0813-cmd.github.io/agentflow-studio/) · [42 당시 판단 기록](2026-10-24-visual-design-42/DECISION.md) · [제품 기준](../PROJECT_STATUS.md) · [질문별 근거](../QUESTIONS.md).
 
-## 현재 제품과 배포
+43은 프로젝트 입구→고정 지도→선택한 부분의 기록·실제 AI 정리로 화면을 다시 구성한다. Claude 단일 세션 `session_019mbJshQGDVwW5sqoPHeX7y`, [PR25](https://github.com/tlsee0813-cmd/agentflow-studio/pull/25), 브랜치 `product/studio-demo-43`. 총괄은 `374f72e`를1280 화면에서 직접 사용했다. 실제 DeepSeek 답변이 기록의 임시 고정·설정 미연결을 짚었으며, 짧은 답과 접힌 상세·선택 때 변화 목록 접힘·지도 복귀 초안·새 프로젝트와 첫 부분·새로고침 초안 보존을 확인했다. 작성자의 스텁 실행과 총괄의 실제 API 실행은 구별한다. 최종 통합 SHA의 양OS CI 전에는 병합·Pages 갱신하지 않는다.
+
+사용자 최신 결정: AI는 사용자 PC의 로컬 프로그램에서 실행한다. 별도 Sites 배포는 중단하고 공개 Pages는 정적 체험을 유지한다. 로컬 프로그램이 Git 밖의 비공개 env 파일에서 키를 읽으며 공개 소스에는 키를 포함하지 않는다. 새 독립 감사·픽셀 검사·증거 묶음을 추가하지 않으며 총괄 직접 사용과 최종 SHA CI로 판단한다. 사용자가 직접 화면을 보고 반려했으므로 “사람이 한 번도 보지 않았다”는 주장은 사실이 아니다.
+
+## 직전 배포42 — 기술 검증 기록이며 현재 제품 수용을 뜻하지 않음
 
 - source `caf6126a4a2e592dc4f17626f0440d13a1d4c188`, app tree `9ba47af6a58cf97d717e743a862553ea2cf1053d`. [PR24](https://github.com/tlsee0813-cmd/agentflow-studio/pull/24)와 정확 양OS CI 성공을 확인했다. 후속 증거 문서 커밋과 제품 SHA는 구분한다.
 - Pages `78356d033e455f2a255a5d03c9790495eb9c7d66`. [배포 파일/키 검사](2026-10-24-visual-design-42/DEPLOYMENT.json)와 [공개 HTTP19개 동일성](2026-10-24-visual-design-42/HTTP_VERIFICATION.json)을 확인했다. 실제 AI 없는 브라우저 MOCK·preview 저장 접두사다. 과거 private Sites35는 최신 체험본이 아니다.

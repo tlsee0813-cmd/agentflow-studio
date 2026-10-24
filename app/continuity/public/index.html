@@ -2,88 +2,51 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AgentFlow Studio · 내 작업 공간</title>
-  <meta name="description" content="아이디어를 작업문으로, 돌아온 결과를 다음 작업으로. 프로젝트의 맥락을 이어가는 작업 공간입니다.">
+  <title>AgentFlow Studio</title>
+  <meta name="description" content="Codex·Claude에서 온 개발 기록을 프로젝트의 부분별 지도로 정리해 보여 줍니다.">
   <link rel="stylesheet" href="./styles.css"><script type="module" src="./client/app.js"></script>
 </head>
 <body>
-  <a href="#main" class="skip-link">현재 작업으로 건너뛰기</a>
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="작업 공간 탐색">
-      <a class="brand" href="./" aria-label="AgentFlow Studio 홈"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M9 23 16 8l7 15M12 18h8"/><circle cx="9" cy="23" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="23" cy="23" r="2"/></svg></span><span class="brand-name">AgentFlow Studio</span></a>
-      <div class="space-label"><span class="workspace-avatar" aria-hidden="true">W</span><span>내 작업 공간<small>이 브라우저의 프로젝트</small></span></div>
-      <p class="nav-caption">프로젝트</p>
-      <nav class="navigation" aria-label="프로젝트 화면">
-        <button id="nav-projects" class="nav-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg><span>내 프로젝트</span></button>
-        <button id="nav-space" class="nav-item"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="4" width="7" height="6" rx="1.5"/><rect x="8.5" y="14" width="7" height="6" rx="1.5"/><path d="M6.5 10v2h11v-2M12 12v2"/></svg><span>전체 공간</span><span id="nav-area-count" class="nav-count">0</span></button>
-        <button id="nav-work" class="nav-item active" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>현재 작업</span></button>
-        <button id="nav-context" class="nav-item" aria-expanded="false" aria-controls="context-panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM9 8h6M9 12h6M9 16h4"/></svg><span>기준 · 출처</span><span id="nav-basis-count" class="nav-count">0</span></button>
-        <button id="nav-history" class="nav-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 5v6h6M12 7v5l3 2"/></svg><span>지난 요청과 결과</span><span id="nav-history-count" class="nav-count">0</span></button>
-      </nav>
-      <div class="sidebar-current"><span class="small-label">지금 이어가는 프로젝트</span><strong id="sidebar-project">나의 프로젝트</strong><p id="sidebar-task">첫 작업을 기다리고 있어요.</p></div>
-          </aside>
-    <div class="app-body">
-      <header class="topbar">
-        <div class="breadcrumb"><button type="button" id="to-projects" class="crumb-link">내 프로젝트</button><span id="breadcrumb-sep" aria-hidden="true">/</span><strong id="breadcrumb-project">나의 프로젝트</strong></div>
-        <section class="project-head" aria-label="현재 프로젝트">
-          <div class="project-heading"><label for="project-name" class="sr-only">프로젝트 이름</label><div class="project-title"><input id="project-name" value="나의 프로젝트" maxlength="120" class="project-name" aria-describedby="name-hint"></div><span id="name-hint" class="sr-only">이름을 직접 수정할 수 있습니다. 같은 브라우저에 자동 저장합니다.</span></div>
-          <div id="example-banner" class="example-banner" role="status" hidden><strong>예제 · 저장 안 됨</strong><details class="example-help"><summary title="예제 안내"><span class="sr-only">예제 안내</span></summary><p>저장되지 않고, 내 프로젝트 목록에 섞이지 않아요. 고쳐 봐도 이 탭에서만 보이고, ‘내 프로젝트 시작’은 빈 프로젝트에서 시작해요.</p></details><button type="button" id="example-start" class="primary">내 프로젝트 시작</button><button type="button" id="example-close" class="quiet">예제 닫기</button></div>
-          <div class="project-tools"><span id="saved" class="saved" role="status">이 브라우저에 자동 저장</span><details id="project-management" open><summary id="project-management-toggle">프로젝트 관리</summary><div class="row"><button id="new-project-top" class="quiet">새 프로젝트</button><button id="backup" class="quiet" title="이 프로젝트 전체를 JSON 파일로 저장">백업 파일 저장</button><button id="import" class="quiet" title="백업 파일을 새 프로젝트 사본으로 추가합니다. 지금 프로젝트는 바뀌지 않습니다.">백업 파일 불러오기</button><button id="trash-current" class="quiet">휴지통으로 옮기기</button></div></details><input id="import-file" type="file" accept="application/json,.json" hidden></div>
-        </section>
-        <div id="topbar-actions" class="topbar-actions"><details id="connection-details" class="connection-details"><summary><span class="mode-dot" aria-hidden="true"></span><span id="mode">모드 확인 중</span><span aria-hidden="true">⌄</span></summary><div class="connection-popover"><strong>작업문 정리 방식</strong><p id="mode-description" class="hint">서버 설정을 확인하고 있습니다.</p><label id="consent-area" class="consent" hidden><input type="checkbox" id="consent"><span>현재 프로젝트 문맥을 DeepSeek에 전송하는 데 동의합니다. 서버에서 허용된 API 비용이 발생할 수 있습니다.</span></label><p class="hint">외부 개발 도구는 연결되어 있지 않습니다. 복사하거나 저장해도 작업이 실행되지는 않습니다.</p></div></details></div>
-      </header>
-      <main id="main" class="shell" tabindex="-1">
-        <div class="feedback-stack"><div id="storage-error" class="alert error" role="alert" hidden></div><div id="notice" class="alert" role="status" hidden></div></div>
-        
-        <section id="projects-view" class="projects-view" aria-labelledby="projects-title" hidden>
-          <div class="view-heading home-heading"><div class="home-heading-text"><h1 id="projects-title" tabindex="-1">내 프로젝트 <span id="projects-count" class="home-count" aria-hidden="true"></span></h1><p class="home-lede">아이디어를 작업문으로 정리하고, 돌아온 결과로 다음 작업을 이어가요. 이 브라우저에 저장돼요.</p></div><div id="home-actions" class="home-actions"><button type="button" id="new-project" class="primary">새 프로젝트</button></div></div>
-          <div id="list-notice" class="alert" role="status" hidden><span id="list-notice-text"></span> <button type="button" id="undo-trash" class="quiet" hidden>되돌리기</button></div>
-          <ul id="project-list" class="project-list"></ul>
-          <div class="row list-tools"><button type="button" id="list-import" class="quiet">백업 파일 불러오기 · 새 사본으로 추가</button></div>
-          <section id="example-section" class="example-section" aria-labelledby="example-title"><h2 id="example-title" class="home-section-title">예제로 먼저 둘러보기 <small>지도에서 부분을 고르고, 그 부분의 작업을 이어가는 흐름이에요 · 열어서 고쳐도 저장되지 않고 내 목록과 섞이지 않아요</small></h2><ul id="example-list" class="example-list"></ul></section>
-          <section id="proposal-entry" class="proposal-entry" aria-labelledby="proposal-entry-title"><h2 id="proposal-entry-title">기록 제안 검토 <small>이미 만들어진 출처 있는 제안을 원문과 함께 살펴봐요 · 프로젝트에 적용되지 않아요</small></h2><button type="button" id="proposal-review-open" class="secondary">기록 제안 검토 열기</button></section>
-          <details id="trash-section" class="trash-section" hidden><summary>휴지통 <span id="trash-count" class="count">0</span></summary><p class="hint">휴지통의 프로젝트는 원문·기준·요청·돌아온 결과가 그대로 남아 있고, 되살리면 그대로 돌아와요. 휴지통에 있어도 이 브라우저의 저장 공간은 그대로 사용해요. 사이트 데이터를 지우면 휴지통도 함께 사라지니, 오래 보관하려면 백업 파일을 저장하세요. 이번 버전에는 영구 삭제가 없어요.</p><ul id="trash-list" class="project-list"></ul></details>
-        </section>
-          <dialog id="project-read" class="project-read" aria-labelledby="project-read-title" aria-describedby="project-read-note"><div class="project-read-head"><h2 id="project-read-title">이름·목적 전체 보기</h2><button type="button" id="project-read-close" class="quiet">닫기</button></div><div id="project-read-body" class="project-read-body" tabindex="0" aria-label="이름과 목적 전체"><p class="project-read-label">이름</p><p id="project-read-name" class="project-read-text"></p><p class="project-read-label">목적</p><p id="project-read-purpose" class="project-read-text"></p></div><p id="project-read-note" class="hint project-read-note">읽기만 해요. 프로젝트를 열거나 바꾸지 않아요.</p></dialog>
-          <dialog id="source-review" class="source-review" aria-labelledby="sr-title" aria-describedby="sr-subtitle"><header class="sr-head"><div class="sr-head-text"><p class="eyebrow">SOURCE PROPOSALS</p><h2 id="sr-title" tabindex="-1">기록 제안 검토</h2><p id="sr-subtitle" class="hint">이미 만들어진 제안을 검토만 해요. 프로젝트·초안에 적용되지 않고, 이 탭 메모리에만 있어 새로고침하면 사라져요.</p></div><div class="sr-head-actions"><button type="button" id="sr-example" class="secondary">검토 예제 열기</button><button type="button" id="sr-import" class="secondary">제안 JSON 가져오기</button><input id="sr-file" type="file" accept="application/json,.json" hidden><button type="button" id="sr-close" class="primary">닫고 돌아가기</button></div></header><div class="sr-feedback"><div id="sr-error" class="alert error" role="alert" tabindex="-1" hidden></div><div id="sr-notice" class="alert" role="status" hidden></div></div><div id="sr-body" class="sr-body"></div></dialog>
-        <section id="space-view" class="space-view" aria-label="전체 공간" hidden></section>
-        <div id="work-view">
-          <nav id="work-place" class="work-place" aria-label="공간 위치" hidden></nav>
-              <div id="pending-bar" class="pending-bar" hidden><span class="spinner" aria-hidden="true"></span><span id="working" role="status"></span><button type="button" id="cancel" class="quiet" hidden>정리 중단</button></div>
-          <section class="context-bar" aria-label="지금 할 일"><div class="context-top"><div><span id="task-number" class="eyebrow">첫 작업</span><h1 id="context-title" tabindex="-1">아이디어에서, 첫 작업으로.</h1><p id="context-sub">만들고 싶은 것 또는 바꾸고 싶은 것을 적어 주세요.</p></div><span id="stage-label" class="tag purple">시작하기</span></div><details id="last-result" class="last-result" hidden><summary id="last-result-summary">최근 가져온 결과</summary><div id="last-result-text" class="source-raw"></div></details></section>
-          <div id="workspace" class="workspace">
-            <div class="main-column">
-              <section id="empty" class="empty welcome" aria-labelledby="welcome-title"><div><p class="eyebrow">AGENTFLOW STUDIO</p><h2 id="welcome-title">AI 개발 도구에 맡길 일을, 매번 처음부터 설명하지 않게.</h2><p id="welcome-text">만들고 싶은 것을 평소 말로 적으면, Claude Code·Cursor 같은 개발 도구에 붙여넣을 작업문을 만들어 드려요. 도구가 돌려준 결과를 가져오면 앞에서 정한 것을 이어서 다음 작업문을 준비해요.</p><form id="brief-form" class="brief-form"><label for="brief-input">무엇을 만드나요? <small>프로젝트 목적 · 작업 요청과 따로 보관해요</small></label><textarea id="brief-input" rows="2" maxlength="12000" placeholder="예: 동네 미용실 손님이 휴대폰으로 날짜와 시간을 골라 예약하는 서비스"></textarea><div class="row"><button type="submit" id="brief-start" class="primary" disabled>영역 나누러 가기</button><span class="hint">큰 영역(예: 예약, 알림)으로 나눈 뒤 영역마다 요청을 이어가요. 아래에서 바로 첫 요청을 준비해도 입력한 목적을 함께 저장해요. 목적은 선택이며, 요청의 배경으로만 보관해요.</span></div></form><div class="row"><button type="button" id="open-example" class="quiet">예제 둘러보기 · 저장 안 됨</button></div></div></section>
-
-              <section id="work" aria-label="현재 작업" aria-live="polite"></section>
-              <section id="outcome-home" class="card outcome-home" aria-label="이 작업의 맥락" tabindex="-1" hidden></section>
-              <details id="compose-panel" class="card compose-panel" open><summary id="compose-summary"><span>새 요청 · 돌아온 결과 붙여넣기</span><small class="compose-apart">지금 이어가는 작업과 별개예요</small><small id="compose-draft-status"></small></summary><section class="compose-card"><div class="section-heading"><div><p id="compose-eyebrow" class="eyebrow">LET'S START</p><h2 id="compose-title">어떤 작업부터 시작할까요?</h2></div></div>
-                <form id="compose"><div class="tabs" role="group" aria-label="입력 종류"><button type="button" id="request-tab" class="tab selected" aria-pressed="true">요청 / 다음 변경</button><button type="button" id="report-tab" class="tab" aria-pressed="false">돌아온 결과</button></div>
-                  <div id="compose-area-row" class="compose-area" hidden><label for="compose-area">이 요청의 영역</label><select id="compose-area"></select></div>
-                  <p id="entry-limits" class="entry-limits"></p>
-                  <label class="sr-only" for="draft">요청 또는 돌아온 결과 원문</label><textarea id="draft" rows="5" maxlength="12000" placeholder="무엇을 만들고 싶나요? 이미 작업 중이라면, 지금 바꾸고 싶은 부분만 알려주세요."></textarea>
-                  <div id="return-preview" hidden aria-label="결과 연결 안내"></div>
-                  <div id="starter-examples" class="starter-examples"><span>이렇게 시작해 보세요</span><div class="row"><button type="button" class="example" data-example="예약 확정 문구를 ‘신청 완료’에서 ‘예약 완료’로 바꿔줘. 예약 방식은 그대로 유지해줘.">문구 하나 바꾸기</button><button type="button" class="example" data-example="빈자리가 생기면 대기자를 자동으로 예약해주는 기능을 만들고 싶어요.">새 기능 구상하기</button><button type="button" class="example" data-example="결제가 실패하는 오류가 있어요. 원인은 아직 모르겠어요.">문제 해결 시작하기</button></div></div>
-                  <div class="composer-bottom"><p id="input-hint" class="hint">필요한 질문만 받고, 바로 전달할 작업문을 준비해요.</p><details id="source-options" class="source-options"><summary>출처 구분</summary><label for="source-kind">이 입력은 무엇인가요?</label><select id="source-kind"><option value="request">실제 사용자 요청</option><option value="report">가져온 구현·진행 보고</option><option value="evidence">가져온 관찰·검사 자료</option><option value="test_answer">합성 시험답변 (실제 요구 아님)</option></select></details></div>
-                  <div class="composer-actions"><p class="privacy">비밀번호나 API 키는 넣지 마세요.</p><div class="actions"><button class="quiet" id="save-input" type="button" hidden>원문만 보관</button><button class="primary" id="send" type="submit" disabled>작업문 준비하기</button></div></div>
-                </form>
-                <details id="result-file-panel" class="file-return-options"><summary>결과 파일로 가져오기 · 선택</summary>
-                  <p class="hint">파일용 작업문을 전달한 같은 작업에서 받은 결과 JSON을 선택하세요. 프로젝트 전체를 바꾸는 JSON 복구와 다릅니다. 파일이 없으면 기존 붙여넣기를 이용하세요.</p>
-                  <button id="select-result-file" type="button" class="secondary">결과 파일 선택</button><input id="result-file-input" type="file" accept="application/json,.json" hidden>
-                  <p id="result-file-message" class="hint" role="status"></p><div id="received-result-host"></div><div id="result-file-preview" aria-live="polite"></div>
-                </details>
-              </section></details>
-
-              
-
-            </div>
-            <aside id="context-panel" class="context-panel" aria-label="기준과 출처" hidden><div class="panel-heading"><div><p class="eyebrow">PROJECT CONTEXT</p><h2 id="panel-title" tabindex="-1">기준 · 출처</h2></div><button id="close-context" class="icon-button" aria-label="기준·출처 닫기">×</button></div><p class="hint">관련 기준부터 확인하세요. 나머지 원문도 보존됩니다.</p><div class="panel-section"><h3>이어갈 기준 <span id="basis-count" class="count">0</span></h3><div id="related-bases"></div><details id="all-bases"><summary>나머지 기준 · 직접 수정</summary><div id="basis-list"></div></details></div><details id="add-basis"><summary>기억할 기준 직접 기록</summary><form id="basis-form"><label for="basis-draft">반복해서 지킬 결정이나 제약</label><textarea id="basis-draft" rows="3" maxlength="12000" placeholder="예: 예약은 참여 의사를 확인한 뒤에만 확정한다."></textarea><p id="basis-draft-status" class="manual-note"></p><button type="submit" class="secondary">이 기준 기록</button></form></details><p class="panel-note">사용자가 기록한 기준과 AI 제안은 구분됩니다. 자세한 원문과 이전 값은 각 항목에서 펼쳐 보세요.</p></aside>
-          </div>
+  <div class="app">
+    <header class="bar">
+      <a class="brand" href="#/" aria-label="AgentFlow Studio 프로젝트 목록"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4" width="7" height="5" rx="1.6"/><rect x="14.5" y="4" width="7" height="5" rx="1.6"/><rect x="8.5" y="15" width="7" height="5" rx="1.6"/><path d="M6 9v2.5h12V9M12 11.5V15"/></svg><span>AgentFlow Studio</span></a>
+      <nav class="crumbs" aria-label="위치"><a id="crumb-home" href="#/">프로젝트</a><span id="crumb-sep" class="sep" aria-hidden="true" hidden>/</span><strong id="crumb-project" hidden></strong><span id="crumb-tag" class="tag" hidden></span></nav>
+      <span class="grow"></span>
+      <span id="ai-pill" class="ai-pill" data-state="checking"><i aria-hidden="true"></i><span id="ai-text">AI 확인 중</span></span>
+    </header>
+    <main id="home" class="home" hidden>
+      <div class="home-inner">
+        <h1 class="home-title">프로젝트</h1>
+        <p class="home-lede">Codex·Claude에서 개발한 기록을 프로젝트의 부분에 연결해, 구조와 최근 변화를 한눈에 봅니다.</p>
+        <form id="new-form" class="new-form"><label for="new-name" class="sr-only">새 프로젝트 이름</label><input id="new-name" maxlength="120" placeholder="새 프로젝트 이름" autocomplete="off"><button type="submit" class="primary">내 프로젝트 시작</button></form>
+        <div id="home-message" class="message" role="status" hidden></div>
+        <ul id="project-list" class="project-list"></ul>
+        <h2 id="saved-title" class="home-sub" hidden>이 브라우저에 저장된 프로젝트</h2>
+        <ul id="saved-list" class="project-list"></ul>
+        <div class="home-foot">
+          <p>예제는 Codex·Claude에서 전달받았다고 가정하고 쓴 기록이에요. 실제 기록 연결기는 아직 설치되어 있지 않아요.</p>
+          <button type="button" id="import" class="link-button">백업 파일 가져오기</button><input id="import-file" type="file" accept="application/json,.json" hidden>
         </div>
-        <section id="history-view" class="history-view" aria-label="지난 요청과 결과" hidden><div class="view-heading"><div><p class="eyebrow">PROJECT HISTORY</p><h1 tabindex="-1" id="history-title">지난 요청과 결과</h1><p class="hint">내가 남긴 요청과 가져온 결과, 그때 복사·저장한 작업문 기록이에요. 개발 도구에서 실제로 실행됐는지는 이 앱이 알 수 없어요.</p></div><button id="back-to-work" class="secondary">현재 작업으로</button></div><details id="history" open><summary>요청·결과 기록 <span id="history-count" class="count">0</span></summary><div id="history-list"></div></details></section>
-        <footer><span>AgentFlow Studio</span><span>이 브라우저에 보관 · 다른 기기로 옮길 때는 백업 파일</span></footer>
-      </main>
-    </div>
+      </div>
+    </main>
+    <main id="space" class="space" hidden>
+      <div id="viewport" class="viewport" tabindex="-1" aria-label="프로젝트 지도"><div id="world" class="world"></div></div>
+      <section id="recent" class="recent" aria-labelledby="recent-title">
+        <button type="button" id="recent-toggle" class="recent-head" aria-expanded="true"><span id="recent-title">최근 변화</span><span id="recent-count" class="count"></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button>
+        <ol id="recent-list" class="recent-list"></ol>
+      </section>
+      <div class="controls" role="toolbar" aria-label="지도 보기">
+        <button type="button" id="zoom-out" aria-label="축소" title="축소">−</button>
+        <span id="zoom-level" class="zoom-level">100%</span>
+        <button type="button" id="zoom-in" aria-label="확대" title="확대">+</button>
+        <button type="button" id="zoom-fit" aria-label="전체 보기" title="전체 보기"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg></button>
+        <button type="button" id="add-part" class="add-part" hidden>+ 부분</button>
+        <span class="legend" aria-label="상태"><i class="s-reported"></i>보고 받음<i class="s-active"></i>진행 중<i class="s-plan"></i>구상</span>
+      </div>
+      <p id="space-empty" class="space-empty" hidden></p>
+      <div id="part-form" class="part-form" hidden></div>
+      <aside id="panel" class="panel" aria-labelledby="panel-title" hidden></aside>
+    </main>
   </div>
 </body>
 </html>
