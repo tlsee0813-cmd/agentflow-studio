@@ -1,8 +1,12 @@
 # AgentFlow 현재 상태
 
-**진행44:** 사용자는43의 시각 개선은 인정했으나 노드 드래그·일반 휠 줌·상세 층위가 사라진 점을 지적했다. 기준 `62106be8fdd5e488db45fa9d8aaefe731834fab9`에서 같은 Claude 세션의 [PR26](https://github.com/tlsee0813-cmd/agentflow-studio/pull/26)을 통합 중이다. 노드/그룹 이동, 커서 기준 휠 줌, 안으로 들어가기·상위 복귀·제자리 접기, 범위별 시점과 저장 프로젝트 배치 보존을 복원했다. 총괄이1280 브라우저에서 조작·초안·3단계 층위·새로고침 배치·예제 초기화를 확인했다. 이는 브라우저 자동화 직접 사용이며 사람의 물리 마우스/트랙패드 검사는 아니다. 배치는 브라우저에 보존되지만 프로젝트 백업에는 아직 포함되지 않는다.
+**현재 수용44 · 2026-10-24:** [Studio 실제 AI 사용](https://agentflow-studio.tlsee0813.workers.dev) · [정적 Pages 체험](https://tlsee0813-cmd.github.io/agentflow-studio/). 사용자가43에서 지적한 노드/그룹 이동, 커서 기준 일반 휠 줌, 안으로 들어가기·상위 복귀·제자리 접기, 범위별 시점과 저장 프로젝트 배치 보존을 복원했다. [PR26](https://github.com/tlsee0813-cmd/agentflow-studio/pull/26)과 Workers 호환 수정 [PR27](https://github.com/tlsee0813-cmd/agentflow-studio/pull/27)을 병합했다. 총괄이1280 브라우저에서 조작·초안·3단계 층위·새로고침 배치·예제 초기화를 확인했다. 이는 브라우저 자동화 직접 사용이며 사람의 물리 마우스/트랙패드 검사는 아니다. 배치는 브라우저에 보존되지만 프로젝트 백업에는 아직 포함되지 않는다.
 
-최종 결합 SHA의 양OS CI와 Cloudflare 실제 응답 확인 전에는44를 수용/배포했다고 기록하지 않는다. `96a0145`의 Windows는 통과했으나 Ubuntu 지도 검사에서 확대 뒤 가려진 그룹을 클릭하려고 해 실패했다. 같은 세션에서 복귀 시점을 먼저 검증하고 ‘전체 보기’로 접근하는 수정만 처리한다. 총괄은 의존성 설치 없는 Workers 배포 스크립트와 CI dry-run을 추가했다. 공개 자산/서버 모듈의 실제 키 일치 검사를 업로드 전에 수행한다.
+최종 배포 source `660fad24d3ad91951316e7abc1ca2bffe8c3d899`, app tree `5f95762473609b69294e517849a83db32ab901b1`; merge `51bcede262c0dde592c07859daaf6d8ab85fd01d`와 동일하다. [CI40080458577](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40080458577)의 Windows `120832733745`·Ubuntu `120832733888` 모두 성공. 배포 BUILD.txt의 SHA와 일치하며 상태 API200, 잘못된 접속 코드401을 확인했다. 최종 Cloudflare 화면에서 실제 DeepSeek 질문 응답을 받았다: 휴무일 안내·필터는 보고된 구현으로, 설정 저장 위치·연결은 미확인으로 구분했고 근거 기록 두 개를 연결했다. 공급자 키는 Worker Secret이며 공개25자산/11서버모듈에 실제 비밀값 일치0을 배포 직전에 검사했다. Pages는 UI가 같은 `c0a805c`의 정적 빌드 `5345ca53cff559913ef2470fef8679fb3f7b0178`이며 공개 BUILD도 확인했다.
+
+작성자299개 Node 검사·6개 스텁 브라우저 흐름, 총괄 직접 조작·실제 API, 양OS CI를 구별한다. `96a0145`의 Ubuntu 실패는 확대 후 화면 밖으로 이동한 그룹의 클릭 준비 문제였다. 복귀 좌표 검사를 추가하고 전체 보기 후 접근하도록 고쳤다. 첫 Cloudflare 실제 요청은 Workers가 지원하지 않는 `redirect:error` 때문에 실패했다. `manual`로 바꾸고302/307을 거절해 키가 다른 주소로 전달되지 않게 유지했다. 새 독립 감사·픽셀 증거 묶음은 만들지 않았다.
+
+## 직전43
 
 2026-10-24 KST. **사용자가42를 반려한 뒤 Studio43의 지도·부분·실제 AI 데모를 다시 구성하고 총괄 직접 사용·양OS CI를 확인했다.** [공개 정적 체험](https://tlsee0813-cmd.github.io/agentflow-studio/) · [PR25](https://github.com/tlsee0813-cmd/agentflow-studio/pull/25) · [로컬 실행](../../app/continuity/README.md) · [질문별 근거](../QUESTIONS.md).
 
@@ -10,7 +14,7 @@
 
 최종 source `00ca5753e46d34c42a535f7acbcea9b0a88d16b2`, app tree `c342d89bdc8a4edecd51d4e1c8d7d3124a57dca7`. [CI40076048672](https://github.com/tlsee0813-cmd/agentflow-studio/actions/runs/40076048672)에서 Ubuntu `120819712336`·Windows `120819712517` 모두 성공했다. PR25 merge `af4675b881f85e3e9ad6457478f97ab001f9fa3c`의 app tree도 일치한다. Pages 배포 커밋은 `27505ed018676f87c725eae742c488c471a121e5`이며 기존 preview 저장 공간을 유지한다. 변경 소스·정적 출력50파일에 실제 키 일치0을 확인했다. 작성자 스텁 실행·총괄 실제 API 및 화면 사용·CI를 구별하며 새 독립 감사는 시행하지 않았다.
 
-사용자 최신 결정: 공개 AI 호스팅은 **Cloudflare Workers**로 전환한다. 계정 인증과 workers.dev 주소 준비는 완료했으며 실제 배포는 아직 없다. 기존 로컬 실행과 Pages의 저장 자료는 유지한다. 키는 Git 밖의 비공개 env 파일과 Worker Secret으로만 전달하며 공개 소스에 포함하지 않는다. Sites는 재개하지 않는다. 새 독립 감사·픽셀 검사·증거 묶음을 추가하지 않으며 총괄 직접 사용과 최종 SHA CI로 판단한다. 사용자가 직접 화면을 보고 반려했으므로 “사람이 한 번도 보지 않았다”는 주장은 사실이 아니다.
+사용자 최신 결정에 따라 공개 AI 호스팅은 **Cloudflare Workers**로 전환·배포했다. 기존 로컬 실행과 Pages의 저장 자료는 유지하며 주소 간 자동 이전은 없다. 키는 Git 밖의 비공개 env 파일과 Worker Secret에만 둔다. Sites는 재개하지 않는다. 사용자가 직접 화면을 보고 반려했으므로 “사람이 한 번도 보지 않았다”는 주장은 사실이 아니다.
 
 ## 직전 배포42 — 기술 검증 기록이며 현재 제품 수용을 뜻하지 않음
 
