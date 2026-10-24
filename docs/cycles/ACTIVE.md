@@ -33,3 +33,5 @@
 총괄만 agentflow-coordinator/Ops를 사용한다. Pro 비교, Claude 좁은 구현, 준비된 Cloud 또는 독립 로컬 실행, DeepSeek 출처 있는 좁은 분류, Sol High 보조를 쓴다. Cloud durable 호스트 접근 실패 때문에 이번 실행은 독립 로컬로 했다. GitHub 연결 재조회는 정상, 계정 전환/환경 재설치는 하지 않았다.
 
 사용자 추가 결정: 공개 Pages 허용, DeepSeek 키 공개 금지, 로컬/저장소 정돈. 이전38에서 배포17파일과 인수 후 코드·증거71개 blob을 실제 키와 대조해 포함0건. runtime은 gh-pages, 결정·최소증거는 각 cycle 한곳에만 둔다. 큰 원로그/중복ZIP은 커밋하지 않으며 게시회수 후 38의 임시생성물 약49.5MiB를 정리했다. 강제 일괄 삭제가 자동 승인 검토에서 차단되어 약144MiB의 잔여물과 완료 통합 브랜치는 남겼다. 경로·정리 경계는 cycle38 DECISION에 기록했다. 기존 dirty checkout·원본 JSONL·키/워커 환경은 보존한다. 사람 사용 기록 제출을 진행 관문으로 만들지 않는다.
+
+40의 후속 정리: GitHub 공유 회수 뒤 이번 전용 evidence/runtime 임시파일8,394,735bytes와 병합된 source-proposals-40 브랜치만 정리했다. 대표2PNG·합친로그는 cycle40 한곳에 유지한다. 이전38 잔여물은 그대로다.

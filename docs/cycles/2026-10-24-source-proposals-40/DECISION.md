@@ -33,3 +33,7 @@ Claude 구현 메시지1, 반례 후속2, PR 후속3(화면 메시지5)만 사�
 ## 최종 게시
 
 [기존 PC 체험본](https://tlsee0813-cmd.github.io/agentflow-studio/)의 배포는 `d2ecd38141384ce54b69563f2512a15beb4a53f8`, rollback은 `4ebf8fa39df1353f9853aa3819c6917a609aa74b`다. runtime20개는 preview target이며 서버/키/원본JSONL 없이 MOCK으로 실행된다. HTTP19개(.nojekyll 제외)의 길이·SHA256이 모두 일치했다. [배포](DEPLOYMENT.json) · [HTTP 확인](HTTP_VERIFICATION.json) · [공개 화면 왕복](PUBLIC_UI.md). 새 사이트·새 저장소·ZIP을 만들지 않았다.
+
+## 회수 후 정리
+
+원격426460c에서 공유 결정 회수를 확인한 뒤 이번 전용 evidence 임시 폴더와 static-preview-dist 두 경로의 8,394,735 bytes를 정리했다. 대표2PNG·합친로그·최소 manifest는 이 cycle의 independent40에 남아 있다. 병합된 product/source-proposals-40 브랜치는 정확head가 checkpoint 조상임을 확인하고 삭제했다. 코드44cfc9a와 PR22·수용/배포 기록은 유지한다. 이전38의 강제 삭제 차단 잔여물은 이번 정리에 포함되지 않는다. 기존 dirty checkout·원본JSONL·키·공용 실행환경은 건드리지 않았다.
